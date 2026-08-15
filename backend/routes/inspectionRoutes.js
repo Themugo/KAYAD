@@ -59,7 +59,18 @@ router.post(
       car: carId,
       buyer: req.user.id,
       fee,
-      payment: payment._id,
+      // Fixed (Phase 5, inspection workflow hardening): initiatePayment()
+      // returns { success, mode, checkoutID, payment: <the actual
+      // payment row>, ... } - the row itself is nested under .payment,
+      // confirmed by reading that function's own return statement
+      // directly. This was accessing payment._id on the top-level
+      // return object (which has no _id field of its own, only a
+      // nested .payment field), always producing undefined - the
+      // inspection order's payment reference was never actually being
+      // set. Also uses .id, not ._id, matching this program's own
+      // Phase 7 confirmation that the real payments table uses id as
+      // its primary key field.
+      payment: payment.payment?.id,
       status: payment.mode === "mock" ? "paid" : "pending_payment",
       location: location || car.location?.city,
       checkoutRequestID: payment.checkoutID,

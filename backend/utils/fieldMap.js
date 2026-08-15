@@ -99,6 +99,23 @@ export const FIELD_ALIASES = {
   inspector_applications: {
     user: "user_id",
   },
+  // Added (Phase 5, inspection workflow hardening): matches
+  // routes/inspectionRoutes.js's already-real, already-working
+  // application code to the real vehicle_inspections table's actual
+  // column names, confirmed directly against
+  // gari_motors_full_schema.sql.sql - car_id/requester_id/
+  // inspector_id are the real foreign keys (car/buyer/inspector are
+  // this codebase's established naming for these same relationships
+  // elsewhere, e.g. cars.dealer, payments.user).
+  vehicle_inspections: {
+    car: "car_id",
+    buyer: "requester_id",
+    inspector: "inspector_id",
+    // Reuses the real table's existing "notes" column rather than
+    // adding a near-duplicate one - lower-risk than introducing a
+    // second free-text notes field with overlapping purpose.
+    inspectorNotes: "notes",
+  },
   inspection_orders: {
     buyer: "requested_by",
     car: "car_id",

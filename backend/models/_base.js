@@ -52,7 +52,24 @@ const TABLE_MAP = {
   Contact: "contacts",
   NotificationAudit: "notification_audit",
   NtsaVerificationRequest: "ntsa_verification_requests",
-  InspectionOrder: "inspection_orders",
+  // Fixed (Phase 5, inspection workflow hardening): was
+  // "inspection_orders", which does not exist anywhere in the real,
+  // authoritative schema (supabase/migrations/) - confirmed by
+  // exhaustive search. The real table, defined in
+  // gari_motors_full_schema.sql.sql, is "vehicle_inspections". This
+  // is the same class of bug already found and fixed for
+  // location/location_city (Phase 6) and confirmed-but-deferred for
+  // escrow_vaults (Phase 8) and organizations (Phase 4) - a model's
+  // TABLE_MAP entry pointing to a name that doesn't match the real
+  // schema. Unlike those deferred cases, this one was safe to fix
+  // directly: the real table's core identity/status columns
+  // (car_id/requester_id/inspector_id/status) map cleanly via
+  // FIELD_ALIASES below, and the additional columns the already-real,
+  // already-working inspectionRoutes.js application code needs
+  // (fee/payment/checklist/overallScore/etc.) were added via a new,
+  // purely additive migration rather than redesigning the working
+  // application logic to fit a narrower schema.
+  InspectionOrder: "vehicle_inspections",
   InspectorApplication: "inspector_applications",
   ErrorBudget: "error_budgets", IdempotencyKey: "idempotency_keys",
   IdempotencyAuditLog: "idempotency_audit_logs",
