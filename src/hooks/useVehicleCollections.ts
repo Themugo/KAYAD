@@ -1,39 +1,145 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Vehicle } from '../types';
+import { getFavorites, toggleFavorite, FavoriteApiError } from '../services/favoriteApi';
 
 /**
- * Phase 1 architecture hardening: extracted from App.tsx, which
- * previously held savedVehicles/comparedVehicles state and their
- * derived lists/toggle handlers directly alongside 15+ other pieces of
- * unrelated state (auth modals, chat, escrow, search/filter, etc.).
- * This is a self-contained, low-risk extraction candidate specifically
- * because these two pieces of state are conceptually related (both
- * "the user's relationship to a set of vehicle IDs"), have no
- * dependency on any other App.tsx state besides the vehicles list
- * itself (passed in, not owned here), and their toggle logic was
- * already fully self-contained before this extraction - moved
- * verbatim, not rewritten, to keep this a structural change only, per
- * this phase's own "do not add features" instruction.
+ * Phase 1 architecture hardening: extracted from App.tsx (savedVehicles/
+ * comparedVehicles state, toggle handlers, derived lists).
  *
- * App.tsx's own vehicles state remains where it is - this hook takes
- * the current vehicle list as a parameter rather than owning it,
- * since vehicles is used by many other parts of App.tsx unrelated to
- * saving/comparing and moving it would be a much larger, riskier
- * change than this phase's scope calls for.
+ * Phase 2 (eliminate mock business state): savedVehicles is now backed
+ * by the real backend `favorites` API for authenticated users -
+ * confirmed real, tested, working (services/favoriteApi.ts). This is a
+ * genuine CONNECTED integration, not just a single successful read:
+ * fetches the real list on mount/login, and every toggle calls the
+ * real POST /api/favorites/:carId/toggle endpoint with optimistic UI
+ * update and rollback on failure.
+ *
+ * A real, permanent behavioral split, not a network-failure fallback:
+ * the backend's favorite routes are auth-required (confirmed via
+ * `router.use(protect)` in favoriteRoutes.js) - there is no anonymous-
+ * favorites concept on the backend at all. So:
+ * - Logged in: real API is the source of truth. A network failure
+ *   here IS treated as a genuine error condition (surfaced via
+ *   favoritesError), not silently swallowed, since a logged-in user
+ *   reasonably expects their real saved list to load.
+ * - Logged out: local-only state (the original, pre-Phase-2 behavior,
+ *   starting from the same ['v1','v2'] default) - this is not a
+ *   fallback for a failure, it's the correct, permanent behavior for
+ *   a user the backend has no way to persist anything for.
+ *
+ * comparedVehicles remains entirely local/client-side in both cases -
+ * there is no backend "compared vehicles" concept at all (confirmed:
+ * no such endpoint exists anywhere in the 92 real route files this
+ * program has audited) - out of scope for this phase's "connect
+ * existing APIs" mission, since there is no existing API to connect to
+ * for this specific piece of state.
  */
-export function useVehicleCollections(vehicles: Vehicle[]) {
+export function useVehicleCollections(vehicles: Vehicle[], userId?: string | null) {
   const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
   const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
+  const [isFetchingFavorites, setIsFetchingFavorites] = useState<boolean>(false);
+  const [favoritesError, setFavoritesError] = useState<string | null>(null);
+  // Tracks in-flight optimistic toggles by car ID, so a rapid
+  // double-click can't race itself into an inconsistent state - a
+  // second toggle on the same ID while one is already in flight is
+  // ignored rather than sent, matching this program's established
+  // "don't introduce new race conditions while fixing old ones"
+  // caution (Phase 8).
+  const pendingToggles = useRef<Set<string>>(new Set());
 
-  // Toggle Save - moved verbatim from App.tsx
+  // Fetch real favorites on mount / whenever the authenticated user
+  // changes (covers login and logout during the same session, not
+  // just app-load). Logged out (userId falsy): does nothing, leaves
+  // the local default in place - the correct behavior per this hook's
+  // own documented split above, not a fetch that was skipped by
+  // accident.
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    setIsFetchingFavorites(true);
+    setFavoritesError(null);
+    (async () => {
+      try {
+        const res = await getFavorites({ limit: 50 });
+        if (!cancelled) {
+          const ids = res.favorites
+            .map((f) => f.id || f._id)
+            .filter((id): id is string => Boolean(id));
+          setSavedVehicles(ids);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const message =
+            err instanceof FavoriteApiError
+              ? err.message
+              : 'Unable to load your saved vehicles right now.';
+          setFavoritesError(message);
+          // Deliberately does NOT clear savedVehicles on failure - a
+          // logged-in user who briefly loses connectivity shouldn't
+          // see their previously-known saved list vanish; it simply
+          // stops being confirmed-fresh until the next successful
+          // fetch or toggle.
+        }
+      } finally {
+        if (!cancelled) setIsFetchingFavorites(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // Toggle Save - real API call when authenticated, local-only
+  // otherwise. Optimistic: UI updates immediately, rolled back if the
+  // real request fails, so the interaction still feels instant (the
+  // pre-Phase-2 behavior) while now reflecting real, persisted state.
   const handleToggleSave = useCallback((id: string) => {
-    setSavedVehicles((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  }, []);
+    if (!userId) {
+      // Not authenticated - same local-only behavior as before Phase 2,
+      // since there is no backend concept to connect to for an
+      // anonymous visitor.
+      setSavedVehicles((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+      return;
+    }
 
-  // Toggle Compare - moved verbatim from App.tsx, including the
-  // existing max-4 limit
+    if (pendingToggles.current.has(id)) return; // ignore a rapid re-click while one is in flight
+    pendingToggles.current.add(id);
+
+    const wasSaved = savedVehicles.includes(id);
+    // Optimistic update
+    setSavedVehicles((prev) => (wasSaved ? prev.filter((item) => item !== id) : [...prev, id]));
+    setFavoritesError(null);
+
+    toggleFavorite(id)
+      .then((res) => {
+        // Reconcile with the server's actual result rather than
+        // trusting the optimistic guess blindly - protects against a
+        // state drift if something else (another tab, a concurrent
+        // action) changed the real favorite state between the
+        // optimistic update and this response.
+        setSavedVehicles((prev) => {
+          const isSaved = prev.includes(id);
+          if (res.favorited === isSaved) return prev;
+          return res.favorited ? [...prev, id] : prev.filter((item) => item !== id);
+        });
+      })
+      .catch((err) => {
+        // Roll back the optimistic update on failure.
+        setSavedVehicles((prev) => (wasSaved ? [...prev, id] : prev.filter((item) => item !== id)));
+        const message =
+          err instanceof FavoriteApiError ? err.message : 'Unable to update your saved vehicles right now.';
+        setFavoritesError(message);
+      })
+      .finally(() => {
+        pendingToggles.current.delete(id);
+      });
+  }, [userId, savedVehicles]);
+
+  // Toggle Compare - unchanged from Phase 1, entirely local/client-side
+  // (no backend "compared vehicles" concept exists - see this file's
+  // own header comment).
   const handleToggleCompare = useCallback((id: string) => {
     setComparedVehicles((prev) => {
       if (prev.includes(id)) return prev.filter((item) => item !== id);
@@ -57,5 +163,7 @@ export function useVehicleCollections(vehicles: Vehicle[]) {
     comparedVehiclesList,
     handleToggleSave,
     handleToggleCompare,
+    isFetchingFavorites,
+    favoritesError,
   };
 }

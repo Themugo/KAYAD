@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import VehicleDetailModal from './components/VehicleDetailModal';
@@ -12,7 +12,7 @@ import { getVehicleIdFromUrl, setVehicleDetailUrl, setAuctionDetailUrl } from '.
 import { INITIAL_AUCTION_SESSIONS } from './data/mockAuctions';
 import { isEscrowApplicable } from './utils/escrow';
 import { useAuth } from './context/AuthContext';
-import { getCars, mapBackendCarToVehicle } from './services/vehicleApi';
+import { getCars, getCarById, mapBackendCarToVehicle } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 
 // Views — lazy-loaded so each is its own chunk, downloaded only when the
@@ -100,6 +100,11 @@ export function App() {
   // (src/hooks/useVehicleCollections.ts) - was previously 2 useState
   // calls, 2 useMemo calls, and 2 useCallback handlers declared
   // directly in this component, moved verbatim with no logic changes.
+  // Phase 2 (eliminate mock business state): savedVehicles is now
+  // backed by the real backend favorites API for authenticated users -
+  // user.id passed through so the hook knows whether to attempt it
+  // (see useVehicleCollections.ts's own header comment for the full
+  // authenticated-vs-anonymous behavioral split).
   const {
     savedVehicles,
     comparedVehicles,
@@ -107,7 +112,8 @@ export function App() {
     comparedVehiclesList,
     handleToggleSave,
     handleToggleCompare,
-  } = useVehicleCollections(vehicles);
+    favoritesError,
+  } = useVehicleCollections(vehicles, user?.id);
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
   
   // Modal Trigger States
@@ -200,19 +206,64 @@ export function App() {
   }, [activeNav, VALID_VIEWS]);
 
   // Central Navigation Handler: Opens Vehicle Details & Updates URL
+  //
+  // Phase 2 (eliminate mock business state) continued: previously, a
+  // vehicle ID not present in the already-loaded `vehicles` array
+  // (only the first 50 real/mock vehicles are loaded - see the
+  // getCars({ limit: 50 }) effect above) went straight to
+  // invalidVehicleId, even if the vehicle genuinely exists in the
+  // backend - a real gap for direct links/deep links to a specific
+  // vehicle outside that initial page. Now falls back to a real,
+  // individual getCarById() fetch (built and tested since Fusion
+  // Phase 4/5/6, previously unused by any UI component) before
+  // concluding a vehicle ID is actually invalid.
+  //
+  // A race-condition guard (latestRequestedVehicleId) is needed here
+  // because this handler is now asynchronous for the fallback path -
+  // if a user opens vehicle A (triggering a fallback fetch), then
+  // quickly opens vehicle B before A's fetch resolves, A's late
+  // response must not overwrite B's already-displayed detail view.
+  const latestRequestedVehicleId = useRef<string | null>(null);
   const handleOpenVehicleDetails = useCallback((vehicleOrId: Vehicle | string) => {
     if (typeof vehicleOrId === 'string') {
       const found = vehicles.find((v) => v.id === vehicleOrId);
       if (found) {
+        latestRequestedVehicleId.current = null; // no fetch in flight for this synchronous path
         setQuickViewVehicle(found);
         setInvalidVehicleId(null);
         setVehicleDetailUrl(found.id);
       } else {
+        // Not in the already-loaded list - try a real, individual
+        // fetch before declaring it invalid. Keeps the previous
+        // synchronous behavior's UI state (null quickView, the
+        // requested ID as "pending") until the fetch resolves, rather
+        // than flashing "invalid" and then correcting it.
+        const requestedId = vehicleOrId;
+        latestRequestedVehicleId.current = requestedId;
         setQuickViewVehicle(null);
-        setInvalidVehicleId(vehicleOrId);
-        setVehicleDetailUrl(vehicleOrId);
+        setInvalidVehicleId(null);
+        setVehicleDetailUrl(requestedId);
+        getCarById(requestedId)
+          .then((car) => {
+            if (latestRequestedVehicleId.current !== requestedId) return; // superseded by a newer request
+            if (car) {
+              setQuickViewVehicle(mapBackendCarToVehicle(car));
+              setInvalidVehicleId(null);
+            } else {
+              // Genuinely doesn't exist (a real 404, or a network
+              // failure treated the same way here - either way there
+              // is no vehicle to show) - falls back to the original,
+              // pre-existing "invalid" UI state.
+              setInvalidVehicleId(requestedId);
+            }
+          })
+          .catch(() => {
+            if (latestRequestedVehicleId.current !== requestedId) return;
+            setInvalidVehicleId(requestedId);
+          });
       }
     } else {
+      latestRequestedVehicleId.current = null;
       setQuickViewVehicle(vehicleOrId);
       setInvalidVehicleId(null);
       setVehicleDetailUrl(vehicleOrId.id);
@@ -227,19 +278,51 @@ export function App() {
   }, []);
 
   // Listen for initial URL vehicle parameter and popstate (browser back/forward)
+  //
+  // Phase 2 (eliminate mock business state) continued: this effect had
+  // its own separate copy of the same "find locally or mark invalid"
+  // logic just fixed in handleOpenVehicleDetails above - a real,
+  // confirmed duplication (this is the path that actually matters most
+  // for the gap being fixed: a shared/bookmarked link to a specific
+  // vehicle hits this effect on page load, not the click-driven
+  // handleOpenVehicleDetails). Given the two call sites have genuinely
+  // different responsibilities (this one reads the URL and must not
+  // re-write it; handleOpenVehicleDetails writes the URL), this fix is
+  // applied directly here rather than restructured into one shared
+  // helper - a larger consolidation than this phase's "connect
+  // existing systems" scope calls for. Reuses the same
+  // latestRequestedVehicleId ref for consistent race protection against
+  // handleOpenVehicleDetails's own fallback fetch.
   useEffect(() => {
     const handleUrlSync = () => {
       const urlVehicleId = getVehicleIdFromUrl();
       if (urlVehicleId) {
         const found = vehicles.find((v) => v.id === urlVehicleId);
         if (found) {
+          latestRequestedVehicleId.current = null;
           setQuickViewVehicle(found);
           setInvalidVehicleId(null);
         } else {
+          latestRequestedVehicleId.current = urlVehicleId;
           setQuickViewVehicle(null);
-          setInvalidVehicleId(urlVehicleId);
+          setInvalidVehicleId(null);
+          getCarById(urlVehicleId)
+            .then((car) => {
+              if (latestRequestedVehicleId.current !== urlVehicleId) return;
+              if (car) {
+                setQuickViewVehicle(mapBackendCarToVehicle(car));
+                setInvalidVehicleId(null);
+              } else {
+                setInvalidVehicleId(urlVehicleId);
+              }
+            })
+            .catch(() => {
+              if (latestRequestedVehicleId.current !== urlVehicleId) return;
+              setInvalidVehicleId(urlVehicleId);
+            });
         }
       } else {
+        latestRequestedVehicleId.current = null;
         setQuickViewVehicle(null);
         setInvalidVehicleId(null);
       }

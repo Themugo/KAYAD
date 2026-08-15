@@ -87,4 +87,38 @@ describe('App', () => {
     const carsCall = fetchMock.mock.calls.find(([url]) => String(url).includes('/api/cars'));
     expect(carsCall).toBeTruthy();
   });
+
+  it('Phase 2 (mock elimination): a vehicleId URL param not in the loaded list attempts a real GET /api/cars/:id fallback fetch, not an immediate "invalid" state', () => {
+    // Confirms the fix to a real, confirmed gap: previously, opening a
+    // direct/shared link to a vehicle ID outside the initial 50-item
+    // loaded list went straight to "invalid vehicle", even if that
+    // vehicle genuinely exists in the backend. Verifies the actual
+    // network call is attempted, not just that the app doesn't crash -
+    // matching this program's established standard for what counts as
+    // a real, verified integration rather than a superficial one.
+    const unknownVehicleId = 'a-real-backend-id-not-in-the-mock-list';
+    window.history.pushState({}, '', `/?vehicleId=${unknownVehicleId}`);
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ success: false }),
+    });
+    global.fetch = fetchMock;
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    );
+
+    const detailCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).includes(`/api/cars/${unknownVehicleId}`)
+    );
+    expect(detailCall).toBeTruthy();
+
+    // Reset the URL so this test doesn't leak state into any test that
+    // runs after it in the same file.
+    window.history.pushState({}, '', '/');
+  });
 });
