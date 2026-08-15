@@ -72,7 +72,7 @@ New test coverage: 1 new test in App.test.jsx, verifying (via a mocked fetch and
 | # | Domain | Status | Basis |
 |---|---|---|---|
 | 1 | Vehicles | PARTIAL | Real vehicleApi.ts client exists, tested. List view wired into App.tsx with honest fallback (Fusion Phase 7). Detail view now also falls back to a real per-vehicle fetch for IDs outside the loaded list (this session's continuation - see section 1a). Auction/creation/editing flows still read INITIAL_VEHICLES mock data directly - a partial slice of the domain, not the whole thing, is connected |
-| 2 | Dealers | MOCK | MOCK_DEALERS still the only data source. Real dealers table and /api/dealer routes exist (confirmed in prior phases) but no frontend client or wiring built |
+| 2 | Dealers | MOCK | MOCK_DEALERS still the only data source. **Investigated this session**: no public "list all dealers" API exists anywhere in the backend - dealerRoutes.js is entirely dealer-own-dashboard (auth-gated to the dealer themselves), dealerPlatformRoutes.js only has a single-dealer-by-ID public lookup. Not a frontend-connection gap; a genuine backend capability that doesn't exist yet |
 | 3 | Sellers | MOCK | Shares /api/cars create/update on the backend with dealers (confirmed), but the private-seller frontend flow is entirely mock-driven |
 | 4 | Users | CONNECTED | Genuinely complete: real registration/login/session-restoration, backend-authoritative, tested end to end (Fusion Phase 3) |
 | 5 | Auctions | MOCK | INITIAL_AUCTION_SESSIONS mock data still the UI's only source. Real, sophisticated backend exists (Redis-backed engine, denormalized-on-cars auction state per Phase 5's correction) but no frontend client exists for it yet |
@@ -80,13 +80,40 @@ New test coverage: 1 new test in App.test.jsx, verifying (via a mocked fetch and
 | 7 | Escrow | MOCK (UI) / SPLIT (backend) | UI entirely mock (MOCK_ESCROW_DEALS). Backend itself has the unresolved two-system split documented in Phase 8 (escrows real, escrow_vaults has no table) - connecting the frontend to this domain should wait until that product decision is made, not attempted blind against an ambiguous backend target |
 | 8 | Inspections | MOCK | No frontend client exists; backend inspection_orders/inspection_packages real but base Inspection/Inspector models lack tables (Phase 0 baseline) |
 | 9 | Payments | MOCK-ADJACENT | No frontend UI exists for payments at all (confirmed in every prior phase) - "mock" doesn't quite apply since there's no frontend payment flow to be mock or real; the backend is real and sophisticated (Phase 6/7/8) |
-| 10 | Chat | UNKNOWN | Not independently investigated in any phase of this program beyond confirming chats/messages tables exist. MOCK_MESSAGES is the UI's current data source; real backend connection status genuinely unassessed |
+| 10 | Chat | MOCK | **Investigated this session, no longer UNKNOWN**: the backend chat system is real and solid (chats table, participants + embedded JSONB messages, protected routes, per-chat authorization). The blocker is specific and structural: the frontend's own ChatMessage type (src/types.ts) has no chat/conversation/participant concept at all (a flat `{sender: 'user'|'seller', text}` model) - connecting it properly requires a frontend data-model change, which crosses into "redesign screens," outside this phase's scope. A second, unused ChatMessage definition also exists in types/index.ts - the same class of duplicate-type issue Phase 1 fixed for UserProfile, not yet cleaned up |
 | 11 | Saved vehicles | CONNECTED | Completed this phase - see section 1 |
 | 12 | Admin records | MOCK | Frontend admin panel is entirely localStorage-backed (Phase 0 baseline's single largest "looks complete, isn't connected" finding); real 64-endpoint /api/admin surface exists, unconnected |
 
-Summary count: 2 of 12 CONNECTED (Users, Saved vehicles - the latter completed this phase), 1 PARTIAL (Vehicles), 7 MOCK, 1 SPLIT/blocked-on-a-decision (Escrow), 1 MOCK-ADJACENT (Payments, no UI to begin with), 1 UNKNOWN (Chat, needs investigation before it can even be classified accurately).
+Summary count: 2 of 12 CONNECTED (Users, Saved vehicles), 1 PARTIAL (Vehicles), 8 MOCK (Dealers, Sellers, Auctions, Bids, Inspections, Chat, Admin records, plus - see below), 1 SPLIT/blocked-on-a-decision (Escrow), 1 MOCK-ADJACENT (Payments, no UI to begin with). No domains remain UNKNOWN as of this session - Chat was investigated and reclassified from UNKNOWN to MOCK with a specific, understood reason, and Dealers' MOCK classification was confirmed with a specific, understood reason (no backend API exists) rather than left as an unexamined assumption.
 
 ---
+
+## 1b. Investigated This Session: Dealers (Priority #2) and Chat (Priority #10) - Real Findings, Neither Connected
+
+Continuing this document's own §3 recommendation, both of the next-named priorities were investigated in full before writing any integration code. Neither was connected - not because the work was skipped, but because each investigation surfaced a real, concrete reason connecting it now would violate this phase's own explicit rules, rather than a reason to force it anyway.
+
+### Dealers: no public listing API exists at all
+`DealersView` (the component `MOCK_DEALERS` feeds) needs a *list* of dealers to browse - confirmed by reading its own props interface (`dealers: Dealer[]`). Checked every dealer-related route file for a matching endpoint:
+- `backend/routes/dealerRoutes.js`: `router.use(protect, dealerOnly, requireApproved)` on the entire file - this is a dealer's own private dashboard API (earnings, inventory, leads), not a public directory. A logged-in dealer can query their own data; nothing here lets a buyer browse dealers.
+- `backend/routes/dealerPlatformRoutes.js`: has one public (no `protect`) route, `GET /profile/:dealerId` - but this returns a *single* dealer by ID, not a list.
+- Searched broadly across every other controller for any dealer-listing logic: found only internal dealer-ID lookups used for filtering cars (`carController.js`) and admin-only aggregate stats (`operationsController.js`), neither of which is a public "browse all dealers" capability.
+
+**Conclusion: there is no existing API to connect to for this specific need.** Per this phase's own explicit rules ("do not create replacement backend systems if an existing API already exists" implies the inverse too - do not invent a new one where none exists, since that would be "add new features," also explicitly prohibited), this is correctly left MOCK, not forced into a false "connected" state via new backend work this phase isn't authorized to do. Building a real dealer-directory endpoint is a legitimate future task, but it's backend feature work, not a frontend-connection task this phase can complete.
+
+### Chat: the backend is real and working; the frontend's own data model is incompatible with it
+The backend chat system is genuinely solid: `chats` table (participants array, `messages` embedded as JSONB - confirmed directly against the real schema, correcting an imprecision in this program's own earlier baseline reports that implied a separate `messages` table exists; there isn't one, by design, and the design is reasonable) with real, protected routes (`startChat`, `getUserChats`, `getMessages`, send-message, mark-seen), proper per-chat authorization checks, and sender enrichment.
+
+**The blocker is the frontend's own `ChatMessage` type**, and it surfaced a real, previously-unfound duplicate-type problem of the same kind Phase 1 fixed for `UserProfile`: two incompatible `ChatMessage` definitions exist -
+- `src/types.ts` (the one `App.tsx`/`ChatView` actually use): `{ id, sender: 'user' | 'seller', text, timestamp, vehicleTitle? }` - a flat, single-conversation model with no chat/participant concept at all.
+- `src/types/index.ts` (unused by the real chat UI): `{ id, senderId, receiverId, vehicleId?, text, sentAt, offerAmount? }` - closer to the backend's real shape, but still not used anywhere.
+
+The frontend's actual, in-use chat data model has no concept of "which conversation" or "which other participant" - it's a single flat list. The backend's real model is "many chats, each between two real participants, each with embedded messages." Building a real API client is not the hard part here (the pattern is identical to `authApi.ts`/`favoriteApi.ts`); the hard part is that using it correctly would require the frontend to gain a chat/conversation concept it currently doesn't have - a genuine data-model and UI restructuring, not a drop-in API swap. That crosses into "redesign screens," which this phase explicitly prohibits.
+
+**Conclusion: correctly left MOCK, with the actual blocker identified precisely** (not "chat is hard," but specifically "the frontend's ChatMessage type has no conversation concept to attach real chat data to") - status upgraded from this document's prior "UNKNOWN, not yet investigated" to a specific, well-understood reason it remains MOCK. The duplicate `ChatMessage` type itself (unused copy in `types/index.ts`) is a smaller, safe cleanup candidate on its own, separate from the larger chat-integration question - not fixed this session, flagged for a future Phase-1-style cleanup pass.
+
+---
+
+
 
 ## 3. Why Only One New Domain Was Completed This Phase
 
