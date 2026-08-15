@@ -246,21 +246,15 @@ export interface PaymentRequest {
 // simpler `Car` type above used by CarCard and the main Home page)
 // ============================================================
 
-export type UserRole = 'buyer' | 'seller' | 'dealer' | 'admin';
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  avatar?: string;
-  phone?: string;
-  companyName?: string;
-  isVerified: boolean;
-  createdAt: string;
-  rating?: number;
-  reviewsCount?: number;
-}
+// UserRole/UserProfile previously duplicated here (Phase 1 hardening,
+// architecture cleanup) - confirmed via a repo-wide import-path check
+// that every real usage of UserProfile in this codebase imports it
+// from src/types.ts (which has its own separate, actually-used
+// UserProfile definition), never from this file - and that no file
+// imports UserRole from here either (the only other matches were
+// unrelated local variable/prop names and comment text). Removed as
+// genuinely dead code, not merely consolidated, since nothing
+// referenced this copy at all.
 
 export type VehicleCondition = 'New' | 'Like New' | 'Excellent' | 'Good' | 'Fair' | 'Brand New';
 export type TransmissionType = 'Automatic' | 'Manual' | 'Dual-Clutch' | 'CVT' | 'Direct Drive' | '10-Speed Automatic' | '8-Speed Automatic';

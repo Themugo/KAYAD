@@ -13,6 +13,7 @@ import { INITIAL_AUCTION_SESSIONS } from './data/mockAuctions';
 import { isEscrowApplicable } from './utils/escrow';
 import { useAuth } from './context/AuthContext';
 import { getCars, mapBackendCarToVehicle } from './services/vehicleApi';
+import { useVehicleCollections } from './hooks/useVehicleCollections';
 
 // Views — lazy-loaded so each is its own chunk, downloaded only when the
 // user navigates there, instead of all being bundled into the initial load.
@@ -75,8 +76,19 @@ export function App() {
   // and flips to 'live' only if the real backend call below genuinely
   // succeeds with at least one real vehicle.
   const [vehicleDataSource, setVehicleDataSource] = useState<'live' | 'demo'>('demo');
-  const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
-  const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
+  // Phase 1 hardening: savedVehicles/comparedVehicles state and their
+  // toggle handlers/derived lists moved into useVehicleCollections()
+  // (src/hooks/useVehicleCollections.ts) - was previously 2 useState
+  // calls, 2 useMemo calls, and 2 useCallback handlers declared
+  // directly in this component, moved verbatim with no logic changes.
+  const {
+    savedVehicles,
+    comparedVehicles,
+    savedVehiclesList,
+    comparedVehiclesList,
+    handleToggleSave,
+    handleToggleCompare,
+  } = useVehicleCollections(vehicles);
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
   
   // Modal Trigger States
@@ -217,21 +229,8 @@ export function App() {
     return () => window.removeEventListener('popstate', handleUrlSync);
   }, [vehicles]);
 
-  // Toggle Save
-  const handleToggleSave = useCallback((id: string) => {
-    setSavedVehicles((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  }, []);
-
-  // Toggle Compare
-  const handleToggleCompare = useCallback((id: string) => {
-    setComparedVehicles((prev) => {
-      if (prev.includes(id)) return prev.filter((item) => item !== id);
-      if (prev.length >= 4) return prev; // max 4
-      return [...prev, id];
-    });
-  }, []);
+  // Toggle Save and Toggle Compare handlers moved into
+  // useVehicleCollections() (Phase 1 hardening) - see above.
 
   // Add Vehicle Handler
   const handleAddVehicle = useCallback((newVehicle: Vehicle) => {
@@ -336,13 +335,8 @@ export function App() {
     navigateTo('marketplace');
   }, [navigateTo]);
 
-  const savedVehiclesList = useMemo(() => {
-    return vehicles.filter((v) => savedVehicles.includes(v.id));
-  }, [vehicles, savedVehicles]);
-
-  const comparedVehiclesList = useMemo(() => {
-    return vehicles.filter((v) => comparedVehicles.includes(v.id));
-  }, [vehicles, comparedVehicles]);
+  // savedVehiclesList/comparedVehiclesList now provided by
+  // useVehicleCollections() above (Phase 1 hardening).
 
   return (
     <div className="min-h-screen bg-[#F6F1E8] text-slate-800 flex flex-col font-sans">

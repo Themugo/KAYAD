@@ -73,8 +73,9 @@ Already established, cited rather than re-derived:
 1. Escrow system split (Phase 8): escrow_vaults has no real table; a real product decision is required before any escrow-vault-based flow (OTP release, admin refund via that path) can function at all.
 2. Fake transaction layer (Phase 7/8): utils/supabaseSession.js provides zero real atomicity; affects bidController.js, escrowVaultController.js, reviewController.js, favoriteController.js. One concrete race condition already found and fixed (bid confirmation); the underlying pattern remains unaddressed elsewhere.
 3. Cookie SameSite=Lax cross-origin concern (Phase 2): if confirmed against live Vercel+Render, the entire login flow may not persist a session for real users. Not yet live-verified.
-4. Redis not provisioned in render.yaml (this phase): if production genuinely lacks Redis, background-job/queue-dependent behavior - and possibly server responsiveness itself, per this sandbox's own observed hang - may not work as designed.
-5. No live, reachable database anywhere in this program's environment: every fix and finding in this entire program is evidence-based against static schema/code analysis, never confirmed by a live run. This is the single largest source of residual uncertainty in every other finding.
+4. Redis not provisioned in render.yaml: if production genuinely lacks Redis, background-job/queue-dependent behavior - and possibly server responsiveness itself, per this sandbox's own observed hang - may not work as designed.
+5. MPESA_ENV also not provisioned in render.yaml (found in PHASE1_ARCHITECTURE_HARDENING.md): production would silently default to "sandbox" mode - including sandbox-level M-Pesa IP whitelisting - unless set manually outside this repository's deployment config. Same category of risk as #4: a behavior-critical variable with no startup validation to catch its absence.
+6. No live, reachable database anywhere in this program's environment: every fix and finding in this entire program is evidence-based against static schema/code analysis, never confirmed by a live run. This is the single largest source of residual uncertainty in every other finding.
 
 ### P1 - Hardening (should resolve before scaling, not necessarily before initial launch)
 1. Full backend authorization audit - only 1 of 92 route files spot-checked for correct permission-helper usage.
