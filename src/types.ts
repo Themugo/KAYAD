@@ -585,7 +585,39 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: 'buyer' | 'dealer' | 'mechanic' | 'bank_officer' | 'admin';
+  // Extended (Phase 2, role consolidation) to preserve real backend
+  // role identity instead of collapsing distinct roles into unrelated
+  // ones - confirmed against backend/config/roles.js (the backend's
+  // own documented single source of truth) and the real database role
+  // constraint in supabase/migrations/..._foundational_tables.sql.sql.
+  // 'buyer' here represents the backend's 'user' role (kept as
+  // 'buyer' since that's this frontend's own established, already-used
+  // term for the same concept - not a new collapse, this naming
+  // predates this phase). 'mechanic'/'bank_officer' are NOT real
+  // backend roles (no matching value in the database's role CHECK
+  // constraint) - kept rather than removed, since existing UI logic in
+  // Navbar.tsx/AuctionsView.tsx already checks for them and removing
+  // them isn't required to fix this phase's actual critical issue
+  // (the individual_seller collapse) - flagged here as a known,
+  // pre-existing frontend-only concept, not newly introduced.
+  role:
+    | 'buyer'
+    | 'dealer'
+    | 'individual_seller'
+    | 'mechanic'
+    | 'bank_officer'
+    | 'broker'
+    | 'ghost_checker'
+    | 'moderator'
+    | 'ad_manager'
+    | 'marketing'
+    | 'escrow_officer'
+    | 'technical_support'
+    | 'hr'
+    | 'accounts'
+    | 'admin'
+    | 'superadmin'
+    | 'webhoist';
   avatar: string;
   isVerified?: boolean;
   unreadMessagesCount?: number;

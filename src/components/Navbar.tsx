@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Car, PlusCircle, Menu, X, MapPin, ShieldCheck, User, ChevronDown, Gavel, CreditCard, HelpCircle, Heart, Bell, LogOut, LayoutDashboard, MessageSquare, Building2, Lock, Settings, Bookmark, BarChart3, Layers, Calendar, FileText, Sliders, CheckCircle2, Landmark } from 'lucide-react';
 import { UserProfile } from '../types';
+import { ROLE_DISPLAY_LABELS } from '../context/AuthContext';
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -241,7 +242,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <p className="font-bold text-slate-900 truncate">{user.name}</p>
                         <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
                         <span className="inline-block mt-1 px-2 py-0.5 bg-[#1E3063] text-white font-semibold text-[9px] rounded uppercase">
-                          {user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Private Seller / Buyer'}
+                          {ROLE_DISPLAY_LABELS[user.role]}
                         </span>
                       </div>
                     </div>

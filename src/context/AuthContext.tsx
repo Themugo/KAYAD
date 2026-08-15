@@ -11,7 +11,17 @@ import { BackendUser, AuthApiError } from '../services/authApi';
  * it's a pre-existing duplicate-file issue outside this phase's scope
  * to clean up). Declared locally since src/types.ts has no separate
  * named export for it. */
-type FrontendUserRole = 'buyer' | 'dealer' | 'mechanic' | 'bank_officer' | 'admin';
+// Phase 2 fix: previously a second, independently-maintained copy of
+// this frontend's role union lived here, separately from
+// UserProfile['role'] in src/types.ts - exactly the "duplicate role
+// logic across components" this phase's own Task 2 warns against, and
+// the reason this file's role union had drifted narrower than the
+// real one (missing individual_seller, superadmin, and the rest of
+// the staff roles) without being caught by TypeScript, since nothing
+// forced the two to stay in sync. Derived directly from the single
+// source of truth instead - there is now exactly one place this union
+// is written out.
+type FrontendUserRole = UserProfile['role'];
 
 /**
  * Real authentication context, backed entirely by the backend API
@@ -45,30 +55,46 @@ type FrontendUserRole = 'buyer' | 'dealer' | 'mechanic' | 'bank_officer' | 'admi
  * backend, which continues to enforce its own real role string on
  * every request regardless of what this frontend labels it.
  */
-function mapBackendRoleToFrontend(backendRole: string): FrontendUserRole {
+export function mapBackendRoleToFrontend(backendRole: string): FrontendUserRole {
+  // Phase 2 fix: this function previously collapsed individual_seller
+  // into 'buyer' and superadmin into 'admin' - both are real, distinct
+  // backend roles (confirmed against backend/config/roles.js and the
+  // real database role constraint) with genuinely different
+  // permissions (individual_seller can list cars, a plain buyer
+  // cannot; superadmin can grant/revoke permissions on staff accounts,
+  // plain admin cannot - see docs/ROLE_MATRIX.md). This phase's own
+  // explicit critical-issue callout is exactly this collapse -
+  // rewritten to preserve identity 1:1 wherever the frontend's role
+  // union (now extended, src/types.ts) has a matching value, which is
+  // every real backend role after this phase's type extension.
   switch (backendRole) {
     case 'user':
+      // 'buyer' is this frontend's own pre-existing, already-used term
+      // for the backend's 'user' role - not a collapse, since no other
+      // backend role also maps here (unlike the individual_seller/
+      // superadmin cases this fix addresses).
       return 'buyer';
     case 'individual_seller':
-      // This frontend's real role union (src/types.ts) has no 'seller'
-      // value at all - unlike the separate, unused UserProfile in
-      // src/types/index.ts, which does. Mapped to 'buyer' as the
-      // closest existing non-dealer, non-staff role rather than
-      // inventing a new frontend role value in this pass - changing
-      // the frontend's own role union is a larger, separate decision
-      // (it's referenced across many components) outside this phase's
-      // "do not modify unrelated features" scope. Documented as a real
-      // gap in phase-03-auth.md, not silently absorbed.
-      return 'buyer';
     case 'dealer':
-      return 'dealer';
+    case 'broker':
+    case 'ghost_checker':
+    case 'moderator':
+    case 'ad_manager':
+    case 'marketing':
+    case 'escrow_officer':
+    case 'technical_support':
+    case 'hr':
+    case 'accounts':
     case 'admin':
     case 'superadmin':
-      return 'admin';
+      // Direct 1:1 preservation - the frontend's role union now
+      // includes every one of these as its own distinct value.
+      return backendRole;
     default:
-      // Unknown backend role (e.g. a staff/inspector role - the
-      // backend has no dedicated inspector role in DEMO_ACCOUNTS
-      // either, confirmed in phase-03-auth.md's testing section).
+      // Genuinely unrecognized backend role string (not one of the 14
+      // real values, or the 'webhoist' virtual role, which is
+      // deliberately never the stored value of user.role itself - see
+      // backend/config/roles.js's own isAdminOrAbove() comment).
       // Fails closed to the least-privileged option rather than
       // silently granting a more powerful frontend role for a string
       // this mapping doesn't recognize.
@@ -237,3 +263,33 @@ export function useAuth(): AuthContextValue {
   }
   return ctx;
 }
+
+/** Single, shared source of display labels for every real frontend
+ * role - added Phase 2 alongside the role-identity fix, so that fixing
+ * the underlying role value (individual_seller/superadmin/staff roles
+ * no longer collapsing) actually shows up correctly in the UI too,
+ * rather than leaving components like Navbar.tsx's role badge falling
+ * through to an incorrect generic label for every one of the newly-
+ * preserved roles. Matches docs/ROLE_MATRIX.md's "Purpose" column.
+ * Exported so no component needs its own copy of this mapping - the
+ * exact duplication this phase's Task 2 warns against. */
+export const ROLE_DISPLAY_LABELS: Record<UserProfile['role'], string> = {
+  buyer: 'Buyer',
+  dealer: 'Verified Dealer',
+  individual_seller: 'Private Seller',
+  mechanic: 'NTSA Mechanic',
+  bank_officer: 'Bank Officer',
+  broker: 'Broker',
+  ghost_checker: 'Vehicle Inspector',
+  moderator: 'Moderator',
+  ad_manager: 'Ads Manager',
+  marketing: 'Marketing Team',
+  escrow_officer: 'Escrow Officer',
+  technical_support: 'Support Team',
+  hr: 'HR',
+  accounts: 'Accounts Team',
+  admin: 'Administrator',
+  superadmin: 'Super Administrator',
+  webhoist: 'Platform Owner',
+};
+
