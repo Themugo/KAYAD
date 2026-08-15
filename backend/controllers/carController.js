@@ -267,6 +267,37 @@ export const createCar = async (req, res) => {
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
     const isDemoSeller = !!seller.isDemo;
 
+    // ── DUPLICATE VIN CHECK ──────────────────────────────────
+    // Found (Phase 4, seller/dealer workflow hardening): neither the
+    // real cars table (vin TEXT, no UNIQUE constraint - confirmed
+    // directly against supabase/migrations/..._foundational_tables.sql.sql,
+    // the authoritative schema) nor this function itself had any
+    // duplicate-VIN check at all - the same VIN could be listed any
+    // number of times, by the same or different sellers, with zero
+    // validation. This directly matches this phase's own explicit
+    // "verify duplicate VIN handling" requirement, which surfaced a
+    // real, previously-unguarded gap rather than confirming existing
+    // protection. Fixed at the application level (not a blind DB
+    // constraint, since there's no live database to confirm this
+    // wouldn't break on pre-existing duplicate data) - a clean,
+    // specific error rather than a generic database constraint
+    // violation. VIN remains optional (matching the real schema's
+    // nullable column) - this check only runs when a VIN is actually
+    // provided, and only rejects on an exact match against a real,
+    // non-deleted, non-demo listing (a demo/test VIN reused across
+    // fixtures is not the fraud/confusion risk this check exists to
+    // prevent).
+    if (req.body.vin && String(req.body.vin).trim()) {
+      const trimmedVin = String(req.body.vin).trim();
+      const existingWithVin = await Car.findOne({ vin: trimmedVin, isDemo: { $ne: true } });
+      if (existingWithVin) {
+        return res.status(409).json({
+          success: false,
+          message: "A listing with this VIN already exists. Each vehicle can only be listed once.",
+        });
+      }
+    }
+
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
     const config = await PlatformConfig.findOne().lean();
     const pkgs = config?.packages || [];
