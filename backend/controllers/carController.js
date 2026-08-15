@@ -609,6 +609,44 @@ export const updateCar = async (req, res) => {
         car.set(key, req.body[key]);
       }
     }
+
+    // ── APPROVAL-GATE RE-ENFORCEMENT ON UPDATE ──────────────
+    // Found (Phase 3, marketplace hardening): "status" is in
+    // allowedFields above with no restriction, and this update path
+    // had no equivalent of createCar's own protection. createCar
+    // (above, ~line 380) computes status AFTER spreading req.body
+    // specifically so a client-supplied status value is always
+    // overridden by the server's own approval decision - confirmed by
+    // reading that code directly, not assumed. This update path had
+    // no such re-computation: the field-assignment loop just above
+    // applies req.body.status verbatim via car.set(), meaning any
+    // owner - including one whose account was never approved - could
+    // PUT their own listing with status: "available" and bypass
+    // approval entirely, since approval is otherwise only checked at
+    // creation time. This directly contradicts this phase's own
+    // explicit requirement ("a deactivated/unapproved vehicle must
+    // not accidentally remain publicly discoverable").
+    //
+    // Fixed narrowly, mirroring createCar's own real logic rather than
+    // inventing new rules: only triggers when the request itself tries
+    // to set/change status (req.body.status !== undefined) - not on
+    // every update to an already-available car, since re-validating
+    // approval on unrelated edits (e.g. a price change) would be a
+    // broader, unintended side effect beyond the actual vulnerability
+    // being closed here. Only the specific "moving TO available while
+    // not approved" transition is blocked (forced back to "pending") -
+    // staff/admin and already-approved owners are unaffected, and an
+    // owner voluntarily moving their own listing to
+    // "hidden"/"draft"/anything else remains unrestricted, since that
+    // is the owner choosing to reduce their own visibility, not a
+    // security concern.
+    if (req.body.status !== undefined && car.status === "available" && !isStaff && !car.isDemo) {
+      const updaterUser = await User.findById(req.user.id).select("status");
+      if (!updaterUser || updaterUser.status !== "approved") {
+        car.status = "pending";
+      }
+    }
+
     if (car.isDemo && isDealer) {
       car.isDemo = true;
       car.demoEditedAt = new Date();
