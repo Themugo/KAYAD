@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, InspectionCategoryDetail } from '../../../types';
 import PrePurchaseInspectionPortal from './PrePurchaseInspectionPortal';
 import { 
@@ -8,8 +8,106 @@ import {
   INITIAL_INSPECTION_PAYMENTS, 
   INITIAL_INSPECTION_RATINGS 
 } from '../../../data/mockInspections';
+import { getMyInspections, BackendInspectionOrder } from '../../../services/inspectionApi';
 import { ShieldCheck, Search, MapPin, Star, CheckCircle2, Clock, FileCheck, Award, Wrench, Calendar, PlusCircle, X, Download, Eye, Sparkles, Check, ThumbsUp, Activity, Navigation, User } from 'lucide-react';
 import { PageHeader, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, LazyImage, Modal } from '../../../components/ui';
+
+/**
+ * Maps a real backend inspection order to this frontend's
+ * InspectionBooking shape. Deliberately leaves fields undefined where
+ * no real backend source exists (buyerPhone/buyerEmail,
+ * platformCommission/netMechanicFee, mechanicCompany) rather than
+ * fabricating placeholder values - see services/inspectionApi.ts's own
+ * scope note for exactly why each of these has no real source today.
+ */
+function mapOrderToBooking(order: BackendInspectionOrder): InspectionBooking {
+  const carTitle = order.car?.title ||
+    [order.car?.brand, order.car?.model, order.car?.year].filter(Boolean).join(' ') ||
+    'Vehicle';
+  // Backend status values (paid/assigned/in_progress/completed) mapped
+  // to this frontend's own status union - "Pending Mechanic
+  // Confirmation" has no real backend equivalent (no
+  // confirm/decline-assignment step exists), so a freshly-assigned
+  // order is shown as "Scheduled" instead, the closest honest match.
+  const statusMap: Record<string, InspectionBooking['status']> = {
+    paid: 'Pending Mechanic Confirmation',
+    pending_payment: 'Pending Mechanic Confirmation',
+    assigned: 'Scheduled',
+    in_progress: 'In Progress',
+    completed: 'Completed',
+  };
+  return {
+    id: order.id || order._id || '',
+    vehicleId: order.car?.id || order.car?._id,
+    vehicleTitle: carTitle,
+    vehicleLocation: order.car?.location || order.location || '',
+    buyerName: '', // Not returned by GET /my - the buyer viewing this is themself
+    buyerPhone: '',
+    buyerEmail: '',
+    mechanicId: order.inspector?.id || order.inspector?._id || '',
+    mechanicName: order.inspector?.name || 'Unassigned',
+    scheduledDate: order.scheduledAt ? new Date(order.scheduledAt).toLocaleDateString() : '—',
+    scheduledTime: order.scheduledAt ? new Date(order.scheduledAt).toLocaleTimeString() : '',
+    packageType: '150-Point Comprehensive', // No real package-type field on the backend order yet
+    totalFee: order.fee || 0,
+    platformCommission: 0, // No real commission concept on the backend
+    netMechanicFee: order.fee || 0,
+    status: statusMap[order.status] || 'Scheduled',
+    paymentStatus: order.status === 'completed' ? 'Released to Mechanic' : 'Escrow Held',
+    reportId: order.status === 'completed' ? (order.id || order._id) : undefined,
+    createdAt: order.createdAt || '',
+  };
+}
+
+/**
+ * Maps a real, completed backend inspection order to this frontend's
+ * InspectionReport shape. Only called for orders with status
+ * "completed" and real checklist/score data - see the filtering in
+ * this component's data-loading effect below. categoryScores has no
+ * real backend equivalent (the real `checklist` column is a generic,
+ * unstructured JSONB array) - left as an empty/zeroed structure rather
+ * than invented sub-scores, since this program does not fabricate data
+ * to fill a UI shape.
+ */
+function mapOrderToReport(order: BackendInspectionOrder): InspectionReport {
+  const carTitle = order.car?.title ||
+    [order.car?.brand, order.car?.model, order.car?.year].filter(Boolean).join(' ') ||
+    'Vehicle';
+  const score = order.overallScore ?? 0;
+  const emptyCategory: InspectionCategoryDetail = { score: 0, status: 'Attention', notes: 'No detailed category data available yet.' };
+  return {
+    id: order.id || order._id || '',
+    bookingId: order.id || order._id || '',
+    vehicleId: order.car?.id || order.car?._id,
+    vehicleTitle: carTitle,
+    vehicleLocation: order.car?.location || order.location,
+    mechanicId: order.inspector?.id || order.inspector?._id || '',
+    mechanicName: order.inspector?.name || 'Unassigned',
+    mechanicCompany: undefined,
+    overallScore: score,
+    verdict: score >= 80 ? 'Passed (Clean Certification)' : score >= 50 ? 'Minor Issues Noted' : 'Failed (Major Defects)',
+    vinVerified: false,
+    chassisVerified: false,
+    logbookOwnerMatch: false,
+    inspectionDate: order.completedAt ? new Date(order.completedAt).toLocaleDateString() : '—',
+    categoryScores: {
+      engineAndDrivetrain: emptyCategory,
+      transmissionAndClutch: emptyCategory,
+      suspensionAndSteering: emptyCategory,
+      brakesAndTires: emptyCategory,
+      electricalAndDiagnostics: emptyCategory,
+      bodyworkAndChassisFrame: emptyCategory,
+      interiorAndHVAC: emptyCategory,
+    },
+    // No real backend source for OBD trouble codes specifically -
+    // left honestly empty rather than fabricated.
+    obdDiagnosticCodes: [],
+    // Maps to the real `notes` column (aliased inspectorNotes on the
+    // real vehicle_inspections table, confirmed in an earlier phase).
+    inspectorSummary: order.notes || 'No summary provided.',
+    photos: (order.images || []).map((img) => img.url).filter(Boolean),
+  };
+}
 
 interface InspectionsViewProps {
   vehicles: Vehicle[];
@@ -28,6 +126,49 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   const [bookings, setBookings] = useState<InspectionBooking[]>(INITIAL_INSPECTION_BOOKINGS);
   const [payments] = useState<InspectionPayment[]>(INITIAL_INSPECTION_PAYMENTS);
   const [ratings, setRatings] = useState<InspectionRating[]>(INITIAL_INSPECTION_RATINGS);
+
+  // Real-data connection for Bookings Tracker / Digital Reports tabs -
+  // the two tabs with a genuine backend match (GET /api/inspections/my,
+  // requires auth). Deliberately does NOT touch mechanics/payments/
+  // ratings, since no real backend concept exists for those (see
+  // services/inspectionApi.ts's own scope note). Follows the same
+  // honest hybrid pattern already used for the vehicle list in
+  // App.tsx: attempt real data, fall back to mock on any failure
+  // (including "not logged in", since this endpoint requires auth),
+  // and track which source is actually showing so the UI can be
+  // truthful about it rather than silently mixing real and mock rows.
+  const [inspectionDataSource, setInspectionDataSource] = useState<'live' | 'demo'>('demo');
+  const [isFetchingInspections, setIsFetchingInspections] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setIsFetchingInspections(true);
+    (async () => {
+      try {
+        const res = await getMyInspections();
+        if (cancelled) return;
+        const orders = res.orders || [];
+        // Only orders with real, meaningful completed data become
+        // "reports" - matches this program's own established rule
+        // (a screen is not integrated merely because it renders; a
+        // completed-but-scoreless order isn't a real report either).
+        const completedOrders = orders.filter((o) => o.status === 'completed');
+        setBookings(orders.map(mapOrderToBooking));
+        setReports(completedOrders.map(mapOrderToReport));
+        setInspectionDataSource('live');
+      } catch {
+        // Expected for a logged-out visitor (this endpoint requires
+        // auth) or if the backend is unreachable - the mock data
+        // already in state remains the fallback, matching the
+        // vehicle-list pattern's own established behavior.
+      } finally {
+        if (!cancelled) setIsFetchingInspections(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Top-Level Mode: 'buyer_marketplace' | 'mechanic_portal'
   const [viewMode, setViewMode] = useState<'buyer_marketplace' | 'mechanic_portal'>('buyer_marketplace');

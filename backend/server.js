@@ -56,6 +56,15 @@ import userRoutes from "./routes/userRoutes.js";
 import savedSearchRoutes from "./routes/savedSearchRoutes.js";
 import ntsaVerificationRoutes from "./routes/ntsaVerificationRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
+// Added while activating backend/inspection/ (the dormant inspection
+// marketplace system - real provider profiles, commission,
+// settlement, per docs/PRE_PURCHASE_INSPECTION_FORENSIC_AUDIT.md).
+// Mounted at a distinct path from the existing /api/inspections
+// (routes/inspectionRoutes.js, above) deliberately - these are two
+// genuinely separate systems with different route shapes
+// (/providers, /bookings/:reference vs /my, /:id/assign), and the
+// existing, working system is not touched or replaced by this.
+import inspectionMarketplaceRoutes from "./inspection/routes/inspectionRoutes.js";
 import escrowVaultRoutes from "./routes/escrowVaultRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 import securityLogRoutes from "./routes/securityLogRoutes.js";
@@ -702,6 +711,7 @@ app.use("/api/saved-searches", csrfProtection, savedSearchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/ntsa-verification", ntsaVerificationRoutes);
 app.use("/api/inspections", inspectionRoutes);
+app.use("/api/inspection-marketplace", inspectionMarketplaceRoutes);
 app.use("/api/escrow-vault", idempotencyCheck, escrowVaultRoutes);
 app.use("/api/security-logs", securityLogRoutes);
 app.use("/api/sms-bidding", smsBiddingRoutes);

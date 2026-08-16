@@ -2,7 +2,7 @@
 // KAYAD INSPECTION MARKETPLACE - REPORT SERVICE
 // ============================================================
 
-import db from '../../db/index.js';
+import db from './dbAdapter.js'; // Fixed (activation pass): real db/index.js has no default export - see dbAdapter.js for the full explanation
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';

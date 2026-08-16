@@ -3,7 +3,19 @@
 // ============================================================
 
 import asyncHandler from '../../middleware/asyncHandler.js';
-import { response } from '../../utils/response.js';
+// Fixed (activation pass): was `import { response } from '../../utils/response.js'`
+// - utils/response.js exports flat named functions (success, error,
+// notFound, etc.), not an object called `response`. This would have
+// crashed on module load the moment this file was ever imported -
+// confirmed directly by reading the real exports, not assumed.
+// Namespace import matches how this controller's own code already
+// calls response.success/response.notFound throughout (24 and 1 real
+// call sites respectively). response.created (6 call sites) did not
+// exist in the real file at all - added as a genuine, minimal,
+// purely-additive export (see utils/response.js) rather than
+// downgrading those 6 calls to response.success and losing the
+// correct 201-vs-200 status distinction for resource creation.
+import * as response from '../../utils/response.js';
 import { providerService, bookingService, reportService, settlementService } from '../services/index.js';
 
 /**
