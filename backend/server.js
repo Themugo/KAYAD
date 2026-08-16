@@ -611,9 +611,44 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("joinChat", (chatId) => {
+  socket.on("joinChat", async (chatId) => {
     if (!socket.user) return; // reject unauthenticated chat access
-    if (!isRateLimited("joinChat") && isValidId(chatId)) socket.join(`chat_${chatId}`);
+    if (isRateLimited("joinChat") || !isValidId(chatId)) return;
+    // Fixed (Phase 8, communication workflow hardening): this
+    // previously joined the requester into ANY validly-formatted
+    // chat_${chatId} room with no check that they're actually a
+    // participant in that specific conversation - any authenticated
+    // user who knew or guessed a valid chat UUID could passively
+    // receive real, private message content and read-receipt data
+    // for a conversation they had no part in (confirmed: real message
+    // broadcasts and "messagesSeen" events are both emitted to this
+    // exact room by controllers/chatController.js). This directly
+    // contradicted this phase's own explicit "only authorized
+    // participants can access conversations" / "users cannot access
+    // arbitrary conversation IDs" requirements.
+    //
+    // Fixed by replicating the same real participant check the HTTP
+    // chat endpoints already use (chatController.js:
+    // chat.participants.some((p) => p.toString() === req.user.id)) -
+    // not inventing new authorization logic, reusing the pattern
+    // already proven correct elsewhere in this backend. Uses a
+    // dynamic import matching the existing joinAuction handler's own
+    // established pattern just above, since this file does not import
+    // getSupabase at module scope.
+    const uid = socket.user?.id || socket.user?._id;
+    if (!uid) return;
+    try {
+      const { getSupabase } = await import("./utils/supabase.js");
+      const sb = getSupabase();
+      const { data: chat } = await sb.from("chats").select("participants").eq("id", chatId).maybeSingle();
+      if (!chat || !Array.isArray(chat.participants) || !chat.participants.some((p) => String(p) === String(uid))) {
+        return; // not a real participant - silently refuse the join, matching this handler's existing no-error-response style
+      }
+      socket.join(`chat_${chatId}`);
+    } catch {
+      // Fail closed - a lookup error must not grant room access.
+      return;
+    }
   });
   socket.on("leaveChat", (chatId) => {
     if (!isRateLimited("leaveChat") && isValidId(chatId)) socket.leave(`chat_${chatId}`);
