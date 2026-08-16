@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { EscrowTransaction, EscrowLogEntry, EscrowDispute, Vehicle } from '../../../types';
 import { Lock, CheckCircle2, Landmark, Clock, Search, ShieldCheck, FileCheck, UserCheck, Building2, Sparkles, ChevronRight, Info, PlusCircle, AlertTriangle, History, Car, FileText, MessageSquare, RefreshCw, Eye, Check, User, ShieldAlert, Download, Upload, PhoneCall } from 'lucide-react';
+import { getEscrowIdFromUrl, setEscrowDetailUrl } from '../../../utils/navigation';
 import { PageHeader, StatWidget, Card, CardHeader, CardTitle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, Modal } from '../../../components/ui';
 
 interface EscrowViewProps {
@@ -19,7 +20,21 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals, pre
   const [dealsList, setDealsList] = useState<EscrowTransaction[]>(initialDeals);
   const [dealSearch, setDealSearch] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create'>('journey');
-  const [selectedDeal, setSelectedDeal] = useState<EscrowTransaction>(initialDeals[0]);
+  // Phase 12 (frontend production hardening): initial value now checks
+  // the URL first, falling back to initialDeals[0] only when there's
+  // no escrowId param or it doesn't match a real deal - selectedDeal's
+  // type stays non-nullable (EscrowTransaction, not | null) to avoid a
+  // larger type-signature change rippling through this already-large
+  // component's many other selectedDeal usages, unlike AuctionsView's
+  // equivalent (selectedSession) which is nullable by design.
+  const [selectedDeal, setSelectedDeal] = useState<EscrowTransaction>(() => {
+    const urlEscrowId = getEscrowIdFromUrl();
+    if (urlEscrowId) {
+      const found = initialDeals.find((d) => d.id === urlEscrowId);
+      if (found) return found;
+    }
+    return initialDeals[0];
+  });
   
   // Perspective Role Switcher: Buyer, Seller, Administrator
   const [userRole, setUserRole] = useState<'Buyer' | 'Seller' | 'Administrator'>('Buyer');
@@ -56,6 +71,38 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals, pre
     triggerToast(`Escrow details pre-filled from ${prefillVehicle.title}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefillVehicle]);
+
+  // Phase 12 (frontend production hardening): browser back/forward
+  // (popstate) support for escrow deep-linking - the same pattern
+  // already proven for vehicle-detail (App.tsx) and auction-lot
+  // (AuctionsView.tsx) deep linking. The initial-mount URL read is
+  // handled by useState's own lazy initializer above; this effect
+  // only needs to additionally react to popstate, since dealsList can
+  // change (e.g. a new deal created via the form) and a stale closure
+  // over the original initialDeals would miss it.
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const urlEscrowId = getEscrowIdFromUrl();
+      if (urlEscrowId) {
+        const found = dealsList.find((d) => d.id === urlEscrowId);
+        if (found) setSelectedDeal(found);
+      }
+    };
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, [dealsList]);
+
+  // Writes the current selectedDeal.id to the URL whenever it changes -
+  // covers every setSelectedDeal call site uniformly (both "user picked
+  // a different deal" and "this deal's own data was refreshed in
+  // place") rather than needing each call site individually updated.
+  // setEscrowDetailUrl's own no-op-if-unchanged check (matching
+  // setVehicleDetailUrl/setAuctionDetailUrl) means an in-place data
+  // refresh that keeps the same id does not create a redundant history
+  // entry.
+  useEffect(() => {
+    if (selectedDeal?.id) setEscrowDetailUrl(selectedDeal.id, false);
+  }, [selectedDeal?.id]);
 
   // Auto-clear Toast
   const triggerToast = (msg: string) => {

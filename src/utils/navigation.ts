@@ -99,3 +99,42 @@ export function setAuctionDetailUrl(auctionId: string | null, pushState: boolean
     }
   }
 }
+
+// Escrow deal deep-linking - same pattern as vehicle-detail and
+// auction-lot deep linking above (query param + pushState/popstate).
+// Found (Phase 12, frontend production hardening) via a direct check
+// of EscrowView.tsx: it has a real per-deal "selectedDeal" sub-state
+// (not just a flat list), but that state was pure local useState
+// defaulting to deals[0] with no URL sync at all - a real deep-link/
+// refresh gap directly matching this phase's own named /escrow/:id
+// verification requirement, using the same proven mechanism already
+// working for vehicles and auctions rather than a new pattern.
+
+export const ESCROW_PARAM = 'escrowId';
+
+export function getEscrowIdFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const escrowId = params.get(ESCROW_PARAM);
+  return escrowId ? escrowId.trim() : null;
+}
+
+export function setEscrowDetailUrl(escrowId: string | null, pushState: boolean = true): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+
+  if (escrowId) {
+    url.searchParams.set(ESCROW_PARAM, escrowId);
+  } else {
+    url.searchParams.delete(ESCROW_PARAM);
+  }
+
+  const newUrl = url.toString();
+  if (newUrl !== window.location.href) {
+    if (pushState) {
+      window.history.pushState({ escrowId }, '', newUrl);
+    } else {
+      window.history.replaceState({ escrowId }, '', newUrl);
+    }
+  }
+}
