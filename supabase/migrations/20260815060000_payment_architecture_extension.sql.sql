@@ -20,7 +20,7 @@ services/paymentService.js's initiateStkPush() calls
 create("mpesa_transactions", {...}) on every single STK push
 initiation (confirmed by direct code read). No CREATE TABLE for
 mpesa_transactions exists anywhere in this migrations directory or in
-backend/db/*.sql. The call is wrapped in .catch() so it does not crash
+backend/db (any .sql file there). The call is wrapped in .catch() so it does not crash
 the STK push flow (payments row still gets created successfully), but
 every mpesa_transactions insert has been silently failing - a real,
 confirmed defect, not a hypothetical one. Column list below matches
