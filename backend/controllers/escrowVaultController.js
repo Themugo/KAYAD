@@ -242,7 +242,16 @@ export const markInspectionComplete = async (req, res) => {
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
-const generateOtp = () => Math.floor(1000 + Math.random() * 9000);
+// Fixed (Phase 10, security hardening): same finding/fix as
+// services/otpService.js and controllers/phoneVerificationController.js
+// - Math.random() replaced with crypto.randomInt() (crypto already
+// imported in this file). This specific OTP authorizes escrow fund
+// release - a genuinely high-stakes use of a random credential,
+// independent of this file's separate, already-documented table-
+// existence issue (Phase 8) - the randomness-source fix is correct
+// and worth making regardless of that unresolved architectural
+// question.
+const generateOtp = () => crypto.randomInt(1000, 10000);
 
 // =============================
 // 📲 REQUEST RELEASE OTP

@@ -49,7 +49,15 @@ const sendEmail = async (to, subject, text) => {
 };
 
 export const sendOTP = async (user, channel = "sms") => {
-  const otp = Math.floor(1000 + Math.random() * 9000);
+  // Fixed (Phase 10, security hardening): Math.random() is not
+  // cryptographically secure - predictable/biased in ways that matter
+  // for a security credential, even a short-lived 4-digit OTP.
+  // crypto.randomInt() (Node's built-in CSPRNG-backed integer
+  // generator, already available since "crypto" is imported in this
+  // file) is the direct, correct replacement - same output range
+  // (1000-9999 inclusive), no new dependency, no behavior change
+  // besides the randomness source itself.
+  const otp = crypto.randomInt(1000, 10000);
   await update("users", user.id, { otpHash: hashOtp(otp), otpExpiry: Date.now() + 600000 });
 
   if (channel === "sms" && user.phone) {

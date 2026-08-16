@@ -359,6 +359,33 @@ const DEMO_ACCOUNTS = {
 
 export const demoLogin = async (req, res) => {
   try {
+    // Fixed (Phase 10, security hardening): this endpoint had no
+    // server-side production gate at all - the only protection was
+    // the frontend's VITE_ENABLE_DEMO flag, which only controls
+    // whether the UI shows a demo-login button. The endpoint itself
+    // was reachable and fully functional regardless of that flag or
+    // NODE_ENV, meaning anyone who discovered this route (trivial -
+    // it's a predictable, documented path) could authenticate as a
+    // demo account in production if any demo data existed there,
+    // and relying on "hopefully nobody seeded demo accounts in
+    // production" is not a real access control. Directly matches this
+    // phase's explicit "ensure production demo functionality is
+    // disabled" requirement.
+    //
+    // Fixed with an explicit, default-off backend gate
+    // (ENABLE_DEMO_LOGIN) - deliberately not reusing NODE_ENV alone,
+    // since that would silently enable this in every non-production
+    // environment (staging, etc.) without an explicit opt-in, and
+    // deliberately a separate variable from the frontend's
+    // VITE_ENABLE_DEMO, since a backend security gate should not
+    // depend on a frontend-only, client-visible build flag. Fails
+    // closed: if this variable is unset (the same "absent from
+    // render.yaml" pattern already flagged for MPESA_ENV/REDIS_URL in
+    // this program's Phase 0/1 baseline), demo login is disabled.
+    if (process.env.ENABLE_DEMO_LOGIN !== "true") {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+
     const { role } = req.body;
     const demo = DEMO_ACCOUNTS[role];
     if (!demo) {

@@ -14,7 +14,12 @@ export const sendPhoneOTP = async (req, res) => {
     if (!user.phone) return R.error(res, "No phone number on account", 400);
     if (user.phoneVerified) return R.success(res, null, "Phone already verified");
 
-    const otp = Math.floor(1000 + Math.random() * 9000);
+    // Fixed (Phase 10, security hardening): same finding and fix as
+    // services/otpService.js's sendOTP - Math.random() replaced with
+    // crypto.randomInt(), Node's built-in CSPRNG-backed integer
+    // generator (crypto is already imported in this file). Identical
+    // output range, no behavior change besides the randomness source.
+    const otp = crypto.randomInt(1000, 10000);
     user.phoneOTP = hashOtp(otp);
     user.phoneOTPExpire = new Date(Date.now() + 600000);
     await user.save();
