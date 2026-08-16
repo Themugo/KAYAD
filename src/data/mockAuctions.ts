@@ -1,5 +1,5 @@
-import { AuctionSession, AuctionOrganizerType } from '../types';
-import { INITIAL_VEHICLES, hoursFromNow } from './mockVehicles';
+import { AuctionSession, Vehicle, AuctionOrganizerType } from '../types';
+import { INITIAL_VEHICLES } from './mockVehicles';
 
 const nissanVehicle = INITIAL_VEHICLES.find(v => v.id === 'v4') || INITIAL_VEHICLES[3];
 const mercVehicle = INITIAL_VEHICLES.find(v => v.id === 'v6') || INITIAL_VEHICLES[5];
@@ -231,14 +231,8 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     buyoutPrice: 2450000,
     minimumIncrement: 25000,
     startsAt: '2026-07-28T09:00:00Z',
-    // Matches the same 18h-from-now offset used for this same
-    // underlying vehicle (v4/nissanVehicle) in mockVehicles.ts's own
-    // auctionEndsAt - these 2 files describe the same auction via 2
-    // separate, unsynced fields (a real architectural gap worth a
-    // follow-up), so kept numerically consistent here rather than
-    // introducing a second, different stale-date bug for the same car.
-    endsAt: hoursFromNow(18),
-    totalBidsCount: 6, // matches bidHistory.length exactly (b1-b6) - was 14, mismatched the actual array (confirmed the Bid Log tab label directly promises this count: `Bid Log (${totalBidsCount})`)
+    endsAt: '2026-08-01T15:00:00Z',
+    totalBidsCount: 14,
     uniqueBiddersCount: 6,
     reserveMet: true,
     termsAndConditions: [
@@ -273,10 +267,8 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     buyoutPrice: 4350000,
     minimumIncrement: 50000,
     startsAt: '2026-07-27T10:00:00Z',
-    // Matches the same 72h-from-now offset used for this same
-    // underlying vehicle (v6/mercVehicle) in mockVehicles.ts.
-    endsAt: hoursFromNow(72),
-    totalBidsCount: 4, // matches bidHistory.length exactly (bm1-bm4) - was 19, same mismatch
+    endsAt: '2026-07-30T18:00:00Z',
+    totalBidsCount: 19,
     uniqueBiddersCount: 8,
     reserveMet: true,
     termsAndConditions: [
@@ -308,12 +300,8 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     currentBid: 5900000,
     buyoutPrice: 6850000,
     minimumIncrement: 50000,
-    // No corresponding vehicle-level auctionEndsAt to stay consistent
-    // with here (v1/INITIAL_VEHICLES[0] isn't itself marked isAuction),
-    // so free to pick clean, clearly-future values: starts in 5 days,
-    // runs for a 3-day bidding window.
-    startsAt: hoursFromNow(120),
-    endsAt: hoursFromNow(192),
+    startsAt: '2026-08-05T09:00:00Z',
+    endsAt: '2026-08-08T18:00:00Z',
     totalBidsCount: 0,
     uniqueBiddersCount: 0,
     reserveMet: false,
@@ -342,7 +330,7 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     minimumIncrement: 25000,
     startsAt: '2026-07-20T09:00:00Z',
     endsAt: '2026-07-25T18:00:00Z',
-    totalBidsCount: 2, // matches bidHistory.length exactly (be1-be2) - was 22, same mismatch
+    totalBidsCount: 22,
     uniqueBiddersCount: 9,
     reserveMet: true,
     termsAndConditions: [

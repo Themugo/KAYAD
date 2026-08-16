@@ -1,7 +1,37 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Car, PlusCircle, Menu, X, MapPin, ShieldCheck, User, ChevronDown, Gavel, CreditCard, HelpCircle, Heart, Bell, LogOut, LayoutDashboard, MessageSquare, Building2, Lock, Settings, Bookmark, BarChart3, Layers, Calendar, FileText, Sliders, CheckCircle2, Landmark } from 'lucide-react';
+import { 
+  Car, 
+  PlusCircle, 
+  Menu, 
+  X, 
+  MapPin, 
+  ShieldCheck, 
+  User, 
+  ChevronDown,
+  Gavel,
+  CreditCard,
+  HelpCircle,
+  Heart,
+  Bell,
+  LogOut,
+  LayoutDashboard,
+  MessageSquare,
+  Building2,
+  Lock,
+  Settings,
+  Bookmark,
+  BarChart3,
+  Layers,
+  Calendar,
+  FileText,
+  Sliders,
+  Sparkles,
+  CheckCircle2,
+  Landmark,
+  Radio,
+  Play,
+} from 'lucide-react';
 import { UserProfile } from '../types';
-import { ROLE_DISPLAY_LABELS } from '../context/AuthContext';
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -29,13 +59,37 @@ export const Navbar: React.FC<NavbarProps> = ({
   unreadCount = 0
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [trustIndex, setTrustIndex] = useState(0);
 
+  const countyRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+
+  const counties = ['All East Africa', 'Nairobi', 'Mombasa', 'Nakuru', 'Kiambu', 'Eldoret', 'Kisumu'];
+
+  const trustMessages = [
+    "Verified Dealers Across East Africa",
+    "Secure Private Sales with Escrow",
+    "150-Point Certified Vehicles",
+    "Live Vehicle Auctions",
+    "Trusted Automotive Marketplace"
+  ];
+
+  // Rotate trust messages slowly every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTrustIndex((prev) => (prev + 1) % trustMessages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [trustMessages.length]);
 
   // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      if (countyRef.current && !countyRef.current.contains(e.target as Node)) {
+        setShowCountyDropdown(false);
+      }
       if (userRef.current && !userRef.current.contains(e.target as Node)) {
         setShowUserDropdown(false);
       }
@@ -54,12 +108,88 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasNotifications = (user?.unreadNotificationsCount ?? 0) > 0 || effectiveUnread > 0;
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#17244B] to-[#1E3063] border-b border-white/10 shadow-sm text-white">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/70 shadow-2xs text-slate-800">
+      {/* Top Utility Bar - Slim Brand Identity & Rotating Trust Strip */}
+      <div className="bg-[#101935] border-b border-slate-800/80 text-[11px] py-1 px-4 sm:px-6 lg:px-8 text-slate-300">
+        <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
+          {/* Left: Rotating Brand Trust Message */}
+          <div className="flex items-center space-x-2.5 min-w-0 overflow-hidden">
+            <span className="text-[#E0D8CB] font-bold text-[10px] uppercase tracking-wider shrink-0 bg-white/10 px-2 py-0.5 rounded border border-white/15">
+              KAYAD EA
+            </span>
+            <div className="flex items-center gap-1.5 font-medium text-slate-200 truncate transition-opacity duration-700 ease-in-out">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="truncate text-slate-200 font-medium">{trustMessages[trustIndex]}</span>
+            </div>
+          </div>
+
+          {/* Right: Region Selector & Account/Alerts */}
+          <div className="flex items-center space-x-3 shrink-0">
+            <div className="relative hidden md:block" ref={countyRef}>
+              <button 
+                onClick={() => setShowCountyDropdown(!showCountyDropdown)}
+                className="flex items-center gap-1.5 hover:text-white transition-colors py-0.5 px-2.5 rounded bg-slate-800/80 border border-slate-700/60"
+                id="county-selector-top"
+              >
+                <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                <span>Region: <strong className="text-white font-semibold">{selectedCounty}</strong></span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {showCountyDropdown && (
+                <div className="absolute right-0 mt-1 w-48 bg-white text-slate-800 rounded-xl shadow-lg border border-slate-200 py-1 z-50 text-xs animate-fade-in">
+                  {counties.map((county) => (
+                    <button
+                      key={county}
+                      onClick={() => {
+                        onCountyChange(county);
+                        setShowCountyDropdown(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-[#F5F2EB] flex items-center justify-between transition-colors ${
+                        selectedCounty === county ? 'font-bold text-[#1E3063] bg-[#F5F2EB]' : ''
+                      }`}
+                    >
+                      {county}
+                      {selectedCounty === county && <span className="w-1.5 h-1.5 rounded-full bg-[#1E3063]"></span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={onOpenAlerts}
+              className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors font-medium hidden sm:flex"
+            >
+              <Bell className="w-3.5 h-3.5 text-slate-400" />
+              <span>Price Alerts</span>
+            </button>
+
+            <span className="text-slate-700 hidden sm:inline">|</span>
+
+            {user ? (
+              <span className="text-slate-300 flex items-center gap-1.5 font-medium text-[11px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span className="hidden sm:inline">Signed in as</span> <strong className="text-white truncate max-w-[110px]">{user.name}</strong>
+              </span>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="flex items-center gap-1 hover:text-white transition-colors font-semibold text-slate-200"
+              >
+                <User className="w-3.5 h-3.5 text-slate-400" />
+                <span>Sign In</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Main Navigation Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-18 gap-4">
           
-          {/* LEFT SECTION: Logo, Marketplace */}
+          {/* LEFT SECTION: Logo, Marketplace, Auctions */}
           <div className="flex items-center space-x-6 md:space-x-8">
             {/* KAYAD Logo */}
             <button 
@@ -67,108 +197,136 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-2.5 group focus:outline-none shrink-0"
               id="brand-logo"
             >
-              <div className="w-9 h-9 rounded-lg bg-amber-400 text-[#17244B] flex items-center justify-center font-black shadow-2xs group-hover:bg-amber-300 transition-colors">
+              <div className="w-9 h-9 rounded-lg bg-[#1E3063] text-white flex items-center justify-center font-black shadow-2xs group-hover:bg-[#17244B] transition-colors">
                 <Car className="w-5 h-5 stroke-[2]" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-black text-2xl tracking-tight text-white font-display leading-none flex items-center gap-1.5">
+                <span className="font-black text-2xl tracking-tight text-[#1E3063] font-display leading-none flex items-center gap-1.5">
                   KAYAD
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-amber-400 border border-white/20 font-sans font-bold">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F5F2EB] text-[#1E3063] border border-[#E5E0D8] font-sans font-bold">
                     EA
                   </span>
                 </span>
-                <span className="text-[9px] text-slate-300 font-semibold tracking-wider uppercase mt-0.5">Automotive Marketplace</span>
+                <span className="text-[9px] text-slate-500 font-semibold tracking-wider uppercase mt-0.5">Automotive Marketplace</span>
               </div>
             </button>
 
-            {/* Desktop Primary Nav - 4 items per explicit direction:
-                Marketplace, Auction, Pre-Purchase Inspection, Support.
-                A revision of the previous "just Marketplace" pass - that
-                one was also a direct, explicit instruction, so this
-                isn't overriding a judgment call, it's implementing a
-                changed decision. Escrow and Finance are not in this list
-                and stay contextual-only (VehicleDetailModal's "Start
-                Secure Escrow Purchase" / Financing Marketplace
-                Estimator), matching what was actually asked for both
-                times - the 4 requested here are the same 4 named in the
-                original "every car has its own rules functions" request,
-                just now as their own nav items rather than folded
-                entirely into per-vehicle-only access.
-
-                "Auction" links to 'auctions' (AuctionsView) specifically,
-                not 'discovery' (AuctionDiscoveryNetwork) - confirmed in
-                an earlier pass that AuctionsView is the functionally
-                real bidding/browsing page (real vehicle data, filtering,
-                escrow integration; 1786 lines) while AuctionDiscoveryNetwork
-                is more of a schedule/education hub with no comparable
-                vehicle-data integration. (AuctionDiscoveryNetwork was
-                later confirmed genuinely orphaned - zero navigation
-                callers anywhere - and deleted entirely in a subsequent
-                frontend-cleanup pass; this comment is kept as the
-                historical reasoning for why 'auctions' was chosen as
-                the canonical link, not as a pointer to a file that still
-                exists.) */}
-            <nav className="hidden lg:flex items-center space-x-2 border-l border-white/15 pl-6 text-xs font-semibold text-slate-200">
+            {/* Desktop Left Nav Items */}
+            <nav className="hidden lg:flex items-center space-x-2 border-l border-slate-200/60 pl-6 text-xs font-semibold text-slate-600">
               <button
                 onClick={() => handleNavSelect('marketplace')}
                 className={`px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'marketplace'
-                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
-                    : 'hover:text-amber-400 hover:bg-white/10'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
               >
                 Marketplace
               </button>
 
               <button
-                onClick={() => handleNavSelect('auctions')}
+                onClick={() => handleNavSelect('kayadlive')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'auctions'
-                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
-                    : 'hover:text-amber-400 hover:bg-white/10'
+                  activeNav === 'kayadlive'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <Radio className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>KAYAD LIVE</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('discovery')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'discovery'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
               >
                 <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                <span>Auction</span>
+                <span>Auctions</span>
               </button>
 
               <button
-                onClick={() => handleNavSelect('inspections')}
+                onClick={() => handleNavSelect('broadcast')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'inspections'
-                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
-                    : 'hover:text-amber-400 hover:bg-white/10'
+                  activeNav === 'broadcast'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 stroke-[1.75]" />
-                <span>Pre-Purchase Inspection</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('support')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'support'
-                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
-                    : 'hover:text-amber-400 hover:bg-white/10'
-                }`}
-              >
-                <HelpCircle className="w-3.5 h-3.5 text-slate-300 shrink-0 stroke-[1.75]" />
-                <span>Support</span>
+                <Play className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>Watch Live</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">
+                  NOW
+                </span>
               </button>
             </nav>
           </div>
+
+          {/* CENTER SECTION: My Garage, Pre-Purchase Inspection, Financing, Support */}
+          <nav className="hidden lg:flex items-center space-x-2 text-xs font-semibold text-slate-600">
+            <button
+              onClick={() => handleNavSelect('buyer-platform')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                activeNav === 'buyer-platform'
+                  ? 'bg-[#D4AF37] text-[#0A1628] font-bold shadow-2xs'
+                  : 'hover:text-[#0A1628] hover:bg-[#F5F2EB]'
+              }`}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-amber-500 shrink-0 stroke-[1.75]" />
+              <span>My Garage</span>
+            </button>
+
+            <button
+              onClick={() => handleNavSelect('inspections')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                activeNav === 'inspections'
+                  ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                  : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[1.75]" />
+              <span>Pre-Purchase Inspection</span>
+            </button>
+
+            <button
+              onClick={() => handleNavSelect('finance')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                activeNav === 'finance'
+                  ? 'bg-emerald-500 text-white font-bold shadow-2xs'
+                  : 'hover:text-emerald-600 hover:bg-emerald-50'
+              }`}
+            >
+              <CreditCard className="w-3.5 h-3.5 text-emerald-500 shrink-0 stroke-[1.75]" />
+              <span>Finance</span>
+            </button>
+
+            <button
+              onClick={() => handleNavSelect('support')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                activeNav === 'support'
+                  ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                  : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+              }`}
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0 stroke-[1.75]" />
+              <span>Support</span>
+            </button>
+          </nav>
 
           {/* RIGHT SECTION: List Vehicle & Login/Register OR User Profile Dropdown */}
           <div className="flex items-center space-x-3">
             {/* Communication Hub Button */}
             <button
               onClick={() => handleNavSelect('chat')}
-              className={`p-2 rounded-xl text-slate-200 hover:text-amber-400 hover:bg-white/10 transition-colors relative ${
-                activeNav === 'chat' ? 'bg-amber-400 text-[#17244B]' : ''
+              className={`p-2 rounded-xl text-slate-600 hover:text-[#1E3063] hover:bg-[#F5F2EB] transition-colors relative ${
+                activeNav === 'chat' ? 'bg-[#1E3063] text-white' : ''
               }`}
               title="Unified Communication Hub"
             >
-              <MessageSquare className={`w-5 h-5 stroke-[1.75] ${activeNav === 'chat' ? 'text-[#17244B]' : 'text-slate-200'}`} />
+              <MessageSquare className={`w-5 h-5 stroke-[1.75] ${activeNav === 'chat' ? 'text-white' : 'text-slate-600'}`} />
               <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[9px] font-black rounded-full bg-amber-400 text-[#17244B] shadow-2xs">
                 3
               </span>
@@ -177,30 +335,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Favorites Icon */}
             <button
               onClick={() => handleNavSelect('saved')}
-              className={`p-2 rounded-xl text-slate-200 hover:text-amber-400 hover:bg-white/10 transition-colors relative ${
-                activeNav === 'saved' ? 'bg-white/10 text-amber-400' : ''
+              className={`p-2 rounded-xl text-slate-600 hover:text-[#1E3063] hover:bg-[#F5F2EB] transition-colors relative ${
+                activeNav === 'saved' ? 'bg-[#F5F2EB] text-[#1E3063]' : ''
               }`}
               title="Saved Vehicles"
             >
-              <Heart className="w-5 h-5 text-slate-200 stroke-[1.75]" />
+              <Heart className="w-5 h-5 text-slate-600 stroke-[1.75]" />
               {savedCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-400 text-[#17244B] shadow-2xs">
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-[#C85A32] text-white shadow-2xs">
                   {savedCount}
                 </span>
               )}
             </button>
 
-            {/* List Vehicle Button (Primary CTA) - matches the footer's
-                own accent (bg-amber-400 text-[#17244B], confirmed
-                directly in App.tsx's footer markup) instead of the
-                terracotta (#C85A32) this used before, which was a
-                second, competing accent color not used in the footer at
-                all. Also better contrast than the old white-on-terracotta -
-                navy-on-amber is the same high-contrast pairing the
-                footer already uses successfully. */}
+            {/* List Vehicle Button (Primary CTA: Muted Terracotta) */}
             <button
               onClick={() => handleNavSelect('seller-platform')}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-amber-400 hover:bg-amber-500 text-[#17244B] transition-all shadow-2xs active:scale-[0.98] shrink-0"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-[#C85A32] hover:bg-[#B34E28] text-white transition-all shadow-2xs active:scale-[0.98] shrink-0"
               id="cta-sell-car"
             >
               <PlusCircle className="w-4 h-4 stroke-[2]" />
@@ -212,24 +363,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="relative" ref={userRef}>
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl hover:bg-white/10 border border-white/20 transition-all focus:outline-none"
+                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl hover:bg-[#F5F2EB] border border-slate-200 transition-all focus:outline-none"
                   id="user-profile-menu-button"
                 >
                   <div className="relative">
                     <img 
                       src={user.avatar} 
                       alt={user.name} 
-                      className="w-7 h-7 rounded-full object-cover border border-amber-400/40 shadow-2xs"
+                      className="w-7 h-7 rounded-full object-cover border border-[#1E3063]/30 shadow-2xs"
                     />
                     {hasNotifications && (
                       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
                     )}
                   </div>
                   <div className="hidden sm:flex flex-col text-left">
-                    <span className="text-xs font-bold text-white leading-none">{user.name}</span>
-                    <span className="text-[10px] text-slate-300 capitalize">{user.role}</span>
+                    <span className="text-xs font-bold text-[#1E3063] leading-none">{user.name}</span>
+                    <span className="text-[10px] text-slate-500 capitalize">{user.role}</span>
                   </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-300 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Authenticated Dropdown Menu */}
@@ -242,7 +393,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <p className="font-bold text-slate-900 truncate">{user.name}</p>
                         <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
                         <span className="inline-block mt-1 px-2 py-0.5 bg-[#1E3063] text-white font-semibold text-[9px] rounded uppercase">
-                          {ROLE_DISPLAY_LABELS[user.role]}
+                          {user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Private Seller / Buyer'}
                         </span>
                       </div>
                     </div>
@@ -451,10 +602,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-xl focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="lg:hidden p-2 text-slate-700 hover:bg-[#F5F2EB] rounded-xl focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Toggle navigation menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+              {mobileMenuOpen ? <X className="w-6 h-6 text-[#1E3063]" /> : <Menu className="w-6 h-6 text-[#1E3063]" />}
             </button>
           </div>
 
@@ -497,19 +648,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onOpenAuth();
                   setMobileMenuOpen(false);
                 }}
-                className="px-3 py-1.5 bg-amber-400 text-[#17244B] font-bold rounded-xl text-xs"
+                className="px-3 py-1.5 bg-[#C85A32] text-white font-bold rounded-xl text-xs"
               >
                 Sign In
               </button>
             </div>
           )}
 
-          {/* Group 1: Public Services - 4 items matching the desktop nav:
-              Marketplace, Auction, Pre-Purchase Inspection, Support.
-              Escrow and Finance stay contextual-only (VehicleDetailModal),
-              matching what was actually requested both times this nav
-              was revised - these 4 are the ones asked for as their own
-              destinations. */}
+          {/* Group 1: Public Services */}
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
               Public Marketplace
@@ -527,13 +673,36 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavSelect('auctions')}
+                onClick={() => handleNavSelect('kayadlive')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'auctions' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'kayadlive' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <Radio className="w-4 h-4" />
+                <span>KAYAD LIVE</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('discovery')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'discovery' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <Gavel className="w-4 h-4" />
-                <span>Auction</span>
+                <span>Auction Discovery</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('broadcast')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between ${
+                  activeNav === 'broadcast' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Play className="w-4 h-4" />
+                  <span>Watch Live</span>
+                </div>
+                <span className="text-[8px] bg-rose-600 text-white px-1 py-0.2 rounded font-bold">LIVE</span>
               </button>
 
               <button
@@ -543,19 +712,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Inspection</span>
+                <span>Mechanic</span>
               </button>
 
               <button
-                onClick={() => handleNavSelect('support')}
+                onClick={() => handleNavSelect('financing')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'support' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'financing' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
-                <HelpCircle className="w-4 h-4 text-slate-400" />
-                <span>Support</span>
+                <CreditCard className="w-4 h-4 text-slate-400" />
+                <span>Financing</span>
               </button>
             </div>
+
+            <button
+              onClick={() => handleNavSelect('support')}
+              className="w-full p-2.5 bg-slate-800/80 rounded-xl font-bold text-xs text-left flex items-center gap-2 text-slate-300"
+            >
+              <HelpCircle className="w-4 h-4 text-slate-400" />
+              <span>Support & Disputes</span>
+            </button>
           </div>
 
           {/* Group 2: Authenticated Account & Role Links */}

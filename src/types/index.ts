@@ -246,15 +246,21 @@ export interface PaymentRequest {
 // simpler `Car` type above used by CarCard and the main Home page)
 // ============================================================
 
-// UserRole/UserProfile previously duplicated here (Phase 1 hardening,
-// architecture cleanup) - confirmed via a repo-wide import-path check
-// that every real usage of UserProfile in this codebase imports it
-// from src/types.ts (which has its own separate, actually-used
-// UserProfile definition), never from this file - and that no file
-// imports UserRole from here either (the only other matches were
-// unrelated local variable/prop names and comment text). Removed as
-// genuinely dead code, not merely consolidated, since nothing
-// referenced this copy at all.
+export type UserRole = 'buyer' | 'seller' | 'dealer' | 'admin';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  avatar?: string;
+  phone?: string;
+  companyName?: string;
+  isVerified: boolean;
+  createdAt: string;
+  rating?: number;
+  reviewsCount?: number;
+}
 
 export type VehicleCondition = 'New' | 'Like New' | 'Excellent' | 'Good' | 'Fair' | 'Brand New';
 export type TransmissionType = 'Automatic' | 'Manual' | 'Dual-Clutch' | 'CVT' | 'Direct Drive' | '10-Speed Automatic' | '8-Speed Automatic';
@@ -322,17 +328,6 @@ export interface Vehicle {
   inspectionPassed?: boolean;
   inspectionReportId?: string;
   escrowEligible?: boolean;
-  /** Per-vehicle admin override for escrow requirement on this specific
-   * sale, independent of the global EscrowRulesConfig seller-type rule.
-   * 'enforce' = escrow required for this vehicle regardless of the
-   * global rule. 'revoke' = escrow not offered for this vehicle
-   * regardless of the global rule. undefined/null = no override, falls
-   * through to the global rule as before. Added per explicit direction:
-   * escrow shouldn't be mandatory for every private-seller sale
-   * unconditionally - an admin needs to be able to enforce or revoke it
-   * per individual sale, not just change the blanket seller-type rule
-   * for everyone at once. */
-  escrowOverride?: 'enforce' | 'revoke' | null;
   financeAvailable?: boolean;
   inspectionBookingAvailable?: boolean;
   responseTime?: string;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import VehicleDetailModal from './components/VehicleDetailModal';
@@ -8,112 +8,38 @@ import PriceAlertsModal from './components/PriceAlertsModal';
 
 import { INITIAL_VEHICLES, MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
 import { Vehicle, ChatMessage, UserProfile } from './types';
-import { getVehicleIdFromUrl, setVehicleDetailUrl, setAuctionDetailUrl } from './utils/navigation';
-import { INITIAL_AUCTION_SESSIONS } from './data/mockAuctions';
-import { isEscrowApplicable } from './utils/escrow';
-import { useAuth } from './context/AuthContext';
-import { getCars, getCarById, mapBackendCarToVehicle } from './services/vehicleApi';
-import { useVehicleCollections } from './hooks/useVehicleCollections';
+import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 
-// Views — lazy-loaded so each is its own chunk, downloaded only when the
-// user navigates there, instead of all being bundled into the initial load.
-// VehicleMarketplace stays a static import since it's the default/landing view.
-const AuctionsView = lazy(() => import('./features/AuctionsView'));
-const EscrowView = lazy(() => import('./features/EscrowView'));
-const InspectionsView = lazy(() => import('./features/InspectionsView'));
-const FinancingView = lazy(() => import('./features/FinancingView'));
-const DealersView = lazy(() => import('./features/DealersView'));
-const DashboardView = lazy(() => import('./features/DashboardView'));
-const PrivateSellerDashboardView = lazy(() => import('./features/PrivateSellerDashboardView'));
-const ChatView = lazy(() => import('./features/ChatView'));
-const AdminView = lazy(() => import('./features/AdminView'));
-const SupportView = lazy(() => import('./features/SupportView'));
-
-const PrivateSellerPlatform = lazy(() => import('./features/PrivateSellerPlatform').then(m => ({ default: m.PrivateSellerPlatform })));
-// FinanceMarketplace lazy import removed - the 'finance' route it backed
-// was confirmed genuinely unreachable (Phase 1 consolidation): zero
-// callers anywhere in the codebase via navigateTo, handleNavSelect, or
-// any other navigation prop pattern checked. FinancingView (route
-// 'financing') is the actively-used, functionally superset
-// implementation of the same business function (5 tabs vs
-// FinanceMarketplace's fewer equivalent sections, plus a "Compare
-// Offers" capability FinanceMarketplace doesn't have), and uses the
-// established Tailwind-class styling convention consistently used
-// everywhere else in this app, where FinanceMarketplace instead used
-// its own inline KAYAD_THEME object and a hardcoded internal "KAYAD"
-// header - architecturally inconsistent with the rest of the codebase.
-// Initially only the dead route was removed (VALID_VIEWS entry, render
-// block, this import), with the component file itself deliberately left
-// in place per that phase's caution against removing files "simply
-// because they appear unused". The full file
-// (features/FinancePlatform/components/FinanceMarketplace.tsx) was
-// subsequently deleted entirely in a later, explicitly-requested
-// frontend-cleanup pass, alongside 4 other confirmed-orphaned
-// components (BuyerPlatform, OwnerGarage, LiveAuctionBroadcastPage,
-// AuctionDiscoveryNetwork, KAYADLive) - see KAYAD_CURRENT_STATE.md for
-// the full list and verification method.
+// Views
+import AuctionsView from './features/AuctionsView';
+import EscrowView from './features/EscrowView';
+import InspectionsView from './features/InspectionsView';
+import FinancingView from './features/FinancingView';
+import DealersView from './features/DealersView';
+import DashboardView from './features/DashboardView';
+import PrivateSellerDashboardView from './features/PrivateSellerDashboardView';
+import ChatView from './features/ChatView';
+import AdminView from './features/AdminView';
+import SupportView from './features/SupportView';
+import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
+import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
+import KAYADLive from './pages/KAYADLive';
+import { BuyerPlatform } from './features/OwnershipPlatform';
+import { PrivateSellerPlatform } from './features/PrivateSellerPlatform';
+import { FinanceMarketplace } from './features/FinancePlatform';
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
-  // Authenticated User State - now backend-authoritative (KAYAD Fusion
-  // Phase 3), sourced from AuthContext (wrapping the whole app in
-  // main.tsx) instead of local component state. Previously this was a
-  // bare `useState<UserProfile | null>(null)` that AuthModal set
-  // directly by picking a role from a local demo list, with zero
-  // backend involvement - confirmed in this project's own earlier
-  // audit phases (docs/fusion/01, 05) to be the actual prior behavior.
-  const { user, logout: authLogout, isRestoringSession } = useAuth();
+  // Authenticated User State (null = anonymous public visitor)
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   // Interactive States
   const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES);
-  // Phase 7: tracks which data source vehicles actually came from -
-  // exposed (not hidden) so a future UI indicator can show it if
-  // desired, and so this isn't a silent swap that misrepresents demo
-  // data as live. Starts 'demo' (matching the initial useState above)
-  // and flips to 'live' only if the real backend call below genuinely
-  // succeeds with at least one real vehicle.
-  const [vehicleDataSource, setVehicleDataSource] = useState<'live' | 'demo'>('demo');
-  // Phase 1 hardening, continued: exposes whether the initial real
-  // vehicle fetch (below) is still in flight - previously this effect
-  // had no loading state at all, only the eventual success/fallback
-  // result. Wired into VehicleMarketplace's own pre-existing
-  // isLoading/SkeletonGrid mechanism (see that component's
-  // isFetchingVehicles prop) rather than building a new loading UI
-  // from scratch.
-  //
-  // Defaults to false, not true, deliberately: mock data is already
-  // available instantly on first render (vehicles starts as
-  // INITIAL_VEHICLES, never empty) - showing a loading skeleton before
-  // content that's already ready to display would be a UX regression,
-  // not an improvement, especially since a network failure (this
-  // project's current common case) means the fetch never succeeds at
-  // all. This flag exists so a future refinement CAN show a small,
-  // non-blocking "checking for live listings" indicator without
-  // hiding the already-available demo content - not to gate content
-  // that doesn't need gating.
-  const [isFetchingVehicles, setIsFetchingVehicles] = useState<boolean>(false);
-  // Phase 1 hardening: savedVehicles/comparedVehicles state and their
-  // toggle handlers/derived lists moved into useVehicleCollections()
-  // (src/hooks/useVehicleCollections.ts) - was previously 2 useState
-  // calls, 2 useMemo calls, and 2 useCallback handlers declared
-  // directly in this component, moved verbatim with no logic changes.
-  // Phase 2 (eliminate mock business state): savedVehicles is now
-  // backed by the real backend favorites API for authenticated users -
-  // user.id passed through so the hook knows whether to attempt it
-  // (see useVehicleCollections.ts's own header comment for the full
-  // authenticated-vs-anonymous behavioral split).
-  const {
-    savedVehicles,
-    comparedVehicles,
-    savedVehiclesList,
-    comparedVehiclesList,
-    handleToggleSave,
-    handleToggleCompare,
-    favoritesError,
-  } = useVehicleCollections(vehicles, user?.id);
+  const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
+  const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
   
   // Modal Trigger States
@@ -123,147 +49,21 @@ export function App() {
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
   const [selectedChatVehicle, setSelectedChatVehicle] = useState<Vehicle | null>(null);
-  // Separate from selectedChatVehicle on purpose - that state is shared
-  // with the unrelated chat feature (handleContactSeller also sets it),
-  // so reusing it here would mean EscrowView could show stale prefill
-  // data from whichever vehicle chat was most recently opened for,
-  // rather than the vehicle escrow was actually started for.
-  const [escrowPrefillVehicle, setEscrowPrefillVehicle] = useState<Vehicle | null>(null);
-
-  // Views that require a signed-in user. Attempting to navigate to one of
-  // these while anonymous opens the auth modal instead of the view itself -
-  // repairs a route-protection gap where any visitor could reach the admin
-  // panel or personal dashboard with no login check at all.
-  const PROTECTED_VIEWS = useMemo(() => new Set(['admin', 'dashboard']), []);
-  const navigateTo = useCallback((nav: string) => {
-    if (PROTECTED_VIEWS.has(nav) && !user) {
-      setShowAuthModal(true);
-      return;
-    }
-    setActiveNav(nav);
-  }, [user, PROTECTED_VIEWS]);
-
-  // Route map: every activeNav value the Module Switcher below actually
-  // renders a view for. Anything else falls back to 'marketplace' - the
-  // equivalent of a 404-to-home redirect for this custom router, so a
-  // stray or future-feature nav target never leaves the user on a blank
-  // screen with no way forward.
-  const VALID_VIEWS = useMemo(() => new Set([
-    'marketplace', 'saved', 'auctions', 'escrow', 'inspections', 'financing',
-    'dealers', 'dashboard', 'chat', 'admin', 'support', 'seller-platform',
-    'seller-dashboard',
-  ]), []);
-
-  // Phase 7: attempt to load real vehicle data from the backend on
-  // mount. This is a hybrid, honest-fallback approach, not a full
-  // replacement of mock data - given no live backend is reachable
-  // anywhere in this program's current environment (the standing
-  // constraint across every phase), a network failure here is the
-  // expected, common case, not an edge case to alarm about. On
-  // success, real vehicles replace the initial mock set and
-  // vehicleDataSource flips to 'live'. On any failure (network error,
-  // empty result), the existing INITIAL_VEHICLES mock data - already
-  // set as this state's initial value - is left in place unchanged,
-  // and vehicleDataSource stays 'demo'. Per this program's established
-  // principle (Phase 6: "never fake successful payments in fallback
-  // mode"), applied here to data rather than payments: this never
-  // silently presents mock data as if it were real - the
-  // vehicleDataSource flag exists specifically so that distinction
-  // remains visible to the rest of the app, even though no UI
-  // component surfaces it yet (a natural next step, not built this
-  // phase).
-  useEffect(() => {
-    let cancelled = false;
-    setIsFetchingVehicles(true);
-    (async () => {
-      try {
-        const res = await getCars({ limit: 50 });
-        const rawCars = res.data && res.data.length > 0 ? res.data : res.cars;
-        if (!cancelled && rawCars && rawCars.length > 0) {
-          setVehicles(rawCars.map(mapBackendCarToVehicle));
-          setVehicleDataSource('live');
-        }
-      } catch (err) {
-        // Expected in this project's current state (no deployed
-        // backend) - logged for visibility during development/
-        // debugging, not surfaced as a user-facing error, since the
-        // mock-data experience remains fully functional as a fallback.
-        console.warn('KAYAD vehicles: falling back to demo data', err);
-      } finally {
-        if (!cancelled) setIsFetchingVehicles(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!VALID_VIEWS.has(activeNav)) {
-      setActiveNav('marketplace');
-    }
-  }, [activeNav, VALID_VIEWS]);
 
   // Central Navigation Handler: Opens Vehicle Details & Updates URL
-  //
-  // Phase 2 (eliminate mock business state) continued: previously, a
-  // vehicle ID not present in the already-loaded `vehicles` array
-  // (only the first 50 real/mock vehicles are loaded - see the
-  // getCars({ limit: 50 }) effect above) went straight to
-  // invalidVehicleId, even if the vehicle genuinely exists in the
-  // backend - a real gap for direct links/deep links to a specific
-  // vehicle outside that initial page. Now falls back to a real,
-  // individual getCarById() fetch (built and tested since Fusion
-  // Phase 4/5/6, previously unused by any UI component) before
-  // concluding a vehicle ID is actually invalid.
-  //
-  // A race-condition guard (latestRequestedVehicleId) is needed here
-  // because this handler is now asynchronous for the fallback path -
-  // if a user opens vehicle A (triggering a fallback fetch), then
-  // quickly opens vehicle B before A's fetch resolves, A's late
-  // response must not overwrite B's already-displayed detail view.
-  const latestRequestedVehicleId = useRef<string | null>(null);
   const handleOpenVehicleDetails = useCallback((vehicleOrId: Vehicle | string) => {
     if (typeof vehicleOrId === 'string') {
       const found = vehicles.find((v) => v.id === vehicleOrId);
       if (found) {
-        latestRequestedVehicleId.current = null; // no fetch in flight for this synchronous path
         setQuickViewVehicle(found);
         setInvalidVehicleId(null);
         setVehicleDetailUrl(found.id);
       } else {
-        // Not in the already-loaded list - try a real, individual
-        // fetch before declaring it invalid. Keeps the previous
-        // synchronous behavior's UI state (null quickView, the
-        // requested ID as "pending") until the fetch resolves, rather
-        // than flashing "invalid" and then correcting it.
-        const requestedId = vehicleOrId;
-        latestRequestedVehicleId.current = requestedId;
         setQuickViewVehicle(null);
-        setInvalidVehicleId(null);
-        setVehicleDetailUrl(requestedId);
-        getCarById(requestedId)
-          .then((car) => {
-            if (latestRequestedVehicleId.current !== requestedId) return; // superseded by a newer request
-            if (car) {
-              setQuickViewVehicle(mapBackendCarToVehicle(car));
-              setInvalidVehicleId(null);
-            } else {
-              // Genuinely doesn't exist (a real 404, or a network
-              // failure treated the same way here - either way there
-              // is no vehicle to show) - falls back to the original,
-              // pre-existing "invalid" UI state.
-              setInvalidVehicleId(requestedId);
-            }
-          })
-          .catch(() => {
-            if (latestRequestedVehicleId.current !== requestedId) return;
-            setInvalidVehicleId(requestedId);
-          });
+        setInvalidVehicleId(vehicleOrId);
+        setVehicleDetailUrl(vehicleOrId);
       }
     } else {
-      latestRequestedVehicleId.current = null;
       setQuickViewVehicle(vehicleOrId);
       setInvalidVehicleId(null);
       setVehicleDetailUrl(vehicleOrId.id);
@@ -278,51 +78,19 @@ export function App() {
   }, []);
 
   // Listen for initial URL vehicle parameter and popstate (browser back/forward)
-  //
-  // Phase 2 (eliminate mock business state) continued: this effect had
-  // its own separate copy of the same "find locally or mark invalid"
-  // logic just fixed in handleOpenVehicleDetails above - a real,
-  // confirmed duplication (this is the path that actually matters most
-  // for the gap being fixed: a shared/bookmarked link to a specific
-  // vehicle hits this effect on page load, not the click-driven
-  // handleOpenVehicleDetails). Given the two call sites have genuinely
-  // different responsibilities (this one reads the URL and must not
-  // re-write it; handleOpenVehicleDetails writes the URL), this fix is
-  // applied directly here rather than restructured into one shared
-  // helper - a larger consolidation than this phase's "connect
-  // existing systems" scope calls for. Reuses the same
-  // latestRequestedVehicleId ref for consistent race protection against
-  // handleOpenVehicleDetails's own fallback fetch.
   useEffect(() => {
     const handleUrlSync = () => {
       const urlVehicleId = getVehicleIdFromUrl();
       if (urlVehicleId) {
         const found = vehicles.find((v) => v.id === urlVehicleId);
         if (found) {
-          latestRequestedVehicleId.current = null;
           setQuickViewVehicle(found);
           setInvalidVehicleId(null);
         } else {
-          latestRequestedVehicleId.current = urlVehicleId;
           setQuickViewVehicle(null);
-          setInvalidVehicleId(null);
-          getCarById(urlVehicleId)
-            .then((car) => {
-              if (latestRequestedVehicleId.current !== urlVehicleId) return;
-              if (car) {
-                setQuickViewVehicle(mapBackendCarToVehicle(car));
-                setInvalidVehicleId(null);
-              } else {
-                setInvalidVehicleId(urlVehicleId);
-              }
-            })
-            .catch(() => {
-              if (latestRequestedVehicleId.current !== urlVehicleId) return;
-              setInvalidVehicleId(urlVehicleId);
-            });
+          setInvalidVehicleId(urlVehicleId);
         }
       } else {
-        latestRequestedVehicleId.current = null;
         setQuickViewVehicle(null);
         setInvalidVehicleId(null);
       }
@@ -334,8 +102,21 @@ export function App() {
     return () => window.removeEventListener('popstate', handleUrlSync);
   }, [vehicles]);
 
-  // Toggle Save and Toggle Compare handlers moved into
-  // useVehicleCollections() (Phase 1 hardening) - see above.
+  // Toggle Save
+  const handleToggleSave = useCallback((id: string) => {
+    setSavedVehicles((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }, []);
+
+  // Toggle Compare
+  const handleToggleCompare = useCallback((id: string) => {
+    setComparedVehicles((prev) => {
+      if (prev.includes(id)) return prev.filter((item) => item !== id);
+      if (prev.length >= 4) return prev; // max 4
+      return [...prev, id];
+    });
+  }, []);
 
   // Add Vehicle Handler
   const handleAddVehicle = useCallback((newVehicle: Vehicle) => {
@@ -343,48 +124,11 @@ export function App() {
   }, []);
 
   // Escrow CTA Handler
-  // Guards on isEscrowApplicable before navigating anywhere - the
-  // primary trigger (VehicleDetailModal's "Start Secure Escrow
-  // Purchase" button) is already conditionally rendered based on this
-  // same check, so in normal use this guard is a defense-in-depth
-  // backstop, not the only thing standing between a user and an
-  // ineligible vehicle's escrow flow - but "make the routing respect
-  // that" means this handler itself shouldn't blindly trust that
-  // whatever called it already checked. Silently doesn't navigate if
-  // the vehicle isn't eligible, rather than presenting a UI message -
-  // there's no existing app-wide toast/alert system to hook into here
-  // (checked before assuming one existed), and this path realistically
-  // shouldn't be reachable for an ineligible vehicle given the upstream
-  // gate, so a hard block without new UI infrastructure is the
-  // proportionate fix.
   const handleStartEscrow = useCallback((vehicle: Vehicle) => {
-    if (!isEscrowApplicable(vehicle)) return;
     setQuickViewVehicle(null);
-    setEscrowPrefillVehicle(vehicle);
-    navigateTo('escrow');
-  }, [navigateTo]);
-
-  // View Auction Lot Handler - "Place Bid / Submit Auction Offer" on
-  // VehicleDetailModal previously called onContactSeller (opening a
-  // chat with the seller) for auction vehicles - a real, confirmed bug:
-  // the button's own label promised bidding, but its action opened
-  // chat instead, with no route to the actual auction lot at all.
-  // Finds the specific auction session for this vehicle (by vehicleId,
-  // not just navigating to the bare /auctions directory and making the
-  // user search again) and deep-links directly to it using the same
-  // getAuctionIdFromUrl/setAuctionDetailUrl mechanism built for auction
-  // lot deep-linking - AuctionsView's own URL-sync effect (added in
-  // that same change) picks up the param on mount and opens the
-  // correct lot automatically, so no additional wiring is needed on
-  // the AuctionsView side.
-  const handleViewAuctionLot = useCallback((vehicle: Vehicle) => {
-    const session = INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id);
-    setQuickViewVehicle(null);
-    if (session) {
-      setAuctionDetailUrl(session.id);
-    }
-    navigateTo('auctions');
-  }, [navigateTo]);
+    setSelectedChatVehicle(vehicle);
+    setActiveNav('escrow');
+  }, []);
 
   // Update Vehicle Auction Status Handler
   const handleUpdateVehicleAuctionStatus = useCallback((vehicleId: string, isAuction: boolean) => {
@@ -393,34 +137,12 @@ export function App() {
     );
   }, []);
 
-  // Per-sale escrow override handler - added per explicit direction:
-  // escrow shouldn't be unconditionally mandatory for every
-  // private-seller sale, an admin needs to enforce or revoke it per
-  // individual sale rather than only being able to change the blanket
-  // seller-type rule for everyone at once (that global rule already
-  // existed - see escrowRulesConfig.ts). Updates the app-level vehicles
-  // array specifically (not just AuctionsView's own local session
-  // state) so the override is reflected consistently everywhere a
-  // vehicle's escrow status is shown - VehicleCard, VehicleDetailModal,
-  // the auction lot itself - not just within the auction page. This is
-  // the same vehicles-vs-sessions dual-state consideration already
-  // found and fixed for price in this project's history; deliberately
-  // avoiding reintroducing that same class of gap here.
-  const handleUpdateVehicleEscrowOverride = useCallback(
-    (vehicleId: string, override: 'enforce' | 'revoke' | null) => {
-      setVehicles((prev) =>
-        prev.map((v) => (v.id === vehicleId ? { ...v, escrowOverride: override } : v))
-      );
-    },
-    []
-  );
-
   // Contact Seller Handler
   const handleContactSeller = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
-    navigateTo('chat');
-  }, [navigateTo]);
+    setActiveNav('chat');
+  }, []);
 
   // Send Chat Message
   const handleSendMessage = useCallback((text: string) => {
@@ -437,11 +159,16 @@ export function App() {
   // Select Dealer Vehicles Shortcut
   const handleSelectDealerVehicles = useCallback((dealerName: string) => {
     setSearchQuery(dealerName);
-    navigateTo('marketplace');
-  }, [navigateTo]);
+    setActiveNav('marketplace');
+  }, []);
 
-  // savedVehiclesList/comparedVehiclesList now provided by
-  // useVehicleCollections() above (Phase 1 hardening).
+  const savedVehiclesList = useMemo(() => {
+    return vehicles.filter((v) => savedVehicles.includes(v.id));
+  }, [vehicles, savedVehicles]);
+
+  const comparedVehiclesList = useMemo(() => {
+    return vehicles.filter((v) => comparedVehicles.includes(v.id));
+  }, [vehicles, comparedVehicles]);
 
   return (
     <div className="min-h-screen bg-[#F6F1E8] text-slate-800 flex flex-col font-sans">
@@ -450,23 +177,18 @@ export function App() {
         user={user}
         savedCount={savedVehicles.length}
         activeNav={activeNav}
-        onNavClick={(nav) => navigateTo(nav)}
+        onNavClick={(nav) => setActiveNav(nav)}
         selectedCounty={selectedCounty}
         onCountyChange={(c) => setSelectedCounty(c)}
         onOpenAuth={() => setShowAuthModal(true)}
         onOpenAlerts={() => setShowAlertsModal(true)}
-        onLogout={() => authLogout()}
+        onLogout={() => setUser(null)}
       />
 
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* Module Switcher Rendering */}
-        <Suspense fallback={
-          <div className="flex items-center justify-center py-24">
-            <div className="w-8 h-8 border-4 border-slate-200 border-t-[#17244B] rounded-full animate-spin" />
-          </div>
-        }>
         {activeNav === 'marketplace' && (
             <VehicleMarketplace
               vehicles={vehicles}
@@ -481,11 +203,8 @@ export function App() {
               searchQuery={searchQuery}
               onSearchChange={(q) => setSearchQuery(q)}
               onOpenCompareModal={() => setShowCompareModal(true)}
-              onNavigate={(nav) => navigateTo(nav)}
+              onNavigate={(nav) => setActiveNav(nav)}
               onOpenAuth={() => setShowAuthModal(true)}
-              user={user}
-              isHomePage
-              isFetchingVehicles={isFetchingVehicles}
             />
           )}
 
@@ -497,14 +216,12 @@ export function App() {
               onStartEscrow={handleStartEscrow}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onUpdateVehicleAuctionStatus={handleUpdateVehicleAuctionStatus}
-              onUpdateVehicleEscrowOverride={handleUpdateVehicleEscrowOverride}
             />
           )}
 
           {activeNav === 'escrow' && (
             <EscrowView
               deals={MOCK_ESCROW_DEALS}
-              prefillVehicle={escrowPrefillVehicle}
             />
           )}
 
@@ -541,7 +258,7 @@ export function App() {
               user={user}
               messages={messages}
               comparedVehicles={comparedVehicles}
-              onNavigate={(nav) => navigateTo(nav)}
+              onNavigate={(nav) => setActiveNav(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onToggleSave={handleToggleSave}
               onToggleCompare={handleToggleCompare}
@@ -559,40 +276,13 @@ export function App() {
               onSendMessage={handleSendMessage}
               selectedVehicle={selectedChatVehicle}
               onQuickViewVehicle={handleOpenVehicleDetails}
-              onNavigateToEscrow={() => navigateTo('escrow')}
-              onNavigateToInspections={() => navigateTo('inspections')}
-              onNavigateToFinancing={() => navigateTo('financing')}
+              onNavigateToEscrow={() => setActiveNav('escrow')}
+              onNavigateToInspections={() => setActiveNav('inspections')}
+              onNavigateToFinancing={() => setActiveNav('financing')}
             />
           )}
 
-          {/* Admin route guard added (Phase 2 consolidation): previously
-              activeNav === 'admin' rendered AdminView with zero role
-              check at this level - the only protection was the Navbar's
-              own button being conditionally hidden for non-admins
-              (confirmed: `{user.role === 'admin' && (...)}` gates the
-              button correctly), but nothing stopped AdminView from
-              actually rendering if activeNav ever became 'admin' by any
-              other means (devtools state manipulation, a future bug
-              elsewhere setting it, etc.) - exactly the "frontend state
-              must not grant access on its own" gap this consolidation
-              phase asks to verify. This app has no connected backend
-              (confirmed throughout this project's history), so this
-              client-side check is not a real security boundary against
-              a determined attacker - true admin protection requires
-              server-side authorization, which doesn't exist yet and is
-              out of scope to build here (explicitly prohibited: "do not
-              introduce a new authentication provider"). This guard is
-              still worth adding as defense-in-depth and correct default
-              behavior: it prevents accidental/unintended admin access
-              (e.g. stale state after a role change) without requiring a
-              new auth system, and it doesn't regress anything - the
-              real, current entry point (the gated Navbar button) is
-              unaffected. Falls through to the existing VALID_VIEWS-style
-              reset behavior (no explicit error UI) since a non-admin
-              reaching this state happens only via direct manipulation,
-              not normal navigation - consistent with how invalid views
-              already silently fall back elsewhere in this file. */}
-          {activeNav === 'admin' && user?.role === 'admin' && (
+          {activeNav === 'admin' && (
             <AdminView
               vehicles={vehicles}
               onQuickViewVehicle={handleOpenVehicleDetails}
@@ -603,22 +293,28 @@ export function App() {
             <SupportView />
           )}
 
-          {/* broadcast/discovery/kayadlive/buyer-platform routes removed
-              during frontend cleanup - all 4 were confirmed genuinely
-              orphaned (zero callers under every navigation pattern
-              checked: direct navigateTo, indirect handleNavSelect/
-              onNavigate prop chains, and named-prop callbacks) across
-              multiple consolidation-phase audits this project's
-              history. The only 3 references found outside their own
-              component folders were code comments (historical notes in
-              Navbar.tsx, mockSponsors.ts, PrivateSellerPlatform.tsx),
-              not actual imports or calls - confirmed individually
-              before deleting anything. Their component files and
-              folders have been deleted entirely as part of this same
-              cleanup, not just this route wiring. */}
+          {activeNav === 'broadcast' && (
+            <LiveAuctionBroadcastPage />
+          )}
+
+          {activeNav === 'discovery' && (
+            <AuctionDiscoveryNetwork />
+          )}
+
+          {activeNav === 'kayadlive' && (
+            <KAYADLive />
+          )}
+
+          {activeNav === 'buyer-platform' && (
+            <BuyerPlatform />
+          )}
 
           {activeNav === 'seller-platform' && (
-            <PrivateSellerPlatform user={user} />
+            <PrivateSellerPlatform />
+          )}
+
+          {activeNav === 'finance' && (
+            <FinanceMarketplace />
           )}
 
           {activeNav === 'saved' && (
@@ -638,24 +334,17 @@ export function App() {
             />
           )}
 
-          {/* 'sell' and 'seller' aliases removed - confirmed zero
-              callers under every navigation pattern checked
-              (consolidation-phase audit, re-verified fresh here before
-              removing). 'seller-dashboard' is the sole real, actively-
-              used route to this component (Navbar.tsx and
-              DashboardView.tsx both call it), kept as-is. */}
-          {activeNav === 'seller-dashboard' && (
+          {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard') && (
             <PrivateSellerDashboardView
               vehicles={vehicles}
               user={user}
               deals={MOCK_ESCROW_DEALS}
               messages={messages}
-              onNavigate={(nav) => navigateTo(nav)}
+              onNavigate={(nav) => setActiveNav(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onOpenAuthModal={() => setShowAuthModal(true)}
             />
           )}
-        </Suspense>
         </main>
 
       {/* 3. Footer */}
@@ -672,10 +361,10 @@ export function App() {
           </div>
 
           <div className="flex items-center gap-6 text-slate-300">
-            <button onClick={() => navigateTo('marketplace')} className="hover:text-amber-300">Marketplace</button>
-            <button onClick={() => navigateTo('escrow')} className="hover:text-amber-300">Escrow Vault</button>
-            <button onClick={() => navigateTo('financing')} className="hover:text-amber-300">Financing</button>
-            <button onClick={() => navigateTo('support')} className="hover:text-amber-300">Support & Disputes</button>
+            <button onClick={() => setActiveNav('marketplace')} className="hover:text-amber-300">Marketplace</button>
+            <button onClick={() => setActiveNav('escrow')} className="hover:text-amber-300">Escrow Vault</button>
+            <button onClick={() => setActiveNav('financing')} className="hover:text-amber-300">Financing</button>
+            <button onClick={() => setActiveNav('support')} className="hover:text-amber-300">Support & Disputes</button>
           </div>
         </div>
       </footer>
@@ -688,10 +377,7 @@ export function App() {
         onClose={handleCloseVehicleDetails}
         onStartEscrow={handleStartEscrow}
         onContactSeller={handleContactSeller}
-        onRequestInspection={() => navigateTo('inspections')}
-        onViewAuctionLot={handleViewAuctionLot}
-        onNavigateToFinancing={() => navigateTo('financing')}
-        onViewShowroom={handleSelectDealerVehicles}
+        onRequestInspection={() => setActiveNav('inspections')}
         isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}
@@ -710,6 +396,7 @@ export function App() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        onLogin={(loggedInUser) => setUser(loggedInUser)}
       />
 
       <PriceAlertsModal

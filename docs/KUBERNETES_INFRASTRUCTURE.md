@@ -86,9 +86,10 @@ This document outlines the infrastructure requirements for deploying the KAYAD p
 
 ### Supporting Services
 
-**Supabase** - external, hosted service; not deployed into this
-cluster, so it has no CPU/Memory/Storage allocation here. Configure
-connectivity via the `kayad-secrets` Secret (see step 5 below) instead.
+**MongoDB**
+- CPU: 2000m - 4000m
+- Memory: 4Gi - 8Gi
+- Storage: 100Gi (SSD)
 
 **Redis**
 - CPU: 500m - 1000m
@@ -134,7 +135,7 @@ Internet
     │                                 │              │
     │                                 ▼              ▼
     │                          ┌──────────┐  ┌──────────┐
-    │                          │ Supabase │  │  Redis   │
+    │                          │ MongoDB  │  │  Redis   │
     │                          └──────────┘  └──────────┘
     │
     ▼
@@ -152,7 +153,7 @@ Internet
 
 **Allowed Traffic**:
 - Frontend → Backend (port 5000)
-- Backend → Supabase (port 443, HTTPS)
+- Backend → MongoDB (port 27017)
 - Backend → Redis (port 6379)
 - Backend → External APIs (port 443, 80)
 - Ingress Controller → Frontend/Backend
@@ -322,7 +323,7 @@ Internet
 
 ### Data HA
 
-**Supabase (external, not self-hosted)**:
+**MongoDB**:
 - Replica set (3 nodes)
 - Automatic failover
 - Read preference: secondary
@@ -459,19 +460,24 @@ Internet
 5. **Create secrets**
    ```bash
    kubectl create secret generic kayad-secrets \
-     --from-literal=supabase-url="https://<your-project>.supabase.co" \
-     --from-literal=supabase-service-key="<service-role-key>" \
+     --from-literal=mongo-uri="mongodb://..." \
      --from-literal=redis-url="redis://..." \
      --namespace kayad
    ```
 
-6. **Deploy Redis**
+6. **Deploy MongoDB**
+   ```bash
+   helm install mongodb bitnami/mongodb \
+     --namespace kayad --set architecture=replicaset
+   ```
+
+7. **Deploy Redis**
    ```bash
    helm install redis bitnami/redis \
      --namespace kayad --set architecture=replication
    ```
 
-7. **Deploy applications**
+8. **Deploy applications**
    ```bash
    helm install kayad-backend ./helm/kayad-backend \
      --namespace kayad

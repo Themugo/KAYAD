@@ -17,6 +17,7 @@ COPY backend/models ./models
 COPY backend/routes ./routes
 COPY backend/services ./services
 COPY backend/utils ./utils
+COPY backend/scripts ./scripts
 COPY backend/identity ./identity
 COPY backend/ai ./ai
 COPY backend/cms ./cms
@@ -47,13 +48,13 @@ COPY backend/workflowOrchestration ./workflowOrchestration
 # Install dependencies
 RUN npm ci --omit=dev
 
-# 🔒 SECURITY: Create non-root user before any chown that references it
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodeuser -u 1001 -G nodejs
-
-# Create uploads directory and set permissions (user/group now exist)
+# Create uploads directory and set permissions
 RUN mkdir -p uploads && chown -R nodeuser:nodejs /app
 
+# 🔒 SECURITY: Run as non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodeuser -u 1001 -G nodejs && \
+    chown -R nodeuser:nodejs /app
 USER nodeuser
 
 EXPOSE 5000

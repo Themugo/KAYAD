@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authLimiter } from "../middleware/rateLimiter.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 // Import v2 routes (future implementation)

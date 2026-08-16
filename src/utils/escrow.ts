@@ -1,82 +1,24 @@
 import { Vehicle } from '../types';
-import { readEscrowRulesConfig } from '../features/Admin/hooks/escrowRulesConfig';
 
 /**
- * Evaluates whether Escrow Vault protection is applicable for a given
- * vehicle. Previously hardcoded ("Private Seller listings MUST ALWAYS
- * require Escrow Vault protection; Dealer listings ONLY if
- * escrowEligible === true") - now reads from the admin-configurable
- * EscrowRulesConfig instead, per explicit direction to let admins set
- * rules like this without code changes. The default config
- * (DEFAULT_ESCROW_RULES_CONFIG in escrowRulesConfig.ts) matches this
- * function's exact previous hardcoded behavior, so nothing about the
- * app's actual behavior changes until an admin edits a setting.
- *
- * Eligibility itself (this function) is independent of the config's
- * liveMode flag - a vehicle is still correctly identified as
- * escrow-eligible even while liveMode is off (not yet CBK-certified),
- * so the UI and demo flows work exactly as they do today. What
- * liveMode gates is the disclosure/labeling shown to a real user (see
- * getEscrowBadgeLabel below) and, upstream, whether App.tsx's
- * handleStartEscrow actually lets someone proceed into a live escrow
- * flow - not whether this eligibility check itself returns true.
+ * Evaluates whether Escrow Vault protection is applicable for a given vehicle.
+ * Rules:
+ * 1. Private Seller listings MUST ALWAYS require Escrow Vault protection.
+ * 2. Dealer listings ONLY display/use Escrow Vault protection if explicitly enabled (escrowEligible === true).
  */
 export function isEscrowApplicable(vehicle: Vehicle | null | undefined): boolean {
   if (!vehicle) return false;
-
-  // Per-vehicle admin override takes precedence over the global
-  // seller-type rule - this is the actual fix for "escrow shouldn't be
-  // mandatory for every private-seller sale unconditionally, admin
-  // needs to enforce or revoke it per individual sale". Checked before
-  // the global rule below, not after, so an override always wins
-  // regardless of what the blanket seller-type setting is.
-  if (vehicle.escrowOverride === 'enforce') return true;
-  if (vehicle.escrowOverride === 'revoke') return false;
-
-  const rules = readEscrowRulesConfig();
-  const requirement =
-    vehicle.sellerType === 'Private Seller' ? rules.privateSellerRequirement :
-    vehicle.sellerType === 'Verified Dealer' ? rules.dealerRequirement :
-    rules.dealerRequirement; // unrecognized/undefined sellerType falls back to the dealer rule, matching the original function's own fallback branch
-
-  if (requirement === 'disabled') return false;
-  if (requirement === 'mandatory') return true;
-  // 'optional' - same as before, still gated on the specific listing's
-  // own escrowEligible flag (an admin setting a seller type to
-  // "optional" doesn't force it onto every listing of that type,
-  // just permits it where the seller has opted in).
+  if (vehicle.sellerType === 'Private Seller') return true;
+  if (vehicle.sellerType === 'Verified Dealer') return Boolean(vehicle.escrowEligible);
   return Boolean(vehicle.escrowEligible);
 }
 
-/** True once an admin has flipped the platform into live escrow mode
- * (i.e. CBK certification is in place). Exported separately from
- * isEscrowApplicable so callers can distinguish "is this vehicle
- * eligible" from "is escrow actually live on this platform right
- * now" - both are real, separate questions once liveMode exists. */
-export function isEscrowLive(): boolean {
-  return readEscrowRulesConfig().liveMode;
-}
-
 /**
- * Returns the dynamic label for the Escrow status badge based on
- * backend vehicle seller properties. Now also reflects liveMode: while
- * not yet live (pending CBK certification), appends a clear
- * "(Preview)" qualifier rather than silently presenting a
- * not-yet-real guarantee as fully active - an honest label matters
- * more here than anywhere else in the app, since this is about
- * financial protection specifically.
+ * Returns the dynamic label for the Escrow status badge based on backend vehicle seller properties.
  */
 export function getEscrowBadgeLabel(vehicle: Vehicle): string {
-  const live = isEscrowLive();
-  // Wording now reflects the actual effective requirement (accounting
-  // for a per-vehicle override), not just raw sellerType - if an admin
-  // has enforced escrow on a dealer vehicle, or revoked it on a private
-  // seller's, the badge should say so accurately rather than assuming
-  // seller type alone still determines "Mandatory" vs "Enabled".
-  const isMandatory =
-    vehicle.escrowOverride === 'enforce' ? true :
-    vehicle.escrowOverride === 'revoke' ? false :
-    vehicle.sellerType === 'Private Seller';
-  const base = isMandatory ? 'Escrow Mandatory' : 'Escrow Vault Enabled';
-  return live ? base : `${base} (Preview)`;
+  if (vehicle.sellerType === 'Private Seller') {
+    return 'Escrow Mandatory';
+  }
+  return 'Escrow Vault Enabled';
 }

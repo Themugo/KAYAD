@@ -30,7 +30,7 @@ jobs:
       - name: Check if secrets are configured
         id: secrets-check
         run: |
-          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" ]; then
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
             echo "secrets_status=configured" >> $GITHUB_OUTPUT
           else
             echo "secrets_status=missing" >> $GITHUB_OUTPUT
@@ -41,7 +41,7 @@ jobs:
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Build for production (without secrets - preview mode)
         if: steps.secrets-check.outputs.secrets_status == 'missing'
@@ -50,7 +50,7 @@ jobs:
           npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'placeholder-key' }}
 
       - name: Validate dist output
         run: |
@@ -102,29 +102,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify required Vercel secrets are configured
-        run: |
-          missing=""
-          [ -z "${{ secrets.VERCEL_TOKEN }}" ] && missing="$missing VERCEL_TOKEN"
-          [ -z "${{ secrets.VERCEL_ORG_ID }}" ] && missing="$missing VERCEL_ORG_ID"
-          [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ] && missing="$missing VERCEL_PROJECT_ID"
-          if [ -n "$missing" ]; then
-            echo "::error::Missing required GitHub Actions secret(s):$missing"
-            echo ""
-            echo "This deploy job needs 3 secrets set in this repo's settings"
-            echo "(Settings > Secrets and variables > Actions > New repository secret):"
-            echo ""
-            echo "  VERCEL_TOKEN       - an API token from https://vercel.com/account/tokens"
-            echo "  VERCEL_ORG_ID      - from .vercel/project.json after running 'vercel link'"
-            echo "                       locally once, or from your Vercel team/account settings"
-            echo "  VERCEL_PROJECT_ID  - from the same .vercel/project.json (this project's ID)"
-            echo ""
-            echo "Without all three, 'vercel pull'/'vercel build'/'vercel deploy' cannot run"
-            echo "non-interactively in CI."
-            exit 1
-          fi
-          echo "All required Vercel secrets are present."
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -135,16 +112,12 @@ jobs:
         run: npm install -g vercel
 
       - name: Pull Vercel Project Information
-        run: vercel pull --yes --environment=production
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Check if secrets are configured
         id: secrets-check
         run: |
-          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" ]; then
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
             echo "secrets_status=configured" >> $GITHUB_OUTPUT
           else
             echo "secrets_status=missing" >> $GITHUB_OUTPUT
@@ -152,27 +125,17 @@ jobs:
 
       - name: Build Project for Production (with secrets)
         if: steps.secrets-check.outputs.secrets_status == 'configured'
-        run: vercel build --prod
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Build Project for Production (without secrets)
         if: steps.secrets-check.outputs.secrets_status == 'missing'
-        run: vercel build --prod
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VITE_SUPABASE_URL: https://placeholder.supabase.co
-          VITE_SUPABASE_PUBLISHABLE_KEY: placeholder-key
+          VITE_SUPABASE_ANON_KEY: placeholder-key
 
       - name: Deploy to Vercel (Production)
-        run: vercel deploy --prod
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}

@@ -13,27 +13,6 @@ export const success = (res, data = null, message = "Success", meta = {}) => {
 };
 
 // =============================
-// ✅ CREATED (201) RESPONSE
-// =============================
-// Added while activating backend/inspection/ (the dormant inspection
-// marketplace system) - its controller (providerController.js) calls
-// response.created(...) 6 times but this file never exported it,
-// which - combined with a separate import-name mismatch in the same
-// system's routes file - is very likely the actual reason this
-// substantial, otherwise well-built system was never mounted. Mirrors
-// success() exactly, at the correct 201 status for a resource-creation
-// response rather than reusing success()'s 200 and losing that
-// distinction.
-export const created = (res, data = null, message = "Created", meta = {}) => {
-  return res.status(201).json({
-    success: true,
-    message,
-    data,
-    ...(Object.keys(meta).length && { meta }),
-  });
-};
-
-// =============================
 // ❌ ERROR RESPONSE
 // =============================
 export const error = (res, message = "Error", code = 500, details = null) => {

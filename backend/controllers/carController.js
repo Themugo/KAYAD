@@ -121,22 +121,10 @@ export const getCars = async (req, res) => {
     }
     if (drivetrain) query.drivetrain = exactText(drivetrain);
     if (dealerType === "dealer") {
-      // Found and fixed during Fusion Phase 5: distinct("_id") returns
-      // a Promise directly (see backend/models/_base.js's query-builder
-      // distinct() - it's `this._executor().then(rows => [...])`, not
-      // a chainable query object), so the previous
-      // .distinct("_id").lean() call would throw
-      // "TypeError: ...lean is not a function" at runtime for any
-      // request using ?dealerType=dealer or ?dealerType=private -
-      // confirmed directly by reading the actual method implementation,
-      // not assumed. distinct() already returns the final, deduplicated
-      // plain array (not Mongoose documents needing .lean()'s
-      // conversion), so the fix is simply removing the erroneous call
-      // rather than replacing it with anything.
-      const dealerIds = await User.find({ role: "dealer" }).distinct("_id");
+      const dealerIds = await User.find({ role: "dealer" }).distinct("_id").lean();
       query.dealer = { $in: dealerIds };
     } else if (dealerType === "private") {
-      const sellerIds = await User.find({ role: "individual_seller" }).distinct("_id");
+      const sellerIds = await User.find({ role: "individual_seller" }).distinct("_id").lean();
       query.dealer = { $in: sellerIds };
     }
 
@@ -266,37 +254,6 @@ export const createCar = async (req, res) => {
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
     const isDemoSeller = !!seller.isDemo;
-
-    // ── DUPLICATE VIN CHECK ──────────────────────────────────
-    // Found (Phase 4, seller/dealer workflow hardening): neither the
-    // real cars table (vin TEXT, no UNIQUE constraint - confirmed
-    // directly against supabase/migrations/..._foundational_tables.sql.sql,
-    // the authoritative schema) nor this function itself had any
-    // duplicate-VIN check at all - the same VIN could be listed any
-    // number of times, by the same or different sellers, with zero
-    // validation. This directly matches this phase's own explicit
-    // "verify duplicate VIN handling" requirement, which surfaced a
-    // real, previously-unguarded gap rather than confirming existing
-    // protection. Fixed at the application level (not a blind DB
-    // constraint, since there's no live database to confirm this
-    // wouldn't break on pre-existing duplicate data) - a clean,
-    // specific error rather than a generic database constraint
-    // violation. VIN remains optional (matching the real schema's
-    // nullable column) - this check only runs when a VIN is actually
-    // provided, and only rejects on an exact match against a real,
-    // non-deleted, non-demo listing (a demo/test VIN reused across
-    // fixtures is not the fraud/confusion risk this check exists to
-    // prevent).
-    if (req.body.vin && String(req.body.vin).trim()) {
-      const trimmedVin = String(req.body.vin).trim();
-      const existingWithVin = await Car.findOne({ vin: trimmedVin, isDemo: { $ne: true } });
-      if (existingWithVin) {
-        return res.status(409).json({
-          success: false,
-          message: "A listing with this VIN already exists. Each vehicle can only be listed once.",
-        });
-      }
-    }
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
     const config = await PlatformConfig.findOne().lean();
@@ -640,44 +597,6 @@ export const updateCar = async (req, res) => {
         car.set(key, req.body[key]);
       }
     }
-
-    // ── APPROVAL-GATE RE-ENFORCEMENT ON UPDATE ──────────────
-    // Found (Phase 3, marketplace hardening): "status" is in
-    // allowedFields above with no restriction, and this update path
-    // had no equivalent of createCar's own protection. createCar
-    // (above, ~line 380) computes status AFTER spreading req.body
-    // specifically so a client-supplied status value is always
-    // overridden by the server's own approval decision - confirmed by
-    // reading that code directly, not assumed. This update path had
-    // no such re-computation: the field-assignment loop just above
-    // applies req.body.status verbatim via car.set(), meaning any
-    // owner - including one whose account was never approved - could
-    // PUT their own listing with status: "available" and bypass
-    // approval entirely, since approval is otherwise only checked at
-    // creation time. This directly contradicts this phase's own
-    // explicit requirement ("a deactivated/unapproved vehicle must
-    // not accidentally remain publicly discoverable").
-    //
-    // Fixed narrowly, mirroring createCar's own real logic rather than
-    // inventing new rules: only triggers when the request itself tries
-    // to set/change status (req.body.status !== undefined) - not on
-    // every update to an already-available car, since re-validating
-    // approval on unrelated edits (e.g. a price change) would be a
-    // broader, unintended side effect beyond the actual vulnerability
-    // being closed here. Only the specific "moving TO available while
-    // not approved" transition is blocked (forced back to "pending") -
-    // staff/admin and already-approved owners are unaffected, and an
-    // owner voluntarily moving their own listing to
-    // "hidden"/"draft"/anything else remains unrestricted, since that
-    // is the owner choosing to reduce their own visibility, not a
-    // security concern.
-    if (req.body.status !== undefined && car.status === "available" && !isStaff && !car.isDemo) {
-      const updaterUser = await User.findById(req.user.id).select("status");
-      if (!updaterUser || updaterUser.status !== "approved") {
-        car.status = "pending";
-      }
-    }
-
     if (car.isDemo && isDealer) {
       car.isDemo = true;
       car.demoEditedAt = new Date();

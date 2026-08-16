@@ -1,0 +1,1819 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Vehicle, AuctionSession, BidRecord, UserProfile } from '../types';
+import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
+import { CreateAuctionModal } from '../components/CreateAuctionModal';
+import { AuctionCreationForm } from './AuctionsView/components/AuctionCreationForm';
+import { BidderRegistrationModal, VerifiedBidderProfile } from './AuctionsView/components/BidderRegistrationModal';
+import { PreAuctionInspectionModal } from './AuctionsView/components/PreAuctionInspectionModal';
+import { LiveAuctionRoomModal } from './AuctionsView/components/LiveAuctionRoomModal';
+import { PostAuctionCompletionModal } from './AuctionsView/components/PostAuctionCompletionModal';
+import { OrganizerManagementConsole } from './AuctionsView/components/OrganizerManagementConsole';
+import { AuctionOrganizerDashboard } from './AuctionsView/components/AuctionOrganizerDashboard';
+import { 
+  Gavel, 
+  Clock, 
+  Lock, 
+  CheckCircle2, 
+  ShieldCheck, 
+  History, 
+  X, 
+  Bell, 
+  Calendar, 
+  FileText, 
+  Check, 
+  ChevronRight, 
+  Search, 
+  Filter, 
+  Heart, 
+  TrendingUp, 
+  ArrowRight, 
+  Shield, 
+  Tag, 
+  RotateCcw,
+  Sparkles,
+  Zap,
+  DollarSign,
+  UserCheck,
+  Building2,
+  BarChart2,
+  Info,
+  Award,
+  PlusCircle,
+  EyeOff,
+  UserPlus,
+  Wrench
+} from 'lucide-react';
+import { PageHeader, Card, Badge, Button, LazyImage, Input } from '../components/ui';
+
+interface AuctionsViewProps {
+  vehicles: Vehicle[];
+  user?: UserProfile | null;
+  onOpenAuth?: () => void;
+  onStartEscrow: (vehicle: Vehicle) => void;
+  onQuickViewVehicle?: (vehicle: Vehicle) => void;
+  onUpdateVehicleAuctionStatus?: (vehicleId: string, isAuction: boolean) => void;
+}
+
+// Time remaining formatter helper
+function formatTimeRemaining(endsAt: string): {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  isUrgent: boolean;
+  isExpired: boolean;
+  formatted: string;
+} {
+  const totalMs = new Date(endsAt).getTime() - Date.now();
+  if (totalMs <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, isUrgent: false, isExpired: true, formatted: 'Auction Closed' };
+  }
+  const days = Math.floor(totalMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((totalMs / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((totalMs / (1000 * 60)) % 60);
+  const seconds = Math.floor((totalMs / 1000) % 60);
+
+  const isUrgent = totalMs < 24 * 60 * 60 * 1000; // less than 24 hours
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  let formatted = '';
+  if (days > 0) {
+    formatted = `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+  } else {
+    formatted = `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+  }
+
+  return { days, hours, minutes, seconds, isUrgent, isExpired: false, formatted };
+}
+
+export const AuctionsView: React.FC<AuctionsViewProps> = ({ 
+  vehicles, 
+  user,
+  onOpenAuth,
+  onStartEscrow, 
+  onQuickViewVehicle,
+  onUpdateVehicleAuctionStatus
+}) => {
+  // Auction sessions state initialized from mock service
+  const [sessions, setSessions] = useState<AuctionSession[]>(INITIAL_AUCTION_SESSIONS);
+
+  // Watched Auctions state
+  const [watchedIds, setWatchedIds] = useState<string[]>(['AUC-2026-8801']);
+  
+  // Dedicated Search & Filter states
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [reserveStatusFilter, setReserveStatusFilter] = useState<'All' | 'Reserve Met' | 'Reserve Unmet'>('All');
+  const [minBidFilter, setMinBidFilter] = useState<string>('');
+  const [maxBidFilter, setMaxBidFilter] = useState<string>('');
+  const [filterEndingSoon, setFilterEndingSoon] = useState<boolean>(false);
+  const [filterBuyNow, setFilterBuyNow] = useState<boolean>(false);
+  const [filterVerified, setFilterVerified] = useState<boolean>(false);
+  
+  // Detail & Bid Modal State
+  const [selectedSession, setSelectedSession] = useState<AuctionSession | null>(null);
+  const [modalTab, setModalTab] = useState<'bid' | 'history' | 'inspection' | 'terms'>('bid');
+
+  // Bidder Registration State (Only verified bidders may enter an auction room and place bids)
+  const [verifiedBiddersMap, setVerifiedBiddersMap] = useState<Record<string, VerifiedBidderProfile>>({
+    'AUC-2026-8801': {
+      sessionId: 'AUC-2026-8801',
+      bidderNumber: 'Bidder A-104',
+      anonymousAlias: 'Bidder A-104',
+      idNumber: '34892014',
+      fullName: 'James K. Mugo',
+      phone: '+254 712 *** 678',
+      paymentReference: 'QGH89021X9',
+      verifiedAt: '10:15 AM',
+      depositAmount: 50000
+    }
+  });
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState<boolean>(false);
+  const [registeringSession, setRegisteringSession] = useState<AuctionSession | null>(null);
+
+  const handleOpenRegistration = (session: AuctionSession, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setRegisteringSession(session);
+    setIsRegistrationModalOpen(true);
+  };
+
+  const handleRegistrationComplete = (profile: VerifiedBidderProfile) => {
+    setVerifiedBiddersMap(prev => ({
+      ...prev,
+      [profile.sessionId]: profile
+    }));
+    showToast(`✅ Bidder Pass Activated! You are ${profile.bidderNumber} with verified deposit.`);
+  };
+
+  // Pre-Auction Inspection State (Physical Viewing, Mechanic Marketplace Booking, Digital Report)
+  const [isPreInspectionModalOpen, setIsPreInspectionModalOpen] = useState<boolean>(false);
+  const [inspectionTargetSession, setInspectionTargetSession] = useState<AuctionSession | null>(null);
+
+  const handleOpenPreInspection = (session: AuctionSession, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setInspectionTargetSession(session);
+    setIsPreInspectionModalOpen(true);
+  };
+
+  // Live Auction Room Modal State
+  const [isLiveRoomOpen, setIsLiveRoomOpen] = useState<boolean>(false);
+  const [liveRoomSession, setLiveRoomSession] = useState<AuctionSession | null>(null);
+
+  const handleOpenLiveRoom = (session: AuctionSession, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setLiveRoomSession(session);
+    setIsLiveRoomOpen(true);
+  };
+
+  // Post-Auction Completion Modal State
+  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState<boolean>(false);
+  const [completionSession, setCompletionSession] = useState<AuctionSession | null>(null);
+  const [completionWinnerAlias, setCompletionWinnerAlias] = useState<string | undefined>(undefined);
+  const [completionWinningAmount, setCompletionWinningAmount] = useState<number | undefined>(undefined);
+
+  const handleOpenCompletion = (session: AuctionSession, winnerAlias?: string, winningAmount?: number, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setCompletionSession(session);
+    setCompletionWinnerAlias(winnerAlias);
+    setCompletionWinningAmount(winningAmount);
+    setIsCompletionModalOpen(true);
+  };
+
+  // Create Auction Modal & Form State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [showInlineCreateForm, setShowInlineCreateForm] = useState<boolean>(false);
+  const [isOrganizerConsoleOpen, setIsOrganizerConsoleOpen] = useState<boolean>(false);
+  const [isOrganizerDashboardOpen, setIsOrganizerDashboardOpen] = useState<boolean>(false);
+
+  const handleAuctionCreated = (newSession: AuctionSession) => {
+    setSessions(prev => [newSession, ...prev]);
+    setShowInlineCreateForm(false);
+    showToast(`Successfully published auction event "${newSession.vehicleTitle}"!`);
+  };
+  
+  // Bid Form state inside modal
+  const [customBidAmount, setCustomBidAmount] = useState<string>('');
+  const [bidderName, setBidderName] = useState<string>('');
+  const [bidderLocation, setBidderLocation] = useState<string>('Nairobi');
+
+  // Notify Me Alert state for No Live Auctions
+  const [notifyContact, setNotifyContact] = useState<string>('');
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+
+  // Toast notification feedback
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
+
+  // Ticking 1-second interval timer for accurate countdowns
+  const [, setSecondsTick] = useState<number>(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsTick((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const showToast = (message: string, type: 'success' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Toggle watchlist
+  const toggleWatchSession = (sessionId: string, title: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (watchedIds.includes(sessionId)) {
+      setWatchedIds(watchedIds.filter(id => id !== sessionId));
+      showToast(`Removed "${title}" from your Watchlist`, 'info');
+    } else {
+      setWatchedIds([...watchedIds, sessionId]);
+      showToast(`Added "${title}" to your Watchlist!`);
+    }
+  };
+
+  // Reset search filters
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('All');
+    setReserveStatusFilter('All');
+    setMinBidFilter('');
+    setMaxBidFilter('');
+    setFilterEndingSoon(false);
+    setFilterBuyNow(false);
+    setFilterVerified(false);
+  };
+
+  const hasActiveFilters = Boolean(
+    searchQuery ||
+    selectedCategory !== 'All' ||
+    reserveStatusFilter !== 'All' ||
+    minBidFilter ||
+    maxBidFilter ||
+    filterEndingSoon ||
+    filterBuyNow ||
+    filterVerified
+  );
+
+  // Filtered Auction Sessions using backend data
+  const filteredLiveSessions = useMemo(() => {
+    return sessions.filter((s) => {
+      if (s.status !== 'Live') return false;
+
+      // Search Query filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesTitle = s.vehicleTitle.toLowerCase().includes(query);
+        const matchesCategory = s.category.toLowerCase().includes(query);
+        const matchesMake = s.vehicle.make?.toLowerCase().includes(query);
+        const matchesModel = s.vehicle.model?.toLowerCase().includes(query);
+        if (!matchesTitle && !matchesCategory && !matchesMake && !matchesModel) return false;
+      }
+
+      // Category filter
+      if (selectedCategory !== 'All') {
+        if (selectedCategory === 'SUVs & 4x4s') {
+          if (s.vehicle.bodyStyle !== 'SUV' && !s.vehicleTitle.toLowerCase().includes('prado') && !s.vehicleTitle.toLowerCase().includes('x-trail')) return false;
+        } else if (selectedCategory === 'Luxury & Executive') {
+          if (!['Mercedes-Benz', 'BMW', 'Audi', 'Lexus', 'Porsche'].includes(s.vehicle.make)) return false;
+        } else if (s.category !== selectedCategory) {
+          return false;
+        }
+      }
+
+      // Reserve status filter
+      if (reserveStatusFilter === 'Reserve Met' && !s.reserveMet) return false;
+      if (reserveStatusFilter === 'Reserve Unmet' && s.reserveMet) return false;
+
+      // Min/Max bid filter
+      if (minBidFilter && s.currentBid < Number(minBidFilter)) return false;
+      if (maxBidFilter && s.currentBid > Number(maxBidFilter)) return false;
+
+      // Ending soon filter (< 24h)
+      if (filterEndingSoon) {
+        const remainingMs = new Date(s.endsAt).getTime() - Date.now();
+        if (remainingMs > 24 * 60 * 60 * 1000) return false;
+      }
+
+      // Buy now filter
+      if (filterBuyNow && !s.buyoutPrice) return false;
+
+      // Verified listings filter
+      if (filterVerified && !s.vehicle.verified && !s.vehicle.inspectionPassed) return false;
+
+      return true;
+    });
+  }, [sessions, searchQuery, selectedCategory, reserveStatusFilter, minBidFilter, maxBidFilter, filterEndingSoon, filterBuyNow, filterVerified]);
+
+  // Ending Soon sessions (< 24h remaining, sorted by remaining time ascending)
+  const endingSoonSessions = useMemo(() => {
+    return sessions
+      .filter((s) => {
+        if (s.status !== 'Live') return false;
+        const timeObj = formatTimeRemaining(s.endsAt);
+        return !timeObj.isExpired && timeObj.isUrgent;
+      })
+      .sort((a, b) => new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime());
+  }, [sessions]);
+
+  // Upcoming sessions
+  const upcomingSessions = useMemo(() => {
+    return sessions.filter((s) => s.status === 'Upcoming');
+  }, [sessions]);
+
+  // Recently Sold / Settled sessions
+  const recentlySoldSessions = useMemo(() => {
+    return sessions.filter((s) => s.status === 'Ended' || s.status === 'Awaiting Settlement');
+  }, [sessions]);
+
+  // Category summary counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      'All': sessions.filter(s => s.status === 'Live').length,
+      'Bank Repossession': sessions.filter(s => s.category === 'Bank Repossession' && (s.status === 'Live' || s.status === 'Upcoming')).length,
+      'Direct Import': sessions.filter(s => s.category === 'Direct Import' && (s.status === 'Live' || s.status === 'Upcoming')).length,
+      'Fleet Clearance': sessions.filter(s => s.category === 'Fleet Clearance' && (s.status === 'Live' || s.status === 'Upcoming')).length,
+      'Dealer Clearance': sessions.filter(s => s.category === 'Dealer Clearance' && (s.status === 'Live' || s.status === 'Upcoming')).length,
+      'SUVs & 4x4s': sessions.filter(s => (s.vehicle.bodyStyle === 'SUV' || s.vehicleTitle.toLowerCase().includes('prado')) && (s.status === 'Live' || s.status === 'Upcoming')).length,
+      'Luxury & Executive': sessions.filter(s => ['Mercedes-Benz', 'BMW', 'Audi', 'Lexus'].includes(s.vehicle.make) && (s.status === 'Live' || s.status === 'Upcoming')).length,
+    };
+    return counts;
+  }, [sessions]);
+
+  // Execute a bid function
+  const executeBid = (session: AuctionSession, amount: number, bidder: string = 'Verified Bidder', location: string = 'Nairobi') => {
+    if (amount <= session.currentBid) {
+      showToast(`Bid must be higher than current bid of Ksh ${session.currentBid.toLocaleString()}`, 'info');
+      return;
+    }
+
+    const minRequired = session.currentBid + session.minimumIncrement;
+    if (amount < minRequired) {
+      showToast(`Minimum bid increment is Ksh ${minRequired.toLocaleString()}`, 'info');
+      return;
+    }
+
+    const isReserveMet = amount >= session.reservePrice;
+
+    const newBidRecord: BidRecord = {
+      id: `bid-${Date.now()}`,
+      bidderName: bidder,
+      bidderLocation: location,
+      amount,
+      timestamp: 'Just now',
+      status: 'Highest Bid'
+    };
+
+    const updatedSessions = sessions.map((s) => {
+      if (s.id === session.id) {
+        const updatedHistory = [
+          newBidRecord,
+          ...s.bidHistory.map((b) => ({ ...b, status: 'Outbid' as const }))
+        ];
+        const updatedSession = {
+          ...s,
+          currentBid: amount,
+          totalBidsCount: s.totalBidsCount + 1,
+          reserveMet: isReserveMet || s.reserveMet,
+          bidHistory: updatedHistory,
+          vehicle: { ...s.vehicle, currentBid: amount, isAuction: true }
+        };
+        if (selectedSession?.id === s.id) {
+          setSelectedSession(updatedSession);
+        }
+        return updatedSession;
+      }
+      return s;
+    });
+
+    setSessions(updatedSessions);
+    showToast(`Bid of Ksh ${amount.toLocaleString()} placed on ${session.vehicleTitle}!`);
+    setCustomBidAmount('');
+  };
+
+  // Handle Subscribe Alert
+  const handleNotifySubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!notifyContact.trim()) return;
+    setIsSubscribed(true);
+    showToast(`Subscribed! We will notify ${notifyContact} when new live auctions launch.`);
+  };
+
+  return (
+    <div className="space-y-10 relative bg-[#F5F2EB]/50 min-h-screen pb-16 font-sans">
+      {/* Toast Notification Banner */}
+      {toast && (
+        <div className="fixed top-20 right-4 z-50 bg-[#1E3063] text-white px-5 py-3 rounded-2xl shadow-xl border border-emerald-400/30 flex items-center gap-3 animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-xs font-bold">{toast.message}</span>
+        </div>
+      )}
+
+      {/* Clean Buyer-Focused Page Header */}
+      <PageHeader
+        variant="navy"
+        badgeIcon={<Gavel className="w-4 h-4 text-[#C85A32]" />}
+        badgeText="Live Automotive Marketplace"
+        title="KAYAD Vehicle Auctions"
+        description="Discover active vehicle auctions, compare listings, place real-time bids, and track ending times. All purchases feature 100% Escrow Vault protection."
+        rightElement={
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 bg-[#101935]/60 px-3.5 py-2 rounded-xl border border-white/10 text-white text-xs">
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C85A32] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#C85A32]"></span>
+              </span>
+              <span className="font-bold">{filteredLiveSessions.length} Active Auctions</span>
+            </div>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setIsOrganizerDashboardOpen(true)}
+              className="border-amber-400/50 hover:bg-white/10 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2 bg-[#101935]/80"
+            >
+              <BarChart2 className="w-4 h-4 text-amber-300" />
+              <span>Organizer Dashboard</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setIsOrganizerConsoleOpen(true)}
+              className="border-white/20 hover:bg-white/10 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2"
+            >
+              <Building2 className="w-4 h-4 text-amber-400" />
+              <span>Organizer Portal</span>
+            </Button>
+            <Button
+              variant={showInlineCreateForm ? 'primary' : 'accent'}
+              size="md"
+              onClick={() => setShowInlineCreateForm(prev => !prev)}
+              className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2"
+            >
+              <Gavel className="w-4 h-4 text-amber-300" />
+              <span>{showInlineCreateForm ? 'Hide Creation Form' : 'Organize Auction Event'}</span>
+            </Button>
+          </div>
+        }
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+
+        {/* INLINE AUCTION CREATION FORM COMPONENT */}
+        {showInlineCreateForm && (
+          <section id="auction-creation-form-section" className="animate-fade-in">
+            <AuctionCreationForm
+              availableVehicles={vehicles}
+              onAuctionCreated={handleAuctionCreated}
+              onCancel={() => setShowInlineCreateForm(false)}
+              userRole={user?.role || 'dealer'}
+              isUserVerified={user?.isVerified ?? true}
+            />
+          </section>
+        )}
+
+        {/* ==================================================
+            1. DEDICATED AUCTION SEARCH
+            ================================================== */}
+        <section id="auction-search" className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/90 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-extrabold text-[#1E3063] uppercase tracking-wider flex items-center gap-2">
+              <Search className="w-4 h-4 text-[#C85A32]" />
+              <span>Auction Vehicle Search & Filters</span>
+            </h2>
+            {hasActiveFilters && (
+              <button
+                onClick={resetFilters}
+                className="text-xs font-bold text-[#C85A32] hover:text-[#B34E28] flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Filters</span>
+              </button>
+            )}
+          </div>
+
+          {/* Primary Search Inputs Row */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-xs">
+            {/* Search Keyword */}
+            <div className="md:col-span-5 relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <input
+                type="text"
+                placeholder="Search by make, model, or keywords (e.g. Prado, Nissan, Repossession)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-[#F5F2EB]/40 font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E3063]"
+              />
+            </div>
+
+            {/* Category Select */}
+            <div className="md:col-span-3">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full p-2.5 rounded-xl border border-slate-200 bg-[#F5F2EB]/40 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1E3063]"
+              >
+                <option value="All">All Auction Channels</option>
+                <option value="Bank Repossession">Bank Repossession</option>
+                <option value="Direct Import">Direct Port Import</option>
+                <option value="Fleet Clearance">Fleet Clearance</option>
+                <option value="Dealer Clearance">Dealer Clearance</option>
+                <option value="SUVs & 4x4s">SUVs & 4x4s</option>
+                <option value="Luxury & Executive">Luxury & Executive</option>
+              </select>
+            </div>
+
+            {/* Reserve Status Select */}
+            <div className="md:col-span-2">
+              <select
+                value={reserveStatusFilter}
+                onChange={(e) => setReserveStatusFilter(e.target.value as any)}
+                className="w-full p-2.5 rounded-xl border border-slate-200 bg-[#F5F2EB]/40 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1E3063]"
+              >
+                <option value="All">All Reserve Status</option>
+                <option value="Reserve Met">Reserve Met</option>
+                <option value="Reserve Unmet">Reserve Unmet</option>
+              </select>
+            </div>
+
+            {/* Price Filter range */}
+            <div className="md:col-span-2 flex items-center gap-1.5">
+              <input
+                type="number"
+                placeholder="Min Ksh"
+                value={minBidFilter}
+                onChange={(e) => setMinBidFilter(e.target.value)}
+                className="w-1/2 p-2.5 rounded-xl border border-slate-200 bg-[#F5F2EB]/40 font-medium text-slate-800 text-[11px] focus:outline-none focus:ring-2 focus:ring-[#1E3063]"
+              />
+              <span className="text-slate-400 font-bold">-</span>
+              <input
+                type="number"
+                placeholder="Max Ksh"
+                value={maxBidFilter}
+                onChange={(e) => setMaxBidFilter(e.target.value)}
+                className="w-1/2 p-2.5 rounded-xl border border-slate-200 bg-[#F5F2EB]/40 font-medium text-slate-800 text-[11px] focus:outline-none focus:ring-2 focus:ring-[#1E3063]"
+              />
+            </div>
+          </div>
+
+          {/* Quick Filter Toggle Pills */}
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+            <span className="text-[10px] font-bold text-[#1E3063] uppercase tracking-wider">Quick Filters:</span>
+            
+            <button
+              onClick={() => setFilterEndingSoon(!filterEndingSoon)}
+              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                filterEndingSoon
+                  ? 'bg-[#C85A32] text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5" />
+              <span>Ending Soon (&lt; 24h)</span>
+            </button>
+
+            <button
+              onClick={() => setFilterBuyNow(!filterBuyNow)}
+              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                filterBuyNow
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <DollarSign className="w-3.5 h-3.5" />
+              <span>Buy Now Available</span>
+            </button>
+
+            <button
+              onClick={() => setFilterVerified(!filterVerified)}
+              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                filterVerified
+                  ? 'bg-[#1E3063] text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>150-Point Verified</span>
+            </button>
+          </div>
+        </section>
+
+
+        {/* ==================================================
+            2. AUCTION CATEGORIES
+            ================================================== */}
+        <section id="auction-categories" className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
+              <Tag className="w-4 h-4 text-[#C85A32]" />
+              <span>Auction Categories</span>
+            </h2>
+            <span className="text-xs text-slate-500 font-medium">Select a category to filter listings</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
+            {[
+              { id: 'All', label: 'All Listings', icon: Gavel, count: categoryCounts['All'] },
+              { id: 'Bank Repossession', label: 'Bank Repossessions', icon: LandmarkIcon, count: categoryCounts['Bank Repossession'] },
+              { id: 'Direct Import', label: 'Direct Imports', icon: DirectImportIcon, count: categoryCounts['Direct Import'] },
+              { id: 'Fleet Clearance', label: 'Fleet Clearance', icon: FleetIcon, count: categoryCounts['Fleet Clearance'] },
+              { id: 'Dealer Clearance', label: 'Dealer Clearance', icon: DealerIcon, count: categoryCounts['Dealer Clearance'] },
+              { id: 'SUVs & 4x4s', label: 'SUVs & 4x4s', icon: SUVIcon, count: categoryCounts['SUVs & 4x4s'] },
+              { id: 'Luxury & Executive', label: 'Luxury Cars', icon: LuxuryIcon, count: categoryCounts['Luxury & Executive'] },
+            ].map((cat) => {
+              const isSelected = selectedCategory === cat.id;
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`p-3 rounded-xl border transition-all text-left flex flex-col justify-between cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-md'
+                      : 'bg-white text-slate-800 border-slate-200/80 hover:border-[#1E3063]/40 hover:bg-[#F5F2EB]/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <Icon className={`w-4 h-4 ${isSelected ? 'text-amber-300' : 'text-[#1E3063]'}`} />
+                    <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {cat.count}
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold mt-2 line-clamp-1">{cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+
+        {/* ==================================================
+            3. LIVE AUCTIONS (only when active)
+            ================================================== */}
+        <section id="live-auctions" className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-3 w-3 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C85A32] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#C85A32]"></span>
+              </span>
+              <h2 className="text-lg font-black text-[#1E3063] font-display flex items-center gap-2">
+                Live Bidding Events
+              </h2>
+            </div>
+            <span className="text-xs text-slate-600 font-semibold">
+              Showing {filteredLiveSessions.length} active live auctions
+            </span>
+          </div>
+
+          {filteredLiveSessions.length > 0 ? (
+            /* ACTIVE LIVE AUCTION CARDS GRID */
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredLiveSessions.map((session) => {
+                const vehicle = session.vehicle;
+                const timeObj = formatTimeRemaining(session.endsAt);
+                const isWatched = watchedIds.includes(session.id);
+
+                return (
+                  <Card 
+                    key={session.id} 
+                    className="flex flex-col justify-between overflow-hidden hover:border-[#1E3063]/40 transition-all shadow-2xs hover:shadow-md bg-white rounded-2xl border border-slate-200"
+                  >
+                    <div>
+                      {/* Vehicle Image Container */}
+                      <div 
+                        className="relative h-60 cursor-pointer overflow-hidden bg-slate-100 group"
+                        onClick={() => setSelectedSession(session)}
+                      >
+                        <LazyImage 
+                          src={vehicle.image} 
+                          alt={session.vehicleTitle} 
+                          wrapperClassName="w-full h-full" 
+                          className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500" 
+                        />
+
+                        {/* Top Overlay Badges - MAX THREE STATUS BADGES */}
+                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {/* Badge 1: Live Status in Coral Red */}
+                            <Badge variant="live" size="sm" className="bg-[#C85A32] text-white border-none font-bold">
+                              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                              <span>LIVE</span>
+                            </Badge>
+
+                            {/* Badge 2: Channel Category */}
+                            <Badge variant="neutral" size="sm" className="bg-white/95 text-[#1E3063] font-bold shadow-2xs">
+                              {session.category}
+                            </Badge>
+
+                            {/* Badge 3: Reserve Status */}
+                            {session.reserveMet ? (
+                              <Badge variant="success" size="sm" className="bg-emerald-600 text-white font-bold border-none shadow-2xs">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>Reserve Met</span>
+                              </Badge>
+                            ) : (
+                              <Badge variant="neutral" size="sm" className="bg-slate-900/80 text-white font-medium backdrop-blur-xs">
+                                <span>Reserve Unmet</span>
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Watch Auction Toggle Button */}
+                          <button
+                            onClick={(e) => toggleWatchSession(session.id, session.vehicleTitle, e)}
+                            className={`p-2 rounded-full backdrop-blur-md transition-all pointer-events-auto cursor-pointer shadow-sm ${
+                              isWatched
+                                ? 'bg-[#C85A32] text-white'
+                                : 'bg-white/90 text-slate-700 hover:text-[#C85A32] hover:bg-white'
+                            }`}
+                            title={isWatched ? 'Remove from Watchlist' : 'Watch Auction'}
+                          >
+                            <Heart className={`w-4 h-4 ${isWatched ? 'fill-current' : ''}`} />
+                          </button>
+                        </div>
+
+                        {/* Dynamic Time Remaining Bar */}
+                        <div className="absolute bottom-3 left-3 right-3 bg-[#101935]/85 backdrop-blur-md px-3.5 py-2 rounded-xl text-white flex items-center justify-between text-xs pointer-events-none z-10">
+                          <span className="text-slate-300 text-[11px] font-medium flex items-center gap-1.5">
+                            <Clock className={`w-3.5 h-3.5 ${timeObj.isUrgent ? 'text-[#C85A32]' : 'text-slate-300'}`} />
+                            Time Remaining:
+                          </span>
+                          <span className={`font-mono font-bold text-xs ${timeObj.isUrgent ? 'text-[#C85A32] animate-pulse' : 'text-white'}`}>
+                            {timeObj.formatted}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Content Details */}
+                      <div className="p-5 space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+                            <span>{session.sellerType} • {vehicle.county}</span>
+                            <span className="text-slate-700 font-extrabold">{session.totalBidsCount} Bids</span>
+                          </div>
+                          <h3 
+                            className="text-lg font-black text-[#1E3063] font-display mt-1 hover:text-[#C85A32] cursor-pointer transition-colors line-clamp-1"
+                            onClick={() => setSelectedSession(session)}
+                          >
+                            {session.vehicleTitle}
+                          </h3>
+                        </div>
+
+                        {/* Primary Focal Point: Current Bid Block */}
+                        <div className="p-4 bg-[#F5F2EB]/70 rounded-xl border border-slate-200/80 flex items-baseline justify-between">
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Current Bid</p>
+                            <p className="text-2xl font-black text-[#1E3063] font-display mt-0.5">
+                              Ksh {(session.currentBid ?? 0).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Reserve Status</p>
+                            <p className={`text-xs font-extrabold mt-1 ${session.reserveMet ? 'text-emerald-700' : 'text-slate-600'}`}>
+                              {session.reserveMet ? '✓ Reserve Met' : `Reserve: Ksh ${(session.reservePrice ?? 0).toLocaleString()}`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Actions */}
+                    <div className="p-5 pt-0 space-y-2">
+                      {/* Bidder Pass Status Indicator */}
+                      {verifiedBiddersMap[session.id] ? (
+                        <div className="flex items-center justify-between text-[11px] p-2 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-900 font-bold">
+                          <span className="flex items-center gap-1.5">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                            Pass Active: <span className="font-mono">{verifiedBiddersMap[session.id].bidderNumber}</span>
+                          </span>
+                          <span className="text-[10px] text-emerald-700">Ready to Bid</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between text-[11px] px-2 py-1.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-600 font-medium">
+                          <span className="flex items-center gap-1 text-slate-700 font-bold">
+                            <Lock className="w-3.5 h-3.5 text-amber-600" />
+                            Bidder Pass Required
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => handleOpenRegistration(session, e)}
+                            className="text-[10px] font-bold text-[#C85A32] hover:underline"
+                          >
+                            Register Deposit →
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleOpenPreInspection(session, e)}
+                          className="text-xs font-bold border-slate-300 text-[#1E3063] hover:bg-[#F5F2EB]"
+                          title="View physical inspection details or book mechanic"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-[#C85A32]" />
+                          <span>Inspect</span>
+                        </Button>
+
+                        {session.buyoutPrice && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onStartEscrow(vehicle)}
+                            className="text-xs font-bold border-slate-300 text-[#1E3063] hover:bg-[#F5F2EB]"
+                          >
+                            <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Buy: {(session.buyoutPrice / 1000000).toFixed(2)}M</span>
+                          </Button>
+                        )}
+
+                        <Button
+                          variant="primary"
+                          size="md"
+                          onClick={(e) => handleOpenLiveRoom(session, e)}
+                          className="bg-[#1E3063] hover:bg-[#17244B] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex-1 justify-center shadow-xs hover:shadow-md transition-all"
+                        >
+                          <Gavel className="w-4 h-4 text-amber-300 animate-pulse" />
+                          <span>{verifiedBiddersMap[session.id] ? 'Enter Live Auction Room' : 'Live Auction Room'}</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            /* ==================================================
+               NO LIVE AUCTIONS FALLBACK BLOCK
+               ================================================== */
+            <div className="space-y-6">
+              <Card className="p-8 text-center bg-white space-y-4 border border-slate-200/90 shadow-xs rounded-2xl">
+                <div className="w-14 h-14 rounded-full bg-[#F5F2EB] text-[#1E3063] flex items-center justify-center mx-auto">
+                  <Gavel className="w-7 h-7 stroke-[1.75] text-[#C85A32]" />
+                </div>
+                <div className="max-w-md mx-auto space-y-1">
+                  <h3 className="text-xl font-black text-[#1E3063]">No Live Auctions Active Right Now</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    No bidding sessions match your filter criteria or the live auction window is currently closed. Subscribe below for instant alerts when the next auction launches.
+                  </p>
+                </div>
+
+                {/* Next Auction Date Banner */}
+                <div className="inline-flex items-center gap-2 bg-[#F5F2EB] px-4 py-2 rounded-xl text-xs font-bold text-[#1E3063] border border-slate-200">
+                  <Calendar className="w-4 h-4 text-[#C85A32]" />
+                  <span>Next Live Event: Wednesday, Aug 5, 2026 at 09:00 EAT</span>
+                </div>
+
+                {/* Notify Me Subscription Form */}
+                <form onSubmit={handleNotifySubscribe} className="max-w-md mx-auto pt-2 flex items-center gap-2">
+                  <Input
+                    placeholder="Enter email or phone number"
+                    value={notifyContact}
+                    onChange={(e) => setNotifyContact(e.target.value)}
+                    required
+                    className="text-xs"
+                  />
+                  <Button
+                    type="submit"
+                    variant="accent"
+                    size="md"
+                    className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-bold text-xs shrink-0"
+                  >
+                    <Bell className="w-3.5 h-3.5" />
+                    <span>Notify Me</span>
+                  </Button>
+                </form>
+                {isSubscribed && (
+                  <p className="text-xs font-bold text-emerald-700 flex items-center justify-center gap-1 pt-1">
+                    <Check className="w-4 h-4" /> You're subscribed for live auction alerts!
+                  </p>
+                )}
+              </Card>
+            </div>
+          )}
+        </section>
+
+
+        {/* ==================================================
+            4. ENDING SOON (< 24 Hours)
+            ================================================== */}
+        <section id="ending-soon" className="space-y-4 pt-4 border-t border-slate-200/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
+                <Zap className="w-4 h-4 text-[#C85A32]" />
+                <span>Ending Soon</span>
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">Auctions ending within the next 24 hours — sorted automatically by remaining time</p>
+            </div>
+            <span className="text-xs font-bold text-[#C85A32] bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+              {endingSoonSessions.length} Closing Soon
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {endingSoonSessions.map((session) => {
+              const timeObj = formatTimeRemaining(session.endsAt);
+              return (
+                <Card key={session.id} className="p-4 flex flex-col sm:flex-row gap-4 bg-white border border-slate-200/90 hover:border-[#1E3063]/40 transition-all rounded-2xl">
+                  <LazyImage
+                    src={session.vehicle.image}
+                    alt={session.vehicleTitle}
+                    wrapperClassName="w-full sm:w-36 h-32 rounded-xl overflow-hidden shrink-0"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="flex-1 flex flex-col justify-between space-y-2">
+                    <div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <Badge variant="neutral" size="sm" className="bg-[#F5F2EB] text-[#1E3063] font-bold">
+                          {session.category}
+                        </Badge>
+                        <span className="font-mono font-extrabold text-[#C85A32] animate-pulse flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {timeObj.formatted}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-black text-[#1E3063] mt-1.5 line-clamp-1">{session.vehicleTitle}</h3>
+                      <p className="text-xs font-bold text-slate-600 mt-0.5">
+                        Current Bid: <span className="text-[#1E3063] font-black text-sm">Ksh {(session.currentBid ?? 0).toLocaleString()}</span>
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                      <span className="text-[11px] text-slate-500">{session.totalBidsCount} Bids</span>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedSession(session);
+                          setModalTab('bid');
+                        }}
+                        className="bg-[#1E3063] hover:bg-[#17244B] text-white font-bold text-xs py-1.5 px-3"
+                      >
+                        Bid Now
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+
+        {/* ==================================================
+            5. UPCOMING AUCTIONS
+            ================================================== */}
+        <section id="upcoming-auctions" className="space-y-4 pt-4 border-t border-slate-200/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#1E3063]" />
+                <span>Upcoming Auction Catalogue</span>
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">Scheduled bidding sessions opening soon</p>
+            </div>
+            <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+              {upcomingSessions.length} Scheduled
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {upcomingSessions.map((session) => (
+              <Card key={session.id} className="p-4 flex gap-4 bg-white border border-slate-200/90 rounded-2xl hover:border-slate-300 transition-all">
+                <LazyImage
+                  src={session.vehicle.image}
+                  alt={session.vehicleTitle}
+                  wrapperClassName="w-32 h-28 rounded-xl overflow-hidden shrink-0"
+                  className="w-full h-full object-cover"
+                />
+                <div className="flex-1 flex flex-col justify-between space-y-1">
+                  <div>
+                    <span className="text-[10px] font-extrabold text-[#1E3063] uppercase tracking-wider bg-[#F5F2EB] px-2 py-0.5 rounded">
+                      Starts: {new Date(session.startsAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    <h3 className="text-sm font-bold text-[#1E3063] line-clamp-1 mt-1">{session.vehicleTitle}</h3>
+                    <p className="text-xs text-slate-600 font-medium mt-0.5">Starting Bid: Ksh {(session.startingPrice ?? (session as any).startingBid ?? 0).toLocaleString()}</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedSession(session);
+                      setModalTab('bid');
+                    }}
+                    className="text-xs font-bold text-[#1E3063] border-slate-200 self-start py-1 px-3 h-auto"
+                  >
+                    View Schedule & Terms
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+
+        {/* ==================================================
+            6. RECENTLY SOLD
+            ================================================== */}
+        <section id="recently-sold" className="space-y-4 pt-4 border-t border-slate-200/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
+                <History className="w-4 h-4 text-emerald-600" />
+                <span>Recently Sold</span>
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">Verified winning bids and completed logbook transfers</p>
+            </div>
+            <Badge variant="success" size="sm" className="bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+              100% Escrow Protected
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {recentlySoldSessions.map((session) => (
+              <Card key={session.id} className="p-4 flex gap-4 bg-white border border-slate-200/80 rounded-2xl opacity-95">
+                <LazyImage
+                  src={session.vehicle.image}
+                  alt={session.vehicleTitle}
+                  wrapperClassName="w-28 h-24 rounded-xl overflow-hidden shrink-0 grayscale opacity-90"
+                  className="w-full h-full object-cover"
+                />
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                      ✓ SOLD & SETTLED
+                    </span>
+                    <h3 className="text-sm font-bold text-[#1E3063] line-clamp-1 mt-1">{session.vehicleTitle}</h3>
+                    <p className="text-xs font-black text-emerald-700 mt-0.5">Winning Bid: Ksh {(session.currentBid ?? 0).toLocaleString()}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2 mt-1">
+                    <span>{session.totalBidsCount} Total Bids</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => handleOpenCompletion(session, undefined, session.currentBid, e)}
+                      className="text-[10px] font-extrabold text-[#1E3063] border-[#1E3063]/30 hover:bg-[#1E3063] hover:text-white px-2 py-1 h-auto"
+                    >
+                      <Award className="w-3 h-3 mr-1 text-amber-500" />
+                      <span>Winning Certificate</span>
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+
+        {/* ==================================================
+            7. AUCTION PROCESS (SIMPLE VISUAL TIMELINE)
+            ================================================== */}
+        <section id="auction-process" className="bg-white rounded-2xl p-6 shadow-xs border border-slate-200/90 space-y-6">
+          <div className="text-center max-w-xl mx-auto space-y-1">
+            <h2 className="text-lg font-black text-[#1E3063] font-display">
+              How KAYAD Vehicle Auctions Work
+            </h2>
+            <p className="text-xs text-slate-500">
+              Simple 6-step transparent process from discovery to driving away safely
+            </p>
+          </div>
+
+          {/* Visual Timeline Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 relative">
+            {[
+              { step: '1', title: 'Register', desc: 'Verify identity & setup profile', icon: UserCheck },
+              { step: '2', title: 'Place Bid', desc: 'Real-time competitive bidding', icon: Gavel },
+              { step: '3', title: 'Win Auction', desc: 'Highest bidder at timer zero', icon: Sparkles },
+              { step: '4', title: 'Escrow Payment', desc: 'Funds secured in Escrow Vault', icon: Lock },
+              { step: '5', title: 'Ownership Transfer', desc: 'NTSA logbook title verification', icon: FileText },
+              { step: '6', title: 'Vehicle Collection', desc: 'Inspected handover & keys', icon: CheckCircle2 },
+            ].map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.step} className="p-3.5 bg-[#F5F2EB]/60 rounded-xl border border-slate-200/80 text-center space-y-2 flex flex-col justify-between relative group hover:bg-[#1E3063] hover:text-white transition-all">
+                  <div className="w-8 h-8 rounded-full bg-[#1E3063] text-white flex items-center justify-center font-bold text-xs mx-auto group-hover:bg-amber-400 group-hover:text-[#1E3063] transition-colors">
+                    {item.step}
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-[#1E3063] group-hover:text-white transition-colors">{item.title}</h3>
+                    <p className="text-[10px] text-slate-500 group-hover:text-slate-200 mt-1 leading-tight">{item.desc}</p>
+                  </div>
+                  <Icon className="w-4 h-4 mx-auto text-slate-400 group-hover:text-amber-300 transition-colors" />
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+
+        {/* ==================================================
+            8. FOOTER ANCHOR
+            ================================================== */}
+        <footer className="pt-6 border-t border-slate-200/80 text-center text-xs text-slate-500 space-y-1">
+          <p className="font-bold text-[#1E3063]">KAYAD Vehicle Auction Marketplace</p>
+          <p className="text-[11px] text-slate-400">All vehicle auctions are subject to verified technical inspection and logbook title clearance.</p>
+        </footer>
+
+      </div>
+
+
+      {/* ==================================================
+          COMPREHENSIVE AUCTION DETAILS & BID MODAL
+          ================================================== */}
+      {selectedSession && (
+        <div className="fixed inset-0 z-50 bg-[#101935]/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+          <Card className="max-w-3xl w-full p-6 space-y-5 bg-white relative max-h-[92vh] overflow-y-auto rounded-2xl border-none shadow-2xl">
+            <button
+              onClick={() => setSelectedSession(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal Header */}
+            <div>
+              <div className="flex items-center gap-2">
+                <Badge variant="live" size="sm" className="bg-[#C85A32] text-white border-none font-bold">
+                  {selectedSession.status === 'Live' ? 'LIVE AUCTION' : selectedSession.status.toUpperCase()}
+                </Badge>
+                <Badge variant="neutral" size="sm" className="bg-[#F5F2EB] text-[#1E3063] font-semibold">
+                  {selectedSession.category}
+                </Badge>
+              </div>
+              <h3 className="text-2xl font-black text-[#1E3063] font-display mt-1">
+                {selectedSession.vehicleTitle}
+              </h3>
+              <p className="text-xs text-slate-500 font-mono mt-0.5">Session ID: {selectedSession.id} • {selectedSession.sellerType}</p>
+            </div>
+
+            {/* Modal Tabs: Bid, History, Inspection, Terms */}
+            <div className="flex border-b border-slate-200 text-xs font-bold text-slate-600 gap-1 overflow-x-auto">
+              {[
+                { id: 'bid', label: 'Bidding & Buyout', icon: Gavel },
+                { id: 'history', label: `Bid Log (${selectedSession.totalBidsCount})`, icon: History },
+                { id: 'inspection', label: '150-Point Inspection', icon: ShieldCheck },
+                { id: 'terms', label: 'Escrow & Legal Terms', icon: FileText },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = modalTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setModalTab(tab.id as any)}
+                    className={`px-4 py-2.5 border-b-2 font-bold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+                      isActive 
+                        ? 'border-[#1E3063] text-[#1E3063] bg-[#F5F2EB]/50' 
+                        : 'border-transparent hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* TAB 1: BIDDING & BUYOUT CONTROLS */}
+            {modalTab === 'bid' && (() => {
+              const verifiedPass = verifiedBiddersMap[selectedSession.id];
+              const depositAmount = selectedSession.bidSecurityAmount || 50000;
+
+              return (
+                <div className="space-y-5 text-xs">
+                  {/* VERIFICATION PASS BANNER OR REGISTRATION GATE */}
+                  {verifiedPass ? (
+                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-300 flex items-start justify-between gap-3 shadow-2xs">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="success" size="sm" className="bg-emerald-600 text-white font-extrabold text-[10px]">
+                            VERIFIED BIDDER PASS ACTIVE
+                          </Badge>
+                          <span className="font-mono font-black text-[#1E3063] text-sm">{verifiedPass.bidderNumber}</span>
+                        </div>
+                        <p className="text-[#1E3063] text-xs font-semibold">
+                          Organizer Deposit Verified (Ksh {verifiedPass.depositAmount.toLocaleString()} • Ref: {verifiedPass.paymentReference}).
+                        </p>
+                        <p className="text-slate-500 text-[11px] flex items-center gap-1">
+                          <EyeOff className="w-3.5 h-3.5 text-emerald-700" />
+                          Your real identity remains hidden from other participants in the bidding room.
+                        </p>
+                      </div>
+                      <ShieldCheck className="w-8 h-8 text-emerald-600 shrink-0 mt-0.5" />
+                    </div>
+                  ) : (
+                    <div className="p-5 bg-[#101935] text-white rounded-2xl border border-[#C85A32]/40 shadow-md space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black text-[#C85A32] uppercase tracking-wider">Accreditation Required</span>
+                            <Badge variant="neutral" size="sm" className="bg-white/10 text-slate-200 text-[10px]">
+                              Deposit: Ksh {depositAmount.toLocaleString()}
+                            </Badge>
+                          </div>
+                          <h4 className="text-base font-black text-white font-display">Only Verified & Qualified Bidders May Enter</h4>
+                        </div>
+                        <Lock className="w-6 h-6 text-amber-400 shrink-0" />
+                      </div>
+
+                      <p className="text-slate-300 text-xs leading-relaxed">
+                        To maintain auction integrity and prevent speculative bidding, this room requires a verified bidder registration and security deposit paid directly to <strong>{selectedSession.sellerName}</strong>.
+                      </p>
+
+                      {/* 6-step flow overview */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 py-1 text-[11px]">
+                        <div className="p-2 bg-white/5 rounded-lg border border-white/10">1. Read Rules</div>
+                        <div className="p-2 bg-white/5 rounded-lg border border-white/10">2. Identity KYC</div>
+                        <div className="p-2 bg-white/5 rounded-lg border border-white/10">3. Accept Terms</div>
+                        <div className="p-2 bg-white/5 rounded-lg border border-white/10">4. Pay Deposit</div>
+                        <div className="p-2 bg-white/5 rounded-lg border border-white/10">5. Verify Receipt</div>
+                        <div className="p-2 bg-emerald-500/20 text-emerald-300 rounded-lg border border-emerald-500/30 font-bold">6. Alias Pass</div>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="accent"
+                        size="md"
+                        fullWidth
+                        onClick={(e) => handleOpenRegistration(selectedSession, e)}
+                        className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-black text-xs py-3 rounded-xl cursor-pointer"
+                      >
+                        <UserPlus className="w-4 h-4 mr-2 text-amber-200" />
+                        <span>Start Bidder Registration & Access Pass</span>
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Price Highlights */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-[#F5F2EB]/70 rounded-xl border border-slate-200">
+                    <div>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Current Highest Bid</p>
+                      <p className="text-3xl font-black text-[#1E3063] font-display mt-0.5">
+                        Ksh {(selectedSession.currentBid ?? 0).toLocaleString()}
+                      </p>
+                      <p className={`text-xs font-extrabold mt-1 ${selectedSession.reserveMet ? 'text-emerald-700' : 'text-slate-600'}`}>
+                        {selectedSession.reserveMet ? '✓ Reserve Met (Highest Bid Wins)' : `Reserve Price: Ksh ${(selectedSession.reservePrice ?? 0).toLocaleString()}`}
+                      </p>
+                    </div>
+
+                    {selectedSession.buyoutPrice && (
+                      <div className="border-t sm:border-t-0 sm:border-l border-slate-300 pt-3 sm:pt-0 sm:pl-4">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Instant Buyout Price</p>
+                        <p className="text-2xl font-bold text-slate-800 font-display mt-0.5">
+                          Ksh {(selectedSession.buyoutPrice ?? 0).toLocaleString()}
+                        </p>
+                        <Button
+                          variant="accent"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSession(null);
+                            onStartEscrow(selectedSession.vehicle);
+                          }}
+                          className="mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3 w-full"
+                        >
+                          <Lock className="w-3.5 h-3.5" /> Buy Instantly via Escrow
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick Bid Increments - Available ONLY for Verified Bidders */}
+                  {selectedSession.status === 'Live' && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="font-bold text-slate-700">Quick Bid Increments:</p>
+                        {!verifiedPass && (
+                          <span className="text-[10px] font-bold text-amber-700">⚠️ Requires Bidder Registration</span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          selectedSession.minimumIncrement,
+                          selectedSession.minimumIncrement * 2,
+                          selectedSession.minimumIncrement * 4
+                        ].map((inc) => {
+                          const targetVal = selectedSession.currentBid + inc;
+                          return (
+                            <button
+                              key={inc}
+                              disabled={!verifiedPass}
+                              onClick={() => {
+                                if (!verifiedPass) {
+                                  handleOpenRegistration(selectedSession);
+                                  return;
+                                }
+                                executeBid(
+                                  selectedSession, 
+                                  targetVal, 
+                                  verifiedPass.anonymousAlias, 
+                                  bidderLocation
+                                );
+                              }}
+                              className={`p-3 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-2xs ${
+                                verifiedPass
+                                  ? 'bg-white hover:bg-[#1E3063] hover:text-white border border-slate-200 text-[#1E3063]'
+                                  : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75'
+                              }`}
+                            >
+                              +Ksh {(inc / 1000).toFixed(0)}k
+                              <span className="block text-[10px] opacity-75 font-normal">Ksh {(targetVal ?? 0).toLocaleString()}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Custom Bid Input Form */}
+                  {selectedSession.status === 'Live' && (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!verifiedPass) {
+                          handleOpenRegistration(selectedSession);
+                          return;
+                        }
+                        executeBid(
+                          selectedSession, 
+                          Number(customBidAmount), 
+                          verifiedPass.anonymousAlias, 
+                          bidderLocation
+                        );
+                      }}
+                      className="p-4 bg-white rounded-xl border border-slate-200 space-y-3"
+                    >
+                      <p className="font-bold text-[#1E3063]">Place Custom Bid Amount:</p>
+                      <div className="space-y-1">
+                        <Input
+                          type="number"
+                          value={customBidAmount}
+                          disabled={!verifiedPass}
+                          onChange={(e) => setCustomBidAmount(e.target.value)}
+                          placeholder={verifiedPass ? `Minimum bid Ksh ${((selectedSession.currentBid ?? 0) + (selectedSession.minimumIncrement ?? 10000)).toLocaleString()}` : "Register to unlock custom bid entry"}
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <Input
+                          placeholder="Public Bidding Identity"
+                          value={verifiedPass ? verifiedPass.anonymousAlias : 'Registration Required'}
+                          disabled
+                          className="bg-slate-50 font-mono font-bold text-[#1E3063]"
+                        />
+                        <Input
+                          placeholder="Location (e.g. Nairobi)"
+                          value={bidderLocation}
+                          disabled={!verifiedPass}
+                          onChange={(e) => setBidderLocation(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      {verifiedPass ? (
+                        <Button
+                          type="submit"
+                          variant="primary"
+                          size="md"
+                          fullWidth
+                          className="bg-[#1E3063] hover:bg-[#17244B] text-white font-bold"
+                        >
+                          <TrendingUp className="w-4 h-4" />
+                          <span>Confirm & Place Bid as {verifiedPass.bidderNumber}</span>
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="accent"
+                          size="md"
+                          fullWidth
+                          onClick={() => handleOpenRegistration(selectedSession)}
+                          className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-bold"
+                        >
+                          <UserPlus className="w-4 h-4 mr-1.5" />
+                          <span>Complete Registration to Bid</span>
+                        </Button>
+                      )}
+                    </form>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* TAB 2: CHRONOLOGICAL BID HISTORY LOG */}
+            {modalTab === 'history' && (
+              <div className="space-y-3 text-xs">
+                <p className="font-bold text-slate-700 flex items-center gap-1.5">
+                  <History className="w-4 h-4 text-slate-500" />
+                  Chronological Bid Audit Trail:
+                </p>
+
+                <div className="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100">
+                  {selectedSession.bidHistory.length === 0 ? (
+                    <p className="p-4 text-slate-400 text-center">No bids recorded yet for this session.</p>
+                  ) : (
+                    selectedSession.bidHistory.map((bid, idx) => (
+                      <div key={bid.id || idx} className="p-3 flex items-center justify-between hover:bg-slate-50">
+                        <div>
+                          <p className="font-bold text-[#1E3063]">{bid.bidderName} <span className="text-slate-400 font-normal">({bid.bidderLocation})</span></p>
+                          <p className="text-[10px] text-slate-400">{bid.timestamp}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-mono font-bold text-slate-900">Ksh {(bid.amount ?? 0).toLocaleString()}</p>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                            idx === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {idx === 0 ? 'Highest Bidder' : 'Outbid'}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: PRE-AUCTION VEHICLE INSPECTION PORTAL */}
+            {modalTab === 'inspection' && (
+              <div className="space-y-4 text-xs">
+                {/* KAYAD Mechanic Disclaimer Header */}
+                <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-3">
+                  <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="font-extrabold text-amber-900">Pre-Auction Verification & Mechanic Marketplace</p>
+                    <p className="text-amber-800 text-[11px] leading-relaxed">
+                      Every bidder has the right to inspect before placing bids. KAYAD does not perform inspections directly — independent certified mechanics on the Mechanic Marketplace provide on-site inspections.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Core Inspection Options Bar */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenPreInspection(selectedSession)}
+                    className="p-3.5 bg-[#1E3063]/5 hover:bg-[#1E3063]/10 border border-[#1E3063]/20 rounded-xl text-left space-y-1 transition-all cursor-pointer"
+                  >
+                    <span className="font-black text-[#1E3063] flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-[#C85A32]" />
+                      1. Physical Viewing
+                    </span>
+                    <p className="text-[11px] text-slate-600">
+                      {selectedSession.viewingDates || 'Mon-Sat 8:30 AM - 4:30 PM'}
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenPreInspection(selectedSession)}
+                    className="p-3.5 bg-[#1E3063]/5 hover:bg-[#1E3063]/10 border border-[#1E3063]/20 rounded-xl text-left space-y-1 transition-all cursor-pointer"
+                  >
+                    <span className="font-black text-[#1E3063] flex items-center gap-1.5">
+                      <Wrench className="w-4 h-4 text-[#C85A32]" />
+                      2. Book Mechanic
+                    </span>
+                    <p className="text-[11px] text-slate-600">
+                      Vetted Marketplace Inspectors (Ksh 3,500+)
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenPreInspection(selectedSession)}
+                    className="p-3.5 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-xl text-left space-y-1 transition-all cursor-pointer"
+                  >
+                    <span className="font-black text-emerald-900 flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-emerald-700" />
+                      3. Digital Report
+                    </span>
+                    <p className="text-[11px] text-emerald-800">
+                      View/Download 150-Point Certified Diagnostic PDF
+                    </p>
+                  </button>
+                </div>
+
+                {/* Highlight Summary Card */}
+                <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-200 flex items-start gap-3">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-extrabold text-emerald-900">150-Point Certified Pre-Auction Diagnostic Completed</p>
+                    <p className="text-emerald-800 text-[11px]">
+                      This vehicle underwent a complete physical diagnostic evaluation covering engine compression, transmission fluid analysis, chassis integrity, and digital OBD-II scanning.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase">Engine Health</p>
+                    <p className="font-bold text-[#1E3063] text-sm mt-0.5">Grade A (96%)</p>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase">Chassis & Frame</p>
+                    <p className="font-bold text-[#1E3063] text-sm mt-0.5">Zero Accident Structural</p>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase">OBD-II Scan</p>
+                    <p className="font-bold text-emerald-700 text-sm mt-0.5">No Error Codes</p>
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => handleOpenPreInspection(selectedSession)}
+                    className="w-full bg-[#1E3063] hover:bg-[#17244B] text-white font-extrabold text-xs py-2.5"
+                  >
+                    <Wrench className="w-4 h-4 mr-2 text-amber-300" />
+                    <span>Open Pre-Auction Inspection & Booking Hub</span>
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: ESCROW WORKFLOW & TERMS & BID SECURITY */}
+            {modalTab === 'terms' && (
+              <div className="space-y-4 text-xs">
+                {/* KAYAD Technology Provider Disclaimer Notice */}
+                <div className="p-3.5 bg-[#F5F2EB] rounded-xl border border-slate-200/90 flex items-start gap-3">
+                  <Info className="w-4 h-4 text-[#1E3063] shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-extrabold text-[#1E3063]">KAYAD Marketplace Platform Architecture</p>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      KAYAD is a marketplace technology provider and does not conduct or hold auctions directly. Bidding sessions are configured and executed by verified dealers, licensed auctioneers, banks, and fleet custodians.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Organizer Accreditation */}
+                <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-[#1E3063] flex items-center gap-1.5">
+                      <Building2 className="w-4 h-4 text-[#C85A32]" /> Event Organizer & Custodian
+                    </span>
+                    <Badge variant="neutral" size="sm" className="bg-[#1E3063] text-white font-bold">
+                      {selectedSession.organizerType || selectedSession.sellerType}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-700 pt-1">
+                    <div><span className="font-bold">Organizer:</span> {selectedSession.sellerName}</div>
+                    <div><span className="font-bold">Category:</span> {selectedSession.category}</div>
+                    <div><span className="font-bold">Viewing Dates:</span> {selectedSession.viewingDates || 'Mon-Fri 9:00 AM - 4:00 PM'}</div>
+                    <div><span className="font-bold">Viewing Location:</span> {selectedSession.viewingLocation || selectedSession.vehicle.location}</div>
+                  </div>
+                </div>
+
+                {/* Bid Security Deposit Section */}
+                <div className="p-4 bg-emerald-50/70 rounded-xl border border-emerald-200/90 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-emerald-900 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-700" /> Mandatory Bid Security Deposit
+                    </span>
+                    <span className="font-mono font-black text-emerald-800 text-sm">
+                      Ksh {(selectedSession.bidSecurityAmount || 50000).toLocaleString()}
+                    </span>
+                  </div>
+                  
+                  <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-amber-900 text-[11px] leading-relaxed font-medium">
+                    <strong>NOTICE:</strong> Bid Security deposit is collected and held directly by the verified organizer ({selectedSession.sellerName}), NOT by KAYAD corporate.
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-800">
+                    <div><span className="font-bold">Receiving Institution:</span> {selectedSession.bidSecurityBank || 'NCBA Bank Kenya PLC'}</div>
+                    <div><span className="font-bold">Account Name:</span> {selectedSession.bidSecurityAccountName || `${selectedSession.sellerName} Bidding Escrow`}</div>
+                    <div><span className="font-bold">Paybill / Account:</span> {selectedSession.bidSecurityPaybillOrAccount || 'Paybill 888100 | Acc: AUC-DEP'}</div>
+                    <div><span className="font-bold">Verification:</span> {selectedSession.bidSecurityVerificationMethod || 'Automated M-Pesa Ref / Bank Slip'}</div>
+                  </div>
+
+                  <div className="pt-2 border-t border-emerald-200/80 text-[11px] text-emerald-900">
+                    <span className="font-bold">Refund Policy:</span> {selectedSession.bidSecurityRefundPolicy || '100% deposit refunded to non-winning bidders within 24 hours after auction conclusion.'}
+                  </div>
+                </div>
+
+                {/* Terms & Handover Instructions */}
+                <div className="p-4 bg-[#F5F2EB] rounded-xl border border-slate-200 space-y-2">
+                  <p className="font-bold text-[#1E3063] flex items-center gap-1.5">
+                    <Lock className="w-4 h-4 text-emerald-600" /> Auction Terms & Winning Settlement:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-slate-600">
+                    {selectedSession.termsAndConditions.map((term, i) => (
+                      <li key={i}>{term}</li>
+                    ))}
+                  </ul>
+                  {selectedSession.handoverInstructions && (
+                    <div className="pt-2 border-t border-slate-300 text-[11px] text-slate-700">
+                      <span className="font-bold text-[#1E3063]">Winning Handover & Settlement:</span> {selectedSession.handoverInstructions}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Footer Close Button */}
+            <div className="pt-3 border-t border-slate-200 flex justify-end">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setSelectedSession(null)}
+                className="text-xs font-bold"
+              >
+                Close Details
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* CREATE AUCTION MODAL FOR VERIFIED ORGANIZERS */}
+      <CreateAuctionModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        availableVehicles={vehicles}
+        onAuctionCreated={handleAuctionCreated}
+        currentUserRole={user?.role || 'dealer'}
+      />
+
+      {/* BIDDER REGISTRATION & ACCREDITATION MODAL */}
+      {registeringSession && (
+        <BidderRegistrationModal
+          isOpen={isRegistrationModalOpen}
+          onClose={() => {
+            setIsRegistrationModalOpen(false);
+            setRegisteringSession(null);
+          }}
+          session={registeringSession}
+          onRegistrationComplete={handleRegistrationComplete}
+        />
+      )}
+
+      {/* PRE-AUCTION VEHICLE INSPECTION PORTAL MODAL */}
+      {inspectionTargetSession && (
+        <PreAuctionInspectionModal
+          isOpen={isPreInspectionModalOpen}
+          onClose={() => {
+            setIsPreInspectionModalOpen(false);
+            setInspectionTargetSession(null);
+          }}
+          session={inspectionTargetSession}
+          showToast={showToast}
+        />
+      )}
+
+      {/* LIVE AUCTION ROOM MODAL */}
+      {liveRoomSession && (
+        <LiveAuctionRoomModal
+          isOpen={isLiveRoomOpen}
+          onClose={() => {
+            setIsLiveRoomOpen(false);
+            setLiveRoomSession(null);
+          }}
+          session={liveRoomSession}
+          verifiedPass={verifiedBiddersMap[liveRoomSession.id]}
+          onOpenRegistration={() => {
+            setIsLiveRoomOpen(false);
+            handleOpenRegistration(liveRoomSession);
+          }}
+          onPlaceBid={(sess, amount, bidderName, loc) => {
+            executeBid(sess, amount, bidderName, loc);
+            // Update local state copy of current bid in room
+            setLiveRoomSession(prev => prev ? {
+              ...prev,
+              currentBid: amount,
+              totalBidsCount: prev.totalBidsCount + 1,
+              reserveMet: amount >= prev.reservePrice ? true : prev.reserveMet,
+              bidHistory: [
+                {
+                  id: `bid-${Date.now()}`,
+                  amount: amount,
+                  bidderName: bidderName,
+                  timestamp: new Date().toISOString(),
+                  status: 'Highest Bid',
+                  verifiedDeposit: true
+                },
+                ...prev.bidHistory
+              ]
+            } : null);
+          }}
+          onStartEscrow={onStartEscrow}
+          onOpenCompletion={(sess, winnerAlias, amount) => {
+            setIsLiveRoomOpen(false);
+            handleOpenCompletion(sess, winnerAlias, amount);
+          }}
+          showToast={showToast}
+        />
+      )}
+
+      {/* POST-AUCTION COMPLETION & WINNING CERTIFICATE MODAL */}
+      {completionSession && (
+        <PostAuctionCompletionModal
+          isOpen={isCompletionModalOpen}
+          onClose={() => {
+            setIsCompletionModalOpen(false);
+            setCompletionSession(null);
+          }}
+          session={completionSession}
+          winnerAlias={completionWinnerAlias}
+          winningAmount={completionWinningAmount}
+          verifiedPass={verifiedBiddersMap[completionSession.id]}
+          showToast={showToast}
+        />
+      )}
+
+      {/* ORGANIZER MANAGEMENT CONSOLE & KAYAD REVENUE PORTAL */}
+      <OrganizerManagementConsole
+        isOpen={isOrganizerConsoleOpen}
+        onClose={() => setIsOrganizerConsoleOpen(false)}
+        sessions={sessions}
+        verifiedBiddersMap={verifiedBiddersMap}
+        onApproveBidder={(_sessionId, profile) => handleRegistrationComplete(profile)}
+        onCreateNewAuction={() => setShowInlineCreateForm(true)}
+        onOpenLiveRoom={(sess) => handleOpenLiveRoom(sess)}
+        onPublishResults={(sess) => handleOpenCompletion(sess, undefined, sess.currentBid)}
+        onUpdateSession={(updatedSess) => {
+          setSessions(prev => prev.map(s => s.id === updatedSess.id ? updatedSess : s));
+        }}
+        showToast={showToast}
+      />
+
+      {/* DEDICATED AUCTION ORGANIZER DASHBOARD */}
+      <AuctionOrganizerDashboard
+        isOpen={isOrganizerDashboardOpen}
+        onClose={() => setIsOrganizerDashboardOpen(false)}
+        sessions={sessions}
+        onOpenLiveRoom={(sess) => handleOpenLiveRoom(sess)}
+        onUpdateSession={(updatedSess) => {
+          setSessions(prev => prev.map(s => s.id === updatedSess.id ? updatedSess : s));
+        }}
+        showToast={showToast}
+      />
+    </div>
+  );
+};
+
+// SVG Icon Helpers for Categories
+function LandmarkIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="3" y1="22" x2="21" y2="22"></line>
+      <line x1="6" y1="18" x2="6" y2="11"></line>
+      <line x1="10" y1="18" x2="10" y2="11"></line>
+      <line x1="14" y1="18" x2="14" y2="11"></line>
+      <line x1="18" y1="18" x2="18" y2="11"></line>
+      <polygon points="12 2 20 7 4 7 12 2"></polygon>
+    </svg>
+  );
+}
+
+function DirectImportIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M2 20a2 2 0 0 0 2 2 h16a2 2 0 0 0 2-2V8l-7-5H9L2 8v12z"></path>
+      <polyline points="12 12 12 17 15 14"></polyline>
+      <line x1="12" y1="17" x2="9" y2="14"></line>
+    </svg>
+  );
+}
+
+function FleetIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="1" y="3" width="15" height="13" rx="2"></rect>
+      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+      <circle cx="5.5" cy="18.5" r="2.5"></circle>
+      <circle cx="18.5" cy="18.5" r="2.5"></circle>
+    </svg>
+  );
+}
+
+function DealerIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3 21h18"></path>
+      <path d="M3 7v14"></path>
+      <path d="M13 7v14"></path>
+      <path d="M21 7v14"></path>
+      <path d="M3 7l9-4 9 4"></path>
+    </svg>
+  );
+}
+
+function SUVIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A2 2 0 0 0 2 11.7V16c0 .6.4 1 1 1h2"></path>
+      <circle cx="7" cy="17" r="2"></circle>
+      <circle cx="17" cy="17" r="2"></circle>
+    </svg>
+  );
+}
+
+function LuxuryIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
+  );
+}
+
+export default AuctionsView;

@@ -25,15 +25,6 @@ const TABLE_MAP = {
   SearchAnalytics: "search_analytics", ListingQuality: "listing_quality",
   MarketplaceHealth: "marketplace_health", FraudDetection: "fraud_detection",
   ConversionFunnel: "conversion_funnels", Organization: "organizations",
-  // Role added (fusion Phase 2): backend/db/identity.schema.sql defines
-  // a real, complete `roles` table (role_code, role_name, scope,
-  // organization_id FK, permissions JSONB, is_active/is_system flags) -
-  // confirmed no model anywhere in this file referenced it, the
-  // opposite of this codebase's more common "model expects a table
-  // that doesn't exist" pattern. Purely additive: no existing entry
-  // changed, no existing caller affected, since nothing previously
-  // referenced a Role model at all.
-  Role: "roles",
   LedgerAccount: "ledger_accounts",
   LedgerEntry: "ledger_entries",
   ReconciliationRecord: "reconciliation_records",
@@ -43,33 +34,10 @@ const TABLE_MAP = {
   AuctionIntegrityFlag: "auction_integrity_flags",
   AuctionRiskProfile: "auction_risk_profiles",
   MpesaTransaction: "mpesa_transactions", SmsBidder: "sms_bidders",
-  // Added (Phase 6, payment architecture): all 5 backed by real tables
-  // created in this same phase's migration
-  // (20260815060000_payment_architecture_extension.sql.sql) - purely
-  // additive, no existing entry changed.
-  PaymentProvider: "payment_providers", PaymentAttempt: "payment_attempts",
-  PaymentEvent: "payment_events", Refund: "refunds", WebhookEvent: "webhook_events",
   Contact: "contacts",
   NotificationAudit: "notification_audit",
   NtsaVerificationRequest: "ntsa_verification_requests",
-  // Fixed (Phase 5, inspection workflow hardening): was
-  // "inspection_orders", which does not exist anywhere in the real,
-  // authoritative schema (supabase/migrations/) - confirmed by
-  // exhaustive search. The real table, defined in
-  // gari_motors_full_schema.sql.sql, is "vehicle_inspections". This
-  // is the same class of bug already found and fixed for
-  // location/location_city (Phase 6) and confirmed-but-deferred for
-  // escrow_vaults (Phase 8) and organizations (Phase 4) - a model's
-  // TABLE_MAP entry pointing to a name that doesn't match the real
-  // schema. Unlike those deferred cases, this one was safe to fix
-  // directly: the real table's core identity/status columns
-  // (car_id/requester_id/inspector_id/status) map cleanly via
-  // FIELD_ALIASES below, and the additional columns the already-real,
-  // already-working inspectionRoutes.js application code needs
-  // (fee/payment/checklist/overallScore/etc.) were added via a new,
-  // purely additive migration rather than redesigning the working
-  // application logic to fit a narrower schema.
-  InspectionOrder: "vehicle_inspections",
+  InspectionOrder: "inspection_orders",
   InspectorApplication: "inspector_applications",
   ErrorBudget: "error_budgets", IdempotencyKey: "idempotency_keys",
   IdempotencyAuditLog: "idempotency_audit_logs",

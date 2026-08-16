@@ -210,33 +210,6 @@ export const sendMessage = async (req, res) => {
             `New message from ${fromUser?.name || "a user"} on Kayad${chat.car?.title ? ` about ${chat.car.title}` : ""}.`,
           ).catch((e) => console.warn("⚠️ SMS notification failed:", e.message));
         }
-        // Fixed (Phase 8, communication workflow hardening): email/SMS
-        // were already wired for a new message, but no persisted,
-        // in-app notification record was ever created - meaning a
-        // recipient who wasn't watching email/SMS at that moment had
-        // no way to see "you have a new message" anywhere in the app
-        // itself (no notifications-list/badge entry), despite
-        // notification.service.js already supporting a dedicated
-        // "chat" type built for exactly this. This directly matches
-        // this phase's own "ensure critical transaction events can
-        // trigger the EXISTING notification mechanisms" requirement -
-        // wiring an already-real function into an already-real event,
-        // not building anything new. Fire-and-forget, matching this
-        // block's own established convention - a notification-record
-        // failure must never affect whether the message itself was
-        // sent successfully.
-        try {
-          const { sendNotification } = await import("../services/notification.service.js");
-          const fromUser = await findUser("users", req.user.id, "name");
-          sendNotification({
-            userId: otherUserId,
-            title: "New message",
-            message: `${fromUser?.name || "A user"} sent you a message${chat.car?.title ? ` about ${chat.car.title}` : ""}.`,
-            type: "chat",
-          }).catch((e) => console.warn("⚠️ In-app chat notification failed:", e.message));
-        } catch (e) {
-          console.warn("⚠️ In-app chat notification setup failed:", e.message);
-        }
       }
     } catch (notifErr) {
       console.warn("⚠️ Failed to send notification for new message:", notifErr.message);

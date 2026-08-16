@@ -293,7 +293,7 @@ This document defines the performance budgets and targets for the KAYAD platform
 - [Web Vitals](https://web.dev/vitals/)
 - [Performance Budgets](https://web.dev/performance-budgets-101/)
 - [Load Testing Best Practices](https://k6.io/docs/)
-- [Database Performance](https://supabase.com/docs/guides/database/query-optimization)
+- [Database Performance](https://www.mongodb.com/docs/manual/administration/analyzing-mongodb-performance/)
 
 ---
 

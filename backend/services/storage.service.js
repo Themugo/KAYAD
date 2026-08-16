@@ -4,30 +4,61 @@
 // Falls back gracefully when services are not configured
 // ─────────────────────────────────────────────────────────────
 
+import { createClient } from "@supabase/supabase-js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
-import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
 
 // =============================
 // 🔐 SUPABASE CONFIG
 // =============================
 
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || "";
 const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET || "kayad-images";
 
-// This module used to create its own second Supabase client here,
-// separate from the shared one in utils/supabase.js (different auth
-// options, different logging, same env vars). It now reads from the
-// single shared client instead. Calls are lazy (resolved at request
-// time, not at module-import time) because utils/supabase.js's
-// initSupabase() runs during server.js's bootstrap sequence, which
-// can happen after this module is first imported - a module-load-time
-// client reference here would risk running before that init completes.
-const getClient = () => {
+// Placeholder values that should be replaced
+const PLACEHOLDER_PATTERNS = [
+  "placeholder",
+  "your-project",
+  "your_supabase",
+];
+
+const isPlaceholder = (value) => {
+  if (!value) return true;
+  const lower = value.toLowerCase();
+  return PLACEHOLDER_PATTERNS.some(p => lower.includes(p));
+};
+
+let supabaseClient = null;
+let supabaseConnected = false;
+
+const initSupabaseStorage = () => {
+  // Check if placeholder values are used
+  if (isPlaceholder(SUPABASE_URL) || isPlaceholder(SUPABASE_SERVICE_KEY)) {
+    logWarn("Supabase storage not configured — using Cloudinary fallback");
+    return false;
+  }
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    logWarn("Supabase storage not configured — set SUPABASE_URL and SUPABASE_SERVICE_KEY");
+    return false;
+  }
+
   try {
-    return isSupabaseConnected() ? getSupabase() : null;
-  } catch {
-    return null;
+    supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+      auth: { persistSession: false },
+      storage: { abortSignal: undefined },
+    });
+    supabaseConnected = true;
+    logInfo("✅ Supabase storage initialized");
+    return true;
+  } catch (err) {
+    logError("Supabase storage init failed:", err);
+    return false;
   }
 };
+
+// Initialize on module load
+initSupabaseStorage();
 
 // =============================
 // 🏗️ IMAGE VARIANTS CONFIG
@@ -49,8 +80,7 @@ const IMAGE_VARIANTS = {
 // =============================
 
 export const uploadToSupabase = async (file, folder = "cars") => {
-  const supabaseClient = getClient();
-  if (!supabaseClient) {
+  if (!supabaseConnected || !supabaseClient) {
     throw new Error("Supabase storage not available");
   }
 
@@ -118,8 +148,7 @@ export const uploadToSupabase = async (file, folder = "cars") => {
 // =============================
 
 export const deleteFromSupabase = async (publicId) => {
-  const supabaseClient = getClient();
-  if (!supabaseClient || !publicId) {
+  if (!supabaseConnected || !supabaseClient || !publicId) {
     return;
   }
 
@@ -141,7 +170,6 @@ export const deleteFromSupabase = async (publicId) => {
 // =============================
 
 export const getSupabasePublicUrl = (path) => {
-  const supabaseClient = getClient();
   if (!supabaseClient) return null;
 
   const { data } = supabaseClient.storage
@@ -155,10 +183,10 @@ export const getSupabasePublicUrl = (path) => {
 // 📊 STORAGE STATUS
 // =============================
 
-export const isStorageConnected = () => isSupabaseConnected();
+export const isStorageConnected = () => supabaseConnected;
 
-export const getStorageProvider = () =>
-  isSupabaseConnected() ? "supabase" : "cloudinary-fallback";
+export const getStorageProvider = () => 
+  supabaseConnected ? "supabase" : "cloudinary-fallback";
 
 export default {
   uploadToSupabase,

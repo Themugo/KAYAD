@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { isAdminOrAbove } from "../config/roles.js";
 import { startSession } from "../utils/supabaseSession.js";
 import Car from "../models/Car.js";
 import EscrowVault from "../models/EscrowVault.js";
@@ -242,16 +241,7 @@ export const markInspectionComplete = async (req, res) => {
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
-// Fixed (Phase 10, security hardening): same finding/fix as
-// services/otpService.js and controllers/phoneVerificationController.js
-// - Math.random() replaced with crypto.randomInt() (crypto already
-// imported in this file). This specific OTP authorizes escrow fund
-// release - a genuinely high-stakes use of a random credential,
-// independent of this file's separate, already-documented table-
-// existence issue (Phase 8) - the randomness-source fix is correct
-// and worth making regardless of that unresolved architectural
-// question.
-const generateOtp = () => crypto.randomInt(1000, 10000);
+const generateOtp = () => Math.floor(1000 + Math.random() * 9000);
 
 // =============================
 // 📲 REQUEST RELEASE OTP
@@ -495,7 +485,7 @@ export const getVaultById = async (req, res) => {
       .populate("seller", "name phone");
     if (!vault) return res.status(404).json({ success: false, message: "Vault not found" });
     const userId = req.user.id;
-    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && !isAdminOrAbove(req.user)) {
+    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && req.user.role !== "admin") {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
     res.json({ success: true, vault });
@@ -536,7 +526,7 @@ export const getVaultForCar = async (req, res) => {
       .populate("seller", "name");
     if (!vault) return res.json({ success: true, vault: null });
     const userId = req.user.id;
-    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && !isAdminOrAbove(req.user)) {
+    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && req.user.role !== "admin") {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
     res.json({ success: true, vault });

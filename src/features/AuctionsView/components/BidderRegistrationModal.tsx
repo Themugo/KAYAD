@@ -1,6 +1,25 @@
 import React, { useState } from 'react';
 import { AuctionSession } from '../../../types';
-import { ShieldCheck, Lock, FileText, UserCheck, CreditCard, CheckCircle2, ArrowRight, Sparkles, X, Building2, Copy, Check, EyeOff, ShieldAlert, Gavel } from 'lucide-react';
+import { 
+  ShieldCheck, 
+  Lock, 
+  FileText, 
+  UserCheck, 
+  CreditCard, 
+  CheckCircle2, 
+  ArrowRight, 
+  Sparkles, 
+  X, 
+  AlertCircle, 
+  Building2, 
+  Copy, 
+  Check, 
+  EyeOff, 
+  ShieldAlert,
+  Info,
+  HelpCircle,
+  Gavel
+} from 'lucide-react';
 import { Card, Badge, Button, Input } from '../../../components/ui';
 
 export interface VerifiedBidderProfile {

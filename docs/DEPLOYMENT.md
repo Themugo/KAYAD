@@ -33,7 +33,7 @@ This document describes the deployment pipeline for the KAYAD application, inclu
 - **CI/CD Platform**: GitHub Actions
 - **Production Hosting**: Render (Backend), Vercel (Frontend)
 - **Containerization**: Docker (optional)
-- **Database**: Supabase (Postgres)
+- **Database**: MongoDB Atlas
 - **Cache**: Redis (optional, in-memory fallback)
 - **Monitoring**: Sentry, custom metrics, OpenTelemetry
 
@@ -55,7 +55,7 @@ Triggers on:
 
 Jobs:
 - **Frontend**: Install dependencies, lint, test, build
-- **Backend**: Install dependencies, lint, test
+- **Backend**: Install dependencies, lint, test with MongoDB service
 - **Security Audit**: npm audit, Snyk security scan
 
 ```yaml
@@ -77,6 +77,7 @@ jobs:
     - npm ci
     - npm run format:check
     - npm test
+    # MongoDB service for tests
 
   security-audit:
     - npm audit
@@ -132,8 +133,8 @@ NODE_ENV=production
 PORT=5000
 
 # Database
-SUPABASE_URL=https://<your-project>.supabase.co
-SUPABASE_SERVICE_KEY=<service-role-key-from-supabase-dashboard>
+MONGO_URI=mongodb+srv://...
+MONGO_POOL_SIZE=10
 
 # Security
 JWT_SECRET=<generate-32-char-string>
@@ -211,9 +212,7 @@ npm run seed-depts
 
 ### Migration Strategy
 
-- **Real migrations**: SQL migration files under `supabase/migrations/`,
-  applied in filename order (see `supabase/migrations/` for the current
-  history)
+- **No formal migrations**: The application uses Mongoose models with automatic schema updates
 - **Seed data**: Initial data seeded on first deployment
 - **Backup before changes**: Always backup before schema changes
 - **Rollback capability**: Keep previous schema versions in code

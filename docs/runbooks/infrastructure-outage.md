@@ -354,20 +354,20 @@ We apologize for any inconvenience and will keep you updated.
 ## Tools and Resources
 
 **Monitoring**
-- Infrastructure monitoring (Render, Supabase)
+- Infrastructure monitoring (Render, MongoDB Atlas)
 - Resource utilization monitoring
 - Health check monitoring
 - Log aggregation
 
 **Infrastructure**
 - Render dashboard
-- Supabase dashboard
+- MongoDB Atlas dashboard
 - Redis dashboard
 - CDN dashboard
 
 **Vendor Support**
 - Render support
-- Supabase support
+- MongoDB Atlas support
 - Redis support
 - ISP support
 
@@ -396,6 +396,6 @@ We apologize for any inconvenience and will keep you updated.
 ## References
 
 - [Render Documentation](https://render.com/docs)
-- [Supabase Documentation](https://supabase.com/docs)
+- [MongoDB Atlas Documentation](https://docs.atlas.mongodb.com/)
 - [Redis Documentation](https://redis.io/documentation)
 - [Infrastructure Best Practices](https://www.oreilly.com/library/view/site-reliability-engineering/9781491972942/)

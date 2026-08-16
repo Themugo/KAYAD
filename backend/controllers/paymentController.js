@@ -1,14 +1,12 @@
 // backend/controllers/paymentController.js
 
-import { findOne, findById, create } from "../db/index.js";
+import { findOne, findById } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 import { isValidId } from "../utils/validateId.js";
-import { isAdminOrAbove } from "../config/roles.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 import { logInfo } from "../utils/logger.js";
 import { logError } from "../infrastructure/logging/index.js";
-import crypto from "crypto";
 
 // =============================
 // 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
@@ -109,36 +107,6 @@ export const mpesaCallback = async (req, res) => {
       throw new Error("Invalid callback format");
     }
 
-    // Added (Phase 6, payment architecture): payload-level replay
-    // protection via webhook_events.dedupe_key, distinct from the
-    // existing idempotencyCheck middleware (routes/paymentRoutes.js) -
-    // that middleware keys on request headers (an idempotency-key
-    // header the caller supplies), which M-Pesa's own Daraja callbacks
-    // do not send. This check is keyed on a hash of the payload itself
-    // plus CheckoutRequestID, so a byte-identical replayed webhook is
-    // caught even with no idempotency header present - the actual
-    // gap this phase's "add replay protection" requirement is about.
-    // Fire-and-forget on the INSERT specifically (never blocks
-    // processing on a logging failure, matching the same
-    // fire-and-forget convention already used for payment_events in
-    // paymentCallback.service.js) - but the SELECT-before-insert check
-    // itself is awaited, since that's the actual protection.
-    const dedupeKey = crypto
-      .createHash("sha256")
-      .update(`${callback.CheckoutRequestID || ""}:${JSON.stringify(req.body)}`)
-      .digest("hex");
-
-    const alreadySeen = await findOne("webhook_events", { dedupeKey }).catch(() => null);
-    if (alreadySeen) {
-      logInfo("Duplicate webhook payload rejected", { checkoutRequestId: callback.CheckoutRequestID });
-      return res.json({ success: true }); // Acknowledge to the provider - do NOT reprocess, but also do not error (a 5xx would trigger a real provider retry storm)
-    }
-    create("webhook_events", {
-      eventSource: "mpesa_daraja",
-      dedupeKey,
-      rawPayload: req.body,
-    }).catch((e) => logInfo("Webhook event log failed (non-blocking)", { error: e.message }));
-
     const existing = await findOne("payments", {
       checkoutRequestId: callback.CheckoutRequestID,
     });
@@ -203,7 +171,7 @@ export const checkPaymentStatus = async (req, res) => {
     }
 
     // 🔒 SECURITY CHECK
-    if (req.user && payment.user && payment.user.toString() !== req.user.id && !isAdminOrAbove(req.user)) {
+    if (req.user && payment.user && payment.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized",

@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import axios from "axios";
-import { logInfo, logError } from "../utils/logger.js";
-import { withRetry } from "../utils/retry.js";
+import { logInfo } from "../utils/logger.js";
 import { update } from "../db/index.js";
 
 const AT_API_KEY = process.env.AT_API_KEY;
@@ -10,25 +9,34 @@ const FROM_EMAIL = process.env.EMAIL_FROM || "noreply@kayad.space";
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
+const retry = async (fn, retries = 2, delay = 1000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, delay * attempt));
+    }
+  }
+};
+
 const sendSMS = async (to, message) => {
   if (AT_API_KEY) {
     try {
-      await withRetry(
-        () =>
-          axios.post(
-            "https://api.africastalking.com/version1/messaging",
-            {
-              username: AT_USERNAME,
-              to,
-              message,
-            },
-            { headers: { ApiKey: AT_API_KEY, Accept: "application/json" }, timeout: 15000 },
-          ),
-        { serviceName: "sms" },
+      await retry(() =>
+        axios.post(
+          "https://api.africastalking.com/version1/messaging",
+          {
+            username: AT_USERNAME,
+            to,
+            message,
+          },
+          { headers: { ApiKey: AT_API_KEY, Accept: "application/json" } },
+        ),
       );
       return;
     } catch (err) {
-      logError("OTP SMS send failed", err, { to: to.slice(0, -4) + "****" });
+      console.error("SMS error:", err.message);
     }
   }
   logInfo(`OTP sent via SMS to ${to.slice(0, -4)}****`);
@@ -39,25 +47,17 @@ const sendEmail = async (to, subject, text) => {
     try {
       const { default: sgMail } = await import("@sendgrid/mail");
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      await withRetry(() => sgMail.send({ to, from: FROM_EMAIL, subject, text }), { serviceName: "email" });
+      await retry(() => sgMail.send({ to, from: FROM_EMAIL, subject, text }));
       return;
     } catch (err) {
-      logError("OTP email send failed", err, { to });
+      console.error("Email error:", err.message);
     }
   }
   logInfo(`OTP email to ${to}: ${subject}`);
 };
 
 export const sendOTP = async (user, channel = "sms") => {
-  // Fixed (Phase 10, security hardening): Math.random() is not
-  // cryptographically secure - predictable/biased in ways that matter
-  // for a security credential, even a short-lived 4-digit OTP.
-  // crypto.randomInt() (Node's built-in CSPRNG-backed integer
-  // generator, already available since "crypto" is imported in this
-  // file) is the direct, correct replacement - same output range
-  // (1000-9999 inclusive), no new dependency, no behavior change
-  // besides the randomness source itself.
-  const otp = crypto.randomInt(1000, 10000);
+  const otp = Math.floor(1000 + Math.random() * 9000);
   await update("users", user.id, { otpHash: hashOtp(otp), otpExpiry: Date.now() + 600000 });
 
   if (channel === "sms" && user.phone) {

@@ -1,8 +1,43 @@
 import React, { useState } from 'react';
-import { AuctionSession } from '../../../types';
+import { AuctionSession, Vehicle } from '../../../types';
 import { VerifiedBidderProfile } from './BidderRegistrationModal';
-import { Building2, Gavel, Users, Award, Download, TrendingUp, DollarSign, CheckCircle2, XCircle, Clock, Plus, Edit3, ShieldCheck, Sparkles, Tag, Zap, FileSpreadsheet, FileText, Play, Pause, X, ChevronRight, BarChart2, Radio, Car } from 'lucide-react';
-import { Card, Badge, Button } from '../../../components/ui';
+import { 
+  Building2, 
+  Gavel, 
+  Users, 
+  Activity, 
+  Award, 
+  Download, 
+  TrendingUp, 
+  DollarSign, 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  Plus, 
+  Edit3, 
+  Eye, 
+  ShieldCheck, 
+  Sparkles, 
+  Tag, 
+  Zap, 
+  FileSpreadsheet, 
+  FileText, 
+  Play, 
+  Pause, 
+  RefreshCw, 
+  AlertTriangle, 
+  Check, 
+  X, 
+  ChevronRight, 
+  BarChart2, 
+  Radio, 
+  Sliders, 
+  ShieldAlert,
+  Car,
+  Search,
+  ArrowUpRight
+} from 'lucide-react';
+import { Card, Badge, Button, Input } from '../../../components/ui';
 
 export interface OrganizerUpgradeConfig {
   listingFeePaid: boolean;

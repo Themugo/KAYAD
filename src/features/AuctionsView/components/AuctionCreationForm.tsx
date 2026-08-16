@@ -1,7 +1,26 @@
 import React, { useState } from 'react';
 import { Vehicle, AuctionSession, AuctionOrganizerType } from '../../../types';
 import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
-import { Gavel, DollarSign, ShieldCheck, Sparkles, ShieldX, UserCheck, CheckCircle2, Info } from 'lucide-react';
+import { 
+  Gavel, 
+  Building2, 
+  ShieldAlert, 
+  Calendar, 
+  MapPin, 
+  DollarSign, 
+  Clock, 
+  ShieldCheck, 
+  Check, 
+  FileText, 
+  Sparkles,
+  AlertTriangle,
+  ArrowRight,
+  ShieldX,
+  UserCheck,
+  CheckCircle2,
+  Lock,
+  Info
+} from 'lucide-react';
 import { Card, Badge, Button, Input } from '../../../components/ui';
 
 // Map display types to organizer types

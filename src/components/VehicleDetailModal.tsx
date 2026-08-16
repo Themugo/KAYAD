@@ -1,8 +1,53 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle } from '../types';
-import { isEscrowApplicable } from '../utils/escrow';
-import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
-import { CheckCircle2, MapPin, Lock, MessageSquare, Heart, FileCheck, ShieldCheck, Landmark, Calculator, Gauge, Fuel, Sliders, Sparkles, Zap, ChevronRight, ChevronLeft, Award, ArrowRight, SearchX, AlertCircle, Gavel, Maximize2, ChevronDown, ChevronUp, Check, Building2, Car, Wrench, Share2, Calendar, Layers, PlayCircle, RotateCw, Compass, CheckSquare } from 'lucide-react';
+import { isEscrowApplicable, getEscrowBadgeLabel } from '../utils/escrow';
+import { 
+  CheckCircle2, 
+  MapPin, 
+  Lock, 
+  MessageSquare, 
+  Heart, 
+  FileCheck, 
+  ShieldCheck, 
+  Landmark, 
+  Calculator, 
+  Gauge, 
+  Fuel, 
+  Sliders, 
+  Sparkles, 
+  Phone, 
+  Zap, 
+  Info, 
+  ChevronRight, 
+  ChevronLeft, 
+  Shield, 
+  Star, 
+  Award, 
+  Clock, 
+  ArrowRight, 
+  SearchX, 
+  AlertCircle, 
+  Gavel,
+  Maximize2,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Building2,
+  UserCheck,
+  Car,
+  Wrench,
+  Share2,
+  ExternalLink,
+  Eye,
+  Calendar,
+  Layers,
+  ShieldAlert,
+  PlayCircle,
+  RotateCw,
+  Compass,
+  CheckSquare,
+  Sparkle
+} from 'lucide-react';
 import { Modal, Badge, Button, Card, LazyImage } from './ui';
 
 interface VehicleDetailModalProps {
@@ -13,27 +58,6 @@ interface VehicleDetailModalProps {
   onStartEscrow: (vehicle: Vehicle) => void;
   onContactSeller: (vehicle: Vehicle) => void;
   onRequestInspection?: (vehicle: Vehicle) => void;
-  /** Navigates to the specific auction lot for this vehicle, if one
-   * exists. Optional and defaults to falling back to onContactSeller
-   * (the previous, incorrect behavior) only if not provided - kept
-   * optional so any other, untouched call site of this modal doesn't
-   * break, though the one real call site (App.tsx) now always
-   * provides it. */
-  onViewAuctionLot?: (vehicle: Vehicle) => void;
-  /** Navigates to the Financing page. Reuses the exact same
-   * navigateTo('financing') call already proven working elsewhere in
-   * App.tsx (ChatView's onNavigateToFinancing) - just extended to this
-   * modal's own "Compare Bank Rates" button, which previously called
-   * onContactSeller instead (opening chat, not financing) despite its
-   * label. Optional so this stays a non-breaking addition. */
-  onNavigateToFinancing?: () => void;
-  /** Navigates to the seller's other listings via the marketplace
-   * search - reuses App.tsx's existing handleSelectDealerVehicles
-   * (already used elsewhere for the same "browse this seller's
-   * inventory" purpose), not a new mechanism. Previously "View
-   * Showroom" called onContactSeller instead (opening chat), despite
-   * its label promising to show the seller's inventory. */
-  onViewShowroom?: (sellerName: string) => void;
   isSaved: boolean;
   onToggleSave: (id: string) => void;
   onSelectVehicle?: (vehicle: Vehicle) => void;
@@ -47,9 +71,6 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   onStartEscrow,
   onContactSeller,
   onRequestInspection,
-  onViewAuctionLot,
-  onNavigateToFinancing,
-  onViewShowroom,
   isSaved,
   onToggleSave,
   onSelectVehicle
@@ -68,54 +89,6 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
     const set = new Set([vehicle.image, ...(vehicle.additionalImages || [])]);
     return Array.from(set);
   }, [vehicle]);
-
-  // Grouped Features Categorization
-  // Moved here (was previously after the early-return guards below) -
-  // a hook called only on some renders but not others is a Rules of
-  // Hooks violation: React requires the exact same hooks, in the same
-  // order, on every render of a given component instance. Since this
-  // modal is always mounted (open/closed is controlled via the
-  // `vehicle` prop being null or not, not by conditionally rendering
-  // the whole component), going from closed (vehicle=null, this hook
-  // never reached) to open (vehicle set, this hook now reached) was a
-  // real hook-count mismatch between renders - which is exactly what
-  // threw "Minified React error #310" on a real click, crashing to
-  // the ErrorBoundary. Fixed by moving it up to always run, with a
-  // null-safe fallback matching the pattern the two hooks above it
-  // already use correctly.
-  const featureGroups = useMemo(() => {
-    const rawFeatures = vehicle?.features || [
-      'EyeSight Driver Assist', 'Lane Departure Warning', 'ABS Brakes', 'Multiple Airbags',
-      'Heated Seats', 'Dual Climate Control', 'Leather Interior', 'Sunroof',
-      'Apple CarPlay', 'Bluetooth Connectivity', 'Premium Audio System', 'Reverse Camera',
-      'Roof Rails', 'Power Tailgate', 'Cargo Cover', 'Alloy Wheels'
-    ];
-
-    const safety: string[] = [];
-    const comfort: string[] = [];
-    const technology: string[] = [];
-    const utility: string[] = [];
-
-    rawFeatures.forEach(feat => {
-      const lower = feat.toLowerCase();
-      if (lower.includes('eyesight') || lower.includes('lane') || lower.includes('abs') || lower.includes('airbag') || lower.includes('safety') || lower.includes('brake') || lower.includes('blind')) {
-        safety.push(feat);
-      } else if (lower.includes('heat') || lower.includes('climate') || lower.includes('leather') || lower.includes('seat') || lower.includes('sunroof') || lower.includes('keyless')) {
-        comfort.push(feat);
-      } else if (lower.includes('play') || lower.includes('bluetooth') || lower.includes('audio') || lower.includes('camera') || lower.includes('nav') || lower.includes('screen') || lower.includes('tech')) {
-        technology.push(feat);
-      } else {
-        utility.push(feat);
-      }
-    });
-
-    return {
-      safety: safety.length ? safety : ['EyeSight Driver Assist', 'Lane Keep Assist', 'Anti-Lock Brakes (ABS)', 'Front & Side Airbags'],
-      comfort: comfort.length ? comfort : ['Heated Front Seats', 'Dual-Zone Automatic Climate Control', 'Leather Upholstery'],
-      technology: technology.length ? technology : ['Apple CarPlay & Android Auto', 'Bluetooth Audio & Hands-Free', 'Multi-View Reverse Camera'],
-      utility: utility.length ? utility : ['Roof Rails & Crossbars', 'Power Tailgate', 'Retractable Cargo Cover']
-    };
-  }, [vehicle?.features]);
 
   const [activeImage, setActiveImage] = useState<string>(vehicle?.image || '');
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
@@ -206,22 +179,6 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
   const isPrivateSeller = vehicle.sellerType === 'Private Seller';
   const isAuction = Boolean(vehicle.isAuction);
-  // Looks up the real, live AuctionSession for this vehicle (if one
-  // exists) so the price panel can show its actual currentBid instead
-  // of vehicle.price. Found a real, user-visible contradiction while
-  // auditing data consistency: this panel labels its number "Current
-  // Highest Bid" for auction vehicles but was displaying vehicle.price
-  // directly - a field that does NOT get updated when a bid is placed
-  // (AuctionsView's executeBid updates its own local `sessions` state
-  // and that session's own nested vehicle copy, not the vehicles array
-  // this modal reads from). Confirmed directly against real mock data
-  // before fixing: for the Nissan X-Trail specifically, this would have
-  // shown "Ksh 2,450,000" here while the real auction lot correctly
-  // shows "Ksh 2,300,000" for the exact same vehicle - the kind of
-  // cross-page contradiction this consolidation phase exists to find.
-  const liveAuctionSession = isAuction
-    ? INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id)
-    : undefined;
   const isEscrowActive = isEscrowApplicable(vehicle);
   const isInspectionActive = Boolean(vehicle.inspectionPassed);
   const isFinanceActive = Boolean(vehicle.financeAvailable);
@@ -264,6 +221,40 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
     setOpenSpecSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Grouped Features Categorization
+  const featureGroups = useMemo(() => {
+    const rawFeatures = vehicle.features || [
+      'EyeSight Driver Assist', 'Lane Departure Warning', 'ABS Brakes', 'Multiple Airbags',
+      'Heated Seats', 'Dual Climate Control', 'Leather Interior', 'Sunroof',
+      'Apple CarPlay', 'Bluetooth Connectivity', 'Premium Audio System', 'Reverse Camera',
+      'Roof Rails', 'Power Tailgate', 'Cargo Cover', 'Alloy Wheels'
+    ];
+
+    const safety: string[] = [];
+    const comfort: string[] = [];
+    const technology: string[] = [];
+    const utility: string[] = [];
+
+    rawFeatures.forEach(feat => {
+      const lower = feat.toLowerCase();
+      if (lower.includes('eyesight') || lower.includes('lane') || lower.includes('abs') || lower.includes('airbag') || lower.includes('safety') || lower.includes('brake') || lower.includes('blind')) {
+        safety.push(feat);
+      } else if (lower.includes('heat') || lower.includes('climate') || lower.includes('leather') || lower.includes('seat') || lower.includes('sunroof') || lower.includes('keyless')) {
+        comfort.push(feat);
+      } else if (lower.includes('play') || lower.includes('bluetooth') || lower.includes('audio') || lower.includes('camera') || lower.includes('nav') || lower.includes('screen') || lower.includes('tech')) {
+        technology.push(feat);
+      } else {
+        utility.push(feat);
+      }
+    });
+
+    return {
+      safety: safety.length ? safety : ['EyeSight Driver Assist', 'Lane Keep Assist', 'Anti-Lock Brakes (ABS)', 'Front & Side Airbags'],
+      comfort: comfort.length ? comfort : ['Heated Front Seats', 'Dual-Zone Automatic Climate Control', 'Leather Upholstery'],
+      technology: technology.length ? technology : ['Apple CarPlay & Android Auto', 'Bluetooth Audio & Hands-Free', 'Multi-View Reverse Camera'],
+      utility: utility.length ? utility : ['Roof Rails & Crossbars', 'Power Tailgate', 'Retractable Cargo Cover']
+    };
+  }, [vehicle.features]);
 
   // Header Title Component
   const modalTitle = (
@@ -438,7 +429,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         {isAuction ? 'Current Highest Bid' : 'Listed Price'}
                       </p>
                       <span className="text-3xl font-black text-[#1E3063] font-display tracking-tight">
-                        Ksh {(liveAuctionSession?.currentBid ?? vehicle.price).toLocaleString()}
+                        Ksh {vehicle.price.toLocaleString()}
                       </span>
                     </div>
 
@@ -492,7 +483,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => (onViewShowroom ? onViewShowroom(vehicle.sellerName) : onContactSeller(vehicle))}
+                      onClick={() => onContactSeller(vehicle)}
                     >
                       <Building2 className="w-3.5 h-3.5 text-amber-400" />
                       <span>View Showroom</span>
@@ -518,7 +509,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     variant="accent"
                     size="lg"
                     fullWidth
-                    onClick={() => (onViewAuctionLot ? onViewAuctionLot(vehicle) : onContactSeller(vehicle))}
+                    onClick={() => onContactSeller(vehicle)}
                     className="shadow-md font-black text-sm"
                   >
                     <Gavel className="w-5 h-5 text-[#17244B]" />
@@ -540,7 +531,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     variant="primary"
                     size="lg"
                     fullWidth
-                    onClick={() => (onRequestInspection ? onRequestInspection(vehicle) : onContactSeller(vehicle))}
+                    onClick={() => onContactSeller(vehicle)}
                     className="shadow-md font-black text-sm"
                   >
                     <MessageSquare className="w-5 h-5 text-white" />
@@ -890,7 +881,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <Button
                   variant="accent"
                   size="md"
-                  onClick={() => (onNavigateToFinancing ? onNavigateToFinancing() : onContactSeller(vehicle))}
+                  onClick={() => onContactSeller(vehicle)}
                   fullWidth
                 >
                   <span>Compare Bank Rates for this Vehicle</span>
@@ -977,11 +968,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           ========================================== */}
       <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 lg:hidden shadow-lg flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">
-            {isAuction ? 'Current Highest Bid' : 'Listed Price'}
-          </p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">Listed Price</p>
           <p className="text-base font-black text-[#1E3063] font-display">
-            Ksh {(liveAuctionSession?.currentBid ?? vehicle.price).toLocaleString()}
+            Ksh {vehicle.price.toLocaleString()}
           </p>
         </div>
 

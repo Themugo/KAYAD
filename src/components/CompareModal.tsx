@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Vehicle } from '../types';
 import { isEscrowApplicable, getEscrowBadgeLabel } from '../utils/escrow';
-import { X, Lock, ArrowRightLeft, Sparkles } from 'lucide-react';
+import { X, Lock, ArrowRightLeft, Sparkles, CheckCircle2, ShieldCheck, Tag } from 'lucide-react';
 import { Modal, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Button, Badge, LazyImage } from './ui';
 
 interface CompareModalProps {

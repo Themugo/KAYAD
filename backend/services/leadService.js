@@ -128,38 +128,16 @@ export const getDealerLeads = async (dealerId, filters = {}) => {
 
 export const getLeadById = async (leadId) => {
   try {
-    const lead = await findById("leads", leadId);
+    const lead = await findById("leads", leadId)
+       /* .populate("buyer", "name email phone") - TODO: use separate query */
+       /* .populate("dealer", "name email businessName") - TODO: use separate query */
+       /* .populate("vehicle", "title brand model year price images") - TODO: use separate query */;
 
     if (!lead) {
       throw new Error("Lead not found");
     }
 
-    // Resolved (Phase 4, seller/dealer workflow hardening): the
-    // previous 3 commented-out .populate() calls here left buyer/
-    // dealer/vehicle as bare IDs on every lead - directly affecting
-    // the dealer-facing "Leads" step named in this phase's own dealer
-    // flow, since a dealer viewing a lead's detail needs the buyer's
-    // contact info and the vehicle's title/images to actually act on
-    // it, not opaque UUIDs. Fixed with the separate-query approach the
-    // TODO comment itself suggested, matching the pattern already used
-    // elsewhere in this backend (e.g. chatController.js's participant
-    // enrichment) - real columns confirmed against the authoritative
-    // schema (supabase/migrations/..._leads_and_escrow_columns.sql.sql:
-    // buyer/dealer/vehicle are real UUID foreign keys to users/users/
-    // cars respectively) before writing this, not guessed.
-    const sb = getSupabase();
-    const [buyerRes, dealerRes, vehicleRes] = await Promise.all([
-      lead.buyer ? sb.from("users").select("id, name, email, phone").eq("id", lead.buyer).maybeSingle() : null,
-      lead.dealer ? sb.from("users").select("id, name, email, businessName").eq("id", lead.dealer).maybeSingle() : null,
-      lead.vehicle ? sb.from("cars").select("id, title, brand, model, year, price, images").eq("id", lead.vehicle).maybeSingle() : null,
-    ]);
-
-    return {
-      ...lead,
-      buyer: buyerRes?.data || lead.buyer,
-      dealer: dealerRes?.data || lead.dealer,
-      vehicle: vehicleRes?.data || lead.vehicle,
-    };
+    return lead;
   } catch (err) {
     logError("Failed to get lead by id", err, { leadId });
     throw err;
@@ -355,27 +333,14 @@ export const getLeadAnalytics = async (dealerId, startDate, endDate) => {
 
 export const findOrCreateLeadFromChat = async (chatId) => {
   try {
-    const chat = await findById("chats", chatId);
+    const chat = await findById("chats", chatId) /* .populate("car") - TODO: use separate query */;
     if (!chat) {
       throw new Error("Chat not found");
     }
 
-    // Fixed (Phase 4, seller/dealer workflow hardening): this was a
-    // real, confirmed, severe bug, not just a missing-enrichment
-    // cosmetic gap like the other TODOs in this file. chat.car was
-    // treated as if it were a populated object (chat.car?.dealer,
-    // chat.car?._id), but the .populate("car") call was commented out
-    // - chat.car is actually a bare UUID string, which has no .dealer
-    // or ._id property, so dealerId was ALWAYS undefined and this
-    // function ALWAYS threw "Invalid chat participants". This directly
-    // broke the inquiry-to-lead pipeline named in this phase's own
-    // seller/dealer flows (a buyer's chat inquiry is supposed to
-    // create a lead here). Fixed by fetching the car separately, per
-    // the TODO's own suggestion, and using its real dealer/id fields.
-    const car = chat.car ? await findById("cars", chat.car) : null;
-    const buyerId = chat.participants.find((p) => p.toString() !== car?.dealer?.toString());
-    const dealerId = car?.dealer;
-    const vehicleId = car?.id;
+    const buyerId = chat.participants.find((p) => p.toString() !== chat.car?.dealer?.toString());
+    const dealerId = chat.car?.dealer;
+    const vehicleId = chat.car?._id;
 
     if (!buyerId || !dealerId) {
       throw new Error("Invalid chat participants");
@@ -394,19 +359,7 @@ export const findOrCreateLeadFromChat = async (chatId) => {
 
 export const findOrCreateLeadFromAuction = async (auctionId, buyerId) => {
   try {
-    // Note (Phase 4): this find/populate comment previously looked
-    // like the same class of bug as the chat/escrow cases above, but
-    // checked directly and confirmed it isn't - auction.carId below is
-    // already used as a plain ID (never treated as a populated
-    // object), and the real vehicle is correctly fetched separately
-    // right after. No fix needed here; the misleading stale comment
-    // is removed rather than left implying a problem that isn't real.
-    // (Separately, and not fixed here: this "auctions" table doesn't
-    // exist in the real, authoritative schema per
-    // docs/PHASE8.md/phase-05-schema-correction.md - auction state is
-    // denormalized onto cars. That's a distinct, already-tracked issue
-    // from a different phase, not this comment-cleanup.)
-    const auction = await findById("auctions", auctionId);
+    const auction = await findById("auctions", auctionId) /* .populate("carId") - TODO: use separate query */;
     if (!auction) {
       throw new Error("Auction not found");
     }
@@ -431,22 +384,14 @@ export const findOrCreateLeadFromAuction = async (auctionId, buyerId) => {
 
 export const findOrCreateLeadFromEscrow = async (escrowId) => {
   try {
-    const escrow = await findById("escrows", escrowId);
+    const escrow = await findById("escrows", escrowId) /* .populate("car") - TODO: use separate query */;
     if (!escrow) {
       throw new Error("Escrow not found");
     }
 
     const buyerId = escrow.buyer;
     const dealerId = escrow.seller;
-    // Fixed (Phase 4): escrow.car is already the plain vehicle ID
-    // (confirmed against the real escrows table schema - a UUID
-    // foreign key, not an embedded object), so no separate query is
-    // actually needed here, unlike the chat case above. The previous
-    // `escrow.car?._id` treated it as a populated object it never was
-    // - ._id on a bare UUID string is always undefined, meaning every
-    // lead created from an escrow silently had no vehicle reference at
-    // all. Fixed by using the ID directly.
-    const vehicleId = escrow.car;
+    const vehicleId = escrow.car?._id;
 
     const lead = await createLead(buyerId, dealerId, vehicleId, "chat", null);
 

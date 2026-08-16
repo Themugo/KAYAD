@@ -50,7 +50,7 @@ export const submitVerification = async (req, res) => {
         });
       }
     } else {
-      verification = await DealerVerification.create({
+      verification = new DealerVerification({
         user: userId,
         dealer: dealer._id,
         verificationStatus: "pending",
@@ -212,7 +212,7 @@ export const requestPhoneVerification = async (req, res) => {
         });
       }
 
-      verification = await DealerVerification.create({
+      verification = new DealerVerification({
         user: userId,
         dealer: dealer._id,
         verificationStatus: "pending",

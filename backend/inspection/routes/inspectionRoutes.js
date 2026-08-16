@@ -4,16 +4,8 @@
 
 import express from 'express';
 import * as controller from '../controllers/providerController.js';
-// Fixed (activation pass): this file imported requireAuth/requireRole,
-// which do not exist in the real middleware/auth.js - confirmed
-// directly by reading its actual exports. The real names are protect
-// and allowRoles. This import mismatch would have crashed the entire
-// server on startup (a named-export that doesn't exist throws at
-// module load time in ES modules) the moment this file was ever
-// mounted - very likely the actual reason this substantial, otherwise
-// well-built system was never wired into server.js.
-import { protect as requireAuth, optionalAuth } from '../../middleware/auth.js';
-import { allowRoles } from '../../middleware/auth.js';
+import { requireAuth, optionalAuth } from '../../middleware/auth.js';
+import { requireRole } from '../../middleware/auth.js';
 
 const router = express.Router();
 
@@ -120,10 +112,10 @@ router.get('/provider/:providerId/earnings-summary', requireAuth, controller.get
  */
 
 // Process payment (admin)
-router.post('/bookings/:bookingId/payment', requireAuth, allowRoles('admin'), controller.processPayment);
+router.post('/bookings/:bookingId/payment', requireRole(['admin']), controller.processPayment);
 
 // Process refund (admin)
-router.post('/bookings/:bookingId/refund', requireAuth, allowRoles('admin'), controller.processRefund);
+router.post('/bookings/:bookingId/refund', requireRole(['admin']), controller.processRefund);
 
 /**
  * ============================================================

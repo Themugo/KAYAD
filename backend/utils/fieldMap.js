@@ -21,74 +21,14 @@ export const snakeToCamel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpper
 // can't fix. Add to this as more mismatches are found in other
 // tables — do not duplicate this map elsewhere.
 export const FIELD_ALIASES = {
-  // bids and favorites had no entry here at all, meaning Bid.create({ user })
-  // and Favorite.create({ user, car }) were writing literal columns
-  // "user"/"car" (camelToSnake of a single word is a no-op) - but the real
-  // columns are user_id/car_id. Every bid placement and every favorite
-  // would have failed with an unknown-column error. Found by auditing
-  // every write call across the backend against the real schema - see
-  // the migration this was added alongside for the full trail.
-  bids: {
-    user: "user_id",
-    carId: "car_id",
-    checkoutRequestID: "checkout_request_id",
-  },
-  favorites: {
-    user: "user_id",
-    car: "car_id",
-    carSnapshot: "car_snapshot",
-  },
-  notifications: {
-    user: "user_id",
-  },
-  audit_logs: {
-    actor: "actor_id",
-    target: "entity_id",
-    targetModel: "entity_type",
-  },
-  // reviews had no entry here at all - Review.create({ user, dealer, car })
-  // wrote those 3 keys literally, but the real columns are reviewer_id/
-  // dealer_id/car_id (not a plain camelToSnake conversion for user/dealer,
-  // since neither word naturally becomes its *_id-suffixed real name).
-  // Every review submission (controllers/reviewController.js, the only
-  // real write path) would have failed with an unknown-column error.
-  reviews: {
-    user: "reviewer_id",
-    dealer: "dealer_id",
-    car: "car_id",
-  },
   cars: {
-    // brand, fuel, engine need no translation - confirmed via
-    // seed_demo_vehicles.sql.sql and update_car_bid_stats.sql.sql that
-    // these ARE the real column names (previously mapped to make/
-    // fuel_type/engine_capacity, which don't exist in the real schema -
-    // see the schema-repair migrations for the full evidence trail).
+    brand: "make",
+    fuel: "fuel_type",
     drivetrain: "drive_type",
+    engine: "engine_capacity",
     isAuction: "has_auction",
     dealer: "dealer_id",
-    city: "location_city",
-    // Added (Fusion Phase 6): carController.js's getCars/createCar/
-    // updateCar all reference a plain "location" field directly
-    // (select("...location...") in getCars; body.location in create/
-    // update) - confirmed no alias existed for it, meaning every one
-    // of those calls was translating "location" via generic
-    // camelToSnake("location") = "location" (a no-op, since it's a
-    // single lowercase word) rather than to the real column. The real
-    // column, per supabase/migrations/..._foundational_tables.sql.sql
-    // (the authoritative source established in Phase 5's schema
-    // correction, cross-referenced against 3 independent sources), is
-    // location_city - there is no column literally named "location" on
-    // the real cars table. A comment inside carController.js itself
-    // claims "location is a flat TEXT column", but no migration
-    // (including every one after foundational_tables) ever defines or
-    // renames a column to that name - that comment was almost
-    // certainly written against the same stale backend/db/
-    // schema_clean.sql source Phase 5 already found and corrected.
-    // Fixed as a single alias entry (not by rewriting every call site
-    // individually) since mapKeyOut is the shared translation function
-    // used by both the read path (select/where/sort) and the write
-    // path (create/update) - one change corrects both.
-    location: "location_city",
+    city: "location",
     highestBidder: "highest_bidder_id",
   },
   users: {
@@ -98,23 +38,6 @@ export const FIELD_ALIASES = {
   },
   inspector_applications: {
     user: "user_id",
-  },
-  // Added (Phase 5, inspection workflow hardening): matches
-  // routes/inspectionRoutes.js's already-real, already-working
-  // application code to the real vehicle_inspections table's actual
-  // column names, confirmed directly against
-  // gari_motors_full_schema.sql.sql - car_id/requester_id/
-  // inspector_id are the real foreign keys (car/buyer/inspector are
-  // this codebase's established naming for these same relationships
-  // elsewhere, e.g. cars.dealer, payments.user).
-  vehicle_inspections: {
-    car: "car_id",
-    buyer: "requester_id",
-    inspector: "inspector_id",
-    // Reuses the real table's existing "notes" column rather than
-    // adding a near-duplicate one - lower-risk than introducing a
-    // second free-text notes field with overlapping purpose.
-    inspectorNotes: "notes",
   },
   inspection_orders: {
     buyer: "requested_by",
@@ -167,7 +90,7 @@ export const REVERSE_FIELD_ALIASES = Object.fromEntries(
 // table. Tables not listed here don't support `$text` — we skip the
 // filter rather than guess at column names that may not exist.
 export const SEARCHABLE_FIELDS = {
-  cars: ["title", "brand", "model", "description"],
+  cars: ["title", "make", "model", "description"],
 };
 
 export function mapKeyOut(table, key) {

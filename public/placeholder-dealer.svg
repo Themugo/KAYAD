@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#1a1a1a"/>
+  <circle cx="100" cy="85" r="35" fill="rgba(255,255,255,0.06)" stroke="rgba(212,196,168,0.2)" stroke-width="2"/>
+  <rect x="55" y="130" width="90" height="10" rx="5" fill="rgba(255,255,255,0.04)"/>
+  <rect x="55" y="150" width="60" height="8" rx="4" fill="rgba(255,255,255,0.02)"/>
+  <text x="100" y="92" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="40" fill="rgba(212,196,168,0.25)">D</text>
+</svg>

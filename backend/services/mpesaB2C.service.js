@@ -24,7 +24,6 @@
 import axios from "axios";
 import https from "https";
 import { logInfo } from "../utils/logger.js";
-import { getMpesaAccessToken } from "./mpesaAuth.service.js";
 
 // ── CONFIG ────────────────────────────────────────────────────
 const MPESA_ENV = process.env.MPESA_ENV || "sandbox";
@@ -41,10 +40,24 @@ const B2C_TIMEOUT =
 const B2C_REMARKS = process.env.MPESA_B2C_REMARKS || "Kayad seller payout";
 const B2C_OCCASION = process.env.MPESA_B2C_OCCASION || "Vehicle sale payout";
 
-// Token fetching (with caching) now lives in mpesaAuth.service.js, shared
-// with the STK push flow (mpesaService.js) - was duplicated and only
-// cached here, not there.
-const getOAuthToken = () => getMpesaAccessToken(MPESA_BASE, process.env.MPESA_CONSUMER_KEY, process.env.MPESA_CONSUMER_SECRET);
+// ── OAUTH TOKEN ───────────────────────────────────────────────
+let _oauthToken = null;
+let _tokenExpiry = 0;
+
+const getOAuthToken = async () => {
+  if (_oauthToken && Date.now() < _tokenExpiry) return _oauthToken;
+
+  const auth = Buffer.from(`${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`).toString("base64");
+
+  const res = await axios.get(`${MPESA_BASE}/oauth/v1/generate?grant_type=client_credentials`, {
+    headers: { Authorization: `Basic ${auth}` },
+    timeout: 10000,
+  });
+
+  _oauthToken = res.data.access_token;
+  _tokenExpiry = Date.now() + 50 * 60 * 1000; // 50 min (token valid for 1h)
+  return _oauthToken;
+};
 
 // ── B2C DISBURSEMENT ─────────────────────────────────────────
 export const disburseB2C = async ({

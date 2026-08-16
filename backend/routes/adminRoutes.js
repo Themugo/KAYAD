@@ -309,21 +309,6 @@ router.post(
     user.isBanned = !user.isBanned;
     await user.save();
 
-    // Added (Phase 9, admin/operational hardening): toggle-ban - one
-    // of the most sensitive possible admin actions - had no audit log
-    // entry at all, despite this file's own established AuditLog.create
-    // pattern already being used correctly for 24 of its 64 other
-    // handlers. Directly matches this phase's explicit "certify...
-    // every sensitive action is auditable" requirement. Replicates the
-    // exact pattern already proven correct elsewhere in this same
-    // file, not new logging infrastructure.
-    await AuditLog.create({
-      action: `User ${user.isBanned ? "banned" : "unbanned"}: ${user.name || user.email}`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-      details: { userId: user._id, isBanned: user.isBanned },
-    });
-
     res.json({
       success: true,
       message: user.isBanned ? "User banned" : "User unbanned",
@@ -352,17 +337,6 @@ router.post(
     user.verificationStatus = "verified";
 
     await user.save();
-
-    // Added (Phase 9, admin/operational hardening): same finding as
-    // toggle-ban above - dealer approval had no audit log entry
-    // despite being one of the actions this phase explicitly names
-    // ("approval"). Replicates this file's own existing pattern.
-    await AuditLog.create({
-      action: `Dealer approved: ${user.name || user.email}`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-      details: { userId: user._id },
-    });
 
     const { sendDealerApprovedEmail } = adminEmailService;
     if (typeof sendDealerApprovedEmail === "function") {
@@ -614,7 +588,7 @@ router.put(
   adminOrSuper,
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne();
-    if (!config) config = await PlatformConfig.create({});
+    if (!config) config = new PlatformConfig();
 
     const allowed = [
       "platformName",
@@ -678,7 +652,7 @@ router.put(
   adminOrSuper,
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne();
-    if (!config) config = await PlatformConfig.create({});
+    if (!config) config = new PlatformConfig();
 
     const { packages } = req.body;
     if (!Array.isArray(packages)) return res.status(400).json({ success: false, message: "packages must be an array" });
@@ -1431,7 +1405,7 @@ router.post(
       preserveOriginal: true,
     });
     let config = await PlatformConfig.findOne();
-    if (!config) config = await PlatformConfig.create({});
+    if (!config) config = new PlatformConfig();
     config.branding.logoType = "image";
     config.branding.logoUrl = result.url;
     await config.save();

@@ -25,11 +25,11 @@ import { globalLimiter, authLimiter, adminLimiter, webhookLimiter, socketRateLim
 
 // ─── Security Middleware ───────────────────────────────────────
 import { mongoSanitize as sanitizeInput, xssProtection, paginationCap, extraHeaders, bodyGuard, hppProtection } from "./middleware/security.js";
+import { mpesaIpWhitelist, validateMpesaCallback } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection, csrfToken } from "./middleware/csrf.js";
 import { idempotencyCheck } from "./middleware/idempotency.js";
 import { protect, adminOnly } from "./middleware/auth.js";
-import { isAdminOrAbove } from "./config/roles.js";
 import responseWrapper from "./middleware/responseWrapper.js";
 import { performanceMonitor, memoryMonitor, cpuMonitor } from "./middleware/performanceMonitor.js";
 import sliMiddleware from "./middleware/sliMiddleware.js";
@@ -56,15 +56,6 @@ import userRoutes from "./routes/userRoutes.js";
 import savedSearchRoutes from "./routes/savedSearchRoutes.js";
 import ntsaVerificationRoutes from "./routes/ntsaVerificationRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
-// Added while activating backend/inspection/ (the dormant inspection
-// marketplace system - real provider profiles, commission,
-// settlement, per docs/PRE_PURCHASE_INSPECTION_FORENSIC_AUDIT.md).
-// Mounted at a distinct path from the existing /api/inspections
-// (routes/inspectionRoutes.js, above) deliberately - these are two
-// genuinely separate systems with different route shapes
-// (/providers, /bookings/:reference vs /my, /:id/assign), and the
-// existing, working system is not touched or replaced by this.
-import inspectionMarketplaceRoutes from "./inspection/routes/inspectionRoutes.js";
 import escrowVaultRoutes from "./routes/escrowVaultRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 import securityLogRoutes from "./routes/securityLogRoutes.js";
@@ -487,24 +478,8 @@ if (NODE_ENV !== "production") {
   );
 }
 
-// ─── RESPONSE WRAPPER (ensures every JSON response has `success` field) ──
-// Must be registered before any route mount, not just the unversioned
-// ones below - otherwise it silently never runs for /api/v1, /api/v2,
-// or the analytics dashboard routes, since Express only continues past
-// a middleware to routes registered AFTER it, and those route groups
-// respond directly without calling next(). Confirmed this was
-// unintentional, not a deliberate versioned/unversioned split: this
-// middleware's own comment says "ensures every JSON response", and the
-// system-status check below says "global middleware for protected
-// routes" - neither was true for roughly a third of the API surface
-// (v1 alone is 31 sub-routers) before this fix.
-app.use(responseWrapper);
-
-// ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
-app.use("/api", checkSystemStatus);
-
 // ─── API ROUTES (VERSIONED) ───────────────────────────────────
-app.use("/api/v1", checkSystemStatus, v1Routes);
+app.use("/api/v1", v1Routes);
 app.use("/api/v2", v2Routes);
 
 // ─── DASHBOARD ROUTES (ROLE-BASED) ───────────────────────────
@@ -620,44 +595,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("joinChat", async (chatId) => {
+  socket.on("joinChat", (chatId) => {
     if (!socket.user) return; // reject unauthenticated chat access
-    if (isRateLimited("joinChat") || !isValidId(chatId)) return;
-    // Fixed (Phase 8, communication workflow hardening): this
-    // previously joined the requester into ANY validly-formatted
-    // chat_${chatId} room with no check that they're actually a
-    // participant in that specific conversation - any authenticated
-    // user who knew or guessed a valid chat UUID could passively
-    // receive real, private message content and read-receipt data
-    // for a conversation they had no part in (confirmed: real message
-    // broadcasts and "messagesSeen" events are both emitted to this
-    // exact room by controllers/chatController.js). This directly
-    // contradicted this phase's own explicit "only authorized
-    // participants can access conversations" / "users cannot access
-    // arbitrary conversation IDs" requirements.
-    //
-    // Fixed by replicating the same real participant check the HTTP
-    // chat endpoints already use (chatController.js:
-    // chat.participants.some((p) => p.toString() === req.user.id)) -
-    // not inventing new authorization logic, reusing the pattern
-    // already proven correct elsewhere in this backend. Uses a
-    // dynamic import matching the existing joinAuction handler's own
-    // established pattern just above, since this file does not import
-    // getSupabase at module scope.
-    const uid = socket.user?.id || socket.user?._id;
-    if (!uid) return;
-    try {
-      const { getSupabase } = await import("./utils/supabase.js");
-      const sb = getSupabase();
-      const { data: chat } = await sb.from("chats").select("participants").eq("id", chatId).maybeSingle();
-      if (!chat || !Array.isArray(chat.participants) || !chat.participants.some((p) => String(p) === String(uid))) {
-        return; // not a real participant - silently refuse the join, matching this handler's existing no-error-response style
-      }
-      socket.join(`chat_${chatId}`);
-    } catch {
-      // Fail closed - a lookup error must not grant room access.
-      return;
-    }
+    if (!isRateLimited("joinChat") && isValidId(chatId)) socket.join(`chat_${chatId}`);
   });
   socket.on("leaveChat", (chatId) => {
     if (!isRateLimited("leaveChat") && isValidId(chatId)) socket.leave(`chat_${chatId}`);
@@ -667,11 +607,7 @@ io.on("connection", (socket) => {
     if (!isRateLimited("typing") && chatId) socket.to(`chat_${chatId}`).emit("typing", { chatId, userId, name });
   });
   socket.on("joinAdmin", () => {
-    // includes superadmin - was previously role === "admin" only, which
-    // wrongly excluded superadmin (the platform's highest-privilege
-    // role, strictly above admin in config/roles.js's ROLE_HIERARCHY)
-    // from the real-time admin dashboard/alert feed.
-    if (isAdminOrAbove(socket.user)) socket.join("admins");
+    if (socket.user?.role === "admin") socket.join("admins");
   });
   socket.on("joinShowroom", () => {
     if (!isRateLimited("joinShowroom")) socket.join("showroom");
@@ -687,6 +623,12 @@ io.on("connection", (socket) => {
     }
   });
 });
+
+// ─── RESPONSE WRAPPER (ensures every JSON response has `success` field) ──
+app.use(responseWrapper);
+
+// ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
+app.use("/api", checkSystemStatus);
 
 // ─── API ROUTES ───────────────────────────────────────────────
 app.use("/api/auth/refresh", csrfProtection); // CSRF for cookie-based refresh
@@ -711,7 +653,6 @@ app.use("/api/saved-searches", csrfProtection, savedSearchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/ntsa-verification", ntsaVerificationRoutes);
 app.use("/api/inspections", inspectionRoutes);
-app.use("/api/inspection-marketplace", inspectionMarketplaceRoutes);
 app.use("/api/escrow-vault", idempotencyCheck, escrowVaultRoutes);
 app.use("/api/security-logs", securityLogRoutes);
 app.use("/api/sms-bidding", smsBiddingRoutes);
@@ -778,25 +719,8 @@ app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* — versioned alias for all routes above
-// (the /api/v1 -> v1Routes mount itself lives earlier, in the
-// "API ROUTES (VERSIONED)" section - it was duplicated here by
-// mistake, registering the identical router at the identical path
-// a second time; removed rather than keeping both.)
-//
-// Also removed a dead app.use("/api/v1/payments/callback", ...) that
-// used to sit here: it only had 2 middleware (mpesaIpWhitelist,
-// validateMpesaCallback) and no terminal route handler, so even in
-// the hypothetical case it was ever reached it wouldn't have done
-// anything. It never was reached anyway - v1Routes (mounted earlier,
-// in the VERSIONED section) already has its own complete /payments
-// mount (routes/v1.js -> paymentRoutes.js), which has its own full
-// /callback route at the identical path
-// (router.post("/callback", mpesaIpWhitelist, validateMpesaCallback,
-// idempotencyCheck, asyncHandler(mpesaCallback))) - IP whitelist,
-// validation, idempotency, AND the actual mpesaCallback business
-// logic, all present. That's the one real M-Pesa callback handler;
-// this was a vestigial, non-functional duplicate of just its first
-// two middleware.
+app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
+app.use("/api/v1", checkSystemStatus, v1Routes);
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
 // Note: In newer Sentry versions, handlers are auto-instrumented

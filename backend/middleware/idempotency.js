@@ -282,14 +282,7 @@ export const idempotencyCheck = async (req, res, next) => {
  */
 export const generateIdempotencyKey = (prefix = "idemp") => {
   const timestamp = Date.now();
-  // Fixed (Phase 10, security hardening): same class of finding as
-  // the OTP generators - Math.random() replaced with
-  // crypto.randomBytes (crypto already imported in this file).
-  // Idempotency keys are identifiers rather than secrets, but a
-  // predictable one is still a weaker defense against a deliberate
-  // collision/interference attempt than a cryptographically random
-  // one, and the fix is free (no new dependency, same output shape).
-  const random = crypto.randomBytes(10).toString("hex");
+  const random = Math.random().toString(36).substring(2, 15);
   return `${prefix}_${timestamp}_${random}`;
 };
 

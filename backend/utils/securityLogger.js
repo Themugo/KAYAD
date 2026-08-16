@@ -175,8 +175,6 @@ const sendEmailAlert = async ({ action, actor, target, ip }) => {
 const sendSlackAlert = async ({ action, actor, target, ip, severity }) => {
   const webhook = process.env.SECURITY_SLACK_WEBHOOK;
   if (!webhook) return;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
   try {
     await fetch(webhook, {
       method: "POST",
@@ -184,12 +182,9 @@ const sendSlackAlert = async ({ action, actor, target, ip, severity }) => {
       body: JSON.stringify({
         text: `*[${severity.toUpperCase()}] Security Alert*\n• Action: ${action}\n• Actor: ${actor || "unknown"}\n• Target: ${target || "N/A"}\n• IP: ${ip || "N/A"}\n• Time: ${new Date().toISOString()}`,
       }),
-      signal: controller.signal,
     });
   } catch {
     logWarn("Slack security alert failed");
-  } finally {
-    clearTimeout(timeout);
   }
 };
 
