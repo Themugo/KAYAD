@@ -393,7 +393,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (maxPrice < 20000000) list.push({ id: 'price', label: `Under Ksh ${(maxPrice / 1000000).toFixed(1)}M`, onClear: () => setMaxPrice(20000000) });
     if (minYear > 2005) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => setMinYear(2005) });
     if (maxYear < 2026) list.push({ id: 'maxyear', label: `Up to ${maxYear}`, onClear: () => setMaxYear(2026) });
-    if (onlyInspected) list.push({ id: 'inspected', label: '150-Pt Inspected', onClear: () => setOnlyInspected(false) });
+    if (onlyInspected) list.push({ id: 'inspected', label: 'Pre-Purchase Inspected', onClear: () => setOnlyInspected(false) });
     if (onlyEscrow) list.push({ id: 'escrow', label: 'Escrow Protected', onClear: () => setOnlyEscrow(false) });
     if (onlyFinance) list.push({ id: 'finance', label: 'Finance Available', onClear: () => setOnlyFinance(false) });
     if (onlyAuction) list.push({ id: 'auction', label: 'Live Auction', onClear: () => setOnlyAuction(false) });
@@ -995,7 +995,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   className="rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063] accent-[#1E3063]"
                 />
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>150-Point Certified</span>
+                <span>Pre-Purchase Inspected</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 hover:text-[#1E3063]">
@@ -1006,7 +1006,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   className="rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063] accent-[#1E3063]"
                 />
                 <Lock className="w-3.5 h-3.5 text-[#1E3063]" />
-                <span>Escrow Vault Ready</span>
+                <span>Escrow Protected</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 hover:text-[#1E3063]">
@@ -1414,11 +1414,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <label className="flex items-center gap-1.5 cursor-pointer font-semibold">
                     <input type="checkbox" checked={onlyInspected} onChange={(e) => setOnlyInspected(e.target.checked)} className="rounded text-[#1E3063]" />
-                    <span>150-Pt Inspected</span>
+                    <span>Pre-Purchase Inspected</span>
                   </label>
                   <label className="flex items-center gap-1.5 cursor-pointer font-semibold">
                     <input type="checkbox" checked={onlyEscrow} onChange={(e) => setOnlyEscrow(e.target.checked)} className="rounded text-[#1E3063]" />
-                    <span>Escrow Vault</span>
+                    <span>Escrow Protected</span>
                   </label>
                 </div>
               </div>
