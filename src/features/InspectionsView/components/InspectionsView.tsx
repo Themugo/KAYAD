@@ -492,7 +492,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 Find Certified Independent Vehicle Inspectors
               </h1>
               <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
-                Choose from verified independent mechanics across East Africa. Book on-site 150-point pre-purchase audits, diagnostic scanner checks, and foreign import clearance certificates.
+                KAYAD is a marketplace connecting you with verified independent inspection providers across East Africa. Compare providers by location, specialization, and their own pricing to find the right fit for your vehicle.
               </p>
             </div>
 
@@ -548,9 +548,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 3
               </div>
               <div>
-                <h4 className="font-bold text-white text-xs">Protected Escrow Payment</h4>
+                <h4 className="font-bold text-white text-xs">Protected Inspection Payment</h4>
                 <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                  Funds held safely in KAYAD Escrow until the digital report is delivered.
+                  Your inspection fee is held securely until the digital report is delivered. This is separate from - and unrelated to - any vehicle purchase funds, which KAYAD never holds.
                 </p>
               </div>
             </div>
@@ -560,9 +560,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 4
               </div>
               <div>
-                <h4 className="font-bold text-white text-xs">15% Transparent Platform Fee</h4>
+                <h4 className="font-bold text-white text-xs">Transparent Platform Fee</h4>
                 <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                  KAYAD facilitates transactions & earns 15% commission per completed audit.
+                  KAYAD facilitates the transaction and earns a small, configurable commission per completed inspection - providers set their own inspection prices.
                 </p>
               </div>
             </div>
@@ -598,7 +598,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               }`}
             >
               <Award className="w-4 h-4 text-emerald-500" />
-              <span>Inspection Packages</span>
+              <span>Inspection Types</span>
             </button>
 
             <button
@@ -611,9 +611,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             >
               <FileCheck className="w-4 h-4 text-blue-500" />
               <span>Digital Reports</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-bold">
-                150-Point
-              </span>
             </button>
 
             <button
@@ -971,8 +968,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
                         <div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Fixed Price:</span>
-                          <span className="text-xl font-black text-[#1E3063] font-mono">Ksh {pkg.price.toLocaleString()}</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Typical Market Price:</span>
+                          <span className="text-xl font-black text-[#1E3063] font-mono">from Ksh {pkg.price.toLocaleString()}</span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5">Set independently by each provider</span>
                         </div>
                         <Badge variant="verified">{pkg.pointsCount}-Point Audit</Badge>
                       </div>
@@ -1014,9 +1012,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           <div className="space-y-6 animate-fade-in">
             <PageHeader
               badgeIcon={<Award className="w-4 h-4 text-emerald-600" />}
-              badgeText="Standardized Technical Audits"
-              title="KAYAD Inspection Packages & Transparent Pricing"
-              description="Every independent mechanic on KAYAD adheres to standardized point-by-point diagnostic protocols. Select the package that matches your vehicle category."
+              badgeText="Inspection Types"
+              title="Types of Pre-Purchase Inspection"
+              description="Every independent provider on KAYAD sets their own pricing for these inspection types. Prices shown are typical market rates for reference - compare providers to see their actual rates."
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1039,8 +1037,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 
                     <div className="bg-[#FDFBF7] p-4 rounded-xl border border-slate-200 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Package Fee:</span>
-                        <span className="text-2xl font-black text-[#1E3063] font-mono">Ksh {pkg.price.toLocaleString()}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Typical Market Price:</span>
+                        <span className="text-2xl font-black text-[#1E3063] font-mono">from Ksh {pkg.price.toLocaleString()}</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">Each provider sets their own final price</span>
                       </div>
                       <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                         {pkg.pointsCount} Checkpoints
@@ -1070,10 +1069,10 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                       fullWidth
                       onClick={() => {
                         setPackageType(pkg.id as any);
-                        handleOpenBooking();
+                        setActiveTab('marketplace');
                       }}
                     >
-                      Book {pkg.name}
+                      Compare Providers for This Type
                     </Button>
                   </div>
                 </Card>
@@ -1848,7 +1847,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs font-bold text-[#1E3063]">{pkg.name}</h4>
                         <span className="text-sm font-black font-mono text-[#1E3063]">
-                          Ksh {pkg.price.toLocaleString()}
+                          from Ksh {pkg.price.toLocaleString()}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-500">{pkg.description}</p>

@@ -61,7 +61,21 @@ async function findWithPagination(table, filters = {}, options = {}) {
     }
   }
 
-  const result = await paginate(table, { page, limit, filters, orderBy, ascending });
+  // Fixed: this system's old-style projection object ({ field: 1, ... })
+  // was silently dropped - never converted to the real paginate()'s
+  // select string parameter, meaning every caller passing a
+  // projection got back full, unfiltered rows instead of the narrower
+  // set they asked for. Not a correctness bug (extra fields aren't
+  // harmful), but confirmed while building the inspection frontend
+  // that this bridge's own doc comment already promised projection
+  // support it never actually implemented - fixed to genuinely honor
+  // it now.
+  let select;
+  if (options.projection && typeof options.projection === 'object') {
+    select = Object.keys(options.projection).join(',');
+  }
+
+  const result = await paginate(table, { page, limit, filters, orderBy, ascending, select });
   return result.data;
 }
 
