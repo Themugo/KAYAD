@@ -37,4 +37,33 @@ describe('SupportFAQ - does not overclaim regulatory status or specific unverifi
     expect(escrowFaq!.answer.length).toBeGreaterThan(50);
     expect(escrowFaq!.answer).toMatch(/trustee|held|released/i);
   });
+
+  // Found in a later pass, auditing this same file against language
+  // already corrected elsewhere in this project (the inspection page
+  // and homepage filters): "150-Point"/"150-Pt" named one specific,
+  // fixed inspection depth as if every provider followed it - the
+  // real, active inspection system has no such fixed standard, since
+  // providers define their own checklist depth. "Escrow Vault" (vs.
+  // this file's own already-correct "Escrow" elsewhere) was a second,
+  // inconsistent label for the same real concept. Also found: the
+  // financing FAQ separately named specific bank partners (NCBA,
+  // Stanbic, Equity) and a specific interest rate (12.5% p.a.) as
+  // confirmed fact - the same unverified-partnership pattern the tests
+  // above already established as unacceptable for the escrow section,
+  // just not yet applied to financing.
+  it('does not name one fixed inspection point-count as a universal standard', () => {
+    const fullText = JSON.stringify(FAQ_DATA);
+    expect(fullText).not.toMatch(/150-Point|150-Pt|150-point/);
+  });
+
+  it('does not use "Escrow Vault" as an inconsistent second label for escrow', () => {
+    const fullText = JSON.stringify(FAQ_DATA);
+    expect(fullText).not.toMatch(/Escrow Vault/i);
+  });
+
+  it('does not name specific financing partner banks or a specific interest rate as confirmed fact', () => {
+    const fullText = JSON.stringify(FAQ_DATA);
+    expect(fullText).not.toMatch(/NCBA Bank Kenya|Stanbic Bank Kenya|Equity Bank Asset Finance/);
+    expect(fullText).not.toMatch(/12\.5% p\.a\./);
+  });
 });
