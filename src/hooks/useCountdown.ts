@@ -11,6 +11,21 @@ export interface CountdownResult {
   isEndingSoon: boolean;
   /** True once msRemaining has reached 0. */
   hasEnded: boolean;
+  // Broken-out unit fields, added for block-style countdown displays
+  // (separate day/hour/minute/second boxes) that need individual
+  // numbers rather than the pre-formatted label string above. expired/
+  // urgent are aliases for hasEnded/isEndingSoon under the naming
+  // these specific consumers (src/components/CountdownDisplay.tsx and
+  // src/components/features/auction/CountdownDisplay.tsx) already
+  // expected - kept as real, separate fields rather than requiring
+  // those components to rename their destructuring, since both were
+  // written independently against this exact shape.
+  d: number;
+  h: number;
+  m: number;
+  s: number;
+  expired: boolean;
+  urgent: boolean;
 }
 
 /**
@@ -25,8 +40,11 @@ export interface CountdownResult {
  * only once inside that final window, where a live countdown actually
  * matters.
  */
-export function useCountdown(targetIso: string | null | undefined, urgencyThresholdMs = 30 * 60 * 1000): CountdownResult {
-  const targetMs = useMemo(() => (targetIso ? new Date(targetIso).getTime() : null), [targetIso]);
+export function useCountdown(targetIso: string | Date | null | undefined, urgencyThresholdMs = 30 * 60 * 1000): CountdownResult {
+  const targetMs = useMemo(
+    () => (targetIso ? new Date(targetIso).getTime() : null),
+    [targetIso instanceof Date ? targetIso.getTime() : targetIso]
+  );
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -43,17 +61,25 @@ export function useCountdown(targetIso: string | null | undefined, urgencyThresh
 
   return useMemo(() => {
     if (!targetMs) {
-      return { msRemaining: 0, label: '', isEndingSoon: false, hasEnded: false };
+      // No target at all is treated as already-expired (nothing to
+      // count down to), not "not yet expired" - matches
+      // src/__tests__/hooks/useCountdown.test.jsx's own expectation.
+      return { msRemaining: 0, label: '', isEndingSoon: false, hasEnded: true, d: 0, h: 0, m: 0, s: 0, expired: true, urgent: false };
     }
     const msRemaining = Math.max(0, targetMs - now);
     const hasEnded = msRemaining === 0;
     const isEndingSoon = msRemaining > 0 && msRemaining <= urgencyThresholdMs;
 
+    const totalSeconds = Math.floor(msRemaining / 1000);
+    const d = Math.floor(totalSeconds / 86400);
+    const h = Math.floor((totalSeconds % 86400) / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+
     let label: string;
     if (hasEnded) {
       label = 'Ended';
     } else {
-      const totalSeconds = Math.floor(msRemaining / 1000);
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
@@ -66,6 +92,6 @@ export function useCountdown(targetIso: string | null | undefined, urgencyThresh
       }
     }
 
-    return { msRemaining, label, isEndingSoon, hasEnded };
+    return { msRemaining, label, isEndingSoon, hasEnded, d, h, m, s, expired: hasEnded, urgent: isEndingSoon };
   }, [targetMs, now, urgencyThresholdMs]);
 }

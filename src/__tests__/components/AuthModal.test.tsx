@@ -24,7 +24,7 @@ describe('AuthModal - real backend authentication (Phase 3)', () => {
   const renderModal = () =>
     render(
       <AuthProvider>
-        <AuthModal isOpen={true} onClose={() => {}} />
+        <AuthModal isOpen={true} onClose={() => {}} onLogin={() => {}} />
       </AuthProvider>
     );
 
@@ -154,7 +154,7 @@ describe('AuthModal - demo access, only when explicitly enabled', () => {
 
     render(
       <AuthProvider>
-        <AuthModal isOpen={true} onClose={() => {}} />
+        <AuthModal isOpen={true} onClose={() => {}} onLogin={() => {}} />
       </AuthProvider>
     );
     await waitFor(() => expect(screen.getByText('Demo Access')).toBeTruthy());

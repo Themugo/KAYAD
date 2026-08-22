@@ -164,6 +164,21 @@ export async function demoLogin(role: string): Promise<BackendUser> {
   return res.user;
 }
 
+// Added while rewiring AuthContext.tsx off the old, incompatible
+// src/api/api.exports.ts authAPI (Bearer-token auth, no /v1 path
+// segment - both wrong for the real backend, confirmed directly) onto
+// this file, the confirmed-correct client (cookie-based, right paths,
+// already used and verified throughout this project). Matches the
+// real backend's PUT /api/v1/auth/profile route exactly.
+export async function updateProfile(body: Record<string, unknown>): Promise<BackendUser> {
+  const res = await authFetch('/api/v1/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  if (!res.user) throw new AuthApiError('Profile update succeeded but no user was returned.', 'unknown');
+  return res.user;
+}
+
 /** Session restoration - called on app mount. Relies entirely on the
  * httpOnly refresh/access token cookies already being present in the
  * browser from a prior login; there is nothing else for the frontend
