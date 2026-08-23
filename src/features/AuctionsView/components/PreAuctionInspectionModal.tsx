@@ -104,7 +104,13 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
 
   // Professional Inspection Booking State
   const [selectedInspector, setSelectedInspector] = useState<InspectorOption | null>(MOCK_INSPECTORS[0]);
-  const [bookingDate, setBookingDate] = useState('2026-07-31');
+  // Fixed: was hardcoded to a stale, already-past literal date
+  // ('2026-07-31') - defaults to tomorrow's real date instead.
+  const [bookingDate, setBookingDate] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  });
   const [bookingTime, setBookingTime] = useState('10:00 AM');
   const [buyerNotes, setBuyerNotes] = useState('');
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'booking' | 'confirmed'>('idle');
@@ -493,6 +499,7 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
                             type="date"
                             value={bookingDate}
                             onChange={(e) => setBookingDate(e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
                             required
                           />
                         </div>
