@@ -14,6 +14,11 @@ import { getSupabase } from "../utils/supabase.js";
 
 const router = express.Router();
 
+// All metrics endpoints expose process internals (memory, CPU, node version,
+// DB/cache stats) — admin-only. Previously the GET routes were public while
+// only POST /reset was protected.
+router.use(protect, adminOnly);
+
 // Get all metrics
 router.get("/", async (req, res) => {
   try {

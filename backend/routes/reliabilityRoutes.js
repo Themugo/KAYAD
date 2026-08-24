@@ -19,7 +19,7 @@ import { SLIS, SLOS } from "../config/reliability.js";
 const router = Router();
 
 // GET /api/reliability/slis — list all SLI definitions and current values
-router.get("/slis", asyncHandler(async (req, res) => {
+router.get("/slis", protect, adminOnly, asyncHandler(async (req, res) => {
   const values = computeAllSlis();
   const definitions = Object.entries(SLIS).map(([id, def]) => ({
     id,
@@ -34,7 +34,7 @@ router.get("/slis", asyncHandler(async (req, res) => {
 }));
 
 // GET /api/reliability/slis/:sliId — specific SLI
-router.get("/slis/:sliId", asyncHandler(async (req, res) => {
+router.get("/slis/:sliId", protect, adminOnly, asyncHandler(async (req, res) => {
   const sliDef = SLIS[req.params.sliId];
   if (!sliDef) {
     return res.status(404).json({ success: false, message: "SLI not found" });
@@ -44,14 +44,14 @@ router.get("/slis/:sliId", asyncHandler(async (req, res) => {
 }));
 
 // GET /api/reliability/slos — list all SLO definitions and compliance
-router.get("/slos", asyncHandler(async (req, res) => {
+router.get("/slos", protect, adminOnly, asyncHandler(async (req, res) => {
   const sliValues = computeAllSlis();
   const evaluations = evaluateAllSlos(sliValues);
   res.json({ success: true, data: evaluations });
 }));
 
 // GET /api/reliability/slos/:sloId — specific SLO
-router.get("/slos/:sloId", asyncHandler(async (req, res) => {
+router.get("/slos/:sloId", protect, adminOnly, asyncHandler(async (req, res) => {
   const slo = SLOS.find(s => s.id === req.params.sloId);
   if (!slo) {
     return res.status(404).json({ success: false, message: "SLO not found" });
@@ -96,7 +96,7 @@ router.get("/report", protect, adminOnly, asyncHandler(async (req, res) => {
 }));
 
 // GET /api/reliability/health — quick reliability health summary
-router.get("/health", asyncHandler(async (req, res) => {
+router.get("/health", protect, adminOnly, asyncHandler(async (req, res) => {
   const sliValues = computeAllSlis();
   const sloEvals = evaluateAllSlos(sliValues);
   const budgets = await getAllErrorBudgets();

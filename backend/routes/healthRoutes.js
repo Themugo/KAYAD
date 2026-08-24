@@ -83,8 +83,9 @@ router.get("/", async (req, res) => {
   res.status(statusCode).json(health);
 });
 
-// Detailed health check with replica set info
-router.get("/detailed", async (req, res) => {
+// Detailed health check with replica set info — admin only (leaks memory,
+// cache stats and raw infrastructure error messages)
+router.get("/detailed", protect, adminOnly, async (req, res) => {
   const health = {
     status: "healthy",
     timestamp: new Date().toISOString(),
@@ -158,8 +159,8 @@ router.get("/detailed", async (req, res) => {
   res.status(statusCode).json(health);
 });
 
-// Cache statistics endpoint
-router.get("/cache", validateQuery(analyticsQuerySchema), async (req, res) => {
+// Cache statistics endpoint — admin only
+router.get("/cache", protect, adminOnly, validateQuery(analyticsQuerySchema), async (req, res) => {
   const stats = cacheService.getStats();
   res.json({
     success: true,

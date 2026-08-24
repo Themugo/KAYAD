@@ -164,7 +164,7 @@ export async function reseed() {
   ];
 
   for (const acc of demos) {
-    await upsertUser({ ...acc, must_change_password: true, email_verified: true });
+    await upsertUser({ ...acc, must_change_password: true, email_verified: true, is_demo: true });
     created.demos.push(acc.email);
   }
 

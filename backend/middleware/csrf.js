@@ -15,7 +15,7 @@ export const csrfProtection = (req, res, next) => {
   // Skip if using Authorization header (JWT)
   if (req.headers.authorization) return next();
 
-  const token = req.headers["x-csrf-token"] || req.body._csrf;
+  const token = req.headers["x-csrf-token"] || req.body?._csrf;
   const sessionToken = req.session?.csrfToken;
 
   if (!token || !sessionToken || token !== sessionToken) {

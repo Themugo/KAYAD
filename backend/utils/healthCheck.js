@@ -117,9 +117,18 @@ export const registerHealthRoutes = (app) => {
   app.get("/health", shallowHealth);
   app.get("/api/health", shallowHealth);
 
-  // Deep health — internal monitoring
-  app.get("/health/deep", deepHealth);
-  app.get("/api/health/deep", deepHealth);
+  // Deep health — internal monitoring. Exposes queue depths, memory and
+  // raw infra error messages, so require admin auth. Loaded lazily to
+  // avoid a module cycle (this util is imported by server.js before the
+  // middleware stack is fully wired).
+  app.get("/health/deep", async (req, res, next) => {
+    const { protect, adminOnly } = await import("../middleware/auth.js");
+    protect(req, res, (err) => (err ? next(err) : adminOnly(req, res, next)));
+  }, deepHealth);
+  app.get("/api/health/deep", async (req, res, next) => {
+    const { protect, adminOnly } = await import("../middleware/auth.js");
+    protect(req, res, (err) => (err ? next(err) : adminOnly(req, res, next)));
+  }, deepHealth);
 
   // Kubernetes liveness probe
   app.get("/health/live", (_, res) => res.json({ status: "ok" }));

@@ -1119,7 +1119,27 @@ router.put(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (req.body.role) user.role = req.body.role;
+    if (req.body.role) {
+      // Only known staff roles may be assigned — never "superadmin" itself
+      // (superadmin elevation goes through the webhoist owner flow only).
+      const staffRoles = [
+        "admin",
+        "marketing",
+        "technical_support",
+        "hr",
+        "accounts",
+        "escrow_officer",
+        "ad_manager",
+        "moderator",
+        "ghost_checker",
+      ];
+      if (!staffRoles.includes(req.body.role)) {
+        return res
+          .status(400)
+          .json({ success: false, message: `Invalid staff role. Must be one of: ${staffRoles.join(", ")}` });
+      }
+      user.role = req.body.role;
+    }
     if (req.body.name) user.name = req.body.name;
     if (req.body.isBanned !== undefined) user.isBanned = req.body.isBanned;
     await user.save();

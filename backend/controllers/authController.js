@@ -45,6 +45,10 @@ const isOwnerEmail = (email) =>
       .trim(),
   );
 
+// Single-use email tokens (verify + password reset) are stored as SHA-256
+// hashes so a database leak does not expose usable tokens.
+const hashToken = (token) => crypto.createHash("sha256").update(String(token)).digest("hex");
+
 // H-1 FIX: Strip sensitive fields before sending user data in any response.
 // Without this, bankAccount, mpesaBusiness, paymentDetails, phoneOTP, emailVerifyToken,
 // password reset tokens, and internal flags leak to the client.
@@ -198,7 +202,7 @@ export const register = async (req, res) => {
     const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
 
     let referredBy = null;
-    const referralCode = req.body.referralCode || req.query.ref;
+    const referralCode = req.body.referralCode || req.query?.ref;
     if (referralCode) {
       const referrer = await User.findOne({ referralCode });
       if (referrer && referrer.email !== email) {
@@ -216,15 +220,32 @@ export const register = async (req, res) => {
       role,
       phone: validPhone,
       status,
-      emailVerified: true,
+      emailVerified: false,
       referredBy,
     });
+
+    // Email verification token — only the SHA-256 hash is stored; the raw
+    // token goes out in the verification email. Login/API access stays open
+    // unless verification is enforced (EMAIL_HOST configured or
+    // REQUIRE_EMAIL_VERIFICATION=true), matching the login gate.
+    const verifyToken = crypto.randomBytes(32).toString("hex");
 
     const userAuth = await UserAuth.create({
       user: user._id,
       password: await bcrypt.hash(password, 12),
       tokenVersion: 0,
+      emailVerifyToken: hashToken(verifyToken),
+      emailVerifyExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
+
+    if (process.env.EMAIL_HOST) {
+      const { sendVerificationEmail } = emailService;
+      if (typeof sendVerificationEmail === "function") {
+        sendVerificationEmail(user.email, user.name, verifyToken).catch((e) =>
+          console.warn("⚠️  Verification email failed:", e.message),
+        );
+      }
+    }
 
     if (referredBy) {
       const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
@@ -357,8 +378,20 @@ const DEMO_ACCOUNTS = {
   buyer:  { email: "buyer@kayad.space",  role: "user" },
 };
 
+// Demo login is passwordless, so it must never be reachable in production
+// unless explicitly enabled. Default: allowed outside production only;
+// ENABLE_DEMO_LOGIN=true is required to enable it in production.
+export const isDemoLoginEnabled = () => {
+  if (process.env.ENABLE_DEMO_LOGIN === "true") return true;
+  return process.env.NODE_ENV !== "production";
+};
+
 export const demoLogin = async (req, res) => {
   try {
+    if (!isDemoLoginEnabled()) {
+      return res.status(403).json({ success: false, message: "Demo login is disabled" });
+    }
+
     const { role } = req.body;
     const demo = DEMO_ACCOUNTS[role];
     if (!demo) {
@@ -586,14 +619,10 @@ export const updateProfile = async (req, res) => {
 
     if (!user) return R.notFound(res, "User not found");
 
-    // Auto-approve dealer when onboarding is completed
-    if (onboardingComplete && (user.role === "dealer" || user.role === "individual_seller")) {
-      await Dealer.findOneAndUpdate(
-        { user: req.user.id },
-        { approved: true, verifiedAt: new Date() },
-        { upsert: true },
-      );
-    }
+    // NOTE: Dealer approval must ONLY come from the admin verification
+    // workflow (/api/verification). Never set Dealer.approved here — doing so
+    // lets a pending dealer self-approve and bypass requireDealerVerification's
+    // legacy-approval grandfather clause.
 
     res.json({ success: true, user: serializeUser(user) });
   } catch (err) {
@@ -657,7 +686,7 @@ export const verifyEmail = async (req, res) => {
     if (!token) return R.error(res, "Token required", 400);
 
     const userAuth = await UserAuth.findOne({
-      emailVerifyToken: token,
+      emailVerifyToken: hashToken(token),
       emailVerifyExpire: { $gt: Date.now() },
     }).select("+emailVerifyToken +emailVerifyExpire");
 
@@ -701,9 +730,9 @@ export const resendVerification = async (req, res) => {
       return res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
     }
 
-    // Generate new token
+    // Generate new token (hash stored, raw token emailed)
     const verifyToken = crypto.randomBytes(32).toString("hex");
-    userAuth.emailVerifyToken = verifyToken;
+    userAuth.emailVerifyToken = hashToken(verifyToken);
     userAuth.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
     await userAuth.save();
 
@@ -737,7 +766,7 @@ export const forgotPassword = async (req, res) => {
     if (!userAuth) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
 
     const token = crypto.randomBytes(32).toString("hex");
-    userAuth.resetToken = token;
+    userAuth.resetToken = hashToken(token);
     userAuth.resetTokenExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await userAuth.save();
 
@@ -760,9 +789,13 @@ export const resetPassword = async (req, res) => {
     const { token, password } = req.body;
     if (!token || !password) return R.error(res, "Token and password required", 400);
     if (password.length < 8) return R.error(res, "Password must be at least 8 characters", 400);
+    if (!/[A-Z]/.test(password)) return R.error(res, "Password must contain at least one uppercase letter", 400);
+    if (!/[a-z]/.test(password)) return R.error(res, "Password must contain at least one lowercase letter", 400);
+    if (!/\d/.test(password)) return R.error(res, "Password must contain at least one number", 400);
+    if (!/[^A-Za-z0-9]/.test(password)) return R.error(res, "Password must contain at least one special character", 400);
 
     const userAuth = await UserAuth.findOne({
-      resetToken: token,
+      resetToken: hashToken(token),
       resetTokenExpire: { $gt: Date.now() },
     });
 
