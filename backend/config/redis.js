@@ -16,7 +16,63 @@ const DISABLE_REDIS = false;
 
 let redis = null;
 let redisCircuitBreakerOpen = false;
-let inMemoryFallback = new Map();
+// In-memory fallback used when Redis is down. A plain Map only supports
+// get/set/delete — the incr/hset/lpush wrappers would throw on it. Wrap
+// the map in a minimal adapter implementing the same method surface so
+// degraded-mode calls behave like Redis instead of crashing.
+const inMemoryStore = new Map();
+const inMemoryFallback = {
+  _map: inMemoryStore,
+  get: async (key) => {
+    const v = inMemoryStore.get(key);
+    return v === undefined ? null : v;
+  },
+  set: async (key, value) => {
+    inMemoryStore.set(key, String(value));
+    return "OK";
+  },
+  del: async (key) => (inMemoryStore.delete(key) ? 1 : 0),
+  expire: async () => 1, // TTLs are advisory in degraded mode
+  incr: async (key) => {
+    const n = (parseInt(inMemoryStore.get(key) || "0", 10) || 0) + 1;
+    inMemoryStore.set(key, String(n));
+    return n;
+  },
+  decr: async (key) => {
+    const n = (parseInt(inMemoryStore.get(key) || "0", 10) || 0) - 1;
+    inMemoryStore.set(key, String(n));
+    return n;
+  },
+  hget: async (key, field) => inMemoryStore.get(`${key}:${field}`) ?? null,
+  hset: async (key, field, value) => {
+    inMemoryStore.set(`${key}:${field}`, String(value));
+    return 1;
+  },
+  hgetall: async (key) => {
+    const out = {};
+    for (const k of inMemoryStore.keys()) {
+      if (k.startsWith(`${key}:`)) out[k.slice(key.length + 1)] = inMemoryStore.get(k);
+    }
+    return out;
+  },
+  lpush: async (key, value) => {
+    const list = JSON.parse(inMemoryStore.get(key) || "[]");
+    list.unshift(String(value));
+    inMemoryStore.set(key, JSON.stringify(list));
+    return list.length;
+  },
+  rpop: async (key) => {
+    const list = JSON.parse(inMemoryStore.get(key) || "[]");
+    const v = list.pop() ?? null;
+    inMemoryStore.set(key, JSON.stringify(list));
+    return v;
+  },
+  lrange: async (key, start, stop) => {
+    const list = JSON.parse(inMemoryStore.get(key) || "[]");
+    const end = stop === -1 ? list.length : stop + 1;
+    return list.slice(start, end);
+  },
+};
 let redisHealthStatus = "unknown";
 
 // Redis health check interval
@@ -259,7 +315,7 @@ export const getRedisHealth = async () => {
       latency: duration,
       circuitBreakerOpen: redisCircuitBreakerOpen,
       usingFallback: false,
-      memoryUsage: inMemoryFallback.size,
+      memoryUsage: inMemoryStore.size,
     };
   } catch (err) {
     return {
@@ -267,7 +323,7 @@ export const getRedisHealth = async () => {
       error: err.message,
       circuitBreakerOpen: redisCircuitBreakerOpen,
       usingFallback: true,
-      memoryUsage: inMemoryFallback.size,
+      memoryUsage: inMemoryStore.size,
     };
   }
 };
@@ -284,7 +340,7 @@ export const resetRedisCircuitBreaker = () => {
 export const getRedisCircuitState = () => ({
   open: redisCircuitBreakerOpen,
   status: redisHealthStatus,
-  fallbackSize: inMemoryFallback.size,
+  fallbackSize: inMemoryStore.size,
 });
 
 // =============================
