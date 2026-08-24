@@ -878,8 +878,9 @@ router.post(
 // =============================
 // 🔨 DEALER AUCTION CONTROLS
 // =============================
-import { startAuction, endAuction } from "../realtime/auctionEngine.js";
-import { syncAuctionEnd } from "../services/auctionSync.service.js";
+// Canonical engine only: auction state lives on the cars row, closing
+// goes through services/auctionClose.service.js.
+import { closeAuction } from "../services/auctionClose.service.js";
 
 // 🚀 Start auction on dealer's own car
 router.post(
@@ -924,11 +925,8 @@ router.post(
       return res.status(400).json({ success: false, message: "Reserve price must be >= starting bid" });
     }
 
-    const result = await startAuction({
-      roomId: car.id,
-      startingBid: startingBidVal,
-      durationMs,
-    });
+    // Server-authoritative schedule: the server sets both timestamps.
+    const endTime = new Date(Date.now() + durationMs);
 
     const updated = await update("cars", req.params.id, {
       auctionStatus: "live",
@@ -938,7 +936,7 @@ router.post(
       reservePrice: reserveVal,
       reserveMode: reserveMode || "none",
       auctionStartTime: new Date().toISOString(),
-      auctionEnd: new Date(Date.now() + durationMs).toISOString(),
+      auctionEnd: endTime.toISOString(),
     });
 
     await logActionFromReq(req, "auction_start", {
@@ -947,7 +945,7 @@ router.post(
       details: { startingBid: startingBidVal, reservePrice: reserveVal, durationMs },
     });
 
-    res.json({ success: true, message: "Auction started", endTime: result.endTime, reservePrice: reserveVal });
+    res.json({ success: true, message: "Auction started", endTime, reservePrice: reserveVal });
   }),
 );
 
@@ -963,16 +961,13 @@ router.post(
       return res.status(400).json({ success: false, message: "Auction is not live" });
     }
 
-    const result = await endAuction(car.id);
-    await syncAuctionResult({ roomId: car.id, winner: result.winner });
+    // Canonical close: winner determination, loser handling, audit
+    // trail, and realtime notification all happen in one place.
+    const result = await closeAuction(req.params.id, { req, actor: req.user, reason: "dealer_end" });
 
-    await update("cars", req.params.id, { auctionStatus: "ended", allowBid: false });
-
-    await logActionFromReq(req, "auction_end", {
-      target: req.params.id,
-      targetModel: "Car",
-      details: { winner: result.winner, finalBid: result.finalBid },
-    });
+    if (!result.success && !result.alreadyClosed) {
+      return res.status(500).json({ success: false, message: "Failed to end auction" });
+    }
 
     res.json({ success: true, result });
   }),

@@ -138,7 +138,6 @@ import * as Sentry from "@sentry/node";
 // ─── Services & Utils ─────────────────────────────────────────
 import requestLogger from "./middleware/logger.js";
 import { logInfo, logWarn, logError, logDebug } from "./utils/logger.js";
-import { startAuctionEngine } from "./realtime/auctionEngine.js";
 import { startAuctionTimer } from "./utils/auctionTimer.js";
 import { startEscrowCron } from "./services/escrowCron.js";
 import { startAuctionReminderCron } from "./services/auctionReminderCron.js";
@@ -747,10 +746,6 @@ const startBackgroundServices = async (io) => {
   console.log("🔧 Starting background services...");
   await Promise.allSettled([
     (async () => {
-      try { await startAuctionEngine(); console.log("✅ Auction engine started"); }
-      catch (err) { logError("Failed to start auction engine", err); console.log("❌ Failed to start auction engine:", err); }
-    })(),
-    (async () => {
       try { startAuctionTimer(io); console.log("✅ Auction timer started"); }
       catch (err) { logError("Failed to start auction timer", err); console.log("❌ Failed to start auction timer:", err); }
     })(),
@@ -826,7 +821,7 @@ const startBackgroundServices = async (io) => {
     auctionReminderCron: "reminders active",
     savedSearchCron: "10-min cycle",
     priceAlertCron: "15-min cycle",
-    auctionEngine: "running",
+    auctionTimer: "5s close sweep (canonical)",
     sliScheduler: "1-min SLI / 5-min budget / 1-min alerts",
   });
 

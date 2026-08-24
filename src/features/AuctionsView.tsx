@@ -338,53 +338,18 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   }, [sessions]);
 
   // Execute a bid function
+  // Auction authority is the canonical backend engine only. The
+  // sessions rendered here are preview/mock data with no server-side
+  // auction behind them, so bids must NOT be accepted or simulated
+  // client-side — a client can never determine the current bid, the
+  // winning bid, or auction state. Real bidding happens on live
+  // listings via POST /api/bids/:id/bid (see AuctionLivePage).
   const executeBid = (session: AuctionSession, amount: number, bidder: string = 'Verified Bidder', location: string = 'Nairobi') => {
-    if (amount <= session.currentBid) {
-      showToast(`Bid must be higher than current bid of Ksh ${session.currentBid.toLocaleString()}`, 'info');
-      return;
-    }
-
-    const minRequired = session.currentBid + session.minimumIncrement;
-    if (amount < minRequired) {
-      showToast(`Minimum bid increment is Ksh ${minRequired.toLocaleString()}`, 'info');
-      return;
-    }
-
-    const isReserveMet = amount >= session.reservePrice;
-
-    const newBidRecord: BidRecord = {
-      id: `bid-${Date.now()}`,
-      bidderName: bidder,
-      bidderLocation: location,
-      amount,
-      timestamp: 'Just now',
-      status: 'Highest Bid'
-    };
-
-    const updatedSessions = sessions.map((s) => {
-      if (s.id === session.id) {
-        const updatedHistory = [
-          newBidRecord,
-          ...s.bidHistory.map((b) => ({ ...b, status: 'Outbid' as const }))
-        ];
-        const updatedSession = {
-          ...s,
-          currentBid: amount,
-          totalBidsCount: s.totalBidsCount + 1,
-          reserveMet: isReserveMet || s.reserveMet,
-          bidHistory: updatedHistory,
-          vehicle: { ...s.vehicle, currentBid: amount, isAuction: true }
-        };
-        if (selectedSession?.id === s.id) {
-          setSelectedSession(updatedSession);
-        }
-        return updatedSession;
-      }
-      return s;
-    });
-
-    setSessions(updatedSessions);
-    showToast(`Bid of Ksh ${amount.toLocaleString()} placed on ${session.vehicleTitle}!`);
+    void session;
+    void amount;
+    void bidder;
+    void location;
+    showToast('Bidding is disabled on preview auctions. Bid on live listings in the marketplace.', 'info');
     setCustomBidAmount('');
   };
 

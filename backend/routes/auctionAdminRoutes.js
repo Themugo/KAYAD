@@ -9,9 +9,9 @@ import Car from "../models/Car.js";
 import User from "../models/User.js";
 import Bid from "../models/Bid.js";
 
-import { startAuction, endAuction, getBidHistory } from "../realtime/auctionEngine.js";
-
-import { syncAuctionEnd } from "../services/auctionSync.service.js";
+// Canonical engine only: auction state lives on the cars row, closing
+// goes through services/auctionClose.service.js.
+import { closeAuction } from "../services/auctionClose.service.js";
 
 const router = express.Router();
 
@@ -51,12 +51,7 @@ router.post(
       return res.status(400).json({ success: false, message: "Duration required" });
     }
 
-    const result = await startAuction({
-      roomId: car._id.toString(),
-      startingBid,
-      durationMs,
-    });
-
+    // Server-authoritative schedule: the server sets both timestamps.
     car.auctionStatus = "live";
     car.allowBid = true;
     car.startingBid = startingBid;
@@ -69,7 +64,7 @@ router.post(
     res.json({
       success: true,
       message: "Auction started",
-      endTime: result.endTime,
+      endTime: car.auctionEnd,
     });
   }),
 );
@@ -84,19 +79,13 @@ router.post(
   asyncHandler(async (req, res) => {
     const carId = req.params.carId;
 
-    const result = await endAuction(carId);
+    // Canonical close: atomic live→ended transition, winner
+    // determination, loser handling, audit trail, realtime notify.
+    const result = await closeAuction(carId, { req, actor: req.user, reason: "admin_force_end" });
 
-    // 🔥 SYNC DB
-    await syncAuctionResult({
-      roomId: carId,
-      winner: result.winner,
-    });
-
-    // Always mark auction as ended and close bidding
-    await Car.findByIdAndUpdate(carId, {
-      auctionStatus: "ended",
-      allowBid: false,
-    });
+    if (!result.success && !result.alreadyClosed) {
+      return res.status(500).json({ success: false, message: "Failed to end auction" });
+    }
 
     res.json({
       success: true,
@@ -150,16 +139,12 @@ router.get(
   "/:carId/bids",
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const [dbBids, redisBids] = await Promise.all([
-      Bid.find({ carId: req.params.carId }).sort({ createdAt: -1 }).limit(100).lean(),
-
-      getBidHistory(req.params.carId),
-    ]);
+    // Canonical store: the bids table is the only bid history.
+    const bids = await Bid.find({ carId: req.params.carId }).sort({ createdAt: -1 }).limit(100).lean();
 
     res.json({
       success: true,
-      dbBids,
-      redisBids,
+      bids,
     });
   }),
 );

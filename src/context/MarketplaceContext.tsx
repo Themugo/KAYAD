@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Vehicle, BodyStyle } from '../types';
 import { mockVehicles, mockEscrowContracts, mockBids, mockNotifications } from '../data/mockData';
+import { bidsAPI } from '../api/api';
 import type { FC } from 'react';
 
 // Local type definitions for context state
@@ -191,7 +192,7 @@ interface MarketplaceContextType {
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   resetFilters: () => void;
   bids: BidLocal[];
-  placeBid: (vehicleId: string, amount: number, bidderName: string, bidderId: string) => boolean;
+  placeBid: (vehicleId: string, amount: number, bidderName: string, bidderId: string) => Promise<boolean>;
   escrowContracts: EscrowContractLocal[];
   initiateEscrow: (vehicle: Vehicle, buyerId: string, buyerName: string) => EscrowContractLocal;
   updateEscrowStep: (contractId: string, nextStep: number) => void;
@@ -315,12 +316,20 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
 
   const resetFilters = () => setFilters(initialFilters);
 
-  const placeBid = (vehicleId: string, amount: number, bidderName: string, bidderId: string): boolean => {
+  // A bid only counts once the canonical backend auction engine
+  // (POST /api/bids/:id/bid) accepts it — the frontend never decides
+  // the current bid, the minimum bid, or the winner. Local bid history
+  // is updated only after server confirmation.
+  const placeBid = async (vehicleId: string, amount: number, bidderName: string, bidderId: string): Promise<boolean> => {
     const target = vehicles.find(v => v.id === vehicleId);
     if (!target) return false;
 
-    const minBid = (target.currentBid || target.price) + 500;
-    if (amount < minBid) return false;
+    try {
+      const res = await bidsAPI.place(vehicleId, { amount });
+      if (!res?.data?.success) return false;
+    } catch {
+      return false;
+    }
 
     const newBid: BidLocal = {
       id: `bid_${Date.now()}`,

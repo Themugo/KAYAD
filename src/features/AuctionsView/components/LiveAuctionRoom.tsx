@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Gavel,
   Clock,
@@ -890,9 +890,8 @@ export const LiveAuctionRoom: FC<LiveAuctionRoomProps> = ({
   onPlaceBid,
   onClose,
 }) => {
-  const [isConnected, setIsConnected] = useState(true);
-  const [notifications, setNotifications] = useState<string[]>([]);
-  const [bids, setBids] = useState<BidEntry[]>([
+  const [notifications] = useState<string[]>([]);
+  const [bids] = useState<BidEntry[]>([
     { id: '1', timestamp: new Date().toISOString(), bidderAlias: 'C-042', amount: auction.startingBid, status: 'outbid' },
     { id: '2', timestamp: new Date().toISOString(), bidderAlias: 'A-104', amount: auction.startingBid + auction.bidIncrement, status: 'highest', isMe: true },
     { id: '3', timestamp: new Date().toISOString(), bidderAlias: 'B-227', amount: auction.startingBid + auction.bidIncrement * 2, status: 'outbid' },
@@ -905,35 +904,15 @@ export const LiveAuctionRoom: FC<LiveAuctionRoomProps> = ({
   const isClosed = auction.status === 'auction_closed' || auction.status === 'winner_confirmed' || auction.status === 'completed';
   const reserveMet = !auction.reservePrice || auction.currentBid >= auction.reservePrice;
 
-  // Simulate real-time connection
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsConnected(Math.random() > 0.05);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // No realtime socket channel is wired to this preview room — report
+  // the honest state instead of simulating one.
+  const isConnected = false;
 
-  // Add notification helper
-  const addNotification = useCallback((message: string) => {
-    setNotifications(prev => [...prev.slice(-2), message]);
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n !== message));
-    }, 5000);
-  }, []);
-
-  // Place bid handler
+  // Place bid handler — delegates to the parent. This preview room has
+  // no server-side auction behind it, so the client must never append a
+  // bid locally or declare a highest bidder; the canonical backend
+  // engine is the only authority on bid state.
   const handlePlaceBid = (amount: number) => {
-    const newBid: BidEntry = {
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
-      bidderAlias: myBid.alias,
-      amount,
-      status: 'highest',
-      isMe: true,
-    };
-    
-    setBids(prev => [...prev.map(b => ({ ...b, status: b.isMe ? 'outbid' : b.status })), newBid]);
-    addNotification(`Your bid of ${formatCurrency(amount)} has been placed!`);
     onPlaceBid(amount);
   };
 

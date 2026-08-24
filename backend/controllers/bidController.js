@@ -9,6 +9,9 @@ import { emitListingUpdate } from "../socket/socket.js";
 import { sendSMS } from "../utils/sms.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { applySnipingProtection } from "../utils/snipeGuard.js";
+import { getMinIncrement } from "../utils/bidRules.js";
+import { acquireLock, releaseLock } from "../middleware/distributedLock.js";
+import { closeAuction } from "../services/auctionClose.service.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { findOrCreateLeadFromAuction, addLeadActivity, updateLeadStage } from "../services/leadService.js";
@@ -200,6 +203,12 @@ export const placeBid = async (req, res) => {
   const session = await startSession();
   session.startTransaction();
 
+  // Per-car bid lock: serializes concurrent bids on the same auction so
+  // the read-validate-write sequence below cannot interleave. Without it
+  // two simultaneous bids can both pass the minimum-bid check.
+  let bidLock = null;
+  let bidLockResource = null;
+
   try {
     const { id: carId } = req.params;
     const { amount, phone, maxBid } = req.body;
@@ -217,6 +226,17 @@ export const placeBid = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid bid amount",
+      });
+    }
+
+    bidLockResource = `auction:bid:${carId}`;
+    bidLock = await acquireLock(bidLockResource, 15000);
+    if (!bidLock?.acquired) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(409).json({
+        success: false,
+        message: "Another bid is being processed for this auction. Retry.",
       });
     }
 
@@ -257,6 +277,18 @@ export const placeBid = async (req, res) => {
       });
     }
 
+    // Server-authoritative auction time: the status flag alone can lag
+    // the close sweep by up to one interval, so the end time itself is
+    // the final word on whether bidding is still open.
+    if (car.auctionEnd && new Date(car.auctionEnd).getTime() <= Date.now()) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: "Auction has ended",
+      });
+    }
+
     // 📱 Require verified phone for bids
     const bidder = await User.findById(userId).select("phone emailVerified phone notifications");
     if (!bidder?.phone || bidder.phone.length < 8) {
@@ -291,8 +323,8 @@ export const placeBid = async (req, res) => {
     const highest = await Bid.getHighestBid(carId);
     const currentBid = Math.max(highest?.amount || 0, car.currentBid || 0) || car.price || 0;
 
-    // 📏 Enforce minimum bid increment
-    const minIncrement = currentBid < 100000 ? 1000 : currentBid < 500000 ? 5000 : currentBid < 2000000 ? 10000 : 25000;
+    // 📏 Enforce minimum bid increment (canonical tiers — utils/bidRules.js)
+    const minIncrement = getMinIncrement(currentBid);
     if (amount < currentBid + minIncrement) {
       await session.abortTransaction();
       session.endSession();
@@ -318,7 +350,7 @@ export const placeBid = async (req, res) => {
     // =============================
     // 🧾 CREATE BID
     // =============================
-    const bid = await Bid.create([{
+    const bid = await Bid.create({
       carId,
       user: userId,
       amount,
@@ -327,7 +359,7 @@ export const placeBid = async (req, res) => {
       bidderTag: generatePseudonym(userId, carId),
       status: payment.mode === "mpesa" ? "pending" : "paid",
       checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
-    }], { session });
+    });
 
     // Create lead from bid
     try {
@@ -361,12 +393,12 @@ export const placeBid = async (req, res) => {
         target: car._id,
         targetModel: "Car",
         resourceId: carId,
-        details: { amount, bidId: bid[0]._id, mode: payment.mode },
+        details: { amount, bidId: bid.id, mode: payment.mode },
         severity: "info",
       });
 
       // Log auction bid to audit trail
-      await logAuctionBidPlaced(car, bid[0], req.user, req);
+      await logAuctionBidPlaced(car, bid, req.user, req);
 
       if (getIO()) {
         getIO().to(`car_${carId}`).emit("auctionUpdate", {
@@ -401,14 +433,14 @@ export const placeBid = async (req, res) => {
         if (canNotify(userId)) {
           const bidder = await User.findById(userId).select("email name phone notifications");
           if (bidder?.email && typeof sendBidConfirmationEmail === "function") {
-            sendBidConfirmationEmail(bidder, bid[0], car).catch((e) =>
+            sendBidConfirmationEmail(bidder, bid, car).catch((e) =>
               logWarn("Bid confirm email failed", { error: e.message }),
             );
           }
           if (bidder?.phone && bidder?.notifications?.sms !== false) {
             sendSMS(
               bidder.phone,
-              `Bid confirmed on ${car.title || "vehicle"} — KES ${Number(amount || bid[0].amount).toLocaleString("en-KE")}. Track it live on Kayad.`,
+              `Bid confirmed on ${car.title || "vehicle"} — KES ${Number(amount || bid.amount).toLocaleString("en-KE")}. Track it live on Kayad.`,
             ).catch((e) => logWarn("SMS send failed", { error: e.message }));
           }
         }
@@ -439,13 +471,17 @@ export const placeBid = async (req, res) => {
       success: true,
       message: payment.mode === "mpesa" ? "STK push sent" : "Bid placed",
       checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
-      bid: bid[0],
+      bid: bid,
     });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
     logError("PLACE BID ERROR", err);
     res.status(500).json({ success: false, message: "Bid failed" });
+  } finally {
+    if (bidLock?.acquired && bidLockResource) {
+      releaseLock(bidLockResource, bidLock.id).catch(() => {});
+    }
   }
 };
 
@@ -486,7 +522,7 @@ export const confirmBidPayment = async (req, res) => {
     if (!bid.bidderTag || bid.bidderTag === "Bidder") {
       bid.bidderTag = generatePseudonym(bid.user.toString(), bid.carId.toString());
     }
-    await bid.markAsPaid(receipt);
+    await Bid.findByIdAndUpdate(bid.id || bid._id, { status: "paid", bidderTag: bid.bidderTag });
 
     // ── PDF RECEIPT (fire-and-forget) ───────────────────────
     try {
@@ -505,7 +541,17 @@ export const confirmBidPayment = async (req, res) => {
     const car = await Car.findById(bid.carId).session(session);
     const previousHighestBidder = car?.highestBidder;
 
-    if (car) {
+    // The payment is confirmed regardless of auction state, but market
+    // state only moves while the auction is still live and the confirmed
+    // bid actually raises the price — a late or out-of-order callback
+    // must never lower currentBid or move an ended auction.
+    const auctionStillLive =
+      car &&
+      car.auctionStatus === "live" &&
+      (!car.auctionEnd || new Date(car.auctionEnd).getTime() > Date.now());
+    const raisesMarket = auctionStillLive && Number(bid.amount) > (Number(car.currentBid) || 0);
+
+    if (raisesMarket) {
       car.currentBid = bid.amount;
       car.highestBidder = bid.user;
       car.bidsCount = (car.bidsCount || 0) + 1;
@@ -516,17 +562,27 @@ export const confirmBidPayment = async (req, res) => {
 
     await session.commitTransaction();
 
-    // 🔥 AUTO-BID AFTER PAYMENT
-    await runAutoBidding(bid.carId);
+    logActionFromReq(req, "bid.payment_confirmed", {
+      target: bid.carId,
+      targetModel: "Car",
+      resourceId: String(bid.carId),
+      details: { bidId: bid.id || bid._id, amount: bid.amount, receipt, appliedToMarket: raisesMarket },
+      severity: "info",
+    });
 
-    if (getIO()) {
-      const carIdStr = bid.carId.toString();
-      getIO().to(`car_${carIdStr}`).emit("auctionUpdate", {
-        carId: carIdStr,
-        currentBid: bid.amount,
-      });
+    // 🔥 AUTO-BID + REALTIME — only when the confirmed bid moved the market
+    if (raisesMarket) {
+      await runAutoBidding(bid.carId);
+
+      if (getIO()) {
+        const carIdStr = bid.carId.toString();
+        getIO().to(`car_${carIdStr}`).emit("auctionUpdate", {
+          carId: carIdStr,
+          currentBid: car.currentBid,
+        });
+      }
+      emitListingUpdate(bid.carId.toString(), { currentBid: car.currentBid, bidsCount: car?.bidsCount || 1 });
     }
-    emitListingUpdate(bid.carId.toString(), { currentBid: bid.amount, bidsCount: car?.bidsCount || 1 });
 
     // 📧 Email notifications + 📱 SMS (fire-and-forget)
     try {
@@ -599,69 +655,33 @@ export const getMyBids = async (req, res) => {
 };
 
 // =============================
-// 🏁 END AUCTION
+// 🏁 END AUCTION (ADMIN)
 // =============================
+// Delegates to the canonical close path — the same code the auto-close
+// sweep and dealer/admin control routes use. Route middleware already
+// provides adminOnly + idempotency.
 export const endAuction = async (req, res) => {
   try {
     const { id: carId } = req.params;
-    const session = await startSession();
-    session.startTransaction();
 
-    try {
-      const car = await Car.findById(carId).session(session);
-      if (!car) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(404).json({ success: false, message: "Car not found" });
-      }
-
-      const highestBid = await Bid.getHighestBid(carId);
-
-      if (!highestBid) {
-        car.auctionStatus = "ended";
-        await car.save({ session });
-        await session.commitTransaction();
-        session.endSession();
-        return res.json({ success: true });
-      }
-
-      car.auctionStatus = "ended";
-      car.winner = {
-        user: highestBid.user?._id || highestBid.user,
-        amount: highestBid.amount,
-      };
-
-      await car.save({ session });
-      await Bid.markWinner(highestBid._id, session);
-
-      await session.commitTransaction();
-      session.endSession();
-
-      logActionFromReq(req, "auction.ended", {
-        target: car._id,
-        targetModel: "Car",
-        resourceId: carId,
-        details: { winner: car.winner, finalBid: highestBid.amount },
-        severity: "info",
-      });
-
-      if (getIO()) {
-        getIO().to(`car_${carId}`).emit("auctionEnded", {
-          carId,
-          winner: car.winner,
-        });
-      }
-      emitListingUpdate(carId, { auctionStatus: "ended", sold: true });
-
-      res.json({
-        success: true,
-        winner: car.winner,
-      });
-    } catch (err) {
-      await session.abortTransaction();
-      session.endSession();
-      throw err;
+    const car = await Car.findById(carId);
+    if (!car) {
+      return res.status(404).json({ success: false, message: "Car not found" });
     }
+
+    const result = await closeAuction(carId, { req, actor: req.user, reason: "admin_end" });
+
+    if (result.alreadyClosed) {
+      return res.json({ success: true, alreadyClosed: true });
+    }
+    if (!result.success) {
+      return res.status(500).json({ success: false, message: "Failed to end auction" });
+    }
+
+    res.json({
+      success: true,
+      winner: result.winner,
+    });
   } catch (err) {
     logError("Failed to end auction", err);
     res.status(500).json({ success: false, message: "Failed to end auction" });

@@ -8,6 +8,8 @@ import { emitListingUpdate } from "../socket/socket.js";
 import { sendNotification } from "../services/notification.service.js";
 import { sendSMS } from "../utils/sms.js";
 import { getIO } from "../utils/io.js";
+import { applySnipingProtection } from "../utils/snipeGuard.js";
+import { getMinNextBid } from "../utils/bidRules.js";
 
 // =============================
 // 🔢 SMS BID PARSER
@@ -70,11 +72,12 @@ export const handleInboundSms = async (req, res) => {
     }
 
     const highest = await Bid.getHighestBid(car._id);
-    const currentBid = highest?.amount || car.currentBid || car.price;
-    if (amount <= currentBid) {
+    const currentBid = Math.max(highest?.amount || 0, car.currentBid || 0) || car.price || 0;
+    const minNextBid = getMinNextBid(currentBid);
+    if (amount < minNextBid) {
       await sendSMS(
         cleanedPhone,
-        `Bid too low. Current bid is KES ${currentBid.toLocaleString("en-KE")}. Reply with a higher amount.`,
+        `Bid too low. Minimum next bid is KES ${minNextBid.toLocaleString("en-KE")} (current: KES ${currentBid.toLocaleString("en-KE")}). Reply with a higher amount.`,
       );
       return res.json({ success: true, message: "Bid too low" });
     }
@@ -97,18 +100,9 @@ export const handleInboundSms = async (req, res) => {
     car.bidsCount = (car.bidsCount || 0) + 1;
     await car.save();
 
-    // Sniping protection
-    if (car.auctionEnd) {
-      const now = Date.now();
-      const end = new Date(car.auctionEnd).getTime();
-      const remaining = end - now;
-      if (remaining > 0 && remaining < 120000) {
-        car.auctionEnd = new Date(end + 120000);
-        await car.save();
-        const { emitAuctionExtended } = await import("../socket/socket.js");
-        emitAuctionExtended(car._id.toString(), car.auctionEnd);
-      }
-    }
+    // Sniping protection — canonical implementation (env-configured
+    // window/extension, extension caps, realtime notify).
+    await applySnipingProtection(car);
 
     // Socket events
     if (getIO()) {
