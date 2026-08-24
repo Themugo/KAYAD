@@ -11,7 +11,10 @@ export const VALIDATION_LIMITS = {
   password: { min: 8, max: 128 },
 };
 
-export function validateEmail(email) {
+// Note: helpers.ts owns the canonical boolean validateEmail (both are
+// re-exported through utils/index.ts, so this module's richer result
+// variant would collide). This one stays internal to this module.
+function validateEmailDetailed(email) {
   if (!email) return { valid: false, error: 'Email is required' };
   const str = String(email).trim();
   if (str.length > 255) return { valid: false, error: 'Email too long' };
@@ -125,7 +128,7 @@ export function logSecurityEvent(event, metadata = {}) {
 
 export default {
   VALIDATION_PATTERNS, VALIDATION_LIMITS,
-  validateEmail, validatePhone,
+  validateEmail: validateEmailDetailed, validatePhone,
   sanitizeHTML, sanitizeQueryObject, isSafeURL,
   validateFile, UPLOAD_LIMITS,
   getSecurityHeaders, getCSRFToken,
