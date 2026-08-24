@@ -1,7 +1,7 @@
 {
   "name": "kayad-backend",
   "version": "2.0.0",
-  "description": "Kayad API — Live Auctions, M-Pesa, Escrow",
+  "description": "Kayad API \u2014 Live Auctions, M-Pesa, Escrow",
   "main": "server.js",
   "type": "module",
   "engines": {
@@ -22,7 +22,6 @@
     "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --passWithNoTests --coverage",
     "backup": "node scripts/backup.js",
     "backup:status": "node scripts/backup.js status",
-    "release": "semantic-release",
     "monitor": "node scripts/deploymentMonitor.js monitor",
     "health-check": "node scripts/deploymentMonitor.js check",
     "notify-deployment": "node scripts/deploymentMonitor.js notify"
@@ -65,7 +64,6 @@
     "posthog-node": "^5.47.2",
     "sharp": "^0.35.3",
     "socket.io": "^4.8.3",
-    "stripe": "^22.4.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^6.0.2",
@@ -74,20 +72,16 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
-    "@semantic-release/changelog": "^7.0.0",
-    "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/git": "^11.0.1",
-    "@semantic-release/github": "^12.0.9",
-    "@semantic-release/npm": "^13.1.5",
-    "@semantic-release/release-notes-generator": "^14.1.1",
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
-    "prettier": "^3.9.5",
-    "semantic-release": "^25.0.6"
+    "prettier": "^3.9.5"
   },
   "overrides": {
-    "brace-expansion": "^5.0.6",
+    "brace-expansion": "^5.0.9",
     "ws": "^8.20.1",
-    "minimist": "^1.2.8"
+    "minimist": "^1.2.8",
+    "ip-address": "^10.3.1",
+    "tar": "^7.5.21",
+    "undici": "^6.27.1"
   }
 }

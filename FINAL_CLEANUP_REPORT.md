@@ -32,9 +32,10 @@ For each candidate: `grep` across `src/`, `e2e/`, `backend/` for static imports,
 ## What was deliberately NOT removed (looked suspicious but is live)
 
 - **7 "unmounted" backend route files** (`auctionRoutes`, `bidLogRoutes`, `biddingSecurityRoutes`, `localizationRoutes`, `transactionLedgerRoutes`, `userPreferenceRoutes`) — all actually mounted in `routes/v1.js` (the `/api/v1` tree). Verified, kept.
-- `mediaEventRoutes.js` / `mediaEventController.js` / `mediaEventEngine/` — an entire parallel media-event subsystem with a test suite (`mediaEventEngine.test.js`, which passes). The routes/controller are not mounted in `server.js` or `v1.js`, but the engine is tested and the controller is the only consumer of much of the engine. **Judgement call: NOT deleted** — removing a tested subsystem with a live controller is a product decision, not proven dead debt. Flagged here for an explicit owner decision instead.
-- `web-vitals` dependency — 0 direct `from 'web-vitals'` imports found, but it's a declared runtime dep that may be used via `reportWebVitals` patterns; no build/test failure proves it dead. Kept (harmless).
+- ~~`mediaEventRoutes.js` / `mediaEventController.js`~~ — **removed in the second pass** (see below): the routes were mounted nowhere, the controller was consumed only by those routes, and no test touches either. The `mediaEventEngine/` library itself is **kept** — its own test suite depends on it and passes.
+- `web-vitals` dependency — dynamically imported in `utils/observability.ts` (`await import('web-vitals')`). Live. Kept.
 - All `services/*Api.js` — each has ≥1 importer. Kept.
+- All `docs/` (57 files) — these are the phase truth-maps and audit evidence this directive instructs to clean *using*; deleting them would destroy the evidence trail. Kept.
 
 ## Gates after cleanup (all green)
 
@@ -45,7 +46,24 @@ For each candidate: `grep` across `src/`, `e2e/`, `backend/` for static imports,
 | Backend tests (Jest) | **16/16 suites, 335/335 passed** |
 | Frontend build (`vite build`) | **succeeds** (chunk-size warning only) |
 | E2E workflow-certification (Playwright, system Chromium) | **8/8 passed** |
-| Security audit (`npm audit --audit-level=high`) | **0 vulnerabilities** |
+| Security audit (`npm audit --audit-level=high`) | **0 vulnerabilities (frontend AND backend)** |
+
+## Second pass (2026-08-24) — additional proven-dead removals
+
+| Item | Class | Verification evidence |
+| --- | --- | --- |
+| `src/pages/HomePage.jsx` | orphaned page | 0 imports, no router config, no test import (matches are unrelated `MobileHomePage` / `isHomePage` prop) |
+| `src/pages/ChatPage.jsx` | orphaned duplicate page | 0 imports; `ChatPage.test.jsx` imports `pages/Chat.tsx` (the live twin) |
+| `src/pages/ProfilePage.jsx` | orphaned duplicate page | 0 imports; `ProfilePage.test.jsx` imports `pages/Profile.tsx` |
+| `src/pages/Home.tsx` | orphaned page | imports CarCard types but is imported by nothing; app shell doesn't route it |
+| `src/test-setup.ts` | dead config file | 0 references; vitest uses `src/__tests__/setup.js` |
+| `backend/routes/mediaEventRoutes.js` | orphaned routes | mounted in neither `server.js` nor `v1.js`; referenced only by itself; tests don't touch it |
+| `backend/controllers/mediaEventController.js` | orphaned controller | consumed only by the orphaned routes file; engine (`mediaEventEngine/`) KEPT — its test suite exercises it directly |
+| `stripe` (backend dependency) | unused dependency | never imported anywhere (only the string `'stripe'` as a provider label in seed data) |
+| `semantic-release` + 5 `@semantic-release/*` plugins + `release` script (backend devDeps) | abandoned experiment / unused dependencies | no `.releaserc`, no CI workflow, no code reference; also the source of ALL 7 remaining backend audit vulnerabilities (bundled npm inside it). Backend `npm audit --audit-level=high` now **0** |
+| Fixed runtime CVEs | security | `dompurify`, `ip-address`, `brace-expansion` (runtime copies) via `npm audit fix` + version overrides (`brace-expansion ^5.0.9`, `ip-address ^10.3.1`, `tar ^7.5.21`, `undici ^6.27.1`) |
+
+Note: `backend/mediaEventEngine/` itself was again **kept** — its own test suite (`mediaEventEngine.test.js`) depends on it and passes. Only the unmounted routes and their exclusively-consuming controller were removed as proven dead.
 
 ---
 
