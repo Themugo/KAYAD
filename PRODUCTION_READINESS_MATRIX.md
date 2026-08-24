@@ -18,9 +18,17 @@ Scope: End-to-end workflow certification using the existing Playwright infrastru
 
 ## Environment finding (verified empirically)
 
-1. Existing E2E specs (10 files, ~4,290 lines, 8 workflow areas) all fail at setup: `ApiHelper.loginApi` → **404**, because the frontend dev server on `:3000` does not proxy `/api` to the backend and no backend with a database is reachable. Root cause is **environment**, not application code.
-2. The backend without Supabase accepts connections but requests never complete (queue/DB init blocks) — so "backend-only, no DB" is not a usable staging tier either.
-3. The pre-existing specs also encode stale UI contracts (e.g. a `firstName`/`lastName` registration form; the deployed `RegisterPage.jsx` uses `name` + a role-picker) — test drift, separate from any app bug.
+Run attempt executed 2026-08-24 with the existing Playwright infrastructure, frontend dev server serving the real build, and system Chromium installed:
+
+```
+$ BASE_URL=http://localhost:3000 playwright test tests/vehicle-listing/vehicle-listing.spec.ts -g "should create vehicle listing successfully"
+✘ 1 failed — Error: Login failed: 404   (ApiHelper.loginApi → POST /api/auth/login never reaches a backend)
+```
+
+1. Existing E2E specs (10 files, ~4,290 lines, 8 workflow areas) all fail at setup the same way: `ApiHelper.loginApi` → **404**, because the frontend dev server on `:3000` does not proxy `/api` to the backend and no backend with a database is reachable. Root cause is **environment**, not application code.
+2. The backend without Supabase accepts connections but requests never complete (queue/DB init blocks) — so "backend-only, no DB" is not a usable staging tier either (verified by curl probe: connection accepted, `/health` never returns).
+3. No Supabase credentials exist anywhere in this environment (checked process env, repo, and all of `docs/`) — only example placeholders. A staging database cannot be provisioned from inside this workspace.
+4. The pre-existing specs also encode stale UI contracts (e.g. a `firstName`/`lastName` registration form; the deployed `RegisterPage.jsx` uses `name` + a role-picker) — test drift, separate from any app bug.
 
 ## Workflow evidence matrix
 
