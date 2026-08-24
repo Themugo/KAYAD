@@ -68,7 +68,7 @@ The certification gate "CI passes" required fixing what was actually failing. Al
 | Gate | Result |
 | --- | --- |
 | Build passes | ✅ `vite build` OK; backend `node --check` clean |
-| CI passes | ❌→⏳ Was failing on main; root causes fixed here — **CI result on this commit pending, recorded in §6 before declaring anything** |
+| CI passes | ✅ **CONFIRMED on this commit** — run 32752332202 (`c8c0251`): Quality Checks **success**, Security Audit **success**; CodeQL **success**. Was failing on main before this phase (lint / tests / audit) |
 | Security checks pass | ✅ CodeQL: success (latest runs). `npm audit --audit-level=high`: 0 vulnerabilities after fix. Phase 10 security suite: 56/56 |
 | E2E passes | ⚠️ PARTIAL — Phase 12 workflow-certification suite: 8/8 vs real build locally. **P0 E2E against the deployed environment: CANNOT RUN — both production endpoints are down (§1)** |
 | Database persistence verified | ⚠️ NOT VERIFIED — no reachable production backend/database |
@@ -88,7 +88,7 @@ The certification gate "CI passes" required fixing what was actually failing. Al
 2. **The production backend is down** — `api.kayad.space` returns 502 on every endpoint including `/health`.
 3. **`www.kayad.space` TLS certificate is expired** (since 2026-08-16).
 4. **Smoke tests and the P0 E2E suite cannot run against the real deployment** because it does not respond — so every live-environment item above is NOT VERIFIED, not PASS.
-5. CI on main was failing at the start of this phase (lint, tests, security audit). The root causes — including two production runtime crashes and a demo-only auth modal — are fixed in this commit; the CI run for this commit is the acceptance check.
+5. CI on main was failing at the start of this phase (lint, tests, security audit). The root causes — including two production runtime crashes and a demo-only auth modal — are fixed in this commit, and **CI is now confirmed green on it** (Quality Checks + Security Audit + CodeQL all success). Deploy to Production still fails: Vercel credentials/project missing (owner-side, §1).
 
 **Minimum actions before re-certification (owner-side, require dashboard access):**
 1. Restore/re-link the Vercel project (or remove the stale DNS), set `VITE_API_URL=https://api.kayad.space`, fix `VERCEL_TOKEN` + project secrets for `deploy.yml`.
