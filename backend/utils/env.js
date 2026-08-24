@@ -37,6 +37,15 @@ const ALWAYS_REQUIRED_VARS = [
   { key: "PORT", desc: "Server port" },
 ];
 
+// Required only in production — local development may rely on
+// documented fallbacks, but a production deploy that silently falls
+// back to localhost (FRONTEND_URL → http://localhost:3000 in server.js)
+// produces wrong CORS/callback/email-link behavior with no loud error.
+const PRODUCTION_REQUIRED_VARS = [
+  { key: "FRONTEND_URL", desc: "Public frontend origin (CORS, email links)" },
+  { key: "BACKEND_URL", desc: "Public backend origin (payment callbacks)" },
+];
+
 const FEATURE_GROUPS = [
   {
     label: "M-Pesa (Safaricom Daraja)",
@@ -97,6 +106,16 @@ export const validateEnv = (opts = { silent: false }) => {
     } catch {
       console.error(`  ❌ Missing required env: ${key} (${desc})`);
       hasError = true;
+    }
+  }
+
+  // ─── PRODUCTION-ONLY REQUIRED ────────────────────────────────
+  if (process.env.NODE_ENV === "production") {
+    for (const { key, desc } of PRODUCTION_REQUIRED_VARS) {
+      if (!process.env[key]) {
+        console.error(`  ❌ Missing production-required env: ${key} (${desc})`);
+        hasError = true;
+      }
     }
   }
 

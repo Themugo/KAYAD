@@ -19,6 +19,16 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      // Dev-only: forward /api to the local backend so the frontend's
+      // relative API calls (and the e2e ApiHelper) reach it instead of
+      // getting the SPA index.html. Production API URL comes from
+      // VITE_API_URL at build time; this proxy never ships.
+      proxy: {
+        '/api': {
+          target: process.env.VITE_DEV_API_TARGET || 'http://localhost:5000',
+          changeOrigin: true,
+        },
+      },
     },
   };
 });

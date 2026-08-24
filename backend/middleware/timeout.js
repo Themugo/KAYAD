@@ -5,8 +5,15 @@
 
 export const createTimeoutMiddleware = (timeoutMs) => {
   return (req, res, next) => {
+    // Without a callback, a socket timeout destroys the connection with
+    // no HTTP response at all — the client sees a bare connection reset
+    // instead of an actionable error. Respond 408 explicitly first.
+    const onTimeout = () => {
+      if (res.headersSent) return;
+      res.status(408).json({ success: false, message: "Request timeout" });
+    };
     req.setTimeout(timeoutMs);
-    res.setTimeout(timeoutMs);
+    res.setTimeout(timeoutMs, onTimeout);
     next();
   };
 };

@@ -978,24 +978,41 @@ const shutdown = async (signal) => {
 if (NODE_ENV !== "test") {
   process.on("SIGTERM", () => shutdown("SIGTERM"));
   process.on("SIGINT", () => shutdown("SIGINT"));
-  process.on("unhandledRejection", async (err) => {
-    // Skip shutdown for Supabase connection errors - server can run without database
-    if (err.message && err.message.includes("Supabase not initialized")) {
-      logError("Supabase-related unhandled rejection (non-fatal)", err);
-      return;
-    }
+  // Rejections from per-request or per-job async work are logged and
+  // alerted, but must NOT take down the whole server — one bad request
+  // killing every other in-flight request is a worse failure mode than
+  // the rejection itself. A threshold guards against a process that is
+  // genuinely reject-looping (sustained leak): only then do we restart.
+  let rejectionBurst = 0;
+  let rejectionWindowStart = Date.now();
+  const REJECTION_BURST_LIMIT = 25;
+  const REJECTION_WINDOW_MS = 60_000;
 
-    logError("Unhandled rejection", err);
+  process.on("unhandledRejection", async (err) => {
+    logError("Unhandled rejection (non-fatal)", err);
     recordError("unhandled_rejection", String(err));
 
-    // Trigger critical alert
-    if (process.env.SENTRY_DSN) {
+    // Trigger critical alert (rate-limited to avoid alert storms)
+    if (process.env.SENTRY_DSN && rejectionBurst === 0) {
       await triggerAlert("Unhandled Rejection", `Unhandled promise rejection: ${String(err)}`, ALERT_LEVELS.CRITICAL, {
         reason: String(err),
       });
     }
 
-    shutdown("unhandledRejection");
+    const now = Date.now();
+    if (now - rejectionWindowStart > REJECTION_WINDOW_MS) {
+      rejectionWindowStart = now;
+      rejectionBurst = 0;
+    }
+    rejectionBurst++;
+
+    if (rejectionBurst > REJECTION_BURST_LIMIT) {
+      logError("Unhandled-rejection burst limit exceeded — shutting down for orchestrator restart", null, {
+        count: rejectionBurst,
+        windowMs: REJECTION_WINDOW_MS,
+      });
+      shutdown("unhandledRejectionBurst");
+    }
   });
   process.on("uncaughtException", async (err) => {
     logError("Uncaught exception", err);
