@@ -1,5 +1,9 @@
 import { Vehicle, Dealer, EscrowTransaction, ChatMessage } from '../types';
 
+// Shared time helper so every mock auction/end date is relative to load
+// time and can never go stale against the app's own countdown logic.
+export const hoursFromNow = (h: number): string => new Date(Date.now() + h * 60 * 60 * 1000).toISOString();
+
 // Default values for required Vehicle properties
 const defaultVehicleProps = {
   vin: 'UNKNOWN',
@@ -152,7 +156,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     escrowEligible: true,
     financeAvailable: true,
     isAuction: true, // LIVE AUCTION enabled -> MUST display auction badge
-    auctionEndsAt: '2026-08-01T15:00:00Z',
+    auctionEndsAt: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
     currentBid: 2300000,
     image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=800',
     description: 'Fuel efficient hybrid SUV with intelligent 4x4 lock. Includes panaromic sunroof and zero accident record.',
@@ -220,7 +224,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     escrowEligible: true, // Escrow enabled
     financeAvailable: true,
     isAuction: true, // LIVE AUCTION enabled
-    auctionEndsAt: '2026-07-30T18:00:00Z',
+    auctionEndsAt: new Date(Date.now() + 20 * 60 * 60 * 1000).toISOString(),
     currentBid: 4100000,
     image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=800',
     description: 'Executive sedan with AMG body styling, widescreen cockpit digital display, ambient lighting, ambient fragrance.',

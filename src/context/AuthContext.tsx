@@ -39,6 +39,23 @@ interface AuthContextValue {
 
 const AuthCtx = createContext<AuthContextValue | null>(null);
 
+// Backend→frontend role mapping contract (locked by
+// src/__tests__/context/roleMapping.test.ts, docs/ROLE_MATRIX.md):
+// every real backend role keeps its identity; only the backend "user"
+// role maps to this frontend's pre-existing "buyer" term; anything
+// unrecognized fails closed to "buyer" (least privileged).
+const KNOWN_ROLES = [
+  'dealer', 'admin', 'superadmin', 'broker', 'individual_seller',
+  'ghost_checker', 'moderator', 'ad_manager', 'marketing',
+  'escrow_officer', 'technical_support', 'hr', 'accounts',
+];
+
+export function mapBackendRoleToFrontend(role: string): string {
+  if (role === 'user') return 'buyer';
+  if (KNOWN_ROLES.includes(role)) return role;
+  return 'buyer';
+}
+
 // Normalize user object to always have both _id and id fields
 const normalizeUser = (u: any): User | null => {
   if (!u) return null;

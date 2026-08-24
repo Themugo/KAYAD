@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle } from '../types';
+import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { isEscrowApplicable, getEscrowBadgeLabel } from '../utils/escrow';
 import { 
   CheckCircle2, 
@@ -58,6 +59,9 @@ interface VehicleDetailModalProps {
   onStartEscrow: (vehicle: Vehicle) => void;
   onContactSeller: (vehicle: Vehicle) => void;
   onRequestInspection?: (vehicle: Vehicle) => void;
+  onViewAuctionLot?: (vehicle: Vehicle) => void;
+  onNavigateToFinancing?: (vehicle: Vehicle) => void;
+  onViewShowroom?: (sellerName: string) => void;
   isSaved: boolean;
   onToggleSave: (id: string) => void;
   onSelectVehicle?: (vehicle: Vehicle) => void;
@@ -71,6 +75,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   onStartEscrow,
   onContactSeller,
   onRequestInspection,
+  onViewAuctionLot,
+  onNavigateToFinancing,
+  onViewShowroom,
   isSaved,
   onToggleSave,
   onSelectVehicle
@@ -121,6 +128,50 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       setTestDriveBooked(false);
       setShareSuccess(false);
     }
+  }, [vehicle]);
+
+  // Grouped Features Categorization.
+  // MUST stay above the early returns below: React hooks may not be
+  // called conditionally — with this useMemo after `if (!vehicle)
+  // return null`, re-rendering the same mounted instance from closed
+  // (vehicle=null) to open ran more hooks than the previous render and
+  // crashed with React error #310 on the real click path.
+  const featureGroups = useMemo(() => {
+    if (!vehicle) {
+      return { safety: [], comfort: [], technology: [], utility: [] } as Record<string, string[]>;
+    }
+
+    const rawFeatures = vehicle.features || [
+      'EyeSight Driver Assist', 'Lane Departure Warning', 'ABS Brakes', 'Multiple Airbags',
+      'Heated Seats', 'Dual Climate Control', 'Leather Interior', 'Sunroof',
+      'Apple CarPlay', 'Bluetooth Connectivity', 'Premium Audio System', 'Reverse Camera',
+      'Roof Rails', 'Power Tailgate', 'Cargo Cover', 'Alloy Wheels'
+    ];
+
+    const safety: string[] = [];
+    const comfort: string[] = [];
+    const technology: string[] = [];
+    const utility: string[] = [];
+
+    rawFeatures.forEach(feat => {
+      const lower = feat.toLowerCase();
+      if (lower.includes('eyesight') || lower.includes('lane') || lower.includes('abs') || lower.includes('airbag') || lower.includes('safety') || lower.includes('brake') || lower.includes('blind')) {
+        safety.push(feat);
+      } else if (lower.includes('heat') || lower.includes('climate') || lower.includes('leather') || lower.includes('seat') || lower.includes('sunroof') || lower.includes('keyless')) {
+        comfort.push(feat);
+      } else if (lower.includes('play') || lower.includes('bluetooth') || lower.includes('audio') || lower.includes('camera') || lower.includes('nav') || lower.includes('screen') || lower.includes('tech')) {
+        technology.push(feat);
+      } else {
+        utility.push(feat);
+      }
+    });
+
+    return {
+      safety: safety.length ? safety : ['EyeSight Driver Assist', 'Lane Keep Assist', 'Anti-Lock Brakes (ABS)', 'Front & Side Airbags'],
+      comfort: comfort.length ? comfort : ['Heated Front Seats', 'Dual-Zone Automatic Climate Control', 'Leather Upholstery'],
+      technology: technology.length ? technology : ['Apple CarPlay & Android Auto', 'Bluetooth Audio & Hands-Free', 'Multi-View Reverse Camera'],
+      utility: utility.length ? utility : ['Roof Rails & Crossbars', 'Power Tailgate', 'Retractable Cargo Cover']
+    };
   }, [vehicle]);
 
   if (!vehicle && !notFoundId) return null;
@@ -183,6 +234,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const isInspectionActive = Boolean(vehicle.inspectionPassed);
   const isFinanceActive = Boolean(vehicle.financeAvailable);
 
+  // For auction vehicles, the displayed price must be the live auction
+  // session's currentBid — vehicle.price is the stale starting price
+  // and visibly disagrees with the auction page for the same vehicle.
+  const liveAuctionSession = isAuction
+    ? INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id)
+    : undefined;
+  const displayPrice = liveAuctionSession?.currentBid ?? vehicle.price;
+
   // Market Deal Analysis
   const getMarketDiff = () => {
     if (!vehicle.marketPriceAvg) return null;
@@ -220,41 +279,6 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const toggleSpecSection = (key: string) => {
     setOpenSpecSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
-
-  // Grouped Features Categorization
-  const featureGroups = useMemo(() => {
-    const rawFeatures = vehicle.features || [
-      'EyeSight Driver Assist', 'Lane Departure Warning', 'ABS Brakes', 'Multiple Airbags',
-      'Heated Seats', 'Dual Climate Control', 'Leather Interior', 'Sunroof',
-      'Apple CarPlay', 'Bluetooth Connectivity', 'Premium Audio System', 'Reverse Camera',
-      'Roof Rails', 'Power Tailgate', 'Cargo Cover', 'Alloy Wheels'
-    ];
-
-    const safety: string[] = [];
-    const comfort: string[] = [];
-    const technology: string[] = [];
-    const utility: string[] = [];
-
-    rawFeatures.forEach(feat => {
-      const lower = feat.toLowerCase();
-      if (lower.includes('eyesight') || lower.includes('lane') || lower.includes('abs') || lower.includes('airbag') || lower.includes('safety') || lower.includes('brake') || lower.includes('blind')) {
-        safety.push(feat);
-      } else if (lower.includes('heat') || lower.includes('climate') || lower.includes('leather') || lower.includes('seat') || lower.includes('sunroof') || lower.includes('keyless')) {
-        comfort.push(feat);
-      } else if (lower.includes('play') || lower.includes('bluetooth') || lower.includes('audio') || lower.includes('camera') || lower.includes('nav') || lower.includes('screen') || lower.includes('tech')) {
-        technology.push(feat);
-      } else {
-        utility.push(feat);
-      }
-    });
-
-    return {
-      safety: safety.length ? safety : ['EyeSight Driver Assist', 'Lane Keep Assist', 'Anti-Lock Brakes (ABS)', 'Front & Side Airbags'],
-      comfort: comfort.length ? comfort : ['Heated Front Seats', 'Dual-Zone Automatic Climate Control', 'Leather Upholstery'],
-      technology: technology.length ? technology : ['Apple CarPlay & Android Auto', 'Bluetooth Audio & Hands-Free', 'Multi-View Reverse Camera'],
-      utility: utility.length ? utility : ['Roof Rails & Crossbars', 'Power Tailgate', 'Retractable Cargo Cover']
-    };
-  }, [vehicle.features]);
 
   // Header Title Component
   const modalTitle = (
@@ -429,7 +453,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         {isAuction ? 'Current Highest Bid' : 'Listed Price'}
                       </p>
                       <span className="text-3xl font-black text-[#1E3063] font-display tracking-tight">
-                        Ksh {vehicle.price.toLocaleString()}
+                        Ksh {displayPrice.toLocaleString()}
                       </span>
                     </div>
 
@@ -483,7 +507,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => onContactSeller(vehicle)}
+                      onClick={() => (onViewShowroom ? onViewShowroom(vehicle.sellerName) : onContactSeller(vehicle))}
                     >
                       <Building2 className="w-3.5 h-3.5 text-amber-400" />
                       <span>View Showroom</span>
@@ -509,7 +533,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     variant="accent"
                     size="lg"
                     fullWidth
-                    onClick={() => onContactSeller(vehicle)}
+                    onClick={() => (onViewAuctionLot ? onViewAuctionLot(vehicle) : onContactSeller(vehicle))}
                     className="shadow-md font-black text-sm"
                   >
                     <Gavel className="w-5 h-5 text-[#17244B]" />
@@ -531,7 +555,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     variant="primary"
                     size="lg"
                     fullWidth
-                    onClick={() => onContactSeller(vehicle)}
+                    onClick={() => (onRequestInspection ? onRequestInspection(vehicle) : onContactSeller(vehicle))}
                     className="shadow-md font-black text-sm"
                   >
                     <MessageSquare className="w-5 h-5 text-white" />
@@ -881,7 +905,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <Button
                   variant="accent"
                   size="md"
-                  onClick={() => onContactSeller(vehicle)}
+                  onClick={() => (onNavigateToFinancing ? onNavigateToFinancing(vehicle) : onContactSeller(vehicle))}
                   fullWidth
                 >
                   <span>Compare Bank Rates for this Vehicle</span>
@@ -968,9 +992,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           ========================================== */}
       <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 lg:hidden shadow-lg flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Listed Price</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">{isAuction ? 'Current Highest Bid' : 'Listed Price'}</p>
           <p className="text-base font-black text-[#1E3063] font-display">
-            Ksh {vehicle.price.toLocaleString()}
+            Ksh {displayPrice.toLocaleString()}
           </p>
         </div>
 

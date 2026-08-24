@@ -1,5 +1,5 @@
 import { AuctionSession, Vehicle, AuctionOrganizerType } from '../types';
-import { INITIAL_VEHICLES } from './mockVehicles';
+import { INITIAL_VEHICLES, hoursFromNow } from './mockVehicles';
 
 const nissanVehicle = INITIAL_VEHICLES.find(v => v.id === 'v4') || INITIAL_VEHICLES[3];
 const mercVehicle = INITIAL_VEHICLES.find(v => v.id === 'v6') || INITIAL_VEHICLES[5];
@@ -230,9 +230,9 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     currentBid: 2300000,
     buyoutPrice: 2450000,
     minimumIncrement: 25000,
-    startsAt: '2026-07-28T09:00:00Z',
-    endsAt: '2026-08-01T15:00:00Z',
-    totalBidsCount: 14,
+    startsAt: hoursFromNow(-48),
+    endsAt: hoursFromNow(6),
+    totalBidsCount: 6,
     uniqueBiddersCount: 6,
     reserveMet: true,
     termsAndConditions: [
@@ -266,9 +266,9 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     currentBid: 4100000,
     buyoutPrice: 4350000,
     minimumIncrement: 50000,
-    startsAt: '2026-07-27T10:00:00Z',
-    endsAt: '2026-07-30T18:00:00Z',
-    totalBidsCount: 19,
+    startsAt: hoursFromNow(-72),
+    endsAt: hoursFromNow(20),
+    totalBidsCount: 4,
     uniqueBiddersCount: 8,
     reserveMet: true,
     termsAndConditions: [
@@ -300,8 +300,8 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     currentBid: 5900000,
     buyoutPrice: 6850000,
     minimumIncrement: 50000,
-    startsAt: '2026-08-05T09:00:00Z',
-    endsAt: '2026-08-08T18:00:00Z',
+    startsAt: hoursFromNow(48),
+    endsAt: hoursFromNow(96),
     totalBidsCount: 0,
     uniqueBiddersCount: 0,
     reserveMet: false,
@@ -328,9 +328,9 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     currentBid: 3200000,
     buyoutPrice: 3250000,
     minimumIncrement: 25000,
-    startsAt: '2026-07-20T09:00:00Z',
-    endsAt: '2026-07-25T18:00:00Z',
-    totalBidsCount: 22,
+    startsAt: hoursFromNow(-144),
+    endsAt: hoursFromNow(-96),
+    totalBidsCount: 2,
     uniqueBiddersCount: 9,
     reserveMet: true,
     termsAndConditions: [

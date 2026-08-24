@@ -3,36 +3,22 @@ import { renderHook, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../../context/AuthContext';
 import { MemoryRouter } from 'react-router-dom';
 
-// Mock supabase client - the AuthContext uses supabase directly
-vi.mock('../../lib/supabaseClient', () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
-      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
-      signInWithPassword: vi.fn(),
-      signUp: vi.fn(),
-      signOut: vi.fn(),
-      updateUser: vi.fn(),
-    },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          maybeSingle: vi.fn().mockResolvedValue({ data: null }),
-        })),
-      })),
-    })),
+// Mock the real dependency: AuthContext calls authAPI.me() on mount
+// (cookie-based session probe). A 401/network failure is the normal
+// "not logged in" case and must resolve loading to false.
+vi.mock('../../api/api', () => ({
+  authAPI: {
+    me: vi.fn().mockRejectedValue(Object.assign(new Error('Unauthorized'), { response: { status: 401 } })),
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn().mockResolvedValue({}),
+    updateProfile: vi.fn(),
   },
 }));
 
-vi.mock('../../utils/sentry', () => ({
-  setSentryUser: vi.fn(),
-  clearSentryUser: vi.fn(),
-}));
-
-vi.mock('../../utils/security', () => ({
-  logSecurityEvent: vi.fn(),
-  SecurityEvents: {},
-  initSessionMonitor: vi.fn(() => vi.fn()),
+vi.mock('../../utils/posthog', () => ({
+  setPostHogUser: vi.fn(),
+  clearPostHogUser: vi.fn(),
 }));
 
 function wrapper({ children }) {

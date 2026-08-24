@@ -104,7 +104,11 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
 
   // Professional Inspection Booking State
   const [selectedInspector, setSelectedInspector] = useState<InspectorOption | null>(MOCK_INSPECTORS[0]);
-  const [bookingDate, setBookingDate] = useState('2026-07-31');
+  // Default 3 days from now (never a stale hardcoded date); min=today
+  // stops the picker accepting an already-passed booking date.
+  const todayIso = new Date().toISOString().split('T')[0];
+  const defaultBookingDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const [bookingDate, setBookingDate] = useState(defaultBookingDate);
   const [bookingTime, setBookingTime] = useState('10:00 AM');
   const [buyerNotes, setBuyerNotes] = useState('');
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'booking' | 'confirmed'>('idle');
@@ -492,6 +496,7 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
                           <Input
                             type="date"
                             value={bookingDate}
+                            min={todayIso}
                             onChange={(e) => setBookingDate(e.target.value)}
                             required
                           />

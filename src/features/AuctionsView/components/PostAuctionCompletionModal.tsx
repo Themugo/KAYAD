@@ -36,6 +36,7 @@ interface PostAuctionCompletionModalProps {
   winningAmount?: number;
   verifiedPass?: VerifiedBidderProfile;
   showToast?: (msg: string) => void;
+  onStartEscrow?: (vehicle: any) => void;
 }
 
 export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProps> = ({
@@ -45,7 +46,8 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
   winnerAlias,
   winningAmount,
   verifiedPass,
-  showToast
+  showToast,
+  onStartEscrow
 }) => {
   const [activeTab, setActiveTab] = useState<'certificate' | 'payment' | 'collection'>('certificate');
   const [copiedRef, setCopiedRef] = useState(false);
@@ -143,7 +145,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
               }`}
             >
               <CreditCard className="w-4 h-4 text-emerald-400" />
-              <span>2. Direct Payment Instructions</span>
+              <span>2. Payment Instructions</span>
             </button>
 
             <button
@@ -330,7 +332,39 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
           {/* TAB 2: PAYMENT INSTRUCTIONS (DIRECT WITH ORGANIZER DISCLAIMER) */}
           {activeTab === 'payment' && (
             <div className="space-y-6 animate-fade-in">
-              
+
+              {/* ESCROW VAULT PAYMENT PATH — only for vehicles that are
+                  genuinely escrow-eligible; hands off the REAL winning
+                  amount (winningAmount), never the stale vehicle.price
+                  (session.vehicle.price is not updated by bidding). */}
+              {(session.vehicle.escrowEligible || session.sellerType === 'Private Seller') && onStartEscrow && (
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-300 space-y-3 shadow-2xs">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                    <div className="space-y-1 text-xs">
+                      <p className="font-black text-emerald-900">Escrow-Protected Purchase Available</p>
+                      <p className="text-emerald-800 text-[11px] leading-relaxed font-bold">
+                        This vehicle is eligible for KAYAD Escrow Vault — funds are held securely and only released to the seller after you confirm delivery.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    fullWidth
+                    onClick={() =>
+                      onStartEscrow({
+                        ...session.vehicle,
+                        price: winningAmount ?? session.vehicle.price,
+                      })
+                    }
+                  >
+                    <ShieldCheck className="w-4 h-4 text-amber-400" />
+                    <span>Secure Payment via Escrow Vault</span>
+                  </Button>
+                </div>
+              )}
+
               {/* CRITICAL MANDATORY PAYMENT DISCLAIMER */}
               <div className="p-4 bg-amber-50 rounded-xl border border-amber-300 flex items-start gap-3 shadow-2xs">
                 <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />

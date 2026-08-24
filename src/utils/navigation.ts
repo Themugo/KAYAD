@@ -59,3 +59,73 @@ export function setVehicleDetailUrl(vehicleId: string | null, pushState: boolean
     }
   }
 }
+
+export const AUCTION_PARAM = 'auctionId';
+
+/**
+ * Reads the auction lot ID from the current browser URL query parameters.
+ */
+export function getAuctionIdFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const auctionId = params.get(AUCTION_PARAM);
+  return auctionId ? auctionId.trim() : null;
+}
+
+/**
+ * Updates the browser location URL with or without pushing a history state entry.
+ */
+export function setAuctionDetailUrl(auctionId: string | null, pushState: boolean = true): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+
+  if (auctionId) {
+    url.searchParams.set(AUCTION_PARAM, auctionId);
+  } else {
+    url.searchParams.delete(AUCTION_PARAM);
+  }
+
+  const newUrl = url.toString();
+  if (newUrl !== window.location.href) {
+    if (pushState) {
+      window.history.pushState({ auctionId }, '', newUrl);
+    } else {
+      window.history.replaceState({ auctionId }, '', newUrl);
+    }
+  }
+}
+
+export const ESCROW_PARAM = 'escrowId';
+
+/**
+ * Reads the escrow transaction ID from the current browser URL query parameters.
+ */
+export function getEscrowIdFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const escrowId = params.get(ESCROW_PARAM);
+  return escrowId ? escrowId.trim() : null;
+}
+
+/**
+ * Updates the browser location URL with or without pushing a history state entry.
+ */
+export function setEscrowDetailUrl(escrowId: string | null, pushState: boolean = true): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+
+  if (escrowId) {
+    url.searchParams.set(ESCROW_PARAM, escrowId);
+  } else {
+    url.searchParams.delete(ESCROW_PARAM);
+  }
+
+  const newUrl = url.toString();
+  if (newUrl !== window.location.href) {
+    if (pushState) {
+      window.history.pushState({ escrowId }, '', newUrl);
+    } else {
+      window.history.replaceState({ escrowId }, '', newUrl);
+    }
+  }
+}

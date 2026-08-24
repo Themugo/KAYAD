@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Vehicle } from '../types';
+import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { isEscrowApplicable } from '../utils/escrow';
 import { 
   ShieldCheck, 
@@ -54,72 +55,43 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
 
   const marketTag = getMarketPriceTag();
 
-  // 2. Maximum Three Dynamic Trust Badges Rule
-  const getDynamicBadges = () => {
-    const badges: Array<{
-      key: string;
-      label: string;
-      variant: 'live' | 'verified' | 'inspected' | 'escrow' | 'success' | 'neutral';
-      icon: React.ElementType;
-    }> = [];
+  // 2. Trust facts are carried in the card's aria-label (screen-reader
+  // accessible) rather than as visible badges — the visible overlay is
+  // reserved exclusively for the auction badge.
+  const trustFacts: string[] = [];
+  if (vehicle.sellerType === 'Verified Dealer' || vehicle.dealerName) trustFacts.push('Dealer');
+  if (vehicle.verified) trustFacts.push('Verified');
+  if (vehicle.inspectionPassed) trustFacts.push('Certified');
+  if (isEscrowApplicable(vehicle)) trustFacts.push('Escrow');
+  if (vehicle.financeAvailable) trustFacts.push('Finance');
+  const ariaLabel = `View details for ${vehicle.title}${trustFacts.length ? ` — ${trustFacts.join(', ')}` : ''}`;
 
-    // Priority 1: Auction Status
-    if (vehicle.isAuction) {
-      badges.push({
-        key: 'auction',
-        label: 'LIVE AUCTION',
-        variant: 'live',
-        icon: Gavel
-      });
-    }
+  // Auction badge: calm "LIVE" while the auction is comfortably open,
+  // switching to a live mm:ss countdown inside the 30-minute urgency
+  // window. Ends-at times in the past are treated as urgency too.
+  const URGENCY_WINDOW_MS = 30 * 60 * 1000;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!vehicle.isAuction) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [vehicle.isAuction]);
 
-    // Priority 2: Seller Verification
-    if (vehicle.sellerType === 'Verified Dealer' || vehicle.verified) {
-      badges.push({
-        key: 'dealer',
-        label: '✓ Verified Dealer',
-        variant: 'verified',
-        icon: ShieldCheck
-      });
-    } else if (vehicle.sellerType === 'Private Seller') {
-      badges.push({
-        key: 'private',
-        label: '✓ Verified Seller',
-        variant: 'neutral',
-        icon: UserCheck
-      });
-    }
+  const endsAtMs = vehicle.auctionEndsAt ? new Date(vehicle.auctionEndsAt).getTime() : null;
+  const msRemaining = endsAtMs !== null ? endsAtMs - now : null;
+  const isEndingSoon = msRemaining !== null && msRemaining <= URGENCY_WINDOW_MS;
+  const countdownLabel =
+    msRemaining !== null && msRemaining > 0
+      ? `${Math.floor(msRemaining / 60000)}:${String(Math.floor((msRemaining % 60000) / 1000)).padStart(2, '0')}`
+      : null;
 
-    // Priority 3: Inspection or Escrow or Finance (up to 3 total)
-    if (vehicle.inspectionPassed && badges.length < 3) {
-      badges.push({
-        key: 'inspected',
-        label: '✓ 150-Pt Certified',
-        variant: 'inspected',
-        icon: CheckCircle2
-      });
-    }
-
-    if (isEscrowApplicable(vehicle) && badges.length < 3) {
-      badges.push({
-        key: 'escrow',
-        label: '✓ Escrow Protected',
-        variant: 'escrow',
-        icon: Lock
-      });
-    } else if (vehicle.financeAvailable && badges.length < 3) {
-      badges.push({
-        key: 'finance',
-        label: '✓ Finance',
-        variant: 'success',
-        icon: Landmark
-      });
-    }
-
-    return badges.slice(0, 3);
-  };
-
-  const dynamicBadges = getDynamicBadges();
+  // Live price: for auction vehicles with a real auction session, the
+  // session's currentBid is the truth — vehicle.price is the stale
+  // starting price and visibly disagrees with the auction page.
+  const liveAuctionSession = vehicle.isAuction
+    ? INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id)
+    : undefined;
+  const displayPrice = liveAuctionSession?.currentBid ?? vehicle.price;
 
   // Seller display text
   const sellerDisplayName = vehicle.dealerName || vehicle.sellerName || (vehicle.sellerType === 'Private Seller' ? 'Private Seller' : 'Verified Dealer');
@@ -140,11 +112,11 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
       }}
       tabIndex={0}
       role="button"
-      aria-label={`View details for ${vehicle.title}`}
+      aria-label={ariaLabel}
       className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#1E3063]/30 transition-all duration-200 flex flex-col group relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:ring-offset-2"
     >
       {/* 1. VEHICLE IMAGE CONTAINER */}
-      <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
+      <div className="relative h-32 overflow-hidden bg-slate-100">
         <LazyImage 
           src={vehicle.image} 
           alt={vehicle.title} 
@@ -153,13 +125,13 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
         />
 
         {/* Dynamic Top Overlay Badges (Max 3) */}
-        <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[78%] pointer-events-none z-10">
-          {dynamicBadges.map((b) => (
-            <Badge key={b.key} variant={b.variant} size="sm">
-              {React.createElement(b.icon, { className: 'w-3 h-3 shrink-0' })}
-              <span>{b.label}</span>
+        <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 max-w-[78%] pointer-events-none z-10">
+          {vehicle.isAuction && (
+            <Badge variant="live" size="sm">
+              <Gavel className="w-3 h-3 shrink-0" />
+              <span>{isEndingSoon && countdownLabel ? countdownLabel : 'LIVE'}</span>
             </Badge>
-          ))}
+          )}
         </div>
 
         {/* Action Controls (Save & Compare) */}
@@ -219,7 +191,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
           {/* Primary Price Focal Point */}
           <div className="flex items-baseline gap-2 pt-0.5">
             <span className="text-xl sm:text-2xl font-black text-[#1E3063] font-display tracking-tight">
-              Ksh {vehicle.price.toLocaleString()}
+              Ksh {displayPrice.toLocaleString()}
             </span>
             {vehicle.marketPriceAvg && (
               <span className="text-xs text-slate-400 line-through font-medium">
