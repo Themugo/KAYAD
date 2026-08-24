@@ -89,6 +89,23 @@ export const webhookFundsReceived = async (req, res) => {
     const { id } = req.params;
     const { bankRef, amount } = req.body;
 
+    // Amount integrity: the reported amount must equal the vault's
+    // expected amount exactly — a callback must never be able to fund
+    // a vault for less (or more) than the agreed winning bid.
+    const expected = await EscrowVault.findById(id).select("amount status");
+    if (!expected) return res.status(404).json({ success: false, message: "Vault not found" });
+    if (Number(amount) !== Number(expected.amount)) {
+      logSecurityAction({
+        action: "escrow_vault.funding_amount_mismatch",
+        target: expected._id,
+        targetModel: "EscrowVault",
+        resourceId: id,
+        details: { expected: expected.amount, reported: amount, bankRef },
+        severity: "critical",
+      });
+      return res.status(400).json({ success: false, message: "Amount does not match the escrow vault amount" });
+    }
+
     const result = await withTransaction(async (session) => {
       const vault = await EscrowVault.findOneAndUpdate(
         { _id: id, status: "awaiting_payment" },

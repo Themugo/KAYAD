@@ -55,11 +55,11 @@ const getClientIp = (req) =>
   "";
 
 export const mpesaIpWhitelist = (req, res, next) => {
-  // Skip in dev/test mode
+  // Skip in dev/test mode only. In production the bypass flag is
+  // ignored — the whitelist is always enforced (fail closed).
   if (process.env.MPESA_SKIP_IP_CHECK === "true") {
     if (process.env.NODE_ENV !== "production") return next();
-    logWarn("MPESA_SKIP_IP_CHECK=true in production — THIS IS DANGEROUS");
-    return next();
+    logError("MPESA_SKIP_IP_CHECK=true ignored in production — enforcing IP whitelist");
   }
 
   const allowedIps = process.env.MPESA_ENV === "production" ? SAFARICOM_PRODUCTION_IPS : SAFARICOM_SANDBOX_IPS;
@@ -159,10 +159,11 @@ export const validateMpesaCallback = (req, res, next) => {
     const bodyString = JSON.stringify(req.body);
     const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(bodyString).digest("hex");
 
-    if (signature !== expectedSignature) {
+    const sigBuf = Buffer.from(String(signature));
+    const expBuf = Buffer.from(expectedSignature);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
       logError("M-Pesa callback signature mismatch", null, {
-        received: signature.slice(0, 20),
-        expected: expectedSignature.slice(0, 20),
+        received: String(signature).slice(0, 20),
       });
       return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid signature" });
     }

@@ -48,6 +48,18 @@ export const createDispute = async (req, res) => {
       timeline: [{ action: "Dispute opened", actor: userId, note: title, at: new Date() }],
     });
 
+    // Lock the funds: move the escrow itself into DISPUTED so the
+    // auto-release cron and the release endpoint are blocked while the
+    // dispute is open. Best-effort — the dispute case must still be
+    // recorded even if the escrow is already disputed or terminal.
+    try {
+      const { disputeEscrow: lockEscrow } = await import("../services/escrow.service.js");
+      const lockRole = ["admin", "superadmin"].includes(req.user.role) ? "admin" : isBuyer ? "buyer" : "seller";
+      await lockEscrow(escrowId, userId, lockRole, `Dispute opened: ${title}`);
+    } catch (lockErr) {
+      logInfo("Escrow dispute lock skipped", { escrowId, reason: lockErr.message });
+    }
+
     const io = getIO();
     if (io) {
       io.to(`user_${escrow.buyer}`).emit("disputeUpdate", { disputeId: dispute._id, status: STATES.OPEN });

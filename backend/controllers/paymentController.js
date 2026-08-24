@@ -41,11 +41,47 @@ export const initiatePayment = async (req, res) => {
     // All purchases go through escrow by default — normalize buy-type
     const normalizedType = type === "buy" || type === "direct" ? "escrow" : type;
 
+    // Amount integrity: for vehicle escrow payments the settlement
+    // amount is derived server-side from the car record — the winning
+    // bid when this user won the auction, otherwise the listing price.
+    // A client-supplied amount must match it exactly; it never
+    // determines settlement on its own.
+    let settlementAmount = parsedAmount;
+    if (normalizedType === "escrow" && carId) {
+      const carForAmount = await findById("cars", carId, "price,winner");
+      if (!carForAmount) {
+        return res.status(404).json({ success: false, message: "Car not found" });
+      }
+      const winnerUser = carForAmount.winner?.user?.toString?.() || carForAmount.winner?.user;
+      const winnerAmount = Number(carForAmount.winner?.amount);
+      const serverAmount =
+        winnerUser && winnerUser === req.user.id && Number.isFinite(winnerAmount) && winnerAmount > 0
+          ? winnerAmount
+          : Number(carForAmount.price);
+
+      if (!Number.isFinite(serverAmount) || serverAmount <= 0) {
+        return res.status(400).json({ success: false, message: "Cannot determine a valid settlement amount for this vehicle" });
+      }
+      if (parsedAmount !== serverAmount) {
+        logError("Payment amount mismatch — client amount rejected", null, {
+          userId: req.user.id,
+          carId,
+          clientAmount: parsedAmount,
+          serverAmount,
+        });
+        return res.status(400).json({
+          success: false,
+          message: "Amount does not match the server-determined amount for this vehicle",
+        });
+      }
+      settlementAmount = serverAmount;
+    }
+
     const result = await initiate({
       userId: req.user.id,
       carId,
       type: normalizedType,
-      amount: parsedAmount,
+      amount: settlementAmount,
       phone,
     });
 
@@ -64,7 +100,7 @@ export const initiatePayment = async (req, res) => {
           car: carId,
           buyer: req.user.id,
           seller: car.dealer,
-          amount: parsedAmount,
+          amount: settlementAmount,
           payment: result.payment.id,
           status: "pending",
         });

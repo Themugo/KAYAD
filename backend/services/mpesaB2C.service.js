@@ -24,6 +24,7 @@
 import axios from "axios";
 import https from "https";
 import { logInfo } from "../utils/logger.js";
+import { findById, update } from "../db/index.js";
 
 // ── CONFIG ────────────────────────────────────────────────────
 const MPESA_ENV = process.env.MPESA_ENV || "sandbox";

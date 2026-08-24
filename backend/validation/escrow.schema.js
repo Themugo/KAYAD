@@ -18,9 +18,8 @@ export const releaseEscrowSchema = z.object({
 });
 
 export const escrowVaultWebhookSchema = z.object({
-  transactionId: z.string(),
+  bankRef: z.string().min(1, "bankRef is required"),
   amount: z.number().positive(),
-  status: z.enum(["completed", "failed", "pending"]),
 });
 
 export const releaseOtpSchema = z.object({

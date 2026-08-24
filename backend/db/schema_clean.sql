@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS escrows (
   seller_id UUID REFERENCES users(id),
   amount NUMERIC NOT NULL,
   fee NUMERIC DEFAULT 0,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','funded','inspecting','approved','released','refunded','disputed','cancelled')),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','funded','vehicle_confirmed','delivered','inspecting','approved','released','refunded','disputed','cancelled','closed')),
   release_code TEXT,
   release_code_expires TIMESTAMPTZ,
   auto_release_at TIMESTAMPTZ,
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS payments (
   currency TEXT DEFAULT 'KES',
   method TEXT DEFAULT 'mpesa',
   provider_ref TEXT,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','processing','completed','failed','refunded')),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','processing','completed','success','failed','refunded','released')),
   type TEXT DEFAULT 'escrow_funding',
   mpesa_receipt TEXT,
   phone TEXT,
@@ -1017,6 +1017,15 @@ ALTER TABLE payments ADD COLUMN IF NOT EXISTS mode TEXT;
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS mpesa_receipt_number TEXT;
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS processed BOOLEAN DEFAULT false;
+
+-- Phase 9 hardening: align status CHECK constraints with the escrow
+-- state machine and payment flows the code actually writes.
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_status_check;
+ALTER TABLE escrows ADD CONSTRAINT escrows_status_check
+  CHECK (status IN ('pending','funded','vehicle_confirmed','delivered','inspecting','approved','released','refunded','disputed','cancelled','closed'));
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check;
+ALTER TABLE payments ADD CONSTRAINT payments_status_check
+  CHECK (status IN ('pending','processing','completed','success','failed','refunded','released'));
 CREATE INDEX IF NOT EXISTS idx_payments_checkout_request_id ON payments(checkout_request_id);
 
 ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check;

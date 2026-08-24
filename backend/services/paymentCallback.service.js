@@ -1,4 +1,4 @@
-import { findById, findOne, findAll, create, update } from "../db/index.js";
+import { findById, findOne, findAll, create, update, updateMany } from "../db/index.js";
 import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
 import { getIO } from "../utils/io.js";
@@ -20,6 +20,10 @@ const retry = async (fn, retries = MAX_RETRIES, delay = RETRY_DELAY_MS) => {
 };
 
 export const handleMpesaCallback = async (callbackData) => {
+  // Tracks a claimed-but-unfinished payment so the outer catch can
+  // release the claim and let a provider retry reprocess it.
+  let claimedPaymentId = null;
+  let finalized = false;
   try {
     const stk = callbackData.Body?.stkCallback;
 
@@ -28,10 +32,18 @@ export const handleMpesaCallback = async (callbackData) => {
     const checkoutId = stk.CheckoutRequestID;
     const success = stk.ResultCode === 0;
 
-    // ── Claim payment ──
-    const payment = await findOne("payments", { checkoutRequestId: checkoutId, processed: false });
+    // ── Claim payment atomically ──
+    // Single conditional UPDATE: only the first callback to flip
+    // processed=false → true claims the payment. Concurrent duplicate
+    // callbacks update 0 rows and exit, so side effects (escrow
+    // creation, bid settlement, notifications) can never run twice.
+    const claimed = await updateMany(
+      "payments",
+      { checkoutRequestId: checkoutId, processed: false },
+      { processed: true },
+    );
 
-    if (!payment) {
+    if (!claimed || claimed.length === 0) {
       const existing = await findOne("payments", { checkoutRequestId: checkoutId });
       if (existing && existing.status === "success") {
         logInfo("Callback idempotent: payment already succeeded", { checkoutId });
@@ -41,14 +53,24 @@ export const handleMpesaCallback = async (callbackData) => {
       return;
     }
 
-    // Claim this payment
-    await update("payments", payment.id, { processed: true });
+    const payment = claimed[0];
+    claimedPaymentId = payment.id;
+
+    // If processing fails after the claim (provider sent incomplete
+    // data, a downstream write failed, etc.), release the claim so a
+    // later provider retry can reprocess instead of leaving the
+    // payment stuck in "pending" forever.
+    const releaseClaim = () =>
+      update("payments", payment.id, { processed: false }).catch((e) =>
+        logError("Failed to release payment claim", e, { paymentId: payment.id }),
+      );
 
     if (!success) {
       await update("payments", payment.id, {
         status: "failed",
         resultDesc: stk.ResultDesc || "M-Pesa transaction failed",
       });
+      finalized = true;
 
       await sendNotification({
         userId: payment.user,
@@ -77,12 +99,25 @@ export const handleMpesaCallback = async (callbackData) => {
 
     const amount = metadata.find((i) => i.Name === "Amount")?.Value;
 
-    if (!receipt || !amount) {
+    if (!receipt || amount === undefined || amount === null) {
+      await releaseClaim();
       throw new Error("Incomplete M-Pesa metadata");
     }
 
     if (Number(amount) !== Number(payment.amount)) {
-      throw new Error("Amount mismatch");
+      // Amount integrity violation — definitive, not retryable. The
+      // settled amount must always equal the server-recorded amount.
+      await update("payments", payment.id, {
+        status: "failed",
+        resultDesc: `Amount mismatch: expected ${payment.amount}, provider reported ${amount}`,
+      });
+      logError("M-Pesa callback amount mismatch — payment failed", null, {
+        paymentId: payment.id,
+        expected: payment.amount,
+        reported: amount,
+        receipt,
+      });
+      return;
     }
 
     await update("payments", payment.id, {
@@ -90,6 +125,7 @@ export const handleMpesaCallback = async (callbackData) => {
       mpesaReceipt: receipt,
       paidAt: new Date(),
     });
+    finalized = true;
 
     let userDoc = null;
     try {
@@ -232,6 +268,13 @@ export const handleMpesaCallback = async (callbackData) => {
 
     return payment;
   } catch (err) {
+    // Unexpected failure before a definitive status was written —
+    // release the claim so provider retries can reprocess.
+    if (claimedPaymentId && !finalized) {
+      await update("payments", claimedPaymentId, { processed: false }).catch((e) =>
+        logError("Failed to release payment claim", e, { paymentId: claimedPaymentId }),
+      );
+    }
     logError("CALLBACK ERROR", err);
     throw err;
   }

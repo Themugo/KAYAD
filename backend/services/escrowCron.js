@@ -15,7 +15,7 @@ import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { STATES } from "./escrowStateMachine.js";
-import { findAll, findOne, create } from "../db/index.js";
+import { findAll, findOne, create, update } from "../db/index.js";
 import { autoReleaseEscrow } from "./escrow.service.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
 

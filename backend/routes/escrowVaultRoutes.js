@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { Router } from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
@@ -21,9 +22,33 @@ import {
 
 const router = Router();
 
+// ── Bank webhook authentication ──────────────────────────────
+// The "bank confirms funds" callback moves real money state, so it
+// must prove it comes from the bank integration, not the public
+// internet. Fail closed: unless ESCROW_VAULT_WEBHOOK_SECRET is
+// deliberately configured, the endpoint stays disabled (503) — the
+// vault then relies on the admin funding-confirmation path only.
+const verifyEscrowVaultWebhook = (req, res, next) => {
+  const secret = process.env.ESCROW_VAULT_WEBHOOK_SECRET;
+  if (!secret) {
+    return res.status(503).json({
+      success: false,
+      message: "Escrow vault webhook is not enabled (no webhook secret configured)",
+    });
+  }
+  const provided = req.headers["x-escrow-vault-secret"] || "";
+  const a = Buffer.from(String(provided));
+  const b = Buffer.from(secret);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    return res.status(401).json({ success: false, message: "Invalid webhook credentials" });
+  }
+  next();
+};
+
 router.post(
   "/webhook/:id/funded",
   webhookLimiter,
+  verifyEscrowVaultWebhook,
   validate(escrowVaultWebhookSchema),
   asyncHandler(webhookFundsReceived),
 );
