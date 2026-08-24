@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { AuctionSession, Vehicle } from '../../../types';
+import { AuctionSession } from '../../../types';
 import { VerifiedBidderProfile } from './BidderRegistrationModal';
-import { isEscrowApplicable } from '../../../utils/escrow';
 import { 
   Award, 
   CheckCircle2, 
@@ -37,7 +36,6 @@ interface PostAuctionCompletionModalProps {
   winningAmount?: number;
   verifiedPass?: VerifiedBidderProfile;
   showToast?: (msg: string) => void;
-  onStartEscrow?: (vehicle: Vehicle) => void;
 }
 
 export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProps> = ({
@@ -47,35 +45,13 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
   winnerAlias,
   winningAmount,
   verifiedPass,
-  showToast,
-  onStartEscrow
+  showToast
 }) => {
   const [activeTab, setActiveTab] = useState<'certificate' | 'payment' | 'collection'>('certificate');
   const [copiedRef, setCopiedRef] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   if (!isOpen) return null;
-
-  // Found while checking the app's own advertised auction process
-  // (step 4: "Escrow Payment") against what this modal actually
-  // offered: only ever direct-bank-wire instructions, for every won
-  // auction regardless of the underlying vehicle's real escrow
-  // eligibility - a direct contradiction of the advertised step.
-  const escrowOptionAvailable = isEscrowApplicable(session.vehicle);
-
-  // Real bug fixed: session.vehicle.price is never updated when a bid
-  // is placed (executeBid in AuctionsView.tsx only sets .currentBid on
-  // the nested vehicle copy) - so the vehicle object handed to escrow
-  // would still carry the original, stale listing price, not what the
-  // auction was actually won for. Corrected using the separately-and-
-  // correctly-passed winningAmount prop before the handoff.
-  const handleStartEscrowForWonVehicle = () => {
-    const correctedVehicle: Vehicle = {
-      ...session.vehicle,
-      price: winningAmount ?? session.vehicle.price,
-    };
-    onStartEscrow?.(correctedVehicle);
-  };
 
   const vehicle = session.vehicle;
   const winner = winnerAlias || verifiedPass?.anonymousAlias || 'Bidder A-104';
@@ -167,7 +143,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
               }`}
             >
               <CreditCard className="w-4 h-4 text-emerald-400" />
-              <span>2. Payment Instructions</span>
+              <span>2. Direct Payment Instructions</span>
             </button>
 
             <button
@@ -354,23 +330,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
           {/* TAB 2: PAYMENT INSTRUCTIONS (DIRECT WITH ORGANIZER DISCLAIMER) */}
           {activeTab === 'payment' && (
             <div className="space-y-6 animate-fade-in">
-
-              {escrowOptionAvailable && (
-                <button
-                  type="button"
-                  onClick={handleStartEscrowForWonVehicle}
-                  className="w-full p-4 bg-emerald-50 rounded-xl border-2 border-emerald-300 flex items-center gap-3 shadow-2xs text-left hover:bg-emerald-100 transition-colors"
-                >
-                  <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
-                  <div className="space-y-0.5">
-                    <p className="font-black text-emerald-900 text-sm">Secure Payment via Escrow Vault</p>
-                    <p className="text-emerald-800 text-[11px] leading-relaxed">
-                      This vehicle is eligible for KAYAD's escrow protection - your payment is held securely until you confirm the vehicle matches what was won.
-                    </p>
-                  </div>
-                </button>
-              )}
-
+              
               {/* CRITICAL MANDATORY PAYMENT DISCLAIMER */}
               <div className="p-4 bg-amber-50 rounded-xl border border-amber-300 flex items-start gap-3 shadow-2xs">
                 <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />

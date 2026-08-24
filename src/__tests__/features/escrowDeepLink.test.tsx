@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { EscrowView } from '../../features/EscrowView/components/EscrowView';
+import { EscrowView } from '../../features/EscrowView';
 import { EscrowTransaction } from '../../types';
 
 /**
