@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import MarketingCard from '../../../components/MarketingCard';
 import { MOCK_SPONSOR_CARDS } from '../../../data/mockSponsors';
@@ -35,18 +35,21 @@ interface VehicleMarketplaceProps {
    * theme, trust-pillar text) are scoped to the real home page only. */
   isHomePage?: boolean;
   /** True while the initial real vehicle-data fetch (App.tsx's
-   * GET /api/cars attempt, Fusion Phase 7) is still in flight.
-   * Accepted here but deliberately NOT wired to gate this component's
-   * own isLoading/SkeletonGrid mechanism (Phase 1 hardening,
-   * continued: an earlier version of this change did wire it in, then
-   * reconsidered - mock data is already valid and displayed instantly
-   * on first render, so blocking it behind a skeleton while a
-   * near-instant, usually-failing network call resolves would be a
-   * UX regression, not an improvement). Kept as an accepted prop so a
-   * future, non-blocking indicator (e.g. a small "checking for live
-   * listings" badge elsewhere in this component) can use it without
-   * needing a second round of prop-plumbing through App.tsx. */
-  isFetchingVehicles?: boolean;
+   * GET /api/cars) is still in flight, and the real error message if
+   * that fetch failed. Wired directly to this component's own
+   * isLoading/SkeletonGrid mechanism and a new, real error state -
+   * revisits an earlier version of this comment, which deliberately
+   * left this unwired on the reasoning that "mock data is already
+   * valid and displayed instantly on first render." That premise no
+   * longer holds: this project's own Phase 3 work changed App.tsx to
+   * start `vehicles` empty and fetch real data on mount, specifically
+   * so mock data is never shown as if it were real - not wiring a
+   * real loading/error signal here would mean this page briefly shows
+   * an empty-results screen instead, which is worse, not better, now
+   * that the underlying data flow has changed. */
+  isLoadingReal?: boolean;
+  loadError?: string | null;
+  onRetryLoad?: () => void;
 }
 
 interface SavedSearchPreset {
@@ -78,7 +81,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   onOpenAuth,
   user,
   isHomePage = false,
-  isFetchingVehicles = false
+  isLoadingReal,
+  loadError,
+  onRetryLoad
 }) => {
   // Home page admin customization - scoped to the real home page only
   // (isHomePage), and its UI only rendered/reachable for admins
@@ -139,8 +144,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // often visitors need to paginate at real scale.
   const [pageSize, setPageSize] = useState<number>(24);
 
-  // Loading Simulation for fast feedback
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Loading Simulation for fast feedback - real fetch status
+  // (isLoadingReal, from App.tsx's actual API call) takes precedence
+  // when provided, matching the same fix already applied to the flat
+  // VehicleMarketplace.tsx during Phase 3 real-data-consolidation work.
+  const [simulatedLoading, setIsLoading] = useState<boolean>(false);
+  const isLoading = isLoadingReal ?? simulatedLoading;
 
   // Recently Viewed Vehicles Tracking (stored in localStorage)
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>(() => {
@@ -1036,7 +1045,30 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
         {/* RESULTS GRID / COMPACT / LIST / EMPTY */}
         <div className="flex-1 min-w-0">
-          {isLoading ? (
+          {loadError ? (
+            /* Real fetch failure - matches the same fix already
+               applied to the flat VehicleMarketplace.tsx during
+               Phase 3. Never falls back to mock data on failure -
+               shows this, with a real retry action, instead. */
+            <Card className="p-8 sm:p-12 text-center space-y-6 bg-white border border-rose-200 shadow-sm rounded-2xl">
+              <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-xl font-extrabold text-[#1E3063] font-display">
+                  Couldn't load vehicles
+                </h3>
+                <p className="text-slate-500 text-xs max-w-md mx-auto mt-1 leading-relaxed">
+                  {loadError}
+                </p>
+              </div>
+              {onRetryLoad && (
+                <Button variant="primary" size="sm" onClick={onRetryLoad}>
+                  Try Again
+                </Button>
+              )}
+            </Card>
+          ) : isLoading ? (
             <SkeletonGrid count={pageSize} />
           ) : filteredVehicles.length === 0 ? (
             /* EMPTY RESULTS RECOVERY STATE */
