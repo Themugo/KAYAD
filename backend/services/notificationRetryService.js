@@ -6,7 +6,15 @@
 
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
-import { findById } from "../db/index.js";
+import { findById, findAll, update, count } from "../db/index.js";
+
+// The retry service runs against the real notification_audit schema:
+// (id, notification_id, channel, status, error, sent_at). Recovery data
+// for the re-queued job comes from the linked notifications row.
+const FAILED_STATUS = "failed";
+const RETRY_QUEUED_STATUS = "retry_queued";
+
+const auditIsRetryable = (audit) => !!audit && audit.status === FAILED_STATUS;
 
 // =============================
 // 🔁 RETRY FAILED NOTIFICATION
@@ -20,42 +28,34 @@ export const retryFailedNotification = async (auditId) => {
       return { success: false, message: "Audit not found" };
     }
 
-    if (!audit.shouldRetry()) {
-      logWarn("Notification should not be retried", {
-        auditId,
-        retryCount: audit.retryCount,
-        maxRetries: audit.maxRetries,
-      });
-      return { success: false, message: "Max retries reached or not eligible for retry" };
+    if (!auditIsRetryable(audit)) {
+      logWarn("Notification is not eligible for retry", { auditId, status: audit.status });
+      return { success: false, message: "Notification is not in a failed state" };
     }
 
-    // Increment retry count
-    await audit.incrementRetry();
+    // db/index maps snake_case columns to camelCase (notification_id → notificationId)
+    const notification = audit.notificationId ? await findById("notifications", audit.notificationId) : null;
+    if (!notification) {
+      logWarn("Linked notification not found — cannot retry", { auditId });
+      return { success: false, message: "Linked notification not found" };
+    }
 
-    // Schedule next retry
-    await audit.scheduleRetry();
+    await update("notification_audits", audit.id, { status: RETRY_QUEUED_STATUS, error: null });
 
-    // Re-add to notification queue
     await addNotificationJob({
-      userId: audit.userId,
-      title: audit.title,
-      message: audit.message,
-      type: audit.type,
+      userId: notification.userId,
+      title: notification.title,
+      message: notification.message,
+      type: notification.type,
       channels: [audit.channel],
-      metadata: {
-        originalAuditId: audit.id,
-        isRetry: true,
-        retryCount: audit.retryCount,
-      },
+      metadata: { originalAuditId: audit.id, isRetry: true },
     });
 
-    logInfo("Notification retry scheduled", { auditId, retryCount: audit.retryCount });
+    logInfo("Notification retry queued", { auditId });
 
     return {
       success: true,
-      message: "Retry scheduled",
-      retryCount: audit.retryCount,
-      nextRetryAt: audit.nextRetryAt,
+      message: "Retry queued",
     };
   } catch (err) {
     logError("Failed to retry notification", err);
@@ -67,9 +67,16 @@ export const retryFailedNotification = async (auditId) => {
 // 🔁 BULK RETRY FAILED NOTIFICATIONS
 // =============================
 
+const getFailedAudits = async (channel = null, periodHours = 24) => {
+  const since = new Date(Date.now() - periodHours * 3600 * 1000);
+  const filters = { status: FAILED_STATUS, sentAt: { $gte: since } };
+  if (channel) filters.channel = channel;
+  return findAll("notification_audits", { filters, orderBy: "sentAt", ascending: false, limit: 200 });
+};
+
 export const bulkRetryFailedNotifications = async (channel = null, period = 24) => {
   try {
-    const failedNotifications = await NotificationAudit.getFailed(channel, period);
+    const failedNotifications = await getFailedAudits(channel, period);
 
     const results = [];
     for (const notification of failedNotifications) {
@@ -119,18 +126,17 @@ export const scheduleRetry = async (auditId) => {
       return { success: false, message: "Audit not found" };
     }
 
-    const scheduled = await audit.scheduleRetry();
-    if (!scheduled) {
-      return { success: false, message: "Max retries reached" };
+    if (!auditIsRetryable(audit)) {
+      return { success: false, message: "Notification is not in a failed state" };
     }
 
-    logInfo("Retry scheduled", { auditId, nextRetryAt: audit.nextRetryAt });
+    // Queue the retry immediately; the notification queue applies its own
+    // backoff between delivery attempts.
+    const result = await retryFailedNotification(auditId);
 
-    return {
-      success: true,
-      nextRetryAt: audit.nextRetryAt,
-      retryCount: audit.retryCount,
-    };
+    logInfo("Retry scheduled", { auditId, success: result.success });
+
+    return result;
   } catch (err) {
     logError("Failed to schedule retry", err);
     throw err;
@@ -144,9 +150,7 @@ export const scheduleRetry = async (auditId) => {
 export const shouldRetry = async (auditId) => {
   try {
     const audit = await findById("notification_audits", auditId);
-    if (!audit) return false;
-
-    return audit.shouldRetry();
+    return auditIsRetryable(audit);
   } catch (err) {
     logError("Failed to check if should retry", err);
     return false;
@@ -159,15 +163,13 @@ export const shouldRetry = async (auditId) => {
 
 export const getRetryQueue = async (channel = null) => {
   try {
-    const pendingRetry = await NotificationAudit.getPendingRetry(channel);
+    const pendingRetry = await getFailedAudits(channel, 24 * 7);
 
     return pendingRetry.map((audit) => ({
       auditId: audit.id,
       channel: audit.channel,
-      retryCount: audit.retryCount,
-      maxRetries: audit.maxRetries,
-      nextRetryAt: audit.nextRetryAt,
-      failureReason: audit.failureReason,
+      failureReason: audit.error,
+      sentAt: audit.sentAt,
     }));
   } catch (err) {
     logError("Failed to get retry queue", err);
@@ -234,8 +236,14 @@ export const calculateBackoff = (retryCount) => {
 
 export const getRetryStatistics = async (period = 24) => {
   try {
-    const stats = await NotificationAudit.getRetryStats(period);
-    return stats;
+    const since = new Date(Date.now() - period * 3600 * 1000);
+    const window = { sentAt: { $gte: since } };
+    const [failed, retryQueued, sent] = await Promise.all([
+      count("notification_audits", { ...window, status: FAILED_STATUS }),
+      count("notification_audits", { ...window, status: RETRY_QUEUED_STATUS }),
+      count("notification_audits", { ...window, status: "sent" }),
+    ]);
+    return { failed, retryQueued, sent, periodHours: period };
   } catch (err) {
     logError("Failed to get retry statistics", err);
     throw err;

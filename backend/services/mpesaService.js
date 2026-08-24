@@ -95,14 +95,17 @@ const mpesaConfig = createServiceConfig("mpesa", {
     });
   },
   fallback: async () => {
-    logInfo("M-Pesa unavailable, using fallback mode");
+    // FAIL CLOSED: never fabricate a successful-looking STK response.
+    // Returning ResponseCode "0" with a synthetic CheckoutRequestID made
+    // callers create real pending payments against a checkout ID no
+    // Safaricom callback will ever match — false success and permanently
+    // unreconciled financial state. Throw a distinct error instead so
+    // callers surface an honest failure to the user.
+    logWarn("M-Pesa unavailable, failing closed");
     incrementCounter("mpesa_fallback_used");
-    return {
-      CheckoutRequestID: "fallback_" + Date.now(),
-      ResponseCode: "0",
-      CustomerMessage: "M-Pesa unavailable - queued for retry",
-      fallback: true,
-    };
+    const err = new Error("M-Pesa is temporarily unavailable — please try again shortly");
+    err.code = "MPESA_UNAVAILABLE";
+    throw err;
   },
 });
 
@@ -120,11 +123,21 @@ const getAccessToken = async (baseUrl, consumerKey, consumerSecret) => {
       mpesaConfig,
     );
 
+    // Validate the response shape: a 200 with an HTML error page or an
+    // unexpected body must NOT continue as if authenticated ("Bearer
+    // undefined"). Treat malformed responses as failures.
+    const token = res?.data?.access_token;
+    if (typeof token !== "string" || token.length === 0) {
+      const err = new Error("M-Pesa token response malformed");
+      err.code = "MPESA_MALFORMED_RESPONSE";
+      throw err;
+    }
+
     const duration = Date.now() - startTime;
     recordMetric("mpesa_token_fetch_duration", duration);
     incrementCounter("mpesa_token_fetch_success");
 
-    return res.data.access_token;
+    return token;
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("mpesa_token_fetch_duration", duration, { status: "error" });
@@ -199,6 +212,15 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
         }),
       mpesaConfig,
     );
+
+    // Daraja returns HTTP 200 with ResponseCode "0" on success — anything
+    // else (error body, HTML page, missing checkout id) is a failure even
+    // when the HTTP status was 200. Never treat it as a sent STK push.
+    if (String(res?.data?.ResponseCode) !== "0" || !res?.data?.CheckoutRequestID) {
+      const err = new Error(res?.data?.errorMessage || "M-Pesa STK response malformed or rejected");
+      err.code = "MPESA_MALFORMED_RESPONSE";
+      throw err;
+    }
 
     const duration = Date.now() - startTime;
     recordMetric("mpesa_stk_push_duration", duration);

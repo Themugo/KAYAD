@@ -12,7 +12,7 @@ export function setCache(key, data) {
   cache.set(key, { data, ts: Date.now() });
 }
 
-export function clearCache(pattern) {
+export function clearCache(pattern?) {
   if (!pattern) { cache.clear(); inflight.clear(); return; }
   for (const key of cache.keys()) {
     if (key.includes(pattern)) cache.delete(key);
