@@ -433,10 +433,24 @@ export function createModel(name) {
       const col = mapKeyOut(table, k);
 
       if (typeof v === "object" && v !== null && !Array.isArray(v)) {
-        if (v.$gte !== undefined) q = q.gte(col, v.$gte);
-        if (v.$lte !== undefined) q = q.lte(col, v.$lte);
-        if (v.$gt !== undefined) q = q.gt(col, v.$gt);
-        if (v.$lt !== undefined) q = q.lt(col, v.$lt);
+        // Fixed (Phase 12 - E2E environment work): confirmed directly
+        // by actually running the real backend against a real
+        // database - a Date object passed as $gte/$lte/$gt/$lt (e.g.
+        // utils/auctionTimer.js's own auctionEnd: { $lte: now }, now =
+        // new Date()) was forwarded to supabase-js's .gte()/.lte()
+        // as-is. Those methods stringify a raw Date with JS's own
+        // default Date.toString() ("Thu Aug 27 2026 13:48:22 GMT..."),
+        // which Postgres/PostgREST rejects outright (error 22007,
+        // "invalid input syntax for type timestamp"). Reproduced this
+        // exact failure on every 5s tick of the real auction-closing
+        // sweep - it has been silently unable to find or close any
+        // expiring auction in this environment. Normalized to ISO
+        // 8601 (Date.toISOString()), which Postgres accepts.
+        const toComparable = (val) => (val instanceof Date ? val.toISOString() : val);
+        if (v.$gte !== undefined) q = q.gte(col, toComparable(v.$gte));
+        if (v.$lte !== undefined) q = q.lte(col, toComparable(v.$lte));
+        if (v.$gt !== undefined) q = q.gt(col, toComparable(v.$gt));
+        if (v.$lt !== undefined) q = q.lt(col, toComparable(v.$lt));
         if (v.$ne !== undefined) q = q.neq(col, v.$ne);
         if (v.$in !== undefined) q = q.in(col, v.$in);
         if (v.$nin !== undefined) q = q.not(col, "in", `(${v.$nin.join(",")})`);
