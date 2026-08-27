@@ -267,13 +267,35 @@ describe('AuctionsView - premium refinement pass (internal language, count consi
   // fallback (no live auctions matching filters), so the test drives
   // the real search filter to a query with zero matches rather than
   // asserting on a synthetic prop.
+  //
+  // This test's own assertion previously reintroduced the identical
+  // stale-date bug it describes above: it hardcoded the expected
+  // month ("Aug 2026") in its regex, correct only at the moment this
+  // test was written - confirmed failing for real in CI once the real
+  // "next Wednesday" rolled into September. Fixed to compute the
+  // expected label with the exact same real-clock logic the component
+  // itself uses (mirrored here, not re-imported, to keep this test
+  // from depending on the component's internal implementation detail)
+  // rather than asserting a fixed calendar date.
   it('the "Next Live Event" banner shows a real future date whose weekday label actually matches (via the real empty-state path)', () => {
+    const WEDNESDAY = 3;
+    const today = new Date();
+    const daysUntilWednesday = (WEDNESDAY - today.getDay() + 7) % 7;
+    const nextWednesday = new Date(today);
+    nextWednesday.setDate(today.getDate() + daysUntilWednesday);
+    const expectedLabel = nextWednesday.toLocaleDateString('en-KE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+
     render(<AuctionsView {...baseProps} />);
     const searchInput = screen.getByPlaceholderText(/Search/i);
     fireEvent.change(searchInput, { target: { value: 'zzz-no-such-vehicle-zzz' } });
     expect(screen.getByText('No Live Auctions Active Right Now')).toBeTruthy();
     const banner = screen.getByText(/Next Live Event:/);
-    expect(banner.textContent).toMatch(/Next Live Event: Wednesday, \d{1,2} Aug 2026/);
+    expect(banner.textContent).toContain(`Next Live Event: ${expectedLabel}`);
     expect(banner.textContent).not.toMatch(/Aug 5, 2026/);
   });
 });
