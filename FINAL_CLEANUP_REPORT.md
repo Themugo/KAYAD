@@ -144,3 +144,33 @@ TESTING: backend 16 suites/335 tests (Jest) · frontend 50 files/359 (Vitest)
 
 ## Codebase state after cleanup
 12 proven-dead files removed (~2 backup/duplicate-source files, 6 untyped shadow duplicates, 4-file orphaned demo-data island). One parallel subsystem (`mediaEventEngine` + unmounted routes/controller) flagged for an explicit owner keep-or-remove decision rather than unilaterally deleted. Typecheck, all tests, build, and security audit are green.
+
+---
+
+## Addendum — this pass, additional proven-dead items found and removed
+
+This repository's own cumulative cleanup history (this document plus `AUDIT_CLEANUP_REPORT.md`) already accounts for 52 verified-dead items across 3 prior passes. Checking the current codebase directly (not assuming prior claims still held, given some earlier-reported removals - e.g. `api.exports.backup.ts` above - were found to still be present on disk) surfaced 4 more items this session's own earlier work (Phases 0 and 7) had independently identified as orphaned:
+
+| Item | Class | Verification performed this pass |
+|---|---|---|
+| `src/features/InspectionMarketplace/` (8 files, 2,909 lines) | Orphaned frontend feature - a complete, parallel inspection-marketplace UI (its own pages, components, services, types) with no navigation path to it | Re-verified fresh: zero references anywhere in `src/` outside the folder itself, and zero in `src/__tests__/`, `e2e/`, or `docs/` |
+| `backend/inspectionBusinessCenter/` (7 files, 2,104 lines) | Orphaned backend service, first flagged dead in this project's own Phase 0 audit | Re-verified fresh: zero references anywhere in `backend/` outside the folder itself; no route file wires it |
+| `src/api/api.exports.backup.ts` | Explicit backup file (still present on disk despite this document's earlier claim of removal) | Zero references anywhere |
+| `backend/db/schema_legacy.sql` | Explicit legacy file | Zero references anywhere |
+
+**Total this pass: 17 files, 5,013+ lines. Cumulative program total: 56 proven-dead items removed.**
+
+**Re-verified all gates green after these deletions:**
+
+| Check | Result |
+|---|---|
+| Frontend typecheck | 0 errors |
+| Frontend tests | 358/360 passing, 1 skipped, 1 failing (the same pre-existing, date-sensitive `AuctionsView.test.tsx` assertion already identified as unrelated to any code change) |
+| Backend tests | 16/16 suites, 335/335 passing |
+| Frontend build | Succeeds |
+| Frontend + backend security audits | 0 vulnerabilities each |
+
+**Not touched, deliberately:** the ambiguous items this document and `AUDIT_CLEANUP_REPORT.md` already correctly flagged for owner review rather than auto-deleted (the entangled `'mechanic'`-role UI, the 46 uncalled backend service exports) were re-checked and left alone - re-deleting them without new evidence would repeat the exact mistake this session's own Phase 4 work learned from directly, where two components initially judged "duplicate/dead" turned out to be substantial, undeployed real work.
+
+Production-readiness verdict: **unchanged, NOT production-ready** - the live-deployment findings above are unaffected by dead-code removal, which cannot fix an unreachable Vercel project, a crashing backend, or an expired certificate.
+
