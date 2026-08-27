@@ -563,12 +563,81 @@ export function createModel(name) {
     },
 
     async findOneAndUpdate(filter, update, options = {}) {
-      const existing = await model.findOne(filter);
-      if (!existing) {
+      // Fixed (Phase 8 - auction/bidding certification): this
+      // previously did findOne(filter) then findByIdAndUpdate(id) as
+      // two separate operations - not atomic at all, despite being
+      // relied on as if it were (see realtime/auctionEngine.js's own
+      // "ATOMIC END (PREVENT DUPLICATES)" comment on its own
+      // auction-closing call to this exact method). Reproduced
+      // directly: two concurrent calls with the identical filter
+      // (auctionStatus: "live") both succeeded, both returning the
+      // "ended" row - the safety check callers rely on
+      // (`if (!updated) continue`) never actually triggers, because
+      // the write was never re-checked against the filter at write
+      // time, only at the read a moment earlier. Fixed to build one
+      // real, atomic UPDATE ... WHERE <full filter> query (reusing
+      // buildWhere, the same, already-proven filter-translation logic
+      // every read path already uses) - if another caller already
+      // changed a field the filter depends on between two calls, this
+      // now genuinely affects zero rows and correctly returns null,
+      // instead of unconditionally succeeding for whoever happened to
+      // read first. Does not attempt to make the $inc/$push/$pull
+      // branches below atomic against a concurrent writer (they still
+      // read a "current" value first) - out of this phase's specific
+      // scope, since the real bug this phase reproduced and every
+      // real caller in this codebase (confirmed by search) uses only
+      // plain field-value updates, never these operators, with this
+      // method.
+      if (Object.keys(filter || {}).length === 0) {
+        // No filter at all - nothing meaningful to make atomic
+        // against; preserve prior behavior exactly (act as an
+        // unconditional single-document update) rather than change
+        // behavior for a case this phase's bug does not involve.
+        const existing = await model.findOne(filter);
+        if (!existing) {
+          if (options.upsert) return model.create({ ...filter, ...update.$set, ...update });
+          return null;
+        }
+        return model.findByIdAndUpdate(existing.id, update, options);
+      }
+
+      const client = sb();
+      let updateData = {};
+      if (update.$set) updateData = { ...updateData, ...update.$set };
+      for (const [k, v] of Object.entries(update)) {
+        if (!k.startsWith("$")) updateData[k] = v;
+      }
+
+      if (Object.keys(updateData).length === 0 || update.$inc || update.$push || update.$pull) {
+        // Falls back to the pre-existing (non-atomic) path only for
+        // operators this fix does not cover, or a no-op update -
+        // never for the plain-field-update case this phase's real bug
+        // and every real caller actually uses.
+        const existing = await model.findOne(filter);
+        if (!existing) {
+          if (options.upsert) return model.create({ ...filter, ...update.$set, ...update });
+          return null;
+        }
+        return model.findByIdAndUpdate(existing.id, update, options);
+      }
+
+      const payload = Object.fromEntries(Object.entries(updateData).map(([k, v]) => [mapKeyOut(table, k), v]));
+      let q = client.from(table).update(payload);
+      q = buildWhere(q, filter);
+      // Always select, regardless of options.new - needed to
+      // correctly determine whether the update actually affected a
+      // row at all (the whole point of this fix), independent of
+      // whether the caller wants the updated document returned.
+      q = q.select();
+      const { data, error } = await q;
+      if (error) throw error;
+
+      const row = Array.isArray(data) ? data?.[0] : data;
+      if (!row) {
         if (options.upsert) return model.create({ ...filter, ...update.$set, ...update });
         return null;
       }
-      return model.findByIdAndUpdate(existing.id, update, options);
+      return options.new !== false ? wrapDoc(row, table, sb) : null;
     },
 
     async findByIdAndDelete(id) {

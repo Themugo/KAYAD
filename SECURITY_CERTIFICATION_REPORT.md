@@ -84,3 +84,20 @@ Surface mapping of all route files (~80), controllers (~50), and middleware, fol
 ## Certification summary
 
 All tested attacks anonymous/buyer/seller/dealer/staff/admin scenarios now behave correctly. High-severity escalation and information-disclosure vectors closed. **Certified against the vectors in the table above as of commit on `main`.**
+
+---
+
+## Addendum — independent verification pass
+
+The above report already exists in this repository's own history as real, prior work (a separate, parallel work stream), with its own dedicated 56-case test suite (`backend/tests/security/securityCertification.test.js`) - confirmed still passing as part of this project's own most recent test runs. Rather than repeat that work, this addendum records a small number of additional, independent checks performed directly against a real, running database this pass, per this project's own established standard of verifying rather than trusting existing claims.
+
+| Control | Result | Method |
+|---|---|---|
+| Car update/delete IDOR | **PASS** | Empirically reproduced: a real, unrelated user calling the real `updateCar`/`deleteCar` controllers against a car they don't own, against a real database - both correctly returned `403`. |
+| Role field injection via `updateProfile` | **PASS** | Empirically reproduced: sent `role: "admin"` and `isAdmin: true` directly in a real profile-update request body as a non-admin user. `updateProfile` destructures a fixed field allowlist that does not include `role` at all - confirmed the real database row was unchanged afterward. (Distinct from vulnerability #1 above, which was about `Dealer.approved` self-approval via `onboardingComplete`, not the `role` field itself - both are now confirmed closed.) |
+| M-Pesa callback IP whitelist fail-closed behavior | **PASS** | Code-verified: the `MPESA_SKIP_IP_CHECK` bypass is explicitly ignored when `NODE_ENV === "production"`, confirmed by direct read of the guard condition. |
+| File upload magic-byte validation | **PASS** | Code-verified: upload filter reads real stream bytes and validates against known signatures per declared MIME type, independent of the extension/MIME-type check. |
+| Error-leakage default-safe behavior | **PASS** | Code-verified: response building defaults to the production (non-leaking) branch when `NODE_ENV` is simply unset, not the more permissive development branch. |
+
+No new vulnerabilities were found in this addendum's checks - all five were already correctly implemented. Not independently re-verified this pass (relying on the existing report and its own test suite above): the remaining ~50 controls that report already covers, including its own 11 fixed vulnerabilities.
+

@@ -58,6 +58,17 @@ export const FIELD_ALIASES = {
   user_auth: {
     user: "user_id",
   },
+  // Added (Phase 9 - escrow/payment safety audit): found while
+  // verifying the real M-Pesa callback path end-to-end - the real
+  // notifications table has no alias entry at all, and its real
+  // column is user_id, not user. Confirmed directly (\d notifications)
+  // and by reproducing the real error ("Could not find the 'user'
+  // column of 'notifications'") when sendNotification's real caller
+  // (paymentCallback.service.js, a real, non-blocking side effect of
+  // a successful payment) tried to create one.
+  notifications: {
+    user: "user_id",
+  },
   user_preferences: {
     user: "user_id",
   },
