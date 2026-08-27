@@ -95,3 +95,16 @@ The certification gate "CI passes" required fixing what was actually failing. Al
 2. Fix the Render service crash (check deploy logs; verify `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL` are set).
 3. Renew the `*.kayad.space` certificate (www).
 4. Then: run smoke tests (`/health` 200, `/api/cars` 200, register→login→browse→detail→save flows) and the full `e2e/` P0 suite against the live deployment, and re-run this certification.
+
+---
+
+## Addendum — attempted independent re-verification of live production status
+
+This report's own §1 findings (Vercel `DEPLOYMENT_NOT_FOUND`, backend 502, expired `www` certificate) are from 2026-08-24 - 3 days before this addendum. Given this is a real, live, external system that could genuinely have changed since then (the owner may have fixed the Vercel/Render configuration), an attempt was made to independently re-check the current live status rather than assume the prior finding still holds.
+
+**Result: could not be re-verified, stated honestly rather than guessed at.** This session's sandbox has a restricted network allowlist that does not include `kayad.space`/`api.kayad.space`, and this session's web-search tool returned no results for the actual project domain (only unrelated organizations sharing similar names) - so no prior search result existed to `web_fetch` from either. Neither of this session's two available methods for reaching a real, live external system could reach this one.
+
+**This does not change the certification.** Per this phase's own explicit instruction ("No optimistic certification"), the absence of new evidence is not evidence of improvement - the existing, real, dated findings above remain the most recent verified evidence available, and the **NOT production-ready** verdict stands unchanged. Re-running the live checks in §1 (a simple `curl` against the three production URLs, or opening them in a browser) is something the project owner can do directly and immediately, and would give a more current answer than anything achievable from this or any other sandboxed session without direct network access to the deployment.
+
+**Confirmed unchanged, locally:** frontend `tsc --noEmit` clean; backend test suite 16/16 suites, 335/335 tests passing - consistent with §5's "Build passes" / "CI passes" gates, re-verified on the current commit.
+
