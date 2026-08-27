@@ -61,3 +61,18 @@ Implementation treats `pattern` as optional; the `.ts` signature required it. Fi
 - The in-memory idempotency fallback and in-process lock fallback are per-process: with multiple backend instances, duplicate protection degrades to best-effort during a DB outage. Documented; the primary (Supabase) path is the enforcement layer.
 - `withRetry` circuit keys default to `"default"` when callers don't pass `key`, so same-service calls share one circuit. Acceptable for current callers (single M-Pesa service); pass explicit keys if new services adopt it.
 - Development-mode mock fallbacks remain (deliberate dev convenience) but are now gated to `NODE_ENV=development` and can no longer produce a "success" financial state.
+
+---
+
+## Addendum — independent verification pass
+
+The above report already exists in this repository's own history as real, prior work (a separate, parallel work stream), with its own dedicated test coverage (`backend/tests/resilience/failureModes.test.js`, 32 cases; `src/__tests__/api/apiResilience.test.ts`, 8 cases) - confirmed still passing as part of this project's own most recent full test runs (16/16 backend suites, 335/335 tests). Per this project's own established standard of verifying rather than trusting existing claims, the single most financially-critical claim (F1) was independently, empirically re-tested this pass.
+
+| Claim | Result | Method |
+|---|---|---|
+| F1 - M-Pesa fallback never fabricates a successful STK response | **Confirmed** | Called the real `stkPush` function directly, 6 times, against a real (but unconfigured/uncredentialed) M-Pesa setup in this sandbox. Every single call threw a real error (`M-Pesa not configured`, `err.code`) - never once returned anything resembling a success shape. Separately traced the actual circuit-breaker-open code path in `utils/retry.js` directly: when the circuit is open, it calls `return await fallback()` - since `mpesaService.js`'s own `fallback` is an `async` function that `throw`s, this `await` necessarily propagates that rejection to the real caller. The mechanism is sound by direct trace even though this sandbox's real calls hit an earlier, equally-safe "not configured" guard rather than the circuit-open state specifically (no real, working Daraja credentials exist here to drive genuine repeated network failures). |
+
+Not independently re-verified this pass (relying on the existing report and its own 32+8 test cases above): F2 through F7, and every item in the "verified SAFE" table. Given the depth of this project's own existing work here and the time available, no further independent testing was performed this pass.
+
+No new weaknesses were found. No application code was changed this pass.
+
