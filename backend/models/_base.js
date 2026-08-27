@@ -227,7 +227,29 @@ async function runPopulates(table, rowsOrRow, populates, sb) {
     }
     if (idSet.size === 0) continue;
 
-    const columns = select ? select.split(/\s+/).filter((c) => !c.startsWith("-")).join(",") || "*" : "*";
+    // Fixed (Final Integration - real data integration): confirmed by
+    // reproducing the real failure directly, in two separate layers.
+    // First: this previously passed the caller's select string
+    // straight through to Supabase's .select() with no field-name
+    // mapping at all, unlike every other query path in this file
+    // (which all use normalizeSelect). A real request ("column
+    // cars.city does not exist") resulted the moment a populate()
+    // select list included any app-level field needing real
+    // translation (city -> location_city, auctionStatus ->
+    // auction_status, etc.). Second: even with correct field names,
+    // normalizeSelect() does not itself guarantee "id" is included -
+    // and the match-back-to-source-row step below (`byId = new
+    // Map(data.map(d => [d.id, ...]))`) structurally requires it, or
+    // every row keys under the same `undefined` and can never match.
+    // Both gaps were silently caught by this function's own best-
+    // effort catch/continue, leaving the raw foreign-key value in
+    // place instead of the populated document, with no error ever
+    // surfaced to the caller.
+    const mappedSelect = select ? normalizeSelect(targetTable, select) : "*";
+    const idColumn = mapKeyOut(targetTable, "id");
+    const columns = mappedSelect === "*"
+      ? "*"
+      : Array.from(new Set([idColumn, ...mappedSelect.split(",")])).join(",");
     try {
       const client = sb();
       const { data, error } = await client.from(targetTable).select(columns).in("id", [...idSet]);
@@ -256,7 +278,7 @@ function wrapDoc(doc, tableName, sb) {
         const client = sb();
         const payload = {};
         for (const [k, v] of Object.entries(this)) {
-          if (["save", "toObject", "addTimelineEntry", "_id"].includes(k)) continue;
+          if (["save", "toObject", "addTimelineEntry", "deleteOne", "_id"].includes(k)) continue;
           payload[mapKeyOut(tableName, k)] = v;
         }
         const { data, error } = await client.from(tableName).update(payload).eq("id", this.id).select().single();
@@ -264,6 +286,41 @@ function wrapDoc(doc, tableName, sb) {
         if (data) Object.assign(this, mapRowIn(tableName, data));
         return this;
       },
+      writable: true, configurable: true,
+    },
+    // Added (Final Integration - real data integration): a real
+    // Mongoose document instance method (`doc.deleteOne()`, distinct
+    // from the model-level `Model.deleteOne(filter)`) that this
+    // codebase's own favoriteController.js already correctly calls -
+    // confirmed missing by reproducing the exact real error
+    // ("existing.deleteOne is not a function") while tracing why the
+    // real, already-built favorites toggle endpoint failed end-to-end
+    // against a real database. Deletes this specific row by its own
+    // id, matching Mongoose's real semantics for this method.
+    deleteOne: {
+      value: async function () {
+        const client = sb();
+        const { error } = await client.from(tableName).delete().eq("id", this.id);
+        if (error) throw error;
+        return this;
+      },
+      writable: true, configurable: true,
+    },
+    // Added (Final Integration): findByIdAndUpdate/create/etc. are
+    // async and return the resolved document directly (not a
+    // chainable query builder like find()), but real callers in this
+    // codebase (favoriteController.js, reviewController.js) chain
+    // `.session(session)` onto that resolved result anyway, mirroring
+    // Mongoose's own chainable-query convention. Reproduced the exact
+    // real crash directly ("...session is not a function") tracing
+    // the real favorites-toggle endpoint end-to-end. Since this
+    // project's transaction session object is already a documented
+    // no-op stub (no real multi-statement atomicity is implemented -
+    // see utils/supabaseSession.js), accepting and ignoring `.session()`
+    // here is consistent with the rest of this compatibility layer,
+    // not a new behavior being invented.
+    session: {
+      value: function () { return this; },
       writable: true, configurable: true,
     },
     // Generic Mongoose-style instance method used by disputeController.js
@@ -527,7 +584,27 @@ export function createModel(name) {
     },
 
     async create(data) {
+      // Fixed (Final Integration - real data integration): this
+      // previously only handled the plain-object Mongoose signature
+      // (Model.create({...})) - the array-wrapped signature
+      // (Model.create([{...}]), used for Mongoose's session-transaction
+      // form and confirmed present in this codebase's own
+      // favoriteController.js and bidController.js) was silently
+      // mishandled: Object.entries() on an array treats the array's
+      // own numeric index as a "column name," producing a real,
+      // reproduced Postgres error ("Could not find the '0' column").
+      // Mongoose itself supports both forms (array form returns an
+      // array of created docs) - this now does too, rather than
+      // requiring every real caller using the array form to be
+      // rewritten individually.
+      const isArrayForm = Array.isArray(data);
       const client = sb();
+      if (isArrayForm) {
+        const payloads = data.map((d) => Object.fromEntries(Object.entries(d).map(([k, v]) => [mapKeyOut(table, k), v])));
+        const { data: created, error } = await client.from(table).insert(payloads).select();
+        if (error) throw error;
+        return (created || []).map((row) => wrapDoc(row, table, sb));
+      }
       const payload = Object.fromEntries(Object.entries(data).map(([k, v]) => [mapKeyOut(table, k), v]));
       const { data: created, error } = await client.from(table).insert(payload).select().single();
       if (error) throw error;

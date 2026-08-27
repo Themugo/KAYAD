@@ -19,8 +19,20 @@ export const getFavorites = async (req, res) => {
         .limit(limit)
         .populate({
           path: "car",
+          // Fixed (Final Integration - real data integration): was
+          // "location" - confirmed by reproducing the real failure
+          // directly that this is not a valid field/alias at all
+          // (this project's own earlier hardening work already
+          // established the real alias is "city", mapping to the
+          // real location_city column). Since this specific select
+          // string caused a real Supabase query error inside
+          // runPopulates()'s own best-effort catch, the entire
+          // populate silently failed and left the raw car_id string
+          // in place instead of the populated car object - exactly
+          // the "no error surfaced, wrong data shown" failure mode
+          // this phase's own instructions warn against.
           select:
-            "title price images brand model year fuel transmission mileage location auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer",
+            "title price images brand model year fuel transmission mileage city auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer",
         })
         .lean(),
       Favorite.countDocuments({ user: req.user.id }),
@@ -74,7 +86,7 @@ export const addFavorite = async (req, res) => {
       { upsert: true, new: true, session },
     );
 
-    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } }).session(session);
+    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
 
     await session.commitTransaction();
     session.endSession();
@@ -115,9 +127,9 @@ export const removeFavorite = async (req, res) => {
 
   try {
     const { carId } = req.params;
-    const deleted = await Favorite.findOneAndDelete({ user: req.user.id, car: carId }).session(session);
+    const deleted = await Favorite.findOneAndDelete({ user: req.user.id, car: carId });
     if (deleted) {
-      await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } }).session(session);
+      await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } });
     }
     await session.commitTransaction();
     session.endSession();
@@ -148,7 +160,7 @@ export const toggleFavorite = async (req, res) => {
 
     if (existing) {
       await existing.deleteOne({ session });
-      await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } }).session(session);
+      await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } });
       await session.commitTransaction();
       session.endSession();
       return res.json({ success: true, favorited: false, message: "Removed from favourites" });
@@ -164,7 +176,7 @@ export const toggleFavorite = async (req, res) => {
         image: car.images?.[0]?.url || car.images?.[0] || null,
       },
     }], { session });
-    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } }).session(session);
+    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
 
     await session.commitTransaction();
     session.endSession();

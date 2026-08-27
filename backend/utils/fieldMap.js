@@ -64,6 +64,18 @@ export const FIELD_ALIASES = {
     seller: "seller_id",
     car: "car_id",
   },
+  // Added (Final Integration - real data integration): found while
+  // wiring the real, already-built favoriteApi.ts frontend client to
+  // this project's own saved-vehicles UI (previously hardcoded fake
+  // IDs, never actually connected to any backend). Reproduced
+  // directly against a real database: no alias entry existed for this
+  // table at all, and the real columns are user_id/car_id, not the
+  // app-level user/car this controller's own code already uses
+  // throughout (Favorite.find({ user: ... }), etc.).
+  favorites: {
+    user: "user_id",
+    car: "car_id",
+  },
   user_auth: {
     user: "user_id",
   },

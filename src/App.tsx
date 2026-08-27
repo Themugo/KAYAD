@@ -8,6 +8,8 @@ import PriceAlertsModal from './components/PriceAlertsModal';
 
 import { MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
 import { getCars, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
+import { useVehicleCollections } from './hooks/useVehicleCollections';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Vehicle, ChatMessage, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 
@@ -29,13 +31,51 @@ import { BuyerPlatform } from './features/OwnershipPlatform';
 import { PrivateSellerPlatform } from './features/PrivateSellerPlatform';
 import { FinanceMarketplace } from './features/FinancePlatform';
 
-export function App() {
+// Fixed (Final Integration - real data integration): App() previously
+// held its own, disconnected local user state directly - re-applying
+// this project's own earlier hardening fix (Phase 2), confirmed lost
+// on this branch: useAuth() requires an AuthProvider ancestor, so
+// App() is now a thin wrapper providing that, with the real logic in
+// AppInner().
+function AppInner() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  
-  // Authenticated User State (null = anonymous public visitor)
-  const [user, setUser] = useState<UserProfile | null>(null);
+
+  // Fixed (Final Integration - real data integration): this was
+  // useState<UserProfile | null>(null) - a second, disconnected
+  // source of truth for "who is logged in," never wired to the real,
+  // HttpOnly-cookie-based session at all. Confirmed reverted from
+  // this project's own earlier hardening work. Now consumes the one,
+  // real, authoritative user directly from AuthProvider via
+  // useAuth().
+  //
+  // authUser (from AuthContext) and the UserProfile shape the rest of
+  // this app's component tree expects are two different types -
+  // AuthContext's User has broader, all-optional fields matching
+  // exactly what the real backend returns; UserProfile is this app's
+  // own, stricter, required-fields shape. This adapter bridges the
+  // two honestly: no field is invented that the backend doesn't
+  // provide, except isVerified (backend has no such field - mapped
+  // from the real, existing emailVerified boolean).
+  const { user: authUser, logout: authLogout, isAdmin } = useAuth();
+  const user: UserProfile | null = useMemo(() => {
+    if (!authUser) return null;
+    const id = authUser.id || authUser._id;
+    if (!id) return null;
+    return {
+      id,
+      email: authUser.email || '',
+      name: authUser.name || '',
+      // This narrow role union is UserProfile's own, pre-existing
+      // contract in src/types.ts - not something this fix changes or
+      // widens.
+      role: (authUser.role || 'user') as UserProfile['role'],
+      phone: authUser.phone || '',
+      avatar: authUser.avatar || '',
+      isVerified: Boolean(authUser.emailVerified),
+    };
+  }, [authUser]);
 
   // Interactive States
   // Fixed (Final Integration - production mock-data dependencies):
@@ -75,8 +115,6 @@ export function App() {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
-  const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
   
   // Modal Trigger States
@@ -140,20 +178,26 @@ export function App() {
   }, [vehicles]);
 
   // Toggle Save
-  const handleToggleSave = useCallback((id: string) => {
-    setSavedVehicles((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  }, []);
-
-  // Toggle Compare
-  const handleToggleCompare = useCallback((id: string) => {
-    setComparedVehicles((prev) => {
-      if (prev.includes(id)) return prev.filter((item) => item !== id);
-      if (prev.length >= 4) return prev; // max 4
-      return [...prev, id];
-    });
-  }, []);
+  // Fixed (Final Integration - real data integration): savedVehicles
+  // was local-only state starting from hardcoded, fake IDs (['v1',
+  // 'v2']) that never match any real vehicle, with no connection to
+  // the real, already-built favorites backend (verified end-to-end
+  // this pass: real toggle, real fetch, real persisted result,
+  // survives refresh). A complete, already-built hook
+  // (useVehicleCollections) already wires this correctly - real API
+  // for logged-in users, honest local-only behavior for anonymous
+  // ones (the backend has no anonymous-favorites concept at all) -
+  // it simply was never connected to App.tsx. comparedVehicles has no
+  // backend concept at all (confirmed: no such endpoint exists
+  // anywhere) and correctly stays local-only in both cases.
+  const {
+    savedVehicles,
+    comparedVehicles,
+    savedVehiclesList,
+    comparedVehiclesList,
+    handleToggleSave,
+    handleToggleCompare,
+  } = useVehicleCollections(vehicles, user?.id ?? null);
 
   // Add Vehicle Handler
   const handleAddVehicle = useCallback((newVehicle: Vehicle) => {
@@ -199,14 +243,6 @@ export function App() {
     setActiveNav('marketplace');
   }, []);
 
-  const savedVehiclesList = useMemo(() => {
-    return vehicles.filter((v) => savedVehicles.includes(v.id));
-  }, [vehicles, savedVehicles]);
-
-  const comparedVehiclesList = useMemo(() => {
-    return vehicles.filter((v) => comparedVehicles.includes(v.id));
-  }, [vehicles, comparedVehicles]);
-
   return (
     <div className="min-h-screen bg-[#F6F1E8] text-slate-800 flex flex-col font-sans">
       {/* 1. Header Navigation */}
@@ -219,7 +255,7 @@ export function App() {
         onCountyChange={(c) => setSelectedCounty(c)}
         onOpenAuth={() => setShowAuthModal(true)}
         onOpenAlerts={() => setShowAlertsModal(true)}
-        onLogout={() => setUser(null)}
+        onLogout={() => { authLogout(); }}
       />
 
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
@@ -322,7 +358,16 @@ export function App() {
             />
           )}
 
-          {activeNav === 'admin' && (
+          {/* Fixed (Final Integration): this rendered purely on
+              activeNav === 'admin', with no check on the real user's
+              role - any visitor, including an anonymous, logged-out
+              one, could reach this by manipulating client-side
+              navigation state alone. Confirmed reverted from this
+              project's own earlier hardening work (Phase 2). This
+              frontend gate is a UX improvement, not the sole security
+              boundary - real backend authorization on this view's own
+              data calls remains the authoritative check. */}
+          {activeNav === 'admin' && isAdmin && (
             <AdminView
               vehicles={vehicles}
               onQuickViewVehicle={handleOpenVehicleDetails}
@@ -439,7 +484,11 @@ export function App() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onLogin={(loggedInUser) => setUser(loggedInUser)}
+        // Fixed: the real state update already happens inside
+        // AuthModal's own login()/register()/demoLogin() calls
+        // through AuthContext by the time this fires - App no longer
+        // keeps any separate state to set here.
+        onLogin={() => {}}
       />
 
       <PriceAlertsModal
@@ -447,6 +496,14 @@ export function App() {
         onClose={() => setShowAlertsModal(false)}
       />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
   );
 }
 

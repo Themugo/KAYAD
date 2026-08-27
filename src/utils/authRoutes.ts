@@ -35,6 +35,16 @@ export interface User {
   role?: UserRole;
   status?: string;
   emailVerified?: boolean;
+  // Added (Final Integration - real data integration): both are real
+  // fields the backend actually returns (confirmed directly against
+  // backend/controllers/authController.js's own allowed-fields list
+  // in this project's own earlier hardening work) but were missing
+  // from this type - needed so App.tsx can consume this context's
+  // real user directly instead of maintaining its own, separate local
+  // user state.
+  avatar?: string;
+  createdAt?: string;
+  phone?: string;
 }
 
 export const isStaffRole = (role?: string): role is StaffRole => 

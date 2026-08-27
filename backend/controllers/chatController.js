@@ -8,6 +8,20 @@ import { getIO } from "../utils/io.js";
 import { findOrCreateLeadFromChat, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logError } from '../infrastructure/logging/index.js';
 
+// Fixed (Final Integration - real data integration): CHAT_FIELDS was
+// previously declared as a local const inside startChat only, but
+// getUserChats (a separate function further down this same file)
+// also referenced it directly - a real ReferenceError, reproduced
+// directly by calling the real function against a real database
+// ("CHAT_FIELDS is not defined"), meaning this endpoint - the one
+// this project's real chat backend needs for its most basic "list my
+// chats" operation - has never been able to return anything but a
+// 500. Hoisted to module scope so both functions (and any other real
+// caller in this file) can safely share the identical field list.
+// H-2 FIX (pre-existing comment, kept): select specific fields
+// instead of "*" to avoid leaking internal chat data.
+const CHAT_FIELDS = "id, participants, car, lastMessage, lastMessageAt, isBlocked, createdAt, updatedAt";
+
 // =============================
 // 💬 START / CREATE CHAT
 // =============================
@@ -22,8 +36,6 @@ export const startChat = async (req, res) => {
     const participants = [req.user.id, participantId].sort();
 
     const sb = getSupabase();
-    // H-2 FIX: Select specific fields instead of "*" to avoid leaking internal chat data.
-    const CHAT_FIELDS = "id, participants, car, lastMessage, lastMessageAt, isBlocked, createdAt, updatedAt";
     let query = sb.from("chats").select(CHAT_FIELDS).contains("participants", participants);
     if (carId) query = query.eq("car", carId);
 
