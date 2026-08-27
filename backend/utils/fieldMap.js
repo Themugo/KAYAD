@@ -22,13 +22,22 @@ export const snakeToCamel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpper
 // tables — do not duplicate this map elsewhere.
 export const FIELD_ALIASES = {
   cars: {
-    brand: "make",
-    fuel: "fuel_type",
+    // Fixed (re-applied - this project's own earlier hardening work
+    // already found and fixed this exact defect; confirmed reverted
+    // when this file was rebuilt on a diverged branch, reproduced
+    // failing again directly against a real database before re-
+    // fixing): brand/fuel/engine were aliased to column names that do
+    // not exist at all (make/fuel_type/engine_capacity) - the real
+    // columns are named exactly the same as the app-level field
+    // (brand/fuel/engine), so these need no alias entry at all. city
+    // was aliased to "location" but the real column is
+    // "location_city". This is the exact root cause of GET /api/cars
+    // - the endpoint App.tsx's own real vehicle-fetch calls - throwing
+    // a real Postgres error on every single request.
     drivetrain: "drive_type",
-    engine: "engine_capacity",
     isAuction: "has_auction",
     dealer: "dealer_id",
-    city: "location",
+    city: "location_city",
     highestBidder: "highest_bidder_id",
   },
   users: {
@@ -101,7 +110,7 @@ export const REVERSE_FIELD_ALIASES = Object.fromEntries(
 // table. Tables not listed here don't support `$text` — we skip the
 // filter rather than guess at column names that may not exist.
 export const SEARCHABLE_FIELDS = {
-  cars: ["title", "make", "model", "description"],
+  cars: ["title", "brand", "model", "description"],
 };
 
 export function mapKeyOut(table, key) {

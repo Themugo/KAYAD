@@ -25,6 +25,23 @@ const toNumber = (val, def) => {
 // 📦 GET ALL CARS (SERVER-SIDE FILTERING + PAGINATION)
 // =============================
 export const getCars = async (req, res) => {
+  // Fixed (re-applied - this project's own earlier hardening work
+  // already found and fixed this exact defect; confirmed reverted):
+  // query/pageNum/limitNum/sortOption were all declared with
+  // const/let inside the try block below, but the catch block at the
+  // bottom of this function references all four for error logging -
+  // a real ReferenceError (reproduced directly against a real
+  // database), since JS does not expose try-block-scoped bindings to
+  // their own catch block. This masks whatever the original error
+  // actually is: any real failure inside the try (such as the wrong-
+  // column-name bug fixed in fieldMap.js) throws a second, unrelated
+  // ReferenceError from this catch block's own logging code, hiding
+  // the real cause. Hoisted here so the catch block can safely
+  // reference them.
+  let query = {};
+  let pageNum = 1;
+  let limitNum = 12;
+  let sortOption = {};
   try {
     const {
       keyword,
@@ -54,12 +71,12 @@ export const getCars = async (req, res) => {
       limit = 12,
     } = req.query;
 
-    const pageNum = Math.max(toNumber(page, 1), 1);
+    pageNum = Math.max(toNumber(page, 1), 1);
     // Hard cap: clamp limit to 1..100 so a request like ?limit=999999 can
     // never trigger an unbounded query (pagination cap — Issue: security test).
-    const limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
+    limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
 
-    const query = { status: "available", isDemo: { $ne: true } };
+    query = { status: "available", isDemo: { $ne: true } };
 
     if (keyword) {
       const trimmed = keyword.trim();
@@ -149,7 +166,7 @@ export const getCars = async (req, res) => {
       query.auctionStatus = auctionStatus;
     }
 
-    let sortOption = {};
+    sortOption = {};
     if (query.$text && !sort) {
       // When using text search without explicit sort, rank by relevance
       sortOption = { score: { $meta: "textScore" }, createdAt: -1 };
@@ -178,7 +195,10 @@ export const getCars = async (req, res) => {
         brand: 1,
         year: 1,
         model: 1,
-        location: 1,
+        // Fixed (re-applied): "location" is not a real field/alias -
+        // the real column is location_city, reached via the "city"
+        // app-level alias.
+        city: 1,
         fuel: 1,
         transmission: 1,
         mileage: 1,
@@ -206,7 +226,7 @@ export const getCars = async (req, res) => {
       });
     } else {
       findQuery = findQuery.select(
-        "title price images coverImage brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
+        "title price images coverImage brand year model city fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
       );
     }
 

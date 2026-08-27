@@ -6,7 +6,8 @@ import CompareModal from './components/CompareModal';
 import AuthModal from './components/AuthModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 
-import { INITIAL_VEHICLES, MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
+import { MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
+import { getCars, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { Vehicle, ChatMessage, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 
@@ -37,7 +38,43 @@ export function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
 
   // Interactive States
-  const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES);
+  // Fixed (Final Integration - production mock-data dependencies):
+  // this had regressed back to useState<Vehicle[]>(INITIAL_VEHICLES)
+  // - the exact same mock-on-every-load defect originally found and
+  // fixed in this project's own earlier hardening work (Phase 3),
+  // confirmed to have been lost when this file was rebuilt on a
+  // diverged branch. Re-applying the same, already-proven fix: starts
+  // empty + loading, fetches real data from the already-existing,
+  // already-correct services/vehicleApi.ts (getCars/
+  // mapBackendCarToVehicle - neither needed any changes, both were
+  // still intact). A failed fetch produces an explicit error state,
+  // never a silent fallback to mock data.
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState<boolean>(true);
+  const [vehiclesError, setVehiclesError] = useState<string | null>(null);
+
+  const fetchVehicles = useCallback(async () => {
+    setVehiclesLoading(true);
+    setVehiclesError(null);
+    try {
+      const res = await getCars({ limit: 50 });
+      const real = (res.data || res.cars || []).map(mapBackendCarToVehicle);
+      setVehicles(real);
+    } catch (err) {
+      setVehiclesError(
+        err instanceof VehicleApiError
+          ? err.message
+          : 'Something went wrong loading vehicles. Please try again.'
+      );
+    } finally {
+      setVehiclesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, [fetchVehicles]);
+
   const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
   const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
@@ -205,6 +242,9 @@ export function App() {
               onOpenCompareModal={() => setShowCompareModal(true)}
               onNavigate={(nav) => setActiveNav(nav)}
               onOpenAuth={() => setShowAuthModal(true)}
+              isLoadingReal={vehiclesLoading}
+              loadError={vehiclesError}
+              onRetryLoad={fetchVehicles}
             />
           )}
 
@@ -331,6 +371,9 @@ export function App() {
               searchQuery=""
               onSearchChange={() => {}}
               onOpenCompareModal={() => setShowCompareModal(true)}
+              isLoadingReal={vehiclesLoading}
+              loadError={vehiclesError}
+              onRetryLoad={fetchVehicles}
             />
           )}
 
