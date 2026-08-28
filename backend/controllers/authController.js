@@ -357,7 +357,14 @@ export const login = async (req, res) => {
       );
     }
 
-    user.lastLogin = new Date();
+    // Fixed (Final Integration Phase 5 - API/database contract
+    // certification): removed the redundant `user.lastLogin =
+    // new Date()` line that was here - reproduced the real failure
+    // directly ("Could not find the 'last_login' column of
+    // 'users'"): no such column exists, only last_login_at
+    // (which lastLoginAt already correctly maps to). This was a
+    // real, blocking defect - user.save() writes every enumerable
+    // field, so this alone failed every single successful login.
     user.lastLoginAt = new Date();
     await user.save();
     if (userAuth) await userAuth.save();
@@ -408,7 +415,14 @@ export const demoLogin = async (req, res) => {
       });
     }
 
-    user.lastLogin = new Date();
+    // Fixed (Final Integration Phase 5 - API/database contract
+    // certification): removed the redundant `user.lastLogin =
+    // new Date()` line that was here - reproduced the real failure
+    // directly ("Could not find the 'last_login' column of
+    // 'users'"): no such column exists, only last_login_at
+    // (which lastLoginAt already correctly maps to). This was a
+    // real, blocking defect - user.save() writes every enumerable
+    // field, so this alone failed every single successful login.
     user.lastLoginAt = new Date();
     await user.save();
 

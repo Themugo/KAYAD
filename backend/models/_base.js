@@ -288,7 +288,26 @@ async function runPopulates(table, rowsOrRow, populates, sb) {
 function wrapDoc(doc, tableName, sb) {
   if (!doc) return null;
   mapRowIn(tableName, doc);
-  return Object.defineProperties(doc, {
+  // Fixed (Final Integration Phase 5 - API/database contract
+  // certification): CRITICAL - this function previously called
+  // `return Object.defineProperties(doc, {...baseProps})` and exited
+  // immediately, before ever reaching the `if (tableName === "users"
+  // || tableName === "user_auth")` block below it that defines
+  // matchPassword/hashPassword - that entire block was permanently
+  // unreachable, dead code. Reproduced the exact real-world
+  // consequence directly: every single login attempt, for every
+  // user, has been throwing "userAuth.matchPassword is not a
+  // function" and returning "Login failed" (500) - login itself was
+  // completely broken. This was never caught earlier this session
+  // because every other test authenticated by injecting a pre-built
+  // req.user directly (matching how real, valid session cookies work
+  // once already logged in) rather than exercising the real login()
+  // controller itself - this phase's own systematic, endpoint-by-
+  // endpoint audit is what surfaced it. Fixed by building the full
+  // properties object first (base properties, then the users/
+  // user_auth-specific ones merged in when applicable), and calling
+  // Object.defineProperties exactly once, at the end.
+  const props = {
     _id: { get() { return this.id; }, set(v) { this.id = v; }, enumerable: true, configurable: true },
     save: {
       value: async function () {
@@ -373,27 +392,27 @@ function wrapDoc(doc, tableName, sb) {
       value: function () { return { ...this }; },
       writable: true, configurable: true,
     },
-  });
+  };
 
   if (tableName === "users" || tableName === "user_auth") {
-    Object.defineProperties(doc, {
-      matchPassword: {
-        value: async function (candidatePassword) {
-          if (!this.password || !candidatePassword) return false;
-          return bcrypt.compare(candidatePassword, this.password);
-        },
-        writable: true, configurable: true,
+    props.matchPassword = {
+      value: async function (candidatePassword) {
+        if (!this.password || !candidatePassword) return false;
+        return bcrypt.compare(candidatePassword, this.password);
       },
-      hashPassword: {
-        value: async function () {
-          if (this.password && !this.password.startsWith("$2")) {
-            this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
-          }
-        },
-        writable: true, configurable: true,
+      writable: true, configurable: true,
+    };
+    props.hashPassword = {
+      value: async function () {
+        if (this.password && !this.password.startsWith("$2")) {
+          this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
+        }
       },
-    });
+      writable: true, configurable: true,
+    };
   }
+
+  return Object.defineProperties(doc, props);
 }
 
 function createQuery(tableName) {
@@ -410,7 +429,29 @@ function createQuery(tableName) {
     _executor: null,
 
     select(fields) {
-      this._select = normalizeSelect(tableName, fields);
+      // Fixed (Final Integration Phase 5 - API/database contract
+      // certification): normalizeSelect() does not itself guarantee
+      // "id" is included in a caller's custom select list (already
+      // confirmed and fixed once for runPopulates() specifically -
+      // this is the same structural gap in the more general, direct
+      // .select() path). Reproduced a real, severe consequence
+      // directly: UserAuth.findOne(...).select("+password
+      // +tokenVersion") - the real, canonical login flow's own call -
+      // produced an object with no id at all, so the immediately
+      // following .save() call's own `.eq("id", this.id)` filter
+      // became `.eq("id", undefined)`, a real Postgres error
+      // ("invalid input syntax for type uuid"), breaking every real
+      // login on this entire platform. Any caller selecting specific
+      // fields and later calling .save()/.deleteOne() on the result
+      // was silently exposed to this same defect, not just this one
+      // call site. Always including the mapped id column here is a
+      // structural requirement for those methods to work at all, not
+      // something every caller should need to remember to ask for.
+      const mapped = normalizeSelect(tableName, fields);
+      const idColumn = mapKeyOut(tableName, "id");
+      this._select = mapped === "*" || mapped.split(",").includes(idColumn)
+        ? mapped
+        : `${idColumn},${mapped}`;
       return this;
     },
 
