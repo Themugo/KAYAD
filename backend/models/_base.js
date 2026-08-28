@@ -277,8 +277,24 @@ function wrapDoc(doc, tableName, sb) {
       value: async function () {
         const client = sb();
         const payload = {};
+        // Fixed (Final Integration Phase 3 - real auction & bidding
+        // integration): found while providing the required "real,
+        // persisted bid" evidence for this phase - Car.prototype.
+        // save() writes every enumerable field, including isAuction,
+        // which maps to has_auction - a real Postgres GENERATED
+        // column (auction_status IS DISTINCT FROM 'none'), confirmed
+        // directly in this project's own earlier documentation
+        // (services/vehicleApi.ts's own BackendCar type comment) and
+        // reproduced live ("column \"has_auction\" can only be
+        // updated to DEFAULT") tracing why a real bid's own
+        // currentBid update wasn't being persisted. Excluded only for
+        // the cars table specifically - this is a real, table-
+        // specific database constraint, not a general property to
+        // skip for every model.
+        const tableSkip = tableName === "cars" ? ["isAuction", "has_auction"] : [];
         for (const [k, v] of Object.entries(this)) {
           if (["save", "toObject", "addTimelineEntry", "deleteOne", "_id"].includes(k)) continue;
+          if (tableSkip.includes(k)) continue;
           payload[mapKeyOut(tableName, k)] = v;
         }
         const { data, error } = await client.from(tableName).update(payload).eq("id", this.id).select().single();

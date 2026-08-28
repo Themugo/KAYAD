@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Vehicle, AuctionSession, BidRecord, UserProfile } from '../../../types';
 import { INITIAL_AUCTION_SESSIONS } from '../../../data/mockAuctions';
 import { getAuctionIdFromUrl, setAuctionDetailUrl } from '../../../utils/navigation';
+import { placeBid, BidApiError } from '../../../services/bidApi';
 // CreateAuctionModal import removed - its only usage in this file was
 // the dead, unreachable modal instance removed above. The component
 // itself still lives on and is used by DealerBusinessView.tsx.
@@ -503,16 +504,53 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
     showToast(`Escrow ${label} for "${session.vehicleTitle}"`, 'success');
   };
 
-  const executeBid = (session: AuctionSession, amount: number, bidder: string = 'Verified Bidder', location: string = 'Nairobi') => {
-    // Auction authority is the canonical backend engine only. These
-    // sessions are preview/mock data — bids must not be accepted or
-    // simulated client-side. Real bidding: POST /api/bids/:id/bid.
-    void session;
-    void amount;
+  // Fixed (Final Integration Phase 3 - real auction & bidding
+  // integration): previously always showed "Bidding is disabled on
+  // preview auctions" unconditionally - correct, honest behavior for
+  // this component's own mock sessions (INITIAL_AUCTION_SESSIONS),
+  // but it never actually attempted the real backend call even when
+  // it could. Now genuinely connects to the real, canonical bid
+  // endpoint (POST /api/bids/:id/bid, via services/bidApi.ts) when
+  // this session's vehicleId matches a real, fetched vehicle (the
+  // `vehicles` prop is real - App.tsx fetches it from the live
+  // backend, this project's own earlier hardening work) - this
+  // session's own presentation data (organizer info, etc.) may still
+  // be from this component's own mock scaffolding, but the bid
+  // request itself, its validation, and its persisted result are
+  // 100% real and backend-authoritative whenever the target vehicle
+  // is real. If the target isn't a real, fetched vehicle, this
+  // correctly keeps the same honest "preview" message as before -
+  // never simulates a bid client-side either way.
+  const executeBid = async (session: AuctionSession, amount: number, bidder: string = 'Verified Bidder', location: string = 'Nairobi') => {
     void bidder;
     void location;
-    showToast('Bidding is disabled on preview auctions. Bid on live listings in the marketplace.', 'info');
-    setCustomBidAmount('');
+
+    const realVehicle = vehicles.find((v) => v.id === session.vehicleId);
+    if (!realVehicle) {
+      showToast('Bidding is disabled on preview auctions. Bid on live listings in the marketplace.', 'info');
+      setCustomBidAmount('');
+      return;
+    }
+
+    if (!user) {
+      showToast('Please sign in to place a bid.', 'info');
+      onOpenAuth?.();
+      return;
+    }
+
+    try {
+      const result = await placeBid(realVehicle.id, amount, user.phone || '');
+      if (result.success) {
+        showToast('Bid placed successfully.');
+        setCustomBidAmount('');
+      } else {
+        // Real, unmodified backend rejection message - never replaced
+        // with a generic or optimistic string.
+        showToast(result.message || 'Bid was not accepted.', 'info');
+      }
+    } catch (err) {
+      showToast(err instanceof BidApiError ? err.message : 'Failed to place bid. Please try again.', 'info');
+    }
   };
 
   // Handle Subscribe Alert

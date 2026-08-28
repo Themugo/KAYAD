@@ -21,6 +21,19 @@ export const snakeToCamel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpper
 // can't fix. Add to this as more mismatches are found in other
 // tables — do not duplicate this map elsewhere.
 export const FIELD_ALIASES = {
+  // Added (Final Integration Phase 3 - real auction & bidding
+  // integration): found while providing the required "real, persisted
+  // bid" evidence for this phase. No alias entry existed for this
+  // table at all - carId/maxBid/bidderTag/checkoutRequestID all
+  // already happen to convert correctly via the default camelToSnake
+  // fallback (confirmed directly), but "user" (a single, already-
+  // lowercase word) does not change under that fallback, while the
+  // real column is user_id - reproduced the real failure directly
+  // ("Could not find the 'user' column of 'bids'") calling the real
+  // placeBid() controller against a real database.
+  bids: {
+    user: "user_id",
+  },
   cars: {
     // Fixed (re-applied - this project's own earlier hardening work
     // already found and fixed this exact defect; confirmed reverted
@@ -39,6 +52,18 @@ export const FIELD_ALIASES = {
     dealer: "dealer_id",
     city: "location_city",
     highestBidder: "highest_bidder_id",
+    // Added (Final Integration Phase 3): found while providing the
+    // required "real, persisted bid" evidence for this phase - the
+    // one, sole exception on this table to the otherwise-consistent
+    // snake_case convention (confirmed via a full column-name scan:
+    // `SELECT column_name ... WHERE column_name ~ '[A-Z]'` returns
+    // only this one column). The default camelToSnake() fallback
+    // converts it to "is_paid", which does not exist, reproduced
+    // directly ("Could not find the 'is_paid' column of 'cars'")
+    // while tracing why a real bid's own currentBid update wasn't
+    // being persisted (Car.prototype.save() writes every field,
+    // including this one, on every real save).
+    isPaid: "isPaid",
   },
   users: {
     logo: "avatar",

@@ -290,7 +290,7 @@ export const placeBid = async (req, res) => {
     }
 
     // 📱 Require verified phone for bids
-    const bidder = await User.findById(userId).select("phone emailVerified phone notifications");
+    const bidder = await User.findById(userId).select("phone emailVerified phone");
     if (!bidder?.phone || bidder.phone.length < 8) {
       await session.abortTransaction();
       session.endSession();
@@ -431,7 +431,7 @@ export const placeBid = async (req, res) => {
         };
 
         if (canNotify(userId)) {
-          const bidder = await User.findById(userId).select("email name phone notifications");
+          const bidder = await User.findById(userId).select("email name phone");
           if (bidder?.email && typeof sendBidConfirmationEmail === "function") {
             sendBidConfirmationEmail(bidder, bid, car).catch((e) =>
               logWarn("Bid confirm email failed", { error: e.message }),
@@ -450,7 +450,7 @@ export const placeBid = async (req, res) => {
           String(previousHighestBidder) !== String(userId) &&
           canNotify(previousHighestBidder)
         ) {
-          const prevBidder = await User.findById(previousHighestBidder).select("email name phone notifications");
+          const prevBidder = await User.findById(previousHighestBidder).select("email name phone");
           if (prevBidder?.email && typeof sendOutbidEmail === "function") {
             sendOutbidEmail(prevBidder, amount, car).catch((e) => logWarn("Outbid email failed", { error: e.message }));
           }
@@ -589,7 +589,7 @@ export const confirmBidPayment = async (req, res) => {
       const { sendBidConfirmationEmail, sendOutbidEmail } = bidEmailService;
       const User = (await import("../models/User.js")).default;
 
-      const bidder = await User.findById(bid.user).select("email name phone notifications");
+      const bidder = await User.findById(bid.user).select("email name phone");
       if (bidder?.email && typeof sendBidConfirmationEmail === "function") {
         sendBidConfirmationEmail(bidder, bid, car).catch((e) =>
           logWarn("Bid confirm email failed", { error: e.message }),
@@ -603,7 +603,7 @@ export const confirmBidPayment = async (req, res) => {
       }
 
       if (previousHighestBidder && String(previousHighestBidder) !== String(bid.user)) {
-        const prevBidder = await User.findById(previousHighestBidder).select("email name phone notifications");
+        const prevBidder = await User.findById(previousHighestBidder).select("email name phone");
         if (prevBidder?.email && typeof sendOutbidEmail === "function") {
           sendOutbidEmail(prevBidder, bid.amount, car).catch((e) =>
             logWarn("Outbid email failed", { error: e.message }),

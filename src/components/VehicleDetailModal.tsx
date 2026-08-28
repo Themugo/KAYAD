@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle } from '../types';
-import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { isEscrowApplicable, getEscrowBadgeLabel } from '../utils/escrow';
 import { 
   CheckCircle2, 
@@ -234,13 +233,15 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const isInspectionActive = Boolean(vehicle.inspectionPassed);
   const isFinanceActive = Boolean(vehicle.financeAvailable);
 
-  // For auction vehicles, the displayed price must be the live auction
-  // session's currentBid — vehicle.price is the stale starting price
-  // and visibly disagrees with the auction page for the same vehicle.
-  const liveAuctionSession = isAuction
-    ? INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id)
-    : undefined;
-  const displayPrice = liveAuctionSession?.currentBid ?? vehicle.price;
+  // Fixed (Final Integration Phase 3): displayPrice previously looked
+  // up INITIAL_AUCTION_SESSIONS (mock data) by vehicle ID for the
+  // live current bid. vehicle.currentBid is already the real, current
+  // value - mapped directly from the real backend by
+  // mapBackendCarToVehicle (this project's own earlier Phase 3
+  // hardening work already wired vehicles to fetch real data) - the
+  // mock lookup was both wrong (a real vehicle's ID would never match
+  // a mock session's ID) and unnecessary.
+  const displayPrice = isAuction ? (vehicle.currentBid ?? vehicle.price) : vehicle.price;
 
   // Market Deal Analysis
   const getMarketDiff = () => {

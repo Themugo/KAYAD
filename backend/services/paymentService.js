@@ -51,7 +51,21 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     status: "pending",
     checkoutRequestId: checkoutID,
     mode,
-    ...metadata,
+    // Fixed (Final Integration Phase 3 - real auction & bidding
+    // integration): was `...metadata` - spreading a caller's metadata
+    // object's own keys directly as top-level row columns. Confirmed
+    // by reproducing the real failure directly against a real
+    // database: every real bid attempt (which passes
+    // { bidAmount: amount } here) failed with "Could not find the
+    // 'bid_amount' column of 'payments'", since no such column
+    // exists, nor should one - metadata is meant to be stored as one,
+    // real, nested value, matching how it's already read elsewhere in
+    // this same codebase (paymentCallback.service.js's own
+    // `payment.metadata?.planId`, which only works against a real,
+    // single nested field, not spread top-level columns). Stored as
+    // the real, correct shape now, into the real payments.metadata
+    // JSONB column (added in the same migration as this fix).
+    metadata,
   });
 
   await create("mpesa_transactions", {
