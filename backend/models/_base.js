@@ -37,14 +37,31 @@ const TABLE_MAP = {
   Contact: "contacts",
   NotificationAudit: "notification_audit",
   NtsaVerificationRequest: "ntsa_verification_requests",
-  InspectionOrder: "inspection_orders",
+  InspectionOrder: "vehicle_inspections",
   InspectorApplication: "inspector_applications",
   ErrorBudget: "error_budgets", IdempotencyKey: "idempotency_keys",
   IdempotencyAuditLog: "idempotency_audit_logs",
   JobFailure: "job_failures", Ad: "ads", AdminAlert: "admin_alerts",
   Event: "events", DuplicateVehicleLog: "duplicate_vehicle_logs",
   Referral: "referrals", Feedback: "feedback",
-  DemandSignals: "demand_signals", GlobalSettings: "global_settings",
+  DemandSignals: "demand_signals",
+  // Fixed (Final Integration Phase 4 - inspection frontend
+  // integration): was "global_settings" - confirmed directly against
+  // a real, migrated database (\dt) that no such table exists at all.
+  // The real, existing settings table is "system_settings" - found
+  // reproducing the real crash ("relation \"public.global_settings\"
+  // does not exist") tracing why the real inspection-order endpoint
+  // failed on every request. Note: system_settings is a real
+  // key/value store (one row per setting key), not a single flat
+  // settings document - GlobalSettings.findOne() (no filter) will
+  // return an arbitrary row, so a direct field like `.ghostCheckFee`
+  // will not be populated from this table's real shape. The one real
+  // caller of this (backend/routes/inspectionRoutes.js's order
+  // creation) already has its own safe fallback
+  // (`settings?.ghostCheckFee || 2500`), so this remains correct,
+  // graceful behavior - not a redesign of the settings table, which
+  // is out of this phase's own scope.
+  GlobalSettings: "system_settings",
   TransactionLedger: "transaction_ledger", Localization: "localizations",
   UserPreference: "user_preferences", BidderDeposit: "bidder_deposits",
   BidLog: "bid_logs",

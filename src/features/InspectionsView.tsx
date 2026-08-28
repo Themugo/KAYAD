@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Vehicle, Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, InspectionCategoryDetail } from '../types';
+import { Vehicle, Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, InspectionCategoryDetail, UserProfile } from '../types';
+import { createInspectionOrder, InspectionApiError } from '../services/inspectionApi';
 import PrePurchaseInspectionPortal from './PrePurchaseInspectionPortal';
 import { 
   INITIAL_MECHANICS, 
@@ -55,12 +56,16 @@ import { PageHeader, StatWidget, Card, CardHeader, CardTitle, CardContent, Table
 
 interface InspectionsViewProps {
   vehicles: Vehicle[];
+  user?: UserProfile | null;
+  onOpenAuth?: () => void;
   initialSelectedVehicle?: Vehicle | null;
   onViewVehicleDetails?: (vehicleId: string) => void;
 }
 
 export const InspectionsView: React.FC<InspectionsViewProps> = ({ 
   vehicles, 
+  user,
+  onOpenAuth,
   initialSelectedVehicle,
   onViewVehicleDetails 
 }) => {
@@ -259,7 +264,24 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   };
 
   // Submit New Booking
-  const handleConfirmBooking = (e: React.FormEvent) => {
+  // Fixed (Final Integration Phase 4 - inspection frontend
+  // integration): previously always generated a fake, client-side ID
+  // ("INSP-2026-####") and stored the booking purely in local state -
+  // never persisted anywhere. Now calls the real, canonical
+  // POST /api/inspections/order (services/inspectionApi.ts) when the
+  // selected vehicle is a real, currently-fetched one (this
+  // project's own earlier hardening work already made `vehicles` a
+  // real prop) - the real backend only supports carId/phone/location,
+  // not a buyer-chosen inspector, a specific time slot, or a package
+  // tier, so this UI's own richer selection (mechanic, scheduledDate/
+  // Time, packageType) remains cosmetic for now, same as this
+  // project's own already-documented EscrowView shape gap - the real
+  // request/response and persisted state are 100% real and backend-
+  // authoritative regardless. If the target vehicle isn't real (the
+  // "custom vehicle" option, which has no backend concept at all),
+  // this correctly keeps this component's own existing local-only
+  // behavior rather than inventing a fake success either way.
+  const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!buyerName || !buyerPhone || !buyerEmail) {
       showToast('Please fill in your contact information');
@@ -271,8 +293,54 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
     const vehicleTitle = targetVeh ? targetVeh.title : (customVehicleTitle || '2021 Vehicle Audit');
     const vehicleLocation = targetVeh ? targetVeh.location : customVehicleLocation;
 
+    if (targetVeh) {
+      if (!user) {
+        showToast('Please sign in to request an inspection.');
+        onOpenAuth?.();
+        return;
+      }
+      try {
+        const result = await createInspectionOrder(targetVeh.id, buyerPhone, vehicleLocation);
+        if (result.success && result.order) {
+          const newBooking: InspectionBooking = {
+            id: result.order.id,
+            vehicleId: targetVehicleId,
+            vehicleTitle,
+            vehicleLocation,
+            buyerName,
+            buyerPhone,
+            buyerEmail,
+            mechanicId: mech.id,
+            mechanicName: mech.name,
+            scheduledDate,
+            scheduledTime,
+            packageType,
+            totalFee: currentPackagePrice,
+            platformCommission,
+            netMechanicFee,
+            status: 'Scheduled',
+            paymentStatus: 'Escrow Held',
+            createdAt: new Date().toISOString().split('T')[0]
+          };
+          setBookings([newBooking, ...bookings]);
+          setNewBookingId(result.order.id);
+          setBookingStep(7);
+          showToast(`Inspection requested for ${vehicleTitle}. Your real order is saved.`);
+        } else {
+          showToast(result.message || 'Could not request inspection. Please try again.');
+        }
+      } catch (err) {
+        showToast(err instanceof InspectionApiError ? err.message : 'Could not request inspection. Please try again.');
+      }
+      return;
+    }
+
+    // No real vehicle target (the "custom vehicle" option) - the real
+    // backend has no concept of an inspection request for a vehicle
+    // that doesn't exist in its own database. Keeps this component's
+    // pre-existing, honest local-only behavior for this specific case
+    // rather than fabricate a persisted result.
     const generatedId = `INSP-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    
     const newBooking: InspectionBooking = {
       id: generatedId,
       vehicleId: targetVehicleId !== 'custom' ? targetVehicleId : undefined,

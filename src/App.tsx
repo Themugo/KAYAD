@@ -304,6 +304,8 @@ function AppInner() {
           {activeNav === 'inspections' && (
             <InspectionsView
               vehicles={vehicles}
+              user={user}
+              onOpenAuth={() => setShowAuthModal(true)}
               onViewVehicleDetails={handleOpenVehicleDetails}
             />
           )}

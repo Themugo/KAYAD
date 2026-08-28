@@ -131,3 +131,30 @@ async function inspectionFetch<T>(path: string, options: RequestInit = {}): Prom
 export async function getMyInspections(): Promise<GetMyInspectionsResponse> {
   return inspectionFetch<GetMyInspectionsResponse>('/api/inspections/my', { method: 'GET' });
 }
+
+export interface CreateInspectionOrderResponse {
+  success: boolean;
+  message?: string;
+  order?: BackendInspectionOrder;
+}
+
+/** POST /api/inspections/order - the one, real, canonical way to
+ * request an inspection (confirmed directly - the real
+ * backend/routes/inspectionRoutes.js file has exactly one order-
+ * creation route). Requires authentication (router.use(protect)) and
+ * only carId/phone/location - the real backend does not support a
+ * buyer choosing their own inspector, scheduling a specific time
+ * slot, or picking a package tier; those remain real, existing UI
+ * concepts with no backend to connect them to, same as this
+ * project's own earlier, honestly-documented finding for EscrowView's
+ * own richer shape. */
+export async function createInspectionOrder(
+  carId: string,
+  phone: string,
+  location?: string
+): Promise<CreateInspectionOrderResponse> {
+  return inspectionFetch<CreateInspectionOrderResponse>('/api/inspections/order', {
+    method: 'POST',
+    body: JSON.stringify({ carId, phone, location }),
+  });
+}

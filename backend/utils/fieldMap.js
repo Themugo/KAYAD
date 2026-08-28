@@ -73,11 +73,18 @@ export const FIELD_ALIASES = {
   inspector_applications: {
     user: "user_id",
   },
-  inspection_orders: {
-    buyer: "requested_by",
+  // Fixed (re-applied - this project's own Phase 7 hardening work
+  // already found and fixed this exact defect; confirmed reverted
+  // when this file was rebuilt on a diverged branch): renamed to
+  // match the real table (see _base.js's TABLE_MAP fix); buyer/
+  // payment aliases were also wrong - confirmed against the real
+  // columns (\d vehicle_inspections): requester_id (not
+  // requested_by), payment (not payment_id, no suffix on the real
+  // column at all).
+  vehicle_inspections: {
+    buyer: "requester_id",
     car: "car_id",
     inspector: "inspector_id",
-    payment: "payment_id",
   },
   payments: {
     user: "user_id",

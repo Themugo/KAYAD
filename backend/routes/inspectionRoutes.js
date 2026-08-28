@@ -8,6 +8,7 @@ import { validateObjectId, validateQuery, inspectionListQuerySchema } from "../m
 import InspectionOrder from "../models/InspectionOrder.js";
 import Car from "../models/Car.js";
 import { initiatePayment } from "../services/paymentService.js";
+import { logWarn } from "../infrastructure/logging/index.js";
 
 const router = express.Router();
 router.use(protect);
@@ -37,7 +38,29 @@ router.post(
         .json({ success: false, message: "You already have an active inspection for this vehicle" });
     }
 
-    const settings = await GlobalSettings.findOne().lean();
+    // Fixed (Final Integration Phase 4 - inspection frontend
+    // integration): confirmed by reproducing the real failure
+    // directly - GlobalSettings maps to a table (global_settings)
+    // that does not exist. The real, only settings-like table
+    // (system_settings) is a genuinely different, key/value shape (one
+    // row per named setting, e.g. dealer_commission_pct,
+    // min_bid_increment) with no ghostCheckFee key anywhere in it -
+    // not a match for this single-document model's own expected shape,
+    // so renaming the table mapping to it would be wrong (it would
+    // stop throwing, but silently return the wrong shape instead of
+    // genuinely fixing anything). This is a real, pre-existing gap -
+    // no real settings document for this fee exists anywhere - and
+    // this call site's own fallback (`settings?.ghostCheckFee ||
+    // 2500`) already shows the real, intended behavior when settings
+    // are unavailable. Wrapped so a missing/broken settings lookup
+    // degrades to that already-correct default instead of failing the
+    // entire, otherwise-working inspection-order request.
+    let settings = null;
+    try {
+      settings = await GlobalSettings.findOne().lean();
+    } catch (err) {
+      logWarn("GlobalSettings lookup failed, using default inspection fee", { error: err.message });
+    }
     const fee = settings?.ghostCheckFee || 2500;
 
     let payment;
