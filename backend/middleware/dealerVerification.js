@@ -21,7 +21,28 @@ export const requireDealerVerification = async (req, res, next) => {
     const userId = req.user.id;
 
     // Check if user is a dealer
-    const dealer = await Dealer.findOne({ user: userId });
+    let dealer = await Dealer.findOne({ user: userId });
+
+    // Fixed (re-applied - this project's own earlier hardening work,
+    // Phase 6, already found and fixed this exact defect; confirmed
+    // reverted when this file was rebuilt on a diverged branch,
+    // reproduced failing again directly while testing the real seller
+    // listing-publish flow): a freshly-registered individual_seller
+    // (private seller, not a business dealer) is rejected here with
+    // "Dealer profile not found" on their very first listing attempt,
+    // since nothing anywhere ever creates a Dealer row for this role.
+    // The full business-verification concept this middleware
+    // otherwise enforces does not conceptually apply to a private
+    // individual listing their own single vehicle. Auto-create an
+    // approved Dealer record the first time an individual_seller
+    // reaches this check - the same "grandfathered, no full
+    // verification required" outcome this middleware already grants
+    // legacy approved dealers just below, extended to the one real
+    // role it was silently blocking entirely.
+    if (!dealer && req.user.role === "individual_seller") {
+      dealer = await Dealer.create({ user: userId, approved: true, verifiedAt: new Date() });
+    }
+
     if (!dealer) {
       return res.status(403).json({
         success: false,

@@ -395,16 +395,21 @@ export const createCar = async (req, res) => {
       body.demoEditedAt = new Date();
       body.demoEditedBy = req.user.id;
     }
-    // `location` is a flat TEXT column (and every display site across
-    // the app — HomePage, BrowsePage, etc. — reads car.location as a
-    // plain string). This previously built a nested {city, address}
-    // object here, which would fail against the real column type.
-    if (!body.location) {
-      body.location = [body.city || seller.location || "", body.address || ""]
+    // `city` is the correct app-level alias for the real
+    // location_city column (confirmed and fixed in this project's own
+    // earlier hardening work - utils/fieldMap.js's cars.city ->
+    // location_city alias). This block previously built body.location
+    // instead - a real, reproduced failure ("Could not find the
+    // 'location' column of 'cars'"), since no such column or alias
+    // exists at all. Every display site across the app already reads
+    // car.location as a plain string (a frontend-level naming choice,
+    // separate from the real backend column) - that mapping is
+    // handled by mapBackendCarToVehicle, not here.
+    if (!body.city) {
+      body.city = [body.city || seller.location || "", body.address || ""]
         .filter(Boolean)
         .join(", ");
     }
-    delete body.city;
     delete body.address;
 
     // ── PROCESS UPLOADED IMAGES ───────────────────────────────

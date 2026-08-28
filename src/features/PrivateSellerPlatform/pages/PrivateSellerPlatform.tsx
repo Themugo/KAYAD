@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createCar, VehicleApiError } from '../../../services/vehicleApi';
 import {
   Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock,
   Bell, TrendingUp, Award, Bot, MessageSquare, Settings, ChevronRight, Menu, X,
@@ -763,6 +764,61 @@ function ListingWizardSection({ draft, setDraft, onNavigate }: {
 }) {
   const [currentStep, setCurrentStep] = useState(draft?.step || 1);
   const totalSteps = 12;
+  // Added (Final Integration Phase 2): real publish state - the
+  // frontend must not claim publication until the real backend
+  // confirms it (this phase's own explicit instruction). No fake
+  // "success" is ever shown; the real HTTP response, success or
+  // failure, is what the UI reflects.
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishedCarId, setPublishedCarId] = useState<string | null>(null);
+
+  const handlePublish = useCallback(async () => {
+    setIsPublishing(true);
+    setPublishError(null);
+    try {
+      // Maps the wizard's own, existing draft state to the real
+      // backend's real field names - does not invent any field the
+      // wizard doesn't already declare in its own ListingDraft type.
+      // title is constructed from year+make+model since the wizard
+      // never collects a separate title field of its own - a direct,
+      // literal combination of fields it does declare, not a new
+      // input being added.
+      const vehicleInfo = draft?.vehicleInfo;
+      const details = draft?.details;
+      const pricing = draft?.pricing;
+      const title = vehicleInfo
+        ? [vehicleInfo.year, vehicleInfo.make, vehicleInfo.model].filter(Boolean).join(' ').trim()
+        : '';
+
+      const result = await createCar({
+        title: title || undefined,
+        brand: vehicleInfo?.make,
+        model: vehicleInfo?.model,
+        year: vehicleInfo?.year,
+        vin: vehicleInfo?.vin,
+        registrationNumber: vehicleInfo?.registration,
+        mileage: details?.mileage,
+        fuel: details?.fuelType,
+        transmission: details?.transmission,
+        color: details?.color,
+        condition: details?.condition,
+        description: details?.description,
+        price: pricing?.askingPrice,
+      });
+
+      if (result.success && result.car) {
+        setPublishedCarId(result.car.id);
+        setDraft(null);
+      } else {
+        setPublishError(result.message || 'Failed to publish listing.');
+      }
+    } catch (err) {
+      setPublishError(err instanceof VehicleApiError ? err.message : 'Failed to publish listing. Please try again.');
+    } finally {
+      setIsPublishing(false);
+    }
+  }, [draft, setDraft]);
 
   const steps = [
     { id: 1, label: 'Start' },
@@ -821,22 +877,54 @@ function ListingWizardSection({ draft, setDraft, onNavigate }: {
           <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: `${KAYAD_THEME.orange}15` }}>
             <Sparkles size={40} style={{ color: KAYAD_THEME.orange }} />
           </div>
-          <h2 className="text-2xl font-bold mb-4" style={{ color: KAYAD_THEME.navy }}>Create Your Vehicle Listing</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: KAYAD_THEME.slate[500] }}>
-            We'll guide you step-by-step to create a professional listing. The process takes about 10-15 minutes.
-          </p>
-          <button 
-            onClick={() => setCurrentStep(currentStep < totalSteps ? currentStep + 1 : 1)}
-            className="px-8 py-3 rounded-xl font-bold text-white"
-            style={{ backgroundColor: KAYAD_THEME.orange }}
-          >
-            {currentStep < totalSteps ? 'Start Creating Listing' : 'Publish Listing'} <ArrowRight size={20} className="inline ml-2" />
-          </button>
+          {publishedCarId ? (
+            // Real success - only ever shown after the real backend
+            // returned a real, created car record. Never shown
+            // optimistically.
+            <>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: KAYAD_THEME.navy }}>Listing Published</h2>
+              <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: KAYAD_THEME.slate[500] }}>
+                Your listing has been saved to KAYAD. It is now searchable in the real marketplace.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: KAYAD_THEME.navy }}>Create Your Vehicle Listing</h2>
+              <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: KAYAD_THEME.slate[500] }}>
+                We'll guide you step-by-step to create a professional listing. The process takes about 10-15 minutes.
+              </p>
+              {publishError && (
+                // Real failure, surfaced honestly - the real backend's
+                // own validation/authorization message, never
+                // swallowed or replaced with a fake success state.
+                <p className="text-sm mb-4 max-w-2xl mx-auto font-medium" style={{ color: '#DC2626' }}>
+                  {publishError}
+                </p>
+              )}
+              <button
+                onClick={() => {
+                  if (currentStep < totalSteps) {
+                    setCurrentStep(currentStep + 1);
+                  } else {
+                    handlePublish();
+                  }
+                }}
+                disabled={isPublishing}
+                className="px-8 py-3 rounded-xl font-bold text-white disabled:opacity-60"
+                style={{ backgroundColor: KAYAD_THEME.orange }}
+              >
+                {isPublishing
+                  ? 'Publishing…'
+                  : currentStep < totalSteps ? 'Start Creating Listing' : 'Publish Listing'} <ArrowRight size={20} className="inline ml-2" />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
 
 // ============================================================
 // OTHER SECTIONS (Simplified for brevity)

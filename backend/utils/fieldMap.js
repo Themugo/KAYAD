@@ -58,11 +58,32 @@ export const FIELD_ALIASES = {
     user: "user_id",
     car: "car_id",
   },
+  // Fixed (Final Integration - escrow views): all 4 previous aliases
+  // (payment/buyer/seller/car) were wrong, confirmed directly against
+  // the real, migrated table (\d escrows) - reproduced the real
+  // failure first ("column escrows.buyer_id does not exist") calling
+  // the real getUserEscrows() controller. Unlike most other tables in
+  // this project, escrows' own real columns are already camelCase for
+  // multi-word fields (sellerAmount, fundedAt, vehicleConfirmedAt,
+  // etc.) - the default camelToSnake() fallback (used automatically
+  // when no alias entry exists) would incorrectly convert these to
+  // snake_case, which does not match the real schema. Every multi-
+  // word camelCase column needs an explicit identity alias to
+  // override that fallback; buyer/seller/car/payment are single-word
+  // and already match their real columns exactly, needing none.
   escrows: {
-    payment: "payment_id",
-    buyer: "buyer_id",
-    seller: "seller_id",
-    car: "car_id",
+    sellerAmount: "sellerAmount",
+    fundedAt: "fundedAt",
+    vehicleConfirmedAt: "vehicleConfirmedAt",
+    deliveredAt: "deliveredAt",
+    releasedAt: "releasedAt",
+    createdAt: "createdAt",
+    updatedAt: "updatedAt",
+    lastActionKey: "lastActionKey",
+    autoReleaseEligibleAt: "autoReleaseEligibleAt",
+    closedAt: "closedAt",
+    disputeReason: "disputeReason",
+    disputedAt: "disputedAt",
   },
   // Added (Final Integration - real data integration): found while
   // wiring the real, already-built favoriteApi.ts frontend client to

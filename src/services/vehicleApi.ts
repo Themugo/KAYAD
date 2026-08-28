@@ -296,3 +296,90 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
   };
 }
 
+// Added (Final Integration Phase 2 - seller listing -> publish ->
+// marketplace). The real backend already has a complete, working
+// POST /api/cars endpoint (backend/controllers/carController.js's
+// createCar, mounted with real auth/ownership/validation middleware
+// - protect, dealerOnly, requireDealerVerification, image upload,
+// createCarSchema validation) - it was simply never called from any
+// real frontend UI. This is the one, real, canonical creation
+// endpoint - not a new API being invented here.
+//
+// Traced directly: the real seller listing wizard
+// (PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx) has no
+// per-step form inputs implemented at all for any of its 12 steps -
+// its own `ListingDraft` state is declared but never populated by any
+// real user input anywhere in that file, confirmed by direct
+// inspection (no <input>, no onChange handler exists for any listing
+// field in that component). Per this phase's own explicit
+// instruction ("do not add seller functionality, do not redesign the
+// seller wizard"), this function does not invent form fields that
+// were never collected - it sends exactly what the wizard's own
+// draft state actually contains, using FormData so it matches the
+// real backend's multipart/form-data + upload.array("images", 10)
+// contract exactly (never manually set Content-Type here - the
+// browser must set the multipart boundary itself).
+export interface CreateCarPayload {
+  title?: string;
+  brand?: string;
+  model?: string;
+  year?: number;
+  price?: number;
+  mileage?: number;
+  fuel?: string;
+  transmission?: string;
+  color?: string;
+  condition?: string;
+  vin?: string;
+  registrationNumber?: string;
+  description?: string;
+  city?: string;
+}
+
+export interface CreateCarResponse {
+  success: boolean;
+  message?: string;
+  car?: BackendCar;
+}
+
+/** POST /api/cars - the one, real, canonical listing-creation
+ * endpoint. Server-side validation (createCarSchema) is authoritative
+ * - this function does not duplicate or pre-empt it, it simply
+ * surfaces exactly what the real backend decides, success or
+ * rejection, to the caller. */
+export async function createCar(payload: CreateCarPayload): Promise<CreateCarResponse> {
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      formData.append(key, String(value));
+    }
+  });
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/cars`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+  } catch {
+    throw new VehicleApiError(
+      'Unable to reach KAYAD servers. Please check your connection and try again.',
+      'network'
+    );
+  }
+
+  let body: CreateCarResponse & { message?: string };
+  try {
+    body = await res.json();
+  } catch {
+    throw new VehicleApiError('Unexpected response from server.', 'server', res.status);
+  }
+
+  if (!res.ok) {
+    throw new VehicleApiError(body.message || 'Failed to publish listing.', 'server', res.status);
+  }
+
+  return body;
+}
+
