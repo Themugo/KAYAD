@@ -341,6 +341,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <ShieldCheck className="w-4 h-4 text-emerald-600 stroke-[1.75]" />
                     <span>Pre-Purchase Inspection</span>
                   </button>
+                  {/* Fixed: Escrow had no navbar entry point at all -
+                      the only way to reach it was a link buried
+                      inside the footer. Added here, matching the
+                      same pattern as every other Services item. */}
+                  <button
+                    onClick={() => handleNavSelect('escrow')}
+                    className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
+                      activeNav === 'escrow' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
+                    }`}
+                  >
+                    <Lock className="w-4 h-4 text-blue-600 stroke-[1.75]" />
+                    <span>Escrow</span>
+                  </button>
                   <button
                     onClick={() => handleNavSelect('finance')}
                     className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
