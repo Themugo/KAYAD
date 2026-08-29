@@ -285,6 +285,21 @@ async function runPopulates(table, rowsOrRow, populates, sb) {
   return rowsOrRow;
 }
 
+// Strips the app-level fields named in excludeFields (Mongoose's own
+// "-field" exclusion syntax, translated by .select() above into a
+// real "select everything" query plus this list) from a real row
+// before it's returned to the caller - achieving the same real end
+// result Mongoose's exclusion syntax produces (e.g. "never send the
+// password hash back"), via a mechanism Supabase actually supports.
+function stripExcluded(data, excludeFields) {
+  if (!data || !excludeFields || excludeFields.length === 0) return data;
+  const arr = Array.isArray(data) ? data : [data];
+  for (const row of arr) {
+    for (const f of excludeFields) delete row[f];
+  }
+  return data;
+}
+
 function wrapDoc(doc, tableName, sb) {
   if (!doc) return null;
   mapRowIn(tableName, doc);
@@ -429,24 +444,35 @@ function createQuery(tableName) {
     _executor: null,
 
     select(fields) {
-      // Fixed (Final Integration Phase 5 - API/database contract
-      // certification): normalizeSelect() does not itself guarantee
-      // "id" is included in a caller's custom select list (already
-      // confirmed and fixed once for runPopulates() specifically -
-      // this is the same structural gap in the more general, direct
-      // .select() path). Reproduced a real, severe consequence
-      // directly: UserAuth.findOne(...).select("+password
-      // +tokenVersion") - the real, canonical login flow's own call -
-      // produced an object with no id at all, so the immediately
-      // following .save() call's own `.eq("id", this.id)` filter
-      // became `.eq("id", undefined)`, a real Postgres error
-      // ("invalid input syntax for type uuid"), breaking every real
-      // login on this entire platform. Any caller selecting specific
-      // fields and later calling .save()/.deleteOne() on the result
-      // was silently exposed to this same defect, not just this one
-      // call site. Always including the mapped id column here is a
-      // structural requirement for those methods to work at all, not
-      // something every caller should need to remember to ask for.
+      // Fixed (Final Integration Phase 7 - real end-to-end workflow
+      // certification): reproduced directly, tracing the real GET
+      // /api/auth/me endpoint - the real session-restoration call
+      // this entire platform depends on to keep a user logged in
+      // across a refresh - failing with a real Postgres/PostgREST
+      // error ("failed to parse select parameter (id,-password)").
+      // normalizeSelect() only ever stripped Mongoose's "+field"
+      // inclusion prefix; it never handled "-field" exclusion syntax
+      // (used here to mean "every column except password") at all -
+      // the literal string "-password" was being sent to Supabase's
+      // own .select(), which has no concept of field exclusion and
+      // rejects it outright. This was a real, pre-existing defect
+      // independent of this file's own earlier fix (which guarantees
+      // "id" is included) - not introduced by it. Detected here,
+      // before reaching normalizeSelect: an exclusion-only select
+      // (every requested field starts with "-") is translated to a
+      // real "select everything" query, with the excluded field
+      // names recorded on the query so the executor can strip them
+      // from the result afterward - the same real end result
+      // Mongoose's own "-field" syntax produces, achieved through a
+      // method Supabase actually supports.
+      if (typeof fields === "string" && fields.trim().length > 0) {
+        const tokens = fields.trim().split(/\s+/);
+        if (tokens.every((t) => t.startsWith("-"))) {
+          this._excludeFields = tokens.map((t) => t.slice(1));
+          this._select = "*";
+          return this;
+        }
+      }
       const mapped = normalizeSelect(tableName, fields);
       const idColumn = mapKeyOut(tableName, "id");
       this._select = mapped === "*" || mapped.split(",").includes(idColumn)
@@ -616,6 +642,7 @@ export function createModel(name) {
         if (q._skip) query = query.range(q._skip, q._skip + (q._limit || 1000) - 1);
         const { data, error } = await query;
         if (error) throw error;
+        stripExcluded(data, q._excludeFields);
         const rows = (data || []).map((d) => q._lean ? mapRowIn(table, d) : wrapDoc(d, table, sb));
         await runPopulates(table, rows, q._populates, sb);
         return rows;
@@ -632,6 +659,7 @@ export function createModel(name) {
         const { data, error } = await client.from(table).select(q._select).eq("id", q._findById).maybeSingle();
         if (error) throw error;
         if (!data) return null;
+        stripExcluded(data, q._excludeFields);
         const row = q._lean ? mapRowIn(table, data) : wrapDoc(data, table, sb);
         await runPopulates(table, row, q._populates, sb);
         return row;
@@ -650,6 +678,7 @@ export function createModel(name) {
         if (error) throw error;
         const doc = data?.[0] || null;
         if (!doc) return null;
+        stripExcluded(doc, q._excludeFields);
         const row = q._lean ? mapRowIn(table, doc) : wrapDoc(doc, table, sb);
         await runPopulates(table, row, q._populates, sb);
         return row;
