@@ -71,11 +71,21 @@ export interface BackendCar {
   approved?: boolean | null;
   inspection_status?: string | null; // basic status only - not the full inspection record
   is_verified_dealer?: boolean | null;
+  /** Real, already-populated by the backend (carController.js:
+   * .populate("dealer", "name businessName phone role avatar
+   * dealerApprovedAt")). Not consumed directly by this type's own
+   * dealer field below - callers derive verification from the
+   * separate, direct is_verified_dealer flag on the car itself
+   * instead (more reliable than depending on this join succeeding -
+   * see pages/AuctionDiscoveryNetwork.tsx's own mapper for why). */
+  dealer?: { name?: string; businessName?: string; avatar?: string; dealerApprovedAt?: string | null } | null;
   is_promoted?: boolean | null;
   deal_rating?: string | null;
   // --- Auction fields, denormalized directly onto the car row ---
-  auction_status?: string | null; // 'none' | (other real values not yet fully enumerated)
+  auction_status?: string | null; // 'none' | 'draft' | 'live' | 'ended' - confirmed via backend/config/swagger.js's own documented enum
   auction_end?: string | null;
+  auction_start_time?: string | null;
+  starting_bid?: number | null;
   current_bid?: number | null;
   bids_count?: number | null;
   highest_bidder_id?: string | null;
@@ -160,6 +170,10 @@ export interface GetCarsParams {
   city?: string;
   minPrice?: number;
   maxPrice?: number;
+  /** Confirmed real, already-supported backend filter
+   * (carController.js's own getCars: query.auctionStatus =
+   * auctionStatus) - 'draft' | 'live' | 'ended'. */
+  auctionStatus?: string;
 }
 
 /** GET /api/cars - real, paginated listing. Query params match

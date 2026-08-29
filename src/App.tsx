@@ -386,7 +386,7 @@ function AppInner() {
           )}
 
           {activeNav === 'discovery' && (
-            <AuctionDiscoveryNetwork />
+            <AuctionDiscoveryNetwork user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
           {activeNav === 'kayadlive' && (

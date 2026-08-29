@@ -230,7 +230,16 @@ export const getCars = async (req, res) => {
       );
     }
 
-    findQuery = findQuery.populate("dealer", "name businessName phone role logo verified");
+    // Fixed (Auction page real-data integration): reproduced directly
+    // - "logo" and "verified" are not real columns on the users
+    // table (confirmed: only "avatar" exists; there is no plain
+    // boolean "verified" field, only the real, honest signal
+    // dealer_approved_at being non-null). This entire populate call
+    // was silently failing on every single request (population is
+    // best-effort and swallows its own error), so car.dealer was
+    // always just the raw, unpopulated foreign key - never the real
+    // dealer object - on every real car fetch, not just auctions.
+    findQuery = findQuery.populate("dealer", "name businessName phone role avatar dealerApprovedAt");
 
     const [cars, total] = await Promise.all([
       findQuery.sort(sortOption).skip(skip).limit(limitNum).lean(),
@@ -851,8 +860,16 @@ export const addCarImages = async (req, res) => {
 // =============================
 export const getCar = async (req, res) => {
   try {
+    // Fixed (Auction page real-data integration): reproduced the
+    // same real defect found in the other dealer populate() call
+    // above - "visibility" and "approved" are not real columns on
+    // the users table (confirmed directly). Removed "visibility" (no
+    // real equivalent found) and corrected "approved" to the real,
+    // honest signal (dealerApprovedAt being non-null means the dealer
+    // is approved) - this populate call was silently failing on
+    // every single vehicle-detail-page view.
     const car = await Car.findById(req.params.id)
-      .populate("dealer", "_id name email phone location businessName bio visibility dealerRating approved role")
+      .populate("dealer", "_id name email phone location businessName bio dealerRating dealerApprovedAt role")
       .lean();
 
     if (!car) {
