@@ -411,17 +411,26 @@ export interface UnifiedChatThread {
   auctionId?: string;
 
   // Counterparty info (Protected PII)
+  // Fixed: trustScore/rating/verifiedSince/county were required, but no
+  // real backend equivalent exists for any of them - a real chat
+  // participant has no real trust score or star rating anywhere in
+  // this system. Made optional (matching maskedPhone, the one other
+  // field with no honest real value for a plain, real conversation) so
+  // real data can honestly omit them rather than requiring invented
+  // values. The 2 fields this component actually renders (trustScore,
+  // maskedPhone) were checked directly - both already handle a missing
+  // value safely once optional.
   counterpartyInfo: {
     name: string;
     role: string;
     avatar?: string;
-    maskedPhone: string;
+    maskedPhone?: string;
     unmaskedPhone?: string;
-    rating: number;
-    trustScore: number;
-    verifiedSince: string;
+    rating?: number;
+    trustScore?: number;
+    verifiedSince?: string;
     location: string;
-    county: string;
+    county?: string;
   };
   
   // Structured live sub-summaries for context panel

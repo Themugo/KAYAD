@@ -375,9 +375,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Unified Communication Hub"
             >
               <MessageSquare className={`w-5 h-5 stroke-[1.75] ${activeNav === 'chat' ? 'text-white' : 'text-slate-600'}`} />
-              <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[9px] font-black rounded-full bg-amber-400 text-[#17244B] shadow-2xs">
-                3
-              </span>
+              {/* Fixed: this badge was hardcoded to "3" unconditionally,
+                  always showing regardless of whether there was any
+                  real unread message - unlike the Favorites badge
+                  right below it, which correctly only renders when
+                  its real count is actually > 0. effectiveUnread was
+                  already computed above and already used correctly
+                  in this same component's dropdown menu - this badge
+                  just wasn't wired to it. */}
+              {effectiveUnread > 0 && (
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[9px] font-black rounded-full bg-amber-400 text-[#17244B] shadow-2xs">
+                  {effectiveUnread}
+                </span>
+              )}
             </button>
 
             {/* Favorites Icon */}

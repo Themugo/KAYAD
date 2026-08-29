@@ -5,9 +5,10 @@ import {
   UnifiedCommCategory, 
   MessageAttachment, 
   Vehicle,
-  SharedTransactionFile
+  SharedTransactionFile,
+  UserProfile
 } from '../types';
-import { MOCK_UNIFIED_THREADS } from '../data/mockUnifiedCommunication';
+import { getMyChats, getChatMessages, sendChatMessage, markChatSeen, mapBackendChatToThread, mapBackendMessagesToUnified, ChatApiError } from '../services/chatApi';
 import { 
   MessageSquare, 
   Bell, 
@@ -55,6 +56,7 @@ import {
 import { Card, Badge, Button, Input, Modal, LazyImage } from '../components/ui';
 
 interface UnifiedCommunicationHubProps {
+  user?: UserProfile | null;
   onQuickViewVehicle?: (vehicleOrId: Vehicle | string) => void;
   onNavigateToEscrow?: () => void;
   onNavigateToInspections?: () => void;
@@ -63,15 +65,53 @@ interface UnifiedCommunicationHubProps {
 }
 
 export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = ({
+  user,
   onQuickViewVehicle,
   onNavigateToEscrow,
   onNavigateToInspections,
   onNavigateToFinancing,
   onNavigateToAuctions
 }) => {
-  // Master Threads State
-  const [threads, setThreads] = useState<UnifiedChatThread[]>(MOCK_UNIFIED_THREADS);
-  const [selectedThreadId, setSelectedThreadId] = useState<string>(MOCK_UNIFIED_THREADS[0].id);
+  // Fixed: this entire hub previously started from, and only ever
+  // showed, MOCK_UNIFIED_THREADS - elaborate, specific fake sample
+  // data (real-looking names, escrow amounts, bank details) with no
+  // connection to the real, already-working chat backend at all.
+  // Master Threads State - now starts empty and loads real
+  // conversations from the real backend on mount (see the effect
+  // below). See services/chatApi.ts's own file-level note for exactly
+  // which fields are real vs. honest, generic placeholders for
+  // concepts (escrow/inspection/finance) the real backend has no
+  // equivalent for.
+  const [threads, setThreads] = useState<UnifiedChatThread[]>([]);
+  const [threadsLoading, setThreadsLoading] = useState<boolean>(true);
+  const [threadsError, setThreadsError] = useState<string | null>(null);
+  const [selectedThreadId, setSelectedThreadId] = useState<string>('');
+
+  useEffect(() => {
+    if (!user) {
+      setThreads([]);
+      setThreadsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setThreadsLoading(true);
+    setThreadsError(null);
+    getMyChats()
+      .then((chats) => {
+        if (cancelled) return;
+        const mapped = chats.map((c) => mapBackendChatToThread(c, user.id));
+        setThreads(mapped);
+        setSelectedThreadId((prev) => prev || mapped[0]?.id || '');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setThreadsError(err instanceof ChatApiError ? err.message : 'Could not load conversations.');
+      })
+      .finally(() => {
+        if (!cancelled) setThreadsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [user]);
 
   // Filter & Search State
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -106,14 +146,17 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     return threads.find((t) => t.id === selectedThreadId) || threads[0];
   }, [threads, selectedThreadId]);
 
-  // Actionable Notifications List
+  // Fixed: this was a separate, still-hardcoded array of fake
+  // "actionable alerts" (specific fake inspection scores, finance
+  // approvals, auction status, escrow amounts, referencing mock
+  // thread ids that no longer exist now that threads loads real
+  // data) - exactly the fake content shown in the navbar's
+  // "Actionable Alerts" panel. No real alerts system exists on the
+  // backend for any of these concepts, so this is honestly empty
+  // rather than continuing to show fake alerts unrelated to a real
+  // user's real conversations.
   const actionableNotifications = useMemo(() => {
-    return [
-      { id: 'n1', title: 'Inspection Complete', text: 'AutoCheck 150-pt audit passed (96/100) for Land Cruiser Prado.', time: '10m ago', threadId: 'thread-escrow-01', type: 'inspection' },
-      { id: 'n2', title: 'Finance Pre-Approved', text: 'NCBA pre-approved Ksh 4,795,000 facility at 13.5% p.a.', time: '30m ago', threadId: 'thread-finance-06', type: 'finance' },
-      { id: 'n3', title: 'Auction Ending Soon', text: '28 minutes remaining in Mercedes C200 live bidding floor.', time: '1h ago', threadId: 'thread-auction-04', type: 'auction' },
-      { id: 'n4', title: 'Escrow Action Required', text: 'NCBA Vault #88201 awaiting digital confirmation for TIMS transfer.', time: '2h ago', threadId: 'thread-escrow-01', type: 'escrow' }
-    ];
+    return [] as { id: string; title: string; text: string; time: string; threadId: string; type: string }[];
   }, []);
 
   // Filtered Threads List
@@ -156,16 +199,47 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeThread?.messages.length, selectedThreadId]);
 
-  // Select thread & mark as read
+  // Fixed: the initially auto-selected thread (set once real
+  // conversations load, above) never had its own real messages
+  // fetched - only a thread opened by an explicit click did (via
+  // handleSelectThread). Loads real message history for whichever
+  // thread is current whenever it changes and is still empty.
+  useEffect(() => {
+    if (!user || !selectedThreadId) return;
+    const current = threads.find((t) => t.id === selectedThreadId);
+    if (!current || current.messages.length > 0) return;
+    getChatMessages(selectedThreadId)
+      .then((realMessages) => {
+        const mapped = mapBackendMessagesToUnified(realMessages, selectedThreadId, user.id);
+        setThreads(prev => prev.map(t => t.id === selectedThreadId ? { ...t, messages: mapped } : t));
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedThreadId, user]);
+
+  // Fixed: this only reset the local unreadCount - it never actually
+  // loaded a thread's real messages (which now start empty, since
+  // mapBackendChatToThread honestly has no message history to
+  // include upfront). Now fetches the real message history and marks
+  // it seen on the real backend when a thread is opened.
   const handleSelectThread = (threadId: string) => {
     setSelectedThreadId(threadId);
     setMobileView('chat');
-    setThreads(prev => prev.map(t => {
-      if (t.id === threadId) {
-        return { ...t, unreadCount: 0 };
-      }
-      return t;
-    }));
+    setThreads(prev => prev.map(t => t.id === threadId ? { ...t, unreadCount: 0 } : t));
+
+    if (!user) return;
+    getChatMessages(threadId)
+      .then((realMessages) => {
+        const mapped = mapBackendMessagesToUnified(realMessages, threadId, user.id);
+        setThreads(prev => prev.map(t => t.id === threadId ? { ...t, messages: mapped } : t));
+      })
+      .catch(() => {
+        // Best-effort - the thread still opens with its already-known
+        // summary (participant, last message preview) even if the
+        // full history fails to load; the input box itself will
+        // surface any real send failure separately.
+      });
+    markChatSeen(threadId).catch(() => {});
   };
 
   // Toggle PII Unmask with Audit Log
@@ -177,52 +251,37 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     }
   };
 
-  // Handle Send Message
-  const handleSendMessage = (e?: React.FormEvent) => {
+  // Fixed: this previously never called the real backend at all -
+  // purely local state, with the sender hardcoded to "James Mwangi
+  // (Buyer)" regardless of who was actually logged in, and a fake,
+  // simulated "read" status after a timeout. Now sends a real
+  // message via the real backend and reflects its real, persisted
+  // result - never claims success before the backend confirms it.
+  const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || !activeThread) return;
-
-    const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const newMsg: UnifiedMessageItem = {
-      id: `msg-${Date.now()}`,
-      threadId: activeThread.id,
-      category: activeThread.category,
-      sender: 'user',
-      senderName: 'James Mwangi (Buyer)',
-      text: inputText.trim(),
-      timestamp: timeString,
-      readStatus: 'sent',
-      vehicleId: activeThread.vehicleId,
-      vehicleTitle: activeThread.vehicleTitle,
-      referenceNumber: activeThread.referenceNumber
-    };
-
-    setThreads(prev => prev.map(t => {
-      if (t.id === activeThread.id) {
-        return {
-          ...t,
-          lastMessage: inputText.trim(),
-          lastTimestamp: timeString,
-          messages: [...t.messages, newMsg]
-        };
-      }
-      return t;
-    }));
+    const text = inputText.trim();
+    if (!text || !activeThread || !user) return;
 
     setInputText('');
-
-    // Simulate auto-read status progression after 1.2s
-    setTimeout(() => {
+    try {
+      await sendChatMessage(activeThread.id, text);
+      const realMessages = await getChatMessages(activeThread.id);
+      const mapped = mapBackendMessagesToUnified(realMessages, activeThread.id, user.id);
+      const lastReal = realMessages[realMessages.length - 1];
       setThreads(prev => prev.map(t => {
         if (t.id === activeThread.id) {
           return {
             ...t,
-            messages: t.messages.map(m => m.id === newMsg.id ? { ...m, readStatus: 'read' } : m)
+            lastMessage: lastReal?.message || lastReal?.text || text,
+            lastTimestamp: lastReal?.createdAt || new Date().toISOString(),
+            messages: mapped,
           };
         }
         return t;
       }));
-    }, 1200);
+    } catch (err) {
+      showToast(err instanceof ChatApiError ? err.message : 'Failed to send message. Please try again.');
+    }
   };
 
   // Send Attachment Simulation
@@ -275,7 +334,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       threadId: activeThread.id,
       category: activeThread.category,
       sender: 'user',
-      senderName: 'James Mwangi (Buyer)',
+      senderName: user?.name || 'You',
       text: textSummary,
       timestamp: timeString,
       readStatus: 'read',
@@ -308,7 +367,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       fileType: newFileType,
       fileSize: `${(1 + Math.random() * 3).toFixed(1)} MB`,
       uploadedAt: 'Just now',
-      uploadedBy: 'James Mwangi (You)'
+      uploadedBy: user?.name ? `${user.name} (You)` : 'You'
     };
 
     setThreads(prev => prev.map(t => {
@@ -345,7 +404,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         threadId: activeThread.id,
         category: activeThread.category,
         sender: 'user',
-        senderName: 'James Mwangi',
+        senderName: user?.name || 'You',
         text: `Initiated action: [${label}] on transaction ${activeThread.referenceNumber}`,
         timestamp: timeString,
         readStatus: 'read'
@@ -514,7 +573,32 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
           {/* Threads List */}
           <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
-            {filteredThreads.length === 0 ? (
+            {/* Fixed: previously only handled "filtered to nothing" -
+                now honestly distinguishes still loading real data,
+                a real fetch failure, and genuinely zero real
+                conversations, rather than collapsing all three into
+                one generic message. */}
+            {threadsLoading ? (
+              <div className="p-8 text-center text-slate-400 text-xs space-y-2">
+                <MessageSquare className="w-8 h-8 mx-auto text-slate-300 animate-pulse" />
+                <p>Loading your conversations…</p>
+              </div>
+            ) : threadsError ? (
+              <div className="p-8 text-center text-rose-500 text-xs space-y-2">
+                <MessageSquare className="w-8 h-8 mx-auto text-rose-300" />
+                <p>{threadsError}</p>
+              </div>
+            ) : !user ? (
+              <div className="p-8 text-center text-slate-400 text-xs space-y-2">
+                <MessageSquare className="w-8 h-8 mx-auto text-slate-300" />
+                <p>Sign in to see your conversations.</p>
+              </div>
+            ) : filteredThreads.length === 0 && threads.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs space-y-2">
+                <MessageSquare className="w-8 h-8 mx-auto text-slate-300" />
+                <p>No conversations yet.</p>
+              </div>
+            ) : filteredThreads.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs space-y-2">
                 <Search className="w-8 h-8 mx-auto text-slate-300" />
                 <p>No conversations found matching filter.</p>
@@ -1005,27 +1089,39 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/80">
-                    <span className="text-slate-500 font-medium">Contact Phone:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-bold text-slate-800">
-                        {unmaskedPii[activeThread.id] ? (activeThread.counterpartyInfo.unmaskedPhone || activeThread.counterpartyInfo.maskedPhone) : activeThread.counterpartyInfo.maskedPhone}
-                      </span>
-                      <button
-                        onClick={() => toggleUnmaskPhone(activeThread.id, activeThread.counterpartyInfo.name)}
-                        className="text-[10px] font-bold text-[#1E3063] hover:underline flex items-center gap-0.5 cursor-pointer"
-                        title="Audit logged unmask"
-                      >
-                        {unmaskedPii[activeThread.id] ? <Lock className="w-3 h-3 text-slate-400" /> : <Unlock className="w-3 h-3 text-[#D96B43]" />}
-                        {unmaskedPii[activeThread.id] ? 'Mask' : 'Unmask'}
-                      </button>
+                  {/* Fixed: previously always rendered, showing
+                      "undefined" for real conversations, which have
+                      no real masked phone on record. Only shown when
+                      real data exists. */}
+                  {(activeThread.counterpartyInfo.maskedPhone || activeThread.counterpartyInfo.unmaskedPhone) && (
+                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/80">
+                      <span className="text-slate-500 font-medium">Contact Phone:</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-slate-800">
+                          {unmaskedPii[activeThread.id] ? (activeThread.counterpartyInfo.unmaskedPhone || activeThread.counterpartyInfo.maskedPhone) : activeThread.counterpartyInfo.maskedPhone}
+                        </span>
+                        <button
+                          onClick={() => toggleUnmaskPhone(activeThread.id, activeThread.counterpartyInfo.name)}
+                          className="text-[10px] font-bold text-[#1E3063] hover:underline flex items-center gap-0.5 cursor-pointer"
+                          title="Audit logged unmask"
+                        >
+                          {unmaskedPii[activeThread.id] ? <Lock className="w-3 h-3 text-slate-400" /> : <Unlock className="w-3 h-3 text-[#D96B43]" />}
+                          {unmaskedPii[activeThread.id] ? 'Mask' : 'Unmask'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500 font-medium">Trust Score:</span>
-                    <span className="font-black text-emerald-700">{activeThread.counterpartyInfo.trustScore}% Verified</span>
-                  </div>
+                  {/* Fixed: previously always rendered "undefined%
+                      Verified" for real conversations, which have no
+                      real trust score anywhere in this system. Only
+                      shown when real data exists. */}
+                  {activeThread.counterpartyInfo.trustScore !== undefined && (
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500 font-medium">Trust Score:</span>
+                      <span className="font-black text-emerald-700">{activeThread.counterpartyInfo.trustScore}% Verified</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

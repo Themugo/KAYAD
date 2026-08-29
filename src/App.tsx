@@ -353,6 +353,7 @@ function AppInner() {
               messages={messages}
               onSendMessage={handleSendMessage}
               selectedVehicle={selectedChatVehicle}
+              user={user}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onNavigateToEscrow={() => setActiveNav('escrow')}
               onNavigateToInspections={() => setActiveNav('inspections')}
