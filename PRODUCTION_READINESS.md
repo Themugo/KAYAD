@@ -3,6 +3,19 @@
 **Date:** 2026-07-23  
 **Status:** ✅ READY FOR PRODUCTION
 
+> **⚠️ SUPERSEDED — this document's "READY FOR PRODUCTION" claim and its
+> 90.2/100 score are stale and no longer accurate.** They predate this
+> project's extensive, evidence-based hardening and integration work
+> (multiple phases fixing real database, authentication, and workflow
+> defects, including two critical, platform-wide login failures found
+> and fixed after this document was written) and this project's own,
+> much more recent, directly-verified production certification. **See
+> `PRODUCTION_CERTIFICATION.md` for the current, accurate verdict:
+> NOT PRODUCTION READY**, graded item-by-item against real evidence
+> (live deployment checks, real database queries, real backend
+> execution), not the estimated scores below. This file is retained
+> for historical reference only.
+
 ---
 
 ## Overall Score

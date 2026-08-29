@@ -4,6 +4,11 @@
 **Auditor:** OpenHands Agent  
 **Status:** Production Ready (with recommendations)
 
+> **⚠️ SUPERSEDED — this document's "Production Ready" status is stale
+> and no longer accurate.** See `PRODUCTION_CERTIFICATION.md` for the
+> current, evidence-based verdict: NOT PRODUCTION READY. Retained for
+> historical reference only.
+
 ---
 
 ## Executive Summary

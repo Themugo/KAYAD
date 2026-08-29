@@ -5,6 +5,11 @@
 **Status:** PRODUCTION READY  
 **Recommendation:** 🚀 **GO FOR LAUNCH**
 
+> **⚠️ SUPERSEDED — this document's "PRODUCTION READY" status is stale
+> and no longer accurate.** See `PRODUCTION_CERTIFICATION.md` for the
+> current, evidence-based verdict: NOT PRODUCTION READY. Retained for
+> historical reference only.
+
 ---
 
 ## Update Log

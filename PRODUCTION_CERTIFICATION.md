@@ -135,3 +135,15 @@ Every workflow this session could reach directly — authentication, marketplace
 That work does not change the DEPLOYMENT verdict above. Per this phase's own explicit instruction — "do not declare production ready if frontend deployment is broken, backend returns 502, or database is unreachable" — the most recent real evidence available shows all three. This sandbox could not independently confirm or refute that today, since it cannot reach the live domains at all; the honest position is that the FAIL grade stands on the last real evidence obtained, not on an assumption that it has since resolved.
 
 **What would change this verdict, stated plainly:** the project owner (or any environment with real network access to `kayad.space`/`api.kayad.space`) confirming the live frontend and backend are reachable and returning healthy responses. That is a check outside this sandbox's own reach, not outside the project's.
+
+---
+
+## Addendum — Final Integration Phase 9 (production freeze)
+
+Re-attempted live verification again this phase: same result - a direct request to the live domains returns `403` from this sandbox's own network allowlist, and a web search for the project's real domain returns no results. No newer evidence exists to change the verdict above.
+
+This phase performed final cleanup (re-applying several already-proven-dead file removals that had regressed via this project's own repeatedly-found `robocopy` delivery issue) and found, while re-running the full test suite as the final check, a real regression this project's own certification work had not previously caught: 2 real, test-covered pages (`Showroom.jsx`, `EscrowPage.jsx`) had been deleted in favor of their dead, same-named `.tsx` siblings during a prior cleanup pass, breaking 3 real tests. Restored both, removed the correct dead siblings, and confirmed no other such collisions exist among the remaining page files.
+
+Final, re-verified state this phase: frontend typecheck clean, 50/50 test files, 359/360 tests passing (1 intentionally skipped), build succeeds. Backend: 16/16 suites, 335/335 tests passing. A consolidated smoke test (real register -> login -> marketplace browse) executed against a real database: all three genuinely successful.
+
+**Verdict unchanged: NOT PRODUCTION READY**, for the same reason stated above - the live deployment's status, independent of this project's now-extensively-verified application code.
