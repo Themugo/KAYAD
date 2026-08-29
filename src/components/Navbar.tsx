@@ -25,11 +25,8 @@ import {
   Calendar,
   FileText,
   Sliders,
-  Sparkles,
   CheckCircle2,
   Landmark,
-  Radio,
-  Play,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -61,20 +58,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  // Refined: the desktop nav previously listed 8 separate top-level
-  // links in one row (Marketplace, KAYAD LIVE, Auctions, Watch Live
-  // NOW, My Garage, Pre-Purchase Inspection, Finance, Support) -
-  // crowded and hard to scan. Grouped the lower-frequency, related
-  // destinations into two dropdowns; every nav id below is identical
-  // to before, so App.tsx's own activeNav routing needs no changes.
-  const [showAuctionsDropdown, setShowAuctionsDropdown] = useState(false);
-  const [showServicesDropdown, setShowServicesDropdown] = useState(false);
   const [trustIndex, setTrustIndex] = useState(0);
 
   const countyRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
-  const auctionsRef = useRef<HTMLDivElement>(null);
-  const servicesRef = useRef<HTMLDivElement>(null);
 
   const counties = ['All East Africa', 'Nairobi', 'Mombasa', 'Nakuru', 'Kiambu', 'Eldoret', 'Kisumu'];
 
@@ -103,12 +90,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       if (userRef.current && !userRef.current.contains(e.target as Node)) {
         setShowUserDropdown(false);
       }
-      if (auctionsRef.current && !auctionsRef.current.contains(e.target as Node)) {
-        setShowAuctionsDropdown(false);
-      }
-      if (servicesRef.current && !servicesRef.current.contains(e.target as Node)) {
-        setShowServicesDropdown(false);
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -117,8 +98,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   const handleNavSelect = (navId: string) => {
     onNavClick(navId);
     setShowUserDropdown(false);
-    setShowAuctionsDropdown(false);
-    setShowServicesDropdown(false);
     setMobileMenuOpen(false);
   };
 
@@ -230,6 +209,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Desktop Left Nav Items */}
+            {/* Fixed: removed the Auctions/Services dropdowns per
+                explicit direction - most functions live on each
+                car's own page, so the navbar only needs these flat,
+                direct links now. */}
             <nav className="hidden lg:flex items-center space-x-2 border-l border-slate-200/60 pl-6 text-xs font-semibold text-slate-600">
               <button
                 onClick={() => handleNavSelect('marketplace')}
@@ -242,140 +225,55 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Marketplace
               </button>
 
-              {/* Auctions dropdown - consolidates the 3 auction-related
-                  destinations (KAYAD LIVE, Auction Discovery, Watch
-                  Live) that previously sat as separate top-level
-                  buttons. isAuctionsActive keeps the trigger visually
-                  "on" whenever any of its own destinations is the
-                  active one, so state is never lost by the grouping. */}
-              <div className="relative" ref={auctionsRef}>
-                <button
-                  onClick={() => setShowAuctionsDropdown(!showAuctionsDropdown)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                    ['kayadlive', 'discovery', 'broadcast'].includes(activeNav)
-                      ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                      : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
-                  }`}
-                  aria-expanded={showAuctionsDropdown}
-                >
-                  <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                  <span>Auctions</span>
-                  <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${showAuctionsDropdown ? 'rotate-180' : ''}`} />
-                </button>
-
-                {showAuctionsDropdown && (
-                  <div className="absolute left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-fade-in text-xs">
-                    <button
-                      onClick={() => handleNavSelect('kayadlive')}
-                      className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
-                        activeNav === 'kayadlive' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                      }`}
-                    >
-                      <Radio className="w-4 h-4 text-rose-500 stroke-[1.75]" />
-                      <span>KAYAD LIVE</span>
-                    </button>
-                    <button
-                      onClick={() => handleNavSelect('discovery')}
-                      className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
-                        activeNav === 'discovery' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                      }`}
-                    >
-                      <Gavel className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                      <span>Auction Discovery</span>
-                    </button>
-                    <button
-                      onClick={() => handleNavSelect('broadcast')}
-                      className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center justify-between font-semibold ${
-                        activeNav === 'broadcast' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Play className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                        <span>Watch Live</span>
-                      </div>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">NOW</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </nav>
-          </div>
-
-          {/* CENTER SECTION: Services dropdown - consolidates the 4
-              lower-frequency destinations (My Garage, Pre-Purchase
-              Inspection, Finance, Support) that previously sat as
-              separate top-level buttons in their own nav block. */}
-          <nav className="hidden lg:flex items-center text-xs font-semibold text-slate-600">
-            <div className="relative" ref={servicesRef}>
               <button
-                onClick={() => setShowServicesDropdown(!showServicesDropdown)}
+                onClick={() => handleNavSelect('discovery')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  ['buyer-platform', 'inspections', 'finance', 'support'].includes(activeNav)
+                  activeNav === 'discovery'
                     ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
                     : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
-                aria-expanded={showServicesDropdown}
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 stroke-[1.75]" />
-                <span>Services</span>
-                <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${showServicesDropdown ? 'rotate-180' : ''}`} />
+                <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>Auction</span>
               </button>
 
-              {showServicesDropdown && (
-                <div className="absolute left-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-fade-in text-xs">
-                  <button
-                    onClick={() => handleNavSelect('buyer-platform')}
-                    className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
-                      activeNav === 'buyer-platform' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                    }`}
-                  >
-                    <LayoutDashboard className="w-4 h-4 text-amber-500 stroke-[1.75]" />
-                    <span>My Garage</span>
-                  </button>
-                  <button
-                    onClick={() => handleNavSelect('inspections')}
-                    className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
-                      activeNav === 'inspections' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                    }`}
-                  >
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 stroke-[1.75]" />
-                    <span>Pre-Purchase Inspection</span>
-                  </button>
-                  {/* Fixed: Escrow had no navbar entry point at all -
-                      the only way to reach it was a link buried
-                      inside the footer. Added here, matching the
-                      same pattern as every other Services item. */}
-                  <button
-                    onClick={() => handleNavSelect('escrow')}
-                    className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
-                      activeNav === 'escrow' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                    }`}
-                  >
-                    <Lock className="w-4 h-4 text-blue-600 stroke-[1.75]" />
-                    <span>Escrow</span>
-                  </button>
-                  <button
-                    onClick={() => handleNavSelect('finance')}
-                    className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
-                      activeNav === 'finance' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                    }`}
-                  >
-                    <CreditCard className="w-4 h-4 text-emerald-500 stroke-[1.75]" />
-                    <span>Finance</span>
-                  </button>
-                  <button
-                    onClick={() => handleNavSelect('support')}
-                    className={`w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold ${
-                      activeNav === 'support' ? 'text-[#1E3063] bg-[#F5F2EB]/70' : 'text-slate-700'
-                    }`}
-                  >
-                    <HelpCircle className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                    <span>Support</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </nav>
+              <button
+                onClick={() => handleNavSelect('inspections')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'inspections'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[1.75]" />
+                <span>Pre-Purchase Inspection</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('escrow')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'escrow'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <Lock className="w-3.5 h-3.5 text-blue-600 shrink-0 stroke-[1.75]" />
+                <span>Escrow</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('support')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'support'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0 stroke-[1.75]" />
+                <span>Support</span>
+              </button>
+            </nav>
+          </div>
 
           {/* RIGHT SECTION: List Vehicle & Login/Register OR User Profile Dropdown */}
           <div className="flex items-center space-x-3">
@@ -727,6 +625,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Group 1: Public Services */}
+          {/* Fixed: matches the same simplified, flat list as desktop
+              now - removed KAYAD LIVE/Watch Live/Financing (not in
+              scope), added the missing Escrow link. */}
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
               Public Marketplace
@@ -744,36 +645,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavSelect('kayadlive')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'kayadlive' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <Radio className="w-4 h-4" />
-                <span>KAYAD LIVE</span>
-              </button>
-
-              <button
                 onClick={() => handleNavSelect('discovery')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
                   activeNav === 'discovery' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <Gavel className="w-4 h-4" />
-                <span>Auction Discovery</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('broadcast')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between ${
-                  activeNav === 'broadcast' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Play className="w-4 h-4" />
-                  <span>Watch Live</span>
-                </div>
-                <span className="text-[8px] bg-rose-600 text-white px-1 py-0.2 rounded font-bold">LIVE</span>
+                <span>Auction</span>
               </button>
 
               <button
@@ -783,17 +661,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Mechanic</span>
+                <span>Pre-Purchase Inspection</span>
               </button>
 
               <button
-                onClick={() => handleNavSelect('financing')}
+                onClick={() => handleNavSelect('escrow')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'financing' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'escrow' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
-                <CreditCard className="w-4 h-4 text-slate-400" />
-                <span>Financing</span>
+                <Lock className="w-4 h-4 text-blue-400" />
+                <span>Escrow</span>
               </button>
             </div>
 
