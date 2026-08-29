@@ -518,16 +518,27 @@ export interface InspectionReport {
   vehicleId?: string;
   vehicleTitle: string;
   vehicleLocation?: string;
-  mechanicId: string;
-  mechanicName: string;
+  // Fixed: mechanicId/mechanicName/categoryScores were required, but
+  // have no honest real value in every case - an inspector may not
+  // yet be assigned (real backend, confirmed directly), and the real
+  // checklist column is a generic JSONB array with no fixed
+  // engine/transmission/suspension/etc. sub-score schema at all
+  // (already documented in services/inspectionApi.ts's own header
+  // comment). Made optional rather than inventing sub-scores that
+  // don't exist.
+  mechanicId?: string;
+  mechanicName?: string;
   mechanicCompany?: string;
   overallScore: number;
   verdict: 'Passed (Clean Certification)' | 'Minor Issues Noted' | 'Failed (Major Defects)';
-  vinVerified: boolean;
-  chassisVerified: boolean;
-  logbookOwnerMatch: boolean;
+  // Fixed: the real backend has no separate VIN/chassis/logbook
+  // verification flags - made optional rather than defaulting to
+  // false, which would falsely imply a real, failed check.
+  vinVerified?: boolean;
+  chassisVerified?: boolean;
+  logbookOwnerMatch?: boolean;
   inspectionDate: string;
-  categoryScores: {
+  categoryScores?: {
     engineAndDrivetrain: InspectionCategoryDetail;
     transmissionAndClutch: InspectionCategoryDetail;
     suspensionAndSteering: InspectionCategoryDetail;
@@ -550,16 +561,25 @@ export interface InspectionBooking {
   buyerName: string;
   buyerPhone: string;
   buyerEmail: string;
-  mechanicId: string;
-  mechanicName: string;
+  // Fixed: mechanicId/mechanicName were required, but a real
+  // inspection order's inspector is only assigned later by an admin
+  // (confirmed directly in the real backend) - not always present.
+  // packageType was a fixed 3-tier union with no real backend
+  // equivalent (the real backend has one flat fee, no package
+  // concept) - widened to a plain string. platformCommission/
+  // netMechanicFee are not real, buyer-facing concepts at all (the
+  // real backend never exposes a commission split to the buyer) -
+  // made optional rather than required.
+  mechanicId?: string;
+  mechanicName?: string;
   scheduledDate: string;
   scheduledTime: string;
-  packageType: '50-Point Essential' | '150-Point Comprehensive' | 'VIP Import Audit';
+  packageType: string;
   totalFee: number;
-  platformCommission: number;
-  netMechanicFee: number;
+  platformCommission?: number;
+  netMechanicFee?: number;
   status: 'Pending Mechanic Confirmation' | 'Scheduled' | 'In Progress' | 'Completed' | 'Cancelled';
-  paymentStatus: 'Escrow Held' | 'Released to Mechanic' | 'Refunded';
+  paymentStatus?: 'Escrow Held' | 'Released to Mechanic' | 'Refunded';
   reportId?: string;
   createdAt: string;
 }

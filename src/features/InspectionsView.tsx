@@ -1,11 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, InspectionCategoryDetail, UserProfile } from '../types';
-import { createInspectionOrder, InspectionApiError } from '../services/inspectionApi';
+import { createInspectionOrder, getMyInspections, InspectionApiError, BackendInspectionOrder } from '../services/inspectionApi';
 import PrePurchaseInspectionPortal from './PrePurchaseInspectionPortal';
 import { 
   INITIAL_MECHANICS, 
-  INITIAL_INSPECTION_REPORTS, 
-  INITIAL_INSPECTION_BOOKINGS, 
   INITIAL_INSPECTION_PAYMENTS, 
   INITIAL_INSPECTION_RATINGS 
 } from '../data/mockInspections';
@@ -54,6 +52,65 @@ import {
 } from 'lucide-react';
 import { PageHeader, StatWidget, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, LazyImage, Modal } from '../components/ui';
 
+// Honestly maps a real backend inspection order into this UI's own
+// InspectionBooking shape. See types.ts's own comments on
+// InspectionBooking for exactly which fields have no real backend
+// equivalent (packages, commission split) and were widened/made
+// optional rather than invented.
+function mapBackendOrderToBooking(order: BackendInspectionOrder): InspectionBooking {
+  const statusMap: Record<string, InspectionBooking['status']> = {
+    pending_payment: 'Pending Mechanic Confirmation',
+    assigned: 'Scheduled',
+    in_progress: 'In Progress',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+  };
+  const id = order.id || order._id || '';
+  return {
+    id,
+    vehicleId: order.car?.id,
+    vehicleTitle: order.car?.title || 'Vehicle',
+    vehicleLocation: order.location || order.car?.location || '',
+    buyerName: '',
+    buyerPhone: '',
+    buyerEmail: '',
+    mechanicId: order.inspector?.id,
+    mechanicName: order.inspector?.name,
+    scheduledDate: order.scheduledAt ? new Date(order.scheduledAt).toLocaleDateString() : '',
+    scheduledTime: order.scheduledAt ? new Date(order.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+    packageType: 'Pre-Purchase Inspection',
+    totalFee: order.fee || 0,
+    status: statusMap[order.status] || 'Pending Mechanic Confirmation',
+    reportId: order.overallScore !== undefined ? id : undefined,
+    createdAt: order.createdAt || '',
+  };
+}
+
+// Honestly maps a real, completed backend inspection order into this
+// UI's own InspectionReport shape - only called for orders that
+// actually have a real overallScore.
+function mapBackendOrderToReport(order: BackendInspectionOrder): InspectionReport {
+  const id = order.id || order._id || '';
+  const score = order.overallScore ?? 0;
+  const verdict: InspectionReport['verdict'] =
+    score >= 80 ? 'Passed (Clean Certification)' : score >= 50 ? 'Minor Issues Noted' : 'Failed (Major Defects)';
+  return {
+    id,
+    bookingId: id,
+    vehicleId: order.car?.id,
+    vehicleTitle: order.car?.title || 'Vehicle',
+    vehicleLocation: order.location || order.car?.location,
+    mechanicId: order.inspector?.id,
+    mechanicName: order.inspector?.name,
+    overallScore: score,
+    verdict,
+    inspectionDate: order.completedAt ? new Date(order.completedAt).toLocaleDateString() : '',
+    obdDiagnosticCodes: [],
+    inspectorSummary: order.notes || '',
+    photos: (order.images || []).map((img) => img.url),
+  };
+}
+
 interface InspectionsViewProps {
   vehicles: Vehicle[];
   user?: UserProfile | null;
@@ -71,16 +128,54 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 }) => {
   // State
   const [mechanics] = useState<Mechanic[]>(INITIAL_MECHANICS);
-  const [reports, setReports] = useState<InspectionReport[]>(INITIAL_INSPECTION_REPORTS);
-  const [bookings, setBookings] = useState<InspectionBooking[]>(INITIAL_INSPECTION_BOOKINGS);
+  // Fixed: reports/bookings previously started from, and only ever
+  // showed, entirely fake mock data (specific fake mechanic names,
+  // ratings, business names, platform-wide fake "recently completed"
+  // reports unrelated to this user). Per explicit direction: removed
+  // the fake inspector-directory/ratings concept entirely (it has no
+  // real, buyer-accessible backend equivalent - confirmed directly,
+  // the real available-inspectors endpoint is admin-only), and now
+  // loads the buyer's own real inspection history from the real
+  // backend instead.
+  const [reports, setReports] = useState<InspectionReport[]>([]);
+  const [bookings, setBookings] = useState<InspectionBooking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState<boolean>(true);
+  const [bookingsError, setBookingsError] = useState<string | null>(null);
   const [payments] = useState<InspectionPayment[]>(INITIAL_INSPECTION_PAYMENTS);
   const [ratings, setRatings] = useState<InspectionRating[]>(INITIAL_INSPECTION_RATINGS);
+
+  useEffect(() => {
+    if (!user) {
+      setBookings([]);
+      setReports([]);
+      setBookingsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setBookingsLoading(true);
+    setBookingsError(null);
+    getMyInspections()
+      .then((res) => {
+        if (cancelled) return;
+        const orders = res.orders || [];
+        setBookings(orders.map(mapBackendOrderToBooking));
+        setReports(orders.filter((o) => o.overallScore !== undefined).map(mapBackendOrderToReport));
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setBookingsError(err instanceof InspectionApiError ? err.message : 'Could not load your inspections.');
+      })
+      .finally(() => {
+        if (!cancelled) setBookingsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [user]);
 
   // Top-Level Mode: 'buyer_marketplace' | 'mechanic_portal'
   const [viewMode, setViewMode] = useState<'buyer_marketplace' | 'mechanic_portal'>('buyer_marketplace');
 
   // Active Main Navigation Sub-Tab
-  const [activeTab, setActiveTab] = useState<'marketplace' | 'packages' | 'reports' | 'bookings' | 'reviews' | 'coverage'>('marketplace');
+  const [activeTab, setActiveTab] = useState<'packages' | 'reports' | 'bookings'>('bookings');
 
   // Search & Filters for Mechanics
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -90,7 +185,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   const [packageTypeFilter, setPackageTypeFilter] = useState<string>('All');
 
   // Selected items & Modals
-  const [selectedMechanic, setSelectedMechanic] = useState<Mechanic | null>(null);
+  // Fixed: selectedMechanic (and the "Mechanic Profile Modal" that
+  // displayed it) was only ever set from the fake inspector directory
+  // removed above - now genuinely dead state, removed.
   const [selectedReport, setSelectedReport] = useState<InspectionReport | null>(null);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   const [bookingStep, setBookingStep] = useState<number>(1);
@@ -100,7 +197,8 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   const [customVehicleTitle, setCustomVehicleTitle] = useState<string>('');
   const [customVehicleLocation, setCustomVehicleLocation] = useState<string>('Westlands, Nairobi');
   const [customVehicleVin, setCustomVehicleVin] = useState<string>('');
-  const [chosenMechanicId, setChosenMechanicId] = useState<string>(mechanics[0]?.id || '');
+  // Fixed: chosenMechanicId was only ever set/read by the fake
+  // "choose your inspector" step removed above - genuinely dead now.
   const [buyerName, setBuyerName] = useState<string>('');
   const [buyerPhone, setBuyerPhone] = useState<string>('');
   const [buyerEmail, setBuyerEmail] = useState<string>('');
@@ -232,34 +330,18 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   const availableCounties = ['All', 'Nairobi', 'Mombasa', 'Kiambu', 'Nakuru', 'Eldoret', 'Machakos', 'Kajiado', 'Kisumu', 'Kilifi', 'Kwale'];
   const specializationOptions = ['All', 'Toyota 4x4', 'German Luxury', 'Subaru AWD', 'Diesel Turbo Systems', 'Hybrid Diagnostics', 'Commercial Fleet', 'Foreign Import Audit'];
 
-  // Filtered Mechanics List
-  const filteredMechanics = useMemo(() => {
-    return mechanics.filter(mech => {
-      const matchesSearch = searchQuery === '' || 
-        mech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        mech.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        mech.specializations.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesCounty = countyFilter === 'All' || mech.counties.includes(countyFilter);
-
-      const matchesSpecialization = specializationFilter === 'All' || 
-        mech.specializations.some(s => s.toLowerCase().includes(specializationFilter.toLowerCase()));
-
-      const matchesRating = mech.rating >= minRatingFilter;
-
-      return matchesSearch && matchesCounty && matchesSpecialization && matchesRating;
-    });
-  }, [mechanics, searchQuery, countyFilter, specializationFilter, minRatingFilter]);
-
   // Launch Booking Modal for a specific mechanic
-  const handleOpenBooking = (mechanic?: Mechanic, vehicle?: Vehicle) => {
-    if (mechanic) {
-      setChosenMechanicId(mechanic.id);
-    }
+  // Fixed: the wizard previously started at Step 1, "Choose Your
+  // Preferred Independent Inspector" - the same fake, rated-mechanic-
+  // directory concept removed above, just relocated inside the
+  // booking wizard. The real backend never lets a buyer choose their
+  // own inspector at all (admin-assigned, confirmed directly) - now
+  // starts at the real first step instead.
+  const handleOpenBooking = (vehicle?: Vehicle) => {
     if (vehicle) {
       setTargetVehicleId(vehicle.id);
     }
-    setBookingStep(1);
+    setBookingStep(2);
     setShowBookingModal(true);
   };
 
@@ -288,7 +370,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       return;
     }
 
-    const mech = mechanics.find(m => m.id === chosenMechanicId) || mechanics[0];
     const targetVeh = vehicles.find(v => v.id === targetVehicleId);
     const vehicleTitle = targetVeh ? targetVeh.title : (customVehicleTitle || '2021 Vehicle Audit');
     const vehicleLocation = targetVeh ? targetVeh.location : customVehicleLocation;
@@ -302,26 +383,15 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       try {
         const result = await createInspectionOrder(targetVeh.id, buyerPhone, vehicleLocation);
         if (result.success && result.order) {
-          const newBooking: InspectionBooking = {
-            id: result.order.id,
-            vehicleId: targetVehicleId,
-            vehicleTitle,
-            vehicleLocation,
-            buyerName,
-            buyerPhone,
-            buyerEmail,
-            mechanicId: mech.id,
-            mechanicName: mech.name,
-            scheduledDate,
-            scheduledTime,
-            packageType,
-            totalFee: currentPackagePrice,
-            platformCommission,
-            netMechanicFee,
-            status: 'Scheduled',
-            paymentStatus: 'Escrow Held',
-            createdAt: new Date().toISOString().split('T')[0]
-          };
+          // Fixed: this previously built a local InspectionBooking by
+          // hand, using a fake, never-actually-chosen mechanic (the
+          // "choose your inspector" step was removed - see above) and
+          // fake status/paymentStatus values that didn't match the
+          // real order's own real, initial state. Uses the same real
+          // mapper the rest of this view relies on instead, so the
+          // immediate result the buyer sees is honest and consistent
+          // with what a real refetch would show.
+          const newBooking = mapBackendOrderToBooking(result.order);
           setBookings([newBooking, ...bookings]);
           setNewBookingId(result.order.id);
           setBookingStep(7);
@@ -339,7 +409,10 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
     // backend has no concept of an inspection request for a vehicle
     // that doesn't exist in its own database. Keeps this component's
     // pre-existing, honest local-only behavior for this specific case
-    // rather than fabricate a persisted result.
+    // rather than fabricate a persisted result. mechanicId/
+    // mechanicName correctly omitted - no inspector is chosen or
+    // assigned at this point (the fake "choose your inspector" step
+    // was removed - see above), matching real, initial order state.
     const generatedId = `INSP-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const newBooking: InspectionBooking = {
       id: generatedId,
@@ -349,8 +422,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       buyerName,
       buyerPhone,
       buyerEmail,
-      mechanicId: mech.id,
-      mechanicName: mech.name,
       scheduledDate,
       scheduledTime,
       packageType,
@@ -365,7 +436,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
     setBookings([newBooking, ...bookings]);
     setNewBookingId(generatedId);
     setBookingStep(7); // Jump to Confirmation / Stepper step
-    showToast(`Inspection booked with ${mech.name}. Funds held in KAYAD Escrow.`);
+    showToast('Inspection request saved. Funds held in KAYAD Escrow.');
   };
 
   // Upvote helpful review
@@ -540,24 +611,17 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       </div>
 
       {/* Main Navigation Sub-Tabs */}
+      {/* Fixed: removed the "Find Inspector" (fake directory),
+          "Verified Reviews", and "Regional Map & Coverage" tabs -
+          per explicit direction, the fake inspector-marketplace/
+          ratings concept (with no real, buyer-accessible backend at
+          all) was removed entirely. "Inspection Packages" kept as
+          informational service-tier content, not user-specific data.
+          "Digital Reports" and "Bookings Tracker" now show this
+          user's own real inspection history. */}
       <div className="sticky top-14 z-40 bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center space-x-1 sm:space-x-4 overflow-x-auto py-2 scrollbar-none text-xs font-bold">
-            <button
-              onClick={() => setActiveTab('marketplace')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
-                activeTab === 'marketplace'
-                  ? 'bg-[#1E3063] text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <Wrench className="w-4 h-4 text-amber-400" />
-              <span>Find Inspector</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono">
-                {filteredMechanics.length}
-              </span>
-            </button>
-
             <button
               onClick={() => setActiveTab('packages')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
@@ -579,10 +643,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               }`}
             >
               <FileCheck className="w-4 h-4 text-blue-500" />
-              <span>Digital Reports</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-bold">
-                150-Point
-              </span>
+              <span>My Reports</span>
             </button>
 
             <button
@@ -594,36 +655,12 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               }`}
             >
               <Clock className="w-4 h-4 text-amber-500" />
-              <span>Bookings Tracker</span>
+              <span>My Bookings</span>
               {bookings.filter(b => b.status !== 'Completed').length > 0 && (
                 <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500 text-white font-bold animate-pulse">
                   {bookings.filter(b => b.status !== 'Completed').length} Active
                 </span>
               )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
-                activeTab === 'reviews'
-                  ? 'bg-[#1E3063] text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-              <span>Verified Reviews</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('coverage')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
-                activeTab === 'coverage'
-                  ? 'bg-[#1E3063] text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <MapPin className="w-4 h-4 text-rose-500" />
-              <span>Regional Map & Coverage</span>
             </button>
           </nav>
         </div>
@@ -631,352 +668,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-
-        {/* TAB 1: MECHANIC MARKETPLACE HOMEPAGE */}
-        {activeTab === 'marketplace' && (
-          <div className="space-y-8 animate-fade-in">
-            {/* Search & Filter Bar */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-card space-y-4">
-              <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
-                {/* Search Input */}
-                <div className="flex-1 relative">
-                  <Input
-                    placeholder="Search mechanic name, diagnostic lab, Toyota 4x4, German luxury..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    icon={<Search className="w-4 h-4 text-slate-400" />}
-                    className="w-full"
-                  />
-                  {searchQuery && (
-                    <button 
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-
-                {/* County Selector */}
-                <div className="w-full sm:w-48">
-                  <select
-                    value={countyFilter}
-                    onChange={(e) => setCountyFilter(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-[#1E3063] focus:outline-none"
-                  >
-                    <option value="All">All Regions / Counties</option>
-                    {availableCounties.filter(c => c !== 'All').map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Specialization Selector */}
-                <div className="w-full sm:w-56">
-                  <select
-                    value={specializationFilter}
-                    onChange={(e) => setSpecializationFilter(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-[#1E3063] focus:outline-none"
-                  >
-                    <option value="All">All Specializations</option>
-                    {specializationOptions.filter(s => s !== 'All').map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Minimum Rating Selector */}
-                <div className="w-full sm:w-40">
-                  <select
-                    value={minRatingFilter}
-                    onChange={(e) => setMinRatingFilter(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-[#1E3063] focus:outline-none"
-                  >
-                    <option value={0}>Any Rating</option>
-                    <option value={4.5}>4.5 ★ & Above</option>
-                    <option value={4.8}>4.8 ★ & Above</option>
-                    <option value={4.9}>4.9 ★ Top Rated</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Active Filters Summary */}
-              {(searchQuery || countyFilter !== 'All' || specializationFilter !== 'All' || minRatingFilter > 0) && (
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-600">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-slate-400">Filters applied:</span>
-                    {searchQuery && (
-                      <Badge variant="neutral">Query: "{searchQuery}"</Badge>
-                    )}
-                    {countyFilter !== 'All' && (
-                      <Badge variant="verified">County: {countyFilter}</Badge>
-                    )}
-                    {specializationFilter !== 'All' && (
-                      <Badge variant="neutral">Spec: {specializationFilter}</Badge>
-                    )}
-                    {minRatingFilter > 0 && (
-                      <Badge variant="accent">Min {minRatingFilter} ★</Badge>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setCountyFilter('All');
-                      setSpecializationFilter('All');
-                      setMinRatingFilter(0);
-                    }}
-                    className="text-xs text-rose-600 font-bold hover:underline"
-                  >
-                    Clear All Filters
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Recently Completed Inspections Live Ticker / Highlights */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-card space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-emerald-600" />
-                  <h3 className="text-sm font-bold text-[#1E3063] font-display">Recently Completed Platform Inspections</h3>
-                </div>
-                <span className="text-[11px] font-semibold text-slate-500">Live Updates</span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {reports.slice(0, 3).map((rep) => (
-                  <div 
-                    key={rep.id} 
-                    onClick={() => setSelectedReport(rep)}
-                    className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#1E3063]/40 cursor-pointer transition-all space-y-2 hover:shadow-xs"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-slate-400 font-bold">{rep.id}</span>
-                      <Badge variant={rep.verdict.includes('Passed') ? 'success' : 'warning'}>
-                        {rep.verdict}
-                      </Badge>
-                    </div>
-
-                    <h4 className="text-xs font-bold text-slate-800 truncate">{rep.vehicleTitle}</h4>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
-                      <span className="truncate">Inspector: <strong className="text-slate-700">{rep.mechanicName}</strong></span>
-                      <span className="font-black text-[#1E3063] font-mono">{rep.overallScore}/100</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Independent Mechanic Cards Grid */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-[#1E3063] font-display">
-                    Certified Independent Inspectors ({filteredMechanics.length})
-                  </h2>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Select an inspector to view complete credentials or book a 150-point pre-purchase audit.
-                  </p>
-                </div>
-              </div>
-
-              {filteredMechanics.length === 0 ? (
-                <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
-                  <Wrench className="w-10 h-10 text-slate-300 mx-auto" />
-                  <h3 className="text-base font-bold text-slate-700">No independent inspectors match your filters</h3>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    Try broadening your county or specialization filter settings to explore certified mechanics nearby.
-                  </p>
-                  <Button 
-                    variant="secondary" 
-                    size="sm"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setCountyFilter('All');
-                      setSpecializationFilter('All');
-                      setMinRatingFilter(0);
-                    }}
-                  >
-                    Reset Search Filters
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {filteredMechanics.map((mech) => (
-                    <Card key={mech.id} hoverable className="flex flex-col justify-between border-slate-200/80">
-                      <div className="p-5 space-y-4">
-                        {/* Card Header: Avatar, Name, Badge, Rating */}
-                        <div className="flex items-start gap-4">
-                          <LazyImage
-                            src={mech.avatar}
-                            alt={mech.name}
-                            wrapperClassName="w-16 h-16 rounded-2xl shrink-0 border border-slate-200"
-                            className="w-full h-full object-cover"
-                          />
-
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                                <ShieldCheck className="w-3 h-3 text-emerald-600" /> Independent Inspector
-                              </span>
-                              {mech.verified && (
-                                <Badge variant="verified" size="sm">NTSA Verified</Badge>
-                              )}
-                            </div>
-
-                            <h3 className="text-base font-bold text-[#1E3063] font-display truncate">
-                              {mech.name}
-                            </h3>
-
-                            <p className="text-xs text-slate-500 font-semibold truncate">
-                              {mech.companyName}
-                            </p>
-
-                            <div className="flex items-center gap-3 text-xs pt-1">
-                              <div className="flex items-center gap-1 font-bold text-slate-800">
-                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                <span>{mech.rating.toFixed(2)}</span>
-                                <span className="text-slate-400 text-[11px]">({mech.reviewsCount} reviews)</span>
-                              </div>
-
-                              <span className="text-slate-300">•</span>
-
-                              <span className="text-slate-600 font-medium">
-                                <strong>{mech.inspectionsCompleted}</strong> Audits
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Location & Experience */}
-                        <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
-                          <div className="flex items-center gap-1.5 text-slate-700 font-medium truncate">
-                            <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                            <span className="truncate">{mech.counties.slice(0, 2).join(', ')}</span>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                            <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                            <span>{mech.yearsExperience} Years Exp.</span>
-                          </div>
-                        </div>
-
-                        {/* Specializations Badges */}
-                        <div className="space-y-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Specializations:</span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {mech.specializations.map((spec, i) => (
-                              <span key={i} className="text-[11px] font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200/60">
-                                {spec}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Bio snippet */}
-                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                          {mech.bio}
-                        </p>
-                      </div>
-
-                      {/* Card Footer: Price & Actions */}
-                      <div className="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-3">
-                        <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Inspection Fee:</span>
-                          <span className="text-sm font-extrabold text-[#1E3063] font-mono">
-                            From Ksh {mech.baseFee.toLocaleString()}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="secondary" 
-                            size="sm"
-                            onClick={() => setSelectedMechanic(mech)}
-                          >
-                            <User className="w-3.5 h-3.5 mr-1 text-slate-600" /> View Profile
-                          </Button>
-
-                          <Button 
-                            variant="primary" 
-                            size="sm"
-                            onClick={() => handleOpenBooking(mech)}
-                          >
-                            <Calendar className="w-3.5 h-3.5 mr-1" /> Book Inspector
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Standard Inspection Packages Section */}
-            <div className="space-y-4 pt-6">
-              <div>
-                <h2 className="text-xl font-bold text-[#1E3063] font-display">Popular Inspection Packages</h2>
-                <p className="text-xs text-slate-500 font-medium">
-                  Standardized technical evaluation packages available across all certified independent inspectors.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {inspectionPackages.slice(0, 3).map((pkg) => (
-                  <Card key={pkg.id} className={`flex flex-col justify-between ${pkg.popular ? 'border-2 border-[#1E3063] shadow-lg' : ''}`}>
-                    <div className="p-5 space-y-4">
-                      {pkg.popular && (
-                        <span className="bg-[#1E3063] text-amber-300 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full w-max flex items-center gap-1">
-                          <Sparkles className="w-3 h-3" /> Most Popular Choice
-                        </span>
-                      )}
-
-                      <div>
-                        <h3 className="text-base font-extrabold text-[#1E3063] font-display">{pkg.name}</h3>
-                        <p className="text-xs text-slate-500 mt-1">{pkg.description}</p>
-                      </div>
-
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
-                        <div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Fixed Price:</span>
-                          <span className="text-xl font-black text-[#1E3063] font-mono">Ksh {pkg.price.toLocaleString()}</span>
-                        </div>
-                        <Badge variant="verified">{pkg.pointsCount}-Point Audit</Badge>
-                      </div>
-
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Includes:</span>
-                        <ul className="space-y-1.5 text-xs text-slate-600">
-                          {pkg.features.map((feat, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                              <span>{feat}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <div className="p-5 pt-0">
-                      <Button 
-                        variant={pkg.popular ? 'primary' : 'secondary'} 
-                        fullWidth
-                        onClick={() => {
-                          setPackageType(pkg.id as any);
-                          handleOpenBooking();
-                        }}
-                      >
-                        Select {pkg.pointsCount}-Point Package
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* TAB 2: INSPECTION PACKAGES */}
         {activeTab === 'packages' && (
@@ -1228,280 +919,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           </div>
         )}
 
-        {/* TAB 5: VERIFIED REVIEWS */}
-        {activeTab === 'reviews' && (
-          <div className="space-y-6 animate-fade-in">
-            <PageHeader
-              badgeIcon={<Star className="w-4 h-4 text-amber-500 fill-amber-500" />}
-              badgeText="Marketplace Feedback"
-              title="Verified Buyer Reviews"
-              description="Read genuine reviews from vehicle buyers who booked independent mechanics on KAYAD. Every review is linked to a completed inspection booking."
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {ratings.map((rate) => {
-                const mech = mechanics.find(m => m.id === rate.mechanicId);
-                const voteCount = (helpfulVotes[rate.id] || 0) + 12; // base count + votes
-                const isVoted = votedItems[rate.id];
-
-                return (
-                  <Card key={rate.id} className="p-6 space-y-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#1E3063] text-amber-300 font-bold flex items-center justify-center text-sm">
-                          {rate.buyerName.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-800">{rate.buyerName}</h4>
-                          <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1 w-max mt-0.5">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Verified Escrow Buyer
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-200 text-xs font-bold">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        <span>{rate.rating}.0</span>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-700 leading-relaxed font-medium">
-                      "{rate.comment}"
-                    </p>
-
-                    <div className="flex items-center justify-between text-xs pt-3 border-t border-slate-100 text-slate-500">
-                      <span>Inspector: <strong className="text-slate-800">{mech?.name || 'Independent Inspector'}</strong></span>
-
-                      <button
-                        onClick={() => handleToggleHelpful(rate.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all text-[11px] font-bold ${
-                          isVoted 
-                            ? 'bg-[#1E3063] text-white border-[#1E3063]' 
-                            : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                        }`}
-                      >
-                        <ThumbsUp className={`w-3 h-3 ${isVoted ? 'text-amber-400' : 'text-slate-400'}`} />
-                        <span>Helpful ({voteCount})</span>
-                      </button>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 6: REGIONAL COVERAGE MAP */}
-        {activeTab === 'coverage' && (
-          <div className="space-y-6 animate-fade-in">
-            <PageHeader
-              badgeIcon={<MapPin className="w-4 h-4 text-rose-500" />}
-              badgeText="Regional Distribution"
-              title="Mechanic Marketplace Regional Coverage"
-              description="Independent certified inspectors on KAYAD cover major automotive hubs and ports across Kenya and East Africa."
-            />
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Coverage Cards */}
-              <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { name: 'Nairobi Metro', count: '14 Independent Inspectors', radius: '50 km radius', hubs: 'Westlands, Karen, Thika Road, Industrial Area' },
-                  { name: 'Mombasa Coastal Region', count: '8 Port Inspectors', radius: '75 km radius', hubs: 'Mombasa Port Yard, Nyali, Kilifi, Kwale' },
-                  { name: 'Nakuru & Central Rift', count: '6 Certified Inspectors', radius: '60 km radius', hubs: 'Nakuru City, Naivasha, Gilgil' },
-                  { name: 'Eldoret & North Rift', count: '5 Fleet Specialists', radius: '80 km radius', hubs: 'Eldoret, Kitale, Uasin Gishu' },
-                  { name: 'Kiambu & Mt. Kenya', count: '7 Mobile Inspectors', radius: '45 km radius', hubs: 'Ruiru, Thika, Kiambu Town' },
-                  { name: 'Kisumu & Western Region', count: '4 Vehicle Auditors', radius: '70 km radius', hubs: 'Kisumu Port, Kakamega, Bungoma' }
-                ].map((region, i) => (
-                  <Card key={i} className="p-5 space-y-3 border-slate-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-rose-500" />
-                        <h4 className="text-sm font-bold text-[#1E3063] font-display">{region.name}</h4>
-                      </div>
-                      <Badge variant="verified">{region.radius}</Badge>
-                    </div>
-
-                    <p className="text-xs font-bold text-emerald-700">{region.count}</p>
-                    <p className="text-xs text-slate-500"><strong>Key Hubs:</strong> {region.hubs}</p>
-
-                    <Button 
-                      variant="secondary" 
-                      size="sm"
-                      fullWidth
-                      onClick={() => {
-                        setCountyFilter(region.name.split(' ')[0]);
-                        setActiveTab('marketplace');
-                      }}
-                    >
-                      Filter Inspectors in {region.name.split(' ')[0]}
-                    </Button>
-                  </Card>
-                ))}
-              </div>
-
-              {/* On-Site Travel Policy Card */}
-              <Card className="p-6 bg-[#1E3063] text-white space-y-4">
-                <div className="flex items-center gap-2 text-amber-300 font-bold text-xs uppercase tracking-wider">
-                  <Navigation className="w-4 h-4" /> Mobile Inspector Policy
-                </div>
-
-                <h3 className="text-lg font-bold font-display">Where do inspections happen?</h3>
-
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Independent mechanics on KAYAD are 100% mobile equipped. They travel directly to:
-                </p>
-
-                <ul className="space-y-2 text-xs text-slate-200">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong>Dealer Showrooms & Used Car Lots:</strong> On-site audit prior to payment.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong>Private Seller Residences:</strong> Convenient meeting at seller’s estate or workplace.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong>Mombasa Port & CFS Yards:</strong> Direct import clearance before duty release.</span>
-                  </li>
-                </ul>
-
-                <Button 
-                  variant="accent"
-                  fullWidth
-                  onClick={() => handleOpenBooking()}
-                  className="font-bold shadow-md mt-2"
-                >
-                  Book On-Site Inspection
-                </Button>
-              </Card>
-            </div>
-          </div>
-        )}
 
       </main>
 
-      {/* ========================================================================== */}
-      {/* MODAL 1: MECHANIC PROFILE MODAL */}
-      {/* ========================================================================== */}
-      {selectedMechanic && (
-        <Modal
-          isOpen={true}
-          onClose={() => setSelectedMechanic(null)}
-          maxWidth="4xl"
-        >
-          <div className="space-y-6">
-            {/* Header: Avatar, Name, Title */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-              <div className="flex items-center gap-4">
-                <LazyImage
-                  src={selectedMechanic.avatar}
-                  alt={selectedMechanic.name}
-                  wrapperClassName="w-20 h-20 rounded-2xl shrink-0 border-2 border-[#1E3063]"
-                  className="w-full h-full object-cover"
-                />
-
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded">
-                      Independent Inspector
-                    </span>
-                    <Badge variant="verified">NTSA Class A</Badge>
-                  </div>
-
-                  <h2 className="text-xl font-extrabold text-[#1E3063] font-display">{selectedMechanic.name}</h2>
-                  <p className="text-xs text-slate-600 font-semibold">{selectedMechanic.companyName} • {selectedMechanic.title}</p>
-                </div>
-              </div>
-
-              <div className="text-right space-y-1">
-                <div className="flex items-center gap-1 text-sm font-bold text-slate-800 justify-end">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <span>{selectedMechanic.rating.toFixed(2)}</span>
-                  <span className="text-slate-400 text-xs font-normal">({selectedMechanic.reviewsCount} reviews)</span>
-                </div>
-                <div className="text-xs font-mono font-black text-[#1E3063]">
-                  From Ksh {selectedMechanic.baseFee.toLocaleString()}
-                </div>
-              </div>
-            </div>
-
-            {/* Bio & Certifications */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 space-y-4">
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold text-[#1E3063] uppercase tracking-wider">Inspector Bio & Background</h4>
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium bg-slate-50 p-4 rounded-xl border border-slate-200/80">
-                    {selectedMechanic.bio}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold text-[#1E3063] uppercase tracking-wider">Certifications & Licenses</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedMechanic.certifications.map((cert, i) => (
-                      <span key={i} className="text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-xl flex items-center gap-1.5">
-                        <Award className="w-3.5 h-3.5 text-emerald-600" /> {cert}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold text-[#1E3063] uppercase tracking-wider">Specializations</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedMechanic.specializations.map((spec, i) => (
-                      <span key={i} className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-xl border border-slate-200">
-                        {spec}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Sidebar Info */}
-              <div className="bg-[#FDFBF7] p-4 rounded-2xl border border-slate-200 space-y-4">
-                <h4 className="text-xs font-bold text-[#1E3063] uppercase tracking-wider">Coverage & Details</h4>
-
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Counties Covered:</span>
-                    <span className="font-semibold text-slate-800">{selectedMechanic.counties.join(', ')}</span>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Experience:</span>
-                    <span className="font-semibold text-slate-800">{selectedMechanic.yearsExperience} Years Technical Auditing</span>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Inspections Completed:</span>
-                    <span className="font-semibold text-slate-800">{selectedMechanic.inspectionsCompleted} Audits</span>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Available Days:</span>
-                    <span className="font-semibold text-slate-800">{selectedMechanic.availableDays.join(', ')}</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={() => {
-                    const mech = selectedMechanic;
-                    setSelectedMechanic(null);
-                    handleOpenBooking(mech);
-                  }}
-                  className="font-bold shadow-md"
-                >
-                  Book Inspection with {selectedMechanic.name.split(' ')[0]}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       {/* ========================================================================== */}
       {/* MODAL 2: 150-POINT DIGITAL REPORT VIEWER MODAL */}
@@ -1663,7 +1083,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* Stepper Progress Indicator */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 text-xs font-bold">
               {[
-                { step: 1, label: 'Inspector' },
                 { step: 2, label: 'Vehicle' },
                 { step: 3, label: 'Package' },
                 { step: 4, label: 'Schedule' },
@@ -1696,53 +1115,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             </div>
 
             {/* STEP 1: CHOOSE MECHANIC */}
-            {bookingStep === 1 && (
-              <div className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 1: Choose Your Preferred Independent Inspector</h3>
-                <p className="text-xs text-slate-500">
-                  Select an inspector based on location, specializations, and reviews. KAYAD facilitates the booking.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
-                  {mechanics.map((mech) => (
-                    <div
-                      key={mech.id}
-                      onClick={() => setChosenMechanicId(mech.id)}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all space-y-2 ${
-                        chosenMechanicId === mech.id
-                          ? 'border-2 border-[#1E3063] bg-amber-50/20 shadow-xs'
-                          : 'border-slate-200 bg-white hover:border-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <LazyImage
-                          src={mech.avatar}
-                          alt={mech.name}
-                          wrapperClassName="w-12 h-12 rounded-xl shrink-0 border border-slate-200"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-slate-800 truncate">{mech.name}</h4>
-                          <p className="text-[11px] text-slate-500 truncate">{mech.companyName}</p>
-                          <div className="flex items-center gap-1 text-[11px] font-bold text-amber-800 mt-0.5">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                            <span>{mech.rating.toFixed(2)}</span>
-                            <span className="text-slate-400">({mech.reviewsCount})</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex justify-end pt-4 border-t border-slate-200">
-                  <Button variant="primary" onClick={() => setBookingStep(2)}>
-                    Next: Select Vehicle →
-                  </Button>
-                </div>
-              </div>
-            )}
-
             {/* STEP 2: SELECT VEHICLE */}
             {bookingStep === 2 && (
               <div className="space-y-4">
@@ -1788,8 +1160,12 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 )}
 
                 <div className="flex justify-between pt-4 border-t border-slate-200">
-                  <Button variant="secondary" onClick={() => setBookingStep(1)}>
-                    ← Back
+                  {/* Fixed: this is now the real first step (the fake
+                      "choose your inspector" step was removed) - Back
+                      closes the wizard instead of returning to a
+                      now-nonexistent step 1. */}
+                  <Button variant="secondary" onClick={() => setShowBookingModal(false)}>
+                    ← Cancel
                   </Button>
                   <Button variant="primary" onClick={() => setBookingStep(3)}>
                     Next: Choose Package →
