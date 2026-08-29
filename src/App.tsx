@@ -6,7 +6,7 @@ import CompareModal from './components/CompareModal';
 import AuthModal from './components/AuthModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 
-import { MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
+import { MOCK_DEALERS, MOCK_MESSAGES } from './data/mockVehicles';
 import { getCars, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -297,7 +297,8 @@ function AppInner() {
 
           {activeNav === 'escrow' && (
             <EscrowView
-              deals={MOCK_ESCROW_DEALS}
+              user={user}
+              onOpenAuth={() => setShowAuthModal(true)}
             />
           )}
 
@@ -332,7 +333,13 @@ function AppInner() {
             <DashboardView
               savedVehicles={savedVehicles}
               vehicles={vehicles}
-              deals={MOCK_ESCROW_DEALS}
+              // Fixed: this dashboard widget's own escrow-deals list is
+              // a separate integration from the real Escrow page
+              // (src/features/EscrowView.tsx, now connected to real
+              // data) - out of today's explicit scope. Passing an
+              // honest empty list rather than continuing to show fake
+              // sample deals here.
+              deals={[]}
               user={user}
               messages={messages}
               comparedVehicles={comparedVehicles}
@@ -429,7 +436,10 @@ function AppInner() {
             <PrivateSellerDashboardView
               vehicles={vehicles}
               user={user}
-              deals={MOCK_ESCROW_DEALS}
+              // Fixed: same as DashboardView above - a separate
+              // integration, out of today's explicit scope. Honest
+              // empty list instead of fake sample deals.
+              deals={[]}
               messages={messages}
               onNavigate={(nav) => setActiveNav(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}

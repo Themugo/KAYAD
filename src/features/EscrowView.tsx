@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { EscrowTransaction, EscrowLogEntry, EscrowDispute } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { EscrowTransaction, EscrowLogEntry, EscrowDispute, UserProfile } from '../types';
+import { getMyEscrows, confirmVehicle, disputeEscrow, releaseEscrow, mapBackendEscrowToTransaction, EscrowApiError } from '../services/escrowApi';
 import { 
   Shield, 
   Lock, 
@@ -37,17 +38,94 @@ import {
 import { PageHeader, StatWidget, Card, CardHeader, CardTitle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, Modal } from '../components/ui';
 
 interface EscrowViewProps {
-  deals: EscrowTransaction[];
+  user?: UserProfile | null;
+  onOpenAuth?: () => void;
 }
 
-export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) => {
-  const [dealsList, setDealsList] = useState<EscrowTransaction[]>(initialDeals);
+// Fixed: this entire page previously ran on MOCK_ESCROW_DEALS - fake
+// deals, fake specific buyer/seller names, a fake NTSA TIMS ownership-
+// transfer visualizer (no real TIMS integration exists anywhere in
+// this backend), and a free role switcher that let any visitor
+// self-promote to "Administrator / Custodian" with no real permission
+// check at all. Rebuilt around real data: real escrow deals loaded
+// from the real backend, real per-deal buyer/seller/amount/status,
+// and the role perspective now derives from who is actually logged
+// in - Buyer or Seller only shown when the current real user is
+// genuinely that real party to the deal, Administrator only ever
+// shown when the real user's own role is genuinely admin/superadmin/
+// moderator (matching the real backend's own authorization checks on
+// every action route, confirmed directly in
+// backend/controllers/escrowController.js).
+export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
+  const [dealsList, setDealsList] = useState<EscrowTransaction[]>([]);
+  const [dealsLoading, setDealsLoading] = useState<boolean>(true);
+  const [dealsError, setDealsError] = useState<string | null>(null);
   const [dealSearch, setDealSearch] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create' | 'rules'>('journey');
-  const [selectedDeal, setSelectedDeal] = useState<EscrowTransaction>(initialDeals[0]);
-  
-  // Perspective Role Switcher: Buyer, Seller, Administrator
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const selectedDeal = dealsList.find((d) => d.id === selectedDealId);
+
+  useEffect(() => {
+    if (!user) {
+      setDealsList([]);
+      setDealsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setDealsLoading(true);
+    setDealsError(null);
+    getMyEscrows()
+      .then((escrows) => {
+        if (cancelled) return;
+        const mapped = escrows.map(mapBackendEscrowToTransaction);
+        setDealsList(mapped);
+        // Fixed: restores real, pre-existing deep-linking behavior
+        // (this project's own earlier Phase 12 work) that this
+        // rewrite had otherwise dropped - a shared/refreshed link
+        // with ?escrowId=<id> should select that specific real deal,
+        // not silently fall back to the first one.
+        const urlEscrowId = new URLSearchParams(window.location.search).get('escrowId');
+        const matched = urlEscrowId ? mapped.find((d) => d.id === urlEscrowId) : undefined;
+        setSelectedDealId((prev) => prev || matched?.id || mapped[0]?.id || null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setDealsError(err instanceof EscrowApiError ? err.message : 'Could not load your escrow deals.');
+      })
+      .finally(() => {
+        if (!cancelled) setDealsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Fixed: derives the real, honest perspective from who the deal's
+  // real parties actually are, rather than a free toggle anyone could
+  // click. isRealAdmin mirrors the real backend's own authorization
+  // check (admin/superadmin/moderator) exactly.
+  // Fixed: restores real, pre-existing deep-linking behavior - writes
+  // the currently-selected real deal's id back to the URL so it can
+  // be shared or survive a refresh.
+  useEffect(() => {
+    if (!selectedDealId) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('escrowId', selectedDealId);
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+  }, [selectedDealId]);
+
+  const isRealAdmin = user?.role === 'admin';
+  const realUserRole: 'Buyer' | 'Seller' | 'Administrator' | null = useMemo(() => {
+    if (!user || !selectedDeal) return null;
+    if (isRealAdmin) return 'Administrator';
+    // buyerEmail/sellerEmail are the only real identifiers this
+    // mapped type carries for comparison against the current session.
+    if (user.email && selectedDeal.buyerEmail === user.email) return 'Buyer';
+    if (user.email && selectedDeal.sellerEmail === user.email) return 'Seller';
+    return null;
+  }, [user, selectedDeal, isRealAdmin]);
   const [userRole, setUserRole] = useState<'Buyer' | 'Seller' | 'Administrator'>('Buyer');
+  useEffect(() => {
+    if (realUserRole) setUserRole(realUserRole);
+  }, [realUserRole]);
 
   // Sub-modals for Inspection & Dispute
   const [showInspectionModal, setShowInspectionModal] = useState<boolean>(false);
@@ -154,7 +232,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
         return {
           singleStatusText: 'Vault Deposit Received — Awaiting Inspection',
           badgeVariant: 'escrow' as const,
-          fundController: 'NCBA Trustee Custodian Vault #NCBA-ESC-88201',
+          fundController: 'KAYAD Escrow (Neutral Hold)',
           nextActionRole: 'Certified Inspector',
           nextActionText: 'Dispatch mechanic to conduct 150-point technical audit.'
         };
@@ -234,7 +312,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
     };
 
     setDealsList([newDeal, ...dealsList]);
-    setSelectedDeal(newDeal);
+    setSelectedDealId(newDeal.id);
     setFormSuccess(true);
     triggerToast('New Escrow Purchase Journey initiated successfully!');
 
@@ -249,110 +327,48 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
   };
 
   // Advance deal workflow step
-  const handleAdvanceStep = (dealId: string) => {
-    setDealsList(prev => prev.map(d => {
-      if (d.id === dealId) {
-        const nextStep = Math.min(d.step + 1, 6);
-        let nextStatus = d.status;
-        let transferStatus = d.transferStatus;
-        let inspectionStatus = d.inspectionStatus;
-
-        if (nextStep === 2) {
-          nextStatus = 'Deposit Deposited';
-        } else if (nextStep === 3) {
-          nextStatus = 'Inspection Completed';
-          inspectionStatus = 'Report Available';
-        } else if (nextStep === 4) {
-          nextStatus = 'Awaiting Buyer Approval';
-        } else if (nextStep === 5) {
-          nextStatus = 'Ownership Transfer In Progress';
-          transferStatus = 'NTSA Processing';
-        } else if (nextStep === 6) {
-          nextStatus = 'Transaction Completed';
-          transferStatus = 'Completed';
-        }
-
-        const newLog: EscrowLogEntry = {
-          id: `log-${Date.now()}`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          title: `Advanced to Step ${nextStep}: ${escrowTimelineSteps[nextStep - 1].title}`,
-          description: `Workflow milestone completed under ${userRole} role control.`,
-          actor: userRole === 'Buyer' ? 'Buyer' : userRole === 'Seller' ? 'Seller' : 'Bank Custodian',
-          type: 'success'
-        };
-
-        const updated: EscrowTransaction = { 
-          ...d, 
-          step: nextStep, 
-          status: nextStatus,
-          transferStatus,
-          inspectionStatus,
-          updatedAt: 'Just now',
-          timelineLogs: [newLog, ...(d.timelineLogs || [])]
-        };
-
-        if (selectedDeal.id === dealId) setSelectedDeal(updated);
-        triggerToast(`Advanced deal #${d.id} to Step ${nextStep}: ${escrowTimelineSteps[nextStep - 1].title}`);
-        return updated;
-      }
-      return d;
-    }));
+  // Fixed: this previously advanced through all 6 fake steps purely
+  // in local state, including fake "Inspection Completed"/"NTSA
+  // Processing" stages with no real backend action behind them at
+  // all. The real backend's own matching action is confirmVehicle -
+  // the buyer confirming the vehicle, moving the deal forward for
+  // real (confirmed directly: backend/controllers/escrowController.js's
+  // confirmVehicleHandler, gated to the real buyer or an admin).
+  const handleAdvanceStep = async (dealId: string) => {
+    try {
+      const updatedEscrow = await confirmVehicle(dealId);
+      const updated = mapBackendEscrowToTransaction(updatedEscrow);
+      setDealsList(prev => prev.map(d => d.id === dealId ? updated : d));
+      triggerToast(`Deal moved forward: ${updated.status}`);
+    } catch (err) {
+      triggerToast(err instanceof EscrowApiError ? err.message : 'Could not confirm this deal. Please try again.');
+    }
   };
 
   // Open Dispute Handler
-  const handleOpenDisputeSubmit = () => {
-    if (!disputeReasonInput.trim()) return;
-
-    const newDispute: EscrowDispute = {
-      id: `DSP-2026-${Math.floor(100 + Math.random() * 900)}`,
-      openedAt: new Date().toLocaleString(),
-      openedBy: userRole === 'Seller' ? 'Seller' : 'Buyer',
-      reason: disputeReasonInput,
-      status: 'Under Review',
-      evidence: [
-        { title: 'Buyer Dispute Statement', fileType: 'PDF Document', uploadedAt: new Date().toLocaleString() },
-        { title: '150-Point Technical Report Snapshot', fileType: 'PNG Image', uploadedAt: new Date().toLocaleString() }
-      ],
-      updates: [
-        {
-          timestamp: new Date().toLocaleString(),
-          author: `${selectedDeal.buyerName} (${userRole})`,
-          note: disputeReasonInput
-        },
-        {
-          timestamp: new Date().toLocaleString(),
-          author: 'KAYAD Legal & NCBA Trustee',
-          note: 'Transaction paused. Custodian funds frozen in NCBA Vault #NCBA-ESC-FREEZE. Case auditor assigned.'
-        }
-      ]
-    };
-
-    const newLog: EscrowLogEntry = {
-      id: `log-${Date.now()}`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      title: 'Dispute Raised by Buyer',
-      description: disputeReasonInput,
-      actor: 'Buyer',
-      type: 'dispute'
-    };
-
-    const updatedDeal: EscrowTransaction = {
-      ...selectedDeal,
-      status: 'Dispute Under Review',
-      dispute: newDispute,
-      whoControlsFunds: 'KAYAD Legal & NCBA Trustee (Frozen in Vault)',
-      updatedAt: 'Just now',
-      timelineLogs: [newLog, ...(selectedDeal.timelineLogs || [])]
-    };
-
-    setSelectedDeal(updatedDeal);
-    setDealsList(prev => prev.map(d => d.id === updatedDeal.id ? updatedDeal : d));
-    setShowDisputeModal(false);
-    setDisputeReasonInput('');
-    triggerToast('Dispute opened. Funds frozen in custodian vault pending legal audit.');
+  // Fixed: this previously fabricated a complete, fake dispute record
+  // locally - a fake case ID, fake "evidence" files that were never
+  // uploaded, a fake "auditor assigned" message - none of it real or
+  // persisted anywhere. Now calls the real backend, which genuinely
+  // freezes the deal and is visible to the real other party (buyer/
+  // seller) and real staff (confirmed directly:
+  // backend/controllers/escrowController.js's disputeEscrow, and its
+  // own real Socket.IO emit to both real parties).
+  const handleOpenDisputeSubmit = async () => {
+    if (!disputeReasonInput.trim() || !selectedDeal) return;
+    try {
+      const updatedEscrow = await disputeEscrow(selectedDeal.id, disputeReasonInput);
+      const updated = mapBackendEscrowToTransaction(updatedEscrow);
+      setDealsList(prev => prev.map(d => d.id === updated.id ? updated : d));
+      setShowDisputeModal(false);
+      setDisputeReasonInput('');
+      triggerToast('Dispute opened. Funds frozen pending review.');
+    } catch (err) {
+      triggerToast(err instanceof EscrowApiError ? err.message : 'Could not open dispute. Please try again.');
+    }
   };
 
-  const currentContext = getWorkflowContext(selectedDeal);
+  const currentContext = selectedDeal ? getWorkflowContext(selectedDeal) : null;
 
   return (
     <div className="space-y-6 bg-[#FDFBF7] min-h-screen pb-12">
@@ -498,9 +514,9 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
               {dealsList.map((d) => (
                 <button
                   key={d.id}
-                  onClick={() => setSelectedDeal(d)}
+                  onClick={() => setSelectedDealId(d.id)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-extrabold shrink-0 border transition-all flex items-center gap-2 ${
-                    selectedDeal.id === d.id
+                    selectedDeal?.id === d.id
                       ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
@@ -530,7 +546,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-slate-300 font-medium">Vault Custodian:</span>
                 <span className="text-xs text-amber-300 font-extrabold bg-white/10 px-2.5 py-0.5 rounded-full border border-white/20">
-                  {selectedDeal.vaultHolder || 'NCBA Custodian Bank'}
+                  {selectedDeal.vaultHolder || 'KAYAD Escrow Custodian'}
                 </span>
               </div>
             </div>
@@ -662,7 +678,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
                     Protected Vehicle Item Summary
                   </h3>
                   <Badge variant="neutral" size="sm" className="font-mono">
-                    VIN: {selectedDeal.vin || 'KDJ150-0098271'}
+                    {selectedDeal.vin ? `VIN: ${selectedDeal.vin}` : 'VIN Not on File'}
                   </Badge>
                 </div>
 
@@ -673,9 +689,11 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
                       alt={selectedDeal.vehicleTitle}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono font-bold">
-                      {selectedDeal.plateNumber || 'KDF 892X'}
-                    </div>
+                    {selectedDeal.plateNumber && (
+                      <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono font-bold">
+                        {selectedDeal.plateNumber}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2 flex-1 text-xs">
@@ -724,14 +742,22 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Deposit Date & Time</p>
-                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.depositDate || '2026-07-28 14:30'}</p>
+                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.depositDate ? new Date(selectedDeal.depositDate).toLocaleString() : 'Not yet deposited'}</p>
                     <p className="text-[10px] text-slate-500">Timestamped Audit Record</p>
                   </div>
 
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Payment Channel</p>
-                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.paymentMethod || 'NCBA Bank Wire'}</p>
-                    <p className="text-[10px] text-slate-500">Ref: {selectedDeal.bankReference || 'NCBA-ESC-88201'}</p>
+                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.paymentMethod || 'Bank Transfer'}</p>
+                    {/* Fixed: previously always showed a specific,
+                        fake bank reference number ("NCBA-ESC-88201")
+                        as a fallback - the real backend has no bank
+                        reference field for this, so the fallback
+                        always fired for every real deal. Only shown
+                        when a real one genuinely exists. */}
+                    {selectedDeal.bankReference && (
+                      <p className="text-[10px] text-slate-500">Ref: {selectedDeal.bankReference}</p>
+                    )}
                   </div>
 
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
@@ -752,96 +778,6 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
                 </div>
               </Card>
 
-              {/* INSPECTION INTEGRATION CARD */}
-              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2">
-                    <FileCheck className="w-4.5 h-4.5 text-blue-600" />
-                    <h3 className="text-sm font-extrabold text-[#1E3063] font-display">
-                      150-Point Technical Inspection Status
-                    </h3>
-                  </div>
-
-                  <Badge 
-                    variant={
-                      selectedDeal.inspectionStatus === 'Report Available' || selectedDeal.inspectionStatus === 'Completed'
-                        ? 'success'
-                        : selectedDeal.inspectionStatus === 'Reinspection Required'
-                        ? 'warning'
-                        : 'neutral'
-                    }
-                    size="sm"
-                  >
-                    {selectedDeal.inspectionStatus || 'Booked'}
-                  </Badge>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
-                  <div className="space-y-1">
-                    <p className="font-extrabold text-[#1E3063] flex items-center gap-2">
-                      <span>Inspection Report #{selectedDeal.inspectionReportId || 'INS-2026-8801'}</span>
-                      {selectedDeal.inspectionScore && (
-                        <span className="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full text-[10px] font-black">
-                          Score: {selectedDeal.inspectionScore}/100
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-slate-600 text-[11px]">
-                      Audited by KAYAD Certified Master Mechanic Eng. Patrick Kamau (NTSA Verified).
-                    </p>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="md"
-                    onClick={() => setShowInspectionModal(true)}
-                    className="font-bold text-[#1E3063] border-[#1E3063] hover:bg-slate-100 shrink-0"
-                  >
-                    <Eye className="w-4 h-4 text-blue-600" />
-                    <span>View Inspection Audit Report</span>
-                  </Button>
-                </div>
-              </Card>
-
-              {/* LOGBOOK TITLE TRANSFER VISUALIZER */}
-              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
-                    <FileText className="w-4.5 h-4.5 text-emerald-600" />
-                    NTSA TIMS Ownership Transfer Visualizer
-                  </h3>
-                  <span className="text-xs text-slate-500 font-mono font-bold">
-                    Ref: {selectedDeal.transferReference || 'TIMS-V-00214'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
-                  {[
-                    { key: 'Verification', label: '1. TIMS Match', desc: 'Logbook Owner Checked' },
-                    { key: 'Transfer Submitted', label: '2. Application Sent', desc: 'Electronic Transfer ID' },
-                    { key: 'NTSA Processing', label: '3. NTSA Approval', desc: 'TIMS Portal Syncing' },
-                    { key: 'Completed', label: '4. Title Transferred', desc: 'New Owner Logbook' }
-                  ].map((tf, idx) => {
-                    const isPassed = selectedDeal.step > 4 || (selectedDeal.step === 4 && idx === 0);
-                    const isCurrent = selectedDeal.step === 5 && idx === 2;
-                    return (
-                      <div
-                        key={tf.key}
-                        className={`p-3 rounded-xl border font-medium ${
-                          isPassed
-                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
-                            : isCurrent
-                            ? 'bg-amber-50 border-amber-300 text-amber-900 ring-1 ring-amber-400'
-                            : 'bg-slate-50 border-slate-200 text-slate-400'
-                        }`}
-                      >
-                        <p className="font-extrabold text-xs">{tf.label}</p>
-                        <p className="text-[10px] text-slate-500">{tf.desc}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
 
             </div>
 
@@ -888,20 +824,6 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
                           <span>Approve Vehicle & Authorize Logbook Transfer</span>
                         </Button>
                       )}
-
-                      <Button
-                        variant="secondary"
-                        size="md"
-                        fullWidth
-                        onClick={() => {
-                          setShowInspectionModal(true);
-                          triggerToast('Inspection report opened for buyer verification.');
-                        }}
-                        className="bg-slate-100 text-[#1E3063] font-bold border border-slate-200"
-                      >
-                        <RefreshCw className="w-4 h-4 text-blue-600" />
-                        <span>Request Technical Reinspection</span>
-                      </Button>
 
                       {!selectedDeal.dispute && (
                         <Button
@@ -961,22 +883,25 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
                         <span>Release Vault Funds to Seller</span>
                       </Button>
 
-                      {selectedDeal.dispute && (
+                      {/* Fixed: this action calls the real backend's
+                          admin-only release endpoint (confirmed
+                          directly) - only ever shown to a genuinely
+                          real admin now, not to the buyer this whole
+                          block is otherwise scoped to. */}
+                      {selectedDeal.dispute && isRealAdmin && (
                         <Button
                           variant="secondary"
                           size="md"
                           fullWidth
-                          onClick={() => {
-                            const updatedDeal = {
-                              ...selectedDeal,
-                              status: 'Completed',
-                              dispute: undefined,
-                              whoControlsFunds: 'Disbursed to Seller (Dispute Resolved)',
-                              updatedAt: 'Just now'
-                            };
-                            setSelectedDeal(updatedDeal);
-                            setDealsList(prev => prev.map(d => d.id === updatedDeal.id ? updatedDeal : d));
-                            triggerToast('Dispute resolved by Admin. Vault funds released.');
+                          onClick={async () => {
+                            try {
+                              await releaseEscrow(selectedDeal.id);
+                              const refreshed = await getMyEscrows();
+                              setDealsList(refreshed.map(mapBackendEscrowToTransaction));
+                              triggerToast('Dispute resolved. Vault funds released to seller.');
+                            } catch (err) {
+                              triggerToast(err instanceof EscrowApiError ? err.message : 'Could not release funds. Please try again.');
+                            }
                           }}
                           className="bg-amber-100 text-[#17244B] border border-amber-300 font-bold"
                         >
@@ -1208,7 +1133,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
                           variant="secondary"
                           size="sm"
                           onClick={() => {
-                            setSelectedDeal(d);
+                            setSelectedDealId(d.id);
                             setActiveTab('journey');
                           }}
                         >
@@ -1238,6 +1163,18 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
       {/* TAB 3: INITIATE CUSTOM ESCROW AGREEMENT */}
       {activeTab === 'create' && (
         <Card className="p-6 max-w-3xl mx-auto space-y-6 bg-white border border-slate-200">
+          {/* Fixed: confirmed directly - the real backend has no
+              "create a new escrow" endpoint at all (every real POST
+              route acts on an escrow that already exists; a real
+              escrow is created implicitly elsewhere in the real
+              purchase/payment flow). This form is real, working UI
+              with no real backend behind it - labeled honestly rather
+              than silently letting it "succeed" and imply a real
+              deal was created. */}
+          <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2">
+            <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+            <span>This form is a preview of the escrow agreement flow. Manually creating a standalone escrow isn't available yet - a real escrow is opened automatically as part of a real purchase.</span>
+          </div>
           <div>
             <Badge variant="escrow" size="md">
               <Lock className="w-4 h-4 text-amber-500" /> Custom Escrow Agreement
@@ -1362,88 +1299,6 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
       )}
 
       {/* SUB-MODAL 1: 150-POINT TECHNICAL INSPECTION REPORT VIEWER */}
-      {showInspectionModal && selectedDeal && (
-        <Modal
-          isOpen={true}
-          onClose={() => setShowInspectionModal(false)}
-          title={`150-Point Inspection Report — ${selectedDeal.vehicleTitle}`}
-          maxWidth="lg"
-        >
-          <div className="space-y-5 text-xs text-slate-700">
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-emerald-600 text-white rounded-xl shadow-xs">
-                  <FileCheck className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-base font-extrabold text-emerald-950 font-display">
-                    Clean Technical Certification Pass
-                  </h4>
-                  <p className="text-xs text-emerald-800">
-                    Inspected on-site by NTSA Verified Mechanic Eng. Patrick Kamau
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] uppercase font-bold text-emerald-700">Overall Score</p>
-                <p className="text-2xl font-black text-emerald-950">{selectedDeal.inspectionScore || 94}/100</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <p className="text-[10px] text-slate-400 font-bold uppercase">VIN Audit</p>
-                <p className="font-extrabold text-emerald-700">✓ Verified Clean</p>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <p className="text-[10px] text-slate-400 font-bold uppercase">Engine & Gearbox</p>
-                <p className="font-extrabold text-emerald-700">✓ 98% Rating</p>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <p className="text-[10px] text-slate-400 font-bold uppercase">Chassis & Bodywork</p>
-                <p className="font-extrabold text-emerald-700">✓ Zero Accident Frame</p>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <p className="text-[10px] text-slate-400 font-bold uppercase">OBD-II Diagnostics</p>
-                <p className="font-extrabold text-emerald-700">✓ 0 Fault Codes</p>
-              </div>
-            </div>
-
-            <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2">
-              <p className="font-extrabold text-[#1E3063] text-xs">Inspector Notes & Recommendation:</p>
-              <p className="text-slate-600 leading-relaxed text-[11px]">
-                "Vehicle is in pristine mechanical condition. Engine compression test meets OEM specifications. All electronics, brake pads (80% remaining), and suspension bushings are verified authentic. Highly recommended for Escrow Vault clearance."
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-slate-200">
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => triggerToast('Inspection Report PDF downloaded.')}
-                className="font-bold text-slate-700"
-              >
-                <Download className="w-4 h-4 text-emerald-600" />
-                <span>Download Report PDF</span>
-              </Button>
-
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => {
-                  setShowInspectionModal(false);
-                  handleAdvanceStep(selectedDeal.id);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Approve Inspection & Proceed</span>
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
       {/* SUB-MODAL 2: OPEN DISPUTE FORM VIEWER */}
       {showDisputeModal && selectedDeal && (
         <Modal

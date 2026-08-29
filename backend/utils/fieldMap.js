@@ -116,6 +116,17 @@ export const FIELD_ALIASES = {
     closedAt: "closedAt",
     disputeReason: "disputeReason",
     disputedAt: "disputedAt",
+    // Fixed (escrow page real-data integration): found while running
+    // the real end-to-end backend verification for this pass -
+    // disputedBy/refundedBy/releasedBy are real, camelCase-exception
+    // columns on this same table (confirmed directly via \d escrows),
+    // same as every other alias already listed here, but these three
+    // were missing. Reproduced the real, direct consequence: every
+    // real dispute request failed ("Could not find the 'disputed_by'
+    // column of 'escrows' in the schema cache").
+    disputedBy: "disputedBy",
+    refundedBy: "refundedBy",
+    releasedBy: "releasedBy",
   },
   // Added (Final Integration - real data integration): found while
   // wiring the real, already-built favoriteApi.ts frontend client to

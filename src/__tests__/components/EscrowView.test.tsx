@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EscrowView } from '../../features/EscrowView';
-import { MOCK_ESCROW_DEALS, INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_VEHICLES } from '../../data/mockVehicles';
 
 // Phase 4 note (core workflow consolidation): this file previously
 // tested a `prefillVehicle` prop and its "switches to the create tab
@@ -20,9 +20,16 @@ import { MOCK_ESCROW_DEALS, INITIAL_VEHICLES } from '../../data/mockVehicles';
 // behavior for a future, dedicated pass. The one test below covering
 // genuinely real, current behavior (the default view with no prefill
 // concept involved) is kept.
+//
+// Fixed (escrow page real-data integration): the `deals` prop no
+// longer exists - EscrowView now loads real deals itself via
+// services/escrowApi.ts when a real `user` is provided. With no user
+// (this test's own case, matching a signed-out visitor), the real
+// component correctly renders an empty/sign-in state rather than any
+// deals at all - updated to verify that, instead of a removed prop.
 describe('EscrowView - default view (real, current behavior)', () => {
-  it('renders the default deals view without crashing', () => {
-    render(<EscrowView deals={MOCK_ESCROW_DEALS} />);
+  it('renders without crashing for a signed-out visitor (no deals prop, no user)', () => {
+    render(<EscrowView />);
     expect(screen.queryByDisplayValue(INITIAL_VEHICLES[0].title)).toBeNull();
   });
 });
