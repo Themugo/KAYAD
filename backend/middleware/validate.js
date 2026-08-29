@@ -140,7 +140,23 @@ export const validateQuery = (schema) => (req, res, next) => {
       .join("; ");
     return validationError(res, messages);
   }
-  req.query = result.data;
+  // Fixed: reproduced directly against a real, mounted HTTP server -
+  // req.query = result.data threw "Cannot set property query of
+  // #<IncomingMessage> which has only a getter" on every single
+  // request through this middleware (the Node/Express version here
+  // exposes req.query as a read-only, getter-derived property; direct
+  // reassignment is no longer allowed). This uncaught error was
+  // caught by a generic error handler that returned an HTML page
+  // instead of JSON, breaking every route using validateQuery -
+  // including GET /api/cars, the marketplace's own core listing
+  // endpoint - with no visible error in the browser beyond "Unexpected
+  // response from server." Fixed by mutating the existing req.query
+  // object's own properties in place instead of replacing the
+  // reference itself - works correctly even when the property itself
+  // can't be reassigned, and every real consumer of req.query
+  // (plain property reads) is unaffected by this change.
+  for (const key of Object.keys(req.query)) delete req.query[key];
+  Object.assign(req.query, result.data);
   next();
 };
 

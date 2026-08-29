@@ -529,30 +529,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {homeConfig.sectionVisibility.searchTrustCard && (
       <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-3 sm:p-4 shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row items-center gap-2.5">
-          {/* Instant Keyword Input */}
-          <div className="relative flex-1 w-full flex items-center">
-            <Search className="w-4 h-4 absolute left-3.5 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Instant search (e.g. Toyota Prado, Leather, Turbo, Nairobi...)"
-              className="w-full pl-10 pr-9 py-2 bg-white text-slate-900 placeholder-slate-400 border border-white/20 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => onSearchChange('')}
-                className="absolute right-3 text-slate-400 hover:text-slate-600 p-0.5"
-                title="Clear query"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          {/* Fixed: removed the "Instant Keyword Input" search box
+              that used to sit here, per explicit direction - the
+              sidebar's own Filter Vehicles panel already covers make,
+              model, price, year, body style, and more, making this a
+              redundant second way to search. Make/Region/Filters
+              controls below are unchanged. */}
 
           {/* Quick Selects & Controls */}
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+          <div className="flex flex-wrap items-center gap-2 w-full justify-between md:justify-end">
             {/* Make Selector - hidden only at the lg: breakpoint when
                 the sidebar is also showing, not hidden outright. See
                 the git history on this exact selector for the full

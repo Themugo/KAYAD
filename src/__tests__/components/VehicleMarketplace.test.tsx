@@ -229,9 +229,14 @@ describe('VehicleMarketplace - unified search/trust card (space audit)', () => {
   // functional. Verifies both halves render inside a single shared
   // card container, and that no element in the page carries the old
   // sticky positioning class.
-  it('renders the search bar and all 3 trust pillars inside one shared card, not two', () => {
+  it('renders all 3 trust pillars inside the shared card (search bar removed per explicit direction)', () => {
     render(<VehicleMarketplace {...baseProps} />);
-    expect(screen.getByPlaceholderText(/Instant search/)).toBeTruthy();
+    // Fixed: this card previously also held an "Instant search" input;
+    // it was removed per explicit direction (the sidebar's own Filter
+    // Vehicles panel already covers search/filtering, making this a
+    // redundant second search box). Updated to verify what the card
+    // actually contains now instead of asserting removed behavior.
+    expect(screen.queryByPlaceholderText(/Instant search/)).toBeNull();
     expect(screen.getByText('Escrow Protection')).toBeTruthy();
     // "150-Point Inspection" (the trust strip's current heading, after
     // the accuracy-focused copy rewrite) is checked with getAllByText
@@ -244,18 +249,20 @@ describe('VehicleMarketplace - unified search/trust card (space audit)', () => {
     expect(screen.getByText('Live Auctions')).toBeTruthy();
   });
 
-  it('the merged search/trust card itself does not use position: sticky (the filter sidebar and modal headers have their own unrelated, legitimate sticky uses elsewhere on the page, not touched by this)', () => {
+  it('the trust card itself does not use position: sticky (the filter sidebar and modal headers have their own unrelated, legitimate sticky uses elsewhere on the page, not touched by this)', () => {
     render(<VehicleMarketplace {...baseProps} />);
-    const searchInput = screen.getByPlaceholderText(/Instant search/);
-    // Walk up from the search input to find its containing card - the
+    // Fixed: locates the card via its own trust-pillar heading rather
+    // than the now-removed search input.
+    const trustHeading = screen.getByText('Escrow Protection');
+    // Walk up from the trust heading to find its containing card - the
     // direct parent chain, not a page-wide selector, since sticky is
     // still legitimately used elsewhere (the filter sidebar, a modal's
-    // header/footer) and this test is specifically about the merged
+    // header/footer) and this test is specifically about this shared
     // card, not a blanket "no sticky anywhere" claim that would be
     // false.
-    let el: HTMLElement | null = searchInput.parentElement;
+    let el: HTMLElement | null = trustHeading.parentElement;
     let foundCard: HTMLElement | null = null;
-    for (let i = 0; i < 6 && el; i++) {
+    for (let i = 0; i < 8 && el; i++) {
       if (el.className.includes('bg-gradient-to-r')) {
         foundCard = el;
         break;
