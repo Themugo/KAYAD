@@ -25,7 +25,6 @@ import PrivateSellerDashboardView from './features/PrivateSellerDashboardView';
 import ChatView from './features/ChatView';
 import AdminView from './features/AdminView';
 import SupportView from './features/SupportView';
-import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
 import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
 import KAYADLive from './pages/KAYADLive';
 import { BuyerPlatform } from './features/OwnershipPlatform';
@@ -394,10 +393,17 @@ function AppInner() {
             <SupportView user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
-          {activeNav === 'broadcast' && (
-            <LiveAuctionBroadcastPage />
-          )}
-
+          {/* Fixed: 'broadcast' (LiveAuctionBroadcastPage) removed
+              entirely - confirmed zero real navigation ever reached
+              it (no nav link, no button anywhere in the real app), it
+              was driven entirely by 2 hardcoded mock constants with
+              no real backend connection, and the real, working "watch
+              a live auction, see the real current bid, place a real
+              bid" experience already exists and is genuinely
+              connected (AuctionDiscoveryNetwork's own WatchLiveModal,
+              'discovery'). Rebuilding this as a real, separate page
+              would have duplicated that already-real functionality
+              rather than adding anything genuinely new. */}
           {activeNav === 'discovery' && (
             <AuctionDiscoveryNetwork user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}

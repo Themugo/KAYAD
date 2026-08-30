@@ -242,23 +242,30 @@ export async function getContents(req, res) {
     ];
   }
 
-  const contents = await CMSContent.find({
-    ...filter,
-    _sort: "publishedAt",
-    _order: "desc",
-    _page: parseInt(page),
-    _limit: parseInt(limit)
-  });
+  // Fixed: reproduced directly - _sort/_order/_page/_limit were being
+  // passed as part of the filter object itself, but this project's
+  // real query builder (models/_base.js) treats every key in a filter
+  // as a real column to match against, not a special pagination/sort
+  // instruction - every real request threw ("column cms_contents._sort
+  // does not exist"). The real, correct pattern (matching this
+  // project's own other controllers, e.g. .find(filter).sort({...}))
+  // chains .sort()/.limit()/.skip() separately instead.
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const contents = await CMSContent.find(filter)
+    .sort({ publishedAt: -1 })
+    .skip((pageNum - 1) * limitNum)
+    .limit(limitNum);
 
   const total = await CMSContent.countDocuments(filter);
 
   res.json({
     data: contents,
     pagination: {
-      page: parseInt(page),
-      limit: parseInt(limit),
+      page: pageNum,
+      limit: limitNum,
       total,
-      pages: Math.ceil(total / parseInt(limit))
+      pages: Math.ceil(total / limitNum)
     }
   });
 }

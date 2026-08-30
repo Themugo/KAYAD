@@ -394,6 +394,37 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 );
 
 -- =============================
+-- CMS CONTENT (read path only - createContent/updateContent's own
+-- cms_revisions dependency intentionally not added; nothing in this
+-- project writes through that path yet)
+-- =============================
+CREATE TABLE IF NOT EXISTS cms_contents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  content_type TEXT DEFAULT 'article',
+  body TEXT,
+  excerpt TEXT,
+  featured_image TEXT,
+  category TEXT,
+  tags TEXT[] DEFAULT '{}',
+  author UUID REFERENCES users(id),
+  seo JSONB DEFAULT '{}',
+  status TEXT DEFAULT 'published' CHECK (status IN ('draft','published','archived')),
+  schedule_at TIMESTAMPTZ,
+  featured BOOLEAN DEFAULT false,
+  related_articles TEXT[] DEFAULT '{}',
+  reading_time INTEGER DEFAULT 0,
+  created_by UUID REFERENCES users(id),
+  updated_by UUID REFERENCES users(id),
+  version INTEGER DEFAULT 1,
+  published_at TIMESTAMPTZ DEFAULT now(),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+GRANT ALL ON cms_contents TO service_role;
+
+-- =============================
 -- HERO SLIDES (admin-managed hero card - text, layered background,
 -- and slider support)
 -- =============================
