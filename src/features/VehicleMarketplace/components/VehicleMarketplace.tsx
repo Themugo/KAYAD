@@ -630,63 +630,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       </div>
       )}
 
-      {/* 3. TRUST STRIP - real, admin-editable content (homeConfig.trustPillars) */}
-      {homeConfig.sectionVisibility.searchTrustCard && (
-      <section className="bg-white border-b border-slate-200 px-4 sm:px-6 py-7 mt-8">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="flex gap-3 items-start">
-            <div className="w-10 h-10 rounded-xl bg-[#EAF0FD] text-[#1E3063] flex items-center justify-center shrink-0 text-lg">
-              <Lock className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-[#1E3063]">{homeConfig.trustPillars.escrow.heading}</h4>
-              <p className="text-xs text-slate-500 mt-0.5">{homeConfig.trustPillars.escrow.subtext}</p>
-            </div>
-          </div>
-          <div className="flex gap-3 items-start">
-            <div className={`w-10 h-10 rounded-xl bg-amber-50 ${accent.text600} flex items-center justify-center shrink-0`}>
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-[#1E3063]">{homeConfig.trustPillars.inspection.heading}</h4>
-              <p className="text-xs text-slate-500 mt-0.5">{homeConfig.trustPillars.inspection.subtext}</p>
-            </div>
-          </div>
-          <div className="flex gap-3 items-start">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#1E3063] flex items-center justify-center shrink-0">
-              <Gavel className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-[#1E3063]">{homeConfig.trustPillars.auctions.heading}</h4>
-              <p className="text-xs text-slate-500 mt-0.5">{homeConfig.trustPillars.auctions.subtext}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      )}
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8" id="market-results">
-        {/* Saved Searches quick-access - a real, working feature (not
-            part of the uploaded reference layout, which has no
-            equivalent element at all) kept visible here rather than
-            dropped entirely just because the new layout doesn't
-            picture it - only reachable via the Save Search modal
-            otherwise. */}
-        {savedPresets.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
-            <span className="font-bold text-slate-500">Saved Searches:</span>
-            {savedPresets.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => applyPreset(p)}
-                className="flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-full px-2.5 py-1 font-semibold"
-              >
-                ⚡ {p.name}
-              </button>
-            ))}
-          </div>
-        )}
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5" id="market-results">
         {/* 4. FILTER SUMMARY CHIPS */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -698,6 +642,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               >
                 {f.label}
                 <X className="w-3 h-3" />
+
               </button>
             ))}
             <button onClick={resetFilters} className="text-[11px] font-bold text-[#C85A32] hover:underline px-1">
