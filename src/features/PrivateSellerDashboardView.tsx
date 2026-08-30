@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile } from '../types';
 import { createCar, VehicleApiError } from '../services/vehicleApi';
+import PhoneVerification from '../components/PhoneVerification';
 import { 
   Car, 
   PlusCircle, 
@@ -1121,38 +1122,49 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
         </div>
 
         <Card className="p-6 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 border-slate-200 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          {/* Fixed: this entire grid previously hardcoded "VERIFIED
+              ✓"/"SYNCED ✓"/"CONFIGURED ✓" on all 4 cards regardless
+              of the real signed-in seller's actual status - including
+              a specific, false phone number and "authenticated via
+              Safaricom OTP" claim, while the real phone-OTP system
+              was (until an earlier pass) completely broken at every
+              layer, and would have shown this exact false "VERIFIED"
+              badge to a seller who had never verified anything.
+              Phone & Email OTP now genuinely reflects the real,
+              signed-in seller's real status (components/
+              PhoneVerification.tsx). The other 3 - National ID/
+              Passport, NTSA TIMS Logbook sync, and Payout Account -
+              have no real backend equivalent (no identity-document
+              verification, no real NTSA integration, no real payout-
+              account setup flow exist anywhere in this project) -
+              labeled honestly as not yet available rather than left
+              falsely claiming completion. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-slate-600">National ID / Passport</span>
-                <Badge variant="success" size="sm">VERIFIED ✓</Badge>
+                <Badge variant="neutral" size="sm">NOT YET AVAILABLE</Badge>
               </div>
-              <p className="text-slate-500 text-[11px]">Identity matched with Kenyan Registrar of Persons.</p>
+              <p className="text-slate-500 text-[11px]">Identity document verification isn't available yet.</p>
             </div>
 
             <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-slate-600">NTSA TIMS Logbook</span>
-                <Badge variant="success" size="sm">SYNCED ✓</Badge>
+                <Badge variant="neutral" size="sm">NOT YET AVAILABLE</Badge>
               </div>
-              <p className="text-slate-500 text-[11px]">Vehicle title ownership verified directly with NTSA.</p>
-            </div>
-
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-600">Phone & Email OTP</span>
-                <Badge variant="success" size="sm">VERIFIED ✓</Badge>
-              </div>
-              <p className="text-slate-500 text-[11px]">+254 7** *** **2 authenticated via Safaricom OTP.</p>
+              <p className="text-slate-500 text-[11px]">Direct NTSA title verification isn't available yet.</p>
             </div>
 
             <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-slate-600">Payout Account</span>
-                <Badge variant="success" size="sm">CONFIGURED ✓</Badge>
+                <Badge variant="neutral" size="sm">NOT YET AVAILABLE</Badge>
               </div>
-              <p className="text-slate-500 text-[11px]">our escrow custodian (A/C ending ****8891).</p>
+              <p className="text-slate-500 text-[11px]">Setting up a payout account isn't available yet.</p>
             </div>
+
+            <PhoneVerification />
           </div>
         </Card>
       </div>
