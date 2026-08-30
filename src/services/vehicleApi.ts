@@ -354,6 +354,10 @@ export interface CreateCarPayload {
   registrationNumber?: string;
   description?: string;
   city?: string;
+  /** Real image files - the real backend requires at least one
+   * (confirmed directly: POST /api/cars rejects with "At least one
+   * image is required." when omitted). */
+  images?: File[];
 }
 
 export interface CreateCarResponse {
@@ -369,11 +373,15 @@ export interface CreateCarResponse {
  * rejection, to the caller. */
 export async function createCar(payload: CreateCarPayload): Promise<CreateCarResponse> {
   const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
+  const { images, ...scalarFields } = payload;
+  Object.entries(scalarFields).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       formData.append(key, String(value));
     }
   });
+  // Real backend field name, confirmed directly: routes/carRoutes.js's
+  // own upload.array("images", 10).
+  (images || []).forEach((file) => formData.append('images', file));
 
   let res: Response;
   try {

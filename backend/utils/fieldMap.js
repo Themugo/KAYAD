@@ -69,6 +69,31 @@ export const FIELD_ALIASES = {
     logo: "avatar",
     averageRating: "rating",
     completedChecks: "inspections_completed",
+    // Fixed: reproduced directly - the default camelToSnake regex
+    // needs a lowercase-to-uppercase transition to detect a word
+    // boundary, but "OTPExpire" has an uppercase-to-uppercase
+    // transition ("P" then "E") right where the real boundary is,
+    // so it silently produced "phone_otpexpire" instead of the real
+    // column name. Every real phone-OTP send/verify failed
+    // unconditionally as a direct result ("Could not find the
+    // 'phone_otpexpire' column of 'users' in the schema cache").
+    phoneOTPExpire: "phone_otp_expire",
+    // Fixed: found while verifying the fix above actually completes
+    // the real send-then-verify cycle end-to-end - phoneOTP itself
+    // writes correctly without an alias (camelToSnake('phoneOTP')
+    // already happens to produce the real column name, "phone_otp"),
+    // but with no explicit alias entry, this table's reverse map
+    // (auto-generated from this same object, see
+    // REVERSE_FIELD_ALIASES below) had nothing for it - reading a row
+    // back fell through to the plain, one-directional snakeToCamel
+    // helper, which only capitalizes the single letter after an
+    // underscore ("phone_otp" -> "phoneOtp", not "phoneOTP"). The
+    // genuinely-saved code was silently readable only under a
+    // different-cased key than every real caller
+    // (phoneVerificationController.js) actually reads. Declaring the
+    // alias explicitly here populates the reverse map correctly, the
+    // same fix as phoneOTPExpire above.
+    phoneOTP: "phone_otp",
   },
   inspector_applications: {
     user: "user_id",

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile } from '../types';
+import { createCar, VehicleApiError } from '../services/vehicleApi';
 import { 
   Car, 
   PlusCircle, 
@@ -147,6 +148,21 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
   const [showNewListingModal, setShowNewListingModal] = useState<boolean>(false);
   const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<SellerOffer | null>(null);
   const [counterPriceInput, setCounterPriceInput] = useState<string>('');
+
+  // Fixed: this modal previously used <Input defaultValue="Toyota">
+  // style uncontrolled fields with hardcoded sample values, and its
+  // own "Publish Private Listing" button just closed the modal and
+  // showed a fake success toast - nothing was ever actually
+  // submitted anywhere, so a real seller's vehicle was never actually
+  // listed. Real, controlled form state below, wired to the real,
+  // already-working POST /api/cars endpoint (confirmed directly,
+  // end-to-end, against the real database as part of this fix).
+  const [newListingForm, setNewListingForm] = useState({
+    make: '', model: '', year: '', price: '', mileage: '', registrationNumber: '',
+  });
+  const [newListingImages, setNewListingImages] = useState<File[]>([]);
+  const [newListingSubmitting, setNewListingSubmitting] = useState(false);
+  const [newListingError, setNewListingError] = useState<string | null>(null);
   const [selectedTaskModal, setSelectedTaskModal] = useState<string | null>(null);
 
   // Mock Private Listings (Clean, user-centric)
@@ -1189,52 +1205,107 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
       {showNewListingModal && (
         <Modal
           isOpen={true}
-          onClose={() => setShowNewListingModal(false)}
+          onClose={() => { setShowNewListingModal(false); setNewListingError(null); }}
           title="List Your Personal Vehicle for Sale"
           maxWidth="xl"
         >
           <div className="p-6 space-y-4 text-xs">
             <p className="text-slate-600 font-medium">
-              List your car as a verified private seller. KAYAD automatically checks your NTSA TIMS logbook status for instant buyer trust.
+              List your car as a verified private seller.
             </p>
+
+            {newListingError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 font-semibold">
+                {newListingError}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="font-bold text-[#1E3063] block">Car Make:</label>
-                <Input placeholder="e.g. Toyota" defaultValue="Toyota" />
+                <Input placeholder="e.g. Toyota" value={newListingForm.make} onChange={(e) => setNewListingForm((f) => ({ ...f, make: e.target.value }))} />
               </div>
               <div className="space-y-1">
                 <label className="font-bold text-[#1E3063] block">Car Model:</label>
-                <Input placeholder="e.g. Prado" defaultValue="Prado TX-L" />
+                <Input placeholder="e.g. Prado" value={newListingForm.model} onChange={(e) => setNewListingForm((f) => ({ ...f, model: e.target.value }))} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="font-bold text-[#1E3063] block">Year of Manufacture:</label>
-                <Input placeholder="e.g. 2021" defaultValue="2021" />
+                <Input placeholder="e.g. 2021" value={newListingForm.year} onChange={(e) => setNewListingForm((f) => ({ ...f, year: e.target.value }))} />
               </div>
               <div className="space-y-1">
                 <label className="font-bold text-[#1E3063] block">Asking Price (Ksh):</label>
-                <Input placeholder="e.g. 7450000" defaultValue="7450000" />
+                <Input placeholder="e.g. 7450000" value={newListingForm.price} onChange={(e) => setNewListingForm((f) => ({ ...f, price: e.target.value }))} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="font-bold text-[#1E3063] block">Mileage (km):</label>
+                <Input placeholder="e.g. 45000" value={newListingForm.mileage} onChange={(e) => setNewListingForm((f) => ({ ...f, mileage: e.target.value }))} />
+              </div>
+              <div className="space-y-1">
+                <label className="font-bold text-[#1E3063] block">NTSA Registration / Logbook Number:</label>
+                <Input placeholder="e.g. KDG 492A" value={newListingForm.registrationNumber} onChange={(e) => setNewListingForm((f) => ({ ...f, registrationNumber: e.target.value }))} />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-[#1E3063] block">NTSA Registration / Logbook Number:</label>
-              <Input placeholder="e.g. KDG ***A / TIMS-8821" defaultValue="KDG 492A" />
+              <label className="font-bold text-[#1E3063] block">Photos (at least 1 required):</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => setNewListingImages(Array.from(e.target.files || []))}
+                className="w-full text-xs"
+              />
+              {newListingImages.length > 0 && (
+                <p className="text-emerald-700 font-semibold">{newListingImages.length} photo(s) selected</p>
+              )}
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-4">
-              <Button variant="secondary" onClick={() => setShowNewListingModal(false)}>Cancel</Button>
+              <Button variant="secondary" onClick={() => { setShowNewListingModal(false); setNewListingError(null); }}>Cancel</Button>
               <Button
                 variant="primary"
-                onClick={() => {
-                  setShowNewListingModal(false);
-                  showToast('Personal vehicle draft created! Pending NTSA TIMS instant verification.');
+                disabled={newListingSubmitting}
+                onClick={async () => {
+                  setNewListingError(null);
+                  if (!newListingForm.make.trim() || !newListingForm.model.trim() || !newListingForm.year || !newListingForm.price) {
+                    setNewListingError('Make, model, year, and price are required.');
+                    return;
+                  }
+                  if (newListingImages.length === 0) {
+                    setNewListingError('At least one photo is required.');
+                    return;
+                  }
+                  setNewListingSubmitting(true);
+                  try {
+                    await createCar({
+                      title: `${newListingForm.year} ${newListingForm.make} ${newListingForm.model}`.trim(),
+                      brand: newListingForm.make,
+                      model: newListingForm.model,
+                      year: Number(newListingForm.year),
+                      price: Number(newListingForm.price),
+                      mileage: newListingForm.mileage ? Number(newListingForm.mileage) : undefined,
+                      registrationNumber: newListingForm.registrationNumber || undefined,
+                      images: newListingImages,
+                    });
+                    setShowNewListingModal(false);
+                    setNewListingForm({ make: '', model: '', year: '', price: '', mileage: '', registrationNumber: '' });
+                    setNewListingImages([]);
+                    showToast('Your vehicle has been listed.');
+                  } catch (err) {
+                    setNewListingError(err instanceof VehicleApiError ? err.message : 'Could not publish your listing. Please try again.');
+                  } finally {
+                    setNewListingSubmitting(false);
+                  }
                 }}
               >
-                Publish Private Listing
+                {newListingSubmitting ? 'Publishing…' : 'Publish Private Listing'}
               </Button>
             </div>
           </div>

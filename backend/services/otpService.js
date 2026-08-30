@@ -34,12 +34,22 @@ const sendSMS = async (to, message) => {
           { headers: { ApiKey: AT_API_KEY, Accept: "application/json" } },
         ),
       );
-      return;
+      return true;
     } catch (err) {
       console.error("SMS error:", err.message);
+      return false;
     }
   }
-  logInfo(`OTP sent via SMS to ${to.slice(0, -4)}****`);
+  // Fixed: this previously logged "OTP sent via SMS to..." even when
+  // AT_API_KEY isn't configured and no real SMS provider was ever
+  // called - a real, misleading log line, since nothing was actually
+  // sent. The real caller (sendOTP below) then returned success to
+  // the frontend regardless, meaning a real user could be told
+  // "Verification code sent" and never receive anything, with no way
+  // to know their account is stuck. Now returns false so the real
+  // caller can surface this honestly instead.
+  logInfo(`SMS not sent - no SMS provider configured (AT_API_KEY missing). Would have sent to ${to.slice(0, -4)}****: ${message}`);
+  return false;
 };
 
 const sendEmail = async (to, subject, text) => {
@@ -48,25 +58,36 @@ const sendEmail = async (to, subject, text) => {
       const { default: sgMail } = await import("@sendgrid/mail");
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
       await retry(() => sgMail.send({ to, from: FROM_EMAIL, subject, text }));
-      return;
+      return true;
     } catch (err) {
       console.error("Email error:", err.message);
+      return false;
     }
   }
-  logInfo(`OTP email to ${to}: ${subject}`);
+  // Fixed: same issue as sendSMS above - was silently "succeeding"
+  // with just a log line when no real email provider is configured.
+  logInfo(`Email not sent - no email provider configured (SENDGRID_API_KEY missing). Would have sent to ${to}: ${subject}`);
+  return false;
 };
 
 export const sendOTP = async (user, channel = "sms") => {
   const otp = Math.floor(1000 + Math.random() * 9000);
   await update("users", user.id, { otpHash: hashOtp(otp), otpExpiry: Date.now() + 600000 });
 
+  // Fixed: previously always returned the plain otp regardless of
+  // whether sendSMS/sendEmail actually reached a real provider - the
+  // real delivery outcome was silently discarded. Now returns it
+  // alongside a real `delivered` flag so a real caller (e.g.
+  // sendPhoneOTP) can tell a real user honestly when their code could
+  // not actually be delivered, instead of always claiming success.
+  let delivered = false;
   if (channel === "sms" && user.phone) {
-    await sendSMS(user.phone, `Your KAYAD verification code is: ${otp}`);
+    delivered = await sendSMS(user.phone, `Your KAYAD verification code is: ${otp}`);
   } else if (user.email) {
-    await sendEmail(user.email, "Verify your KAYAD Account", `Your KAYAD verification code is: ${otp}`);
+    delivered = await sendEmail(user.email, "Verify your KAYAD Account", `Your KAYAD verification code is: ${otp}`);
   }
 
-  return otp;
+  return { otp, delivered };
 };
 
 export const verifyOTP = async (user, otp) => {

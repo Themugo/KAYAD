@@ -15,6 +15,21 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified BOOLEAN DEFAULT false,
   phone TEXT,
   phone_verified BOOLEAN DEFAULT false,
+  -- Fixed: reproduced directly against a real database - neither of
+  -- these columns existed at all (confirmed via \d users), so every
+  -- real phone-OTP or general-purpose OTP request failed
+  -- unconditionally at the point of saving the code ("Could not find
+  -- the 'phone_otp' column of 'users' in the schema cache"),
+  -- regardless of whether a real SMS/email provider was even
+  -- configured. phone_otp/phone_otp_expire back
+  -- controllers/phoneVerificationController.js's own dedicated
+  -- phone-verification OTP; otp_hash/otp_expiry back the separate,
+  -- more general services/otpService.js used elsewhere (email OTP,
+  -- other verification flows).
+  phone_otp TEXT,
+  phone_otp_expire TIMESTAMPTZ,
+  otp_hash TEXT,
+  otp_expiry BIGINT,
   avatar TEXT DEFAULT '',
   business_name TEXT,
   location TEXT,
