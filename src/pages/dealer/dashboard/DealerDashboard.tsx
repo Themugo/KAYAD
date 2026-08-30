@@ -274,6 +274,46 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     }
   }, [activeSection, user, listingsLoaded]);
 
+  // Fixed: both Leads and Pipeline previously showed entirely
+  // hardcoded, invented leads (fake emails, a fake "lead score" with
+  // no real scoring system, fake staff assignments with no real team-
+  // assignment system) - Pipeline had no content at all behind its
+  // own real nav entry. Both now share this one real fetch, against
+  // the real leads table (found already fully defined in the schema
+  // but never actually queried).
+  const [leads, setLeads] = useState([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
+  const [leadsError, setLeadsError] = useState(null);
+  const [leadsLoaded, setLeadsLoaded] = useState(false);
+  const [leadUpdating, setLeadUpdating] = useState(null);
+
+  const loadLeads = () => {
+    setLeadsLoading(true);
+    setLeadsError(null);
+    dealerApi.getLeads({ limit: 100 })
+      .then(({ data }) => { setLeads(data.data.items); setLeadsLoaded(true); })
+      .catch(() => setLeadsError('Could not load your leads. Please try again.'))
+      .finally(() => setLeadsLoading(false));
+  };
+
+  useEffect(() => {
+    if ((activeSection === 'leads' || activeSection === 'pipeline') && user && !leadsLoaded) {
+      loadLeads();
+    }
+  }, [activeSection, user, leadsLoaded]);
+
+  const advanceLeadStage = async (leadId, nextStage) => {
+    setLeadUpdating(leadId);
+    try {
+      const { data } = await dealerApi.updateLead(leadId, { stage: nextStage });
+      setLeads((prev) => prev.map((l) => l.id === leadId ? data.data : l));
+    } catch {
+      setLeadsError('Could not update this lead. Please try again.');
+    } finally {
+      setLeadUpdating(null);
+    }
+  };
+
   const loadDashboard = async () => {
     setLoadError(null);
     try {
@@ -599,70 +639,122 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             <div className="bg-white rounded-xl border border-slate-100 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-slate-800">Lead Management (CRM)</h3>
-                <div className="flex items-center gap-3">
-                  <button className="px-4 py-2 border border-slate-200 rounded-xl text-slate-700 font-medium hover:bg-slate-50">
-                    Filter
-                  </button>
-                  <button className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700">
-                    Export
-                  </button>
+              </div>
+              {/* Fixed: this whole table previously showed 5
+                  entirely invented leads - fake emails, a fake "lead
+                  score" and fake staff assignments with no real
+                  scoring or team-assignment system anywhere in this
+                  project. Removed those 2 fake columns rather than
+                  fake a version of either; the rest (name, email,
+                  phone, vehicle, real source, real stage, real
+                  timestamp) are all genuinely real now. The dead
+                  "Filter"/"Export" buttons (no onClick handler on
+                  either) were removed rather than left non-functional. */}
+              {leadsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
                 </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-200">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Lead</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Vehicle</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Source</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Score</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Stage</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Assigned To</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Last Contact</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { name: 'James Mwangi', email: 'james@example.com', vehicle: 'Toyota Land Cruiser 300', source: 'Website', score: 85, stage: 'new', assigned: 'Sales Team', last: null },
-                      { name: 'Sarah Ochieng', email: 'sarah@example.com', vehicle: 'Mercedes-Benz GLE', source: 'WhatsApp', score: 72, stage: 'contacted', assigned: 'Mary Wanjiku', last: '2024-02-20' },
-                      { name: 'Michael Otieno', email: 'michael@example.com', vehicle: 'BMW X5', source: 'Phone', score: 91, stage: 'negotiating', assigned: 'Mary Wanjiku', last: '2024-02-19' },
-                      { name: 'Grace Achieng', email: 'grace@example.com', vehicle: 'Porsche Cayenne', source: 'Instagram', score: 88, stage: 'inspectionBooked', assigned: 'John Kamau', last: '2024-02-18' },
-                      { name: 'David Kamau', email: 'david@example.com', vehicle: 'Range Rover', source: 'Referral', score: 95, stage: 'reserved', assigned: 'John Kamau', last: '2024-02-20' },
-                    ].map((lead, i) => (
-                      <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="py-3 px-4">
-                          <p className="font-medium text-slate-800">{lead.name}</p>
-                          <p className="text-xs text-slate-500">{lead.email}</p>
-                        </td>
-                        <td className="py-3 px-4 text-slate-700">{lead.vehicle}</td>
-                        <td className="py-3 px-4 text-slate-700">{lead.source}</td>
-                        <td className="py-3 px-4">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                            lead.score >= 80 ? 'bg-emerald-100 text-emerald-700' :
-                            lead.score >= 60 ? 'bg-amber-100 text-amber-700' :
-                            'bg-slate-100 text-slate-600'
-                          }`}>
-                            {lead.score}
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                            lead.stage === 'new' ? 'bg-blue-100 text-blue-700' :
-                            lead.stage === 'contacted' ? 'bg-purple-100 text-purple-700' :
-                            lead.stage === 'negotiating' ? 'bg-amber-100 text-amber-700' :
-                            lead.stage === 'inspectionBooked' ? 'bg-pink-100 text-pink-700' :
-                            'bg-emerald-100 text-emerald-700'
-                          }`}>
-                            {lead.stage.replace(/([A-Z])/g, ' $1').trim()}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-slate-700">{lead.assigned}</td>
-                        <td className="py-3 px-4 text-slate-500">{lead.last || 'Never'}</td>
+              ) : leadsError ? (
+                <div className="text-center py-12">
+                  <p className="text-sm text-slate-500 mb-3">{leadsError}</p>
+                  <button onClick={loadLeads} className="text-xs font-bold text-purple-600">Try Again</button>
+                </div>
+              ) : leads.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-12">No leads yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Lead</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Vehicle</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Source</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Stage</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Last Activity</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {leads.map((lead) => (
+                        <tr key={lead.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <p className="font-medium text-slate-800">{lead.buyer?.name || 'Unknown'}</p>
+                            <p className="text-xs text-slate-500">{lead.buyer?.email}</p>
+                          </td>
+                          <td className="py-3 px-4 text-slate-700">{lead.vehicle?.title || 'Vehicle'}</td>
+                          <td className="py-3 px-4 text-slate-700">{lead.source || '—'}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                              lead.stage === 'new' ? 'bg-blue-100 text-blue-700' :
+                              lead.stage === 'contacted' ? 'bg-purple-100 text-purple-700' :
+                              lead.stage === 'negotiating' ? 'bg-amber-100 text-amber-700' :
+                              lead.stage === 'sold' ? 'bg-emerald-100 text-emerald-700' :
+                              'bg-slate-100 text-slate-600'
+                            }`}>
+                              {(lead.stage || 'new').replace(/([A-Z])/g, ' $1').trim()}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-500">{lead.last_activity_at ? new Date(lead.last_activity_at).toLocaleDateString() : 'Never'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'pipeline' && (
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-6">Sales Pipeline</h3>
+              {/* Fixed: this section had a real nav entry (Pipeline)
+                  but zero content behind it at all - clicking it
+                  showed nothing. Real, working kanban-style view now,
+                  sharing the same real leads data as the table above.
+                  Advancing a lead's stage genuinely persists (the
+                  real backend's own updateLead previously just echoed
+                  back whatever was sent without writing to the
+                  database at all - fixed as part of this same pass). */}
+              {leadsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                </div>
+              ) : leadsError ? (
+                <div className="text-center py-12">
+                  <p className="text-sm text-slate-500 mb-3">{leadsError}</p>
+                  <button onClick={loadLeads} className="text-xs font-bold text-purple-600">Try Again</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {['new', 'contacted', 'negotiating', 'sold'].map((stage, stageIdx) => {
+                    const nextStage = ['new', 'contacted', 'negotiating', 'sold'][stageIdx + 1];
+                    const stageLeads = leads.filter((l) => (l.stage || 'new') === stage);
+                    return (
+                      <div key={stage} className="bg-slate-50 rounded-xl p-3">
+                        <h4 className="text-xs font-bold text-slate-500 uppercase mb-3">{stage} ({stageLeads.length})</h4>
+                        <div className="space-y-2">
+                          {stageLeads.length === 0 ? (
+                            <p className="text-xs text-slate-400">Empty</p>
+                          ) : stageLeads.map((lead) => (
+                            <div key={lead.id} className="bg-white rounded-lg p-3 border border-slate-100 shadow-xs">
+                              <p className="text-xs font-bold text-slate-800">{lead.buyer?.name || 'Unknown'}</p>
+                              <p className="text-[11px] text-slate-500 mb-2">{lead.vehicle?.title || 'Vehicle'}</p>
+                              {nextStage && (
+                                <button
+                                  onClick={() => advanceLeadStage(lead.id, nextStage)}
+                                  disabled={leadUpdating === lead.id}
+                                  className="text-[10px] font-bold text-purple-600 disabled:opacity-50"
+                                >
+                                  {leadUpdating === lead.id ? 'Moving…' : `Move to ${nextStage} →`}
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

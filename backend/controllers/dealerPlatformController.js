@@ -229,42 +229,77 @@ export async function bulkUpdateListings(req, res) {
 // LEAD MANAGEMENT (CRM)
 // ============================================================
 
+// Fixed: this previously returned 7 fully hardcoded, invented leads
+// (with fake email addresses, a fake "lead score", and fake staff
+// assignments - no real lead-scoring or staff-assignment system
+// exists anywhere in this project) - identical for every dealer who
+// ever called it. Rebuilt around the real, already-fully-defined
+// `leads` table (found never actually queried by this controller at
+// all despite existing in the schema).
 export async function getLeads(req, res) {
-  const { stage, page = 1, limit = 20 } = req.query;
+  try {
+    const { stage, page = 1, limit = 20 } = req.query;
+    const dealerId = req.user.id;
+    const filter = { dealer: dealerId };
+    if (stage) filter.stage = stage;
 
-  const leads = {
-    items: [
-      { id: '1', name: 'James Mwangi', email: 'james@example.com', phone: '+254 712 345 678', vehicle: 'Toyota Land Cruiser 300', stage: 'new', source: 'Website', score: 85, assignedTo: 'Sales Team', createdAt: '2024-02-20', lastContact: null },
-      { id: '2', name: 'Sarah Ochieng', email: 'sarah@example.com', phone: '+254 723 456 789', vehicle: 'Mercedes-Benz GLE', stage: 'contacted', source: 'WhatsApp', score: 72, assignedTo: 'Mary Wanjiku', createdAt: '2024-02-19', lastContact: '2024-02-20' },
-      { id: '3', name: 'Michael Otieno', email: 'michael@example.com', phone: '+254 734 567 890', vehicle: 'BMW X5', stage: 'negotiating', source: 'Phone', score: 91, assignedTo: 'Mary Wanjiku', createdAt: '2024-02-15', lastContact: '2024-02-19' },
-      { id: '4', name: 'Grace Achieng', email: 'grace@example.com', phone: '+254 745 678 901', vehicle: 'Porsche Cayenne', stage: 'inspectionBooked', source: 'Instagram', score: 88, assignedTo: 'John Kamau', createdAt: '2024-02-10', lastContact: '2024-02-18' },
-      { id: '5', name: 'David Kamau', email: 'david@example.com', phone: '+254 756 789 012', vehicle: 'Range Rover', stage: 'reserved', source: 'Referral', score: 95, assignedTo: 'John Kamau', createdAt: '2024-02-05', lastContact: '2024-02-20' },
-      { id: '6', name: 'Emily Njeri', email: 'emily@example.com', phone: '+254 767 890 123', vehicle: 'Audi Q7', stage: 'sold', source: 'KAYAD', score: 100, assignedTo: 'Sales Team', createdAt: '2024-01-20', lastContact: '2024-02-15', soldAt: '2024-02-15', price: 1950000 },
-      { id: '7', name: 'Robert Maina', email: 'robert@example.com', phone: '+254 778 901 234', vehicle: 'Toyota Corolla', stage: 'lost', source: 'Website', score: 45, assignedTo: 'Sales Team', createdAt: '2024-01-10', lastContact: '2024-01-25', lostReason: 'Budget constraints' },
-    ],
-    pagination: { page: parseInt(page), limit: parseInt(limit), total: 156, pages: 8 },
-    stats: {
-      total: 156,
-      new: 12,
-      contacted: 34,
-      negotiating: 28,
-      inspectionBooked: 15,
-      reserved: 8,
-      sold: 45,
-      lost: 14,
-    },
-    conversionRate: 29,
-    avgClosingTime: 18,
-  };
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const [leads, allLeads] = await Promise.all([
+      Lead.find(filter)
+        .populate("buyer", "name email phone")
+        .populate("vehicle", "title")
+        .sort({ createdAt: -1 })
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum),
+      Lead.find({ dealer: dealerId }),
+    ]);
 
-  res.json({ success: true, data: leads });
+    const stats = { total: allLeads.length, new: 0, contacted: 0, negotiating: 0, inspectionBooked: 0, reserved: 0, sold: 0, lost: 0 };
+    for (const lead of allLeads) {
+      if (Object.prototype.hasOwnProperty.call(stats, lead.stage)) stats[lead.stage]++;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        items: leads,
+        pagination: { page: pageNum, limit: limitNum, total: allLeads.length, pages: Math.ceil(allLeads.length / limitNum) },
+        stats,
+      },
+    });
+  } catch (err) {
+    logError("Error fetching leads:", err);
+    res.status(500).json({ success: false, message: "Failed to load leads" });
+  }
 }
 
 export async function updateLead(req, res) {
-  const { leadId } = req.params;
-  const updates = req.body;
-  
-  res.json({ success: true, data: { id: leadId, ...updates, updatedAt: new Date().toISOString() } });
+  try {
+    const { leadId } = req.params;
+    const existing = await Lead.findById(leadId);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Lead not found" });
+    }
+    // Fixed: this previously just echoed back req.body without ever
+    // writing to the database at all - a dealer changing a lead's
+    // stage (e.g. dragging a card in a real pipeline view) would see
+    // a confident success response while nothing was actually saved.
+    if (existing.dealer !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Not authorized to update this lead" });
+    }
+    const allowedFields = ["stage", "isHot", "archived", "estimatedValue"];
+    const updates = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+    updates.lastActivityAt = new Date().toISOString();
+    const updated = await Lead.findByIdAndUpdate(leadId, updates, { new: true });
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    logError("Error updating lead:", err);
+    res.status(500).json({ success: false, message: "Failed to update lead" });
+  }
 }
 
 export async function addLeadNote(req, res) {
