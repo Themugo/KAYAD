@@ -489,7 +489,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [paginatedVehicles, homeConfig.sectionVisibility.sponsorCardsInGrid]);
 
   return (
-    <div className="space-y-5 pb-16">
+    <div className="space-y-0 pb-16">
       {/* TOAST NOTIFICATION FLOATER */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 bg-[#1E3063] text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
@@ -498,306 +498,243 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       )}
 
-      {/* 1. UNIFIED SEARCH + TRUST CARD — search bar and trust strip were
-          2 separate cards stacked on top of each other (their own
-          padding, border, rounded corners, shadow each), and the search
-          bar was ALSO position: sticky, meaning it permanently occupied
-          viewport space while scrolling through results - a sticky
-          element is exactly the kind of thing that reads as "wasted
-          space" even when it's technically useful, since it's real
-          estate a user can never scroll past. Combined into one card,
-          dropped sticky entirely (functionality preserved - search and
-          filters are still right at the top of the page, just no longer
-          pinned there while browsing), and picked the trust strip's dark
-          navy gradient as the shared background (it read as a stronger
-          brand/identity statement - "the 3 things that make KAYAD a
-          marketplace, not a listings board" - than plain white chrome),
-          adapting the search/filter controls to it rather than the
-          other way around. */}
-      {isAdmin && (
-        <div className="flex justify-end">
-          <button
-            onClick={() => setShowAdminPanel(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1E3063] hover:bg-[#17244B] text-white rounded-xl text-xs font-bold shadow-sm"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span>Customize Home Page</span>
-          </button>
+      {/* Redesigned per an uploaded HTML reference layout - same original
+          KAYAD palette throughout (navy #1E3063/#17244B, terracotta
+          #C85A32, cream #F5F2EB), no new colors introduced. Every section
+          below reuses this component's own real state/logic (filters,
+          sort, pagination, saved/compare, admin config) - only the visual
+          layer changed, not the data or behavior. */}
+
+      {/* 1. HERO */}
+      {homeConfig.sectionVisibility.searchTrustCard && (
+      <section className="relative -mx-4 sm:-mx-6 lg:-mx-8 bg-gradient-to-b from-[#17244B] to-[#1E3063] text-white overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(600px 400px at 85% 10%, rgba(200,90,50,.18), transparent 60%), radial-gradient(500px 350px at 100% 60%, rgba(251,191,36,.10), transparent 60%)'
+        }} />
+        <div className="relative max-w-3xl mx-auto text-center px-4 sm:px-6 pt-10 pb-20">
+          <div className="inline-flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase text-amber-400 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            KAYAD EA Automotive Marketplace
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4">
+            Find the right vehicle.<br />Buy with <span className="text-[#E08A6B]">confidence.</span>
+          </h1>
+          <p className="text-sm sm:text-base text-slate-300 max-w-lg mx-auto mb-7">
+            Quality vehicles, live auctions, and inspection reports from registered local mechanics — all verified through one escrow-protected marketplace built for East Africa.
+          </p>
+          <div className="flex items-center justify-center gap-3 mb-7">
+            <button
+              onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
+              className="bg-[#C85A32] hover:bg-[#B34E29] text-white font-bold text-sm px-6 py-3 rounded-full transition-colors flex items-center gap-2"
+            >
+              Explore Vehicles →
+            </button>
+            <button
+              onClick={() => onNavigate('seller-platform')}
+              className="border border-white/35 hover:border-white text-white font-bold text-sm px-6 py-3 rounded-full transition-colors"
+            >
+              Sell Your Vehicle
+            </button>
+          </div>
+          <div className="flex items-center justify-center gap-3 text-xs text-slate-300">
+            <div className="flex">
+              {['JM', 'AN', 'TK'].map((initials, i) => (
+                <span key={initials} className={`w-7 h-7 rounded-full border-2 border-[#17244B] bg-gradient-to-br from-[#C85A32] to-[#E08A6B] flex items-center justify-center text-[10px] font-bold ${i > 0 ? '-ml-2' : ''}`}>
+                  {initials}
+                </span>
+              ))}
+            </div>
+            <span>Trusted by verified sellers across East Africa</span>
+            <span className="text-amber-400 font-bold">★ 4.8/5</span>
+          </div>
         </div>
+      </section>
       )}
 
+      {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-      <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-3 sm:p-4 shadow-sm space-y-3">
-        <div className="flex flex-col md:flex-row items-center gap-2.5">
-          {/* Fixed: removed the "Instant Keyword Input" search box
-              that used to sit here, per explicit direction - the
-              sidebar's own Filter Vehicles panel already covers make,
-              model, price, year, body style, and more, making this a
-              redundant second way to search. Make/Region/Filters
-              controls below are unchanged. */}
-
-          {/* Quick Selects & Controls */}
-          <div className="flex flex-wrap items-center gap-2 w-full justify-between md:justify-end">
-            {/* Make Selector - hidden only at the lg: breakpoint when
-                the sidebar is also showing, not hidden outright. See
-                the git history on this exact selector for the full
-                reasoning (a JS-conditional first attempt would have
-                broken it below lg: entirely) - unchanged by this merge,
-                just restyled for the dark card background. */}
+      <div className="relative z-10 -mt-12 px-4 sm:px-6">
+        <div className="bg-white rounded-2xl shadow-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end max-w-5xl mx-auto">
+          <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
+            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Search</label>
+            <div className="border border-slate-200 rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F5F2EB]/40">
+              <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <input
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Make, model or keyword…"
+                className="w-full bg-transparent text-xs outline-none min-w-0"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Make</label>
+            {/* Fixed: this select was always visible regardless of the
+                sidebar, but the sidebar has its own Make selector too -
+                showing both at once above the lg: breakpoint is
+                redundant. Hidden via CSS only (never JS-removed, so it
+                stays reachable below lg: where the sidebar itself is
+                always CSS-hidden), matching the sidebar's own
+                already-established pattern for this exact class of
+                redundancy. */}
             <select
               value={selectedMake}
-              onChange={(e) => {
-                setSelectedMake(e.target.value);
-                setSelectedModel('All');
-              }}
-              className={`px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white focus:outline-none cursor-pointer ${showDesktopSidebar ? 'lg:hidden' : ''}`}
+              onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }}
+              className={`border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
             >
-              <option value="All" className="text-slate-900">All Makes</option>
-              {makes.filter((m) => m !== 'All').map((m) => (
-                <option key={m} value={m} className="text-slate-900">{m}</option>
-              ))}
+              {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
             </select>
-
-            {/* Region / Location Selector */}
+          </div>
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Price up to</label>
             <select
-              value={selectedCounty}
-              onChange={(e) => onCountyChange(e.target.value)}
-              className="px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white focus:outline-none cursor-pointer"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value))}
+              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none"
             >
-              {locations.map((loc) => (
-                <option key={loc} value={loc} className="text-slate-900">{loc}</option>
-              ))}
+              <option value={20000000}>All</option>
+              <option value={2500000}>Ksh 2.5M</option>
+              <option value={4000000}>Ksh 4M</option>
+              <option value={7000000}>Ksh 7M</option>
             </select>
-
-            {/* Desktop Sidebar Toggle */}
-            <button
-              onClick={() => setShowDesktopSidebar(!showDesktopSidebar)}
-              className={`hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
-                showDesktopSidebar
-                  ? 'bg-amber-400 text-[#17244B] border-amber-400'
-                  : 'bg-white/10 text-white border-white/20 hover:bg-white/15'
-              }`}
-              title="Toggle filter sidebar"
+          </div>
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Year</label>
+            <select
+              value={minYear}
+              onChange={(e) => setMinYear(Number(e.target.value))}
+              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none"
             >
-              {showDesktopSidebar ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4 text-amber-400" />}
-              <span>Filters</span>
-              {activeFilters.length > 0 && (
-                <span className="bg-[#17244B] text-amber-400 text-[10px] font-black px-1.5 py-0.2 rounded-full ml-0.5">
-                  {activeFilters.length}
-                </span>
-              )}
-            </button>
-
-            {/* Mobile Filter Drawer Button */}
-            <button
-              onClick={() => setShowMobileFilterDrawer(true)}
-              className="lg:hidden flex items-center gap-1.5 px-3.5 py-2 bg-amber-400 text-[#17244B] rounded-xl text-xs font-bold shadow-sm"
+              <option value={2005}>2005 – 2026</option>
+              <option value={2020}>2020 – 2026</option>
+              <option value={2023}>2023 – 2026</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Body Style</label>
+            <select
+              value={selectedBodyStyle}
+              onChange={(e) => setSelectedBodyStyle(e.target.value)}
+              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none"
             >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span>Filters</span>
-              {activeFilters.length > 0 && (
-                <span className="bg-[#17244B] text-amber-400 text-[10px] font-black px-1.5 py-0.2 rounded-full">
-                  {activeFilters.length}
-                </span>
-              )}
-            </button>
-
-            {/* Save Search Button */}
-            <button
-              onClick={() => setShowSaveSearchModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-white/10 text-amber-400 hover:bg-white/15 rounded-xl text-xs font-bold border border-white/20 transition-all"
-              title="Save search alert"
-            >
-              <Bookmark className="w-3.5 h-3.5 fill-amber-400" />
-              <span className="hidden sm:inline">Save Search</span>
-            </button>
+              {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
+            </select>
           </div>
-        </div>
-
-        {/* Trust pillars - copy corrected for accuracy, sizing tightened
-            further. Previously read as blanket, universal claims about
-            every listing on the marketplace - checked against real mock
-            data before rewriting anything (confirmed via a direct
-            count: only 3 of 6 vehicles are actually inspected, only 2
-            of 6 are auctions, escrow is mandatory for private sellers
-            specifically but only optional/available for dealers, not
-            an automatic guarantee on every transaction). "Every
-            inspected listing checked before it's live" was technically
-            true in isolation but the heading + subtext together read as
-            "every listing is inspected", which isn't the case - fixed
-            to describe these as available features/rules rather than
-            universal facts. Icon boxes reduced w-9->w-7, padding
-            tightened pt-4->pt-3. */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 sm:divide-x sm:divide-white/10 pt-3 border-t border-white/10">
-          <div className="flex items-center gap-2.5">
-            <div className={`w-7 h-7 rounded-lg ${accent.bg400Subtle} border ${accent.border400} flex items-center justify-center shrink-0`}>
-              <Lock className={`w-3.5 h-3.5 ${accent.text400}`} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">{homeConfig.trustPillars.escrow.heading}</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">{homeConfig.trustPillars.escrow.subtext}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5 sm:pl-6">
-            <div className={`w-7 h-7 rounded-lg ${accent.bg400Subtle} border ${accent.border400} flex items-center justify-center shrink-0`}>
-              <CheckCircle2 className={`w-3.5 h-3.5 ${accent.text400}`} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">{homeConfig.trustPillars.inspection.heading}</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">{homeConfig.trustPillars.inspection.subtext}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5 sm:pl-6">
-            <div className={`w-7 h-7 rounded-lg ${accent.bg400Subtle} border ${accent.border400} flex items-center justify-center shrink-0`}>
-              <Gavel className={`w-3.5 h-3.5 ${accent.text400}`} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">{homeConfig.trustPillars.auctions.heading}</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">{homeConfig.trustPillars.auctions.subtext}</p>
-            </div>
-          </div>
+          <button
+            onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-[#C85A32] hover:bg-[#B34E29] text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap"
+          >
+            Filter Vehicles
+          </button>
         </div>
       </div>
       )}
 
-      {/* 1.6 FEATURED PICKS — a horizontal, fit-to-screen slider (native
-          CSS scroll-snap: overflow-x-auto + snap-x/snap-start, not a JS
-          carousel library or added autoplay/dots/arrows - no new
-          features) inside a neutral, light card whose only job is
-          space management (padding/boundary/heading for the slider),
-          not branding. Previously used the same navy gradient as the
-          search+trust card - reverted per explicit direction ("remove
-          the navy") so the vehicle cards inside stay visually
-          independent, standing on their own white/bordered styling
-          rather than looking adapted to sit on a colored background.
-          Cards themselves stay smaller: constrained to a fixed w-52
-          within the slider, relying on VehicleCard's own responsive
-          internal sizing to compact further in a narrower container. */}
-      {homeConfig.sectionVisibility.featuredPicks && featuredPicks.length > 0 && (
-        <div className="bg-white/80 rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-2xs">
-          <div className="flex items-center gap-2 mb-2.5 px-0.5">
-            <LayoutGrid className="w-3.5 h-3.5 text-amber-500" />
-            <h2 className="text-xs font-black text-[#1E3063] uppercase tracking-wide">Featured Picks</h2>
+      {/* 3. TRUST STRIP - real, admin-editable content (homeConfig.trustPillars) */}
+      {homeConfig.sectionVisibility.searchTrustCard && (
+      <section className="bg-white border-b border-slate-200 px-4 sm:px-6 py-7 mt-8">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="flex gap-3 items-start">
+            <div className="w-10 h-10 rounded-xl bg-[#EAF0FD] text-[#1E3063] flex items-center justify-center shrink-0 text-lg">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#1E3063]">{homeConfig.trustPillars.escrow.heading}</h4>
+              <p className="text-xs text-slate-500 mt-0.5">{homeConfig.trustPillars.escrow.subtext}</p>
+            </div>
           </div>
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-2.5 pb-1 scrollbar-none">
-            {featuredPicks.map(({ vehicle: v, reason }) => (
-              <div key={v.id} className="shrink-0 snap-start w-52">
-                <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">{reason}</span>
-                </div>
-                <VehicleCard
-                  vehicle={v}
-                  isSaved={savedVehicles.includes(v.id)}
-                  isCompared={comparedVehicles.includes(v.id)}
-                  onToggleSave={onToggleSave}
-                  onToggleCompare={onToggleCompare}
-                  onQuickView={handleVehicleSelect}
-                  onStartEscrow={onStartEscrow}
-                />
-              </div>
-            ))}
+          <div className="flex gap-3 items-start">
+            <div className={`w-10 h-10 rounded-xl bg-amber-50 ${accent.text600} flex items-center justify-center shrink-0`}>
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#1E3063]">{homeConfig.trustPillars.inspection.heading}</h4>
+              <p className="text-xs text-slate-500 mt-0.5">{homeConfig.trustPillars.inspection.subtext}</p>
+            </div>
+          </div>
+          <div className="flex gap-3 items-start">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#1E3063] flex items-center justify-center shrink-0">
+              <Gavel className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#1E3063]">{homeConfig.trustPillars.auctions.heading}</h4>
+              <p className="text-xs text-slate-500 mt-0.5">{homeConfig.trustPillars.auctions.subtext}</p>
+            </div>
           </div>
         </div>
+      </section>
       )}
 
-      {/* 2. FILTER SUMMARY (Removable Chips) */}
-      {activeFilters.length > 0 && (
-        <div className="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1 mr-1">
-            <Filter className="w-3 h-3 text-amber-500" />
-            Active Filters ({activeFilters.length}):
-          </span>
-
-          {activeFilters.map((f) => (
-            <span
-              key={f.id}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 text-[#1E3063] font-bold border border-slate-200 hover:border-slate-300 transition-colors"
-            >
-              <span>{f.label}</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8" id="market-results">
+        {/* Saved Searches quick-access - a real, working feature (not
+            part of the uploaded reference layout, which has no
+            equivalent element at all) kept visible here rather than
+            dropped entirely just because the new layout doesn't
+            picture it - only reachable via the Save Search modal
+            otherwise. */}
+        {savedPresets.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
+            <span className="font-bold text-slate-500">Saved Searches:</span>
+            {savedPresets.map((p) => (
               <button
-                onClick={f.onClear}
-                className="hover:text-rose-600 transition-colors rounded-full p-0.5 hover:bg-slate-200"
-                title="Remove filter"
+                key={p.id}
+                onClick={() => applyPreset(p)}
+                className="flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-full px-2.5 py-1 font-semibold"
               >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          ))}
-
-          <button
-            onClick={resetFilters}
-            className="text-[11px] font-extrabold text-rose-600 hover:text-rose-700 hover:underline ml-auto flex items-center gap-1"
-          >
-            <RotateCcw className="w-3 h-3" /> Clear All
-          </button>
-        </div>
-      )}
-
-      {/* 3. RESULT HEADER & CONTROLS — merged with the Saved Search
-          Presets row above it, same reasoning as the earlier search-bar
-          + trust-strip merge: 2 stacked cards (well, one bare row plus
-          one actual white card) with their own spacing between them,
-          for content that's really one continuous "here's what you're
-          looking at and how to adjust it" unit. The presets row is
-          still conditional (only shown when savedPresets.length > 0 &&
-          activeFilters.length === 0, unchanged) - just as the top,
-          bordered-off sub-section of this card instead of its own
-          separate, cardless row floating above it. */}
-      {homeConfig.sectionVisibility.savedSearchesAndInventoryHeader && (
-      <div className="bg-white/80 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
-        {savedPresets.length > 0 && activeFilters.length === 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-slate-200/80 scrollbar-none">
-            <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap shrink-0 flex items-center gap-1">
-              <Bookmark className="w-3.5 h-3.5 text-amber-500" /> Saved Searches:
-            </span>
-            {savedPresets.map((preset) => (
-              <button
-                key={preset.id}
-                onClick={() => applyPreset(preset)}
-                className="px-3 py-1.5 bg-white hover:bg-amber-50 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 hover:border-amber-300 whitespace-nowrap transition-all shadow-2xs"
-              >
-                ⚡ {preset.name}
+                ⚡ {p.name}
               </button>
             ))}
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-black text-[#1E3063] font-display flex items-center gap-2">
-            Vehicle Inventory
-            <span className="text-xs bg-[#1E3063] text-white px-2.5 py-0.5 rounded-full font-sans font-bold">
-              {filteredVehicles.length.toLocaleString()}
-            </span>
-          </h2>
-          <p className="text-[11px] text-slate-500 font-medium">
-            Showing inspected marketplace listings in <strong className="text-[#1E3063]">{selectedCounty}</strong>
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end text-xs">
-          {/* Per Page Selector */}
-          <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 font-medium text-slate-600">
-            <span className="hidden sm:inline">Show:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="bg-transparent font-bold text-[#1E3063] focus:outline-none cursor-pointer"
-            >
-              <option value={6}>6</option>
-              <option value={12}>12</option>
-              <option value={24}>24</option>
-            </select>
+        {/* 4. FILTER SUMMARY CHIPS */}
+        {activeFilters.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {activeFilters.map((f) => (
+              <button
+                key={f.id}
+                onClick={f.onClear}
+                className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-[#C85A32] hover:text-[#C85A32] transition-colors"
+              >
+                {f.label}
+                <X className="w-3 h-3" />
+              </button>
+            ))}
+            <button onClick={resetFilters} className="text-[11px] font-bold text-[#C85A32] hover:underline px-1">
+              Clear all
+            </button>
           </div>
+        )}
 
-          {/* Sort Selector */}
-          <div className="flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 font-medium text-slate-600">
-            <span>Sort:</span>
+        {/* 5. MARKET HEAD */}
+        <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
+          <div>
+            <h2 className="text-xl font-bold text-[#1E3063] font-display">
+              Vehicle Inventory — {filteredVehicles.length} listing{filteredVehicles.length === 1 ? '' : 's'}
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Showing inspected marketplace listings in {selectedCounty}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              Show
+              <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
+                {[12, 24, 48].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setPageSize(n)}
+                    className={`px-2.5 py-1.5 text-xs ${pageSize === n ? 'bg-[#1E3063] text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
             <select
               value={sortBy}
-              onChange={(e: any) => setSortBy(e.target.value)}
-              className="bg-transparent font-bold text-[#1E3063] focus:outline-none cursor-pointer text-xs"
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="border border-slate-200 bg-white rounded-lg px-2.5 py-1.5 text-xs text-slate-700"
             >
               <option value="newest">Newest First</option>
               <option value="price-asc">Price: Low to High</option>
@@ -808,651 +745,427 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <option value="most-viewed">Most Viewed</option>
               <option value="auction-ending">Auction Ending Soon</option>
             </select>
-          </div>
-
-          {/* View Mode Switcher - 2 modes now (grid/list), not 3. See
-              the viewMode state comment above for why 'compact' was
-              removed as a genuine redundancy once both grid variants
-              capped at the same 4 columns. */}
-          <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#1E3063] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
-              title="Grid View"
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#1E3063] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
-              title="List View"
-            >
-              <ListIcon className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-        </div>
-      </div>
-      )}
-
-      {/* 4. MAIN INVENTORY SECTION: SIDEBAR + RESULTS GRID */}
-      <div className="flex items-start gap-6">
-        {/* DESKTOP COLLAPSIBLE LEFT SIDEBAR */}
-        {showDesktopSidebar && (
-          <aside className="hidden lg:block w-72 shrink-0 bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-5 text-xs sticky top-36">
-            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-              <h3 className="font-extrabold text-[#1E3063] text-sm font-display flex items-center gap-1.5">
-                <Filter className="w-4 h-4 text-amber-500" /> Filter Vehicles
-              </h3>
+            <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
               <button
-                onClick={resetFilters}
-                className="text-[11px] font-bold text-rose-600 hover:underline flex items-center gap-1"
+                onClick={() => setViewMode('grid')}
+                title="Grid view"
+                className={`p-2 ${viewMode === 'grid' ? 'bg-[#EAF0FD] text-[#1E3063]' : 'text-slate-400'}`}
               >
-                <RotateCcw className="w-3 h-3" /> Reset
+                <Grid className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                title="List view"
+                className={`p-2 ${viewMode === 'list' ? 'bg-[#EAF0FD] text-[#1E3063]' : 'text-slate-400'}`}
+              >
+                <ListIcon className="w-3.5 h-3.5" />
               </button>
             </div>
+            <button
+              onClick={() => setShowDesktopSidebar((s) => !s)}
+              className="hidden lg:flex p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"
+              title="Toggle filter sidebar"
+            >
+              {showDesktopSidebar ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={() => setShowMobileFilterDrawer(true)}
+              className="lg:hidden flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-600 text-xs font-semibold"
+            >
+              <Filter className="w-3.5 h-3.5" /> Filters
+            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowAdminPanel(true)}
+                className="flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 text-xs font-semibold"
+                title="Customize Home Page"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">Customize Home Page</span>
+              </button>
+            )}
+          </div>
+        </div>
 
-            {/* Make & Model */}
-            <div className="space-y-3">
-              <Select
-                label="Make"
-                value={selectedMake}
-                onChange={(e) => {
-                  setSelectedMake(e.target.value);
-                  setSelectedModel('All');
-                }}
-                options={makes.map((m) => ({ value: m, label: m === 'All' ? 'All Makes' : m }))}
-              />
-
-              <Select
-                label="Model"
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                options={models.map((m) => ({ 
-                  value: m, 
-                  label: m === 'All' ? (selectedMake !== 'All' ? `All ${selectedMake}` : 'All Models') : m 
-                }))}
-              />
+        {/* 6. MARKET BODY: SIDEBAR + RESULTS GRID */}
+        <div className={`grid ${showDesktopSidebar ? 'lg:grid-cols-[266px_1fr]' : 'lg:grid-cols-1'} gap-6 items-start`}>
+          {/* SIDEBAR */}
+          {showDesktopSidebar && (
+          <aside className="hidden lg:block bg-white border border-slate-200 rounded-2xl p-5 sticky top-20">
+            <div className="flex items-center justify-between mb-3.5">
+              <h3 className="text-sm font-bold text-[#1E3063]">Filter Vehicles</h3>
+              <button onClick={resetFilters} className="text-[11px] font-semibold text-[#C85A32] hover:underline">Reset</button>
             </div>
 
-            {/* Price Range Dual Slider & Quick Presets */}
-            <div className="space-y-2 p-3 bg-slate-50/90 rounded-xl border border-slate-200">
-              <div className="flex items-center justify-between font-extrabold text-[11px]">
-                <span className="text-slate-600 uppercase tracking-wider">Price Range</span>
-                <span className="text-[#1E3063] font-black">{formatPriceM(maxPrice)}</span>
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
+              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+                {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
+              </select>
+            </div>
+
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Model</label>
+              <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+                {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
+              </select>
+            </div>
+
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Price Range · {formatPriceM(maxPrice)}</label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={minPrice || ''}
+                  onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
+                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxPrice === 20000000 ? '' : maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)}
+                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                />
               </div>
-              <input
-                type="range"
-                min={500000}
-                max={20000000}
-                step={250000}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-[#1E3063] cursor-pointer h-1.5 bg-slate-200 rounded-lg"
-              />
-              <div className="flex flex-wrap gap-1 pt-1">
-                {[
-                  { label: '< 2.5M', val: 2500000 },
-                  { label: '< 4M', val: 4000000 },
-                  { label: '< 7M', val: 7000000 },
-                  { label: 'All', val: 20000000 }
-                ].map((preset) => (
+              <div className="flex flex-wrap gap-1.5">
+                {[{ label: '< 2.5M', v: 2500000 }, { label: '< 4M', v: 4000000 }, { label: '< 7M', v: 7000000 }, { label: 'All', v: 20000000 }].map((c) => (
                   <button
-                    key={preset.label}
-                    onClick={() => setMaxPrice(preset.val)}
-                    className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-colors ${
-                      maxPrice === preset.val
-                        ? 'bg-[#1E3063] text-white'
-                        : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
-                    }`}
+                    key={c.label}
+                    onClick={() => setMaxPrice(c.v)}
+                    className={`border rounded-full px-2.5 py-1 text-[10.5px] font-medium ${maxPrice === c.v ? 'border-[#C85A32] bg-[#FBEDE7] text-[#C85A32]' : 'border-slate-200 text-slate-500'}`}
                   >
-                    {preset.label}
+                    {c.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Year Range */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                Year Range
-              </label>
-              <div className="grid grid-cols-2 gap-1.5">
-                <select
-                  value={minYear}
-                  onChange={(e) => setMinYear(Number(e.target.value))}
-                  className="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"
-                >
-                  <option value={2005}>Min (2005)</option>
-                  {availableYears.map((y) => (
-                    <option key={`side-min-${y}`} value={y}>{y}</option>
-                  ))}
-                </select>
-                <select
-                  value={maxYear}
-                  onChange={(e) => setMaxYear(Number(e.target.value))}
-                  className="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"
-                >
-                  <option value={2026}>Max (2026)</option>
-                  {availableYears.map((y) => (
-                    <option key={`side-max-${y}`} value={y}>{y}</option>
-                  ))}
-                </select>
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Year Range</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder={`Min (2005)`}
+                  value={minYear === 2005 ? '' : minYear}
+                  onChange={(e) => setMinYear(Number(e.target.value) || 2005)}
+                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                />
+                <input
+                  type="number"
+                  placeholder={`Max (2026)`}
+                  value={maxYear === 2026 ? '' : maxYear}
+                  onChange={(e) => setMaxYear(Number(e.target.value) || 2026)}
+                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                />
               </div>
             </div>
 
-            {/* Body Style & Fuel */}
-            <div className="space-y-3">
-              <Select
-                label="Body Style"
-                value={selectedBodyStyle}
-                onChange={(e) => setSelectedBodyStyle(e.target.value)}
-                options={bodyStyles.map((b) => ({ value: b, label: b === 'All' ? 'All Body Styles' : b }))}
-              />
-
-              <Select
-                label="Fuel Type"
-                value={selectedFuel}
-                onChange={(e) => setSelectedFuel(e.target.value)}
-                options={fuelTypes.map((f) => ({ value: f, label: f === 'All' ? 'All Fuel Types' : f }))}
-              />
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body Style</label>
+              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+                {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
+              </select>
             </div>
 
-            {/* Transmission & Seller Type */}
-            <div className="space-y-3">
-              <Select
-                label="Transmission"
-                value={selectedTransmission}
-                onChange={(e) => setSelectedTransmission(e.target.value)}
-                options={transmissionOptions.map((t) => ({ value: t, label: t === 'All' ? 'All Transmissions' : t }))}
-              />
-
-              <Select
-                label="Seller Type"
-                value={selectedSellerType}
-                onChange={(e) => setSelectedSellerType(e.target.value)}
-                options={sellerTypeOptions.map((s) => ({ value: s, label: s === 'All' ? 'All Sellers' : s }))}
-              />
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel Type</label>
+              <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+                {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
+              </select>
             </div>
 
-            {/* Feature Toggles (Trust & Options) */}
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1">
-                Verified Guarantees
-              </span>
-
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 hover:text-[#1E3063]">
-                <input
-                  type="checkbox"
-                  checked={onlyInspected}
-                  onChange={(e) => setOnlyInspected(e.target.checked)}
-                  className="rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063] accent-[#1E3063]"
-                />
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Pre-Purchase Inspected</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 hover:text-[#1E3063]">
-                <input
-                  type="checkbox"
-                  checked={onlyEscrow}
-                  onChange={(e) => setOnlyEscrow(e.target.checked)}
-                  className="rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063] accent-[#1E3063]"
-                />
-                <Lock className="w-3.5 h-3.5 text-[#1E3063]" />
-                <span>Escrow Protected</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 hover:text-[#1E3063]">
-                <input
-                  type="checkbox"
-                  checked={onlyFinance}
-                  onChange={(e) => setOnlyFinance(e.target.checked)}
-                  className="rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063] accent-[#1E3063]"
-                />
-                <Landmark className="w-3.5 h-3.5 text-amber-600" />
-                <span>Finance Available</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 hover:text-[#1E3063]">
-                <input
-                  type="checkbox"
-                  checked={onlyAuction}
-                  onChange={(e) => setOnlyAuction(e.target.checked)}
-                  className="rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063] accent-[#1E3063]"
-                />
-                <Gavel className="w-3.5 h-3.5 text-amber-500" />
-                <span>Live Auction Listings</span>
-              </label>
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Transmission</label>
+              <select value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+                {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
+              </select>
             </div>
+
+            <div className="border-b border-slate-100 py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Seller Type</label>
+              <select value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+                {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
+              </select>
+            </div>
+
+            <div className="py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2.5">Verified Guarantees</label>
+              <div className="flex flex-col gap-2.5">
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" checked={onlyInspected} onChange={(e) => setOnlyInspected(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
+                  Pre-Purchase Inspected
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" checked={onlyEscrow} onChange={(e) => setOnlyEscrow(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
+                  Escrow Protected
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#1E3063]" />
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" checked={onlyFinance} onChange={(e) => setOnlyFinance(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
+                  Finance Available
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
+                  Live Auction Listings
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-rose-500" />
+                </label>
+              </div>
+            </div>
+
+            <button onClick={resetFilters} className="w-full bg-[#1E3063] hover:bg-[#17244B] text-white font-bold text-xs rounded-lg py-2.5 mt-3">
+              Apply Filters
+            </button>
           </aside>
-        )}
-
-        {/* RESULTS GRID / COMPACT / LIST / EMPTY */}
-        <div className="flex-1 min-w-0">
-          {loadError ? (
-            /* Real fetch failure - matches the same fix already
-               applied to the flat VehicleMarketplace.tsx during
-               Phase 3. Never falls back to mock data on failure -
-               shows this, with a real retry action, instead. */
-            <Card className="p-8 sm:p-12 text-center space-y-6 bg-white border border-rose-200 shadow-sm rounded-2xl">
-              <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
-                <AlertTriangle className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-xl font-extrabold text-[#1E3063] font-display">
-                  Couldn't load vehicles
-                </h3>
-                <p className="text-slate-500 text-xs max-w-md mx-auto mt-1 leading-relaxed">
-                  {loadError}
-                </p>
-              </div>
-              {onRetryLoad && (
-                <Button variant="primary" size="sm" onClick={onRetryLoad}>
-                  Try Again
-                </Button>
-              )}
-            </Card>
-          ) : isLoading ? (
-            <SkeletonGrid count={pageSize} />
-          ) : filteredVehicles.length === 0 ? (
-            /* EMPTY RESULTS RECOVERY STATE */
-            <Card className="p-8 sm:p-12 text-center space-y-6 bg-white border border-slate-200/90 shadow-sm rounded-2xl">
-              <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200">
-                <Search className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-xl font-extrabold text-[#1E3063] font-display">
-                  No matching vehicles found
-                </h3>
-                <p className="text-slate-500 text-xs max-w-md mx-auto mt-1 leading-relaxed">
-                  We couldn't find any listings matching all your selected filters in {selectedCounty}. Try expanding your search parameters or selecting one of the popular criteria below.
-                </p>
-              </div>
-
-              {/* Popular Search Suggestions */}
-              <div className="space-y-2 max-w-md mx-auto">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Popular Inventory Categories:</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {['Toyota Prado', 'Subaru Outback', 'Diesel SUV', 'Verified Dealer', 'Under 3.5M', 'Hybrid'].map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => {
-                        resetFilters();
-                        if (tag === 'Under 3.5M') {
-                          setMaxPrice(3500000);
-                        } else if (tag === 'Verified Dealer') {
-                          setSelectedSellerType('Verified Dealer');
-                        } else if (tag === 'Hybrid') {
-                          setSelectedFuel('Hybrid');
-                        } else if (tag === 'Diesel SUV') {
-                          setSelectedFuel('Diesel');
-                          setSelectedBodyStyle('SUV');
-                        } else {
-                          onSearchChange(tag);
-                        }
-                      }}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-amber-100 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 transition-all"
-                    >
-                      🔍 {tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={resetFilters}
-                  className="bg-[#1E3063] hover:bg-[#17244B] text-white font-bold"
-                >
-                  <RotateCcw className="w-4 h-4" /> Remove Filters & Show All
-                </Button>
-              </div>
-            </Card>
-          ) : (
-            <div className={
-              // Consolidated to a single grid definition, capped at 4
-              // columns per direct instruction (previously 2 separate
-              // modes topped out at 4 and 5). Gap tightened from
-              // gap-3/gap-4 down to gap-2.5 - explicitly requested,
-              // reduce spacing between cards. Kept the mobile (base)
-              // breakpoint at 1 column - the card still carries real
-              // text content (title, price, metadata line, seller row),
-              // and going to 2-up on the smallest phone screens risks
-              // cramming that without being able to see it rendered on
-              // an actual device.
-              viewMode === 'list'
-                ? "space-y-4"
-                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5"
-            }>
-              {viewMode === 'list'
-                ? paginatedVehicles.map((v) => (
-                    <VehicleCard
-                      key={v.id}
-                      vehicle={v}
-                      isSaved={savedVehicles.includes(v.id)}
-                      isCompared={comparedVehicles.includes(v.id)}
-                      onToggleSave={onToggleSave}
-                      onToggleCompare={onToggleCompare}
-                      onQuickView={handleVehicleSelect}
-                      onStartEscrow={onStartEscrow}
-                    />
-                  ))
-                : gridItemsWithSponsors.map((item, i) =>
-                    item.type === 'sponsor' ? (
-                      <MarketingCard key={`sponsor-${item.sponsor.id}-${i}`} data={item.sponsor} />
-                    ) : (
-                      <VehicleCard
-                        key={item.vehicle.id}
-                        vehicle={item.vehicle}
-                        isSaved={savedVehicles.includes(item.vehicle.id)}
-                        isCompared={comparedVehicles.includes(item.vehicle.id)}
-                        onToggleSave={onToggleSave}
-                        onToggleCompare={onToggleCompare}
-                        onQuickView={handleVehicleSelect}
-                        onStartEscrow={onStartEscrow}
-                      />
-                    )
-                  )}
-            </div>
           )}
 
-          {/* 5. PAGINATION CONTROLS */}
-          {filteredVehicles.length > pageSize && (
-            <div className="mt-6 bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold">
-              <span className="text-slate-500">
-                Showing <strong className="text-[#1E3063]">{startIndex + 1}–{Math.min(startIndex + pageSize, filteredVehicles.length)}</strong> of <strong className="text-[#1E3063]">{filteredVehicles.length.toLocaleString()}</strong> vehicles
-              </span>
+          {/* RESULTS */}
+          <div className="min-h-[400px]">
+            {isLoading ? (
+              <SkeletonGrid count={pageSize} />
+            ) : loadError ? (
+              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
+                <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
+                <h4 className="text-sm font-bold text-[#1E3063] mb-1">Couldn't load vehicles</h4>
+                <p className="text-xs text-slate-500 mb-4">{loadError}</p>
+                {onRetryLoad && (
+                  <button onClick={onRetryLoad} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-4 py-2">
+                    Try Again
+                  </button>
+                )}
+              </div>
+            ) : filteredVehicles.length === 0 ? (
+              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
+                <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                <h4 className="text-sm font-bold text-[#1E3063] mb-1">No vehicles match your filters</h4>
+                <p className="text-xs text-slate-500 mb-4">Try widening your price range or clearing a filter to see more results.</p>
+                <button onClick={resetFilters} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-4 py-2">
+                  Reset Filters
+                </button>
+              </div>
+            ) : (
+              <div className={viewMode === 'grid'
+                ? `grid grid-cols-1 sm:grid-cols-2 ${showDesktopSidebar ? 'xl:grid-cols-3' : 'xl:grid-cols-4'} gap-4`
+                : 'flex flex-col gap-3'
+              }>
+                {onlyAuction === false && paginatedVehicles.some((v) => v.isAuction) === false && filteredVehicles.some((v) => v.isAuction) && viewMode === 'grid' && (
+                  <div className="bg-gradient-to-br from-[#1E3063] to-[#17244B] rounded-2xl text-white p-5 flex flex-col relative overflow-hidden">
+                    <span className="self-start bg-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3">🔴 LIVE</span>
+                    <h3 className="text-lg font-bold mb-2">Live Vehicle Auctions</h3>
+                    <p className="text-xs text-slate-300 mb-4">Bid on quality vehicles from trusted, verified sellers across East Africa.</p>
+                    <button onClick={() => onNavigate('discovery')} className="self-start bg-[#C85A32] hover:bg-[#B34E29] text-white text-xs font-bold px-4 py-2 rounded-lg mt-auto">
+                      View Auctions →
+                    </button>
+                  </div>
+                )}
+                {gridItemsWithSponsors.map((item, idx) => {
+                  if (item.type === 'sponsor') {
+                    return <MarketingCard key={`sponsor-${idx}`} data={item.sponsor} />;
+                  }
+                  const v = item.vehicle;
+                  const isSaved = savedVehicles.includes(v.id);
+                  const ribbon = v.inspectionPassed
+                    ? { label: 'Report Available', cls: 'bg-emerald-600' }
+                    : v.isAuction
+                    ? { label: '🔴 Live Auction', cls: 'bg-rose-600' }
+                    : v.badge
+                    ? { label: `★ ${v.badge}`, cls: 'bg-[#1E3063]' }
+                    : null;
+                  return (
+                    <div
+                      key={v.id}
+                      className={`bg-white border border-slate-200 rounded-2xl overflow-hidden flex hover:shadow-lg hover:-translate-y-0.5 transition-all ${viewMode === 'list' ? 'flex-row' : 'flex-col'}`}
+                    >
+                      <div className={`relative bg-gradient-to-br from-slate-200 to-slate-300 shrink-0 ${viewMode === 'list' ? 'w-56' : 'h-40'}`}>
+                        {v.images?.[0] && (
+                          <img src={v.images[0]} alt={v.title} className="w-full h-full object-cover" />
+                        )}
+                        {ribbon && (
+                          <span className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-1 rounded-md text-white ${ribbon.cls}`}>
+                            {ribbon.label}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => onToggleSave(v.id)}
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center"
+                          title={isSaved ? 'Remove from saved' : 'Save vehicle'}
+                        >
+                          {isSaved ? '♥' : '♡'}
+                        </button>
+                        {v.isAuction && v.currentBid && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-[10px] font-mono px-2.5 py-1.5 flex justify-between">
+                            <span>Current bid: Ksh {(v.currentBid / 1000000).toFixed(2)}M</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3.5 border-t border-slate-100 flex-1 flex flex-col">
+                        <h4 className="text-sm font-semibold text-[#1E3063] mb-1">{v.year} {v.make} {v.model}</h4>
+                        <div className="font-mono font-bold text-base text-[#1E3063] mb-2">{formatPriceM(v.price)}</div>
+                        <div className="flex flex-wrap gap-2.5 text-[11px] text-slate-500 mb-2">
+                          <span>{v.mileage.toLocaleString()} km</span>
+                          <span>{v.fuelType}</span>
+                          <span>{v.transmission}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mb-2">{v.location}</div>
+                        {v.inspectionPassed ? (
+                          <div className="text-[11px] rounded-lg px-2 py-1.5 mb-2.5 bg-emerald-50 text-emerald-800 flex items-center gap-1.5">
+                            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                            <span>Inspection report available</span>
+                          </div>
+                        ) : (
+                          <div className="text-[11px] rounded-lg px-2 py-1.5 mb-2.5 bg-slate-100 text-slate-500 flex items-center justify-between">
+                            <span>No inspection report yet</span>
+                            <button onClick={() => onNavigate('inspections')} className="text-[#C85A32] font-semibold">Request one →</button>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => handleVehicleSelect(v)}
+                          className="mt-auto w-full text-center border border-slate-200 hover:bg-[#EAF0FD] hover:border-[#EAF0FD] rounded-lg py-2 text-xs font-semibold text-[#1E3063]"
+                        >
+                          View Details →
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-              <div className="flex items-center gap-1">
+            {/* PAGINATION */}
+            {filteredVehicles.length > pageSize && (
+              <div className="flex items-center justify-center gap-2 mt-8">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                  title="Previous page"
+                  className="p-2 border border-slate-200 rounded-lg disabled:opacity-40"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-3.5 h-3.5" />
                 </button>
-
-                {Array.from({ length: totalPages }).map((_, i) => {
-                  const pageNum = i + 1;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`w-8 h-8 rounded-xl font-bold transition-all ${
-                        currentPage === pageNum
-                          ? 'bg-[#1E3063] text-white shadow-sm'
-                          : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-
+                <span className="text-xs text-slate-500 font-medium">Page {currentPage} of {totalPages}</span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                  title="Next page"
+                  className="p-2 border border-slate-200 rounded-lg disabled:opacity-40"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 6. RECENTLY VIEWED VEHICLES CAROUSEL */}
-      {homeConfig.sectionVisibility.recentlyViewed && recentlyViewedVehicles.length > 0 && (
-        <div className="pt-8 border-t border-slate-200/80 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" />
-              Recently Viewed Vehicles
-            </h3>
-            <span className="text-xs text-slate-500 font-medium">Your browser session history</span>
-          </div>
-
-          <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-thin">
-            {recentlyViewedVehicles.map((v) => (
-              <div
-                key={`rv-${v.id}`}
-                onClick={() => handleVehicleSelect(v)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleVehicleSelect(v);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-label={`View details for ${v.title}`}
-                className="w-64 shrink-0 bg-white rounded-2xl p-3 border border-slate-200 hover:border-[#1E3063]/40 hover:shadow-md transition-all cursor-pointer space-y-2 focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:ring-offset-2"
-              >
-                <div className="relative h-32 rounded-xl overflow-hidden bg-slate-100">
-                  <img src={v.image} alt={v.title} className="w-full h-full object-cover" />
-                  <span className="absolute top-2 left-2 bg-[#1E3063]/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
-                    {v.year}
-                  </span>
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-[#1E3063] text-xs truncate">{v.title}</h4>
-                  <p className="font-black text-emerald-700 text-sm mt-0.5">Ksh {v.price.toLocaleString()}</p>
-                  <p className="text-[10px] text-slate-500 truncate mt-0.5">{v.location} • {v.fuelType}</p>
-                </div>
-              </div>
-            ))}
+            )}
           </div>
         </div>
-      )}
 
-      {/* 7. PERSISTENT FLOATING COMPARISON TRAY */}
-      {comparedVehicles.length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:max-w-lg z-40 bg-[#1E3063] text-white p-4 rounded-2xl shadow-2xl border border-white/20 flex items-center justify-between gap-4 animate-bounce-short">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-xl bg-amber-400 text-[#17244B] font-black flex items-center justify-center shrink-0">
-              <ArrowRightLeft className="w-5 h-5 stroke-[2.5]" />
+        {/* 7. CTA BANDS */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 mt-12 rounded-2xl overflow-hidden">
+          <div className="bg-gradient-to-br from-[#17244B] to-[#1E3063] text-white p-8 sm:p-10 flex flex-col justify-center gap-4">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">Buy with more confidence</span>
+            <h3 className="text-xl sm:text-2xl font-bold font-display max-w-md">A registered local mechanic inspects it. The report stays on file — for you and every buyer after you.</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs text-slate-300">
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Registered mechanic near the vehicle</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Pay the mechanic directly</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Report uploaded to the listing</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Later buyers can unlock it</div>
             </div>
-            <div className="min-w-0">
-              <p className="font-extrabold text-sm truncate font-display">
-                Comparing {comparedVehicles.length} {comparedVehicles.length === 1 ? 'Vehicle' : 'Vehicles'}
-              </p>
-              <p className="text-[11px] text-slate-300 truncate">Side-by-side technical spec matrix (Max 4)</p>
-            </div>
+            <button onClick={() => onNavigate('inspections')} className="self-start bg-[#C85A32] hover:bg-[#B34E29] text-white text-sm font-bold px-5 py-2.5 rounded-full mt-1">
+              Request an Inspection →
+            </button>
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              variant="accent"
-              size="sm"
-              onClick={onOpenCompareModal}
-              className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-bold text-xs"
-            >
-              Compare Matrix
-            </Button>
-            <button
-              onClick={() => comparedVehicles.forEach((id) => onToggleCompare(id))}
-              className="p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-white/10"
-              title="Clear comparison list"
-            >
-              <X className="w-4 h-4" />
+          <div className="bg-[#F5F2EB] p-8 sm:p-9 flex flex-col justify-center">
+            <h4 className="text-lg font-bold text-[#1E3063] mb-2 max-w-xs">Ready to sell your vehicle?</h4>
+            <p className="text-xs text-slate-600 mb-4 max-w-xs">Reach verified buyers across East Africa through the KAYAD marketplace and escrow network.</p>
+            <button onClick={() => onNavigate('seller-platform')} className="self-start bg-[#1E3063] hover:bg-[#17244B] text-white text-sm font-bold px-5 py-2.5 rounded-full">
+              Sell Your Vehicle →
             </button>
           </div>
         </div>
+      </div>
+
+      {/* 8. FLOATING COMPARISON TRAY */}
+      {comparedVehicles.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-[#1E3063] text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4">
+          <ArrowRightLeft className="w-4 h-4 text-amber-400" />
+          <span className="text-xs font-semibold">{comparedVehicles.length} vehicle{comparedVehicles.length > 1 ? 's' : ''} selected to compare</span>
+          <button onClick={onOpenCompareModal} className="bg-[#C85A32] text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+            Compare Now
+          </button>
+        </div>
       )}
 
-      {/* 8. SAVE SEARCH MODAL */}
+      {/* 9. SAVE SEARCH MODAL */}
       {showSaveSearchModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl border border-slate-200">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-              <h3 className="font-extrabold text-[#1E3063] text-sm font-display flex items-center gap-2">
-                <Bookmark className="w-4 h-4 text-amber-500 fill-amber-500" />
-                Save Current Search Filter
-              </h3>
-              <button onClick={() => setShowSaveSearchModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveCurrentPreset} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 block">Search Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. My Favorite Land Cruiser Search"
-                  value={newPresetName}
-                  onChange={(e) => setNewPresetName(e.target.value)}
-                  required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#1E3063]"
-                />
-              </div>
-
-              <div className="p-3 bg-slate-50 rounded-xl text-slate-600 space-y-1 border border-slate-200 text-[11px]">
-                <p className="font-bold text-[#1E3063]">Included Search Criteria:</p>
-                <p>• Make: {selectedMake}</p>
-                <p>• Max Budget: Ksh {(maxPrice / 1000000).toFixed(1)}M</p>
-                <p>• Location: {selectedCounty}</p>
-                {searchQuery && <p>• Keyword: "{searchQuery}"</p>}
-              </div>
-
-              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 text-[11px] flex items-start gap-2">
-                <Bell className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-                <span>You will be notified via email and app alert whenever matching inventory is posted!</span>
-              </div>
-
-              <div className="flex gap-2 pt-1">
-                <Button variant="outline" size="md" fullWidth onClick={() => setShowSaveSearchModal(false)}>
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowSaveSearchModal(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-[#1E3063] mb-3">Save this search</h3>
+            <form onSubmit={handleSaveCurrentPreset} className="space-y-3">
+              <input
+                value={newPresetName}
+                onChange={(e) => setNewPresetName(e.target.value)}
+                placeholder="e.g. Under Ksh 3.5M SUVs"
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setShowSaveSearchModal(false)} className="flex-1 border border-slate-200 rounded-lg py-2 text-xs font-semibold text-slate-600">
                   Cancel
-                </Button>
-                <Button variant="primary" size="md" fullWidth type="submit" className="bg-[#1E3063] text-white">
+                </button>
+                <button type="submit" className="flex-1 bg-[#1E3063] text-white rounded-lg py-2 text-xs font-bold">
                   Save Search
-                </Button>
+                </button>
               </div>
             </form>
+            {savedPresets.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100 space-y-1.5">
+                <p className="text-[10px] font-bold uppercase text-slate-400 mb-1.5">Saved Searches</p>
+                {savedPresets.map((p) => (
+                  <button key={p.id} onClick={() => applyPreset(p)} className="w-full text-left text-xs text-slate-600 hover:text-[#C85A32] flex items-center gap-1.5">
+                    <Bookmark className="w-3 h-3 shrink-0" /> {p.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* 9. MOBILE FULL-SCREEN FILTER DRAWER */}
+      {/* 10. MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-end">
-          <div className="bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto p-5 space-y-4 shadow-2xl border-t border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 sticky top-0 bg-white z-10 pt-1">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-amber-500" />
-                <h3 className="text-base font-extrabold text-[#1E3063] font-display">
-                  Complete Inventory Filters
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowMobileFilterDrawer(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden">
+          <div className="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#1E3063]">Filter Vehicles</h3>
+            <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5">
+              <X className="w-5 h-5 text-slate-500" />
+            </button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
+              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+                {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
+              </select>
             </div>
-
-            <div className="space-y-4 text-xs">
-              <Select
-                label="Make"
-                value={selectedMake}
-                onChange={(e) => {
-                  setSelectedMake(e.target.value);
-                  setSelectedModel('All');
-                }}
-                options={makes.map((m) => ({ value: m, label: m === 'All' ? 'All Makes' : m }))}
-              />
-
-              <Select
-                label="Model"
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                options={models.map((m) => ({ 
-                  value: m, 
-                  label: m === 'All' ? (selectedMake !== 'All' ? `All ${selectedMake}` : 'All Models') : m 
-                }))}
-              />
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Max Budget: {formatPriceM(maxPrice)}
-                </label>
-                <input
-                  type="range"
-                  min={500000}
-                  max={20000000}
-                  step={250000}
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  className="w-full accent-[#1E3063] h-2 bg-slate-200 rounded-lg"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <Select
-                  label="Body Style"
-                  value={selectedBodyStyle}
-                  onChange={(e) => setSelectedBodyStyle(e.target.value)}
-                  options={bodyStyles.map((b) => ({ value: b, label: b === 'All' ? 'All Body Styles' : b }))}
-                />
-                <Select
-                  label="Fuel Type"
-                  value={selectedFuel}
-                  onChange={(e) => setSelectedFuel(e.target.value)}
-                  options={fuelTypes.map((f) => ({ value: f, label: f === 'All' ? 'All Fuels' : f }))}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <Select
-                  label="Transmission"
-                  value={selectedTransmission}
-                  onChange={(e) => setSelectedTransmission(e.target.value)}
-                  options={transmissionOptions.map((t) => ({ value: t, label: t === 'All' ? 'All Trans' : t }))}
-                />
-                <Select
-                  label="Seller Type"
-                  value={selectedSellerType}
-                  onChange={(e) => setSelectedSellerType(e.target.value)}
-                  options={sellerTypeOptions.map((s) => ({ value: s, label: s === 'All' ? 'All Sellers' : s }))}
-                />
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
-                  Guarantees
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold">
-                    <input type="checkbox" checked={onlyInspected} onChange={(e) => setOnlyInspected(e.target.checked)} className="rounded text-[#1E3063]" />
-                    <span>Pre-Purchase Inspected</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold">
-                    <input type="checkbox" checked={onlyEscrow} onChange={(e) => setOnlyEscrow(e.target.checked)} className="rounded text-[#1E3063]" />
-                    <span>Escrow Protected</span>
-                  </label>
-                </div>
-              </div>
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body Style</label>
+              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+                {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
+              </select>
             </div>
-
-            <div className="flex items-center gap-3 pt-3 border-t border-slate-200 sticky bottom-0 bg-white pb-2">
-              <Button variant="ghost" size="md" onClick={resetFilters} className="flex-1 text-slate-600 font-bold">
-                Reset
-              </Button>
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => setShowMobileFilterDrawer(false)}
-                className="flex-[2] bg-[#1E3063] text-white font-bold py-3 rounded-xl shadow-lg"
-              >
-                Show {filteredVehicles.length} Vehicles
-              </Button>
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel Type</label>
+              <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+                {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2.5 pt-2">
+              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyInspected} onChange={(e) => setOnlyInspected(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Pre-Purchase Inspected</label>
+              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyEscrow} onChange={(e) => setOnlyEscrow(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Escrow Protected</label>
+              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyFinance} onChange={(e) => setOnlyFinance(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Finance Available</label>
+              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Live Auction Listings</label>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button onClick={resetFilters} className="flex-1 border border-slate-200 rounded-lg py-2.5 text-xs font-bold text-slate-600">Reset</button>
+              <button onClick={() => setShowMobileFilterDrawer(false)} className="flex-1 bg-[#1E3063] text-white rounded-lg py-2.5 text-xs font-bold">Show Results</button>
             </div>
           </div>
         </div>

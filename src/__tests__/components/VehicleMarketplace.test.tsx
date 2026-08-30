@@ -4,7 +4,7 @@ import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesCon
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
 
-describe('VehicleMarketplace - Featured Picks (home page redesign)', () => {
+describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   const baseProps = {
     vehicles: INITIAL_VEHICLES,
     savedVehicles: [],
@@ -25,112 +25,59 @@ describe('VehicleMarketplace - Featured Picks (home page redesign)', () => {
     expect(screen.getByText(/Vehicle Inventory/i)).toBeTruthy();
   });
 
-  it('shows a Featured Picks section with at least one real reason label', () => {
+  // Fixed: this whole describe block previously tested a "Featured
+  // Picks" strip - a real, working feature, but not part of the
+  // redesigned layout adopted from an uploaded HTML reference per
+  // explicit direction ("replace...entirely without duplicating
+  // anything"). The underlying featuredPicks computation itself was
+  // intentionally not deleted (still real, still correct, simply not
+  // rendered in this specific layout) - these tests are updated to
+  // verify the real behavior the new layout actually has instead of
+  // asserting removed UI.
+  it('shows the real, current vehicle count in the inventory heading', () => {
     render(<VehicleMarketplace {...baseProps} />);
-    expect(screen.getByText('Featured Picks')).toBeTruthy();
-    // At least one of the 3 possible reasons should be present, since
-    // INITIAL_VEHICLES has real marketPriceAvg/viewsCount/auction data.
-    const reasons = ['Biggest Saving', 'Most Viewed', 'Auction Ending Soon'];
-    const foundAny = reasons.some((r) => screen.queryByText(r) !== null);
-    expect(foundAny).toBe(true);
+    const heading = screen.getByText(/Vehicle Inventory/i);
+    expect(heading.textContent).toContain(String(INITIAL_VEHICLES.length));
   });
 
-  it('never shows the same vehicle twice across the 3 featured reasons', () => {
-    render(<VehicleMarketplace {...baseProps} />);
-    // Each vehicle title in INITIAL_VEHICLES is unique - if the same
-    // vehicle were picked for 2 reasons, its title would render twice
-    // within the Featured Picks strip specifically. Cheapest reliable
-    // check without over-coupling to DOM structure: every vehicle id
-    // used in featuredPicks must be distinct, which the component's
-    // own filter (v.id !== biggestSaving?.id / !picks.some(...)) is
-    // responsible for - this just confirms it doesn't crash or silently
-    // duplicate when actually rendered against real data.
-    const picksHeading = screen.getByText('Featured Picks');
-    expect(picksHeading).toBeTruthy();
-  });
-
-  it('renders empty vehicles list without crashing (no Featured Picks shown)', () => {
+  it('renders empty vehicles list without crashing, showing a real empty state', async () => {
     render(<VehicleMarketplace {...baseProps} vehicles={[]} />);
-    expect(screen.queryByText('Featured Picks')).toBeNull();
+    await waitFor(() => {
+      expect(screen.getByText(/No vehicles match your filters/i)).toBeTruthy();
+    }, { timeout: 2000 });
   });
 
-  // Density pass: the view-mode default changed from 'grid' to 'compact'
-  // and the page-size default from 12 to 24, so every visitor sees the
-  // denser layout without needing to find and click the toggle first.
-  // Verified against the actual rendered output rather than just the
-  // useState initial value, since that's what a visitor actually sees.
-  //
-  // Updated for the view-mode consolidation: 'grid' and 'compact' (used
-  // to top out at 4 vs 5 columns) were merged into a single mode capped
-  // at 4 columns per direct instruction, so the assertion this test
-  // originally made (defaults to a 5-column grid) is no longer the
-  // correct behavior - the current, correct behavior is a single
-  // consolidated 4-column grid with no separate denser mode to default
-  // into. Also switched the "has loading actually finished" signal from
-  // a specific skeleton height class to .animate-pulse, since the
-  // skeleton's own markup changed in the same pass that shrank
-  // VehicleCard (SkeletonCard's placeholder height went from h-12 to
-  // h-8 to match) - the old selector would have silently stopped
-  // matching anything and made this wait resolve instantly, exactly the
-  // kind of false-pass this test exists to avoid.
-  it('renders a single consolidated 4-column grid (not a separate 5-column dense mode)', async () => {
+  // Fixed: the redesigned grid uses 3 columns with the sidebar showing
+  // (the sidebar is visible by default) and 4 without it - not the
+  // previous single "4, never 5" consolidated mode, since the sidebar
+  // itself now takes real, dedicated width in this layout.
+  it('renders a real grid with the sidebar-aware column count (xl:grid-cols-3 while the sidebar shows)', async () => {
     const { container } = render(<VehicleMarketplace {...baseProps} />);
-    // Tried gating this on the skeleton actually disappearing first
-    // (via a couple of different DOM selectors), but that kept producing
-    // inconsistent results not worth chasing further - simplified to
-    // just waiting comfortably past the known ~180ms delay, then
-    // asserting directly on what actually matters here (the grid's own
-    // className), via waitFor's own polling/retry rather than a fixed
-    // one-shot check, so a slow CI run doesn't flake this either.
     await waitFor(() => {
       const grids = Array.from(container.querySelectorAll('.grid'));
-      const inventoryGrid = grids.find((g) => /xl:grid-cols-4/.test(g.className));
+      const inventoryGrid = grids.find((g) => /xl:grid-cols-3/.test(g.className));
       expect(inventoryGrid).toBeTruthy();
     }, { timeout: 2000 });
-    const grids = Array.from(container.querySelectorAll('.grid'));
-    const inventoryGrid = grids.find((g) => /xl:grid-cols-4/.test(g.className));
-    expect(inventoryGrid?.className).not.toMatch(/xl:grid-cols-5/);
   });
 
-  // New feature: sponsor/partner cards interleaved into the grid. Verifies
-  // against real mock sponsor data (MOCK_SPONSOR_CARDS), not a synthetic
-  // fixture, and confirms the sponsor placement doesn't inflate the real
-  // "Showing X-Y of Z vehicles" count - that count must stay based on
-  // actual vehicles regardless of how many sponsor cards are interleaved
-  // into the visual grid alongside them.
   it('interleaves a real sponsor card into the grid without inflating the vehicle count', async () => {
     render(<VehicleMarketplace {...baseProps} />);
-    // Same simplification as the grid test above: wait directly on the
-    // real assertion via waitFor's polling/retry, rather than trying to
-    // first prove the skeleton is gone via a DOM selector - that
-    // intermediate check produced inconsistent results across several
-    // attempts and wasn't worth chasing further when the direct
-    // assertion is just as reliable.
     await waitFor(() => {
       expect(screen.queryAllByText(/Sponsored|^Partner$|Featured Dealer/).length).toBeGreaterThan(0);
     }, { timeout: 2000 });
-    // The sponsor-insertion point (every 4th item) requires more than 4
-    // real vehicles to trigger at all. Confirmed the real count directly
-    // via a runtime check (a throwaway debug test's console.log) rather
-    // than trusting a source-file grep, which turned out unreliable for
-    // this file (matched nested object braces, not just top-level
-    // vehicles, overcounting significantly) - INITIAL_VEHICLES has 6
-    // real entries.
     expect(INITIAL_VEHICLES.length).toBeGreaterThan(4);
-    // The "Vehicle Inventory" count badge (unconditional, unlike the
-    // "Showing X-Y of Z" pagination summary which only renders when
-    // there's more than one page) must still show the real vehicle
-    // count, not one inflated by however many sponsor cards got
-    // interleaved into the visual grid alongside them.
-    expect(screen.getByText('Vehicle Inventory').parentElement?.textContent).toContain(
-      INITIAL_VEHICLES.length.toString()
-    );
+    const heading = screen.getByText(/Vehicle Inventory/i);
+    expect(heading.textContent).toContain(INITIAL_VEHICLES.length.toString());
   });
 
-  it('defaults the page-size selector to 24, not 12', () => {
+  // Fixed: page size is now a real button group (6/12/24 in the
+  // redesigned toolbar, matching the uploaded reference layout), not a
+  // <select> - defaults to 24 either way, verified via which button
+  // carries the "active"-style class instead of getByDisplayValue.
+  it('defaults the page-size control to 24, not 12', () => {
     render(<VehicleMarketplace {...baseProps} />);
-    const select = screen.getByDisplayValue('24');
-    expect(select).toBeTruthy();
+    const button24 = screen.getByText('24');
+    expect(button24.className).toMatch(/bg-\[#1E3063\]/);
   });
 });
 
@@ -249,28 +196,26 @@ describe('VehicleMarketplace - unified search/trust card (space audit)', () => {
     expect(screen.getByText('Live Auctions')).toBeTruthy();
   });
 
-  it('the trust card itself does not use position: sticky (the filter sidebar and modal headers have their own unrelated, legitimate sticky uses elsewhere on the page, not touched by this)', () => {
+  it('the trust strip itself does not use position: sticky (the filter sidebar and modal headers have their own unrelated, legitimate sticky uses elsewhere on the page, not touched by this)', () => {
     render(<VehicleMarketplace {...baseProps} />);
-    // Fixed: locates the card via its own trust-pillar heading rather
-    // than the now-removed search input.
+    // Fixed: the redesigned layout has the trust strip as its own
+    // separate, white-background section (matching the uploaded HTML
+    // reference's .trust-strip{background:#fff}), not merged into a
+    // navy gradient card with the search bar as before - locates it by
+    // its own section element instead of the old bg-gradient-to-r
+    // container class.
     const trustHeading = screen.getByText('Escrow Protection');
-    // Walk up from the trust heading to find its containing card - the
-    // direct parent chain, not a page-wide selector, since sticky is
-    // still legitimately used elsewhere (the filter sidebar, a modal's
-    // header/footer) and this test is specifically about this shared
-    // card, not a blanket "no sticky anywhere" claim that would be
-    // false.
     let el: HTMLElement | null = trustHeading.parentElement;
-    let foundCard: HTMLElement | null = null;
+    let foundSection: HTMLElement | null = null;
     for (let i = 0; i < 8 && el; i++) {
-      if (el.className.includes('bg-gradient-to-r')) {
-        foundCard = el;
+      if (el.tagName === 'SECTION') {
+        foundSection = el;
         break;
       }
       el = el.parentElement;
     }
-    expect(foundCard).toBeTruthy();
-    expect(foundCard?.className).not.toMatch(/sticky/);
+    expect(foundSection).toBeTruthy();
+    expect(foundSection?.className).not.toMatch(/sticky/);
   });
 });
 
@@ -290,35 +235,18 @@ describe('VehicleMarketplace - merged Saved Searches + result header card', () =
     onOpenCompareModal: () => {},
   };
 
-  // Previously the Saved Searches row (a bare, cardless horizontal
-  // scroll strip) sat above the Result Header & Controls card (its own
-  // separate white card with the Vehicle Inventory count and Show/Sort
-  // controls) as 2 stacked pieces with their own spacing between them.
-  // Merged into one card, matching the same pattern as the earlier
-  // search-bar + trust-strip merge. Verifies against real default data
-  // (the 3 built-in saved presets, not a synthetic fixture) that both
-  // halves render inside the same shared card element.
-  it('renders Saved Searches and the Vehicle Inventory header inside one shared card', () => {
-    const { container } = render(<VehicleMarketplace {...baseProps} />);
-    const savedSearchesLabel = screen.getByText('Saved Searches:');
-    const inventoryHeading = screen.getByText('Vehicle Inventory');
-
-    // Walk up from each to find their nearest shared ancestor card
-    // (bg-white/80 rounded-2xl) - confirms they're both inside the SAME
-    // card element, not just visually adjacent siblings.
-    const findCard = (el: HTMLElement | null): HTMLElement | null => {
-      let cur = el;
-      for (let i = 0; i < 6 && cur; i++) {
-        if (cur.className?.includes('bg-white/80') && cur.className?.includes('rounded-2xl')) return cur;
-        cur = cur.parentElement;
-      }
-      return null;
-    };
-    const savedSearchesCard = findCard(savedSearchesLabel.parentElement);
-    const inventoryCard = findCard(inventoryHeading.parentElement);
-    expect(savedSearchesCard).toBeTruthy();
-    expect(inventoryCard).toBeTruthy();
-    expect(savedSearchesCard).toBe(inventoryCard);
+  // Fixed: this whole describe block previously tested a merged
+  // "Saved Searches + result header" card, a prior design decision -
+  // the redesigned layout (adopted from an uploaded HTML reference per
+  // explicit direction) has no equivalent merged card at all. Saved
+  // Searches is real, kept as its own visible quick-access row (not
+  // dropped just because the reference design doesn't picture it), but
+  // it is not merged with the inventory header - these tests verify
+  // the real, current structure instead of a prior merge that no
+  // longer exists.
+  it('shows the real Saved Searches quick-access row with its label', () => {
+    render(<VehicleMarketplace {...baseProps} />);
+    expect(screen.getByText('Saved Searches:')).toBeTruthy();
   });
 
   it('still shows all 3 real default saved search presets by name', () => {
@@ -328,10 +256,14 @@ describe('VehicleMarketplace - merged Saved Searches + result header card', () =
     expect(screen.getByText(/Low-Mileage Hybrids/)).toBeTruthy();
   });
 
-  it('Show and Sort controls still work correctly inside the merged card', () => {
+  // Fixed: the redesigned toolbar (matching the uploaded reference
+  // layout) has no "Show:"/"Sort:" text labels - "Show" appears as
+  // plain text before the real page-size button group, and sort is a
+  // bare <select> with no separate label. Verifies the real controls
+  // by their actual, current text/value instead of removed labels.
+  it('Show and Sort controls are real and functional in the redesigned toolbar', () => {
     render(<VehicleMarketplace {...baseProps} />);
-    expect(screen.getByText('Show:')).toBeTruthy();
-    expect(screen.getByText('Sort:')).toBeTruthy();
+    expect(screen.getByText('Show')).toBeTruthy();
     expect(screen.getByDisplayValue('Newest First')).toBeTruthy();
   });
 });
@@ -379,57 +311,18 @@ describe('VehicleMarketplace - trust strip accuracy', () => {
   });
 });
 
-describe('VehicleMarketplace - Featured Picks as a trust hero slider', () => {
-  const baseProps = {
-    vehicles: INITIAL_VEHICLES,
-    savedVehicles: [],
-    comparedVehicles: [],
-    onToggleSave: () => {},
-    onToggleCompare: () => {},
-    onQuickView: () => {},
-    onStartEscrow: () => {},
-    selectedCounty: 'All East Africa',
-    onCountyChange: () => {},
-    searchQuery: '',
-    onSearchChange: () => {},
-    onOpenCompareModal: () => {},
-  };
-
-  // Explicit direction: convert Featured Picks from a static 3-column
-  // grid into a "trust hero card" with a fit-to-screen slider, and make
-  // the cards themselves smaller. Verifies the actual structural change
-  // - a branded hero card background wraps a horizontally-scrollable
-  // container - rather than just checking the section still renders.
-  // Navy background reverted per explicit follow-up direction ("remove
-  // the navy from hero card, let the cars stay independent") - the
-  // slider structure and its neutral, light card wrapper stay (space
-  // management is still the point), but it's no longer navy-branded.
-  it('wraps Featured Picks in a neutral, light card (not navy) with a horizontal scroll-snap slider', () => {
-    const { container } = render(<VehicleMarketplace {...baseProps} />);
-    const heading = screen.getByText('Featured Picks');
-    let heroCard: HTMLElement | null = heading.parentElement;
-    for (let i = 0; i < 4 && heroCard; i++) {
-      if (heroCard.className.includes('bg-white/80')) break;
-      heroCard = heroCard.parentElement;
-    }
-    expect(heroCard?.className).toMatch(/bg-white\/80/);
-    expect(heroCard?.className).not.toMatch(/from-\[#17244B\]/);
-    expect(heroCard?.className).not.toMatch(/bg-gradient-to-r/);
-
-    const slider = container.querySelector('.snap-x');
-    expect(slider).toBeTruthy();
-    expect(slider?.className).toMatch(/overflow-x-auto/);
-  });
-
-  it('constrains each featured card to a fixed, smaller width within the slider', () => {
-    const { container } = render(<VehicleMarketplace {...baseProps} />);
-    const slideItems = container.querySelectorAll('.snap-start');
-    expect(slideItems.length).toBeGreaterThan(0);
-    slideItems.forEach((item) => {
-      expect(item.className).toMatch(/w-52/);
-    });
-  });
-});
+// Fixed: Featured Picks (a slider card above the inventory grid) was a
+// real, working feature, but is not part of the redesigned layout
+// adopted from an uploaded HTML reference per explicit direction
+// ("replace...entirely without duplicating anything"). The underlying
+// featuredPicks computation itself was intentionally left in place
+// (still correct, simply not rendered in this layout) rather than
+// deleted - if a future design brings back an equivalent slider, the
+// same real data is still there to power it. The 2 tests that
+// previously verified this section's own specific visual treatment
+// (a neutral card, a scroll-snap slider, fixed-width cards) have no
+// current equivalent to test and were removed rather than kept
+// asserting removed UI.
 
 describe('VehicleMarketplace - admin home page customization', () => {
   const baseProps = {
@@ -486,11 +379,16 @@ describe('VehicleMarketplace - admin home page customization', () => {
   it('toggling a section off in the admin panel actually hides that section on the page', async () => {
     render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
     fireEvent.click(screen.getByText('Customize Home Page'));
-    // Featured Picks is visible by default with this mock data.
-    await waitFor(() => expect(screen.getByText('Featured Picks')).toBeTruthy());
-    fireEvent.click(screen.getByText('Featured Picks Slider'));
+    // Fixed: previously toggled "Featured Picks Slider" - a real
+    // config flag, but with no current visible effect since Featured
+    // Picks isn't rendered by the redesigned layout at all. Uses
+    // "Search & Trust Info Card" instead - the section this component
+    // genuinely, visibly renders/hides based on this same real config
+    // flag (homeConfig.sectionVisibility.searchTrustCard).
+    await waitFor(() => expect(screen.getByText('Escrow Protection')).toBeTruthy());
+    fireEvent.click(screen.getByText('Search & Trust Info Card'));
     await waitFor(() => {
-      expect(screen.queryByText('Featured Picks')).toBeNull();
+      expect(screen.queryByText('Escrow Protection')).toBeNull();
     });
   });
 
@@ -509,25 +407,25 @@ describe('VehicleMarketplace - admin home page customization', () => {
   it('persists the config to localStorage so a page reload (a fresh render) keeps the admin\'s changes', async () => {
     const { unmount } = render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
     fireEvent.click(screen.getByText('Customize Home Page'));
-    fireEvent.click(screen.getByText('Featured Picks Slider'));
-    await waitFor(() => expect(screen.queryByText('Featured Picks')).toBeNull());
+    fireEvent.click(screen.getByText('Search & Trust Info Card'));
+    await waitFor(() => expect(screen.queryByText('Escrow Protection')).toBeNull());
     unmount();
 
     // Fresh render, simulating a reload - reads from the same
     // localStorage the first render just wrote to.
     render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
-    expect(screen.queryByText('Featured Picks')).toBeNull();
+    expect(screen.queryByText('Escrow Protection')).toBeNull();
   });
 
   it('Reset to Defaults in the admin panel restores hidden sections and edited text', async () => {
     render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
     fireEvent.click(screen.getByText('Customize Home Page'));
-    fireEvent.click(screen.getByText('Featured Picks Slider'));
-    await waitFor(() => expect(screen.queryByText('Featured Picks')).toBeNull());
+    fireEvent.click(screen.getByText('Search & Trust Info Card'));
+    await waitFor(() => expect(screen.queryByText('Escrow Protection')).toBeNull());
 
     fireEvent.click(screen.getByText('Reset to Defaults'));
     await waitFor(() => {
-      expect(screen.getByText('Featured Picks')).toBeTruthy();
+      expect(screen.getByText('Escrow Protection')).toBeTruthy();
     });
   });
 });
