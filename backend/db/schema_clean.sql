@@ -394,6 +394,29 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 );
 
 -- =============================
+-- LOAN APPLICATIONS (real financing applications - a buyer applies,
+-- an admin/lender reviews and updates status)
+-- =============================
+CREATE TABLE IF NOT EXISTS loan_applications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  applicant UUID NOT NULL REFERENCES users(id),
+  car UUID REFERENCES cars(id),
+  vehicle_price NUMERIC,
+  deposit_amount NUMERIC,
+  loan_amount NUMERIC,
+  term_months INTEGER,
+  monthly_income NUMERIC,
+  employment_status TEXT,
+  status TEXT DEFAULT 'submitted' CHECK (status IN ('submitted','under_review','approved','declined','withdrawn')),
+  reviewer_notes TEXT,
+  reviewed_by UUID REFERENCES users(id),
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+GRANT ALL ON loan_applications TO service_role;
+
+-- =============================
 -- CMS CONTENT (read path only - createContent/updateContent's own
 -- cms_revisions dependency intentionally not added; nothing in this
 -- project writes through that path yet)

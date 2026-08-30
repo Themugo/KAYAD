@@ -76,6 +76,7 @@ const router = express.Router();
 router.get("/pages/s/:slug", asyncHandler(getPageBySlug));
 router.get("/content/s/:slug", asyncHandler(getContentBySlug));
 router.get("/content/:id", asyncHandler(getContentById));
+router.get("/content", asyncHandler(getContents));
 router.get("/search", asyncHandler(searchContent));
 router.post("/analytics/track", asyncHandler(trackAnalytics));
 
@@ -97,7 +98,6 @@ router.post("/pages/:id/schedule", validateObjectId, allowRoles("admin", "supera
 router.post("/pages/:id/rollback", validateObjectId, allowRoles("admin", "superadmin", "editor"), asyncHandler(rollbackPage));
 
 // Content CRUD
-router.get("/content", asyncHandler(getContents));
 router.post("/content", allowRoles("admin", "superadmin", "editor", "publisher"), asyncHandler(createContent));
 router.put("/content/:id", validateObjectId, allowRoles("admin", "superadmin", "editor", "publisher"), asyncHandler(updateContent));
 router.delete("/content/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteContent));

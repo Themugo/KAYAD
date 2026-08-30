@@ -230,7 +230,20 @@ export async function getContents(req, res) {
   const { status, contentType, category, tags, search, page = 1, limit = 20 } = req.query;
   const filter = {};
 
-  if (status) filter.status = status;
+  // Fixed: this route is now genuinely public (see routes/cmsRoutes.js
+  // - it sits right next to its own public siblings /content/s/:slug
+  // and /content/:id, clearly intended to be public by the same
+  // comment/grouping, but was accidentally left after router.use(protect)
+  // until this fix). Since there is no real req.user on a public
+  // request, an unauthenticated caller must never be able to request
+  // draft/archived content by simply passing a different status value
+  // - only a genuinely authenticated request may see anything other
+  // than published content.
+  if (req.user) {
+    if (status) filter.status = status;
+  } else {
+    filter.status = "published";
+  }
   if (contentType) filter.contentType = contentType;
   if (category) filter.category = category;
   if (tags) filter.tags = { $contains: tags.split(",") };

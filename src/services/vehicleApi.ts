@@ -174,6 +174,12 @@ export interface GetCarsParams {
    * (carController.js's own getCars: query.auctionStatus =
    * auctionStatus) - 'draft' | 'live' | 'ended'. */
   auctionStatus?: string;
+  /** Confirmed real, already-supported backend sort values
+   * (carController.js's own getCars sortOption logic) -
+   * 'newest' is also the real, unconditional default when
+   * omitted, so this param only needs passing for a non-default
+   * order. */
+  sort?: 'price_asc' | 'price_desc' | 'year_desc' | 'year_asc' | 'mileage_asc' | 'views_desc' | 'newest' | 'ending_soon';
 }
 
 /** GET /api/cars - real, paginated listing. Query params match

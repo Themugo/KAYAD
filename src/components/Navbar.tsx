@@ -27,6 +27,7 @@ import {
   Sliders,
   CheckCircle2,
   Landmark,
+  Sparkles,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -436,6 +437,30 @@ export const Navbar: React.FC<NavbarProps> = ({
                       >
                         <Bookmark className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>Saved Searches</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavSelect('kayadlive')}
+                        className="w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1E3063]"
+                      >
+                        <Sparkles className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <span>KAYAD Live</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavSelect('buyer-platform')}
+                        className="w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1E3063]"
+                      >
+                        <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <span>My Garage</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavSelect('finance')}
+                        className="w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1E3063]"
+                      >
+                        <CreditCard className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <span>Vehicle Financing</span>
                       </button>
 
                       <button

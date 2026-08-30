@@ -409,11 +409,11 @@ function AppInner() {
           )}
 
           {activeNav === 'kayadlive' && (
-            <KAYADLive />
+            <KAYADLive onNavigate={(nav) => setActiveNav(nav)} />
           )}
 
           {activeNav === 'buyer-platform' && (
-            <BuyerPlatform />
+            <BuyerPlatform user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
           {activeNav === 'seller-platform' && (
@@ -421,7 +421,7 @@ function AppInner() {
           )}
 
           {activeNav === 'finance' && (
-            <FinanceMarketplace />
+            <FinanceMarketplace user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
           {activeNav === 'saved' && (
