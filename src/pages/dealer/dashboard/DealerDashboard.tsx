@@ -10,6 +10,7 @@ import {
   Gavel, X, Loader2,
 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
+import { getMyListings } from '../../../services/vehicleApi';
 
 // ============================================================
 // DESIGN TOKENS
@@ -240,16 +241,38 @@ const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
 // MAIN COMPONENT
 // ============================================================
 
-export default function DealerDashboard({ user, onOpenAuth }) {
+export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
+  // Fixed: the Inventory section previously never fetched anything at
+  // all - every stat (38 published, 5 draft, etc.) and all 4 listed
+  // vehicles were hardcoded directly in the JSX, identical for every
+  // dealer regardless of what's actually in the database. Reuses the
+  // same real, already-proven getMyListings endpoint built for the
+  // private seller dashboards (scoped to req.user.id server-side).
+  const [myListings, setMyListings] = useState([]);
+  const [listingsLoading, setListingsLoading] = useState(false);
+  const [listingsError, setListingsError] = useState(null);
+  const [listingsLoaded, setListingsLoaded] = useState(false);
+
   useEffect(() => {
     if (user) loadDashboard();
     else setLoading(false);
   }, [user]);
+
+  useEffect(() => {
+    if (activeSection === 'inventory' && user && !listingsLoaded) {
+      setListingsLoading(true);
+      setListingsError(null);
+      getMyListings()
+        .then((data) => { setMyListings(data); setListingsLoaded(true); })
+        .catch(() => setListingsError('Could not load your inventory. Please try again.'))
+        .finally(() => setListingsLoading(false));
+    }
+  }, [activeSection, user, listingsLoaded]);
 
   const loadDashboard = async () => {
     setLoadError(null);
@@ -495,70 +518,80 @@ export default function DealerDashboard({ user, onOpenAuth }) {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-slate-800">Inventory Management</h3>
                 <div className="flex items-center gap-3">
-                  <button className="px-4 py-2 border border-slate-200 rounded-xl text-slate-700 font-medium hover:bg-slate-50 flex items-center gap-2">
-                    <Filter className="w-4 h-4" />
-                    Filter
-                  </button>
-                  <button className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center gap-2">
+                  <button onClick={() => onNavigate?.('seller-platform')} className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center gap-2">
                     <Plus className="w-4 h-4" />
                     Add Listing
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-3 mb-6">
-                <div className="p-3 bg-emerald-50 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-emerald-600">38</p>
-                  <p className="text-xs text-emerald-600">Published</p>
+              {/* Fixed: this entire section previously never fetched
+                  anything - every stat below and all 4 listed
+                  vehicles were hardcoded directly in the JSX (the
+                  same "Toyota Land Cruiser 300 GX-R" invented model
+                  found earlier in this same file's now-fixed backend
+                  call), identical for every dealer regardless of
+                  what's actually in the database. Real counts and
+                  real listings below, computed from this dealer's own
+                  real inventory (getMyListings). The "Filter" button
+                  had no onClick handler at all - removed rather than
+                  left as dead UI, since no real filtering logic
+                  exists here to wire it to. */}
+              {listingsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
                 </div>
-                <div className="p-3 bg-amber-50 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-amber-600">5</p>
-                  <p className="text-xs text-amber-600">Draft</p>
+              ) : listingsError ? (
+                <div className="text-center py-12">
+                  <p className="text-sm text-slate-500 mb-3">{listingsError}</p>
+                  <button onClick={() => setListingsLoaded(false)} className="text-xs font-bold text-purple-600">Try Again</button>
                 </div>
-                <div className="p-3 bg-blue-50 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-blue-600">2</p>
-                  <p className="text-xs text-blue-600">Pending</p>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-purple-600">4</p>
-                  <p className="text-xs text-purple-600">Reserved</p>
-                </div>
-                <div className="p-3 bg-slate-100 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-slate-600">23</p>
-                  <p className="text-xs text-slate-600">Sold</p>
-                </div>
-                <div className="p-3 bg-slate-100 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-slate-600">3</p>
-                  <p className="text-xs text-slate-600">Archived</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { title: 'Toyota Land Cruiser 300 GX-R', price: 3200000, status: 'published', views: 456, days: 23 },
-                  { title: 'Mercedes-Benz GLE 450 4MATIC', price: 1850000, status: 'published', views: 389, days: 18 },
-                  { title: 'BMW X5 M Sport', price: 1650000, status: 'published', views: 345, days: 12 },
-                  { title: 'Porsche Cayenne S', price: 2450000, status: 'reserved', views: 289, days: 28 },
-                ].map((car, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
-                    <div className="w-16 h-12 bg-slate-200 rounded-lg flex items-center justify-center">
-                      <Car className="w-6 h-6 text-slate-400" />
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                    <div className="p-3 bg-emerald-50 rounded-xl text-center">
+                      <p className="text-2xl font-bold text-emerald-600">{myListings.filter((l) => l.status === 'available' || l.status === 'active').length}</p>
+                      <p className="text-xs text-emerald-600">Published</p>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-800">{car.title}</p>
-                      <p className="text-sm text-slate-500">Ksh {(car.price / 1000000).toFixed(1)}M • {car.views} views • {car.days} days</p>
+                    <div className="p-3 bg-amber-50 rounded-xl text-center">
+                      <p className="text-2xl font-bold text-amber-600">{myListings.filter((l) => l.status === 'draft').length}</p>
+                      <p className="text-xs text-amber-600">Draft</p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                      car.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
-                      car.status === 'reserved' ? 'bg-purple-100 text-purple-700' :
-                      'bg-slate-100 text-slate-600'
-                    }`}>
-                      {car.status}
-                    </span>
-                    <button className="p-2 hover:bg-slate-200 rounded-lg">
-                      <MoreVertical className="w-4 h-4 text-slate-400" />
-                    </button>
+                    <div className="p-3 bg-purple-50 rounded-xl text-center">
+                      <p className="text-2xl font-bold text-purple-600">{myListings.filter((l) => l.status === 'reserved').length}</p>
+                      <p className="text-xs text-purple-600">Reserved</p>
+                    </div>
+                    <div className="p-3 bg-slate-100 rounded-xl text-center">
+                      <p className="text-2xl font-bold text-slate-600">{myListings.filter((l) => l.status === 'sold').length}</p>
+                      <p className="text-xs text-slate-600">Sold</p>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-3">
+                    {myListings.length === 0 ? (
+                      <p className="text-sm text-slate-400 text-center py-8">You haven't listed any vehicles yet.</p>
+                    ) : myListings.map((car) => {
+                      const image = car.images?.[0]?.thumb || car.images?.[0]?.url;
+                      return (
+                        <div key={car.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                          <div className="w-16 h-12 bg-slate-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                            {image ? <img src={image} alt={car.title} className="w-full h-full object-cover" /> : <Car className="w-6 h-6 text-slate-400" />}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-slate-800">{car.title || `${car.year} ${car.brand} ${car.model}`}</p>
+                            <p className="text-sm text-slate-500">Ksh {(car.price / 1000000).toFixed(1)}M • {car.views || 0} views</p>
+                          </div>
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            car.status === 'available' || car.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                            car.status === 'reserved' ? 'bg-purple-100 text-purple-700' :
+                            'bg-slate-100 text-slate-600'
+                          }`}>
+                            {car.status || 'draft'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           )}
 

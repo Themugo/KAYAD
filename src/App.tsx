@@ -422,7 +422,7 @@ function AppInner() {
           )}
 
           {activeNav === 'dealer-dashboard' && (
-            <DealerDashboard user={user} onOpenAuth={() => setShowAuthModal(true)} />
+            <DealerDashboard user={user} onOpenAuth={() => setShowAuthModal(true)} onNavigate={(nav) => setActiveNav(nav)} />
           )}
 
           {activeNav === 'finance' && (
