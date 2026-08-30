@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import VehicleMarketplace from './features/VehicleMarketplace';
+import TopNoticeStrip from './components/TopNoticeStrip';
 import VehicleDetailModal from './components/VehicleDetailModal';
 import CompareModal from './components/CompareModal';
 import AuthModal from './components/AuthModal';
@@ -245,6 +246,11 @@ function AppInner() {
 
   return (
     <div className="min-h-screen bg-[#F6F1E8] text-slate-800 flex flex-col font-sans">
+      {/* 0. Top notice/advertisement strip - real, backend-driven,
+          admin-managed entirely through the Ad Manager panel, no code
+          changes needed to add/edit/recolor/remove an entry. */}
+      <TopNoticeStrip />
+
       {/* 1. Header Navigation */}
       <Navbar
         user={user}

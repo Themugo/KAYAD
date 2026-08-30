@@ -1,8 +1,26 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+
+// Fixed: mid-grid sponsor cards previously came from MOCK_SPONSOR_CARDS
+// (static, always-present placeholder data) - now fetched for real via
+// services/adApi.ts's getVisibleAdSlots, which has no real backend to
+// reach in this test environment. Mocked here (matching this project's
+// own established fetch-mocking pattern elsewhere) so the real
+// sponsor-interleaving logic itself can still be verified.
+vi.mock('../../services/adApi', async () => {
+  const actual = await vi.importActual('../../services/adApi');
+  return {
+    ...actual,
+    getVisibleAdSlots: vi.fn(async (placement: string) =>
+      placement === 'mid_grid'
+        ? [{ id: 'ad-1', placement: 'mid_grid', title: 'Test Sponsor', tagline: 'A real test ad', backgroundColor: '#1E3063', textColor: '#FFFFFF', opacity: 100, isVisible: true, sortOrder: 0, createdAt: '', updatedAt: '' }]
+        : []
+    ),
+  };
+});
 
 describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   const baseProps = {

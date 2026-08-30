@@ -1,12 +1,14 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
-import MarketingCard from '../../../components/MarketingCard';
-import { MOCK_SPONSOR_CARDS } from '../../../data/mockSponsors';
+import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
+import FloatingAdRail from '../../../components/FloatingAdRail';
+import { getVisibleAdSlots, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
 import HomePageAdminPanel from './HomePageAdminPanel';
+import AdManagerPanel from '../../AdManager/AdManagerPanel';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -91,6 +93,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // page renders correctly regardless of who's viewing it.
   const { config: homeConfig, updateConfig: updateHomeConfig, resetConfig: resetHomeConfig } = useHomePageConfig();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showAdManager, setShowAdManager] = useState(false);
   const isAdmin = isHomePage && user?.role === 'admin';
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
 
@@ -475,18 +478,44 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // placement shows up even with a small catalog, while still reading
   // as a natural row-boundary insertion rather than every-item ad
   // clutter once the catalog is genuinely large.
+  // Fixed: this previously interleaved MOCK_SPONSOR_CARDS - static,
+  // hardcoded placeholder content with no real advertiser or business
+  // behind it at all. Now fetches real, backend-persisted ad slots
+  // (placement='mid_grid') from the real Ad Manager system, mapped
+  // into MarketingCard's own real shape.
+  const [midGridAds, setMidGridAds] = useState<AdSlot[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    getVisibleAdSlots('mid_grid')
+      .then((data) => { if (!cancelled) setMidGridAds(data); })
+      .catch(() => { /* a failed ad fetch should never block the real vehicle grid */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const mapAdSlotToMarketingCard = (slot: AdSlot): MarketingCardData => ({
+    id: slot.id,
+    label: 'Sponsored',
+    category: 'Advertisement',
+    name: slot.title,
+    tagline: slot.tagline || '',
+    ctaLabel: slot.buttonText || 'Learn More',
+    ctaUrl: slot.buttonUrl,
+    icon: Megaphone,
+    accentColor: slot.backgroundColor,
+  });
+
   const gridItemsWithSponsors = useMemo(() => {
-    const items: ({ type: 'vehicle'; vehicle: Vehicle } | { type: 'sponsor'; sponsor: typeof MOCK_SPONSOR_CARDS[number] })[] = [];
+    const items: ({ type: 'vehicle'; vehicle: Vehicle } | { type: 'sponsor'; sponsor: MarketingCardData })[] = [];
     let sponsorIndex = 0;
     paginatedVehicles.forEach((v, i) => {
-      if (homeConfig.sectionVisibility.sponsorCardsInGrid && i > 0 && i % 4 === 0 && MOCK_SPONSOR_CARDS.length > 0) {
-        items.push({ type: 'sponsor', sponsor: MOCK_SPONSOR_CARDS[sponsorIndex % MOCK_SPONSOR_CARDS.length] });
+      if (homeConfig.sectionVisibility.sponsorCardsInGrid && i > 0 && i % 4 === 0 && midGridAds.length > 0) {
+        items.push({ type: 'sponsor', sponsor: mapAdSlotToMarketingCard(midGridAds[sponsorIndex % midGridAds.length]) });
         sponsorIndex += 1;
       }
       items.push({ type: 'vehicle', vehicle: v });
     });
     return items;
-  }, [paginatedVehicles, homeConfig.sectionVisibility.sponsorCardsInGrid]);
+  }, [paginatedVehicles, homeConfig.sectionVisibility.sponsorCardsInGrid, midGridAds]);
 
   return (
     <div className="space-y-0 pb-16">
@@ -630,7 +659,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5" id="market-results">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 flex gap-5 items-start" id="market-results">
+        {/* Left floating ad rail - its own column, never overlapping
+            the search/filter/grid content next to it. */}
+        <FloatingAdRail placement="left_rail" />
+
+        <div className="max-w-7xl mx-auto flex-1 min-w-0">
         {/* 4. FILTER SUMMARY CHIPS */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -727,6 +761,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span className="hidden xl:inline">Customize Home Page</span>
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setShowAdManager(true)}
+                className="flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 text-xs font-semibold"
+                title="Manage Ads"
+              >
+                <Megaphone className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">Manage Ads</span>
               </button>
             )}
           </div>
@@ -1001,7 +1045,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             )}
           </div>
         </div>
+        </div>
 
+        {/* Right floating ad rail - its own column, never overlapping
+            the grid next to it. */}
+        <FloatingAdRail placement="right_rail" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* 7. CTA BANDS */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 mt-12 rounded-2xl overflow-hidden">
           <div className="bg-gradient-to-br from-[#17244B] to-[#1E3063] text-white p-8 sm:p-10 flex flex-col justify-center gap-4">
@@ -1124,6 +1175,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           onClose={() => setShowAdminPanel(false)}
           adminUser={{ id: user!.id, name: user!.name }}
         />
+      )}
+
+      {isAdmin && showAdManager && (
+        <AdManagerPanel onClose={() => setShowAdManager(false)} />
       )}
     </div>
   );

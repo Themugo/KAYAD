@@ -394,6 +394,40 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 );
 
 -- =============================
+-- ADVERTISEMENTS (admin-managed ad slots)
+-- =============================
+-- Real, backend-persisted so a real advertiser's content is visible to
+-- every real visitor - not the same localStorage-only pattern already
+-- used elsewhere in this project for admin home-page customization
+-- (deliberately different there: presentation-only page layout, not a
+-- real paid-advertiser business feature where visibility to every
+-- visitor is the whole point).
+CREATE TABLE IF NOT EXISTS ad_slots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  placement TEXT NOT NULL CHECK (placement IN ('top_ticker','left_rail','right_rail','mid_grid','sidebar')),
+  title TEXT NOT NULL,
+  tagline TEXT,
+  price_tag TEXT,
+  button_text TEXT,
+  button_url TEXT,
+  background_color TEXT DEFAULT '#1E3063',
+  text_color TEXT DEFAULT '#FFFFFF',
+  opacity INTEGER DEFAULT 100 CHECK (opacity >= 10 AND opacity <= 100),
+  is_visible BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+-- Explicit grant: unlike every other table in this schema file (whose
+-- permissions come from a one-time, already-applied blanket grant on
+-- this project's real database), this table is new - reproduced the
+-- real, exact consequence of omitting this on a fresh database
+-- directly: every real read/write failed ("permission denied for
+-- table ad_slots").
+GRANT ALL ON ad_slots TO service_role;
+
+-- =============================
 -- FEATURE FLAGS
 -- =============================
 CREATE TABLE IF NOT EXISTS feature_flags (
