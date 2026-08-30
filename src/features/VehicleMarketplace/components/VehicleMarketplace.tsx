@@ -1,14 +1,17 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
 import FloatingAdRail from '../../../components/FloatingAdRail';
+import CarSilhouette from '../../../components/CarSilhouette';
+import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { getVisibleAdSlots, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
 import HomePageAdminPanel from './HomePageAdminPanel';
 import AdManagerPanel from '../../AdManager/AdManagerPanel';
+import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -94,6 +97,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const { config: homeConfig, updateConfig: updateHomeConfig, resetConfig: resetHomeConfig } = useHomePageConfig();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showAdManager, setShowAdManager] = useState(false);
+  const [showHeroEditor, setShowHeroEditor] = useState(false);
   const isAdmin = isHomePage && user?.role === 'admin';
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
 
@@ -492,6 +496,58 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => { cancelled = true; };
   }, []);
 
+  // Fixed: 'sidebar' was a real, selectable placement in the Ad
+  // Manager panel - an admin could create one, see it marked "Visible
+  // on page", and it would never actually appear anywhere on the real
+  // page at all. Now genuinely fetched and rendered at the bottom of
+  // the real filter sidebar.
+  const [sidebarAds, setSidebarAds] = useState<AdSlot[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    getVisibleAdSlots('sidebar')
+      .then((data) => { if (!cancelled) setSidebarAds(data); })
+      .catch(() => { /* a failed ad fetch should never block the real filter sidebar */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Fixed: the hero card's text/background/CTAs are now real,
+  // backend-persisted, fully admin-editable content (via
+  // features/HeroEditor/HeroEditorPanel.tsx) - not hardcoded. Falls
+  // back to a single, honest default slide when the admin hasn't
+  // created any real ones yet, so the page never shows an empty hero
+  // on a fresh install.
+  const DEFAULT_HERO_SLIDE: HeroSlide = {
+    id: 'default',
+    eyebrowText: 'KAYAD EA Automotive Marketplace',
+    headline: 'Find the right vehicle. Buy with confidence.',
+    subheadline: 'Quality vehicles, live auctions, and inspection reports from registered local mechanics — all verified through one escrow-protected marketplace built for East Africa.',
+    ctaPrimaryText: 'Explore Vehicles →',
+    ctaSecondaryText: 'Sell Your Vehicle',
+    backgroundType: 'gradient',
+    overlayColor: '#1E3063',
+    overlayOpacity: 100,
+    displayMode: 'boxed',
+    isVisible: true,
+    sortOrder: 0,
+    createdAt: '',
+    updatedAt: '',
+  };
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([DEFAULT_HERO_SLIDE]);
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    getVisibleHeroSlides()
+      .then((data) => { if (!cancelled && data.length > 0) setHeroSlides(data); })
+      .catch(() => { /* a failed hero fetch falls back to the real default slide */ });
+    return () => { cancelled = true; };
+  }, []);
+  useEffect(() => {
+    if (heroSlides.length < 2) return;
+    const timer = setInterval(() => setHeroSlideIndex((i) => (i + 1) % heroSlides.length), 6000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+  const activeHeroSlide = heroSlides[heroSlideIndex % heroSlides.length];
+
   const mapAdSlotToMarketingCard = (slot: AdSlot): MarketingCardData => ({
     id: slot.id,
     label: 'Sponsored',
@@ -534,47 +590,111 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           sort, pagination, saved/compare, admin config) - only the visual
           layer changed, not the data or behavior. */}
 
-      {/* 1. HERO */}
+      {/* 1. HERO - redesigned and compacted (~30% less vertical space
+          than before), with popular-in-Kenya car silhouettes flanking
+          the text on wide screens. Fully driven by real,
+          backend-persisted content (activeHeroSlide) - text, CTAs,
+          background layer, and overlay color/opacity are all
+          admin-editable through the real Hero Editor panel, not
+          hardcoded. Supports a real slider: when the admin adds more
+          than one slide, this auto-rotates between them. */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-      <section className="relative -mx-4 sm:-mx-6 lg:-mx-8 bg-gradient-to-b from-[#17244B] to-[#1E3063] text-white overflow-hidden">
+      <section
+        className={`relative -mx-4 sm:-mx-6 lg:-mx-8 text-white overflow-hidden ${activeHeroSlide.displayMode === 'fullscreen' ? 'min-h-[70vh] flex items-center' : ''}`}
+        style={activeHeroSlide.backgroundType === 'image' && activeHeroSlide.backgroundValue ? {
+          backgroundImage: `url(${activeHeroSlide.backgroundValue})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : activeHeroSlide.backgroundType === 'color' && activeHeroSlide.backgroundValue ? {
+          backgroundColor: activeHeroSlide.backgroundValue,
+        } : undefined}
+      >
+        {/* Base gradient layer - only shown when no real image/color
+            background has been set, so a genuine admin-chosen
+            background is never fought by this default underneath it. */}
+        {(activeHeroSlide.backgroundType === 'gradient' || !activeHeroSlide.backgroundValue) && (
+          <div className="absolute inset-0 bg-gradient-to-b from-[#17244B] to-[#1E3063]" />
+        )}
+        {/* Overlay layer - admin-controlled color + opacity, sits above
+            the background layer and below the text/CTA content. */}
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: activeHeroSlide.overlayColor, opacity: activeHeroSlide.overlayOpacity / 100 }}
+        />
         <div className="absolute inset-0 pointer-events-none" style={{
           background: 'radial-gradient(600px 400px at 85% 10%, rgba(200,90,50,.18), transparent 60%), radial-gradient(500px 350px at 100% 60%, rgba(251,191,36,.10), transparent 60%)'
         }} />
-        <div className="relative max-w-3xl mx-auto text-center px-4 sm:px-6 pt-10 pb-20">
-          <div className="inline-flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase text-amber-400 mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            KAYAD EA Automotive Marketplace
+
+        <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 py-7 flex items-center gap-6">
+          {/* Left car silhouettes - popular Kenyan road vehicles,
+              hidden below xl: where there isn't real room for them
+              without crowding the text. */}
+          <div className="hidden xl:flex flex-col gap-6 w-28 shrink-0 text-[#E08A6B]">
+            <CarSilhouette label="Toyota Probox" />
+            <CarSilhouette label="Land Cruiser Prado" />
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4">
-            Find the right vehicle.<br />Buy with <span className="text-[#E08A6B]">confidence.</span>
-          </h1>
-          <p className="text-sm sm:text-base text-slate-300 max-w-lg mx-auto mb-7">
-            Quality vehicles, live auctions, and inspection reports from registered local mechanics — all verified through one escrow-protected marketplace built for East Africa.
-          </p>
-          <div className="flex items-center justify-center gap-3 mb-7">
-            <button
-              onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-[#C85A32] hover:bg-[#B34E29] text-white font-bold text-sm px-6 py-3 rounded-full transition-colors flex items-center gap-2"
-            >
-              Explore Vehicles →
-            </button>
-            <button
-              onClick={() => onNavigate('seller-platform')}
-              className="border border-white/35 hover:border-white text-white font-bold text-sm px-6 py-3 rounded-full transition-colors"
-            >
-              Sell Your Vehicle
-            </button>
-          </div>
-          <div className="flex items-center justify-center gap-3 text-xs text-slate-300">
-            <div className="flex">
-              {['JM', 'AN', 'TK'].map((initials, i) => (
-                <span key={initials} className={`w-7 h-7 rounded-full border-2 border-[#17244B] bg-gradient-to-br from-[#C85A32] to-[#E08A6B] flex items-center justify-center text-[10px] font-bold ${i > 0 ? '-ml-2' : ''}`}>
-                  {initials}
-                </span>
-              ))}
+
+          <div className="flex-1 text-center px-0 sm:px-2">
+            {activeHeroSlide.eyebrowText && (
+              <div className="inline-flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase text-amber-400 mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                {activeHeroSlide.eyebrowText}
+              </div>
+            )}
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-3">
+              {activeHeroSlide.headline}
+            </h1>
+            {activeHeroSlide.subheadline && (
+              <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto mb-5">
+                {activeHeroSlide.subheadline}
+              </p>
+            )}
+            <div className="flex items-center justify-center gap-3 mb-5">
+              {activeHeroSlide.ctaPrimaryText && (
+                <button
+                  onClick={() => activeHeroSlide.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="bg-[#C85A32] hover:bg-[#B34E29] text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-full transition-colors flex items-center gap-2"
+                >
+                  {activeHeroSlide.ctaPrimaryText}
+                </button>
+              )}
+              {activeHeroSlide.ctaSecondaryText && (
+                <button
+                  onClick={() => activeHeroSlide.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')}
+                  className="border border-white/35 hover:border-white text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-full transition-colors"
+                >
+                  {activeHeroSlide.ctaSecondaryText}
+                </button>
+              )}
             </div>
-            <span>Trusted by verified sellers across East Africa</span>
-            <span className="text-amber-400 font-bold">★ 4.8/5</span>
+            <div className="flex items-center justify-center gap-3 text-[11px] text-slate-300">
+              <div className="flex">
+                {['JM', 'AN', 'TK'].map((initials, i) => (
+                  <span key={initials} className={`w-6 h-6 rounded-full border-2 border-[#17244B] bg-gradient-to-br from-[#C85A32] to-[#E08A6B] flex items-center justify-center text-[9px] font-bold ${i > 0 ? '-ml-2' : ''}`}>
+                    {initials}
+                  </span>
+                ))}
+              </div>
+              <span>Trusted by verified sellers across East Africa</span>
+              <span className="text-amber-400 font-bold">★ 4.8/5</span>
+            </div>
+            {heroSlides.length > 1 && (
+              <div className="flex items-center justify-center gap-1.5 mt-4">
+                {heroSlides.map((s, i) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setHeroSlideIndex(i)}
+                    className={`h-1.5 rounded-full transition-all ${i === heroSlideIndex ? 'w-5 bg-amber-400' : 'w-1.5 bg-white/30'}`}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="hidden xl:flex flex-col gap-6 w-28 shrink-0 text-[#E08A6B]">
+            <CarSilhouette label="Subaru Forester" flip />
+            <CarSilhouette label="Toyota Premio" flip />
           </div>
         </div>
       </section>
@@ -773,6 +893,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <span className="hidden xl:inline">Manage Ads</span>
               </button>
             )}
+            {isAdmin && (
+              <button
+                onClick={() => setShowHeroEditor(true)}
+                className="flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 text-xs font-semibold"
+                title="Edit Hero"
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">Edit Hero</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -908,6 +1038,24 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <button onClick={resetFilters} className="w-full bg-[#1E3063] hover:bg-[#17244B] text-white font-bold text-xs rounded-lg py-2.5 mt-3">
               Apply Filters
             </button>
+
+            {sidebarAds.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
+                {sidebarAds.map((slot) => (
+                  <a
+                    key={slot.id}
+                    href={slot.buttonUrl || undefined}
+                    className="block rounded-xl p-3.5 space-y-1.5"
+                    style={{ backgroundColor: slot.backgroundColor, color: slot.textColor, opacity: slot.opacity / 100 }}
+                  >
+                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">Advertisement</span>
+                    <h5 className="text-xs font-bold leading-snug">{slot.title}</h5>
+                    {slot.tagline && <p className="text-[10.5px] opacity-85 leading-snug">{slot.tagline}</p>}
+                    {slot.buttonText && <span className="text-[10.5px] font-bold underline underline-offset-2">{slot.buttonText}</span>}
+                  </a>
+                ))}
+              </div>
+            )}
           </aside>
           )}
 
@@ -1179,6 +1327,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {isAdmin && showAdManager && (
         <AdManagerPanel onClose={() => setShowAdManager(false)} />
+      )}
+
+      {isAdmin && showHeroEditor && (
+        <HeroEditorPanel onClose={() => { setShowHeroEditor(false); getVisibleHeroSlides().then((data) => { if (data.length > 0) setHeroSlides(data); }).catch(() => {}); }} />
       )}
     </div>
   );

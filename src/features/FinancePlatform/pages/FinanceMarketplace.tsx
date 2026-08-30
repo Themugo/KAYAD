@@ -144,7 +144,7 @@ const FINANCE_PARTNERS: FinancePartner[] = [
   },
   {
     id: 'kcb',
-    name: 'another partner bank Bank',
+    name: 'another partner bank',
     type: 'bank',
     logo: '🏛️',
     products: ['Vehicle Finance', 'Asset Loans', 'Salary Advance'],
@@ -160,7 +160,7 @@ const FINANCE_PARTNERS: FinancePartner[] = [
   },
   {
     id: 'stima',
-    name: 'Stima SACCO',
+    name: 'a partner SACCO',
     type: 'sacco',
     logo: '🤝',
     products: ['Vehicle Loans', 'Emergency Loans', 'Savings'],
@@ -235,7 +235,7 @@ const SAMPLE_APPLICATION: FinanceApplication = {
   submittedAt: '2024-03-10T09:30:00Z',
   offers: [
     { lenderId: 'equity', lenderName: 'a partner bank', interestRate: 14, monthlyPayment: 43500, term: 48, totalCost: 2088000, approved: true },
-    { lenderId: 'kcb', lenderName: 'another partner bank Bank', interestRate: 12.5, monthlyPayment: 42500, term: 48, totalCost: 2040000, approved: true },
+    { lenderId: 'kcb', lenderName: 'another partner bank', interestRate: 12.5, monthlyPayment: 42500, term: 48, totalCost: 2040000, approved: true },
   ],
   documents: [
     { id: 'd1', type: 'national_id', name: 'National ID', status: 'verified', verifiedAt: '2024-03-10' },
@@ -1168,7 +1168,7 @@ function PreQualificationSection() {
               <div className="rounded-xl p-4" style={{ backgroundColor: `${KAYAD_THEME.emerald}10` }}>
                 <h3 className="font-bold mb-2" style={{ color: KAYAD_THEME.emerald }}>Suggested Lenders</h3>
                 <div className="space-y-2">
-                  {['a partner bank', 'another partner bank', 'Stima SACCO'].map((name, i) => (
+                  {['a partner bank', 'another partner bank', 'a partner SACCO'].map((name, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <CheckCircle size={16} style={{ color: KAYAD_THEME.emerald }} />
                       <span style={{ color: KAYAD_THEME.navy }}>{name}</span>
@@ -1212,8 +1212,8 @@ function ApplicationSection({ vehiclePrice }: { vehiclePrice: number }) {
 
   const lenders = [
     { id: 'equity', name: 'a partner bank', rate: '12-16%' },
-    { id: 'kcb', name: 'another partner bank Bank', rate: '11-15%' },
-    { id: 'stima', name: 'Stima SACCO', rate: '8-12%' },
+    { id: 'kcb', name: 'another partner bank', rate: '11-15%' },
+    { id: 'stima', name: 'a partner SACCO', rate: '8-12%' },
     { id: 'faulu', name: 'Faulu Kenya', rate: '15-20%' },
   ];
 
@@ -1800,9 +1800,9 @@ function FinanceAdvisorSection() {
         content: `Based on your situation, here are my recommendations:
 
 • For your income level, aim to save at least 15-20% deposit
-• Banks like Equity and another partner bank offer competitive rates for your profile
+• Some partner banks offer competitive rates for your profile
 • Balloon financing can reduce monthly payments by 20-30%
-• Consider Stima SACCO if you want lower rates and are a member
+• Consider a partner SACCO if you want lower rates and are a member
 
 Would you like me to compare specific lenders or calculate payments?`
       }]);
@@ -1985,8 +1985,8 @@ function AnalyticsSection() {
         <div className="space-y-3">
           {[
             { name: 'a partner bank', applications: 342, approval: '72%', volume: 'KES 580M' },
-            { name: 'another partner bank Bank', applications: 298, approval: '75%', volume: 'KES 520M' },
-            { name: 'Stima SACCO', applications: 256, approval: '82%', volume: 'KES 380M' },
+            { name: 'another partner bank', applications: 298, approval: '75%', volume: 'KES 520M' },
+            { name: 'a partner SACCO', applications: 256, approval: '82%', volume: 'KES 380M' },
             { name: 'Faulu Kenya', applications: 189, approval: '65%', volume: 'KES 240M' },
           ].map((partner, i) => (
             <div key={i} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: KAYAD_THEME.warmBeige }}>

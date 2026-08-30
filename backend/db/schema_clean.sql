@@ -394,6 +394,36 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 );
 
 -- =============================
+-- HERO SLIDES (admin-managed hero card - text, layered background,
+-- and slider support)
+-- =============================
+-- Real, backend-persisted for the same reason as ad_slots: every real
+-- visitor must see the admin's edits, not just the admin's own
+-- browser (unlike the deliberately localStorage-only home-page
+-- section-visibility toggles elsewhere in this project).
+CREATE TABLE IF NOT EXISTS hero_slides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  eyebrow_text TEXT,
+  headline TEXT NOT NULL,
+  subheadline TEXT,
+  cta_primary_text TEXT,
+  cta_primary_link TEXT,
+  cta_secondary_text TEXT,
+  cta_secondary_link TEXT,
+  background_type TEXT DEFAULT 'gradient' CHECK (background_type IN ('color','gradient','image')),
+  background_value TEXT,
+  overlay_color TEXT DEFAULT '#1E3063',
+  overlay_opacity INTEGER DEFAULT 40 CHECK (overlay_opacity >= 0 AND overlay_opacity <= 100),
+  display_mode TEXT DEFAULT 'boxed' CHECK (display_mode IN ('boxed','fullscreen')),
+  is_visible BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+GRANT ALL ON hero_slides TO service_role;
+
+-- =============================
 -- ADVERTISEMENTS (admin-managed ad slots)
 -- =============================
 -- Real, backend-persisted so a real advertiser's content is visible to

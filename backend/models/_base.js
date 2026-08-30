@@ -14,7 +14,7 @@ const TABLE_MAP = {
   AuditLog: "audit_logs", SecurityLog: "security_logs",
   RefreshToken: "refresh_tokens", Dispute: "disputes", Evidence: "evidence",
   Lead: "leads", LeadActivity: "lead_activities",
-  SupportTicket: "support_tickets", FeatureFlag: "feature_flags", AdSlot: "ad_slots",
+  SupportTicket: "support_tickets", FeatureFlag: "feature_flags", AdSlot: "ad_slots", HeroSlide: "hero_slides",
   PlatformConfig: "platform_config", Announcement: "announcements",
   SavedSearch: "saved_searches", Report: "reports",
   Transaction: "transactions", Subscription: "subscriptions",
