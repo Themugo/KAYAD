@@ -323,7 +323,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         appointmentTitle: 'Vehicle Handover & Logbook Verification',
         appointmentDate: '2026-07-31',
         appointmentTime: '10:30 AM',
-        appointmentLocation: 'NCBA Bank Custody Vault, Nairobi',
+        appointmentLocation: 'the partner bank Custody Vault, Nairobi',
         appointmentStatus: 'Pending'
       };
       textSummary = 'Scheduled an appointment proposal.';

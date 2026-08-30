@@ -62,7 +62,7 @@ export interface SellerOffer {
   buyerName: string;
   buyerAvatar?: string;
   buyerPhone: string;
-  paymentType: 'Escrow Vault (Cash)' | 'NCBA Asset Financing';
+  paymentType: 'Escrow Vault (Cash)' | 'KAYAD Asset Financing';
   status: 'Pending' | 'Accepted' | 'Countered' | 'Declined';
   expiresInHours: number;
   timestamp: string;
@@ -268,7 +268,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
       offeredAmount: 7450000,
       buyerName: 'Eng. Beatrice Mwangi',
       buyerPhone: '+254 711 *** 441',
-      paymentType: 'NCBA Asset Financing',
+      paymentType: 'KAYAD Asset Financing',
       status: 'Pending',
       expiresInHours: 36,
       timestamp: 'Yesterday at 04:30 PM'
@@ -330,7 +330,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
       buyerName: 'Grace Wanjiku',
       agreedPrice: 2650000,
       payoutAmount: 2636750, // net after 0.5% escrow fee
-      payoutMethod: 'NCBA Bank Kenya (A/C ****8891)',
+      payoutMethod: 'our escrow custodian (A/C ****8891)',
       timsTransferRef: 'TIMS-KE-9920148',
       completedDate: 'June 14, 2026'
     }
@@ -777,7 +777,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
               id: 'inq-2',
               buyerName: 'Eng. Beatrice Mwangi',
               vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-              lastMsg: 'I have submitted an NCBA asset financing pre-approval offer of Ksh 7,450,000.',
+              lastMsg: 'I have submitted an KAYAD asset financing pre-approval offer of Ksh 7,450,000.',
               time: 'Yesterday',
               unread: false
             },
@@ -1135,7 +1135,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
                 <span className="font-bold text-slate-600">Payout Account</span>
                 <Badge variant="success" size="sm">CONFIGURED ✓</Badge>
               </div>
-              <p className="text-slate-500 text-[11px]">NCBA Bank Kenya (A/C ending ****8891).</p>
+              <p className="text-slate-500 text-[11px]">our escrow custodian (A/C ending ****8891).</p>
             </div>
           </div>
         </Card>

@@ -1,5 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { FAQ_DATA } from '../../features/SupportView/components/SupportFAQ';
+import { FAQ_DATA } from '../../features/SupportFAQ';
+
+// Fixed: this test previously imported from
+// '../../features/SupportView/components/SupportFAQ' - a confirmed-
+// orphaned duplicate file, unreachable from the real app (App.tsx's
+// own SupportView imports from '../../features/SupportFAQ', the flat
+// file, which wins standard module resolution over the same-named
+// folder). This test suite's own real intent - guarding against
+// exactly the false-partnership-claim regression its own comments
+// below describe - was silently not protecting the real, live file
+// users actually see. Fixed to import the real, canonical file, and
+// its FAQ_DATA content (previously still containing the very claims
+// this test asserts against) replaced with the already-correct,
+// already-vetted content this test was written for.
 
 describe('SupportFAQ - does not overclaim regulatory status or specific unverified bank partnerships', () => {
   // Found while auditing for fake/unverified trust claims (a production-

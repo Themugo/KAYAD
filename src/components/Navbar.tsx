@@ -302,20 +302,29 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Favorites Icon */}
-            <button
-              onClick={() => handleNavSelect('saved')}
-              className={`p-2 rounded-xl text-slate-600 hover:text-[#1E3063] hover:bg-[#F5F2EB] transition-colors relative ${
-                activeNav === 'saved' ? 'bg-[#F5F2EB] text-[#1E3063]' : ''
-              }`}
-              title="Saved Vehicles"
-            >
-              <Heart className="w-5 h-5 text-slate-600 stroke-[1.75]" />
-              {savedCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-[#C85A32] text-white shadow-2xs">
-                  {savedCount}
-                </span>
-              )}
-            </button>
+            {/* Fixed: this was always shown, even to signed-out
+                visitors, even though favorites are inherently
+                per-user (require being signed in to mean anything -
+                the "saved" destination has nothing real to show a
+                logged-out visitor). Now only shown once genuinely
+                signed in, matching the same real gating already used
+                elsewhere in this navbar (e.g. the profile dropdown). */}
+            {user && (
+              <button
+                onClick={() => handleNavSelect('saved')}
+                className={`p-2 rounded-xl text-slate-600 hover:text-[#1E3063] hover:bg-[#F5F2EB] transition-colors relative ${
+                  activeNav === 'saved' ? 'bg-[#F5F2EB] text-[#1E3063]' : ''
+                }`}
+                title="Saved Vehicles"
+              >
+                <Heart className="w-5 h-5 text-slate-600 stroke-[1.75]" />
+                {savedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-[#C85A32] text-white shadow-2xs">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* List Vehicle Button (Primary CTA: Muted Terracotta) */}
             <button

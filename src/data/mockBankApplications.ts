@@ -2,10 +2,10 @@ import { BankFinancingApplication } from '../types';
 
 export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
   {
-    id: 'APP-NCBA-2026-001',
-    appRef: 'NCBA-AF-8812',
+    id: 'APP-KAYAD-2026-001',
+    appRef: 'KAYAD-AF-8812',
     bankId: 'ncba',
-    bankName: 'NCBA Drive Asset Finance',
+    bankName: 'Partner Bank Asset Finance',
     applicantName: 'Dr. Samuel Omondi',
     applicantPhone: '+254 722 104 902',
     applicantEmail: 'samuel.omondi@knh.or.ke',
@@ -36,9 +36,9 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
     submissionDate: '2026-07-28 09:30 AM',
     lastUpdated: '2026-07-29 11:15 AM',
     stipulations: [
-      'Certified 6-month bank statement from KCB Bank',
+      'Certified 6-month bank statement from another partner bank Bank',
       'Original NTSA Joint Logbook Transfer Authorization',
-      'Comprehensive Auto Insurance Policy under NCBA Interest'
+      'Comprehensive Auto Insurance Policy under KAYAD Interest'
     ],
     documents: [
       { id: 'DOC-01', name: 'National ID Card (Front & Back).pdf', type: 'National ID', status: 'Verified', uploadedAt: '2026-07-28' },
@@ -52,7 +52,7 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
         id: 'MSG-01',
         sender: 'KAYAD System',
         senderName: 'System',
-        message: 'Financing application submitted directly to NCBA Bank via KAYAD Instant Express Portal.',
+        message: 'Financing application submitted directly to the partner bank via KAYAD Instant Express Portal.',
         timestamp: '2026-07-28 09:30 AM',
         type: 'Status Update'
       },
@@ -70,7 +70,7 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
     id: 'APP-EQT-2026-002',
     appRef: 'EQT-AL-9043',
     bankId: 'equity',
-    bankName: 'Equity Bank Vehicle Financing',
+    bankName: 'Partner Bank Vehicle Financing',
     applicantName: 'Sarah Mwangi',
     applicantPhone: '+254 718 493 201',
     applicantEmail: 'sarah.mwangi@techfirm.co.ke',
@@ -101,7 +101,7 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
     submissionDate: '2026-07-25 10:00 AM',
     lastUpdated: '2026-07-27 04:30 PM',
     stipulations: [
-      'Direct Payroll Standing Order setup with Equity Bank',
+      'Direct Payroll Standing Order setup with a partner bank',
       'Vehicle GPS Tracker Installation Confirmation'
     ],
     documents: [
@@ -121,10 +121,10 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
     ]
   },
   {
-    id: 'APP-KCB-2026-003',
-    appRef: 'KCB-AUT-1029',
+    id: 'APP-another partner bank-2026-003',
+    appRef: 'another partner bank-AUT-1029',
     bankId: 'kcb',
-    bankName: 'KCB Auto Loan Express',
+    bankName: 'another partner bank Auto Loan Express',
     applicantName: 'James Kariuki',
     applicantPhone: '+254 733 890 112',
     applicantEmail: 'jkariuki@transport-sme.co.ke',
@@ -163,7 +163,7 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
         id: 'MSG-21',
         sender: 'KAYAD System',
         senderName: 'System',
-        message: 'New application submitted to KCB Auto Loan Express. Awaiting initial officer assignment.',
+        message: 'New application submitted to another partner bank Auto Loan Express. Awaiting initial officer assignment.',
         timestamp: '2026-07-29 08:15 AM',
         type: 'Status Update'
       }
@@ -173,7 +173,7 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
     id: 'APP-STB-2026-004',
     appRef: 'STB-VF-7710',
     bankId: 'stanbic',
-    bankName: 'Stanbic Vehicle & Asset Solutions',
+    bankName: 'Partner Bank Vehicle Finance',
     applicantName: 'Fatuma Hassan',
     applicantPhone: '+254 701 554 992',
     applicantEmail: 'fatuma.h@coastalimports.com',
@@ -203,7 +203,7 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
     assignedOfficer: 'Kevin Njoroge (Risk Director)',
     submissionDate: '2026-07-20 11:30 AM',
     lastUpdated: '2026-07-22 03:00 PM',
-    rejectionReason: 'Debt-to-Income (DTI) ratio of 63% exceeds Stanbic policy limit of 45%. Adverse CRB default listings recorded.',
+    rejectionReason: 'Debt-to-Income (DTI) ratio of 63% exceeds the partner bank policy limit of 45%. Adverse CRB default listings recorded.',
     documents: [
       { id: 'DOC-31', name: 'National ID.pdf', type: 'National ID', status: 'Verified', uploadedAt: '2026-07-20' },
       { id: 'DOC-32', name: 'Bank Statement.pdf', type: 'Bank Statement', status: 'Re-upload Required', uploadedAt: '2026-07-20' }
@@ -220,10 +220,10 @@ export const MOCK_BANK_APPLICATIONS: BankFinancingApplication[] = [
     ]
   },
   {
-    id: 'APP-NCBA-2026-005',
-    appRef: 'NCBA-AF-8109',
+    id: 'APP-KAYAD-2026-005',
+    appRef: 'KAYAD-AF-8109',
     bankId: 'ncba',
-    bankName: 'NCBA Drive Asset Finance',
+    bankName: 'Partner Bank Asset Finance',
     applicantName: 'Eng. Brian Rotich',
     applicantPhone: '+254 720 112 334',
     applicantEmail: 'brian.rotich@kenha.go.ke',

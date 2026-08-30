@@ -82,16 +82,16 @@ export const ORGANIZER_TRUST_METRICS = {
 const ORGANIZERS = {
   ncbBank: {
     id: 'org-ncba',
-    name: 'NCBA Bank Kenya',
+    name: 'our escrow custodian',
     type: 'commercial_bank' as AuctionOrganizerType,
-    logo: 'https://ui-avatars.com/api/?name=NCBA&background=1E3063&color=fff&size=128',
+    logo: 'https://ui-avatars.com/api/?name=KAYAD&background=1E3063&color=fff&size=128',
     isVerified: true,
     verificationBadge: 'bank' as const,
     profileUrl: '/organizer/ncba-bank',
     contact: {
       phone: '+254 722 889 012',
       email: 'repossessed@ncbank.co.ke',
-      address: 'NCBA Tower, Upper Hill Road, Nairobi',
+      address: 'KAYAD Tower, Upper Hill Road, Nairobi',
       website: 'https://www.ncbagroup.com/kenya',
       businessHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
       operatingRegion: 'Nationwide',
@@ -100,8 +100,8 @@ const ORGANIZERS = {
     yearsOnPlatform: 4,
     completedAuctions: 156,
     paymentDetails: {
-      bankName: 'NCBA Bank Kenya PLC',
-      accountName: 'NCBA Asset Disposal Account',
+      bankName: 'our escrow custodian PLC',
+      accountName: 'KAYAD Asset Disposal Account',
       accountNumber: '0123456789012',
       paybill: '880100',
     },
@@ -126,7 +126,7 @@ const ORGANIZERS = {
     yearsOnPlatform: 6,
     completedAuctions: 89,
     paymentDetails: {
-      bankName: 'Equity Bank Kenya',
+      bankName: 'a partner bank',
       accountName: 'Crown Motors Kenya Ltd',
       accountNumber: '0987654321098',
       paybill: '247247',
@@ -153,7 +153,7 @@ const ORGANIZERS = {
     yearsOnPlatform: 3,
     completedAuctions: 42,
     paymentDetails: {
-      bankName: 'Standard Chartered Bank Kenya',
+      bankName: 'our escrow custodian',
       accountName: 'Coastline Auto Limited',
       accountNumber: '0123456789001',
     },
@@ -236,7 +236,7 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     uniqueBiddersCount: 6,
     reserveMet: true,
     termsAndConditions: [
-      'NCBA Bank Repossession Asset Sale #4092.',
+      'the partner bank Repossession Asset Sale #4092.',
       '150-Point physical inspection report available for download.',
       'Logbook title transfer handled directly via KAYAD Escrow Vault & NTSA TIMS.',
       'Winning bidder must complete payment within 48 hours.'

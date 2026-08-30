@@ -849,7 +849,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </div>
                 <div>
                   <h3 className="font-extrabold text-blue-950 text-base font-display">Financing Marketplace Estimator</h3>
-                  <p className="text-xs text-blue-800">Pre-approved by NCBA, Equity Bank, KCB & Stanbic</p>
+                  <p className="text-xs text-blue-800">Compare pre-approval offers from multiple lenders</p>
                 </div>
               </div>
               <Badge variant="success" size="md">

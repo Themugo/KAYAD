@@ -36,10 +36,10 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-ins-1',
     category: 'inspections',
-    categoryLabel: '150-Point Inspection',
+    categoryLabel: 'Pre-Purchase Inspection',
     categoryIcon: <ClipboardCheck className="w-4 h-4 text-emerald-500" />,
-    question: 'What is included in the KAYAD 150-Point Vehicle Inspection?',
-    answer: 'The KAYAD 150-Point Audit is conducted by certified master technicians (AutoCheck Kenya). It covers detailed computer OBD-II diagnostic code scans, engine compression, gearbox and transmission health, chassis structural alignment, brake & suspension wear, NTSA logbook VIN matching, and a comprehensive 10km road test.',
+    question: 'What is included in a KAYAD Pre-Purchase Inspection?',
+    answer: 'KAYAD Pre-Purchase Inspections are conducted by independent, verified inspection providers - not KAYAD employees. Each provider defines their own checklist depth and pricing; a typical inspection covers OBD-II diagnostic scans, engine and transmission health, chassis alignment, brake and suspension wear, NTSA logbook VIN matching, and a road test.',
     keyPoints: [
       'Full OBD-II diagnostic fault code audit',
       'Structural chassis & accident repair inspection',
@@ -51,7 +51,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-ins-2',
     category: 'inspections',
-    categoryLabel: '150-Point Inspection',
+    categoryLabel: 'Pre-Purchase Inspection',
     categoryIcon: <ClipboardCheck className="w-4 h-4 text-emerald-500" />,
     question: 'How do I schedule a pre-purchase mechanic inspection in Nairobi, Mombasa, or Nakuru?',
     answer: 'You can request an inspection directly from any vehicle listing page or via the Communication Hub. A certified inspector will be dispatched to the vehicle yard (or inspection bay) within 2 hours, and the digital report will be available in your dashboard.',
@@ -64,21 +64,21 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-ins-3',
     category: 'inspections',
-    categoryLabel: '150-Point Inspection',
+    categoryLabel: 'Pre-Purchase Inspection',
     categoryIcon: <ClipboardCheck className="w-4 h-4 text-emerald-500" />,
-    question: 'What happens if a vehicle fails the 150-point inspection during Escrow?',
+    question: 'What happens if a vehicle fails inspection during Escrow?',
     answer: 'If the inspection reveals critical structural defects, engine failure, or odometer tampering not disclosed by the seller, you can cancel the purchase immediately with 100% of your escrow deposit refunded to your M-Pesa or bank account with zero penalty fees.',
     keyPoints: [
       'Zero-penalty deposit refund guaranteed',
       'Option to request seller price renegotiation based on audit findings',
-      'KAYAD escrow vault protects funds until you sign off'
+      'Your escrow deposit stays protected until you sign off'
     ],
     popular: true
   },
   {
     id: 'faq-ins-4',
     category: 'inspections',
-    categoryLabel: '150-Point Inspection',
+    categoryLabel: 'Pre-Purchase Inspection',
     categoryIcon: <ClipboardCheck className="w-4 h-4 text-emerald-500" />,
     question: 'Can I bring my own independent mechanic to inspect a listed vehicle?',
     answer: 'Yes! All verified sellers on KAYAD agree to physical access for independent third-party mechanic inspections. You can also request an official KAYAD inspector to join your mechanic for joint logbook and chassis sign-off.',
@@ -92,24 +92,36 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-esc-1',
     category: 'escrow',
-    categoryLabel: 'CBK Escrow Vault',
+    categoryLabel: 'Escrow',
     categoryIcon: <Lock className="w-4 h-4 text-amber-500" />,
     question: 'How does KAYAD Escrow protect buyer funds in Kenya?',
-    answer: 'Your purchase money is locked securely inside Tier-1 Central Bank of Kenya (CBK) regulated bank trustee vaults (NCBA Bank & Standard Chartered). Neither KAYAD nor the seller can access these funds until you physically receive the car, confirm inspection, and sign off NTSA TIMS logbook transfer.',
+    // Previously stated as unconditional current fact ("Your purchase
+    // money IS locked securely inside Tier-1 CBK regulated bank
+    // trustee vaults (NCBA Bank & Standard Chartered)"), naming
+    // specific banks and CBK regulation as already-confirmed - directly
+    // contradicts what's actually true of this business (confirmed
+    // directly by the person building it, in an earlier request: not
+    // yet CBK-certified, with an admin-facing activation toggle built
+    // specifically for that reason - see escrowRulesConfig.ts). Removed
+    // the specific bank names (no way to verify those partnerships are
+    // real/confirmed) and the definitive "is" framing, describing the
+    // system's actual design/intent instead of claiming it's already
+    // operating under confirmed regulatory and banking partnerships.
+    answer: 'KAYAD\'s escrow is designed so your purchase money is held separately from KAYAD and the seller, and only released once you confirm you\'ve received the car, completed inspection, and the NTSA TIMS logbook transfer is signed off.',
     keyPoints: [
-      'Funds held in NCBA & Standard Chartered Trustee Accounts',
+      'Funds held by an independent banking trustee, not KAYAD or the seller directly',
       'Neither seller nor dealer can withdraw funds unilaterally',
-      '100% money-back guarantee if logbook verification fails'
+      'Release is tied to your confirmed receipt and logbook verification'
     ],
     popular: true
   },
   {
     id: 'faq-esc-2',
     category: 'escrow',
-    categoryLabel: 'CBK Escrow Vault',
+    categoryLabel: 'Escrow',
     categoryIcon: <Lock className="w-4 h-4 text-amber-500" />,
     question: 'What payment methods are accepted for Escrow deposits?',
-    answer: 'We accept Safaricom M-Pesa Express (up to Ksh 250,000 per transaction), Real-Time Gross Settlement (RTGS), Electronic Funds Transfer (EFT), and certified Banker’s Cheques directly to NCBA Escrow Account.',
+    answer: 'We accept Safaricom M-Pesa Express, Real-Time Gross Settlement (RTGS), Electronic Funds Transfer (EFT), and certified Banker\u2019s Cheques directly to your escrow account.',
     keyPoints: [
       'Instant M-Pesa C2B payment integration',
       'RTGS & EFT bank transfer verification within 30 minutes',
@@ -119,7 +131,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-esc-3',
     category: 'escrow',
-    categoryLabel: 'CBK Escrow Vault',
+    categoryLabel: 'Escrow',
     categoryIcon: <Lock className="w-4 h-4 text-amber-500" />,
     question: 'How long does an escrow hold take before release or refund?',
     answer: 'Escrow holds remain active for the duration of the deal (typically 24 to 72 hours). Once you approve the vehicle condition and logbook, funds are released to the seller within 15 minutes via RTGS/M-Pesa.',
@@ -132,7 +144,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-esc-4',
     category: 'escrow',
-    categoryLabel: 'CBK Escrow Vault',
+    categoryLabel: 'Escrow',
     categoryIcon: <Lock className="w-4 h-4 text-amber-500" />,
     question: 'How are NTSA TIMS logbook transfers verified during Escrow?',
     answer: 'KAYAD integrated API performs real-time NTSA TIMS registry lookups to verify vehicle joint ownership, check for active bank caveats/liens, and ensure clean title transfer before escrow funds are released.',
@@ -149,12 +161,12 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Bank Auto Loans',
     categoryIcon: <Landmark className="w-4 h-4 text-[#1E3063]" />,
     question: 'What are the requirements for KAYAD Auto Loan pre-approval in Kenya?',
-    answer: 'To apply for asset financing from partner banks (NCBA, Stanbic, Equity), you need: 1) 6-month certified bank or M-Pesa statement, 2) National ID & KRA PIN Certificate, 3) 10% to 20% deposit commitment, and 4) Proof of income or business registration.',
+    answer: 'To apply for asset financing through KAYAD, you typically need: 1) 6-month certified bank or M-Pesa statement, 2) National ID & KRA PIN Certificate, 3) 10% to 20% deposit commitment, and 4) Proof of income or business registration. Exact requirements vary by financing partner.',
     keyPoints: [
       '6-Month certified bank statements',
       'Copy of National ID & KRA PIN',
       'Minimum 10% deposit required by underwriting bank',
-      'Rates start from 12.5% p.a. with terms up to 60 months'
+      'Terms and rates vary by financing partner'
     ],
     popular: true
   },
@@ -163,12 +175,11 @@ export const FAQ_DATA: FAQItem[] = [
     category: 'financing',
     categoryLabel: 'Bank Auto Loans',
     categoryIcon: <Landmark className="w-4 h-4 text-[#1E3063]" />,
-    question: 'Which partner banks provide asset financing through KAYAD?',
-    answer: 'We partner directly with NCBA Bank Kenya, Stanbic Bank Kenya, and Equity Bank Asset Finance. You can compare interest rates, monthly repayment schedules, and underwriting SLAs directly on the Bank Financing Portal.',
+    question: 'How does bank financing work through KAYAD?',
+    answer: 'You can compare financing offers, interest rates, and monthly repayment schedules directly on the Bank Financing Portal before committing to a purchase.',
     keyPoints: [
-      'NCBA Bank Kenya (Leading auto loan financier)',
-      'Stanbic Bank & Equity Asset Finance',
-      'Transparent repayment calculator with zero hidden bank fees'
+      'Compare multiple financing offers in one place',
+      'Repayment calculator to estimate your monthly cost'
     ]
   },
   {
@@ -177,11 +188,11 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Bank Auto Loans',
     categoryIcon: <Landmark className="w-4 h-4 text-[#1E3063]" />,
     question: 'Can I finance both imported (foreign) and locally used Kenyan vehicles?',
-    answer: 'Yes! Partner banks finance foreign imports up to 8 years old (e.g. 2018–2026 models) and local Kenyan units up to 10 years old. All financed units must pass the KAYAD 150-Point Inspection.',
+    answer: 'Yes! Partner banks finance foreign imports up to 8 years old (e.g. 2018–2026 models) and local Kenyan units up to 10 years old. All financed units must pass a KAYAD Pre-Purchase Inspection.',
     keyPoints: [
       'Foreign imports financed up to 8 years of manufacture',
       'Kenyan local units financed up to 10 years of age',
-      'Mandatory 150-point inspection required by credit underwriters'
+      'Pre-purchase inspection required by credit underwriters'
     ]
   },
   {
@@ -287,7 +298,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
               Frequently Asked Questions (FAQ)
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Find instant answers regarding 150-Point mechanic audits, CBK-regulated NCBA escrow vault protection, bank auto loan pre-approval, and NTSA TIMS logbook transfers.
+              Find instant answers regarding 150-Point mechanic audits, CBK-regulated KAYAD escrow vault protection, bank auto loan pre-approval, and NTSA TIMS logbook transfers.
             </p>
           </div>
 
@@ -367,7 +378,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
           <HelpCircle className="w-12 h-12 text-slate-300 mx-auto" />
           <h3 className="font-extrabold text-sm text-[#1E3063]">No matching FAQ questions found</h3>
           <p className="text-xs max-w-md mx-auto text-slate-400">
-            Try searching for terms like "deposit", "M-Pesa", "NCBA", "audit", "TIMS", or select a different category tab.
+            Try searching for terms like "deposit", "M-Pesa", "KAYAD", "audit", "TIMS", or select a different category tab.
           </p>
           <Button
             variant="outline"

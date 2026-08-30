@@ -141,7 +141,7 @@ export interface FinanceApplication {
   vehiclePrice: number;
   downPayment: number;
   financedAmount: number;
-  bankPartner: 'NCBA Bank Kenya' | 'Co-operative Bank' | 'Equity Bank' | 'Stanbic Bank';
+  bankPartner: 'Partner Bank A' | 'Co-operative Bank' | 'Partner Bank B' | 'Partner Bank C';
   status: 'Underwriting Review' | 'Pre-Approved' | 'Documents Required' | 'Disbursed';
   tenureMonths: number;
   monthlyInstallment: number;
@@ -318,7 +318,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
       vehiclePrice: 7450000,
       downPayment: 1490000,
       financedAmount: 5960000,
-      bankPartner: 'NCBA Bank Kenya',
+      bankPartner: 'Partner Bank A',
       status: 'Pre-Approved',
       tenureMonths: 60,
       monthlyInstallment: 132500,
@@ -1484,7 +1484,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
               <h2 className="text-lg font-black text-[#1E3063] font-display flex items-center gap-2">
                 <Landmark className="w-5 h-5 text-indigo-600" /> Bank Asset Financing Applications
               </h2>
-              <p className="text-xs text-slate-500">Track loan pre-approvals and underwriting status from NCBA, Equity & Co-op Bank.</p>
+              <p className="text-xs text-slate-500">Track loan pre-approvals and underwriting status from KAYAD, Equity & Co-op Bank.</p>
             </div>
           </div>
 
@@ -1608,7 +1608,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
               <Badge variant="accent" size="sm">Active</Badge>
             </div>
             <p className="text-slate-600">Renews automatically on August 28, 2026 (Ksh 65,000 / mo)</p>
-            <p className="text-emerald-700 font-bold">Designated Escrow Payout Account: NCBA Bank Kenya (A/C ****8891)</p>
+            <p className="text-emerald-700 font-bold">Designated Escrow Payout Account: our escrow custodian (A/C ****8891)</p>
           </div>
         </Card>
       )}

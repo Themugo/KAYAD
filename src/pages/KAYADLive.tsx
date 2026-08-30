@@ -213,7 +213,7 @@ const MOCK_LIVE_BROADCASTS: LiveBroadcast[] = [
   {
     id: 'live-1',
     title: 'Premium SUV Auction Live',
-    subtitle: 'NCBA Bank Kenya - 8 vehicles',
+    subtitle: 'our escrow custodian - 8 vehicles',
     image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
     viewers: 312,
     isLive: true,
@@ -253,7 +253,7 @@ const MOCK_DEALER_SHOWCASES: DealerShowcase[] = [
   },
   {
     id: 'ds-2',
-    dealerName: 'NCBA Bank Kenya',
+    dealerName: 'our escrow custodian',
     dealerLogo: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=200&q=80',
     type: 'auction',
     title: 'Bank Repossessed Vehicles Auction',
@@ -289,7 +289,7 @@ const MOCK_NEW_ARRIVALS: NewArrival[] = [
     id: 'na-2',
     title: 'MERCEDES-AMG GT 63 S',
     price: 16800000,
-    dealer: 'NCBA Bank Kenya',
+    dealer: 'our escrow custodian',
     region: 'Nairobi',
     image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=400&q=80',
     publishedAt: '1 hour ago',
@@ -897,7 +897,7 @@ const KAYADLive: React.FC = () => {
               </div>
               <div className="grid md:grid-cols-3 gap-4">
                 {[
-                  { title: 'Premium SUV Auction', time: 'Tomorrow, 10:00 AM', organizer: 'NCBA Bank' },
+                  { title: 'Premium SUV Auction', time: 'Tomorrow, 10:00 AM', organizer: 'the partner bank' },
                   { title: 'Dealer Clearance Sale', time: 'Jan 22, 2:00 PM', organizer: 'Crown Motors' },
                   { title: 'Inspection Workshop', time: 'Jan 25, 11:00 AM', organizer: 'AutoCheck' },
                 ].map((item, i) => (

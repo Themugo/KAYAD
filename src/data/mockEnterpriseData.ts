@@ -57,7 +57,7 @@ export interface EscrowTxnRecord {
   sellerName: string;
   amount: number;
   status: 'Funded in Vault' | 'Inspection Release Pending' | 'Completed' | 'Disputed' | 'Refunded';
-  bankVault: 'NCBA Trustee Bank' | 'Standard Chartered Escrow';
+  bankVault: 'KAYAD Trustee Bank' | 'our escrow custodian Escrow';
   lockedTimestamp: string;
   inspectionPassed: boolean;
 }
@@ -280,8 +280,8 @@ export class MockEnterpriseData {
   static bankPartners: BankPartnerRecord[] = [
     {
       id: 'BNK-01',
-      name: 'NCBA Bank Kenya',
-      code: 'NCBA-KE',
+      name: 'our escrow custodian',
+      code: 'KAYAD-KE',
       activePortfolio: 1420000000,
       underwritingSlaHours: 4,
       approvalRate: 78.5,
@@ -290,7 +290,7 @@ export class MockEnterpriseData {
     },
     {
       id: 'BNK-02',
-      name: 'Stanbic Bank',
+      name: 'a partner bank',
       code: 'STANBIC-KE',
       activePortfolio: 890000000,
       underwritingSlaHours: 6,
@@ -300,7 +300,7 @@ export class MockEnterpriseData {
     },
     {
       id: 'BNK-03',
-      name: 'Equity Bank Asset Finance',
+      name: 'partner bank asset finance',
       code: 'EQUITY-AF',
       activePortfolio: 650000000,
       underwritingSlaHours: 12,
@@ -313,13 +313,13 @@ export class MockEnterpriseData {
   static escrowTxns: EscrowTxnRecord[] = [
     {
       id: 'ESC-901-KE',
-      vaultId: 'NCBA-ESC-88201',
+      vaultId: 'KAYAD-ESC-REF',
       vehicleTitle: 'Toyota Land Cruiser Prado TX-L 2.8L',
       buyerName: 'James Mwangi',
       sellerName: 'Crown Motors Kenya',
       amount: 6850000,
       status: 'Funded in Vault',
-      bankVault: 'NCBA Trustee Bank',
+      bankVault: 'KAYAD Trustee Bank',
       lockedTimestamp: '2026-07-29 11:20 AM',
       inspectionPassed: true
     },
@@ -331,19 +331,19 @@ export class MockEnterpriseData {
       sellerName: 'Simons Auto Selection',
       amount: 3200000,
       status: 'Inspection Release Pending',
-      bankVault: 'Standard Chartered Escrow',
+      bankVault: 'our escrow custodian Escrow',
       lockedTimestamp: '2026-07-28 04:15 PM',
       inspectionPassed: true
     },
     {
       id: 'ESC-870-KE',
-      vaultId: 'NCBA-ESC-11902',
+      vaultId: 'KAYAD-ESC-REF',
       vehicleTitle: '2019 Isuzu D-Max Double Cab 4x4',
       buyerName: 'Samuel Wanjiku',
       sellerName: 'Rift Valley Motor Hub',
       amount: 4100000,
       status: 'Completed',
-      bankVault: 'NCBA Trustee Bank',
+      bankVault: 'KAYAD Trustee Bank',
       lockedTimestamp: '2026-07-25 09:30 AM',
       inspectionPassed: true
     }
@@ -450,7 +450,7 @@ export class MockEnterpriseData {
       id: 'TCK-551',
       ticketNo: 'TICK-8801',
       userEmail: 'jimmymugo00@gmail.com',
-      subject: 'Inquiry regarding NCBA Escrow release authorization code',
+      subject: 'Inquiry regarding KAYAD Escrow release authorization code',
       category: 'Escrow Payment',
       priority: 'Urgent',
       status: 'In Progress',

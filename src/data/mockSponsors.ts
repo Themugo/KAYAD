@@ -2,7 +2,7 @@ import { Landmark, ShieldCheck, Wrench, Award } from 'lucide-react';
 import { MarketingCardData } from '../components/MarketingCard';
 
 // Realistic sponsor/partner set for the marketplace grid. Draws on
-// partner names already established elsewhere in the app (NCBA Bank,
+// partner names already established elsewhere in the app (the partner bank,
 // AutoSure EA - was listed as an "Inspection Partner" in KAYADLive's
 // mock data before that page was confirmed orphaned and deleted in a
 // later frontend-cleanup pass; kept as a naming-continuity note, not a
@@ -18,7 +18,7 @@ export const MOCK_SPONSOR_CARDS: MarketingCardData[] = [
     id: 'sponsor-ncba',
     label: 'Partner',
     category: 'Finance Partner',
-    name: 'NCBA Bank Kenya',
+    name: 'our escrow custodian',
     tagline: 'Get pre-approved for auto financing in as little as 24 hours.',
     ctaLabel: 'Check Your Rate',
     icon: Landmark,

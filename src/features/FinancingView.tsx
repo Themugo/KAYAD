@@ -131,8 +131,8 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const partnerBanks: PartnerBank[] = useMemo(() => [
     {
       id: 'ncba',
-      name: 'NCBA Drive Asset Finance',
-      shortName: 'NCBA Bank',
+      name: 'Partner Bank Asset Finance',
+      shortName: 'the partner bank',
       logoBg: 'bg-[#1E3063] text-[#F3EFE6]',
       rateRange: '12.5% - 13.0% p.a.',
       baseRate: 12.5,
@@ -147,8 +147,8 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     },
     {
       id: 'equity',
-      name: 'Equity Bank Vehicle Financing',
-      shortName: 'Equity Bank',
+      name: 'Partner Bank Vehicle Financing',
+      shortName: 'a partner bank',
       logoBg: 'bg-[#C85A32] text-white',
       rateRange: '12.8% - 13.5% p.a.',
       baseRate: 12.8,
@@ -163,8 +163,8 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     },
     {
       id: 'kcb',
-      name: 'KCB Auto Loan Express',
-      shortName: 'KCB Bank',
+      name: 'another partner bank Auto Loan Express',
+      shortName: 'another partner bank Bank',
       logoBg: 'bg-[#15803D] text-white',
       rateRange: '13.0% - 13.8% p.a.',
       baseRate: 13.0,
@@ -179,8 +179,8 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     },
     {
       id: 'stanbic',
-      name: 'Stanbic Vehicle & Asset Solutions',
-      shortName: 'Stanbic Bank',
+      name: 'Partner Bank Vehicle Finance',
+      shortName: 'a partner bank',
       logoBg: 'bg-[#17244B] text-amber-300',
       rateRange: '13.2% - 14.0% p.a.',
       baseRate: 13.2,
@@ -267,7 +267,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         sellerName: 'Simba Caetano Motors',
         sellerType: 'Verified Dealer',
         sellerRating: 4.9,
-        financedBank: 'NCBA Drive'
+        financedBank: 'the partner bank'
       },
       {
         id: 'fin-02',
@@ -287,7 +287,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         sellerName: 'Coastal Premium Auto',
         sellerType: 'Verified Dealer',
         sellerRating: 4.8,
-        financedBank: 'Equity Bank'
+        financedBank: 'a partner bank'
       },
       {
         id: 'fin-03',
@@ -307,7 +307,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         sellerName: 'Rift Valley Motors',
         sellerType: 'Verified Dealer',
         sellerRating: 4.7,
-        financedBank: 'KCB Auto'
+        financedBank: 'another partner bank Auto'
       }
     ];
   }, [vehicles]);
@@ -316,7 +316,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const faqs = [
     {
       q: "Is KAYAD a direct lender or bank?",
-      a: "KAYAD is an independent automotive fintech marketplace. We are NOT a lender. We partner with top-tier Central Bank regulated financial institutions (NCBA, KCB, Equity, Stanbic, Absa) to enable transparent rate comparison, instant affordability calculation, and direct pre-qualified application routing."
+      a: "KAYAD is an independent automotive fintech marketplace. We are NOT a lender. We help you compare rates from Central Bank regulated financial institutions to enable transparent rate comparison, instant affordability calculation, and direct pre-qualified application routing."
     },
     {
       q: "How long does the loan approval process take?",
@@ -324,7 +324,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     },
     {
       q: "Can I settle my vehicle loan early without penalties?",
-      a: "Yes! Major partners like NCBA and KCB offer 0% penalty for early settlement. Other lenders charge a nominal 0.5% - 1% processing fee on the remaining balance. Always check individual lender policies in our comparison tool."
+      a: "Yes! Some lenders offer 0% penalty for early settlement. Other lenders charge a nominal 0.5% - 1% processing fee on the remaining balance. Always check individual lender policies in our comparison tool."
     },
     {
       q: "What insurance requirements apply to financed cars?",
@@ -1025,7 +1025,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               <div>
                 <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Active Application Ref #KYD-FIN-8892</p>
                 <h3 className="text-base font-extrabold text-[#1E3063] font-display">
-                  NCBA Drive Asset Finance Request
+                  Partner Bank Asset Finance Request
                 </h3>
               </div>
             </div>
@@ -1058,7 +1058,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="font-bold text-[#1E3063]">
-                {currentAppStatus === 'Under Review' && 'Your application is currently under review with NCBA Credit Underwriters.'}
+                {currentAppStatus === 'Under Review' && 'Your application is currently under review with the lending bank\'s underwriting team.'}
                 {currentAppStatus === 'Draft' && 'Your calculator inputs are saved. Click Apply to submit to partner banks.'}
                 {currentAppStatus === 'Submitted' && 'Application received. Upload requested documents below to expedite review.'}
                 {currentAppStatus === 'Documents Requested' && 'Please upload your 6-month certified bank statement to complete credit audit.'}

@@ -329,7 +329,7 @@ export const BankFinancingPortal: React.FC<BankFinancingPortalProps> = ({
               Bank Financing Application Management Portal
             </h1>
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Managing <strong className="text-amber-400">Ksh {(totalPortfolioValue / 1000000).toFixed(1)}M</strong> in auto loan application pipeline across Kenya's tier-1 banking partners (NCBA, Equity, KCB, Stanbic, Absa).
+              Managing <strong className="text-amber-400">Ksh {(totalPortfolioValue / 1000000).toFixed(1)}M</strong> in auto loan application pipeline across Kenya's tier-1 banking partners (KAYAD, Equity, another partner bank, the partner bank, Absa).
             </p>
           </div>
 
@@ -338,10 +338,10 @@ export const BankFinancingPortal: React.FC<BankFinancingPortalProps> = ({
             <span className="text-[11px] font-bold text-slate-300 px-2">Select Lender View:</span>
             {[
               { id: 'all', label: 'All Lenders' },
-              { id: 'ncba', label: 'NCBA Bank' },
-              { id: 'equity', label: 'Equity Bank' },
-              { id: 'kcb', label: 'KCB Bank' },
-              { id: 'stanbic', label: 'Stanbic Bank' }
+              { id: 'ncba', label: 'the partner bank' },
+              { id: 'equity', label: 'a partner bank' },
+              { id: 'kcb', label: 'another partner bank Bank' },
+              { id: 'stanbic', label: 'a partner bank' }
             ].map(bank => (
               <button
                 key={bank.id}
@@ -551,10 +551,10 @@ export const BankFinancingPortal: React.FC<BankFinancingPortalProps> = ({
 
                 <div className="space-y-3 text-xs">
                   {[
-                    { name: 'NCBA Drive Asset Finance', count: 2, share: '40%', rate: '12.5% p.a.' },
-                    { name: 'Equity Bank Vehicle Finance', count: 1, share: '20%', rate: '12.8% p.a.' },
-                    { name: 'KCB Auto Loan Express', count: 1, share: '20%', rate: '13.0% p.a.' },
-                    { name: 'Stanbic Vehicle Solutions', count: 1, share: '20%', rate: '13.5% p.a.' }
+                    { name: 'Partner Bank Asset Finance', count: 2, share: '40%', rate: '12.5% p.a.' },
+                    { name: 'a partner bank Vehicle Finance', count: 1, share: '20%', rate: '12.8% p.a.' },
+                    { name: 'another partner bank Auto Loan Express', count: 1, share: '20%', rate: '13.0% p.a.' },
+                    { name: 'the partner bank Vehicle Solutions', count: 1, share: '20%', rate: '13.5% p.a.' }
                   ].map((bank, i) => (
                     <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
                       <div>

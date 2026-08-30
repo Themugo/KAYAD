@@ -356,7 +356,7 @@ const SAMPLE_FINANCE: FinanceAccount[] = [
     id: 'f1',
     vehicleId: 'v2',
     type: 'hire_purchase',
-    provider: 'Stanbic Bank Kenya',
+    provider: 'a partner bank',
     accountNumber: 'HP-2023-001234',
     totalAmount: 6200000,
     monthlyPayment: 145000,
@@ -398,7 +398,7 @@ const SAMPLE_EXPENSES: Expense[] = [
   { id: 'e1', vehicleId: 'v1', category: 'fuel', title: 'Fuel - Shell Petrol Station', amount: 8500, date: '2024-03-01', recurring: true },
   { id: 'e2', vehicleId: 'v1', category: 'maintenance', title: 'Oil Change - Toyota Service', amount: 12000, date: '2024-02-15', recurring: false },
   { id: 'e3', vehicleId: 'v2', category: 'insurance', title: 'Annual Insurance Premium', amount: 75000, date: '2024-01-20', recurring: true },
-  { id: 'e4', vehicleId: 'v2', category: 'loan_payment', title: 'Stanbic HP Monthly Payment', amount: 145000, date: '2024-03-01', recurring: true },
+  { id: 'e4', vehicleId: 'v2', category: 'loan_payment', title: 'the partner bank HP Monthly Payment', amount: 145000, date: '2024-03-01', recurring: true },
   { id: 'e5', vehicleId: 'v1', category: 'parking', title: 'Monthly Parking - Westlands', amount: 8000, date: '2024-03-01', recurring: true },
 ];
 
@@ -438,7 +438,7 @@ const SAMPLE_REWARDS: RewardPoint[] = [
 const SAMPLE_MESSAGES: Message[] = [
   { id: 'm1', sender: 'dealer', senderName: 'KAYAD Premium Dealers', subject: 'Your Toyota Land Cruiser Service Reminder', preview: 'Dear James, this is a reminder that your Toyota Land Cruiser is due for its 45,000 km service...', content: '', date: '2024-03-15', read: false, vehicleId: 'v1', actionRequired: true, actions: [{ label: 'Book Service', url: '/book-service' }] },
   { id: 'm2', sender: 'system', senderName: 'KAYAD System', subject: 'Inspection Report Ready', preview: 'Your inspection report for Mercedes-Benz C-Class is now available for download.', content: '', date: '2024-03-10', read: true, vehicleId: 'v2', actionRequired: false },
-  { id: 'm3', sender: 'finance', senderName: 'Stanbic Bank', subject: 'Upcoming Loan Payment', preview: 'Your monthly payment of KSh 145,000 is due on April 25, 2024.', content: '', date: '2024-03-15', read: false, vehicleId: 'v2', actionRequired: true, actions: [{ label: 'Make Payment', url: '/finance' }] },
+  { id: 'm3', sender: 'finance', senderName: 'a partner bank', subject: 'Upcoming Loan Payment', preview: 'Your monthly payment of KSh 145,000 is due on April 25, 2024.', content: '', date: '2024-03-15', read: false, vehicleId: 'v2', actionRequired: true, actions: [{ label: 'Make Payment', url: '/finance' }] },
 ];
 
 const SAMPLE_NOTIFICATIONS: Notification[] = [

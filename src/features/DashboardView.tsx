@@ -165,7 +165,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   // Derived Finance Status
   const financeApp = {
-    partnerBank: 'NCBA Bank Kenya',
+    partnerBank: 'our escrow custodian',
     status: 'Pre-Approved (Asset Financing)',
     preApprovedAmount: 5200000,
     tenureMonths: 48,
@@ -209,7 +209,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         id: 'n4',
         type: 'finance',
         title: 'Asset Financing Pre-Approval',
-        message: 'NCBA Bank Kenya approved asset financing up to Ksh 5,200,000 at 13% p.a.',
+        message: 'our escrow custodian approved asset financing up to Ksh 5,200,000 at 13% p.a.',
         time: '2 days ago'
       }
     ];
@@ -339,7 +339,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Calculator className="w-3.5 h-3.5 text-blue-300" /> Asset Finance
             </p>
             <p className="text-2xl font-black font-display text-white">Pre-Approved</p>
-            <p className="text-[11px] text-blue-200 font-bold">Ksh 5.2M Limit (NCBA)</p>
+            <p className="text-[11px] text-blue-200 font-bold">Ksh 5.2M Limit (KAYAD)</p>
           </div>
         </div>
       </div>
@@ -735,7 +735,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <h4 className="font-extrabold text-[#1E3063] text-sm font-display">
                   2022 Nissan X-Trail 2.0 Hybrid (Auction Lot #AUC-209)
                 </h4>
-                <p className="text-slate-600 font-medium">Bank Repossession • NCBA Bank Custody</p>
+                <p className="text-slate-600 font-medium">Bank Repossession • the partner bank Custody</p>
               </div>
 
               <div className="flex items-center gap-4">
@@ -893,7 +893,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <div>
               <h3 className="text-base font-black text-[#1E3063] font-display">Asset Financing Application Status</h3>
-              <p className="text-xs text-blue-800 font-medium">Partnered with NCBA, Equity Bank, KCB & Stanbic</p>
+              <p className="text-xs text-blue-800 font-medium">Compare financing offers from multiple lenders</p>
             </div>
           </div>
 

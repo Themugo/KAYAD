@@ -186,12 +186,12 @@ const MOCK_AUCTION: LiveAuction = {
     auctioneerName: 'James Mwangi',
   },
   organizer: {
-    name: 'NCBA Bank Kenya',
+    name: 'our escrow custodian',
     verified: true,
     type: 'Verified Financial Institution',
     completedAuctions: 156,
     rating: 4.8,
-    address: 'NCBA Tower, Upper Hill Road, Nairobi',
+    address: 'KAYAD Tower, Upper Hill Road, Nairobi',
     phone: '+254 20 288 8000',
     email: 'auctions@ ncbagroup.co.ke',
     licenseNumber: 'RD/2024/09876',
@@ -1023,7 +1023,7 @@ const AuctionClosedSummary: React.FC<{ auction: LiveAuction; winningAlias: strin
         <div className="p-4 space-y-3">
           {[
             { title: 'BMW X7 M50i xDrive', organizer: 'Premium Auto Auctions', date: 'Jan 18, 2026', image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=400&q=80', price: 14500000 },
-            { title: 'MERCEDES-AMG GT 63', organizer: 'NCBA Bank Kenya', date: 'Jan 20, 2026', image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=400&q=80', price: 16800000 },
+            { title: 'MERCEDES-AMG GT 63', organizer: 'our escrow custodian', date: 'Jan 20, 2026', image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=400&q=80', price: 16800000 },
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
               <img src={item.image} alt={item.title} className="w-20 h-14 rounded-lg object-cover" />

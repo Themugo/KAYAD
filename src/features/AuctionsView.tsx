@@ -1545,7 +1545,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-800">
-                    <div><span className="font-bold">Receiving Institution:</span> {selectedSession.bidSecurityBank || 'NCBA Bank Kenya PLC'}</div>
+                    <div><span className="font-bold">Receiving Institution:</span> {selectedSession.bidSecurityBank || 'our escrow custodian PLC'}</div>
                     <div><span className="font-bold">Account Name:</span> {selectedSession.bidSecurityAccountName || `${selectedSession.sellerName} Bidding Escrow`}</div>
                     <div><span className="font-bold">Paybill / Account:</span> {selectedSession.bidSecurityPaybillOrAccount || 'Paybill 888100 | Acc: AUC-DEP'}</div>
                     <div><span className="font-bold">Verification:</span> {selectedSession.bidSecurityVerificationMethod || 'Automated M-Pesa Ref / Bank Slip'}</div>

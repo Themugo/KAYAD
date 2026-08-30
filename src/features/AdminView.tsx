@@ -317,7 +317,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             <StatWidget
               label="Finance Applications"
               value="34 Pre-Approved"
-              trend="NCBA, Stanbic, Equity"
+              trend="our partner banks"
               trendType="positive"
               icon={<Landmark className="w-4 h-4 text-[#1E3063]" />}
             />
@@ -359,7 +359,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 <span className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-amber-500" /> CBK Escrow Vault Operations
                 </span>
-                <Badge variant="accent" size="sm">Real-time NCBA & Stanbic Sync</Badge>
+                <Badge variant="accent" size="sm">Real-time KAYAD & the partner bank Sync</Badge>
               </CardTitle>
               <div className="space-y-3 text-xs">
                 {escrowTxns.map((tx) => (
@@ -693,7 +693,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             <h3 className="text-sm font-extrabold text-[#1E3063] flex items-center gap-2">
               <Shield className="w-4 h-4 text-amber-500" /> CBK Regulated Trustee Vault Monitor
             </h3>
-            <Badge variant="accent" size="sm">NCBA & Stanbic Trustee</Badge>
+            <Badge variant="accent" size="sm">KAYAD & the partner bank Trustee</Badge>
           </div>
           <Table>
             <TableHeader>
@@ -1046,7 +1046,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
               <p className="font-bold text-[#1E3063]">CBK Escrow Transaction Fee</p>
               <p className="text-2xl font-black text-emerald-700">1.5%</p>
-              <p className="text-slate-500">Applied automatically upon buyer escrow deposit settlement in NCBA vault.</p>
+              <p className="text-slate-500">Applied automatically upon buyer escrow deposit settlement in KAYAD vault.</p>
             </div>
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
               <p className="font-bold text-[#1E3063]">Inspection Fee Split</p>

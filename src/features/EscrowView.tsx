@@ -160,7 +160,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
       step: 2, 
       id: 'deposit', 
       title: 'Buyer Deposits Funds', 
-      desc: 'Funds locked in neutral NCBA Custodian Vault.',
+      desc: 'Funds locked in neutral KAYAD Escrow Vault.',
       controller: 'Awaiting Vault Confirmation'
     },
     { 
@@ -213,7 +213,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
       return {
         singleStatusText: 'Dispute Opened — Custodian Funds Frozen in Vault',
         badgeVariant: 'warning' as const,
-        fundController: 'KAYAD Legal & NCBA Trustee Custody (Frozen)',
+        fundController: 'KAYAD Legal & KAYAD Trustee Custody (Frozen)',
         nextActionRole: 'Administrator / Legal Compliance',
         nextActionText: 'Reviewing evidence & mechanic logs to resolve dispute.'
       };
@@ -226,7 +226,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
           badgeVariant: 'escrow' as const,
           fundController: 'Buyer (Awaiting Vault Transfer)',
           nextActionRole: 'Buyer',
-          nextActionText: 'Deposit purchase funds into NCBA Custodian Bank Vault.'
+          nextActionText: 'Deposit purchase funds into KAYAD Escrow Vault.'
         };
       case 2:
         return {
@@ -240,7 +240,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         return {
           singleStatusText: '150-Point Technical Inspection Completed',
           badgeVariant: 'verified' as const,
-          fundController: 'NCBA Trustee Custodian Vault (Neutral Hold)',
+          fundController: 'KAYAD Escrow Vault (Neutral Hold)',
           nextActionRole: 'Buyer',
           nextActionText: 'Review 150-Point Audit Report and approve vehicle.'
         };
@@ -248,7 +248,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         return {
           singleStatusText: 'Awaiting Buyer Approval',
           badgeVariant: 'escrow' as const,
-          fundController: 'NCBA Trustee Custodian Vault (Neutral Hold)',
+          fundController: 'KAYAD Escrow Vault (Neutral Hold)',
           nextActionRole: 'Buyer',
           nextActionText: 'Sign electronic approval certificate to initiate title transfer.'
         };
@@ -256,7 +256,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         return {
           singleStatusText: 'Ownership Transfer In Progress (NTSA TIMS)',
           badgeVariant: 'verified' as const,
-          fundController: 'NCBA Trustee Custodian Vault (Neutral Hold)',
+          fundController: 'KAYAD Escrow Vault (Neutral Hold)',
           nextActionRole: 'Seller & NTSA TIMS',
           nextActionText: 'Confirm NTSA TIMS electronic logbook assignment.'
         };
@@ -293,9 +293,9 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
       step: 2,
       updatedAt: 'Just now',
       depositDate: 'Pending Deposit',
-      paymentMethod: 'NCBA Custodian Bank Wire / M-Pesa',
-      bankReference: 'NCBA-ESC-NEW',
-      vaultHolder: 'NCBA Trustee Custodian Vault',
+      paymentMethod: 'Bank Wire Transfer / M-Pesa',
+      bankReference: 'KAYAD-ESC-REF',
+      vaultHolder: 'KAYAD Escrow Vault',
       whoControlsFunds: 'Awaiting Deposit',
       inspectionStatus: 'Booked',
       transferStatus: 'Verification',
@@ -424,7 +424,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         <StatWidget
           label="Total Locked Vault Volume"
           value={`Ksh ${totalVaultValue.toLocaleString()}`}
-          trend="NCBA & SCB Custody"
+          trend="our escrow custodian Custody"
           trendType="positive"
           icon={<Landmark className="w-4 h-4 text-emerald-600" />}
         />
@@ -735,7 +735,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                     Custodial Payment Details & Vault Balance
                   </h3>
                   <Badge variant="escrow" size="sm">
-                    Protected by NCBA / SCB Trustee
+                    Protected by KAYAD Trustee
                   </Badge>
                 </div>
 
@@ -750,7 +750,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Payment Channel</p>
                     <p className="font-extrabold text-[#1E3063]">{selectedDeal.paymentMethod || 'Bank Transfer'}</p>
                     {/* Fixed: previously always showed a specific,
-                        fake bank reference number ("NCBA-ESC-88201")
+                        fake bank reference number ("KAYAD-ESC-REF")
                         as a fallback - the real backend has no bank
                         reference field for this, so the fallback
                         always fired for every real deal. Only shown
@@ -808,7 +808,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                           className="bg-[#1E3063] text-white font-extrabold shadow-xs"
                         >
                           <Lock className="w-4 h-4 text-amber-300" />
-                          <span>Pay Deposit into NCBA Vault</span>
+                          <span>Pay Deposit into KAYAD Escrow Vault</span>
                         </Button>
                       )}
 
@@ -1279,7 +1279,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                   KAYAD Escrow Vault Guarantee Policy
                 </p>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Funds will be deposited directly into NCBA Custodian Account #NCBA-ESC-88201. KAYAD holds zero-liability release authorization until physical 150-point inspection and NTSA TIMS logbook clearance pass.
+                  Funds will be deposited directly into KAYAD Escrow Vault #KAYAD-ESC-REF. KAYAD holds zero-liability release authorization until physical 150-point inspection and NTSA TIMS logbook clearance pass.
                 </p>
               </div>
 
@@ -1314,7 +1314,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                 <span>Immediate Custodian Vault Freeze Guarantee</span>
               </div>
               <p className="text-[11px] text-slate-600 leading-normal">
-                Submitting this dispute will immediately freeze all funds (Ksh {selectedDeal.amount.toLocaleString()}) inside the NCBA Trustee Custodian Vault. No funds can be released to the seller until KAYAD legal mediation completes.
+                Submitting this dispute will immediately freeze all funds (Ksh {selectedDeal.amount.toLocaleString()}) inside the KAYAD Escrow Vault. No funds can be released to the seller until KAYAD legal mediation completes.
               </p>
             </div>
 
@@ -1332,7 +1332,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 space-y-1">
               <p className="font-bold text-[#1E3063]">Automatic Evidence Attached:</p>
               <p>✓ 150-Point Mechanic Inspection Audit Log</p>
-              <p>✓ NCBA Custodian Vault Bank Deposit Statement</p>
+              <p>✓ KAYAD Escrow Vault Bank Deposit Statement</p>
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
