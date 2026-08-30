@@ -7,15 +7,18 @@ const dealerPlatformApi = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Fixed: this client's own interceptor read a token from
+  // localStorage.getItem('token') to send as a Bearer header - but
+  // confirmed directly, nothing anywhere in this real app ever writes
+  // a token there. With no withCredentials either, this client sent
+  // neither a real Authorization header nor real auth cookies -
+  // every real call would fail with 401 regardless of whether the
+  // user is genuinely signed in. withCredentials matches the same
+  // real, working cookie-based auth pattern already used by every
+  // other real API client in this project.
+  withCredentials: true,
 });
 
-dealerPlatformApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 // Dashboard
 export const getDealerDashboard = () => dealerPlatformApi.get('/dashboard');

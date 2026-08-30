@@ -479,7 +479,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           Dealer Management
                         </div>
                         <button
-                          onClick={() => handleNavSelect('dashboard')}
+                          onClick={() => handleNavSelect('dealer-dashboard')}
                           className="w-full text-left px-4 py-1.5 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-bold text-[#1E3063]"
                         >
                           <Building2 className="w-4 h-4 text-[#1E3063]" />
@@ -755,7 +755,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="p-2.5 bg-slate-800/90 border border-slate-700 rounded-xl space-y-1 mt-2">
                   <span className="text-[9px] font-bold text-slate-400 uppercase block">Dealer Tools</span>
                   <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => handleNavSelect('dashboard')} className="text-xs font-bold text-slate-200 flex items-center gap-1.5 py-1">
+                    <button onClick={() => handleNavSelect('dealer-dashboard')} className="text-xs font-bold text-slate-200 flex items-center gap-1.5 py-1">
                       <Building2 className="w-3.5 h-3.5 text-slate-400" /> Dashboard
                     </button>
                     <button onClick={() => handleNavSelect('dealers')} className="text-xs font-bold text-slate-200 flex items-center gap-1.5 py-1">

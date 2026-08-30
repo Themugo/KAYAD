@@ -6,64 +6,69 @@
 import DealerProfile from "../models/DealerProfile.js";
 import DealerSubscription from "../models/DealerSubscription.js";
 import DealerAnalytics from "../models/DealerAnalytics.js";
+import Car from "../models/Car.js";
+import Lead from "../models/Lead.js";
+import Escrow from "../models/Escrow.js";
+import { logError } from "../utils/logger.js";
 
 // ============================================================
 // DEALER DASHBOARD
 // ============================================================
 
+// Fixed: this entire function previously returned a single, fully
+// hardcoded object (47 listings, KES 187,500,000 revenue, 156 leads,
+// etc.) - identical for every dealer who ever calls it, regardless
+// of who they are or what's actually in the database. Rebuilt around
+// real, computed data: the real, signed-in dealer's own real
+// listings (Car.find, scoped to req.user.id, matching the same
+// secure pattern as getMyListings elsewhere in this project), real
+// per-listing view counts, real leads from the real leads table
+// (found already fully defined in the schema but never actually
+// queried by this controller), and real revenue derived from this
+// dealer's own real, released escrow deals - not invented.
 export async function getDealerDashboard(req, res) {
-  const dashboard = {
-    overview: {
-      totalListings: 47,
-      activeListings: 38,
-      totalViews: 12845,
-      thisMonthViews: 2341,
-      leads: {
-        total: 156,
-        new: 12,
-        contacted: 34,
-        negotiating: 28,
-        inspectionBooked: 15,
-        reserved: 8,
-        sold: 45,
-        lost: 14,
-      },
-      revenue: {
-        total: 187500000,
-        thisMonth: 28500000,
-        averagePerVehicle: 4166667,
-      },
-      performance: {
-        responseRate: 94,
-        avgResponseTime: 2.3,
-        leadConversion: 29,
-        customerSatisfaction: 4.7,
-      },
-    },
-    recentActivity: [
-      { type: 'lead', message: 'New enquiry on Toyota Land Cruiser 300', time: '5 min ago' },
-      { type: 'view', message: '45 views on your showroom today', time: '12 min ago' },
-      { type: 'lead', message: 'Inspection booked for Mercedes GLE', time: '1 hour ago' },
-      { type: 'sale', message: 'Vehicle sold: BMW X5', time: '2 hours ago' },
-      { type: 'listing', message: 'New listing published successfully', time: '3 hours ago' },
-    ],
-    quickStats: {
-      listingsNeedingAttention: 5,
-      expiringSoon: 3,
-      priceReductions: 8,
-      newEnquiries: 12,
-    },
-    topPerformers: {
-      vehicles: [
-        { id: '1', title: 'Toyota Land Cruiser 300', views: 456, leads: 12, price: 3200000 },
-        { id: '2', title: 'Mercedes-Benz GLE 450', views: 389, leads: 9, price: 1850000 },
-        { id: '3', title: 'BMW X5 M Sport', views: 345, leads: 7, price: 1650000 },
-      ],
-    },
-  };
+  try {
+    const dealerId = req.user.id;
+    const [listings, leads, releasedEscrows] = await Promise.all([
+      Car.find({ dealer: dealerId, isDemo: { $ne: true } }),
+      Lead.find({ dealer: dealerId }),
+      Escrow.find({ seller: dealerId, status: "released" }),
+    ]);
 
-  res.json({ success: true, data: dashboard });
+    const activeListings = listings.filter((l) => l.status === "available" || l.status === "active").length;
+    const totalViews = listings.reduce((sum, l) => sum + (l.views || 0), 0);
+    const totalRevenue = releasedEscrows.reduce((sum, e) => sum + (e.sellerAmount || 0), 0);
+
+    const leadStageCounts = { new: 0, contacted: 0, negotiating: 0, inspectionBooked: 0, reserved: 0, sold: 0, lost: 0 };
+    for (const lead of leads) {
+      if (Object.prototype.hasOwnProperty.call(leadStageCounts, lead.stage)) {
+        leadStageCounts[lead.stage]++;
+      }
+    }
+
+    const topPerformers = [...listings]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 3)
+      .map((l) => ({ id: l.id, title: l.title, views: l.views || 0, price: l.price }));
+
+    const dashboard = {
+      overview: {
+        totalListings: listings.length,
+        activeListings,
+        totalViews,
+        leads: { total: leads.length, ...leadStageCounts },
+        revenue: { total: totalRevenue },
+      },
+      topPerformers: { vehicles: topPerformers },
+    };
+
+    res.json({ success: true, data: dashboard });
+  } catch (err) {
+    logError("Error fetching dealer dashboard:", err);
+    res.status(500).json({ success: false, message: "Failed to load dashboard" });
+  }
 }
+
 
 // ============================================================
 // DEALER PROFILE (PUBLIC SHOWROOM)

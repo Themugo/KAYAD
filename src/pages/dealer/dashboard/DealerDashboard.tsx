@@ -240,62 +240,29 @@ const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
 // MAIN COMPONENT
 // ============================================================
 
-export default function DealerDashboard() {
+export default function DealerDashboard({ user, onOpenAuth }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
-    loadDashboard();
-  }, []);
+    if (user) loadDashboard();
+    else setLoading(false);
+  }, [user]);
 
   const loadDashboard = async () => {
+    setLoadError(null);
     try {
       const { data } = await dealerApi.getDealerDashboard();
       setDashboard(data.data);
     } catch (error) {
-      // Use mock data on error
-      setDashboard({
-        overview: {
-          totalListings: 47,
-          activeListings: 38,
-          totalViews: 12845,
-          thisMonthViews: 2341,
-          leads: {
-            total: 156,
-            new: 12,
-            contacted: 34,
-            negotiating: 28,
-            inspectionBooked: 15,
-            reserved: 8,
-            sold: 45,
-            lost: 14,
-          },
-          revenue: {
-            total: 187500000,
-            thisMonth: 28500000,
-          },
-          performance: {
-            responseRate: 94,
-            leadConversion: 29,
-            customerSatisfaction: 4.7,
-          },
-        },
-        recentActivity: [
-          { type: 'lead', message: 'New enquiry on Toyota Land Cruiser 300', time: '5 min ago' },
-          { type: 'view', message: '45 views on your showroom today', time: '12 min ago' },
-          { type: 'lead', message: 'Inspection booked for Mercedes GLE', time: '1 hour ago' },
-          { type: 'sale', message: 'Vehicle sold: BMW X5', time: '2 hours ago' },
-          { type: 'listing', message: 'New listing published successfully', time: '3 hours ago' },
-        ],
-        topPerformers: {
-          vehicles: [
-            { id: '1', title: 'Toyota Land Cruiser 300', views: 456, leads: 12, price: 3200000 },
-            { id: '2', title: 'Mercedes-Benz GLE 450', views: 389, leads: 9, price: 1850000 },
-            { id: '3', title: 'BMW X5 M Sport', views: 345, leads: 7, price: 1650000 },
-          ],
-        },
-      });
+      // Fixed: this previously silently substituted the exact same
+      // fake numbers (47 listings, KES 187,500,000 revenue, 156
+      // leads) on any real failure - a dealer would see confident,
+      // invented business figures with zero indication anything had
+      // gone wrong. Now shows a real, honest error state instead.
+      setLoadError('Could not load your dashboard. Please try again.');
     }
     setLoading(false);
   };
@@ -304,6 +271,32 @@ export default function DealerDashboard() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-sm text-slate-600 mb-4">Sign in to manage your dealership.</p>
+          <button onClick={onOpenAuth} className="bg-[#17244B] text-white text-xs font-bold rounded-lg px-5 py-2.5">
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center max-w-sm">
+          <p className="text-sm text-slate-600 mb-4">{loadError}</p>
+          <button onClick={loadDashboard} className="bg-[#17244B] text-white text-xs font-bold rounded-lg px-5 py-2.5">
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }

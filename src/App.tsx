@@ -29,6 +29,7 @@ import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
 import KAYADLive from './pages/KAYADLive';
 import { BuyerPlatform } from './features/OwnershipPlatform';
 import { PrivateSellerPlatform } from './features/PrivateSellerPlatform';
+import DealerDashboard from './pages/dealer/dashboard/DealerDashboard';
 import { FinanceMarketplace } from './features/FinancePlatform';
 
 // Fixed (Final Integration - real data integration): App() previously
@@ -418,6 +419,10 @@ function AppInner() {
 
           {activeNav === 'seller-platform' && (
             <PrivateSellerPlatform user={user} onOpenAuth={() => setShowAuthModal(true)} />
+          )}
+
+          {activeNav === 'dealer-dashboard' && (
+            <DealerDashboard user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
           {activeNav === 'finance' && (
