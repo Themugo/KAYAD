@@ -273,6 +273,32 @@ export const getCars = async (req, res) => {
 };
 
 // =============================
+// 📋 GET MY LISTINGS (real, signed-in seller's own inventory, every
+// status - not the public "available only" default GET /cars uses)
+// =============================
+// Fixed: PrivateSellerPlatform.tsx's own dashboard previously called
+// a completely fake backend endpoint (dealerPlatformController.js's
+// getInventory) that returned 7 hardcoded, invented vehicles
+// regardless of who called it or what's actually in the database - a
+// backend-side fake, not just a frontend display issue. This is a
+// real query, scoped to req.user.id directly (never a client-
+// supplied id, since GET /cars itself is fully public with no auth -
+// a client-suppliable sellerId filter that bypassed the public
+// status:"available" default would let anyone view any other user's
+// private draft/pending listings without authentication).
+export const getMyListings = async (req, res) => {
+  try {
+    const cars = await Car.find({ dealer: req.user.id, isDemo: { $ne: true } })
+      .populate("dealer", "name businessName avatar")
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: cars });
+  } catch (err) {
+    logError("Error fetching my listings:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch your listings" });
+  }
+};
+
+// =============================
 // ➕ CREATE CAR
 // =============================
 export const createCar = async (req, res) => {

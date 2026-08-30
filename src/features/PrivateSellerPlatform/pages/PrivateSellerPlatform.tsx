@@ -3,9 +3,13 @@
 // Sections 1-17: Step-by-step seller journey
 // ============================================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createCar, VehicleApiError } from '../../../services/vehicleApi';
+import { createCar, getMyListings, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
+import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
+import { calculateListingQualityScore } from '../../../utils/listingQualityScore';
+import PhoneVerification from '../../../components/PhoneVerification';
+import type { UserProfile } from '../../../types';
 import {
   Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock,
   Bell, TrendingUp, Award, Bot, MessageSquare, Settings, ChevronRight, Menu, X,
@@ -165,211 +169,6 @@ interface ListingDraft {
 }
 
 // ============================================================
-// SAMPLE DATA
-// ============================================================
-
-const SAMPLE_SELLER = {
-  name: 'John Mwangi',
-  email: 'john.mwangi@email.com',
-  phone: '+254 723 456 789',
-  memberSince: '2023-06-15',
-  trustScore: 85,
-  tier: 'Verified Seller' as 'New Seller' | 'Verified Seller' | 'Trusted Seller' | 'Premium Seller',
-};
-
-const SAMPLE_STATS: SellerStats = {
-  totalListings: 3,
-  activeListings: 1,
-  draftListings: 1,
-  soldVehicles: 1,
-  totalViews: 1247,
-  totalEnquiries: 23,
-  avgResponseTime: 2.5,
-  trustScore: 85,
-};
-
-const SAMPLE_LISTINGS: Listing[] = [
-  {
-    id: 'l1',
-    make: 'Toyota',
-    model: 'Corolla',
-    year: 2019,
-    price: 1850000,
-    mileage: 45000,
-    fuelType: 'Petrol',
-    transmission: 'Automatic',
-    color: 'Silver',
-    condition: 'good',
-    description: 'Well maintained Toyota Corolla. Single owner. Full service history.',
-    images: [],
-    status: 'active',
-    views: 523,
-    favorites: 12,
-    enquiries: 8,
-    createdAt: '2024-02-15',
-    verified: true,
-    inspected: true,
-    listedForInspection: true,
-    escrowEnabled: true,
-  },
-  {
-    id: 'l2',
-    make: 'Honda',
-    model: 'Civic',
-    year: 2020,
-    price: 2200000,
-    mileage: 32000,
-    fuelType: 'Petrol',
-    transmission: 'Automatic',
-    color: 'White',
-    condition: 'excellent',
-    description: 'Low mileage Honda Civic in pristine condition.',
-    images: [],
-    status: 'draft',
-    views: 0,
-    favorites: 0,
-    enquiries: 0,
-    createdAt: '2024-03-01',
-    verified: false,
-    inspected: false,
-    listedForInspection: false,
-    escrowEnabled: false,
-  },
-  {
-    id: 'l3',
-    make: 'Nissan',
-    model: 'X-Trail',
-    year: 2018,
-    price: 2100000,
-    mileage: 68000,
-    fuelType: 'Diesel',
-    transmission: 'Manual',
-    color: 'Black',
-    condition: 'good',
-    description: 'Family SUV with ample space. Good condition.',
-    images: [],
-    status: 'sold',
-    views: 724,
-    favorites: 18,
-    enquiries: 15,
-    createdAt: '2023-11-20',
-    verified: true,
-    inspected: true,
-    listedForInspection: true,
-    escrowEnabled: true,
-  },
-];
-
-const SAMPLE_ENQUIRIES: Enquiry[] = [
-  {
-    id: 'e1',
-    buyerName: 'Sarah Kimani',
-    vehicleId: 'l1',
-    vehicleTitle: '2019 Toyota Corolla',
-    type: 'viewing_request',
-    subject: 'Viewing Request',
-    message: 'Hi, I am interested in viewing this vehicle. Would tomorrow at 2 PM be possible?',
-    preferredDate: '2024-03-16',
-    status: 'new',
-    date: '2024-03-15',
-  },
-  {
-    id: 'e2',
-    buyerName: 'David Ochieng',
-    vehicleId: 'l1',
-    vehicleTitle: '2019 Toyota Corolla',
-    type: 'offer',
-    subject: 'Offer: KES 1,700,000',
-    message: 'I would like to make an offer of KES 1,700,000. I can pay cash and complete the transaction within 3 days.',
-    budget: 1700000,
-    status: 'replied',
-    date: '2024-03-14',
-  },
-];
-
-const SAMPLE_VIEWINGS: ViewingAppointment[] = [
-  {
-    id: 'v1',
-    buyerName: 'Sarah Kimani',
-    vehicleId: 'l1',
-    vehicleTitle: '2019 Toyota Corolla',
-    date: '2024-03-16',
-    time: '14:00',
-    status: 'confirmed',
-    location: 'Westlands, Nairobi',
-    buyerConfirmed: true,
-    sellerConfirmed: true,
-  },
-  {
-    id: 'v2',
-    buyerName: 'Peter Njoroge',
-    vehicleId: 'l1',
-    vehicleTitle: '2019 Toyota Corolla',
-    date: '2024-03-18',
-    time: '10:30',
-    status: 'scheduled',
-    location: 'Kasarani, Nairobi',
-    buyerConfirmed: true,
-    sellerConfirmed: false,
-  },
-];
-
-const SAMPLE_ESCROW: EscrowTransaction[] = [
-  {
-    id: 'esc1',
-    vehicleId: 'l3',
-    vehicleTitle: '2018 Nissan X-Trail',
-    buyerName: 'James Otieno',
-    salePrice: 2000000,
-    escrowAmount: 2000000,
-    depositAmount: 200000,
-    depositPaid: true,
-    status: 'completed',
-    milestones: [
-      { name: 'Deposit Received', completed: true, date: '2023-12-01' },
-      { name: 'Vehicle Inspection', completed: true, date: '2023-12-03' },
-      { name: 'Balance Payment', completed: true, date: '2023-12-05' },
-      { name: 'Ownership Transfer', completed: true, date: '2023-12-07' },
-      { name: 'Funds Released', completed: true, date: '2023-12-07' },
-    ],
-    createdAt: '2023-12-01',
-    completedAt: '2023-12-07',
-  },
-];
-
-const SAMPLE_VERIFICATION: VerificationStatus = {
-  nationalId: { verified: true, date: '2024-01-15' },
-  phone: { verified: true, date: '2024-01-10' },
-  email: { verified: true, date: '2024-01-10' },
-  tims: { verified: false },
-  ghostCheck: { completed: false },
-  profileComplete: 75,
-};
-
-const SAMPLE_DOCUMENTS = [
-  { id: 'd1', type: 'logbook', title: 'TIMS Logbook - Toyota Corolla', date: '2024-01-20', verified: true },
-  { id: 'd2', type: 'national_id', title: 'National ID Copy', date: '2024-01-15', verified: true },
-  { id: 'd3', type: 'service', title: 'Service Record - Jan 2024', date: '2024-01-25', verified: false },
-];
-
-const SAMPLE_PRICE_GUIDANCE = {
-  suggestedPrice: 1820000,
-  marketRange: { min: 1700000, max: 1950000 },
-  highDemandPrice: 1900000,
-  quickSalePrice: 1750000,
-  premiumPrice: 2100000,
-  tradeInEstimate: 1600000,
-  confidenceScore: 85,
-  comparableCount: 12,
-  marketTrend: 'stable' as 'increasing' | 'stable' | 'decreasing',
-  priceFactors: [
-    { factor: 'Low mileage for age', impact: 'positive' },
-    { factor: 'Full service history', impact: 'positive' },
-    { factor: 'Automatic transmission', impact: 'positive' },
-    { factor: 'Silver color', impact: 'neutral' },
-  ],
-};
-
 // ============================================================
 // THEME CONSTANTS
 // ============================================================
@@ -405,31 +204,59 @@ const KAYAD_THEME = {
 type PlatformSection = 
   | 'home' 
   | 'listing-wizard' 
-  | 'pricing' 
   | 'trust-center' 
   | 'listing-quality' 
-  | 'photo-studio' 
-  | 'enquiries' 
-  | 'viewings' 
   | 'escrow' 
-  | 'documents' 
-  | 'progress' 
-  | 'insights' 
-  | 'copilot' 
   | 'help';
 
-export default function PrivateSellerPlatform() {
+interface PrivateSellerPlatformProps {
+  user?: UserProfile | null;
+  onOpenAuth?: () => void;
+}
+
+export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSellerPlatformProps) {
   const [activeSection, setActiveSection] = useState<PlatformSection>('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [listingDraft, setListingDraft] = useState<ListingDraft | null>(null);
+
+  // Fixed: this entire dashboard previously ran on hardcoded
+  // SAMPLE_SELLER/SAMPLE_STATS/SAMPLE_LISTINGS and a completely fake
+  // backend endpoint (dealerPlatformController.js's getInventory,
+  // which returned 7 invented vehicles regardless of who asked).
+  // Real, signed-in seller's own listings and escrow deals below,
+  // via 2 real, already-proven endpoints.
+  const [myListings, setMyListings] = useState<BackendCar[]>([]);
+  const [myEscrows, setMyEscrows] = useState<BackendEscrow[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  useEffect(() => {
+    if (!user) { setDataLoading(false); return; }
+    let cancelled = false;
+    Promise.all([
+      getMyListings().catch(() => [] as BackendCar[]),
+      getMyEscrows().catch(() => [] as BackendEscrow[]),
+    ]).then(([listings, escrows]) => {
+      if (cancelled) return;
+      setMyListings(listings);
+      setMyEscrows(escrows);
+    }).finally(() => { if (!cancelled) setDataLoading(false); });
+    return () => { cancelled = true; };
+  }, [user]);
 
   const handleSectionChange = useCallback((section: PlatformSection) => {
     setActiveSection(section);
     setMobileMenuOpen(false);
   }, []);
 
-  const unreadEnquiries = SAMPLE_ENQUIRIES.filter(e => e.status === 'new').length;
-  const upcomingViewings = SAMPLE_VIEWINGS.filter(v => v.status === 'scheduled' || v.status === 'confirmed').length;
+  if (!user) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-sm text-slate-500 mb-4">Sign in to list and manage your own vehicles.</p>
+        <button onClick={onOpenAuth} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-5 py-2.5">
+          Sign In
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: KAYAD_THEME.warmBeige }}>
@@ -438,8 +265,6 @@ export default function PrivateSellerPlatform() {
         <SidebarContent 
           activeSection={activeSection} 
           onSectionChange={handleSectionChange}
-          unreadEnquiries={unreadEnquiries}
-          upcomingViewings={upcomingViewings}
         />
       </aside>
 
@@ -485,8 +310,6 @@ export default function PrivateSellerPlatform() {
               <SidebarContent 
                 activeSection={activeSection} 
                 onSectionChange={handleSectionChange}
-                unreadEnquiries={unreadEnquiries}
-                upcomingViewings={upcomingViewings}
               />
             </motion.div>
           </motion.div>
@@ -504,19 +327,11 @@ export default function PrivateSellerPlatform() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {activeSection === 'home' && <SellerHomeSection seller={SAMPLE_SELLER} stats={SAMPLE_STATS} onNavigate={handleSectionChange} />}
+              {activeSection === 'home' && <SellerHomeSection listings={myListings} loading={dataLoading} userName={user?.name} onNavigate={handleSectionChange} />}
               {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} />}
-              {activeSection === 'pricing' && <PricingAssistantSection />}
-              {activeSection === 'trust-center' && <TrustCenterSection verification={SAMPLE_VERIFICATION} />}
-              {activeSection === 'listing-quality' && <ListingQualitySection listings={SAMPLE_LISTINGS} />}
-              {activeSection === 'photo-studio' && <PhotoStudioSection />}
-              {activeSection === 'enquiries' && <EnquiryCenterSection enquiries={SAMPLE_ENQUIRIES} />}
-              {activeSection === 'viewings' && <ViewingAppointmentsSection viewings={SAMPLE_VIEWINGS} />}
-              {activeSection === 'escrow' && <EscrowCenterSection transactions={SAMPLE_ESCROW} />}
-              {activeSection === 'documents' && <DocumentCenterSection documents={SAMPLE_DOCUMENTS} />}
-              {activeSection === 'progress' && <SaleProgressSection />}
-              {activeSection === 'insights' && <SellerInsightsSection stats={SAMPLE_STATS} />}
-              {activeSection === 'copilot' && <SellerCopilotSection />}
+              {activeSection === 'trust-center' && <TrustCenterSection />}
+              {activeSection === 'listing-quality' && <ListingQualitySection listings={myListings} loading={dataLoading} />}
+              {activeSection === 'escrow' && <EscrowCenterSection transactions={myEscrows} loading={dataLoading} />}
               {activeSection === 'help' && <HelpCenterSection />}
             </motion.div>
           </AnimatePresence>
@@ -533,28 +348,16 @@ export default function PrivateSellerPlatform() {
 function SidebarContent({ 
   activeSection, 
   onSectionChange, 
-  unreadEnquiries,
-  upcomingViewings,
 }: { 
   activeSection: PlatformSection;
   onSectionChange: (s: PlatformSection) => void;
-  unreadEnquiries: number;
-  upcomingViewings: number;
 }) {
   const navItems: { id: PlatformSection; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'home', label: 'Seller Home', icon: <Home size={20} /> },
     { id: 'listing-wizard', label: 'Create Listing', icon: <PlusCircleIcon size={20} /> },
-    { id: 'enquiries', label: 'Enquiries', icon: <MessageCircle size={20} />, badge: unreadEnquiries },
-    { id: 'viewings', label: 'Viewings', icon: <CalendarIcon size={20} />, badge: upcomingViewings },
     { id: 'escrow', label: 'Escrow', icon: <Shield size={20} /> },
-    { id: 'documents', label: 'Documents', icon: <FileText size={20} /> },
-    { id: 'progress', label: 'Sale Progress', icon: <TrendingUp size={20} /> },
-    { id: 'insights', label: 'Insights', icon: <BarChart3 size={20} /> },
-    { id: 'pricing', label: 'AI Pricing', icon: <DollarSign size={20} /> },
     { id: 'trust-center', label: 'Trust Center', icon: <BadgeCheck size={20} /> },
-    { id: 'listing-quality', label: 'Quality Score', icon: <CheckCircle size={20} /> },
-    { id: 'photo-studio', label: 'Photo Studio', icon: <Camera size={20} /> },
-    { id: 'copilot', label: 'AI Copilot', icon: <Bot size={20} /> },
+    { id: 'listing-quality', label: 'My Listings', icon: <CheckCircle size={20} /> },
     { id: 'help', label: 'Help', icon: <HelpCircle size={20} /> },
   ];
 
@@ -616,12 +419,15 @@ function SidebarContent({
 // SECTION 1: SELLER HOME
 // ============================================================
 
-function SellerHomeSection({ seller, stats, onNavigate }: { 
-  seller: typeof SAMPLE_SELLER; 
-  stats: SellerStats;
+function SellerHomeSection({ listings, loading, userName, onNavigate }: {
+  listings: BackendCar[];
+  loading: boolean;
+  userName?: string;
   onNavigate: (s: PlatformSection) => void;
 }) {
   const greeting = new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening';
+  const activeListings = listings.filter((l) => l.status === 'available' || l.status === 'active').length;
+  const soldListings = listings.filter((l) => l.status === 'sold').length;
 
   return (
     <div className="space-y-6">
@@ -634,9 +440,9 @@ function SellerHomeSection({ seller, stats, onNavigate }: {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-              {greeting}, {seller.name.split(' ')[0]}
+              {greeting}{userName ? `, ${userName.split(' ')[0]}` : ''}
             </h1>
-            <p className="text-white/70">Your personal selling assistant is ready to help</p>
+            <p className="text-white/70">Manage your listings and track your sales</p>
           </div>
           <button 
             onClick={() => onNavigate('listing-wizard')}
@@ -647,53 +453,30 @@ function SellerHomeSection({ seller, stats, onNavigate }: {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          <QuickStat icon={<Car size={20} />} value={stats.activeListings.toString()} label="Active" color={KAYAD_THEME.orange} />
-          <QuickStat icon={<EyeIcon size={20} />} value={stats.totalViews.toLocaleString()} label="Views" color={KAYAD_THEME.gold} />
-          <QuickStat icon={<MessageCircle size={20} />} value={stats.totalEnquiries.toString()} label="Enquiries" color={KAYAD_THEME.emerald} />
-          <QuickStat icon={<CheckCircle size={20} />} value={stats.soldVehicles.toString()} label="Sold" color="#10B981" />
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <QuickStat icon={<Car size={20} />} value={activeListings.toString()} label="Active Listings" color={KAYAD_THEME.orange} />
+          <QuickStat icon={<CheckCircle size={20} />} value={soldListings.toString()} label="Sold" color="#10B981" />
         </div>
       </motion.div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Create Listing', icon: <PlusCircleIcon size={24} />, color: KAYAD_THEME.orange, section: 'listing-wizard' as PlatformSection },
-          { label: 'View Enquiries', icon: <MessageCircle size={24} />, color: KAYAD_THEME.navy, section: 'enquiries' as PlatformSection },
-          { label: 'Check Pricing', icon: <DollarSign size={24} />, color: KAYAD_THEME.emerald, section: 'pricing' as PlatformSection },
-          { label: 'Manage Viewings', icon: <CalendarIcon size={24} />, color: '#8B5CF6', section: 'viewings' as PlatformSection },
-        ].map((action, i) => (
-          <motion.button
-            key={action.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            onClick={() => onNavigate(action.section)}
-            className="rounded-xl p-4 lg:p-6 text-center transition-all hover:scale-105 hover:shadow-lg"
-            style={{ backgroundColor: 'white' }}
-          >
-            <div 
-              className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
-              style={{ backgroundColor: `${action.color}15` }}
-            >
-              <div style={{ color: action.color }}>{action.icon}</div>
-            </div>
-            <p className="font-semibold text-sm" style={{ color: KAYAD_THEME.navy }}>{action.label}</p>
-          </motion.button>
-        ))}
-      </div>
 
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold" style={{ color: KAYAD_THEME.navy }}>Your Listings</h2>
-          <button onClick={() => onNavigate('listing-wizard')} className="text-sm font-medium flex items-center gap-1" style={{ color: KAYAD_THEME.orange }}>
+          <button onClick={() => onNavigate('listing-quality')} className="text-sm font-medium flex items-center gap-1" style={{ color: KAYAD_THEME.orange }}>
             View All <ChevronRight size={16} />
           </button>
         </div>
-        <div className="space-y-4">
-          {SAMPLE_LISTINGS.filter(l => l.status === 'active' || l.status === 'draft').map((listing, i) => (
-            <ListingCard key={listing.id} listing={listing} delay={i * 0.1} />
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-sm text-slate-400">Loading your listings…</p>
+        ) : listings.length === 0 ? (
+          <p className="text-sm text-slate-400">You haven't listed any vehicles yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {listings.slice(0, 5).map((listing, i) => (
+              <ListingCard key={listing.id} listing={listing} delay={i * 0.1} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -713,11 +496,16 @@ function QuickStat({ icon, value, label, color }: { icon: React.ReactNode; value
   );
 }
 
-function ListingCard({ listing, delay }: { listing: Listing; delay: number }) {
+function ListingCard({ listing, delay }: { listing: BackendCar; delay: number }) {
   const statusColors: Record<string, { bg: string; text: string }> = {
+    available: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
     active: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
     draft: { bg: 'bg-slate-100', text: 'text-slate-600' },
+    sold: { bg: 'bg-blue-100', text: 'text-blue-700' },
+    pending: { bg: 'bg-amber-100', text: 'text-amber-700' },
   };
+  const statusClass = statusColors[listing.status || 'draft'] || statusColors.draft;
+  const image = listing.images?.[0]?.thumb || listing.images?.[0]?.url;
 
   return (
     <motion.div
@@ -729,23 +517,25 @@ function ListingCard({ listing, delay }: { listing: Listing; delay: number }) {
     >
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-48 h-32 md:h-auto flex items-center justify-center" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-          <Car size={48} style={{ color: KAYAD_THEME.slate[300] }} />
+          {image ? (
+            <img src={image} alt={listing.title} className="w-full h-full object-cover" />
+          ) : (
+            <Car size={48} style={{ color: KAYAD_THEME.slate[300] }} />
+          )}
         </div>
         <div className="flex-1 p-4">
           <div className="flex items-start justify-between mb-2">
             <div>
-              <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{listing.year} {listing.make} {listing.model}</h3>
-              <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{listing.mileage.toLocaleString()} km</p>
+              <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{listing.year} {listing.brand} {listing.model}</h3>
+              {listing.mileage != null && <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{listing.mileage.toLocaleString()} km</p>}
             </div>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusColors[listing.status].bg} ${statusColors[listing.status].text}`}>
-              {listing.status}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusClass.bg} ${statusClass.text}`}>
+              {listing.status || 'draft'}
             </span>
           </div>
           <p className="text-xl font-bold mb-3" style={{ color: KAYAD_THEME.gold }}>KES {(listing.price / 1000000).toFixed(1)}M</p>
           <div className="flex flex-wrap gap-3 text-sm" style={{ color: KAYAD_THEME.slate[500] }}>
-            <span className="flex items-center gap-1"><EyeIcon size={14} /> {listing.views}</span>
-            <span className="flex items-center gap-1"><HeartIcon size={14} /> {listing.favorites}</span>
-            <span className="flex items-center gap-1"><MessageCircle size={14} /> {listing.enquiries}</span>
+            <span className="flex items-center gap-1"><EyeIcon size={14} /> {listing.views || 0}</span>
           </div>
         </div>
       </div>
@@ -930,41 +720,27 @@ function ListingWizardSection({ draft, setDraft, onNavigate }: {
 // OTHER SECTIONS (Simplified for brevity)
 // ============================================================
 
-function PricingAssistantSection() {
-  const g = SAMPLE_PRICE_GUIDANCE;
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>AI Pricing Assistant</h1>
-      <div className="rounded-xl p-6" style={{ background: `linear-gradient(135deg, ${KAYAD_THEME.gold}20 0%, ${KAYAD_THEME.gold}5 100%)` }}>
-        <h2 className="text-lg font-bold mb-4" style={{ color: KAYAD_THEME.navy }}>Price Recommendations</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl text-center bg-white"><p className="text-sm mb-1" style={{ color: KAYAD_THEME.slate[500] }}>Suggested</p><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>KES {(g.suggestedPrice / 1000000).toFixed(2)}M</p></div>
-          <div className="p-4 rounded-xl text-center bg-white"><p className="text-sm mb-1" style={{ color: KAYAD_THEME.slate[500] }}>Market Range</p><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>{(g.marketRange.min / 1000000).toFixed(1)}M - {(g.marketRange.max / 1000000).toFixed(1)}M</p></div>
-          <div className="p-4 rounded-xl text-center bg-white"><p className="text-sm mb-1" style={{ color: KAYAD_THEME.slate[500] }}>Confidence</p><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.gold }}>{g.confidenceScore}%</p></div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TrustCenterSection({ verification }: { verification: VerificationStatus }) {
+function TrustCenterSection() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Trust Center</h1>
-      <div className="rounded-xl p-6" style={{ background: `linear-gradient(135deg, ${KAYAD_THEME.navy} 0%, #2d4a6f 100%)` }}>
-        <h2 className="text-white font-bold text-lg mb-1">Your Trust Score</h2>
-        <p className="text-4xl font-bold text-white">{verification.profileComplete}%</p>
-      </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        {[
-          { label: 'National ID', verified: verification.nationalId.verified },
-          { label: 'Phone', verified: verification.phone.verified },
-          { label: 'Email', verified: verification.email.verified },
-          { label: 'TIMS', verified: verification.tims.verified },
-        ].map((v, i) => (
-          <div key={i} className="p-4 rounded-xl bg-white flex items-center gap-3">
-            {v.verified ? <CheckCircle size={20} style={{ color: KAYAD_THEME.emerald }} /> : <Circle size={20} style={{ color: KAYAD_THEME.slate[300] }} />}
-            <span style={{ color: KAYAD_THEME.navy }}>{v.label}</span>
+      {/* Fixed: this section previously hardcoded a fake "Trust Score"
+          percentage and 4 always-"verified" badges (National ID,
+          Phone, Email, TIMS) from SAMPLE_VERIFICATION, regardless of
+          the real signed-in seller's actual status - same class of
+          issue already fixed in PrivateSellerDashboardView.tsx's own
+          Verification Status tab. Phone verification is now the real
+          thing (components/PhoneVerification.tsx); the other 3 have
+          no real backend equivalent anywhere in this project (no
+          identity-document verification, no real email-OTP flow
+          wired to any UI, no real NTSA integration) - labeled
+          honestly rather than left claiming false completion. */}
+      <PhoneVerification />
+      <div className="grid md:grid-cols-3 gap-4">
+        {['National ID', 'Email', 'NTSA TIMS Logbook'].map((label) => (
+          <div key={label} className="p-4 rounded-xl bg-white border border-slate-200 flex items-center justify-between">
+            <span style={{ color: KAYAD_THEME.navy }} className="text-sm font-semibold">{label}</span>
+            <span className="text-[10px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-1 rounded-full">Not Yet Available</span>
           </div>
         ))}
       </div>
@@ -972,96 +748,56 @@ function TrustCenterSection({ verification }: { verification: VerificationStatus
   );
 }
 
-function ListingQualitySection({ listings }: { listings: Listing[] }) {
-  const getScore = (l: Listing) => {
-    let s = 0;
-    if (l.images.length >= 8) s += 25;
-    else if (l.images.length >= 4) s += 15;
-    if (l.description.length > 100) s += 20;
-    if (l.verified) s += 20;
-    if (l.inspected) s += 20;
-    return s;
-  };
+function ListingQualitySection({ listings, loading }: { listings: BackendCar[]; loading: boolean }) {
+  if (loading) return <p className="text-sm text-slate-400">Loading your listings…</p>;
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Listing Quality Score</h1>
-      {listings.map(l => (
-        <div key={l.id} className="rounded-xl p-4 bg-white flex items-center gap-4">
-          <div className="w-16 h-16 rounded-lg flex items-center justify-center" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-            <Car size={32} style={{ color: KAYAD_THEME.slate[400] }} />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{l.year} {l.make} {l.model}</h3>
-            <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{l.status}</p>
-          </div>
-          <p className="text-2xl font-bold" style={{ color: getScore(l) >= 80 ? KAYAD_THEME.emerald : KAYAD_THEME.amber }}>{getScore(l)}%</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function PhotoStudioSection() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Photo Studio</h1>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {['Front 45°', 'Rear 45°', 'Side Profile', 'Interior'].map((a, i) => (
-          <div key={i} className="aspect-square rounded-xl flex flex-col items-center justify-center border-2 border-dashed" style={{ borderColor: KAYAD_THEME.slate[300] }}>
-            <Camera size={24} style={{ color: KAYAD_THEME.slate[400] }} />
-            <span className="text-xs mt-2" style={{ color: KAYAD_THEME.slate[500] }}>{a}</span>
-            <span className="text-xs text-orange-500 mt-1">Required</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function EnquiryCenterSection({ enquiries }: { enquiries: Enquiry[] }) {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Enquiry Center</h1>
-      <div className="space-y-4">
-        {enquiries.map(e => (
-          <div key={e.id} className="rounded-xl p-4 bg-white">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${KAYAD_THEME.navy}15` }}>
-                <User size={14} style={{ color: KAYAD_THEME.navy }} />
-              </div>
-              <span className="font-medium" style={{ color: KAYAD_THEME.navy }}>{e.buyerName}</span>
-              {e.status === 'new' && <span className="w-2 h-2 rounded-full bg-blue-500" />}
+      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>My Listings</h1>
+      {listings.length === 0 ? (
+        <p className="text-sm text-slate-400">You haven't listed any vehicles yet.</p>
+      ) : listings.map((l) => {
+        const { score } = calculateListingQualityScore({
+          hasTitle: !!l.title,
+          hasBrand: !!l.brand,
+          hasModel: !!l.model,
+          hasYear: !!l.year,
+          hasPrice: !!l.price,
+          hasMileage: l.mileage != null,
+          hasFuel: !!l.fuel,
+          hasTransmission: !!l.transmission,
+          hasBodyType: !!l.body_type,
+          hasDescription: !!l.description,
+          hasLocation: !!l.location_city,
+          hasImages: (l.images?.length || 0) > 0,
+          imageCount: l.images?.length || 0,
+          hasFeatures: (l.features?.length || 0) > 0,
+          featureCount: l.features?.length || 0,
+          hasVin: !!l.vin,
+          hasLogbook: !!l.registration_number,
+          descriptionLength: l.description?.length || 0,
+        });
+        return (
+          <div key={l.id} className="rounded-xl p-4 bg-white flex items-center gap-4">
+            <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden shrink-0" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
+              {l.images?.[0]?.thumb || l.images?.[0]?.url ? (
+                <img src={l.images[0].thumb || l.images[0].url} alt={l.title} className="w-full h-full object-cover" />
+              ) : (
+                <Car size={32} style={{ color: KAYAD_THEME.slate[400] }} />
+              )}
             </div>
-            <p className="font-medium" style={{ color: KAYAD_THEME.navy }}>{e.subject}</p>
-            <p className="text-sm mt-1" style={{ color: KAYAD_THEME.slate[500] }}>{e.message}</p>
+            <div className="flex-1">
+              <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{l.year} {l.brand} {l.model}</h3>
+              <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{l.status || 'draft'}</p>
+            </div>
+            <p className="text-2xl font-bold" style={{ color: score >= 80 ? KAYAD_THEME.emerald : KAYAD_THEME.amber }}>{score}%</p>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
 
-function ViewingAppointmentsSection({ viewings }: { viewings: ViewingAppointment[] }) {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Viewing Appointments</h1>
-      {viewings.map(v => (
-        <div key={v.id} className="rounded-xl p-4 bg-white">
-          <div className="flex items-center justify-between mb-3">
-            <span className="font-bold" style={{ color: KAYAD_THEME.navy }}>{v.buyerName}</span>
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 capitalize">{v.status.replace('_', ' ')}</span>
-          </div>
-          <div className="flex gap-4 text-sm" style={{ color: KAYAD_THEME.slate[500] }}>
-            <span>{v.date} at {v.time}</span>
-            <span>{v.location}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function EscrowCenterSection({ transactions }: { transactions: EscrowTransaction[] }) {
+function EscrowCenterSection({ transactions, loading }: { transactions: BackendEscrow[]; loading: boolean }) {
   return (
     <div className="space-y-6">
       <div className="rounded-xl p-6" style={{ backgroundColor: `${KAYAD_THEME.emerald}10` }}>
@@ -1069,97 +805,20 @@ function EscrowCenterSection({ transactions }: { transactions: EscrowTransaction
         <span style={{ color: KAYAD_THEME.navy }}>KAYAD Escrow Protection - Secure transactions for private sales</span>
       </div>
       <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Escrow Transactions</h1>
-      {transactions.length === 0 ? (
+      {loading ? (
+        <p className="text-sm text-slate-400">Loading…</p>
+      ) : transactions.length === 0 ? (
         <div className="rounded-xl p-8 text-center bg-white">
           <Shield size={48} style={{ color: KAYAD_THEME.slate[300] }} className="mx-auto mb-4" />
           <p style={{ color: KAYAD_THEME.slate[500] }}>No active escrow transactions</p>
         </div>
       ) : transactions.map(t => (
         <div key={t.id} className="rounded-xl p-6 bg-white">
-          <h3 className="font-bold mb-2" style={{ color: KAYAD_THEME.navy }}>{t.vehicleTitle}</h3>
-          <p className="text-sm mb-4" style={{ color: KAYAD_THEME.slate[500] }}>Buyer: {t.buyerName}</p>
-          <p className="text-2xl font-bold" style={{ color: KAYAD_THEME.gold }}>KES {(t.salePrice / 1000000).toFixed(2)}M</p>
+          <h3 className="font-bold mb-2" style={{ color: KAYAD_THEME.navy }}>{t.car?.title || 'Vehicle'}</h3>
+          <p className="text-sm mb-4 capitalize" style={{ color: KAYAD_THEME.slate[500] }}>{t.status.replace('_', ' ')}</p>
+          <p className="text-2xl font-bold" style={{ color: KAYAD_THEME.gold }}>KES {(t.amount / 1000000).toFixed(2)}M</p>
         </div>
       ))}
-    </div>
-  );
-}
-
-function DocumentCenterSection({ documents }: { documents: typeof SAMPLE_DOCUMENTS }) {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Document Center</h1>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {documents.map(d => (
-          <div key={d.id} className="rounded-xl p-4 bg-white">
-            <FileText size={24} style={{ color: KAYAD_THEME.gold }} className="mb-2" />
-            <h3 className="font-medium text-sm" style={{ color: KAYAD_THEME.navy }}>{d.title}</h3>
-            <p className="text-xs" style={{ color: KAYAD_THEME.slate[500] }}>{d.date}</p>
-            {d.verified && <span className="text-xs text-emerald-600">Verified</span>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SaleProgressSection() {
-  const milestones = [
-    { label: 'Listing Created', completed: true },
-    { label: 'Buyer Contacted', completed: true },
-    { label: 'Viewing Completed', completed: false },
-    { label: 'Inspection', completed: false },
-    { label: 'Offer Accepted', completed: false },
-    { label: 'Escrow Started', completed: false },
-    { label: 'Ownership Transfer', completed: false },
-    { label: 'Complete', completed: false },
-  ];
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Sale Progress Tracker</h1>
-      <div className="rounded-xl p-6 bg-white">
-        {milestones.map((m, i) => (
-          <div key={i} className="flex items-center gap-3 py-2">
-            {m.completed ? <CheckCircle size={16} style={{ color: KAYAD_THEME.emerald }} /> : <Circle size={16} style={{ color: KAYAD_THEME.slate[300] }} />}
-            <span style={{ color: m.completed ? KAYAD_THEME.navy : KAYAD_THEME.slate[400] }}>{m.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SellerInsightsSection({ stats }: { stats: SellerStats }) {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Seller Insights</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl p-4 bg-white"><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>{stats.totalViews}</p><p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>Total Views</p></div>
-        <div className="rounded-xl p-4 bg-white"><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.emerald }}>{stats.totalEnquiries}</p><p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>Enquiries</p></div>
-        <div className="rounded-xl p-4 bg-white"><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.red }}>30</p><p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>Favorites</p></div>
-        <div className="rounded-xl p-4 bg-white"><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.gold }}>{stats.avgResponseTime}h</p><p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>Avg Response</p></div>
-      </div>
-    </div>
-  );
-}
-
-function SellerCopilotSection() {
-  const [query, setQuery] = useState('');
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>AI Selling Copilot</h1>
-      <div className="rounded-xl p-6 bg-white">
-        <div className="h-64 flex items-center justify-center" style={{ color: KAYAD_THEME.slate[400] }}>
-          <div className="text-center">
-            <Bot size={48} className="mx-auto mb-4" />
-            <p>Ask me anything about selling your vehicle</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Ask about selling..." className="flex-1 px-4 py-2 rounded-lg border" style={{ borderColor: KAYAD_THEME.slate[200] }} />
-          <button className="px-4 py-2 rounded-lg bg-navy text-white font-medium" style={{ backgroundColor: KAYAD_THEME.navy }}>Send</button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -1169,11 +828,16 @@ function HelpCenterSection() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Help Center</h1>
+      {/* Fixed: each card's own "Read More →" button had no onClick
+          handler at all - looked clickable, did nothing when clicked.
+          No real, dedicated help-article system exists to link these
+          to, so the button (a promise of functionality that isn't
+          real) is removed rather than left dead; the topic titles
+          themselves are honest, static content and stay. */}
       <div className="grid md:grid-cols-2 gap-4">
         {topics.map((t, i) => (
           <div key={i} className="rounded-xl p-4 bg-white">
-            <h3 className="font-bold mb-2" style={{ color: KAYAD_THEME.navy }}>{t}</h3>
-            <button className="text-sm" style={{ color: KAYAD_THEME.orange }}>Read More →</button>
+            <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{t}</h3>
           </div>
         ))}
       </div>

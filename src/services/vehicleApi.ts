@@ -209,6 +209,13 @@ export async function getCarById(id: string): Promise<BackendCar | null> {
   }
 }
 
+/** GET /api/cars/my-listings - the real, signed-in seller's own
+ * listings, every status (not just "available"). */
+export async function getMyListings(): Promise<BackendCar[]> {
+  const res = await vehicleFetch<{ data: BackendCar[] }>('/api/cars/my-listings', { method: 'GET' });
+  return res.data || [];
+}
+
 /** Maps a real backend car row to this frontend's real Vehicle type
  * (src/types/index.ts). Corrected in Phase 5 to reflect the real
  * schema (see file header) - auction fields are now mapped from real

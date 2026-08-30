@@ -417,7 +417,7 @@ function AppInner() {
           )}
 
           {activeNav === 'seller-platform' && (
-            <PrivateSellerPlatform />
+            <PrivateSellerPlatform user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
           {activeNav === 'finance' && (

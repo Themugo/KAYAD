@@ -17,6 +17,7 @@ import { requirePermission } from "../middleware/rbac.js";
 
 import {
   getCars,
+  getMyListings,
   getCar,
   createCar,
   updateCar,
@@ -139,6 +140,11 @@ router.get(
  *                     meta:
  *                       $ref: '#/components/schemas/PaginationMeta'
  */
+// 📋 GET MY LISTINGS (real, signed-in seller's own inventory, every
+// status) - placed before the public "/" route; no /:id pattern
+// exists in this file that would otherwise capture "/my-listings".
+router.get("/my-listings", protect, asyncHandler(getMyListings));
+
 router.get("/", validateQuery(carListQuerySchema), validateResponse(carListResponseSchema), cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
 
 // 🔎 GET SINGLE CAR
