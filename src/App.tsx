@@ -385,7 +385,7 @@ function AppInner() {
           )}
 
           {activeNav === 'support' && (
-            <SupportView />
+            <SupportView user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
           {activeNav === 'broadcast' && (

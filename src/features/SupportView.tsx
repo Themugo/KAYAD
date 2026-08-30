@@ -2,16 +2,54 @@ import React, { useState, useRef } from 'react';
 import { HelpCircle, ShieldCheck, CheckCircle2, MessageSquare } from 'lucide-react';
 import { PageHeader, Card, Select, Textarea, Button, Badge } from '../components/ui';
 import SupportFAQ from './SupportFAQ';
+import { createSupportTicket, SupportApiError } from '../services/supportApi';
+import { UserProfile } from '../types';
 
-export const SupportView: React.FC = () => {
+interface SupportViewProps {
+  user?: UserProfile | null;
+  onOpenAuth?: () => void;
+}
+
+export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth }) => {
   const [submitted, setSubmitted] = useState(false);
   const [issue, setIssue] = useState('');
+  const [category, setCategory] = useState('escrow');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [ticketId, setTicketId] = useState<string | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Fixed: this form previously never called any backend at all -
+  // handleSubmit just set local state, showing a fake ticket number
+  // ("#SUP-882") and promising a callback that could never come,
+  // since nothing was ever actually submitted anywhere. A real,
+  // already-built client (services/supportApi.ts) existed for this
+  // exact purpose but had never been wired in. Now creates a real
+  // ticket via the real backend and only shows success once it's
+  // genuinely confirmed - the fake, hardcoded ticket number is
+  // replaced with the real one the backend returns.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!issue.trim()) return;
-    setSubmitted(true);
+    if (!user) {
+      onOpenAuth?.();
+      return;
+    }
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const result = await createSupportTicket({
+        category,
+        subject: issue.trim().slice(0, 80),
+        description: issue.trim(),
+      });
+      setTicketId(result.ticket.id);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof SupportApiError ? err.message : 'Could not submit your ticket. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleScrollToForm = () => {
@@ -46,22 +84,34 @@ export const SupportView: React.FC = () => {
               <MessageSquare className="w-4 h-4 text-amber-500" />
               Submit Ticket or Open Dispute
             </h3>
-            <Badge variant="accent" size="sm">15-Min Response SLA</Badge>
+            {/* Fixed: this badge said "15-Min Response SLA", but the
+                real backend's own actual SLA (set on every real
+                ticket, confirmed directly:
+                backend/controllers/supportController.js's createTicket)
+                is a 1-hour first-response target, not 15 minutes. */}
+            <Badge variant="accent" size="sm">1-Hour Response SLA</Badge>
           </div>
 
           {submitted ? (
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2 text-xs text-emerald-900">
               <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-              <p className="font-bold">Support Request Received (#SUP-882)</p>
-              <p>A KAYAD Escrow & Technical Audit Agent will contact you within 15 minutes.</p>
-              <button onClick={() => { setSubmitted(false); setIssue(''); }} className="text-emerald-800 font-bold underline pt-2 cursor-pointer">
+              <p className="font-bold">Support Request Received{ticketId ? ` (#${ticketId.slice(0, 8).toUpperCase()})` : ''}</p>
+              <p>A KAYAD Escrow & Technical Audit Agent will contact you soon.</p>
+              <button onClick={() => { setSubmitted(false); setIssue(''); setTicketId(null); }} className="text-emerald-800 font-bold underline pt-2 cursor-pointer">
                 Submit another inquiry
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+              {submitError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 font-semibold">
+                  {submitError}
+                </div>
+              )}
               <Select
                 label="Inquiry Category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
                 options={[
                   { value: 'escrow', label: 'Escrow Vault Deposit & Refund' },
                   { value: 'inspection', label: '150-Point Inspection Verification' },
@@ -76,7 +126,7 @@ export const SupportView: React.FC = () => {
                 rows={4}
                 value={issue}
                 onChange={(e) => setIssue(e.target.value)}
-                placeholder="Provide vehicle title, deal reference (e.g. ESC-901-KE), or inspection ID..."
+                placeholder="Provide vehicle title, deal reference, or inspection ID..."
               />
 
               <Button
@@ -84,8 +134,9 @@ export const SupportView: React.FC = () => {
                 variant="primary"
                 size="md"
                 fullWidth
+                disabled={submitting}
               >
-                Submit Support Ticket
+                {submitting ? 'Submitting…' : user ? 'Submit Support Ticket' : 'Sign In to Submit'}
               </Button>
             </form>
           )}

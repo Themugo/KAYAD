@@ -128,6 +128,17 @@ export const FIELD_ALIASES = {
     refundedBy: "refundedBy",
     releasedBy: "releasedBy",
   },
+  // Fixed (Support page real-data integration): reproduced directly
+  // - the real support_tickets table's own owner column is user_id,
+  // not user (confirmed via \d support_tickets); no alias existed for
+  // this table at all, so the default camelToSnake conversion left
+  // "user" unmapped. Real, direct consequence: every single support
+  // ticket creation and every "my tickets" list request failed
+  // ("Could not find the 'user' column of 'support_tickets' in the
+  // schema cache").
+  support_tickets: {
+    user: "user_id",
+  },
   // Added (Final Integration - real data integration): found while
   // wiring the real, already-built favoriteApi.ts frontend client to
   // this project's own saved-vehicles UI (previously hardcoded fake
