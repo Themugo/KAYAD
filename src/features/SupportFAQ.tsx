@@ -222,6 +222,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
   const [selectedCategory, setSelectedCategory] = useState<FAQCategory>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedIds, setExpandedIds] = useState<string[]>(['faq-ins-1', 'faq-esc-1', 'faq-fin-1']);
+  const [helpfulClickedId, setHelpfulClickedId] = useState<string | null>(null);
 
   // Filtered FAQ Items
   const filteredFaqs = useMemo(() => {
@@ -454,12 +455,30 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
                     <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100">
                       <span>Was this answer helpful?</span>
                       <div className="flex items-center gap-3 font-bold text-[#1E3063]">
-                        <button 
-                          onClick={() => alert('Thank you for your feedback!')}
-                          className="hover:underline text-emerald-700 cursor-pointer"
-                        >
-                          👍 Yes, clear
-                        </button>
+                        {/* Fixed: this previously claimed "Thank you
+                            for your feedback!" via a browser alert,
+                            but recorded nothing anywhere - a real,
+                            matching backend action exists
+                            (POST /api/cms/faqs/:id/popularity), but it
+                            needs a real database id, and these FAQ
+                            entries are static, local content with no
+                            such id - connecting it for real would mean
+                            migrating this entire FAQ dataset into the
+                            backend first, a separate, larger task.
+                            Made this an honest, purely local
+                            interaction instead - it no longer implies
+                            the click was received or counted
+                            anywhere. */}
+                        {helpfulClickedId === faq.id ? (
+                          <span className="text-emerald-700">Thanks!</span>
+                        ) : (
+                          <button
+                            onClick={() => setHelpfulClickedId(faq.id)}
+                            className="hover:underline text-emerald-700 cursor-pointer"
+                          >
+                            👍 Yes, clear
+                          </button>
+                        )}
                         <span>•</span>
                         {onContactSupport && (
                           <button 
