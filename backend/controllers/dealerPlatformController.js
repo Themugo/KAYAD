@@ -9,6 +9,7 @@ import DealerAnalytics from "../models/DealerAnalytics.js";
 import Car from "../models/Car.js";
 import Lead from "../models/Lead.js";
 import Escrow from "../models/Escrow.js";
+import MarketingCampaign from "../models/MarketingCampaign.js";
 import { logError } from "../utils/logger.js";
 
 // ============================================================
@@ -376,36 +377,51 @@ export async function getSalesPipeline(req, res) {
 // MARKETING CENTER
 // ============================================================
 
+// Fixed: this previously returned 4 fully hardcoded, invented
+// campaigns with fabricated impressions/clicks/conversions/ROI
+// numbers - no real ad-performance tracking infrastructure (real
+// impression or click counters tied to a campaign) exists anywhere
+// in this project, so those metrics are not included here rather
+// than invent a version of them. Real, basic campaign info (name,
+// type, budget, status, start date) is genuinely persisted via a new
+// real table.
 export async function getMarketingCampaigns(req, res) {
-  const campaigns = {
-    items: [
-      { id: '1', name: 'February Luxury SUV Sale', type: 'promotion', status: 'active', budget: 50000, spent: 32500, impressions: 45000, clicks: 890, leads: 45, conversions: 8, roi: 340 },
-      { id: '2', name: 'Toyota Weekend Special', type: 'promotion', status: 'scheduled', budget: 30000, spent: 0, impressions: 0, clicks: 0, leads: 0, conversions: 0, roi: 0, startDate: '2024-03-01' },
-      { id: '3', name: 'New Arrivals Showcase', type: 'featured', status: 'active', budget: 25000, spent: 18000, impressions: 32000, clicks: 620, leads: 28, conversions: 5, roi: 280 },
-      { id: '4', name: 'SMS Flash Sale', type: 'sms', status: 'completed', budget: 15000, spent: 15000, impressions: 15000, clicks: 0, leads: 120, conversions: 12, roi: 420 },
-    ],
-    stats: {
-      activeCampaigns: 2,
-      totalBudget: 120000,
-      totalSpent: 65500,
-      totalLeads: 193,
-      totalConversions: 25,
-      avgROI: 347,
-    },
-  };
-
-  res.json({ success: true, data: campaigns });
+  try {
+    const campaigns = await MarketingCampaign.find({ dealer: req.user.id }).sort({ createdAt: -1 });
+    res.json({
+      success: true,
+      data: {
+        items: campaigns,
+        stats: {
+          activeCampaigns: campaigns.filter((c) => c.status === "active").length,
+          totalBudget: campaigns.reduce((sum, c) => sum + Number(c.budget || 0), 0),
+        },
+      },
+    });
+  } catch (err) {
+    logError("Error fetching campaigns:", err);
+    res.status(500).json({ success: false, message: "Failed to load campaigns" });
+  }
 }
 
 export async function createCampaign(req, res) {
-  const campaign = {
-    id: `cmp_${Date.now()}`,
-    ...req.body,
-    status: 'draft',
-    createdAt: new Date().toISOString(),
-  };
-
-  res.status(201).json({ success: true, data: campaign });
+  try {
+    const { name, campaignType, budget, startDate } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Campaign name is required" });
+    }
+    const campaign = await MarketingCampaign.create({
+      dealer: req.user.id,
+      name: name.trim(),
+      campaignType,
+      budget,
+      startDate,
+    });
+    res.status(201).json({ success: true, data: campaign });
+  } catch (err) {
+    logError("Error creating campaign:", err);
+    res.status(500).json({ success: false, message: "Failed to create campaign" });
+  }
 }
 
 // ============================================================
@@ -638,33 +654,78 @@ export async function askDealerCopilot(req, res) {
 // CUSTOMER DATABASE
 // ============================================================
 
+// Fixed: this previously returned 3 fully hardcoded, invented
+// customers (including a specific bank name, "Equity Bank", claimed
+// as a real finance partner - the same class of false-partnership
+// claim already removed everywhere else in this project) - identical
+// for every dealer. "Customer" is honestly derived from this dealer's
+// own real, released escrow deals (the same real revenue source
+// already used for the dashboard overview), grouped by real buyer -
+// there is no separate real "customer" entity anywhere in this
+// project's schema.
 export async function getCustomers(req, res) {
-  const customers = {
-    items: [
-      { id: '1', name: 'James Mwangi', email: 'james@example.com', phone: '+254 712 345 678', vehicles: [{ title: 'Toyota Land Cruiser 300', purchaseDate: '2024-01-15', price: 3200000 }], totalSpent: 3200000, lifetimeValue: 3200000, lastPurchase: '2024-01-15', status: 'active' },
-      { id: '2', name: 'Emily Njeri', email: 'emily@example.com', phone: '+254 767 890 123', vehicles: [{ title: 'Audi Q7', purchaseDate: '2024-02-15', price: 1950000 }], totalSpent: 1950000, lifetimeValue: 2150000, lastPurchase: '2024-02-15', status: 'active' },
-      { id: '3', name: 'Robert Maina', email: 'robert@example.com', phone: '+254 778 901 234', vehicles: [], totalSpent: 0, lifetimeValue: 0, lastActivity: '2024-01-25', status: 'inactive', lostReason: 'Budget constraints' },
-    ],
-    stats: { total: 156, active: 134, lifetimeValue: 234500000, avgValue: 1503205 },
-  };
+  try {
+    const dealerId = req.user.id;
+    const releasedEscrows = await Escrow.find({ seller: dealerId, status: "released" })
+      .populate("buyer", "name email phone")
+      .populate("car", "title");
 
-  res.json({ success: true, data: customers });
+    const byBuyer = {};
+    for (const e of releasedEscrows) {
+      const buyerId = e.buyer?.id;
+      if (!buyerId) continue;
+      if (!byBuyer[buyerId]) {
+        byBuyer[buyerId] = {
+          id: buyerId,
+          name: e.buyer?.name || "Buyer",
+          email: e.buyer?.email,
+          phone: e.buyer?.phone,
+          vehicles: [],
+          totalSpent: 0,
+        };
+      }
+      byBuyer[buyerId].vehicles.push({ title: e.car?.title || "Vehicle", amount: e.sellerAmount || e.amount });
+      byBuyer[buyerId].totalSpent += e.sellerAmount || e.amount || 0;
+    }
+
+    const items = Object.values(byBuyer);
+    res.json({
+      success: true,
+      data: {
+        items,
+        stats: {
+          total: items.length,
+          lifetimeValue: items.reduce((sum, c) => sum + c.totalSpent, 0),
+        },
+      },
+    });
+  } catch (err) {
+    logError("Error fetching customers:", err);
+    res.status(500).json({ success: false, message: "Failed to load customers" });
+  }
 }
 
 export async function getCustomerTimeline(req, res) {
-  const { customerId } = req.params;
-  
-  const timeline = {
-    customerId,
-    events: [
-      { type: 'purchase', title: 'Vehicle Purchased', description: 'Toyota Land Cruiser 300 GX-R', date: '2024-01-15', amount: 3200000 },
-      { type: 'finance', title: 'Finance Application', description: 'Approved - Equity Bank', date: '2024-01-10', amount: 2560000 },
-      { type: 'inspection', title: 'Inspection Completed', description: 'Ghost Checkers 150-Point - Score 94%', date: '2024-01-08' },
-      { type: 'enquiry', title: 'Initial Enquiry', description: 'Interested in Toyota Land Cruiser', date: '2024-01-05' },
-    ],
-  };
+  try {
+    const { customerId } = req.params;
+    const dealerId = req.user.id;
+    const escrows = await Escrow.find({ seller: dealerId, buyer: customerId })
+      .populate("car", "title")
+      .sort({ createdAt: -1 });
 
-  res.json({ success: true, data: timeline });
+    const events = escrows.map((e) => ({
+      type: "purchase",
+      title: `Deal ${e.status}`,
+      description: e.car?.title || "Vehicle",
+      date: e.createdAt,
+      amount: e.amount,
+    }));
+
+    res.json({ success: true, data: { customerId, events } });
+  } catch (err) {
+    logError("Error fetching customer timeline:", err);
+    res.status(500).json({ success: false, message: "Failed to load customer history" });
+  }
 }
 
 // ============================================================

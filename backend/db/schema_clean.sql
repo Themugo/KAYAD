@@ -432,6 +432,25 @@ CREATE TABLE IF NOT EXISTS loan_applications (
 GRANT ALL ON loan_applications TO service_role;
 
 -- =============================
+-- DEALER MARKETING CAMPAIGNS (real, honest scope - basic campaign
+-- info only, no fabricated performance metrics since no real
+-- impression/click tracking infrastructure exists anywhere in this
+-- project)
+-- =============================
+CREATE TABLE IF NOT EXISTS marketing_campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  dealer UUID NOT NULL REFERENCES users(id),
+  name TEXT NOT NULL,
+  campaign_type TEXT DEFAULT 'promotion' CHECK (campaign_type IN ('promotion','featured','sms')),
+  budget NUMERIC DEFAULT 0,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft','scheduled','active','completed')),
+  start_date TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+GRANT ALL ON marketing_campaigns TO service_role;
+
+-- =============================
 -- CMS CONTENT (read path only - createContent/updateContent's own
 -- cms_revisions dependency intentionally not added; nothing in this
 -- project writes through that path yet)

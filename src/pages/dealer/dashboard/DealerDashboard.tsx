@@ -314,6 +314,71 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     }
   };
 
+  // Fixed: Customers previously had no real backend equivalent at all
+  // (getCustomers returned 3 fully invented people, including one
+  // specifically credited to "Equity Bank" financing that never
+  // happened) - real customers are honestly derived from this
+  // dealer's own real, released escrow deals.
+  const [customers, setCustomers] = useState([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customersError, setCustomersError] = useState(null);
+  const [customersLoaded, setCustomersLoaded] = useState(false);
+
+  useEffect(() => {
+    if (activeSection === 'customers' && user && !customersLoaded) {
+      setCustomersLoading(true);
+      setCustomersError(null);
+      dealerApi.getCustomers()
+        .then(({ data }) => { setCustomers(data.data.items); setCustomersLoaded(true); })
+        .catch(() => setCustomersError('Could not load your customers. Please try again.'))
+        .finally(() => setCustomersLoading(false));
+    }
+  }, [activeSection, user, customersLoaded]);
+
+  // Fixed: Marketing previously showed 4 fully invented campaigns with
+  // fabricated impressions/clicks/ROI numbers, and its own real
+  // "create campaign" action never actually saved anything at all -
+  // it just echoed back whatever was submitted. Real campaigns below,
+  // genuinely persisted via a new real table - performance metrics
+  // (impressions, clicks, ROI) are intentionally not shown, since no
+  // real ad-tracking infrastructure exists to back them honestly.
+  const [campaigns, setCampaigns] = useState([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(false);
+  const [campaignsError, setCampaignsError] = useState(null);
+  const [campaignsLoaded, setCampaignsLoaded] = useState(false);
+  const [newCampaignName, setNewCampaignName] = useState('');
+  const [creatingCampaign, setCreatingCampaign] = useState(false);
+
+  const loadCampaigns = () => {
+    setCampaignsLoading(true);
+    setCampaignsError(null);
+    dealerApi.getMarketingCampaigns()
+      .then(({ data }) => { setCampaigns(data.data.items); setCampaignsLoaded(true); })
+      .catch(() => setCampaignsError('Could not load your campaigns. Please try again.'))
+      .finally(() => setCampaignsLoading(false));
+  };
+
+  useEffect(() => {
+    if (activeSection === 'marketing' && user && !campaignsLoaded) {
+      loadCampaigns();
+    }
+  }, [activeSection, user, campaignsLoaded]);
+
+  const handleCreateCampaign = async () => {
+    if (!newCampaignName.trim()) return;
+    setCreatingCampaign(true);
+    try {
+      await dealerApi.createCampaign({ name: newCampaignName.trim(), campaignType: 'promotion', budget: 0 });
+      setNewCampaignName('');
+      setCampaignsLoaded(false);
+      loadCampaigns();
+    } catch {
+      setCampaignsError('Could not create this campaign. Please try again.');
+    } finally {
+      setCreatingCampaign(false);
+    }
+  };
+
   const loadDashboard = async () => {
     setLoadError(null);
     try {
@@ -753,6 +818,99 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'customers' && (
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-6">Customers</h3>
+              {/* Fixed: this section had a real nav entry but zero
+                  content behind it at all. Real customers below,
+                  honestly derived from this dealer's own real,
+                  released escrow deals (there is no separate real
+                  "customer" entity anywhere in this project's
+                  schema). */}
+              {customersLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                </div>
+              ) : customersError ? (
+                <div className="text-center py-12">
+                  <p className="text-sm text-slate-500 mb-3">{customersError}</p>
+                  <button onClick={() => setCustomersLoaded(false)} className="text-xs font-bold text-purple-600">Try Again</button>
+                </div>
+              ) : customers.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-12">No customers yet - customers appear here once a real deal completes.</p>
+              ) : (
+                <div className="space-y-3">
+                  {customers.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                      <div>
+                        <p className="font-medium text-slate-800">{c.name}</p>
+                        <p className="text-xs text-slate-500">{c.email} • {c.vehicles.length} vehicle{c.vehicles.length === 1 ? '' : 's'}</p>
+                      </div>
+                      <p className="text-sm font-bold text-slate-800">Ksh {(c.totalSpent / 1000000).toFixed(2)}M</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'marketing' && (
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-6">Marketing</h3>
+              {/* Fixed: this section had a real nav entry but zero
+                  content behind it at all. Real campaigns below, with
+                  a real create form - performance metrics
+                  (impressions/clicks/ROI) are intentionally not shown
+                  since no real ad-tracking infrastructure exists to
+                  back them honestly. */}
+              <div className="flex gap-2 mb-6">
+                <input
+                  value={newCampaignName}
+                  onChange={(e) => setNewCampaignName(e.target.value)}
+                  placeholder="New campaign name"
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                />
+                <button
+                  onClick={handleCreateCampaign}
+                  disabled={creatingCampaign || !newCampaignName.trim()}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 disabled:opacity-50"
+                >
+                  {creatingCampaign ? 'Creating…' : 'Create Campaign'}
+                </button>
+              </div>
+              {campaignsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                </div>
+              ) : campaignsError ? (
+                <div className="text-center py-12">
+                  <p className="text-sm text-slate-500 mb-3">{campaignsError}</p>
+                  <button onClick={loadCampaigns} className="text-xs font-bold text-purple-600">Try Again</button>
+                </div>
+              ) : campaigns.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-8">No campaigns yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {campaigns.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                      <div>
+                        <p className="font-medium text-slate-800">{c.name}</p>
+                        <p className="text-xs text-slate-500 capitalize">{c.campaign_type} • Budget Ksh {Number(c.budget).toLocaleString()}</p>
+                      </div>
+                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        c.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                        c.status === 'draft' ? 'bg-slate-100 text-slate-600' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {c.status}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
