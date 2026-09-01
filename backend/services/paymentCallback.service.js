@@ -125,8 +125,6 @@ export const handleMpesaCallback = async (callbackData) => {
       mpesaReceipt: receipt,
       paidAt: new Date(),
     });
-    finalized = true;
-
     let userDoc = null;
     try {
       userDoc = await findById("users", payment.user, "email name phone");
@@ -214,24 +212,29 @@ export const handleMpesaCallback = async (callbackData) => {
         }
       }
 
-      const config = await findOne("platform_config", {});
-      const rate = config?.dealerCommission ? config.dealerCommission / 100 : 0.05;
-      const commission = Math.round(payment.amount * rate);
-      const sellerAmount = payment.amount - commission;
-      const newEscrow = await create("escrows", {
-        car: payment.car,
-        buyer: payment.user,
-        seller: sellerId,
-        amount: payment.amount,
-        payment: payment.id,
-        commission,
-        sellerAmount,
-        status: "funded",
-        fundedAt: new Date(),
-        autoReleaseEligibleAt: new Date(Date.now() + 3 * 86400000),
-        timeline: { depositReceived: true, depositReceivedAt: new Date() },
-        history: [{ action: "Escrow created and funded", at: new Date() }],
-      });
+      // Payment callbacks may be retried after a downstream timeout. The
+      // payment reference is the idempotency key for escrow creation.
+      const existingEscrow = await findOne("escrows", { payment: payment.id });
+      if (!existingEscrow) {
+        const config = await findOne("platform_config", {});
+        const rate = config?.dealerCommission ? config.dealerCommission / 100 : 0.05;
+        const commission = Math.round(payment.amount * rate);
+        const sellerAmount = payment.amount - commission;
+        await create("escrows", {
+          car: payment.car,
+          buyer: payment.user,
+          seller: sellerId,
+          amount: payment.amount,
+          payment: payment.id,
+          commission,
+          sellerAmount,
+          status: "funded",
+          fundedAt: new Date(),
+          autoReleaseEligibleAt: new Date(Date.now() + 3 * 86400000),
+          timeline: { depositReceived: true, depositReceivedAt: new Date() },
+          history: [{ action: "Escrow created and funded", at: new Date() }],
+        });
+      }
     }
 
     await sendNotification({
@@ -266,6 +269,9 @@ export const handleMpesaCallback = async (callbackData) => {
       if (payment.car) io.to(String(payment.car)).emit("paymentSuccess", payload);
     }
 
+    // All authoritative settlement paths have completed successfully. Only
+    // now is the callback considered finalized; duplicates remain harmless.
+    finalized = true;
     return payment;
   } catch (err) {
     // Unexpected failure before a definitive status was written —

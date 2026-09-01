@@ -208,11 +208,11 @@ export async function getLedgerEntries({ source, status, user_id, startDate, end
 
   if (source) query = query.eq("source", source);
   if (status) query = query.eq("status", status);
-  if (user_id) query = query.eq("user", user_id);
-  if (startDate) query = query.gte("createdAt", new Date(startDate).toISOString());
-  if (endDate) query = query.lte("createdAt", new Date(endDate).toISOString());
+  if (user_id) query = query.eq("user_id", user_id);
+  if (startDate) query = query.gte("created_at", new Date(startDate).toISOString());
+  if (endDate) query = query.lte("created_at", new Date(endDate).toISOString());
 
-  query = query.order("createdAt", { ascending: false });
+  query = query.order("created_at", { ascending: false });
   query = query.range((page - 1) * limit, (page - 1) * limit + limit - 1);
 
   const { data: entries, error, count } = await query;
@@ -264,10 +264,10 @@ export async function getReconciliationReport({ startDate, endDate }) {
   const sb = getSupabase();
   let query = sb.from("ledger_entries").select("*");
 
-  if (startDate) query = query.gte("createdAt", new Date(startDate).toISOString());
-  if (endDate) query = query.lte("createdAt", new Date(endDate).toISOString());
+  if (startDate) query = query.gte("created_at", new Date(startDate).toISOString());
+  if (endDate) query = query.lte("created_at", new Date(endDate).toISOString());
 
-  query = query.order("createdAt", { ascending: false });
+  query = query.order("created_at", { ascending: false });
 
   const { data: entries, error } = await query;
   if (error) throw error;
