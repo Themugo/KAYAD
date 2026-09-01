@@ -118,6 +118,7 @@ const makeCallback = ({ checkoutId = "ws_CO_123", resultCode = 0, amount = 50000
 
 describe("handleMpesaCallback", () => {
   let payments;
+  let attempts;
 
   const seedPayment = (overrides = {}) => {
     const payment = {
@@ -137,15 +138,25 @@ describe("handleMpesaCallback", () => {
 
   beforeEach(() => {
     payments = [];
+    attempts = [];
     jest.clearAllMocks();
 
     dbMock.updateMany.mockImplementation(async (table, filters, data) => {
-      expect(table).toBe("payments");
-      const matched = payments.filter(
-        (p) => p.checkoutRequestId === filters.checkoutRequestId && p.processed === filters.processed,
-      );
-      for (const p of matched) Object.assign(p, data);
-      return matched;
+      if (table === "payments") {
+        const matched = payments.filter(
+          (p) => p.checkoutRequestId === filters.checkoutRequestId && p.processed === filters.processed,
+        );
+        for (const p of matched) Object.assign(p, data);
+        return matched;
+      }
+      if (table === "payment_attempts") {
+        const matched = attempts.filter(
+          (a) => a.checkoutRequestId === filters.checkoutRequestId,
+        );
+        for (const a of matched) Object.assign(a, data);
+        return matched;
+      }
+      throw new Error(`Unexpected updateMany table: ${table}`);
     });
     dbMock.update.mockImplementation(async (table, id, data) => {
       const p = payments.find((p) => p.id === id);
@@ -159,15 +170,21 @@ describe("handleMpesaCallback", () => {
       ) || null;
     });
     dbMock.findById.mockResolvedValue(null);
-    dbMock.create.mockImplementation(async (table, data) => ({ id: `${table}-new`, ...data }));
+    dbMock.create.mockImplementation(async (table, data) => {
+      const row = { id: `${table}-new`, ...data };
+      if (table === "payment_attempts") attempts.push(row);
+      return row;
+    });
   });
 
-  test("successful callback marks the payment success with the provider receipt", async () => {
+  test("successful callback marks the payment and attempt success with the provider receipt", async () => {
     seedPayment();
+    attempts.push({ id: "attempt-1", checkoutRequestId: "ws_CO_123", status: "pending" });
     await handleMpesaCallback(makeCallback());
     expect(payments[0].status).toBe("success");
     expect(payments[0].mpesaReceipt).toBe("QGH12345");
     expect(payments[0].processed).toBe(true);
+    expect(attempts[0].status).toBe("success");
   });
 
   test("duplicate callback does not reprocess: side effects run exactly once", async () => {
@@ -182,16 +199,20 @@ describe("handleMpesaCallback", () => {
 
   test("amount integrity: a callback reporting a different amount fails the payment, never settles it", async () => {
     seedPayment();
+    attempts.push({ id: "attempt-1", checkoutRequestId: "ws_CO_123", status: "pending" });
     await handleMpesaCallback(makeCallback({ amount: 5 }));
     expect(payments[0].status).toBe("failed");
+    expect(attempts[0].status).toBe("failed");
     expect(payments[0].resultDesc).toMatch(/Amount mismatch/);
     expect(payments[0].mpesaReceipt).toBeUndefined();
   });
 
-  test("provider-reported failure marks the payment failed", async () => {
+  test("provider-reported failure marks the payment and attempt failed", async () => {
     seedPayment();
+    attempts.push({ id: "attempt-1", checkoutRequestId: "ws_CO_123", status: "pending" });
     await handleMpesaCallback(makeCallback({ resultCode: 1032 }));
     expect(payments[0].status).toBe("failed");
+    expect(attempts[0].status).toBe("failed");
   });
 
   test("incomplete metadata releases the claim so a provider retry can recover", async () => {
