@@ -56,25 +56,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Notifications Filter Tag State
   const [notifFilter, setNotifFilter] = useState<'all' | 'escrow' | 'price' | 'auction' | 'finance'>('all');
 
-  // Interactive Saved Searches State
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([
-    {
-      id: 'search-1',
-      title: 'Toyota Prado TX-L (2018-2022) in Nairobi',
-      filters: { make: 'Toyota', model: 'Prado', county: 'Nairobi', maxPrice: 7500000 },
-      notifyOnPriceDrop: true,
-      notifyOnNewListing: true,
-      createdAt: '2 days ago'
-    },
-    {
-      id: 'search-2',
-      title: 'Subaru Outback AWD < 80,000 km',
-      filters: { make: 'Subaru', model: 'Outback', maxMileage: 80000 },
-      notifyOnPriceDrop: true,
-      notifyOnNewListing: false,
-      createdAt: '1 week ago'
-    }
-  ]);
+  // Saved-search persistence is not yet connected to a server-backed contract.
+  // Keep this dashboard truthful instead of showing invented searches.
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
 
   // Derived Saved Vehicle Objects
   const savedItems = useMemo(() => {
@@ -85,102 +69,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return savedItems.reduce((acc, curr) => acc + curr.price, 0);
   }, [savedItems]);
 
-  // Derived Active Purchases
+  // Derived Active Purchases: only expose facts carried by real escrow records.
   const activePurchases = useMemo(() => {
     return deals.map((deal) => {
       const matchVehicle = vehicles.find((v) => v.id === deal.vehicleId || v.title === deal.vehicleTitle);
+      const stage = deal.status || (deal.step ? `Step ${deal.step}` : 'Status unavailable');
       return {
         ...deal,
-        vehicleImage: matchVehicle?.image || deal.vehicleImage || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600',
+        vehicleImage: matchVehicle?.image || deal.vehicleImage,
         vehiclePrice: matchVehicle?.price || deal.amount,
-        escrowStageText: deal.step >= 5 ? 'Step 5/6: NTSA TIMS Logbook Transfer' : deal.step >= 3 ? 'Step 3/6: 150-Point Technical Inspection Passed' : 'Step 2/6: Deposit Secured in Escrow Vault',
-        inspectionStatusText: 'Passed - 96% Certification Score by Eng. David Kamau',
-        sellerResponseText: 'Seller Confirmed - NTSA TIMS Title Transfer Initiated',
-        outstandingTask: deal.step === 3 || deal.step === 4 
-          ? { id: 'task-1', text: 'Action Required: Sign Vault Release Agreement & Upload National ID', urgent: true }
-          : { id: 'task-2', text: 'Confirm Physical Delivery Address', urgent: false }
+        escrowStageText: stage,
+        inspectionStatusText: 'Inspection status is available in the inspection record.',
+        sellerResponseText: 'Seller communication is available in the Chat Hub.',
+        outstandingTask: { id: `task-${deal.id}`, text: 'Review the current escrow record for any required action.', urgent: false }
       };
     });
   }, [deals, vehicles]);
 
-  // Derived Finance Status
-  const financeApp = {
-    partnerBank: 'NCBA Bank Kenya',
-    status: 'Pre-Approved (Asset Financing)',
-    preApprovedAmount: 5200000,
-    tenureMonths: 48,
-    monthlyPaymentEstimate: 124500,
-    documentsRequested: [
-      { name: 'National ID / Passport Copy', status: 'Approved ✓' },
-      { name: '6-Month Certified Bank Statement', status: 'Approved ✓' },
-      { name: 'KRA PIN Certificate Copy', status: 'Pending Upload ⏳' },
-      { name: 'Proforma Invoice / KAYAD Escrow Quote', status: 'System Generated ✓' }
-    ]
-  };
+  // Finance applications are not represented by a live dashboard contract yet.
+  const financeApp = null;
 
-  // Derived Notifications Feed (chronological, no fake data)
-  const notifications = useMemo(() => {
-    const list = [
-      {
-        id: 'n1',
-        type: 'price',
-        title: 'Price Drop Alert',
-        message: '2021 Toyota Land Cruiser Prado TX-L dropped by Ksh 50,000!',
-        time: '2 hours ago',
-        vehicleId: 'v1'
-      },
-      {
-        id: 'n2',
-        type: 'escrow',
-        title: 'Escrow Vault Deposit Secured',
-        message: 'Ksh 4,850,000 successfully deposited in KAYAD Protected Vault for Deal #ESC-8092.',
-        time: '5 hours ago',
-        vehicleId: 'v2'
-      },
-      {
-        id: 'n3',
-        type: 'auction',
-        title: 'Lead Bidder Status',
-        message: 'Your bid of Ksh 2,300,000 on Nissan X-Trail Hybrid is currently the highest bid!',
-        time: '1 day ago',
-        auctionId: 'AUC-2026-8801'
-      },
-      {
-        id: 'n4',
-        type: 'finance',
-        title: 'Asset Financing Pre-Approval',
-        message: 'NCBA Bank Kenya approved asset financing up to Ksh 5,200,000 at 13% p.a.',
-        time: '2 days ago'
-      }
-    ];
+  // Notifications must come from real event/notification records. No fabricated feed.
+  const notifications: Array<{ id: string; type: 'price' | 'escrow' | 'auction' | 'finance'; title: string; message: string; time: string }> = [];
 
-    if (notifFilter === 'all') return list;
-    return list.filter((item) => item.type === notifFilter);
-  }, [notifFilter]);
-
-  // Recent Messages Snippets
-  const recentMessages = useMemo(() => {
-    if (messages.length > 0) return messages.slice(-3);
-    return [
-      {
-        id: 'm1',
-        sender: 'seller' as const,
-        text: 'Hello Jimmy, the 2021 Prado TX-L logbook title is cleared with NTSA TIMS. Ready for escrow inspection.',
-        timestamp: '10:45 AM',
-        vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L'
-      },
-      {
-        id: 'm2',
-        sender: 'user' as const,
-        text: 'Thank you! I have requested the 150-Point inspection through David Kamau.',
-        timestamp: '11:02 AM',
-        vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L'
-      }
-    ];
-  }, [messages]);
+  // Messages are supplied by the live communication layer.
+  const recentMessages = messages.slice(-3);
 
   // Buyer Name
-  const buyerName = user?.name || 'Jimmy Mugo';
+  const buyerName = user?.name || 'Buyer';
 
   return (
     <div className="space-y-8 relative pb-12">
@@ -263,23 +179,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Lock className="w-3.5 h-3.5 text-amber-400" /> Active Deals
             </p>
             <p className="text-2xl font-black font-display text-white">{activePurchases.length} Escrow Deals</p>
-            <p className="text-[11px] text-emerald-300 font-bold">100% Vault Protected</p>
+            <p className="text-[11px] text-emerald-300 font-bold">Status from live escrow records</p>
           </div>
 
           <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 space-y-1">
             <p className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-300" /> Action Required
             </p>
-            <p className="text-2xl font-black font-display text-amber-300">1 Urgent Task</p>
-            <p className="text-[11px] text-slate-200 font-bold truncate">Sign Vault Release</p>
+            <p className="text-2xl font-black font-display text-amber-300">{activePurchases.filter((deal) => deal.outstandingTask.urgent).length} Urgent Tasks</p>
+            <p className="text-[11px] text-slate-200 font-bold truncate">Based on live escrow records</p>
           </div>
 
           <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 space-y-1">
             <p className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
               <Calculator className="w-3.5 h-3.5 text-blue-300" /> Asset Finance
             </p>
-            <p className="text-2xl font-black font-display text-white">Pre-Approved</p>
-            <p className="text-[11px] text-blue-200 font-bold">Ksh 5.2M Limit (NCBA)</p>
+            <p className="text-2xl font-black font-display text-white">Unavailable</p>
+            <p className="text-[11px] text-blue-200 font-bold">No lender record loaded</p>
           </div>
         </div>
       </div>
@@ -296,7 +212,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {[
             {
               title: 'Browse Market',
-              desc: 'Explore 500+ Verified Cars',
+              desc: `${vehicles.length} vehicles currently loaded`,
               icon: <Car className="w-5 h-5 text-[#1E3063]" />,
               action: () => onNavigate('marketplace'),
               color: 'hover:border-[#1E3063]'
@@ -310,7 +226,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             },
             {
               title: 'Continue Purchase',
-              desc: '1 Active Escrow Vault',
+              desc: `${activePurchases.length} active escrow record${activePurchases.length === 1 ? '' : 's'}`, 
               icon: <Lock className="w-5 h-5 text-emerald-600" />,
               action: () => onNavigate('escrow'),
               color: 'hover:border-emerald-500'
@@ -331,7 +247,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             },
             {
               title: 'View Auctions',
-              desc: '1 Active Highest Bid',
+              desc: 'Open the live auction service',
               icon: <Gavel className="w-5 h-5 text-amber-700" />,
               action: () => onNavigate('auctions'),
               color: 'hover:border-amber-600'
@@ -496,7 +412,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <Card key={deal.id} className="p-6 bg-white border-slate-200 shadow-sm space-y-5">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
-                  <LazyImage src={deal.vehicleImage} alt={deal.vehicleTitle} wrapperClassName="w-16 h-12 rounded-xl border border-slate-200 shrink-0" className="w-full h-full object-cover" />
+                  <LazyImage src={deal.vehicleImage || ''} alt={deal.vehicleTitle} wrapperClassName="w-16 h-12 rounded-xl border border-slate-200 shrink-0" className="w-full h-full object-cover" />
                   <div>
                     <span className="font-mono text-[10px] text-slate-400 font-bold uppercase">{deal.id}</span>
                     <h4 className="text-base font-black text-[#1E3063] font-display">{deal.vehicleTitle}</h4>
@@ -566,164 +482,46 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* ==========================================
           5. ESCROW TRANSACTIONS TIMELINE
           ========================================== */}
-      <Card className="p-6 bg-white space-y-6">
+      <Card className="p-6 bg-white space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
-            <h3 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Lock className="w-5 h-5 text-amber-500" />
-              Escrow Transaction Timeline Progress
-            </h3>
-            <p className="text-xs text-slate-500">Real-time status tracking through KAYAD Protected Escrow Vault.</p>
+            <h3 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2"><Lock className="w-5 h-5 text-amber-500" /> Escrow Transaction Timeline</h3>
+            <p className="text-xs text-slate-500">Progress is calculated from the live escrow records loaded for your account.</p>
           </div>
-
-          <Badge variant="success" size="md">
-            100% Capital Guaranteed
-          </Badge>
+          <Button variant="secondary" size="sm" onClick={() => onNavigate('escrow')}>Open Escrow Portal</Button>
         </div>
-
-        {/* 6 Step Visual Timeline */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
-          {[
-            { step: 1, label: '1. Offer Accepted', status: 'done', desc: 'Agreed Ksh 4.85M' },
-            { step: 2, label: '2. Vault Deposit', status: 'done', desc: 'Funds Held Safely' },
-            { step: 3, label: '3. 150-Pt Inspection', status: 'done', desc: 'Score: 96% Clean' },
-            { step: 4, label: '4. Buyer Signoff', status: 'active', desc: 'Action Needed' },
-            { step: 5, label: '5. TIMS Title Transfer', status: 'pending', desc: 'Logbook Processing' },
-            { step: 6, label: '6. Funds Released', status: 'pending', desc: 'Final Handover' }
-          ].map((item) => (
-            <div
-              key={item.step}
-              className={`p-3 rounded-2xl border text-center space-y-1 ${
-                item.status === 'done'
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                  : item.status === 'active'
-                  ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-400/30 text-amber-950 font-bold'
-                  : 'bg-slate-50 border-slate-200 text-slate-400'
-              }`}
-            >
-              <div className="flex justify-center">
-                {item.status === 'done' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                ) : item.status === 'active' ? (
-                  <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
-                ) : (
-                  <span className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[10px]">{item.step}</span>
-                )}
+        {deals.length === 0 ? (
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600">No escrow transaction is currently loaded. No transaction stage or balance is displayed until a real escrow record exists.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            {deals.map((deal) => (
+              <div key={deal.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <p className="font-black text-[#1E3063]">{deal.vehicleTitle || 'Vehicle transaction'}</p>
+                <p className="text-slate-500 mt-1">Status: {deal.status || 'Unavailable'}</p>
+                <p className="font-bold text-slate-700 mt-2">Ksh {deal.amount.toLocaleString()}</p>
               </div>
-              <p className="font-extrabold text-[11px] truncate">{item.label}</p>
-              <p className="text-[10px] opacity-80">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 gap-3 text-xs">
-          <div>
-            <p className="font-black text-[#1E3063]">Payment Vault Status: Ksh 4,850,000 Safe in Custody</p>
-            <p className="text-slate-600 font-medium">Funds remain locked until you authorize physical vehicle handover.</p>
+            ))}
           </div>
-
-          <Button variant="primary" size="sm" onClick={() => onNavigate('escrow')}>
-            <span>Review Report & Authorize Release</span>
-          </Button>
-        </div>
+        )}
       </Card>
 
       {/* ==========================================
           6. AUCTION ACTIVITY
           ========================================== */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
             <h3 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Gavel className="w-5 h-5 text-amber-600" />
-              Auction Bids & Activity
+              <Gavel className="w-5 h-5 text-amber-600" /> Auction Bids & Activity
             </h3>
-            <p className="text-xs text-slate-500">Monitor live bids, watched auction lots, won assets, and auction histories.</p>
+            <p className="text-xs text-slate-500">Live auction activity is shown from the connected auction service.</p>
           </div>
-
-          {/* Sub Tab Controls */}
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-            {[
-              { id: 'bids', label: 'Current Bids (1)' },
-              { id: 'watching', label: 'Watching (2)' },
-              { id: 'won', label: 'Won (1)' },
-              { id: 'lost', label: 'Lost (0)' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setAuctionTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
-                  auctionTab === tab.id
-                    ? 'bg-white text-[#1E3063] shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <Button variant="secondary" size="sm" onClick={() => onNavigate('auctions')}>Browse Auctions</Button>
         </div>
-
-        {/* Current Bids Content */}
-        {auctionTab === 'bids' && (
-          <Card className="p-5 bg-white space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-amber-50/60 rounded-2xl border border-amber-200 text-xs">
-              <div className="space-y-1">
-                <Badge variant="warning" size="sm">
-                  <Clock className="w-3.5 h-3.5 text-amber-600" /> Closes in 3h 15m
-                </Badge>
-                <h4 className="font-extrabold text-[#1E3063] text-sm font-display">
-                  2022 Nissan X-Trail 2.0 Hybrid (Auction Lot #AUC-209)
-                </h4>
-                <p className="text-slate-600 font-medium">Bank Repossession • NCBA Bank Custody</p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="text-left sm:text-right">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Your Lead Bid</p>
-                  <p className="text-lg font-black text-emerald-700 font-display">Ksh 2,300,000</p>
-                  <Badge variant="success" size="sm">
-                    ✓ Highest Bidder
-                  </Badge>
-                </div>
-
-                <Button variant="accent" size="sm" onClick={() => onNavigate('auctions')}>
-                  <span>Increase Bid</span>
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Won Auctions Content */}
-        {auctionTab === 'won' && (
-          <Card className="p-5 bg-white space-y-3">
-            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div>
-                <Badge variant="success" size="sm">
-                  🏆 AUCTION WON
-                </Badge>
-                <h4 className="font-black text-emerald-950 text-sm mt-1">2020 Subaru Outback Limited AWD</h4>
-                <p className="text-emerald-800 font-medium">Winning Bid: Ksh 3,150,000 • Closed Yesterday</p>
-              </div>
-
-              <Button variant="primary" size="sm" onClick={() => onNavigate('escrow')}>
-                <Lock className="w-3.5 h-3.5 text-amber-400" />
-                <span>Start Escrow Settlement</span>
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {/* Watching / Lost Placeholders */}
-        {(auctionTab === 'watching' || auctionTab === 'lost') && (
-          <Card className="p-6 text-center text-xs text-slate-500 bg-white">
-            <p className="font-bold">No items in this auction view.</p>
-            <Button variant="secondary" size="sm" onClick={() => onNavigate('auctions')} className="mt-2">
-              Browse Live Auctions
-            </Button>
-          </Card>
-        )}
+        <Card className="p-6 text-center text-xs text-slate-500 bg-white">
+          <p className="font-bold">No live auction activity is loaded for this account.</p>
+          <p className="mt-1">KAYAD will not display invented bids, watched lots, winning bids, or auction results.</p>
+        </Card>
       </div>
 
       {/* ==========================================
@@ -744,159 +542,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Completed Inspection Card */}
-          <Card className="p-5 bg-white space-y-4 border-emerald-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center font-display">
-                  96
-                </div>
-                <div>
-                  <h4 className="font-black text-[#1E3063] text-sm">2021 Toyota Prado TX-L</h4>
-                  <p className="text-[11px] text-slate-500 font-medium">150-Point Comprehensive Audit</p>
-                </div>
-              </div>
-
-              <Badge variant="success" size="sm">
-                ✓ CERTIFIED PASS
-              </Badge>
+        <Card className="p-5 bg-white border-slate-200">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h4 className="font-black text-[#1E3063] text-sm">Your inspection records</h4>
+              <p className="text-[11px] text-slate-500 font-medium mt-1">Inspection status is shown from the live inspection workflow when a booking exists.</p>
             </div>
-
-            <div className="space-y-2 text-xs text-slate-600">
-              <p className="flex items-center gap-2 font-semibold">
-                <UserCheck className="w-4 h-4 text-emerald-600" /> Inspector: <strong>Eng. David Kamau (SAE Certified)</strong>
-              </p>
-              <p className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-400" /> Date: July 28, 2026 • Westlands Yard
-              </p>
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              fullWidth
-              onClick={() => setSelectedInspectionModal({
-                vehicleTitle: '2021 Toyota Prado TX-L',
-                score: 96,
-                inspector: 'Eng. David Kamau',
-                verdict: 'Clean Pass - Zero Structural or Engine Faults'
-              })}
-            >
-              <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>View 150-Point Inspection Certificate</span>
-            </Button>
-          </Card>
-
-          {/* Scheduled Inspection Card */}
-          <Card className="p-5 bg-white space-y-4 border-blue-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <h4 className="font-black text-[#1E3063] text-sm">2022 Subaru Outback AWD</h4>
-                <p className="text-[11px] text-slate-500 font-medium">Scheduled Physical Inspection</p>
-              </div>
-
-              <Badge variant="verified" size="sm">
-                SCHEDULED
-              </Badge>
-            </div>
-
-            <div className="space-y-2 text-xs text-slate-600">
-              <p className="flex items-center gap-2 font-semibold">
-                <UserCheck className="w-4 h-4 text-blue-600" /> Inspector: <strong>Eng. Patrick Kipchumba</strong>
-              </p>
-              <p className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-400" /> Time: Tomorrow, July 30 @ 10:00 AM
-              </p>
-            </div>
-
-            <Button
-              variant="secondary"
-              size="sm"
-              fullWidth
-              onClick={() => onNavigate('inspections')}
-            >
-              <span>Manage Inspection Schedule</span>
-            </Button>
-          </Card>
-        </div>
+            <Button variant="secondary" size="sm" onClick={() => onNavigate('inspections')}>Open Inspections</Button>
+          </div>
+          <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+            No inspection record is loaded into the dashboard. KAYAD will not invent an inspector, score, booking time, or completion status.
+          </div>
+        </Card>
       </div>
 
       {/* ==========================================
           8. FINANCE APPLICATIONS
           ========================================== */}
-      <Card className="p-6 bg-gradient-to-br from-blue-50/80 via-white to-slate-50 space-y-6 border border-blue-200">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-blue-200 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-xs">
-              <Calculator className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="text-base font-black text-[#1E3063] font-display">Asset Financing Application Status</h3>
-              <p className="text-xs text-blue-800 font-medium">Partnered with NCBA, Equity Bank, KCB & Stanbic</p>
-            </div>
+      <Card className="p-6 bg-white space-y-3 border border-slate-200">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl"><Calculator className="w-6 h-6" /></div>
+          <div>
+            <h3 className="text-base font-black text-[#1E3063] font-display">Asset Financing</h3>
+            <p className="text-xs text-slate-500 font-medium">Financing applications will appear here when a live lender integration provides an application record.</p>
           </div>
-
-          <Badge variant="success" size="md">
-            ✓ Pre-Approval Active
-          </Badge>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-          {/* Pre Approval Terms Summary */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-xs">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <span className="text-slate-500 font-bold">Partner Bank</span>
-              <span className="font-black text-[#1E3063] font-display text-sm">{financeApp.partnerBank}</span>
-            </div>
-
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <span className="text-slate-500 font-bold">Pre-Approved Limit</span>
-              <span className="font-black text-emerald-700 font-display text-sm">Ksh {financeApp.preApprovedAmount.toLocaleString()}</span>
-            </div>
-
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <span className="text-slate-500 font-bold">Interest Rate</span>
-              <span className="font-black text-[#1E3063]">13% p.a. Fixed</span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">Max Loan Tenure</span>
-              <span className="font-black text-[#1E3063]">{financeApp.tenureMonths} Months (4 Years)</span>
-            </div>
-          </div>
-
-          {/* Requested Documents Box */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-xs flex flex-col justify-between">
-            <div className="space-y-2">
-              <p className="font-black text-[#1E3063] uppercase tracking-wider text-[10px]">Requested Documents Checklist</p>
-              
-              <div className="space-y-1.5">
-                {financeApp.documentsRequested.map((doc, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-xl text-xs">
-                    <span className="font-semibold text-slate-700 truncate">{doc.name}</span>
-                    <span className={`text-[10px] font-black ${doc.status.includes('Approved') ? 'text-emerald-700' : 'text-amber-600'}`}>
-                      {doc.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setActiveTaskModal({
-                title: 'Upload KRA PIN Certificate',
-                desc: 'Upload a certified PDF or photo of your KRA PIN certificate to finalize bank dispatch.',
-                type: 'doc'
-              })}
-              fullWidth
-            >
-              <Upload className="w-3.5 h-3.5 text-amber-400" />
-              <span>Upload Pending Documents</span>
-            </Button>
-          </div>
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+          No financing application is currently available for this account. KAYAD does not display fabricated approval limits, rates, lenders, or document statuses.
         </div>
       </Card>
 
@@ -1025,7 +697,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
 
             <div className="space-y-3">
-              {savedSearches.map((item) => (
+              {savedSearches.length === 0 ? (
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600">
+                  No saved searches are stored for this account yet. Saved-search persistence will appear here when the server-backed contract is connected.
+                </div>
+              ) : savedSearches.map((item) => (
                 <div key={item.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
@@ -1103,32 +779,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   variant="primary"
                   size="md"
                   fullWidth
-                  onClick={() => {
-                    setActiveTaskModal(null);
-                    showToast('Document uploaded successfully! Verified by compliance team.');
-                  }}
+                  onClick={() => { setActiveTaskModal(null); onNavigate('inspections'); }}
                 >
-                  Submit Document for Bank Dispatch
+                  Open Inspection Portal
                 </Button>
               </div>
             ) : (
               <div className="space-y-3">
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-slate-700 space-y-2">
-                  <p className="font-bold text-[#1E3063]">KAYAD Escrow Agreement #ESC-8092</p>
+                  <p className="font-bold text-[#1E3063]">Live Escrow Agreement</p>
                   <p className="text-[11px] text-slate-600">
-                    By confirming below, you authorize KAYAD Vault to hold Ksh 4,850,000 until 150-point inspection and NTSA TIMS logbook title transfer are verified.
+                    Open the Escrow Portal to review the current agreement and authorize any available next step from the live transaction record.
                   </p>
                 </div>
                 <Button
                   variant="primary"
                   size="md"
                   fullWidth
-                  onClick={() => {
-                    setActiveTaskModal(null);
-                    showToast('Task completed! Vault release authorization recorded.');
-                  }}
+                  onClick={() => { setActiveTaskModal(null); onNavigate('escrow'); }}
                 >
-                  Sign & Confirm Release Agreement
+                  Open Escrow Portal
                 </Button>
               </div>
             )}

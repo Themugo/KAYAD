@@ -81,74 +81,11 @@ export const OrganizerManagementConsole: React.FC<OrganizerManagementConsoleProp
   const [selectedSessionId, setSelectedSessionId] = useState<string>(sessions[0]?.id || '');
   const selectedSession = sessions.find(s => s.id === selectedSessionId) || sessions[0];
 
-  // Pending bidder requests state
-  const [pendingBidders, setPendingBidders] = useState<Array<{
-    id: string;
-    sessionId: string;
-    sessionTitle: string;
-    fullName: string;
-    phone: string;
-    idNumber: string;
-    depositAmount: number;
-    paymentRef: string;
-    timestamp: string;
-    status: 'pending' | 'approved' | 'rejected';
-  }>>([
-    {
-      id: 'REQ-901',
-      sessionId: 'AUC-2026-8801',
-      sessionTitle: '2023 Toyota Land Cruiser Prado TX-L',
-      fullName: 'Dr. Kennedy Omondi',
-      phone: '+254 722 445 190',
-      idNumber: '29801452',
-      depositAmount: 50000,
-      paymentRef: 'MP-QGH88219A',
-      timestamp: '12 mins ago',
-      status: 'pending'
-    },
-    {
-      id: 'REQ-902',
-      sessionId: 'AUC-2026-8801',
-      sessionTitle: '2023 Toyota Land Cruiser Prado TX-L',
-      fullName: 'Beatrice Wanjiku',
-      phone: '+254 733 881 002',
-      idNumber: '31092874',
-      depositAmount: 50000,
-      paymentRef: 'MP-QGH91022B',
-      timestamp: '25 mins ago',
-      status: 'pending'
-    },
-    {
-      id: 'REQ-903',
-      sessionId: 'AUC-2026-8802',
-      sessionTitle: '2022 Subaru Forester 2.0i EyeSight',
-      fullName: 'Hassan Mohamed',
-      phone: '+254 710 334 991',
-      idNumber: '27651094',
-      depositAmount: 30000,
-      paymentRef: 'MP-QGH77390C',
-      timestamp: '1 hour ago',
-      status: 'pending'
-    }
-  ]);
+  // Pending bidder requests must come from the server-backed auction workflow.
+  const [pendingBidders, setPendingBidders] = useState<Array<{ id: string; sessionId: string; sessionTitle: string; fullName: string; phone: string; idNumber: string; depositAmount: number; paymentRef: string; timestamp: string; status: 'pending' | 'approved' | 'rejected' }>>([]);
 
-  // KAYAD Revenue Upgrades State for Active Sessions
-  const [activeUpgrades, setActiveUpgrades] = useState<Record<string, OrganizerUpgradeConfig>>({
-    'AUC-2026-8801': {
-      listingFeePaid: true,
-      featuredUpgrade: true,
-      homepagePromo: true,
-      sponsoredPlacement: false,
-      premiumAnalytics: true
-    },
-    'AUC-2026-8802': {
-      listingFeePaid: true,
-      featuredUpgrade: false,
-      homepagePromo: false,
-      sponsoredPlacement: false,
-      premiumAnalytics: false
-    }
-  });
+  // Revenue upgrades must be loaded from the connected billing/auction service.
+  const [activeUpgrades, setActiveUpgrades] = useState<Record<string, OrganizerUpgradeConfig>>({});
 
   // Monitor Live Control State
   const [isPaused, setIsPaused] = useState(false);
@@ -886,7 +823,7 @@ export const OrganizerManagementConsole: React.FC<OrganizerManagementConsoleProp
                         <h4 className="font-extrabold text-[#1E3063] text-sm">{session.vehicleTitle}</h4>
                       </div>
                       <p className="text-slate-600 text-[11px]">
-                        Winning Bidder: <strong className="text-slate-900">Bidder A-104 (James K. Mugo)</strong> • Amount: <strong className="text-emerald-700 font-mono">Ksh {(session.currentBid || 0).toLocaleString()}</strong>
+                        Winning Bidder: <strong className="text-slate-900">Live bidder record required</strong> • Amount: <strong className="text-emerald-700 font-mono">Ksh {(session.currentBid || 0).toLocaleString()}</strong>
                       </p>
                     </div>
 

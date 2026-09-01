@@ -1,0 +1,19 @@
+KAYAD PHASE 13 AUDIT MANIFEST
+=============================
+Scope: Truthful Buyer Dashboard & Auction State Hardening
+
+Primary changes:
+- Canonicalized DashboardView to the folder/index implementation.
+- Removed fabricated dashboard auction, inspection, finance, escrow and message records.
+- Removed fabricated saved-search records.
+- Removed fabricated auction organizer bidder and revenue-upgrade state.
+- Removed hard-coded auction watch/registration seeds.
+- Preserved fail-closed behavior where no backend contract exists.
+
+Validation:
+- Node syntax validation for changed JS files where applicable.
+- Production-source hardcoded demo/seed scan performed.
+- Archive integrity verified with unzip -t.
+- Full npm/TypeScript test suite requires the user's Windows environment because the container lacks compatible installed dependencies.
+
+Archive SHA-256: SEE FINAL DELIVERY CHECKSUM

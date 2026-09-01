@@ -60,10 +60,10 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
   const [readRules, setReadRules] = useState<boolean>(false);
 
   // Step 2: Identity Verification
-  const [fullName, setFullName] = useState<string>('James K. Mugo');
-  const [idNumber, setIdNumber] = useState<string>('34892014');
-  const [phone, setPhone] = useState<string>('+254 712 345 678');
-  const [kraPin, setKraPin] = useState<string>('A019827492Z');
+  const [fullName, setFullName] = useState<string>('');
+  const [idNumber, setIdNumber] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [kraPin, setKraPin] = useState<string>('');
 
   // Step 3: Terms Agreement
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
@@ -71,7 +71,7 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
 
   // Step 4 & 5: Payment & Verification
   const [paymentMethod, setPaymentMethod] = useState<'M-Pesa Paybill' | 'Bank Transfer' | 'Till Number'>('M-Pesa Paybill');
-  const [paymentReference, setPaymentReference] = useState<string>('QGH89021X9');
+  const [paymentReference, setPaymentReference] = useState<string>('');
   const [isVerifyingPayment, setIsVerifyingPayment] = useState<boolean>(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 

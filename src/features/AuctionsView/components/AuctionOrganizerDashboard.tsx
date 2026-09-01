@@ -89,14 +89,8 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
   // Bulk selection state
   const [selectedBulkIds, setSelectedBulkIds] = useState<string[]>([]);
 
-  // Bidders management state
-  const [bidders, setBidders] = useState<PendingBidder[]>([
-    { id: 'BD-8801', name: 'James K. Mugo', idNumber: 'ID-28491029', kraPin: 'A019283910K', depositAmount: 50000, depositStatus: 'verified', approved: true, registeredAt: '10 mins ago' },
-    { id: 'BD-8802', name: 'Grace W. Njeri', idNumber: 'ID-30192841', kraPin: 'A082910492M', depositAmount: 50000, depositStatus: 'verified', approved: true, registeredAt: '25 mins ago' },
-    { id: 'BD-8803', name: 'Dr. Kennedy Omondi', idNumber: 'ID-19204928', kraPin: 'A091827491P', depositAmount: 50000, depositStatus: 'verified', approved: true, registeredAt: '1 hour ago' },
-    { id: 'BD-8804', name: 'Hassan Mohamed', idNumber: 'ID-24910293', kraPin: 'A071625341L', depositAmount: 50000, depositStatus: 'pending', approved: false, registeredAt: '2 hours ago' },
-    { id: 'BD-8805', name: 'Sarah Chebet', idNumber: 'ID-31029481', kraPin: 'A048192039N', depositAmount: 50000, depositStatus: 'pending', approved: false, registeredAt: '3 hours ago' },
-  ]);
+  // Bidder records must come from the server-backed auction workflow.
+  const [bidders, setBidders] = useState<PendingBidder[]>([]);
 
   // Create auction form state
   const [newAuctionTitle, setNewAuctionTitle] = useState('');
@@ -106,14 +100,10 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
   const [newMinIncrement, setNewMinIncrement] = useState('10000');
 
   // Published results state
-  const [publishedLotIds, setPublishedLotIds] = useState<string[]>(['SESSION-102']);
+  const [publishedLotIds, setPublishedLotIds] = useState<string[]>([]);
 
-  // KAYAD Revenue Services active upgrades state per session
-  const [upgrades, setUpgrades] = useState<{ [lotId: string]: { featured: boolean; homepage: boolean; sponsored: boolean; analytics: boolean } }>({
-    'SESSION-101': { featured: true, homepage: false, sponsored: true, analytics: true },
-    'SESSION-102': { featured: false, homepage: true, sponsored: false, analytics: false },
-    'SESSION-103': { featured: true, homepage: true, sponsored: true, analytics: true }
-  });
+  // Revenue upgrades must be loaded from the connected billing/auction service.
+  const [upgrades, setUpgrades] = useState<{ [lotId: string]: { featured: boolean; homepage: boolean; sponsored: boolean; analytics: boolean } }>({});
 
   // Update form fields when selected session changes
   React.useEffect(() => {
@@ -1554,10 +1544,10 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Average Bid Velocity</span>
                   <div className="flex items-baseline gap-2">
                     <h4 className="text-2xl font-black text-[#1E3063]">4.2 Bids / Min</h4>
-                    <span className="text-[10px] text-emerald-700 font-bold">+18% high activity</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Live data unavailable</span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-[#1E3063] h-full w-[72%] rounded-full"></div>
+                    <div className="bg-slate-300 h-full w-full rounded-full"></div>
                   </div>
                 </Card>
 
@@ -1565,57 +1555,31 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Registered Bidders in Room</span>
                   <div className="flex items-baseline gap-2">
                     <h4 className="text-2xl font-black text-emerald-700">14 Verified Bidders</h4>
-                    <span className="text-[10px] text-slate-500 font-bold">100% Security Deposit Paid</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Security deposit status unavailable</span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-emerald-600 h-full w-[88%] rounded-full"></div>
+                    <div className="bg-slate-300 h-full w-full rounded-full"></div>
                   </div>
                 </Card>
 
                 <Card className="p-4 bg-white border-slate-200 space-y-2">
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Lead Bidder Retention</span>
                   <div className="flex items-baseline gap-2">
-                    <h4 className="text-2xl font-black text-purple-900">85% Retained</h4>
+                    <h4 className="text-2xl font-black text-purple-900">Unavailable</h4>
                     <span className="text-[10px] text-purple-700 font-bold">Low churn rate</span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-purple-700 h-full w-[85%] rounded-full"></div>
+                    <div className="bg-slate-300 h-full w-full rounded-full"></div>
                   </div>
                 </Card>
               </div>
 
-              {/* TOP ENGAGED BIDDERS LEADERBOARD */}
-              <Card className="p-5 bg-white border-slate-200 space-y-4">
+              <Card className="p-5 bg-white border-slate-200">
                 <h4 className="font-extrabold text-[#1E3063] text-sm flex items-center gap-2">
                   <Award className="w-4 h-4 text-amber-500" />
                   <span>Top Bidding Participants Leaderboard</span>
                 </h4>
-
-                <div className="space-y-2">
-                  {[
-                    { alias: 'Bidder A-104 (James K. Mugo)', bids: 8, maxBid: 3450000, status: 'Leading Highest Bidder', time: '2 mins ago' },
-                    { alias: 'Bidder A-209 (Grace W. Njeri)', bids: 6, maxBid: 3400000, status: 'Active Contender', time: '5 mins ago' },
-                    { alias: 'Bidder A-301 (Dr. Kennedy Omondi)', bids: 4, maxBid: 3350000, status: 'Active Contender', time: '12 mins ago' },
-                    { alias: 'Bidder A-112 (Hassan Mohamed)', bids: 3, maxBid: 3200000, status: 'Outbid', time: '25 mins ago' }
-                  ].map((bidder, i) => (
-                    <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-[#1E3063] text-white font-mono font-bold text-[10px] flex items-center justify-center">
-                          #{i + 1}
-                        </span>
-                        <div>
-                          <span className="font-bold text-[#1E3063]">{bidder.alias}</span>
-                          <span className="text-[10px] text-slate-500 block">{bidder.bids} bids placed • Last active {bidder.time}</span>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="font-mono font-black text-emerald-700 block">Ksh {bidder.maxBid.toLocaleString()}</span>
-                        <span className="text-[10px] font-bold text-slate-600">{bidder.status}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-xs text-slate-500 mt-2">Leaderboard data is unavailable until live bidder records are returned by the auction service.</p>
               </Card>
             </div>
           )}

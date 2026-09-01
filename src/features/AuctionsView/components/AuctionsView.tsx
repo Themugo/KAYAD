@@ -82,7 +82,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   onQuickViewVehicle,
   onUpdateVehicleEscrowOverride
 }) => {
-  // Auction sessions state initialized from mock service
+  // Auction sessions are populated only by server-backed/authorized flows.
   const [sessions, setSessions] = useState<AuctionSession[]>([]);
 
   // Computed once per render, not per-second like the live countdowns -
@@ -125,7 +125,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   const [showAuctionAdminPanel, setShowAuctionAdminPanel] = useState(false);
 
   // Watched Auctions state
-  const [watchedIds, setWatchedIds] = useState<string[]>(['AUC-2026-8801']);
+  const [watchedIds, setWatchedIds] = useState<string[]>([]);
   
   // Dedicated Search & Filter states
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -188,19 +188,8 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   const [modalTab, setModalTab] = useState<'bid' | 'history' | 'inspection' | 'terms'>('bid');
 
   // Bidder Registration State (Only verified bidders may enter an auction room and place bids)
-  const [verifiedBiddersMap, setVerifiedBiddersMap] = useState<Record<string, VerifiedBidderProfile>>({
-    'AUC-2026-8801': {
-      sessionId: 'AUC-2026-8801',
-      bidderNumber: 'Bidder A-104',
-      anonymousAlias: 'Bidder A-104',
-      idNumber: '34892014',
-      fullName: 'James K. Mugo',
-      phone: '+254 712 *** 678',
-      paymentReference: 'QGH89021X9',
-      verifiedAt: '10:15 AM',
-      depositAmount: 50000
-    }
-  });
+  const [verifiedBiddersMap, setVerifiedBiddersMap] = useState<Record<string, VerifiedBidderProfile>>({});
+
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState<boolean>(false);
   const [registeringSession, setRegisteringSession] = useState<AuctionSession | null>(null);
 
@@ -504,7 +493,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   // Fixed (Final Integration Phase 3 - real auction & bidding
   // integration): previously always showed "Bidding is disabled on
   // preview auctions" unconditionally - correct, honest behavior for
-  // this component's own mock sessions (INITIAL_AUCTION_SESSIONS),
+  // preview sessions that are not backed by the auction service,
   // but it never actually attempted the real backend call even when
   // it could. Now genuinely connects to the real, canonical bid
   // endpoint (POST /api/bids/:id/bid, via services/bidApi.ts) when
@@ -554,8 +543,8 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   const handleNotifySubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!notifyContact.trim()) return;
-    setIsSubscribed(true);
-    showToast(`Subscribed! We will notify ${notifyContact} when new live auctions launch.`);
+    setIsSubscribed(false);
+    showToast('Auction alerts are not yet connected to a server-backed notification subscription.', 'info');
   };
 
   return (
