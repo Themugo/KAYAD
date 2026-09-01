@@ -16,26 +16,15 @@ const colors = {
   softBlue: '#60A5FA',
 };
 
-const mockPages = [
-  { id: '1', title: 'Homepage', url: '/', metaTitle: 'KAYAD - East Africa\'s Premier Automotive Marketplace', metaDescription: 'Buy, sell, and auction vehicles with confidence. Trusted escrow protection, professional inspections, and verified dealers.', ogImage: 'https://picsum.photos/1200/630', status: 'good' },
-  { id: '2', title: 'Browse Vehicles', url: '/browse', metaTitle: 'Browse Cars, Trucks & SUVs | KAYAD Marketplace', metaDescription: 'Explore thousands of verified vehicles from trusted dealers across East Africa.', ogImage: 'https://picsum.photos/1200/630', status: 'warning' },
-  { id: '3', title: 'Auctions', url: '/auctions', metaTitle: '', metaDescription: '', ogImage: '', status: 'error' },
-  { id: '4', title: 'Dealers', url: '/dealers', metaTitle: 'Verified Car Dealers | KAYAD', metaDescription: 'Connect with verified, trusted car dealers across East Africa.', ogImage: '', status: 'good' },
-  { id: '5', title: 'Financing', url: '/financing', metaTitle: 'Easy Car Finance & Loans | KAYAD', metaDescription: 'Get pre-approved for vehicle financing with competitive rates.', ogImage: 'https://picsum.photos/1200/630', status: 'good' },
-  { id: '6', title: 'Inspections', url: '/inspections', metaTitle: 'Professional Vehicle Inspections | KAYAD', metaDescription: 'Book comprehensive vehicle inspections by certified professionals.', ogImage: '', status: 'warning' },
-];
+const pagesSeed = [];
 
-const mockRedirects = [
-  { id: '1', from: '/old-page', to: '/new-page', status: 'active' },
-  { id: '2', from: '/cars', to: '/browse', status: 'active' },
-  { id: '3', from: '/auction', to: '/auctions', status: 'active' },
-];
+const redirectsSeed = [];
 
 export default function SEOManager() {
   const [activeTab, setActiveTab] = useState('pages');
   const [selectedPage, setSelectedPage] = useState(null);
-  const [pages, setPages] = useState(mockPages);
-  const [redirects, setRedirects] = useState(mockRedirects);
+  const [pages, setPages] = useState(pagesSeed);
+  const [redirects, setRedirects] = useState(redirectsSeed);
   const [showAddRedirect, setShowAddRedirect] = useState(false);
   const [newRedirect, setNewRedirect] = useState({ from: '', to: '', status: 'active' });
   const [copiedField, setCopiedField] = useState(null);

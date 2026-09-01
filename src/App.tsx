@@ -10,7 +10,7 @@ import PriceAlertsModal from './components/PriceAlertsModal';
 import { getCars, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { Vehicle, ChatMessage, UserProfile } from './types';
+import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 
 // Views
@@ -114,8 +114,6 @@ function AppInner() {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  
   // Modal Trigger States
   const [quickViewVehicle, setQuickViewVehicle] = useState<Vehicle | null>(null);
   const [invalidVehicleId, setInvalidVehicleId] = useState<string | null>(null);
@@ -199,9 +197,11 @@ function AppInner() {
   } = useVehicleCollections(vehicles, user?.id ?? null);
 
   // Add Vehicle Handler
-  const handleAddVehicle = useCallback((newVehicle: Vehicle) => {
-    setVehicles((prev) => [newVehicle, ...prev]);
-  }, []);
+  const handleAddVehicle = useCallback((_newVehicle: Vehicle) => {
+    // Vehicle creation is backend-authoritative. Refresh the real inventory
+    // after a successful create instead of inserting a locally synthesized row.
+    void fetchVehicles();
+  }, [fetchVehicles]);
 
   // Escrow CTA Handler
   const handleStartEscrow = useCallback((vehicle: Vehicle) => {
@@ -210,31 +210,12 @@ function AppInner() {
     setActiveNav('escrow');
   }, []);
 
-  // Update Vehicle Auction Status Handler
-  const handleUpdateVehicleAuctionStatus = useCallback((vehicleId: string, isAuction: boolean) => {
-    setVehicles((prev) =>
-      prev.map((v) => (v.id === vehicleId ? { ...v, isAuction } : v))
-    );
-  }, []);
-
   // Contact Seller Handler
   const handleContactSeller = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
     setActiveNav('chat');
   }, []);
-
-  // Send Chat Message
-  const handleSendMessage = useCallback((text: string) => {
-    const newMsg: ChatMessage = {
-      id: `m-${Date.now()}`,
-      sender: 'user',
-      text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      vehicleTitle: selectedChatVehicle?.title
-    };
-    setMessages((prev) => [...prev, newMsg]);
-  }, [selectedChatVehicle]);
 
   // Select Dealer Vehicles Shortcut
   const handleSelectDealerVehicles = useCallback((dealerName: string) => {
@@ -295,7 +276,6 @@ function AppInner() {
               onOpenAuth={() => setShowAuthModal(true)}
               onStartEscrow={handleStartEscrow}
               onQuickViewVehicle={handleOpenVehicleDetails}
-              onUpdateVehicleAuctionStatus={handleUpdateVehicleAuctionStatus}
             />
           )}
 
@@ -345,7 +325,7 @@ function AppInner() {
               // sample deals here.
               deals={[]}
               user={user}
-              messages={messages}
+              messages={[]}
               comparedVehicles={comparedVehicles}
               onNavigate={(nav) => setActiveNav(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}
@@ -361,8 +341,7 @@ function AppInner() {
 
           {activeNav === 'chat' && (
             <ChatView
-              messages={messages}
-              onSendMessage={handleSendMessage}
+              messages={[]}
               selectedVehicle={selectedChatVehicle}
               user={user}
               onQuickViewVehicle={handleOpenVehicleDetails}
@@ -455,7 +434,7 @@ function AppInner() {
               // integration, out of today's explicit scope. Honest
               // empty list instead of fake sample deals.
               deals={[]}
-              messages={messages}
+              messages={[]}
               onNavigate={(nav) => setActiveNav(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onOpenAuthModal={() => setShowAuthModal(true)}

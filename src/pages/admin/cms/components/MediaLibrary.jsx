@@ -26,16 +26,7 @@ const mediaTypes = [
   { id: 'archive', label: 'Archives', icon: Archive },
 ];
 
-const mockMedia = [
-  { id: '1', filename: 'hero-banner.jpg', originalName: 'hero-banner.jpg', url: 'https://picsum.photos/800/400', mediaType: 'image', size: 245000, uploadedAt: '2024-01-15T10:30:00Z', tags: ['banner', 'hero'] },
-  { id: '2', filename: 'dealer-logo.png', originalName: 'dealer-logo.png', url: 'https://picsum.photos/200/200', mediaType: 'image', size: 45000, uploadedAt: '2024-01-14T09:15:00Z', tags: ['logo', 'dealer'] },
-  { id: '3', filename: 'promo-video.mp4', originalName: 'promo-video.mp4', url: '#', mediaType: 'video', size: 15000000, uploadedAt: '2024-01-13T14:20:00Z', tags: ['video', 'promo'] },
-  { id: '4', filename: 'terms.pdf', originalName: 'terms.pdf', url: '#', mediaType: 'document', size: 125000, uploadedAt: '2024-01-12T11:00:00Z', tags: ['legal', 'terms'] },
-  { id: '5', filename: 'car-showcase-1.jpg', originalName: 'car-showcase-1.jpg', url: 'https://picsum.photos/600/400', mediaType: 'image', size: 180000, uploadedAt: '2024-01-11T16:45:00Z', tags: ['car', 'showcase'] },
-  { id: '6', filename: 'car-showcase-2.jpg', originalName: 'car-showcase-2.jpg', url: 'https://picsum.photos/600/400', mediaType: 'image', size: 175000, uploadedAt: '2024-01-11T16:46:00Z', tags: ['car', 'showcase'] },
-  { id: '7', filename: 'team-photo.jpg', originalName: 'team-photo.jpg', url: 'https://picsum.photos/800/600', mediaType: 'image', size: 320000, uploadedAt: '2024-01-10T08:00:00Z', tags: ['team', 'about'] },
-  { id: '8', filename: 'icon-set.svg', originalName: 'icon-set.svg', url: '#', mediaType: 'image', size: 12000, uploadedAt: '2024-01-09T12:30:00Z', tags: ['icons', 'ui'] },
-];
+const mediaSeed = [];
 
 const formatFileSize = (bytes) => {
   if (bytes < 1024) return bytes + ' B';
@@ -49,7 +40,7 @@ const formatDate = (dateString) => {
 };
 
 export default function MediaLibrary() {
-  const [media, setMedia] = useState(mockMedia);
+  const [media, setMedia] = useState(mediaSeed);
   const [loading, setLoading] = useState(false);
   const [selectedType, setSelectedType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');

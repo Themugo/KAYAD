@@ -35,7 +35,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
   existingAlert,
   onShowToast
 }) => {
-  const { setPriceAlert, removePriceAlert, simulatePriceChange, simulateStatusChange } = useMarketplace();
+  const { setPriceAlert, removePriceAlert } = useMarketplace();
   const { user } = useAuth();
 
   const currentPrice = vehicle.price;
@@ -315,42 +315,6 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                 >
                   <Smartphone className="w-4 h-4 text-[#23EBFF]" />
                   <span className="text-xs font-bold">In-App + SMS</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Test Simulation Controls */}
-            <div className="p-4 rounded-2xl bg-[#141E3F] text-white border border-[#23EBFF]/30 space-y-3">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#23EBFF]" />
-                <span className="text-xs font-black uppercase text-[#23EBFF] tracking-wider">
-                  Live Alert Testing Sandbox
-                </span>
-              </div>
-              <p className="text-xs text-slate-300">
-                Test how you will receive real-time notifications when the price drops or status changes.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const dropPrice = Math.max(100000, currentPrice - 100000);
-                    simulatePriceChange(vehicle.id, dropPrice);
-                    onShowToast(`Simulated KSh 100,000 price drop! Check top notification bell.`);
-                  }}
-                  className="py-2.5 px-3 rounded-xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-black text-xs transition-all cursor-pointer shadow-xs"
-                >
-                  ⚡ Simulate Price Drop (-100k)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    simulateStatusChange(vehicle.id, 'pending');
-                    onShowToast(`Simulated Status Change to Pending! Check top notification bell.`);
-                  }}
-                  className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs border border-white/20 transition-all cursor-pointer"
-                >
-                  ⚡ Simulate Status Change
                 </button>
               </div>
             </div>

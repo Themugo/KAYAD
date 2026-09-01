@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Vehicle, AuctionSession } from '../../../types';
-import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
 import { Card, Badge, Button, Input } from '../../../components/ui';
 import { 
   Gavel, 
@@ -225,73 +224,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
   // Create auction handler
   const handleCreateAuctionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAuctionTitle.trim()) return;
-
-    const newId = `SESSION-${Math.floor(100 + Math.random() * 900)}`;
-    const organizerName = newAuctionOrganizer || 'Auction Organizer';
-    const dummyVehicle: Vehicle = createPlaceholderVehicle({
-      id: `V-${Math.floor(1000 + Math.random() * 9000)}`,
-      title: newAuctionTitle,
-      make: 'Toyota',
-      model: 'Land Cruiser',
-      year: 2023,
-      price: Number(newStartingPrice) || 1000000,
-      mileage: 15000,
-      fuelType: 'Diesel',
-      transmission: 'Automatic',
-      location: 'Nairobi',
-      county: 'Nairobi',
-      sellerType: 'Verified Dealer',
-      sellerName: organizerName,
-      sellerRating: 4.9,
-      verified: true,
-      inspectionPassed: true,
-      escrowEligible: true,
-      financeAvailable: true,
-      isAuction: true,
-      image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
-      listingFreshness: 'Just Added'
-    });
-
-    const newSession: AuctionSession = {
-      id: newId,
-      vehicleId: dummyVehicle.id,
-      vehicleTitle: newAuctionTitle,
-      vehicle: dummyVehicle,
-      sellerId: 'SELL-001',
-      sellerName: organizerName,
-      sellerType: 'Verified Dealer',
-      organizer: {
-        id: `org-${Date.now()}`,
-        name: organizerName,
-        type: 'verified_dealer',
-        isVerified: true,
-        verificationBadge: 'verified',
-      },
-      category: 'Bank Repossession',
-      startingPrice: Number(newStartingPrice) || 1000000,
-      reservePrice: Number(newReservePrice) || 1500000,
-      minimumIncrement: Number(newMinIncrement) || 10000,
-      currentBid: Number(newStartingPrice) || 1000000,
-      reserveMet: false,
-      status: 'Upcoming',
-      startsAt: new Date().toISOString(),
-      endsAt: new Date(Date.now() + 86400000).toISOString(),
-      totalBidsCount: 0,
-      uniqueBiddersCount: 0,
-      bidHistory: [],
-      termsAndConditions: ['Standard KAYAD Auction Terms']
-    };
-
-    if (onUpdateSession) {
-      onUpdateSession(newSession);
-    }
-    if (showToast) {
-      showToast(`🎉 Created new auction lot ${newId}: "${newAuctionTitle}"`);
-    }
-
-    setNewAuctionTitle('');
-    setActiveTab('monitor');
+    showToast?.('Auction creation is not enabled here until a server-backed auction endpoint is connected. No local auction was created.', 'info');
   };
 
   // Publish results handler

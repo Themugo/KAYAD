@@ -29,7 +29,6 @@ interface AuctionsViewProps {
   onOpenAuth?: () => void;
   onStartEscrow: (vehicle: Vehicle) => void;
   onQuickViewVehicle?: (vehicle: Vehicle) => void;
-  onUpdateVehicleAuctionStatus?: (vehicleId: string, isAuction: boolean) => void;
   onUpdateVehicleEscrowOverride?: (vehicleId: string, override: 'enforce' | 'revoke' | null) => void;
 }
 
@@ -81,7 +80,6 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   onOpenAuth,
   onStartEscrow, 
   onQuickViewVehicle,
-  onUpdateVehicleAuctionStatus,
   onUpdateVehicleEscrowOverride
 }) => {
   // Auction sessions state initialized from mock service

@@ -343,34 +343,54 @@ export async function createTask(req, res) {
 // ============================================================
 
 export async function getSalesPipeline(req, res) {
-  const pipeline = {
-    stages: [
-      { id: 'new', name: 'New Leads', count: 12, value: 0, color: '#60A5FA' },
-      { id: 'contacted', name: 'Contacted', count: 34, value: 62700000, color: '#8B5CF6' },
-      { id: 'negotiating', name: 'Negotiating', count: 28, value: 86200000, color: '#F59E0B' },
-      { id: 'inspectionBooked', name: 'Inspection Booked', count: 15, value: 48750000, color: '#EC4899' },
-      { id: 'reserved', name: 'Reserved', count: 8, value: 25600000, color: '#10B981' },
-      { id: 'sold', name: 'Sold', count: 45, value: 187500000, color: '#17244B' },
-    ],
-    deals: [
-      { id: '1', name: 'James Mwangi', vehicle: 'Toyota Land Cruiser 300', price: 3200000, stage: 'negotiating', probability: 75, expectedClose: '2024-03-15', lastActivity: '2024-02-20' },
-      { id: '2', name: 'Sarah Ochieng', vehicle: 'Mercedes-Benz GLE', price: 1850000, stage: 'inspectionBooked', probability: 90, expectedClose: '2024-02-28', lastActivity: '2024-02-19' },
-      { id: '3', name: 'Michael Otieno', vehicle: 'BMW X5', price: 1650000, stage: 'reserved', probability: 95, expectedClose: '2024-02-25', lastActivity: '2024-02-20' },
-    ],
-    forecast: {
-      thisMonth: 45000000,
-      nextMonth: 62000000,
-      thisQuarter: 187500000,
-    },
-    conversionRates: {
-      leadToContacted: 78,
-      contactedToNegotiating: 65,
-      negotiatingToReserved: 72,
-      reservedToSold: 94,
-    },
-  };
+  try {
+    const dealerId = req.user.id;
+    const [leads, releasedEscrows] = await Promise.all([
+      Lead.find({ dealer: dealerId }),
+      Escrow.find({ seller: dealerId, status: "released" }),
+    ]);
 
-  res.json({ success: true, data: pipeline });
+    const stages = [
+      ["new", "New Leads"],
+      ["contacted", "Contacted"],
+      ["negotiating", "Negotiating"],
+      ["inspectionBooked", "Inspection Booked"],
+      ["reserved", "Reserved"],
+      ["sold", "Sold"],
+    ];
+
+    const pipelineStages = stages.map(([id, name]) => {
+      const stageLeads = leads.filter((lead) => lead.stage === id);
+      const value = stageLeads.reduce((sum, lead) => sum + Number(lead.estimatedValue || 0), 0);
+      return { id, name, count: stageLeads.length, value };
+    });
+
+    const soldValue = releasedEscrows.reduce((sum, escrow) => sum + Number(escrow.sellerAmount || escrow.amount || 0), 0);
+    const total = leads.length;
+    const contacted = leads.filter((lead) => ["contacted", "negotiating", "inspectionBooked", "reserved", "sold"].includes(lead.stage)).length;
+    const negotiating = leads.filter((lead) => ["negotiating", "inspectionBooked", "reserved", "sold"].includes(lead.stage)).length;
+    const reserved = leads.filter((lead) => ["reserved", "sold"].includes(lead.stage)).length;
+
+    const rate = (num, den) => den > 0 ? Math.round((num / den) * 100) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        stages: pipelineStages,
+        deals: [],
+        forecast: { thisMonth: 0, nextMonth: 0, thisQuarter: soldValue },
+        conversionRates: {
+          leadToContacted: rate(contacted, total),
+          contactedToNegotiating: rate(negotiating, contacted),
+          negotiatingToReserved: rate(reserved, negotiating),
+          reservedToSold: rate(releasedEscrows.length, reserved),
+        },
+      },
+    });
+  } catch (err) {
+    logError("Error fetching sales pipeline:", err);
+    res.status(500).json({ success: false, message: "Failed to load sales pipeline" });
+  }
 }
 
 // ============================================================

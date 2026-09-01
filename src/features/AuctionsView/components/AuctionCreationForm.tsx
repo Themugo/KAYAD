@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Vehicle, AuctionSession, AuctionOrganizerType } from '../../../types';
-import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
 import { 
   Gavel, 
   Building2, 
@@ -49,7 +48,7 @@ export const AuctionCreationForm: React.FC<AuctionCreationFormProps> = ({
   isUserVerified = true,
 }) => {
   // Role selector state for demonstration and testing permissions
-  const [activeRole, setActiveRole] = useState<string>(userRole);
+  const [activeRole] = useState<string>(userRole);
 
   // Form Fields State
   const [auctionTitle, setAuctionTitle] = useState<string>('Simbas Asset Recovery Clearance Auction');
@@ -102,71 +101,11 @@ export const AuctionCreationForm: React.FC<AuctionCreationFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthorized) return;
-
-    const newAuctionSession: AuctionSession = {
-      id: `AUC-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      vehicleId: selectedVehicle ? selectedVehicle.id : 'v-custom',
-      vehicleTitle: auctionTitle,
-      vehicle: selectedVehicle || createPlaceholderVehicle({
-        id: 'v-custom',
-        title: auctionTitle,
-        make: 'Toyota',
-        model: 'Land Cruiser',
-        year: 2021,
-        price: startingPrice,
-        mileage: 45000,
-        fuelType: 'Diesel',
-        transmission: 'Automatic',
-        location: viewingLocation,
-        county: 'Nairobi',
-        sellerType: 'Verified Dealer',
-        sellerName: organizerName,
-        sellerRating: 4.9,
-        verified: true,
-        inspectionPassed: true,
-        escrowEligible: true,
-        financeAvailable: true,
-        image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
-        listingFreshness: 'Just now'
-      }),
-      sellerId: 'org-custom',
-      sellerName: organizerName,
-      sellerType: 'Verified Dealer',
-      organizer: {
-        id: `org-${Date.now()}`,
-        name: organizerName,
-        type: DISPLAY_TO_ORGANIZER_TYPE[organizerType] || 'verified_dealer',
-        isVerified: true,
-        verificationBadge: organizerType === 'Commercial Bank' ? 'bank' : 'verified',
-      },
-      category,
-      status: 'Live',
-      startingPrice: Number(startingPrice),
-      reservePrice: Number(reservePrice),
-      currentBid: Number(startingPrice),
-      buyoutPrice: enableBuyNow ? Number(buyoutPrice) : undefined,
-      minimumIncrement: Number(minimumIncrement),
-      startsAt: new Date(startsAtDate).toISOString(),
-      endsAt: new Date(endsAtDate).toISOString(),
-      totalBidsCount: 0,
-      uniqueBiddersCount: 0,
-      reserveMet: false,
-      termsAndConditions: [
-        'All vehicles sold with 150-Point Certified Technical Inspection Report.',
-        'Buyer must complete full balance within 48 hours of auction end.',
-        'Logbook title transfer processed via NTSA TIMS system.'
-      ],
-      viewingDates,
-      viewingLocation,
-      bidSecurityAmount: Number(bidSecurityAmount),
-      bidSecurityRefundPolicy,
-      bidHistory: []
-    };
-
-    // Trigger confirmation alert upon successful submission
-    alert(`✅ AUCTION PUBLISHED SUCCESSFULLY!\n\nAuction Title: ${auctionTitle}\nOpening Bid: Ksh ${Number(startingPrice).toLocaleString()}\nBid Security: Ksh ${Number(bidSecurityAmount).toLocaleString()}\nOrganizer: ${organizerName}\n\nYour live vehicle auction is now visible on KAYAD Marketplace.`);
-
-    onAuctionCreated(newAuctionSession);
+    if (!selectedVehicle) {
+      setVerificationSuccessMessage('Select an existing KAYAD vehicle before creating an auction. Auction creation cannot synthesize a vehicle.');
+      return;
+    }
+    setVerificationSuccessMessage('Auction publishing is not enabled in this form until a server-backed auction creation endpoint is connected. No local auction was created.');
   };
 
   return (

@@ -16,16 +16,7 @@ const colors = {
 };
 
 // Mock scheduled content
-const mockScheduledContent = [
-  { id: '1', title: 'New Year Sale Announcement', type: 'campaign', date: '2024-01-15', time: '09:00', status: 'scheduled' },
-  { id: '2', title: 'Top 10 SUVs for 2024', type: 'blog', date: '2024-01-16', time: '10:00', status: 'scheduled' },
-  { id: '3', title: 'Holiday Banner Update', type: 'banner', date: '2024-01-17', time: '08:00', status: 'scheduled' },
-  { id: '4', title: 'Auction Week Kickoff', type: 'campaign', date: '2024-01-18', time: '07:00', status: 'draft' },
-  { id: '5', title: 'Dealer Spotlight: Toyota Kenya', type: 'news', date: '2024-01-19', time: '11:00', status: 'scheduled' },
-  { id: '6', title: 'Finance Tips Article', type: 'blog', date: '2024-01-20', time: '09:30', status: 'scheduled' },
-  { id: '7', title: 'Valentines Promo Banner', type: 'banner', date: '2024-02-01', time: '00:00', status: 'draft' },
-  { id: '8', title: 'New Dealer Onboarding Guide', type: 'page', date: '2024-01-22', time: '14:00', status: 'scheduled' },
-];
+const scheduledContent = [];
 
 const contentTypes = {
   campaign: { label: 'Campaign', color: '#EC4899', icon: Megaphone },
@@ -77,7 +68,7 @@ export default function PublishingCalendar() {
   };
 
   const getEventsForDate = (dateString) => {
-    return mockScheduledContent.filter(item => item.date === dateString);
+    return scheduledContent.filter(item => item.date === dateString);
   };
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -214,7 +205,7 @@ export default function PublishingCalendar() {
         <div className="mt-6 bg-white rounded-xl shadow-sm border border-slate-100 p-6">
           <h3 className="text-lg font-semibold text-slate-800 mb-4">Upcoming Scheduled Content</h3>
           <div className="space-y-3">
-            {mockScheduledContent
+            {scheduledContent
               .filter(item => item.status === 'scheduled')
               .sort((a, b) => new Date(a.date) - new Date(b.date))
               .slice(0, 5)

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, Dealer, DealerTeamMember, DealerLead, DealerPromotion, DealerAnalytics } from '../../../types';
-import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
 
 import { Building2, ShieldCheck, TrendingUp, Users, Car, Sparkles, BarChart3, PlusCircle, Search, Lock, Zap, Clock, X, UserCheck, Flame, FileText, Crown, Megaphone, Eye, Upload, FileSpreadsheet, Cpu, AlertTriangle, Gavel, Landmark, RefreshCw, PieChart, CreditCard, FileCheck } from 'lucide-react';
 import { 
@@ -337,16 +336,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   ]);
 
   // Draft Vehicles Local State
-  const [draftVehicles, setDraftVehicles] = useState<any[]>([
-    {
-      id: 'v-draft-d1',
-      title: '2022 Lexus RX 450h F-Sport (Draft Specs)',
-      price: 9200000,
-      mileage: 22000,
-      location: 'Kilimani Yard',
-      missingInfo: 'Awaiting HD Interior Photos & TIMS Inspection Sheet'
-    }
-  ]);
+  const [draftVehicles, setDraftVehicles] = useState<any[]>([]);
 
   // Dealer Vehicles Filtered
   const dealerVehicles = useMemo(() => {
@@ -366,172 +356,36 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   // Total floorplan value
   const totalFloorplan = dealerVehicles.reduce((sum, v) => sum + v.price, 0);
 
-  // VIN Decoder Logic Simulation
+  // VIN decoding requires a verified external/NTSA integration.
+  // Do not fabricate vehicle specifications or valuation client-side.
   const handleDecodeVin = () => {
     if (!inputVin || inputVin.length < 6) {
       showToast('Please enter a valid 17-digit VIN / Chassis number');
       return;
     }
-
-    const mockDecoded = {
-      vin: inputVin.toUpperCase(),
-      make: 'Toyota',
-      model: 'Land Cruiser Prado TX-L',
-      year: 2021,
-      engineSize: '2754 cc (2.8L 1GD-FTV Turbo Diesel)',
-      transmission: '6-Speed Super ECT Automatic',
-      drivetrain: 'Full-Time 4WD with Torsen LSD',
-      chassisPrefix: 'TRJ150R-GKTEK',
-      fuelType: 'Diesel',
-      assemblyCountry: 'Japan (Tahara Plant)',
-      kraTaxCategory: 'Passenger Station Wagon',
-      safetyRating: '5-Star ANCAP',
-      estimatedValue: 7450000
-    };
-
-    setDecodedSpecs(mockDecoded);
-    showToast('VIN Decoded successfully from NTSA / Manufacturer database!');
+    setDecodedSpecs(null);
+    showToast('VIN decoding is not connected to a verified data provider yet. No vehicle data was fabricated.');
   };
 
   const handleCreateFromVin = () => {
-    if (!decodedSpecs) return;
-
-    const created: Vehicle = createPlaceholderVehicle({
-      id: `v-vin-${Date.now()}`,
-      title: `${decodedSpecs.year} ${decodedSpecs.make} ${decodedSpecs.model}`,
-      make: decodedSpecs.make,
-      model: decodedSpecs.model,
-      year: decodedSpecs.year,
-      price: decodedSpecs.estimatedValue,
-      mileage: 41000,
-      fuelType: 'Diesel',
-      transmission: 'Automatic',
-      location: 'Westlands Showroom',
-      county: 'Nairobi',
-      sellerType: 'Verified Dealer',
-      sellerName: currentDealer.name,
-      sellerRating: 4.9,
-      verified: true,
-      inspectionPassed: true,
-      escrowEligible: true,
-      financeAvailable: true,
-      image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      listingFreshness: 'Just Listed (VIN Decoded)',
-      responseTime: '< 10 mins'
-    });
-
-    onAddVehicle?.(created);
-    setShowVinDecoderModal(false);
-    setDecodedSpecs(null);
-    showToast(`Added VIN-decoded "${created.title}" to inventory!`);
+    showToast('VIN-based listing creation is unavailable until verified VIN data is connected.');
   };
 
-  // CSV Bulk Import Logic Simulation
+  // Bulk import is intentionally fail-closed until each row can be
+  // persisted through the real listing API with server-side validation.
   const handleCsvImportSubmit = () => {
-    const lines = csvRawText.trim().split('\n');
-    if (lines.length <= 1) {
-      showToast('No valid CSV records detected.');
+    if (!csvRawText.trim()) {
+      showToast('Paste a CSV file to continue.');
       return;
     }
-
-    let added = 0;
-    for (let i = 1; i < lines.length; i++) {
-      const parts = lines[i].split(',');
-      if (parts.length >= 4) {
-        const make = parts[0]?.trim() || 'Toyota';
-        const model = parts[1]?.trim() || 'Vehicle';
-        const year = parseInt(parts[2]?.trim() || '2020');
-        const price = parseInt(parts[3]?.trim() || '3500000');
-        const mileage = parseInt(parts[4]?.trim() || '45000');
-        const loc = parts[5]?.trim() || 'Nairobi Yard';
-
-        const created: Vehicle = createPlaceholderVehicle({
-          id: `v-csv-${Date.now()}-${i}`,
-          title: `${year} ${make} ${model}`,
-          make,
-          model,
-          year,
-          price,
-          mileage,
-          fuelType: 'Gasoline',
-          transmission: 'Automatic',
-          location: loc,
-          county: 'Nairobi',
-          sellerType: 'Verified Dealer',
-          sellerName: currentDealer.name,
-          sellerRating: 4.9,
-          verified: true,
-          inspectionPassed: true,
-          escrowEligible: true,
-          financeAvailable: true,
-          image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800',
-          listingFreshness: 'Bulk CSV Imported',
-          responseTime: '< 10 mins'
-        });
-
-        onAddVehicle?.(created);
-        added++;
-      }
-    }
-
-    setCsvImportedCount(added);
-    setShowCsvImportModal(false);
-    showToast(`Bulk imported ${added} vehicles into ${currentDealer.name} Showroom!`);
+    setCsvImportedCount(0);
+    showToast('Bulk CSV listing import is not enabled in this deployment yet. No local listings were created.');
   };
 
   // Handle Add Vehicle Form
   const handleCreateVehicle = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle || !newPrice) {
-      showToast('Please provide vehicle title and price');
-      return;
-    }
-
-    if (isDraft) {
-      setDraftVehicles([
-        ...draftVehicles,
-        {
-          id: `draft-${Date.now()}`,
-          title: newTitle,
-          price: Number(newPrice),
-          mileage: Number(newMileage),
-          location: newLocation,
-          missingInfo: 'Draft Saved - Needs photos'
-        }
-      ]);
-      setShowAddVehicleModal(false);
-      showToast(`Saved "${newTitle}" as Draft in inventory console.`);
-      return;
-    }
-
-    const createdVehicle: Vehicle = createPlaceholderVehicle({
-      id: `v-d-${Date.now()}`,
-      title: newTitle,
-      make: newMake,
-      model: newModel,
-      year: Number(newYear),
-      price: Number(newPrice),
-      mileage: Number(newMileage),
-      fuelType: 'Diesel',
-      transmission: 'Automatic',
-      location: newLocation,
-      county: newCounty,
-      sellerType: 'Verified Dealer',
-      sellerName: currentDealer.name,
-      sellerRating: currentDealer.rating,
-      verified: true,
-      inspectionPassed: true,
-      escrowEligible: true,
-      financeAvailable: true,
-      image: newImage || 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=800',
-      listingFreshness: 'Just Listed',
-      responseTime: '< 10 mins'
-    });
-
-    onAddVehicle?.(createdVehicle);
-    setShowAddVehicleModal(false);
-    showToast(`Added "${newTitle}" to ${currentDealer.name} Showroom Inventory!`);
-    setNewTitle('');
+    showToast('Vehicle creation must use the verified server-backed listing workflow. No local vehicle was created.');
   };
 
   // Handle Add Staff

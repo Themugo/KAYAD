@@ -1,0 +1,65 @@
+KAYAD PHASE 12 AUDIT MANIFEST
+============================
+
+Objective:
+Production Runtime Integration & Frontend Contract Hardening
+
+Baseline:
+Phase 11 production/demo cleanup archive
+
+Primary fixes:
+- Real AuthContext login replaces legacy simulated SignIn.
+- App no longer creates local chat-message success state.
+- App refreshes real inventory after server-backed vehicle creation.
+- Truncated dealerPlatformApi.js restored with real backend endpoints.
+- Dealer sales pipeline now derives from authenticated dealer data.
+- Dealer AI copilot canned demo claims removed.
+- Price-alert simulation controls removed.
+- Dormant unreferenced demo auction/broadcast/bidder/operations surfaces removed.
+- Dealer VIN/CSV/local-placeholder listing simulations removed.
+- Local seeded dealer drafts removed.
+- CMS mock seed records removed from production-facing components.
+- Unused demo-mode/helper files removed.
+
+Changed key files:
+src/pages/SignIn.tsx
+src/App.tsx
+src/services/dealerPlatformApi.js
+src/pages/dealer/dashboard/DealerDashboard.tsx
+backend/controllers/dealerPlatformController.js
+src/components/detail/PriceAlertModal.tsx
+src/context/MarketplaceContext.tsx
+src/features/DealersView/components/DealerBusinessView.tsx
+src/features/DealerBusinessView.tsx
+src/features/AuctionsView/components/AuctionsView.tsx
+src/features/AuctionsView/components/AuctionCreationForm.tsx
+src/features/AuctionsView/components/AuctionOrganizerDashboard.tsx
+src/pages/admin/cms/components/PublishingCalendar.jsx
+src/pages/admin/cms/components/SEOManager.jsx
+src/pages/admin/cms/components/MediaLibrary.jsx
+
+Removed dormant demo surfaces:
+src/features/Broadcast/
+src/features/BidderPortal/
+src/features/OperationsHub/
+src/features/AuctionsView/components/AuctionOperationsCenter.tsx
+src/features/AuctionsView/components/AuctionDetailsPage.tsx
+src/components/auctions/AuctionsPage.tsx
+src/pages/SupportDashboard.jsx
+src/components/DemoModeBanner.tsx
+src/components/features/common/DemoModeBanner.tsx
+src/lib/supabase.ts
+src/utils/vehicleDefaults.ts
+
+Production-data rule:
+No demo records are seeded or synthesized by Phase 12 production flows.
+
+Validation:
+- Targeted JavaScript syntax checks passed.
+- Production source stale-symbol scan performed.
+- No production `MOCK_*` or `INITIAL_*` constants remain in src outside test fixtures.
+- Archive integrity checked with unzip -t.
+- Full npm/TypeScript test suite could not run in container due unavailable installed dependencies / previously observed Node-jsdom engine constraint.
+
+Archive: KAYAD-PHASE-12-COMPLETE.zip
+SHA-256 is supplied with the final archive outside the archive to avoid a self-referential checksum.

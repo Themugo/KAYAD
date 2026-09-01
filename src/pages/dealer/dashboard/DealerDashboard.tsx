@@ -124,100 +124,19 @@ const TopVehicle = ({ vehicle, rank }) => (
 );
 
 /** AI Copilot */
-const AICopilot = () => {
-  const [question, setQuestion] = useState('');
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm your AI Dealer Copilot. Ask me about promoting vehicles, pricing recommendations, sales forecasts, or generating reports." }
-  ]);
-  const [loading, setLoading] = useState(false);
-
-  const quickQuestions = [
-    'What vehicles should I promote?',
-    'Which leads need follow-up?',
-    'Predict my sales this month',
-    'Generate inventory report',
-  ];
-
-  const handleSend = async (q?: string) => {
-    const query = q || question;
-    if (!query.trim()) return;
-    
-    setMessages(prev => [...prev, { role: 'user', content: query }]);
-    setQuestion('');
-    setLoading(true);
-    
-    await new Promise(r => setTimeout(r, 1500));
-    
-    const responses = {
-      'What vehicles should I promote?': 'Based on your inventory and market data, I recommend promoting your Toyota Land Cruiser 300 and Mercedes-Benz GLE. They have the highest view-to-lead conversion rates (12% and 9%).',
-      'Which leads need follow-up?': '3 high-priority leads need follow-up: James Mwangi (Toyota Land Cruiser, score 85), Sarah Ochieng (Mercedes GLE, score 72), Michael Otieno (BMW X5, score 91).',
-      'Predict my sales this month': 'Based on historical data and current market trends, I forecast 12-15 vehicle sales this month with revenue between Ksh 50-65 million.',
-      'Generate inventory report': 'Your February report shows: 45 sales (+12% MoM), Ksh 187.5M revenue (+18% MoM), 94% response rate, 29% lead conversion.',
-    };
-    
-    setMessages(prev => [...prev, { 
-      role: 'assistant', 
-      content: responses[query] || 'Based on your data, your dealership is performing well. Current inventory has good mix with 38 active listings and 94% response rate.' 
-    }]);
-    setLoading(false);
-  };
-
-  return (
-    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-      <div className="p-4 bg-gradient-to-r from-purple-600 to-purple-500 text-white">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-            <Bot className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="font-bold">AI Dealer Copilot</h3>
-            <p className="text-xs text-purple-100">Powered by KAYAD Intelligence</p>
-          </div>
-        </div>
-      </div>
-      <div className="h-64 overflow-y-auto p-4 space-y-3">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-3 rounded-xl text-sm ${
-              msg.role === 'user' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700'
-            }`}>
-              {msg.content}
-            </div>
-          </div>
-        ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-slate-100 p-3 rounded-xl">
-              <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="p-3 border-t border-slate-100">
-        <div className="flex flex-wrap gap-2 mb-3">
-          {quickQuestions.map((q) => (
-            <button key={q} onClick={() => handleSend(q)} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full hover:bg-slate-200">
-              {q}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask me anything..."
-            className="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-          />
-          <button onClick={() => handleSend()} className="p-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700">
-            <Send className="w-5 h-5" />
-          </button>
-        </div>
+const AICopilot = () => (
+  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+    <div className="p-4 bg-gradient-to-r from-purple-600 to-purple-500 text-white">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Bot className="w-5 h-5" /></div>
+        <div><h3 className="font-bold">AI Dealer Copilot</h3><p className="text-xs text-purple-100">KAYAD Intelligence</p></div>
       </div>
     </div>
-  );
-};
+    <div className="p-6 text-sm text-slate-600">
+      AI dealer insights are not enabled for this deployment yet. No simulated recommendations, forecasts, leads, or revenue figures are shown here.
+    </div>
+  </div>
+);
 
 /** Navigation Tab */
 const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
