@@ -52,6 +52,7 @@ export const FIELD_ALIASES = {
     dealer: "dealer_id",
     city: "location_city",
     highestBidder: "highest_bidder_id",
+    extensionCount: "extension_count",
     // Added (Final Integration Phase 3): found while providing the
     // required "real, persisted bid" evidence for this phase - the
     // one, sole exception on this table to the otherwise-consistent

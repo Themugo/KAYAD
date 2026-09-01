@@ -7,6 +7,7 @@
 import { findById, findOne, create, update } from "../db/index.js";
 import { STATES, validateTransition } from "../services/escrowStateMachine.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { atomicTransitionEscrow } from "../utils/atomicTransactions.js";
 
 const getCommissionRate = async () => {
   try {
@@ -43,260 +44,71 @@ export const createEscrow = async (data) => {
 };
 
 export const fundEscrow = async (escrowId, { idempotencyKey, paymentId } = {}) => {
-  try {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error("Escrow not found");
-
-    if (escrow.lastActionKey === idempotencyKey) {
-      return escrow;
-    }
-
-    const validation = validateTransition(escrow.status, STATES.FUNDED, "system", escrow);
-    if (!validation.allowed) throw new Error(validation.reason);
-
-    const now = new Date();
-    await update("escrows", escrow.id, {
-      status: STATES.FUNDED,
-      fundedAt: now,
-      autoReleaseEligibleAt: new Date(Date.now() + (escrow.releaseWindowDays || 3) * 86400000),
-      timeline: { depositReceived: true, depositReceivedAt: now },
-      lastActionKey: idempotencyKey,
-      history: [...(escrow.history || []), { action: `Funded — KES ${escrow.amount.toLocaleString("en-KE")} held`, at: now }],
-    });
-
-    logInfo("Escrow funded", { escrowId, amount: escrow.amount });
-    return { ...escrow, status: STATES.FUNDED, fundedAt: now };
-  } catch (err) {
-    logError("Escrow fund failed", err);
-    throw err;
-  }
+  const result = await atomicTransitionEscrow({
+    escrowId, nextStatus: STATES.FUNDED, actorId: null, role: "system",
+    idempotencyKey,
+  });
+  const escrow = await findById("escrows", escrowId);
+  logInfo("Escrow funded atomically", { escrowId, paymentId, amount: escrow?.amount });
+  return escrow || result;
 };
 
 export const confirmVehicle = async (escrowId, userId, { idempotencyKey } = {}) => {
-  try {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error("Escrow not found");
-
-    if (String(escrow.buyer) !== userId) {
-      throw new Error("Only the buyer can confirm vehicle");
-    }
-
-    if (escrow.lastActionKey === idempotencyKey) {
-      return escrow;
-    }
-
-    const validation = validateTransition(escrow.status, STATES.VEHICLE_CONFIRMED, "buyer", escrow);
-    if (!validation.allowed) throw new Error(validation.reason);
-
-    const now = new Date();
-    await update("escrows", escrow.id, {
-      status: STATES.VEHICLE_CONFIRMED,
-      vehicleConfirmedAt: now,
-      timeline: { ...escrow.timeline, inspectionCompleted: true, inspectionCompletedAt: now },
-      lastActionKey: idempotencyKey,
-      history: [...(escrow.history || []), { action: "Buyer confirmed vehicle inspection", by: userId, at: now }],
-    });
-
-    return { ...escrow, status: STATES.VEHICLE_CONFIRMED, vehicleConfirmedAt: now };
-  } catch (err) {
-    throw err;
-  }
+  await atomicTransitionEscrow({
+    escrowId, nextStatus: STATES.VEHICLE_CONFIRMED, actorId: userId, role: "buyer",
+    idempotencyKey,
+  });
+  return findById("escrows", escrowId);
 };
 
 export const deliverEscrow = async (escrowId, userId, { idempotencyKey } = {}) => {
-  try {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error("Escrow not found");
-
-    if (escrow.lastActionKey === idempotencyKey) {
-      return escrow;
-    }
-
-    const validation = validateTransition(escrow.status, STATES.DELIVERED, "seller", escrow);
-    if (!validation.allowed) throw new Error(validation.reason);
-
-    const now = new Date();
-    await update("escrows", escrow.id, {
-      status: STATES.DELIVERED,
-      deliveredAt: now,
-      deliveryConfirmed: true,
-      deliveryConfirmedAt: now,
-      lastActionKey: idempotencyKey,
-      history: [...(escrow.history || []), { action: "Seller confirmed delivery", by: userId, at: now }],
-    });
-
-    return { ...escrow, status: STATES.DELIVERED, deliveredAt: now };
-  } catch (err) {
-    throw err;
-  }
+  await atomicTransitionEscrow({
+    escrowId, nextStatus: STATES.DELIVERED, actorId: userId, role: "seller",
+    idempotencyKey,
+  });
+  return findById("escrows", escrowId);
 };
 
-export const releaseEscrow = async (escrowId, adminId, { idempotencyKey, req } = {}) => {
-  try {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error("Escrow not found");
-
-    if (escrow.lastActionKey === idempotencyKey) {
-      return escrow;
-    }
-
-    const validation = validateTransition(escrow.status, STATES.RELEASED, "admin", escrow);
-    if (!validation.allowed) throw new Error(validation.reason);
-
-    const { commission, sellerAmount } = await calculateCommission(escrow.amount);
-    const now = new Date();
-
-    await update("escrows", escrow.id, {
-      commission,
-      sellerAmount,
-      status: STATES.RELEASED,
-      releasedAt: now,
-      releasedBy: adminId,
-      timeline: { ...escrow.timeline, fundsReleased: true, fundsReleasedAt: now },
-      lastActionKey: idempotencyKey,
-      history: [...(escrow.history || []), { action: `Released to seller — KES ${sellerAmount.toLocaleString("en-KE")}`, by: adminId, at: now }],
-    });
-
-    if (escrow.car) {
-      const car = await findById("cars", escrow.car);
-      if (car) {
-        await update("cars", car.id, { sold: true, status: "sold", isPaid: true });
-      }
-    }
-
-    if (escrow.payment) {
-      const payment = await findById("payments", escrow.payment);
-      if (payment) {
-        await update("payments", payment.id, {
-          status: "released",
-          platformFee: commission,
-          dealerAmount: sellerAmount,
-        });
-      }
-    }
-
-    logInfo("Escrow released", { escrowId, sellerAmount, commission });
-    return { ...escrow, commission, sellerAmount, status: STATES.RELEASED, releasedAt: now };
-  } catch (err) {
-    logError("Escrow release failed", err);
-    throw err;
-  }
+export const releaseEscrow = async (escrowId, adminId, { idempotencyKey } = {}) => {
+  const escrow = await findById("escrows", escrowId);
+  if (!escrow) throw new Error("Escrow not found");
+  // Explicitly select the canonical role. The DB function enforces whether
+  // this actor may release from the current state.
+  const role = "admin";
+  const result = await atomicTransitionEscrow({
+    escrowId, nextStatus: STATES.RELEASED, actorId: adminId, role,
+    idempotencyKey,
+  });
+  logInfo("Escrow released atomically", { escrowId, sellerAmount: result?.sellerAmount, commission: result?.commission });
+  return findById("escrows", escrowId);
 };
 
 export const autoReleaseEscrow = async (escrowId) => {
-  try {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error("Escrow not found");
-
-    const validation = validateTransition(escrow.status, STATES.RELEASED, "system", escrow);
-    if (!validation.allowed) throw new Error(validation.reason);
-
-    const { commission, sellerAmount } = await calculateCommission(escrow.amount);
-    const now = new Date();
-
-    await update("escrows", escrow.id, {
-      commission,
-      sellerAmount,
-      status: STATES.RELEASED,
-      releasedAt: now,
-      releasedBy: null,
-      timeline: { ...escrow.timeline, fundsReleased: true, fundsReleasedAt: now },
-      history: [...(escrow.history || []), { action: `Auto-released after timeout — KES ${sellerAmount.toLocaleString("en-KE")}`, by: "system", at: now }],
-    });
-
-    if (escrow.car) {
-      const { findById: fi } = await import("../db/index.js");
-      const car = await fi("cars", escrow.car);
-      if (car) {
-        await update("cars", car.id, { sold: true, status: "sold", isPaid: true });
-      }
-    }
-
-    if (escrow.payment) {
-      const { findById: fi } = await import("../db/index.js");
-      const payment = await fi("payments", escrow.payment);
-      if (payment) {
-        await update("payments", payment.id, {
-          status: "released",
-          platformFee: commission,
-          dealerAmount: sellerAmount,
-        });
-      }
-    }
-
-    logInfo("Escrow auto-released", { escrowId, sellerAmount, commission });
-    return { ...escrow, commission, sellerAmount, status: STATES.RELEASED, releasedAt: now };
-  } catch (err) {
-    logError("Escrow auto-release failed", err);
-    throw err;
-  }
+  const result = await atomicTransitionEscrow({
+    escrowId, nextStatus: STATES.RELEASED, actorId: null, role: "system",
+    idempotencyKey: `auto-release:${escrowId}`,
+  });
+  const escrow = await findById("escrows", escrowId);
+  logInfo("Escrow auto-released atomically", { escrowId, sellerAmount: result?.sellerAmount, commission: result?.commission });
+  return escrow || result;
 };
 
-export const refundEscrow = async (escrowId, adminId, reason, { idempotencyKey, req } = {}) => {
-  try {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error("Escrow not found");
-
-    if (escrow.lastActionKey === idempotencyKey) {
-      return escrow;
-    }
-
-    const validation = validateTransition(escrow.status, STATES.REFUNDED, "admin", escrow);
-    if (!validation.allowed) throw new Error(validation.reason);
-
-    const now = new Date();
-    await update("escrows", escrow.id, {
-      status: STATES.REFUNDED,
-      refundedAt: now,
-      refundedBy: adminId,
-      disputeReason: reason,
-      lastActionKey: idempotencyKey,
-      history: [...(escrow.history || []), { action: `Refunded to buyer — ${reason || "No reason"}`, by: adminId, at: now }],
-    });
-
-    if (escrow.payment) {
-      const payment = await findById("payments", escrow.payment);
-      if (payment) {
-        await update("payments", payment.id, { status: "refunded" });
-      }
-    }
-
-    if (escrow.car) {
-      const car = await findById("cars", escrow.car);
-      if (car) {
-        await update("cars", car.id, { sold: false, isPaid: false });
-      }
-    }
-
-    logInfo("Escrow refunded", { escrowId, reason });
-    return { ...escrow, status: STATES.REFUNDED, refundedAt: now };
-  } catch (err) {
-    logError("Escrow refund failed", err);
-    throw err;
-  }
+export const refundEscrow = async (escrowId, adminId, reason, { idempotencyKey } = {}) => {
+  const result = await atomicTransitionEscrow({
+    escrowId, nextStatus: STATES.REFUNDED, actorId: adminId, role: "admin",
+    idempotencyKey, reason,
+  });
+  const escrow = await findById("escrows", escrowId);
+  logInfo("Escrow refunded atomically", { escrowId, reason });
+  return escrow || result;
 };
 
-export const disputeEscrow = async (escrowId, userId, role, reason, { req } = {}) => {
-  try {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error("Escrow not found");
-
-    const validation = validateTransition(escrow.status, STATES.DISPUTED, role, escrow);
-    if (!validation.allowed) throw new Error(validation.reason);
-
-    const now = new Date();
-    await update("escrows", escrow.id, {
-      status: STATES.DISPUTED,
-      disputedAt: now,
-      disputedBy: userId,
-      disputeReason: reason,
-      history: [...(escrow.history || []), { action: `Dispute opened — ${reason}`, by: userId, at: now }],
-    });
-
-    return { ...escrow, status: STATES.DISPUTED, disputedAt: now };
-  } catch (err) {
-    throw err;
-  }
+export const disputeEscrow = async (escrowId, userId, role, reason) => {
+  await atomicTransitionEscrow({
+    escrowId, nextStatus: STATES.DISPUTED, actorId: userId, role,
+    reason,
+  });
+  return findById("escrows", escrowId);
 };
 
 export const closeEscrow = async (escrowId, userId, role, { req } = {}) => {

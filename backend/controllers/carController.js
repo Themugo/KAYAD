@@ -973,3 +973,4 @@ export const placeBid = async (req, res) => {
   }
 };
 
+// (getDemoCars removed — demo data eliminated)

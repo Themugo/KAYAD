@@ -1,4 +1,4 @@
-import { AuctionSession, Vehicle, AuctionOrganizerType } from '../../types';
+import { AuctionSession, Vehicle, AuctionOrganizerType } from '../types';
 import { INITIAL_VEHICLES, hoursFromNow } from './mockVehicles';
 
 const nissanVehicle = INITIAL_VEHICLES.find(v => v.id === 'v4') || INITIAL_VEHICLES[3];

@@ -59,27 +59,6 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     metadata,
   });
 
-  // Payment attempts are an audit/enrichment record for each provider
-  // initiation. Failure to record the attempt must never make a real STK
-  // push look failed to the caller; the canonical payment row remains the
-  // source of truth for the payment lifecycle.
-  try {
-    const provider = await findOne("payment_providers", { code: "mpesa_daraja" }, "id");
-    await create("payment_attempts", {
-      paymentId: payment.id,
-      providerId: provider?.id || null,
-      attemptNumber: 1,
-      status: "pending",
-      checkoutRequestId: checkoutID,
-    });
-  } catch (e) {
-    logWarn("Payment attempt tracking failed", {
-      error: e.message,
-      paymentId: payment.id,
-      checkoutRequestId: checkoutID,
-    });
-  }
-
   await create("mpesa_transactions", {
     checkoutRequestID: checkoutID,
     phone: formattedPhone,

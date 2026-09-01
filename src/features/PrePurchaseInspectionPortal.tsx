@@ -289,7 +289,9 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
   const [newPhotoUrlInput, setNewPhotoUrlInput] = useState<string>('');
 
   // Video Clips State
-  const [videoList, setVideoList] = useState<{ title: string; url: string }[]>([    { title: 'Exhaust Emissions & Blow-by Inspection', url: 'https://youtube.com/watch?v=mock-exhaust' }
+  const [videoList, setVideoList] = useState<{ title: string; url: string }[]>([
+    { title: 'Engine Cold Start & Rev Sound Test', url: 'https://youtube.com/watch?v=mock-engine-rev' },
+    { title: 'Exhaust Emissions & Blow-by Inspection', url: 'https://youtube.com/watch?v=mock-exhaust' }
   ]);
   const [newVideoTitle, setNewVideoTitle] = useState<string>('');
   const [newVideoUrl, setNewVideoUrl] = useState<string>('');
@@ -329,7 +331,7 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
   // Add Photo to Builder
   const handleAddPhoto = () => {
     if (!newPhotoUrlInput) {
-      showToast('Please enter a photo image URL.');
+      showToast('Please enter a photo image URL or select a sample photo');
       return;
     }
     setPhotosList([...photosList, newPhotoUrlInput]);
@@ -340,7 +342,7 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
   // Add Video to Builder
   const handleAddVideo = () => {
     if (!newVideoTitle) return;
-    setVideoList([...videoList, { title: newVideoTitle, url: newVideoUrl }]);
+    setVideoList([...videoList, { title: newVideoTitle, url: newVideoUrl || 'https://youtube.com/watch?v=sample-inspection' }]);
     setNewVideoTitle('');
     setNewVideoUrl('');
     showToast('Inspection video clip added to report');

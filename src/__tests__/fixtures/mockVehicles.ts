@@ -1,4 +1,4 @@
-import { Vehicle, Dealer, EscrowTransaction, ChatMessage } from '../../types';
+import { Vehicle, Dealer, EscrowTransaction, ChatMessage } from '../types';
 
 // Shared time helper so every mock auction/end date is relative to load
 // time and can never go stale against the app's own countdown logic.

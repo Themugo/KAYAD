@@ -65,27 +65,10 @@ export const handleMpesaCallback = async (callbackData) => {
         logError("Failed to release payment claim", e, { paymentId: payment.id }),
       );
 
-    const updateAttempt = (status, extra = {}) =>
-      updateMany(
-        "payment_attempts",
-        { checkoutRequestId: checkoutId },
-        { status, ...extra },
-      ).catch((e) =>
-        logWarn("Payment attempt status update failed", {
-          error: e.message,
-          checkoutRequestId: checkoutId,
-          status,
-        }),
-      );
-
     if (!success) {
       await update("payments", payment.id, {
         status: "failed",
         resultDesc: stk.ResultDesc || "M-Pesa transaction failed",
-      });
-      updateAttempt("failed", {
-        failureReason: stk.ResultDesc || "M-Pesa transaction failed",
-        providerReference: stk.MerchantRequestID || null,
       });
       finalized = true;
 
@@ -128,10 +111,6 @@ export const handleMpesaCallback = async (callbackData) => {
         status: "failed",
         resultDesc: `Amount mismatch: expected ${payment.amount}, provider reported ${amount}`,
       });
-      updateAttempt("failed", {
-        failureReason: `Amount mismatch: expected ${payment.amount}, provider reported ${amount}`,
-        providerReference: stk.MerchantRequestID || null,
-      });
       logError("M-Pesa callback amount mismatch — payment failed", null, {
         paymentId: payment.id,
         expected: payment.amount,
@@ -145,10 +124,6 @@ export const handleMpesaCallback = async (callbackData) => {
       status: "success",
       mpesaReceipt: receipt,
       paidAt: new Date(),
-    });
-    updateAttempt("success", {
-      providerReference: stk.MerchantRequestID || null,
-      failureReason: null,
     });
     finalized = true;
 

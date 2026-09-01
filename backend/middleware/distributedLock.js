@@ -12,47 +12,41 @@ function instanceId() {
 }
 
 export async function acquireLock(resourceId, ttl = LOCK_TTL_MS) {
-  const now = Date.now();
-  const expiresAt = new Date(now + ttl).toISOString();
   const id = instanceId();
 
   try {
     const sb = getSupabase();
-    const { data: existing } = await sb.from("distributed_locks").select("*").eq("resource_id", resourceId).single();
-
-    if (!existing || new Date(existing.expires_at) < new Date()) {
-      await sb.from("distributed_locks").upsert({
-        resource_id: resourceId,
-        holder: id,
-        acquired_at: new Date().toISOString(),
-        expires_at: expiresAt,
-      }, { onConflict: "resource_id" });
-      return { acquired: true, id };
-    }
-
-    if (existing.holder === id) return { acquired: true, id };
-    return { acquired: false, holder: existing.holder, id };
+    const { data, error } = await sb.rpc("kayad_try_acquire_lock", {
+      p_resource_id: resourceId,
+      p_holder: id,
+      p_ttl_seconds: Math.max(1, Math.ceil(ttl / 1000)),
+    });
+    if (error) throw error;
+    return { acquired: data === true, id };
   } catch {
-    if (!locks.has(resourceId)) {
+    // Development/test fallback only. Production uses the database function
+    // above, which serializes acquisition inside PostgreSQL.
+    const now = Date.now();
+    const expiresAt = now + ttl;
+    if (!locks.has(resourceId) || locks.get(resourceId).expiresAt < now) {
       locks.set(resourceId, { holder: id, expiresAt });
       return { acquired: true, id };
     }
     const existing = locks.get(resourceId);
-    if (existing.holder === id) return { acquired: true, id };
-    if (existing.expiresAt < now) {
-      locks.set(resourceId, { holder: id, expiresAt });
-      return { acquired: true, id };
-    }
-    return { acquired: false, holder: existing.holder, id };
+    return { acquired: existing.holder === id, holder: existing.holder, id };
   }
 }
 
 export async function releaseLock(resourceId, holderId) {
   try {
     const sb = getSupabase();
-    await sb.from("distributed_locks").delete().eq("resource_id", resourceId).eq("holder", holderId);
+    const { error } = await sb.rpc("kayad_release_lock", {
+      p_resource_id: resourceId,
+      p_holder: holderId,
+    });
+    if (error) throw error;
   } catch {
-    /* ignore */
+    /* local fallback below */
   }
   if (locks.has(resourceId) && locks.get(resourceId).holder === holderId) {
     locks.delete(resourceId);

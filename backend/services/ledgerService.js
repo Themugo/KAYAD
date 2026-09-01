@@ -1,6 +1,7 @@
-import { findAll, findById, findOne, create, update } from "../db/index.js";
+import { findAll, findById, update, upsert } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 import crypto from "crypto";
+import { mapRowIn } from "../utils/fieldMap.js";
 
 function generateTransactionId() {
   return `LGR-${Date.now()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
@@ -11,35 +12,25 @@ function formatCurrency(amount) {
 }
 
 async function ensureAccounts() {
-  const accounts = await findAll("ledger_accounts", {});
-  if (accounts.length === 0) {
-    const seed = [
-      { code: "1000", name: "Cash - M-Pesa", type: "asset", category: "cash", description: "M-Pesa payment collections" },
-      { code: "1100", name: "Escrow Holdings", type: "asset", category: "escrow", description: "Funds held in escrow" },
-      { code: "1200", name: "Bank Account", type: "asset", category: "cash", description: "Platform bank account" },
-      { code: "2000", name: "Escrow Payable", type: "liability", category: "escrow", description: "Funds owed to sellers" },
-      { code: "2100", name: "Refund Payable", type: "liability", category: "refund", description: "Funds owed to buyers" },
-      { code: "2200", name: "Commission Payable", type: "liability", category: "commission", description: "Unpaid commissions" },
-      { code: "3000", name: "Retained Earnings", type: "equity", category: "reserve", description: "Platform retained earnings" },
-      { code: "4000", name: "Commission Revenue", type: "revenue", category: "commission", description: "Platform commission fees" },
-      { code: "4100", name: "Subscription Revenue", type: "revenue", category: "subscription", description: "Dealer subscription fees" },
-      { code: "4200", name: "Inspection Fees", type: "revenue", category: "inspection", description: "Vehicle inspection fees" },
-      { code: "4300", name: "Listing Fees", type: "revenue", category: "fees", description: "Listing promotion fees" },
-      { code: "5000", name: "B2C Disbursement Payable", type: "liability", category: "payable", description: "Pending seller payouts" },
-    ];
-    const created = [];
-    for (const acct of seed) {
-      created.push(await create("ledger_accounts", acct));
-    }
-    return created;
-  }
-  return accounts;
-}
+  const seed = [
+    { code: "1000", name: "Cash - M-Pesa", type: "asset", category: "cash", description: "M-Pesa payment collections" },
+    { code: "1100", name: "Escrow Holdings", type: "asset", category: "escrow", description: "Funds held in escrow" },
+    { code: "1200", name: "Bank Account", type: "asset", category: "cash", description: "Platform bank account" },
+    { code: "2000", name: "Escrow Payable", type: "liability", category: "escrow", description: "Funds owed to sellers" },
+    { code: "2100", name: "Refund Payable", type: "liability", category: "refund", description: "Funds owed to buyers" },
+    { code: "2200", name: "Commission Payable", type: "liability", category: "commission", description: "Unpaid commissions" },
+    { code: "3000", name: "Retained Earnings", type: "equity", category: "reserve", description: "Platform retained earnings" },
+    { code: "4000", name: "Commission Revenue", type: "revenue", category: "commission", description: "Platform commission fees" },
+    { code: "4100", name: "Subscription Revenue", type: "revenue", category: "subscription", description: "Dealer subscription fees" },
+    { code: "4200", name: "Inspection Fees", type: "revenue", category: "inspection", description: "Vehicle inspection fees" },
+    { code: "4300", name: "Listing Fees", type: "revenue", category: "fees", description: "Listing promotion fees" },
+    { code: "5000", name: "B2C Disbursement Payable", type: "liability", category: "payable", description: "Pending seller payouts" },
+  ];
 
-async function getAccountId(code) {
-  const account = await findOne("ledger_accounts", { code });
-  if (!account) throw new Error(`Account not found: ${code}`);
-  return account.id;
+  // Upsert by the unique account code so concurrent workers cannot both
+  // observe an empty ledger and race into duplicate-account creation.
+  for (const acct of seed) await upsert("ledger_accounts", acct, "code");
+  return findAll("ledger_accounts", {});
 }
 
 export async function recordLedgerEntry({
@@ -56,38 +47,22 @@ export async function recordLedgerEntry({
 }) {
   try {
     await ensureAccounts();
-    const debitAccountId = await getAccountId(debitAccountCode);
-    const creditAccountId = await getAccountId(creditAccountCode);
     const roundedAmount = formatCurrency(amount);
 
-    const entry = await create("ledger_entries", {
-      transaction_id: generateTransactionId(),
-      external_reference,
-      user: user_id,
-      amount: roundedAmount,
-      currency,
-      source,
-      destination,
-      status: "completed",
-      description: description || `${source} → ${destination}`,
-      entries: [
-        { account: debitAccountId, debit: roundedAmount, credit: 0 },
-        { account: creditAccountId, debit: 0, credit: roundedAmount },
-      ],
-      metadata,
+    const { data: entry, error } = await getSupabase().rpc("kayad_post_ledger_entry_atomic", {
+      p_external_reference: String(external_reference),
+      p_user_id: user_id || null,
+      p_amount: roundedAmount,
+      p_currency: currency,
+      p_source: source,
+      p_destination: destination,
+      p_description: description || `${source} → ${destination}`,
+      p_metadata: metadata,
+      p_debit_account_code: debitAccountCode,
+      p_credit_account_code: creditAccountCode,
     });
-
-    const debitAccount = await findById("ledger_accounts", debitAccountId);
-    if (debitAccount) {
-      await update("ledger_accounts", debitAccountId, { balance: (debitAccount.balance || 0) + roundedAmount });
-    }
-
-    const creditAccount = await findById("ledger_accounts", creditAccountId);
-    if (creditAccount) {
-      await update("ledger_accounts", creditAccountId, { balance: (creditAccount.balance || 0) - roundedAmount });
-    }
-
-    return entry;
+    if (error) throw error;
+    return entry ? mapRowIn("ledger_entries", entry) : entry;
   } catch (err) {
     throw err;
   }
@@ -276,47 +251,13 @@ export async function getLedgerEntryById(id) {
 }
 
 export async function reverseLedgerEntry(entryId, userId, reason) {
-  try {
-    const original = await findById("ledger_entries", entryId);
-    if (!original) throw new Error("Entry not found");
-    if (original.status === "reversed") throw new Error("Entry already reversed");
-
-    for (const e of original.entries) {
-      const account = await findById("ledger_accounts", e.account);
-      if (!account) throw new Error(`Account ${e.account} not found`);
-      const newBalance = (account.balance || 0) - (e.debit || 0) + (e.credit || 0);
-      await update("ledger_accounts", account.id, { balance: newBalance });
-    }
-
-    await update("ledger_entries", original.id, {
-      status: "reversed",
-      reversed_at: new Date().toISOString(),
-      reversed_by: userId,
-      metadata: { ...original.metadata, reversal_reason: reason },
-    });
-
-    const reversalEntry = await create("ledger_entries", {
-      transaction_id: generateTransactionId(),
-      external_reference: original.transaction_id,
-      user: original.user,
-      amount: original.amount,
-      currency: original.currency,
-      source: original.source,
-      destination: original.destination,
-      status: "completed",
-      description: `Reversal: ${reason} — ref ${original.transaction_id}`,
-      entries: original.entries.map((e) => ({
-        account: e.account,
-        debit: e.credit || 0,
-        credit: e.debit || 0,
-      })),
-      metadata: { reversed_entry_id: entryId, reason, event: "reversal" },
-    });
-
-    return reversalEntry;
-  } catch (err) {
-    throw err;
-  }
+  const { data, error } = await getSupabase().rpc("kayad_reverse_ledger_entry_atomic", {
+    p_entry_id: entryId,
+    p_user_id: userId || null,
+    p_reason: reason || null,
+  });
+  if (error) throw error;
+  return data ? mapRowIn("ledger_entries", data) : data;
 }
 
 export async function getReconciliationReport({ startDate, endDate }) {

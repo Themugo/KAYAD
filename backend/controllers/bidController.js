@@ -14,6 +14,7 @@ import { acquireLock, releaseLock } from "../middleware/distributedLock.js";
 import { closeAuction } from "../services/auctionClose.service.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { atomicPlaceBid, atomicConfirmBidPayment } from "../utils/atomicTransactions.js";
 import { findOrCreateLeadFromAuction, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logAuctionBidPlaced } from "../services/auditService.js";
 
@@ -348,18 +349,25 @@ export const placeBid = async (req, res) => {
     });
 
     // =============================
-    // 🧾 CREATE BID
+    // 🧾 ATOMIC BID + AUCTION UPDATE
     // =============================
-    const bid = await Bid.create({
+    // The database function locks the car row and performs the bid insert
+    // plus any paid-market update in one PostgreSQL transaction. The old
+    // compatibility session was not a real DB transaction.
+    const checkoutRequestId = payment.checkoutRequestID || payment.checkoutID;
+    const bidStatus = payment.mode === "mpesa" ? "pending" : "paid";
+    const atomicResult = await atomicPlaceBid({
       carId,
-      user: userId,
+      userId,
       amount,
       maxBid: maxBid || null,
       phone,
       bidderTag: generatePseudonym(userId, carId),
-      status: payment.mode === "mpesa" ? "pending" : "paid",
-      checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
+      status: bidStatus,
+      checkoutRequestId,
     });
+    const bid = await Bid.findById(atomicResult.bid_id);
+    if (!bid) throw new Error("Atomic bid creation succeeded but bid could not be reloaded");
 
     // Create lead from bid
     try {
@@ -374,14 +382,10 @@ export const placeBid = async (req, res) => {
     if (payment.mode === "mock") {
       const previousHighestBidder = car.highestBidder;
 
-      car.currentBid = amount;
+      car.currentBid = atomicResult.current_bid;
       car.highestBidder = userId;
-      car.bidsCount = (car.bidsCount || 0) + 1;
-
-      await car.save({ session });
-
-      // ⏱ SNIPING PROTECTION BEFORE AUTO-BID
-      await applySnipingProtection(car);
+      car.bidsCount = atomicResult.bids_count;
+      if (atomicResult.auction_end) car.auctionEnd = atomicResult.auction_end;
 
       await session.commitTransaction();
       session.endSession();
@@ -490,9 +494,6 @@ export const placeBid = async (req, res) => {
 // =============================
 export const confirmBidPayment = async (req, res) => {
   try {
-    const session = await startSession();
-    session.startTransaction();
-
     const callback = req.body?.Body?.stkCallback || req.body?.stkCallback;
 
     if (!callback) throw new Error("Invalid callback");
@@ -506,23 +507,12 @@ export const confirmBidPayment = async (req, res) => {
 
     if (resultCode !== 0) {
       await Bid.updateOne({ checkoutRequestID }, { status: "failed" });
-
-      await session.commitTransaction();
       return res.json({ success: false, message: "Payment failed" });
     }
 
-    const bid = await Bid.findOne({ checkoutRequestID }).session(session);
-    if (!bid) throw new Error("Bid not found");
-
-    if (bid.status === "paid") {
-      await session.commitTransaction();
-      return res.json({ success: true });
-    }
-
-    if (!bid.bidderTag || bid.bidderTag === "Bidder") {
-      bid.bidderTag = generatePseudonym(bid.user.toString(), bid.carId.toString());
-    }
-    await Bid.findByIdAndUpdate(bid.id || bid._id, { status: "paid", bidderTag: bid.bidderTag });
+    const atomicConfirmation = await atomicConfirmBidPayment(checkoutRequestID, receipt);
+    const bid = await Bid.findById(atomicConfirmation.bid_id);
+    if (!bid) throw new Error("Atomic bid confirmation succeeded but bid could not be reloaded");
 
     // ── PDF RECEIPT (fire-and-forget) ───────────────────────
     try {
@@ -538,29 +528,9 @@ export const confirmBidPayment = async (req, res) => {
       /* PDF generation non-critical */
     }
 
-    const car = await Car.findById(bid.carId).session(session);
-    const previousHighestBidder = car?.highestBidder;
-
-    // The payment is confirmed regardless of auction state, but market
-    // state only moves while the auction is still live and the confirmed
-    // bid actually raises the price — a late or out-of-order callback
-    // must never lower currentBid or move an ended auction.
-    const auctionStillLive =
-      car &&
-      car.auctionStatus === "live" &&
-      (!car.auctionEnd || new Date(car.auctionEnd).getTime() > Date.now());
-    const raisesMarket = auctionStillLive && Number(bid.amount) > (Number(car.currentBid) || 0);
-
-    if (raisesMarket) {
-      car.currentBid = bid.amount;
-      car.highestBidder = bid.user;
-      car.bidsCount = (car.bidsCount || 0) + 1;
-      await car.save();
-      // ⏱ SNIPING PROTECTION AFTER PAYMENT CONFIRMATION
-      await applySnipingProtection(car);
-    }
-
-    await session.commitTransaction();
+    const car = await Car.findById(bid.carId);
+    const previousHighestBidder = atomicConfirmation.previous_highest_bidder;
+    const raisesMarket = atomicConfirmation.applied_to_market === true;
 
     logActionFromReq(req, "bid.payment_confirmed", {
       target: bid.carId,

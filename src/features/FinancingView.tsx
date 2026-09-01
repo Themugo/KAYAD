@@ -243,8 +243,74 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     setUploadedDocs(prev => ({ ...prev, [docKey]: !prev[docKey] }));
   };
 
-  // Show only real vehicles supplied by the production vehicle API.
-  const financedVehicles = useMemo(() => (vehicles || []).slice(0, 3), [vehicles]);
+  // Recently Financed Vehicles (Sample fallback if vehicles list is small)
+  const financedVehicles = useMemo(() => {
+    if (vehicles && vehicles.length >= 3) {
+      return vehicles.slice(0, 3);
+    }
+    return [
+      {
+        id: 'fin-01',
+        title: '2021 Toyota Prado VX 2.8L Diesel',
+        make: 'Toyota',
+        model: 'Prado',
+        year: 2021,
+        price: 7800000,
+        image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
+        location: 'Nairobi',
+        county: 'Nairobi County',
+        mileage: 42000,
+        fuelType: 'Diesel',
+        transmission: 'Automatic',
+        condition: 'Foreign Used',
+        verified: true,
+        sellerName: 'Simba Caetano Motors',
+        sellerType: 'Verified Dealer',
+        sellerRating: 4.9,
+        financedBank: 'the partner bank'
+      },
+      {
+        id: 'fin-02',
+        title: '2020 Subaru Forester 2.0i Eyesight',
+        make: 'Subaru',
+        model: 'Forester',
+        year: 2020,
+        price: 3450000,
+        image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=800&q=80',
+        location: 'Mombasa',
+        county: 'Mombasa County',
+        mileage: 58000,
+        fuelType: 'Petrol',
+        transmission: 'Automatic',
+        condition: 'Foreign Used',
+        verified: true,
+        sellerName: 'Coastal Premium Auto',
+        sellerType: 'Verified Dealer',
+        sellerRating: 4.8,
+        financedBank: 'a partner bank'
+      },
+      {
+        id: 'fin-03',
+        title: '2019 Mazda CX-5 2.2L Skyactiv-D',
+        make: 'Mazda',
+        model: 'CX-5',
+        year: 2019,
+        price: 2950000,
+        image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80',
+        location: 'Nakuru',
+        county: 'Nakuru County',
+        mileage: 64000,
+        fuelType: 'Diesel',
+        transmission: 'Automatic',
+        condition: 'Locally Used',
+        verified: true,
+        sellerName: 'Rift Valley Motors',
+        sellerType: 'Verified Dealer',
+        sellerRating: 4.7,
+        financedBank: 'another partner bank Auto'
+      }
+    ];
+  }, [vehicles]);
 
   // FAQs
   const faqs = [
@@ -892,6 +958,20 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               Application Journey & Live Tracker
             </h2>
             <p className="text-xs text-slate-500 font-medium">Track your active pre-qualification status through the 6-step KAYAD routing pipeline</p>
+          </div>
+          
+          {/* Status Simulator dropdown for interactive demo */}
+          <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+            <span className="text-[11px] text-slate-500 font-bold px-1">Simulate Status:</span>
+            <select
+              value={currentAppStatus}
+              onChange={(e) => setCurrentAppStatus(e.target.value as ApplicationStatus)}
+              className="text-xs font-bold text-[#1E3063] bg-white border border-slate-300 rounded-lg px-2.5 py-1 outline-none cursor-pointer"
+            >
+              {statusFlow.map((s) => (
+                <option key={s.status} value={s.status}>{s.label}</option>
+              ))}
+            </select>
           </div>
         </div>
 

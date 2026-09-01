@@ -73,6 +73,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   onNavigateToAuctions
 }) => {
   // Fixed: this entire hub previously started from, and only ever
+  // showed, MOCK_UNIFIED_THREADS - elaborate, specific fake sample
   // data (real-looking names, escrow amounts, bank details) with no
   // connection to the real, already-working chat backend at all.
   // Master Threads State - now starts empty and loads real

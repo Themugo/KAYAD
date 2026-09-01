@@ -1,8 +1,5 @@
-# PHASE 7 — PAYMENT LOOSE ENDS + REAL VEHICLE DATA WIRING
-
-**Status: COMPLETE.** See `PHASE_7_COMPLETE.md` for the implementation and verification summary.
-
-KAYAD - Phase 7: Payment Loose Ends + Real Vehicle Data Wiring
+# PHASE7.md
+**KAYAD - Phase 7: Payment Loose Ends + Real Vehicle Data Wiring**
 
 Two workstreams this phase: (1) Phase 6's payment loose ends, (2) wiring the tested-but-unused vehicleApi.ts client into the actual UI.
 

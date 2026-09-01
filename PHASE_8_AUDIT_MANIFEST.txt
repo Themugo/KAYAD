@@ -1,0 +1,25 @@
+KAYAD PHASE 8 AUDIT MANIFEST
+Baseline: KAYAD-main (9).zip
+
+Atomic PostgreSQL functions:
+kayad_try_acquire_lock
+kayad_release_lock
+kayad_place_bid_atomic
+kayad_confirm_bid_payment_atomic
+kayad_transition_escrow_atomic
+kayad_post_ledger_entry_atomic
+kayad_reverse_ledger_entry_atomic
+
+Modified runtime files:
+backend/controllers/bidController.js
+backend/middleware/distributedLock.js
+backend/services/escrow.service.js
+backend/services/ledgerService.js
+backend/utils/atomicTransactions.js
+backend/utils/fieldMap.js
+
+Tests:
+backend/tests/transactions/atomicTransactions.test.js
+
+Migration:
+supabase/migrations/20260901210000_phase8_transaction_atomicity.sql

@@ -506,6 +506,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   // Fixed (Final Integration Phase 3 - real auction & bidding
   // integration): previously always showed "Bidding is disabled on
   // preview auctions" unconditionally - correct, honest behavior for
+  // this component's own mock sessions (INITIAL_AUCTION_SESSIONS),
   // but it never actually attempted the real backend call even when
   // it could. Now genuinely connects to the real, canonical bid
   // endpoint (POST /api/bids/:id/bid, via services/bidApi.ts) when

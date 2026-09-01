@@ -220,6 +220,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSelle
   const [listingDraft, setListingDraft] = useState<ListingDraft | null>(null);
 
   // Fixed: this entire dashboard previously ran on hardcoded
+  // SAMPLE_SELLER/SAMPLE_STATS/SAMPLE_LISTINGS and a completely fake
   // backend endpoint (dealerPlatformController.js's getInventory,
   // which returned 7 invented vehicles regardless of who asked).
   // Real, signed-in seller's own listings and escrow deals below,
@@ -725,6 +726,7 @@ function TrustCenterSection() {
       <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Trust Center</h1>
       {/* Fixed: this section previously hardcoded a fake "Trust Score"
           percentage and 4 always-"verified" badges (National ID,
+          Phone, Email, TIMS) from SAMPLE_VERIFICATION, regardless of
           the real signed-in seller's actual status - same class of
           issue already fixed in PrivateSellerDashboardView.tsx's own
           Verification Status tab. Phone verification is now the real
