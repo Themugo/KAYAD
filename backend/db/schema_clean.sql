@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS users (
   password TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user','dealer','admin','superadmin','escrow_officer','ad_manager','moderator','ghost_checker','individual_seller','marketing','technical_support','hr','accounts')),
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending','approved','suspended','rejected')),
-  is_demo BOOLEAN DEFAULT false,
   is_banned BOOLEAN DEFAULT false,
   email_verified BOOLEAN DEFAULT false,
   phone TEXT,
@@ -965,10 +964,8 @@ CREATE TABLE IF NOT EXISTS distributed_locks (
 -- that were missing from the original schema. The Mongo-era app
 -- code assumes these fields exist on `cars`; without them, the
 -- primary listing/search endpoint (getCars) fails on its very
--- first filter (isDemo), and auction/promotion filtering fails too.
 -- Added idempotently so this is safe to re-run.
 -- =============================
-ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_demo BOOLEAN DEFAULT false;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS auction_status TEXT;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS allow_bid BOOLEAN DEFAULT false;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS allow_buy BOOLEAN DEFAULT true;
@@ -984,7 +981,6 @@ ALTER TABLE cars ADD COLUMN IF NOT EXISTS cover_image TEXT;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS demo_edited_at TIMESTAMPTZ;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS demo_edited_by UUID REFERENCES users(id);
 
-CREATE INDEX IF NOT EXISTS idx_cars_is_demo ON cars(is_demo);
 CREATE INDEX IF NOT EXISTS idx_cars_auction_status ON cars(auction_status);
 CREATE INDEX IF NOT EXISTS idx_cars_is_promoted ON cars(is_promoted);
 

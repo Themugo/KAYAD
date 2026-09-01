@@ -2,7 +2,7 @@
 // Premium mobile-first UI components for automotive marketplace
 
 // Layout components
-export { default as MobileBottomNav } from './MobileBottomNav';
+export { default as MobileBottomNav } from '../MobileBottomNav';
 export { default as MobilePage, Page, Section, Tabs, StatsBar, MobileCarousel, Carousel, CarouselItem, usePullToRefresh } from './MobilePage';
 export { default as MobileHeader, HeaderButton, MobileSearchHeader, MobileHeroHeader, MobileTabHeader, PRESET_HEADERS } from './MobileHeader';
 

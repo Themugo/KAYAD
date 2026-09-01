@@ -34,8 +34,6 @@ import { getCars, getCarById, BackendCar } from '../services/vehicleApi';
 import { placeBid, BidApiError } from '../services/bidApi';
 import type { UserProfile } from '../types';
 
-// Fixed: this entire page previously ran on MOCK_AUCTIONS/
-// MOCK_ORGANIZERS - fake auctions, fake bidder/spectator counts, fake
 // "organizer" profiles with fabricated ratings and follower counts,
 // a fake weekly calendar, a fake replay archive, and fake "browse by
 // category" counts. Per explicit direction, rebuilt around real data:

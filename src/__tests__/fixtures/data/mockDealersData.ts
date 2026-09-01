@@ -1,4 +1,4 @@
-import { Dealer, DealerTeamMember, DealerLead, DealerPromotion, DealerAnalytics } from '../types';
+import { Dealer, DealerTeamMember, DealerLead, DealerPromotion, DealerAnalytics } from '../../../types';
 
 export const INITIAL_DEALER_BUSINESSES: Dealer[] = [
   {

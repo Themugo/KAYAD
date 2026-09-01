@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile } from '../types';
 import { createCar, VehicleApiError } from '../services/vehicleApi';
 import PhoneVerification from '../components/PhoneVerification';
@@ -166,192 +166,44 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
   const [newListingError, setNewListingError] = useState<string | null>(null);
   const [selectedTaskModal, setSelectedTaskModal] = useState<string | null>(null);
 
-  // Mock Private Listings (Clean, user-centric)
-  const [listings, setListings] = useState<PrivateSellerListing[]>([
-    {
-      id: 'v1',
-      title: '2021 Toyota Land Cruiser Prado TX-L',
-      make: 'Toyota',
-      model: 'Prado',
-      year: 2021,
-      price: 7450000,
-      mileage: 42000,
-      status: 'Active',
-      viewsCount: 342,
-      savesCount: 28,
-      inquiriesCount: 9,
-      image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      location: 'Kilimani',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: '3 days ago'
-    },
-    {
-      id: 'v-draft-1',
-      title: '2019 Subaru Outback 2.5i Limited',
-      make: 'Subaru',
-      model: 'Outback',
-      year: 2019,
-      price: 3250000,
-      mileage: 68000,
-      status: 'Draft',
-      viewsCount: 0,
-      savesCount: 0,
-      inquiriesCount: 0,
-      image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800',
-      location: 'Westlands',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: 'Yesterday'
-    },
-    {
-      id: 'v-sold-1',
-      title: '2018 Mazda CX-5 2.2 XD L-Package',
-      make: 'Mazda',
-      model: 'CX-5',
-      year: 2018,
-      price: 2650000,
-      mileage: 75000,
-      status: 'Sold',
-      viewsCount: 512,
-      savesCount: 41,
-      inquiriesCount: 14,
-      image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=800',
-      location: 'Lavington',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: '1 month ago'
-    },
-    {
-      id: 'v-paused-1',
-      title: '2020 Nissan X-Trail Hybrid 2.0',
-      make: 'Nissan',
-      model: 'X-Trail',
-      year: 2020,
-      price: 2850000,
-      mileage: 52000,
-      status: 'Paused',
-      viewsCount: 180,
-      savesCount: 12,
-      inquiriesCount: 4,
-      image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=800',
-      location: 'Karen',
-      county: 'Nairobi',
-      ntsaTimsVerified: false,
-      createdAt: '2 weeks ago'
-    },
-    {
-      id: 'v-exp-1',
-      title: '2015 Mercedes-Benz C200 AMG Line',
-      make: 'Mercedes-Benz',
-      model: 'C200',
-      year: 2015,
-      price: 2400000,
-      mileage: 94000,
-      status: 'Expired',
-      viewsCount: 220,
-      savesCount: 15,
-      inquiriesCount: 3,
-      image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=800',
-      location: 'Runda',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: '60 days ago'
-    }
-  ]);
+  // Production listings are derived from the real vehicle collection passed by App.
+  // Only vehicles owned by the signed-in seller are shown here.
+  const toSellerListing = (vehicle: Vehicle): PrivateSellerListing => ({
+    id: vehicle.id,
+    title: vehicle.title,
+    make: vehicle.make,
+    model: vehicle.model,
+    year: vehicle.year,
+    price: vehicle.price,
+    mileage: vehicle.mileage,
+    status: vehicle.status === 'sold' ? 'Sold' : vehicle.status === 'draft' ? 'Draft' : vehicle.status === 'pending' ? 'Paused' : 'Active',
+    viewsCount: vehicle.viewsCount || 0,
+    savesCount: vehicle.savedCount || 0,
+    inquiriesCount: 0,
+    image: vehicle.image || vehicle.images?.[0] || '',
+    location: vehicle.location || '',
+    county: vehicle.county || '',
+    ntsaTimsVerified: Boolean(vehicle.verified),
+    createdAt: vehicle.createdAt || '',
+  });
 
-  // Mock Offers Received
-  const [offers, setOffers] = useState<SellerOffer[]>([
-    {
-      id: 'OFF-701',
-      vehicleId: 'v1',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      vehicleImage: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      askingPrice: 7450000,
-      offeredAmount: 7300000,
-      buyerName: 'Dr. Samuel Omondi',
-      buyerPhone: '+254 722 *** 902',
-      paymentType: 'Escrow Vault (Cash)',
-      status: 'Pending',
-      expiresInHours: 18,
-      timestamp: 'Today at 09:15 AM'
-    },
-    {
-      id: 'OFF-702',
-      vehicleId: 'v1',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      vehicleImage: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      askingPrice: 7450000,
-      offeredAmount: 7450000,
-      buyerName: 'Eng. Beatrice Mwangi',
-      buyerPhone: '+254 711 *** 441',
-      paymentType: 'KAYAD Asset Financing',
-      status: 'Pending',
-      expiresInHours: 36,
-      timestamp: 'Yesterday at 04:30 PM'
-    }
-  ]);
+  const sellerVehicles = useMemo(() => {
+    if (!user?.id) return [];
+    return vehicles.filter((vehicle) => vehicle.sellerId === user.id);
+  }, [vehicles, user?.id]);
 
-  // Mock Active Escrow Transactions
-  const activeEscrowDeals = useMemo(() => {
-    return [
-      {
-        id: 'ESC-9081',
-        vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-        buyerName: 'Dr. Samuel Omondi',
-        agreedPrice: 7300000,
-        fundsStatus: 'Ksh 7,300,000 Secured in KAYAD Vault',
-        buyerProgress: [
-          { step: 1, label: 'Offer Accepted', done: true },
-          { step: 2, label: 'Vault Deposit', done: true },
-          { step: 3, label: '150-Point Inspection', done: true },
-          { step: 4, label: 'TIMS Logbook Transfer', done: false, active: true },
-          { step: 5, label: 'Physical Handover', done: false },
-          { step: 6, label: 'Payout Release', done: false }
-        ],
-        requiredAction: 'Action Required: Upload Signed NTSA TIMS Transfer Form 9',
-        buyerPhone: '+254 722 104 902'
-      }
-    ];
-  }, []);
+  const [listings, setListings] = useState<PrivateSellerListing[]>([]);
+  useEffect(() => {
+    setListings(sellerVehicles.map(toSellerListing));
+  }, [sellerVehicles]);
 
-  // Mock Inspection Requests
-  const inspectionRequests: SellerInspectionRequest[] = [
-    {
-      id: 'INS-201',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      buyerName: 'Dr. Samuel Omondi',
-      inspectorName: 'Eng. David Kamau (SAE Certified)',
-      scheduledTime: 'Yesterday @ 11:00 AM',
-      location: 'Kilimani, Nairobi (Seller Residence)',
-      status: 'Completed',
-      overallScore: 96,
-      reportSummary: 'Pass - Clean engine compressions, pristine chassis, 96% overall rating.'
-    },
-    {
-      id: 'INS-202',
-      vehicleTitle: '2019 Subaru Outback 2.5i Limited',
-      buyerName: 'Kevin Mutua',
-      inspectorName: 'Eng. Patrick Kipchumba',
-      scheduledTime: 'Tomorrow @ 02:30 PM',
-      location: 'Westlands Auto Yard',
-      status: 'Requested'
-    }
-  ];
-
-  // Mock Completed Sales
-  const completedSales: CompletedSale[] = [
-    {
-      id: 'SALE-101',
-      vehicleTitle: '2018 Mazda CX-5 2.2 XD L-Package',
-      buyerName: 'Grace Wanjiku',
-      agreedPrice: 2650000,
-      payoutAmount: 2636750, // net after 0.5% escrow fee
-      payoutMethod: 'our escrow custodian (A/C ****8891)',
-      timsTransferRef: 'TIMS-KE-9920148',
-      completedDate: 'June 14, 2026'
-    }
-  ];
+  // Offers, inspection requests, and completed-sale history require their
+  // own backend endpoints. Until those integrations return records, render
+  // honest empty states instead of synthetic business activity.
+  const [offers, setOffers] = useState<SellerOffer[]>([]);
+  const activeEscrowDeals = useMemo(() => [], [deals]);
+  const inspectionRequests: SellerInspectionRequest[] = [];
+  const completedSales: CompletedSale[] = [];
 
   // Handle Offer Actions
   const handleAcceptOffer = (offerId: string) => {

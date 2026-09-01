@@ -222,7 +222,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   const [newMileage, setNewMileage] = useState<number>(0);
   const [newLocation, setNewLocation] = useState('');
   const [newCounty, setNewCounty] = useState('Nairobi');
-  const [newImage, setNewImage] = useState('https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=800');
+  const [newImage, setNewImage] = useState('');
   const [isDraft, setIsDraft] = useState<boolean>(false);
 
   // Team Form
@@ -235,163 +235,19 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   const [newLeadName, setNewLeadName] = useState('');
   const [newLeadPhone, setNewLeadPhone] = useState('');
   const [newLeadEmail, setNewLeadEmail] = useState('');
-  const [newLeadVehicleTitle, setNewLeadVehicleTitle] = useState(vehicles[0]?.title || '2021 Toyota Prado');
+  const [newLeadVehicleTitle, setNewLeadVehicleTitle] = useState(vehicles[0]?.title || '');
 
-  // Trade-ins Mock Data
-  const [tradeIns, setTradeIns] = useState<TradeInRequest[]>([
-    {
-      id: 'TRD-401',
-      customerName: 'Arch. Peter Kiprop',
-      customerPhone: '+254 722 891 002',
-      targetVehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      tradeInVehicleTitle: '2016 Subaru Forester 2.0XT Turbo',
-      tradeInYear: 2016,
-      tradeInMileage: 89000,
-      estimatedMarketValue: 2450000,
-      dealerAppraisalOffer: 2350000,
-      inspectionPassed: true,
-      status: 'Pending Appraisal',
-      requestedDate: 'Yesterday'
-    },
-    {
-      id: 'TRD-402',
-      customerName: 'Dr. Mary Muthoni',
-      customerPhone: '+254 733 412 900',
-      targetVehicleTitle: '2022 Land Rover Defender 110 SE',
-      tradeInVehicleTitle: '2018 Toyota RAV4 Hybrid',
-      tradeInYear: 2018,
-      tradeInMileage: 64000,
-      estimatedMarketValue: 3100000,
-      dealerAppraisalOffer: 3000000,
-      inspectionPassed: true,
-      status: 'Appraised',
-      requestedDate: '3 days ago'
-    }
-  ]);
+  const [tradeIns, setTradeIns] = useState<TradeInRequest[]>([]);
 
-  // Auctions Mock Data (B2B Wholesale Exchange)
-  const [auctionLots, setAuctionLots] = useState<AuctionLot[]>([
-    {
-      id: 'AUC-901',
-      vehicleTitle: '2017 Isuzu D-Max 3.0 4x4 Double Cab',
-      vehicleImage: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      year: 2017,
-      mileage: 112000,
-      startingPrice: 2200000,
-      reservePrice: 2450000,
-      currentHighestBid: 2500000,
-      bidsCount: 14,
-      highestBidderDealer: 'Rift Valley Motors Nakuru',
-      endsInHours: 4,
-      status: 'Reserve Met'
-    },
-    {
-      id: 'AUC-902',
-      vehicleTitle: '2019 Nissan X-Trail 2.0 Hybrid',
-      vehicleImage: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=800',
-      year: 2019,
-      mileage: 58000,
-      startingPrice: 2100000,
-      reservePrice: 2350000,
-      currentHighestBid: 2250000,
-      bidsCount: 7,
-      highestBidderDealer: 'Coastal Auto Emporium Mombasa',
-      endsInHours: 19,
-      status: 'Active'
-    }
-  ]);
+  const [auctionLots, setAuctionLots] = useState<AuctionLot[]>([]);
 
-  // Finance Applications Mock Data
-  const [financeApps, setFinanceApps] = useState<FinanceApplication[]>([
-    {
-      id: 'FIN-801',
-      applicantName: 'Eng. Beatrice Mwangi',
-      applicantPhone: '+254 711 304 441',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      vehiclePrice: 7450000,
-      downPayment: 1490000,
-      financedAmount: 5960000,
-      bankPartner: 'Partner Bank A',
-      status: 'Pre-Approved',
-      tenureMonths: 60,
-      monthlyInstallment: 132500,
-      appliedDate: 'July 26, 2026'
-    },
-    {
-      id: 'FIN-802',
-      applicantName: 'Capt. James Oduor',
-      applicantPhone: '+254 720 112 009',
-      vehicleTitle: '2019 Mercedes-Benz C200 AMG',
-      vehiclePrice: 3850000,
-      downPayment: 770000,
-      financedAmount: 3080000,
-      bankPartner: 'Co-operative Bank',
-      status: 'Underwriting Review',
-      tenureMonths: 48,
-      monthlyInstallment: 79200,
-      appliedDate: 'July 28, 2026'
-    }
-  ]);
+  const [financeApps, setFinanceApps] = useState<FinanceApplication[]>([]);
 
-  // Call Logs Mock Data
-  const [callLogs, setCallLogs] = useState<CallLog[]>([
-    {
-      id: 'CALL-101',
-      customerName: 'Dr. Samuel Omondi',
-      customerPhone: '+254 722 104 902',
-      callType: 'Inbound Call',
-      duration: '4m 12s',
-      salesRep: 'Samuel Mwaura',
-      notes: 'Inquired about Prado TX-L logbook status and escrow release terms.',
-      timestamp: 'Today @ 10:14 AM'
-    },
-    {
-      id: 'CALL-102',
-      customerName: 'Kevin Mutua',
-      customerPhone: '+254 712 990 120',
-      callType: 'Outbound Followup',
-      duration: '6m 45s',
-      salesRep: 'Grace Wanjiku',
-      notes: 'Confirmed appointment for Subaru Outback test drive at Westlands yard.',
-      timestamp: 'Yesterday @ 03:30 PM'
-    }
-  ]);
+  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
 
-  // Appointments Mock Data
-  const [appointments, setAppointments] = useState<Appointment[]>([
-    {
-      id: 'APT-301',
-      customerName: 'Dr. Samuel Omondi',
-      customerPhone: '+254 722 104 902',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      type: 'Showroom Test Drive',
-      dateTime: 'Tomorrow @ 11:00 AM',
-      assignedRep: 'Samuel Mwaura',
-      status: 'Scheduled'
-    },
-    {
-      id: 'APT-302',
-      customerName: 'Grace Wanjiku',
-      customerPhone: '+254 711 002 911',
-      vehicleTitle: '2018 Mazda CX-5 2.2 XD',
-      type: 'Handover Delivery',
-      dateTime: 'Completed Today',
-      assignedRep: 'Grace Wanjiku',
-      status: 'Completed'
-    }
-  ]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-  // Draft Vehicles Local State
-  const [draftVehicles, setDraftVehicles] = useState<any[]>([
-    {
-      id: 'v-draft-d1',
-      title: '2022 Lexus RX 450h F-Sport (Draft Specs)',
-      price: 9200000,
-      mileage: 22000,
-      location: 'Kilimani Yard',
-      missingInfo: 'Awaiting HD Interior Photos & TIMS Inspection Sheet'
-    }
-  ]);
+  const [draftVehicles, setDraftVehicles] = useState<any[]>([]);
 
   // Dealer Vehicles Filtered
   const dealerVehicles = useMemo(() => {
@@ -411,31 +267,13 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   // Total floorplan value
   const totalFloorplan = dealerVehicles.reduce((sum, v) => sum + v.price, 0);
 
-  // VIN Decoder Logic Simulation
   const handleDecodeVin = () => {
     if (!inputVin || inputVin.length < 6) {
       showToast('Please enter a valid 17-digit VIN / Chassis number');
       return;
     }
-
-    const mockDecoded = {
-      vin: inputVin.toUpperCase(),
-      make: 'Toyota',
-      model: 'Land Cruiser Prado TX-L',
-      year: 2021,
-      engineSize: '2754 cc (2.8L 1GD-FTV Turbo Diesel)',
-      transmission: '6-Speed Super ECT Automatic',
-      drivetrain: 'Full-Time 4WD with Torsen LSD',
-      chassisPrefix: 'TRJ150R-GKTEK',
-      fuelType: 'Diesel',
-      assemblyCountry: 'Japan (Tahara Plant)',
-      kraTaxCategory: 'Passenger Station Wagon',
-      safetyRating: '5-Star ANCAP',
-      estimatedValue: 7450000
-    };
-
-    setDecodedSpecs(mockDecoded);
-    showToast('VIN Decoded successfully from NTSA / Manufacturer database!');
+    setDecodedSpecs(null);
+    showToast('VIN decoding requires the live NTSA/manufacturer integration and is not available from placeholder data.');
   };
 
   const handleCreateFromVin = () => {

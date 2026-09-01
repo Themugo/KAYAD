@@ -42,7 +42,6 @@ interface EscrowViewProps {
   onOpenAuth?: () => void;
 }
 
-// Fixed: this entire page previously ran on MOCK_ESCROW_DEALS - fake
 // deals, fake specific buyer/seller names, a fake NTSA TIMS ownership-
 // transfer visualizer (no real TIMS integration exists anywhere in
 // this backend), and a free role switcher that let any visitor
