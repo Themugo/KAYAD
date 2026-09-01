@@ -88,7 +88,7 @@ export default function AdminSettings() {
           setBranding({ ...DEFAULT_BRANDING, ...c.branding });
         }
       }
-    } catch { /* demo fallback — keep defaults */ }
+    } catch { /* keep server-backed defaults when configuration is unavailable */ }
 
     try {
       const { entries } = await adminAPI.getAuditLog({ limit: 100 });

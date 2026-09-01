@@ -1,0 +1,15 @@
+KAYAD PHASE 11 AUDIT MANIFEST
+==============================
+Base commit: f4797de9
+Scope: production demo isolation and legacy artifact cleanup
+
+Key changes:
+- backend/seed.js
+- src/pages/admin/AdminSettings.jsx
+- supabase/migrations/20260902110000_phase11_production_demo_cleanup.sql
+- removed unused demo/mock/backup artifacts
+
+Validation:
+- backend/seed.js syntax: PASS
+- production-source demo import scan: PASS
+- full npm/Vitest: WINDOWS GATE REQUIRED
