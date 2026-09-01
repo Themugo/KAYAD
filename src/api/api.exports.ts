@@ -3,22 +3,41 @@
 import { api, unwrap } from "./api";
 
 // ── AUTH ──────────────────────────────────────────────
+import {
+  login as authLogin,
+  register as authRegister,
+  logout as authLogout,
+  getMe as authGetMe,
+  updateProfile as authUpdateProfile,
+  changePassword as authChangePassword,
+  forgotPassword as authForgotPassword,
+  resetPassword as authResetPassword,
+  verifyEmail as authVerifyEmail,
+  resendVerification as authResendVerification,
+  sendOTP as authSendOTP,
+  verifyPhone as authVerifyPhone,
+  phoneStatus as authPhoneStatus,
+} from '../services/authApi';
+
+// Canonical authentication adapter. All legacy callers keep their existing
+// response shape while the actual transport is the verified /api/v1/auth
+// cookie-based client. No second authentication implementation remains.
 export const authAPI = {
-  register: (body: any) => api.post('/auth/register', body).then(unwrap),
-  login:    (body: any) => api.post('/auth/login', body).then(unwrap),
-  refresh:  ()     => api.post('/auth/refresh').then(unwrap),
-  logout:   ()     => api.post('/auth/logout').then(unwrap),
-  profile:  ()     => api.get('/auth/profile').then(unwrap),
-  me:       ()     => api.get('/auth/me').then(unwrap),
-  changePassword:   (body: any) => api.put('/auth/change-password', body).then(unwrap),
-  forgotPassword:   (body: any) => api.post('/auth/forgot-password', body).then(unwrap),
-  resetPassword:    (body: any) => api.post('/auth/reset-password', body).then(unwrap),
-  verifyEmail:         (token: string) => api.get(`/auth/verify-email/${token}`).then(unwrap),
-  resendVerification:  (body: any)  => api.post('/auth/resend-verification', body).then(unwrap),
-  updateProfile:       (body: any) => api.put('/auth/profile', body).then(unwrap),
-  sendOTP:       ()     => api.post('/auth/send-otp').then(unwrap),
-  verifyPhone:   (otp: string) => api.post('/auth/verify-phone', { otp }).then(unwrap),
-  phoneStatus:   ()     => api.get('/auth/phone-status').then(unwrap),
+  register: async (body: any) => ({ success: true, user: await authRegister(body) }),
+  login: async (body: any) => ({ success: true, user: await authLogin(body.email, body.password) }),
+  refresh: () => api.post('/v1/auth/refresh').then(unwrap),
+  logout: async () => ({ success: true, ...(await authLogout(), {}) }),
+  profile: async () => { const user = await authGetMe(); return { success: !!user, user }; },
+  me: async () => { const user = await authGetMe(); return { success: !!user, user }; },
+  changePassword: (body: any) => authChangePassword(body),
+  forgotPassword: (body: any) => authForgotPassword(body),
+  resetPassword: (body: any) => authResetPassword(body),
+  verifyEmail: (token: string) => authVerifyEmail(token),
+  resendVerification: (body: any) => authResendVerification(body),
+  updateProfile: async (body: any) => ({ success: true, user: await authUpdateProfile(body) }),
+  sendOTP: () => authSendOTP(),
+  verifyPhone: (otp: string) => authVerifyPhone(otp),
+  phoneStatus: () => authPhoneStatus(),
 };
 
 // ── CARS ──────────────────────────────────────────────

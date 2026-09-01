@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend loan-application client - a buyer submits a real
  * application, sees their own real applications and status, and an
@@ -52,7 +53,7 @@ async function loanFetch<T>(path: string, options: RequestInit = {}): Promise<T>
   try {
     res = await fetch(`${API_BASE}${path}`, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
       ...options,
     });
   } catch {

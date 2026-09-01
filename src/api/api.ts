@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getCsrfHeaders } from '../utils/csrf';
 
 export const api = axios.create({
   baseURL: '/api',
@@ -11,6 +12,11 @@ export const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  const method = String(config.method || 'get').toUpperCase();
+  Object.assign(config.headers, getCsrfHeaders(method));
+  return config;
+});
 
 // Auth endpoints return 401 as a normal part of their own flows
 // (bad credentials, "not logged in" probes) — those must NOT trigger

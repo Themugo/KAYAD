@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend favorites API client. KAYAD Phase 2 (eliminate mock
  * business state) - "Saved vehicles" priority item.
@@ -79,6 +80,7 @@ async function favoriteFetch<T>(path: string, options: RequestInit = {}): Promis
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getCsrfHeaders(options.method),
         ...(options.headers || {}),
       },
     });

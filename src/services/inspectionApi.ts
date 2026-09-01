@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend inspection API client.
  *
@@ -99,6 +100,7 @@ async function inspectionFetch<T>(path: string, options: RequestInit = {}): Prom
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getCsrfHeaders(options.method),
         ...(options.headers || {}),
       },
     });

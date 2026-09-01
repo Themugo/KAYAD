@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend chat API client, and an honest mapper from the real
  * chat/message shape into this frontend's own UnifiedChatThread/
@@ -80,7 +81,7 @@ async function chatFetch<T>(path: string, options: RequestInit = {}): Promise<T>
   try {
     res = await fetch(`${API_BASE}${path}`, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method) },
       ...options,
     });
   } catch {

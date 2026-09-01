@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend support-ticket API client.
  *
@@ -60,6 +61,7 @@ async function supportFetch<T>(path: string, options: RequestInit = {}): Promise
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getCsrfHeaders(options.method),
         ...(options.headers || {}),
       },
     });

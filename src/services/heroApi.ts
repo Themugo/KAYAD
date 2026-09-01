@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend hero-slide API client - the hero card's text, layered
  * background, and slider content are all real, backend-persisted, and
@@ -66,7 +67,7 @@ async function heroFetch<T>(path: string, options: RequestInit = {}): Promise<T>
   try {
     res = await fetch(`${API_BASE}${path}`, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
       ...options,
     });
   } catch {

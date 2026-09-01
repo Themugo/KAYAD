@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend escrow API client, and an honest mapper from the
  * real escrow shape into this frontend's own EscrowTransaction type.
@@ -79,7 +80,7 @@ async function escrowFetch<T>(path: string, options: RequestInit = {}): Promise<
   try {
     res = await fetch(`${API_BASE}${path}`, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method) },
       ...options,
     });
   } catch {

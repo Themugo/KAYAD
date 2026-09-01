@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend ad-slot API client - a real, backend-persisted
  * advertisement management system, deliberately different from this
@@ -60,7 +61,7 @@ async function adFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   try {
     res = await fetch(`${API_BASE}${path}`, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
       ...options,
     });
   } catch {

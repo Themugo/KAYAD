@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend authentication API client. Built for KAYAD Fusion Phase 3
  * Authentication uses the backend as the single source of truth.
@@ -81,6 +82,7 @@ async function authFetch(path: string, options: RequestInit = {}): Promise<AuthR
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getCsrfHeaders(options.method),
         ...(options.headers || {}),
       },
     });
@@ -175,3 +177,44 @@ export async function logout(): Promise<void> {
   await authFetch('/api/v1/auth/logout', { method: 'POST' });
 }
 
+
+
+/** Generic authenticated auth request for the remaining v1 auth endpoints. */
+async function authMessageRequest(path: string, method: string, body?: Record<string, unknown>) {
+  return authFetch(path, {
+    method,
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+}
+
+export async function changePassword(body: { currentPassword: string; newPassword: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/change-password', 'PUT', body);
+}
+
+export async function forgotPassword(body: { email: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/forgot-password', 'POST', body);
+}
+
+export async function resetPassword(body: { token: string; password: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/reset-password', 'POST', body);
+}
+
+export async function verifyEmail(token: string): Promise<AuthResponse> {
+  return authMessageRequest(`/api/v1/auth/verify-email/${encodeURIComponent(token)}`, 'GET');
+}
+
+export async function resendVerification(body: { email: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/resend-verification', 'POST', body);
+}
+
+export async function sendOTP(): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/send-otp', 'POST');
+}
+
+export async function verifyPhone(otp: string): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/verify-phone', 'POST', { otp });
+}
+
+export async function phoneStatus(): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/phone-status', 'GET');
+}

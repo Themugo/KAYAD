@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend phone-verification client - send a real OTP, verify
  * it, and check real verification status, via the real, now-fixed
@@ -26,7 +27,7 @@ async function phoneFetch<T>(path: string, options: RequestInit = {}): Promise<T
   try {
     res = await fetch(`${API_BASE}${path}`, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
       ...options,
     });
   } catch {

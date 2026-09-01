@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend vehicle/car API client. KAYAD Fusion Phase 4/5.
  *
@@ -136,6 +137,7 @@ async function vehicleFetch<T>(path: string, options: RequestInit = {}): Promise
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getCsrfHeaders(options.method),
         ...(options.headers || {}),
       },
     });

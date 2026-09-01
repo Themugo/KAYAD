@@ -1,3 +1,4 @@
+import { getCsrfHeaders } from '../utils/csrf';
 /**
  * Real backend bid-placement API client. KAYAD Final Integration
  * Phase 3 (real auction & bidding integration) - the last item in the
@@ -70,7 +71,7 @@ export async function placeBid(carId: string, amount: number, phone: string): Pr
     res = await fetch(`${API_BASE}/api/bids/${carId}/bid`, {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders('POST') },
       body: JSON.stringify({ amount, phone }),
     });
   } catch {

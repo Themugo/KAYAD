@@ -1,0 +1,17 @@
+KAYAD PHASE 14 AUDIT MANIFEST
+=============================
+Scope: Authentication transport and CSRF contract hardening
+
+Primary changes:
+- Canonical auth adapter delegates to services/authApi.ts and /api/v1/auth.
+- Added shared CSRF cookie/header helper.
+- Added CSRF propagation to Axios and critical fetch API clients.
+- Pinned Node baseline to 22.22.2 for current frontend dependency compatibility.
+- Added scripts/validate-phase14.mjs.
+
+Validation:
+- Dependency-free Phase 14 contract validator: PASS.
+- TypeScript invocation attempted; repository dependencies are not installed in the build container, so module-resolution errors remain environment-only.
+- Archive integrity: verified with unzip -t.
+
+Archive SHA-256: SEE FINAL DELIVERY CHECKSUM
