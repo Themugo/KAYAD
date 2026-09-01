@@ -12,7 +12,6 @@ import { getIO } from "../utils/io.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { addEmailJob } from "../queues/emailQueue.js";
 import { findAll, findById, create, update } from "../db/index.js";
-import { isSupabaseConnected } from "../utils/supabase.js";
 
 let cronEmailService = {};
 try {
@@ -70,8 +69,8 @@ const runReminders = async () => {
 
     for (const car of endingAuctions) {
       try {
-        const activeBidders = await getSupabase().from("bids").select("user").eq("carId", car.id).in("status", ["active", "paid"]);
-        const bidderIds = [...new Set((activeBidders.data || []).map(b => b.user))];
+        const activeBidders = await findAll("bids", { filters: { carId: car.id, status: { $in: ["active", "paid"] } }, select: "user" });
+        const bidderIds = [...new Set(activeBidders.map(b => b.user).filter(Boolean))];
 
         if (bidderIds.length === 0) continue;
 
@@ -107,7 +106,7 @@ const runReminders = async () => {
           [`reminderSent_${threshold.label}min`]: true,
         });
 
-        logInfo(`Reminder sent (${threshold.minutes}min) for car ${car.id} (${activeBidders.length} bidders)`);
+        logInfo(`Reminder sent (${threshold.minutes}min) for car ${car.id} (${bidderIds.length} bidders)`);
       } catch (err) {
         console.error(`  ❌ Reminder failed for ${car.id}:`, err.message);
       }

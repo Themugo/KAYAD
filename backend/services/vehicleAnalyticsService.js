@@ -1,6 +1,5 @@
 import { logInfo, logError } from "../utils/logger.js";
-import { findAll, update, count, upsert } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
+import { findAll, findOne, create, update, count, upsert } from "../db/index.js";
 
 export const calculateAverageSellingPrice = async (startDate, endDate) => {
   try {
@@ -161,15 +160,10 @@ export const generateMarketAnalytics = async (period, startDate, endDate) => {
 
     const analyticsData = { averageSellingPrice, averageListingPrice, priceRange, averageDaysOnMarket: daysOnMarket.average, medianDaysOnMarket: daysOnMarket.median, fastestSaleDays: daysOnMarket.fastest, totalListings, totalSales, totalAuctions, conversionRate, mostViewed, fastestSelling, topSearches: mostSearched, countyTrends, brandTrends, modelTrends, fuelTypeTrends: specTrends.fuelTypeTrends, transmissionTrends: specTrends.transmissionTrends, bodyTypeTrends: specTrends.bodyTypeTrends };
 
-    const existing = await getSupabase().from("vehicle_market_analytics").select("id").eq("period", period).eq("startDate", startDate).eq("endDate", endDate).single();
-    let analytics;
-    if (existing.data) {
-      const { data } = await getSupabase().from("vehicle_market_analytics").update(analyticsData).eq("id", existing.data.id).select().single();
-      analytics = data;
-    } else {
-      const { data } = await getSupabase().from("vehicle_market_analytics").insert({ period, startDate, endDate, ...analyticsData }).select().single();
-      analytics = data;
-    }
+    const existing = await findOne("vehicle_market_analytics", { period, startDate, endDate });
+    const analytics = existing
+      ? await update("vehicle_market_analytics", existing.id, analyticsData)
+      : await create("vehicle_market_analytics", { period, startDate, endDate, ...analyticsData });
 
     logInfo("Market analytics generated", { period, startDate, endDate, analyticsId: analytics?.id });
     return analytics;

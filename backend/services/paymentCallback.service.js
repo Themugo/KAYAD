@@ -3,6 +3,7 @@ import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { atomicSettleBidPayment, atomicSettlePurchasePayment } from "../utils/atomicTransactions.js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -120,11 +121,13 @@ export const handleMpesaCallback = async (callbackData) => {
       return;
     }
 
-    await update("payments", payment.id, {
-      status: "success",
-      mpesaReceipt: receipt,
-      paidAt: new Date(),
-    });
+    if (!['bid', 'purchase'].includes(payment.type)) {
+      await update("payments", payment.id, {
+        status: "success",
+        mpesaReceipt: receipt,
+        paidAt: new Date(),
+      });
+    }
     let userDoc = null;
     try {
       userDoc = await findById("users", payment.user, "email name phone");
@@ -137,103 +140,20 @@ export const handleMpesaCallback = async (callbackData) => {
     }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
 
     if (payment.type === "bid") {
-      await retry(async () => {
-        let bid = null;
-
-        if (payment.bidId) {
-          bid = await findById("bids", payment.bidId);
-        }
-
-        if (!bid && payment.car) {
-          bid = await findOne("bids", {
-            carId: payment.car,
-            status: "pending",
-            checkoutRequestID: checkoutId,
-          });
-        }
-
-        if (bid && bid.status !== "paid") {
-          await update("bids", bid.id, {
-            status: "paid",
-            mpesaReceipt: receipt,
-            paidAt: new Date(),
-          });
-
-          const car = await findById("cars", bid.carId);
-
-          if (car) {
-            await update("cars", car.id, {
-              currentBid: bid.amount,
-              highestBidder: bid.user,
-            });
-
-            if (getIO()) {
-              getIO().to(`car_${car.id}`).emit("auctionUpdate", {
-                carId: car.id,
-                currentBid: bid.amount,
-              });
-            }
-          }
-
-          const auction = await findOne("auctions", { carId: bid.carId, status: "pending_payment" });
-          if (auction) {
-            await update("auctions", auction.id, { status: "completed", paidAt: new Date() });
-          }
-        }
-      });
+      await retry(() => atomicSettleBidPayment(payment.id, receipt));
     }
 
     if (payment.type === "purchase") {
-      const escrowCar = await findById("cars", payment.car);
-      const sellerId = escrowCar?.dealer || payment.user;
-
-      const dealer = await findOne("dealers", { user: sellerId });
-      if (dealer) {
-        if (dealer.approved !== true) {
-          const verification = await findOne("dealer_verifications", { user: sellerId });
-          if (!verification || verification.verificationStatus !== "approved") {
-            logWarn("Escrow creation blocked: seller not verified", {
-              sellerId,
-              verificationStatus: verification?.verificationStatus || "none",
-              paymentId: payment.id,
-            });
-            await update("payments", payment.id, {
-              status: "failed",
-              resultDesc: "Seller verification required for escrow",
-            });
-            await sendNotification({
-              userId: payment.user,
-              title: "Payment Refunded",
-              message: "Your payment was refunded because the seller is not verified. Please contact support.",
-              type: "payment",
-            });
-            return payment;
-          }
-        }
-      }
-
-      // Payment callbacks may be retried after a downstream timeout. The
-      // payment reference is the idempotency key for escrow creation.
-      const existingEscrow = await findOne("escrows", { payment: payment.id });
-      if (!existingEscrow) {
-        const config = await findOne("platform_config", {});
-        const rate = config?.dealerCommission ? config.dealerCommission / 100 : 0.05;
-        const commission = Math.round(payment.amount * rate);
-        const sellerAmount = payment.amount - commission;
-        await create("escrows", {
-          car: payment.car,
-          buyer: payment.user,
-          seller: sellerId,
-          amount: payment.amount,
-          payment: payment.id,
-          commission,
-          sellerAmount,
-          status: "funded",
-          fundedAt: new Date(),
-          autoReleaseEligibleAt: new Date(Date.now() + 3 * 86400000),
-          timeline: { depositReceived: true, depositReceivedAt: new Date() },
-          history: [{ action: "Escrow created and funded", at: new Date() }],
-        });
+      const settlement = await atomicSettlePurchasePayment(payment.id, receipt);
+      if (settlement?.refund_required) {
+        await sendNotification({
+          userId: payment.user,
+          title: "Payment received — refund required",
+          message: "Your payment was received, but the seller could not be verified. A refund has been queued for processing.",
+          type: "payment",
+        }).catch((e) => logWarn("Refund-required notification failed", { error: e.message }));
+        finalized = true;
+        return payment;
       }
     }
 

@@ -21,6 +21,8 @@ export const snakeToCamel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpper
 // can't fix. Add to this as more mismatches are found in other
 // tables — do not duplicate this map elsewhere.
 export const FIELD_ALIASES = {
+  events: { user: "user_id" },
+  search_analytics: { user: "user_id" },
   // Added (Final Integration Phase 3 - real auction & bidding
   // integration): found while providing the required "real, persisted
   // bid" evidence for this phase. No alias entry existed for this

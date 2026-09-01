@@ -1,5 +1,4 @@
 import { findAll, findById } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
 
 export const getPersonalizedRecommendations = async (userId) => {
   try {
@@ -18,18 +17,18 @@ export const getPersonalizedRecommendations = async (userId) => {
 const getUserActivity = async (userId) => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
   const [viewedData, favData, searchData, offerData, bidData] = await Promise.all([
-    getSupabase().from("events").select("targetId").eq("user", userId).eq("eventType", "car_viewed"),
-    getSupabase().from("events").select("targetId").eq("user", userId).eq("eventType", "car_favorited"),
-    getSupabase().from("events").select("data").eq("user", userId).eq("eventType", "search_performed").gte("createdAt", thirtyDaysAgo).limit(50),
-    getSupabase().from("events").select("targetId").eq("user", userId).eq("eventType", "offer_made"),
-    getSupabase().from("events").select("targetId").eq("user", userId).eq("eventType", "bid_placed"),
+    findAll("events", { filters: { user: userId, eventType: "car_viewed" }, select: "targetId" }),
+    findAll("events", { filters: { user: userId, eventType: "car_favorited" }, select: "targetId" }),
+    findAll("events", { filters: { user: userId, eventType: "search_performed", createdAt: { $gte: thirtyDaysAgo } }, select: "data", orderBy: "createdAt", ascending: false, limit: 50 }),
+    findAll("events", { filters: { user: userId, eventType: "offer_made" }, select: "targetId" }),
+    findAll("events", { filters: { user: userId, eventType: "bid_placed" }, select: "targetId" }),
   ]);
   return {
-    viewedCars: (viewedData.data || []).map(r => r.targetId),
-    favoriteCars: (favData.data || []).map(r => r.targetId),
-    searchHistory: searchData.data || [],
-    offers: (offerData.data || []).map(r => r.targetId),
-    bids: (bidData.data || []).map(r => r.targetId),
+    viewedCars: viewedData.map(r => r.targetId).filter(Boolean),
+    favoriteCars: favData.map(r => r.targetId).filter(Boolean),
+    searchHistory: searchData,
+    offers: offerData.map(r => r.targetId).filter(Boolean),
+    bids: bidData.map(r => r.targetId).filter(Boolean),
   };
 };
 
@@ -59,8 +58,8 @@ const getRecommendedAuctions = async (userId, userActivity) => {
 const getRecommendedDealers = async (userId, userActivity) => {
   try {
     const { viewedCars, favoriteCars } = userActivity;
-    const { data: dealerData } = await getSupabase().from("cars").select("dealer").in("id", [...viewedCars, ...favoriteCars].slice(0, 50));
-    const dealerIds = [...new Set((dealerData || []).map(r => r.dealer).filter(Boolean))];
+    const dealerData = await findAll("cars", { filters: { id: { $in: [...viewedCars, ...favoriteCars].slice(0, 50) } }, select: "id,dealer" });
+    const dealerIds = [...new Set(dealerData.map(r => r.dealer).filter(Boolean))];
     if (dealerIds.length === 0) return [];
     const trustScores = await findAll("dealer_trust_scores", { filters: { dealer: { $in: dealerIds } } });
     trustScores.sort((a, b) => (b.overallScore || 0) - (a.overallScore || 0));

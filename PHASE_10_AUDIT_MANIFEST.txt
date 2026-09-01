@@ -1,0 +1,23 @@
+KAYAD PHASE 10 AUDIT MANIFEST
+============================
+
+Base commit: 875e1599
+Scope: Operational data-contract and financial-ledger hardening
+
+Key files:
+supabase/migrations/20260902090000_phase10_operational_data_contract.sql
+backend/utils/atomicTransactions.js
+backend/services/paymentCallback.service.js
+backend/services/ledgerService.js
+backend/services/recommendationService.js
+backend/services/searchInsightsService.js
+backend/services/vehicleAnalyticsService.js
+backend/services/auctionReminderCron.js
+backend/utils/fieldMap.js
+backend/tests/phase10/operationalDataContract.test.js
+
+Validation:
+- JavaScript syntax: PASS
+- Phase 10 SQL symbol scan: PASS
+- Targeted direct Supabase query scan: PASS
+- Full npm/Vitest: WINDOWS GATE REQUIRED

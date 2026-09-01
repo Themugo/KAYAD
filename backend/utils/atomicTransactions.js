@@ -38,6 +38,24 @@ export async function atomicConfirmBidPayment(checkoutRequestId, receipt = null)
   return data;
 }
 
+export async function atomicSettleBidPayment(paymentId, receipt = null) {
+  const { data, error } = await getSupabase().rpc("kayad_settle_bid_payment_atomic", {
+    p_payment_id: paymentId,
+    p_receipt: receipt,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function atomicSettlePurchasePayment(paymentId, receipt = null) {
+  const { data, error } = await getSupabase().rpc("kayad_settle_purchase_payment_atomic", {
+    p_payment_id: paymentId,
+    p_receipt: receipt,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function atomicTransitionEscrow({
   escrowId,
   nextStatus,

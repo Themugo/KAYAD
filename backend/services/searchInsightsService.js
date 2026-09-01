@@ -1,20 +1,20 @@
 import { logInfo, logError } from "../utils/logger.js";
-import { findAll, count } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
+import { findAll, create, count } from "../db/index.js";
 
 export const trackSearch = async (searchData) => {
   try {
-    const search = await getSupabase().from("search_analytics").insert({
+    const search = await create("search_analytics", {
       searchTerm: searchData.searchTerm,
       normalizedTerm: (searchData.searchTerm || "").toLowerCase().trim(),
       filters: searchData.filters || {},
       resultCount: searchData.resultCount || 0,
       hasResults: (searchData.resultCount || 0) > 0,
-      userId: searchData.userId,
+      user: searchData.userId || null,
+      searchCount: 1,
       lastSearchedAt: new Date().toISOString(),
-    }).select().single();
+    });
     logInfo("Search tracked", { searchTerm: searchData.searchTerm, resultCount: searchData.resultCount });
-    return search.data;
+    return search;
   } catch (err) {
     logError("Failed to track search", err);
     return null;
@@ -24,12 +24,13 @@ export const trackSearch = async (searchData) => {
 export const getTrendingSearches = async (limit = 10, period = 7) => {
   try {
     const since = new Date(Date.now() - period * 86400000).toISOString();
-    const { data } = await getSupabase().from("search_analytics")
-      .select("normalizedTerm, searchCount:count")
-      .gte("lastSearchedAt", since)
-      .order("searchCount", { ascending: false })
-      .limit(limit);
-    return data || [];
+    const rows = await findAll("search_analytics", { filters: { lastSearchedAt: { $gte: since } }, orderBy: "searchCount", ascending: false, limit: Math.max(limit * 5, 50) });
+    const grouped = new Map();
+    for (const row of rows) {
+      const key = row.normalizedTerm;
+      grouped.set(key, (grouped.get(key) || 0) + (row.searchCount || 1));
+    }
+    return [...grouped.entries()].sort((a,b) => b[1]-a[1]).slice(0, limit).map(([normalizedTerm, searchCount]) => ({ normalizedTerm, searchCount }));
   } catch (err) {
     logError("Failed to get trending searches", err);
     throw err;
@@ -39,13 +40,7 @@ export const getTrendingSearches = async (limit = 10, period = 7) => {
 export const getNoResultSearches = async (limit = 10, period = 7) => {
   try {
     const since = new Date(Date.now() - period * 86400000).toISOString();
-    const { data } = await getSupabase().from("search_analytics")
-      .select("*")
-      .eq("hasResults", false)
-      .gte("lastSearchedAt", since)
-      .order("searchCount", { ascending: false })
-      .limit(limit);
-    return data || [];
+    return findAll("search_analytics", { filters: { hasResults: false, lastSearchedAt: { $gte: since } }, orderBy: "searchCount", ascending: false, limit });
   } catch (err) {
     logError("Failed to get no-result searches", err);
     throw err;
@@ -55,9 +50,7 @@ export const getNoResultSearches = async (limit = 10, period = 7) => {
 export const getPopularFilters = async (period = 7) => {
   try {
     const since = new Date(Date.now() - period * 86400000).toISOString();
-    const { data } = await getSupabase().from("search_analytics")
-      .select("filters")
-      .gte("lastSearchedAt", since);
+    const data = await findAll("search_analytics", { filters: { lastSearchedAt: { $gte: since } }, select: "filters" });
     const filterCounts = {};
     for (const row of (data || [])) {
       const key = JSON.stringify(row.filters || {});
@@ -75,9 +68,7 @@ export const getPopularFilters = async (period = 7) => {
 export const getCountySearchStats = async (period = 7) => {
   try {
     const since = new Date(Date.now() - period * 86400000).toISOString();
-    const { data } = await getSupabase().from("search_analytics")
-      .select("filters")
-      .gte("lastSearchedAt", since);
+    const data = await findAll("search_analytics", { filters: { lastSearchedAt: { $gte: since } }, select: "filters" });
     const countyCounts = {};
     for (const row of (data || [])) {
       const county = row.filters?.county || row.filters?.location;
@@ -93,9 +84,7 @@ export const getCountySearchStats = async (period = 7) => {
 export const getPriceRangeSearchStats = async (period = 7) => {
   try {
     const since = new Date(Date.now() - period * 86400000).toISOString();
-    const { data } = await getSupabase().from("search_analytics")
-      .select("filters")
-      .gte("lastSearchedAt", since);
+    const data = await findAll("search_analytics", { filters: { lastSearchedAt: { $gte: since } }, select: "filters" });
     const ranges = {};
     for (const row of (data || [])) {
       const pMin = row.filters?.priceMin || row.filters?.price?.min;
@@ -113,9 +102,7 @@ export const getPriceRangeSearchStats = async (period = 7) => {
 export const getBrandModelSearchStats = async (period = 7) => {
   try {
     const since = new Date(Date.now() - period * 86400000).toISOString();
-    const { data } = await getSupabase().from("search_analytics")
-      .select("filters, searchCount")
-      .gte("lastSearchedAt", since);
+    const data = await findAll("search_analytics", { filters: { lastSearchedAt: { $gte: since } }, select: "filters,searchCount" });
     const stats = {};
     for (const row of (data || [])) {
       const brand = row.filters?.brand;
@@ -198,11 +185,11 @@ export const getSearchSummary = async (period = 7) => {
   try {
     const startDate = new Date(Date.now() - period * 86400000).toISOString();
     const totalSearches = await count("search_analytics", { lastSearchedAt: { $gte: startDate } });
-    const { data: uniqueData } = await getSupabase().from("search_analytics").select("normalizedTerm");
-    const uniqueSearches = new Set((uniqueData || []).map(r => r.normalizedTerm)).size;
+    const uniqueData = await findAll("search_analytics", { select: "normalizedTerm" });
+    const uniqueSearches = new Set(uniqueData.map(r => r.normalizedTerm)).size;
     const noResultCount = await count("search_analytics", { lastSearchedAt: { $gte: startDate }, hasResults: false });
-    const { data: resultData } = await getSupabase().from("search_analytics").select("resultCount").gte("lastSearchedAt", startDate);
-    const avgResultCount = (resultData || []).length > 0 ? (resultData.reduce((s, r) => s + (r.resultCount || 0), 0) / resultData.length) : 0;
+    const resultData = await findAll("search_analytics", { filters: { lastSearchedAt: { $gte: startDate } }, select: "resultCount" });
+    const avgResultCount = resultData.length > 0 ? (resultData.reduce((s, r) => s + (r.resultCount || 0), 0) / resultData.length) : 0;
 
     return { totalSearches, uniqueSearches, noResultCount, noResultRate: totalSearches > 0 ? (noResultCount / totalSearches) * 100 : 0, avgResultCount, period, generatedAt: new Date() };
   } catch (err) {
