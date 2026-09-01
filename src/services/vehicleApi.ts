@@ -367,6 +367,82 @@ export interface CreateCarPayload {
   images?: File[];
 }
 
+export interface UpdateCarPayload {
+  title?: string;
+  brand?: string;
+  model?: string;
+  year?: number;
+  price?: number;
+  mileage?: number;
+  fuel?: string;
+  transmission?: string;
+  color?: string;
+  condition?: string;
+  vin?: string;
+  registrationNumber?: string;
+  description?: string;
+  city?: string;
+  status?: string;
+}
+
+export async function updateCar(id: string, payload: UpdateCarPayload): Promise<CreateCarResponse> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/cars/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    throw new VehicleApiError(
+      'Unable to reach KAYAD servers. Please check your connection and try again.',
+      'network'
+    );
+  }
+
+  let body: CreateCarResponse & { message?: string };
+  try {
+    body = await res.json();
+  } catch {
+    throw new VehicleApiError('Unexpected response from server.', 'server', res.status);
+  }
+
+  if (!res.ok) {
+    throw new VehicleApiError(body.message || 'Failed to update listing.', 'server', res.status);
+  }
+
+  return body;
+}
+
+export async function deleteCar(id: string): Promise<{ success: boolean; message?: string }> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/cars/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+  } catch {
+    throw new VehicleApiError(
+      'Unable to reach KAYAD servers. Please check your connection and try again.',
+      'network'
+    );
+  }
+
+  let body: { success: boolean; message?: string };
+  try {
+    body = await res.json();
+  } catch {
+    throw new VehicleApiError('Unexpected response from server.', 'server', res.status);
+  }
+
+  if (!res.ok) {
+    throw new VehicleApiError(body.message || 'Failed to remove listing.', 'server', res.status);
+  }
+
+  return body;
+}
+
 export interface CreateCarResponse {
   success: boolean;
   message?: string;

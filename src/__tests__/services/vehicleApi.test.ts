@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
+import { getCars, getCarById, getMyListings, updateCar, deleteCar, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
 
 /**
  * KAYAD Fusion Phase 4/5 tests. Updated in Phase 5 to match the
@@ -87,6 +87,48 @@ describe('vehicleApi.getCarById', () => {
     global.fetch = mockFetchOnce({ success: false, message: 'Car not found' }, false, 404);
     const result = await getCarById('nonexistent');
     expect(result).toBeNull();
+  });
+});
+
+describe('vehicleApi seller mutations - real backend contract', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('loads only the signed-in seller listings from /api/cars/my-listings', async () => {
+    const fetchMock = mockFetchOnce({ success: true, data: [] });
+    global.fetch = fetchMock;
+
+    await getMyListings();
+
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).toContain('/api/cars/my-listings');
+    expect(options.method).toBe('GET');
+    expect(options.credentials).toBe('include');
+  });
+
+  it('updates a listing through the authenticated PUT endpoint', async () => {
+    const fetchMock = mockFetchOnce({ success: true, data: { id: 'car-1' } });
+    global.fetch = fetchMock;
+
+    await updateCar('car-1', { price: 7200000, status: 'hidden' });
+
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).toContain('/api/cars/car-1');
+    expect(options.method).toBe('PUT');
+    expect(options.credentials).toBe('include');
+    expect(options.headers['Content-Type']).toBe('application/json');
+    expect(JSON.parse(options.body)).toEqual({ price: 7200000, status: 'hidden' });
+  });
+
+  it('deletes a listing through the authenticated DELETE endpoint', async () => {
+    const fetchMock = mockFetchOnce({ success: true });
+    global.fetch = fetchMock;
+
+    await deleteCar('car-1');
+
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).toContain('/api/cars/car-1');
+    expect(options.method).toBe('DELETE');
+    expect(options.credentials).toBe('include');
   });
 });
 

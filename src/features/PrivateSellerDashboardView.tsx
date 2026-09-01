@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile } from '../types';
-import { createCar, VehicleApiError } from '../services/vehicleApi';
+import { createCar, deleteCar, getCarById, getMyListings, mapBackendCarToVehicle, updateCar, VehicleApiError, BackendCar } from '../services/vehicleApi';
 import PhoneVerification from '../components/PhoneVerification';
 import { 
   Car, 
@@ -114,23 +114,23 @@ export interface CompletedSale {
 }
 
 interface PrivateSellerDashboardViewProps {
-  vehicles?: Vehicle[];
   user?: UserProfile | null;
   deals?: EscrowTransaction[];
   messages?: ChatMessage[];
   onNavigate: (nav: string) => void;
   onQuickViewVehicle?: (vehicle: Vehicle) => void;
   onOpenAuthModal?: () => void;
+  onRefreshVehicles?: () => Promise<void> | void;
 }
 
 export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProps> = ({
-  vehicles = [],
   user,
   deals = [],
   messages = [],
   onNavigate,
   onQuickViewVehicle,
-  onOpenAuthModal
+  onOpenAuthModal,
+  onRefreshVehicles,
 }) => {
   // Toast Alert State
   const [toast, setToast] = useState<string | null>(null);
@@ -166,36 +166,47 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
   const [newListingError, setNewListingError] = useState<string | null>(null);
   const [selectedTaskModal, setSelectedTaskModal] = useState<string | null>(null);
 
-  // Production listings are derived from the real vehicle collection passed by App.
-  // Only vehicles owned by the signed-in seller are shown here.
-  const toSellerListing = (vehicle: Vehicle): PrivateSellerListing => ({
-    id: vehicle.id,
-    title: vehicle.title,
-    make: vehicle.make,
-    model: vehicle.model,
-    year: vehicle.year,
-    price: vehicle.price,
-    mileage: vehicle.mileage,
-    status: vehicle.status === 'sold' ? 'Sold' : vehicle.status === 'draft' ? 'Draft' : vehicle.status === 'pending' ? 'Paused' : 'Active',
-    viewsCount: vehicle.viewsCount || 0,
-    savesCount: vehicle.savedCount || 0,
-    inquiriesCount: 0,
-    image: vehicle.image || vehicle.images?.[0] || '',
-    location: vehicle.location || '',
-    county: vehicle.county || '',
-    ntsaTimsVerified: Boolean(vehicle.verified),
-    createdAt: vehicle.createdAt || '',
-  });
-
-  const sellerVehicles = useMemo(() => {
-    if (!user?.id) return [];
-    return vehicles.filter((vehicle) => vehicle.sellerId === user.id);
-  }, [vehicles, user?.id]);
-
   const [listings, setListings] = useState<PrivateSellerListing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+
+  const refreshSellerListings = async () => {
+    if (!user?.id) {
+      setListings([]);
+      setListingsLoading(false);
+      return;
+    }
+    setListingsLoading(true);
+    try {
+      const backendListings = await getMyListings();
+      setListings(backendListings.map((car: BackendCar) => ({
+        id: car.id,
+        title: car.title,
+        make: car.brand,
+        model: car.model,
+        year: car.year,
+        price: car.price,
+        mileage: car.mileage || 0,
+        status: car.status === 'sold' ? 'Sold' : car.status === 'draft' ? 'Draft' : car.status === 'pending' ? 'Paused' : car.status === 'hidden' ? 'Paused' : 'Active',
+        viewsCount: car.views || 0,
+        savesCount: 0,
+        inquiriesCount: 0,
+        image: car.images?.[0]?.thumb || car.images?.[0]?.url || '',
+        location: car.location_city || '',
+        county: '',
+        ntsaTimsVerified: Boolean(car.approved),
+        createdAt: car.created_at || '',
+      })));
+    } catch (err) {
+      setListings([]);
+      showToast(err instanceof VehicleApiError ? err.message : 'Could not load your listings.');
+    } finally {
+      setListingsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setListings(sellerVehicles.map(toSellerListing));
-  }, [sellerVehicles]);
+    void refreshSellerListings();
+  }, [user?.id]);
 
   // Offers, inspection requests, and completed-sale history require their
   // own backend endpoints. Until those integrations return records, render
@@ -237,23 +248,29 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
     showToast(`Counter offer of Ksh ${price.toLocaleString()} sent to buyer!`);
   };
 
-  // Handle Listing Toggle Status (Pause / Resume)
-  const handleToggleListingStatus = (id: string) => {
-    setListings((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const nextStatus = item.status === 'Active' ? 'Paused' : 'Active';
-          return { ...item, status: nextStatus };
-        }
-        return item;
-      })
-    );
-    showToast('Listing status updated successfully.');
+  // Listing state changes are real backend mutations. The UI is only updated
+  // after the server confirms the operation; no optimistic fake success state.
+  const handleToggleListingStatus = async (id: string, currentStatus: PrivateSellerListing['status']) => {
+    try {
+      const nextStatus = currentStatus === 'Active' ? 'hidden' : 'available';
+      await updateCar(id, { status: nextStatus });
+      await refreshSellerListings();
+      await onRefreshVehicles?.();
+      showToast(currentStatus === 'Active' ? 'Listing paused.' : 'Listing activated.');
+    } catch (err) {
+      showToast(err instanceof VehicleApiError ? err.message : 'Could not update listing.');
+    }
   };
 
-  const handleDeleteListing = (id: string) => {
-    setListings((prev) => prev.filter((item) => item.id !== id));
-    showToast('Listing removed.');
+  const handleDeleteListing = async (id: string) => {
+    try {
+      await deleteCar(id);
+      await refreshSellerListings();
+      await onRefreshVehicles?.();
+      showToast('Listing removed.');
+    } catch (err) {
+      showToast(err instanceof VehicleApiError ? err.message : 'Could not remove listing.');
+    }
   };
 
   // Filtered Listings
@@ -502,7 +519,9 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
         </div>
 
         {/* Listings Display Grid */}
-        {filteredListings.length === 0 ? (
+        {listingsLoading ? (
+              <div className="py-10 text-center text-sm text-slate-400">Loading your listings…</div>
+            ) : filteredListings.length === 0 ? (
           <Card className="p-8 text-center space-y-3 bg-white">
             <Car className="w-10 h-10 text-slate-300 mx-auto" />
             <p className="font-bold text-slate-700 text-sm">No vehicles in "{listingStatusFilter}" state</p>
@@ -581,7 +600,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => handleToggleListingStatus(vehicle.id)}
+                      onClick={() => void handleToggleListingStatus(vehicle.id, vehicle.status)}
                     >
                       {vehicle.status === 'Active' ? <PauseCircle className="w-3.5 h-3.5 text-amber-600" /> : <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />}
                       <span>{vehicle.status === 'Active' ? 'Pause Listing' : 'Activate Listing'}</span>
@@ -599,9 +618,14 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      const match = vehicles.find((v) => v.id === vehicle.id) || vehicles[0];
-                      if (match && onQuickViewVehicle) onQuickViewVehicle(match);
+                    onClick={async () => {
+                      if (!onQuickViewVehicle) return;
+                      try {
+                        const car = await getCarById(vehicle.id);
+                        if (car) onQuickViewVehicle(mapBackendCarToVehicle(car));
+                      } catch (err) {
+                        showToast(err instanceof VehicleApiError ? err.message : 'Could not load the public listing.');
+                      }
                     }}
                   >
                     <Eye className="w-3.5 h-3.5 text-[#1E3063]" />
@@ -1161,6 +1185,8 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
                     setShowNewListingModal(false);
                     setNewListingForm({ make: '', model: '', year: '', price: '', mileage: '', registrationNumber: '' });
                     setNewListingImages([]);
+                    await refreshSellerListings();
+                    await onRefreshVehicles?.();
                     showToast('Your vehicle has been listed.');
                   } catch (err) {
                     setNewListingError(err instanceof VehicleApiError ? err.message : 'Could not publish your listing. Please try again.');

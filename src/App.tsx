@@ -449,7 +449,6 @@ function AppInner() {
 
           {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard') && (
             <PrivateSellerDashboardView
-              vehicles={vehicles}
               user={user}
               // Fixed: same as DashboardView above - a separate
               // integration, out of today's explicit scope. Honest
@@ -459,6 +458,7 @@ function AppInner() {
               onNavigate={(nav) => setActiveNav(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onOpenAuthModal={() => setShowAuthModal(true)}
+              onRefreshVehicles={fetchVehicles}
             />
           )}
         </main>
