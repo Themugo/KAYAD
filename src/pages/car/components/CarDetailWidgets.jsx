@@ -88,18 +88,6 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onExpand }) {
           <span>FEATURED</span>
         </div>
       )}
-
-      {car?.isDemo && (
-        <div style={{
-          position: 'absolute', top: 12, right: 12, zIndex: 5,
-          background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
-          borderRadius: 8, padding: '4px 10px',
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-        }}>
-          <Star size={10} style={{ color: '#000' }} />
-          <span style={{ fontSize: 9, color: '#000', fontWeight: 800, letterSpacing: '0.08em' }}>DEMO</span>
-        </div>
-      )}
     </div>
   );
 }

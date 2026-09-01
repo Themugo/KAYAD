@@ -888,27 +888,6 @@ const bootstrap = async () => {
           await triggerAlert("Server Started", `KAYAD backend server started successfully on port ${PORT}`, ALERT_LEVELS.LOW, { port: PORT, host: "localhost", environment: NODE_ENV });
         }
 
-        // Auto-seed (non-blocking — port already open)
-        try {
-          console.log("🌱 Checking if auto-seed is needed...");
-          const { getSupabase } = await import("./utils/supabase.js");
-          const sb = getSupabase();
-          const { count: carCount } = await sb.from("cars").select("*", { count: "exact", head: true });
-          const { count: adminCount } = await sb.from("users").select("*", { count: "exact", head: true }).eq("role", "superadmin");
-          if (!carCount || carCount === 0 || !adminCount || adminCount === 0) {
-            console.log("🌱 Auto-seeding database...");
-            const { reseed } = await import("./seed.js");
-            const result = await reseed();
-            logInfo("Auto-seeded database", result);
-            console.log("✅ Auto-seed completed");
-          } else {
-            console.log("✅ Auto-seed not needed (cars and superadmin exist)");
-          }
-        } catch (seedErr) {
-          logWarn("Auto-seed skipped", { error: seedErr.message });
-          console.log("⚠️ Auto-seed skipped:", seedErr.message);
-        }
-
         await startBackgroundServices(io);
       });
     } catch (listenErr) {

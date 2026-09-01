@@ -1,6 +1,6 @@
 /**
  * Real backend authentication API client. Built for KAYAD Fusion Phase 3
- * ("Replace all demo/local frontend authentication with ONE real
+ * Authentication uses the backend as the single source of truth.
  * authentication system backed by the existing backend").
  *
  * Every function here calls the actual, already-built backend endpoints
@@ -43,7 +43,6 @@ export interface BackendUser {
   bio?: string;
   businessName?: string;
   businessType?: string;
-  isDemo?: boolean;
   createdAt?: string;
   updatedAt?: string;
   emailVerified?: boolean;
@@ -138,32 +137,6 @@ export async function login(email: string, password: string): Promise<BackendUse
   return res.user;
 }
 
-/** Calls the backend's own real demo-login endpoint (confirmed to exist
- * in backend/controllers/authController.js's DEMO_ACCOUNTS/demoLogin -
- * this is not a new mechanism invented here). Per this phase's explicit
- * instruction, demo accounts must be backend-seed-configured, not a
- * frontend-local list - this function's entire job is to defer that
- * decision to the backend rather than deciding it here. If the backend
- * hasn't been seeded (backend/seed.js never run against a real
- * database), this will fail with the backend's own real "Demo account
- * not found. Run seed first." message - surfaced to the caller
- * unmodified, not papered over.
- *
- * IMPORTANT MISMATCH, DOCUMENTED RATHER THAN SILENTLY RESOLVED: the
- * backend's DEMO_ACCOUNTS only defines 3 roles (dealer, seller/
- * individual_seller, buyer) - not the 4 the frontend's old demo modal
- * offered (buyer, dealer, mechanic, admin). See phase-03-auth.md for
- * how this is handled in the UI - not fixed by inventing a 4th backend
- * demo account unilaterally in this pass. */
-export async function demoLogin(role: string): Promise<BackendUser> {
-  const res = await authFetch('/api/v1/auth/demo-login', {
-    method: 'POST',
-    body: JSON.stringify({ role }),
-  });
-  if (!res.user) throw new AuthApiError('Demo login succeeded but no user was returned.', 'unknown');
-  return res.user;
-}
-
 // Added while rewiring AuthContext.tsx off the old, incompatible
 // src/api/api.exports.ts authAPI (Bearer-token auth, no /v1 path
 // segment - both wrong for the real backend, confirmed directly) onto
@@ -202,13 +175,3 @@ export async function logout(): Promise<void> {
   await authFetch('/api/v1/auth/logout', { method: 'POST' });
 }
 
-/** True only when the app is explicitly configured to allow demo
- * access, per this phase's own requirement to preserve demo accounts
- * "only if explicitly moved into development/test seed configuration" -
- * gated on a real, previously-declared-but-unused env var
- * (VITE_ENABLE_DEMO, already present in vite-env.d.ts before this
- * phase) rather than always-on, so a production deployment can turn
- * this off entirely without a code change. */
-export function isDemoModeEnabled(): boolean {
-  return import.meta.env.VITE_ENABLE_DEMO === 'true';
-}

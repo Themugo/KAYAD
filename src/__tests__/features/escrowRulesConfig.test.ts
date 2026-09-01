@@ -7,7 +7,7 @@ import {
 } from '../../features/Admin/hooks/escrowRulesConfig';
 import { readLogEntries } from '../../features/Admin/hooks/adminAuditLog';
 import { Vehicle } from '../../types';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
 
 describe('Escrow rules config actually drives real business logic (not decorative admin UI)', () => {
   beforeEach(() => {

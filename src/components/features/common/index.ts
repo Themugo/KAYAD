@@ -5,7 +5,6 @@ export { default as AppealPanel } from './AppealPanel';
 export { default as BackButton } from './BackButton';
 export { default as CompareDrawer } from './CompareDrawer';
 export { default as DarkModeToggle } from './DarkModeToggle';
-export { default as DemoModeBanner } from './DemoModeBanner';
 export { default as EscrowTimeline } from '../escrow/EscrowTimeline';
 export { default as EvidenceTimeline } from './EvidenceTimeline';
 export { default as EvidenceUpload } from './EvidenceUpload';

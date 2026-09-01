@@ -47,14 +47,11 @@ describe('api client resilience', () => {
   });
 
   it('401 on a data endpoint clears the token and dispatches kayad:auth-expired', async () => {
-    localStorage.setItem('kayad_token', 'stale-token');
     const listener = vi.fn();
     window.addEventListener('kayad:auth-expired', listener);
 
     const error = { response: { status: 401 }, config: { url: '/cars' } };
     await expect(handlers.responseErr(error)).rejects.toBe(error);
-
-    expect(localStorage.getItem('kayad_token')).toBeNull();
     expect(listener).toHaveBeenCalledTimes(1);
     window.removeEventListener('kayad:auth-expired', listener);
   });
@@ -62,21 +59,18 @@ describe('api client resilience', () => {
   it('401 on auth endpoints does NOT dispatch the expiry event (normal login failure)', async () => {
     const listener = vi.fn();
     window.addEventListener('kayad:auth-expired', listener);
-    localStorage.setItem('kayad_token', 'keep-me');
 
     for (const url of ['/auth/login', '/auth/me', '/auth/refresh']) {
       await expect(handlers.responseErr({ response: { status: 401 }, config: { url } })).rejects.toBeTruthy();
     }
 
     expect(listener).not.toHaveBeenCalled();
-    expect(localStorage.getItem('kayad_token')).toBe('keep-me');
     window.removeEventListener('kayad:auth-expired', listener);
   });
 
   it('500 / network errors pass through without touching session state', async () => {
     const listener = vi.fn();
     window.addEventListener('kayad:auth-expired', listener);
-    localStorage.setItem('kayad_token', 'keep-me');
 
     const err500 = { response: { status: 500 }, config: { url: '/cars' } };
     await expect(handlers.responseErr(err500)).rejects.toBe(err500);
@@ -85,7 +79,6 @@ describe('api client resilience', () => {
     await expect(handlers.responseErr(networkErr)).rejects.toBe(networkErr);
 
     expect(listener).not.toHaveBeenCalled();
-    expect(localStorage.getItem('kayad_token')).toBe('keep-me');
     window.removeEventListener('kayad:auth-expired', listener);
   });
 

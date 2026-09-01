@@ -7,15 +7,9 @@ const governanceApi = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-governanceApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 // Dashboard
 export const getGovernanceDashboard = () => governanceApi.get('/dashboard');

@@ -2,28 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, X, Eye } from 'lucide-react';
 import { useCompare } from '../context/CompareContext';
-import { CARS } from '../data/cars';
+import { carsAPI } from '../api/api';
 
-function getImageSrc(img: any): string {
-  if (!img) return '';
-  return typeof img === 'string' ? img : img?.url || '';
-}
 
 export default function CompareDrawer() {
   const { compareIds, compareCount, maxCompare, removeCar, clearAll } = useCompare();
   const [cars, setCars] = useState<any[]>([]);
 
-  // Get car data from CARS array
   useEffect(() => {
-    if (compareIds.length === 0) {
-      setCars([]);
-      return;
-    }
-    
-    const carData = compareIds
-      .map(id => CARS.find(c => String(c.id) === id))
-      .filter(Boolean);
-    setCars(carData);
+    let cancelled = false;
+    Promise.all(compareIds.map(id => carsAPI.get(id).catch(() => null)))
+      .then(results => { if (!cancelled) setCars(results.map((r: any) => r?.car || r?.data || r).filter(Boolean)); });
+    return () => { cancelled = true; };
   }, [compareIds]);
 
   if (compareIds.length === 0) return null;

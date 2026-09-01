@@ -3,7 +3,6 @@ import { adminAPI } from '../api/api';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CompareDrawer from './CompareDrawer';
-import DemoModeBanner from './DemoModeBanner';
 import MobileBottomNav from './MobileBottomNav';
 
 interface SiteConfig {
@@ -50,7 +49,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <a href="#app-main-content" className="skip-link">
         Skip to main content
       </a>
-      <DemoModeBanner />
       <Navbar
         user={null}
         activeNav=""

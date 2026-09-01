@@ -93,13 +93,6 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onOpenGallery }:
         </div>
       )}
 
-      {/* Demo badge */}
-      {car?.isDemo && (
-        <div className="absolute top-4 right-4 px-3 py-1.5 bg-orange-500/90 text-white text-xs font-bold rounded-full z-10">
-          🧪 DEMO
-        </div>
-      )}
-
       {/* Live auction badge */}
       {car?.auctionStatus === 'live' && (
         <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-red-500/90 text-white text-xs font-bold rounded-full z-10">

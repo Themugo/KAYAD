@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PreAuctionInspectionModal } from '../../features/AuctionsView/components/PreAuctionInspectionModal';
-import { INITIAL_AUCTION_SESSIONS } from '../../data/mockAuctions';
+import { INITIAL_AUCTION_SESSIONS } from '../fixtures/mockAuctions';
 
 describe('PreAuctionInspectionModal - booking date defaults to the future', () => {
   // Found while continuing the auction ecosystem review: bookingDate

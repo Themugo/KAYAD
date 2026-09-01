@@ -20,7 +20,6 @@ export interface Car {
   dealerName?: string;
   isVerified?: boolean;
   isBankOwned?: boolean;
-  isDemo?: boolean;
   isNegotiable?: boolean;
   hasFinancing?: boolean;
   views?: number;
@@ -409,11 +408,6 @@ function CarCardComponent({
           {car.isVerified && (
             <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(16,185,129,0.92)', color: '#fff' }}>
               ✓
-            </span>
-          )}
-          {car.isDemo && (
-            <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(245,158,11,0.92)', color: '#1a1200' }}>
-              DEMO
             </span>
           )}
           {car.isBankOwned && (

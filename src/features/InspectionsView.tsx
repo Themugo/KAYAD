@@ -3,11 +3,6 @@ import { Vehicle, Mechanic, InspectionBooking, InspectionReport, InspectionPayme
 import { createInspectionOrder, getMyInspections, InspectionApiError, BackendInspectionOrder } from '../services/inspectionApi';
 import PrePurchaseInspectionPortal from './PrePurchaseInspectionPortal';
 import { 
-  INITIAL_MECHANICS, 
-  INITIAL_INSPECTION_PAYMENTS, 
-  INITIAL_INSPECTION_RATINGS 
-} from '../data/mockInspections';
-import { 
   ShieldCheck, 
   Search, 
   MapPin, 
@@ -127,7 +122,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   onViewVehicleDetails 
 }) => {
   // State
-  const [mechanics] = useState<Mechanic[]>(INITIAL_MECHANICS);
+  const [mechanics] = useState<Mechanic[]>([]);
   // Fixed: reports/bookings previously started from, and only ever
   // showed, entirely fake mock data (specific fake mechanic names,
   // ratings, business names, platform-wide fake "recently completed"
@@ -141,8 +136,8 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   const [bookings, setBookings] = useState<InspectionBooking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState<boolean>(true);
   const [bookingsError, setBookingsError] = useState<string | null>(null);
-  const [payments] = useState<InspectionPayment[]>(INITIAL_INSPECTION_PAYMENTS);
-  const [ratings, setRatings] = useState<InspectionRating[]>(INITIAL_INSPECTION_RATINGS);
+  const [payments] = useState<InspectionPayment[]>([]);
+  const [ratings, setRatings] = useState<InspectionRating[]>([]);
 
   useEffect(() => {
     if (!user) {

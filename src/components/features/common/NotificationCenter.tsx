@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { useNotifications } from '../../../context/NotificationContext';
 import { Link } from 'react-router-dom';
 import { Bell, Check, X, Clock, MessageCircle, Shield, DollarSign, Gavel } from 'lucide-react';
 import { timeAgo } from '../../../utils/helpers';
@@ -28,64 +29,9 @@ const TYPE_CONFIG = {
   referral: { icon: Bell, color: 'text-gold-400', bg: 'bg-gold-500/10' },
 };
 
-// Demo notifications
-const DEMO_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'auction',
-    title: 'New bid on Toyota Land Cruiser',
-    message: 'Someone placed a bid of KES 15,500,000',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    link: '/auction/1',
-  },
-  {
-    id: '2',
-    type: 'escrow',
-    title: 'Payment received',
-    message: 'Your escrow payment has been confirmed',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    link: '/escrow/1',
-  },
-  {
-    id: '3',
-    type: 'chat',
-    title: 'New message from Premium Motors',
-    message: 'Is this vehicle still available?',
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    link: '/chat/1',
-  },
-  {
-    id: '4',
-    type: 'bid',
-    title: 'You were outbid',
-    message: 'Someone placed a higher bid on Range Rover Sport',
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    link: '/auction/2',
-  },
-];
-
 export default function NotificationCenter({ onClose }: NotificationCenterProps) {
-  const [notifications, setNotifications] = useState<Notification[]>(DEMO_NOTIFICATIONS);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
-  };
-
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
-
-  const deleteNotif = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+  const { notifications, unreadCount, markAsRead, markAllRead, deleteNotif } = useNotifications();
+  const visibleNotifications = useMemo(() => notifications.slice(0, 20), [notifications]);
 
   const getNotifIcon = (type: Notification['type']) => {
     const config = TYPE_CONFIG[type] || TYPE_CONFIG.info;
@@ -115,7 +61,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
       </div>
 
       {/* Empty state */}
-      {notifications.length === 0 && (
+      {visibleNotifications.length === 0 && (
         <div className="px-5 py-12 text-center text-white/30 font-sans text-sm">
           No notifications yet
         </div>
@@ -132,7 +78,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
                 className={`px-5 py-3 border-b border-white/3 flex gap-3 items-start cursor-pointer transition-colors ${
                   n.read ? 'hover:bg-white/2' : 'bg-gold-500/3 hover:bg-gold-500/5'
                 }`}
-                onClick={() => markAsRead(n.id)}
+                onClick={() => void markAsRead(n._id)}
               >
                 {/* Icon */}
                 <div className={`w-8 h-8 rounded-lg ${config.bg} flex items-center justify-center flex-shrink-0`}>
@@ -147,7 +93,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
                     </span>
                     {!n.read && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
+                        onClick={(e) => { e.stopPropagation(); markAsRead(n._id); }}
                         className="bg-transparent border-none text-gold-400/40 text-xs cursor-pointer hover:text-gold-400 flex-shrink-0"
                       >
                         <Check size={14} />
@@ -163,7 +109,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
                       {timeAgo(n.createdAt)}
                     </span>
                     <button
-                      onClick={(e) => { e.stopPropagation(); deleteNotif(n.id); }}
+                      onClick={(e) => { e.stopPropagation(); deleteNotif(n._id); }}
                       className="bg-transparent border-none text-red-400/30 text-xs cursor-pointer hover:text-red-400 ml-auto"
                     >
                       <X size={12} />
@@ -176,7 +122,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
             if (n.link) {
               return (
                 <Link
-                  key={n.id}
+                  key={n._id}
                   to={n.link}
                   onClick={onClose}
                   className="block no-underline"
@@ -186,7 +132,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
               );
             }
 
-            return <div key={n.id}>{content}</div>;
+            return <div key={n._id}>{content}</div>;
           })}
         </div>
       )}

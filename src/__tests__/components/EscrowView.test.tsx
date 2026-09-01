@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EscrowView } from '../../features/EscrowView';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
 
 // Phase 4 note (core workflow consolidation): this file previously
 // tested a `prefillVehicle` prop and its "switches to the create tab

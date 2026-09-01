@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Vehicle, AuctionSession, BidRecord, UserProfile } from '../../../types';
-import { INITIAL_AUCTION_SESSIONS } from '../../../data/mockAuctions';
 import { getAuctionIdFromUrl, setAuctionDetailUrl } from '../../../utils/navigation';
 import { placeBid, BidApiError } from '../../../services/bidApi';
 // CreateAuctionModal import removed - its only usage in this file was
@@ -86,7 +85,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   onUpdateVehicleEscrowOverride
 }) => {
   // Auction sessions state initialized from mock service
-  const [sessions, setSessions] = useState<AuctionSession[]>(INITIAL_AUCTION_SESSIONS);
+  const [sessions, setSessions] = useState<AuctionSession[]>([]);
 
   // Computed once per render, not per-second like the live countdowns -
   // this banner only needs to be accurate to the day, not the second.

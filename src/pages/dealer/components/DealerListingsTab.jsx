@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { dealerAPI, carsAPI } from '../../../api/api';
 import { Plus, Download, Copy, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { StatusBadge, DemoBadge } from './DashboardWidgets';
+import { StatusBadge } from './DashboardWidgets';
 
 const STATUS_OPTS = ['', 'active', 'sold', 'pending', 'rejected'];
 const PAGE_SIZES = [25, 50, 100];
@@ -176,7 +176,6 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{car.title}</span>
-                    {car.isDemo && <DemoBadge edited={!!car.demoEditedAt} />}
                   </div>
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{car.year || '—'} · {car.mileage?.toLocaleString() || '—'} km</span>

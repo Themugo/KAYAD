@@ -1,27 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Supabase is used by KAYAD's frontend only for Realtime infrastructure.
+// Authentication is owned by the KAYAD backend and its HttpOnly cookie/JWT
+// contract. Do not call supabase.auth.* here: that would create a second,
+// unrelated browser authentication session.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Use placeholder values for development/demo mode
-const safeUrl = supabaseUrl || 'https://placeholder.supabase.co';
-const safeKey = supabaseAnonKey || 'placeholder-key';
-
-// Validate environment variables in production
-if (import.meta.env.PROD && (!supabaseUrl || !supabaseAnonKey)) {
-  console.error('[SECURITY] Missing Supabase environment variables');
+const missingSupabaseConfig = !supabaseUrl || !supabaseAnonKey;
+if (missingSupabaseConfig && import.meta.env.PROD) {
+  throw new Error('[KAYAD] VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are required for Realtime in production.');
 }
+
+const safeUrl = supabaseUrl || 'http://127.0.0.1:54321';
+const safeKey = supabaseAnonKey || 'development-only-missing-key';
 
 export const supabase = createClient(safeUrl, safeKey, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    cookieOptions: {
-      secure: import.meta.env.PROD,
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 1000,
-    },
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
   },
   realtime: {
     params: { eventsPerSecond: 10 },
@@ -32,24 +30,5 @@ export const supabase = createClient(safeUrl, safeKey, {
     },
   },
 });
-
-export async function getSecureSession() {
-  try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) {
-      if (import.meta.env.DEV) console.error('[AUTH] Session error:', error.message);
-      return null;
-    }
-    return session;
-  } catch (err) {
-    if (import.meta.env.DEV) console.error('[AUTH] Unexpected session error:', err);
-    return null;
-  }
-}
-
-export async function verifyAuth() {
-  const session = await getSecureSession();
-  return !!session?.user;
-}
 
 export default supabase;

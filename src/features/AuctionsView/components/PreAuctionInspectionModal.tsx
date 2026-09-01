@@ -42,47 +42,7 @@ export interface InspectorOption {
   phone: string;
 }
 
-const MOCK_INSPECTORS: InspectorOption[] = [
-  {
-    id: 'insp-1',
-    name: 'Eng. Patrick K. Njoroge',
-    agencyName: 'AutoCheck East Africa Diagnostics',
-    rating: 4.9,
-    reviewsCount: 142,
-    price: 4500,
-    availability: 'Today at 2:30 PM & Tomorrow 9:00 AM',
-    specialization: 'German Engineering & OBD-II Scans',
-    badge: 'Master Certified',
-    certifiedPoints: 150,
-    phone: '+254 722 102 938'
-  },
-  {
-    id: 'insp-2',
-    name: 'David Omondi',
-    agencyName: 'Apex Mobile Vehicle Inspectors',
-    rating: 4.8,
-    reviewsCount: 98,
-    price: 3500,
-    availability: 'Tomorrow at 10:00 AM & 1:00 PM',
-    specialization: 'Japanese & Commercial Fleet Vehicles',
-    badge: 'Vetted Mechanic',
-    certifiedPoints: 120,
-    phone: '+254 733 881 204'
-  },
-  {
-    id: 'insp-3',
-    name: 'Safariline Fleet Certifiers',
-    agencyName: 'Safariline Technical Solutions',
-    rating: 4.9,
-    reviewsCount: 215,
-    price: 5000,
-    availability: 'Same Day Express (Within 2 Hours)',
-    specialization: 'Heavy Commercial, SUV & Hybrid Systems',
-    badge: 'Top Rated Agency',
-    certifiedPoints: 150,
-    phone: '+254 711 900 812'
-  }
-];
+const AVAILABLE_INSPECTORS: InspectorOption[] = [];
 
 interface PreAuctionInspectionModalProps {
   isOpen: boolean;
@@ -103,7 +63,7 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
   const [copiedLocation, setCopiedLocation] = useState(false);
 
   // Professional Inspection Booking State
-  const [selectedInspector, setSelectedInspector] = useState<InspectorOption | null>(MOCK_INSPECTORS[0]);
+  const [selectedInspector, setSelectedInspector] = useState<InspectorOption | null>(null);
   // Default 3 days from now (never a stale hardcoded date); min=today
   // stops the picker accepting an already-passed booking date.
   const todayIso = new Date().toISOString().split('T')[0];
@@ -431,7 +391,7 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
 
                   {/* INSPECTOR LIST */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {MOCK_INSPECTORS.map(inspector => (
+                    {AVAILABLE_INSPECTORS.map(inspector => (
                       <div
                         key={inspector.id}
                         onClick={() => setSelectedInspector(inspector)}

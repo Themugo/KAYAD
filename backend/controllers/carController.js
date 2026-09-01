@@ -76,7 +76,7 @@ export const getCars = async (req, res) => {
     // never trigger an unbounded query (pagination cap — Issue: security test).
     limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
 
-    query = { status: "available", isDemo: { $ne: true } };
+    query = { status: "available" };
 
     if (keyword) {
       const trimmed = keyword.trim();
@@ -220,13 +220,10 @@ export const getCars = async (req, res) => {
         ntsaVerified: 1,
         dutyStatus: 1,
         isPromoted: 1,
-        isDemo: 1,
-        demoEditedAt: 1,
-        demoEditedBy: 1,
       });
     } else {
       findQuery = findQuery.select(
-        "title price images coverImage brand year model city fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
+        "title price images coverImage brand year model city fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted",
       );
     }
 
@@ -288,7 +285,7 @@ export const getCars = async (req, res) => {
 // private draft/pending listings without authentication).
 export const getMyListings = async (req, res) => {
   try {
-    const cars = await Car.find({ dealer: req.user.id, isDemo: { $ne: true } })
+    const cars = await Car.find({ dealer: req.user.id })
       .populate("dealer", "name businessName avatar")
       .sort({ createdAt: -1 });
     res.json({ success: true, data: cars });
@@ -304,11 +301,10 @@ export const getMyListings = async (req, res) => {
 export const createCar = async (req, res) => {
   try {
     const seller = await User.findById(req.user.id).select(
-      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role status isDemo",
+      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role status",
     );
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
-    const isDemoSeller = !!seller.isDemo;
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
     const config = await PlatformConfig.findOne().lean();
@@ -322,15 +318,15 @@ export const createCar = async (req, res) => {
 
     const isDealer = seller.role === "dealer";
     const isSeller = seller.role === "individual_seller";
-    const currentListingCount = isDemoSeller ? 0 : await Car.countDocuments({ dealer: req.user.id });
+    const currentListingCount = await Car.countDocuments({ dealer: req.user.id });
 
     // Determine if user is allowed to create a listing (without incrementing yet)
     let shouldIncrementListingCount = false;
 
     if (monetisationOff) {
       // Free-for-all launch mode — allow the listing, still track count for analytics.
-      shouldIncrementListingCount = !isDemoSeller;
-    } else if (!isDemoSeller && isDealer && pkg) {
+      shouldIncrementListingCount = true;
+    } else if (isDealer && pkg) {
       const now = new Date();
 
       if (pkg.isFree && pkg.trialDays > 0) {
@@ -379,7 +375,7 @@ export const createCar = async (req, res) => {
       }
     }
 
-    if (!monetisationOff && !isDemoSeller && isSeller) {
+    if (!monetisationOff && isSeller) {
       const sellerPkg = pkgs.find((p) => p.id === seller.dealerPackage) || null;
 
       if (!seller.firstVehicleUsed || currentListingCount === 0) {
@@ -422,14 +418,9 @@ export const createCar = async (req, res) => {
       views: 0,
       bidsCount: 0,
       trustScore: 0,
-      status: isDemoSeller ? "available" : (seller.status === "approved" ? "available" : "pending"),
+      status: seller.status === "approved" ? "available" : "pending",
       isVerifiedDealer: seller.status === "approved",
-      isDemo: isDemoSeller,
     };
-    if (isDemoSeller) {
-      body.demoEditedAt = new Date();
-      body.demoEditedBy = req.user.id;
-    }
     // `city` is the correct app-level alias for the real
     // location_city column (confirmed and fixed in this project's own
     // earlier hardening work - utils/fieldMap.js's cars.city ->
@@ -486,10 +477,10 @@ export const createCar = async (req, res) => {
     // ── INCREMENT LISTING COUNT (only after successful Car.create) ──
     if (shouldIncrementListingCount) {
       const updateOps = { $inc: { listingCount: 1 } };
-      if (!isDemoSeller && isDealer && pkg?.isFree && pkg?.trialDays > 0) {
+      if (isDealer && pkg?.isFree && pkg?.trialDays > 0) {
         updateOps.$inc.trialListingsUsed = 1;
       }
-      if (!isDemoSeller && isSeller && !seller.firstVehicleUsed) {
+      if (isSeller && !seller.firstVehicleUsed) {
         updateOps.firstVehicleUsed = true;
       }
       await User.findByIdAndUpdate(req.user.id, updateOps);
@@ -576,11 +567,8 @@ export const updateCar = async (req, res) => {
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
 
-    // Permission rules:
-    //   • Owner always edits their own car
-    //   • Demo dealers can edit demo cars
-    //   • Staff can edit demo cars ONLY — never real dealer/seller listings
-    const canEdit = isOwner || (car.isDemo && (isDealer || isStaff));
+    // Permission rules: owners, staff, or the appropriate authorized seller/dealer may edit.
+    const canEdit = isOwner || isStaff;
     if (!canEdit) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
@@ -657,11 +645,6 @@ export const updateCar = async (req, res) => {
         car.set(key, req.body[key]);
       }
     }
-    if (car.isDemo && isDealer) {
-      car.isDemo = true;
-      car.demoEditedAt = new Date();
-      car.demoEditedBy = req.user.id;
-    }
 
     // ── SMART COVER IMAGE AUTO-SELECTION ────────────────────
     // Helper: find first index with a real URL
@@ -723,8 +706,7 @@ export const deleteCar = async (req, res) => {
     const isStaff = STAFF_ROLES.includes(req.user.role);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
-    if (!isOwner && !isStaff && !isDemoMgmt) {
+    if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to delete this listing" });
     }
 
@@ -775,8 +757,7 @@ export const deleteCarImage = async (req, res) => {
     const isStaff = STAFF_ROLES.includes(req.user.role);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
-    if (!isOwner && !isStaff && !isDemoMgmt) {
+    if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
 
@@ -831,8 +812,7 @@ export const addCarImages = async (req, res) => {
     const isStaff = STAFF_ROLES.includes(req.user.role);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
-    if (!isOwner && !isStaff && !isDemoMgmt) {
+    if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
 

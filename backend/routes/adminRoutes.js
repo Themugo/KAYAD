@@ -86,24 +86,6 @@ router.get(
 );
 
 // =============================
-// 🔄 RE-SEED PRODUCTION DB (webhost/superadmin only)
-// =============================
-import { reseed } from "../seed.js";
-import { protectAccount } from "../middleware/protectAccount.js";
-router.post(
-  "/reseed",
-  protect,
-  authorize("superadmin"),
-  asyncHandler(async (req, res) => {
-    if (process.env.NODE_ENV === "production") {
-      return res.status(403).json({ success: false, message: "Reseed disabled in production" });
-    }
-    const result = await reseed();
-    res.json({ success: true, message: "Database re-seeded", result });
-  }),
-);
-
-// =============================
 // 🔒 APPLY GLOBAL ADMIN GUARD
 // =============================
 router.use(protect, adminOnly);
@@ -148,7 +130,6 @@ router.get(
       pendingReviews,
       activeAlerts,
       individualSellers,
-      demoUsers,
       carsSold,
       pendingReports,
       verificationQueue,
@@ -181,7 +162,6 @@ router.get(
       Review.countDocuments({ status: "pending" }),                                   // pendingReviews
       AdminAlert.countDocuments({ read: false }),                                      // activeAlerts
       User.countDocuments({ role: "individual_seller" }),                              // individualSellers
-      User.countDocuments({ isDemo: true }),                                           // demoUsers
       Car.countDocuments({ status: "sold" }),                                          // carsSold
       Dispute.countDocuments({ status: { $in: ["open", "investigating"] } }),          // pendingReports
       DealerVerification.countDocuments({ verificationStatus: { $in: ["pending", "under_review"] } }), // verificationQueue
@@ -214,8 +194,7 @@ router.get(
         pendingReviews,
         activeAlerts,
         individualSellers,
-        demoUsers,
-        carsSold,
+          carsSold,
         pendingReports,
         verificationQueue,
         supportQueue,
@@ -247,8 +226,6 @@ router.get(
       filter.role = { $in: ["dealer", "individual_seller"] };
       filter.approved = false;
     }
-    if (req.query.isDemo === "true") filter.isDemo = true;
-    if (req.query.isDemo === "false") filter.isDemo = { $ne: true };
 
     // 🔎 SEARCH (name/email)
     // H-9 FIX: Escape user input to prevent ReDoS via $regex patterns.
@@ -469,7 +446,7 @@ router.delete(
     }
 
     await Car.softDelete(car._id, req.user.id);
-    if (car.dealer && !car.isDemo) {
+    if (car.dealer) {
       await User.findByIdAndUpdate(car.dealer, {
         $inc: { listingCount: -1, trialListingsUsed: -1 },
       });
@@ -605,7 +582,6 @@ router.put(
       "dealerTrialDays",
       "waivePayments",
       "freeMarket",
-      "demoMode",
       "fontDisplay",
       "fontBody",
       "fontSizePct",

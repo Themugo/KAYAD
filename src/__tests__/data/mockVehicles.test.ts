@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
 
 describe('mockVehicles - auction end times stay live', () => {
   // Found a real bug: both mock auction vehicles had hardcoded

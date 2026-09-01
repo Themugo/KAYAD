@@ -9,7 +9,7 @@ import {
   Plus, Gavel, BarChart3, Settings, Edit3, Trash2, Eye,
   TrendingUp, ChevronRight, Activity, Package, ArrowUpRight,
 } from 'lucide-react';
-import { StatCard, StatusBadge, DemoBadge, MiniBarChart, timeAgo } from './DashboardWidgets';
+import { StatCard, StatusBadge, MiniBarChart, timeAgo } from './DashboardWidgets';
 import DealerMarketInsights from '../../../components/features/dealer/DealerMarketInsights';
 import { DealerKPIRow } from './DealerKPIWidgets';
 import ConversionFunnelDashboard from './ConversionFunnelDashboard';
@@ -217,7 +217,6 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{car.title}</span>
-                    {car.isDemo && <DemoBadge edited={!!car.demoEditedAt} />}
                   </div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{car.views || 0} views · {car.year}</div>
                 </div>

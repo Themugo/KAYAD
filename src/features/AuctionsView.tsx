@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle, AuctionSession, BidRecord, UserProfile } from '../types';
-import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { CreateAuctionModal } from '../components/CreateAuctionModal';
 import { AuctionCreationForm } from './AuctionsView/components/AuctionCreationForm';
 import { BidderRegistrationModal, VerifiedBidderProfile } from './AuctionsView/components/BidderRegistrationModal';
@@ -94,11 +93,11 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   onQuickViewVehicle,
   onUpdateVehicleAuctionStatus
 }) => {
-  // Auction sessions state initialized from mock service
-  const [sessions, setSessions] = useState<AuctionSession[]>(INITIAL_AUCTION_SESSIONS);
+  // Auction sessions are loaded from the live auction service.
+  const [sessions, setSessions] = useState<AuctionSession[]>([]);
 
   // Watched Auctions state
-  const [watchedIds, setWatchedIds] = useState<string[]>(['AUC-2026-8801']);
+  const [watchedIds, setWatchedIds] = useState<string[]>([]);
   
   // Dedicated Search & Filter states
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -115,19 +114,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   const [modalTab, setModalTab] = useState<'bid' | 'history' | 'inspection' | 'terms'>('bid');
 
   // Bidder Registration State (Only verified bidders may enter an auction room and place bids)
-  const [verifiedBiddersMap, setVerifiedBiddersMap] = useState<Record<string, VerifiedBidderProfile>>({
-    'AUC-2026-8801': {
-      sessionId: 'AUC-2026-8801',
-      bidderNumber: 'Bidder A-104',
-      anonymousAlias: 'Bidder A-104',
-      idNumber: '34892014',
-      fullName: 'James K. Mugo',
-      phone: '+254 712 *** 678',
-      paymentReference: 'QGH89021X9',
-      verifiedAt: '10:15 AM',
-      depositAmount: 50000
-    }
-  });
+  const [verifiedBiddersMap, setVerifiedBiddersMap] = useState<Record<string, VerifiedBidderProfile>>({});
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState<boolean>(false);
   const [registeringSession, setRegisteringSession] = useState<AuctionSession | null>(null);
 
@@ -339,11 +326,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
 
   // Execute a bid function
   // Auction authority is the canonical backend engine only. The
-  // sessions rendered here are preview/mock data with no server-side
-  // auction behind them, so bids must NOT be accepted or simulated
-  // client-side — a client can never determine the current bid, the
-  // winning bid, or auction state. Real bidding happens on live
-  // listings via POST /api/bids/:id/bid (see AuctionLivePage).
+  // Auction state and bids are authoritative on the backend.
   const executeBid = (session: AuctionSession, amount: number, bidder: string = 'Verified Bidder', location: string = 'Nairobi') => {
     void session;
     void amount;

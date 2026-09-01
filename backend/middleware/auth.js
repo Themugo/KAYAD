@@ -142,7 +142,7 @@ export const protect = async (req, res, next) => {
     const _requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION
       ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
       : _emailConfigured;
-    if (_requireVerification && !user.emailVerified && !isOwnerEmail(user.email) && !user.isDemo) {
+    if (_requireVerification && !user.emailVerified && !isOwnerEmail(user.email)) {
       return res.status(403).json({
         success: false,
         message: "Please verify your email before accessing this resource",

@@ -1,8 +1,4 @@
 import React, { useState } from 'react';
-import { Vehicle } from '../../../types';
-import { Lock, ShieldCheck, Search, ShieldAlert, Building2, Zap, LayoutDashboard, Car, Users, Wrench, Landmark, Shield, Gavel, ClipboardCheck, AlertOctagon, Ticket, FileText, PieChart, CreditCard, Percent, Settings, History, Key, Server, Download, Unlock, TrendingUp, Sliders } from 'lucide-react';
-import { PageHeader, StatWidget, Card, CardTitle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, LazyImage, Select } from '../../../components/ui';
-import { MockEnterpriseData, DealerRecord, PrivateSellerRecord, EscrowTxnRecord, DisputeRecord, FraudFlagRecord, AuditLogRecord } from '../../../data/mockEnterpriseData';
 
 interface AdminViewProps {
   vehicles: Vehicle[];
@@ -40,12 +36,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
 
   // Enterprise Data state
   const [inspectedIds, setInspectedIds] = useState<string[]>(['v1', 'v2', 'v3', 'v4']);
-  const [dealers, setDealers] = useState<DealerRecord[]>(MockEnterpriseData.dealers);
-  const [privateSellers, setPrivateSellers] = useState<PrivateSellerRecord[]>(MockEnterpriseData.privateSellers);
-  const [escrowTxns, setEscrowTxns] = useState<EscrowTxnRecord[]>(MockEnterpriseData.escrowTxns);
-  const [disputes, setDisputes] = useState<DisputeRecord[]>(MockEnterpriseData.disputes);
-  const [fraudFlags, setFraudFlags] = useState<FraudFlagRecord[]>(MockEnterpriseData.fraudFlags);
-  const [auditLogs, setAuditLogs] = useState<AuditLogRecord[]>(MockEnterpriseData.auditLogs);
+  const [dealers, setDealers] = useState<any[]>([]);
+  const [privateSellers, setPrivateSellers] = useState<any[]>([]);
+  const [escrowTxns, setEscrowTxns] = useState<any[]>([]);
+  const [disputes, setDisputes] = useState<any[]>([]);
+  const [fraudFlags, setFraudFlags] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
   // Helper to record audit log
   const recordAuditLog = (action: string, module: string, targetId: string) => {
@@ -554,7 +550,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MockEnterpriseData.mechanics.map((m) => (
+              {[].map((m) => (
                 <TableRow key={m.id} className="hover:bg-slate-50">
                   <TableCell className="font-bold text-[#1E3063] text-xs">{m.name}</TableCell>
                   <TableCell className="text-xs text-slate-600">{m.station}</TableCell>
@@ -596,7 +592,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MockEnterpriseData.bankPartners.map((b) => (
+              {[].map((b) => (
                 <TableRow key={b.id} className="hover:bg-slate-50">
                   <TableCell className="font-bold text-[#1E3063] text-xs">{b.name}</TableCell>
                   <TableCell className="text-xs font-mono text-slate-500">{b.code}</TableCell>
@@ -680,7 +676,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MockEnterpriseData.auctions.map((a) => (
+              {[].map((a) => (
                 <TableRow key={a.id} className="hover:bg-slate-50">
                   <TableCell className="font-bold text-[#1E3063] text-xs">{a.title}</TableCell>
                   <TableCell className="text-xs text-slate-600">{a.sellerName}</TableCell>
@@ -722,7 +718,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MockEnterpriseData.inspections.map((ins) => (
+              {[].map((ins) => (
                 <TableRow key={ins.id} className="hover:bg-slate-50">
                   <TableCell className="font-bold text-[#1E3063] text-xs">{ins.id}</TableCell>
                   <TableCell className="text-xs font-bold text-slate-800">{ins.vehicleTitle}</TableCell>
@@ -850,7 +846,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MockEnterpriseData.supportTickets.map((st) => (
+              {[].map((st) => (
                 <TableRow key={st.id} className="hover:bg-slate-50">
                   <TableCell className="font-bold text-[#1E3063] text-xs">{st.ticketNo}</TableCell>
                   <TableCell className="text-xs font-mono text-slate-600">{st.userEmail}</TableCell>
@@ -1129,7 +1125,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MockEnterpriseData.apiEndpoints.map((api) => (
+              {[].map((api) => (
                 <TableRow key={api.id} className="hover:bg-slate-50">
                   <TableCell className="font-bold text-[#1E3063] text-xs">{api.service}</TableCell>
                   <TableCell className="text-xs font-mono text-slate-500">{api.endpoint}</TableCell>

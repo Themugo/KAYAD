@@ -2,13 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { Vehicle, Dealer, DealerTeamMember, DealerLead, DealerPromotion, DealerAnalytics } from '../types';
 import { createPlaceholderVehicle } from '../utils/vehicleDefaults';
 import { 
-  INITIAL_DEALER_BUSINESSES, 
-  INITIAL_DEALER_TEAM, 
-  INITIAL_DEALER_LEADS, 
-  INITIAL_DEALER_PROMOTIONS, 
-  INITIAL_DEALER_ANALYTICS 
-} from '../data/mockDealersData';
-import { 
   Building2, 
   ShieldCheck, 
   TrendingUp, 
@@ -184,11 +177,11 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   };
 
   // Dealer Profile State
-  const [currentDealer, setCurrentDealer] = useState<Dealer>(INITIAL_DEALER_BUSINESSES[0]);
-  const [teamMembers, setTeamMembers] = useState<DealerTeamMember[]>(INITIAL_DEALER_TEAM);
-  const [leads, setLeads] = useState<DealerLead[]>(INITIAL_DEALER_LEADS);
-  const [promotions, setPromotions] = useState<DealerPromotion[]>(INITIAL_DEALER_PROMOTIONS);
-  const [analytics] = useState<DealerAnalytics>(INITIAL_DEALER_ANALYTICS);
+  const [currentDealer, setCurrentDealer] = useState<Dealer>({} as Dealer);
+  const [teamMembers, setTeamMembers] = useState<DealerTeamMember[]>([]);
+  const [leads, setLeads] = useState<DealerLead[]>([]);
+  const [promotions, setPromotions] = useState<DealerPromotion[]>([]);
+  const [analytics] = useState<DealerAnalytics>({ viewsByCounty: [], conversionRate: 0, averageDaysToSell: 0 } as DealerAnalytics);
 
   // Active Module State (12 Modules)
   const [activeTab, setActiveTab] = useState<DealerTabModule>('dashboard');
@@ -211,7 +204,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   const [showBoostModal, setShowBoostModal] = useState<Vehicle | null>(null);
 
   // VIN Decoder Form
-  const [inputVin, setInputVin] = useState<string>('JTEBU5JR8K5098124');
+  const [inputVin, setInputVin] = useState<string>('');
   const [decodedSpecs, setDecodedSpecs] = useState<any | null>(null);
 
   // CSV Import State
@@ -222,12 +215,12 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
 
   // Form States
   const [newTitle, setNewTitle] = useState('');
-  const [newMake, setNewMake] = useState('Toyota');
-  const [newModel, setNewModel] = useState('Prado TX');
-  const [newYear, setNewYear] = useState<number>(2022);
-  const [newPrice, setNewPrice] = useState<number>(7500000);
-  const [newMileage, setNewMileage] = useState<number>(38000);
-  const [newLocation, setNewLocation] = useState('Mombasa Road, Nairobi');
+  const [newMake, setNewMake] = useState('');
+  const [newModel, setNewModel] = useState('');
+  const [newYear, setNewYear] = useState<number>(0);
+  const [newPrice, setNewPrice] = useState<number>(0);
+  const [newMileage, setNewMileage] = useState<number>(0);
+  const [newLocation, setNewLocation] = useState('');
   const [newCounty, setNewCounty] = useState('Nairobi');
   const [newImage, setNewImage] = useState('https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=800');
   const [isDraft, setIsDraft] = useState<boolean>(false);

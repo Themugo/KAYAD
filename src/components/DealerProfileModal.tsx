@@ -39,7 +39,6 @@ import {
 } from 'lucide-react';
 import { Modal, Badge, Button, Input, Select, Card, LazyImage } from './ui';
 import VehicleCard from './VehicleCard';
-import { INITIAL_DEALER_BUSINESSES } from '../data/mockDealersData';
 
 interface DealerProfileModalProps {
   dealer: Dealer | null;
@@ -53,7 +52,7 @@ interface DealerProfileModalProps {
 
 export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
   dealer,
-  allDealers = INITIAL_DEALER_BUSINESSES,
+  allDealers = [],
   vehicles,
   onClose,
   onQuickViewVehicle,

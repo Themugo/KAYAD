@@ -5,8 +5,6 @@ import { Building2, ShieldCheck, User, KeyRound, Sparkles } from 'lucide-react';
 import {
   login as apiLogin,
   register as apiRegister,
-  demoLogin as apiDemoLogin,
-  isDemoModeEnabled,
   AuthApiError,
   BackendUser,
 } from '../services/authApi';
@@ -35,14 +33,6 @@ const REGISTER_ROLES: { key: RegisterRole; backendRole: string; label: string }[
   { key: 'dealer', backendRole: 'dealer', label: 'Dealer' },
 ];
 
-// Demo roles mirror the backend's DEMO_ACCOUNTS exactly (buyer, seller,
-// dealer) - the old frontend-local 4th role (mechanic/admin) is not
-// offered because the backend has no such demo account to issue.
-const DEMO_ROLES = [
-  { role: 'buyer', label: 'Buyer' },
-  { role: 'seller', label: 'Seller' },
-  { role: 'dealer', label: 'Dealer' },
-];
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin }) => {
   const [mode, setMode] = useState<'signin' | 'register'>('signin');
@@ -88,17 +78,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin }
     }
   };
 
-  const handleDemoLogin = async (role: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      finishWith(await apiDemoLogin(role));
-    } catch (err) {
-      showError(err, 'Demo sign in failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="md">
@@ -201,30 +180,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin }
           <span>{loading ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Create Account'}</span>
         </Button>
 
-        {/* Demo access is ONLY offered when the deployment explicitly
-            enables it (VITE_ENABLE_DEMO=true) — and it calls the real
-            backend demo-login endpoint, never a frontend-local account. */}
-        {isDemoModeEnabled() && (
-          <div className="pt-2 border-t border-slate-100 space-y-2">
-            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider text-center">
-              Demo Access
-            </p>
-            <div className="grid grid-cols-3 gap-1.5">
-              {DEMO_ROLES.map((d) => (
-                <button
-                  key={d.role}
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handleDemoLogin(d.role)}
-                  className="p-2 rounded-lg font-extrabold text-[11px] bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all flex items-center justify-center gap-1 disabled:opacity-50"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                  {d.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </Modal>
   );

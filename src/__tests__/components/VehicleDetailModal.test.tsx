@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { VehicleDetailModal } from '../../components/VehicleDetailModal';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
-import { INITIAL_AUCTION_SESSIONS } from '../../data/mockAuctions';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
+import { INITIAL_AUCTION_SESSIONS } from '../fixtures/mockAuctions';
 
 describe('VehicleDetailModal', () => {
   it('renders without throwing when given a real vehicle from mock data', () => {

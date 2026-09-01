@@ -7,15 +7,9 @@ const ecpApi = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-ecpApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 // Dashboard
 export const getExecutiveDashboard = () => ecpApi.get('/dashboard');

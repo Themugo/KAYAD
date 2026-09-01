@@ -10,7 +10,7 @@ checked every field referenced against the schema built so far.
 
 ## cars.images: TEXT[] -> JSONB (a real bug, not just a missing field)
 The previous version of this migration defined images as TEXT[] with
-plain URL strings, matching seed_demo_vehicles.sql.sql's format. But
+plain URL strings. The real listing flow stores a richer JSONB representation.
 createCar()/updateCar()'s real, live code stores an array of OBJECTS
 ({url, thumb, public_id, _pending} initially, then Cloudinary's own
 {url, public_id, ...} shape once a background job finishes uploading) -
@@ -19,11 +19,8 @@ follow-up Car.findByIdAndUpdate(car._id, { $set: { images: uploaded } })
 that replaces the placeholders. Postgres would reject inserting an
 array of JSON objects into a TEXT[] column outright - every single
 listing creation would have failed at the database level. Changed to
-JSONB, and rewrote seed_demo_vehicles.sql.sql's 12 image arrays from
-ARRAY['url1','url2'] literal syntax to
-'[{"url":"url1"},{"url":"url2"}]'::jsonb, so the seed data matches the
-same shape the real app actually uses instead of being independently
-(and now incompatibly) formatted.
+JSONB so the live listing flow stores URL-bearing image objects and
+Cloudinary metadata consistently.
 
 ## users: dealer package / trial system
 trialListingsUsed, firstVehicleUsed, dealerPackage, packageListingMax,
@@ -34,8 +31,7 @@ escrow auto-enable for forced accounts).
 ## cars: listing fields
 coverImage (an index into the images array, not a URL - confirmed via
 `Number(body.coverImage)` and a `0 <= requestedCover < totalImages`
-bounds check), isDemo/demoEditedAt/demoEditedBy (demo-account listing
-tracking), trustScore, escrowEnabled, priceHistory (a JSONB array of
+bounds check), trustScore, escrowEnabled, priceHistory (a JSONB array of
 {price, date} entries, pushed to on every price change - same
 denormalized-array pattern as chats.messages/escrows.history found
 earlier this session), auctionStartTime, startingBid, reservePrice,
@@ -58,9 +54,6 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS package_expires_at TIMESTAMPTZ;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS escrow_forced BOOLEAN DEFAULT false;
 
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS cover_image INTEGER DEFAULT 0;
-ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_demo BOOLEAN DEFAULT false;
-ALTER TABLE cars ADD COLUMN IF NOT EXISTS demo_edited_at TIMESTAMPTZ;
-ALTER TABLE cars ADD COLUMN IF NOT EXISTS demo_edited_by UUID REFERENCES users(id);
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS trust_score NUMERIC DEFAULT 0;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS escrow_enabled BOOLEAN DEFAULT false;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS price_history JSONB DEFAULT '[]';
@@ -74,7 +67,6 @@ ALTER TABLE cars ADD COLUMN IF NOT EXISTS ntsa_verified BOOLEAN DEFAULT false;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS duty_status TEXT;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS logbook_verified BOOLEAN DEFAULT false;
 
-CREATE INDEX IF NOT EXISTS idx_cars_demo_edited_by ON cars(demo_edited_by);
 
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS packages JSONB DEFAULT '[]';
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS free_market BOOLEAN DEFAULT true;

@@ -7,7 +7,6 @@ import CompareModal from './components/CompareModal';
 import AuthModal from './components/AuthModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 
-import { MOCK_DEALERS, MOCK_MESSAGES } from './data/mockVehicles';
 import { getCars, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -80,7 +79,6 @@ function AppInner() {
 
   // Interactive States
   // Fixed (Final Integration - production mock-data dependencies):
-  // this had regressed back to useState<Vehicle[]>(INITIAL_VEHICLES)
   // - the exact same mock-on-every-load defect originally found and
   // fixed in this project's own earlier hardening work (Phase 3),
   // confirmed to have been lost when this file was rebuilt on a
@@ -116,7 +114,7 @@ function AppInner() {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   
   // Modal Trigger States
   const [quickViewVehicle, setQuickViewVehicle] = useState<Vehicle | null>(null);
@@ -326,7 +324,7 @@ function AppInner() {
 
           {activeNav === 'dealers' && (
             <DealersView
-              dealers={MOCK_DEALERS}
+              dealers={[]}
               vehicles={vehicles}
               onSelectDealerVehicles={handleSelectDealerVehicles}
               onQuickViewVehicle={handleOpenVehicleDetails}
@@ -515,7 +513,7 @@ function AppInner() {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         // Fixed: the real state update already happens inside
-        // AuthModal's own login()/register()/demoLogin() calls
+        // AuthModal's own login()/register()/login() calls
         // through AuthContext by the time this fires - App no longer
         // keeps any separate state to set here.
         onLogin={() => {}}

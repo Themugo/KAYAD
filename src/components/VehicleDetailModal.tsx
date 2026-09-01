@@ -234,7 +234,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const isFinanceActive = Boolean(vehicle.financeAvailable);
 
   // Fixed (Final Integration Phase 3): displayPrice previously looked
-  // up INITIAL_AUCTION_SESSIONS (mock data) by vehicle ID for the
+  // up the live auction session by vehicle ID for the
   // live current bid. vehicle.currentBid is already the real, current
   // value - mapped directly from the real backend by
   // mapBackendCarToVehicle (this project's own earlier Phase 3

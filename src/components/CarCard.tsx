@@ -20,7 +20,6 @@ export interface Car {
   dealerName?: string;
   isVerified?: boolean;
   isBankOwned?: boolean;
-  isDemo?: boolean;
   isNegotiable?: boolean;
   hasFinancing?: boolean;
   views?: number;
@@ -233,11 +232,6 @@ export default function CarCard({
           {car.isVerified && (
             <span className="card-badge bg-emerald-500/90 text-white backdrop-blur-sm">
               ✓
-            </span>
-          )}
-          {car.isDemo && (
-            <span className="card-badge bg-orange-500/90 text-white backdrop-blur-sm">
-              DEMO
             </span>
           )}
         </div>

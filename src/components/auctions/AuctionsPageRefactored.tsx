@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Gavel,
   Clock,
@@ -29,6 +29,7 @@ import { Button } from '../ui/Button';
 import { AuctionCard } from './AuctionCard';
 import { AuctionDisclaimer } from '../auction/AuctionDisclaimer';
 import type { FC } from 'react';
+import { fetchList } from '../../services/auctionService';
 
 // ============================================================
 // Types
@@ -56,137 +57,18 @@ interface AuctionLot {
 }
 
 // ============================================================
-// Mock Data
-// ============================================================
-
-const MOCK_AUCTIONS: AuctionLot[] = [
-  {
-    id: 'lot_1',
-    title: 'TOYOTA Land Cruiser 300 GX-R',
-    year: 2022,
-    currentBid: 16835000,
-    startingBid: 14800000,
-    bidsCount: 7,
-    endsInSeconds: 3570,
-    status: 'live',
-    reserveStatus: 'met',
-    location: 'Nairobi Vault',
-    inspectionScore: 100,
-    imageUrl: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
-    organizerName: 'NCBA Bank Kenya',
-    organizerType: 'Verified Dealer',
-    organizerVerified: true,
-    organizerRating: 4.8,
-    organizerAuctions: 156,
-  },
-  {
-    id: 'lot_2',
-    title: 'PORSCHE Cayenne S',
-    year: 2020,
-    currentBid: 12212000,
-    startingBid: 10560000,
-    bidsCount: 10,
-    endsInSeconds: 8370,
-    status: 'live',
-    reserveStatus: 'met',
-    location: 'Nairobi Vault',
-    inspectionScore: 99,
-    imageUrl: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80',
-    organizerName: 'Crown Motors Kenya',
-    organizerType: 'Licensed Auctioneer',
-    organizerVerified: true,
-    organizerRating: 4.6,
-    organizerAuctions: 89,
-  },
-  {
-    id: 'lot_3',
-    title: 'MERCEDES-BENZ GLE 450 4MATIC',
-    year: 2021,
-    currentBid: 12048000,
-    startingBid: 10240000,
-    bidsCount: 13,
-    endsInSeconds: 13170,
-    status: 'live',
-    reserveStatus: 'near',
-    location: 'Mombasa Vault',
-    inspectionScore: 98,
-    imageUrl: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
-    organizerName: 'Kenya Government Disposal',
-    organizerType: 'Government Entity',
-    organizerVerified: true,
-    organizerRating: 4.9,
-    organizerAuctions: 234,
-  },
-  {
-    id: 'lot_4',
-    title: 'FORD Ranger Raptor',
-    year: 2022,
-    currentBid: 5696000,
-    startingBid: 4480000,
-    bidsCount: 16,
-    endsInSeconds: 17970,
-    status: 'live',
-    reserveStatus: 'no_reserve',
-    location: 'Nakuru Hub',
-    inspectionScore: 100,
-    imageUrl: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80',
-    organizerName: 'AutoBid Kenya',
-    organizerType: 'Verified Dealer',
-    organizerVerified: true,
-    organizerRating: 4.5,
-    organizerAuctions: 67,
-  },
-  {
-    id: 'lot_5',
-    title: 'RANGE ROVER Autobiography P530',
-    year: 2023,
-    currentBid: 24500000,
-    startingBid: 24500000,
-    bidsCount: 0,
-    endsInSeconds: 86400,
-    startsInSeconds: 7200,
-    status: 'upcoming',
-    reserveStatus: 'met',
-    location: 'Nairobi Vault',
-    inspectionScore: 100,
-    imageUrl: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800&q=80',
-    organizerName: 'NCBA Bank Kenya',
-    organizerType: 'Verified Dealer',
-    organizerVerified: true,
-    organizerRating: 4.8,
-    organizerAuctions: 156,
-  },
-  {
-    id: 'lot_6',
-    title: 'BMW X7 M50i xDrive',
-    year: 2021,
-    currentBid: 13200000,
-    startingBid: 13200000,
-    bidsCount: 0,
-    endsInSeconds: 100000,
-    startsInSeconds: 21600,
-    status: 'upcoming',
-    reserveStatus: 'near',
-    location: 'Nairobi Vault',
-    inspectionScore: 97,
-    imageUrl: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80',
-    organizerName: 'Premium Auto Auctions',
-    organizerType: 'Licensed Auctioneer',
-    organizerVerified: true,
-    organizerRating: 4.7,
-    organizerAuctions: 112,
-  },
-];
+// Auction inventory is loaded from the live KAYAD auction API.
+// No sample lots are shipped with the production UI.
 
 const CATEGORIES = [
-  { id: 'all', label: 'All Auctions', icon: <Gavel className="w-5 h-5" />, count: 156 },
-  { id: 'sedan', label: 'Sedans', icon: <Car className="w-5 h-5" />, count: 45 },
-  { id: 'suv', label: 'SUVs', icon: <Car className="w-5 h-5" />, count: 67 },
-  { id: 'pickup', label: 'Pickups', icon: <Car className="w-5 h-5" />, count: 28 },
-  { id: 'luxury', label: 'Luxury', icon: <Award className="w-5 h-5" />, count: 16 },
-  { id: 'commercial', label: 'Commercial', icon: <Car className="w-5 h-5" />, count: 12 },
-  { id: 'bank', label: 'Bank Disposals', icon: <Building2 className="w-5 h-5" />, count: 34 },
-  { id: 'govt', label: 'Government', icon: <Shield className="w-5 h-5" />, count: 23 },
+  { id: 'all', label: 'All Auctions', icon: <Gavel className="w-5 h-5" />, count: 0 },
+  { id: 'sedan', label: 'Sedans', icon: <Car className="w-5 h-5" />, count: 0 },
+  { id: 'suv', label: 'SUVs', icon: <Car className="w-5 h-5" />, count: 0 },
+  { id: 'pickup', label: 'Pickups', icon: <Car className="w-5 h-5" />, count: 0 },
+  { id: 'luxury', label: 'Luxury', icon: <Award className="w-5 h-5" />, count: 0 },
+  { id: 'commercial', label: 'Commercial', icon: <Car className="w-5 h-5" />, count: 0 },
+  { id: 'bank', label: 'Bank Disposals', icon: <Building2 className="w-5 h-5" />, count: 0 },
+  { id: 'govt', label: 'Government', icon: <Shield className="w-5 h-5" />, count: 0 },
 ];
 
 // ============================================================
@@ -505,21 +387,58 @@ const OrganizerTrustSection: FC = () => (
 export const AuctionsPageRefactored: FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [auctions, setAuctions] = useState<AuctionLot[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Filter auctions
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    fetchList({ page: 1, limit: 100 })
+      .then((response: any) => {
+        if (cancelled) return;
+        const rows = Array.isArray(response) ? response : (response?.auctions || response?.data || []);
+        const mapped: AuctionLot[] = rows.map((a: any) => {
+          const start = a.startTime || a.start_time;
+          const end = a.endTime || a.end_time;
+          const endMs = end ? new Date(end).getTime() : 0;
+          const startMs = start ? new Date(start).getTime() : 0;
+          const now = Date.now();
+          const status = a.status || (startMs > now ? 'upcoming' : endMs > now ? 'live' : 'ended');
+          return {
+            id: String(a.id || a._id),
+            title: a.title || a.car?.title || 'Vehicle auction',
+            year: Number(a.year || a.car?.year || 0),
+            currentBid: Number(a.currentPrice ?? a.current_bid ?? a.car?.current_bid ?? a.startPrice ?? 0),
+            startingBid: Number(a.startPrice ?? a.start_price ?? 0),
+            bidsCount: Number(a.bidCount ?? a.bid_count ?? a.bidsCount ?? 0),
+            endsInSeconds: Math.max(0, Math.floor((endMs - now) / 1000)),
+            startsInSeconds: Math.max(0, Math.floor((startMs - now) / 1000)),
+            status: status as AuctionLot['status'],
+            location: a.location || a.car?.location_city || '',
+            inspectionScore: a.inspectionScore ?? a.car?.inspection_score,
+            imageUrl: a.imageUrl || a.image || a.car?.images?.[0]?.url || a.car?.images?.[0] || '/placeholder-car.svg',
+            organizerName: a.organizerName || a.organizer?.name || '',
+            organizerType: a.organizerType || a.organizer?.type || '',
+            organizerVerified: Boolean(a.organizerVerified ?? a.organizer?.verified),
+            organizerRating: Number(a.organizerRating ?? a.organizer?.rating ?? 0),
+            organizerAuctions: Number(a.organizerAuctions ?? a.organizer?.auctions ?? 0),
+          };
+        });
+        setAuctions(mapped);
+        setLoadError(null);
+      })
+      .catch(() => {
+        if (!cancelled) { setAuctions([]); setLoadError('Unable to load auctions right now.'); }
+      })
+      .finally(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   const filteredAuctions = useMemo(() => {
-    let auctions = MOCK_AUCTIONS;
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      auctions = auctions.filter(a => 
-        a.title.toLowerCase().includes(query) ||
-        a.location.toLowerCase().includes(query)
-      );
-    }
-
-    return auctions;
-  }, [searchQuery]);
+    const query = searchQuery.trim().toLowerCase();
+    return auctions.filter(a => !query || a.title.toLowerCase().includes(query) || a.location.toLowerCase().includes(query));
+  }, [auctions, searchQuery]);
 
   // Auction categories
   const liveAuctions = filteredAuctions.filter(a => a.status === 'live');
@@ -611,6 +530,16 @@ export const AuctionsPageRefactored: FC = () => {
           auctions={upcomingAuctions}
           onViewDetails={handleViewDetails}
         />
+      )}
+
+      {isLoading && (
+        <section className="py-16 text-center"><p className="text-sm text-slate-500">Loading live auctions…</p></section>
+      )}
+      {!isLoading && loadError && (
+        <section className="py-16 text-center"><p className="text-sm text-red-600">{loadError}</p></section>
+      )}
+      {!isLoading && !loadError && filteredAuctions.length === 0 && (
+        <section className="py-16 text-center"><p className="text-lg font-semibold text-slate-700">No auctions are currently available.</p><p className="mt-2 text-sm text-slate-500">Live inventory will appear here when an auction organizer publishes a lot.</p></section>
       )}
 
       {/* 7. Your Auction Journey */}

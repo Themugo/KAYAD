@@ -31,9 +31,6 @@ const CS = {
   noUnderline: { textDecoration: 'none' },
   navDesc: { fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', marginTop: 2 },
   loadingContainer: { padding: 24 },
-  demoGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10, marginBottom: 20 },
-  demoStatCard: { padding: '12px 14px', borderRadius: 10, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)' },
-  demoStatLabel: { fontSize: 10, color: 'rgba(15, 23, 42, 0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 },
   btnRow: { display: 'flex', gap: 10 },
   dangerBtn: { padding: '10px 20px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 },
   normalBtn: { padding: '10px 20px', background: 'rgba(15, 23, 42, 0.05)', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 10, color: '#0F172A', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
@@ -78,7 +75,6 @@ const getNavCardStyle = (danger) => ({
 const getNavIconStyle = (danger) => ({ color: danger ? '#ef4444' : 'var(--gold)', marginBottom: 4 });
 const getNavLabelStyle = (danger) => ({ fontWeight: 700, fontSize: 13, color: danger ? '#ef4444' : '#fff' });
 const getStatValueStyle = (color) => ({ fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', color });
-const getDemoStatValueStyle = (color) => ({ fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)', color });
 const getHealthStatusColor = (status) => status === 'healthy' ? '#22c55e' : '#ef4444';
 const getDeptIconStyle = (color) => ({ color, marginBottom: 2 });
 const getDeptLabelStyle = (color) => ({ color, fontWeight: 600 });
@@ -114,21 +110,16 @@ function StatRow({ label, value, color = '#fff' }) {
 export default function ControlRoom() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [demo, setDemo] = useState(null);
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [cleaning, setCleaning] = useState(false);
 
-  const isSuperadmin = user?.role === 'superadmin';
 
   const [lastRefresh, setLastRefresh] = useState(null);
 
   const loadData = () => {
     Promise.all([
-      adminAPI.demoStatus().catch(() => null),
       adminAPI.systemHealth().catch(() => null),
-    ]).then(([d, h]) => {
-      setDemo(d);
+    ]).then(([h]) => {
       setHealth(h?.health || h);
       setLastRefresh(new Date());
     }).finally(() => setLoading(false));
@@ -140,17 +131,6 @@ export default function ControlRoom() {
     return () => clearInterval(iv);
   }, []);
 
-  const handleCleanup = async () => {
-    if (!window.confirm('Delete ALL demo accounts, cars, bids, payments, and escrows? This cannot be undone.')) return;
-    setCleaning(true);
-    try {
-      const result = await adminAPI.demoCleanup();
-      toast(`🧹 Demo cleanup complete: ${result.deleted.users} users, ${result.deleted.cars} cars`, 'success');
-      setDemo(null);
-      adminAPI.demoStatus().then(setDemo).catch(() => {});
-    } catch { toast('Cleanup failed', 'error'); }
-    finally { setCleaning(false); }
-  };
 
   return (
     <ErrorBoundary>
@@ -217,44 +197,6 @@ export default function ControlRoom() {
         </SectionCard>
 
         {/* Demo Data Management (superadmin only) */}
-        {isSuperadmin && (
-          <SectionCard title="Demo Data Management" accent="#f59e0b">
-            {loading ? (
-              <div className="loading-center" style={CS.loadingContainer}><div className="spinner" /></div>
-            ) : demo ? (
-              <>
-                <div style={CS.demoGrid}>
-                  {[
-                    { label: 'Active Demo Users', value: demo.status.activeDemoUsers, color: '#22c55e' },
-                    { label: 'Deactivated Demo', value: demo.status.deactivatedDemoUsers, color: '#f97316' },
-                    { label: 'Demo Cars', value: demo.status.demoCars, color: '#3b82f6' },
-                    { label: 'Demo Bids', value: demo.status.demoBids, color: '#a855f7' },
-                    { label: 'Demo Payments', value: demo.status.demoPayments, color: '#06b6d4' },
-                    { label: 'Demo Escrows', value: demo.status.demoEscrows, color: '#22c55e' },
-                  ].map(s => (
-                    <div key={s.label} style={CS.demoStatCard}>
-                      <div style={getDemoStatValueStyle(s.color)}>{s.value}</div>
-                      <div style={CS.demoStatLabel}>{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={CS.btnRow}>
-                  <button onClick={handleCleanup} disabled={cleaning} style={CS.dangerBtn}>
-                    {cleaning ? 'Cleaning...' : '🧹 Delete All Demo Data'}
-                  </button>
-                  <button onClick={async () => { try { await adminAPI.reseed(); toast('✅ Database re-seeded', 'success'); adminAPI.demoStatus().then(setDemo).catch(() => {}); } catch { toast('Reseed failed', 'error'); } }} style={CS.normalBtn}>
-                    🔄 Re-seed Database
-                  </button>
-                </div>
-                <div style={CS.warningBox}>
-                  ⚠️ Deleting demo data removes all pre-seeded accounts and their associated data. This is permanent. Use <strong style={accentStrong}>Re-seed</strong> to restore demo data.
-                </div>
-              </>
-            ) : (
-              <div style={CS.noData}>Unable to load demo status</div>
-            )}
-          </SectionCard>
-        )}
 
         {/* System Management Staff */}
         <SectionCard title="System Management Staff" accent="#3b82f6">

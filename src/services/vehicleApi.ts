@@ -6,7 +6,7 @@
  * STALE, SUPERSEDED schema definition - confirmed directly via a
  * detailed comment in supabase/migrations/..._foundational_tables.sql.sql
  * (a prior session's own cross-referenced schema-archaeology work,
- * checked against seed_demo_vehicles.sql.sql, update_car_bid_stats.sql.sql,
+ * checked against the historical vehicle seed migration, update_car_bid_stats.sql.sql,
  * and real multi-file backend usage) that explicitly states its column
  * choices "disagree with backend/db/schema_clean.sql's naming, and take
  * precedence here as already-committed, already-real evidence."
@@ -252,7 +252,7 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
   const transmissionValue = (car.transmission || 'Automatic') as Vehicle['transmission'];
   const fuelTypeValue = (car.fuel || 'Petrol') as Vehicle['fuelType'];
   // These 4 casts assume the backend's free-text column values line up
-  // with this frontend's stricter union types - true for the seed/demo
+  // with this frontend's stricter union types - true for the historical seed
   // data these columns were designed around, but not enforced by any
   // schema constraint on the backend side (confirmed: these are plain
   // TEXT columns, no CHECK constraint restricting their values the way

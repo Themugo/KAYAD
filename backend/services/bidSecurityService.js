@@ -11,30 +11,25 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount }) 
   const destination =
     auction.paymentRecipient === "DEALER_DIRECT"
       ? auction.dealerMpesaShortcode
-      : process.env.KAYAD_MASTER_PAYBILL || "174379";
+      : process.env.KAYAD_MASTER_PAYBILL;
 
   // Trigger STK Push
-  let checkoutID = "MOCK_" + Date.now();
-  let mode = "mock";
+  if (!destination) {
+    return { success: false, message: "Payment recipient is not configured" };
+  }
+
+  let checkoutID;
+  const mode = "mpesa";
   try {
     const stkRes = await stkPush(phone, securityAmount, destination);
-    if (stkRes?.CheckoutRequestID) {
-      checkoutID = stkRes.CheckoutRequestID;
-      mode = String(checkoutID).toLowerCase().startsWith("mock_") ? "mock" : "mpesa";
-    }
+    checkoutID = stkRes?.CheckoutRequestID;
+    if (!checkoutID) throw new Error("M-Pesa did not return a checkout request ID");
   } catch (err) {
-    // FAIL CLOSED: never mark a bid-security deposit as paid when the
-    // money never moved. Mock mode is a development convenience only;
-    // anywhere else the user must get an honest failure.
-    if (process.env.NODE_ENV === "development") {
-      console.warn("Bid security STK failed, using mock mode (development only):", err.message);
-    } else {
-      console.error("Bid security STK failed, failing closed:", err.message);
-      return {
-        success: false,
-        message: "Unable to initiate deposit payment right now — please try again shortly",
-      };
-    }
+    console.error("Bid security STK failed, failing closed:", err.message);
+    return {
+      success: false,
+      message: "Unable to initiate deposit payment right now — please try again shortly",
+    };
   }
 
   // Create transaction record. In mock mode the status stays "pending"

@@ -48,7 +48,7 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
         ).slice(0, 5);
         setCars(featured.length > 0 ? featured : fetchedCars.slice(0, 5));
       } catch {
-        // API not available, will use demo data
+        // API unavailable; keep the featured carousel empty
       } finally {
         setLoading(false);
       }
@@ -56,59 +56,7 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
     fetchFeatured();
   }, []);
 
-  // Fallback demo featured cars
-  const demoCars: FeaturedCar[] = [
-    {
-      _id: 'featured-1',
-      title: 'Toyota Land Cruiser GX-R 2024',
-      brand: 'Toyota',
-      model: 'Land Cruiser GX-R',
-      price: 18500000,
-      year: 2024,
-      mileage: '12,500 km',
-      fuel: 'Petrol',
-      location: { city: 'Nairobi' },
-      images: ['https://images.unsplash.com/photo-1594502184342-2e12f877aa73?w=1200&h=800&fit=crop'],
-      isPromoted: true,
-      views: 1250,
-      escrowEnabled: true,
-      ntsaVerified: true,
-    },
-    {
-      _id: 'featured-2',
-      title: 'Mercedes-Benz GLE 450 2023',
-      brand: 'Mercedes-Benz',
-      model: 'GLE 450',
-      price: 14200000,
-      year: 2023,
-      mileage: '8,200 km',
-      fuel: 'Petrol',
-      location: { city: 'Mombasa' },
-      images: ['https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&h=800&fit=crop'],
-      isPromoted: true,
-      views: 890,
-      escrowEnabled: true,
-      ntsaVerified: true,
-    },
-    {
-      _id: 'featured-3',
-      title: 'Range Rover Sport HSE 2023',
-      brand: 'Range Rover',
-      model: 'Sport HSE',
-      price: 16800000,
-      year: 2023,
-      mileage: '15,800 km',
-      fuel: 'Diesel',
-      location: { city: 'Nairobi' },
-      images: ['https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=1200&h=800&fit=crop'],
-      isPromoted: true,
-      views: 720,
-      escrowEnabled: true,
-      dealer: { name: 'Premium Motors KE' },
-    },
-  ];
-
-  const displayCars = cars.length > 0 ? cars : demoCars;
+  const displayCars = cars;
 
   const nextSlide = useCallback(() => {
     setCurrentIndex(prev => (prev + 1) % displayCars.length);
@@ -163,7 +111,7 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
     const imgs = car.images || [];
     const img = imgs[0];
     if (typeof img === 'string') return img;
-    return img?.url || 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?w=1200&h=800&fit=crop';
+    return img?.url || '';
   };
 
   return (

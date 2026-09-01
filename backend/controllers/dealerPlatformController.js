@@ -31,7 +31,7 @@ export async function getDealerDashboard(req, res) {
   try {
     const dealerId = req.user.id;
     const [listings, leads, releasedEscrows] = await Promise.all([
-      Car.find({ dealer: dealerId, isDemo: { $ne: true } }),
+      Car.find({ dealer: dealerId }),
       Lead.find({ dealer: dealerId }),
       Escrow.find({ seller: dealerId, status: "released" }),
     ]);

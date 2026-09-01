@@ -5,7 +5,6 @@ import {
   BankDocumentItem, 
   BankCommunicationMessage 
 } from '../../../types';
-import { MOCK_BANK_APPLICATIONS } from '../../../data/mockBankApplications';
 import { Landmark, ShieldCheck, CheckCircle2, Clock, FileText, DollarSign, Users, Car, MessageSquare, BarChart3, Settings, Search, UploadCloud, Download, Eye, Send, Check, FileCheck, Sparkles, TrendingUp, CreditCard, Zap, AlertCircle } from 'lucide-react';
 import { 
   StatWidget, 
@@ -54,14 +53,14 @@ export const BankFinancingPortal: React.FC<BankFinancingPortalProps> = ({
   const [activeModule, setActiveModule] = useState<BankPortalModule>('dashboard');
 
   // Master Applications Dataset
-  const [applications, setApplications] = useState<BankFinancingApplication[]>(MOCK_BANK_APPLICATIONS);
+  const [applications, setApplications] = useState<BankFinancingApplication[]>([]);
 
   // Status Filter for Applications Module (Pending | Under Review | Approved | Rejected | Completed | All)
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Selected Application for Detail Modal & Action Center
-  const [selectedApp, setSelectedApp] = useState<BankFinancingApplication | null>(MOCK_BANK_APPLICATIONS[0]);
+  const [selectedApp, setSelectedApp] = useState<BankFinancingApplication | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   // Decision Modal State

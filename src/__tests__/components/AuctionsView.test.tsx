@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuctionsView } from '../../features/AuctionsView/components/AuctionsView';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
 
 describe('AuctionsView - escrow accuracy (first test coverage for this component)', () => {
   const baseProps = {

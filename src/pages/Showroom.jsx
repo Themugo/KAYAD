@@ -47,7 +47,6 @@ import useMediaQuery from '../hooks/useMediaQuery';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 import useDebouncedValue from '../hooks/useDebouncedValue';
 import { ItemListStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
-import DEMO_CARS from '../data/demoCars';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import ShowroomEmptyState from './showroom/components/ShowroomEmptyState';
@@ -250,8 +249,8 @@ export default function Showroom() {
       const data = await carsAPI.list(getApiParams(pageNum));
       const newCars = data.data || data.cars || [];
       if (replace && (!newCars || newCars.length === 0)) {
-        setCars(DEMO_CARS);
-        setTotalCount(DEMO_CARS.length);
+        setCars([]);
+        setTotalCount(0);
         setHasMore(false);
         setShowroomError(null);
       } else {
@@ -280,10 +279,10 @@ export default function Showroom() {
       
       toast(errorMessage, 'error');
       if (replace) {
-        setCars(DEMO_CARS);
-        setTotalCount(DEMO_CARS.length);
+        setCars([]);
+        setTotalCount(0);
         setHasMore(false);
-        setShowroomError(null);
+        setShowroomError(errorMessage);
       }
     } finally {
       setLoading(false);

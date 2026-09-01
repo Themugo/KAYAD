@@ -26,19 +26,10 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     return { success: false, message: "Payment already in progress", payment: existing };
   }
 
-  let checkoutID = "MOCK_" + Date.now();
-  let mode = "mock";
-
-  try {
-    const stkRes = await stkPush(formattedPhone, amount);
-    if (stkRes?.CheckoutRequestID) {
-      checkoutID = stkRes.CheckoutRequestID;
-      mode = String(checkoutID).toLowerCase().startsWith("mock_") ? "mock" : "mpesa";
-    }
-  } catch (err) {
-    if (process.env.NODE_ENV !== "development") throw err;
-    console.warn("STK Push failed, using mock mode:", err.message);
-  }
+  const stkRes = await stkPush(formattedPhone, amount);
+  const checkoutID = stkRes?.CheckoutRequestID;
+  if (!checkoutID) throw new Error("M-Pesa did not return a checkout request ID");
+  const mode = "mpesa";
 
   const payment = await create("payments", {
     user: userId,

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
 
 // Fixed: mid-grid sponsor cards previously came from MOCK_SPONSOR_CARDS
 // (static, always-present placeholder data) - now fetched for real via

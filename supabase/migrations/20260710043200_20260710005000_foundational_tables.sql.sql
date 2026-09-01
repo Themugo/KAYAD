@@ -58,11 +58,9 @@ inert and misleading about how this app actually enforces access.
 Cross-referenced against three sources rather than invented: the
 ALTER TABLE cars ADD COLUMN statements in the later migration (slug,
 approved, inspection_status, deleted_at); the exact column list
-seed_demo_vehicles.sql.sql's INSERT statement sets (brand, fuel, engine,
-location_city, auction_status, auction_end, current_bid, bids_count,
-allow_bid, allow_buy, is_promoted, is_verified_dealer, deal_rating - all
-of which disagree with backend/db/schema_clean.sql's naming, and take
-precedence here as already-committed, already-real evidence); and
+the production vehicle field list used by the backend and application
+field mapping; these names take precedence over stale legacy schema
+documentation; and
 update_car_bid_stats.sql.sql's RPC function, which proves bids reference
 cars.id directly (bids.car_id) rather than a separate auctions entity -
 there is no auctions table in this migration. highest_bidder_id,
@@ -198,10 +196,8 @@ CREATE TABLE IF NOT EXISTS cars (
   -- objects ({url, thumb, public_id, _pending}, later replaced with
   -- Cloudinary's own {url, public_id, ...} shape by a background job),
   -- not plain URL strings - both the initial insert and the follow-up
-  -- Cloudinary-upload update write this richer shape. seed_demo_vehicles.sql.sql's
-  -- images values were rewritten from ARRAY['url1','url2'] to
-  -- '[{"url":"url1"},{"url":"url2"}]'::jsonb to match, rather than
-  -- leaving the seed data internally inconsistent with the real app.
+  -- Cloudinary-upload update writes this richer shape: an array of
+  -- URL-bearing objects, later enriched with Cloudinary metadata.
   images JSONB DEFAULT '[]',
   location_city TEXT,
   vin TEXT,

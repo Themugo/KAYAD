@@ -1,8 +1,8 @@
 import type React from 'react';
-import { createContext, useContext, useState, useMemo } from 'react';
+import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Vehicle, BodyStyle } from '../types';
-import { mockVehicles, mockEscrowContracts, mockBids, mockNotifications } from '../data/mockData';
+import { getCars, mapBackendCarToVehicle } from '../services/vehicleApi';
 import { bidsAPI } from '../api/api';
 import type { FC } from 'react';
 
@@ -129,36 +129,7 @@ const PAGE_TO_PATH: Record<PageView, string> = {
   sell: '/sell',
 };
 
-export const initialAdverts: Advert[] = [
-  {
-    id: 'adv_1',
-    title: 'M-Pesa Zero-Fee Escrow Weekend',
-    subtitle: 'Pay 0% escrow transaction fee on all verified Land Cruiser & Porsche auctions until Sunday.',
-    badgeTag: 'PROMOTION',
-    ctaText: 'Explore Live Auctions',
-    ctaPage: 'auctions',
-    theme: 'cyan_navy',
-    placement: 'homepage',
-    imageUrl: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80',
-    isActive: true,
-    clicksCount: 342,
-    createdAt: '2024-02-14T10:00:00Z'
-  },
-  {
-    id: 'adv_2',
-    title: 'Get 150-Point Ghost Check Verified',
-    subtitle: 'Free physical KRA logbook & structural inspection for all new seller listings this month.',
-    badgeTag: 'SPECIAL DEAL',
-    ctaText: 'Book Inspection',
-    ctaPage: 'ghost_check',
-    theme: 'emerald_escrow',
-    placement: 'search_feed',
-    imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
-    isActive: true,
-    clicksCount: 189,
-    createdAt: '2024-02-12T08:00:00Z'
-  }
-];
+
 
 export type PageView = 
   | 'home'
@@ -244,20 +215,39 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   const [navHistory, setNavHistory] = useState<PageView[]>(['home']);
   const [navIndex, setNavIndex] = useState<number>(0);
 
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>('veh_1');
-  const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [savedVehicleIds, setSavedVehicleIds] = useState<string[]>(['veh_1', 'veh_5']);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [savedVehicleIds, setSavedVehicleIds] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
-  const [bids, setBids] = useState<BidLocal[]>(mockBids as BidLocal[]);
-  const [escrowContracts, setEscrowContracts] = useState<EscrowContractLocal[]>(mockEscrowContracts as EscrowContractLocal[]);
-  const [notifications, setNotifications] = useState<NotificationItemLocal[]>(mockNotifications as NotificationItemLocal[]);
+  const [bids, setBids] = useState<BidLocal[]>([]);
+  const [escrowContracts, setEscrowContracts] = useState<EscrowContractLocal[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItemLocal[]>([]);
   
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [activeChatVehicleId, setActiveChatVehicleId] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const navigate = useNavigate();
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    getCars({ limit: 100 })
+      .then((response) => {
+        if (cancelled) return;
+        const mapped = (response.data || []).map(mapBackendCarToVehicle);
+        setVehicles(mapped);
+        setSelectedVehicleId((current) => current && mapped.some((v) => v.id === current) ? current : null);
+      })
+      .catch(() => {
+        if (!cancelled) setVehicles([]);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
 
   const navigateTo = (page: PageView, vehicleId?: string) => {
     if (vehicleId) {
@@ -502,7 +492,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     return newVehicle;
   };
 
-  const [adverts, setAdverts] = useState<Advert[]>(initialAdverts);
+  const [adverts, setAdverts] = useState<Advert[]>([]);
 
   const addAdvert = (data: Omit<Advert, 'id' | 'clicksCount' | 'createdAt'>): Advert => {
     const newAdv: Advert = {
@@ -531,21 +521,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     setAdverts(prev => prev.filter(a => a.id !== id));
   };
 
-  const [priceAlerts, setPriceAlerts] = useState<PriceAlertLocal[]>([
-    {
-      id: 'alert_1',
-      userId: 'user_1',
-      vehicleId: 'veh_c200',
-      vehicleTitle: '2009 Mercedes-Benz C200 Kompressor',
-      targetPrice: 1300000,
-      alertOnPriceDrop: true,
-      alertOnStatusChange: true,
-      currentPriceAtSet: 1400000,
-      notifyMethod: 'both',
-      createdAt: new Date().toISOString(),
-      isActive: true
-    }
-  ]);
+  const [priceAlerts, setPriceAlerts] = useState<PriceAlertLocal[]>([]);
 
   const setPriceAlert = (alertData: Omit<PriceAlertLocal, 'id' | 'createdAt' | 'isActive'>): PriceAlertLocal => {
     const existingIndex = priceAlerts.findIndex(a => a.vehicleId === alertData.vehicleId && a.userId === alertData.userId);

@@ -3,9 +3,9 @@
  * Supabase Setup Script for KAYAD
  * 
  * This script helps set up Supabase for the KAYAD project:
- * 1. Applies the database schema
- * 2. Sets up storage buckets
- * 3. Configures Row Level Security policies
+ * 1. Verifies Supabase connectivity
+ * 2. Applies the versioned migration chain
+ * 3. Optionally sets up storage (only when explicitly requested)
  * 
  * Usage:
  *   node scripts/setup-supabase.js --apply-schema
@@ -86,42 +86,6 @@ async function executeSQL(sql) {
     return { success: false, status, data };
   }
   return { success: true, data };
-}
-
-/**
- * Apply database schema
- */
-async function applySchema() {
-  console.log('\n📦 Applying database schema...\n');
-
-  const schemaPath = path.join(__dirname, '../backend/db/schema.sql');
-  const schema = fs.readFileSync(schemaPath, 'utf8');
-
-  // For Supabase, we need to use the Management API
-  // Since direct SQL isn't available, we'll output instructions
-  
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('📋 MANUAL STEP REQUIRED: Apply Database Schema');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('\n1. Go to: https://supabase.com/dashboard');
-  console.log('2. Select your project');
-  console.log('3. Click "SQL Editor" in the left sidebar');
-  console.log('4. Click "New Query"');
-  console.log(`5. Copy the contents of: ${schemaPath}`);
-  console.log('6. Paste into the SQL Editor');
-  console.log('7. Click "Run" or press Ctrl+Enter');
-  console.log('\n✅ Schema includes:');
-  console.log('   - Users table with role-based access');
-  console.log('   - Cars/Vehicles table');
-  console.log('   - Auctions and Bids tables');
-  console.log('   - Escrow system tables');
-  console.log('   - Payments table');
-  console.log('   - Chat and Messaging tables');
-  console.log('   - Notifications table');
-  console.log('   - 50+ additional tables for full functionality');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-  return { success: 'manual' };
 }
 
 /**
@@ -274,11 +238,11 @@ function printSummary() {
   console.log('║                                                                ║');
   console.log('║  Next steps to complete setup:                                ║');
   console.log('║                                                                ║');
-  console.log('║  1. 📦 Apply Database Schema                                   ║');
-  console.log('║     → backend/db/schema.sql                                    ║');
-  console.log('║                                                                ║');
-  console.log('║  2. 🔄 Apply Migrations                                       ║');
+  console.log('║  1. 📦 Apply Versioned Database Migrations                     ║');
   console.log('║     → supabase/migrations/*.sql                                ║');
+  console.log('║                                                                ║');
+  console.log('║  2. 🔐 Configure RLS Policies                                 ║');
+  console.log('║     → Use the versioned migration chain                        ║');
   console.log('║                                                                ║');
   console.log('║  3. 🗄️  Setup Storage Bucket                                  ║');
   console.log('║     → Create "kayad-images" bucket in Storage                  ║');
@@ -286,8 +250,8 @@ function printSummary() {
   console.log('║  4. 🔐 Configure RLS Policies                                 ║');
   console.log('║     → Enable Row Level Security on tables                     ║');
   console.log('║                                                                ║');
-  console.log('║  5. 🚀 Run Backend Seed                                       ║');
-  console.log('║     → cd backend && npm run seed                               ║');
+  console.log('║  5. 🚫 Do not seed demo/sample marketplace data                ║');
+  console.log('║     → Production starts with real users and real inventory      ║');
   console.log('║                                                                ║');
   console.log('╚════════════════════════════════════════════════════════════════╝\n');
 }
@@ -312,10 +276,6 @@ async function main() {
       // Just verify, done above
       break;
 
-    case '--apply-schema':
-      await applySchema();
-      break;
-
     case '--migrations':
       await applyMigrations();
       break;
@@ -327,9 +287,7 @@ async function main() {
 
     case '--all':
     default:
-      await applySchema();
       await applyMigrations();
-      await setupStorage();
       printSummary();
       break;
   }

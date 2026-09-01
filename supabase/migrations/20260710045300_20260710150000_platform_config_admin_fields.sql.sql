@@ -39,7 +39,6 @@ ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS max_listing_images INTEGER;
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS allow_guest_browsing BOOLEAN DEFAULT true;
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS require_dealer_approval BOOLEAN DEFAULT false;
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS dealer_trial_days INTEGER;
-ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS demo_mode BOOLEAN DEFAULT false;
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS font_display TEXT;
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS font_body TEXT;
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS font_size_pct NUMERIC;

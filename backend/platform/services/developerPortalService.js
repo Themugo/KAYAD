@@ -595,9 +595,9 @@ class DeveloperPortalService {
       created_at: new Date(),
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       features: {
-        mock_listings: true,
-        mock_auctions: true,
-        mock_payments: true,
+        test_listings: true,
+        test_auctions: true,
+        test_payments: true,
         webhook_testing: true,
         rate_limit: 1000,
       },

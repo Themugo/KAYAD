@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, X, Trash2, ArrowRight, Calendar, Gauge, Fuel, MapPin, Settings } from 'lucide-react';
 import { useCompare } from '../context/CompareContext';
-import { CARS } from '../data/cars';
+import { carsAPI } from '../api/api';
 import { formatKES } from '../utils/helpers';
 
 interface CompareProps {
@@ -13,11 +13,13 @@ interface CompareProps {
 export default function Compare({ setPage, viewCar }: CompareProps) {
   const { compareIds, removeCar, clearAll, compareCount } = useCompare();
 
-  // Get car data from CARS array
-  const compareCars = useMemo(() => {
-    return compareIds
-      .map(id => CARS.find(car => String(car.id) === id))
-      .filter(Boolean);
+  const [compareCars, setCompareCars] = useState<any[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(compareIds.map(id => carsAPI.get(id).catch(() => null)))
+      .then(results => { if (!cancelled) setCompareCars(results.map((r: any) => r?.car || r?.data || r).filter(Boolean)); });
+    return () => { cancelled = true; };
   }, [compareIds]);
 
   const specs = [

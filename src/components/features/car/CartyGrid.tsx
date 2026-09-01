@@ -25,7 +25,6 @@ interface Car {
   transmission?: string;
   mileage?: number;
   ntsaVerified?: boolean;
-  isDemo?: boolean;
   isPromoted?: boolean;
   escrowEnabled?: boolean;
   status?: string;
@@ -101,11 +100,6 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               <div style={{ position: 'absolute', top: 10, left: 10, padding: '3px 9px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: 'rgba(239,68,68,0.92)', color: '#fff', letterSpacing: '0.06em' }}>
                 <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite', marginRight: 4 }} />
                 LIVE
-              </div>
-            )}
-            {car.isDemo && (
-              <div style={{ position: 'absolute', top: 10, right: 10 }}>
-                <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.1em', background: 'rgba(245,158,11,0.92)', color: '#1a1200', padding: '2px 7px', borderRadius: 4 }}>DEMO</span>
               </div>
             )}
           </div>

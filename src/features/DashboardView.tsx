@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile, SavedSearch } from '../types';
-import { INITIAL_MECHANICS, INITIAL_INSPECTION_BOOKINGS } from '../data/mockInspections';
-import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { 
   LayoutDashboard, 
   Heart, 

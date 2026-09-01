@@ -23,14 +23,6 @@ constraint violation wouldn't).
   non-conflicting - but an empty string is a distinct, non-NULL value
   that would incorrectly collide with any other blank-VIN listing
   under a plain UNIQUE constraint. The partial index avoids that.
-- isDemo is deliberately NOT excluded here at the database level (only
-  the application-level check in createCar excludes isDemo=true
-  listings) - a database constraint has no clean way to express "except
-  demo rows" without a more invasive schema change, and demo/seed data
-  is expected to be curated carefully enough not to collide in
-  practice. The database constraint's job is defense-in-depth against
-  the real, adversarial case (two real listings racing), not
-  replicating every nuance of the application-level rule.
 - Uses CREATE UNIQUE INDEX CONCURRENTLY... wait: CONCURRENTLY cannot
   run inside a transaction block, which most migration runners
   (including Supabase's) wrap each migration in by default. Using a

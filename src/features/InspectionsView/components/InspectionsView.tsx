@@ -1,13 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, InspectionCategoryDetail } from '../../../types';
 import PrePurchaseInspectionPortal from './PrePurchaseInspectionPortal';
-import { 
-  INITIAL_MECHANICS, 
-  INITIAL_INSPECTION_REPORTS, 
-  INITIAL_INSPECTION_BOOKINGS, 
-  INITIAL_INSPECTION_PAYMENTS, 
-  INITIAL_INSPECTION_RATINGS 
-} from '../../../data/mockInspections';
 import { getMyInspections, BackendInspectionOrder } from '../../../services/inspectionApi';
 import { ShieldCheck, Search, MapPin, Star, CheckCircle2, Clock, FileCheck, Award, Wrench, Calendar, PlusCircle, X, Download, Eye, Sparkles, Check, ThumbsUp, Activity, Navigation, User } from 'lucide-react';
 import { PageHeader, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, LazyImage, Modal } from '../../../components/ui';
@@ -121,11 +114,11 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   onViewVehicleDetails 
 }) => {
   // State
-  const [mechanics] = useState<Mechanic[]>(INITIAL_MECHANICS);
-  const [reports, setReports] = useState<InspectionReport[]>(INITIAL_INSPECTION_REPORTS);
-  const [bookings, setBookings] = useState<InspectionBooking[]>(INITIAL_INSPECTION_BOOKINGS);
-  const [payments] = useState<InspectionPayment[]>(INITIAL_INSPECTION_PAYMENTS);
-  const [ratings, setRatings] = useState<InspectionRating[]>(INITIAL_INSPECTION_RATINGS);
+  const [mechanics] = useState<Mechanic[]>([]);
+  const [reports, setReports] = useState<InspectionReport[]>([]);
+  const [bookings, setBookings] = useState<InspectionBooking[]>([]);
+  const [payments] = useState<InspectionPayment[]>([]);
+  const [ratings, setRatings] = useState<InspectionRating[]>([]);
 
   // Real-data connection for Bookings Tracker / Digital Reports tabs -
   // the two tabs with a genuine backend match (GET /api/inspections/my,
@@ -137,7 +130,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   // (including "not logged in", since this endpoint requires auth),
   // and track which source is actually showing so the UI can be
   // truthful about it rather than silently mixing real and mock rows.
-  const [inspectionDataSource, setInspectionDataSource] = useState<'live' | 'demo'>('demo');
+  const [inspectionDataSource, setInspectionDataSource] = useState<'live' | 'empty'>('empty');
   const [isFetchingInspections, setIsFetchingInspections] = useState(false);
 
   useEffect(() => {
@@ -157,10 +150,12 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         setReports(completedOrders.map(mapOrderToReport));
         setInspectionDataSource('live');
       } catch {
-        // Expected for a logged-out visitor (this endpoint requires
-        // auth) or if the backend is unreachable - the mock data
-        // already in state remains the fallback, matching the
-        // vehicle-list pattern's own established behavior.
+        // Production mode never falls back to synthetic inspection records.
+        if (!cancelled) {
+          setBookings([]);
+          setReports([]);
+          setInspectionDataSource('empty');
+        }
       } finally {
         if (!cancelled) setIsFetchingInspections(false);
       }
@@ -192,15 +187,15 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   // Booking Form State
   const [targetVehicleId, setTargetVehicleId] = useState<string>(initialSelectedVehicle?.id || (vehicles[0]?.id || 'custom'));
   const [customVehicleTitle, setCustomVehicleTitle] = useState<string>('');
-  const [customVehicleLocation, setCustomVehicleLocation] = useState<string>('Westlands, Nairobi');
+  const [customVehicleLocation, setCustomVehicleLocation] = useState<string>('');
   const [customVehicleVin, setCustomVehicleVin] = useState<string>('');
   const [chosenMechanicId, setChosenMechanicId] = useState<string>(mechanics[0]?.id || '');
   const [buyerName, setBuyerName] = useState<string>('');
   const [buyerPhone, setBuyerPhone] = useState<string>('');
   const [buyerEmail, setBuyerEmail] = useState<string>('');
   const [inspectorNotes, setInspectorNotes] = useState<string>('');
-  const [scheduledDate, setScheduledDate] = useState<string>('2026-08-05');
-  const [scheduledTime, setScheduledTime] = useState<string>('10:00 AM');
+  const [scheduledDate, setScheduledDate] = useState<string>('');
+  const [scheduledTime, setScheduledTime] = useState<string>('');
   const [packageType, setPackageType] = useState<InspectionBooking['packageType']>('150-Point Comprehensive');
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card' | 'escrow'>('mpesa');
   const [newBookingId, setNewBookingId] = useState<string | null>(null);

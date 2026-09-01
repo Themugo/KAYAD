@@ -2,7 +2,6 @@ import type { FC } from 'react';
 import type React from 'react';
 import { useState } from 'react';
 import { Building2, Star, MapPin, Phone, Mail, ShieldCheck, CheckCircle2, Calendar } from 'lucide-react';
-import { mockDealers } from '../../data/mockData';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { VehicleCard } from '../gallery/VehicleCard';
 import { Button } from '../ui/Button';
@@ -12,7 +11,16 @@ import { SearchBar } from '../ui/SearchBar';
 
 export const DealerProfilePage: FC = () => {
   const { vehicles, openChat } = useMarketplace();
-  const dealer = mockDealers[0];
+  const dealer = null;
+
+  if (!dealer) {
+    return (
+      <div className="py-16 px-6 text-center max-w-3xl mx-auto">
+        <h1 className="text-2xl font-bold text-[#2E4080]">Dealer profile unavailable</h1>
+        <p className="mt-2 text-sm text-[#6B7A99]">A real dealer profile must be loaded from the KAYAD backend before inventory is displayed.</p>
+      </div>
+    );
+  }
 
   const dealerVehicles = vehicles.filter(v => v.dealerId === dealer.id || v.sellerId === dealer.id);
 

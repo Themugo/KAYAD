@@ -451,7 +451,7 @@ export const calculateResponseScore = async (dealerId) => {
 
 export const calculateListingQualityScore = async (dealerId) => {
   try {
-    const cars = await findAll("cars", { filters: { dealer: dealerId, isDemo: false } });
+    const cars = await findAll("cars", { filters: { dealer: dealerId } });
 
     if (cars.length === 0) {
       return { score: 70, details: { totalListings: 0 } };

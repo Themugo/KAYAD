@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { INITIAL_AUCTION_SESSIONS } from '../../data/mockAuctions';
+import { INITIAL_AUCTION_SESSIONS } from '../fixtures/mockAuctions';
 
 describe('mockAuctions - session dates stay logically consistent with their status', () => {
   // Found a second, independent instance of the same stale-date bug

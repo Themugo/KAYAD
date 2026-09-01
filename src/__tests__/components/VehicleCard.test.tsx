@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { VehicleCard } from '../../components/VehicleCard';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
-import { INITIAL_AUCTION_SESSIONS } from '../../data/mockAuctions';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
+import { INITIAL_AUCTION_SESSIONS } from '../fixtures/mockAuctions';
 
 describe('VehicleCard - size reduction (scale/density pass)', () => {
   const vehicle = INITIAL_VEHICLES[0];

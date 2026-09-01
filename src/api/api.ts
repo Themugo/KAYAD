@@ -2,6 +2,7 @@ import axios from 'axios';
 
 export const api = axios.create({
   baseURL: '/api',
+  withCredentials: true,
   // A hanging request must not hang the UI forever — network
   // interruptions surface as an error the page can render honestly.
   timeout: 30000,
@@ -10,13 +11,6 @@ export const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('kayad_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 // Auth endpoints return 401 as a normal part of their own flows
 // (bad credentials, "not logged in" probes) — those must NOT trigger
@@ -31,7 +25,6 @@ api.interceptors.response.use(
     // (it listens for this event) instead of silently showing stale
     // or empty data.
     if (error?.response?.status === 401 && !isAuthEndpoint(error?.config?.url)) {
-      localStorage.removeItem('kayad_token');
       window.dispatchEvent(new Event('kayad:auth-expired'));
     }
     return Promise.reject(error);

@@ -163,17 +163,6 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
     const baseUrl =
       cfg.environment === "production" ? "https://api.safaricom.co.ke" : "https://sandbox.safaricom.co.ke";
 
-    // Mock mode for testing
-    if (cfg.environment === "mock") {
-      logInfo("M-Pesa MOCK STK push", { phone, amount });
-      incrementCounter("mpesa_stk_push_mock");
-      return {
-        CheckoutRequestID: "mock_" + Date.now(),
-        ResponseCode: "0",
-        CustomerMessage: "STK push simulated",
-        mock: true,
-      };
-    }
 
     if (!cfg.consumerKey || !cfg.consumerSecret || !cfg.shortCode || !cfg.passkey) {
       const error = new Error("M-Pesa not configured — set Daraja keys in Admin Settings");

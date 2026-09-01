@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Vehicle } from '../types';
-import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { isEscrowApplicable } from '../utils/escrow';
 import { 
   ShieldCheck, 
@@ -85,13 +84,9 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
       ? `${Math.floor(msRemaining / 60000)}:${String(Math.floor((msRemaining % 60000) / 1000)).padStart(2, '0')}`
       : null;
 
-  // Live price: for auction vehicles with a real auction session, the
-  // session's currentBid is the truth — vehicle.price is the stale
-  // starting price and visibly disagrees with the auction page.
-  const liveAuctionSession = vehicle.isAuction
-    ? INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id)
-    : undefined;
-  const displayPrice = liveAuctionSession?.currentBid ?? vehicle.price;
+  // The vehicle payload is the source of truth until a dedicated auction
+  // session endpoint is loaded; never substitute sample auction data.
+  const displayPrice = vehicle.currentBid ?? vehicle.price;
 
   // Seller display text
   const sellerDisplayName = vehicle.dealerName || vehicle.sellerName || (vehicle.sellerType === 'Private Seller' ? 'Private Seller' : 'Verified Dealer');

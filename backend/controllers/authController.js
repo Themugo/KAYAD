@@ -55,7 +55,7 @@ const hashToken = (token) => crypto.createHash("sha256").update(String(token)).d
 const SAFE_USER_FIELDS = [
   "_id", "id", "name", "email", "role", "phone", "avatar", "status",
   "isBanned", "approved", "location", "dealerRating", "bio",
-  "businessName", "businessType", "isDemo", "createdAt", "updatedAt",
+  "businessName", "businessType", "createdAt", "updatedAt",
   "lastLogin", "lastLoginAt", "referralCode", "credits",
   "emailVerified", "phoneVerified", "verificationStatus",
   "dealerPackage", "packageListingMax", "packageFeatures", "packageExpiresAt",
@@ -373,63 +373,6 @@ export const login = async (req, res) => {
   } catch (err) {
     logError("❌ LOGIN ERROR", err);
     R.error(res, "Login failed", 500);
-  }
-};
-
-// =============================
-// 👤 DEMO LOGIN (one-click, no password)
-// =============================
-const DEMO_ACCOUNTS = {
-  dealer: { email: "dealer@kayad.space", role: "dealer" },
-  seller: { email: "seller@kayad.space", role: "individual_seller" },
-  buyer:  { email: "buyer@kayad.space",  role: "user" },
-};
-
-// Demo login is passwordless, so it must never be reachable in production
-// unless explicitly enabled. Default: allowed outside production only;
-// ENABLE_DEMO_LOGIN=true is required to enable it in production.
-export const isDemoLoginEnabled = () => {
-  if (process.env.ENABLE_DEMO_LOGIN === "true") return true;
-  return process.env.NODE_ENV !== "production";
-};
-
-export const demoLogin = async (req, res) => {
-  try {
-    if (!isDemoLoginEnabled()) {
-      return res.status(403).json({ success: false, message: "Demo login is disabled" });
-    }
-
-    const { role } = req.body;
-    const demo = DEMO_ACCOUNTS[role];
-    if (!demo) {
-      return res.status(400).json({ success: false, message: "Invalid demo account" });
-    }
-
-    const user = await User.findOne({ email: demo.email, isDemo: true });
-    const userAuth = user ? await UserAuth.findOne({ user: user._id }).select("+password +tokenVersion") : null;
-
-    if (!user || !userAuth) {
-      return res.status(404).json({
-        success: false,
-        message: "Demo account not found. Run seed first.",
-      });
-    }
-
-    // Fixed (Final Integration Phase 5 - API/database contract
-    // certification): removed the redundant `user.lastLogin =
-    // new Date()` line that was here - reproduced the real failure
-    // directly ("Could not find the 'last_login' column of
-    // 'users'"): no such column exists, only last_login_at
-    // (which lastLoginAt already correctly maps to). This was a
-    // real, blocking defect - user.save() writes every enumerable
-    // field, so this alone failed every single successful login.
-    user.lastLoginAt = new Date();
-    await user.save();
-
-    return await sendAuthResponse(res, user, null, req, userAuth?.tokenVersion || 0);
-  } catch (err) {
-    logError("❌ DEMO LOGIN ERROR", err);
-    R.error(res, "Demo login failed", 500);
   }
 };
 

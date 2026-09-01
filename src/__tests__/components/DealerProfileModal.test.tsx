@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DealerProfileModal } from '../../features/DealersView/components/DealerProfileModal';
-import { INITIAL_DEALER_BUSINESSES } from '../../data/mockDealersData';
-import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_DEALER_BUSINESSES } from '../fixtures/data/mockDealersData';
+import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
 
 describe('DealerProfileModal', () => {
   const baseProps = {

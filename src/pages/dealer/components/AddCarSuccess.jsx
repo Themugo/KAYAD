@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { CheckCircle, Clock } from 'lucide-react';
 
 export default function AddCarSuccess({ done, user, onReset }) {
-  const needsReview = user?.role === 'dealer' && !user?.isDemo;
+  const needsReview = user?.role === 'dealer';
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 80, paddingBottom: 32, maxWidth: 560 }}>

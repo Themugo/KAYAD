@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { UnifiedChatThread, UnifiedMessageItem, MessageAttachment, Vehicle, SharedTransactionFile } from '../../../types';
-import { MOCK_UNIFIED_THREADS } from '../../../data/mockUnifiedCommunication';
 import { MessageSquare, Bell, Lock, Gavel, ClipboardCheck, Landmark, Search, Send, Paperclip, Image as ImageIcon, FileText, MapPin, Calendar, Check, CheckCheck, ShieldCheck, Eye, Download, Sparkles, Car, ArrowUpRight, Clock, Building2, Users, Ticket, ChevronLeft, Unlock, FileCheck, UserCheck, Upload, Info, Layers } from 'lucide-react';
 import { Card, Badge, Button, Input, Modal, LazyImage } from '../../../components/ui';
 
@@ -20,8 +19,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   onNavigateToAuctions
 }) => {
   // Master Threads State
-  const [threads, setThreads] = useState<UnifiedChatThread[]>(MOCK_UNIFIED_THREADS);
-  const [selectedThreadId, setSelectedThreadId] = useState<string>(MOCK_UNIFIED_THREADS[0].id);
+  const [threads, setThreads] = useState<UnifiedChatThread[]>([]);
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
   // Filter & Search State
   const [activeCategory, setActiveCategory] = useState<string>('all');

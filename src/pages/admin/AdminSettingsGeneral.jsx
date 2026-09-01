@@ -45,7 +45,6 @@ export default function AdminSettingsGeneral({ config, setConfig, saveConfig, sa
           { key: 'requireDealerApproval', label: 'Require Dealer Approval' },
           { key: 'waivePayments', label: 'Waive Payments (skip all payment/trial enforcement)' },
           { key: 'freeMarket', label: 'Free Market (no fees, no commissions)' },
-          { key: 'demoMode', label: 'Demo Mode (show demo content in marketplace)' },
         ].map(f => (
           <label key={f.key} style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'8px 0' }}>
             <input type="checkbox" checked={config[f.key]}

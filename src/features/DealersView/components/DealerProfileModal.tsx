@@ -3,7 +3,6 @@ import { Dealer, Vehicle, BodyStyle } from '../../../types';
 import { Building2, ShieldCheck, MapPin, Star, Phone, Mail, CheckCircle2, Clock, UserCheck, Lock, Award, MessageSquare, FileCheck, Share2, Heart, Navigation, Calendar, Search, X, ArrowRight, Sparkles, ChevronRight, CreditCard, Globe, Landmark, Eye, Compass, Car } from 'lucide-react';
 import { Modal, Badge, Button, LazyImage } from '../../../components/ui';
 import VehicleCard from '../../../components/VehicleCard';
-import { INITIAL_DEALER_BUSINESSES } from '../../../data/mockDealersData';
 
 interface DealerProfileModalProps {
   dealer: Dealer | null;
@@ -17,7 +16,7 @@ interface DealerProfileModalProps {
 
 export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
   dealer,
-  allDealers = INITIAL_DEALER_BUSINESSES,
+  allDealers = [],
   vehicles,
   onClose,
   onQuickViewVehicle,

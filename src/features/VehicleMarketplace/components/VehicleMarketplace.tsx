@@ -159,15 +159,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const isLoading = isLoadingReal ?? simulatedLoading;
 
   // Recently Viewed Vehicles Tracking (stored in localStorage)
-  const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem('kayad_recently_viewed');
-      return stored ? JSON.parse(stored) : ['v1', 'v3', 'v5'];
-    } catch {
-      return ['v1', 'v3', 'v5'];
-    }
-  });
-
+  const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
   // Track quick view click for recently viewed list
   const handleVehicleSelect = useCallback((vehicle: Vehicle) => {
     setRecentlyViewedIds((prev) => {
@@ -184,11 +176,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [onQuickView]);
 
   // Saved Searches State
-  const [savedPresets, setSavedPresets] = useState<SavedSearchPreset[]>([
-    { id: 'p1', name: 'Under Ksh 3.5M SUVs', make: 'All', model: 'All', maxPrice: 3500000, bodyStyle: 'SUV', fuel: 'All', location: 'All East Africa', createdDate: '2026-07-28' },
-    { id: 'p2', name: 'Toyota Land Cruisers', make: 'Toyota', model: 'All', maxPrice: 15000000, bodyStyle: 'All', fuel: 'All', location: 'Nairobi', createdDate: '2026-07-25' },
-    { id: 'p3', name: 'Low-Mileage Hybrids', make: 'All', model: 'All', maxPrice: 5000000, bodyStyle: 'All', fuel: 'Hybrid', location: 'All East Africa', createdDate: '2026-07-20' },
-  ]);
+  const [savedPresets, setSavedPresets] = useState<SavedSearchPreset[]>([]);
   const [newPresetName, setNewPresetName] = useState<string>('');
   const [showSaveSearchModal, setShowSaveSearchModal] = useState<boolean>(false);
 
@@ -471,7 +459,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // one full row in the 4-column grid, so each sponsor card lands at a
   // clean row boundary rather than breaking mid-row. Originally used an
   // every-8th interval (2 rows), but found while writing test coverage
-  // for this that the real mock dataset (INITIAL_VEHICLES) only has 6
   // vehicles - confirmed directly via a runtime console.log in a
   // throwaway debug test, not the file's own object-literal count via
   // grep, which turned out to be unreliable (matched nested object
@@ -482,7 +469,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // placement shows up even with a small catalog, while still reading
   // as a natural row-boundary insertion rather than every-item ad
   // clutter once the catalog is genuinely large.
-  // Fixed: this previously interleaved MOCK_SPONSOR_CARDS - static,
+  // Fixed: this previously interleaved static sponsor cards,
   // hardcoded placeholder content with no real advertiser or business
   // behind it at all. Now fetches real, backend-persisted ad slots
   // (placement='mid_grid') from the real Ad Manager system, mapped

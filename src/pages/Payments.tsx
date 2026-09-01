@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { paymentsAPI } from '../api/api';
+import { paymentsAPI } from '../api/api';
+import { useEffect, useState } from 'react';
 import { CreditCard, Smartphone, Building2, Clock, CheckCircle, AlertCircle, Download, ExternalLink } from 'lucide-react';
 import { formatKES } from '../utils/helpers';
 import { timeAgo } from '../utils/helpers';
@@ -15,37 +17,35 @@ interface Transaction {
   };
 }
 
-const DEMO_TRANSACTIONS: Transaction[] = [
-  {
-    id: '1',
-    type: 'payment',
-    amount: 18500000,
-    status: 'completed',
-    description: 'Escrow payment for Toyota Land Cruiser',
-    date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    car: { title: 'Toyota Land Cruiser GX-R 2024' },
-  },
-  {
-    id: '2',
-    type: 'payout',
-    amount: 450000,
-    status: 'completed',
-    description: 'Payout from vehicle sale',
-    date: new Date(Date.now() - 86400000 * 7).toISOString(),
-  },
-  {
-    id: '3',
-    type: 'refund',
-    amount: 500000,
-    status: 'pending',
-    description: 'Refund - Inspection fee',
-    date: new Date(Date.now() - 86400000 * 1).toISOString(),
-  },
-];
 
 export default function Payments() {
   const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'pending'>('all');
-  const [transactions] = useState<Transaction[]>(DEMO_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    paymentsAPI.myPayments().then((res: any) => {
+      if (cancelled) return;
+      const list = res?.payments || res?.data || [];
+      const normalized = (Array.isArray(list) ? list : []).map((item: any) => ({
+        id: String(item.id || item._id || item.referenceId || crypto.randomUUID?.() || Date.now()),
+        type: item.type || 'payment',
+        amount: Number(item.amount || 0),
+        status: item.status || 'pending',
+        description: item.description || item.purpose || 'Payment',
+        date: item.createdAt || item.created_at || new Date().toISOString(),
+        car: item.car ? { title: item.car.title || 'Vehicle' } : undefined,
+      }));
+      setTransactions(normalized);
+    }).catch(() => {
+      if (!cancelled) setLoadError('Unable to load your payment history. Please try again.');
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const filteredTransactions = transactions.filter(t => {
     if (activeTab === 'all') return true;
@@ -54,8 +54,6 @@ export default function Payments() {
     return true;
   });
 
-  const balance = 1250000;
-  const pendingBalance = 500000;
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -189,7 +187,11 @@ export default function Payments() {
               </div>
             ))}
 
-            {filteredTransactions.length === 0 && (
+            {loading ? (
+              <div className="p-12 text-center"><p className="font-sans text-sm text-warm-400">Loading transactions…</p></div>
+            ) : loadError ? (
+              <div className="p-12 text-center"><p className="font-sans text-sm text-red-500">{loadError}</p></div>
+            ) : filteredTransactions.length === 0 && (
               <div className="p-12 text-center">
                 <CreditCard size={32} className="text-cream-300 mx-auto mb-3" />
                 <p className="font-sans text-sm text-warm-400">No transactions found</p>

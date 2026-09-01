@@ -9,7 +9,7 @@ const router = express.Router();
 // Only these fields may be set via the inventory webhook. Previously the
 // entire item was spread into Car.create/$set, allowing a dealer (or a
 // leaked API key) to set privileged fields like featured, status,
-// auctionStatus, isDemo, escrowEnabled, or price locks.
+// auctionStatus, escrowEnabled, or price locks.
 const ALLOWED_FIELDS = [
   "title", "make", "model", "year", "price", "mileage", "fuelType",
   "transmission", "bodyType", "color", "engineSize", "description",

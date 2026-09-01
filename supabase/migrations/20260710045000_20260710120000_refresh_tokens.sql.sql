@@ -2,7 +2,7 @@
 # refresh_tokens — the most critical gap found this session
 
 controllers/authController.js's sendAuthResponse() - called
-unconditionally by register, login, demoLogin, AND refreshToken, i.e.
+unconditionally by register, login, AND refreshToken, i.e.
 every single authentication touchpoint in the app - does
 `await RefreshToken.create({...})` with no table backing it anywhere in
 this repo's schema. Confirmed directly: models/RefreshToken.js is (was)

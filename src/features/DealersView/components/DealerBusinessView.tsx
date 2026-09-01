@@ -1,13 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, Dealer, DealerTeamMember, DealerLead, DealerPromotion, DealerAnalytics } from '../../../types';
 import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
-import { 
-  INITIAL_DEALER_BUSINESSES, 
-  INITIAL_DEALER_TEAM, 
-  INITIAL_DEALER_LEADS, 
-  INITIAL_DEALER_PROMOTIONS, 
-  INITIAL_DEALER_ANALYTICS 
-} from '../../../data/mockDealersData';
+
 import { Building2, ShieldCheck, TrendingUp, Users, Car, Sparkles, BarChart3, PlusCircle, Search, Lock, Zap, Clock, X, UserCheck, Flame, FileText, Crown, Megaphone, Eye, Upload, FileSpreadsheet, Cpu, AlertTriangle, Gavel, Landmark, RefreshCw, PieChart, CreditCard, FileCheck } from 'lucide-react';
 import { 
   StatWidget, 
@@ -121,6 +115,15 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   onQuickViewVehicle,
   onStartEscrow
 }) => {
+  if (!currentDealer) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold">Dealer profile not available</h2>
+        <p className="mt-2 text-sm text-slate-500">No authenticated dealer profile is currently available.</p>
+      </div>
+    );
+  }
+
   // Toast Alert State
   const [toast, setToast] = useState<string | null>(null);
   const showToast = (msg: string) => {
@@ -129,11 +132,11 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   };
 
   // Dealer Profile State
-  const [currentDealer, setCurrentDealer] = useState<Dealer>(INITIAL_DEALER_BUSINESSES[0]);
-  const [teamMembers, setTeamMembers] = useState<DealerTeamMember[]>(INITIAL_DEALER_TEAM);
-  const [leads, setLeads] = useState<DealerLead[]>(INITIAL_DEALER_LEADS);
-  const [promotions, setPromotions] = useState<DealerPromotion[]>(INITIAL_DEALER_PROMOTIONS);
-  const [analytics] = useState<DealerAnalytics>(INITIAL_DEALER_ANALYTICS);
+  const [currentDealer, setCurrentDealer] = useState<Dealer | null>(null);
+  const [teamMembers, setTeamMembers] = useState<DealerTeamMember[]>([]);
+  const [leads, setLeads] = useState<DealerLead[]>([]);
+  const [promotions, setPromotions] = useState<DealerPromotion[]>([]);
+  const [analytics] = useState<DealerAnalytics>({ totalViews30Days: 0, totalLeads30Days: 0, conversionRate: 0, averageDaysToSell: 0, totalInventoryValue: 0, topPerformingMake: '', viewsByCounty: [] });
 
   // Active Module State (12 Modules)
   const [activeTab, setActiveTab] = useState<DealerTabModule>('dashboard');

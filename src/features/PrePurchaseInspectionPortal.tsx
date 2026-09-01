@@ -1,12 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, Vehicle } from '../types';
-import { 
-  INITIAL_MECHANICS, 
-  INITIAL_INSPECTION_REPORTS, 
-  INITIAL_INSPECTION_BOOKINGS, 
-  INITIAL_INSPECTION_PAYMENTS, 
-  INITIAL_INSPECTION_RATINGS 
-} from '../data/mockInspections';
+
 import { 
   ShieldCheck, 
   Wrench, 
@@ -204,8 +198,14 @@ const CHECKLIST_150_CATEGORIES: ChecklistCategory[] = [
   }
 ];
 
+const EMPTY_INSPECTION_PROVIDER: Mechanic = {
+  id: '', name: '', avatar: '', companyName: '', title: '', counties: [], rating: 0,
+  reviewsCount: 0, inspectionsCompleted: 0, baseFee: 0, specializations: [], certifications: [],
+  yearsExperience: 0, bio: '', phone: '', email: '', availableDays: [], verified: false
+};
+
 export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalProps> = ({
-  currentMechanic = INITIAL_MECHANICS[0],
+  currentMechanic = EMPTY_INSPECTION_PROVIDER,
   onNavigateToMarketplace
 }) => {
   // Toast Alert
@@ -219,19 +219,19 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
   const [activeTab, setActiveTab] = useState<PortalModuleTab>('dashboard');
 
   // Bookings State
-  const [bookings, setBookings] = useState<InspectionBooking[]>(INITIAL_INSPECTION_BOOKINGS);
+  const [bookings, setBookings] = useState<InspectionBooking[]>([]);
   const [bookingFilterStatus, setBookingFilterStatus] = useState<string>('All');
   const [bookingSearch, setBookingSearch] = useState<string>('');
 
   // Reports State
-  const [reports, setReports] = useState<InspectionReport[]>(INITIAL_INSPECTION_REPORTS);
+  const [reports, setReports] = useState<InspectionReport[]>([]);
   const [selectedReportForView, setSelectedReportForView] = useState<InspectionReport | null>(null);
 
   // Payments State
-  const [payments, setPayments] = useState<InspectionPayment[]>(INITIAL_INSPECTION_PAYMENTS);
+  const [payments, setPayments] = useState<InspectionPayment[]>([]);
 
   // Ratings & Reviews State
-  const [ratings, setRatings] = useState<InspectionRating[]>(INITIAL_INSPECTION_RATINGS);
+  const [ratings, setRatings] = useState<InspectionRating[]>([]);
 
   // Availability Settings State
   const [availableDays, setAvailableDays] = useState<string[]>(currentMechanic.availableDays);

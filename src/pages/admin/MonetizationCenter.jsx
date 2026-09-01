@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { adminAPI, carsAPI, partnersAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { DollarSign, Car, Star, Megaphone, Settings, TrendingUp, Crown, Shield, Database, Eye, EyeOff, RotateCw } from 'lucide-react';
+import { DollarSign, Car, Star, Megaphone, Settings, TrendingUp, Crown, Shield } from 'lucide-react';
 
 export default function MonetizationCenter() {
   const { toast } = useToast();
@@ -15,21 +15,16 @@ export default function MonetizationCenter() {
   const [sponsorDealers, setSponsorDealers] = useState('');
   const [featuredDealerIds, setFeaturedDealerIds] = useState('');
   const [saving, setSaving] = useState(false);
-  const [demoStatus, setDemoStatus] = useState(null);
-  const [togglingDemo, setTogglingDemo] = useState(false);
-  const [reseedingDemo, setReseedingDemo] = useState(false);
 
   useEffect(() => {
     Promise.all([
       adminAPI.getConfig().catch(() => ({})),
       carsAPI.list({ limit: 50, sort: '-createdAt' }).catch(() => ({ cars: [] })),
       partnersAPI.list().catch(() => []),
-      adminAPI.demoStatus().catch(() => null),
-    ]).then(([cfg, cars, pts, demo]) => {
+    ]).then(([cfg, cars, pts]) => {
       setConfig(cfg);
       setFeatured(cars.cars || cars.data || []);
       setPartners(pts);
-      if (demo) setDemoStatus(demo.status || {});
       setHeroCarIds((cfg.heroCarIds || []).join(', '));
       setSponsorCarIds((cfg.sponsorCarIds || []).join(', '));
       setSponsorDealers((cfg.sponsorDealers || []).join(', '));
@@ -186,110 +181,6 @@ export default function MonetizationCenter() {
             </div>
           </Link>
         ))}
-      </div>
-
-      {/* Demo Mode Control */}
-      <div style={{
-        borderRadius: 12, border: `1px solid ${demoStatus?.demoMode !== false ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.08)'}`,
-        background: demoStatus?.demoMode !== false ? 'rgba(34,197,94,0.03)' : 'rgba(255,255,255,0.02)',
-        padding: 24, marginTop: 40,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 8,
-              background: demoStatus?.demoMode !== false ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${demoStatus?.demoMode !== false ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Database size={18} style={{ color: demoStatus?.demoMode !== false ? '#22C55E' : 'rgba(255,255,255,0.4)' }} />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: '#fff' }}>
-                Demo Mode
-              </h3>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0 0' }}>
-                {demoStatus?.demoMode !== false
-                  ? 'Demo content visible — real content takes priority when it becomes available'
-                  : 'Demo content hidden — only real user content is shown in the marketplace'}
-              </p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              onClick={async () => {
-                setTogglingDemo(true);
-                try {
-                  const result = await adminAPI.toggleDemo();
-                  setDemoStatus(prev => ({ ...prev, demoMode: result.demoMode }));
-                  toast(`Demo Mode ${result.demoMode ? 'enabled' : 'disabled'}`, 'success');
-                } catch { toast('Failed to toggle demo mode', 'error'); }
-                finally { setTogglingDemo(false); }
-              }}
-              disabled={togglingDemo}
-              style={{
-                padding: '8px 16px', borderRadius: 8, fontWeight: 600, fontSize: 12,
-                background: demoStatus?.demoMode !== false ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
-                color: demoStatus?.demoMode !== false ? '#EF4444' : '#22C55E',
-                border: `1px solid ${demoStatus?.demoMode !== false ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)'}`,
-                cursor: togglingDemo ? 'not-allowed' : 'pointer', opacity: togglingDemo ? 0.6 : 1,
-                display: 'flex', alignItems: 'center', gap: 6,
-              }}
-            >
-              {demoStatus?.demoMode !== false ? <EyeOff size={14} /> : <Eye size={14} />}
-              {togglingDemo ? '...' : demoStatus?.demoMode !== false ? 'Disable' : 'Enable'}
-            </button>
-            <button
-              onClick={async () => {
-                setReseedingDemo(true);
-                try {
-                  await adminAPI.demoReseed();
-                  toast('Demo data reseeded', 'success');
-                  const demo = await adminAPI.demoStatus();
-                  if (demo) setDemoStatus(demo.status || {});
-                } catch { toast('Failed to reseed demo', 'error'); }
-                finally { setReseedingDemo(false); }
-              }}
-              disabled={reseedingDemo}
-              style={{
-                padding: '8px 16px', borderRadius: 8, fontWeight: 600, fontSize: 12,
-                background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                cursor: reseedingDemo ? 'not-allowed' : 'pointer', opacity: reseedingDemo ? 0.6 : 1,
-                display: 'flex', alignItems: 'center', gap: 6,
-              }}
-            >
-              <RotateCw size={14} />
-              {reseedingDemo ? 'Reseeding...' : 'Reseed'}
-            </button>
-          </div>
-        </div>
-        {demoStatus && (
-          <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
-            {[
-              { label: 'Active Demo Users', value: demoStatus.activeDemoUsers ?? '—', color: '#22C55E' },
-              { label: 'Demo Cars', value: demoStatus.demoCars ?? '—', color: '#3B82F6' },
-              { label: 'Demo Bids', value: demoStatus.demoBids ?? '—', color: '#8B5CF6' },
-              { label: 'Demo Payments', value: demoStatus.demoPayments ?? '—', color: '#F59E0B' },
-              { label: 'Demo Escrows', value: demoStatus.demoEscrows ?? '—', color: '#EF4444' },
-            ].map((item, i) => (
-              <div key={i} style={{
-                padding: '12px', borderRadius: 8,
-                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
-              }}>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 4 }}>
-                  {item.label}
-                </div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: item.color }}>
-                  {item.value}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 12, lineHeight: 1.5 }}>
-          Demo accounts authenticate through the normal login flow. Real content automatically takes precedence over demo content as it becomes available.
-        </div>
       </div>
 
       {/* Featured Vehicles Preview */}

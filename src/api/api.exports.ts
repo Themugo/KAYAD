@@ -644,4 +644,8 @@ export const seoAPI = {
 };
 
 // ── RE-EXPORTS from data layer ──────────────────────────
-export { BRANDS, TESTIMONIALS, MOCK_CARS } from '../data/mockCars';
+export const BRANDS = [
+  'Toyota', 'Mercedes-Benz', 'BMW', 'Land Rover', 'Subaru', 'Mazda', 'Nissan',
+  'Honda', 'Volkswagen', 'Lexus', 'Audi', 'Mitsubishi', 'Hyundai', 'Kia', 'Ford',
+  'Jeep', 'Peugeot', 'Isuzu', 'Porsche', 'Jaguar', 'Volvo', 'Suzuki', 'Daihatsu',
+].map(name => ({ name }));

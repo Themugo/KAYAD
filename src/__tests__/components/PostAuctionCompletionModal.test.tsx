@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PostAuctionCompletionModal } from '../../features/AuctionsView/components/PostAuctionCompletionModal';
-import { INITIAL_AUCTION_SESSIONS } from '../../data/mockAuctions';
+import { INITIAL_AUCTION_SESSIONS } from '../fixtures/mockAuctions';
 
 describe('PostAuctionCompletionModal - escrow payment path (6-step process gap fix)', () => {
   // Found while checking the app's own advertised "How KAYAD Vehicle

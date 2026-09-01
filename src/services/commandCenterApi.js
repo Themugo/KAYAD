@@ -7,15 +7,9 @@ const commandCenterApi = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-commandCenterApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 // Mission Control
 export const getMissionControl = () => commandCenterApi.get('/mission-control');
