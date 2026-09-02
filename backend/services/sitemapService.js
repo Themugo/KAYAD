@@ -46,9 +46,9 @@ export const generateDealerSitemap = async () => {
 
 export const generateAuctionSitemap = async () => {
   try {
-    const auctions = await findAll("auctions", {
-      filters: { status: { $in: ["scheduled", "live"] } },
-      select: "id,updatedAt",
+    const auctions = await findAll("cars", {
+      filters: { deletedAt: null, auctionStatus: { $in: ["live", "ended"] } },
+      select: "id,updatedAt,auctionStatus",
     });
 
     const urls = auctions.map((auction) => ({

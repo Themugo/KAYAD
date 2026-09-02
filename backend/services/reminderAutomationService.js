@@ -221,10 +221,11 @@ const checkEndingAuctions = async () => {
     const oneHour = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const sixHours = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString();
     
-    const auctions = await findAll("auctions", {
+    const auctions = await findAll("cars", {
       filters: {
-        status: 'live',
-        endTime: { $lte: sixHours, $gte: oneHour },
+        deletedAt: null,
+        auctionStatus: "live",
+        auctionEnd: { $lte: sixHours, $gte: oneHour },
       },
     });
 
@@ -239,7 +240,7 @@ const checkEndingAuctions = async () => {
       
       if (existing.length > 0) continue;
 
-      const timeLeft = Math.round((new Date(auction.endTime) - Date.now()) / (60 * 60 * 1000));
+      const timeLeft = Math.round((new Date(auction.auctionEnd) - Date.now()) / (60 * 60 * 1000));
       const reminder = await createReminder({
         type: 'AUCTION_ENDING',
         userId: auction.dealer,

@@ -102,12 +102,15 @@ export const calculateConversionRates = async (startDate, endDate) => {
     const escrowConversionRate = totalEscrows > 0 ? (releasedEscrows / totalEscrows) * 100 : 0;
 
     // Auction conversion
-    const totalAuctions = await count("auctions", {
+    const totalAuctions = await count("cars", {
+      hasAuction: true,
       createdAt: { $gte: startDate, $lte: endDate },
+      deletedAt: null,
     });
-    const completedAuctions = await count("auctions", {
-      status: "completed",
-      endTime: { $gte: startDate, $lte: endDate },
+    const completedAuctions = await count("cars", {
+      auctionStatus: "ended",
+      auctionEnd: { $gte: startDate, $lte: endDate },
+      deletedAt: null,
     });
     const auctionConversionRate = totalAuctions > 0 ? (completedAuctions / totalAuctions) * 100 : 0;
 

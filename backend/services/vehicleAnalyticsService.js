@@ -4,10 +4,10 @@ import { findAll, findOne, create, update, count, upsert } from "../db/index.js"
 export const calculateAverageSellingPrice = async (startDate, endDate) => {
   try {
     const escrows = await findAll("escrows", { filters: { status: "released", releasedAt: { $gte: startDate, $lte: endDate } } });
-    const auctionSales = await findAll("auctions", { filters: { status: "completed", endTime: { $gte: startDate, $lte: endDate } } });
+    const auctionSales = await findAll("cars", { filters: { auctionStatus: "ended", auctionEnd: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "id,currentBid" });
     const prices = [];
     escrows.forEach((e) => { if (e.amount) prices.push(e.amount); });
-    auctionSales.forEach((a) => { if (a.highestBid) prices.push(a.highestBid); });
+    auctionSales.forEach((a) => { if (a.currentBid) prices.push(a.currentBid); });
     return prices.length === 0 ? 0 : prices.reduce((a, b) => a + b, 0) / prices.length;
   } catch (err) { logError("Failed to calculate average selling price", err); throw err; }
 };
@@ -153,7 +153,7 @@ export const generateMarketAnalytics = async (period, startDate, endDate) => {
     const [totalListings, totalSales, totalAuctions] = await Promise.all([
       count("cars", { status: "available", createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }),
       count("cars", { status: "sold", updatedAt: { $gte: startDate, $lte: endDate }, deletedAt: null }),
-      count("auctions", { status: "completed", endTime: { $gte: startDate, $lte: endDate } }),
+      count("cars", { auctionStatus: "ended", auctionEnd: { $gte: startDate, $lte: endDate }, deletedAt: null }),
     ]);
 
     const conversionRate = totalListings > 0 ? (totalSales / totalListings) * 100 : 0;

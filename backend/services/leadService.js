@@ -359,12 +359,10 @@ export const findOrCreateLeadFromChat = async (chatId) => {
 
 export const findOrCreateLeadFromAuction = async (auctionId, buyerId) => {
   try {
-    const auction = await findById("auctions", auctionId) /* .populate("carId") - TODO: use separate query */;
-    if (!auction) {
+    const vehicle = await findById("cars", auctionId);
+    if (!vehicle || !["live", "ended"].includes(vehicle.auctionStatus)) {
       throw new Error("Auction not found");
     }
-
-    const vehicle = await findById("cars", auction.carId);
     if (!vehicle) {
       throw new Error("Vehicle not found");
     }

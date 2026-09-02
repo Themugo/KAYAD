@@ -1,29 +1,33 @@
-// Auction Service - API calls for auction functionality
 import { auctionAPI } from '../api/api.exports';
 
+/**
+ * Canonical public auction contract.
+ * An auction is represented by a car row; id and carId are the same vehicle ID.
+ */
 export interface Auction {
   id: string;
   carId: string;
-  title: string;
-  startPrice: number;
-  currentPrice: number;
-  startTime: string;
-  endTime: string;
-  status: 'upcoming' | 'live' | 'ended';
+  status: 'draft' | 'active' | 'ended';
+  startingBid: number;
+  highestBid: number;
+  startTime: string | null;
+  endTime: string | null;
+  bidIncrement: number;
+  reservePrice?: number | null;
+  highestBidderId?: string | null;
   bidCount: number;
-  highestBidder?: {
-    id: string;
-    name: string;
-  };
+  allowBid: boolean;
+  allowBuy: boolean;
+  car?: Record<string, unknown>;
 }
 
 export async function fetchList(params?: {
   page?: number;
   limit?: number;
-  status?: string;
-  brand?: string;
+  status?: 'active' | 'live' | 'ended';
+  search?: string;
 }) {
-  return auctionAPI.list(params);
+  return auctionAPI.list(params || {});
 }
 
 export async function fetchAuction(id: string) {
@@ -34,14 +38,14 @@ export async function fetchActiveAuctions(params?: {
   page?: number;
   limit?: number;
 }) {
-  return auctionAPI.active(params);
+  return auctionAPI.active(params || {});
 }
 
 export async function fetchMyAuctions(params?: {
   page?: number;
   limit?: number;
 }) {
-  return auctionAPI.my(params);
+  return auctionAPI.my(params || {});
 }
 
 export default {

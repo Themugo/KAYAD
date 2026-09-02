@@ -501,7 +501,7 @@ paths:
       tags:
         - Auctions
       summary: List auctions
-      description: Get paginated list of auctions
+      description: List auction-enabled car records using the canonical cars auction fields
       operationId: listAuctions
       parameters:
         - name: page
@@ -521,7 +521,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [upcoming, active, ended, cancelled]
+            enum: [draft, active, ended]
           description: Filter by status
       responses:
         '200':
@@ -542,49 +542,6 @@ paths:
         window: 1m
         max: 100
 
-    post:
-      tags:
-        - Auctions
-      summary: Create auction
-      description: Create a new auction for a car
-      operationId: createAuction
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateAuctionRequest'
-      responses:
-        '201':
-          description: Auction created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuctionResponse'
-        '400':
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: Forbidden - seller account required
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - bearerAuth: []
-      rateLimit:
-        window: 1h
-        max: 20
-
   /auctions/{auctionId}:
     get:
       tags:
@@ -598,7 +555,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Auction ID
+          description: Canonical vehicle/car ID used as the public auction ID
       responses:
         '200':
           description: Auction details
@@ -617,108 +574,6 @@ paths:
       rateLimit:
         window: 1m
         max: 100
-
-  /auctions/{auctionId}/bids:
-    get:
-      tags:
-        - Bids
-      summary: List auction bids
-      description: Get all bids for an auction
-      operationId: listAuctionBids
-      parameters:
-        - name: auctionId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Auction ID
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-          description: Page number
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-            maximum: 100
-          description: Items per page
-      responses:
-        '200':
-          description: List of bids
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BidListResponse'
-        '404':
-          description: Auction not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - bearerAuth: []
-      rateLimit:
-        window: 1m
-        max: 50
-
-    post:
-      tags:
-        - Bids
-      summary: Place bid
-      description: Place a bid on an auction
-      operationId: placeBid
-      parameters:
-        - name: auctionId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Auction ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PlaceBidRequest'
-      responses:
-        '201':
-          description: Bid placed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BidResponse'
-        '400':
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: Forbidden - auction not active
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Auction not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - bearerAuth: []
-      rateLimit:
-        window: 1m
-        max: 30
 
   /users/profile:
     get:
@@ -10315,74 +10170,58 @@ components:
               type: integer
             total:
               type: integer
-            totalPages:
+            pages:
               type: integer
 
     Auction:
       type: object
       required:
         - id
-        - car
+        - carId
+        - status
         - startTime
         - endTime
-        - startingPrice
-        - status
+        - startingBid
+        - highestBid
       properties:
         id:
           type: string
-          description: Auction ID
-        car:
-          $ref: '#/components/schemas/Car'
-        startTime:
-          type: string
-          format: date-time
-          description: Auction start time
-        endTime:
-          type: string
-          format: date-time
-          description: Auction end time
-        startingPrice:
-          type: number
-          description: Starting price in KES
-        currentBid:
-          type: number
-          description: Current highest bid
-        status:
-          type: string
-          enum: [upcoming, active, ended, cancelled]
-          description: Auction status
-        participants:
-          type: array
-          items:
-            type: string
-          description: Participant user IDs
-        createdAt:
-          type: string
-          format: date-time
-          description: Creation timestamp
-
-    CreateAuctionRequest:
-      type: object
-      required:
-        - carId
-        - startTime
-        - endTime
-        - startingPrice
-      properties:
+          description: Canonical vehicle/car ID used as the auction ID
         carId:
           type: string
-          description: Car ID
+          description: Canonical vehicle/car ID; same value as id
+        car:
+          $ref: '#/components/schemas/Car'
+        status:
+          type: string
+          enum: [draft, active, ended]
+          description: Public auction status derived from cars.auctionStatus and auctionEnd
         startTime:
           type: string
           format: date-time
-          description: Auction start time
         endTime:
           type: string
           format: date-time
-          description: Auction end time
-        startingPrice:
+        startingBid:
           type: number
-          description: Starting price in KES
+          description: Starting bid in KES
+        highestBid:
+          type: number
+          description: Current highest bid in KES
+        bidCount:
+          type: integer
+        bidIncrement:
+          type: number
+        reservePrice:
+          type: number
+          nullable: true
+        highestBidderId:
+          type: string
+          nullable: true
+        allowBid:
+          type: boolean
+        allowBuy:
+          type: boolean
 
     AuctionResponse:
       type: object
@@ -10411,7 +10250,7 @@ components:
               type: integer
             total:
               type: integer
-            totalPages:
+            pages:
               type: integer
 
     Bid:
@@ -10476,7 +10315,7 @@ components:
               type: integer
             total:
               type: integer
-            totalPages:
+            pages:
               type: integer
 
     UserProfileResponse:

@@ -517,33 +517,29 @@ export const calculateListingQualityScore = async (dealerId) => {
 
 export const calculateAuctionScore = async (dealerId) => {
   try {
-    const cars = await findAll("cars", { filters: { dealer: dealerId, isAuction: true } });
+    const cars = await findAll("cars", { filters: { dealer: dealerId, auctionStatus: { $ne: "none" }, deletedAt: null } });
     const auctionIds = cars.map((c) => c.id);
 
     if (auctionIds.length === 0) {
       return { score: 70, details: { totalAuctions: 0 } };
     }
 
-    const auctions = await findAll("auctions", { filters: { carId: { $in: auctionIds } } });
+    const auctions = cars;
 
     if (auctions.length === 0) {
       return { score: 70, details: { totalAuctions: 0 } };
     }
 
     const totalAuctions = auctions.length;
-    const completedAuctions = auctions.filter((a) => a.status === "completed").length;
-    const totalWinners = auctions.filter((a) => a.winner).length;
-    const paidWinners = auctions.filter((a) => a.status === "completed").length; // Simplified
+    const completedAuctions = auctions.filter((a) => a.auctionStatus === "ended").length;
+    const totalWinners = auctions.filter((a) => a.winner?.user || a.highestBidderId).length;
+    const paidWinners = auctions.filter((a) => a.paymentStatus === "paid" || a.isPaid === true).length;
 
-    // Calculate completion rate
     const completionRate = totalAuctions > 0 ? (completedAuctions / totalAuctions) * 100 : 100;
-
-    // Calculate payment rate
     const paymentRate = totalWinners > 0 ? (paidWinners / totalWinners) * 100 : 100;
-
-    // Calculate average bids per auction
-    const totalBids = auctions.reduce((sum, a) => sum + (a.bidHistory?.length || 0), 0);
-    const averageBidsPerAuction = totalAuctions > 0 ? totalBids / totalAuctions : 0;
+    const averageBidsPerAuction = totalAuctions > 0
+      ? auctions.reduce((sum, a) => sum + Number(a.bidsCount || 0), 0) / totalAuctions
+      : 0;
 
     // Overall auction score
     const score = completionRate * 0.4 + paymentRate * 0.3 + Math.min(100, averageBidsPerAuction * 5) * 0.3;

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 const BCRYPT_ROUNDS = 12;
 
 const TABLE_MAP = {
-  User: "users", UserAuth: "user_auth", Car: "cars", Auction: "auctions", Bid: "bids",
+  User: "users", UserAuth: "user_auth", Car: "cars", Bid: "bids",
   Escrow: "escrows", Payment: "payments", Chat: "chats", Message: "messages",
   Notification: "notifications", Favorite: "favorites", Review: "reviews",
   Dealer: "dealers", DealerHealthScore: "dealer_health_scores",
@@ -221,7 +221,7 @@ const TABLE_MAP = {
 const RELATION_TABLE = {
   car: "cars", vehicle: "cars", carId: "cars", relatedCar: "cars",
   originalCar: "cars", matchedCars: "cars",
-  auction: "auctions", relatedAuctions: "auctions",
+  auction: "cars", relatedAuctions: "cars",
   escrow: "escrows", relatedEscrow: "escrows", relatedEscrows: "escrows",
   relatedPayment: "payments",
 };

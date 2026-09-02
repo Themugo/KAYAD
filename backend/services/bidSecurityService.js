@@ -3,15 +3,13 @@ import { sendNotification } from "./notification.service.js";
 import { findById, findOne, create, update } from "../db/index.js";
 
 export async function initiateBidSecurity({ auctionId, userId, phone, amount }) {
-  const auction = await findById("auctions", auctionId) /* .populate("carId") - TODO: use separate query */;
-  if (!auction) return { success: false, message: "Auction not found" };
+  const auction = await findById("cars", auctionId);
+  if (!auction || !["live", "ended"].includes(auction.auctionStatus)) return { success: false, message: "Auction not found" };
 
   const securityAmount = amount || auction.bidSecurityAmount || 50000;
 
   const destination =
-    auction.paymentRecipient === "DEALER_DIRECT"
-      ? auction.dealerMpesaShortcode
-      : process.env.KAYAD_MASTER_PAYBILL;
+    process.env.KAYAD_MASTER_PAYBILL;
 
   // Trigger STK Push
   if (!destination) {
@@ -36,13 +34,13 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount }) 
   // (never "success") so no workflow can treat an unpaid deposit as paid.
   const transaction = await create("transactions", {
     user: userId,
-    car: auction.carId?._id || auction.carId,
+    car: auction.id,
     amount: securityAmount,
     type: "bid_commitment",
     status: "pending",
     phone,
     checkoutRequestId: checkoutID,
-    description: `Bid security for auction ${auctionId} — ${auction.paymentRecipient === "DEALER_DIRECT" ? "paid to dealer" : "held in KAYAD escrow"}`,
+    description: `Bid security for auction ${auctionId} — held in KAYAD escrow`,
     reference: `SEC-${auctionId}-${Date.now()}`,
   });
 
