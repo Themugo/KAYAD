@@ -81,7 +81,7 @@ const ROUTE_PREFIX_MAP = {
   "escrowRoutes.js": "/api/escrow","chatRoutes.js": "/api/chat","favoriteRoutes.js": "/api/favorites",
   "notificationRoutes.js": "/api/notifications","reviewRoutes.js": "/api/reviews",
   "transactionRoutes.js": "/api/transactions","auctionAdminRoutes.js": "/api/auction-admin",
-  "adRoutes.js": "/api/ads","userRoutes.js": "/api/users","savedSearchRoutes.js": "/api/saved-searches",
+  "adSlotRoutes.js": "/api/ads","userRoutes.js": "/api/users","savedSearchRoutes.js": "/api/saved-searches",
   "referralRoutes.js": "/api/referral","ntsaVerificationRoutes.js": "/api/ntsa-verification",
   "inspectionRoutes.js": "/api/inspections","escrowVaultRoutes.js": "/api/escrow-vault",
   "securityLogRoutes.js": "/api/security-logs","smsBiddingRoutes.js": "/api/sms-bidding",

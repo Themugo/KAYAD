@@ -51,7 +51,6 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
 import auctionAdminRoutes from "./routes/auctionAdminRoutes.js";
-import adRoutes from "./routes/adRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import savedSearchRoutes from "./routes/savedSearchRoutes.js";
 import ntsaVerificationRoutes from "./routes/ntsaVerificationRoutes.js";
@@ -481,7 +480,6 @@ if (NODE_ENV !== "production") {
 }
 
 // ─── API ROUTES (VERSIONED) ───────────────────────────────────
-app.use("/api/v1", v1Routes);
 app.use("/api/v2", v2Routes);
 
 // ─── DASHBOARD ROUTES (ROLE-BASED) ───────────────────────────
@@ -649,7 +647,6 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/reviews", csrfProtection, reviewRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/auction-admin", auctionAdminRoutes);
-app.use("/api/ads", adRoutes);
 app.use("/api/users", csrfProtection, userRoutes);
 app.use("/api/saved-searches", csrfProtection, savedSearchRoutes);
 app.use("/api/referral", referralRoutes);
@@ -723,9 +720,11 @@ app.use("/api/dealer-platform", dealerPlatformRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
-// /api/v1/* — versioned alias for all routes above
+// /api/v1/* is mounted once, after the compatibility routes below.
+// checkSystemStatus is already global under /api, so the versioned mount
+// does not need a second copy of that middleware.
 app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
-app.use("/api/v1", checkSystemStatus, v1Routes);
+app.use("/api/v1", v1Routes);
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
 // Note: In newer Sentry versions, handlers are auto-instrumented

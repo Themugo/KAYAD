@@ -113,7 +113,7 @@ Every number here comes from a direct parse of `backend/server.js`'s `app.use()`
 | `/api/reliability` | reliabilityRoutes.js | 10 |
 | `/api/saved-searches` | savedSearchRoutes.js | 4 |
 | `/api/favorites` | favoriteRoutes.js | 5 |
-| `/api/ads` | adRoutes.js | 2 |
+| `/api/ads` | adSlotRoutes.js | 5 |
 
 ### System
 | Mount Path | File | Endpoints |
