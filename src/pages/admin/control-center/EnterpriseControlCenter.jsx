@@ -78,55 +78,7 @@ export default function EnterpriseControlCenter() {
       setSelfHealingRules(rulesData.data);
     } catch (error) {
       console.error('Failed to load ECP data:', error);
-      // Use mock data
-      setDashboard({
-        overall: { status: 'healthy', healthScore: 94, uptime: 99.8, riskLevel: 'low' },
-        business: {
-          revenueToday: 2456789, revenueChange: 12.5, vehiclesListed: 156,
-          activeDealers: 487, liveAuctions: 23, inspectionRequests: 45,
-          financeApplications: 12, supportTickets: 28, activeUsers: 1245,
-        },
-        system: {
-          frontend: { status: 'healthy', latency: 120 },
-          backend: { status: 'healthy', latency: 85 },
-          database: { status: 'healthy', latency: 15 },
-          api: { status: 'healthy', latency: 95 },
-        },
-        security: { status: 'secure', threatsDetected: 0, failedLogins: 12, blockedRequests: 3 },
-      });
-      setSystemHealth({
-        services: [
-          { id: 'frontend', name: 'Frontend', status: 'healthy', latency: 120, uptime: 99.9 },
-          { id: 'backend', name: 'Backend API', status: 'healthy', latency: 85, uptime: 99.8 },
-          { id: 'database', name: 'Database', status: 'healthy', latency: 15, uptime: 99.95 },
-          { id: 'cache', name: 'Redis Cache', status: 'healthy', latency: 2, uptime: 99.99 },
-          { id: 'search', name: 'Search Engine', status: 'healthy', latency: 200, uptime: 99.5 },
-          { id: 'auction', name: 'Auction Engine', status: 'healthy', latency: 95, uptime: 99.6 },
-          { id: 'auth', name: 'Authentication', status: 'healthy', latency: 45, uptime: 99.9 },
-        ],
-        summary: { total: 7, healthy: 7, degraded: 0, down: 0 },
-      });
-      setBusinessHealth({
-        dealers: { total: 487, active: 456, growth: 8.5, newThisWeek: 12 },
-        buyers: { total: 12500, active: 3456, growth: 12.3, conversionRate: 4.5 },
-        revenue: { today: 2456789, thisWeek: 15678900, growth: 12.5 },
-        auctions: { active: 23, completed: 156, successRate: 72 },
-      });
-      setSecurity({
-        overall: { status: 'secure', score: 92 },
-        authentication: { failedLogins: 12, blockedAccounts: 2 },
-        api: { abuseAttempts: 3, rateLimitViolations: 15 },
-      });
-      setPerformance({
-        coreWebVitals: { lcp: { value: 2.1 }, fid: { value: 85 }, cls: { value: 0.08 } },
-        apiLatency: { p50: 85, p95: 245, p99: 450 },
-        uptime: { last24h: 99.8 },
-      });
-      setSelfHealingRules([
-        { id: 'restart_worker', name: 'Restart Unhealthy Worker', enabled: true, autoExecute: true },
-        { id: 'clear_queue', name: 'Clear Stuck Queue', enabled: true, autoExecute: false },
-        { id: 'rebuild_search', name: 'Rebuild Search Index', enabled: true, autoExecute: false },
-      ]);
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

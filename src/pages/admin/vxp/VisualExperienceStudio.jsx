@@ -114,35 +114,7 @@ export default function VisualExperienceStudio() {
       setCards(cardsData.data);
     } catch (error) {
       console.error('Failed to load VXP data:', error);
-      // Use mock data
-      setStats({
-        pages: { total: 12, published: 8, draft: 4 },
-        sections: { total: 156 },
-        themes: { total: 5 },
-        cards: { total: 24 },
-        advertisements: { total: 18 },
-      });
-      setPages([
-        { id: '1', name: 'Homepage', slug: '/', status: 'published', pageType: 'home' },
-        { id: '2', name: 'Marketplace', slug: '/marketplace', status: 'published', pageType: 'listing' },
-        { id: '3', name: 'Auction', slug: '/auction', status: 'published', pageType: 'auction' },
-        { id: '4', name: 'Dealers', slug: '/dealers', status: 'published', pageType: 'dealer' },
-        { id: '5', name: 'Inspection', slug: '/inspection', status: 'published', pageType: 'service' },
-        { id: '6', name: 'Finance', slug: '/finance', status: 'draft', pageType: 'finance' },
-        { id: '7', name: 'Summer Sale', slug: '/summer-sale', status: 'draft', pageType: 'campaign' },
-        { id: '8', name: 'Toyota Week', slug: '/toyota-week', status: 'draft', pageType: 'campaign' },
-      ]);
-      setThemes([
-        { id: '1', name: 'KAYAD Default', isDefault: true, colors: { primary: '#17244B', accent: '#C77B58' } },
-        { id: '2', name: 'Premium Dark', colors: { primary: '#1a1a2e', accent: '#c9a227' } },
-        { id: '3', name: 'Kenyan Heritage', colors: { primary: '#228B22', accent: '#8B4513' } },
-      ]);
-      setCards([
-        { id: '1', name: 'Standard Vehicle', cardType: 'vehicle', status: 'active' },
-        { id: '2', name: 'Premium Vehicle', cardType: 'vehicle', status: 'active' },
-        { id: '3', name: 'Auction Item', cardType: 'auction', status: 'active' },
-        { id: '4', name: 'Dealer Profile', cardType: 'dealer', status: 'active' },
-      ]);
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

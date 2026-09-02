@@ -81,13 +81,9 @@ export const BiddingSecurityGateway: FC<BiddingSecurityGatewayProps> = ({
     setSaving(true);
     setError(null);
     try {
-      // Simulated biometric verification
-      await biddingSecurityAPI.verifyBiometric({
-        biometricToken: 'demo-token',
-        verificationCode: '1234',
-      });
-      setStep('success');
-      checkBidderStatus();
+      // This browser flow has no trusted biometric assertion source. Never send
+      // fabricated tokens or verification codes to the backend.
+      throw new Error('Biometric verification requires a trusted device/provider flow and is not available in this browser session.');
     } catch (err: any) {
       setError(err.message || 'Biometric verification failed');
     } finally {

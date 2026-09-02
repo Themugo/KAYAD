@@ -100,192 +100,33 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
   const [counterPriceInput, setCounterPriceInput] = useState<string>('');
   const [selectedTaskModal, setSelectedTaskModal] = useState<string | null>(null);
 
-  // Mock Private Listings (Clean, user-centric)
-  const [listings, setListings] = useState<PrivateSellerListing[]>([
-    {
-      id: 'v1',
-      title: '2021 Toyota Land Cruiser Prado TX-L',
-      make: 'Toyota',
-      model: 'Prado',
-      year: 2021,
-      price: 7450000,
-      mileage: 42000,
+  // Seller inventory is derived only from real vehicles supplied by the backend.
+  const listings: PrivateSellerListing[] = useMemo(() => (vehicles || [])
+    .filter((vehicle) => !user?.id || vehicle.sellerId === user.id)
+    .map((vehicle) => ({
+      id: vehicle.id,
+      title: vehicle.title,
+      make: vehicle.make,
+      model: vehicle.model,
+      year: vehicle.year,
+      price: vehicle.price,
+      mileage: vehicle.mileage,
       status: 'Active',
-      viewsCount: 342,
-      savesCount: 28,
-      inquiriesCount: 9,
-      image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      location: 'Kilimani',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: '3 days ago'
-    },
-    {
-      id: 'v-draft-1',
-      title: '2019 Subaru Outback 2.5i Limited',
-      make: 'Subaru',
-      model: 'Outback',
-      year: 2019,
-      price: 3250000,
-      mileage: 68000,
-      status: 'Draft',
-      viewsCount: 0,
-      savesCount: 0,
+      viewsCount: vehicle.viewsCount || 0,
+      savesCount: vehicle.savedCount || 0,
       inquiriesCount: 0,
-      image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800',
-      location: 'Westlands',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: 'Yesterday'
-    },
-    {
-      id: 'v-sold-1',
-      title: '2018 Mazda CX-5 2.2 XD L-Package',
-      make: 'Mazda',
-      model: 'CX-5',
-      year: 2018,
-      price: 2650000,
-      mileage: 75000,
-      status: 'Sold',
-      viewsCount: 512,
-      savesCount: 41,
-      inquiriesCount: 14,
-      image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=800',
-      location: 'Lavington',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: '1 month ago'
-    },
-    {
-      id: 'v-paused-1',
-      title: '2020 Nissan X-Trail Hybrid 2.0',
-      make: 'Nissan',
-      model: 'X-Trail',
-      year: 2020,
-      price: 2850000,
-      mileage: 52000,
-      status: 'Paused',
-      viewsCount: 180,
-      savesCount: 12,
-      inquiriesCount: 4,
-      image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=800',
-      location: 'Karen',
-      county: 'Nairobi',
-      ntsaTimsVerified: false,
-      createdAt: '2 weeks ago'
-    },
-    {
-      id: 'v-exp-1',
-      title: '2015 Mercedes-Benz C200 AMG Line',
-      make: 'Mercedes-Benz',
-      model: 'C200',
-      year: 2015,
-      price: 2400000,
-      mileage: 94000,
-      status: 'Expired',
-      viewsCount: 220,
-      savesCount: 15,
-      inquiriesCount: 3,
-      image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=800',
-      location: 'Runda',
-      county: 'Nairobi',
-      ntsaTimsVerified: true,
-      createdAt: '60 days ago'
-    }
-  ]);
+      image: vehicle.image || vehicle.images?.[0] || '',
+      location: vehicle.location,
+      county: vehicle.county || '',
+      ntsaTimsVerified: Boolean(vehicle.verified),
+      createdAt: ''
+    })), [vehicles, user?.id]);
 
-  // Mock Offers Received
-  const [offers, setOffers] = useState<SellerOffer[]>([
-    {
-      id: 'OFF-701',
-      vehicleId: 'v1',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      vehicleImage: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      askingPrice: 7450000,
-      offeredAmount: 7300000,
-      buyerName: 'Dr. Samuel Omondi',
-      buyerPhone: '+254 722 *** 902',
-      paymentType: 'Escrow Vault (Cash)',
-      status: 'Pending',
-      expiresInHours: 18,
-      timestamp: 'Today at 09:15 AM'
-    },
-    {
-      id: 'OFF-702',
-      vehicleId: 'v1',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      vehicleImage: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
-      askingPrice: 7450000,
-      offeredAmount: 7450000,
-      buyerName: 'Eng. Beatrice Mwangi',
-      buyerPhone: '+254 711 *** 441',
-      paymentType: 'NCBA Asset Financing',
-      status: 'Pending',
-      expiresInHours: 36,
-      timestamp: 'Yesterday at 04:30 PM'
-    }
-  ]);
-
-  // Mock Active Escrow Transactions
-  const activeEscrowDeals = useMemo(() => {
-    return [
-      {
-        id: 'ESC-9081',
-        vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-        buyerName: 'Dr. Samuel Omondi',
-        agreedPrice: 7300000,
-        fundsStatus: 'Ksh 7,300,000 Secured in KAYAD Vault',
-        buyerProgress: [
-          { step: 1, label: 'Offer Accepted', done: true },
-          { step: 2, label: 'Vault Deposit', done: true },
-          { step: 3, label: '150-Point Inspection', done: true },
-          { step: 4, label: 'TIMS Logbook Transfer', done: false, active: true },
-          { step: 5, label: 'Physical Handover', done: false },
-          { step: 6, label: 'Payout Release', done: false }
-        ],
-        requiredAction: 'Action Required: Upload Signed NTSA TIMS Transfer Form 9',
-        buyerPhone: '+254 722 104 902'
-      }
-    ];
-  }, []);
-
-  // Mock Inspection Requests
-  const inspectionRequests: SellerInspectionRequest[] = [
-    {
-      id: 'INS-201',
-      vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-      buyerName: 'Dr. Samuel Omondi',
-      inspectorName: 'Eng. David Kamau (SAE Certified)',
-      scheduledTime: 'Yesterday @ 11:00 AM',
-      location: 'Kilimani, Nairobi (Seller Residence)',
-      status: 'Completed',
-      overallScore: 96,
-      reportSummary: 'Pass - Clean engine compressions, pristine chassis, 96% overall rating.'
-    },
-    {
-      id: 'INS-202',
-      vehicleTitle: '2019 Subaru Outback 2.5i Limited',
-      buyerName: 'Kevin Mutua',
-      inspectorName: 'Eng. Patrick Kipchumba',
-      scheduledTime: 'Tomorrow @ 02:30 PM',
-      location: 'Westlands Auto Yard',
-      status: 'Requested'
-    }
-  ];
-
-  // Mock Completed Sales
-  const completedSales: CompletedSale[] = [
-    {
-      id: 'SALE-101',
-      vehicleTitle: '2018 Mazda CX-5 2.2 XD L-Package',
-      buyerName: 'Grace Wanjiku',
-      agreedPrice: 2650000,
-      payoutAmount: 2636750, // net after 0.5% escrow fee
-      payoutMethod: 'NCBA Bank Kenya (A/C ****8891)',
-      timsTransferRef: 'TIMS-KE-9920148',
-      completedDate: 'June 14, 2026'
-    }
-  ];
+  // Offers, completed sales and inspection requests require backend contracts not exposed by this view.
+  const [offers, setOffers] = useState<SellerOffer[]>([]);
+  const activeEscrowDeals = useMemo(() => [], []);
+  const inspectionRequests: SellerInspectionRequest[] = [];
+  const completedSales: CompletedSale[] = [];
 
   // Handle Offer Actions
   const handleAcceptOffer = (offerId: string) => {
@@ -715,68 +556,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
         </div>
 
         <Card className="p-5 bg-white space-y-3">
-          {[
-            {
-              id: 'inq-1',
-              buyerName: 'Dr. Samuel Omondi',
-              vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-              lastMsg: 'Good morning Jimmy, is the Prado available for inspection at Westlands tomorrow?',
-              time: '10:12 AM',
-              unread: true
-            },
-            {
-              id: 'inq-2',
-              buyerName: 'Eng. Beatrice Mwangi',
-              vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-              lastMsg: 'I have submitted an NCBA asset financing pre-approval offer of Ksh 7,450,000.',
-              time: 'Yesterday',
-              unread: false
-            },
-            {
-              id: 'inq-3',
-              buyerName: 'Kevin Mutua',
-              vehicleTitle: '2019 Subaru Outback 2.5i Limited',
-              lastMsg: 'Are you open to Ksh 3.1M for cash settlement in KAYAD escrow?',
-              time: '2 days ago',
-              unread: false
-            }
-          ].map((inq) => (
-            <div
-              key={inq.id}
-              onClick={() => onNavigate('chat')}
-              className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs cursor-pointer ${
-                inq.unread
-                  ? 'bg-amber-50/70 border-amber-300 font-semibold'
-                  : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#1E3063] text-amber-400 font-extrabold flex items-center justify-center font-display shrink-0">
-                  {inq.buyerName.charAt(0)}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-black text-[#1E3063] text-sm">{inq.buyerName}</h4>
-                    {inq.unread && (
-                      <span className="px-2 py-0.5 bg-rose-600 text-white font-extrabold text-[9px] rounded-full uppercase">
-                        NEW MSG
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-500 font-medium">Re: {inq.vehicleTitle}</p>
-                  <p className="text-slate-700 font-medium mt-1 line-clamp-1">{inq.lastMsg}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 self-end sm:self-center">
-                <span className="text-[10px] text-slate-400 font-bold">{inq.time}</span>
-                <Button variant="secondary" size="sm">
-                  <span>Reply</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#1E3063]" />
-                </Button>
-              </div>
-            </div>
-          ))}
+          <p className="text-sm text-slate-500 py-6 text-center">Buyer inquiries are available when returned by the authenticated messaging backend.</p>
         </Card>
       </div>
 

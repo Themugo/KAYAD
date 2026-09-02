@@ -119,21 +119,7 @@ export default function ExecutiveIntelligenceCenter() {
       setReports(reportData.data);
     } catch (error) {
       console.error('Failed to load intelligence data:', error);
-      // Use mock data
-      setDashboard({
-        kpis: {
-          revenueToday: { value: 45890000, change: 12.5, trend: 'up' },
-          revenueMonth: { value: 892450000, change: 8.3, trend: 'up' },
-          vehiclesListed: { value: 1245, change: 15.2, trend: 'up' },
-          vehiclesSold: { value: 89, change: 5.8, trend: 'up' },
-          activeDealers: { value: 456, change: 7.1, trend: 'up' },
-          customerSatisfaction: { value: 94.2, change: 1.5, trend: 'up' },
-        },
-      });
-      setInsights([
-        { type: 'opportunity', title: 'SUV Market Growing', description: 'SUV searches up 45% MoM', impact: 'high' },
-        { type: 'risk', title: 'Inspection Gap', description: 'Mombasa needs more inspectors', impact: 'high' },
-      ]);
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

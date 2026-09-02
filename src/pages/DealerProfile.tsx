@@ -1,15 +1,9 @@
-import { DealerProfilePage } from '../components/dealer/DealerProfilePage';
-import type { Car } from '../components/features/car/CarCard';
+import DealerProfilePage from './DealerProfilePage';
 
-interface DealerProfileProps {
-  setPage?: (page: string) => void;
-  viewCar?: (car: Car) => void;
-}
-
-// Same pattern as previous passes. Known limitation: DealerProfilePage
-// always shows the first mock dealer (mockDealers[0]) rather than looking
-// one up by an id param — matches the reference repo's own behavior, not
-// something introduced here.
-export default function DealerProfile(_props: DealerProfileProps) {
+/**
+ * Canonical public dealer profile route. Dealer data and inventory are loaded
+ * from the backend; no synthetic dealer record is used as a fallback.
+ */
+export default function DealerProfile() {
   return <DealerProfilePage />;
 }

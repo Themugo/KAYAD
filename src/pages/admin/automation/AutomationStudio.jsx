@@ -67,13 +67,7 @@ export default function AutomationStudio() {
       setStats(data.data);
     } catch (error) {
       console.error('Failed to load stats:', error);
-      // Use mock data
-      setStats({
-        workflows: { total: 24, active: 18, paused: 4, draft: 2 },
-        tasks: { total: 156, pending: 45, inProgress: 23, completed: 88, overdue: 12 },
-        rules: { total: 15, active: 12 },
-        executions: { total: 1247, successful: 1198, failed: 49, avgDuration: 2.3 },
-      });
+      // No synthetic production fallback: the dashboard remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

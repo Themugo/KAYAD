@@ -235,7 +235,7 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
 
   // Availability Settings State
   const [availableDays, setAvailableDays] = useState<string[]>(currentMechanic.availableDays);
-  const [emergencyPortAudit, setEmergencyPortAudit] = useState<boolean>(true);
+  const [emergencyPortAudit, setEmergencyPortAudit] = useState<boolean>(false);
   const [dailyAuditLimit, setDailyAuditLimit] = useState<number>(3);
 
   // Service Areas State
@@ -255,8 +255,8 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
   const [inspectorName, setInspectorName] = useState<string>(currentMechanic.name);
   const [inspectorPhone, setInspectorPhone] = useState<string>(currentMechanic.phone);
   const [inspectorEmail, setInspectorEmail] = useState<string>(currentMechanic.email);
-  const [ntsaLicense, setNtsaLicense] = useState<string>('NTSA-MEC-2026-88019');
-  const [kraPin, setKraPin] = useState<string>('A019882341M');
+  const [ntsaLicense, setNtsaLicense] = useState<string>('');
+  const [kraPin, setKraPin] = useState<string>('');
 
   // =========================================================
   // REPORT BUILDER STATE (150-Point Audit Engine)
@@ -265,17 +265,15 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
   const [activeBookingForReport, setActiveBookingForReport] = useState<InspectionBooking | null>(null);
 
   // Builder Vehicle Details
-  const [builderVehicleTitle, setBuilderVehicleTitle] = useState<string>('2021 Toyota Land Cruiser Prado TX-L');
-  const [builderVin, setBuilderVin] = useState<string>('JTEBU5JR8K5098124');
-  const [builderRegNo, setBuilderRegNo] = useState<string>('KDG 482L');
-  const [builderOdometer, setBuilderOdometer] = useState<number>(41200);
-  const [builderBuyerName, setBuilderBuyerName] = useState<string>('Dr. Samuel Omondi');
-  const [builderBuyerPhone, setBuilderBuyerPhone] = useState<string>('+254 722 104 902');
-  const [builderOverallScore, setBuilderOverallScore] = useState<number>(92);
+  const [builderVehicleTitle, setBuilderVehicleTitle] = useState<string>('');
+  const [builderVin, setBuilderVin] = useState<string>('');
+  const [builderRegNo, setBuilderRegNo] = useState<string>('');
+  const [builderOdometer, setBuilderOdometer] = useState<number>(0);
+  const [builderBuyerName, setBuilderBuyerName] = useState<string>('');
+  const [builderBuyerPhone, setBuilderBuyerPhone] = useState<string>('');
+  const [builderOverallScore, setBuilderOverallScore] = useState<number>(0);
   const [builderVerdict, setBuilderVerdict] = useState<InspectionReport['verdict']>('Passed (Clean Certification)');
-  const [builderSummary, setBuilderSummary] = useState<string>(
-    'Vehicle is in exceptional mechanical and aesthetic condition. All 6 cylinders demonstrate balanced compression. Paint micron scan confirms zero structural accident repairs. Transmission shifts smoothly under high load.'
-  );
+  const [builderSummary, setBuilderSummary] = useState<string>('');
 
   // 150-Point Items State (Item key -> 'Pass' | 'Attention' | 'Fail')
   const [itemStatuses, setItemStatuses] = useState<Record<string, 'Pass' | 'Attention' | 'Fail'>>({});
@@ -289,16 +287,13 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
   const [newPhotoUrlInput, setNewPhotoUrlInput] = useState<string>('');
 
   // Video Clips State
-  const [videoList, setVideoList] = useState<{ title: string; url: string }[]>([
-    { title: 'Engine Cold Start & Rev Sound Test', url: 'https://youtube.com/watch?v=mock-engine-rev' },
-    { title: 'Exhaust Emissions & Blow-by Inspection', url: 'https://youtube.com/watch?v=mock-exhaust' }
-  ]);
+  const [videoList, setVideoList] = useState<{ title: string; url: string }[]>([]);
   const [newVideoTitle, setNewVideoTitle] = useState<string>('');
   const [newVideoUrl, setNewVideoUrl] = useState<string>('');
 
   // Digital Signature State
-  const [signatureText, setSignatureText] = useState<string>('Eng. Samuel Mwaura');
-  const [isSignatureConfirmed, setIsSignatureConfirmed] = useState<boolean>(true);
+  const [signatureText, setSignatureText] = useState<string>('');
+  const [isSignatureConfirmed, setIsSignatureConfirmed] = useState<boolean>(false);
 
   // PDF Certificate Print Preview Modal State
   const [showPdfCertificateModal, setShowPdfCertificateModal] = useState<boolean>(false);
@@ -1012,23 +1007,7 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
             </h3>
 
             <div className="space-y-3">
-              {[
-                { name: 'Dr. Samuel Omondi', phone: '+254 722 104 902', car: '2021 Toyota Prado TX-L', audits: 2, status: 'VIP Buyer' },
-                { name: 'Arch. Peter Kiprop', phone: '+254 722 891 002', car: '2016 Subaru Forester 2.0XT', audits: 1, status: 'Trade-In Buyer' },
-                { name: 'Eng. Beatrice Mwangi', phone: '+254 711 304 441', car: '2019 Mercedes-Benz C200', audits: 3, status: 'Repeat Client' }
-              ].map((c) => (
-                <div key={c.name} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                  <div>
-                    <Badge variant="neutral" size="sm">{c.status}</Badge>
-                    <h4 className="font-extrabold text-sm text-[#1E3063] mt-1">{c.name}</h4>
-                    <p className="text-slate-500 font-medium">Contact: {c.phone} • Audited: {c.car}</p>
-                  </div>
-
-                  <Button variant="outline" size="sm" onClick={() => showToast(`Initiated call to ${c.name}`)}>
-                    <Phone className="w-3.5 h-3.5 text-slate-600" /> Contact Buyer
-                  </Button>
-                </div>
-              ))}
+              <p className="text-sm text-slate-500 py-6 text-center">Customer records appear here only when returned by the inspection backend.</p>
             </div>
           </Card>
         </div>

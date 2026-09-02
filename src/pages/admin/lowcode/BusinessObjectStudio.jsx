@@ -111,26 +111,7 @@ export default function BusinessObjectStudio() {
       setBusinessObjects(objectsData.data);
     } catch (error) {
       console.error('Failed to load data:', error);
-      // Use mock data
-      setStats({
-        totalObjects: 8,
-        publishedObjects: 5,
-        draftObjects: 3,
-        totalFields: 67,
-        totalForms: 12,
-        totalViews: 24,
-        byCategory: { vehicle: 3, fleet: 2, support: 2, custom: 1 },
-      });
-      setBusinessObjects([
-        { id: '1', name: 'Vehicle Rental', objectKey: 'vehicle_rental', status: 'published', category: 'vehicle', fieldCount: 15, icon: 'car' },
-        { id: '2', name: 'Fleet Contract', objectKey: 'fleet_contract', status: 'published', category: 'fleet', fieldCount: 12, icon: 'package' },
-        { id: '3', name: 'Driver Profile', objectKey: 'driver_profile', status: 'published', category: 'dealer', fieldCount: 10, icon: 'user' },
-        { id: '4', name: 'Insurance Claim', objectKey: 'insurance_claim', status: 'draft', category: 'support', fieldCount: 8, icon: 'shield' },
-        { id: '5', name: 'Roadside Assistance', objectKey: 'roadside_assistance', status: 'draft', category: 'support', fieldCount: 9, icon: 'alert-triangle' },
-        { id: '6', name: 'Dealer Event', objectKey: 'dealer_event', status: 'published', category: 'event', fieldCount: 11, icon: 'calendar' },
-        { id: '7', name: 'Maintenance Schedule', objectKey: 'maintenance_schedule', status: 'published', category: 'fleet', fieldCount: 14, icon: 'wrench' },
-        { id: '8', name: 'Training Course', objectKey: 'training_course', status: 'draft', category: 'custom', fieldCount: 7, icon: 'graduation-cap' },
-      ]);
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

@@ -139,41 +139,7 @@ export default function IntegrationStudio() {
       setEvents(eventData.data);
     } catch (error) {
       console.error('Failed to load EIP data:', error);
-      // Use mock data
-      setDashboard({
-        summary: {
-          totalPartners: 45, activeIntegrations: 38,
-          totalAPIRequests: 1245678, webhookDeliveries: 45678, pluginsInstalled: 23,
-        },
-        systemStatus: { api: 'operational', webhooks: 'operational', oauth: 'operational', sandbox: 'operational' },
-      });
-      setAPIs([
-        { id: 'vehicle-listings', name: 'Vehicle Listings API', category: 'vehicles', version: 'v2', status: 'active', endpoints: 24 },
-        { id: 'dealer', name: 'Dealer API', category: 'dealers', version: 'v2', status: 'active', endpoints: 18 },
-        { id: 'auction', name: 'Auction API', category: 'auctions', version: 'v2', status: 'active', endpoints: 32 },
-        { id: 'inspection', name: 'Inspection API', category: 'inspections', version: 'v1', status: 'active', endpoints: 15 },
-        { id: 'finance', name: 'Finance API', category: 'finance', version: 'v1', status: 'active', endpoints: 20 },
-        { id: 'payment', name: 'Payment API', category: 'payments', version: 'v2', status: 'active', endpoints: 12 },
-      ]);
-      setPartners([
-        { id: '1', name: 'NCBA Bank', category: 'bank', status: 'verified' },
-        { id: '2', name: 'Toyota Kenya', category: 'manufacturer', status: 'verified' },
-        { id: '3', name: 'CIC Insurance', category: 'insurance', status: 'verified' },
-        { id: '4', name: 'DT Dobie', category: 'dealer', status: 'pending' },
-      ]);
-      setSDKs([
-        { id: 'javascript', name: 'JavaScript SDK', version: '2.4.0', downloads: 125000 },
-        { id: 'typescript', name: 'TypeScript SDK', version: '2.4.0', downloads: 89000 },
-        { id: 'python', name: 'Python SDK', version: '2.3.0', downloads: 45000 },
-        { id: 'flutter', name: 'Flutter SDK', version: '1.5.0', downloads: 34000 },
-      ]);
-      setEvents([
-        { id: 'vehicle.created', name: 'Vehicle Created', category: 'vehicles' },
-        { id: 'auction.started', name: 'Auction Started', category: 'auctions' },
-        { id: 'bid.placed', name: 'Bid Placed', category: 'auctions' },
-        { id: 'payment.received', name: 'Payment Received', category: 'payments' },
-        { id: 'dealer.approved', name: 'Dealer Approved', category: 'dealers' },
-      ]);
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }
@@ -509,7 +475,7 @@ export default function IntegrationStudio() {
           <Boxes size={24} />
           <h3 className="text-lg font-semibold">Sandbox Available</h3>
         </div>
-        <p className="opacity-90 mb-4">Test your integrations in an isolated environment with sample data and mock services.</p>
+        <p className="opacity-90 mb-4">Test integrations against configured backend services. No synthetic production data is generated.</p>
         <button className="px-4 py-2 bg-white text-emerald-600 rounded-lg font-medium hover:bg-emerald-50">
           Open Sandbox
         </button>

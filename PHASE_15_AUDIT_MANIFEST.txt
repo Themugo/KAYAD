@@ -1,0 +1,48 @@
+KAYAD PHASE 15 AUDIT MANIFEST
+============================
+
+Baseline archive:
+KAYAD-PHASE-14-COMPLETE.zip
+
+Primary objective:
+Production truth enforcement and removal of dormant synthetic/demo surfaces.
+
+Production-facing areas audited/fixed:
+- Admin AI platform fallback data
+- Low-code platform fallback data
+- Visual Experience fallback data
+- Experience/XOS fallback data
+- Enterprise command center fallback data
+- Executive intelligence fallback data
+- Enterprise control center fallback data
+- Governance studio fallback data
+- Integration studio fallback data
+- CMS studio fallback data
+- Automation studio fallback data
+- Vehicle detail direct URL behavior
+- Dealer profile route behavior
+- Auction biometric security gateway
+- Financing vehicle fallback/status simulator
+- Inspection report builder defaults/media/CRM
+- Private seller dashboard synthetic records
+- Dealer business console synthetic records
+- Dormant analytics/intelligence modules
+
+Production demo scan:
+PASS — targeted synthetic identities, demo credentials, mock URLs and known seeded IDs are absent from src/backend production code outside tests.
+
+Deleted dormant modules:
+- src/components/analytics/AnalyticsDashboard.tsx
+- src/components/analytics/ConversionFunnel.tsx
+- src/components/analytics/OrganizerPerformance.tsx
+- src/components/analytics/index.ts
+- src/components/intelligence/IntelligenceHub.tsx
+- src/components/intelligence/index.ts
+- src/utils/auctionAnalytics.ts
+- src/utils/intelligenceHub.ts
+
+Important:
+Test fixtures remain under src/__tests__/ and are not production data.
+
+Validation limitation:
+The container lacks npm-installed project dependencies. TypeScript was invoked globally; missing dependency diagnostics are expected. No additional Phase 15-specific diagnostics were identified in changed files.

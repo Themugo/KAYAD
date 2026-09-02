@@ -77,20 +77,7 @@ export default function ContentStudio() {
       setStats(data);
     } catch (error) {
       console.error('Failed to load stats:', error);
-      // Use mock data for demo
-      setStats({
-        pages: { total: 24, published: 18 },
-        content: { total: 156, published: 142 },
-        media: { total: 847 },
-        faqs: { total: 45 },
-        campaigns: { active: 3 },
-        banners: { active: 8 },
-        analytics: {
-          weekViews: 12543,
-          weekClicks: 3421,
-          weekConversions: 287
-        }
-      });
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

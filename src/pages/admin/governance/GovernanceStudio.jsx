@@ -97,41 +97,7 @@ export default function GovernanceStudio() {
       setCompliance(compData.data);
     } catch (error) {
       console.error('Failed to load governance data:', error);
-      // Use mock data
-      setDashboard({
-        summary: {
-          activePolicies: 24, pendingChanges: 8, pendingApprovals: 12,
-          openRisks: 15, upcomingReleases: 3, complianceScore: 94,
-        },
-        riskOverview: { critical: 2, high: 5, medium: 8, low: 15 },
-        pendingApprovals: [
-          { id: '1', type: 'Feature Launch', name: 'AI Assistant', riskLevel: 'medium' },
-          { id: '2', type: 'Policy Change', name: 'Finance Policy Update', riskLevel: 'high' },
-        ],
-      });
-      setPolicies([
-        { id: '1', name: 'Auction Policy', version: '2.1', status: 'active', owner: 'COO' },
-        { id: '2', name: 'Dealer Verification Policy', version: '3.0', status: 'active', owner: 'Operations' },
-        { id: '3', name: 'Security Policy', version: '5.2', status: 'active', owner: 'CISO' },
-      ]);
-      setChanges([
-        { id: '1', title: 'Homepage Redesign', riskLevel: 'medium', status: 'approved' },
-        { id: '2', title: 'API Rate Limit Increase', riskLevel: 'low', status: 'pending' },
-      ]);
-      setRisks([
-        { id: '1', title: 'API Rate Limiting Changes', level: 'high', status: 'open' },
-        { id: '2', title: 'Payment Provider Risk', level: 'critical', status: 'open' },
-        { id: '3', title: 'Compliance Gap', level: 'medium', status: 'in_progress' },
-      ]);
-      setApprovals([
-        { id: '1', name: 'Low Risk Changes', riskLevel: 'low', approvers: ['Marketplace Manager'] },
-        { id: '2', name: 'High Risk Changes', riskLevel: 'high', approvers: ['Executive Committee'] },
-      ]);
-      setFeatures([
-        { id: '1', name: 'AI Assistant', stage: 'production', progress: 100 },
-        { id: '2', name: 'Digital Wallet', stage: 'pilot', progress: 85 },
-        { id: '3', name: 'Vehicle History', stage: 'testing', progress: 70 },
-      ]);
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

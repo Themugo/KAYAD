@@ -106,41 +106,7 @@ export default function EnterpriseCommandCenter() {
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Failed to load command center data:', error);
-      // Use mock data
-      setMissionControl({
-        platformStatus: { overall: 'operational' },
-        liveMetrics: {
-          revenueToday: { value: 45890000, change: 12.5 },
-          revenueMonth: { value: 892450000, change: 8.3 },
-          vehiclesListed: { value: 1245, change: 15.2 },
-          vehiclesSold: { value: 89, change: 5.8 },
-          activeBuyers: { value: 2345, change: 7.2 },
-          activeDealers: { value: 456, change: 7.1 },
-          liveAuctions: { value: 45, change: 12.3 },
-        },
-        departmentHealth: {
-          marketplace: 'healthy', dealers: 'healthy', auctions: 'healthy',
-          finance: 'warning', inspections: 'healthy', support: 'healthy',
-        },
-        pendingActions: { dealerApprovals: 5, auctionReviews: 3 },
-      });
-      setLiveActivity([
-        { id: '1', type: 'vehicle_listed', title: 'New Vehicle Listed', description: 'Toyota Corolla 2023', time: new Date().toISOString() },
-        { id: '2', type: 'vehicle_sold', title: 'Vehicle Sold', description: 'Landcruiser - KES 12.5M', time: new Date(Date.now() - 600000).toISOString() },
-        { id: '3', type: 'auction_started', title: 'Auction Started', description: 'Mercedes GLE 2023', time: new Date(Date.now() - 1200000).toISOString() },
-      ]);
-      setNotifications([
-        { id: '1', type: 'high', title: 'Finance Approval Rate', message: 'Below 75% target', read: false },
-        { id: '2', type: 'medium', title: 'Inspection Capacity', message: 'Mombasa at 85%', read: true },
-      ]);
-      setBriefing({
-        summary: {
-          revenueToday: { value: 45890000, target: 50000000, achievement: 91.8 },
-          vehiclesSold: { value: 89, target: 100, achievement: 89 },
-        },
-        risks: [{ id: '1', title: 'Finance Rate', severity: 'high' }],
-        recommendations: ['Review bank partnerships'],
-      });
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }

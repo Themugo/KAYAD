@@ -116,41 +116,7 @@ export default function ExperienceStudio() {
       setAiRecommendations(aiData.data);
     } catch (error) {
       console.error('Failed to load XOS data:', error);
-      // Use mock data
-      setDashboard({
-        experiences: { total: 15, active: 8, draft: 7 },
-        campaigns: { total: 12, active: 4, scheduled: 3, completed: 5 },
-        journeys: { total: 8, active: 5 },
-        themes: { total: 6, active: 2 },
-      });
-      setCampaigns([
-        { id: '1', name: 'Summer Car Sale', campaignType: 'seasonal', status: 'active', startDate: '2024-06-01', endDate: '2024-08-31', budget: 500000, impressions: 125000, ctr: 3.2 },
-        { id: '2', name: 'Auction Week', campaignType: 'auction', status: 'active', startDate: '2024-07-15', endDate: '2024-07-21', budget: 300000, impressions: 89000, ctr: 4.5 },
-        { id: '3', name: 'Toyota Week', campaignType: 'dealer', status: 'scheduled', startDate: '2024-08-01', endDate: '2024-08-07', budget: 250000, impressions: 0, ctr: 0 },
-        { id: '4', name: 'Finance Week', campaignType: 'finance', status: 'paused', startDate: '2024-08-15', endDate: '2024-08-21', budget: 200000, impressions: 45000, ctr: 2.8 },
-      ]);
-      setExperiences([
-        { id: '1', name: 'Kenya Buyer Experience', experienceType: 'regional', status: 'active', priority: 10 },
-        { id: '2', name: 'Mobile User Experience', experienceType: 'device', status: 'active', priority: 8 },
-        { id: '3', name: 'Dealer Portal Experience', experienceType: 'user_type', status: 'active', priority: 9 },
-        { id: '4', name: 'Auction Participant', experienceType: 'user_type', status: 'active', priority: 7 },
-      ]);
-      setThemes([
-        { id: '1', name: 'Madaraka Day', themeType: 'holiday', status: 'active', startDate: '2024-06-01', endDate: '2024-06-01' },
-        { id: '2', name: 'Auction Week', themeType: 'campaign', status: 'active', startDate: '2024-07-15', endDate: '2024-07-21' },
-        { id: '3', name: 'Summer Sale', themeType: 'seasonal', status: 'draft', startDate: '2024-12-01', endDate: '2025-01-15' },
-      ]);
-      setVariants([
-        { id: '1', name: 'Buyer Homepage', variantType: 'buyer', status: 'active', priority: 10 },
-        { id: '2', name: 'Dealer Homepage', variantType: 'dealer', status: 'active', priority: 9 },
-        { id: '3', name: 'Auction Homepage', variantType: 'auction', status: 'active', priority: 8 },
-        { id: '4', name: 'Kenya Homepage', variantType: 'regional', status: 'draft', priority: 7 },
-      ]);
-      setAiRecommendations([
-        { id: '1', type: 'layout', title: 'Optimize Homepage Hero', description: 'Hero sections with video show 34% higher engagement', impact: 'high', confidence: 87 },
-        { id: '2', type: 'audience', title: 'Create SUV Segment', description: 'SUV browsers convert 45% more with specialized content', impact: 'medium', confidence: 82 },
-        { id: '3', type: 'navigation', title: 'Dynamic Auction Badge', description: 'Live auction indicators increase click-through by 22%', impact: 'high', confidence: 94 },
-      ]);
+      // No synthetic production fallback: the UI remains empty until the backend responds.
     } finally {
       setLoading(false);
     }
