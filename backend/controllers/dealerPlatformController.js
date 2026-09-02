@@ -3,7 +3,9 @@
 // Digital Operating System for KAYAD Dealers
 // ============================================================
 
-import DealerProfile from "../models/DealerProfile.js";
+import User from "../models/User.js";
+import Review from "../models/Review.js";
+import LoanApplication from "../models/LoanApplication.js";
 import DealerSubscription from "../models/DealerSubscription.js";
 import DealerAnalytics from "../models/DealerAnalytics.js";
 import Car from "../models/Car.js";
@@ -76,74 +78,44 @@ export async function getDealerDashboard(req, res) {
 // ============================================================
 
 export async function getDealerProfile(req, res) {
-  const { dealerId } = req.params;
+  try {
+    const { dealerId } = req.params;
+    const dealer = await User.findById(dealerId);
+    if (!dealer || dealer.role !== 'dealer') {
+      return res.status(404).json({ success: false, message: 'Dealer not found' });
+    }
 
-  const profile = {
-    id: dealerId,
-    businessName: 'Nairobi Auto Hub',
-    slug: 'nairobi-auto-hub',
-    tagline: 'East Africa\'s Premier Luxury Vehicle Dealer',
-    description: 'Nairobi Auto Hub has been serving discerning buyers since 2015. We specialize in premium SUVs, luxury sedans, and commercial vehicles from trusted brands worldwide.',
-    logo: 'https://via.placeholder.com/200',
-    coverImage: 'https://via.placeholder.com/1200x400',
-    verified: true,
-    verificationBadges: ['KAYAD Verified', 'Ghost Certified', 'NTSA Licensed'],
-    yearsInBusiness: 9,
-    memberSince: '2015',
-    businessLicense: 'BL-2015-00456',
-    taxId: 'TIN-123456789',
-    branches: [
-      { name: 'Westlands Showroom', address: 'Westlands Road, Nairobi', phone: '+254 20 123 4567', hours: 'Mon-Sat 8AM-6PM' },
-      { name: 'Karen Office', address: 'Karen Road, Nairobi', phone: '+254 20 765 4321', hours: 'Mon-Fri 9AM-5PM' },
-    ],
-    location: { city: 'Nairobi', address: 'Westlands Road, Nairobi, Kenya', map: { lat: -1.286389, lng: 36.817223 } },
-    contact: {
-      phone: '+254 712 345 678',
-      whatsapp: '+254 712 345 678',
-      email: 'info@nairobiautohub.co.ke',
-      website: 'https://nairobiautohub.co.ke',
-    },
-    socialMedia: {
-      facebook: 'nairobiautohub',
-      instagram: '@nairobiautohub',
-      twitter: '@nairobiautohub',
-      youtube: 'nairobiautohub',
-    },
-    languages: ['English', 'Swahili', 'Kikuyu'],
-    team: [
-      { name: 'John Kamau', role: 'Managing Director', photo: null },
-      { name: 'Mary Wanjiku', role: 'Sales Director', photo: null },
-      { name: 'Peter Otieno', role: 'Finance Manager', photo: null },
-    ],
-    awards: [
-      { year: 2023, title: 'Best Luxury Dealer', organization: 'EAMA' },
-      { year: 2022, title: 'Customer Choice Award', organization: 'KAYAD' },
-    ],
-    stats: {
-      vehiclesSold: 1234,
-      happyCustomers: 2156,
-      yearsExperience: 9,
-      averageRating: 4.8,
-      totalReviews: 342,
-    },
-    certifications: ['Ghost Certified Dealer', 'Ghost Platinum Dealer'],
-    financePartners: ['NCBA Bank', 'Equity Bank', 'Stanbic Bank'],
-    inspectionPartner: 'Ghost Checkers',
-    featuredInventory: [
-      { id: '1', title: 'Toyota Land Cruiser 300 GX-R', price: 3200000, image: 'https://via.placeholder.com/400x300', badge: 'Featured' },
-      { id: '2', title: 'Mercedes-Benz GLE 450', price: 1850000, image: 'https://via.placeholder.com/400x300', badge: 'New Arrival' },
-    ],
-    reviews: [
-      { name: 'David M.', rating: 5, date: '2024-02-15', text: 'Excellent service! The team was professional and the vehicle was exactly as described.', vehicle: 'Toyota Land Cruiser' },
-      { name: 'Sarah K.', rating: 5, date: '2024-01-20', text: 'Very transparent process. Got my dream car without any surprises.', vehicle: 'BMW X5' },
-      { name: 'Michael O.', rating: 4, date: '2024-01-05', text: 'Good selection of vehicles. The financing options were competitive.', vehicle: 'Mercedes GLE' },
-    ],
-    trustScore: 94,
-    responseRate: 98,
-    avgResponseTime: '< 1 hour',
-  };
+    const [listings, reviews] = await Promise.all([
+      Car.find({ dealer: dealerId }),
+      Review.find({ dealer: dealerId }),
+    ]);
 
-  res.json({ success: true, data: profile });
+    const averageRating = reviews.length
+      ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length
+      : null;
+
+    res.json({
+      success: true,
+      data: {
+        id: dealer.id,
+        businessName: dealer.businessName || dealer.name,
+        name: dealer.name,
+        bio: dealer.bio || null,
+        location: dealer.location || null,
+        approved: Boolean(dealer.approved),
+        memberSince: dealer.createdAt || null,
+        stats: {
+          activeListings: listings.filter((car) => ['available', 'active'].includes(car.status)).length,
+          totalListings: listings.length,
+          averageRating: averageRating === null ? null : Number(averageRating.toFixed(2)),
+          totalReviews: reviews.length,
+        },
+      },
+    });
+  } catch (err) {
+    logError('Error fetching dealer profile:', err);
+    res.status(500).json({ success: false, message: 'Failed to load dealer profile' });
+  }
 }
 
 export async function updateDealerProfile(req, res) {
@@ -674,10 +646,8 @@ export async function askDealerCopilot(req, res) {
 // CUSTOMER DATABASE
 // ============================================================
 
-// Fixed: this previously returned 3 fully hardcoded, invented
-// customers (including a specific bank name, "Equity Bank", claimed
-// as a real finance partner - the same class of false-partnership
-// claim already removed everywhere else in this project) - identical
+// Customer records are derived from real released escrow deals.
+// No lender identity is inferred or advertised by this endpoint.
 // for every dealer. "Customer" is honestly derived from this dealer's
 // own real, released escrow deals (the same real revenue source
 // already used for the dashboard overview), grouped by real buyer -
@@ -770,16 +740,24 @@ export async function getAuctionInventory(req, res) {
 // ============================================================
 
 export async function getFinanceApplications(req, res) {
-  const applications = {
-    items: [
-      { id: '1', leadName: 'James Mwangi', vehicle: 'Toyota Land Cruiser 300', amount: 2560000, tenure: 60, bank: 'NCBA Bank', status: 'approved', monthlyPayment: 58200, appliedAt: '2024-02-10', approvedAt: '2024-02-18' },
-      { id: '2', leadName: 'Sarah Ochieng', vehicle: 'Mercedes-Benz GLE', amount: 1480000, tenure: 48, bank: 'Equity Bank', status: 'pending', appliedAt: '2024-02-20' },
-      { id: '3', leadName: 'Michael Otieno', vehicle: 'BMW X5', amount: 1320000, tenure: 60, bank: 'Stanbic Bank', status: 'approved', monthlyPayment: 30200, appliedAt: '2024-02-15', approvedAt: '2024-02-20' },
-    ],
-    stats: { total: 45, approved: 38, pending: 5, rejected: 2, totalFinanceVolume: 156000000, avgFinanceAmount: 3466667 },
-  };
-
-  res.json({ success: true, data: applications });
+  try {
+    const applications = (await LoanApplication.find({}).populate('car')).filter((application) => application.car?.dealer === req.user.id);
+    res.json({
+      success: true,
+      data: {
+        items: applications,
+        stats: {
+          total: applications.length,
+          approved: applications.filter((a) => a.status === 'approved').length,
+          pending: applications.filter((a) => ['submitted', 'under_review'].includes(a.status)).length,
+          rejected: applications.filter((a) => a.status === 'declined').length,
+        },
+      },
+    });
+  } catch (err) {
+    logError('Error fetching finance applications:', err);
+    res.status(500).json({ success: false, message: 'Failed to load finance applications' });
+  }
 }
 
 // ============================================================

@@ -233,10 +233,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     }
   };
 
-  // Fixed: Customers previously had no real backend equivalent at all
-  // (getCustomers returned 3 fully invented people, including one
-  // specifically credited to "Equity Bank" financing that never
-  // happened) - real customers are honestly derived from this
+  // Fixed: Customers previously had no real backend equivalent at all.
+  // Real customers are honestly derived from this
   // dealer's own real, released escrow deals.
   const [customers, setCustomers] = useState([]);
   const [customersLoading, setCustomersLoading] = useState(false);

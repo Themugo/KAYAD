@@ -97,8 +97,7 @@ export const FAQ_DATA: FAQItem[] = [
     question: 'How does KAYAD Escrow protect buyer funds in Kenya?',
     // Previously stated as unconditional current fact ("Your purchase
     // money IS locked securely inside Tier-1 CBK regulated bank
-    // trustee vaults (NCBA Bank & Standard Chartered)"), naming
-    // specific banks and CBK regulation as already-confirmed - directly
+    // trustee vaults), naming specific banks and CBK regulation as already-confirmed - directly
     // contradicts what's actually true of this business (confirmed
     // directly by the person building it, in an earlier request: not
     // yet CBK-certified, with an admin-facing activation toggle built

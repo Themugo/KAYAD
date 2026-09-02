@@ -2,14 +2,6 @@ import { useState, useMemo } from 'react';
 import { Calculator, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { formatKES } from '../../../utils/helpers';
 
-const BANK_RATES = [
-  { name: 'KCB', rate: 0.135, years: [1, 2, 3, 4, 5] },
-  { name: 'Equity', rate: 0.14, years: [1, 2, 3, 4, 5] },
-  { name: 'Stanbic', rate: 0.129, years: [1, 2, 3, 4, 5] },
-  { name: 'Co-op', rate: 0.145, years: [1, 2, 3, 4] },
-  { name: 'NCBA', rate: 0.15, years: [1, 2, 3, 4] },
-];
-
 interface TcoCalculatorProps {
   vehicle?: {
     price?: number;
@@ -28,7 +20,7 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
   const [cc, setCc] = useState(defaultCc);
   const [downPct, setDownPct] = useState(20);
   const [loanYears, setLoanYears] = useState(3);
-  const [selectedBank, setSelectedBank] = useState(0);
+  const [estimateRate, setEstimateRate] = useState(0);
 
   const isUsed = vehicle?.dutyStatus === 'already_in_kenya' || !vehicle?.dutyStatus;
   const price = vehicle?.price || 5000000;
@@ -51,8 +43,7 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
 
     // Financing
     const loanAmt = price * (1 - downPct / 100);
-    const bank = BANK_RATES[selectedBank];
-    const monthlyRate = bank.rate / 12;
+    const monthlyRate = (estimateRate / 100) / 12;
     const nMonths = loanYears * 12;
     const monthlyPmt = monthlyRate === 0
       ? loanAmt / nMonths
@@ -61,7 +52,7 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
     const totalInterest = totalFinanced - loanAmt;
 
     return { importDuty, annualInsurance, monthlyPmt, totalFinanced, totalInterest, loanAmt };
-  }, [price, downPct, loanYears, selectedBank, isUsed]);
+  }, [price, downPct, loanYears, estimateRate, isUsed]);
 
   return (
     <div className="bg-charcoal-900 border border-white/10 rounded-xl overflow-hidden mt-4">
@@ -104,22 +95,19 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
           <div className="space-y-3">
             <p className="text-white font-sans text-xs font-bold">Financing</p>
             
-            {/* Bank selection */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {BANK_RATES.map((bank, idx) => (
-                <button
-                  key={bank.name}
-                  onClick={() => setSelectedBank(idx)}
-                  className={`p-2 rounded-lg text-xs font-semibold transition-colors ${
-                    selectedBank === idx
-                      ? 'bg-gold-500 text-charcoal-900'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
-                  }`}
-                >
-                  {bank.name}
-                </button>
-              ))}
-            </div>
+            <label className="block space-y-2">
+              <span className="text-white/60 font-sans text-xs">Illustrative annual rate (optional)</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={estimateRate}
+                onChange={(e) => setEstimateRate(Number(e.target.value) || 0)}
+                className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white outline-none"
+              />
+              <span className="text-white/40 font-sans text-[10px]">This is a calculator assumption, not a lender offer or quoted bank rate.</span>
+            </label>
 
             {/* Down payment */}
             <div>

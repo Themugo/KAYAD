@@ -669,25 +669,11 @@ class CountryService {
    * Initialize payment providers
    */
   async initializePaymentProviders() {
+    // Only integrations that are actually wired into the application are
+    // initialized. Additional regional providers must be added only with
+    // a verified runtime integration and deployment evidence.
     const providers = [
-      // Kenya
       { country_code: 'KE', provider_code: 'mpesa', provider_name: 'M-Pesa', provider_type: 'mobile_money', is_primary: true },
-      { country_code: 'KE', provider_code: 'airtel_money', provider_name: 'Airtel Money', provider_type: 'mobile_money' },
-      { country_code: 'KE', provider_code: 'equity', provider_name: 'Equity Bank', provider_type: 'bank' },
-      { country_code: 'KE', provider_code: 'kcb', provider_name: 'KCB Bank', provider_type: 'bank' },
-      { country_code: 'KE', provider_code: 'stripe', provider_name: 'Stripe', provider_type: 'gateway' },
-      
-      // Uganda
-      { country_code: 'UG', provider_code: 'mtn_momo', provider_name: 'MTN Mobile Money', provider_type: 'mobile_money', is_primary: true },
-      { country_code: 'UG', provider_code: 'airtel_ug', provider_name: 'Airtel Money Uganda', provider_type: 'mobile_money' },
-      { country_code: 'UG', provider_code: 'stanbic', provider_name: 'Stanbic Bank', provider_type: 'bank' },
-      { country_code: 'UG', provider_code: 'flutterwave', provider_name: 'Flutterwave', provider_type: 'gateway' },
-      
-      // Tanzania
-      { country_code: 'TZ', provider_code: 'm pesa_tz', provider_name: 'M-Pesa Tanzania', provider_type: 'mobile_money', is_primary: true },
-      { country_code: 'TZ', provider_code: 'airtel_tz', provider_name: 'Airtel Money Tanzania', provider_type: 'mobile_money' },
-      { country_code: 'TZ', provider_code: 'crdb', provider_name: 'CRDB Bank', provider_type: 'bank' },
-      { country_code: 'TZ', provider_code: 'paystack', provider_name: 'Paystack', provider_type: 'gateway' },
     ];
 
     for (const provider of providers) {

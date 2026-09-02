@@ -1,40 +1,8 @@
-import { Star, ShieldCheck, Quote, MapPin, CheckCircle2 } from 'lucide-react';
+import { Star, ShieldCheck, MapPin } from 'lucide-react';
 import type { FC } from 'react';
 
 export const CustomerTestimonials: FC = () => {
-  const testimonials = [
-    {
-      name: 'Dr. James K. Mwangi',
-      location: 'Nairobi (Karen)',
-      role: 'Porsche Cayenne Turbo Buyer',
-      vehicle: '2022 Porsche Cayenne Turbo GT',
-      quote: 'Transacting KES 14.5M on a vehicle can be daunting. KAYAD held the funds in CBK escrow until my mechanic completed the 150-point inspection at my home. Smooth, professional, and zero stress.',
-      rating: 5,
-      date: 'Verified 3 weeks ago',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
-    },
-    {
-      name: 'Sarah Cherono',
-      location: 'Eldoret',
-      role: 'Toyota Land Cruiser V8 Seller',
-      vehicle: '2021 Toyota Land Cruiser VX-R',
-      quote: 'Listed my V8 on KAYAD and had 3 verified bidders in 48 hours. Escrow notification popped up on M-Pesa once the deposit hit, and full wired payout landed in my Equity Bank account within 10 minutes of handover.',
-      rating: 5,
-      date: 'Verified 1 month ago',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80'
-    },
-    {
-      name: 'Capt. David Omondi',
-      location: 'Mombasa (Nyali)',
-      role: 'Range Rover Sport Auction Winner',
-      vehicle: '2020 Range Rover Sport HSE',
-      quote: 'Won the live auction from Mombasa. Enclosed carrier transport brought the car straight to Nyali with live GPS tracking. The TIMS logbook transfer was initiated automatically. Best car buying experience in East Africa.',
-      rating: 5,
-      date: 'Verified 2 months ago',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80'
-    }
-  ];
-
+  const testimonials: Array<{ name: string; location: string; role: string; vehicle: string; quote: string; rating: number; date: string; avatar: string }> = [];
   return (
     <section className="py-14 sm:py-20 bg-[#FCF9F4] dark:bg-[#0B132B] text-[#1E3063] dark:text-slate-100 border-b border-[#E8E1D5] dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -51,11 +19,12 @@ export const CustomerTestimonials: FC = () => {
           </h2>
 
           <p className="text-xs sm:text-sm text-[#6B7A99] dark:text-slate-300 font-sans font-medium">
-            Read real verified transaction experiences from buyers, sellers, and collectors across Nairobi, Mombasa, Eldoret, and Nakuru.
+            Verified member reviews will appear here once they are loaded from the live review records.
           </p>
         </div>
 
         {/* Testimonials Grid */}
+        {testimonials.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((item, idx) => (
             <div
@@ -112,6 +81,11 @@ export const CustomerTestimonials: FC = () => {
             </div>
           ))}
         </div>
+        ) : (
+          <div className="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-[#121D33] border border-[#E2D8C7] dark:border-white/10 p-8 text-center text-sm text-[#6B7A99] dark:text-slate-300">
+            No verified member reviews are available yet.
+          </div>
+        )}
 
       </div>
     </section>

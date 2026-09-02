@@ -138,7 +138,7 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
           </div>
         )}
 
-        {/* Asset Financing Pill - Only if finance active */}
+        {/* Financing Pill - Only if finance active */}
         {isFinanceActive && (
           <div className="bg-blue-50/80 p-2 rounded-xl border border-blue-200 flex items-center gap-2 flex-1 min-w-[130px]">
             <Landmark className="w-4 h-4 text-blue-600 shrink-0" />
@@ -215,14 +215,14 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
           </div>
         )}
 
-        {/* 5. Asset Financing - Only when active */}
+        {/* 5. Financing - Only when active */}
         {isFinanceActive && (
           <div className="space-y-0.5 min-w-[120px]">
             <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
-              <Landmark className="w-3 h-3 text-blue-400" /> Asset Financing
+              <Landmark className="w-3 h-3 text-blue-400" /> Financing
             </p>
-            <p className="font-bold text-blue-300 text-xs">Pre-Approved Available</p>
-            <p className="text-[10px] text-slate-300">NCBA / Co-op Partnered</p>
+            <p className="font-bold text-blue-300 text-xs">Lender Feed Pending</p>
+            <p className="text-[10px] text-slate-300">Verified lender terms not connected</p>
           </div>
         )}
 

@@ -27,30 +27,7 @@ export const AdminPage: FC = () => {
   const { vehicles, escrowContracts, navigateTo } = useMarketplace();
 
   // Advert Form State
-  const [adverts, setAdverts] = useState<AdvertItem[]>([
-    {
-      id: 'ad_1',
-      title: 'NCBA & KAYAD 0% Financing Special',
-      subtitle: 'Get pre-approved in 10 minutes with guaranteed escrow protection on all 2020+ models.',
-      badge: 'PROMO DEAL',
-      ctaText: 'Apply For Financing',
-      imageUrl: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1200&q=80',
-      placement: 'Hero Banner',
-      isActive: true,
-      createdAt: 'Today, 10:00 AM',
-    },
-    {
-      id: 'ad_2',
-      title: 'Weekly Auction Supercharge',
-      subtitle: 'Over 25 certified Toyota & Subaru models going under the hammer with zero reserve!',
-      badge: 'LIVE AUCTION',
-      ctaText: 'View Auctions',
-      imageUrl: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80',
-      placement: 'Gallery In-feed',
-      isActive: true,
-      createdAt: 'Yesterday',
-    }
-  ]);
+  const [adverts, setAdverts] = useState<AdvertItem[]>([]);
 
   const [formTitle, setFormTitle] = useState('');
   const [formSubtitle, setFormSubtitle] = useState('');
@@ -144,7 +121,7 @@ export const AdminPage: FC = () => {
                 Create & Publish Marketplace Advertisements
               </h2>
               <p className="text-xs text-[#6B7A99] font-medium">
-                Design custom promotion banners to broadcast partner financing, seasonal discounts, or dealer spotlights.
+                Design custom promotion banners using only verified offers, live inventory, and approved marketing claims.
               </p>
             </div>
           </div>
@@ -194,7 +171,7 @@ export const AdminPage: FC = () => {
               </label>
               <textarea
                 rows={2}
-                placeholder="Explain the offer terms, partner perks, or discount details..."
+                placeholder="Explain the verified offer terms or promotion details..."
                 value={formSubtitle}
                 onChange={e => setFormSubtitle(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-semibold text-[#1E3063] focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"

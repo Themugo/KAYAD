@@ -868,10 +868,11 @@ class AIIntelligenceService {
   }
 
   recommendLoanProducts(affordability) {
-    return [
-      { bank: 'KCB', rate: 14.5, maxTenure: 72, monthlyPayment: 45000 },
-      { bank: 'Equity', rate: 15.0, maxTenure: 60, monthlyPayment: 47000 },
-    ];
+    return {
+      available: false,
+      message: 'Verified lender product data is not connected; no lender rates or product terms are returned.',
+      affordability,
+    };
   }
 
   estimateInsuranceForFinance(vehicleData) {

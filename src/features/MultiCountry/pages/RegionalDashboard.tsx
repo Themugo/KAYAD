@@ -56,21 +56,9 @@ const COUNTRY_ANALYTICS: Record<string, any> = {
 };
 
 const PAYMENT_PROVIDERS: Record<string, any> = {
-  KE: [
-    { code: 'mpesa', name: 'M-Pesa', type: 'Mobile Money', status: 'active' },
-    { code: 'airtel', name: 'Airtel Money', type: 'Mobile Money', status: 'active' },
-    { code: 'equity', name: 'Equity Bank', type: 'Bank', status: 'active' },
-  ],
-  UG: [
-    { code: 'mtn_momo', name: 'MTN Mobile Money', type: 'Mobile Money', status: 'active' },
-    { code: 'airtel_ug', name: 'Airtel Money', type: 'Mobile Money', status: 'active' },
-    { code: 'stanbic', name: 'Stanbic Bank', type: 'Bank', status: 'active' },
-  ],
-  TZ: [
-    { code: 'mpesa_tz', name: 'M-Pesa Tanzania', type: 'Mobile Money', status: 'active' },
-    { code: 'airtel_tz', name: 'Airtel Money', type: 'Mobile Money', status: 'active' },
-    { code: 'crdb', name: 'CRDB Bank', type: 'Bank', status: 'active' },
-  ],
+  KE: [{ code: 'mpesa', name: 'M-Pesa', type: 'Mobile Money', status: 'active' }],
+  UG: [],
+  TZ: [],
 };
 
 const CROSS_BORDER_ROUTES = [

@@ -709,7 +709,6 @@ export default function GhostCheckersComplete() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <TestimonialCard name="James Mwangi" role="Car Buyer, Nairobi" text="Ghost Checkers saved me from buying a flood-damaged vehicle. The report was comprehensive and easy to understand." rating={5} />
-            <TestimonialCard name="Sarah Ochieng" role="Bank Manager, KCB" text="We use Ghost Checkers for all vehicle valuations before approving loans. Their reports are professionally detailed." rating={5} />
             <TestimonialCard name="AutoKenya Dealer" role="Verified Dealer" text="Getting Ghost Certified has increased buyer confidence and our conversion rate significantly." rating={5} />
           </div>
         </div>

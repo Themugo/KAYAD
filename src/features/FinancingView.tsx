@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Vehicle } from '../types';
-import BankFinancingPortal from './BankFinancingPortal';
 import { 
   CreditCard, 
   Calculator, 
@@ -81,7 +80,6 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const { user } = useAuth();
 
   // Mode Switcher: 'buyer' | 'bank_portal'
-  const [financingViewMode, setFinancingViewMode] = useState<'buyer' | 'bank_portal'>('buyer');
 
   // Calculator State
   const [vehiclePrice, setVehiclePrice] = useState<number>(3500000);
@@ -91,7 +89,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const [employmentType, setEmploymentType] = useState<'salaried' | 'self_employed' | 'sme'>('salaried');
 
   // Comparison State
-  const [selectedBankIds, setSelectedBankIds] = useState<string[]>(['ncba', 'equity', 'kcb']);
+  const [selectedBankIds, setSelectedBankIds] = useState<string[]>([]);
   
   // Application Form State
   const [activeTab, setActiveTab] = useState<'calculator' | 'lenders' | 'comparison' | 'tracker' | 'eligibility'>('calculator');
@@ -225,10 +223,10 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
 
   // All 8 required application statuses
   const statusFlow: { status: ApplicationStatus; label: string; desc: string; step: number }[] = [
-    { status: 'Draft', label: '1. Draft', desc: 'Calculator inputs saved; choosing partner lender', step: 1 },
+    { status: 'Draft', label: '1. Draft', desc: 'Calculator inputs saved; choosing lender', step: 1 },
     { status: 'Submitted', label: '2. Submitted', desc: 'Pre-approval application routed to lender desk', step: 2 },
     { status: 'Documents Requested', label: '3. Docs Requested', desc: 'Lender underwriting requesting certified statements', step: 3 },
-    { status: 'Under Review', label: '4. Under Review', desc: 'Bank credit committee evaluating debt-to-income ratio', step: 4 },
+    { status: 'Under Review', label: '4. Under Review', desc: 'Lender underwriting evaluation', step: 4 },
     { status: 'Conditionally Approved', label: '5. Conditional Approval', desc: 'Lender issued term sheet pending physical audit', step: 5 },
     { status: 'Approved', label: '6. Approved', desc: 'Full credit approval granted; loan contract ready', step: 6 },
     { status: 'Declined', label: '7. Declined', desc: 'Application failed lender eligibility criteria', step: 7 },
@@ -237,53 +235,17 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Mode Switcher Banner */}
       <div className="bg-[#101935] border-b border-amber-400/30 px-4 py-3 text-xs shadow-md rounded-2xl">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-amber-400 font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">
-              KAYAD Financing Ecosystem
-            </span>
-            <span className="text-slate-300 text-[11px] hidden md:inline font-semibold">
-              Buyer Auto Loans & Bank Underwriting Portal
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 bg-slate-900/90 p-1 rounded-xl border border-slate-700">
-            <button
-              onClick={() => setFinancingViewMode('buyer')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                financingViewMode === 'buyer'
-                  ? 'bg-amber-400 text-[#101935] shadow-sm font-black'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <Calculator className="w-3.5 h-3.5" />
-              <span>Buyer Rate Calculator</span>
-            </button>
-
-            <button
-              onClick={() => setFinancingViewMode('bank_portal')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                financingViewMode === 'bank_portal'
-                  ? 'bg-[#1E3063] text-white border border-amber-400/50 shadow-sm font-black'
-                  : 'text-amber-300 hover:text-white'
-              }`}
-            >
-              <Landmark className="w-3.5 h-3.5 text-amber-400" />
-              <span>Bank & Finance Portal</span>
-              <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.2 rounded-full">
-                BANK OFFICER SUITE
-              </span>
-            </button>
-          </div>
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <span className="text-amber-400 font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">
+            KAYAD Financing Marketplace
+          </span>
+          <span className="text-slate-300 text-[11px] hidden md:inline font-semibold">
+            Real application records only; lender offers remain unavailable until a verified feed is connected.
+          </span>
         </div>
       </div>
 
-      {financingViewMode === 'bank_portal' ? (
-        <BankFinancingPortal onNavigateToBuyerFinancing={() => setFinancingViewMode('buyer')} />
-      ) : (
-        <>
       {/* ==========================================
           1. HERO SECTION
           ========================================== */}
@@ -296,7 +258,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           {/* KAYAD Marketplace Position Badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-xs font-extrabold text-amber-300 shadow-xs">
             <Landmark className="w-4 h-4 text-amber-400" />
-            <span>Independent Vehicle Financing Marketplace Partner</span>
+            <span>Independent Vehicle Financing Marketplace</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display text-white tracking-tight leading-tight">
@@ -304,7 +266,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           </h1>
 
           <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
-            Compare trusted lenders across East Africa. Calculate monthly payments instantly.
+            Calculate an affordability estimate using your own assumptions. Verified lender offers will appear only after a real lender feed is connected.
           </p>
 
           {/* ONE CLEAR PRIMARY CTA */}
@@ -331,33 +293,33 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           ========================================== */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatWidget
-          label="Maximum Financing LTV"
-          value="Up to 85%"
-          trend="15% - 20% Min Down Payment"
+          label="Financing LTV"
+          value="Not quoted"
+          trend="Depends on lender terms"
           trendType="positive"
           icon={<Percent className="w-4 h-4 text-emerald-600" />}
         />
 
         <StatWidget
-          label="Partner Bank Rates"
-          value="12.5% - 14.0%"
-          trend="Reducing Balance p.a."
+          label="Lender Rates"
+          value="Not connected"
+          trend="No verified lender feed"
           trendType="positive"
           icon={<Landmark className="w-4 h-4 text-blue-500" />}
         />
 
         <StatWidget
           label="Approval Decision Time"
-          value="24 - 48 Hours"
-          trend="Direct Digital Routing"
+          value="Not quoted"
+          trend="Determined by lender"
           trendType="neutral"
           icon={<Clock className="w-4 h-4 text-amber-500" />}
         />
 
         <StatWidget
-          label="Logbook Requirement"
-          value="Joint NTSA TIMS"
-          trend="Protected Asset Transfer"
+          label="Lender Requirements"
+          value="Not quoted"
+          trend="Confirm with lender"
           trendType="positive"
           icon={<ShieldCheck className="w-4 h-4 text-emerald-600" />}
         />
@@ -367,7 +329,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       <div className="border-b border-slate-200 flex items-center gap-2 overflow-x-auto scrollbar-none pt-2">
         {[
           { id: 'calculator', label: '1. Finance Calculator', icon: <Calculator className="w-4 h-4" /> },
-          { id: 'lenders', label: '2. Partner Banks', icon: <Landmark className="w-4 h-4" /> },
+          { id: 'lenders', label: '2. Lender Offers', icon: <Landmark className="w-4 h-4" /> },
           { id: 'comparison', label: `3. Compare Offers (${selectedBankIds.length})`, icon: <Sliders className="w-4 h-4" /> },
           { id: 'tracker', label: '4. Application Journey', icon: <Clock className="w-4 h-4" /> },
           { id: 'eligibility', label: '5. Eligibility & Docs', icon: <FileCheck className="w-4 h-4 text-emerald-600" /> }
@@ -574,7 +536,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               <div className="p-3 bg-white/10 rounded-xl border border-white/15 text-[11px] text-slate-300 leading-relaxed flex items-start gap-2">
                 <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Estimates only.</strong> Final loan terms, interest rates, and limits are subject to underwriting approval by your chosen bank.
+                  <strong>Estimates only.</strong> Final loan terms, interest rates, and limits are subject to the terms of the lender that receives a real application.
                 </span>
               </div>
             </div>
@@ -602,7 +564,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           <div>
             <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
               <Landmark className="w-5 h-5 text-amber-500" />
-              Financial Partner Institutions
+              Verified Lender Feed
             </h2>
             <p className="text-xs text-slate-500 font-medium">Partner lender offers will appear here when a verified lender feed is connected</p>
           </div>
@@ -925,8 +887,6 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             )}
           </Card>
         </div>
-      )}
-        </>
       )}
 
     </div>
