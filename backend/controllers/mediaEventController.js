@@ -224,80 +224,6 @@ export const getSupportedEvents = asyncHandler(async (req, res) => {
   response.success(res, { events });
 });
 
-/**
- * POST /api/media-event-engine/simulation/bid
- * Simulate a bid event (for testing)
- */
-export const simulateBid = asyncHandler(async (req, res) => {
-  const { auctionId, amount, bidderId } = req.body;
-  
-  if (!auctionId || !amount) {
-    response.badRequest(res, 'AuctionId and amount are required');
-    return;
-  }
-  
-  // Simulate bid
-  const bidData = {
-    id: `bid_${Date.now()}`,
-    amount,
-    formattedAmount: `KES ${amount.toLocaleString()}`,
-    bidderId,
-    bidderTag: `Bidder-${Math.floor(Math.random() * 9000) + 1000}`,
-    timestamp: Date.now(),
-  };
-  
-  // Publish new highest bid event
-  await mediaEventEngine.publish({
-    type: AuctionEventType.NEW_HIGHEST_BID,
-    auctionId,
-    userId: bidderId,
-    payload: bidData,
-  });
-  
-  // Generate commentary
-  await commentaryService.onNewBid(auctionId, bidData);
-  
-  // Broadcast bid update
-  broadcastSync.broadcastBidUpdate(auctionId, bidData);
-  
-  response.success(res, {
-    message: 'Bid simulated successfully',
-    bid: bidData,
-  });
-});
-
-/**
- * POST /api/media-event-engine/simulation/time-warning
- * Simulate final minutes warning
- */
-export const simulateTimeWarning = asyncHandler(async (req, res) => {
-  const { auctionId, minutesRemaining } = req.body;
-  
-  if (!auctionId) {
-    response.badRequest(res, 'AuctionId is required');
-    return;
-  }
-  
-  const eventType = minutesRemaining === 1 
-    ? AuctionEventType.FINAL_MINUTE 
-    : AuctionEventType.FINAL_FIVE_MINUTES;
-  
-  await mediaEventEngine.publish({
-    type: eventType,
-    auctionId,
-    payload: {
-      minutesRemaining: minutesRemaining || 5,
-      timestamp: Date.now(),
-    },
-  });
-  
-  await commentaryService.onTimeMilestone(auctionId, eventType);
-  
-  response.success(res, {
-    message: `Time warning simulated for ${minutesRemaining || 5} minutes`,
-    eventType,
-  });
-});
 
 export default {
   getDashboard,
@@ -317,6 +243,4 @@ export default {
   publishEvent,
   sendCommentary,
   getSupportedEvents,
-  simulateBid,
-  simulateTimeWarning,
 };

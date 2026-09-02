@@ -1823,20 +1823,6 @@ CREATE TABLE IF NOT EXISTS user_preferences (
 );
 CREATE INDEX IF NOT EXISTS idx_user_preferences_user ON user_preferences(user_id);
 
--- Bidder deposits
-CREATE TABLE IF NOT EXISTS bidder_deposits (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id),
-  auction_id UUID REFERENCES auctions(id),
-  amount NUMERIC NOT NULL,
-  status TEXT DEFAULT 'held' CHECK (status IN ('held','refunded','forfeited')),
-  mpesa_receipt TEXT,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS idx_bidder_deposits_user ON bidder_deposits(user_id);
-CREATE INDEX IF NOT EXISTS idx_bidder_deposits_auction ON bidder_deposits(auction_id);
-
 -- Bid logs (detailed audit trail for bids)
 CREATE TABLE IF NOT EXISTS bid_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1863,8 +1849,6 @@ DROP TRIGGER IF EXISTS set_updated_at ON localizations;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON localizations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS set_updated_at ON user_preferences;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON user_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS set_updated_at ON bidder_deposits;
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON bidder_deposits FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
 -- M6: MISSING FK INDEXES (71 unindexed foreign keys)

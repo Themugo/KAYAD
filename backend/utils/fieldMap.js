@@ -196,10 +196,6 @@ export const FIELD_ALIASES = {
   user_preferences: {
     user: "user_id",
   },
-  bidder_deposits: {
-    user: "user_id",
-    auction: "auction_id",
-  },
   bid_logs: {
     bid: "bid_id",
     user: "user_id",

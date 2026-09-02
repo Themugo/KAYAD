@@ -63,7 +63,7 @@ const TABLE_MAP = {
   // is out of this phase's own scope.
   GlobalSettings: "system_settings",
   TransactionLedger: "transaction_ledger", Localization: "localizations",
-  UserPreference: "user_preferences", BidderDeposit: "bidder_deposits",
+  UserPreference: "user_preferences",
   BidLog: "bid_logs",
   // CMS Models
   CMSPage: "cms_pages",

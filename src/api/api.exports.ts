@@ -565,21 +565,6 @@ export const platformStatsAPI = {
 // ── formatKES (re-exported from helpers) ──────────────
 export { formatKES } from "../utils/helpers";
 
-// ── BIDDING SECURITY ─────────────────────────────────────
-export const biddingSecurityAPI = {
-  // User endpoints
-  getStatus: () => api.get('/bidding-security/status').then(unwrap),
-  createDeposit: (body: any) => api.post('/bidding-security/deposit', body).then(unwrap),
-  verifyDeposit: (depositId: string, body: any) => api.post(`/bidding-security/deposit/${depositId}/verify`, body).then(unwrap),
-  getDeposits: (params?: any) => api.get('/bidding-security/deposits', { params }).then(unwrap),
-  verifyBiometric: (body: any) => api.post('/bidding-security/biometric/verify', body).then(unwrap),
-  checkAuthorization: (carId: string, amount: number) => api.get(`/bidding-security/authorize/${carId}/${amount}`).then(unwrap),
-  
-  // Admin endpoints
-  manageDeposit: (depositId: string, body: any) => api.patch(`/bidding-security/deposit/${depositId}`, body).then(unwrap),
-  getAllDeposits: (params?: any) => api.get('/bidding-security/admin/deposits', { params }).then(unwrap),
-};
-
 // ── BID LOGS ────────────────────────────────────────────
 export const bidLogsAPI = {
   // User endpoints

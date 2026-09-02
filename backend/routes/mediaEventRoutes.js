@@ -4,7 +4,7 @@
 
 import express from 'express';
 import * as controller from '../controllers/mediaEventController.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -32,11 +32,5 @@ router.post('/publish', requireRole(['organizer', 'admin']), controller.publishE
 
 // Commentary (requires announcer or admin role)
 router.post('/commentary', requireRole(['announcer', 'organizer', 'admin']), controller.sendCommentary);
-
-// Simulation endpoints (for testing - require admin)
-if (process.env.NODE_ENV !== 'production') {
-  router.post('/simulation/bid', requireRole(['admin']), controller.simulateBid);
-  router.post('/simulation/time-warning', requireRole(['admin']), controller.simulateTimeWarning);
-}
 
 export default router;

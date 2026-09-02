@@ -29,7 +29,6 @@ import inspectorApplicationRoutes from "./inspectorApplicationRoutes.js";
 import referralRoutes from "./referralRoutes.js";
 import contactRoutes from "./contactRoutes.js";
 import marketRoutes from "./marketRoutes.js";
-import biddingSecurityRoutes from "./biddingSecurityRoutes.js";
 import bidLogRoutes from "./bidLogRoutes.js";
 import transactionLedgerRoutes from "./transactionLedgerRoutes.js";
 import localizationRoutes from "./localizationRoutes.js";
@@ -67,7 +66,6 @@ router.use("/contact", contactRoutes);
 router.use("/market", marketRoutes);
 
 // Bidding Security & Deposits
-router.use("/bidding-security", biddingSecurityRoutes);
 
 // Bid Logs
 router.use("/bid-logs", bidLogRoutes);
