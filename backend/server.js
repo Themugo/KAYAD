@@ -580,34 +580,74 @@ io.on("connection", (socket) => {
   };
 
   socket.on("joinAuction", async (carId) => {
-    if (isRateLimited("joinAuction")) return;
-    if (isValidId(carId)) {
-      socket.join(String(carId));
-      socket.join(`car_${carId}`);
+    if (isRateLimited("joinAuction") || !isValidId(carId)) return;
+
+    try {
       const { getSupabase } = await import("./utils/supabase.js");
       const sb = getSupabase();
-      const { data: car } = await sb.from("cars").select("current_bid, auction_end, auction_status").eq("id", carId).single();
-      if (car) {
-        socket.emit("auctionResync", {
-          carId,
-          currentBid: car.current_bid,
-          auctionEnd: car.auction_end,
-          auctionStatus: car.auction_status,
-        });
-      }
+      const { data: car } = await sb
+        .from("cars")
+        .select("id, current_bid, auction_end, auction_status")
+        .eq("id", carId)
+        .maybeSingle();
+
+      // Public auction watching is allowed, but a socket may only join a
+      // room for a real vehicle. Do not create arbitrary empty rooms.
+      if (!car) return;
+
+      socket.join(String(carId));
+      socket.join(`car_${carId}`);
+      socket.emit("auctionResync", {
+        carId,
+        currentBid: car.current_bid,
+        auctionEnd: car.auction_end,
+        auctionStatus: car.auction_status,
+      });
+    } catch (error) {
+      // Never grant room access when the authorization lookup fails.
+      logWarn("Socket auction room authorization failed", { carId, error: error?.message });
     }
   });
 
-  socket.on("joinChat", (chatId) => {
-    if (!socket.user) return; // reject unauthenticated chat access
-    if (!isRateLimited("joinChat") && isValidId(chatId)) socket.join(`chat_${chatId}`);
+  socket.on("joinChat", async (chatId) => {
+    if (!socket.user || isRateLimited("joinChat") || !isValidId(chatId)) return;
+
+    const userId = socket.user.id || socket.user._id;
+    if (!isValidId(String(userId))) return;
+
+    try {
+      const { getSupabase } = await import("./utils/supabase.js");
+      const sb = getSupabase();
+      const { data: chat } = await sb
+        .from("chats")
+        .select("id")
+        .eq("id", chatId)
+        .contains("participants", [userId])
+        .maybeSingle();
+
+      // Chat rooms are private. Authentication alone is not sufficient; the
+      // authenticated user must actually be a participant in this chat.
+      if (!chat) return;
+      socket.join(`chat_${chatId}`);
+    } catch (error) {
+      logWarn("Socket chat room authorization failed", { chatId, userId, error: error?.message });
+    }
   });
   socket.on("leaveChat", (chatId) => {
     if (!isRateLimited("leaveChat") && isValidId(chatId)) socket.leave(`chat_${chatId}`);
   });
-  socket.on("typing", ({ chatId, userId, name }) => {
-    if (!socket.user) return; // reject unauthenticated typing
-    if (!isRateLimited("typing") && chatId) socket.to(`chat_${chatId}`).emit("typing", { chatId, userId, name });
+  socket.on("typing", ({ chatId } = {}) => {
+    if (!socket.user || !isRateLimited("typing") || !isValidId(String(chatId || ""))) return;
+
+    // A socket can only type into a room it was authorized to join. Never
+    // trust client-supplied userId/name because those values can impersonate
+    // another participant.
+    const room = `chat_${chatId}`;
+    if (!socket.rooms.has(room)) return;
+
+    const userId = socket.user.id || socket.user._id;
+    const name = socket.user.name || socket.user.fullName || socket.user.email || null;
+    socket.to(room).emit("typing", { chatId, userId, name });
   });
   socket.on("joinAdmin", () => {
     if (socket.user?.role === "admin") socket.join("admins");
