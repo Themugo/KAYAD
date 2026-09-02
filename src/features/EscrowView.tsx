@@ -134,12 +134,6 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // New Escrow Form State
-  const [newSellerType, setNewSellerType] = useState<'Private Seller' | 'Verified Dealer'>('Private Seller');
-  const [newVehicleTitle, setNewVehicleTitle] = useState<string>('');
-  const [newAmount, setNewAmount] = useState<string>('');
-  const [newBuyerName, setNewBuyerName] = useState<string>('');
-  const [newSellerName, setNewSellerName] = useState<string>('');
-  const [formSuccess, setFormSuccess] = useState<boolean>(false);
 
   // Auto-clear Toast
   const triggerToast = (msg: string) => {
@@ -272,58 +266,11 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
     }
   };
 
-  // Workflow Handlers
+  // A standalone escrow cannot be created from this view. The backend
+  // creates escrow records as part of its real purchase/payment flow.
   const handleCreateEscrow = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVehicleTitle || !newAmount || !newBuyerName || !newSellerName) return;
-
-    const newDeal: EscrowTransaction = {
-      id: `ESC-2026-${Math.floor(1000 + Math.random() * 9000)}-KE`,
-      vehicleId: `v-${Date.now()}`,
-      vehicleTitle: newVehicleTitle,
-      vehicleImage: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800',
-      amount: Number(newAmount),
-      vehiclePrice: Number(newAmount),
-      buyerName: newBuyerName,
-      buyerPhone: '+254 700 *** ***',
-      sellerName: newSellerName,
-      sellerPhone: '+254 711 *** ***',
-      sellerType: newSellerType,
-      status: 'Awaiting Buyer Deposit',
-      step: 2,
-      updatedAt: 'Just now',
-      depositDate: 'Pending Deposit',
-      paymentMethod: 'Bank Wire Transfer / M-Pesa',
-      bankReference: 'KAYAD-ESC-REF',
-      vaultHolder: 'KAYAD Escrow Vault',
-      whoControlsFunds: 'Awaiting Deposit',
-      inspectionStatus: 'Booked',
-      transferStatus: 'Verification',
-      timelineLogs: [
-        {
-          id: `log-${Date.now()}`,
-          timestamp: new Date().toLocaleString(),
-          title: 'Escrow Agreement Initiated',
-          description: `Custom escrow created for ${newVehicleTitle} at Ksh ${Number(newAmount).toLocaleString()}.`,
-          actor: 'Buyer',
-          type: 'info'
-        }
-      ]
-    };
-
-    setDealsList([newDeal, ...dealsList]);
-    setSelectedDealId(newDeal.id);
-    setFormSuccess(true);
-    triggerToast('New Escrow Purchase Journey initiated successfully!');
-
-    setTimeout(() => {
-      setFormSuccess(false);
-      setActiveTab('journey');
-      setNewVehicleTitle('');
-      setNewAmount('');
-      setNewBuyerName('');
-      setNewSellerName('');
-    }, 1500);
+    triggerToast('Standalone escrow creation is not available. Start from a real purchase/payment flow.');
   };
 
   // Advance deal workflow step
@@ -413,7 +360,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               className="font-bold text-slate-700"
             >
               <PlusCircle className="w-4 h-4 text-[#C85A32]" />
-              <span>Initiate Vault Agreement</span>
+              <span>Escrow Flow</span>
             </Button>
           </div>
         }
@@ -424,7 +371,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         <StatWidget
           label="Total Locked Vault Volume"
           value={`Ksh ${totalVaultValue.toLocaleString()}`}
-          trend="our escrow custodian Custody"
+          trend="Sum of your loaded escrow records"
           trendType="positive"
           icon={<Landmark className="w-4 h-4 text-emerald-600" />}
         />
@@ -432,73 +379,35 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         <StatWidget
           label="Active Protected Transactions"
           value={dealsList.length}
-          trend="100% In Compliance"
+          trend="Live records only"
           trendType="positive"
           icon={<Lock className="w-4 h-4 text-amber-500" />}
         />
 
         <StatWidget
-          label="Avg Settlement Time"
-          value="< 36 Hours"
-          trend="Instant Bank Transfer"
+          label="Escrow Settlement Time"
+          value="Not calculated"
+          trend="Backend does not expose this metric"
           trendType="neutral"
           icon={<Clock className="w-4 h-4 text-blue-500" />}
         />
 
         <StatWidget
-          label="NTSA TIMS Title Clearance"
-          value="100% Authentic"
-          trend="Direct TIMS Portal Match"
+          label="Title Clearance"
+          value="Not verified here"
+          trend="No direct NTSA integration in this view"
           trendType="positive"
           icon={<FileCheck className="w-4 h-4 text-emerald-600" />}
         />
       </div>
 
-      {/* PERSPECTIVE ROLE SWITCHER BAR */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-slate-700 font-bold">
+      <Card className="p-4 border border-slate-200 bg-white">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
           <UserCheck className="w-4 h-4 text-[#1E3063]" />
-          <span>Active Role Perspective:</span>
-          <span className="text-[11px] text-slate-500 font-normal hidden md:inline">
-            (Switch roles to experience contextual workflow action buttons)
-          </span>
+          <span>Current perspective: {userRole}</span>
+          <span className="font-normal text-slate-500">(derived from the signed-in user and selected real escrow)</span>
         </div>
-
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto">
-          <button
-            onClick={() => setUserRole('Buyer')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-              userRole === 'Buyer'
-                ? 'bg-[#1E3063] text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <User className="w-3.5 h-3.5 text-amber-300" /> Buyer View
-          </button>
-
-          <button
-            onClick={() => setUserRole('Seller')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-              userRole === 'Seller'
-                ? 'bg-[#1E3063] text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <Building2 className="w-3.5 h-3.5 text-emerald-400" /> Seller View
-          </button>
-
-          <button
-            onClick={() => setUserRole('Administrator')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-              userRole === 'Administrator'
-                ? 'bg-[#C85A32] text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-amber-200" /> Administrator / Custodian
-          </button>
-        </div>
-      </div>
+      </Card>
 
       {/* TAB 1: ESCROW PURCHASE JOURNEY DASHBOARD */}
       {activeTab === 'journey' && selectedDeal && (
@@ -749,12 +658,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Payment Channel</p>
                     <p className="font-extrabold text-[#1E3063]">{selectedDeal.paymentMethod || 'Bank Transfer'}</p>
-                    {/* Fixed: previously always showed a specific,
-                        fake bank reference number ("KAYAD-ESC-REF")
-                        as a fallback - the real backend has no bank
-                        reference field for this, so the fallback
-                        always fired for every real deal. Only shown
-                        when a real one genuinely exists. */}
+                    {/* Only display a payment reference when the backend actually returns one. */}
                     {selectedDeal.bankReference && (
                       <p className="text-[10px] text-slate-500">Ref: {selectedDeal.bankReference}</p>
                     )}
@@ -1160,141 +1064,18 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         </div>
       )}
 
-      {/* TAB 3: INITIATE CUSTOM ESCROW AGREEMENT */}
+      {/* TAB 3: ESCROW FLOW INFORMATION */}
       {activeTab === 'create' && (
-        <Card className="p-6 max-w-3xl mx-auto space-y-6 bg-white border border-slate-200">
-          {/* Fixed: confirmed directly - the real backend has no
-              "create a new escrow" endpoint at all (every real POST
-              route acts on an escrow that already exists; a real
-              escrow is created implicitly elsewhere in the real
-              purchase/payment flow). This form is real, working UI
-              with no real backend behind it - labeled honestly rather
-              than silently letting it "succeed" and imply a real
-              deal was created. */}
-          <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2">
-            <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
-            <span>This form is a preview of the escrow agreement flow. Manually creating a standalone escrow isn't available yet - a real escrow is opened automatically as part of a real purchase.</span>
+        <Card className="p-6 max-w-3xl mx-auto space-y-4 bg-white border border-slate-200">
+          <Badge variant="escrow" size="md"><Lock className="w-4 h-4 text-amber-500" /> Escrow Flow</Badge>
+          <h3 className="text-2xl font-black text-[#1E3063] font-display">How a real KAYAD escrow starts</h3>
+          <p className="text-xs text-slate-600 leading-relaxed">A standalone escrow agreement cannot be created from this screen. The backend creates and persists escrow records inside the real purchase/payment workflow.</p>
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-xs text-slate-700 space-y-2">
+            <p><strong>1.</strong> A real vehicle purchase/payment flow creates the transaction.</p>
+            <p><strong>2.</strong> The backend creates the corresponding escrow record.</p>
+            <p><strong>3.</strong> This screen reads that persisted escrow and exposes only supported actions where authorized.</p>
           </div>
-          <div>
-            <Badge variant="escrow" size="md">
-              <Lock className="w-4 h-4 text-amber-500" /> Custom Escrow Agreement
-            </Badge>
-            <h3 className="text-2xl font-black text-[#1E3063] font-display mt-2">
-              Initiate Bank-Backed Escrow Agreement
-            </h3>
-            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-              Create a secure Escrow Vault deposit agreement for any vehicle transaction. Funds will be deposited into the neutral custodian account and held until inspection and NTSA TIMS logbook transfer are verified.
-            </p>
-          </div>
-
-          {formSuccess ? (
-            <div className="bg-emerald-50 border border-emerald-300 p-6 rounded-2xl text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-              <h4 className="text-xl font-bold text-emerald-950">Escrow Agreement Created!</h4>
-              <p className="text-xs text-emerald-800">
-                Escrow Vault agreement has been generated and added to the active transaction queue.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleCreateEscrow} className="space-y-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-700">Seller Category</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setNewSellerType('Private Seller')}
-                    className={`p-3 rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer ${
-                      newSellerType === 'Private Seller'
-                        ? 'bg-[#1E3063] text-white border-[#1E3063]'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    <UserCheck className="w-4 h-4 text-amber-400" />
-                    <span>Private Seller (Mandatory Escrow)</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setNewSellerType('Verified Dealer')}
-                    className={`p-3 rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer ${
-                      newSellerType === 'Verified Dealer'
-                        ? 'bg-[#1E3063] text-white border-[#1E3063]'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    <Building2 className="w-4 h-4 text-amber-400" />
-                    <span>Verified Dealer (Escrow Enabled)</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Vehicle Title & Spec</label>
-                  <Input
-                    placeholder="e.g. 2021 Toyota Prado TX 2.8L"
-                    value={newVehicleTitle}
-                    onChange={(e) => setNewVehicleTitle(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Agreed Sale Price (Ksh)</label>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 4500000"
-                    value={newAmount}
-                    onChange={(e) => setNewAmount(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Buyer Full Name</label>
-                  <Input
-                    placeholder="e.g. James Mwangi"
-                    value={newBuyerName}
-                    onChange={(e) => setNewBuyerName(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Seller / Business Name</label>
-                  <Input
-                    placeholder="e.g. Samuel K. / Rift Valley Motors"
-                    value={newSellerName}
-                    onChange={(e) => setNewSellerName(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-1">
-                <p className="font-bold text-[#17244B] flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-amber-600" />
-                  KAYAD Escrow Vault Guarantee Policy
-                </p>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Funds will be deposited directly into KAYAD Escrow Vault #KAYAD-ESC-REF. KAYAD holds zero-liability release authorization until physical 150-point inspection and NTSA TIMS logbook clearance pass.
-                </p>
-              </div>
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                fullWidth
-                className="bg-[#1E3063] text-white font-extrabold"
-              >
-                <Lock className="w-4 h-4 text-amber-400" />
-                <span>Create Escrow Agreement & Generate Vault ID</span>
-              </Button>
-            </form>
-          )}
+          <Button variant="primary" onClick={() => setActiveTab('deals')}>View My Protected Deals</Button>
         </Card>
       )}
 

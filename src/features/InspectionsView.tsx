@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Vehicle, Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, InspectionCategoryDetail, UserProfile } from '../types';
+import { Vehicle, InspectionBooking, InspectionReport, UserProfile } from '../types';
 import { createInspectionOrder, getMyInspections, InspectionApiError, BackendInspectionOrder } from '../services/inspectionApi';
-import PrePurchaseInspectionPortal from './PrePurchaseInspectionPortal';
 import { 
   ShieldCheck, 
   Search, 
@@ -122,7 +121,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   onViewVehicleDetails 
 }) => {
   // State
-  const [mechanics] = useState<Mechanic[]>([]);
   // Fixed: reports/bookings previously started from, and only ever
   // showed, entirely fake mock data (specific fake mechanic names,
   // ratings, business names, platform-wide fake "recently completed"
@@ -167,7 +165,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   }, [user]);
 
   // Top-Level Mode: 'buyer_marketplace' | 'mechanic_portal'
-  const [viewMode, setViewMode] = useState<'buyer_marketplace' | 'mechanic_portal'>('buyer_marketplace');
 
   // Active Main Navigation Sub-Tab
   const [activeTab, setActiveTab] = useState<'packages' | 'reports' | 'bookings'>('bookings');
@@ -189,19 +186,15 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 
   // Booking Form State
   const [targetVehicleId, setTargetVehicleId] = useState<string>(initialSelectedVehicle?.id || (vehicles[0]?.id || 'custom'));
-  const [customVehicleTitle, setCustomVehicleTitle] = useState<string>('');
-  const [customVehicleLocation, setCustomVehicleLocation] = useState<string>('Westlands, Nairobi');
-  const [customVehicleVin, setCustomVehicleVin] = useState<string>('');
   // Fixed: chosenMechanicId was only ever set/read by the fake
   // "choose your inspector" step removed above - genuinely dead now.
   const [buyerName, setBuyerName] = useState<string>('');
   const [buyerPhone, setBuyerPhone] = useState<string>('');
   const [buyerEmail, setBuyerEmail] = useState<string>('');
   const [inspectorNotes, setInspectorNotes] = useState<string>('');
-  const [scheduledDate, setScheduledDate] = useState<string>('2026-08-05');
-  const [scheduledTime, setScheduledTime] = useState<string>('10:00 AM');
-  const [packageType, setPackageType] = useState<InspectionBooking['packageType']>('150-Point Comprehensive');
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card' | 'escrow'>('mpesa');
+  const [scheduledDate, setScheduledDate] = useState<string>('');
+  const [scheduledTime, setScheduledTime] = useState<string>('');
+  const [packageType, setPackageType] = useState<InspectionBooking['packageType']>('Pre-Purchase Inspection');
   const [newBookingId, setNewBookingId] = useState<string | null>(null);
 
   // Helpful votes state
@@ -216,110 +209,25 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Inspection Package Definitions
+  // The buyer-facing API currently exposes one inspection-order contract:
+  // vehicle + phone + location. Pricing, package tier, inspector assignment,
+  // payment and scheduling are not returned by that contract, so this UI
+  // must not invent any of them.
   const inspectionPackages = [
     {
-      id: '50-Point Essential',
-      name: '50-Point Essential Roadworthy Assessment',
-      pointsCount: 50,
-      price: 7500,
-      duration: '45 mins',
-      popular: false,
-      description: 'Core safety check for budget vehicles and city daily drivers. Covers brakes, lights, fluid levels, tires, and basic OBD diagnostics.',
-      idealFor: 'Local city hatchbacks & daily commuters under Ksh 1.5M',
-      features: [
-        'Brake pad thickness & rotor inspection',
-        'Tire tread depth & pressure analysis',
-        'Basic OBD-II ECU diagnostic trouble scan',
-        'Engine oil & coolant fluid leak audit',
-        'Exterior lights & horn operation',
-        'Digital summary report (PDF)'
-      ]
-    },
-    {
-      id: '150-Point Comprehensive',
-      name: '150-Point Comprehensive Pre-Purchase Audit',
-      pointsCount: 150,
-      price: 12000,
-      duration: '90 mins',
+      id: 'Pre-Purchase Inspection',
+      name: 'Pre-Purchase Vehicle Inspection',
+      pointsCount: undefined,
+      price: undefined,
+      duration: undefined,
       popular: true,
-      description: 'The gold-standard pre-purchase inspection in East Africa. Exhaustive 150-point technical audit covering engine compression, transmission shifting, chassis rails, paint thickness micron test, and NTSA TIMS logbook verification.',
-      idealFor: 'SUV buyers, foreign-used imports, and cars over Ksh 2M',
-      features: [
-        'Full 150-point technical & mechanical audit',
-        'Cylinder compression & blow-by check',
-        'Paint micron thickness & collision repair test',
-        'Undercarriage & chassis rail alignment inspection',
-        'Deep ECU multi-module scanner diagnostic',
-        'VIN, Chassis stamp & NTSA Logbook verification',
-        'High-speed road test (0-80 km/h braking & vibration)',
-        'Comprehensive digital report with high-res photos'
-      ]
-    },
-    {
-      id: 'VIP Import Audit',
-      name: 'VIP Foreign Import & Port Clearance Audit',
-      pointsCount: 180,
-      price: 15000,
-      duration: '120 mins',
-      popular: false,
-      description: 'Specialized inspection for direct Japanese & UK foreign imports at Mombasa Port or Bonded Warehouses. Includes Japanese auction sheet verification, saltwater rust inspection, and KRA duty document matching.',
-      idealFor: 'Buyers purchasing newly arrived foreign-used imports',
-      features: [
-        'Japanese auction sheet & genuine mileage cross-check',
-        'Mombasa Port saltwater corrosion & rust audit',
-        'KRA customs entry document & VIN matching',
-        'Hybrid/EV battery State of Health (SOH) telemetry',
-        '180-point mechanical & electrical inspection',
-        'Priority 2-hour digital report delivery',
-        'Direct phone consultation with Senior Inspector'
-      ]
-    },
-    {
-      id: 'Luxury German Audit',
-      name: 'German Luxury & European Vehicle Audit',
-      pointsCount: 195,
-      price: 16500,
-      duration: '120 mins',
-      popular: false,
-      description: 'Tailored specifically for Mercedes-Benz, BMW, Audi, Porsche, and Land Rover. Includes specialized Bosch OBD-II live stream data, air suspension pressure testing, and timing chain tensioner checks.',
-      idealFor: 'Mercedes-Benz, BMW, Audi, Range Rover & Porsche buyers',
-      features: [
-        'Specialized German diagnostic scanner live stream',
-        'Air suspension & hydraulic leak stress test',
-        'Double-clutch (DSG/PDK) transmission health check',
-        'Turbocharger wastegate & intercooler inspection',
-        'Electronic control unit (ECU) flash history audit',
-        'Comprehensive 195-point luxury inspection report'
-      ]
-    },
-    {
-      id: 'Commercial Fleet Audit',
-      name: 'Commercial & Fleet Pickups/Vans Audit',
-      pointsCount: 160,
-      price: 14000,
-      duration: '100 mins',
-      popular: false,
-      description: 'Rigorous technical evaluation for commercial Toyota Hilux, Isuzu D-Max, Land Cruiser Workmates, and fleet vans operating on rough East African roads.',
-      idealFor: 'Business fleets, agriculture pickups, and commercial transport',
-      features: [
-        'Heavy-duty leaf spring & suspension stress test',
-        '4WD transfer case & diff lock engagement check',
-        'Diesel fuel injector balance & turbo boost test',
-        'Payload capacity & towing hitch integrity audit',
-        'NTSA speed governor & commercial compliance check'
-      ]
+      description: 'Request a vehicle inspection through KAYAD. The protected backend assigns and manages the inspection order.',
+      idealFor: 'Vehicles already listed in KAYAD',
+      features: ['Real vehicle-linked order', 'Backend-assigned inspector', 'Backend-authoritative status and report data']
     }
   ];
 
-  // Calculated Pricing for Selected Booking Package
-  const currentPackagePrice = useMemo(() => {
-    const pkg = inspectionPackages.find(p => p.id === packageType);
-    return pkg ? pkg.price : 12000;
-  }, [packageType]);
-
-  const platformCommission = Math.round(currentPackagePrice * 0.15); // 15% KAYAD platform fee
-  const netMechanicFee = currentPackagePrice - platformCommission; // 85% paid to independent inspector
+  const currentPackagePrice: number | undefined = undefined;
 
   // Counties List
   const availableCounties = ['All', 'Nairobi', 'Mombasa', 'Kiambu', 'Nakuru', 'Eldoret', 'Machakos', 'Kajiado', 'Kisumu', 'Kilifi', 'Kwale'];
@@ -340,98 +248,39 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
     setShowBookingModal(true);
   };
 
-  // Submit New Booking
-  // Fixed (Final Integration Phase 4 - inspection frontend
-  // integration): previously always generated a fake, client-side ID
-  // ("INSP-2026-####") and stored the booking purely in local state -
-  // never persisted anywhere. Now calls the real, canonical
-  // POST /api/inspections/order (services/inspectionApi.ts) when the
-  // selected vehicle is a real, currently-fetched one (this
-  // project's own earlier hardening work already made `vehicles` a
-  // real prop) - the real backend only supports carId/phone/location,
-  // not a buyer-chosen inspector, a specific time slot, or a package
-  // tier, so this UI's own richer selection (mechanic, scheduledDate/
-  // Time, packageType) remains cosmetic for now, same as this
-  // project's own already-documented EscrowView shape gap - the real
-  // request/response and persisted state are 100% real and backend-
-  // authoritative regardless. If the target vehicle isn't real (the
-  // "custom vehicle" option, which has no backend concept at all),
-  // this correctly keeps this component's own existing local-only
-  // behavior rather than inventing a fake success either way.
+  // Submit only the real backend-supported inspection order.
   const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!buyerName || !buyerPhone || !buyerEmail) {
-      showToast('Please fill in your contact information');
+    if (!user) {
+      showToast('Please sign in to request an inspection.');
+      onOpenAuth?.();
+      return;
+    }
+    if (!buyerPhone) {
+      showToast('Please provide your phone number.');
       return;
     }
 
     const targetVeh = vehicles.find(v => v.id === targetVehicleId);
-    const vehicleTitle = targetVeh ? targetVeh.title : (customVehicleTitle || '2021 Vehicle Audit');
-    const vehicleLocation = targetVeh ? targetVeh.location : customVehicleLocation;
-
-    if (targetVeh) {
-      if (!user) {
-        showToast('Please sign in to request an inspection.');
-        onOpenAuth?.();
-        return;
-      }
-      try {
-        const result = await createInspectionOrder(targetVeh.id, buyerPhone, vehicleLocation);
-        if (result.success && result.order) {
-          // Fixed: this previously built a local InspectionBooking by
-          // hand, using a fake, never-actually-chosen mechanic (the
-          // "choose your inspector" step was removed - see above) and
-          // fake status/paymentStatus values that didn't match the
-          // real order's own real, initial state. Uses the same real
-          // mapper the rest of this view relies on instead, so the
-          // immediate result the buyer sees is honest and consistent
-          // with what a real refetch would show.
-          const newBooking = mapBackendOrderToBooking(result.order);
-          setBookings([newBooking, ...bookings]);
-          setNewBookingId(result.order.id);
-          setBookingStep(7);
-          showToast(`Inspection requested for ${vehicleTitle}. Your real order is saved.`);
-        } else {
-          showToast(result.message || 'Could not request inspection. Please try again.');
-        }
-      } catch (err) {
-        showToast(err instanceof InspectionApiError ? err.message : 'Could not request inspection. Please try again.');
-      }
+    if (!targetVeh) {
+      showToast('Select a vehicle that exists in KAYAD before requesting an inspection.');
       return;
     }
 
-    // No real vehicle target (the "custom vehicle" option) - the real
-    // backend has no concept of an inspection request for a vehicle
-    // that doesn't exist in its own database. Keeps this component's
-    // pre-existing, honest local-only behavior for this specific case
-    // rather than fabricate a persisted result. mechanicId/
-    // mechanicName correctly omitted - no inspector is chosen or
-    // assigned at this point (the fake "choose your inspector" step
-    // was removed - see above), matching real, initial order state.
-    const generatedId = `INSP-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newBooking: InspectionBooking = {
-      id: generatedId,
-      vehicleId: targetVehicleId !== 'custom' ? targetVehicleId : undefined,
-      vehicleTitle,
-      vehicleLocation,
-      buyerName,
-      buyerPhone,
-      buyerEmail,
-      scheduledDate,
-      scheduledTime,
-      packageType,
-      totalFee: currentPackagePrice,
-      platformCommission,
-      netMechanicFee,
-      status: 'Scheduled',
-      paymentStatus: 'Escrow Held',
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-
-    setBookings([newBooking, ...bookings]);
-    setNewBookingId(generatedId);
-    setBookingStep(7); // Jump to Confirmation / Stepper step
-    showToast('Inspection request saved. Funds held in KAYAD Escrow.');
+    try {
+      const result = await createInspectionOrder(targetVeh.id, buyerPhone, targetVeh.location);
+      if (!result.success || !result.order) {
+        showToast(result.message || 'Could not request inspection. Please try again.');
+        return;
+      }
+      const newBooking = mapBackendOrderToBooking(result.order);
+      setBookings(prev => [newBooking, ...prev]);
+      setNewBookingId(result.order.id || result.order._id || null);
+      setBookingStep(7);
+      showToast(`Inspection requested for ${targetVeh.title}. Your order is saved on the KAYAD backend.`);
+    } catch (err) {
+      showToast(err instanceof InspectionApiError ? err.message : 'Could not request inspection. Please try again.');
+    }
   };
 
   // Upvote helpful review
@@ -459,57 +308,16 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         </div>
       )}
 
-      {/* Mode Switcher Banner */}
+      {/* Service scope banner */}
       <div className="bg-[#101935] border-b border-amber-400/30 px-4 py-3 text-xs shadow-md rounded-2xl">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400 font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">
-              KAYAD Inspection Ecosystem
-            </span>
-            <span className="text-slate-300 text-[11px] hidden md:inline font-semibold">
-              Independent Mechanics & Buyer Directory
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 bg-slate-900/90 p-1 rounded-xl border border-slate-700">
-            <button
-              onClick={() => setViewMode('buyer_marketplace')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                viewMode === 'buyer_marketplace'
-                  ? 'bg-amber-400 text-[#101935] shadow-sm font-black'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span>Buyer Inspector Directory</span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('mechanic_portal')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                viewMode === 'mechanic_portal'
-                  ? 'bg-[#1E3063] text-white border border-amber-400/50 shadow-sm font-black'
-                  : 'text-amber-300 hover:text-white'
-              }`}
-            >
-              <Wrench className="w-3.5 h-3.5 text-amber-400" />
-              <span>Pre-Purchase Inspection Portal</span>
-              <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.2 rounded-full">
-                MECHANIC OS
-              </span>
-            </button>
+            <span className="text-amber-400 font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">KAYAD Inspection Orders</span>
+            <span className="text-slate-300 text-[11px] hidden md:inline font-semibold">Backend-authoritative buyer inspection requests</span>
           </div>
         </div>
       </div>
 
-      {/* Render Independent Mechanic Portal OS if selected */}
-      {viewMode === 'mechanic_portal' ? (
-        <PrePurchaseInspectionPortal
-          currentMechanic={mechanics[0]}
-          onNavigateToMarketplace={() => setViewMode('buyer_marketplace')}
-        />
-      ) : (
-        <>
       {/* Hero Header Banner */}
       <div className="bg-[#1E3063] text-white pt-8 pb-10 px-4 sm:px-6 lg:px-8 shadow-md">
         <div className="max-w-7xl mx-auto space-y-6">
@@ -517,17 +325,17 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold tracking-wider uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                  <Wrench className="w-3 h-3" /> Independent Inspector Marketplace
+                  <Wrench className="w-3 h-3" /> Inspection Order Service
                 </span>
                 <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full">
-                  East Africa Wide
+                  Backend service
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight text-white">
-                Find Certified Independent Vehicle Inspectors
+                Request a Vehicle Inspection
               </h1>
               <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
-                Choose from verified independent mechanics across East Africa. Book on-site 150-point pre-purchase audits, diagnostic scanner checks, and foreign import clearance certificates.
+                Request an inspection for a vehicle already in KAYAD. Inspector assignment, order status, pricing, scheduling and report data are controlled by the backend.
               </p>
             </div>
 
@@ -547,7 +355,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 onClick={() => setActiveTab('reports')}
                 className="text-white border-white/30 hover:bg-white/10"
               >
-                <FileCheck className="w-4 h-4 mr-1.5 text-emerald-400" /> View Sample Reports
+                <FileCheck className="w-4 h-4 mr-1.5 text-emerald-400" /> View My Reports
               </Button>
             </div>
           </div>
@@ -559,9 +367,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 1
               </div>
               <div>
-                <h4 className="font-bold text-white text-xs">Independent Certified Mechanics</h4>
+                <h4 className="font-bold text-white text-xs">Backend-assigned Inspectors</h4>
                 <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                  Inspectors are independent qualified professionals, not KAYAD employees.
+                  Inspector assignment is controlled by the backend; this buyer view does not claim a public inspector directory.
                 </p>
               </div>
             </div>
@@ -571,9 +379,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 2
               </div>
               <div>
-                <h4 className="font-bold text-white text-xs">Buyer Chooses Inspector</h4>
+                <h4 className="font-bold text-white text-xs">Backend Assigns Inspector</h4>
                 <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                  Compare ratings, specializations, pricing & availability freely before booking.
+                  Inspector selection is handled by the backend; this buyer view does not fabricate an inspector directory.
                 </p>
               </div>
             </div>
@@ -585,7 +393,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               <div>
                 <h4 className="font-bold text-white text-xs">Protected Escrow Payment</h4>
                 <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                  Funds held safely in KAYAD Escrow until the digital report is delivered.
+                  Payment and escrow details are shown only when returned by the backend transaction flow.
                 </p>
               </div>
             </div>
@@ -595,9 +403,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 4
               </div>
               <div>
-                <h4 className="font-bold text-white text-xs">15% Transparent Platform Fee</h4>
+                <h4 className="font-bold text-white text-xs">Backend Pricing</h4>
                 <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                  KAYAD facilitates transactions & earns 15% commission per completed audit.
+                  Pricing and platform fees are not hard-coded here; the backend is authoritative.
                 </p>
               </div>
             </div>
@@ -695,7 +503,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     <div className="bg-[#FDFBF7] p-4 rounded-xl border border-slate-200 flex items-center justify-between">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Package Fee:</span>
-                        <span className="text-2xl font-black text-[#1E3063] font-mono">Ksh {pkg.price.toLocaleString()}</span>
+                        <span className="text-2xl font-black text-[#1E3063] font-mono">{pkg.price !== undefined ? `Ksh ${pkg.price.toLocaleString()}` : 'Server-priced'}</span>
                       </div>
                       <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                         {pkg.pointsCount} Checkpoints
@@ -742,9 +550,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           <div className="space-y-6 animate-fade-in">
             <PageHeader
               badgeIcon={<FileCheck className="w-4 h-4 text-emerald-600" />}
-              badgeText="150-Point Digital Certificates"
-              title="Verified Inspection Reports"
-              description="Explore real digital inspection reports recently issued by independent mechanics on KAYAD. Click any report to examine itemized 150-point diagnostics, paint micron measurements, and OBD trouble codes."
+              badgeText="My Digital Inspection Reports"
+              title="My Inspection Reports"
+              description="Review inspection reports returned by the KAYAD backend for your own inspection orders. Only fields actually returned by the server are shown."
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -773,10 +581,8 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                         <span className="text-2xl font-black font-mono text-amber-300">{rep.overallScore}/100</span>
                       </div>
                       <div className="text-right space-y-1">
-                        <span className="text-[10px] text-slate-300 block">VIN & Logbook</span>
-                        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> 100% Matched
-                        </span>
+                        <span className="text-[10px] text-slate-300 block">Backend score</span>
+                        <span className="text-xs font-bold text-emerald-400">Returned by server</span>
                       </div>
                     </div>
 
@@ -802,7 +608,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                       fullWidth
                       onClick={() => setSelectedReport(rep)}
                     >
-                      <Eye className="w-3.5 h-3.5 mr-1.5" /> View Full 150-Point Report
+                      <Eye className="w-3.5 h-3.5 mr-1.5" /> View Report Details
                     </Button>
                   </div>
                 </Card>
@@ -929,7 +735,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           title={
             <div className="flex items-center gap-3">
               <FileCheck className="w-5 h-5 text-emerald-600" />
-              <span>Official KAYAD 150-Point Inspection Certificate ({selectedReport.id})</span>
+              <span>KAYAD Inspection Report ({selectedReport.id})</span>
             </div>
           }
         >
@@ -944,7 +750,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   {selectedReport.vehicleTitle}
                 </h2>
                 <p className="text-xs text-slate-300 mt-1">
-                  Inspected by Independent Inspector: <strong>{selectedReport.mechanicName}</strong> ({selectedReport.mechanicCompany})
+                  Inspector: <strong>{selectedReport.mechanicName || 'Not assigned / not returned'}</strong>
                 </p>
               </div>
 
@@ -963,61 +769,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               </div>
             </div>
 
-            {/* Legal VIN & Logbook Verification Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center gap-2 font-bold text-emerald-800">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>VIN Number Verified & Clean</span>
-              </div>
-
-              <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center gap-2 font-bold text-emerald-800">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Chassis Stamped Rail Matched</span>
-              </div>
-
-              <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center gap-2 font-bold text-emerald-800">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>NTSA Logbook Owner Matched</span>
-              </div>
-            </div>
-
-            {/* Itemized 150-Point Category Scores */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1E3063] font-display uppercase tracking-wider">
-                Detailed 150-Point Technical Category Breakdown
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(Object.entries(selectedReport.categoryScores) as [string, InspectionCategoryDetail][]).map(([catKey, catDetail]) => {
-                  const titles: Record<string, string> = {
-                    engineAndDrivetrain: 'Engine & Drivetrain Compression',
-                    transmissionAndClutch: 'Transmission & Gear shifting',
-                    suspensionAndSteering: 'Suspension, Shocks & Steering',
-                    brakesAndTires: 'Brakes & Tire Tread Depth',
-                    electricalAndDiagnostics: 'Electrical & OBD-II ECU Telemetry',
-                    bodyworkAndChassisFrame: 'Paint Micron & Frame Alignment',
-                    interiorAndHVAC: 'Interior, Climate & Safety Airbags'
-                  };
-
-                  return (
-                    <div key={catKey} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#1E3063]">{titles[catKey] || catKey}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold text-slate-700">{catDetail.score}%</span>
-                          <Badge variant={catDetail.status === 'Pass' ? 'success' : 'warning'}>
-                            {catDetail.status}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                        {catDetail.notes}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-xs text-slate-700">
+              <div className="font-bold text-[#1E3063]">Backend-provided inspection data</div>
+              <p className="mt-1">VIN, chassis, logbook verification flags and fixed category scores are not part of the current buyer report API, so no verification result or invented sub-score is displayed here.</p>
             </div>
 
             {/* Inspector Summary */}
@@ -1031,7 +785,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* Actions */}
             <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200">
               <span className="text-xs text-slate-500 font-medium">
-                Official digital report generated by KAYAD Independent Inspector Network.
+                Report data supplied by the KAYAD inspection backend.
               </span>
 
               <div className="flex items-center gap-3">
@@ -1127,32 +881,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                         {v.title} — Ksh {v.price.toLocaleString()} ({v.location})
                       </option>
                     ))}
-                    <option value="custom">+ Other Vehicle (Custom Entrance)</option>
                   </select>
                 </div>
 
-                {targetVehicleId === 'custom' && (
-                  <div className="space-y-3 pt-2 border-t border-slate-100">
-                    <Input
-                      label="Custom Vehicle Make, Model & Year"
-                      placeholder="e.g. 2020 Toyota Land Cruiser Prado"
-                      value={customVehicleTitle}
-                      onChange={(e) => setCustomVehicleTitle(e.target.value)}
-                    />
-                    <Input
-                      label="Vehicle Inspection Address / Location"
-                      placeholder="e.g. Westlands, Nairobi or Mombasa Port CFS"
-                      value={customVehicleLocation}
-                      onChange={(e) => setCustomVehicleLocation(e.target.value)}
-                    />
-                    <Input
-                      label="VIN / Chassis Number (Optional)"
-                      placeholder="e.g. JTEEE05J..."
-                      value={customVehicleVin}
-                      onChange={(e) => setCustomVehicleVin(e.target.value)}
-                    />
-                  </div>
-                )}
 
                 <div className="flex justify-between pt-4 border-t border-slate-200">
                   {/* Fixed: this is now the real first step (the fake
@@ -1163,7 +894,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     ← Cancel
                   </Button>
                   <Button variant="primary" onClick={() => setBookingStep(3)}>
-                    Next: Choose Package →
+                    Next: Review Request →
                   </Button>
                 </div>
               </div>
@@ -1172,7 +903,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 3: CHOOSE PACKAGE */}
             {bookingStep === 3 && (
               <div className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 3: Select Technical Inspection Package</h3>
+                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 3: Review Inspection Service</h3>
 
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                   {inspectionPackages.map((pkg) => (
@@ -1188,7 +919,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs font-bold text-[#1E3063]">{pkg.name}</h4>
                         <span className="text-sm font-black font-mono text-[#1E3063]">
-                          Ksh {pkg.price.toLocaleString()}
+                          {pkg.price !== undefined ? `Ksh ${pkg.price.toLocaleString()}` : 'Server-priced'}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-500">{pkg.description}</p>
@@ -1201,7 +932,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     ← Back
                   </Button>
                   <Button variant="primary" onClick={() => setBookingStep(4)}>
-                    Next: Schedule Date →
+                    Next: Contact Details →
                   </Button>
                 </div>
               </div>
@@ -1210,18 +941,18 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 4: SCHEDULE DATE & TIME */}
             {bookingStep === 4 && (
               <div className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 4: Choose Inspection Date & Time</h3>
+                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 4: Preferred Timing (Not Submitted)</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Preferred Date"
+                    label="Preferred Date (not submitted)"
                     type="date"
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
                   />
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Time Slot</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Preferred Time (not submitted)</label>
                     <select
                       value={scheduledTime}
                       onChange={(e) => setScheduledTime(e.target.value)}
@@ -1240,7 +971,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     ← Back
                   </Button>
                   <Button variant="primary" onClick={() => setBookingStep(5)}>
-                    Next: Your Contact Details →
+                    Next: Confirm Request →
                   </Button>
                 </div>
               </div>
@@ -1277,7 +1008,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     ← Back
                   </Button>
                   <Button variant="primary" onClick={() => setBookingStep(6)}>
-                    Next: Platform Escrow & Payment →
+                    Next: Submit Request →
                   </Button>
                 </div>
               </div>
@@ -1286,32 +1017,32 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 6: PAYMENT & ESCROW */}
             {bookingStep === 6 && (
               <form onSubmit={handleConfirmBooking} className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 6: Protected Escrow Payment</h3>
+                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 6: Confirm Inspection Request</h3>
 
                 {/* Transparent Price Breakdown */}
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
                   <div className="flex justify-between text-slate-600">
                     <span>Inspection Package ({packageType}):</span>
-                    <strong className="text-slate-800">Ksh {currentPackagePrice.toLocaleString()}</strong>
+                    <strong className="text-slate-800">Determined by server</strong>
                   </div>
                   <div className="flex justify-between text-slate-600">
-                    <span>Platform Facilitation Commission (15%):</span>
-                    <strong className="text-emerald-700">Ksh {platformCommission.toLocaleString()}</strong>
+                    <span>Platform Facilitation Commission:</span>
+                    <strong className="text-slate-700">Not provided</strong>
                   </div>
                   <div className="flex justify-between text-slate-600">
-                    <span>Net Independent Inspector Payout (85%):</span>
-                    <strong className="text-slate-800">Ksh {netMechanicFee.toLocaleString()}</strong>
+                    <span>Inspector Payout:</span>
+                    <strong className="text-slate-700">Not provided</strong>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-extrabold text-[#1E3063]">
-                    <span>Total Held in Platform Escrow Vault:</span>
-                    <span className="font-mono text-amber-600">Ksh {currentPackagePrice.toLocaleString()}</span>
+                    <span>Payment / Escrow Status:</span>
+                    <span className="font-mono text-slate-600">Not provided</span>
                   </div>
                 </div>
 
                 <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>
-                    Your payment will be held safely in KAYAD Escrow. Funds are only released to the mechanic after the digital inspection report is delivered.
+                    Payment and escrow are not created by this request endpoint. Any payment state shown later must come from a real backend transaction.
                   </span>
                 </div>
 
@@ -1320,7 +1051,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     ← Back
                   </Button>
                   <Button variant="accent" type="submit" className="font-bold shadow-md">
-                    Confirm & Deposit to Escrow Vault
+                    Submit Inspection Request
                   </Button>
                 </div>
               </form>
@@ -1336,18 +1067,18 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 <div>
                   <h3 className="text-xl font-extrabold text-[#1E3063] font-display">Inspection Request Confirmed!</h3>
                   <p className="text-xs text-slate-500 mt-1">
-                    Booking Reference: <strong className="font-mono text-slate-800">{newBookingId || 'INSP-2026-9005'}</strong>
+                    Booking Reference: <strong className="font-mono text-slate-800">{newBookingId || 'Pending'}</strong>
                   </p>
                 </div>
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-xs space-y-2 max-w-md mx-auto">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Scheduled Date:</span>
-                    <strong className="text-slate-800">{scheduledDate} ({scheduledTime})</strong>
+                    <strong className="text-slate-800">Backend scheduling not returned</strong>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Escrow Vault Deposit:</span>
-                    <strong className="text-emerald-700">Ksh {currentPackagePrice.toLocaleString()} Held</strong>
+                    <strong className="text-slate-700">Not returned by order API</strong>
                   </div>
                 </div>
 
@@ -1364,8 +1095,6 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             )}
           </div>
         </Modal>
-      )}
-        </>
       )}
     </div>
   );
