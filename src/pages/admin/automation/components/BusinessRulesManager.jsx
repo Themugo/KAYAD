@@ -92,109 +92,11 @@ const statusColors = {
   draft: 'bg-slate-100 text-slate-700',
 };
 
-// Sample rules
-const sampleRules = [
-  {
-    id: '1',
-    name: 'Low Dealer Rating Protection',
-    description: 'Suspend new listings for dealers with rating below 3 stars',
-    category: 'dealer',
-    status: 'active',
-    priority: 1,
-    conditions: [
-      { field: 'dealer.rating', operator: 'less_than', value: '3' }
-    ],
-    actions: [
-      { type: 'listing.hide', config: { reason: 'Low dealer rating' } },
-      { type: 'notification.email', config: { template: 'dealer_rating_warning' } }
-    ],
-    executions: 45,
-    lastExecuted: '2024-01-15T10:30:00Z',
-  },
-  {
-    id: '2',
-    name: 'Auction Deposit Verification',
-    description: 'Issue bidder pass when deposit is verified',
-    category: 'auction',
-    status: 'active',
-    priority: 2,
-    conditions: [
-      { field: 'auction.deposit', operator: 'equals', value: 'verified' }
-    ],
-    actions: [
-      { type: 'task.create', config: { title: 'Issue Bidder Pass' } }
-    ],
-    executions: 234,
-    lastExecuted: '2024-01-15T14:22:00Z',
-  },
-  {
-    id: '3',
-    name: 'Low Inspection Score',
-    description: 'Hide listings with inspection scores below minimum threshold',
-    category: 'vehicle',
-    status: 'active',
-    priority: 1,
-    conditions: [
-      { field: 'vehicle.inspectionScore', operator: 'less_than', value: '60' }
-    ],
-    actions: [
-      { type: 'listing.hide', config: { reason: 'Below minimum inspection score' } }
-    ],
-    executions: 12,
-    lastExecuted: '2024-01-14T09:15:00Z',
-  },
-  {
-    id: '4',
-    name: 'Subscription Expiry',
-    description: 'Disable premium features when subscription expires',
-    category: 'subscription',
-    status: 'active',
-    priority: 1,
-    conditions: [
-      { field: 'user.subscription', operator: 'equals', value: 'expired' }
-    ],
-    actions: [
-      { type: 'subscription.disable', config: {} }
-    ],
-    executions: 89,
-    lastExecuted: '2024-01-15T08:00:00Z',
-  },
-  {
-    id: '5',
-    name: 'Vehicle Sold',
-    description: 'Archive listing when vehicle is marked as sold',
-    category: 'vehicle',
-    status: 'active',
-    priority: 3,
-    conditions: [
-      { field: 'vehicle.status', operator: 'equals', value: 'sold' }
-    ],
-    actions: [
-      { type: 'listing.archive', config: {} }
-    ],
-    executions: 567,
-    lastExecuted: '2024-01-15T16:45:00Z',
-  },
-  {
-    id: '6',
-    name: 'Payment Failed Recovery',
-    description: 'Send notification to seller when payment fails',
-    category: 'payment',
-    status: 'paused',
-    priority: 2,
-    conditions: [
-      { field: 'transaction.status', operator: 'equals', value: 'failed' }
-    ],
-    actions: [
-      { type: 'notification.email', config: { template: 'payment_failed' } }
-    ],
-    executions: 23,
-    lastExecuted: '2024-01-10T11:30:00Z',
-  },
-];
+// Rules are backend-authoritative. Never seed fabricated rules, execution counts, or timestamps.
+const initialRules = [];
 
 export default function BusinessRulesManager() {
-  const [rules, setRules] = useState(sampleRules);
+  const [rules, setRules] = useState(initialRules);
   const [selectedRule, setSelectedRule] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showBuilder, setShowBuilder] = useState(false);
@@ -260,23 +162,11 @@ export default function BusinessRulesManager() {
   };
 
   const saveRule = () => {
-    if (selectedRule) {
-      setRules(rules.map(r => r.id === selectedRule.id ? { ...editingRule, id: selectedRule.id } : r));
-    } else {
-      setRules([...rules, { ...editingRule, id: `rule_${Date.now()}`, executions: 0 }]);
-    }
-    setShowBuilder(false);
-    setIsEditing(false);
-    setSelectedRule(null);
+    console.warn('[BusinessRulesManager] Backend CRUD integration is not connected; rule was not persisted.');
   };
 
-  const toggleRuleStatus = (ruleId) => {
-    setRules(rules.map(r => {
-      if (r.id === ruleId) {
-        return { ...r, status: r.status === 'active' ? 'paused' : 'active' };
-      }
-      return r;
-    }));
+  const toggleRuleStatus = () => {
+    console.warn('[BusinessRulesManager] Backend CRUD integration is not connected; status was not changed.');
   };
 
   return (

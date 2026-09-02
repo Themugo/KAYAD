@@ -284,133 +284,19 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     }
   };
 
-  // Send Attachment Simulation
+  // Attachment and transaction-vault writes are not backed by a real
+  // frontend/backend contract yet. Never manufacture a message, URL,
+  // document identity, GPS point, appointment, file size, or upload success.
   const handleSendAttachment = (type: MessageAttachment['type']) => {
-    if (!activeThread) return;
     setShowAttachMenu(false);
-    const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    let attachmentPayload: MessageAttachment;
-    let textSummary = '';
-
-    if (type === 'image') {
-      attachmentPayload = {
-        type: 'image',
-        fileName: 'Vehicle_Inspection_Yard_Photo.jpg',
-        url: activeThread.vehicleImage || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800'
-      };
-      textSummary = 'Shared vehicle photo attachment.';
-    } else if (type === 'document') {
-      attachmentPayload = {
-        type: 'document',
-        fileName: 'NTSA_TIMS_Ownership_Certificate.pdf',
-        fileSize: '2.4 MB',
-        url: '#'
-      };
-      textSummary = 'Attached NTSA TIMS Document PDF.';
-    } else if (type === 'location') {
-      attachmentPayload = {
-        type: 'location',
-        locationName: activeThread.vehicleLocation || 'KAYAD Verified Showroom',
-        locationAddress: 'Plot 42, Waiyaki Way, Westlands, Nairobi',
-        lat: -1.2676,
-        lng: 36.8052
-      };
-      textSummary = 'Shared showroom GPS location pin.';
-    } else {
-      attachmentPayload = {
-        type: 'appointment',
-        appointmentTitle: 'Vehicle Handover & Logbook Verification',
-        appointmentDate: '2026-07-31',
-        appointmentTime: '10:30 AM',
-        appointmentLocation: 'the partner bank Custody Vault, Nairobi',
-        appointmentStatus: 'Pending'
-      };
-      textSummary = 'Scheduled an appointment proposal.';
-    }
-
-    const newMsg: UnifiedMessageItem = {
-      id: `msg-${Date.now()}`,
-      threadId: activeThread.id,
-      category: activeThread.category,
-      sender: 'user',
-      senderName: user?.name || 'You',
-      text: textSummary,
-      timestamp: timeString,
-      readStatus: 'read',
-      attachments: [attachmentPayload]
-    };
-
-    setThreads(prev => prev.map(t => {
-      if (t.id === activeThread.id) {
-        return {
-          ...t,
-          lastMessage: textSummary,
-          lastTimestamp: timeString,
-          messages: [...t.messages, newMsg]
-        };
-      }
-      return t;
-    }));
-
-    showToast(`Shared ${type.toUpperCase()} attachment in conversation.`);
+    showToast(`${type === 'image' ? 'Image' : type === 'document' ? 'Document' : type === 'location' ? 'Location' : 'Appointment'} sharing is not available until the secure attachment service is connected.`);
   };
 
-  // Upload New File Handler into Transaction Shared Vault
   const handleUploadFileToVault = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFileName.trim() || !activeThread) return;
-
-    const newFile: SharedTransactionFile = {
-      id: `file-${Date.now()}`,
-      fileName: newFileName.endsWith('.pdf') ? newFileName : `${newFileName}.pdf`,
-      fileType: newFileType,
-      fileSize: `${(1 + Math.random() * 3).toFixed(1)} MB`,
-      uploadedAt: 'Just now',
-      uploadedBy: user?.name ? `${user.name} (You)` : 'You'
-    };
-
-    setThreads(prev => prev.map(t => {
-      if (t.id === activeThread.id) {
-        return {
-          ...t,
-          sharedFiles: [newFile, ...t.sharedFiles]
-        };
-      }
-      return t;
-    }));
-
     setShowUploadModal(false);
     setNewFileName('');
-    showToast(`Uploaded ${newFile.fileName} to transaction file vault.`);
-  };
-
-  // Smart Action Executer
-  const handleExecuteSmartAction = (actionKey: string, label: string) => {
-    showToast(`Executing Smart Action: ${label}...`);
-    if (actionKey === 'view_report' && onNavigateToInspections) {
-      onNavigateToInspections();
-    } else if (actionKey === 'start_escrow' || actionKey === 'approve_transfer' || actionKey === 'confirm_escrow') {
-      onNavigateToEscrow?.();
-    } else if (actionKey === 'apply_finance' || actionKey === 'check_status') {
-      onNavigateToFinancing?.();
-    } else if (actionKey === 'place_bid' || actionKey === 'watch_auction') {
-      onNavigateToAuctions?.();
-    } else {
-      // Add message to thread
-      const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const actionMsg: UnifiedMessageItem = {
-        id: `msg-${Date.now()}`,
-        threadId: activeThread.id,
-        category: activeThread.category,
-        sender: 'user',
-        senderName: user?.name || 'You',
-        text: `Initiated action: [${label}] on transaction ${activeThread.referenceNumber}`,
-        timestamp: timeString,
-        readStatus: 'read'
-      };
-      setThreads(prev => prev.map(t => t.id === activeThread.id ? { ...t, messages: [...t.messages, actionMsg] } : t));
-    }
+    showToast('Transaction file uploads are not available until the secure file-vault service is connected.');
   };
 
   // Category Icon & Badge Colors Mapping

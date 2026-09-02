@@ -3,48 +3,25 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Use placeholder values for development/demo mode
-const safeUrl = supabaseUrl || 'https://placeholder.supabase.co';
-const safeKey = supabaseAnonKey || 'placeholder-key';
+// KAYAD authentication is owned by the Express backend (HttpOnly cookie/JWT).
+// Supabase is used here only for optional Realtime subscriptions. Never create
+// a fake client with placeholder credentials and never use Supabase Auth as the
+// application identity layer.
+export const supabase: SupabaseClient | null =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+        realtime: { params: { eventsPerSecond: 10 } },
+        global: { headers: { 'X-Requested-With': 'XMLHttpRequest' } },
+      })
+    : null;
 
-// Validate environment variables in production
-if (import.meta.env.PROD && (!supabaseUrl || !supabaseAnonKey)) {
-  console.error('[SECURITY] Missing Supabase environment variables');
-}
-
-export const supabase: SupabaseClient = createClient(safeUrl, safeKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-  realtime: {
-    params: { eventsPerSecond: 10 },
-  },
-  global: {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-  },
-});
-
-export async function getSecureSession() {
-  try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) {
-      if (import.meta.env.DEV) console.error('[AUTH] Session error:', error.message);
-      return null;
-    }
-    return session;
-  } catch (err) {
-    if (import.meta.env.DEV) console.error('[AUTH] Unexpected session error:', err);
-    return null;
-  }
-}
-
-export async function verifyAuth() {
-  const session = await getSecureSession();
-  return !!session?.user;
+export function isRealtimeConfigured(): boolean {
+  return Boolean(supabase);
 }
 
 export type RealtimeChannel = ReturnType<SupabaseClient['channel']>;

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Vehicle } from '../types';
 import BankFinancingPortal from './BankFinancingPortal';
 import { 
@@ -39,6 +39,8 @@ import {
   Search
 } from 'lucide-react';
 import { PageHeader, StatWidget, Card, Badge, Button, LazyImage } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
+import { createLoanApplication, getMyLoanApplications, LoanApiError, type LoanApplication } from '../services/loanApi';
 
 interface FinancingViewProps {
   vehicles?: Vehicle[];
@@ -76,6 +78,8 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   vehicles = [],
   onQuickViewVehicle
 }) => {
+  const { user } = useAuth();
+
   // Mode Switcher: 'buyer' | 'bank_portal'
   const [financingViewMode, setFinancingViewMode] = useState<'buyer' | 'bank_portal'>('buyer');
 
@@ -83,7 +87,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const [vehiclePrice, setVehiclePrice] = useState<number>(3500000);
   const [depositPercent, setDepositPercent] = useState<number>(20);
   const [tenureMonths, setTenureMonths] = useState<number>(36);
-  const [annualInterestRate, setAnnualInterestRate] = useState<number>(13.0);
+  const [annualInterestRate, setAnnualInterestRate] = useState<number>(0);
   const [employmentType, setEmploymentType] = useState<'salaried' | 'self_employed' | 'sme'>('salaried');
 
   // Comparison State
@@ -94,15 +98,25 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const [selectedBankForApply, setSelectedBankForApply] = useState<PartnerBank | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState<boolean>(false);
   const [applicationSuccess, setApplicationSuccess] = useState<boolean>(false);
+  const [applicationSubmitting, setApplicationSubmitting] = useState(false);
+  const [applicationError, setApplicationError] = useState<string | null>(null);
+  const [monthlyIncome, setMonthlyIncome] = useState<number>(0);
+  const [currentApplication, setCurrentApplication] = useState<LoanApplication | null>(null);
+  const currentAppStatus: ApplicationStatus | null = currentApplication
+    ? ({ submitted: 'Submitted', under_review: 'Under Review', approved: 'Approved', declined: 'Declined', withdrawn: 'Declined' } as const)[currentApplication.status]
+    : null;
+  const uploadedDocs: Record<string, boolean> = {};
 
-  // Active Application Tracker State (Single active status)
-  const [currentAppStatus, setCurrentAppStatus] = useState<ApplicationStatus>('Under Review');
-  const [uploadedDocs, setUploadedDocs] = useState<Record<string, boolean>>({
-    nationalId: true,
-    payslips: true,
-    bankStatements: false,
-    employmentLetter: false
-  });
+  useEffect(() => {
+    if (!user) { setCurrentApplication(null); return; }
+    let cancelled = false;
+    getMyLoanApplications().then(apps => {
+      if (!cancelled) setCurrentApplication(apps[0] || null);
+    }).catch(() => {
+      if (!cancelled) setCurrentApplication(null);
+    });
+    return () => { cancelled = true; };
+  }, [user]);
 
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -127,89 +141,10 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const totalRepayment = estimatedMonthly * tenureMonths;
   const totalInterest = Math.max(0, totalRepayment - loanAmount);
 
-  // Partner Banks Dataset
-  const partnerBanks: PartnerBank[] = useMemo(() => [
-    {
-      id: 'ncba',
-      name: 'Partner Bank Asset Finance',
-      shortName: 'the partner bank',
-      logoBg: 'bg-[#1E3063] text-[#F3EFE6]',
-      rateRange: '12.5% - 13.0% p.a.',
-      baseRate: 12.5,
-      maxFinancing: '85% LTV',
-      minDepositPercent: 15,
-      maxTermMonths: 60,
-      approvalTime: '< 24 Hours',
-      earlyRepaymentPolicy: 'Zero Penalty (0%)',
-      eligibilitySummary: 'Salaried & Corporate SMEs, Min income Ksh 50k/mo',
-      badge: 'Preferred Partner',
-      features: ['Up to 85% Financing', 'Zero early repayment fees', 'Joint NTSA Logbook Registration']
-    },
-    {
-      id: 'equity',
-      name: 'Partner Bank Vehicle Financing',
-      shortName: 'a partner bank',
-      logoBg: 'bg-[#C85A32] text-white',
-      rateRange: '12.8% - 13.5% p.a.',
-      baseRate: 12.8,
-      maxFinancing: '80% LTV',
-      minDepositPercent: 20,
-      maxTermMonths: 48,
-      approvalTime: '24 - 48 Hours',
-      earlyRepaymentPolicy: '0.5% Settlement Fee',
-      eligibilitySummary: 'Salaried, Business Owners & Farmers, Min income Ksh 40k/mo',
-      badge: 'Express Pre-Check',
-      features: ['Fast paperless pre-approval', 'Flexible repayment schedules', 'Covers insurance premium financing']
-    },
-    {
-      id: 'kcb',
-      name: 'another partner bank Auto Loan Express',
-      shortName: 'another partner bank Bank',
-      logoBg: 'bg-[#15803D] text-white',
-      rateRange: '13.0% - 13.8% p.a.',
-      baseRate: 13.0,
-      maxFinancing: '80% LTV',
-      minDepositPercent: 20,
-      maxTermMonths: 60,
-      approvalTime: '< 24 Hours',
-      earlyRepaymentPolicy: 'Zero Penalty (0%)',
-      eligibilitySummary: 'Civil Servants & Salaried Employees, Min income Ksh 45k/mo',
-      badge: 'Government Special',
-      features: ['Dedicated check-off for public servants', 'Instant CRB status check', 'Up to 5 year loan tenure']
-    },
-    {
-      id: 'stanbic',
-      name: 'Partner Bank Vehicle Finance',
-      shortName: 'a partner bank',
-      logoBg: 'bg-[#17244B] text-amber-300',
-      rateRange: '13.2% - 14.0% p.a.',
-      baseRate: 13.2,
-      maxFinancing: '85% LTV',
-      minDepositPercent: 15,
-      maxTermMonths: 60,
-      approvalTime: '36 Hours',
-      earlyRepaymentPolicy: '1.0% Settlement Fee',
-      eligibilitySummary: 'Corporate Executives & Registered SMEs, Min income Ksh 60k/mo',
-      badge: 'High-Value Preferred',
-      features: ['Dedicated Asset Manager', 'Custom residual value options', 'Includes GPS tracker installation']
-    },
-    {
-      id: 'absa',
-      name: 'Absa Auto Finance Direct',
-      shortName: 'Absa Bank',
-      logoBg: 'bg-[#C85A32]/90 text-white',
-      rateRange: '13.5% - 14.2% p.a.',
-      baseRate: 13.5,
-      maxFinancing: '80% LTV',
-      minDepositPercent: 20,
-      maxTermMonths: 48,
-      approvalTime: '48 Hours',
-      earlyRepaymentPolicy: 'Zero Penalty (0%)',
-      eligibilitySummary: 'Private Sector Employees & SMEs, Min income Ksh 50k/mo',
-      badge: 'KRA Integrated',
-      features: ['Direct KRA & TIMS verification', 'Comprehensive Insurance Bundle', 'No hidden appraisal costs']
-    }
-  ], []);
+  // Lender offers must come from a verified backend partner directory.
+  // Until that contract is connected, do not present invented rates, fees,
+  // eligibility thresholds, approval times, or partner names as live offers.
+  const partnerBanks: PartnerBank[] = useMemo(() => [], []);
 
   // Filtered compare list
   const comparedBanks = useMemo(() => {
@@ -233,14 +168,31 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     calculatorRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleOpenApply = (bank: PartnerBank) => {
-    setSelectedBankForApply(bank);
-    setIsApplyModalOpen(true);
-    setApplicationSuccess(false);
+  const handleOpenApply = () => {
+    setSelectedBankForApply({
+      id: 'kayad-financing', name: 'KAYAD Financing Request', shortName: 'KAYAD',
+      logoBg: 'bg-[#1E3063] text-white', rateRange: 'Not quoted', baseRate: annualInterestRate,
+      maxFinancing: 'Subject to lender terms', minDepositPercent: depositPercent, maxTermMonths: tenureMonths,
+      approvalTime: 'Not quoted', earlyRepaymentPolicy: 'Subject to lender terms',
+      eligibilitySummary: 'Submitting this request does not imply lender approval or a lender offer.', badge: 'Request', features: []
+    });
+    setIsApplyModalOpen(true); setApplicationSuccess(false); setApplicationError(null);
   };
 
-  const handleDocToggle = (docKey: string) => {
-    setUploadedDocs(prev => ({ ...prev, [docKey]: !prev[docKey] }));
+  const submitFinancingRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) { setApplicationError('Please sign in before submitting a financing request.'); return; }
+    setApplicationSubmitting(true); setApplicationError(null);
+    try {
+      const created = await createLoanApplication({ vehiclePrice, depositAmount, loanAmount, termMonths: tenureMonths, monthlyIncome: monthlyIncome || undefined, employmentStatus: employmentType });
+      setCurrentApplication(created); setApplicationSuccess(true);
+    } catch (err) {
+      setApplicationError(err instanceof LoanApiError ? err.message : 'Could not submit the financing request.');
+    } finally { setApplicationSubmitting(false); }
+  };
+
+  const handleDocToggle = () => {
+    setApplicationError('Document upload is not connected yet. No document was marked as verified.');
   };
 
   // Only real marketplace vehicles may appear here; never synthesize financed vehicles.
@@ -253,20 +205,20 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       a: "KAYAD is an independent automotive fintech marketplace. We are NOT a lender. We help you compare rates from Central Bank regulated financial institutions to enable transparent rate comparison, instant affordability calculation, and direct pre-qualified application routing."
     },
     {
-      q: "How long does the loan approval process take?",
-      a: "Online pre-qualification is instant (< 2 minutes). Once you choose a lender and upload required identification and proof of income, partner banks provide formal conditional approval within 24 to 48 hours."
+      q: "How long does financing approval take?",
+      a: "Approval timing is determined by the lender after a real application is submitted. KAYAD does not promise a specific turnaround until verified lender terms are connected."
     },
     {
-      q: "Can I settle my vehicle loan early without penalties?",
-      a: "Yes! Some lenders offer 0% penalty for early settlement. Other lenders charge a nominal 0.5% - 1% processing fee on the remaining balance. Always check individual lender policies in our comparison tool."
+      q: "Can I settle a vehicle loan early?",
+      a: "Early-settlement terms depend on the lender and the final loan agreement. Review the lender's current terms before accepting an offer."
     },
     {
       q: "What insurance requirements apply to financed cars?",
-      a: "All partner financial institutions require Comprehensive Motor Insurance with joint logbook interest endorsement until the loan balance is fully settled."
+      a: "Insurance requirements depend on the lender and vehicle. Confirm the current requirements with the lender handling your application."
     },
     {
-      q: "How is the NTSA vehicle logbook transferred during financing?",
-      a: "During the loan term, NTSA TIMS registers joint ownership between the financing bank and the buyer. Upon final loan payment, the bank issues a clear discharge letter and full ownership is transferred exclusively to you."
+      q: "How is vehicle ownership handled during financing?",
+      a: "Ownership and security-interest arrangements depend on the lender and the applicable NTSA process. KAYAD does not claim a specific transfer workflow until the relevant lender contract is connected."
     }
   ];
 
@@ -367,7 +319,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             </Button>
 
             <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" /> Pre-approval in &lt; 2 minutes • Non-binding estimates
+              <ShieldCheck className="w-4 h-4 text-emerald-400" /> Non-binding affordability estimates
             </span>
           </div>
         </div>
@@ -630,12 +582,10 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               variant="accent"
               size="lg"
               fullWidth
-              onClick={() => {
-                setActiveTab('lenders');
-              }}
+              onClick={handleOpenApply}
               className="shadow-md"
             >
-              <span>Compare Lenders for this Plan</span>
+              <span>Submit Financing Request</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -665,335 +615,33 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {partnerBanks.map((bank) => {
-            const isCompared = selectedBankIds.includes(bank.id);
-            // Estimate monthly for this specific bank rate
-            const bankMonthlyRate = (bank.baseRate / 100) / 12;
-            const bankMonthly = loanAmount > 0 
-              ? Math.round((loanAmount * bankMonthlyRate * Math.pow(1 + bankMonthlyRate, tenureMonths)) / (Math.pow(1 + bankMonthlyRate, tenureMonths) - 1))
-              : 0;
-
-            return (
-              <Card 
-                key={bank.id} 
-                className={`p-6 space-y-5 transition-all relative border flex flex-col justify-between ${
-                  isCompared ? 'border-[#1E3063] ring-1 ring-[#1E3063]/20 shadow-sm' : 'border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div className="space-y-4">
-                  
-                  {/* Bank Header */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-11 h-11 rounded-xl font-black text-xs flex items-center justify-center font-display shadow-xs ${bank.logoBg}`}>
-                        {bank.shortName.substring(0, 3).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="font-extrabold text-[#1E3063] text-sm font-display">{bank.name}</h3>
-                        <p className="text-[11px] text-slate-500 font-medium">{bank.approvalTime} Turnaround</p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => toggleCompareBank(bank.id)}
-                      className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-all ${
-                        isCompared ? 'bg-amber-50 text-amber-900 border-amber-300 font-bold' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
-                      }`}
-                      title={isCompared ? 'Remove from comparison' : 'Add to comparison'}
-                    >
-                      {isCompared ? <CheckSquare className="w-4 h-4 text-amber-600" /> : <Square className="w-4 h-4" />}
-                    </button>
-                  </div>
-
-                  {/* Main Rate & Monthly Highlight */}
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-[10px] text-slate-400 font-extrabold uppercase">Interest Rate Range</span>
-                      <span className="text-base font-black text-[#1E3063] font-display">{bank.rateRange}</span>
-                    </div>
-                    <div className="flex justify-between items-baseline pt-1 border-t border-slate-200/60">
-                      <span className="text-xs text-slate-600 font-bold">Est. Monthly ({tenureMonths}m):</span>
-                      <span className="text-sm font-black text-emerald-700 font-display">Ksh {bankMonthly.toLocaleString()} / mo</span>
-                    </div>
-                  </div>
-
-                  {/* Institution Metrics */}
-                  <div className="space-y-2 text-xs text-slate-600">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-medium">Max Financing:</span>
-                      <strong className="text-slate-800">{bank.maxFinancing}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-medium">Min Deposit Required:</span>
-                      <strong className="text-slate-800">{bank.minDepositPercent}% Down</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-medium">Early Repayment Policy:</span>
-                      <strong className="text-emerald-700 font-extrabold">{bank.earlyRepaymentPolicy}</strong>
-                    </div>
-                  </div>
-
-                  {/* Eligibility Summary */}
-                  <div className="p-3 bg-amber-50/70 rounded-xl border border-amber-200/60 text-[11px] text-slate-700 space-y-1">
-                    <p className="font-extrabold text-[#1E3063] flex items-center gap-1">
-                      <UserCheck className="w-3.5 h-3.5 text-amber-600" /> Eligibility Criteria:
-                    </p>
-                    <p className="text-slate-600 leading-snug">{bank.eligibilitySummary}</p>
-                  </div>
-
-                </div>
-
-                {/* Card Action */}
-                <div className="pt-4 border-t border-slate-100">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    fullWidth
-                    onClick={() => handleOpenApply(bank)}
-                  >
-                    <span>Apply with {bank.shortName}</span>
-                    <ArrowRight className="w-4 h-4 text-amber-400" />
-                  </Button>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+        <Card className="p-6 bg-slate-50 border-slate-200">
+          <div className="flex items-start gap-3"><Info className="w-5 h-5 text-amber-600 shrink-0" /><div><p className="font-extrabold text-[#1E3063]">Verified lender offers are not connected yet</p><p className="text-sm text-slate-600 mt-1">KAYAD will not display invented lender rates, fees, approval times, or eligibility claims. Submit a real financing request instead.</p></div></div>
+        </Card>
       </div>
 
       {/* ==========================================
-          5. COMPARE FINANCING OFFERS (Side-by-side Matrix)
+          5. COMPARE FINANCING OFFERS
           ========================================== */}
-      {activeTab === 'comparison' && (
-        <div className="space-y-4 pt-4 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-amber-500" />
-              Side-by-Side Offer Comparison Matrix
-            </h2>
-            <span className="text-xs text-slate-500 font-semibold">Showing {comparedBanks.length} selected lenders</span>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-900 text-white">
-                    <th className="p-4 font-bold text-slate-300 w-44">Feature / Term</th>
-                    {comparedBanks.map((b) => (
-                      <th key={b.id} className="p-4 font-black font-display text-sm text-amber-300 min-w-[200px]">
-                        {b.name}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 text-slate-700">
-                  
-                  {/* Row 1: Estimated Monthly Payment */}
-                  <tr className="bg-amber-50/40 font-bold">
-                    <td className="p-4 text-[#1E3063]">Est. Monthly Payment ({tenureMonths}m)</td>
-                    {comparedBanks.map((b) => {
-                      const bankMonthlyRate = (b.baseRate / 100) / 12;
-                      const bankMonthly = loanAmount > 0 
-                        ? Math.round((loanAmount * bankMonthlyRate * Math.pow(1 + bankMonthlyRate, tenureMonths)) / (Math.pow(1 + bankMonthlyRate, tenureMonths) - 1))
-                        : 0;
-                      return (
-                        <td key={b.id} className="p-4 font-black text-emerald-800 text-sm font-display">
-                          Ksh {bankMonthly.toLocaleString()} / mo
-                        </td>
-                      );
-                    })}
-                  </tr>
-
-                  {/* Row 2: Interest Rate Range */}
-                  <tr>
-                    <td className="p-4 font-bold text-[#1E3063]">Interest Rate Range</td>
-                    {comparedBanks.map((b) => (
-                      <td key={b.id} className="p-4 font-extrabold text-slate-900">
-                        {b.rateRange}
-                      </td>
-                    ))}
-                  </tr>
-
-                  {/* Row 3: Max Loan Term */}
-                  <tr>
-                    <td className="p-4 font-bold text-[#1E3063]">Max Repayment Term</td>
-                    {comparedBanks.map((b) => (
-                      <td key={b.id} className="p-4 font-medium text-slate-700">
-                        Up to {b.maxTermMonths} Months
-                      </td>
-                    ))}
-                  </tr>
-
-                  {/* Row 4: Minimum Deposit */}
-                  <tr>
-                    <td className="p-4 font-bold text-[#1E3063]">Deposit Required</td>
-                    {comparedBanks.map((b) => (
-                      <td key={b.id} className="p-4 font-medium text-slate-700">
-                        {b.minDepositPercent}% (Ksh {((vehiclePrice * b.minDepositPercent) / 100).toLocaleString()})
-                      </td>
-                    ))}
-                  </tr>
-
-                  {/* Row 5: Processing Time */}
-                  <tr>
-                    <td className="p-4 font-bold text-[#1E3063]">Approval Processing Time</td>
-                    {comparedBanks.map((b) => (
-                      <td key={b.id} className="p-4 font-semibold text-amber-900">
-                        {b.approvalTime}
-                      </td>
-                    ))}
-                  </tr>
-
-                  {/* Row 6: Early Repayment Policy */}
-                  <tr>
-                    <td className="p-4 font-bold text-[#1E3063]">Early Settlement Fee</td>
-                    {comparedBanks.map((b) => (
-                      <td key={b.id} className="p-4 font-extrabold text-emerald-700">
-                        {b.earlyRepaymentPolicy}
-                      </td>
-                    ))}
-                  </tr>
-
-                  {/* Row 7: Action CTA */}
-                  <tr className="bg-slate-50">
-                    <td className="p-4 font-bold text-[#1E3063]">Select Offer</td>
-                    {comparedBanks.map((b) => (
-                      <td key={b.id} className="p-4">
-                        <Button
-                          variant="accent"
-                          size="sm"
-                          fullWidth
-                          onClick={() => handleOpenApply(b)}
-                        >
-                          <span>Apply Now</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Button>
-                      </td>
-                    ))}
-                  </tr>
-
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+      {activeTab === 'comparison' && <Card className="p-6 bg-slate-50 border-slate-200"><div className="flex items-start gap-3"><Info className="w-5 h-5 text-amber-600" /><div><h2 className="text-xl font-black text-[#1E3063]">Lender comparison unavailable</h2><p className="text-sm text-slate-600 mt-1">A verified lender-offer feed is not connected yet. No synthetic comparison data is shown.</p></div></div></Card>}
 
       {/* ==========================================
           6. APPLICATION JOURNEY & STATUS TRACKER
           ========================================== */}
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Clock className="w-5 h-5 text-amber-500" />
-              Application Journey & Live Tracker
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">Track your active pre-qualification status through the 6-step KAYAD routing pipeline</p>
-          </div>
-          <div className="text-[11px] text-slate-500 font-semibold px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200">Application status is backend/lender authoritative</div>
+          <div><h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2"><Clock className="w-5 h-5 text-amber-500" />Application Journey & Live Tracker</h2><p className="text-xs text-slate-500 font-medium">Status is read from your real backend loan application.</p></div>
+          <div className="text-[11px] text-slate-500 font-semibold px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200">Backend-authoritative</div>
         </div>
-
-        {/* 6-Step Visual Process Journey */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-          {[
-            { step: 1, title: 'Choose Vehicle', desc: 'Select verified listing' },
-            { step: 2, title: 'Compare Lenders', desc: 'Find best bank rates' },
-            { step: 3, title: 'Submit App', desc: 'Routed to credit desk' },
-            { step: 4, title: 'Document Audit', desc: 'Income & ID verified' },
-            { step: 5, title: 'Approval', desc: 'Pre-approval issued' },
-            { step: 6, title: 'Disbursement', desc: 'Logbook joint transfer' }
-          ].map((item) => {
-            const currentStepNum = statusFlow.find(s => s.status === currentAppStatus)?.step || 4;
-            const isCompleted = currentStepNum > item.step;
-            const isCurrent = currentStepNum === item.step;
-
-            return (
-              <div 
-                key={item.step} 
-                className={`p-3.5 rounded-2xl border transition-all ${
-                  isCurrent 
-                    ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-md ring-2 ring-amber-400/50' 
-                    : isCompleted 
-                    ? 'bg-emerald-50 text-emerald-950 border-emerald-200' 
-                    : 'bg-slate-50 text-slate-400 border-slate-200'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`w-6 h-6 rounded-full font-black text-[11px] flex items-center justify-center ${
-                    isCurrent ? 'bg-amber-400 text-[#17244B]' : isCompleted ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    {isCompleted ? '✓' : item.step}
-                  </span>
-                  {isCurrent && <span className="text-[10px] font-black uppercase text-amber-300">ACTIVE</span>}
-                </div>
-                <p className="font-extrabold text-xs">{item.title}</p>
-                <p className={`text-[10px] mt-0.5 ${isCurrent ? 'text-slate-300' : 'text-slate-500'}`}>{item.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* SINGLE ACTIVE APPLICATION STATUS BANNER (Never multiple active statuses) */}
-        <Card className="p-6 bg-slate-50 border-slate-200 space-y-4 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-[#1E3063] text-amber-400 font-black">
-                <FileCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Active Application Ref #KYD-FIN-8892</p>
-                <h3 className="text-base font-extrabold text-[#1E3063] font-display">
-                  Partner Bank Asset Finance Request
-                </h3>
-              </div>
-            </div>
-
-            <Badge variant={
-              currentAppStatus === 'Approved' || currentAppStatus === 'Completed' ? 'success' :
-              currentAppStatus === 'Declined' ? 'danger' : 'escrow'
-            } size="md">
-              Current Status: {currentAppStatus}
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1">
-              <p className="text-slate-400 font-semibold">Target Vehicle</p>
-              <p className="font-extrabold text-[#1E3063]">Ksh {vehiclePrice.toLocaleString()} Vehicle Asset</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1">
-              <p className="text-slate-400 font-semibold">Requested Loan Amount</p>
-              <p className="font-extrabold text-emerald-700">Ksh {loanAmount.toLocaleString()} ({100 - depositPercent}% LTV)</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1">
-              <p className="text-slate-400 font-semibold">Estimated Monthly Installment</p>
-              <p className="font-extrabold text-blue-900">Ksh {estimatedMonthly.toLocaleString()} / mo ({tenureMonths}m)</p>
-            </div>
-          </div>
-
-          {/* Status Message Guidance */}
-          <div className="p-4 bg-white rounded-xl border border-amber-200 text-xs text-slate-700 flex items-start gap-3">
-            <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="font-bold text-[#1E3063]">
-                {currentAppStatus === 'Under Review' && 'Your application is currently under review with the lending bank\'s underwriting team.'}
-                {currentAppStatus === 'Draft' && 'Your calculator inputs are saved. Click Apply to submit to partner banks.'}
-                {currentAppStatus === 'Submitted' && 'Application received. Upload requested documents below to expedite review.'}
-                {currentAppStatus === 'Documents Requested' && 'Please upload your 6-month certified bank statement to complete credit audit.'}
-                {currentAppStatus === 'Conditionally Approved' && 'Congratulations! Conditional term sheet issued pending vehicle physical inspection.'}
-                {currentAppStatus === 'Approved' && 'Final approval granted! Check your email for loan contract signing details.'}
-                {currentAppStatus === 'Declined' && 'Lender declined current terms. Consider increasing down payment deposit.'}
-                {currentAppStatus === 'Completed' && 'Loan disbursed and vehicle logbook endorsed. Drive away safely!'}
-              </p>
-              <p className="text-slate-500">
-                KAYAD lead desk updates your portal status automatically as bank underwriters process your file.
-              </p>
-            </div>
-          </div>
-        </Card>
+        {currentApplication ? (
+          <Card className="p-6 bg-slate-50 border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2"><div><p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Application {currentApplication.id}</p><h3 className="text-base font-extrabold text-[#1E3063]">Vehicle Financing Request</h3></div><Badge variant={currentAppStatus === 'Approved' ? 'success' : currentAppStatus === 'Declined' ? 'danger' : 'escrow'} size="md">Current Status: {currentAppStatus}</Badge></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs"><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Vehicle Asset Value</p><p className="font-extrabold text-[#1E3063]">Ksh {Number(currentApplication.vehiclePrice || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Requested Loan</p><p className="font-extrabold text-emerald-700">Ksh {Number(currentApplication.loanAmount || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Submitted</p><p className="font-extrabold text-[#1E3063]">{new Date(currentApplication.createdAt).toLocaleString('en-KE')}</p></div></div>
+            <p className="text-xs text-slate-500">KAYAD does not fabricate lender-side approvals, document verification, disbursement, or callback promises.</p>
+          </Card>
+        ) : (
+          <Card className="p-6 bg-slate-50 border-slate-200"><p className="text-sm text-slate-600">No financing application has been submitted from this account yet.</p></Card>
+        )}
       </div>
 
       {/* ==========================================
@@ -1215,13 +863,13 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             {/* Modal Header */}
             <div className="border-b border-slate-200 pb-3 space-y-1">
               <Badge variant="verified" size="sm">
-                Direct Lender Pre-Qualification Route
+                KAYAD Financing Request
               </Badge>
               <h3 className="text-xl font-black text-[#1E3063] font-display">
-                Apply for Pre-Approval with {selectedBankForApply.name}
+                Submit a Financing Request
               </h3>
               <p className="text-xs text-slate-500">
-                Fast-track lead submission to {selectedBankForApply.shortName} asset financing desk.
+                This submits a real financing application to the KAYAD backend. It does not imply lender approval or a lender offer.
               </p>
             </div>
 
@@ -1231,9 +879,9 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-lg font-black text-emerald-950 font-display">Pre-Approval Lead Submitted!</h4>
+                  <h4 className="text-lg font-black text-emerald-950 font-display">Financing Request Submitted</h4>
                   <p className="text-xs text-emerald-800 leading-relaxed max-w-sm mx-auto">
-                    Your pre-qualification file has been securely routed to <strong>{selectedBankForApply.shortName}</strong>. A dedicated bank asset officer will call you within 2 business hours.
+                    Your financing request was recorded by the KAYAD backend. No lender approval or callback time is promised.
                   </p>
                 </div>
                 <Button
@@ -1246,11 +894,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               </div>
             ) : (
               <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setApplicationSuccess(true);
-                  setCurrentAppStatus('Submitted');
-                }} 
+                onSubmit={submitFinancingRequest} 
                 className="space-y-4 text-xs"
               >
                 {/* Summary Box */}
@@ -1273,58 +917,31 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                   </div>
                 </div>
 
-                {/* Form Inputs */}
+                {/* Form Inputs — only fields supported by the real loan API */}
                 <div className="space-y-3">
-                  <div>
-                    <label className="font-bold text-slate-700">Full Official Name (as on ID)</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. John Mwangi Kimani"
-                      className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 font-medium text-slate-800 outline-none focus:border-[#1E3063]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-bold text-slate-700">Phone Number (M-Pesa)</label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="0712 345 678"
-                        className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 font-medium text-slate-800 outline-none focus:border-[#1E3063]"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700">KRA PIN Number</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="A012345678Z"
-                        className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 font-medium text-slate-800 outline-none focus:border-[#1E3063]"
-                      />
-                    </div>
-                  </div>
-
                   <div>
                     <label className="font-bold text-slate-700">Monthly Gross Income (Ksh)</label>
                     <input
                       type="number"
                       required
                       placeholder="e.g. 120000"
+                      value={monthlyIncome || ''}
+                      onChange={(e) => setMonthlyIncome(Number(e.target.value) || 0)}
                       className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 font-medium text-slate-800 outline-none focus:border-[#1E3063]"
                     />
                   </div>
                 </div>
 
+                {applicationError && <div className="p-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700">{applicationError}</div>}
                 <div className="pt-2">
                   <Button
                     variant="accent"
                     size="lg"
                     fullWidth
                     type="submit"
+                    disabled={applicationSubmitting}
                   >
-                    <span>Submit Pre-Approval Lead to {selectedBankForApply.shortName}</span>
+                    <span>{applicationSubmitting ? 'Submitting…' : 'Submit Financing Request'}</span>
                     <ArrowRight className="w-4 h-4 text-[#17244B]" />
                   </Button>
                 </div>

@@ -71,14 +71,10 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const eventHandlersRef = useRef<Map<string, Set<(data: any) => void>>>(new Map());
 
   useEffect(() => {
-    if (user) {
-      setConnected(true);
-    } else {
-      setConnected(false);
-    }
+    setConnected(Boolean(user && supabase));
 
     return () => {
-      channelsRef.current.forEach(ch => supabase.removeChannel(ch));
+      channelsRef.current.forEach(ch => supabase?.removeChannel(ch));
       channelsRef.current = [];
     };
   }, [user]);
@@ -112,6 +108,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   }, []);
 
   const joinAuction = useCallback((carId: string, handlers: AuctionHandlers = {}): RealtimeChannel | undefined => {
+    if (!supabase || !user) return undefined;
     const channel = supabase
       .channel(`auction-${carId}`)
       .on('postgres_changes',
@@ -137,7 +134,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   }, []);
 
   const joinNotifications = useCallback((handlers: NotificationHandlers = {}): RealtimeChannel | null => {
-    if (!user) return null;
+    if (!user || !supabase) return null;
     
     const channel = supabase
       .channel('notifications')
@@ -156,6 +153,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   }, [user]);
 
   const joinMessages = useCallback((conversationId: string, handlers: MessageHandlers = {}): RealtimeChannel | undefined => {
+    if (!supabase || !user) return undefined;
     const channel = supabase
       .channel(`messages-${conversationId}`)
       .on('postgres_changes',
@@ -174,7 +172,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
   const leaveChannel = useCallback((channel: RealtimeChannel) => {
     if (channel) {
-      supabase.removeChannel(channel);
+      supabase?.removeChannel(channel);
       channelsRef.current = channelsRef.current.filter(ch => ch !== channel);
     }
   }, []);
