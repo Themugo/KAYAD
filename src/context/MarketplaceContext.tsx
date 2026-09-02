@@ -293,7 +293,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   const previousPage = navIndex > 0 ? navHistory[navIndex - 1] : null;
 
   const selectedVehicle = useMemo(() => {
-    return vehicles.find(v => v.id === selectedVehicleId) || vehicles[0] || null;
+    return selectedVehicleId ? vehicles.find(v => v.id === selectedVehicleId) || null : null;
   }, [vehicles, selectedVehicleId]);
 
   const toggleSaveVehicle = (id: string) => {

@@ -141,11 +141,9 @@ export const VehicleDetailPage: FC = () => {
   }
 
   // Ensure maximum 10 images
-  const rawImages = vehicle.images || [];
-  const images = (rawImages.length > 0 ? rawImages : [
-    'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1200&q=80'
-  ]).slice(0, 10);
+  const images = (vehicle.images || []).filter(Boolean).slice(0, 10);
   const totalImages = images.length;
+  const hasImages = totalImages > 0;
 
   const selectImage = (idx: number) => {
     if (idx === activeImgIndex) return;
@@ -199,11 +197,11 @@ export const VehicleDetailPage: FC = () => {
   };
 
   const isSaved = savedVehicleIds.includes(vehicle.id);
-  const currentPrice = vehicle.currentBid || vehicle.price;
+  const currentPrice = vehicle.currentBid ?? vehicle.price;
   const minNextBid = currentPrice + 50000;
 
   // Monthly Payment Calculation
-  const principal = Math.max(0, (vehicle.buyNowPrice || vehicle.price) - parseFloat(downPayment || '0'));
+  const principal = Math.max(0, (vehicle.buyNowPrice ?? vehicle.price) - parseFloat(downPayment || '0'));
   const monthlyRate = interestRate / 100 / 12;
   const estimatedMonthly = monthlyRate > 0
     ? Math.round((principal * monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / (Math.pow(1 + monthlyRate, loanTerm) - 1))
@@ -365,7 +363,7 @@ export const VehicleDetailPage: FC = () => {
             <span className="text-[#E2D8C7]">•</span>
             <span className="flex items-center gap-1 text-[#6B7A99] font-medium">
               <Eye className="w-3.5 h-3.5" />
-              <span>{vehicle.viewsCount || 142} Views</span>
+              <span>{vehicle.viewsCount != null ? `${vehicle.viewsCount} Views` : 'Views unavailable'}</span>
             </span>
           </div>
         </div>
@@ -447,9 +445,17 @@ export const VehicleDetailPage: FC = () => {
                 <Skeleton className="absolute inset-0 w-full h-full z-0 rounded-3xl bg-slate-800 animate-pulse" />
               )}
 
-              {!imageFailed ? (
+              {!hasImages ? (
+                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-slate-800 text-white space-y-3">
+                  <div className="w-16 h-16 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center">
+                    <Info className="w-8 h-8 text-[#23EBFF]" />
+                  </div>
+                  <h4 className="text-lg font-serif font-black">Vehicle photos unavailable</h4>
+                  <p className="text-xs text-slate-300 max-w-sm">No vehicle images were supplied by the authoritative listing record.</p>
+                </div>
+              ) : !imageFailed ? (
                 <img
-                  src={images[activeImgIndex]}
+                  src={images[activeImgIndex] || ''}
                   alt={`${formattedFullTitle} - Image ${activeImgIndex + 1}`}
                   width={800}
                   height={600}
@@ -507,8 +513,9 @@ export const VehicleDetailPage: FC = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsFullscreen(true);
+                    if (hasImages) setIsFullscreen(true);
                   }}
+                  disabled={!hasImages}
                   className="p-2 rounded-full bg-[#2E4080]/90 backdrop-blur-md hover:bg-[#1B2647] text-white border border-white/20 shadow-sm transition-all cursor-pointer"
                   title="Fullscreen Lightbox Mode"
                 >
@@ -526,8 +533,9 @@ export const VehicleDetailPage: FC = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handlePrevImage();
+                  if (hasImages) handlePrevImage();
                 }}
+                disabled={!hasImages}
                 className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-[#2E4080]/80 hover:bg-[#2E4080] text-white border border-white/20 transition-all opacity-90 group-hover:opacity-100 z-10 cursor-pointer"
                 aria-label="Previous Image"
               >
@@ -536,8 +544,9 @@ export const VehicleDetailPage: FC = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleNextImage();
+                  if (hasImages) handleNextImage();
                 }}
+                disabled={!hasImages}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-[#2E4080]/80 hover:bg-[#2E4080] text-white border border-white/20 transition-all opacity-90 group-hover:opacity-100 z-10 cursor-pointer"
                 aria-label="Next Image"
               >
@@ -601,11 +610,11 @@ export const VehicleDetailPage: FC = () => {
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Exterior Color</span>
-                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.exteriorColor || 'Metallic'}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.exteriorColor || 'Not provided'}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Condition</span>
-                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.condition || 'Excellent'}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.condition || 'Not provided'}</span>
               </div>
             </div>
 
@@ -1079,7 +1088,7 @@ export const VehicleDetailPage: FC = () => {
           {/* Modal Main Image Display */}
           <div className="relative flex-1 flex items-center justify-center my-4 overflow-hidden select-none">
             <img
-              src={images[activeImgIndex]}
+              src={images[activeImgIndex] || ''}
               alt={`Fullscreen ${vehicle.title} ${activeImgIndex + 1}`}
               width={800}
               height={600}

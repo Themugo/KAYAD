@@ -236,10 +236,10 @@ export async function getMyListings(): Promise<BackendCar[]> {
  */
 export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
   const imageUrls = (car.images || []).map((img) => img.url).filter(Boolean);
-  const conditionValue = (car.condition || 'Good') as Vehicle['condition'];
-  const bodyStyleValue = (car.body_type || 'Sedan') as Vehicle['bodyStyle'];
-  const transmissionValue = (car.transmission || 'Automatic') as Vehicle['transmission'];
-  const fuelTypeValue = (car.fuel || 'Petrol') as Vehicle['fuelType'];
+  const conditionValue = (car.condition || '') as Vehicle['condition'];
+  const bodyStyleValue = (car.body_type || '') as Vehicle['bodyStyle'];
+  const transmissionValue = (car.transmission || '') as Vehicle['transmission'];
+  const fuelTypeValue = (car.fuel || '') as Vehicle['fuelType'];
   // These 4 casts assume the backend's free-text column values line up
   // with this frontend's stricter union types - true for the historical seed
   // data these columns were designed around, but not enforced by any
@@ -311,7 +311,7 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
     // 'active' as the closest equivalent; anything else not in the
     // frontend union falls back to 'active' rather than crashing.
     status: car.status === 'sold' ? 'sold' : car.status === 'pending' ? 'pending' : car.status === 'draft' ? 'draft' : 'active',
-    createdAt: car.created_at || new Date().toISOString(),
+    createdAt: car.created_at || '',
   };
 }
 
