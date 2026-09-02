@@ -1,7 +1,13 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { authAPI } from '../api/api';
+import {
+  getMe,
+  login as authLogin,
+  register as authRegister,
+  logout as authLogout,
+  updateProfile as authUpdateProfile,
+} from '../services/authApi';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
 import { STAFF_ROLES, isSellerRole, type User } from '../utils/authRoutes';
 import {
@@ -82,7 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const handleAuthExpired = () => { setUser(null); setLoading(false); };
     window.addEventListener('kayad:auth-expired', handleAuthExpired);
 
-    authAPI.me()
+    getMe().then(user => ({ user }))
       .then(data => setUser(normalizeUser(data.user)))
       .catch(() => { /* not authenticated — user stays null */ })
       .finally(() => setLoading(false));
@@ -91,27 +97,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = useCallback(async ({ email, password }: { email: string; password: string }) => {
-    const data = await authAPI.login({ email, password });
+    const user = await authLogin(email, password);
+    const data = { success: true, user };
     setUser(normalizeUser(data.user));
     setLoading(false);
     return data;
   }, []);
 
   const register = useCallback(async (body: any) => {
-    const data = await authAPI.register(body);
+    const user = await authRegister(body);
+    const data = { success: true, user };
     setUser(normalizeUser(data.user));
     setLoading(false);
     return data;
   }, []);
 
   const logout = useCallback(async () => {
-    try { await authAPI.logout(); } catch (error) { console.error('Logout failed:', error); }
+    try { await authLogout(); } catch (error) { console.error('Logout failed:', error); }
     setUser(null);
     setLoading(false);
   }, []);
 
   const updateProfile = useCallback(async (body: any) => {
-    const data = await authAPI.updateProfile(body);
+    const user = await authUpdateProfile(body);
+    const data = { success: true, user };
     setUser(normalizeUser(data.user || data));
     return data;
   }, []);
