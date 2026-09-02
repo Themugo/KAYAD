@@ -5,10 +5,10 @@ import { recordMetric, incrementCounter } from "../config/metrics.js";
 import { triggerAlert } from "../config/alerting.js";
 
 const { AT_API_KEY, AT_USERNAME = "sandbox", AT_SENDER_ID } = process.env;
-const SMS_PROVIDER = process.env.SMS_PROVIDER || (AT_API_KEY ? "africastalking" : "mock");
+const SMS_PROVIDER = process.env.SMS_PROVIDER || (AT_API_KEY ? "africastalking" : "disabled");
 
-if (SMS_PROVIDER === "mock") {
-  logWarn("SMS is in MOCK mode — no real messages will be sent. Set AT_API_KEY to enable.");
+if (SMS_PROVIDER === "disabled") {
+  logWarn("SMS provider is not configured — outbound SMS is disabled.");
 }
 
 // SMS service configuration with SRE
@@ -72,10 +72,9 @@ export const sendSMS = async (phone, message) => {
       return false;
     }
 
-    if (SMS_PROVIDER === "mock") {
-      logInfo("MOCK SMS", { to, message });
-      incrementCounter("sms_mock");
-      return true;
+    if (SMS_PROVIDER === "disabled") {
+      incrementCounter("sms_disabled");
+      return false;
     }
 
     const result = await withRetry(() => doSend(phone, message), {

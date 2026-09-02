@@ -73,7 +73,7 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     checkoutID,
     checkoutRequestID: checkoutID,
     payment,
-    message: mode === "mpesa" ? "STK push sent, check your phone" : "Mock payment initiated",
+    message: "STK push sent, check your phone",
   };
 };
 

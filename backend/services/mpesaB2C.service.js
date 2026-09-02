@@ -77,19 +77,11 @@ export const disburseB2C = async ({
     }
   }
 
-  // ── MOCK MODE ─────────────────────────────────────────────
-  if (MPESA_ENV === "sandbox" && !process.env.MPESA_B2C_INITIATOR) {
-    logInfo(`B2C mock: KES ${amount.toLocaleString()} to ${phone} for escrow ${escrowId}`);
-    if (escrowId && idempotencyKey) {
-      await update("escrows", escrowId, { lastActionKey: idempotencyKey });
-    }
-    return {
-      success: true,
-      mock: true,
-      conversationID: `MOCK-${Date.now()}`,
-      originatorConversationID: `KAYAD-${escrowId}`,
-      message: "B2C simulated (sandbox without initiator config)",
-    };
+  // Never fabricate a successful payout when B2C credentials are absent.
+  if (!B2C_INITIATOR || !process.env.MPESA_B2C_INITIATOR_PW || !B2C_SHORTCODE) {
+    const err = new Error("M-Pesa B2C payout is not configured");
+    err.code = "MPESA_B2C_NOT_CONFIGURED";
+    throw err;
   }
 
   // ── LIVE MODE ─────────────────────────────────────────────

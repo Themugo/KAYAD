@@ -371,15 +371,16 @@ class AIIntelligenceService {
    * Monitor suspicious auction behavior
    */
   async detectSuspiciousAuctionBehavior(auctionId) {
-    const auction = await db.findById('auctions', auctionId);
-    const bids = await db.find('bids', { auction_id: auctionId });
+    const auction = await db.findById('cars', auctionId);
+    if (!auction) throw new Error('Auction vehicle not found');
+    const bids = await db.find('bids', { carId: auctionId });
 
     const flags = [];
 
     // Check for bid sniping
     const lastMinuteBids = bids.filter(b => {
       const bidTime = new Date(b.created_at);
-      const endTime = new Date(auction.end_time);
+      const endTime = new Date(auction.auctionEnd);
       return (endTime - bidTime) < 5 * 60 * 1000; // Last 5 minutes
     });
 

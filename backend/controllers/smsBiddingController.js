@@ -82,23 +82,10 @@ export const handleInboundSms = async (req, res) => {
       return res.json({ success: true, message: "Bid too low" });
     }
 
-    // Place the bid (mock mode — SMS bids use mock payment for speed)
-    const bid = await Bid.create({
-      carId: car._id,
-      user: smsBidder.user,
-      amount,
-      maxBid: activeSub.maxAutoBid || null,
-      phone: cleanedPhone,
-      bidderTag: `Bidder-SMS`,
-      status: "paid",
-    });
-
-    // Update car
-    const previousHighestBidder = car.highestBidder;
-    car.currentBid = amount;
-    car.highestBidder = smsBidder.user;
-    car.bidsCount = (car.bidsCount || 0) + 1;
-    await car.save();
+    // SMS bidding has no payment-integrated bid settlement path yet.
+    // Never create a paid bid without a real payment record/callback.
+    await sendSMS(cleanedPhone, "SMS bidding is temporarily unavailable. Please place the bid through KAYAD with M-Pesa payment.");
+    return res.json({ success: false, message: "SMS bidding payment integration unavailable" });
 
     // Sniping protection — canonical implementation (env-configured
     // window/extension, extension caps, realtime notify).

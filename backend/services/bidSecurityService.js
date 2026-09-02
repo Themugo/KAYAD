@@ -30,8 +30,7 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount }) 
     };
   }
 
-  // Create transaction record. In mock mode the status stays "pending"
-  // (never "success") so no workflow can treat an unpaid deposit as paid.
+  // Create a pending transaction. It may become successful only after a verified M-Pesa callback for this checkout request.
   const transaction = await create("transactions", {
     user: userId,
     car: auction.id,

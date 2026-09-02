@@ -355,7 +355,7 @@ export const placeBid = async (req, res) => {
     // plus any paid-market update in one PostgreSQL transaction. The old
     // compatibility session was not a real DB transaction.
     const checkoutRequestId = payment.checkoutRequestID || payment.checkoutID;
-    const bidStatus = payment.mode === "mpesa" ? "pending" : "paid";
+    const bidStatus = "pending";
     const atomicResult = await atomicPlaceBid({
       carId,
       userId,
@@ -376,104 +376,15 @@ export const placeBid = async (req, res) => {
       logWarn("Failed to create lead from bid", { error: leadErr.message });
     }
 
-    // =============================
-    // ⚡ MOCK MODE
-    // =============================
-    if (payment.mode === "mock") {
-      const previousHighestBidder = car.highestBidder;
-
-      car.currentBid = atomicResult.current_bid;
-      car.highestBidder = userId;
-      car.bidsCount = atomicResult.bids_count;
-      if (atomicResult.auction_end) car.auctionEnd = atomicResult.auction_end;
-
-      await session.commitTransaction();
-      session.endSession();
-
-      // 🔥 RUN AUTO-BID AFTER MANUAL BID (outside transaction)
-      await runAutoBidding(carId);
-
-      logActionFromReq(req, "bid.placed", {
-        target: car._id,
-        targetModel: "Car",
-        resourceId: carId,
-        details: { amount, bidId: bid.id, mode: payment.mode },
-        severity: "info",
-      });
-
-      // Log auction bid to audit trail
-      await logAuctionBidPlaced(car, bid, req.user, req);
-
-      if (getIO()) {
-        getIO().to(`car_${carId}`).emit("auctionUpdate", {
-          carId,
-          currentBid: car.currentBid,
-        });
-      }
-      emitListingUpdate(carId, { currentBid: car.currentBid, bidsCount: car.bidsCount });
-
-      // 📧 Email notifications + 📱 SMS (fire-and-forget with throttle)
-      try {
-        const { sendBidConfirmationEmail, sendOutbidEmail } = bidEmailService;
-        const User = (await import("../models/User.js")).default;
-
-        const THROTTLE_MS = 30000;
-        if (!global._bidNotifThrottle) global._bidNotifThrottle = new Map();
-        const throttle = global._bidNotifThrottle;
-        const canNotify = (uid) => {
-          const key = String(uid);
-          const last = throttle.get(key) || 0;
-          if (Date.now() - last < THROTTLE_MS) return false;
-          throttle.set(key, Date.now());
-          if (throttle.size > 500) {
-            const cutoff = Date.now() - THROTTLE_MS * 2;
-            for (const [k, v] of throttle) {
-              if (v < cutoff) throttle.delete(k);
-            }
-          }
-          return true;
-        };
-
-        if (canNotify(userId)) {
-          const bidder = await User.findById(userId).select("email name phone");
-          if (bidder?.email && typeof sendBidConfirmationEmail === "function") {
-            sendBidConfirmationEmail(bidder, bid, car).catch((e) =>
-              logWarn("Bid confirm email failed", { error: e.message }),
-            );
-          }
-          if (bidder?.phone && bidder?.notifications?.sms !== false) {
-            sendSMS(
-              bidder.phone,
-              `Bid confirmed on ${car.title || "vehicle"} — KES ${Number(amount || bid.amount).toLocaleString("en-KE")}. Track it live on Kayad.`,
-            ).catch((e) => logWarn("SMS send failed", { error: e.message }));
-          }
-        }
-
-        if (
-          previousHighestBidder &&
-          String(previousHighestBidder) !== String(userId) &&
-          canNotify(previousHighestBidder)
-        ) {
-          const prevBidder = await User.findById(previousHighestBidder).select("email name phone");
-          if (prevBidder?.email && typeof sendOutbidEmail === "function") {
-            sendOutbidEmail(prevBidder, amount, car).catch((e) => logWarn("Outbid email failed", { error: e.message }));
-          }
-          if (prevBidder?.phone && prevBidder?.notifications?.sms !== false) {
-            sendSMS(
-              prevBidder.phone,
-              `You've been outbid on ${car.title || "vehicle"} — KES ${Number(amount).toLocaleString("en-KE")}. Bid higher now on Kayad.`,
-            ).catch((e) => logWarn("SMS send failed", { error: e.message }));
-          }
-        }
-      } catch (e) { logWarn("Outbid notification failed", { error: e.message }); }
-    } else {
-      await session.commitTransaction();
-      session.endSession();
-    }
+    // Commit the compatibility session only after the canonical atomic
+    // database operation has succeeded. No local/mock payment branch may
+    // mark a bid as paid or advance the auction without M-Pesa confirmation.
+    await session.commitTransaction();
+    session.endSession();
 
     res.json({
       success: true,
-      message: payment.mode === "mpesa" ? "STK push sent" : "Bid placed",
+      message: "STK push sent; bid remains pending until M-Pesa confirmation",
       checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
       bid: bid,
     });

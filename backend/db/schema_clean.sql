@@ -115,39 +115,15 @@ CREATE INDEX IF NOT EXISTS idx_cars_dealer ON cars(dealer_id);
 CREATE INDEX IF NOT EXISTS idx_cars_featured ON cars(featured);
 CREATE INDEX IF NOT EXISTS idx_cars_created ON cars(created_at DESC);
 
--- =============================
--- AUCTIONS
--- =============================
-CREATE TABLE IF NOT EXISTS auctions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  car_id UUID REFERENCES cars(id),
-  seller_id UUID REFERENCES users(id),
-  start_price NUMERIC NOT NULL,
-  reserve_price NUMERIC,
-  current_bid NUMERIC DEFAULT 0,
-  highest_bidder_id UUID REFERENCES users(id),
-  bid_increment NUMERIC DEFAULT 100,
-  start_time TIMESTAMPTZ NOT NULL,
-  end_time TIMESTAMPTZ NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','active','paused','ended','cancelled')),
-  winner_id UUID REFERENCES users(id),
-  final_price NUMERIC,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  deleted_at TIMESTAMPTZ
-);
-
-CREATE INDEX IF NOT EXISTS idx_auctions_status ON auctions(status);
-CREATE INDEX IF NOT EXISTS idx_auctions_car ON auctions(car_id);
-CREATE INDEX IF NOT EXISTS idx_auctions_end ON auctions(end_time);
-CREATE INDEX IF NOT EXISTS idx_auctions_seller ON auctions(seller_id);
+-- AUCTIONS ARE NOT A SEPARATE TABLE. The authoritative schema stores auction lifecycle on cars.
+-- This legacy schema file is retained only as historical reference and must NOT be applied.
 
 -- =============================
 -- BIDS
 -- =============================
 CREATE TABLE IF NOT EXISTS bids (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  auction_id UUID REFERENCES auctions(id),
+  car_id UUID REFERENCES cars(id),
   user_id UUID REFERENCES users(id),
   amount NUMERIC NOT NULL,
   is_auto_bid BOOLEAN DEFAULT false,
@@ -857,7 +833,7 @@ CREATE TABLE IF NOT EXISTS escrow_audits (
 -- =============================
 CREATE TABLE IF NOT EXISTS auction_integrity_flags (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  auction_id UUID REFERENCES auctions(id),
+  car_id UUID REFERENCES cars(id),
   flagged_by UUID REFERENCES users(id),
   reviewed_by UUID REFERENCES users(id),
   flag_type TEXT,
@@ -1828,7 +1804,7 @@ CREATE TABLE IF NOT EXISTS bid_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   bid_id UUID REFERENCES bids(id),
   user_id UUID REFERENCES users(id),
-  auction_id UUID REFERENCES auctions(id),
+  car_id UUID REFERENCES cars(id),
   car_id UUID REFERENCES cars(id),
   amount NUMERIC NOT NULL,
   previous_amount NUMERIC,

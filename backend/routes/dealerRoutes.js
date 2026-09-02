@@ -1063,7 +1063,7 @@ router.post(
       success: true,
       checkoutRequestID: result.checkoutRequestID,
       mode: result.mode,
-      message: result.mode === "mpesa" ? "STK push sent. Enter PIN on your phone." : "Mock payment — refresh to see upgrade",
+      message: "STK push sent. Enter PIN on your phone.",
       paymentId: result.payment.id,
     });
   }),

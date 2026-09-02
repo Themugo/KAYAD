@@ -83,7 +83,7 @@ router.post(
       buyer: req.user.id,
       fee,
       payment: payment._id,
-      status: payment.mode === "mock" ? "paid" : "pending_payment",
+      status: "pending_payment",
       location: location || car.location?.city,
       checkoutRequestID: payment.checkoutID,
     });

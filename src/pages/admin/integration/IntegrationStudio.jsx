@@ -486,11 +486,11 @@ export default function IntegrationStudio() {
           <h3 className="font-semibold text-slate-800 mb-4">Features</h3>
           <ul className="space-y-2">
             {[
-              'Sample data (vehicles, dealers, users)',
-              'Mock payment processing',
-              'Test auction environments',
-              'Simulated user behaviors',
-              'No rate limits (10% of production)',
+              'Configured backend service contracts',
+              'Real payment-provider integration checks',
+              'Canonical auction contract checks',
+              'Authenticated integration testing',
+              'Production rate limits apply',
             ].map((feature, i) => (
               <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
                 <CheckCircle size={16} className="text-emerald-500" />
