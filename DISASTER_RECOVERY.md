@@ -42,11 +42,10 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 - **Verification**: Automated integrity checks after each backup
 
 ### Current Implementation
-- `backend/services/backupService.js` - Backup service
-- `backend/scripts/backup.js` - Backup script
-- Daily scheduled backups at 2 AM
-- 7-day retention policy
-- Gzip compression enabled
+- Supabase/PostgreSQL project backups are the primary production recovery mechanism.
+- `scripts/backup-database.sh` / `scripts/backup-database.bat` provide explicit SQL exports when `SUPABASE_DB_URL` is supplied.
+- Export retention is controlled locally by the helper (7 days by default); production backup retention must be verified in the Supabase project settings.
+- Recovery must be validated in an isolated environment before production restoration.
 
 ## Runbooks
 

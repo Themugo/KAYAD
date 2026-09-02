@@ -2,54 +2,41 @@
 title: TESTING
 owner: @qa-lead
 team: qa
-last-reviewed: 2026-06-23
+last-reviewed: 2026-09-02
 review-frequency: monthly
 status: active
 tags: [testing]
 ---
 # Running the backend tests
 
-The backend test suite uses **Jest + Supertest** against a MongoDB database.
+The backend test suite uses **Jest + Supertest**. The production data layer is **Supabase/PostgreSQL**; there is no MongoDB test service or MongoDB runtime dependency.
 
 ## Requirements
 
-- **Node 20** (see `../.nvmrc`). This is what CI uses.
-  On Node 22+ the bundled `mongodb-memory-server` binary fails to start
-  (`spawn EFTYPE` / `Instance failed to start`), which makes every
-  DB-dependent test fail. Use Node 20:
-
-  ```bash
-  nvm install 20 && nvm use 20
-  ```
+- **Node 22.22.2**, matching `../.nvmrc` and CI.
+- Frontend and backend dependencies installed from the committed lockfiles.
 
 ## Run
 
 ```bash
 cd backend
-npm install
+npm ci
 npm test
 ```
 
-On Node 20 this auto-starts an in-memory MongoDB — no external DB needed.
+The repository's tests should not require a local MongoDB server. Tests that require live Supabase data must use an explicitly configured test project/credentials and must never target production data.
 
-## If you can't use Node 20 (or the in-memory binary won't run)
+## Environment
 
-Point the suite at a real database instead. With `MONGO_URI` set, the
-in-memory binary is never used:
+Start from `backend/.env.test.example` and provide test-only values where a test requires the real Supabase data layer:
 
 ```bash
-# Windows (cmd)
-set MONGO_URI=mongodb://127.0.0.1:27017/kayad-test
-npm test
-
-# macOS/Linux, or a free MongoDB Atlas cluster
-export MONGO_URI=mongodb+srv://<your-atlas-uri>/kayad-test
-npm test
+SUPABASE_URL=https://<test-project>.supabase.co
+SUPABASE_SERVICE_KEY=<test-service-role-key>
 ```
 
-## Notes
+Never commit credentials and never point automated tests at the production database.
 
-- CI provides its own `MONGO_URI` (a real `mongo:7` service), so CI never
-  depends on the bundled binary or your local Node version.
-- If no database is reachable, the suite prints a clear banner and the
-  DB-dependent tests fail fast (they don't hang).
+## CI
+
+GitHub Actions uses Node 22.22.2 and `npm ci`. The CI pipeline must not provision or expect MongoDB.

@@ -215,7 +215,7 @@ OTEL_ENABLED=true
 ### Traced Components
 
 - HTTP requests (Express)
-- Database queries (MongoDB)
+- Database queries (Supabase/PostgreSQL)
 - Cache operations (Redis)
 - External API calls
 
@@ -245,11 +245,11 @@ Response codes:
 
 #### `/health/detailed` - Detailed Health Check
 
-Extended health check with replica set information:
+Extended health check with database connectivity information:
 - All basic checks
-- MongoDB replica set status
-- Primary and secondary nodes
-- Replication lag
+- Supabase/PostgreSQL connectivity status
+- database service availability
+- database response latency
 
 #### `/health/cache` - Cache Statistics
 

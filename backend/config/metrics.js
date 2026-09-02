@@ -190,24 +190,6 @@ export const recordCacheError = () => {
   incrementCounter("cache_errors_total", 1);
 };
 
-// MongoDB replica set metrics
-export const recordReplicaSetStatus = (status, primary, secondaries) => {
-  setGauge("replica_set_status", status === "healthy" ? 1 : 0);
-  setGauge("replica_set_primary_available", primary ? 1 : 0);
-  setGauge("replica_set_secondaries_count", secondaries);
-};
-
-export const recordReplicaSetLag = (lagMs) => {
-  recordHistogram("replica_set_lag_ms", lagMs);
-};
-
-// Connection pool metrics
-export const recordConnectionPoolStats = (total, available, checkedOut) => {
-  setGauge("connection_pool_total", total);
-  setGauge("connection_pool_available", available);
-  setGauge("connection_pool_checked_out", checkedOut);
-};
-
 // Load balancer metrics
 export const recordLoadBalancerRequest = (server, statusCode) => {
   incrementCounter("load_balancer_requests_total", 1, { server, status: statusCode });
@@ -360,9 +342,6 @@ export default {
   recordCacheSet,
   recordCacheDelete,
   recordCacheError,
-  recordReplicaSetStatus,
-  recordReplicaSetLag,
-  recordConnectionPoolStats,
   recordLoadBalancerRequest,
   recordLoadBalancerHealth,
   recordMpesaTokenFetch,

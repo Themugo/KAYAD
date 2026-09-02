@@ -114,7 +114,8 @@ This guide explains how to configure the required GitHub Secrets for the KAYAD d
 
 These secrets should be configured directly in Render, not in GitHub Secrets:
 
-- `MONGO_URI`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_KEY`
 - `JWT_SECRET`
 - `REFRESH_TOKEN_SECRET`
 - `MPESA_CONSUMER_KEY`

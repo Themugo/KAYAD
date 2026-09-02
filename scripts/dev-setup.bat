@@ -12,7 +12,7 @@ REM Check Node.js version
 echo Checking Node.js version...
 node -v
 if %errorlevel% neq 0 (
-    echo ERROR: Node.js is not installed. Please install Node.js 20.x
+    echo ERROR: Node.js is not installed. Please install Node.js 22.22.2
     exit /b 1
 )
 
@@ -20,7 +20,7 @@ echo.
 
 REM Install frontend dependencies
 echo Installing frontend dependencies...
-call npm install
+call npm ci
 if %errorlevel% neq 0 (
     echo ERROR: Failed to install frontend dependencies
     exit /b 1
@@ -31,7 +31,7 @@ echo.
 REM Install backend dependencies
 echo Installing backend dependencies...
 cd backend
-call npm install
+call npm ci
 if %errorlevel% neq 0 (
     echo ERROR: Failed to install backend dependencies
     cd ..
@@ -71,7 +71,7 @@ echo ======================================
 echo.
 echo Next steps:
 echo 1. Edit .env and backend\.env with your configuration
-echo 2. Start MongoDB (or configure MONGO_URI in backend\.env)
+echo 2. Provision/use Supabase and configure backend\.env with the required Supabase credentials
 echo 3. Run 'npm run dev' to start the frontend
 echo 4. Run 'cd backend ^&^& npm run dev' to start the backend
 echo.

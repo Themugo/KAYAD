@@ -14,27 +14,27 @@ NODE_VERSION=$(node -v)
 echo "Node.js version: $NODE_VERSION"
 
 if ! command -v node &> /dev/null; then
-    echo "❌ Node.js is not installed. Please install Node.js 20.x"
+    echo "❌ Node.js is not installed. Please install Node.js 22.22.2"
     exit 1
 fi
 
-# Check if version is 20.x
-if [[ ! $NODE_VERSION =~ ^v20\. ]]; then
-    echo "⚠️  Warning: Node.js 20.x is recommended. Current version: $NODE_VERSION"
+# KAYAD baseline is pinned in .nvmrc.
+if [[ "$NODE_VERSION" != "v22.22.2" ]]; then
+    echo "⚠️  Warning: Node.js 22.22.2 is the supported baseline. Current version: $NODE_VERSION"
 fi
 
 echo ""
 
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
-npm install
+npm ci
 
 echo ""
 
 # Install backend dependencies
 echo "📦 Installing backend dependencies..."
 cd backend
-npm install
+npm ci
 cd ..
 
 echo ""
@@ -87,7 +87,7 @@ echo "✅ Development environment setup complete!"
 echo ""
 echo "Next steps:"
 echo "1. Edit .env and backend/.env with your configuration"
-echo "2. Start MongoDB (or configure MONGO_URI in backend/.env)"
+echo "2. Provision/use Supabase and configure backend/.env with the required Supabase credentials"
 echo "3. Run 'npm run dev' to start the frontend"
 echo "4. Run 'cd backend && npm run dev' to start the backend"
 echo ""

@@ -1,60 +1,33 @@
 #!/bin/bash
 # scripts/backup-database.sh
-# MongoDB backup script for KAYAD
+# Supabase/PostgreSQL backup helper for KAYAD
 
-set -e
+set -euo pipefail
 
-# Configuration
-BACKUP_DIR="./backups/mongodb"
+BACKUP_DIR="./backups/supabase"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_NAME="kayad_backup_${TIMESTAMP}"
+BACKUP_NAME="kayad_backup_${TIMESTAMP}.sql"
 RETENTION_DAYS=7
 
-# Load environment variables
-if [ -f backend/.env ]; then
-    export $(cat backend/.env | grep -v '^#' | xargs)
-fi
-
-# Create backup directory
 mkdir -p "$BACKUP_DIR"
 
-echo "🗄️  Starting MongoDB backup..."
-echo "Backup name: $BACKUP_NAME"
-echo "Timestamp: $TIMESTAMP"
-echo ""
-
-# Extract MongoDB connection details
-if [ -z "$MONGO_URI" ]; then
-    echo "❌ ERROR: MONGO_URI not set in backend/.env"
-    exit 1
+if ! command -v supabase >/dev/null 2>&1; then
+  echo "ERROR: Supabase CLI is required for database backups."
+  echo "Install the official Supabase CLI, then retry."
+  exit 1
 fi
 
-# Perform backup using mongodump
-mongodump \
-    --uri="$MONGO_URI" \
-    --out="$BACKUP_DIR/$BACKUP_NAME" \
-    --gzip
-
-if [ $? -eq 0 ]; then
-    echo "✅ Backup completed successfully: $BACKUP_DIR/$BACKUP_NAME"
-    
-    # Calculate backup size
-    BACKUP_SIZE=$(du -sh "$BACKUP_DIR/$BACKUP_NAME" | cut -f1)
-    echo "Backup size: $BACKUP_SIZE"
-else
-    echo "❌ Backup failed"
-    exit 1
+if [ -z "${SUPABASE_DB_URL:-}" ]; then
+  echo "ERROR: SUPABASE_DB_URL is not set."
+  echo "Set it only in your local shell/secret store; never commit it."
+  exit 1
 fi
 
-# Clean up old backups (keep last N days)
-echo ""
-echo "🧹 Cleaning up old backups (keeping last $RETENTION_DAYS days)..."
-find "$BACKUP_DIR" -type d -mtime +$RETENTION_DAYS -exec rm -rf {} \; 2>/dev/null || true
+echo "Starting KAYAD Supabase/PostgreSQL backup..."
+supabase db dump --db-url "$SUPABASE_DB_URL" --file "$BACKUP_DIR/$BACKUP_NAME"
 
-# List remaining backups
-echo ""
-echo "📋 Current backups:"
-ls -lh "$BACKUP_DIR" | tail -n +2
+echo "Backup completed: $BACKUP_DIR/$BACKUP_NAME"
 
-echo ""
-echo "✅ Backup process completed"
+find "$BACKUP_DIR" -type f -name '*.sql' -mtime +"$RETENTION_DAYS" -delete 2>/dev/null || true
+echo "Current backups:"
+ls -lh "$BACKUP_DIR"

@@ -33,7 +33,7 @@ This document describes the deployment pipeline for the KAYAD application, inclu
 - **CI/CD Platform**: GitHub Actions
 - **Production Hosting**: Render (Backend), Vercel (Frontend)
 - **Containerization**: Docker (optional)
-- **Database**: MongoDB Atlas
+- **Database**: Supabase/PostgreSQL
 - **Cache**: Redis (optional, in-memory fallback)
 - **Monitoring**: Sentry, custom metrics, OpenTelemetry
 
@@ -55,7 +55,7 @@ Triggers on:
 
 Jobs:
 - **Frontend**: Install dependencies, lint, test, build
-- **Backend**: Install dependencies, lint, test with MongoDB service
+- **Backend**: Install dependencies, lint, test against the repository test contract; no MongoDB service
 - **Security Audit**: npm audit, Snyk security scan
 
 ```yaml
@@ -77,7 +77,6 @@ jobs:
     - npm ci
     - npm run format:check
     - npm test
-    # MongoDB service for tests
 
   security-audit:
     - npm audit
@@ -109,13 +108,13 @@ Jobs:
    - Local development
    - Hot reload with nodemon
    - Debug logging enabled
-   - Mock services for external APIs
+   - External integrations are disabled or explicitly sandboxed; no fabricated production data
 
 2. **Staging/Preview** (`NODE_ENV=production`)
    - Preview deployments for PRs
    - Production-like configuration
    - Separate database instance
-   - Test data only
+   - Isolated test data only
 
 3. **Production** (`NODE_ENV=production`)
    - Live production environment
@@ -133,8 +132,8 @@ NODE_ENV=production
 PORT=5000
 
 # Database
-MONGO_URI=mongodb+srv://...
-MONGO_POOL_SIZE=10
+SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_SERVICE_KEY=<service-role-key>
 
 # Security
 JWT_SECRET=<generate-32-char-string>
@@ -242,7 +241,7 @@ Render supports instant rollbacks:
 ```bash
 # Using git
 git checkout <previous-commit-hash>
-git push origin main --force
+git push origin main
 
 # Using PM2 (if using PM2)
 pm2 revert ecosystem.config.cjs
@@ -250,10 +249,14 @@ pm2 revert ecosystem.config.cjs
 
 ### Database Rollback
 
-```bash
-# Restore from backup
-node scripts/backup.js restore <backup-file>
-```
+Database rollback is a controlled Supabase/PostgreSQL operation. Do not use application-code rollback scripts to mutate production data.
+
+1. Stop or disable the affected application deployment if required.
+2. Identify the exact migration or data change that caused the incident.
+3. Use the approved Supabase/PostgreSQL recovery procedure for the project, or restore a verified SQL dump into an isolated recovery environment first.
+4. Reconcile the database state with `supabase/migrations/` before returning traffic.
+
+For an export, use `scripts/backup-database.sh` or `scripts/backup-database.bat` with an explicitly supplied `SUPABASE_DB_URL`.
 
 ### Rollback Checklist
 
