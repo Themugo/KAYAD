@@ -78,7 +78,7 @@ export interface BackendCar {
    * separate, direct is_verified_dealer flag on the car itself
    * instead (more reliable than depending on this join succeeding -
    * see pages/AuctionDiscoveryNetwork.tsx's own mapper for why). */
-  dealer?: { name?: string; businessName?: string; avatar?: string; dealerApprovedAt?: string | null } | null;
+  dealer?: { name?: string; businessName?: string; avatar?: string; phone?: string; email?: string; role?: string; dealerApprovedAt?: string | null } | null;
   is_promoted?: boolean | null;
   deal_rating?: string | null;
   // --- Auction fields, denormalized directly onto the car row ---
@@ -229,13 +229,10 @@ export async function getMyListings(): Promise<BackendCar[]> {
  *
  * Every field genuinely present on the backend is mapped directly -
  * nothing here invents a value the backend didn't actually send.
- * Fields the backend's `cars` row simply does not have at all
- * (sellerName/sellerAvatar/sellerRating - only dealer_id, a foreign
- * key, exists; horsepower; separate exterior/interior color, only a
- * single `color` column exists; full inspection detail) use an
- * honest, clearly-commented default rather than a fabricated
- * plausible-looking value - consistent with this function's approach
- * since it was first written (Phase 4/5).
+ * Seller identity/contact fields are derived from the real populated `dealer`
+ * relation returned by the backend. If that relation is unavailable, the mapper
+ * uses an explicit unknown state rather than inventing a seller identity.
+ * Other fields with no authoritative source retain honest defaults.
  */
 export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
   const imageUrls = (car.images || []).map((img) => img.url).filter(Boolean);
@@ -292,10 +289,13 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
     features: car.features || [],
     // --- still-genuine gaps: not present on the cars row at all ---
     sellerId: car.dealer_id || '',
-    sellerName: 'Unknown Seller', // requires a separate users/dealers lookup by dealer_id - not performed here
-    sellerRating: 0, // no rating data exists on the cars row or via any join performed here
-    sellerType: car.dealer_id ? 'Verified Dealer' : 'Private Seller', // best-effort inference only, not a real backend field
-    isDealerCertified: Boolean(car.is_verified_dealer),
+    sellerName: car.dealer?.businessName || car.dealer?.name || 'Unknown Seller',
+    sellerAvatar: car.dealer?.avatar || undefined,
+    sellerPhone: car.dealer?.phone || undefined,
+    sellerEmail: car.dealer?.email || undefined,
+    sellerRating: 0, // no authoritative rating aggregate is returned by this endpoint
+    sellerType: car.dealer?.role === 'dealer' ? 'Verified Dealer' : car.dealer?.role === 'individual_seller' ? 'Private Seller' : undefined,
+    isDealerCertified: Boolean(car.is_verified_dealer || car.dealer?.dealerApprovedAt),
     verified: Boolean(car.is_verified_dealer),
     isAuction: Boolean(car.has_auction),
     currentBid: car.current_bid != null ? Number(car.current_bid) : undefined,

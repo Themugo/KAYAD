@@ -313,6 +313,8 @@ export interface Vehicle {
   sellerId: string;
   sellerName: string;
   sellerAvatar?: string;
+  sellerPhone?: string;
+  sellerEmail?: string;
   sellerRating: number;
   sellerType?: 'Verified Dealer' | 'Private Seller';
   isDealerCertified: boolean;

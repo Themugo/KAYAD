@@ -613,7 +613,7 @@ export const VehicleDetailPage: FC = () => {
             <div className="pt-2 border-t border-[#E8E1D5] space-y-1.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#6B7A99]">Seller Description</h4>
               <p className="text-xs text-[#3D4F6F] leading-relaxed font-medium">
-                {vehicle.description || `Pristine ${vehicle.title.startsWith(String(vehicle.year)) ? vehicle.title : `${vehicle.year} ${vehicle.title}`} in exceptional condition. Regularly serviced at authorized franchise dealers, duty fully paid with official Kenya logbook ready for immediate transfer.`}
+                {vehicle.description || 'The seller has not provided a description for this listing.'}
               </p>
             </div>
 
@@ -911,9 +911,13 @@ export const VehicleDetailPage: FC = () => {
                 {vehicle.sellerName.charAt(0)}
               </div>
               <div>
-                <p className="text-xs text-slate-300 font-semibold">Listed by Certified Dealer</p>
+                <p className="text-xs text-slate-300 font-semibold">Listed by {vehicle.sellerType || 'Seller'}</p>
                 <h4 className="text-base font-bold text-white font-serif">{vehicle.sellerName}</h4>
-                <p className="text-xs text-[#23EBFF] font-bold">★ {vehicle.sellerRating} Verified KAYAD Dealer</p>
+                {vehicle.sellerRating > 0 ? (
+                  <p className="text-xs text-[#23EBFF] font-bold">★ {vehicle.sellerRating}</p>
+                ) : (
+                  <p className="text-xs text-slate-300 font-medium">Seller rating not yet available</p>
+                )}
               </div>
             </div>
 
@@ -926,17 +930,24 @@ export const VehicleDetailPage: FC = () => {
                 <span>Chat Dealer</span>
               </button>
 
-              <a
-                href="tel:+254700000000"
-                onClick={(e) => {
-                  e.preventDefault();
-                  showToast(`Dealer Phone: +254 700 123 456`);
-                }}
-                className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 border border-white/20 transition-all cursor-pointer"
-              >
-                <Phone className="w-3.5 h-3.5 text-[#23EBFF]" />
-                <span>Call Dealer</span>
-              </a>
+              {vehicle.sellerPhone ? (
+                <a
+                  href={`tel:${vehicle.sellerPhone}`}
+                  className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 border border-white/20 transition-all cursor-pointer"
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#23EBFF]" />
+                  <span>Call Seller</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => showToast('Seller phone number is not available for this listing.')}
+                  className="py-2.5 px-3 rounded-xl bg-white/10 text-slate-300 font-extrabold text-xs flex items-center justify-center gap-1.5 border border-white/20 cursor-not-allowed"
+                >
+                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Phone Unavailable</span>
+                </button>
+              )}
             </div>
 
             <button
