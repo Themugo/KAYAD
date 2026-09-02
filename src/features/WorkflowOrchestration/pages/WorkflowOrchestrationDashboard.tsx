@@ -77,7 +77,6 @@ const MODULES = [
   { id: 'escrow', name: 'Escrow', icon: <DollarSign size={24} />, status: 'active', metrics: { transactions: 345, volume: 'KSh 456M' } },
   { id: 'trust', name: 'Trust Center', icon: <Shield size={24} />, status: 'active', metrics: { verified: 1234, alerts: 12 } },
   { id: 'passport', name: 'Vehicle Passport', icon: <FileText size={24} />, status: 'active', metrics: { passports: 5678, updates: 234 } },
-  { id: 'intelligence', name: 'Intelligence', icon: <TrendingUp size={24} />, status: 'active', metrics: { valuations: 1234, fraud_alerts: 8 } },
 ];
 
 const RECENT_ACTIVITY = [
