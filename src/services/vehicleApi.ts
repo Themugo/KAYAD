@@ -3,13 +3,13 @@ import { getCsrfHeaders } from '../utils/csrf';
  * Real backend vehicle/car API client. KAYAD Fusion Phase 4/5.
  *
  * MAJOR CORRECTION (Phase 5): the original version of this file was
- * built against backend/db/schema_clean.sql, which turned out to be a
+ * built against the retired legacy schema artifact, which turned out to be a
  * STALE, SUPERSEDED schema definition - confirmed directly via a
  * detailed comment in supabase/migrations/..._foundational_tables.sql.sql
  * (a prior session's own cross-referenced schema-archaeology work,
  * checked against the historical vehicle seed migration, update_car_bid_stats.sql.sql,
  * and real multi-file backend usage) that explicitly states its column
- * choices "disagree with backend/db/schema_clean.sql's naming, and take
+ * choices "disagree with the retired legacy schema artifact's naming, and take
  * precedence here as already-committed, already-real evidence."
  *
  * This version is built against that real, authoritative schema
@@ -37,7 +37,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 /** Raw shape of a single row from the backend's real `cars` table
  * (supabase/migrations/..._foundational_tables.sql.sql, cross-checked
  * against backend/utils/fieldMap.js's FIELD_ALIASES.cars and against
- * real controller/service usage - not the stale backend/db/schema_clean.sql
+ * real controller/service usage - not the stale the retired legacy schema artifact
  * version this file originally used). */
 export interface BackendCar {
   id: string;

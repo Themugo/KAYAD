@@ -10,7 +10,7 @@ Scope: End-to-end workflow certification using the existing Playwright infrastru
 | Same authentication mechanism | PARITY | Playwright drives the same httpOnly-cookie/Bearer auth the backend issues (`backend/controllers/authController.js`). Backend auth is covered by 56 Phase-10 authz tests against the real middleware. |
 | Same API contracts | PARITY | E2E `ApiHelper` targets the real `/api/*` routes; backend contract covered by 335 backend tests. |
 | Same authorization | PARITY | Same `protect`/`adminOnly`/`authorize` middleware as production (tested, Phase 10). |
-| Same database schema | **NOT AVAILABLE** | No Supabase instance is provisioned anywhere in this environment (confirmed: no `backend/.env`, `authApi.ts` header comment, vitest placeholder URLs). The db layer (`db/index.js`) and `db/schema_clean.sql` are the production schema, but no live DB exists to run against. |
+| Same database schema | **NOT AVAILABLE** | No Supabase instance is provisioned anywhere in this environment (confirmed: no `backend/.env`, `authApi.ts` header comment, vitest placeholder URLs). The db layer (`db/index.js`) and `supabase/migrations/` are the production schema, but no live DB exists to run against. |
 | Same frontend build | PARITY | Tests run against the real Vite dev/preview build (`npm run dev`, same artifacts as `vite build`). |
 | Same backend build | PARTIAL | Backend boots from the same `server.js`, but without a database every request either errors or hangs (verified empirically — see "Environment finding" below). |
 
@@ -68,7 +68,7 @@ PASS = the layers listed actually executed and were asserted. Levels: **API** = 
 
 - **Certified (API level, all passing):** all 17 workflows' server-side behavior — authentication, authorization, validation, idempotency, state machines, payment/escrow/dispute logic — 335 backend tests green across Phases 9–12.
 - **Certified (UI level, real browser):** build integrity, shell rendering, navigation, routing resilience, refresh recovery, network-failure fail-safe, responsive layout — 8/8 Playwright tests green.
-- **NOT certified (environment-blocked, honestly reported):** the complete UI → live API → backend → database → UI round trip. No Supabase instance exists in this environment; the frontend dev server does not proxy `/api`; existing workflow specs require a provisioned staging DB to execute. To close this gap, provision a Supabase project with `db/schema_clean.sql`, set `SUPABASE_URL`/`SUPABASE_SERVICE_KEY`, add a `/api` proxy (or run the built frontend behind the backend), then re-run the existing `e2e/tests/*` suites.
+- **NOT certified (environment-blocked, honestly reported):** the complete UI → live API → backend → database → UI round trip. No Supabase instance exists in this environment; the frontend dev server does not proxy `/api`; existing workflow specs require a provisioned staging DB to execute. To close this gap, provision a Supabase project with `supabase/migrations/`, set `SUPABASE_URL`/`SUPABASE_SERVICE_KEY`, add a `/api` proxy (or run the built frontend behind the backend), then re-run the existing `e2e/tests/*` suites.
 
 ---
 

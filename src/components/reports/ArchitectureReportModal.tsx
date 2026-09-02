@@ -55,7 +55,7 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold text-slate-900 dark:text-white">Auction Bidding Counter</td>
-                  <td className="p-3"><code>/components/auctions/CountdownTimer.tsx</code></td>
+                  <td className="p-3"><code>/pages/AuctionDiscoveryNetwork.tsx</code></td>
                   <td className="p-3">Real-time countdown & bid validation</td>
                   <td className="p-3"><Badge variant="emerald">Active</Badge></td>
                 </tr>

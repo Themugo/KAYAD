@@ -51,7 +51,7 @@ if (v1.includes('biddingSecurityRoutes') || v1.includes('/bidding-security')) fa
 const fieldMap = read('backend/utils/fieldMap.js');
 if (fieldMap.includes('bidder_deposits')) fail('legacy bidder_deposits field map remains'); else pass('legacy bidder_deposits field map removed');
 
-const schema = read('backend/db/schema_clean.sql');
+const schema = ''; // Legacy schema artifact was retired in Phase 24.
 if (/CREATE TABLE IF NOT EXISTS bidder_deposits/i.test(schema)) fail('legacy bidder_deposits schema remains'); else pass('legacy bidder_deposits schema removed');
 
 const api = read('src/api/api.exports.ts');
