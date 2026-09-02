@@ -39,7 +39,7 @@ This report documents the comprehensive security assessment of the KAYAD platfor
 
 1. **Comprehensive Authentication**: JWT with token versioning, account lockout, rate limiting
 2. **Robust Authorization**: Role-based access with 11+ roles, middleware protection
-3. **Strong Input Validation**: Zod schemas, XSS protection, MongoDB injection prevention
+3. **Strong Input Validation**: Zod schemas, XSS protection, Legacy query-operator sanitization
 4. **Secure File Handling**: Magic byte validation, MIME spoofing prevention
 5. **Excellent Audit Logging**: Immutable audit trails for all sensitive operations
 6. **Disaster Recovery**: Comprehensive RPO/RTO, backup strategies, runbooks
@@ -116,7 +116,7 @@ if (decoded.tokenVersion !== (userAuth?.tokenVersion ?? 0)) {
 
 **Findings**:
 - Zod validation on all inputs
-- MongoDB injection prevention (`$` and `.` stripped)
+- Legacy query-operator sanitization (`$` and `.` stripped)
 - SQL/parameterized queries
 - XSS sanitization via DOMPurify
 
@@ -363,7 +363,7 @@ node_modules/
 |---|--------|--------|----------|
 | 1 | Upgrade react-router to latest | 5 min | CRITICAL |
 | 2 | Run npm audit fix | 10 min | HIGH |
-| 3 | Disable demo login in production | 5 min | HIGH |
+| 3 | Demo login endpoint removed in production | 5 min | HIGH |
 | 4 | Add SSRF protection | 2 hours | MEDIUM |
 | 5 | Enable strict email verification | 1 hour | MEDIUM |
 
@@ -568,7 +568,7 @@ node_modules/
 - [ ] **SECURITY CRITICAL**
   - [ ] Upgrade react-router to latest version
   - [ ] Run `npm audit fix` on frontend and backend
-  - [ ] Disable demo login in production (`DEMO_LOGIN_ENABLED=false`)
+  - [ ] Demo login endpoint removed from production source
   - [ ] Set `REQUIRE_EMAIL_VERIFICATION=true`
   - [ ] Verify all environment variables set
 
@@ -684,7 +684,7 @@ for i in {1..25}; do curl -X POST https://api.kayad.com/api/v1/auth/login; done
 2. **Production Configuration**
    - Set `NODE_ENV=production`
    - Set `REQUIRE_EMAIL_VERIFICATION=true`
-   - Disable demo login
+   - Demo login endpoint removed
    - Enable all security headers
 
 ### High Priority (30 days)
@@ -745,7 +745,7 @@ The platform demonstrates strong security architecture with:
 
 ### Input Validation Controls
 - Zod schema validation
-- MongoDB operator stripping
+- Legacy query-operator stripping
 - XSS sanitization (DOMPurify)
 - File type validation (magic bytes)
 - Size limits enforced

@@ -81,7 +81,7 @@ export const getCars = async (req, res) => {
     if (keyword) {
       const trimmed = keyword.trim();
       if (trimmed.length >= 3) {
-        // Use MongoDB text index (fast, index-backed) for 3+ char queries
+        // Use indexed full-text search for 3+ character queries.
         query.$text = { $search: trimmed };
       } else {
         // Short queries: fall back to regex (text index needs full tokens)
@@ -908,7 +908,7 @@ export const getCar = async (req, res) => {
 
     // ── VIEW COUNT (Issue #5) ─────────────────────────────────
     // Use Redis atomic counter to prevent lost updates under concurrency.
-    // A background flush syncs to MongoDB every 60s (see server.js viewFlush).
+    // A background flush syncs Redis counters to the primary database.
     // Falls back to fire-and-forget $inc when Redis is unavailable.
     try {
       const { isRedisConnected } = await import("../utils/cache.js");

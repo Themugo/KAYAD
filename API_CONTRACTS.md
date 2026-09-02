@@ -63,7 +63,7 @@ Response (200): real, populated car data on list; `{ success: true, favorited: t
 **GET `/api/escrow/my`** (requires session)
 Response (200): `{ success: true, data: [...] }` - real, populated deal records (buyer/seller/car/payment).
 
-## Payments (safe/mock mode only - no real-money contract exercised)
+## Payments (real-money contract requires verified provider configuration)
 
 Real payment records are created via `initiatePayment()`, called internally by the bid/inspection flows above - not a standalone public endpoint. In this program's own environment, `NODE_ENV=development` falls back to a real mock payment mode when the real M-Pesa STK push fails (no real credentials available) - this is documented, existing behavior, not something invented for testing.
 

@@ -1,6 +1,6 @@
 // backend/seed.js
 // Run: node seed.js
-// Also exports reseed() for programmatic re-seeding from admin API
+// Explicit CLI provisioning for configured platform owners only.
 
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
@@ -17,7 +17,7 @@ const connectDB = () => {
   initSupabase();
 };
 
-export async function reseed() {
+export async function provisionOwners() {
   if (process.env.SEED_PROVISIONING_ENABLED !== "true") {
     throw new Error("Seed provisioning is disabled. Set SEED_PROVISIONING_ENABLED=true explicitly to provision configured platform owners.");
   }
@@ -112,7 +112,7 @@ const seed = async () => {
   dotenv.config();
   try {
     connectDB();
-    const result = await reseed();
+    const result = await provisionOwners();
     logInfo("KAYAD — SEED COMPLETE", {
       webhost: result.webhost,
       admin: result.admin,

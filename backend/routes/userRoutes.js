@@ -24,7 +24,7 @@ router.get(
     const filter = {};
 
     if (q) {
-      // Use MongoDB text index for better performance
+      // Search is translated by the database compatibility layer.
       filter.$text = { $search: q };
     }
     if (role) filter.role = role;

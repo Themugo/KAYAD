@@ -2,7 +2,7 @@
 //
 // Shared camelCase <-> snake_case field-name translation for the
 // Postgres/Supabase data layer. The app was originally written
-// against MongoDB/Mongoose (camelCase field names); the real
+// against the legacy model API (camelCase field names); the real
 // database uses Postgres snake_case columns, and in a handful of
 // cases the column was given a genuinely different name, not just a
 // different case (e.g. `brand` in the app vs `make` in the schema).

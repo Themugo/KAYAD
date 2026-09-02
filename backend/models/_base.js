@@ -195,7 +195,7 @@ const TABLE_MAP = {
 // FIELD-NAME TRANSLATION LAYER
 //
 // The application code (controllers, models) was originally written
-// against MongoDB/Mongoose and still uses that field-naming
+// against the legacy model API while preserving application field naming
 // convention (camelCase, and several fields that were simply
 // *renamed* along the way — e.g. `brand` vs the real `make` column).
 // The actual database is now Postgres/Supabase with snake_case

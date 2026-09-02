@@ -138,7 +138,3 @@ export const createAdSchema = z.object({
 
 export const updateAdSchema = createAdSchema.partial();
 
-export const reseedSchema = z.object({
-  cars: z.number().int().min(0).max(100).optional(),
-  users: z.number().int().min(0).max(50).optional(),
-});

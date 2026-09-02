@@ -62,7 +62,7 @@ const applyFilters = (query, filters, table) => {
     if (value instanceof Date) { query = query.eq(col, value.toISOString()); continue; }
 
     if (typeof value === 'object' && !Array.isArray(value)) {
-      // Handle MongoDB-style operators
+      // Handle legacy query operators.
       for (const [op, val] of Object.entries(value)) {
         switch (op) {
           case '$eq': case 'eq': query = query.eq(col, val); break;
@@ -232,7 +232,7 @@ export const distinct = async (table, column, filters = {}) => {
 
 export const aggregate = async (table, pipeline = []) => {
   const sb = getSupabase();
-  // Convert MongoDB-style pipeline stages to Supabase queries
+  // Convert legacy pipeline stages to Supabase queries
   // This is a simplified converter — complex pipelines need manual handling
   let filters = {};
   let groupBy = null;

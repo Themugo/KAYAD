@@ -681,21 +681,6 @@ paths:
           description: "Unauthorized"
         "500":
           description: "Internal server error"
-  /admin/reseed:
-    post:
-      tags: ["Admin"]
-      summary: "POST /admin/reseed"
-      description: "Auto-generated: POST /admin/reseed (adminRoutes.js)"
-      operationId: postAdminReseed
-      responses:
-        "200":
-          description: "Success"
-        "400":
-          description: "Bad request"
-        "401":
-          description: "Unauthorized"
-        "500":
-          description: "Internal server error"
   /admin/stats:
     get:
       tags: ["Admin"]

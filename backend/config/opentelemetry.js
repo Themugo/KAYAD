@@ -51,6 +51,8 @@ export const initOpenTelemetry = () => {
         "@opentelemetry/instrumentation-redis": {
           enabled: true,
         },
+        "@opentelemetry/instrumentation-mongodb": { enabled: false },
+        "@opentelemetry/instrumentation-mongoose": { enabled: false },
       })],
       // Span processors
       spanProcessor: new BatchSpanProcessor(

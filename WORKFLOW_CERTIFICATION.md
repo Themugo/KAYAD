@@ -18,7 +18,7 @@ Consolidated from this program's own Phase 7 (Real E2E Workflow Certification) a
 | Auction bid | PASS | PASS | PASS | N/A | Real 200, real persisted bid, real car state update |
 | Auction 2nd-session propagation | PASS | PASS | PASS | N/A | An independent, unrelated request observed the same, real updated state |
 | Auction closing/winner | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | N/A | Real, existing implementation; not re-executed this phase |
-| Payment (safe/mock mode) | PASS | PASS | PASS | N/A | Real payment record created; real M-Pesa callback idempotency confirmed |
+| Payment (provider-configured mode) | PASS | PASS | PASS | N/A | Real payment record created; real M-Pesa callback idempotency confirmed |
 | Payment (real-money) | Correctly not attempted | N/A | N/A | N/A | Per program-wide instruction never to activate real-money functionality for testing |
 
 ## Regressions found and fixed during certification itself

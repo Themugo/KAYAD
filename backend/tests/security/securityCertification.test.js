@@ -66,7 +66,7 @@ const { protect, adminOnly, allowRoles } = await import("../../middleware/auth.j
 const { authorize } = await import("../../middleware/role.js");
 const { csrfProtection } = await import("../../middleware/csrf.js");
 const errorHandler = (await import("../../middleware/errorHandler.js")).default;
-const { updateProfile, demoLogin, register, forgotPassword, resetPassword, verifyEmail } =
+const { updateProfile, register, forgotPassword, resetPassword, verifyEmail } =
   await import("../../controllers/authController.js");
 const { pickAllowed, safeEqual } = await import("../../routes/webhookRoutes.js");
 
@@ -347,50 +347,6 @@ describe("dealer self-approval prevention", () => {
 
 // ─────────────────────────────────────────────────────────────
 // DEMO LOGIN GATE
-// ─────────────────────────────────────────────────────────────
-describe("demo login gate", () => {
-  const ORIGINAL_ENV = { ...process.env };
-  afterEach(() => {
-    process.env = { ...ORIGINAL_ENV };
-  });
-
-  test("production without ENABLE_DEMO_LOGIN → 403", async () => {
-    process.env.NODE_ENV = "production";
-    delete process.env.ENABLE_DEMO_LOGIN;
-    const res = mockRes();
-    await demoLogin({ body: { role: "buyer" } }, res);
-    expect(res.status).toHaveBeenCalledWith(403);
-  });
-
-  test("production with ENABLE_DEMO_LOGIN=true → allowed through to account lookup", async () => {
-    process.env.NODE_ENV = "production";
-    process.env.ENABLE_DEMO_LOGIN = "true";
-    userModelMock.findOne.mockResolvedValue(null); // demo account not seeded
-    const res = mockRes();
-    await demoLogin({ body: { role: "buyer" } }, res);
-    expect(res.status).toHaveBeenCalledWith(404); // reaches lookup, not blocked
-  });
-
-  test("non-production default → allowed through to account lookup", async () => {
-    process.env.NODE_ENV = "development";
-    delete process.env.ENABLE_DEMO_LOGIN;
-    userModelMock.findOne.mockResolvedValue(null);
-    const res = mockRes();
-    await demoLogin({ body: { role: "buyer" } }, res);
-    expect(res.status).toHaveBeenCalledWith(404);
-  });
-
-  test("demo accounts are limited to non-privileged roles", async () => {
-    process.env.NODE_ENV = "development";
-    delete process.env.ENABLE_DEMO_LOGIN;
-    const res = mockRes();
-    await demoLogin({ body: { role: "admin" } }, res);
-    expect(res.status).toHaveBeenCalledWith(400);
-  });
-});
-
-// ─────────────────────────────────────────────────────────────
-// TOKEN STORAGE — reset/verify tokens hashed at rest
 // ─────────────────────────────────────────────────────────────
 describe("single-use token storage", () => {
   beforeEach(() => jest.clearAllMocks());

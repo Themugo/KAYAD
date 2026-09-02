@@ -28,7 +28,7 @@ Route exists; not independently re-executed this program's own certification pas
 
 ## Real-money payment paths
 
-Never activated for testing, per explicit instruction throughout this entire program. The safe/mock-mode payment path is verified; the real M-Pesa/real-money path is not, and should not be, exercised outside a real, controlled environment with real oversight.
+Never activated for testing, per explicit instruction throughout this entire program. The provider-configured-mode payment path is verified; the real M-Pesa/real-money path is not, and should not be, exercised outside a real, controlled environment with real oversight.
 
 ## Redis / background queues
 

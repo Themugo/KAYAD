@@ -60,7 +60,6 @@ import {
   updateSellerSettingsSchema,
   createAdSchema,
   updateAdSchema,
-  reseedSchema,
 } from "../validation/admin.schema.js";
 import {
   teamInviteSchema,
@@ -324,7 +323,6 @@ export {
   updateSellerSettingsSchema,
   createAdSchema,
   updateAdSchema,
-  reseedSchema,
   // Dealer
   teamInviteSchema,
   updateTeamMemberSchema,

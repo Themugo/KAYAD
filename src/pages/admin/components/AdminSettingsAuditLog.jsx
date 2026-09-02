@@ -38,26 +38,3 @@ export default function AdminSettingsAuditLog({ auditLog, setLoading }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <h3 style={{ fontSize: '1rem', marginBottom: 12 }}>System Tools</h3>
-        <button
-          className="btn btn-outline btn-sm"
-          onClick={async () => {
-            if (!window.confirm('This will re-seed the database and may take 10-15 seconds. Continue?')) return;
-            setLoading(true);
-            try {
-              const res = await adminAPI.reseed();
-              toast.success(`Reseeded: ${res.result.webhost.length} webhost, ${res.result.admin.length} admin, ${res.result.demos.length} demos, ${res.result.cars} cars`);
-            } catch (e) {
-              toast.error(e?.response?.data?.message || e.message);
-            } finally {
-              setLoading(false);
-            }
-          }}
-        >
-          Reseed Database
-        </button>
-      </div>
-    </div>
-  );
-}
