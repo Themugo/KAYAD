@@ -30,14 +30,6 @@ spec:
     - protocol: TCP
       port: 5000
   egress:
-  # Allow egress to MongoDB
-  - to:
-    - podSelector:
-        matchLabels:
-          app: supabase
-    ports:
-    - protocol: TCP
-      port: 27017
   # Allow egress to Redis
   - to:
     - podSelector:

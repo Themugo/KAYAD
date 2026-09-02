@@ -7,13 +7,13 @@ services:
     env: node
     region: oregon
     plan: starter
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && npm ci
     startCommand: cd backend && node server.js
     healthCheckPath: /health/live
     autoDeploy: true
     disk:
       name: uploads-staging
-      mountPath: /app/backend/uploads
+      mountPath: /app/uploads
       sizeGB: 1
     envVars:
       - key: NODE_ENV
@@ -112,95 +112,6 @@ services:
       - key: APP_NAME
         value: Kayad Staging
 
-  # Worker service for background jobs (staging)
-  - type: worker
-    name: kayad-worker-staging
-    env: node
-    region: oregon
-    plan: starter
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && node scripts/startWorkers.js
-    envVars:
-      - key: NODE_ENV
-        value: staging
-      - key: SUPABASE_URL
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: SUPABASE_URL
-      - key: SUPABASE_SERVICE_KEY
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: SUPABASE_SERVICE_KEY
-      - key: JWT_SECRET
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: JWT_SECRET
-      - key: REFRESH_TOKEN_SECRET
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: REFRESH_TOKEN_SECRET
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: kayad-redis-staging
-          property: connectionString
-      - key: POSTHOG_API_KEY
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: POSTHOG_API_KEY
-      - key: POSTHOG_HOST
-        value: https://us.i.posthog.com
-      - key: SENTRY_DSN
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: SENTRY_DSN
-      - key: SENDGRID_API_KEY
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: SENDGRID_API_KEY
-      - key: EMAIL_FROM
-        value: staging@kayad.space
-      - key: AT_API_KEY
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: AT_API_KEY
-      - key: AT_USERNAME
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: AT_USERNAME
-      - key: CLOUDINARY_CLOUD_NAME
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: CLOUDINARY_CLOUD_NAME
-      - key: CLOUDINARY_API_KEY
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: CLOUDINARY_API_KEY
-      - key: CLOUDINARY_API_SECRET
-        fromService:
-          type: web
-          name: kayad-backend-staging
-          property: CLOUDINARY_API_SECRET
-      - key: APP_VERSION
-        value: 2.0.0-staging
-      - key: APP_NAME
-        value: Kayad Staging
-
-# Redis instance for staging
-databases:
-  - name: kayad-redis-staging
-    databaseName: kayad_redis_staging
-    user: kayad_staging
-    region: oregon
-    plan: starter
+# Background queue workers are started by the backend worker manager when Redis is configured.
+# A separate worker service is intentionally not declared here to avoid launching a nonexistent
+# scripts/startWorkers.js entrypoint and duplicating workers.

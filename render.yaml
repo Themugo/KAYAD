@@ -12,7 +12,7 @@ services:
     healthCheckPath: /health
     disk:
       name: uploads
-      mountPath: /app/backend/uploads
+      mountPath: /app/uploads
       sizeGB: 5
     envVars:
       - key: NODE_ENV
