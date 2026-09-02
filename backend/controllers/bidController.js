@@ -1,4 +1,3 @@
-import { startSession } from "../utils/supabaseSession.js";
 import crypto from "crypto";
 import User from "../models/User.js";
 import Car from "../models/Car.js";
@@ -201,8 +200,6 @@ export const getAuctionBids = async (req, res) => {
 // 💰 PLACE BID (AUTO-BID READY - Phase 2 Transaction Support)
 // =============================
 export const placeBid = async (req, res) => {
-  const session = await startSession();
-  session.startTransaction();
 
   // Per-car bid lock: serializes concurrent bids on the same auction so
   // the read-validate-write sequence below cannot interleave. Without it
@@ -216,14 +213,10 @@ export const placeBid = async (req, res) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     if (!amount || isNaN(amount)) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Invalid bid amount",
@@ -233,24 +226,18 @@ export const placeBid = async (req, res) => {
     bidLockResource = `auction:bid:${carId}`;
     bidLock = await acquireLock(bidLockResource, 15000);
     if (!bidLock?.acquired) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(409).json({
         success: false,
         message: "Another bid is being processed for this auction. Retry.",
       });
     }
 
-    const car = await Car.findById(carId).session(session);
+    const car = await Car.findById(carId);
     if (!car) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 
     if (car.dealer?.toString() === userId) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "You cannot bid on your own car",
@@ -258,8 +245,6 @@ export const placeBid = async (req, res) => {
     }
 
     if (car.highestBidder?.toString() === userId) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "You are already the highest bidder",
@@ -270,8 +255,6 @@ export const placeBid = async (req, res) => {
     // 🔐 WALLET-LOCK: Bids > KES 5M require KES 50K pre-authorized escrow
     // =============================
     if (car.auctionStatus !== "live") {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Auction not live",
@@ -282,8 +265,6 @@ export const placeBid = async (req, res) => {
     // the close sweep by up to one interval, so the end time itself is
     // the final word on whether bidding is still open.
     if (car.auctionEnd && new Date(car.auctionEnd).getTime() <= Date.now()) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Auction has ended",
@@ -293,8 +274,6 @@ export const placeBid = async (req, res) => {
     // 📱 Require verified phone for bids
     const bidder = await User.findById(userId).select("phone emailVerified phone");
     if (!bidder?.phone || bidder.phone.length < 8) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "A verified phone number is required to place bids. Update your profile.",
@@ -307,7 +286,7 @@ export const placeBid = async (req, res) => {
         buyer: userId,
         amount: { $gte: 50000 },
         status: "held",
-      }).session(session);
+      });
       if (!escrowDeposit) {
         await session.abortTransaction();
         session.endSession();
@@ -327,8 +306,6 @@ export const placeBid = async (req, res) => {
     // 📏 Enforce minimum bid increment (canonical tiers — utils/bidRules.js)
     const minIncrement = getMinIncrement(currentBid);
     if (amount < currentBid + minIncrement) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: `Minimum bid increment is KES ${minIncrement.toLocaleString("en-KE")}. Current bid: KES ${currentBid.toLocaleString("en-KE")}`,
@@ -376,11 +353,9 @@ export const placeBid = async (req, res) => {
       logWarn("Failed to create lead from bid", { error: leadErr.message });
     }
 
-    // Commit the compatibility session only after the canonical atomic
-    // database operation has succeeded. No local/mock payment branch may
-    // mark a bid as paid or advance the auction without M-Pesa confirmation.
-    await session.commitTransaction();
-    session.endSession();
+    // The canonical atomic database operation has succeeded. No local/mock
+    // payment branch may mark a bid as paid or advance the auction without
+    // M-Pesa confirmation.
 
     res.json({
       success: true,
@@ -389,8 +364,6 @@ export const placeBid = async (req, res) => {
       bid: bid,
     });
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     logError("PLACE BID ERROR", err);
     res.status(500).json({ success: false, message: "Bid failed" });
   } finally {

@@ -3,7 +3,7 @@
 // Enterprise payment reconciliation engine.
 // Compares expected vs actual across all financial systems:
 //   M-Pesa → Payments, Payments → Escrow, Payments → Subscriptions,
-//   EscrowVaults, Refunds, Commissions, Payouts, Releases
+//   Escrows, Refunds, Commissions, Payouts, Releases
 // Generates: matched / unmatched / missing / overpaid / underpaid
 // Creates per-record ReconciliationRecord items for drill-down.
 // ─────────────────────────────────────────────────────────────
@@ -81,7 +81,6 @@ export const runReconciliation = async (reportType, timeRange) => {
     }
 
     if (runType("escrow_vault")) {
-      const r = await reconcileEscrowVaults(startTime, endTime, report);
       total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
       matched += r.matched || 0; unmatched += r.unmatched || 0;
       missing += r.missing || 0;
@@ -552,139 +551,6 @@ export const reconcilePaymentSubscription = async (startDate, endDate, report) =
 // =============================
 // 🔄 RECONCILE ESCROW VAULTS
 // =============================
-export const reconcileEscrowVaults = async (startDate, endDate, report) => {
-  try {
-    const vaults = await findAll("escrow_vaults", { filters: {
-      createdAt: { $gte: startDate, $lte: endDate },
-    } });
-
-    let total = vaults.length;
-    let reconciled = 0;
-    let unreconciled = 0;
-    let matched = 0;
-    let unmatched = 0;
-    let missing = 0;
-    let expectedTotal = 0;
-    let actualTotal = 0;
-
-    for (const vault of vaults) {
-      expectedTotal += vault.amount;
-
-      const txn = await findOne("transactions", {
-        escrowId: vault.id,
-        type: "escrow_deposit",
-      });
-
-      if (!txn) {
-        await report.addIssue({
-          type: "vault_balance_mismatch",
-          severity: "high",
-          description: `EscrowVault ${vault.id} has no corresponding transaction record`,
-          transactionId: vault.id,
-          transactionModel: "EscrowVault",
-          amountDifference: vault.amount,
-        });
-        await createRecord(report.id, {
-          source: "escrow_vault",
-          expectedType: "vault_funding",
-          expectedId: vault.id, expectedModel: "EscrowVault",
-          expectedAmount: vault.amount,
-          outcome: "missing",
-          amountDifference: vault.amount,
-          statusExpected: vault.status,
-        });
-        missing++;
-        unreconciled++;
-        continue;
-      }
-
-      actualTotal += txn.amount;
-
-      if (txn.amount !== vault.amount) {
-        const diff = txn.amount - vault.amount;
-        await report.addIssue({
-          type: "vault_balance_mismatch",
-          severity: "high",
-          description: `Vault amount mismatch: Transaction ${txn.amount} vs Vault ${vault.amount}`,
-          transactionId: txn.id,
-          transactionModel: "Transaction",
-          relatedTransactionId: vault.id,
-          relatedTransactionModel: "EscrowVault",
-          amountDifference: Math.abs(diff),
-        });
-        await createRecord(report.id, {
-          source: "escrow_vault",
-          expectedType: "vault_funding",
-          expectedId: vault.id, expectedModel: "EscrowVault",
-          expectedAmount: vault.amount,
-          actualType: "payment",
-          actualId: txn.id, actualModel: "Transaction",
-          actualAmount: txn.amount,
-          outcome: diff > 0 ? "overpaid" : "underpaid",
-          amountDifference: diff,
-        });
-        unreconciled++;
-        continue;
-      }
-
-      if (vault.status === "awaiting_payment" && txn.status === "success") {
-        await report.addIssue({
-          type: "orphan_transaction",
-          severity: "medium",
-          description: `Transaction paid but vault still awaiting_payment`,
-          transactionId: txn.id,
-          transactionModel: "Transaction",
-          relatedTransactionId: vault.id,
-          relatedTransactionModel: "EscrowVault",
-          amountDifference: 0,
-        });
-        await createRecord(report.id, {
-          source: "escrow_vault",
-          expectedType: "vault_funding",
-          expectedId: vault.id, expectedModel: "EscrowVault",
-          expectedAmount: vault.amount,
-          actualType: "payment",
-          actualId: txn.id, actualModel: "Transaction",
-          actualAmount: txn.amount,
-          outcome: "unmatched",
-          statusExpected: vault.status,
-          statusActual: txn.status,
-        });
-        unmatched++;
-        unreconciled++;
-        continue;
-      }
-
-      // Check status flow consistency
-      const releaseTxn = await findOne("transactions", {
-        escrowId: vault.id,
-        type: "escrow_release",
-      });
-
-      if (vault.status === "released" && !releaseTxn) {
-        await report.addIssue({
-          type: "missing_payout",
-          severity: "high",
-          description: `Vault released but no release transaction found`,
-          transactionId: vault.id,
-          transactionModel: "EscrowVault",
-          amountDifference: vault.amount,
-        });
-        missing++;
-        unreconciled++;
-        continue;
-      }
-
-      matched++;
-      reconciled++;
-    }
-
-    return { total, reconciled, unreconciled, matched, unmatched, missing, expectedTotal, actualTotal };
-  } catch (err) {
-    logError("EscrowVault reconciliation failed", err);
-    return { total: 0, reconciled: 0, unreconciled: 0, matched: 0, unmatched: 0, missing: 0, expectedTotal: 0, actualTotal: 0 };
-  }
-};
 
 // =============================
 // 🔄 RECONCILE REFUNDS
@@ -972,11 +838,7 @@ export const reconcileReleases = async (startDate, endDate, report) => {
       releasedAt: { $gte: startDate, $lte: endDate },
     } });
 
-    const vaults = await findAll("escrow_vaults", { filters: {
-      releasedAt: { $gte: startDate, $lte: endDate },
-    } });
-
-    let total = escrows.length + vaults.length;
+    let total = escrows.length;
     let reconciled = 0;
     let unreconciled = 0;
     let matched = 0;
@@ -1031,37 +893,7 @@ export const reconcileReleases = async (startDate, endDate, report) => {
       reconciled++;
     }
 
-    for (const vault of vaults) {
-      const txn = await findOne("transactions", {
-        escrowId: vault.id,
-        type: "escrow_release",
-      });
 
-      if (!txn) {
-        unmatched++;
-        await report.addIssue({
-          type: "release_mismatch",
-          severity: "high",
-          description: `EscrowVault released but no release transaction: ${vault.id}`,
-          transactionId: vault.id,
-          transactionModel: "EscrowVault",
-          amountDifference: vault.amount,
-        });
-        await createRecord(report.id, {
-          source: "release",
-          expectedType: "vault_release",
-          expectedId: vault.id, expectedModel: "EscrowVault",
-          expectedAmount: vault.amount,
-          outcome: "missing",
-          statusExpected: vault.status,
-        });
-        unreconciled++;
-        continue;
-      }
-
-      matched++;
-      reconciled++;
-    }
 
     return { total, reconciled, unreconciled, matched, unmatched };
   } catch (err) {
@@ -1483,17 +1315,6 @@ export const calculateFinancialIntegrityScore = async (startDate, endDate, repor
       });
     }
 
-    const vaultBalance = await compareVaultBalances(startDate, endDate);
-    if (vaultBalance.mismatch > 0) {
-      score -= 10;
-      await report.addIssue({
-        type: "vault_balance_mismatch",
-        severity: "medium",
-        description: `Vault balance mismatch: ${vaultBalance.mismatch}`,
-        amountDifference: vaultBalance.mismatch,
-      });
-    }
-
     return Math.max(0, score);
   } catch (err) {
     logError("Calculate financial integrity score failed", err);
@@ -1603,22 +1424,6 @@ export const compareEscrowBalances = async (startDate, endDate) => {
 // =============================
 // 📊 COMPARE VAULT BALANCES
 // =============================
-export const compareVaultBalances = async (startDate, endDate) => {
-  try {
-    const vaultResult = await aggregate("escrow_vaults", [{ $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $in: ["escrow_locked", "inspection_pending", "inspection_complete", "otp_sent"] } } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },]);
-    const vaultTotal = vaultResult[0]?.total || 0;
-
-    const txnResult = await aggregate("transactions", [{ $match: { createdAt: { $gte: startDate, $lte: endDate }, type: "escrow_deposit", status: "success" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },]);
-    const txnTotal = txnResult[0]?.total || 0;
-
-    return { vaultTotal, txnTotal, mismatch: Math.abs(vaultTotal - txnTotal) };
-  } catch (err) {
-    logError("Compare vault balances failed", err);
-    return { vaultTotal: 0, txnTotal: 0, mismatch: 0 };
-  }
-};
 
 // =============================
 // 📝 CREATE RECONCILIATION RECORD

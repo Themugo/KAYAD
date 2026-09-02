@@ -14,7 +14,6 @@ import {
   createEscrowSchema,
   escrowActionSchema,
   releaseEscrowSchema,
-  escrowVaultWebhookSchema,
   releaseOtpSchema,
 } from "../validation/escrow.schema.js";
 import {
@@ -288,7 +287,6 @@ export {
   createEscrowSchema,
   escrowActionSchema,
   releaseEscrowSchema,
-  escrowVaultWebhookSchema,
   releaseOtpSchema,
   // Chat
   createChatSchema,

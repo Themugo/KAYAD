@@ -17,11 +17,6 @@ export const releaseEscrowSchema = z.object({
     .regex(/^\d{6}$/, "OTP must contain only digits"),
 });
 
-export const escrowVaultWebhookSchema = z.object({
-  bankRef: z.string().min(1, "bankRef is required"),
-  amount: z.number().positive(),
-});
-
 export const releaseOtpSchema = z.object({
   otp: z
     .string()

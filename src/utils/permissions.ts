@@ -114,7 +114,6 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/auctions":      PERM.MANAGE_AUCTIONS,
   "/admin/bids":          PERM.MANAGE_AUCTIONS,
   "/admin/escrows":       PERM.MANAGE_ESCROW,
-  "/admin/escrow-vault":  PERM.MANAGE_ESCROW,
   "/admin/transactions":  PERM.MANAGE_FINANCE,
   "/admin/reviews":       PERM.MANAGE_MODERATION,
   "/admin/chats":         PERM.MANAGE_MODERATION,

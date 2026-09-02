@@ -14,7 +14,6 @@ const CSRF_EXEMPT_PATHS = [
   "/api/payments/b2c/callback",
   "/api/payments/b2c/timeout",
   "/api/bids/mpesa/callback",
-  "/api/escrow-vault/webhook/",
   "/api/sms-bidding/webhook/",
   "/api/webhooks/",
 ];

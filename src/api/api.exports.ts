@@ -122,21 +122,6 @@ export const escrowAPI = {
   close:          (id: string)          => api.post(`/escrow/${id}/close`).then(unwrap),
 };
 
-// ── ESCROW VAULT ──────────────────────────────────────
-export const escrowVaultAPI = {
-  init:             (carId: string)          => api.post(`/escrow-vault/${carId}/init`).then(unwrap),
-  my:               ()               => api.get('/escrow-vault/my').then(unwrap),
-  get:              (id: string)             => api.get(`/escrow-vault/${id}`).then(unwrap),
-  forCar:           (carId: string)          => api.get(`/escrow-vault/car/${carId}`).then(unwrap),
-  markInspection:   (id: string)             => api.post(`/escrow-vault/${id}/inspection-complete`).then(unwrap),
-  requestOtp:       (id: string)             => api.post(`/escrow-vault/${id}/request-otp`).then(unwrap),
-  release:          (id: string, otp: string)        => api.post(`/escrow-vault/${id}/release`, { otp }).then(unwrap),
-  webhookFunded:    (id: string, body: any)       => api.post(`/escrow-vault/webhook/${id}/funded`, body).then(unwrap),
-  adminAll:         ()               => api.get('/escrow-vault/admin/all').then(unwrap),
-  adminConfirm:     (id: string)             => api.post(`/escrow-vault/${id}/admin-confirm-funding`).then(unwrap),
-  adminRefund:      (id: string)             => api.post(`/escrow-vault/${id}/admin-refund`).then(unwrap),
-};
-
 // ── DEALER ────────────────────────────────────────────
 export const dealerAPI = {
   earnings:   (params: any) => api.get('/dealer/earnings', { params }).then(unwrap),

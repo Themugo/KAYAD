@@ -1,6 +1,5 @@
 // backend/controllers/favoriteController.js
 // Uses the Favorite collection (separate model — no embedded User.favorites needed)
-import { startSession } from "../utils/supabaseSession.js";
 import Favorite from "../models/Favorite.js";
 import Car from "../models/Car.js";
 import { logError } from "../infrastructure/logging/index.js";
@@ -57,17 +56,13 @@ export const getFavorites = async (req, res) => {
   }
 };
 
-// POST /api/favorites/:carId (Phase 2 Transaction Support)
+// POST /api/favorites/:carId
 export const addFavorite = async (req, res) => {
-  const session = await startSession();
-  session.startTransaction();
 
   try {
     const { carId } = req.params;
-    const car = await Car.findById(carId).select("title price images brand").session(session);
+    const car = await Car.findById(carId).select("title price images brand");
     if (!car) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 
@@ -88,13 +83,9 @@ export const addFavorite = async (req, res) => {
 
     await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
 
-    await session.commitTransaction();
-    session.endSession();
 
     return res.json({ success: true, favorited: true, notifyOnPriceDrop: false, message: "Added to favourites" });
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     if (err.code === 11000) return res.json({ success: true, favorited: true, message: "Already in favourites" });
     logError("❌ addFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to add favourite" });
@@ -120,10 +111,8 @@ export const updateFavoritePriceAlert = async (req, res) => {
   }
 };
 
-// DELETE /api/favorites/:carId (Phase 2 Transaction Support)
+// DELETE /api/favorites/:carId
 export const removeFavorite = async (req, res) => {
-  const session = await startSession();
-  session.startTransaction();
 
   try {
     const { carId } = req.params;
@@ -131,32 +120,24 @@ export const removeFavorite = async (req, res) => {
     if (deleted) {
       await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } });
     }
-    await session.commitTransaction();
-    session.endSession();
     res.json({ success: true, favorited: false, message: "Removed from favourites" });
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     logError("❌ removeFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to remove favourite" });
   }
 };
 
-// POST /api/favorites/:carId/toggle (Phase 2 Transaction Support)
+// POST /api/favorites/:carId/toggle
 export const toggleFavorite = async (req, res) => {
-  const session = await startSession();
-  session.startTransaction();
 
   try {
     const { carId } = req.params;
-    const car = await Car.findById(carId).select("title price images brand").session(session);
+    const car = await Car.findById(carId).select("title price images brand");
     if (!car) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 
-    const existing = await Favorite.findOne({ user: req.user.id, car: carId }).session(session);
+    const existing = await Favorite.findOne({ user: req.user.id, car: carId });
 
     if (existing) {
       await existing.deleteOne({ session });
@@ -178,13 +159,9 @@ export const toggleFavorite = async (req, res) => {
     }], { session });
     await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
 
-    await session.commitTransaction();
-    session.endSession();
 
     return res.json({ success: true, favorited: true, notifyOnPriceDrop: false, message: "Added to favourites" });
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     logError("❌ toggleFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to toggle favourite" });
   }

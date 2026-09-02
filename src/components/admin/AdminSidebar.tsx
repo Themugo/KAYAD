@@ -3,7 +3,6 @@ import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
-  UserCheck, Crown, Shield, Star, Lock as VaultIcon, ChevronLeft, PanelRight,
   Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
   Radio,
 } from 'lucide-react';
@@ -28,7 +27,6 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/auctions', icon: Activity, label: 'Auctions' },
   { to: '/admin/bids', icon: Gavel, label: 'Bids' },
   { to: '/admin/escrows', icon: Lock, label: 'Escrows' },
-  { to: '/admin/escrow-vault', icon: VaultIcon, label: 'Escrow Vaults' },
   { to: '/admin/reviews', icon: Star, label: 'Reviews' },
   { to: '/admin/referrals', icon: Gift, label: 'Referrals' },
   { to: '/admin/chats', icon: MessageSquare, label: 'Chats' },

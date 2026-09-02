@@ -16,9 +16,7 @@ import {
   detectUnreleasedEscrows,
   compareLedgerVsGateway,
   compareEscrowBalances,
-  compareVaultBalances,
   reconcileExpectedVsReceived,
-  reconcileEscrowVaults,
   reconcileReleases,
 } from "../services/reconciliationService.js";
 import {
@@ -73,7 +71,6 @@ export const getReconciliationDashboard = async (req, res) => {
 
     const ledgerGateway = await compareLedgerVsGateway(startDate, endDate);
     const escrowBalances = await compareEscrowBalances(startDate, endDate);
-    const vaultBalances = await compareVaultBalances(startDate, endDate);
 
     // Directional totals from reports
     const directionalAgg = await ReconciliationReport.aggregate([
@@ -110,8 +107,7 @@ export const getReconciliationDashboard = async (req, res) => {
         },
         ledgerGateway,
         escrowBalances,
-        vaultBalances,
-        cronStatus,
+          cronStatus,
       },
     });
   } catch (err) {

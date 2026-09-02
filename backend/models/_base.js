@@ -30,7 +30,7 @@ const TABLE_MAP = {
   ReconciliationRecord: "reconciliation_records",
   ReconciliationReport: "reconciliation_reports",
   EscrowAnomaly: "escrow_anomalies", EscrowRiskScore: "escrow_risk_scores",
-  EscrowAudit: "escrow_audits", EscrowVault: "escrow_vaults",
+  EscrowAudit: "escrow_audits",
   AuctionIntegrityFlag: "auction_integrity_flags",
   AuctionRiskProfile: "auction_risk_profiles",
   MpesaTransaction: "mpesa_transactions", SmsBidder: "sms_bidders",
@@ -373,23 +373,6 @@ function wrapDoc(doc, tableName, sb) {
       },
       writable: true, configurable: true,
     },
-    // Added (Final Integration): findByIdAndUpdate/create/etc. are
-    // async and return the resolved document directly (not a
-    // chainable query builder like find()), but real callers in this
-    // codebase (favoriteController.js, reviewController.js) chain
-    // `.session(session)` onto that resolved result anyway, mirroring
-    // Mongoose's own chainable-query convention. Reproduced the exact
-    // real crash directly ("...session is not a function") tracing
-    // the real favorites-toggle endpoint end-to-end. Since this
-    // project's transaction session object is already a documented
-    // no-op stub (no real multi-statement atomicity is implemented -
-    // see utils/supabaseSession.js), accepting and ignoring `.session()`
-    // here is consistent with the rest of this compatibility layer,
-    // not a new behavior being invented.
-    session: {
-      value: function () { return this; },
-      writable: true, configurable: true,
-    },
     // Generic Mongoose-style instance method used by disputeController.js
     // (and available to any other model) — appends a timestamped entry
     // to an in-memory `timeline` array. It does NOT save on its own;
@@ -538,9 +521,6 @@ function createQuery(tableName) {
       return this._executor().finally(handler);
     },
 
-    session(_session) {
-      return this;
-    },
   };
 }
 

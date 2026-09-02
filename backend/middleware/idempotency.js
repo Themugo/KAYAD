@@ -38,13 +38,6 @@ const extractOperationType = (path) => {
   if (path.includes("/escrow") && path.includes("/refund")) return "escrow_refund";
   if (path.includes("/escrow") && path.includes("/confirm")) return "escrow_confirm_delivery";
   if (path.includes("/escrow") && path.includes("/dispute")) return "escrow_dispute";
-  if (path.includes("/escrow-vault") && path.includes("/release")) return "escrow_vault_release";
-  if (path.includes("/escrow-vault") && path.includes("/funded")) return "escrow_vault_funded";
-  if (path.includes("/escrow-vault") && path.includes("/refund")) return "escrow_vault_refund";
-  if (path.includes("/escrow-vault") && path.includes("/init")) return "escrow_vault_init";
-  if (path.includes("/escrow-vault") && path.includes("/inspection-complete")) return "escrow_vault_inspection";
-  if (path.includes("/escrow-vault") && path.includes("/request-otp")) return "escrow_vault_request_otp";
-  if (path.includes("/escrow-vault") && path.includes("/admin-confirm-funding")) return "escrow_vault_admin_confirm";
   if (path.includes("/bid")) return "bid";
   if (path.includes("/auction")) return "auction_end";
   if (path.includes("/verification")) {

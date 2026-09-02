@@ -225,7 +225,6 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/users':          ['superadmin', 'admin', 'technical_support', 'hr', 'moderator'],
   '/admin/transactions':   ['superadmin', 'admin', 'accounts', 'escrow_officer'],
   '/admin/escrows':        ['superadmin', 'admin', 'accounts', 'escrow_officer'],
-  '/admin/escrow-vault':   ['superadmin', 'admin', 'accounts', 'escrow_officer'],
   '/admin/ads':            ['superadmin', 'admin', 'marketing', 'ad_manager'],
   '/admin/moderation':     ['superadmin', 'admin', 'moderator'],
   '/admin/cars':           ['superadmin', 'admin', 'moderator', 'technical_support'],
