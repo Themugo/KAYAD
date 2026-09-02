@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.22.2'
           cache: 'npm'
 
       - name: Install dependencies
@@ -43,14 +43,12 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      - name: Build for production (without secrets - preview mode)
-        if: steps.secrets-check.outputs.secrets_status == 'missing'
+      - name: Require production frontend secrets
+        if: steps.secrets-check.outputs.secrets_status != 'configured'
         run: |
-          echo "Building in preview mode (secrets not configured)..."
-          npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'placeholder-key' }}
+          echo "ERROR: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are required for a production build."
+          echo "Configure both GitHub Actions secrets before merging/deploying to main."
+          exit 1
 
       - name: Validate dist output
         run: |
@@ -130,7 +128,7 @@ jobs:
         if: steps.vercel-check.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.22.2'
           cache: 'npm'
 
       - name: Install Vercel CLI
@@ -158,12 +156,12 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      - name: Build Project for Production (without secrets)
-        if: steps.vercel-check.outputs.configured == 'true' && steps.secrets-check.outputs.secrets_status == 'missing'
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VITE_SUPABASE_URL: https://placeholder.supabase.co
-          VITE_SUPABASE_ANON_KEY: placeholder-key
+      - name: Require production frontend secrets
+        if: steps.vercel-check.outputs.configured == 'true' && steps.secrets-check.outputs.secrets_status != 'configured'
+        run: |
+          echo "ERROR: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are required for a production Vercel build."
+          echo "Configure both GitHub Actions secrets before enabling automatic production deployment."
+          exit 1
 
       - name: Deploy to Vercel (Production)
         if: steps.vercel-check.outputs.configured == 'true'
