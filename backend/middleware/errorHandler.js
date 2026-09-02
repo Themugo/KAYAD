@@ -35,9 +35,9 @@ const errorHandler = (err, req, res, next) => {
   // Never leak internal error messages on 5xx — a Mongoose/Supabase/Redis
   // error message can disclose schema names, connection details, or query
   // internals. 4xx messages are intentional client feedback and pass through.
-  const isProd = process.env.NODE_ENV === "production";
+  const isNonProduction = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
   const clientMessage =
-    statusCode >= 500 ? (isProd ? "Internal server error" : err.message || "Server Error") : err.message || "Error";
+    statusCode >= 500 ? (isNonProduction ? err.message || "Server Error" : "Internal server error") : err.message || "Error";
 
   res.status(statusCode).json({
     success: false,
@@ -46,11 +46,11 @@ const errorHandler = (err, req, res, next) => {
     ...(err.details && { details: err.details }),
     // M-8 FIX: Default to production behavior (no stack traces) when NODE_ENV is unset.
     // Previously the default was "development", which would leak stack traces in production.
-    ...(isProd ? {} : {
+    ...(isNonProduction ? {
       stack: err.stack,
       path: req.originalUrl,
       method: req.method,
-    }),
+    } : {}),
   });
 };
 

@@ -44,6 +44,11 @@ const ALWAYS_REQUIRED_VARS = [
 const PRODUCTION_REQUIRED_VARS = [
   { key: "FRONTEND_URL", desc: "Public frontend origin (CORS, email links)" },
   { key: "BACKEND_URL", desc: "Public backend origin (payment callbacks)" },
+  { key: "SUPABASE_URL", desc: "Supabase project URL" },
+  { key: "SUPABASE_SERVICE_KEY", desc: "Supabase service-role key" },
+  { key: "JWT_SECRET", desc: "JWT signing secret" },
+  { key: "REFRESH_TOKEN_SECRET", desc: "Refresh-token signing secret" },
+  { key: "SESSION_SECRET", desc: "Express session secret" },
 ];
 
 const FEATURE_GROUPS = [
@@ -109,6 +114,34 @@ export const validateEnv = (opts = { silent: false }) => {
     }
   }
 
+  // ─── PRODUCTION SECRET/URL QUALITY CHECKS ───────────────────
+  if (process.env.NODE_ENV === "production") {
+    const secretKeys = ["JWT_SECRET", "REFRESH_TOKEN_SECRET", "SESSION_SECRET"];
+    for (const key of secretKeys) {
+      const value = process.env[key];
+      if (value && value.length < 32) {
+        console.error(`  ❌ ${key} must be at least 32 characters in production`);
+        hasError = true;
+      }
+    }
+
+    for (const key of ["FRONTEND_URL", "BACKEND_URL"]) {
+      const value = process.env[key];
+      if (value) {
+        try {
+          const url = new URL(value);
+          if (url.protocol !== "https:") {
+            console.error(`  ❌ ${key} must use HTTPS in production`);
+            hasError = true;
+          }
+        } catch {
+          console.error(`  ❌ ${key} must be a valid absolute URL`);
+          hasError = true;
+        }
+      }
+    }
+  }
+
   // ─── PRODUCTION-ONLY REQUIRED ────────────────────────────────
   if (process.env.NODE_ENV === "production") {
     for (const { key, desc } of PRODUCTION_REQUIRED_VARS) {
@@ -119,7 +152,10 @@ export const validateEnv = (opts = { silent: false }) => {
     }
   }
 
-  // ─── WARN ABOUT MISSING SECRETS (never fail) ────────────────
+  // ─── WARN ABOUT MISSING SECRETS ─────────────────────────────
+  // In production, the core secrets above are hard requirements and are
+  // validated before the HTTP server starts. Development/test may continue
+  // with explicit warnings so local setup remains practical.
   warnMissingSecrets();
 
   // ─── FEATURE GROUPS (warn if one var is set but others missing) ──

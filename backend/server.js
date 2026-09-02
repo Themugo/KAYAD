@@ -194,8 +194,10 @@ initOpenTelemetry();
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
-const NODE_ENV = process.env.NODE_ENV || "development";
-const FRONTEND = process.env.FRONTEND_URL || "http://localhost:3000";
+const NODE_ENV = process.env.NODE_ENV || "production";
+const IS_DEVELOPMENT = NODE_ENV === "development";
+const IS_TEST = NODE_ENV === "test";
+const FRONTEND = process.env.FRONTEND_URL || (IS_DEVELOPMENT ? "http://localhost:3000" : "");
 const parseOriginHostname = (origin) => {
   try {
     return new URL(origin).hostname;
@@ -245,7 +247,7 @@ app.use(
         upgradeInsecureRequests: [],
       },
       // Enable CSP report-only mode in development for testing
-      reportOnly: NODE_ENV === "development",
+      reportOnly: IS_DEVELOPMENT || IS_TEST,
     },
     hsts: {
       maxAge: 31536000, // 1 year
@@ -316,7 +318,7 @@ const allowedOrigins = [
     .map((v) => v.trim())
     .filter(Boolean),
   // Add specific Vercel deployment URLs (not wildcard)
-  ...(process.env.NODE_ENV === "production"
+  ...(!IS_DEVELOPMENT && !IS_TEST
     ? ["https://kayad-motors.vercel.app", "https://kayad-motors-themugos-projects.vercel.app"]
     : []),
   // Add custom domain if configured
@@ -335,12 +337,12 @@ app.use(
       // In production, only allow non-origin requests (curl, server-to-server) when
       // they don't have credentials. Browser requests always have an Origin header.
       if (!origin) {
-        if (NODE_ENV === "production") return cb(null, false);
+        if (!IS_DEVELOPMENT && !IS_TEST) return cb(null, false);
         return cb(null, true);
       }
       
       // Allow all origins in development
-      if (NODE_ENV === "development") return cb(null, true);
+      if (IS_DEVELOPMENT || IS_TEST) return cb(null, true);
       
       // Check against explicit allowed origins list
       if (allowedOrigins.includes(origin)) return cb(null, true);
@@ -349,8 +351,8 @@ app.use(
       if (vercelPattern.test(origin)) return cb(null, true);
       
       // Allow localhost with specific ports only in non-production
-      if (NODE_ENV !== "production" && /^https?:\/\/localhost(:3000|:5173|:8080)?$/.test(origin)) {
-        return cb(null, true);
+      if (IS_DEVELOPMENT || IS_TEST) {
+        if (/^https?:\/\/localhost(:3000|:5173|:8080)?$/.test(origin)) return cb(null, true);
       }
       
       logWarn("CORS blocked", { origin, message: "Origin not in allowed list" });
@@ -455,8 +457,8 @@ app.get("/metrics", protect, adminOnly, (req, res) => {
 });
 
 // ─── API DOCS ─────────────────────────────────────────────────
-if (NODE_ENV !== "production") {
-  // Open access in development
+if (IS_DEVELOPMENT || IS_TEST) {
+  // Open access only in explicitly non-production environments
   app.use(
     "/api-docs",
     swaggerUi.serve,
@@ -493,12 +495,12 @@ const io = new Server(server, {
     origin: (origin, cb) => {
       // M-6 FIX: Same null-origin fix for Socket.IO.
       if (!origin) {
-        if (NODE_ENV === "production") return cb(null, false);
+        if (!IS_DEVELOPMENT && !IS_TEST) return cb(null, false);
         return cb(null, true);
       }
       
       // Allow all origins in development
-      if (NODE_ENV === "development") return cb(null, true);
+      if (IS_DEVELOPMENT || IS_TEST) return cb(null, true);
       
       // Check against explicit allowed origins list
       if (allowedOrigins.includes(origin)) return cb(null, true);
@@ -507,8 +509,8 @@ const io = new Server(server, {
       if (vercelPattern.test(origin)) return cb(null, true);
       
       // Allow localhost with specific ports only in non-production
-      if (NODE_ENV !== "production" && /^https?:\/\/localhost(:3000|:5173|:8080)?$/.test(origin)) {
-        return cb(null, true);
+      if (IS_DEVELOPMENT || IS_TEST) {
+        if (/^https?:\/\/localhost(:3000|:5173|:8080)?$/.test(origin)) return cb(null, true);
       }
       
       logWarn("Socket CORS blocked", { origin, message: "Origin not in allowed list" });
