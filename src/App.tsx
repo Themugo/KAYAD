@@ -7,7 +7,7 @@ import CompareModal from './components/CompareModal';
 import AuthModal from './components/AuthModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 
-import { getCars, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
+import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Vehicle, UserProfile } from './types';
@@ -117,6 +117,7 @@ function AppInner() {
   // Modal Trigger States
   const [quickViewVehicle, setQuickViewVehicle] = useState<Vehicle | null>(null);
   const [invalidVehicleId, setInvalidVehicleId] = useState<string | null>(null);
+  const resolvedVehicleIds = React.useRef<Set<string>>(new Set());
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
@@ -124,22 +125,38 @@ function AppInner() {
 
   // Central Navigation Handler: Opens Vehicle Details & Updates URL
   const handleOpenVehicleDetails = useCallback((vehicleOrId: Vehicle | string) => {
-    if (typeof vehicleOrId === 'string') {
-      const found = vehicles.find((v) => v.id === vehicleOrId);
-      if (found) {
-        setQuickViewVehicle(found);
-        setInvalidVehicleId(null);
-        setVehicleDetailUrl(found.id);
-      } else {
-        setQuickViewVehicle(null);
-        setInvalidVehicleId(vehicleOrId);
-        setVehicleDetailUrl(vehicleOrId);
-      }
-    } else {
+    if (typeof vehicleOrId !== 'string') {
       setQuickViewVehicle(vehicleOrId);
       setInvalidVehicleId(null);
       setVehicleDetailUrl(vehicleOrId.id);
+      return;
     }
+
+    const found = vehicles.find((v) => v.id === vehicleOrId);
+    if (found) {
+      setQuickViewVehicle(found);
+      setInvalidVehicleId(null);
+      setVehicleDetailUrl(found.id);
+      return;
+    }
+
+    // A valid vehicle can be outside the currently loaded inventory slice.
+    // Resolve the ID from the authoritative backend before declaring it missing.
+    setVehicleDetailUrl(vehicleOrId);
+    setQuickViewVehicle(null);
+    setInvalidVehicleId(null);
+    void getCarById(vehicleOrId).then((car) => {
+      resolvedVehicleIds.current.add(vehicleOrId);
+      if (car) {
+        setQuickViewVehicle(mapBackendCarToVehicle(car));
+        setInvalidVehicleId(null);
+      } else {
+        setInvalidVehicleId(vehicleOrId);
+      }
+    }).catch(() => {
+      resolvedVehicleIds.current.add(vehicleOrId);
+      setInvalidVehicleId(vehicleOrId);
+    });
   }, [vehicles]);
 
   // Central Close Handler: Clears Vehicle Details & Removes URL Param
@@ -151,27 +168,49 @@ function AppInner() {
 
   // Listen for initial URL vehicle parameter and popstate (browser back/forward)
   useEffect(() => {
+    let cancelled = false;
+
     const handleUrlSync = () => {
       const urlVehicleId = getVehicleIdFromUrl();
-      if (urlVehicleId) {
-        const found = vehicles.find((v) => v.id === urlVehicleId);
-        if (found) {
-          setQuickViewVehicle(found);
-          setInvalidVehicleId(null);
-        } else {
-          setQuickViewVehicle(null);
-          setInvalidVehicleId(urlVehicleId);
-        }
-      } else {
+      if (!urlVehicleId) {
         setQuickViewVehicle(null);
         setInvalidVehicleId(null);
+        return;
       }
+
+      const found = vehicles.find((v) => v.id === urlVehicleId);
+      if (found) {
+        setQuickViewVehicle(found);
+        setInvalidVehicleId(null);
+        return;
+      }
+
+      // Browser refreshes and shared URLs must resolve against the backend,
+      // not only the first inventory page currently held in memory.
+      setQuickViewVehicle(null);
+      setInvalidVehicleId(null);
+      if (resolvedVehicleIds.current.has(urlVehicleId)) return;
+
+      resolvedVehicleIds.current.add(urlVehicleId);
+      void getCarById(urlVehicleId).then((car) => {
+        if (cancelled) return;
+        if (car) {
+          setQuickViewVehicle(mapBackendCarToVehicle(car));
+          setInvalidVehicleId(null);
+        } else {
+          setInvalidVehicleId(urlVehicleId);
+        }
+      }).catch(() => {
+        if (!cancelled) setInvalidVehicleId(urlVehicleId);
+      });
     };
 
     handleUrlSync();
-
     window.addEventListener('popstate', handleUrlSync);
-    return () => window.removeEventListener('popstate', handleUrlSync);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('popstate', handleUrlSync);
+    };
   }, [vehicles]);
 
   // Toggle Save

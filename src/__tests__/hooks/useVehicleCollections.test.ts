@@ -6,7 +6,7 @@ import { Vehicle } from '../../types';
 /**
  * KAYAD Phase 1 (architecture hardening) - first coverage for this
  * hook, extracted verbatim from App.tsx. Verifies the moved logic
- * behaves identically to what it did inline (default saved IDs,
+ * preserves the real collection contract (empty initial state,
  * toggle add/remove, the existing max-4 compare limit, and that the
  * derived lists correctly filter the passed-in vehicle array).
  */
@@ -45,9 +45,9 @@ function makeVehicle(id: string): Vehicle {
 }
 
 describe('useVehicleCollections', () => {
-  it('starts with the same default saved vehicle IDs the inline App.tsx state used', () => {
+  it('starts with an empty saved collection and no seeded vehicle IDs', () => {
     const { result } = renderHook(() => useVehicleCollections([]));
-    expect(result.current.savedVehicles).toEqual(['v1', 'v2']);
+    expect(result.current.savedVehicles).toEqual([]);
     expect(result.current.comparedVehicles).toEqual([]);
   });
 
@@ -83,8 +83,8 @@ describe('useVehicleCollections', () => {
     const vehicles = [makeVehicle('v1'), makeVehicle('v2'), makeVehicle('v9')];
     const { result } = renderHook(() => useVehicleCollections(vehicles));
 
-    // Default saved IDs are v1/v2 - both present in this vehicles array
-    expect(result.current.savedVehiclesList.map((v) => v.id)).toEqual(['v1', 'v2']);
+    // No seeded/demo IDs are present, so the derived list starts empty.
+    expect(result.current.savedVehiclesList).toEqual([]);
 
     act(() => result.current.handleToggleCompare('v9'));
     expect(result.current.comparedVehiclesList.map((v) => v.id)).toEqual(['v9']);
@@ -100,7 +100,7 @@ describe('useVehicleCollections', () => {
 describe('useVehicleCollections - authenticated path (real favorites API, Phase 2)', () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it('fetches real favorites on mount when a userId is provided, replacing the local default', async () => {
+  it('fetches real favorites on mount when a userId is provided', async () => {
     global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -173,13 +173,34 @@ describe('useVehicleCollections - authenticated path (real favorites API, Phase 
     await waitFor(() => expect(result.current.favoritesError).toBeTruthy());
   });
 
-  it('a fetch failure on mount does not clear an already-known saved list', async () => {
+  it('a fetch failure on mount does not invent a fabricated local saved list', async () => {
     global.fetch = vi.fn().mockRejectedValueOnce(new TypeError('Failed to fetch'));
 
     const { result } = renderHook(() => useVehicleCollections([], 'user-123'));
 
     await waitFor(() => expect(result.current.favoritesError).toBeTruthy());
-    // Default local list is preserved, not wiped out by the failure
-    expect(result.current.savedVehicles).toEqual(['v1', 'v2']);
+    expect(result.current.savedVehicles).toEqual([]);
+  });
+
+  it('clears the authenticated collection at the logout boundary', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        favorites: [{ id: 'real-1' }],
+        total: 1,
+        pagination: { page: 1, limit: 50, total: 1, pages: 1 },
+      }),
+    });
+
+    const { result, rerender } = renderHook(
+      ({ userId }) => useVehicleCollections([], userId),
+      { initialProps: { userId: 'user-123' as string | null } },
+    );
+
+    await waitFor(() => expect(result.current.savedVehicles).toEqual(['real-1']));
+    rerender({ userId: null });
+    expect(result.current.savedVehicles).toEqual([]);
   });
 });

@@ -23,7 +23,7 @@ import { getFavorites, toggleFavorite, FavoriteApiError } from '../services/favo
  *   favoritesError), not silently swallowed, since a logged-in user
  *   reasonably expects their real saved list to load.
  * - Logged out: local-only state (the original, pre-Phase-2 behavior,
- *   starting from the same ['v1','v2'] default) - this is not a
+ *   starting empty and populated only by explicit user actions - this is not a
  *   fallback for a failure, it's the correct, permanent behavior for
  *   a user the backend has no way to persist anything for.
  *
@@ -35,7 +35,7 @@ import { getFavorites, toggleFavorite, FavoriteApiError } from '../services/favo
  * for this specific piece of state.
  */
 export function useVehicleCollections(vehicles: Vehicle[], userId?: string | null) {
-  const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
+  const [savedVehicles, setSavedVehicles] = useState<string[]>([]);
   const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
   const [isFetchingFavorites, setIsFetchingFavorites] = useState<boolean>(false);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
@@ -54,7 +54,14 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
   // own documented split above, not a fetch that was skipped by
   // accident.
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      // A logout is a hard session boundary. Never leak the previous
+      // authenticated user's saved vehicles into another session.
+      setSavedVehicles([]);
+      setFavoritesError(null);
+      setIsFetchingFavorites(false);
+      return;
+    }
     let cancelled = false;
     setIsFetchingFavorites(true);
     setFavoritesError(null);
