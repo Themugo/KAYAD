@@ -117,7 +117,7 @@ function AppInner() {
   // Modal Trigger States
   const [quickViewVehicle, setQuickViewVehicle] = useState<Vehicle | null>(null);
   const [invalidVehicleId, setInvalidVehicleId] = useState<string | null>(null);
-  const resolvedVehicleIds = React.useRef<Set<string>>(new Set());
+  const resolvedVehicleIds = React.useRef(new Set<string>());
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);

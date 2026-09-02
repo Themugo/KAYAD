@@ -117,11 +117,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [maxMileage, setMaxMileage] = useState<number>(250000);
   
   // Boolean Feature Toggles
-  const [onlyInspected, setOnlyInspected] = useState<boolean>(false);
-  const [onlyEscrow, setOnlyEscrow] = useState<boolean>(false);
-  const [onlyFinance, setOnlyFinance] = useState<boolean>(false);
   const [onlyAuction, setOnlyAuction] = useState<boolean>(false);
-  const [onlyNewArrivals, setOnlyNewArrivals] = useState<boolean>(false);
 
   // Layout & Navigation States
   // Went through 2 revisions: originally defaulted to 'grid' (fewer
@@ -136,7 +132,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // the standard dense layout.
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<
-    'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'recently-reduced' | 'most-viewed' | 'auction-ending'
+    'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'most-viewed' | 'auction-ending'
   >('newest');
   const [showDesktopSidebar, setShowDesktopSidebar] = useState<boolean>(true);
   const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
@@ -193,7 +189,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       'price-desc': 'price_desc',
       mileage: 'mileage_asc',
       year: 'year_desc',
-      'recently-reduced': 'newest',
       'most-viewed': 'views_desc',
       'auction-ending': 'ending_soon',
     };
@@ -269,8 +264,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [
     searchQuery, selectedCounty, selectedMake, selectedModel, selectedBodyStyle, 
     selectedFuel, selectedTransmission, selectedCondition, selectedSellerType, 
-    minPrice, maxPrice, minYear, maxYear, maxMileage, onlyInspected, onlyEscrow, 
-    onlyFinance, onlyAuction, onlyNewArrivals, sortBy
+    minPrice, maxPrice, minYear, maxYear, maxMileage, onlyAuction, sortBy
   ]);
 
   // Dynamic Filter Options Extracted directly from backend dataset
@@ -299,7 +293,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
   const conditionOptions = ['All', 'Foreign Used', 'Locally Used', 'Brand New'];
-  const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller', 'Bank Repossession', 'Direct Port Import'];
+  const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
 
   const locations = useMemo(() => {
     const list = Array.from(new Set(serverVehicles.map((v) => v.county || v.location).filter(Boolean))).sort();
@@ -311,18 +305,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return list;
   }, [serverVehicles]);
 
-  // Phase 42: core search/filter/sort/pagination is performed by the
-  // authoritative backend query above. Only legacy presentation flags
-  // without a verified /api/cars query contract remain as local post-filters.
-  const filteredVehicles = useMemo(() => {
-    return serverVehicles.filter((v) => {
-      if (onlyInspected && !v.inspectionPassed) return false;
-      if (onlyEscrow && !v.escrowEligible) return false;
-      if (onlyFinance && !v.financeAvailable) return false;
-      if (onlyNewArrivals && !v.isNewArrival && !v.badge?.toLowerCase().includes('new')) return false;
-      return true;
-    });
-  }, [serverVehicles, onlyInspected, onlyEscrow, onlyFinance, onlyNewArrivals]);
+  // Phase 44: never post-filter a server-paginated page with feature flags
+  // that lack an authoritative backend query contract. The backend response
+  // is therefore the complete result set for this page.
+  const filteredVehicles = serverVehicles;
 
   // Reset to the first server page when a query dimension changes. Page-size
   // changes intentionally reset too, so the backend always owns the offset.
@@ -354,11 +340,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     setMinYear(2005);
     setMaxYear(2026);
     setMaxMileage(250000);
-    setOnlyInspected(false);
-    setOnlyEscrow(false);
-    setOnlyFinance(false);
     setOnlyAuction(false);
-    setOnlyNewArrivals(false);
     onCountyChange('All East Africa');
   }, [onSearchChange, onCountyChange]);
 
@@ -408,16 +390,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (maxPrice < 20000000) list.push({ id: 'price', label: `Under Ksh ${(maxPrice / 1000000).toFixed(1)}M`, onClear: () => setMaxPrice(20000000) });
     if (minYear > 2005) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => setMinYear(2005) });
     if (maxYear < 2026) list.push({ id: 'maxyear', label: `Up to ${maxYear}`, onClear: () => setMaxYear(2026) });
-    if (onlyInspected) list.push({ id: 'inspected', label: 'Pre-Purchase Inspected', onClear: () => setOnlyInspected(false) });
-    if (onlyEscrow) list.push({ id: 'escrow', label: 'Escrow Protected', onClear: () => setOnlyEscrow(false) });
-    if (onlyFinance) list.push({ id: 'finance', label: 'Finance Available', onClear: () => setOnlyFinance(false) });
     if (onlyAuction) list.push({ id: 'auction', label: 'Live Auction', onClear: () => setOnlyAuction(false) });
-    if (onlyNewArrivals) list.push({ id: 'new', label: 'Recently Added', onClear: () => setOnlyNewArrivals(false) });
     return list;
   }, [
     searchQuery, selectedCounty, selectedMake, selectedModel, selectedBodyStyle, 
     selectedFuel, selectedTransmission, selectedSellerType, selectedCondition, 
-    maxPrice, minYear, maxYear, onlyInspected, onlyEscrow, onlyFinance, onlyAuction, onlyNewArrivals, onSearchChange, onCountyChange
+    maxPrice, minYear, maxYear, onlyAuction, onSearchChange, onCountyChange
   ]);
 
   // Recently Viewed Vehicle Objects
@@ -838,7 +816,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <option value="price-desc">Price: High to Low</option>
               <option value="mileage">Lowest Mileage</option>
               <option value="year">Year: Newest First</option>
-              <option value="recently-reduced">Recently Reduced</option>
               <option value="most-viewed">Most Viewed</option>
               <option value="auction-ending">Auction Ending Soon</option>
             </select>
@@ -1005,32 +982,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <select value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
-            </div>
-
-            <div className="py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2.5">Verified Guarantees</label>
-              <div className="flex flex-col gap-2.5">
-                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" checked={onlyInspected} onChange={(e) => setOnlyInspected(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
-                  Pre-Purchase Inspected
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                </label>
-                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" checked={onlyEscrow} onChange={(e) => setOnlyEscrow(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
-                  Escrow Protected
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#1E3063]" />
-                </label>
-                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" checked={onlyFinance} onChange={(e) => setOnlyFinance(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
-                  Finance Available
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />
-                </label>
-                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-[#C85A32] w-3.5 h-3.5" />
-                  Live Auction Listings
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-rose-500" />
-                </label>
-              </div>
             </div>
 
             <button onClick={resetFilters} className="w-full bg-[#1E3063] hover:bg-[#17244B] text-white font-bold text-xs rounded-lg py-2.5 mt-3">
@@ -1300,9 +1251,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </select>
             </div>
             <div className="flex flex-col gap-2.5 pt-2">
-              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyInspected} onChange={(e) => setOnlyInspected(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Pre-Purchase Inspected</label>
-              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyEscrow} onChange={(e) => setOnlyEscrow(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Escrow Protected</label>
-              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyFinance} onChange={(e) => setOnlyFinance(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Finance Available</label>
               <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Live Auction Listings</label>
             </div>
             <div className="flex gap-2 pt-2">
