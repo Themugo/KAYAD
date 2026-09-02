@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend hero-slide API client - the hero card's text, layered
  * background, and slider content are all real, backend-persisted, and
@@ -9,7 +9,6 @@ import { getCsrfHeaders } from '../utils/csrf';
  * edits, not just the admin's own browser.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export type HeroBackgroundType = 'color' | 'gradient' | 'image';
 export type HeroDisplayMode = 'boxed' | 'fullscreen';
@@ -63,34 +62,13 @@ export class HeroApiError extends Error {
 }
 
 async function heroFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
-      ...options,
-    });
-  } catch {
-    throw new HeroApiError('Unable to reach KAYAD servers. Please check your connection and try again.', 'network');
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: HeroApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 403 ? 'forbidden' : error.status === 404 ? 'not_found' : error.status === 400 ? 'validation' : 'server';
+    throw new HeroApiError(error.message, kind, error.status);
   }
-
-  let body: { success: boolean; message?: string; data?: unknown };
-  try {
-    body = await res.json();
-  } catch {
-    throw new HeroApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: HeroApiErrorKind =
-      res.status === 401 ? 'unauthenticated' :
-      res.status === 403 ? 'forbidden' :
-      res.status === 404 ? 'not_found' :
-      res.status === 400 ? 'validation' : 'server';
-    throw new HeroApiError(body.message || 'Hero request failed.', kind, res.status);
-  }
-
-  return body as T;
 }
 
 /** GET /api/hero - public, only currently-visible slides. */

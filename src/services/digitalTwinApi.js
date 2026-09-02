@@ -1,42 +1,31 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const digitalTwinApi = axios.create({
-  baseURL: `${API_URL}/digital-twin`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // Dashboard
-export const getDigitalTwinDashboard = () => digitalTwinApi.get('/dashboard');
+export const getDigitalTwinDashboard = () => api.get('/digital-twin/dashboard');
 
 // Simulations
-export const getSimulations = (params) => digitalTwinApi.get('/simulations', { params });
-export const getSimulation = (id) => digitalTwinApi.get(`/simulations/${id}`);
-export const createSimulation = (data) => digitalTwinApi.post('/simulations', data);
-export const runSimulation = (id) => digitalTwinApi.post(`/simulations/${id}/run`);
-export const deleteSimulation = (id) => digitalTwinApi.delete(`/simulations/${id}`);
-export const getSimulationHistory = (params) => digitalTwinApi.get('/simulations/history', { params });
-export const compareSimulations = (ids) => digitalTwinApi.post('/simulations/compare', { ids });
+export const getSimulations = (params) => api.get('/digital-twin/simulations', { params });
+export const getSimulation = (id) => api.get(`/digital-twin/simulations/${id}`);
+export const createSimulation = (data) => api.post('/digital-twin/simulations', data);
+export const runSimulation = (id) => api.post(`/digital-twin/simulations/${id}/run`);
+export const deleteSimulation = (id) => api.delete(`/digital-twin/simulations/${id}`);
+export const getSimulationHistory = (params) => api.get('/digital-twin/simulations/history', { params });
+export const compareSimulations = (ids) => api.post('/digital-twin/simulations/compare', { ids });
 
 // Scenarios
-export const getScenarios = (params) => digitalTwinApi.get('/scenarios', { params });
-export const getScenario = (id) => digitalTwinApi.get(`/scenarios/${id}`);
-export const createScenario = (data) => digitalTwinApi.post('/scenarios', data);
-export const updateScenario = (id, data) => digitalTwinApi.put(`/scenarios/${id}`, data);
-export const deleteScenario = (id) => digitalTwinApi.delete(`/scenarios/${id}`);
-export const runScenario = (id, customParameters) => digitalTwinApi.post(`/scenarios/${id}/run`, { customParameters });
-export const getScenarioTemplates = () => digitalTwinApi.get('/scenarios/templates');
+export const getScenarios = (params) => api.get('/digital-twin/scenarios', { params });
+export const getScenario = (id) => api.get(`/digital-twin/scenarios/${id}`);
+export const createScenario = (data) => api.post('/digital-twin/scenarios', data);
+export const updateScenario = (id, data) => api.put(`/digital-twin/scenarios/${id}`, data);
+export const deleteScenario = (id) => api.delete(`/digital-twin/scenarios/${id}`);
+export const runScenario = (id, customParameters) => api.post(`/digital-twin/scenarios/${id}/run`, { customParameters });
+export const getScenarioTemplates = () => api.get('/digital-twin/scenarios/templates');
 
 // Predictions
-export const getPredictions = (params) => digitalTwinApi.get('/predictions', { params });
-export const generatePrediction = (data) => digitalTwinApi.post('/predictions', data);
+export const getPredictions = (params) => api.get('/digital-twin/predictions', { params });
+export const generatePrediction = (data) => api.post('/digital-twin/predictions', data);
 
 // What-If
-export const whatIfAnalysis = (question) => digitalTwinApi.post('/what-if', { question });
+export const whatIfAnalysis = (question) => api.post('/digital-twin/what-if', { question });
 
-export default digitalTwinApi;

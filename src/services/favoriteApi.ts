@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend favorites API client. KAYAD Phase 2 (eliminate mock
  * business state) - "Saved vehicles" priority item.
@@ -27,7 +27,6 @@ import { getCsrfHeaders } from '../utils/csrf';
  * produces.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export interface BackendFavoriteCar {
   id?: string;
@@ -73,38 +72,13 @@ export class FavoriteApiError extends Error {
 }
 
 async function favoriteFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getCsrfHeaders(options.method),
-        ...(options.headers || {}),
-      },
-    });
-  } catch {
-    throw new FavoriteApiError(
-      'Unable to reach KAYAD servers. Please check your connection and try again.',
-      'network'
-    );
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: FavoriteApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 404 ? 'not_found' : 'server';
+    throw new FavoriteApiError(error.message, kind, error.status);
   }
-
-  let body: T & { success?: boolean; message?: string };
-  try {
-    body = await res.json();
-  } catch {
-    throw new FavoriteApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: FavoriteApiErrorKind =
-      res.status === 401 ? 'unauthenticated' : res.status === 404 ? 'not_found' : 'server';
-    throw new FavoriteApiError(body.message || 'Request failed.', kind, res.status);
-  }
-
-  return body;
 }
 
 /** GET /api/favorites - real, paginated, populated list. */

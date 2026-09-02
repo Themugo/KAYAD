@@ -6,7 +6,7 @@
  * pattern already established elsewhere in this project.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import { request } from '../api/httpRequest';
 
 export interface CMSContentItem {
   id: string;
@@ -34,15 +34,8 @@ interface CMSContentResponse {
  * by real content type (e.g. 'news', 'guide'). */
 export async function getCMSContent(contentType: string, limit = 6): Promise<CMSContentItem[]> {
   const params = new URLSearchParams({ contentType, status: 'published', limit: String(limit) });
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}/api/cms/content?${params.toString()}`);
-  } catch {
-    return [];
-  }
-  if (!res.ok) return [];
-  try {
-    const body: CMSContentResponse = await res.json();
+    const body = await request<CMSContentResponse>(`/api/cms/content?${params.toString()}`);
     return body.data || [];
   } catch {
     return [];

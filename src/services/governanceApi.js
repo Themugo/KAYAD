@@ -1,79 +1,68 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const governanceApi = axios.create({
-  baseURL: `${API_URL}/governance`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // Dashboard
-export const getGovernanceDashboard = () => governanceApi.get('/dashboard');
+export const getGovernanceDashboard = () => api.get('/governance/dashboard');
 
 // Policies
-export const getPolicies = (params) => governanceApi.get('/policies', { params });
-export const getPolicy = (id) => governanceApi.get(`/policies/${id}`);
-export const createPolicy = (data) => governanceApi.post('/policies', data);
-export const updatePolicy = (id, data) => governanceApi.put(`/policies/${id}`, data);
+export const getPolicies = (params) => api.get('/governance/policies', { params });
+export const getPolicy = (id) => api.get(`/governance/policies/${id}`);
+export const createPolicy = (data) => api.post('/governance/policies', data);
+export const updatePolicy = (id, data) => api.put(`/governance/policies/${id}`, data);
 
 // Change Requests
-export const getChangeRequests = (params) => governanceApi.get('/changes', { params });
-export const getChangeRequest = (id) => governanceApi.get(`/changes/${id}`);
-export const createChangeRequest = (data) => governanceApi.post('/changes', data);
-export const submitForApproval = (id) => governanceApi.post(`/changes/${id}/submit`);
-export const approveChangeRequest = (id, comments) => governanceApi.post(`/changes/${id}/approve`, { comments });
-export const rejectChangeRequest = (id, reason, comments) => governanceApi.post(`/changes/${id}/reject`, { reason, comments });
+export const getChangeRequests = (params) => api.get('/governance/changes', { params });
+export const getChangeRequest = (id) => api.get(`/governance/changes/${id}`);
+export const createChangeRequest = (data) => api.post('/governance/changes', data);
+export const submitForApproval = (id) => api.post(`/governance/changes/${id}/submit`);
+export const approveChangeRequest = (id, comments) => api.post(`/governance/changes/${id}/approve`, { comments });
+export const rejectChangeRequest = (id, reason, comments) => api.post(`/governance/changes/${id}/reject`, { reason, comments });
 
 // Approval Rules
-export const getApprovalRules = () => governanceApi.get('/approvals');
-export const createApprovalRule = (data) => governanceApi.post('/approvals', data);
-export const updateApprovalRule = (id, data) => governanceApi.put(`/approvals/${id}`, data);
+export const getApprovalRules = () => api.get('/governance/approvals');
+export const createApprovalRule = (data) => api.post('/governance/approvals', data);
+export const updateApprovalRule = (id, data) => api.put(`/governance/approvals/${id}`, data);
 
 // Feature Lifecycle
-export const getFeatureLifecycles = () => governanceApi.get('/features');
-export const createFeatureLifecycle = (data) => governanceApi.post('/features', data);
-export const updateFeatureStage = (id, stage, comments) => governanceApi.put(`/features/${id}/stage`, { stage, comments });
+export const getFeatureLifecycles = () => api.get('/governance/features');
+export const createFeatureLifecycle = (data) => api.post('/governance/features', data);
+export const updateFeatureStage = (id, stage, comments) => api.put(`/governance/features/${id}/stage`, { stage, comments });
 
 // Risks
-export const getRisks = () => governanceApi.get('/risks');
-export const createRisk = (data) => governanceApi.post('/risks', data);
-export const updateRiskStatus = (id, data) => governanceApi.put(`/risks/${id}`, data);
+export const getRisks = () => api.get('/governance/risks');
+export const createRisk = (data) => api.post('/governance/risks', data);
+export const updateRiskStatus = (id, data) => api.put(`/governance/risks/${id}`, data);
 
 // Standards
-export const getStandards = () => governanceApi.get('/standards');
-export const createStandard = (data) => governanceApi.post('/standards', data);
+export const getStandards = () => api.get('/governance/standards');
+export const createStandard = (data) => api.post('/governance/standards', data);
 
 // Country Rules
-export const getCountryRules = () => governanceApi.get('/countries');
-export const createCountryRule = (data) => governanceApi.post('/countries', data);
+export const getCountryRules = () => api.get('/governance/countries');
+export const createCountryRule = (data) => api.post('/governance/countries', data);
 
 // Partner Requirements
-export const getPartnerRequirements = () => governanceApi.get('/partners');
-export const createPartnerRequirement = (data) => governanceApi.post('/partners', data);
+export const getPartnerRequirements = () => api.get('/governance/partners');
+export const createPartnerRequirement = (data) => api.post('/governance/partners', data);
 
 // Releases
-export const getReleases = () => governanceApi.get('/releases');
-export const createRelease = (data) => governanceApi.post('/releases', data);
-export const updateReleaseStatus = (id, data) => governanceApi.put(`/releases/${id}`, data);
+export const getReleases = () => api.get('/governance/releases');
+export const createRelease = (data) => api.post('/governance/releases', data);
+export const updateReleaseStatus = (id, data) => api.put(`/governance/releases/${id}`, data);
 
 // Decisions
-export const getDecisions = () => governanceApi.get('/decisions');
-export const createDecision = (data) => governanceApi.post('/decisions', data);
+export const getDecisions = () => api.get('/governance/decisions');
+export const createDecision = (data) => api.post('/governance/decisions', data);
 
 // Audit
-export const getAuditLogs = (params) => governanceApi.get('/audit', { params });
+export const getAuditLogs = (params) => api.get('/governance/audit', { params });
 
 // Compliance
-export const getComplianceDashboard = () => governanceApi.get('/compliance');
+export const getComplianceDashboard = () => api.get('/governance/compliance');
 
 // AI Help
-export const getGovernanceHelp = (question) => governanceApi.post('/help', { question });
+export const getGovernanceHelp = (question) => api.post('/governance/help', { question });
 
 // Reports
-export const getGovernanceReport = (params) => governanceApi.get('/reports', { params });
+export const getGovernanceReport = (params) => api.get('/governance/reports', { params });
 
-export default governanceApi;

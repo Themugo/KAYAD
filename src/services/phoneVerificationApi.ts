@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend phone-verification client - send a real OTP, verify
  * it, and check real verification status, via the real, now-fixed
@@ -8,7 +8,6 @@ import { getCsrfHeaders } from '../utils/csrf';
  * elsewhere in this project.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export type PhoneVerificationErrorKind = 'network' | 'unauthenticated' | 'no_phone' | 'rate_limited' | 'validation' | 'server';
 
@@ -23,34 +22,13 @@ export class PhoneVerificationError extends Error {
 }
 
 async function phoneFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
-      ...options,
-    });
-  } catch {
-    throw new PhoneVerificationError('Unable to reach KAYAD servers. Please check your connection and try again.', 'network');
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: PhoneVerificationErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 429 ? 'rate_limited' : error.status === 400 && /no phone number/i.test(error.message) ? 'no_phone' : error.status === 400 ? 'validation' : 'server';
+    throw new PhoneVerificationError(error.message, kind, error.status);
   }
-
-  let body: { success: boolean; message?: string; data?: unknown };
-  try {
-    body = await res.json();
-  } catch {
-    throw new PhoneVerificationError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: PhoneVerificationErrorKind =
-      res.status === 401 ? 'unauthenticated' :
-      res.status === 429 ? 'rate_limited' :
-      res.status === 400 && /no phone number/i.test(body.message || '') ? 'no_phone' :
-      res.status === 400 ? 'validation' : 'server';
-    throw new PhoneVerificationError(body.message || 'Phone verification request failed.', kind, res.status);
-  }
-
-  return body as T;
 }
 
 /** POST /api/auth/send-otp - sends a real 4-digit code to the real,

@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend loan-application client - a buyer submits a real
  * application, sees their own real applications and status, and an
@@ -6,7 +6,6 @@ import { getCsrfHeaders } from '../utils/csrf';
  * pattern already established elsewhere in this project.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export type LoanStatus = 'submitted' | 'under_review' | 'approved' | 'declined' | 'withdrawn';
 
@@ -49,34 +48,13 @@ export class LoanApiError extends Error {
 }
 
 async function loanFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
-      ...options,
-    });
-  } catch {
-    throw new LoanApiError('Unable to reach KAYAD servers. Please check your connection and try again.', 'network');
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: LoanApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 403 ? 'forbidden' : error.status === 404 ? 'not_found' : error.status === 400 ? 'validation' : 'server';
+    throw new LoanApiError(error.message, kind, error.status);
   }
-
-  let body: { success: boolean; message?: string; data?: unknown };
-  try {
-    body = await res.json();
-  } catch {
-    throw new LoanApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: LoanApiErrorKind =
-      res.status === 401 ? 'unauthenticated' :
-      res.status === 403 ? 'forbidden' :
-      res.status === 404 ? 'not_found' :
-      res.status === 400 ? 'validation' : 'server';
-    throw new LoanApiError(body.message || 'Loan application request failed.', kind, res.status);
-  }
-
-  return body as T;
 }
 
 /** POST /api/loans - submit a real loan application. */

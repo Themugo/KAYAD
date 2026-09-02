@@ -1,68 +1,57 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const platformFactoryApi = axios.create({
-  baseURL: `${API_URL}/platform-factory`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // Dashboard
-export const getPlatformDashboard = () => platformFactoryApi.get('/dashboard');
+export const getPlatformDashboard = () => api.get('/platform-factory/dashboard');
 
 // Templates
-export const getTemplates = () => platformFactoryApi.get('/templates');
-export const getTemplateDetails = (templateId) => platformFactoryApi.get(`/templates/${templateId}`);
+export const getTemplates = () => api.get('/platform-factory/templates');
+export const getTemplateDetails = (templateId) => api.get(`/platform-factory/templates/${templateId}`);
 
 // Generator
-export const generateProduct = (data) => platformFactoryApi.post('/generate', data);
-export const getGenerationStatus = (productId) => platformFactoryApi.get(`/generate/${productId}/status`);
+export const generateProduct = (data) => api.post('/platform-factory/generate', data);
+export const getGenerationStatus = (productId) => api.get(`/platform-factory/generate/${productId}/status`);
 
 // Products
-export const getProducts = () => platformFactoryApi.get('/products');
-export const getProductDetails = (productId) => platformFactoryApi.get(`/products/${productId}`);
-export const updateProduct = (productId, data) => platformFactoryApi.put(`/products/${productId}`, data);
-export const deleteProduct = (productId) => platformFactoryApi.delete(`/products/${productId}`);
+export const getProducts = () => api.get('/platform-factory/products');
+export const getProductDetails = (productId) => api.get(`/platform-factory/products/${productId}`);
+export const updateProduct = (productId, data) => api.put(`/platform-factory/products/${productId}`, data);
+export const deleteProduct = (productId) => api.delete(`/platform-factory/products/${productId}`);
 
 // Components
-export const getComponents = (category) => platformFactoryApi.get('/components', { params: { category } });
+export const getComponents = (category) => api.get('/platform-factory/components', { params: { category } });
 
 // Domain Models
-export const getDomainModels = () => platformFactoryApi.get('/domain-models');
+export const getDomainModels = () => api.get('/platform-factory/domain-models');
 
 // Shared Services
-export const getSharedServices = () => platformFactoryApi.get('/services');
+export const getSharedServices = () => api.get('/platform-factory/services');
 
 // White Label
-export const getBrands = () => platformFactoryApi.get('/brands');
-export const getBrandDetails = (brandId) => platformFactoryApi.get(`/brands/${brandId}`);
-export const updateBrand = (brandId, data) => platformFactoryApi.put(`/brands/${brandId}`, data);
+export const getBrands = () => api.get('/platform-factory/brands');
+export const getBrandDetails = (brandId) => api.get(`/platform-factory/brands/${brandId}`);
+export const updateBrand = (brandId, data) => api.put(`/platform-factory/brands/${brandId}`, data);
 
 // Deployment
-export const getDeployments = (productId) => platformFactoryApi.get('/deployments', { params: { productId } });
-export const deployProduct = (data) => platformFactoryApi.post('/deploy', data);
-export const rollbackDeployment = (deploymentId) => platformFactoryApi.post(`/deployments/${deploymentId}/rollback`);
+export const getDeployments = (productId) => api.get('/platform-factory/deployments', { params: { productId } });
+export const deployProduct = (data) => api.post('/platform-factory/deploy', data);
+export const rollbackDeployment = (deploymentId) => api.post(`/platform-factory/deployments/${deploymentId}/rollback`);
 
 // App Store
-export const getAppStore = () => platformFactoryApi.get('/store');
-export const installApp = (data) => platformFactoryApi.post('/store/install', data);
+export const getAppStore = () => api.get('/platform-factory/store');
+export const installApp = (data) => api.post('/platform-factory/store/install', data);
 
 // AI Designer
-export const designProduct = (data) => platformFactoryApi.post('/design', data);
-export const getDesignStatus = (designId) => platformFactoryApi.get(`/design/${designId}/status`);
+export const designProduct = (data) => api.post('/platform-factory/design', data);
+export const getDesignStatus = (designId) => api.get(`/platform-factory/design/${designId}/status`);
 
 // Monetization
-export const getMonetizationOptions = () => platformFactoryApi.get('/monetization');
-export const configureMonetization = (data) => platformFactoryApi.post('/monetization/configure', data);
+export const getMonetizationOptions = () => api.get('/platform-factory/monetization');
+export const configureMonetization = (data) => api.post('/platform-factory/monetization/configure', data);
 
 // Platform Health
-export const getPlatformHealth = () => platformFactoryApi.get('/health');
+export const getPlatformHealth = () => api.get('/platform-factory/health');
 
 // Workflows
-export const getWorkflows = () => platformFactoryApi.get('/workflows');
+export const getWorkflows = () => api.get('/platform-factory/workflows');
 
-export default platformFactoryApi;

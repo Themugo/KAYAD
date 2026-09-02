@@ -1,8 +1,13 @@
 import axios from 'axios';
 import { getCsrfHeaders } from '../utils/csrf';
 
+const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+// Keep the established `/api` same-origin fallback for service prefixes while
+// accepting either an API origin or an origin that already ends in `/api`.
+const API_URL = configuredApiUrl ? configuredApiUrl.replace(/\/api$/, '') : '/api';
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_URL,
   withCredentials: true,
   // A hanging request must not hang the UI forever — network
   // interruptions surface as an error the page can render honestly.

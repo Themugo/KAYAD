@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend authentication API client. Built for KAYAD Fusion Phase 3
  * Authentication uses the backend as the single source of truth.
@@ -26,7 +26,6 @@ import { getCsrfHeaders } from '../utils/csrf';
  * can be made here.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export interface BackendUser {
   id: string;
@@ -75,83 +74,13 @@ export class AuthApiError extends Error {
 }
 
 async function authFetch(path: string, options: RequestInit = {}): Promise<AuthResponse> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getCsrfHeaders(options.method),
-        ...(options.headers || {}),
-      },
-    });
+    return await request<AuthResponse>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
   } catch (err) {
-    // A thrown fetch (as opposed to a non-2xx response) means the
-    // request never reached a server at all - no backend deployed at
-    // API_BASE, DNS failure, offline, CORS rejection, etc. This is the
-    // single most likely failure mode in this project's actual current
-    // state (no live backend confirmed provisioned), so it gets its
-    // own distinct, honest error kind rather than being lumped in with
-    // "server returned an error."
-    throw new AuthApiError(
-      'Unable to reach KAYAD servers. Please check your connection and try again.',
-      'network'
-    );
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: AuthErrorKind = error.status === 401 || error.status === 403 ? 'invalid_credentials' : error.status ? 'server' : 'network';
+    throw new AuthApiError(error.message, kind, error.status);
   }
-
-  let body: AuthResponse;
-  try {
-    body = await res.json();
-  } catch {
-    throw new AuthApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok || !body.success) {
-    const kind: AuthErrorKind = res.status === 401 || res.status === 403 ? 'invalid_credentials' : 'server';
-    throw new AuthApiError(body.message || 'Request failed.', kind, res.status);
-  }
-
-  return body;
-}
-
-export async function register(input: {
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-  phone?: string;
-}): Promise<BackendUser> {
-  const res = await authFetch('/api/v1/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(input),
-  });
-  if (!res.user) throw new AuthApiError('Registration succeeded but no user was returned.', 'unknown');
-  return res.user;
-}
-
-export async function login(email: string, password: string): Promise<BackendUser> {
-  const res = await authFetch('/api/v1/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-  if (!res.user) throw new AuthApiError('Login succeeded but no user was returned.', 'unknown');
-  return res.user;
-}
-
-// Added while rewiring AuthContext.tsx off the old, incompatible
-// src/api/api.exports.ts authAPI (Bearer-token auth, no /v1 path
-// segment - both wrong for the real backend, confirmed directly) onto
-// this file, the confirmed-correct client (cookie-based, right paths,
-// already used and verified throughout this project). Matches the
-// real backend's PUT /api/v1/auth/profile route exactly.
-export async function updateProfile(body: Record<string, unknown>): Promise<BackendUser> {
-  const res = await authFetch('/api/v1/auth/profile', {
-    method: 'PUT',
-    body: JSON.stringify(body),
-  });
-  if (!res.user) throw new AuthApiError('Profile update succeeded but no user was returned.', 'unknown');
-  return res.user;
 }
 
 /** Session restoration - called on app mount. Relies entirely on the

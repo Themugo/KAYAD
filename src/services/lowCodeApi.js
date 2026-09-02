@@ -1,100 +1,89 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const lowCodeApi = axios.create({
-  baseURL: `${API_URL}/lowcode`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // ============================================
 // DASHBOARD & STATS
 // ============================================
 
-export const getPlatformStats = () => lowCodeApi.get('/stats');
-export const getFieldTypes = () => lowCodeApi.get('/field-types');
+export const getPlatformStats = () => api.get('/lowcode/stats');
+export const getFieldTypes = () => api.get('/lowcode/field-types');
 
 // ============================================
 // BUSINESS OBJECTS
 // ============================================
 
-export const getBusinessObjects = (params) => lowCodeApi.get('/objects', { params });
-export const getBusinessObject = (id) => lowCodeApi.get(`/objects/${id}`);
-export const createBusinessObject = (data) => lowCodeApi.post('/objects', data);
-export const updateBusinessObject = (id, data) => lowCodeApi.put(`/objects/${id}`, data);
-export const deleteBusinessObject = (id) => lowCodeApi.delete(`/objects/${id}`);
-export const publishBusinessObject = (id) => lowCodeApi.post(`/objects/${id}/publish`);
-export const cloneBusinessObject = (id) => lowCodeApi.post(`/objects/${id}/clone`);
-export const generateApi = (id) => lowCodeApi.get(`/objects/${id}/api`);
+export const getBusinessObjects = (params) => api.get('/lowcode/objects', { params });
+export const getBusinessObject = (id) => api.get(`/lowcode/objects/${id}`);
+export const createBusinessObject = (data) => api.post('/lowcode/objects', data);
+export const updateBusinessObject = (id, data) => api.put(`/lowcode/objects/${id}`, data);
+export const deleteBusinessObject = (id) => api.delete(`/lowcode/objects/${id}`);
+export const publishBusinessObject = (id) => api.post(`/lowcode/objects/${id}/publish`);
+export const cloneBusinessObject = (id) => api.post(`/lowcode/objects/${id}/clone`);
+export const generateApi = (id) => api.get(`/lowcode/objects/${id}/api`);
 
 // ============================================
 // OBJECT FIELDS
 // ============================================
 
-export const getObjectFields = (objectId) => lowCodeApi.get(`/objects/${objectId}/fields`);
-export const createObjectField = (objectId, data) => lowCodeApi.post(`/objects/${objectId}/fields`, data);
-export const updateObjectField = (id, data) => lowCodeApi.put(`/fields/${id}`, data);
-export const deleteObjectField = (id) => lowCodeApi.delete(`/fields/${id}`);
-export const reorderObjectFields = (objectId, data) => lowCodeApi.post(`/objects/${objectId}/fields/reorder`, data);
+export const getObjectFields = (objectId) => api.get(`/lowcode/objects/${objectId}/fields`);
+export const createObjectField = (objectId, data) => api.post(`/lowcode/objects/${objectId}/fields`, data);
+export const updateObjectField = (id, data) => api.put(`/lowcode/fields/${id}`, data);
+export const deleteObjectField = (id) => api.delete(`/lowcode/fields/${id}`);
+export const reorderObjectFields = (objectId, data) => api.post(`/lowcode/objects/${objectId}/fields/reorder`, data);
 
 // ============================================
 // RELATIONSHIPS
 // ============================================
 
-export const getObjectRelationships = (objectId) => lowCodeApi.get(`/objects/${objectId}/relationships`);
-export const createObjectRelationship = (data) => lowCodeApi.post('/relationships', data);
-export const updateObjectRelationship = (id, data) => lowCodeApi.put(`/relationships/${id}`, data);
-export const deleteObjectRelationship = (id) => lowCodeApi.delete(`/relationships/${id}`);
+export const getObjectRelationships = (objectId) => api.get(`/lowcode/objects/${objectId}/relationships`);
+export const createObjectRelationship = (data) => api.post('/lowcode/relationships', data);
+export const updateObjectRelationship = (id, data) => api.put(`/lowcode/relationships/${id}`, data);
+export const deleteObjectRelationship = (id) => api.delete(`/lowcode/relationships/${id}`);
 
 // ============================================
 // FORM DEFINITIONS
 // ============================================
 
-export const getFormDefinitions = (objectId) => lowCodeApi.get(`/objects/${objectId}/forms`);
-export const createFormDefinition = (data) => lowCodeApi.post('/forms', data);
-export const updateFormDefinition = (id, data) => lowCodeApi.put(`/forms/${id}`, data);
-export const deleteFormDefinition = (id) => lowCodeApi.delete(`/forms/${id}`);
+export const getFormDefinitions = (objectId) => api.get(`/lowcode/objects/${objectId}/forms`);
+export const createFormDefinition = (data) => api.post('/lowcode/forms', data);
+export const updateFormDefinition = (id, data) => api.put(`/lowcode/forms/${id}`, data);
+export const deleteFormDefinition = (id) => api.delete(`/lowcode/forms/${id}`);
 
 // ============================================
 // VIEW DEFINITIONS
 // ============================================
 
-export const getViewDefinitions = (objectId) => lowCodeApi.get(`/objects/${objectId}/views`);
-export const createViewDefinition = (data) => lowCodeApi.post('/views', data);
-export const updateViewDefinition = (id, data) => lowCodeApi.put(`/views/${id}`, data);
-export const deleteViewDefinition = (id) => lowCodeApi.delete(`/views/${id}`);
+export const getViewDefinitions = (objectId) => api.get(`/lowcode/objects/${objectId}/views`);
+export const createViewDefinition = (data) => api.post('/lowcode/views', data);
+export const updateViewDefinition = (id, data) => api.put(`/lowcode/views/${id}`, data);
+export const deleteViewDefinition = (id) => api.delete(`/lowcode/views/${id}`);
 
 // ============================================
 // PERMISSIONS
 // ============================================
 
-export const getObjectPermissions = (objectId) => lowCodeApi.get(`/objects/${objectId}/permissions`);
-export const updateObjectPermissions = (objectId, data) => lowCodeApi.put(`/objects/${objectId}/permissions`, data);
+export const getObjectPermissions = (objectId) => api.get(`/lowcode/objects/${objectId}/permissions`);
+export const updateObjectPermissions = (objectId, data) => api.put(`/lowcode/objects/${objectId}/permissions`, data);
 
 // ============================================
 // CUSTOM DASHBOARDS
 // ============================================
 
-export const getCustomDashboards = () => lowCodeApi.get('/dashboards');
-export const createCustomDashboard = (data) => lowCodeApi.post('/dashboards', data);
-export const updateCustomDashboard = (id, data) => lowCodeApi.put(`/dashboards/${id}`, data);
-export const deleteCustomDashboard = (id) => lowCodeApi.delete(`/dashboards/${id}`);
+export const getCustomDashboards = () => api.get('/lowcode/dashboards');
+export const createCustomDashboard = (data) => api.post('/lowcode/dashboards', data);
+export const updateCustomDashboard = (id, data) => api.put(`/lowcode/dashboards/${id}`, data);
+export const deleteCustomDashboard = (id) => api.delete(`/lowcode/dashboards/${id}`);
 
 // ============================================
 // VERSIONS
 // ============================================
 
-export const getObjectVersions = (objectId) => lowCodeApi.get(`/objects/${objectId}/versions`);
-export const rollbackObjectVersion = (versionId) => lowCodeApi.post(`/versions/${versionId}/rollback`);
+export const getObjectVersions = (objectId) => api.get(`/lowcode/objects/${objectId}/versions`);
+export const rollbackObjectVersion = (versionId) => api.post(`/lowcode/versions/${versionId}/rollback`);
 
 // ============================================
 // AI ASSISTANT
 // ============================================
 
-export const suggestBusinessObject = (data) => lowCodeApi.post('/ai/suggest', data);
+export const suggestBusinessObject = (data) => api.post('/lowcode/ai/suggest', data);
 
-export default lowCodeApi;

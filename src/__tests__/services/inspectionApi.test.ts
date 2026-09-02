@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { getMyInspections } from '../../services/inspectionApi';
+import { HttpRequestError, request } from '../../api/httpRequest';
+
+vi.mock('../../api/httpRequest', async () => {
+  const actual = await vi.importActual<typeof import('../../api/httpRequest')>('../../api/httpRequest');
+  return { ...actual, request: vi.fn() };
+});
+
+const requestMock = vi.mocked(request);
 
 /**
  * Coverage for the new inspection data connection: Bookings Tracker
@@ -13,22 +21,16 @@ import { getMyInspections } from '../../services/inspectionApi';
 describe('inspectionApi.getMyInspections', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    requestMock.mockReset();
   });
 
   it('calls the real GET /api/inspections/my endpoint with credentials included', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({ success: true, orders: [] }),
-    });
-    global.fetch = fetchMock as unknown as typeof fetch;
+    requestMock.mockResolvedValueOnce({ success: true, orders: [] });
 
     await getMyInspections();
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, options] = fetchMock.mock.calls[0];
-    expect(String(url)).toContain('/api/inspections/my');
-    expect(options).toMatchObject({ method: 'GET', credentials: 'include' });
+    expect(requestMock).toHaveBeenCalledTimes(1);
+    expect(requestMock).toHaveBeenCalledWith('/api/inspections/my', { method: 'GET' });
   });
 
   it('returns the real orders array from a successful response', async () => {
@@ -40,11 +42,7 @@ describe('inspectionApi.getMyInspections', () => {
       overallScore: 87,
       notes: 'Vehicle in good condition.',
     };
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({ success: true, orders: [mockOrder] }),
-    }) as unknown as typeof fetch;
+    requestMock.mockResolvedValueOnce({ success: true, orders: [mockOrder] });
 
     const res = await getMyInspections();
 
@@ -54,11 +52,7 @@ describe('inspectionApi.getMyInspections', () => {
   });
 
   it('throws an unauthenticated-kind error on a 401 response, not a silent empty result', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 401,
-      json: async () => ({ success: false, message: 'Unauthorized' }),
-    }) as unknown as typeof fetch;
+    requestMock.mockRejectedValueOnce(new HttpRequestError('Unauthorized', 401, { success: false, message: 'Unauthorized' }));
 
     await expect(getMyInspections()).rejects.toMatchObject({ kind: 'unauthenticated' });
   });

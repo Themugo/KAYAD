@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
+import { HttpRequestError, request } from '../../api/httpRequest';
+
+vi.mock('../../api/httpRequest', async () => {
+  const actual = await vi.importActual<typeof import('../../api/httpRequest')>('../../api/httpRequest');
+  return { ...actual, request: vi.fn() };
+});
+
+const requestMock = vi.mocked(request);
 
 /**
  * KAYAD Fusion Phase 4/5 tests. Updated in Phase 5 to match the
@@ -9,52 +17,28 @@ import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError, BackendCa
  * see vehicleApi.ts's file header for the full correction story.
  */
 
-function mockFetchOnce(body: unknown, ok = true, status = ok ? 200 : 404) {
-  return vi.fn().mockResolvedValueOnce({
-    ok,
-    status,
-    json: async () => body,
-  });
-}
 
 describe('vehicleApi.getCars - real request shape', () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => { vi.restoreAllMocks(); requestMock.mockReset(); });
 
   it('calls GET /api/cars with credentials included', async () => {
-    const fetchMock = mockFetchOnce({
-      success: true,
-      data: [],
-      pagination: { page: 1, limit: 12, total: 0 },
-    });
-    global.fetch = fetchMock;
+    requestMock.mockResolvedValueOnce({ success: true, data: [], pagination: { page: 1, limit: 12, total: 0 } });
 
     await getCars();
 
-    const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toContain('/api/cars');
-    expect(options.method).toBe('GET');
-    expect(options.credentials).toBe('include');
+    expect(requestMock).toHaveBeenCalledWith('/api/cars', { method: 'GET' });
   });
 
   it('encodes real query params matching the backend controller\'s actual req.query fields', async () => {
-    const fetchMock = mockFetchOnce({
-      success: true,
-      data: [],
-      pagination: { page: 2, limit: 24, total: 0 },
-    });
-    global.fetch = fetchMock;
+    requestMock.mockResolvedValueOnce({ success: true, data: [], pagination: { page: 2, limit: 24, total: 0 } });
 
     await getCars({ page: 2, limit: 24, brand: 'Toyota', minPrice: 500000 });
 
-    const [url] = fetchMock.mock.calls[0];
-    expect(url).toContain('page=2');
-    expect(url).toContain('limit=24');
-    expect(url).toContain('brand=Toyota');
-    expect(url).toContain('minPrice=500000');
+    expect(requestMock.mock.calls[0][0]).toBe('/api/cars?page=2&limit=24&brand=Toyota&minPrice=500000');
   });
 
   it('a network failure throws a clear, honest VehicleApiError, not a silent failure', async () => {
-    global.fetch = vi.fn().mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    requestMock.mockRejectedValueOnce(new HttpRequestError('Unable to reach KAYAD servers. Please check your connection and try again.'));
 
     let caughtError: unknown;
     try {
@@ -69,22 +53,17 @@ describe('vehicleApi.getCars - real request shape', () => {
 });
 
 describe('vehicleApi.getCarById', () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => { vi.restoreAllMocks(); requestMock.mockReset(); });
 
   it('calls the correct real endpoint for a specific ID', async () => {
-    const fetchMock = mockFetchOnce({
-      success: true,
-      data: { id: 'car-1', title: 'Test', brand: 'Toyota', model: 'Corolla', year: 2020, price: 1000000 },
-    });
-    global.fetch = fetchMock;
+    requestMock.mockResolvedValueOnce({ success: true, data: { id: 'car-1', title: 'Test', brand: 'Toyota', model: 'Corolla', year: 2020, price: 1000000 } });
 
     await getCarById('car-1');
-    const [url] = fetchMock.mock.calls[0];
-    expect(url).toContain('/api/cars/car-1');
+    expect(requestMock).toHaveBeenCalledWith('/api/cars/car-1', { method: 'GET' });
   });
 
   it('returns null (not a thrown error) for a genuine 404 - a normal, expected case', async () => {
-    global.fetch = mockFetchOnce({ success: false, message: 'Car not found' }, false, 404);
+    requestMock.mockRejectedValueOnce(new HttpRequestError('Car not found', 404, { success: false, message: 'Car not found' }));
     const result = await getCarById('nonexistent');
     expect(result).toBeNull();
   });

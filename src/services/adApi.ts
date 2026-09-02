@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend ad-slot API client - a real, backend-persisted
  * advertisement management system, deliberately different from this
@@ -10,7 +10,6 @@ import { getCsrfHeaders } from '../utils/csrf';
  * established in escrowApi.ts/supportApi.ts.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export type AdPlacement = 'top_ticker' | 'left_rail' | 'right_rail' | 'mid_grid' | 'sidebar';
 
@@ -57,34 +56,13 @@ export class AdApiError extends Error {
 }
 
 async function adFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method), ...(options.headers || {}) },
-      ...options,
-    });
-  } catch {
-    throw new AdApiError('Unable to reach KAYAD servers. Please check your connection and try again.', 'network');
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: AdApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 403 ? 'forbidden' : error.status === 404 ? 'not_found' : error.status === 400 ? 'validation' : 'server';
+    throw new AdApiError(error.message, kind, error.status);
   }
-
-  let body: { success: boolean; message?: string; data?: unknown };
-  try {
-    body = await res.json();
-  } catch {
-    throw new AdApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: AdApiErrorKind =
-      res.status === 401 ? 'unauthenticated' :
-      res.status === 403 ? 'forbidden' :
-      res.status === 404 ? 'not_found' :
-      res.status === 400 ? 'validation' : 'server';
-    throw new AdApiError(body.message || 'Ad request failed.', kind, res.status);
-  }
-
-  return body as T;
 }
 
 /** GET /api/ads - public, only currently-visible ad slots. No auth

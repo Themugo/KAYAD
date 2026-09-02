@@ -38,3 +38,6 @@ export default function AdminSettingsAuditLog({ auditLog, setLoading }) {
         </div>
       </div>
 
+    </div>
+  );
+}

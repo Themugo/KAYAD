@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend bid-placement API client. KAYAD Final Integration
  * Phase 3 (real auction & bidding integration) - the last item in the
@@ -32,7 +32,6 @@ import { getCsrfHeaders } from '../utils/csrf';
  * a bid actually work, so it exists to be connected.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export type BidApiErrorKind = 'network' | 'unauthenticated' | 'validation' | 'server';
 
@@ -66,33 +65,15 @@ export interface PlaceBidResponse {
  * it surfaces exactly what the real backend decides, success or
  * rejection, to the caller. */
 export async function placeBid(carId: string, amount: number, phone: string): Promise<PlaceBidResponse> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}/api/bids/${carId}/bid`, {
+    return await request<PlaceBidResponse>(`/api/bids/${carId}/bid`, {
       method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders('POST') },
       body: JSON.stringify({ amount, phone }),
     });
-  } catch {
-    throw new BidApiError(
-      'Unable to reach KAYAD servers. Please check your connection and try again.',
-      'network'
-    );
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: BidApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 400 ? 'validation' : error.status ? 'server' : 'network';
+    throw new BidApiError(error.message, kind, error.status);
   }
 
-  let body: PlaceBidResponse & { message?: string };
-  try {
-    body = await res.json();
-  } catch {
-    throw new BidApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: BidApiErrorKind =
-      res.status === 401 ? 'unauthenticated' : res.status === 400 ? 'validation' : 'server';
-    throw new BidApiError(body.message || 'Failed to place bid.', kind, res.status);
-  }
-
-  return body;
 }

@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend chat API client, and an honest mapper from the real
  * chat/message shape into this frontend's own UnifiedChatThread/
@@ -29,7 +29,6 @@ import { getCsrfHeaders } from '../utils/csrf';
 
 import { UnifiedChatThread, UnifiedMessageItem } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export type ChatApiErrorKind = 'network' | 'unauthenticated' | 'not_found' | 'server';
 
@@ -77,31 +76,13 @@ interface BackendMessage {
 }
 
 async function chatFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...getCsrfHeaders(options.method) },
-      ...options,
-    });
-  } catch {
-    throw new ChatApiError('Unable to reach KAYAD servers. Please check your connection and try again.', 'network');
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: ChatApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 404 ? 'not_found' : 'server';
+    throw new ChatApiError(error.message, kind, error.status);
   }
-
-  let body: { success: boolean; message?: string } & Record<string, unknown>;
-  try {
-    body = await res.json();
-  } catch {
-    throw new ChatApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: ChatApiErrorKind =
-      res.status === 401 ? 'unauthenticated' : res.status === 404 ? 'not_found' : 'server';
-    throw new ChatApiError(body.message || 'Failed to load conversations.', kind, res.status);
-  }
-
-  return body as T;
 }
 
 /** GET /api/chat - the user's own real conversations. */

@@ -1,66 +1,55 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const commandCenterApi = axios.create({
-  baseURL: `${API_URL}/command-center`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // Mission Control
-export const getMissionControl = () => commandCenterApi.get('/mission-control');
-export const getLiveActivity = (params) => commandCenterApi.get('/live-activity', { params });
+export const getMissionControl = () => api.get('/command-center/mission-control');
+export const getLiveActivity = (params) => api.get('/command-center/live-activity', { params });
 
 // Operations Centers
-export const getOperationsCenter = () => commandCenterApi.get('/operations');
-export const getMarketplaceCenter = () => commandCenterApi.get('/marketplace');
-export const getDealerOperations = () => commandCenterApi.get('/dealers');
-export const getAuctionOperations = () => commandCenterApi.get('/auctions');
-export const getInspectionOperations = () => commandCenterApi.get('/inspections');
-export const getFinanceOperations = () => commandCenterApi.get('/finance');
-export const getSupportOperations = () => commandCenterApi.get('/support');
-export const getSecurityOperations = () => commandCenterApi.get('/security');
-export const getInfrastructureOperations = () => commandCenterApi.get('/infrastructure');
-export const getAIOperations = () => commandCenterApi.get('/ai');
+export const getOperationsCenter = () => api.get('/command-center/operations');
+export const getMarketplaceCenter = () => api.get('/command-center/marketplace');
+export const getDealerOperations = () => api.get('/command-center/dealers');
+export const getAuctionOperations = () => api.get('/command-center/auctions');
+export const getInspectionOperations = () => api.get('/command-center/inspections');
+export const getFinanceOperations = () => api.get('/command-center/finance');
+export const getSupportOperations = () => api.get('/command-center/support');
+export const getSecurityOperations = () => api.get('/command-center/security');
+export const getInfrastructureOperations = () => api.get('/command-center/infrastructure');
+export const getAIOperations = () => api.get('/command-center/ai');
 
 // Actions
-export const getPendingActions = () => commandCenterApi.get('/actions');
-export const executeAction = (data) => commandCenterApi.post('/actions/execute', data);
+export const getPendingActions = () => api.get('/command-center/actions');
+export const executeAction = (data) => api.post('/command-center/actions/execute', data);
 
 // Notifications
-export const getNotifications = () => commandCenterApi.get('/notifications');
-export const markNotificationRead = (notificationId) => commandCenterApi.put(`/notifications/${notificationId}/read`);
+export const getNotifications = () => api.get('/command-center/notifications');
+export const markNotificationRead = (notificationId) => api.put(`/command-center/notifications/${notificationId}/read`);
 
 // Decisions
-export const getDecisions = () => commandCenterApi.get('/decisions');
+export const getDecisions = () => api.get('/command-center/decisions');
 
 // Command Palette
-export const getCommands = () => commandCenterApi.get('/commands');
-export const executeCommand = (data) => commandCenterApi.post('/commands/execute', data);
+export const getCommands = () => api.get('/command-center/commands');
+export const executeCommand = (data) => api.post('/command-center/commands/execute', data);
 
 // War Room
-export const getWarRoom = () => commandCenterApi.get('/war-room');
-export const activateWarRoom = (data) => commandCenterApi.post('/war-room/activate', data);
-export const deactivateWarRoom = () => commandCenterApi.post('/war-room/deactivate');
+export const getWarRoom = () => api.get('/command-center/war-room');
+export const activateWarRoom = (data) => api.post('/command-center/war-room/activate', data);
+export const deactivateWarRoom = () => api.post('/command-center/war-room/deactivate');
 
 // Timeline
-export const getExecutiveTimeline = (params) => commandCenterApi.get('/timeline', { params });
+export const getExecutiveTimeline = (params) => api.get('/command-center/timeline', { params });
 
 // Briefing
-export const getExecutiveBriefing = () => commandCenterApi.get('/briefing');
+export const getExecutiveBriefing = () => api.get('/command-center/briefing');
 
 // Search
-export const enterpriseSearch = (params) => commandCenterApi.get('/search', { params });
+export const enterpriseSearch = (params) => api.get('/command-center/search', { params });
 
 // Widgets
-export const getWidgets = () => commandCenterApi.get('/widgets');
-export const saveWidgetLayout = (data) => commandCenterApi.post('/widgets/layout', data);
+export const getWidgets = () => api.get('/command-center/widgets');
+export const saveWidgetLayout = (data) => api.post('/command-center/widgets/layout', data);
 
 // Regional Map
-export const getRegionalMap = () => commandCenterApi.get('/map');
+export const getRegionalMap = () => api.get('/command-center/map');
 
-export default commandCenterApi;

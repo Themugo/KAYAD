@@ -1,82 +1,71 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const xosApi = axios.create({
-  baseURL: `${API_URL}/xos`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // Dashboard
-export const getXOSDashboard = () => xosApi.get('/dashboard');
-export const getExperienceMetrics = () => xosApi.get('/metrics');
+export const getXOSDashboard = () => api.get('/xos/dashboard');
+export const getExperienceMetrics = () => api.get('/xos/metrics');
 
 // Experiences
-export const getExperiences = (params) => xosApi.get('/experiences', { params });
-export const getExperience = (id) => xosApi.get(`/experiences/${id}`);
-export const createExperience = (data) => xosApi.post('/experiences', data);
-export const updateExperience = (id, data) => xosApi.put(`/experiences/${id}`, data);
-export const deleteExperience = (id) => xosApi.delete(`/experiences/${id}`);
-export const activateExperience = (id) => xosApi.post(`/experiences/${id}/activate`);
-export const deactivateExperience = (id) => xosApi.post(`/experiences/${id}/deactivate`);
+export const getExperiences = (params) => api.get('/xos/experiences', { params });
+export const getExperience = (id) => api.get(`/xos/experiences/${id}`);
+export const createExperience = (data) => api.post('/xos/experiences', data);
+export const updateExperience = (id, data) => api.put(`/xos/experiences/${id}`, data);
+export const deleteExperience = (id) => api.delete(`/xos/experiences/${id}`);
+export const activateExperience = (id) => api.post(`/xos/experiences/${id}/activate`);
+export const deactivateExperience = (id) => api.post(`/xos/experiences/${id}/deactivate`);
 
 // Campaigns
-export const getCampaigns = (params) => xosApi.get('/campaigns', { params });
-export const getCampaign = (id) => xosApi.get(`/campaigns/${id}`);
-export const createCampaign = (data) => xosApi.post('/campaigns', data);
-export const updateCampaign = (id, data) => xosApi.put(`/campaigns/${id}`, data);
-export const deleteCampaign = (id) => xosApi.delete(`/campaigns/${id}`);
-export const launchCampaign = (id) => xosApi.post(`/campaigns/${id}/launch`);
-export const pauseCampaign = (id) => xosApi.post(`/campaigns/${id}/pause`);
-export const endCampaign = (id) => xosApi.post(`/campaigns/${id}/end`);
+export const getCampaigns = (params) => api.get('/xos/campaigns', { params });
+export const getCampaign = (id) => api.get(`/xos/campaigns/${id}`);
+export const createCampaign = (data) => api.post('/xos/campaigns', data);
+export const updateCampaign = (id, data) => api.put(`/xos/campaigns/${id}`, data);
+export const deleteCampaign = (id) => api.delete(`/xos/campaigns/${id}`);
+export const launchCampaign = (id) => api.post(`/xos/campaigns/${id}/launch`);
+export const pauseCampaign = (id) => api.post(`/xos/campaigns/${id}/pause`);
+export const endCampaign = (id) => api.post(`/xos/campaigns/${id}/end`);
 
 // Audiences
-export const getAudiences = (params) => xosApi.get('/audiences', { params });
-export const getAudienceSegments = () => xosApi.get('/audiences/segments');
-export const createAudience = (data) => xosApi.post('/audiences', data);
-export const updateAudience = (id, data) => xosApi.put(`/audiences/${id}`, data);
-export const deleteAudience = (id) => xosApi.delete(`/audiences/${id}`);
+export const getAudiences = (params) => api.get('/xos/audiences', { params });
+export const getAudienceSegments = () => api.get('/xos/audiences/segments');
+export const createAudience = (data) => api.post('/xos/audiences', data);
+export const updateAudience = (id, data) => api.put(`/xos/audiences/${id}`, data);
+export const deleteAudience = (id) => api.delete(`/xos/audiences/${id}`);
 
 // Journeys
-export const getJourneys = (params) => xosApi.get('/journeys', { params });
-export const getJourney = (id) => xosApi.get(`/journeys/${id}`);
-export const createJourney = (data) => xosApi.post('/journeys', data);
-export const updateJourney = (id, data) => xosApi.put(`/journeys/${id}`, data);
-export const deleteJourney = (id) => xosApi.delete(`/journeys/${id}`);
-export const activateJourney = (id) => xosApi.post(`/journeys/${id}/activate`);
+export const getJourneys = (params) => api.get('/xos/journeys', { params });
+export const getJourney = (id) => api.get(`/xos/journeys/${id}`);
+export const createJourney = (data) => api.post('/xos/journeys', data);
+export const updateJourney = (id, data) => api.put(`/xos/journeys/${id}`, data);
+export const deleteJourney = (id) => api.delete(`/xos/journeys/${id}`);
+export const activateJourney = (id) => api.post(`/xos/journeys/${id}/activate`);
 
 // Seasonal Themes
-export const getSeasonalThemes = (params) => xosApi.get('/themes', { params });
-export const getSeasonalThemeTemplates = () => xosApi.get('/themes/templates');
-export const createSeasonalTheme = (data) => xosApi.post('/themes', data);
-export const updateSeasonalTheme = (id, data) => xosApi.put(`/themes/${id}`, data);
-export const deleteSeasonalTheme = (id) => xosApi.delete(`/themes/${id}`);
+export const getSeasonalThemes = (params) => api.get('/xos/themes', { params });
+export const getSeasonalThemeTemplates = () => api.get('/xos/themes/templates');
+export const createSeasonalTheme = (data) => api.post('/xos/themes', data);
+export const updateSeasonalTheme = (id, data) => api.put(`/xos/themes/${id}`, data);
+export const deleteSeasonalTheme = (id) => api.delete(`/xos/themes/${id}`);
 
 // Homepage Variants
-export const getHomepageVariants = () => xosApi.get('/variants');
-export const getHomepageVariantTypes = () => xosApi.get('/variants/types');
-export const createHomepageVariant = (data) => xosApi.post('/variants', data);
-export const updateHomepageVariant = (id, data) => xosApi.put(`/variants/${id}`, data);
-export const deleteHomepageVariant = (id) => xosApi.delete(`/variants/${id}`);
+export const getHomepageVariants = () => api.get('/xos/variants');
+export const getHomepageVariantTypes = () => api.get('/xos/variants/types');
+export const createHomepageVariant = (data) => api.post('/xos/variants', data);
+export const updateHomepageVariant = (id, data) => api.put(`/xos/variants/${id}`, data);
+export const deleteHomepageVariant = (id) => api.delete(`/xos/variants/${id}`);
 
 // Navigation Rules
-export const getNavigationRules = () => xosApi.get('/navigation-rules');
-export const createNavigationRule = (data) => xosApi.post('/navigation-rules', data);
-export const updateNavigationRule = (id, data) => xosApi.put(`/navigation-rules/${id}`, data);
-export const deleteNavigationRule = (id) => xosApi.delete(`/navigation-rules/${id}`);
+export const getNavigationRules = () => api.get('/xos/navigation-rules');
+export const createNavigationRule = (data) => api.post('/xos/navigation-rules', data);
+export const updateNavigationRule = (id, data) => api.put(`/xos/navigation-rules/${id}`, data);
+export const deleteNavigationRule = (id) => api.delete(`/xos/navigation-rules/${id}`);
 
 // Analytics
-export const getExperienceAnalytics = (params) => xosApi.get('/analytics', { params });
-export const trackExperienceEvent = (data) => xosApi.post('/analytics/track', data);
+export const getExperienceAnalytics = (params) => api.get('/xos/analytics', { params });
+export const trackExperienceEvent = (data) => api.post('/xos/analytics/track', data);
 
 // AI
-export const getAIRecommendations = () => xosApi.get('/ai/recommendations');
+export const getAIRecommendations = () => api.get('/xos/ai/recommendations');
 
 // Resolution
-export const resolveExperience = (params) => xosApi.get('/resolve', { params });
+export const resolveExperience = (params) => api.get('/xos/resolve', { params });
 
-export default xosApi;

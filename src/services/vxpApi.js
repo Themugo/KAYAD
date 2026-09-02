@@ -1,70 +1,59 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const vxpApi = axios.create({
-  baseURL: `${API_URL}/vxp`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // Dashboard
-export const getVXPStats = () => vxpApi.get('/stats');
+export const getVXPStats = () => api.get('/vxp/stats');
 
 // Pages
-export const getPages = (params) => vxpApi.get('/pages', { params });
-export const getPage = (id) => vxpApi.get(`/pages/${id}`);
-export const createPage = (data) => vxpApi.post('/pages', data);
-export const updatePage = (id, data) => vxpApi.put(`/pages/${id}`, data);
-export const deletePage = (id) => vxpApi.delete(`/pages/${id}`);
-export const publishPage = (id) => vxpApi.post(`/pages/${id}/publish`);
-export const duplicatePage = (id) => vxpApi.post(`/pages/${id}/duplicate`);
+export const getPages = (params) => api.get('/vxp/pages', { params });
+export const getPage = (id) => api.get(`/vxp/pages/${id}`);
+export const createPage = (data) => api.post('/vxp/pages', data);
+export const updatePage = (id, data) => api.put(`/vxp/pages/${id}`, data);
+export const deletePage = (id) => api.delete(`/vxp/pages/${id}`);
+export const publishPage = (id) => api.post(`/vxp/pages/${id}/publish`);
+export const duplicatePage = (id) => api.post(`/vxp/pages/${id}/duplicate`);
 
 // Sections
-export const getSections = (params) => vxpApi.get('/sections', { params });
-export const getSectionTemplates = () => vxpApi.get('/sections/templates');
-export const createSection = (data) => vxpApi.post('/sections', data);
-export const updateSection = (id, data) => vxpApi.put(`/sections/${id}`, data);
-export const deleteSection = (id) => vxpApi.delete(`/sections/${id}`);
-export const reorderSections = (data) => vxpApi.post('/sections/reorder', data);
+export const getSections = (params) => api.get('/vxp/sections', { params });
+export const getSectionTemplates = () => api.get('/vxp/sections/templates');
+export const createSection = (data) => api.post('/vxp/sections', data);
+export const updateSection = (id, data) => api.put(`/vxp/sections/${id}`, data);
+export const deleteSection = (id) => api.delete(`/vxp/sections/${id}`);
+export const reorderSections = (data) => api.post('/vxp/sections/reorder', data);
 
 // Components
-export const getComponents = (params) => vxpApi.get('/components', { params });
-export const getComponentLibrary = () => vxpApi.get('/components/library');
-export const createComponent = (data) => vxpApi.post('/components', data);
-export const updateComponent = (id, data) => vxpApi.put(`/components/${id}`, data);
-export const deleteComponent = (id) => vxpApi.delete(`/components/${id}`);
+export const getComponents = (params) => api.get('/vxp/components', { params });
+export const getComponentLibrary = () => api.get('/vxp/components/library');
+export const createComponent = (data) => api.post('/vxp/components', data);
+export const updateComponent = (id, data) => api.put(`/vxp/components/${id}`, data);
+export const deleteComponent = (id) => api.delete(`/vxp/components/${id}`);
 
 // Themes
-export const getThemes = (params) => vxpApi.get('/themes', { params });
-export const getTheme = (id) => vxpApi.get(`/themes/${id}`);
-export const getDefaultTheme = () => vxpApi.get('/themes/default');
-export const createTheme = (data) => vxpApi.post('/themes', data);
-export const updateTheme = (id, data) => vxpApi.put(`/themes/${id}`, data);
-export const deleteTheme = (id) => vxpApi.delete(`/themes/${id}`);
+export const getThemes = (params) => api.get('/vxp/themes', { params });
+export const getTheme = (id) => api.get(`/vxp/themes/${id}`);
+export const getDefaultTheme = () => api.get('/vxp/themes/default');
+export const createTheme = (data) => api.post('/vxp/themes', data);
+export const updateTheme = (id, data) => api.put(`/vxp/themes/${id}`, data);
+export const deleteTheme = (id) => api.delete(`/vxp/themes/${id}`);
 
 // Cards
-export const getCards = (params) => vxpApi.get('/cards', { params });
-export const getCardFields = () => vxpApi.get('/cards/fields');
-export const createCard = (data) => vxpApi.post('/cards', data);
-export const updateCard = (id, data) => vxpApi.put(`/cards/${id}`, data);
-export const deleteCard = (id) => vxpApi.delete(`/cards/${id}`);
+export const getCards = (params) => api.get('/vxp/cards', { params });
+export const getCardFields = () => api.get('/vxp/cards/fields');
+export const createCard = (data) => api.post('/vxp/cards', data);
+export const updateCard = (id, data) => api.put(`/vxp/cards/${id}`, data);
+export const deleteCard = (id) => api.delete(`/vxp/cards/${id}`);
 
 // Advertisements
-export const getAdvertisements = (params) => vxpApi.get('/advertisements', { params });
-export const getAdZones = () => vxpApi.get('/advertisements/zones');
-export const createAdvertisement = (data) => vxpApi.post('/advertisements', data);
-export const updateAdvertisement = (id, data) => vxpApi.put(`/advertisements/${id}`, data);
-export const deleteAdvertisement = (id) => vxpApi.delete(`/advertisements/${id}`);
+export const getAdvertisements = (params) => api.get('/vxp/advertisements', { params });
+export const getAdZones = () => api.get('/vxp/advertisements/zones');
+export const createAdvertisement = (data) => api.post('/vxp/advertisements', data);
+export const updateAdvertisement = (id, data) => api.put(`/vxp/advertisements/${id}`, data);
+export const deleteAdvertisement = (id) => api.delete(`/vxp/advertisements/${id}`);
 
 // Versions
-export const getVersions = (params) => vxpApi.get('/versions', { params });
-export const rollbackVersion = (id) => vxpApi.post(`/versions/${id}/rollback`);
+export const getVersions = (params) => api.get('/vxp/versions', { params });
+export const rollbackVersion = (id) => api.post(`/vxp/versions/${id}/rollback`);
 
 // AI
-export const aiDesignAssist = (data) => vxpApi.post('/ai/design', data);
+export const aiDesignAssist = (data) => api.post('/vxp/ai/design', data);
 
-export default vxpApi;

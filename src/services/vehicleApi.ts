@@ -1,4 +1,4 @@
-import { getCsrfHeaders } from '../utils/csrf';
+import { request, HttpRequestError } from '../api/httpRequest';
 /**
  * Real backend vehicle/car API client. KAYAD Fusion Phase 4/5.
  *
@@ -32,7 +32,6 @@ import { getCsrfHeaders } from '../utils/csrf';
 
 import type { Vehicle } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
 
 /** Raw shape of a single row from the backend's real `cars` table
  * (supabase/migrations/..._foundational_tables.sql.sql, cross-checked
@@ -130,37 +129,13 @@ export class VehicleApiError extends Error {
 }
 
 async function vehicleFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getCsrfHeaders(options.method),
-        ...(options.headers || {}),
-      },
-    });
-  } catch {
-    throw new VehicleApiError(
-      'Unable to reach KAYAD servers. Please check your connection and try again.',
-      'network'
-    );
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const kind: VehicleApiErrorKind = error.status === 404 ? 'not_found' : 'server';
+    throw new VehicleApiError(error.message, kind, error.status);
   }
-
-  let body: T & { success?: boolean; message?: string };
-  try {
-    body = await res.json();
-  } catch {
-    throw new VehicleApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    const kind: VehicleApiErrorKind = res.status === 404 ? 'not_found' : 'server';
-    throw new VehicleApiError(body.message || 'Request failed.', kind, res.status);
-  }
-
-  return body;
 }
 
 export interface GetCarsParams {
@@ -392,31 +367,14 @@ export async function createCar(payload: CreateCarPayload): Promise<CreateCarRes
   // own upload.array("images", 10).
   (images || []).forEach((file) => formData.append('images', file));
 
-  let res: Response;
   try {
-    res = await fetch(`${API_BASE}/api/cars`, {
+    return await request<CreateCarResponse>('/api/cars', {
       method: 'POST',
-      credentials: 'include',
       body: formData,
     });
-  } catch {
-    throw new VehicleApiError(
-      'Unable to reach KAYAD servers. Please check your connection and try again.',
-      'network'
-    );
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    throw new VehicleApiError(error.message, error.status === 404 ? 'not_found' : 'server', error.status);
   }
-
-  let body: CreateCarResponse & { message?: string };
-  try {
-    body = await res.json();
-  } catch {
-    throw new VehicleApiError('Unexpected response from server.', 'server', res.status);
-  }
-
-  if (!res.ok) {
-    throw new VehicleApiError(body.message || 'Failed to publish listing.', 'server', res.status);
-  }
-
-  return body;
 }
 

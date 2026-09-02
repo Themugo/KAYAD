@@ -1,14 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const cmsApi = axios.create({
-  baseURL: `${API_URL}/cms`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 // Add auth token if available
 
@@ -16,114 +6,113 @@ const cmsApi = axios.create({
 // PAGES
 // ============================================
 
-export const getPages = (params = {}) => cmsApi.get('/pages', { params });
-export const getPageById = (id) => cmsApi.get(`/pages/${id}`);
-export const getPageBySlug = (slug) => cmsApi.get(`/pages/s/${slug}`);
-export const createPage = (data) => cmsApi.post('/pages', data);
-export const updatePage = (id, data) => cmsApi.put(`/pages/${id}`, data);
-export const deletePage = (id) => cmsApi.delete(`/pages/${id}`);
-export const publishPage = (id) => cmsApi.post(`/pages/${id}/publish`);
-export const unpublishPage = (id) => cmsApi.post(`/pages/${id}/unpublish`);
-export const schedulePage = (id, scheduleAt) => cmsApi.post(`/pages/${id}/schedule`, { scheduleAt });
-export const rollbackPage = (id, version) => cmsApi.post(`/pages/${id}/rollback`, { version });
+export const getPages = (params = {}) => api.get('/cms/pages', { params });
+export const getPageById = (id) => api.get(`/cms/pages/${id}`);
+export const getPageBySlug = (slug) => api.get(`/cms/pages/s/${slug}`);
+export const createPage = (data) => api.post('/cms/pages', data);
+export const updatePage = (id, data) => api.put(`/cms/pages/${id}`, data);
+export const deletePage = (id) => api.delete(`/cms/pages/${id}`);
+export const publishPage = (id) => api.post(`/cms/pages/${id}/publish`);
+export const unpublishPage = (id) => api.post(`/cms/pages/${id}/unpublish`);
+export const schedulePage = (id, scheduleAt) => api.post(`/cms/pages/${id}/schedule`, { scheduleAt });
+export const rollbackPage = (id, version) => api.post(`/cms/pages/${id}/rollback`, { version });
 
 // ============================================
 // CONTENT (BLOG / NEWS)
 // ============================================
 
-export const getContents = (params = {}) => cmsApi.get('/content', { params });
-export const getContentById = (id) => cmsApi.get(`/content/${id}`);
-export const getContentBySlug = (slug) => cmsApi.get(`/content/s/${slug}`);
-export const createContent = (data) => cmsApi.post('/content', data);
-export const updateContent = (id, data) => cmsApi.put(`/content/${id}`, data);
-export const deleteContent = (id) => cmsApi.delete(`/content/${id}`);
+export const getContents = (params = {}) => api.get('/cms/content', { params });
+export const getContentById = (id) => api.get(`/cms/content/${id}`);
+export const getContentBySlug = (slug) => api.get(`/cms/content/s/${slug}`);
+export const createContent = (data) => api.post('/cms/content', data);
+export const updateContent = (id, data) => api.put(`/cms/content/${id}`, data);
+export const deleteContent = (id) => api.delete(`/cms/content/${id}`);
 
 // ============================================
 // FAQS
 // ============================================
 
-export const getFaqs = (params = {}) => cmsApi.get('/faqs', { params });
-export const getFaqById = (id) => cmsApi.get(`/faqs/${id}`);
-export const createFaq = (data) => cmsApi.post('/faqs', data);
-export const updateFaq = (id, data) => cmsApi.put(`/faqs/${id}`, data);
-export const deleteFaq = (id) => cmsApi.delete(`/faqs/${id}`);
-export const incrementFaqPopularity = (id) => cmsApi.post(`/faqs/${id}/popularity`);
+export const getFaqs = (params = {}) => api.get('/cms/faqs', { params });
+export const getFaqById = (id) => api.get(`/cms/faqs/${id}`);
+export const createFaq = (data) => api.post('/cms/faqs', data);
+export const updateFaq = (id, data) => api.put(`/cms/faqs/${id}`, data);
+export const deleteFaq = (id) => api.delete(`/cms/faqs/${id}`);
+export const incrementFaqPopularity = (id) => api.post(`/cms/faqs/${id}/popularity`);
 
 // ============================================
 // CAMPAIGNS
 // ============================================
 
-export const getCampaigns = (params = {}) => cmsApi.get('/campaigns', { params });
-export const getCampaignById = (id) => cmsApi.get(`/campaigns/${id}`);
-export const createCampaign = (data) => cmsApi.post('/campaigns', data);
-export const updateCampaign = (id, data) => cmsApi.put(`/campaigns/${id}`, data);
-export const deleteCampaign = (id) => cmsApi.delete(`/campaigns/${id}`);
+export const getCampaigns = (params = {}) => api.get('/cms/campaigns', { params });
+export const getCampaignById = (id) => api.get(`/cms/campaigns/${id}`);
+export const createCampaign = (data) => api.post('/cms/campaigns', data);
+export const updateCampaign = (id, data) => api.put(`/cms/campaigns/${id}`, data);
+export const deleteCampaign = (id) => api.delete(`/cms/campaigns/${id}`);
 
 // ============================================
 // BANNERS
 // ============================================
 
-export const getBanners = (params = {}) => cmsApi.get('/banners', { params });
-export const getBannerById = (id) => cmsApi.get(`/banners/${id}`);
-export const createBanner = (data) => cmsApi.post('/banners', data);
-export const updateBanner = (id, data) => cmsApi.put(`/banners/${id}`, data);
-export const deleteBanner = (id) => cmsApi.delete(`/banners/${id}`);
-export const reorderBanners = (banners) => cmsApi.post('/banners/reorder', { banners });
+export const getBanners = (params = {}) => api.get('/cms/banners', { params });
+export const getBannerById = (id) => api.get(`/cms/banners/${id}`);
+export const createBanner = (data) => api.post('/cms/banners', data);
+export const updateBanner = (id, data) => api.put(`/cms/banners/${id}`, data);
+export const deleteBanner = (id) => api.delete(`/cms/banners/${id}`);
+export const reorderBanners = (banners) => api.post('/cms/banners/reorder', { banners });
 
 // ============================================
 // MEDIA LIBRARY
 // ============================================
 
-export const getMedia = (params = {}) => cmsApi.get('/media', { params });
-export const getMediaById = (id) => cmsApi.get(`/media/${id}`);
-export const uploadMedia = (data) => cmsApi.post('/media', data, {
+export const getMedia = (params = {}) => api.get('/cms/media', { params });
+export const getMediaById = (id) => api.get(`/cms/media/${id}`);
+export const uploadMedia = (data) => api.post('/cms/media', data, {
   headers: { 'Content-Type': 'multipart/form-data' },
 });
-export const updateMedia = (id, data) => cmsApi.put(`/media/${id}`, data);
-export const deleteMedia = (id) => cmsApi.delete(`/media/${id}`);
+export const updateMedia = (id, data) => api.put(`/cms/media/${id}`, data);
+export const deleteMedia = (id) => api.delete(`/cms/media/${id}`);
 
 // ============================================
 // TAXONOMIES (Categories & Tags)
 // ============================================
 
-export const getTaxonomies = (type) => cmsApi.get('/taxonomies', { type });
-export const createTaxonomy = (data) => cmsApi.post('/taxonomies', data);
-export const updateTaxonomy = (id, data) => cmsApi.put(`/taxonomies/${id}`, data);
-export const deleteTaxonomy = (id) => cmsApi.delete(`/taxonomies/${id}`);
+export const getTaxonomies = (type) => api.get('/cms/taxonomies', { type });
+export const createTaxonomy = (data) => api.post('/cms/taxonomies', data);
+export const updateTaxonomy = (id, data) => api.put(`/cms/taxonomies/${id}`, data);
+export const deleteTaxonomy = (id) => api.delete(`/cms/taxonomies/${id}`);
 
 // ============================================
 // REVISIONS
 // ============================================
 
 export const getRevisions = (contentId, contentType) => 
-  cmsApi.get('/revisions', { params: { contentId, contentType } });
-export const getRevisionById = (id) => cmsApi.get(`/revisions/${id}`);
+  api.get('/cms/revisions', { params: { contentId, contentType } });
+export const getRevisionById = (id) => api.get(`/cms/revisions/${id}`);
 
 // ============================================
 // A/B TESTS
 // ============================================
 
-export const getABTests = (status) => cmsApi.get('/ab-tests', { status });
-export const createABTest = (data) => cmsApi.post('/ab-tests', data);
-export const updateABTest = (id, data) => cmsApi.put(`/ab-tests/${id}`, data);
-export const deleteABTest = (id) => cmsApi.delete(`/ab-tests/${id}`);
+export const getABTests = (status) => api.get('/cms/ab-tests', { status });
+export const createABTest = (data) => api.post('/cms/ab-tests', data);
+export const updateABTest = (id, data) => api.put(`/cms/ab-tests/${id}`, data);
+export const deleteABTest = (id) => api.delete(`/cms/ab-tests/${id}`);
 
 // ============================================
 // ANALYTICS
 // ============================================
 
-export const trackAnalytics = (data) => cmsApi.post('/analytics/track', data);
-export const getAnalytics = (params) => cmsApi.get('/analytics', { params });
-export const getContentAnalytics = (contentId) => cmsApi.get(`/analytics/content/${contentId}`);
-export const getDashboardStats = () => cmsApi.get('/dashboard/stats');
+export const trackAnalytics = (data) => api.post('/cms/analytics/track', data);
+export const getAnalytics = (params) => api.get('/cms/analytics', { params });
+export const getContentAnalytics = (contentId) => api.get(`/cms/analytics/content/${contentId}`);
+export const getDashboardStats = () => api.get('/cms/dashboard/stats');
 
 // ============================================
 // PUBLISHING CALENDAR & SEARCH
 // ============================================
 
 export const getPublishingCalendar = (startDate, endDate) =>
-  cmsApi.get('/calendar', { params: { startDate, endDate } });
+  api.get('/cms/calendar', { params: { startDate, endDate } });
 export const searchContent = (q, type) =>
-  cmsApi.get('/search', { params: { q, type } });
+  api.get('/cms/search', { params: { q, type } });
 
-export default cmsApi;

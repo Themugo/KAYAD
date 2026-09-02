@@ -1,46 +1,35 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-const ghostCheckersApi = axios.create({
-  baseURL: `${API_URL}/ghost-checkers`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+import { api } from '../api/httpClient';
 
 
 // Landing
-export const getLandingData = () => ghostCheckersApi.get('/landing');
+export const getLandingData = () => api.get('/ghost-checkers/landing');
 
 // Booking
-export const createBooking = (data) => ghostCheckersApi.post('/booking', data);
-export const getInspectionStatus = (reference) => ghostCheckersApi.get(`/status/${reference}`);
+export const createBooking = (data) => api.post('/ghost-checkers/booking', data);
+export const getInspectionStatus = (reference) => api.get(`/ghost-checkers/status/${reference}`);
 
 // Packages
-export const getPackages = () => ghostCheckersApi.get('/packages');
+export const getPackages = () => api.get('/ghost-checkers/packages');
 
 // Inspectors
-export const getInspectors = (params) => ghostCheckersApi.get('/inspectors', { params });
-export const getInspectorProfile = (inspectorId) => ghostCheckersApi.get(`/inspectors/${inspectorId}`);
+export const getInspectors = (params) => api.get('/ghost-checkers/inspectors', { params });
+export const getInspectorProfile = (inspectorId) => api.get(`/ghost-checkers/inspectors/${inspectorId}`);
 
 // Checklist
-export const getInspectionChecklist = () => ghostCheckersApi.get('/checklist');
+export const getInspectionChecklist = () => api.get('/ghost-checkers/checklist');
 
 // Vehicle Passport
-export const getVehiclePassport = (vin) => ghostCheckersApi.get(`/passport/${vin}`);
+export const getVehiclePassport = (vin) => api.get(`/ghost-checkers/passport/${vin}`);
 
 // Reports
-export const getInspectionReport = (reportId) => ghostCheckersApi.get(`/reports/${reportId}`);
+export const getInspectionReport = (reportId) => api.get(`/ghost-checkers/reports/${reportId}`);
 
 // Analytics
-export const getAnalytics = () => ghostCheckersApi.get('/analytics');
+export const getAnalytics = () => api.get('/ghost-checkers/analytics');
 
 // AI Assistant
-export const askAssistant = (data) => ghostCheckersApi.post('/assistant', data);
+export const askAssistant = (data) => api.post('/ghost-checkers/assistant', data);
 
 // Dealer Certification
-export const getDealerCertification = () => ghostCheckersApi.get('/certification');
+export const getDealerCertification = () => api.get('/ghost-checkers/certification');
 
-export default ghostCheckersApi;
