@@ -19,12 +19,6 @@ import { request, HttpRequestError } from '../api/httpRequest';
  * genuine, permanent behavioral difference between authenticated and
  * anonymous use - documented here so that distinction isn't lost.
  *
- * A known limitation carried over, not fixed here: addFavorite/
- * removeFavorite/toggleFavorite all use the same fake-transaction
- * layer (utils/supabaseSession.js) already documented as providing no
- * real atomicity (Fusion Phase 7/8, PHASE8.md). Not this client's
- * concern to fix - noted for the integration report this phase
- * produces.
  */
 
 

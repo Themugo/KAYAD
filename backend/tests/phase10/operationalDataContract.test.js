@@ -1,12 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "@jest/globals";
 import fs from "node:fs";
 import path from "node:path";
 
-const root = path.resolve(process.cwd());
+const root = path.resolve(process.cwd(), "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 
 describe("Phase 10 operational data contract", () => {
-  it("defines the backing tables and reminder columns", () => {
+  test("defines the backing tables and reminder columns", () => {
     const sql = read("supabase/migrations/20260902090000_phase10_operational_data_contract.sql");
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS events");
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS search_analytics");
@@ -15,7 +15,7 @@ describe("Phase 10 operational data contract", () => {
     expect(sql).toContain("idx_escrows_payment_unique");
   });
 
-  it("uses atomic payment settlement RPCs", () => {
+  test("uses atomic payment settlement RPCs", () => {
     const source = read("backend/services/paymentCallback.service.js");
     expect(source).toContain("atomicSettleBidPayment");
     expect(source).toContain("atomicSettlePurchasePayment");
@@ -23,7 +23,7 @@ describe("Phase 10 operational data contract", () => {
     expect(source).not.toContain('create("escrows"');
   });
 
-  it("does not bypass the field-mapped data layer with direct Supabase table queries", () => {
+  test("does not bypass the field-mapped data layer with direct Supabase table queries", () => {
     const files = [
       "backend/services/recommendationService.js",
       "backend/services/searchInsightsService.js",

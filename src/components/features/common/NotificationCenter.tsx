@@ -33,8 +33,8 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
   const { notifications, unreadCount, markAsRead, markAllRead, deleteNotif } = useNotifications();
   const visibleNotifications = useMemo(() => notifications.slice(0, 20), [notifications]);
 
-  const getNotifIcon = (type: Notification['type']) => {
-    const config = TYPE_CONFIG[type] || TYPE_CONFIG.info;
+  const getNotifIcon = (type: string) => {
+    const config = TYPE_CONFIG[type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.info;
     return config.icon;
   };
 
@@ -72,7 +72,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
         <div className="max-h-[380px] overflow-y-auto">
           {notifications.map((n) => {
             const Icon = getNotifIcon(n.type);
-            const config = TYPE_CONFIG[n.type] || TYPE_CONFIG.info;
+            const config = TYPE_CONFIG[n.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.info;
             const content = (
               <div
                 className={`px-5 py-3 border-b border-white/3 flex gap-3 items-start cursor-pointer transition-colors ${

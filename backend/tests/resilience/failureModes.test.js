@@ -25,6 +25,7 @@ process.env.MPESA_CONSUMER_SECRET = "cs";
 process.env.MPESA_SHORTCODE = "174379";
 process.env.MPESA_PASSKEY = "pk";
 process.env.MPESA_CALLBACK_URL = "https://api.kayad.space/api/payments/callback";
+process.env.KAYAD_MASTER_PAYBILL = "174379";
 
 const ORIGINAL_ENV = { ...process.env };
 
@@ -96,7 +97,7 @@ describe("successful STK flow", () => {
   test("bid security with reachable M-Pesa → pending deposit with real checkout id", async () => {
     axiosMock.get.mockResolvedValue({ data: { access_token: "tok" } });
     axiosMock.post.mockResolvedValue({ data: { CheckoutRequestID: "ws_real_1", ResponseCode: "0" } });
-    dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1" });
+    dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1", auctionStatus: "live" });
     dbMock.findOne.mockResolvedValue(null); // no platform config override
     dbMock.create.mockImplementation(async (_t, data) => ({ id: "tx-1", ...data }));
 
@@ -183,7 +184,7 @@ describe("bid security failure modes", () => {
   test("STK failure in production → failure result, NO transaction created", async () => {
     process.env.NODE_ENV = "production";
     axiosMock.get.mockRejectedValue(new Error("Request failed with status code 500"));
-    dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1" });
+    dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1", auctionStatus: "live" });
     dbMock.findOne.mockResolvedValue(null);
 
     const result = await initiateBidSecurity({ auctionId: "auc-1", userId: "u1", phone: "0712345678", amount: 5000 });
@@ -191,20 +192,17 @@ describe("bid security failure modes", () => {
     expect(dbMock.create).not.toHaveBeenCalled();
   }, 60000);
 
-  test("STK failure in development → mock mode, but deposit stays pending (never success)", async () => {
+  test("STK failure in development → fails closed and creates no transaction", async () => {
     process.env.NODE_ENV = "development";
     axiosMock.get.mockRejectedValue(new Error("down"));
-    dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1" });
+    dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1", auctionStatus: "live" });
     dbMock.findOne.mockResolvedValue(null);
     dbMock.create.mockImplementation(async (_t, data) => ({ id: "tx-1", ...data }));
 
     const result = await initiateBidSecurity({ auctionId: "auc-1", userId: "u1", phone: "0712345678", amount: 5000 });
-    expect(result.success).toBe(true);
-    expect(result.mode).toBe("mock");
-    expect(dbMock.create).toHaveBeenCalledWith(
-      "transactions",
-      expect.objectContaining({ status: "pending" }),
-    );
+    expect(result.success).toBe(false);
+    expect(result.message).toMatch(/unable to initiate deposit payment/i);
+    expect(dbMock.create).not.toHaveBeenCalled();
   }, 60000);
 
   test("callback: failed resultCode marks transaction failed via update (no .save crash)", async () => {

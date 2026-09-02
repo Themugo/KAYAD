@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { PageHeader, Card, Badge, Button, Input, LazyImage } from '../components/ui';
 import DealerProfileModal from '../components/DealerProfileModal';
-import DealerBusinessView from './DealerBusinessView';
+import DealerBusinessView from './DealersView/components/DealerBusinessView';
 
 interface DealersViewProps {
   dealers: Dealer[];

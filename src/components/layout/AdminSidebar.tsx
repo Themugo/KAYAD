@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
-  LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign,
+  LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign, UserCheck, Star, Shield, Crown, PanelRight, ChevronLeft,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
   Radio, Palette, Zap, Database, Layers, Layout, Target, Bot, Binary,

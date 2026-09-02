@@ -5,7 +5,7 @@ import {
   Download, Eye, CheckSquare, Square, X, Plus, ChevronDown, Tag,
   FolderPlus, RefreshCw, ImageIcon, Maximize2, ZoomIn
 } from 'lucide-react';
-import * as cmsApi from '../../../services/cmsApi';
+import * as cmsApi from '../../../../services/cmsApi';
 
 // Design System Colors
 const colors = {

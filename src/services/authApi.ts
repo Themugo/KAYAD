@@ -106,6 +106,33 @@ export async function logout(): Promise<void> {
   await authFetch('/api/v1/auth/logout', { method: 'POST' });
 }
 
+export async function login(email: string, password: string): Promise<BackendUser> {
+  const res = await authFetch('/api/v1/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.user) throw new AuthApiError(res.message || 'Login failed.', 'unknown', 500);
+  return res.user;
+}
+
+export async function register(body: Record<string, unknown>): Promise<BackendUser> {
+  const res = await authFetch('/api/v1/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  if (!res.user) throw new AuthApiError(res.message || 'Registration failed.', 'unknown', 500);
+  return res.user;
+}
+
+export async function updateProfile(body: Record<string, unknown>): Promise<BackendUser> {
+  const res = await authFetch('/api/v1/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  if (!res.user) throw new AuthApiError(res.message || 'Profile update failed.', 'unknown', 500);
+  return res.user;
+}
+
 
 
 /** Generic authenticated auth request for the remaining v1 auth endpoints. */

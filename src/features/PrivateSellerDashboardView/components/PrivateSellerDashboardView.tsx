@@ -161,32 +161,32 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
             <p className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-blue-300" /> Buyer Inquiries
             </p>
-            <p className="text-2xl font-black font-display text-white">9 Direct Chats</p>
-            <p className="text-[11px] text-blue-200 font-bold truncate">Avg Response: &lt;15 mins</p>
+            <p className="text-2xl font-black font-display text-white">{messages.length} Messages</p>
+            <p className="text-[11px] text-blue-200 font-bold truncate">Live count from supplied conversation data</p>
           </div>
 
           <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 space-y-1">
             <p className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-emerald-400" /> Escrow Vault
             </p>
-            <p className="text-2xl font-black font-display text-white">Ksh 7.3M</p>
-            <p className="text-[11px] text-emerald-300 font-bold truncate">1 Active Deal Secured</p>
+            <p className="text-2xl font-black font-display text-white">{deals.length} Records</p>
+            <p className="text-[11px] text-emerald-300 font-bold truncate">Escrow records supplied by the backend</p>
           </div>
 
           <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 space-y-1">
             <p className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
               <DollarSign className="w-3.5 h-3.5 text-rose-300" /> Offers Pending
             </p>
-            <p className="text-2xl font-black font-display text-amber-300">{offers.filter(o => o.status === 'Pending').length} Offers</p>
-            <p className="text-[11px] text-slate-200 font-bold truncate">Highest: Ksh 7.45M</p>
+            <p className="text-2xl font-black font-display text-amber-300">No offers</p>
+            <p className="text-[11px] text-slate-200 font-bold truncate">No seller offer feed is connected</p>
           </div>
 
           <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 space-y-1 col-span-2 sm:col-span-1">
             <p className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Completed Sales
             </p>
-            <p className="text-2xl font-black font-display text-white">1 Vehicle</p>
-            <p className="text-[11px] text-emerald-300 font-bold truncate">Payout Cleared ✓</p>
+            <p className="text-2xl font-black font-display text-white">Unavailable</p>
+            <p className="text-[11px] text-emerald-300 font-bold truncate">No completed-sales API is connected</p>
           </div>
         </div>
       </div>
@@ -199,11 +199,11 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
           {[
             { id: 'overview', label: '1. Overview', icon: <Car className="w-3.5 h-3.5" /> },
             { id: 'listings', label: `2. My Listings (${listings.length})`, icon: <FileText className="w-3.5 h-3.5" /> },
-            { id: 'inquiries', label: '3. Buyer Inquiries (9)', icon: <MessageSquare className="w-3.5 h-3.5" /> },
-            { id: 'escrow', label: '4. Escrow Transactions (1)', icon: <Lock className="w-3.5 h-3.5" /> },
-            { id: 'inspections', label: `5. Inspection Requests (${inspectionRequests.length})`, icon: <Wrench className="w-3.5 h-3.5" /> },
-            { id: 'offers', label: `6. Offers Received (${offers.filter(o => o.status === 'Pending').length})`, icon: <DollarSign className="w-3.5 h-3.5" /> },
-            { id: 'sales', label: `7. Completed Sales (${completedSales.length})`, icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+            { id: 'inquiries', label: `3. Buyer Messages (${messages.length})`, icon: <MessageSquare className="w-3.5 h-3.5" /> },
+            { id: 'escrow', label: `4. Escrow Records (${deals.length})`, icon: <Lock className="w-3.5 h-3.5" /> },
+            { id: 'inspections', label: '5. Inspection Requests', icon: <Wrench className="w-3.5 h-3.5" /> },
+            { id: 'offers', label: '6. Offers Received', icon: <DollarSign className="w-3.5 h-3.5" /> },
+            { id: 'sales', label: '7. Completed Sales', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
             { id: 'verification', label: '8. Verification Status', icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> }
           ].map((tab) => (
             <button

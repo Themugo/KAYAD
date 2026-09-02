@@ -97,6 +97,30 @@ jest.unstable_mockModule("../../utils/logger.js", () => ({
   logWarn: jest.fn(),
   logError: jest.fn(),
 }));
+jest.unstable_mockModule("../../utils/atomicTransactions.js", () => ({
+  atomicSettleBidPayment: jest.fn().mockImplementation(async (paymentId, receipt) => {
+    const payment = await dbMock.findOne("payments", { id: paymentId });
+    if (payment) {
+      await dbMock.update("payments", paymentId, {
+        status: "success",
+        mpesaReceipt: receipt,
+        paidAt: new Date(),
+      });
+    }
+    return { ok: true };
+  }),
+  atomicSettlePurchasePayment: jest.fn().mockImplementation(async (paymentId, receipt) => {
+    const payment = await dbMock.findOne("payments", { id: paymentId });
+    if (payment) {
+      await dbMock.update("payments", paymentId, {
+        status: "success",
+        mpesaReceipt: receipt,
+        paidAt: new Date(),
+      });
+    }
+    return { ok: true };
+  }),
+}));
 
 const { handleMpesaCallback } = await import("../../services/paymentCallback.service.js");
 
@@ -176,8 +200,8 @@ describe("handleMpesaCallback", () => {
     await handleMpesaCallback(makeCallback()); // Safaricom retry
 
     expect(payments[0].status).toBe("success");
-    const escrowCreations = dbMock.create.mock.calls.filter(([table]) => table === "escrows");
-    expect(escrowCreations).toHaveLength(1);
+    const { atomicSettlePurchasePayment } = await import("../../utils/atomicTransactions.js");
+    expect(atomicSettlePurchasePayment).toHaveBeenCalledTimes(1);
   });
 
   test("amount integrity: a callback reporting a different amount fails the payment, never settles it", async () => {

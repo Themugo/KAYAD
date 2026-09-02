@@ -2,7 +2,7 @@
  * VehicleCard - Premium unified vehicle card component
  * 
  * @example
- * import VehicleCard, { VehicleCardSkeleton } from './components/VehicleCard';
+ * import VehicleCard, { VehicleCardSkeleton } from './VehicleCard';
  * 
  * // Basic usage
  * <VehicleCard car={carData} />

@@ -1,5 +1,4 @@
 import { paymentsAPI } from '../api/api';
-import { paymentsAPI } from '../api/api';
 import { useEffect, useState } from 'react';
 import { CreditCard, Smartphone, Building2, Clock, CheckCircle, AlertCircle, Download, ExternalLink } from 'lucide-react';
 import { formatKES } from '../utils/helpers';
@@ -62,19 +61,17 @@ export default function Payments() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="font-serif text-2xl text-white font-bold mb-6">Payments</h1>
 
-          {/* Balance cards */}
+          {/* Real payment-history summary; no synthetic wallet balance is shown. */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-              <p className="text-white/50 text-xs mb-1">Available Balance</p>
-              <p className="font-serif text-3xl text-white font-bold">{formatKES(balance)}</p>
-              <button className="mt-3 px-4 py-2 bg-gold-500 text-charcoal-900 text-xs font-bold rounded-lg hover:bg-gold-600 transition-colors">
-                Withdraw
-              </button>
+              <p className="text-white/50 text-xs mb-1">Completed Payments</p>
+              <p className="font-serif text-3xl text-white font-bold">{transactions.filter((t) => t.status === 'completed').length}</p>
+              <p className="mt-2 text-white/30 text-[10px]">Count from your payment history</p>
             </div>
             <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-              <p className="text-white/50 text-xs mb-1">Pending</p>
-              <p className="font-serif text-3xl text-white font-bold">{formatKES(pendingBalance)}</p>
-              <p className="mt-2 text-white/30 text-[10px]">Available in 2-3 days</p>
+              <p className="text-white/50 text-xs mb-1">Pending Payments</p>
+              <p className="font-serif text-3xl text-white font-bold">{transactions.filter((t) => t.status === 'pending').length}</p>
+              <p className="mt-2 text-white/30 text-[10px]">Count from your payment history</p>
             </div>
           </div>
         </div>

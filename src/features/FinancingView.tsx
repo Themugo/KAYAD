@@ -191,12 +191,13 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     } finally { setApplicationSubmitting(false); }
   };
 
-  const handleDocToggle = () => {
+  const handleDocToggle = (_documentKey?: string) => {
     setApplicationError('Document upload is not connected yet. No document was marked as verified.');
   };
 
-  // Only real marketplace vehicles may appear here; never synthesize financed vehicles.
-  const financedVehicles = useMemo(() => (vehicles || []).slice(0, 3), [vehicles]);
+  // No active API currently exposes vehicles actually financed through KAYAD.
+  // Never relabel ordinary marketplace inventory as funded/partner-bank vehicles.
+  const financedVehicles = useMemo(() => [], []);
 
   // FAQs
   const faqs = [
@@ -601,9 +602,9 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           <div>
             <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
               <Landmark className="w-5 h-5 text-amber-500" />
-              Verified Financial Partner Institutions
+              Financial Partner Institutions
             </h2>
-            <p className="text-xs text-slate-500 font-medium">Select a partner bank to apply or add up to 4 for side-by-side comparison</p>
+            <p className="text-xs text-slate-500 font-medium">Partner lender offers will appear here when a verified lender feed is connected</p>
           </div>
           <Button
             variant="outline"
@@ -755,41 +756,16 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           9. RECENTLY FINANCED VEHICLES
           ========================================== */}
       <div className="space-y-4 pt-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Car className="w-5 h-5 text-amber-500" />
-              Recently Financed Vehicles on KAYAD
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">Real marketplace vehicles funded through our partner bank network (Privacy Protected)</p>
-          </div>
+        <div>
+          <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
+            <Car className="w-5 h-5 text-amber-500" />
+            Recently Financed Vehicles on KAYAD
+          </h2>
+          <p className="text-xs text-slate-500 font-medium">Only vehicles with a real financing record will appear here.</p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {financedVehicles.map((vh) => (
-            <Card key={vh.id} className="p-4 space-y-3 bg-white border-slate-200 hover:shadow-md transition-all">
-              <div className="h-44 rounded-xl overflow-hidden relative bg-slate-900">
-                <LazyImage src={vh.image} alt={vh.title} wrapperClassName="w-full h-full" className="w-full h-full object-cover" />
-                <div className="absolute top-2 left-2">
-                  <Badge variant="verified" size="sm">
-                    <Landmark className="w-3.5 h-3.5 text-amber-400" />
-                    Financed via {vh.financedBank || 'Partner Bank'}
-                  </Badge>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-extrabold text-[#1E3063] text-sm line-clamp-1">{vh.title}</h3>
-                <p className="text-xs font-black text-[#1E3063] mt-0.5">Ksh {vh.price.toLocaleString()}</p>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-                <span>{vh.location}</span>
-                <span className="text-emerald-700 font-bold">✓ Funded & Delivered</span>
-              </div>
-            </Card>
-          ))}
-        </div>
+        <Card className="p-6 bg-slate-50 border-slate-200">
+          <p className="text-sm font-semibold text-slate-700">No financed-vehicle records are currently exposed by the active financing API.</p>
+        </Card>
       </div>
 
       {/* ==========================================

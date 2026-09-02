@@ -138,6 +138,10 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     setTimeout(() => setToast(null), 3500);
   };
 
+  const handleExecuteSmartAction = (_actionKey: string, label: string) => {
+    showToast(`${label} is not available through the current backend contract. No local action was performed.`);
+  };
+
   // Auto-scroll anchor
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
