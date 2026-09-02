@@ -147,6 +147,21 @@ export interface GetCarsParams {
   city?: string;
   minPrice?: number;
   maxPrice?: number;
+  yearMin?: number;
+  yearMax?: number;
+  body?: string;
+  fuel?: string;
+  transmission?: string;
+  mileageMin?: number;
+  mileageMax?: number;
+  color?: string;
+  condition?: string;
+  category?: 'auction' | 'fixed';
+  featured?: boolean;
+  dealerType?: 'dealer' | 'private';
+  vin?: string;
+  engine?: string;
+  drivetrain?: string;
   /** Confirmed real, already-supported backend filter
    * (carController.js's own getCars: query.auctionStatus =
    * auctionStatus) - 'draft' | 'live' | 'ended'. */

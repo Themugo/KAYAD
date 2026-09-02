@@ -7,6 +7,7 @@ import MarketingCard, { MarketingCardData } from '../../../components/MarketingC
 import FloatingAdRail from '../../../components/FloatingAdRail';
 import CarSilhouette from '../../../components/CarSilhouette';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
+import { getCars, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
 import { getVisibleAdSlots, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
 import HomePageAdminPanel from './HomePageAdminPanel';
@@ -151,12 +152,86 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // often visitors need to paginate at real scale.
   const [pageSize, setPageSize] = useState<number>(24);
 
-  // Loading Simulation for fast feedback - real fetch status
-  // (isLoadingReal, from App.tsx's actual API call) takes precedence
-  // when provided, matching the same fix already applied to the flat
-  // VehicleMarketplace.tsx during Phase 3 real-data-consolidation work.
+  // Phase 42: the marketplace query is authoritative and paginated by the
+  // real /api/cars endpoint. App.tsx still supplies the initial inventory
+  // snapshot, but browsing controls now re-query the backend instead of
+  // filtering/slicing only the first 50 records in memory.
+  const [serverVehicles, setServerVehicles] = useState<Vehicle[]>(vehicles);
+  const [serverTotal, setServerTotal] = useState<number>(vehicles.length);
+  const [serverTotalPages, setServerTotalPages] = useState<number>(1);
+  const [serverLoading, setServerLoading] = useState<boolean>(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [simulatedLoading, setIsLoading] = useState<boolean>(false);
-  const isLoading = isLoadingReal ?? simulatedLoading;
+  const isLoading = isLoadingReal || serverLoading || simulatedLoading;
+
+  const serverQuery = useMemo<GetCarsParams>(() => {
+    const query: GetCarsParams = {
+      page: currentPage,
+      limit: pageSize,
+    };
+
+    if (searchQuery.trim()) query.keyword = searchQuery.trim();
+    if (selectedMake !== 'All') query.brand = selectedMake;
+    if (selectedModel !== 'All') query.model = selectedModel;
+    if (selectedCounty !== 'All East Africa') query.city = selectedCounty;
+    if (minPrice > 0) query.minPrice = minPrice;
+    if (maxPrice < 20000000) query.maxPrice = maxPrice;
+    if (minYear > 2005) query.yearMin = minYear;
+    if (maxYear < 2026) query.yearMax = maxYear;
+    if (selectedBodyStyle !== 'All') query.body = selectedBodyStyle;
+    if (selectedFuel !== 'All') query.fuel = selectedFuel;
+    if (selectedTransmission !== 'All') query.transmission = selectedTransmission;
+    if (selectedCondition !== 'All') query.condition = selectedCondition;
+    if (maxMileage < 250000) query.mileageMax = maxMileage;
+    if (selectedSellerType === 'Verified Dealer') query.dealerType = 'dealer';
+    if (selectedSellerType === 'Private Seller') query.dealerType = 'private';
+    if (onlyAuction) query.auctionStatus = 'live';
+
+    const sortMap: Record<typeof sortBy, GetCarsParams['sort']> = {
+      newest: 'newest',
+      'price-asc': 'price_asc',
+      'price-desc': 'price_desc',
+      mileage: 'mileage_asc',
+      year: 'year_desc',
+      'recently-reduced': 'newest',
+      'most-viewed': 'views_desc',
+      'auction-ending': 'ending_soon',
+    };
+    query.sort = sortMap[sortBy];
+    return query;
+  }, [
+    currentPage, pageSize, searchQuery, selectedMake, selectedModel, selectedCounty,
+    minPrice, maxPrice, minYear, maxYear, selectedBodyStyle, selectedFuel,
+    selectedTransmission, selectedCondition, maxMileage, selectedSellerType,
+    onlyAuction, sortBy
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setServerLoading(true);
+    setServerError(null);
+
+    getCars(serverQuery)
+      .then((res) => {
+        if (cancelled) return;
+        const mapped = (res.data || res.cars || []).map(mapBackendCarToVehicle);
+        setServerVehicles(mapped);
+        setServerTotal(res.pagination?.total ?? mapped.length);
+        setServerTotalPages(res.pagination?.pages ?? res.pagination?.totalPages ?? 1);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setServerError(err instanceof VehicleApiError ? err.message : 'Unable to load marketplace results.');
+        setServerVehicles([]);
+        setServerTotal(0);
+        setServerTotalPages(1);
+      })
+      .finally(() => {
+        if (!cancelled) setServerLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [serverQuery]);
 
   // Recently Viewed Vehicles Tracking (stored in localStorage)
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
@@ -200,133 +275,69 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // Dynamic Filter Options Extracted directly from backend dataset
   const makes = useMemo(() => {
-    const list = Array.from(new Set(vehicles.map((v) => v.make).filter(Boolean))).sort();
+    const list = Array.from(new Set(serverVehicles.map((v) => v.make).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [vehicles]);
+  }, [serverVehicles]);
 
   const models = useMemo(() => {
     const source = selectedMake === 'All' 
-      ? vehicles 
-      : vehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
+      ? serverVehicles 
+      : serverVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
     const list = Array.from(new Set(source.map((v) => v.model).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [vehicles, selectedMake]);
+  }, [serverVehicles, selectedMake]);
 
   const bodyStyles = useMemo(() => {
     const list = Array.from(new Set(vehicles.map((v) => v.bodyStyle).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [vehicles]);
+  }, [serverVehicles]);
 
   const fuelTypes = useMemo(() => {
-    const list = Array.from(new Set(vehicles.map((v) => v.fuelType).filter(Boolean))).sort();
+    const list = Array.from(new Set(serverVehicles.map((v) => v.fuelType).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [vehicles]);
+  }, [serverVehicles]);
 
   const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
   const conditionOptions = ['All', 'Foreign Used', 'Locally Used', 'Brand New'];
   const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller', 'Bank Repossession', 'Direct Port Import'];
 
   const locations = useMemo(() => {
-    const list = Array.from(new Set(vehicles.map((v) => v.county || v.location).filter(Boolean))).sort();
+    const list = Array.from(new Set(serverVehicles.map((v) => v.county || v.location).filter(Boolean))).sort();
     return ['All East Africa', ...list];
-  }, [vehicles]);
+  }, [serverVehicles]);
 
   const availableYears = useMemo(() => {
-    const list = Array.from(new Set(vehicles.map((v) => v.year).filter((y): y is number => Boolean(y)))).sort((a: number, b: number) => b - a);
+    const list = Array.from(new Set(serverVehicles.map((v) => v.year).filter((y): y is number => Boolean(y)))).sort((a: number, b: number) => b - a);
     return list;
-  }, [vehicles]);
+  }, [serverVehicles]);
 
-  // Primary Filtering Engine
+  // Phase 42: core search/filter/sort/pagination is performed by the
+  // authoritative backend query above. Only legacy presentation flags
+  // without a verified /api/cars query contract remain as local post-filters.
   const filteredVehicles = useMemo(() => {
-    return vehicles.filter((v) => {
-      // 1. Keyword search
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase().trim();
-        const match = v.title.toLowerCase().includes(q) || 
-                      v.make.toLowerCase().includes(q) || 
-                      v.model.toLowerCase().includes(q) ||
-                      v.sellerName.toLowerCase().includes(q) ||
-                      v.location.toLowerCase().includes(q) ||
-                      v.county.toLowerCase().includes(q);
-        if (!match) return false;
-      }
-
-      // 2. County / Location
-      if (selectedCounty !== 'All East Africa' && v.county !== selectedCounty && v.location !== selectedCounty) {
-        return false;
-      }
-
-      // 3. Make & Model
-      if (selectedMake !== 'All' && v.make.toLowerCase() !== selectedMake.toLowerCase()) return false;
-      if (selectedModel !== 'All' && v.model.toLowerCase() !== selectedModel.toLowerCase()) return false;
-
-      // 4. Body Style
-      if (selectedBodyStyle !== 'All' && v.bodyStyle !== selectedBodyStyle) return false;
-
-      // 5. Fuel Type
-      if (selectedFuel !== 'All' && v.fuelType !== selectedFuel) return false;
-
-      // 6. Transmission
-      if (selectedTransmission !== 'All' && !v.transmission.toLowerCase().includes(selectedTransmission.toLowerCase())) return false;
-
-      // 7. Condition
-      if (selectedCondition !== 'All' && v.condition !== selectedCondition) return false;
-
-      // 8. Seller Type
-      if (selectedSellerType !== 'All') {
-        if (selectedSellerType === 'Verified Dealer' && v.sellerType !== 'Verified Dealer') return false;
-        if (selectedSellerType === 'Private Seller' && v.sellerType !== 'Private Seller') return false;
-        if (selectedSellerType === 'Bank Repossession' && !v.title.toLowerCase().includes('bank')) return false;
-        if (selectedSellerType === 'Direct Port Import' && !v.title.toLowerCase().includes('import')) return false;
-      }
-
-      // 9. Numerical Ranges
-      if (v.price < minPrice || v.price > maxPrice) return false;
-      if (v.year < minYear || v.year > maxYear) return false;
-      if (v.mileage > maxMileage) return false;
-
-      // 10. Boolean Badging / Feature Checks
+    return serverVehicles.filter((v) => {
       if (onlyInspected && !v.inspectionPassed) return false;
       if (onlyEscrow && !v.escrowEligible) return false;
       if (onlyFinance && !v.financeAvailable) return false;
-      if (onlyAuction && !v.isAuction) return false;
       if (onlyNewArrivals && !v.isNewArrival && !v.badge?.toLowerCase().includes('new')) return false;
-
       return true;
-    }).sort((a, b) => {
-      if (sortBy === 'price-asc') return a.price - b.price;
-      if (sortBy === 'price-desc') return b.price - a.price;
-      if (sortBy === 'mileage') return a.mileage - b.mileage;
-      if (sortBy === 'year') return b.year - a.year;
-      if (sortBy === 'recently-reduced') {
-        const diffA = (a.marketPriceAvg || a.price) - a.price;
-        const diffB = (b.marketPriceAvg || b.price) - b.price;
-        return diffB - diffA;
-      }
-      if (sortBy === 'most-viewed') return (b.viewsCount || 0) - (a.viewsCount || 0);
-      if (sortBy === 'auction-ending') {
-        if (a.isAuction && !b.isAuction) return -1;
-        if (!a.isAuction && b.isAuction) return 1;
-        return 0;
-      }
-      return 0; // default newest
     });
-  }, [
-    vehicles, searchQuery, selectedCounty, selectedMake, selectedModel, 
-    selectedBodyStyle, selectedFuel, selectedTransmission, selectedCondition, 
-    selectedSellerType, minPrice, maxPrice, minYear, maxYear, maxMileage, 
-    onlyInspected, onlyEscrow, onlyFinance, onlyAuction, onlyNewArrivals, sortBy
-  ]);
+  }, [serverVehicles, onlyInspected, onlyEscrow, onlyFinance, onlyNewArrivals]);
 
-  // Reset pagination when filter results change
+  // Reset to the first server page when a query dimension changes. Page-size
+  // changes intentionally reset too, so the backend always owns the offset.
   useEffect(() => {
     setCurrentPage(1);
-  }, [filteredVehicles.length]);
+  }, [
+    pageSize, searchQuery, selectedCounty, selectedMake, selectedModel,
+    selectedBodyStyle, selectedFuel, selectedTransmission, selectedCondition,
+    selectedSellerType, minPrice, maxPrice, minYear, maxYear, maxMileage,
+    onlyAuction, sortBy
+  ]);
 
-  // Paginated Slice
-  const totalPages = Math.max(1, Math.ceil(filteredVehicles.length / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedVehicles = filteredVehicles.slice(startIndex, startIndex + pageSize);
+  // The backend has already paginated this page. Do not slice it again.
+  const paginatedVehicles = filteredVehicles;
+  const totalPages = Math.max(1, serverTotalPages);
 
   // Reset all filters to default
   const resetFilters = useCallback(() => {
@@ -412,9 +423,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Recently Viewed Vehicle Objects
   const recentlyViewedVehicles = useMemo(() => {
     return recentlyViewedIds
-      .map((id) => vehicles.find((v) => v.id === id))
+      .map((id) => serverVehicles.find((v) => v.id === id))
       .filter((v): v is Vehicle => Boolean(v));
-  }, [recentlyViewedIds, vehicles]);
+  }, [recentlyViewedIds, serverVehicles]);
 
   // Price formatting helper
   const formatPriceM = (val: number) => {
@@ -453,7 +464,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (endingSoon) picks.push({ vehicle: endingSoon, reason: 'Auction Ending Soon' });
 
     return picks;
-  }, [vehicles]);
+  }, [serverVehicles]);
 
   // Interleaves sponsor/partner cards into the grid every 4th position -
   // one full row in the 4-column grid, so each sponsor card lands at a
@@ -796,7 +807,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
           <div>
             <h2 className="text-xl font-bold text-[#1E3063] font-display">
-              Vehicle Inventory — {filteredVehicles.length} listing{filteredVehicles.length === 1 ? '' : 's'}
+              Vehicle Inventory — {serverTotal} listing{serverTotal === 1 ? '' : 's'}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Showing inspected marketplace listings in {selectedCounty}
@@ -1050,12 +1061,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           <div className="min-h-[400px]">
             {isLoading ? (
               <SkeletonGrid count={pageSize} />
-            ) : loadError ? (
+            ) : (loadError || serverError) ? (
               <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
                 <h4 className="text-sm font-bold text-[#1E3063] mb-1">Couldn't load vehicles</h4>
-                <p className="text-xs text-slate-500 mb-4">{loadError}</p>
-                {onRetryLoad && (
+                <p className="text-xs text-slate-500 mb-4">{loadError || serverError}</p>
+                {onRetryLoad && !serverError && (
                   <button onClick={onRetryLoad} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-4 py-2">
                     Try Again
                   </button>
@@ -1159,7 +1170,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             )}
 
             {/* PAGINATION */}
-            {filteredVehicles.length > pageSize && (
+            {serverTotalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-8">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
