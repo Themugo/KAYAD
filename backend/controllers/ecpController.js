@@ -8,55 +8,30 @@ import Incident from "../models/Incident.js";
 import Alert from "../models/Alert.js";
 import HealthCheck from "../models/HealthCheck.js";
 import SelfHealingAction from "../models/SelfHealingAction.js";
+import AuditLog from "../models/AuditLog.js";
 
 // ============================================
 // EXECUTIVE DASHBOARD
 // ============================================
 
 export async function getExecutiveDashboard(req, res) {
-  const dashboard = {
-    timestamp: new Date().toISOString(),
-    overall: {
-      status: 'healthy',
-      healthScore: 94,
-      uptime: 99.8,
-      riskLevel: 'low',
-    },
-    business: {
-      revenueToday: 2456789,
-      revenueChange: 12.5,
-      vehiclesListed: 156,
-      activeDealers: 487,
-      liveAuctions: 23,
-      inspectionRequests: 45,
-      financeApplications: 12,
-      supportTickets: 28,
-      activeUsers: 1245,
-    },
-    system: {
-      frontend: { status: 'healthy', latency: 120 },
-      backend: { status: 'healthy', latency: 85 },
-      database: { status: 'healthy', latency: 15 },
-      api: { status: 'healthy', latency: 95 },
-      search: { status: 'healthy', latency: 200 },
-    },
-    security: {
-      status: 'secure',
-      threatsDetected: 0,
-      failedLogins: 12,
-      blockedRequests: 3,
-    },
-    recentAlerts: [
-      { id: '1', severity: 'info', message: 'Search index rebuilt successfully', timestamp: new Date().toISOString() },
-      { id: '2', severity: 'warning', message: 'High API latency on /api/cars endpoint', timestamp: new Date(Date.now() - 300000).toISOString() },
-    ],
-    recommendations: [
-      { priority: 'medium', action: 'Consider scaling auction workers before weekend traffic', confidence: 88 },
-      { priority: 'low', action: 'Search optimization can improve load time by 15%', confidence: 75 },
-    ],
-  };
+  const [incidents, alerts, healthChecks] = await Promise.all([
+    Incident.countDocuments(),
+    Alert.countDocuments(),
+    HealthCheck.countDocuments(),
+  ]);
 
-  res.json({ success: true, data: dashboard });
+  res.json({
+    success: true,
+    data: {
+      timestamp: new Date().toISOString(),
+      status: "observed",
+      note: "Only persisted operational records are reported; unavailable live metrics are not fabricated.",
+      incidents,
+      alerts,
+      healthChecks,
+    },
+  });
 }
 
 // ============================================
@@ -449,45 +424,12 @@ export async function getSelfHealingRules(req, res) {
 // ============================================
 
 export async function getRootCauseAnalysis(req, res) {
-  const { incidentId } = req.params;
-
-  // Generate mock root cause analysis
-  const analysis = {
-    incidentId,
-    timestamp: new Date().toISOString(),
-    confidence: 0.87,
-    rootCause: {
-      category: 'database',
-      component: 'PostgreSQL Connection Pool',
-      description: 'Connection pool exhaustion due to slow queries',
-      evidence: [
-        'Database connection count reached maximum (100/100)',
-        'Slow query count increased 500% in the last hour',
-        'Long-running transactions detected',
-      ],
-    },
-    businessImpact: {
-      affectedUsers: 1250,
-      affectedRevenue: 45000,
-      affectedServices: ['Auction Engine', 'Search', 'Listings'],
-      duration: '15 minutes',
-    },
-    contributingFactors: [
-      { factor: 'Missing database index on vehicles.created_at', impact: 'high' },
-      { factor: 'Connection pool size too small', impact: 'medium' },
-      { factor: 'Backup job running during peak hours', impact: 'low' },
-    ],
-    recommendations: [
-      { action: 'Add index on vehicles.created_at', priority: 'high', effort: 'low' },
-      { action: 'Increase connection pool size to 150', priority: 'high', effort: 'low' },
-      { action: 'Schedule backups during off-peak hours', priority: 'medium', effort: 'medium' },
-    ],
-    similarIncidents: [
-      { id: 'INC-1234', date: '2024-01-15', resolution: 'Increased connection pool' },
-    ],
-  };
-
-  res.json({ success: true, data: analysis });
+  return res.status(503).json({
+    success: false,
+    error: "Root-cause analysis is not backed by a live analysis engine",
+    code: "ROOT_CAUSE_ANALYSIS_NOT_CONFIGURED",
+    incidentId: req.params.incidentId,
+  });
 }
 
 // ============================================
@@ -634,19 +576,14 @@ export async function getComplianceStatus(req, res) {
 }
 
 export async function getAuditLogs(req, res) {
-  const { category, userId, page = 1, limit = 100 } = req.query;
-  const offset = (page - 1) * limit;
-
-  // Generate mock audit logs
-  const logs = [
-    { id: '1', action: 'user.login', user: 'admin@kayad.com', category: 'auth', timestamp: new Date().toISOString(), ip: '197.232.x.x' },
-    { id: '2', action: 'config.update', user: 'admin@kayad.com', category: 'config', timestamp: new Date(Date.now() - 60000).toISOString(), changes: { field: 'commission_rate', old: 0.05, new: 0.06 } },
-    { id: '3', action: 'ai.command', user: 'editor@kayad.com', category: 'ai', timestamp: new Date(Date.now() - 120000).toISOString(), command: 'Create a Toyota promotion page' },
-    { id: '4', action: 'deployment.release', user: 'system', category: 'deployment', timestamp: new Date(Date.now() - 300000).toISOString(), version: 'v2.3.1' },
-    { id: '5', action: 'user.permission', user: 'admin@kayad.com', category: 'security', timestamp: new Date(Date.now() - 600000).toISOString(), target: 'user@kayad.com', change: 'promoted_to_admin' },
-  ];
-
-  res.json({ success: true, data: logs.slice(offset, offset + parseInt(limit)) });
+  const { page = 1, limit = 100 } = req.query;
+  const logs = await AuditLog.findAll({
+    limit: Math.min(Number(limit) || 100, 100),
+    offset: Math.max((Number(page) || 1) - 1, 0) * Math.min(Number(limit) || 100, 100),
+    orderBy: "createdAt",
+    ascending: false,
+  });
+  res.json({ success: true, data: logs });
 }
 
 // ============================================
@@ -654,11 +591,11 @@ export async function getAuditLogs(req, res) {
 // ============================================
 
 export async function askOperationsQuestion(req, res) {
-  const { question } = req.body;
-
-  const response = await generateOperationsResponse(question);
-
-  res.json({ success: true, data: response });
+  return res.status(503).json({
+    success: false,
+    error: "Operations copilot is not backed by live operational telemetry",
+    code: "OPERATIONS_COPILOT_NOT_CONFIGURED",
+  });
 }
 
 async function generateOperationsResponse(question) {

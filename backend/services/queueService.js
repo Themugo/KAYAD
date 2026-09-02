@@ -133,9 +133,7 @@ const startWorkers = (connection) => {
     async (job) => {
       const { reportType, filters, userId } = job.data;
       logDebug("Generating report", { reportType, userId });
-      // Generate report based on type
-      // This would integrate with report generation logic
-      return { success: true, reportUrl: "https://example.com/report.pdf" };
+      throw new Error(`Report generation is not configured for ${reportType || "this report"}`);
     },
     { connection },
   );

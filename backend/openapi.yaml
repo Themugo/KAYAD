@@ -1064,36 +1064,6 @@ paths:
           description: "Unauthorized"
         "500":
           description: "Internal server error"
-  /admin/demo/status:
-    get:
-      tags: ["Admin"]
-      summary: "GET /admin/demo/status"
-      description: "Auto-generated: GET /admin/demo/status (adminRoutes.js)"
-      operationId: getAdminDemoStatus
-      responses:
-        "200":
-          description: "Success"
-        "400":
-          description: "Bad request"
-        "401":
-          description: "Unauthorized"
-        "500":
-          description: "Internal server error"
-  /admin/demo/cleanup:
-    delete:
-      tags: ["Admin"]
-      summary: "DELETE /admin/demo/cleanup"
-      description: "Auto-generated: DELETE /admin/demo/cleanup (adminRoutes.js)"
-      operationId: deleteAdminDemoCleanup
-      responses:
-        "200":
-          description: "Success"
-        "400":
-          description: "Bad request"
-        "401":
-          description: "Unauthorized"
-        "500":
-          description: "Internal server error"
   /admin/staff:
     get:
       tags: ["Admin"]
@@ -2605,21 +2575,6 @@ paths:
       summary: "GET /cars/dealer/analytics"
       description: "Auto-generated: GET /cars/dealer/analytics (carRoutes.js)"
       operationId: getCarsDealerAnalytics
-      responses:
-        "200":
-          description: "Success"
-        "400":
-          description: "Bad request"
-        "401":
-          description: "Unauthorized"
-        "500":
-          description: "Internal server error"
-  /cars/demo/all:
-    get:
-      tags: ["Cars"]
-      summary: "GET /cars/demo/all"
-      description: "Auto-generated: GET /cars/demo/all (carRoutes.js)"
-      operationId: getCarsDemoAll
       responses:
         "200":
           description: "Success"

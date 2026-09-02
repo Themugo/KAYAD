@@ -19,41 +19,22 @@ import Release from "../models/Release.js";
 // ============================================
 
 export async function getGovernanceDashboard(req, res) {
-  const dashboard = {
-    summary: {
-      activePolicies: 24,
-      pendingChanges: 8,
-      pendingApprovals: 12,
-      openRisks: 15,
-      upcomingReleases: 3,
-      complianceScore: 94,
-    },
-    recentActivity: [
-      { type: 'policy_approved', name: 'Auction Policy v2', time: '2 hours ago', user: 'CEO' },
-      { type: 'change_approved', name: 'Homepage Redesign', time: '5 hours ago', user: 'CTO' },
-      { type: 'risk_identified', name: 'API Rate Limit Change', time: '8 hours ago', user: 'CISO' },
-      { type: 'release_deployed', name: 'v2.3.1', time: '12 hours ago', user: 'DevOps' },
-    ],
-    pendingApprovals: [
-      { id: '1', type: 'Feature Launch', name: 'AI Assistant', riskLevel: 'medium', requestedBy: 'Product', time: '1 day ago' },
-      { id: '2', type: 'Policy Change', name: 'Finance Policy Update', riskLevel: 'high', requestedBy: 'Finance', time: '2 days ago' },
-      { id: '3', type: 'Partner Addition', name: 'New Insurance Partner', riskLevel: 'low', requestedBy: 'Partnerships', time: '3 days ago' },
-    ],
-    riskOverview: {
-      critical: 2,
-      high: 5,
-      medium: 8,
-      low: 15,
-    },
-    complianceStatus: {
-      policyCompliance: 96,
-      approvalCompliance: 98,
-      auditFindings: 3,
-      outstandingRisks: 15,
-    },
-  };
+  const [activePolicies, pendingChanges, pendingApprovals, openRisks, upcomingReleases, auditLogs] = await Promise.all([
+    GovernancePolicy.countDocuments({ filters: { status: "active" } }),
+    ChangeRequest.countDocuments({ filters: { status: "pending" } }),
+    ApprovalRule.countDocuments({ filters: { status: "pending" } }),
+    RiskAssessment.countDocuments({ filters: { status: "open" } }),
+    Release.countDocuments({ filters: { status: "scheduled" } }),
+    DecisionRegister.countDocuments(),
+  ]);
 
-  res.json({ success: true, data: dashboard });
+  res.json({
+    success: true,
+    data: {
+      summary: { activePolicies, pendingChanges, pendingApprovals, openRisks, upcomingReleases, decisions: auditLogs },
+      note: "Dashboard metrics are derived from persisted governance records; no synthetic activity or compliance scores are reported.",
+    },
+  });
 }
 
 // ============================================
@@ -61,20 +42,7 @@ export async function getGovernanceDashboard(req, res) {
 // ============================================
 
 export async function getPolicies(req, res) {
-  const { category, status, page = 1, limit = 50 } = req.query;
-  const offset = (page - 1) * limit;
-
-  // Return mock policies
-  const policies = [
-    { id: '1', name: 'Auction Policy', category: 'auctions', version: '2.1', status: 'active', owner: 'COO', effectiveDate: '2024-01-01', reviewDate: '2024-06-01' },
-    { id: '2', name: 'Dealer Verification Policy', category: 'dealers', version: '3.0', status: 'active', owner: 'Operations', effectiveDate: '2024-01-15', reviewDate: '2024-07-15' },
-    { id: '3', name: 'Inspection Policy', category: 'inspections', version: '1.5', status: 'active', owner: 'Quality', effectiveDate: '2024-02-01', reviewDate: '2024-08-01' },
-    { id: '4', name: 'Escrow Policy', category: 'finance', version: '2.0', status: 'active', owner: 'Finance', effectiveDate: '2024-01-01', reviewDate: '2024-06-01' },
-    { id: '5', name: 'Data Privacy Policy', category: 'compliance', version: '4.0', status: 'active', owner: 'Legal', effectiveDate: '2024-01-01', reviewDate: '2024-03-01' },
-    { id: '6', name: 'Security Policy', category: 'security', version: '5.2', status: 'active', owner: 'CISO', effectiveDate: '2024-01-01', reviewDate: '2024-06-01' },
-    { id: '7', name: 'Marketplace Policy', category: 'marketplace', version: '2.3', status: 'draft', owner: 'Marketplace', effectiveDate: '2024-03-01', reviewDate: '2024-09-01' },
-  ];
-
+  const policies = await GovernancePolicy.findAll({ limit: 100 });
   res.json({ success: true, data: policies });
 }
 
@@ -139,15 +107,7 @@ export async function updatePolicy(req, res) {
 // ============================================
 
 export async function getChangeRequests(req, res) {
-  const { status, riskLevel, page = 1, limit = 50 } = req.query;
-
-  const changes = [
-    { id: '1', title: 'Homepage Redesign', type: 'feature', riskLevel: 'medium', status: 'approved', requestedBy: 'Product', createdAt: new Date().toISOString() },
-    { id: '2', title: 'API Rate Limit Increase', type: 'configuration', riskLevel: 'low', status: 'pending', requestedBy: 'Engineering', createdAt: new Date(Date.now() - 86400000).toISOString() },
-    { id: '3', title: 'New Payment Gateway', type: 'integration', riskLevel: 'high', status: 'in_review', requestedBy: 'Finance', createdAt: new Date(Date.now() - 172800000).toISOString() },
-    { id: '4', title: 'Pricing Update', type: 'configuration', riskLevel: 'medium', status: 'approved', requestedBy: 'Finance', createdAt: new Date(Date.now() - 259200000).toISOString() },
-  ];
-
+  const changes = await ChangeRequest.findAll({ limit: 100 });
   res.json({ success: true, data: changes });
 }
 
@@ -528,13 +488,7 @@ export async function updateReleaseStatus(req, res) {
 // ============================================
 
 export async function getDecisions(req, res) {
-  const decisions = [
-    { id: '1', title: 'Implement AI Assistant', decision: 'Approved AI Assistant implementation', reason: 'Improve user experience', approver: 'CEO', date: '2024-01-15', reviewDate: '2024-06-15', status: 'active' },
-    { id: '2', title: 'Subscription Price Increase', decision: 'Increase prices by 10%', reason: 'Cover rising costs', approver: 'CFO', date: '2024-01-10', reviewDate: '2024-04-10', status: 'active' },
-    { id: '3', title: 'Expand to Uganda', decision: 'Launch in Uganda by Q2', reason: 'Market opportunity', approver: 'Board', date: '2024-01-05', reviewDate: '2024-07-05', status: 'active' },
-    { id: '4', title: 'New Payment Provider', decision: 'Add Stripe as secondary provider', reason: 'Redundancy', approver: 'CTO', date: '2023-12-20', reviewDate: '2024-03-20', status: 'active' },
-  ];
-
+  const decisions = await DecisionRegister.findAll({ limit: 100 });
   res.json({ success: true, data: decisions });
 }
 
@@ -561,14 +515,7 @@ export async function createDecision(req, res) {
 // ============================================
 
 export async function getAuditLogs(req, res) {
-  const logs = [
-    { id: '1', action: 'policy_approved', user: 'CEO', details: 'Auction Policy v2 approved', timestamp: new Date().toISOString() },
-    { id: '2', action: 'change_approved', user: 'CTO', details: 'Homepage Redesign approved', timestamp: new Date(Date.now() - 3600000).toISOString() },
-    { id: '3', action: 'feature_stage_changed', user: 'Product', details: 'AI Assistant moved to production', timestamp: new Date(Date.now() - 7200000).toISOString() },
-    { id: '4', action: 'risk_created', user: 'CISO', details: 'New risk: API Rate Limiting Changes', timestamp: new Date(Date.now() - 14400000).toISOString() },
-    { id: '5', action: 'release_deployed', user: 'DevOps', details: 'v2.3.1 deployed to production', timestamp: new Date(Date.now() - 86400000).toISOString() },
-  ];
-
+  const logs = await DecisionRegister.findAll({ limit: 100 });
   res.json({ success: true, data: logs });
 }
 

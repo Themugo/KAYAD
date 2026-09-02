@@ -15,147 +15,11 @@ import APIKey from "../models/APIKey.js";
 // ============================================
 
 export async function getAPIs(req, res) {
-  const { category, status = 'active', page = 1, limit = 50 } = req.query;
-  const offset = (page - 1) * limit;
-
-  // Return mock API catalog
-  const apis = [
-    {
-      id: 'vehicle-listings',
-      name: 'Vehicle Listings API',
-      category: 'vehicles',
-      version: 'v2',
-      description: 'Access and manage vehicle listings',
-      endpoints: 24,
-      status: 'active',
-      docs: '/docs/vehicle-listings',
-    },
-    {
-      id: 'dealer',
-      name: 'Dealer API',
-      category: 'dealers',
-      version: 'v2',
-      description: 'Manage dealer profiles and operations',
-      endpoints: 18,
-      status: 'active',
-      docs: '/docs/dealer',
-    },
-    {
-      id: 'auction',
-      name: 'Auction API',
-      category: 'auctions',
-      version: 'v2',
-      description: 'Access auction data and participate in bids',
-      endpoints: 32,
-      status: 'active',
-      docs: '/docs/auction',
-    },
-    {
-      id: 'inspection',
-      name: 'Inspection API',
-      category: 'inspections',
-      version: 'v1',
-      description: 'Schedule and manage vehicle inspections',
-      endpoints: 15,
-      status: 'active',
-      docs: '/docs/inspection',
-    },
-    {
-      id: 'finance',
-      name: 'Finance API',
-      category: 'finance',
-      version: 'v1',
-      description: 'Process finance applications and approvals',
-      endpoints: 20,
-      status: 'active',
-      docs: '/docs/finance',
-    },
-    {
-      id: 'payment',
-      name: 'Payment API',
-      category: 'payments',
-      version: 'v2',
-      description: 'Handle payment processing',
-      endpoints: 12,
-      status: 'active',
-      docs: '/docs/payment',
-    },
-    {
-      id: 'analytics',
-      name: 'Analytics API',
-      category: 'analytics',
-      version: 'v1',
-      description: 'Access platform analytics and reports',
-      endpoints: 8,
-      status: 'active',
-      docs: '/docs/analytics',
-    },
-    {
-      id: 'search',
-      name: 'Search API',
-      category: 'search',
-      version: 'v2',
-      description: 'Full-text search across platform',
-      endpoints: 5,
-      status: 'active',
-      docs: '/docs/search',
-    },
-    {
-      id: 'advertisement',
-      name: 'Advertisement API',
-      category: 'advertisements',
-      version: 'v1',
-      description: 'Manage advertisements and campaigns',
-      endpoints: 16,
-      status: 'active',
-      docs: '/docs/advertisement',
-    },
-    {
-      id: 'notification',
-      name: 'Notification API',
-      category: 'notifications',
-      version: 'v1',
-      description: 'Send and manage notifications',
-      endpoints: 10,
-      status: 'active',
-      docs: '/docs/notification',
-    },
-    {
-      id: 'identity',
-      name: 'Identity API',
-      category: 'identity',
-      version: 'v2',
-      description: 'User authentication and identity management',
-      endpoints: 14,
-      status: 'active',
-      docs: '/docs/identity',
-    },
-    {
-      id: 'document',
-      name: 'Document API',
-      category: 'documents',
-      version: 'v1',
-      description: 'Upload and manage documents',
-      endpoints: 8,
-      status: 'active',
-      docs: '/docs/document',
-    },
-    {
-      id: 'vehicle-passport',
-      name: 'Vehicle Passport API',
-      category: 'vehicles',
-      version: 'v1',
-      description: 'Access vehicle history and certification',
-      endpoints: 12,
-      status: 'beta',
-      docs: '/docs/vehicle-passport',
-    },
-  ];
-
-  let filtered = apis;
-  if (category) filtered = filtered.filter(a => a.category === category);
-
-  res.json({ success: true, data: filtered });
+  return res.status(501).json({
+    success: false,
+    error: "API marketplace catalog is not backed by a live registry",
+    code: "API_CATALOG_NOT_CONFIGURED",
+  });
 }
 
 export async function getAPIDetails(req, res) {
@@ -375,33 +239,19 @@ export async function deleteWebhook(req, res) {
 }
 
 export async function testWebhook(req, res) {
-  const webhook = await Webhook.findById(req.params.id);
-  if (!webhook) return res.status(404).json({ success: false, error: "Webhook not found" });
-
-  // Simulate test delivery
-  res.json({
-    success: true,
-    data: {
-      webhookId: webhook.id,
-      status: 'delivered',
-      responseCode: 200,
-      latency: 145,
-      timestamp: new Date().toISOString(),
-    },
+  return res.status(501).json({
+    success: false,
+    error: "Webhook delivery testing is not configured",
+    code: "WEBHOOK_TEST_NOT_CONFIGURED",
   });
 }
 
 export async function getWebhookLogs(req, res) {
-  const { webhookId } = req.params;
-
-  // Return mock delivery logs
-  const logs = [
-    { id: '1', webhookId, event: 'vehicle.created', status: 'delivered', attempts: 1, timestamp: new Date().toISOString() },
-    { id: '2', webhookId, event: 'auction.started', status: 'delivered', attempts: 1, timestamp: new Date(Date.now() - 3600000).toISOString() },
-    { id: '3', webhookId, event: 'payment.received', status: 'failed', attempts: 3, lastError: 'Connection timeout', timestamp: new Date(Date.now() - 7200000).toISOString() },
-  ];
-
-  res.json({ success: true, data: logs });
+  return res.status(501).json({
+    success: false,
+    error: "Webhook delivery history is not persisted by the current backend",
+    code: "WEBHOOK_LOGS_NOT_CONFIGURED",
+  });
 }
 
 // ============================================
@@ -939,32 +789,9 @@ const client = new KAYAD({
 // ============================================
 
 export async function getIntegrationDashboard(req, res) {
-  const dashboard = {
-    summary: {
-      totalPartners: 45,
-      activeIntegrations: 38,
-      totalAPIRequests: 1245678,
-      webhookDeliveries: 45678,
-      pluginsInstalled: 23,
-    },
-    recentActivity: [
-      { type: 'partner_registered', name: 'NCBA Bank', time: '2 hours ago' },
-      { type: 'api_key_created', name: 'Toyota Kenya', time: '5 hours ago' },
-      { type: 'webhook_failed', name: 'CIC Insurance', time: '8 hours ago' },
-      { type: 'plugin_installed', name: 'Loan Calculator', time: '12 hours ago' },
-    ],
-    popularAPIs: [
-      { name: 'Vehicle Listings', calls: 456789 },
-      { name: 'Auction', calls: 345678 },
-      { name: 'Search', calls: 234567 },
-    ],
-    systemStatus: {
-      api: 'operational',
-      webhooks: 'operational',
-      oauth: 'operational',
-      sandbox: 'operational',
-    },
-  };
-
-  res.json({ success: true, data: dashboard });
+  return res.status(503).json({
+    success: false,
+    error: "Integration dashboard metrics are not backed by live telemetry",
+    code: "INTEGRATION_METRICS_NOT_CONFIGURED",
+  });
 }
