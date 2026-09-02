@@ -1,23 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile } from '../../../types';
-import { Car, PlusCircle, Lock, CheckCircle2, Clock, Eye, MessageSquare, ShieldCheck, DollarSign, FileText, AlertTriangle, Sparkles, PauseCircle, PlayCircle, Trash2, Check, X, ArrowRight, Upload, Wrench, ChevronRight } from 'lucide-react';
-import { Card, Badge, Button, LazyImage, Input, Modal } from '../../../components/ui';
-
-export interface SellerOffer {
-  id: string;
-  vehicleId: string;
-  vehicleTitle: string;
-  vehicleImage: string;
-  askingPrice: number;
-  offeredAmount: number;
-  buyerName: string;
-  buyerAvatar?: string;
-  buyerPhone: string;
-  paymentType: 'Escrow Vault (Cash)' | 'NCBA Asset Financing';
-  status: 'Pending' | 'Accepted' | 'Countered' | 'Declined';
-  expiresInHours: number;
-  timestamp: string;
-}
+import { Car, PlusCircle, Lock, CheckCircle2, Eye, MessageSquare, ShieldCheck, DollarSign, FileText, Sparkles, ArrowRight, Wrench } from 'lucide-react';
+import { Card, Badge, Button, LazyImage, Modal } from '../../../components/ui';
 
 export interface PrivateSellerListing {
   id: string;
@@ -27,7 +11,7 @@ export interface PrivateSellerListing {
   year: number;
   price: number;
   mileage: number;
-  status: 'Draft' | 'Active' | 'Sold' | 'Paused' | 'Expired';
+  status: 'Active';
   viewsCount: number;
   savesCount: number;
   inquiriesCount: number;
@@ -36,30 +20,6 @@ export interface PrivateSellerListing {
   county: string;
   ntsaTimsVerified: boolean;
   createdAt: string;
-}
-
-export interface SellerInspectionRequest {
-  id: string;
-  vehicleTitle: string;
-  buyerName: string;
-  inspectorName: string;
-  scheduledTime: string;
-  location: string;
-  status: 'Requested' | 'Confirmed' | 'Completed';
-  overallScore?: number;
-  reportSummary?: string;
-}
-
-export interface CompletedSale {
-  id: string;
-  vehicleTitle: string;
-  buyerName: string;
-  agreedPrice: number;
-  payoutAmount: number;
-  payoutMethod: string;
-  timsTransferRef: string;
-  completedDate: string;
-  receiptUrl?: string;
 }
 
 interface PrivateSellerDashboardViewProps {
@@ -92,13 +52,10 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'inquiries' | 'escrow' | 'inspections' | 'offers' | 'sales' | 'verification'>('overview');
 
   // Listing Status Filter Tab: Draft, Active, Sold, Paused, Expired
-  const [listingStatusFilter, setListingStatusFilter] = useState<'Active' | 'Draft' | 'Sold' | 'Paused' | 'Expired'>('Active');
+  const [listingStatusFilter, setListingStatusFilter] = useState<'Active'>('Active');
 
   // Modals
   const [showNewListingModal, setShowNewListingModal] = useState<boolean>(false);
-  const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<SellerOffer | null>(null);
-  const [counterPriceInput, setCounterPriceInput] = useState<string>('');
-  const [selectedTaskModal, setSelectedTaskModal] = useState<string | null>(null);
 
   // Seller inventory is derived only from real vehicles supplied by the backend.
   const listings: PrivateSellerListing[] = useMemo(() => (vehicles || [])
@@ -122,62 +79,10 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
       createdAt: ''
     })), [vehicles, user?.id]);
 
-  // Offers, completed sales and inspection requests require backend contracts not exposed by this view.
-  const [offers, setOffers] = useState<SellerOffer[]>([]);
-  const activeEscrowDeals = useMemo(() => [], []);
-  const inspectionRequests: SellerInspectionRequest[] = [];
-  const completedSales: CompletedSale[] = [];
 
-  // Handle Offer Actions
-  const handleAcceptOffer = (offerId: string) => {
-    setOffers((prev) =>
-      prev.map((o) => (o.id === offerId ? { ...o, status: 'Accepted' } : o))
-    );
-    showToast('Offer Accepted! KAYAD Escrow Vault initiated for buyer.');
-  };
-
-  const handleDeclineOffer = (offerId: string) => {
-    setOffers((prev) =>
-      prev.map((o) => (o.id === offerId ? { ...o, status: 'Declined' } : o))
-    );
-    showToast('Offer declined.');
-  };
-
-  const handleCounterOfferSubmit = () => {
-    if (!selectedOfferForCounter) return;
-    const price = parseInt(counterPriceInput);
-    if (!price || isNaN(price)) return;
-
-    setOffers((prev) =>
-      prev.map((o) =>
-        o.id === selectedOfferForCounter.id
-          ? { ...o, status: 'Countered', offeredAmount: price }
-          : o
-      )
-    );
-    setSelectedOfferForCounter(null);
-    setCounterPriceInput('');
-    showToast(`Counter offer of Ksh ${price.toLocaleString()} sent to buyer!`);
-  };
-
-  // Handle Listing Toggle Status (Pause / Resume)
-  const handleToggleListingStatus = (id: string) => {
-    setListings((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const nextStatus = item.status === 'Active' ? 'Paused' : 'Active';
-          return { ...item, status: nextStatus };
-        }
-        return item;
-      })
-    );
-    showToast('Listing status updated successfully.');
-  };
-
-  const handleDeleteListing = (id: string) => {
-    setListings((prev) => prev.filter((item) => item.id !== id));
-    showToast('Listing removed.');
-  };
+  // The active backend exposes no private-seller offer/listing mutation contract.
+  // This view therefore remains read-only and never simulates success locally.
+  const unsupportedSellerAction = () => showToast('This seller action is not available in the current KAYAD backend. No local change was made.');
 
   // Filtered Listings
   const filteredListings = useMemo(() => {
@@ -185,17 +90,11 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
   }, [listings, listingStatusFilter]);
 
   // Status Counts
-  const counts = useMemo(() => {
-    return {
-      Active: listings.filter((l) => l.status === 'Active').length,
-      Draft: listings.filter((l) => l.status === 'Draft').length,
-      Sold: listings.filter((l) => l.status === 'Sold').length,
-      Paused: listings.filter((l) => l.status === 'Paused').length,
-      Expired: listings.filter((l) => l.status === 'Expired').length
-    };
-  }, [listings]);
+  const counts = useMemo(() => ({
+    Active: listings.length,
+  }), [listings]);
 
-  const sellerName = user?.name || 'Jimmy Mugo';
+  const sellerName = user?.name || 'KAYAD Seller';
 
   return (
     <div className="space-y-8 relative pb-16">
@@ -368,7 +267,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
             </div>
             <div>
               <h4 className="font-extrabold text-[#1E3063] text-sm font-display group-hover:text-emerald-800">Monitor Escrow Payouts</h4>
-              <p className="text-xs text-slate-500 font-medium">Ksh 7,300,000 currently protected in vault custody.</p>
+              <p className="text-xs text-slate-500 font-medium">Live escrow records, when available, are shown in the escrow section below.</p>
             </div>
             <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
               Check Vault Status <ArrowRight className="w-3.5 h-3.5" />
@@ -384,7 +283,7 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
             </div>
             <div>
               <h4 className="font-extrabold text-[#1E3063] text-sm font-display group-hover:text-blue-800">Verify Seller Identity</h4>
-              <p className="text-xs text-slate-500 font-medium">National ID and TIMS Ownership Badge Active.</p>
+              <p className="text-xs text-slate-500 font-medium">Only verification data returned by the backend is displayed.</p>
             </div>
             <span className="text-xs font-bold text-blue-600 flex items-center gap-1">
               View Verification <ArrowRight className="w-3.5 h-3.5" />
@@ -406,17 +305,13 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
             <p className="text-xs text-slate-500">Manage status, prices, and view counts for your listed vehicles.</p>
           </div>
 
-          {/* 5 Listing Status Tabs */}
+          {/* Only backend-backed active listings are represented here. */}
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-            {(['Active', 'Draft', 'Sold', 'Paused', 'Expired'] as const).map((status) => (
+            {(['Active'] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setListingStatusFilter(status)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
-                  listingStatusFilter === status
-                    ? 'bg-[#1E3063] text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#1E3063] text-white shadow-xs"
               >
                 {status} ({counts[status]})
               </button>
@@ -504,19 +399,10 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => handleToggleListingStatus(vehicle.id)}
+                      onClick={unsupportedSellerAction}
                     >
-                      {vehicle.status === 'Active' ? <PauseCircle className="w-3.5 h-3.5 text-amber-600" /> : <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />}
-                      <span>{vehicle.status === 'Active' ? 'Pause Listing' : 'Activate Listing'}</span>
+                      <span>Listing controls unavailable</span>
                     </Button>
-
-                    <button
-                      onClick={() => handleDeleteListing(vehicle.id)}
-                      className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
-                      title="Delete Listing"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
 
                   <Button
@@ -564,93 +450,17 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
           SECTION 4: ESCROW TRANSACTIONS
           ========================================== */}
       <div id="section-escrow" className="space-y-4 pt-6 border-t border-slate-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Lock className="w-5 h-5 text-amber-500" />
-              Section 4: Escrow Transactions & Vault Status
-            </h2>
-            <p className="text-xs text-slate-500">4-Way protected escrow vault monitoring, funds status, and required seller actions.</p>
-          </div>
-
-          <Badge variant="success" size="md">
-            100% Capital Protection Guaranteed
-          </Badge>
+        <div>
+          <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
+            <Lock className="w-5 h-5 text-amber-500" />
+            Section 4: Escrow Transactions & Vault Status
+          </h2>
+          <p className="text-xs text-slate-500">Escrow records are available through the canonical escrow workflow.</p>
         </div>
-
-        {activeEscrowDeals.map((deal) => (
-          <Card key={deal.id} className="p-6 bg-white border-amber-300 shadow-md space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <span className="font-mono text-[10px] text-slate-400 font-extrabold uppercase">{deal.id}</span>
-                <h3 className="text-lg font-black text-[#1E3063] font-display">{deal.vehicleTitle}</h3>
-                <p className="text-xs text-slate-500 font-medium">Buyer: <strong>{deal.buyerName}</strong> ({deal.buyerPhone})</p>
-              </div>
-
-              <div className="text-left sm:text-right">
-                <p className="text-[10px] text-slate-400 font-bold uppercase">Agreed Sale Amount</p>
-                <p className="text-2xl font-black text-[#1E3063] font-display">Ksh {deal.agreedPrice.toLocaleString()}</p>
-                <Badge variant="success" size="sm">
-                  ✓ Funds Deposited in KAYAD Vault
-                </Badge>
-              </div>
-            </div>
-
-            {/* Buyer Progress Tracker Bar */}
-            <div className="space-y-2">
-              <p className="text-xs font-black text-[#1E3063] uppercase tracking-wider font-display">
-                Buyer & Handover Milestone Progress
-              </p>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
-                {deal.buyerProgress.map((item) => (
-                  <div
-                    key={item.step}
-                    className={`p-3 rounded-2xl border text-center space-y-1 ${
-                      item.done
-                        ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold'
-                        : item.active
-                        ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-400/30 text-amber-950 font-bold'
-                        : 'bg-slate-50 border-slate-200 text-slate-400'
-                    }`}
-                  >
-                    <div className="flex justify-center">
-                      {item.done ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      ) : item.active ? (
-                        <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
-                      ) : (
-                        <span className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[10px]">{item.step}</span>
-                      )}
-                    </div>
-                    <p className="font-extrabold text-[11px] truncate">{item.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Required Action Callout */}
-            <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5">
-                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                <div>
-                  <p className="font-black text-[#17244B]">Action Required From Seller:</p>
-                  <p className="text-slate-700 font-medium">{deal.requiredAction}</p>
-                </div>
-              </div>
-
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setSelectedTaskModal('Upload NTSA TIMS Logbook Transfer Form 9')}
-                className="shrink-0"
-              >
-                <Upload className="w-3.5 h-3.5 text-amber-400" />
-                <span>Upload Form 9</span>
-              </Button>
-            </div>
-          </Card>
-        ))}
+        <Card className="p-6 bg-slate-50 border-slate-200">
+          <p className="text-sm font-semibold text-slate-700">No seller escrow records are available in this dashboard's current API contract.</p>
+          <p className="text-xs text-slate-500 mt-2">KAYAD does not display fabricated balances, deposit confirmations, buyer milestones, or payout guarantees.</p>
+        </Card>
       </div>
 
       {/* ==========================================
@@ -663,121 +473,29 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
               <Wrench className="w-5 h-5 text-blue-600" />
               Section 5: Inspection Requests
             </h2>
-            <p className="text-xs text-slate-500">150-Point mechanical diagnostic requests scheduled by interested buyers.</p>
+            <p className="text-xs text-slate-500">Only inspection records returned by the active backend are displayed.</p>
           </div>
-
-          <Button variant="secondary" size="sm" onClick={() => onNavigate('inspections')}>
-            <span>View All Inspectors</span>
-          </Button>
+          <Button variant="secondary" size="sm" onClick={() => onNavigate('inspections')}>View Inspections</Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {inspectionRequests.map((req) => (
-            <Card key={req.id} className="p-5 bg-white border-slate-200 space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <Badge variant={req.status === 'Completed' ? 'success' : 'warning'} size="sm">
-                  {req.status.toUpperCase()}
-                </Badge>
-                <span className="text-xs text-slate-400 font-semibold">{req.scheduledTime}</span>
-              </div>
-
-              <h4 className="font-black text-[#1E3063] text-sm">{req.vehicleTitle}</h4>
-
-              <div className="space-y-1.5 text-xs text-slate-600">
-                <p><strong>Buyer:</strong> {req.buyerName}</p>
-                <p><strong>Certified Inspector:</strong> {req.inspectorName}</p>
-                <p><strong>Location:</strong> {req.location}</p>
-                {req.overallScore && (
-                  <p className="font-bold text-emerald-700"><strong>Inspection Rating:</strong> {req.overallScore}% Pass Rating</p>
-                )}
-              </div>
-
-              {req.reportSummary && (
-                <div className="p-3 bg-emerald-50 rounded-xl text-xs text-emerald-950 font-medium border border-emerald-200">
-                  {req.reportSummary}
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
+        <Card className="p-6 bg-slate-50 border-slate-200">
+          <p className="text-sm font-semibold text-slate-700">No seller inspection requests are exposed by this dashboard's current API contract.</p>
+        </Card>
       </div>
 
       {/* ==========================================
           SECTION 6: OFFERS RECEIVED
           ========================================== */}
       <div id="section-offers" className="space-y-4 pt-6 border-t border-slate-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-amber-500" />
-              Section 6: Offers Received
-            </h2>
-            <p className="text-xs text-slate-500">Review cash and financing offers submitted by verified buyers.</p>
-          </div>
+        <div>
+          <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-amber-500" />
+            Section 6: Offers Received
+          </h2>
+          <p className="text-xs text-slate-500">Buyer offers are shown only when returned by a real seller-offer backend contract.</p>
         </div>
-
-        <div className="space-y-3">
-          {offers.map((offer) => (
-            <Card key={offer.id} className="p-5 bg-white border-slate-200 space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-3">
-                  <LazyImage src={offer.vehicleImage} alt={offer.vehicleTitle} wrapperClassName="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-900" className="w-full h-full object-cover" />
-                  <div>
-                    <h4 className="font-black text-[#1E3063] text-sm">{offer.vehicleTitle}</h4>
-                    <p className="text-xs text-slate-500">Buyer: <strong>{offer.buyerName}</strong> • {offer.paymentType}</p>
-                  </div>
-                </div>
-
-                <div className="text-left sm:text-right">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Offered Price</span>
-                  <span className="text-xl font-black text-emerald-700 font-display">Ksh {offer.offeredAmount.toLocaleString()}</span>
-                  <span className="text-[10px] text-slate-400 block">Asking: Ksh {offer.askingPrice.toLocaleString()}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-slate-500 font-semibold">
-                  <Clock className="w-4 h-4 text-amber-500" />
-                  <span>Expires in {offer.expiresInHours} hours</span>
-                  <span>• Status: <strong className="text-[#1E3063]">{offer.status}</strong></span>
-                </div>
-
-                {offer.status === 'Pending' && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleAcceptOffer(offer.id)}
-                    >
-                      <Check className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Accept Offer</span>
-                    </Button>
-
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedOfferForCounter(offer);
-                        setCounterPriceInput(offer.offeredAmount.toString());
-                      }}
-                    >
-                      <span>Counter Offer</span>
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeclineOffer(offer.id)}
-                    >
-                      <X className="w-3.5 h-3.5 text-rose-500" />
-                      <span>Decline</span>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
+        <Card className="p-6 bg-slate-50 border-slate-200">
+          <p className="text-sm font-semibold text-slate-700">No seller offer feed is currently exposed by the backend.</p>
+        </Card>
       </div>
 
       {/* ==========================================
@@ -789,38 +507,11 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             Section 7: Completed Sales & Payout History
           </h2>
-          <p className="text-xs text-slate-500">Historical records of finished private sales and cleared bank payouts.</p>
+          <p className="text-xs text-slate-500">Completed sales and payout records are shown only when returned by the backend.</p>
         </div>
-
-        <div className="space-y-3">
-          {completedSales.map((sale) => (
-            <Card key={sale.id} className="p-5 bg-white border-emerald-200 space-y-3">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                <div>
-                  <Badge variant="success" size="sm">
-                    ✓ PAYOUT CLEARED
-                  </Badge>
-                  <h4 className="font-black text-[#1E3063] text-sm mt-1">{sale.vehicleTitle}</h4>
-                  <p className="text-xs text-slate-500">Buyer: {sale.buyerName} • TIMS Ref: {sale.timsTransferRef}</p>
-                </div>
-
-                <div className="text-left sm:text-right">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Net Payout Received</span>
-                  <span className="text-xl font-black text-emerald-700 font-display">Ksh {sale.payoutAmount.toLocaleString()}</span>
-                  <span className="text-[10px] text-slate-500 block">{sale.payoutMethod}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-                <span>Completed on {sale.completedDate}</span>
-                <Button variant="outline" size="sm" onClick={() => showToast('Downloading Official Sales Receipt PDF...')}>
-                  <FileText className="w-3.5 h-3.5 text-[#1E3063]" />
-                  <span>Download Receipt</span>
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+        <Card className="p-6 bg-slate-50 border-slate-200">
+          <p className="text-sm font-semibold text-slate-700">No completed seller sales or payout history are exposed by this dashboard's current API contract.</p>
+        </Card>
       </div>
 
       {/* ==========================================
@@ -832,181 +523,29 @@ export const PrivateSellerDashboardView: React.FC<PrivateSellerDashboardViewProp
             <ShieldCheck className="w-5 h-5 text-emerald-600" />
             Section 8: Private Seller Verification Status
           </h2>
-          <p className="text-xs text-slate-500">Your trust metrics, identity validation, and logbook sync status.</p>
+          <p className="text-xs text-slate-500">Verification status is shown only when supported by the signed-in user's backend data.</p>
         </div>
-
-        <Card className="p-6 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 border-slate-200 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-600">National ID / Passport</span>
-                <Badge variant="success" size="sm">VERIFIED ✓</Badge>
-              </div>
-              <p className="text-slate-500 text-[11px]">Identity matched with Kenyan Registrar of Persons.</p>
-            </div>
-
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-600">NTSA TIMS Logbook</span>
-                <Badge variant="success" size="sm">SYNCED ✓</Badge>
-              </div>
-              <p className="text-slate-500 text-[11px]">Vehicle title ownership verified directly with NTSA.</p>
-            </div>
-
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-600">Phone & Email OTP</span>
-                <Badge variant="success" size="sm">VERIFIED ✓</Badge>
-              </div>
-              <p className="text-slate-500 text-[11px]">+254 7** *** **2 authenticated via Safaricom OTP.</p>
-            </div>
-
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-600">Payout Account</span>
-                <Badge variant="success" size="sm">CONFIGURED ✓</Badge>
-              </div>
-              <p className="text-slate-500 text-[11px]">NCBA Bank Kenya (A/C ending ****8891).</p>
-            </div>
-          </div>
+        <Card className="p-6 bg-slate-50 border-slate-200">
+          <p className="text-sm font-semibold text-slate-700">No private-seller verification details are currently exposed by the active API contract.</p>
+          <p className="text-xs text-slate-500 mt-2">KAYAD does not display fabricated identity, TIMS, OTP, or payout-account confirmations.</p>
         </Card>
       </div>
 
       {/* ==========================================
-          MODAL: COUNTER OFFER
-          ========================================== */}
-      {selectedOfferForCounter && (
-        <Modal
-          isOpen={true}
-          onClose={() => setSelectedOfferForCounter(null)}
-          title="Submit Counter Offer to Buyer"
-        >
-          <div className="p-6 space-y-4 text-xs">
-            <p className="text-slate-600 font-medium">
-              Propose a counter price to <strong>{selectedOfferForCounter.buyerName}</strong> for <strong>{selectedOfferForCounter.vehicleTitle}</strong>.
-            </p>
-
-            <div className="space-y-1.5">
-              <label className="font-bold text-[#1E3063] block">Asking Price:</label>
-              <Input value={`Ksh ${selectedOfferForCounter.askingPrice.toLocaleString()}`} readOnly className="bg-slate-50" />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="font-bold text-[#1E3063] block">Buyer's Current Offer:</label>
-              <Input value={`Ksh ${selectedOfferForCounter.offeredAmount.toLocaleString()}`} readOnly className="bg-slate-50 text-emerald-700 font-bold" />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="font-bold text-[#1E3063] block">Your Counter Offer Amount (Ksh):</label>
-              <Input
-                type="number"
-                value={counterPriceInput}
-                onChange={(e) => setCounterPriceInput(e.target.value)}
-                placeholder="e.g. 7400000"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-3">
-              <Button variant="secondary" onClick={() => setSelectedOfferForCounter(null)}>Cancel</Button>
-              <Button variant="primary" onClick={handleCounterOfferSubmit}>Send Counter Offer</Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* ==========================================
-          MODAL: NEW LISTING DRAFT
+          MODAL: NEW LISTING
           ========================================== */}
       {showNewListingModal && (
-        <Modal
-          isOpen={true}
-          onClose={() => setShowNewListingModal(false)}
-          title="List Your Personal Vehicle for Sale"
-          maxWidth="xl"
-        >
+        <Modal isOpen={true} onClose={() => setShowNewListingModal(false)} title="List Your Personal Vehicle" maxWidth="xl">
           <div className="p-6 space-y-4 text-xs">
-            <p className="text-slate-600 font-medium">
-              List your car as a verified private seller. KAYAD automatically checks your NTSA TIMS logbook status for instant buyer trust.
-            </p>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="font-bold text-[#1E3063] block">Car Make:</label>
-                <Input placeholder="e.g. Toyota" defaultValue="Toyota" />
-              </div>
-              <div className="space-y-1">
-                <label className="font-bold text-[#1E3063] block">Car Model:</label>
-                <Input placeholder="e.g. Prado" defaultValue="Prado TX-L" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="font-bold text-[#1E3063] block">Year of Manufacture:</label>
-                <Input placeholder="e.g. 2021" defaultValue="2021" />
-              </div>
-              <div className="space-y-1">
-                <label className="font-bold text-[#1E3063] block">Asking Price (Ksh):</label>
-                <Input placeholder="e.g. 7450000" defaultValue="7450000" />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="font-bold text-[#1E3063] block">NTSA Registration / Logbook Number:</label>
-              <Input placeholder="e.g. KDG ***A / TIMS-8821" defaultValue="KDG 492A" />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-4">
-              <Button variant="secondary" onClick={() => setShowNewListingModal(false)}>Cancel</Button>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setShowNewListingModal(false);
-                  showToast('Personal vehicle draft created! Pending NTSA TIMS instant verification.');
-                }}
-              >
-                Publish Private Listing
-              </Button>
+            <p className="text-slate-600 font-medium">Private-seller listing creation is not exposed by the current backend contract.</p>
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-900">No local draft, fake listing, or simulated publication will be created from this screen.</div>
+            <div className="flex justify-end">
+              <Button variant="secondary" onClick={() => setShowNewListingModal(false)}>Close</Button>
             </div>
           </div>
         </Modal>
       )}
 
-      {/* ==========================================
-          MODAL: UPLOAD TIMS FORM TASK
-          ========================================== */}
-      {selectedTaskModal && (
-        <Modal
-          isOpen={true}
-          onClose={() => setSelectedTaskModal(null)}
-          title={selectedTaskModal}
-        >
-          <div className="p-6 space-y-4 text-xs">
-            <p className="text-slate-600 font-medium">
-              Upload a scanned copy or clear photo of signed NTSA TIMS Logbook Transfer Form 9. Once uploaded, funds will be queued for payout upon buyer inspection signoff.
-            </p>
-
-            <div className="p-8 border-2 border-dashed border-slate-300 rounded-2xl text-center space-y-2 bg-slate-50 cursor-pointer hover:border-amber-400 transition-colors">
-              <Upload className="w-8 h-8 text-amber-500 mx-auto" />
-              <p className="font-bold text-slate-700">Click to upload NTSA Form 9 PDF or Image</p>
-              <p className="text-[10px] text-slate-400">Supported formats: PDF, PNG, JPG (Max 10MB)</p>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-3">
-              <Button variant="secondary" onClick={() => setSelectedTaskModal(null)}>Cancel</Button>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setSelectedTaskModal(null);
-                  showToast('Form 9 successfully uploaded to KAYAD Escrow Vault!');
-                }}
-              >
-                Confirm Upload
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 };

@@ -10,8 +10,7 @@ import type { UserProfile } from '../../../types';
  * 13 separate data concepts (watchlist, purchase journey, inspection
  * records, finance accounts, documents, timeline events, service
  * reminders, expenses, resale valuations, reward points, messages,
- * notifications) but was driven entirely by a single hardcoded
- * SAMPLE_USER object - not real, signed-in user data at all.
+ * notifications) but was driven entirely by a single hardcoded demo user object.
  *
  * Investigated each concept for a real backend equivalent before
  * rebuilding, rather than keep any of them as-is:
