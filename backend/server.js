@@ -375,6 +375,7 @@ app.use(cookieParser());
 import CacheStore from "./services/sessionStore.js";
 app.use(
   session({
+    name: "kayad.sid",
     store: new CacheStore(),
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -382,7 +383,8 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "strict",
+      path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     },
   }),

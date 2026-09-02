@@ -416,6 +416,7 @@ describe("csrfProtection", () => {
     const req = {
       method: "POST",
       headers: { "x-csrf-token": "abc" },
+      cookies: { "XSRF-TOKEN": "abc" },
       session: { csrfToken: "abc" },
     };
     const next = jest.fn();
@@ -441,6 +442,7 @@ describe("csrfProtection", () => {
     const req = {
       method: "DELETE",
       headers: { "x-csrf-token": "attacker-token" },
+      cookies: { "XSRF-TOKEN": "real-token" },
       session: { csrfToken: "real-token" },
     };
     const next = jest.fn();
