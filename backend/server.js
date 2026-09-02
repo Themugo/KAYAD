@@ -631,6 +631,10 @@ app.use(responseWrapper);
 
 // ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
 app.use("/api", checkSystemStatus);
+// Enforce CSRF consistently across every browser-facing state-changing API.
+// JWT requests remain exempt inside csrfProtection; machine callbacks have an
+// explicit allowlist in the middleware and retain their own authentication.
+app.use("/api", csrfProtection);
 
 // ─── API ROUTES ───────────────────────────────────────────────
 app.use("/api/auth/refresh", csrfProtection); // CSRF for cookie-based refresh

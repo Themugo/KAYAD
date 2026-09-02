@@ -14,7 +14,8 @@
     "validate:phase32": "node scripts/validate-phase32.mjs",
     "validate:phase33": "node scripts/validate-phase33.mjs",
     "validate:phase34": "node scripts/validate-phase34.mjs",
-    "validate:phase35": "node scripts/validate-phase35.mjs"
+    "validate:phase35": "node scripts/validate-phase35.mjs",
+    "validate:phase36": "node scripts/validate-phase36.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
