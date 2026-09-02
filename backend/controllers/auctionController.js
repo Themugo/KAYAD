@@ -1,122 +1,105 @@
-import Auction from "../models/Auction.js";
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
+
+// KAYAD canonical auction model: auction lifecycle state is stored on the
+// cars row (auctionStatus, auctionStartTime, auctionEnd, currentBid, etc.).
+// There is intentionally no separate `auctions` table in the authoritative
+// Supabase migration chain. Public auction endpoints therefore expose a
+// stable auction-shaped response derived from the canonical car record.
+
+const toPublicStatus = (car) => {
+  if (car.auctionStatus === "ended") return "ended";
+  if (car.auctionStatus === "live") {
+    const end = car.auctionEnd ? new Date(car.auctionEnd).getTime() : NaN;
+    if (Number.isFinite(end) && end <= Date.now()) return "ended";
+    return "active";
+  }
+  return "draft";
+};
+
+const toAuctionResponse = (car) => ({
+  id: car.id,
+  carId: car.id,
+  status: toPublicStatus(car),
+  startingBid: Number(car.startingBid ?? car.price ?? 0),
+  highestBid: Number(car.currentBid ?? 0),
+  startTime: car.auctionStartTime ?? null,
+  endTime: car.auctionEnd ?? null,
+  bidIncrement: Number(car.bidIncrement ?? 0),
+  reservePrice: car.reservePrice ?? null,
+  highestBidderId: car.highestBidderId ?? null,
+  bidCount: Number(car.bidsCount ?? 0),
+  allowBid: Boolean(car.allowBid),
+  allowBuy: Boolean(car.allowBuy),
+  car: {
+    _id: car.id,
+    title: car.title,
+    brand: car.brand,
+    model: car.model,
+    year: car.year,
+    price: car.price,
+    images: car.images,
+    fuel: car.fuel,
+    transmission: car.transmission,
+    mileage: car.mileage,
+    location: car.location,
+    dealer: car.dealer,
+    currentBid: car.currentBid,
+    bidsCount: car.bidsCount,
+    auctionStatus: car.auctionStatus,
+    allowBid: car.allowBid,
+    description: car.description,
+    features: car.features,
+    reservePrice: car.reservePrice,
+    reserveMode: car.reserveMode,
+  },
+});
+
+const buildAuctionFilter = ({ status, search } = {}) => {
+  const filter = {
+    deletedAt: null,
+    auctionStatus: { $in: ["live", "ended"] },
+  };
+
+  if (status === "active" || status === "live") filter.auctionStatus = "live";
+  if (status === "ended") filter.auctionStatus = "ended";
+
+  if (search) filter.$text = { $search: String(search).trim() };
+  return filter;
+};
 
 export const listAuctions = async (req, res) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const skip = (page - 1) * limit;
-  const { status, search, sort } = req.query;
+  const filter = buildAuctionFilter(req.query);
 
-  const filter = { deletedAt: null };
-  if (status) filter.status = status;
+  let sort = { auctionEnd: -1 };
+  if (req.query.sort === "newest") sort = { auctionStartTime: -1 };
+  else if (req.query.sort === "ending_soon") sort = { auctionEnd: 1 };
+  else if (req.query.sort === "price_asc") sort = { currentBid: 1 };
+  else if (req.query.sort === "price_desc") sort = { currentBid: -1 };
 
-  let sortObj = { endTime: -1 };
-  if (sort === "newest") sortObj = { startTime: -1 };
-  else if (sort === "ending_soon") sortObj = { endTime: 1 };
-  else if (sort === "price_asc") sortObj = { highestBid: 1 };
-  else if (sort === "price_desc") sortObj = { highestBid: -1 };
-
-  let pipeline = [
-    { $match: filter },
-    { $sort: sortObj },
-    { $skip: skip },
-    { $limit: limit },
-    {
-      $lookup: {
-        from: "cars",
-        localField: "carId",
-        foreignField: "_id",
-        as: "car",
-      },
-    },
-    { $unwind: { path: "$car", preserveNullAndEmptyArrays: true } },
-  ];
-
-  if (search) {
-    const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-    pipeline.unshift({
-      $match: {
-        $or: [
-          { "car.title": searchRegex },
-          { "car.brand": searchRegex },
-          { "car.model": searchRegex },
-        ],
-      },
-    });
-  }
-
-  const [auctions, total] = await Promise.all([
-    Auction.aggregate(pipeline),
-    Auction.countDocuments(filter),
+  const [cars, total] = await Promise.all([
+    Car.find(filter).sort(sort).skip(skip).limit(limit).lean(),
+    Car.countDocuments(filter),
   ]);
 
-  const enriched = auctions.map((a) => ({
-    _id: a._id,
-    carId: a.car?._id || a.carId,
-    roomId: a.roomId,
-    status: a.status,
-    startingBid: a.startingBid,
-    highestBid: a.highestBid,
-    winner: a.winner,
-    bidHistory: a.bidHistory,
-    startTime: a.startTime,
-    endTime: a.endTime,
-    extendedCount: a.extendedCount,
-    paymentDeadline: a.paymentDeadline,
-    paymentStatus: a.paymentStatus,
-    bidSecurityAmount: a.bidSecurityAmount,
-    commissionRate: a.commissionRate,
-    createdBy: a.createdBy,
-    createdAt: a.createdAt,
-    updatedAt: a.updatedAt,
-    car: a.car
-      ? {
-          _id: a.car._id,
-          title: a.car.title,
-          brand: a.car.brand,
-          model: a.car.model,
-          year: a.car.year,
-          price: a.car.price,
-          images: a.car.images,
-          fuel: a.car.fuel,
-          transmission: a.car.transmission,
-          mileage: a.car.mileage,
-          location: a.car.location,
-          dealer: a.car.dealer,
-          currentBid: a.car.currentBid,
-          bidsCount: a.car.bidsCount,
-          auctionStatus: a.car.auctionStatus,
-          allowBid: a.car.allowBid,
-        }
-      : null,
-  }));
-
+  const auctions = cars.map(toAuctionResponse);
   res.json({
     success: true,
-    auctions: enriched,
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
+    auctions,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 };
 
 export const getAuction = async (req, res) => {
-  const auction = await Auction.findById(req.params.id)
-    .populate({
-      path: "carId",
-      select: "title brand model year price images fuel transmission mileage location dealer currentBid bidsCount auctionStatus allowBid description features reservePrice reserveMode",
-    })
-    .lean();
-
-  if (!auction) {
+  const car = await Car.findById(req.params.id).lean();
+  if (!car || !["live", "ended"].includes(car.auctionStatus)) {
     return res.status(404).json({ success: false, message: "Auction not found" });
   }
 
-  const bids = await Bid.find({ carId: auction.carId })
+  const bids = await Bid.find({ carId: car.id })
     .sort({ amount: -1 })
     .limit(50)
     .populate("user", "name email phone")
@@ -124,10 +107,7 @@ export const getAuction = async (req, res) => {
 
   res.json({
     success: true,
-    auction: {
-      ...auction,
-      car: auction.carId,
-    },
+    auction: toAuctionResponse(car),
     bids,
   });
 };
@@ -136,32 +116,25 @@ export const getMyAuctions = async (req, res) => {
   const userId = req.user?.id;
   if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
 
-  const userCars = await Car.find({ dealer: userId }).select("_id").lean();
-  const carIds = userCars.map((c) => c._id);
-
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const skip = (page - 1) * limit;
+  const filter = {
+    deletedAt: null,
+    dealer: userId,
+    auctionStatus: { $in: ["live", "ended"] },
+  };
+  if (req.query.status === "active" || req.query.status === "live") filter.auctionStatus = "live";
+  if (req.query.status === "ended") filter.auctionStatus = "ended";
 
-  const filter = { carId: { $in: carIds }, deletedAt: null };
-  if (req.query.status) filter.status = req.query.status;
-
-  const [auctions, total] = await Promise.all([
-    Auction.find(filter)
-      .sort({ endTime: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate({
-        path: "carId",
-        select: "title brand model year price images",
-      })
-      .lean(),
-    Auction.countDocuments(filter),
+  const [cars, total] = await Promise.all([
+    Car.find(filter).sort({ auctionEnd: -1 }).skip(skip).limit(limit).lean(),
+    Car.countDocuments(filter),
   ]);
 
   res.json({
     success: true,
-    auctions: auctions.map((a) => ({ ...a, car: a.carId })),
+    auctions: cars.map(toAuctionResponse),
     pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 };
@@ -170,31 +143,23 @@ export const getActiveAuctions = async (req, res) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const skip = (page - 1) * limit;
-
-  const now = new Date();
+  const now = new Date().toISOString();
   const filter = {
     deletedAt: null,
-    status: "active",
-    startTime: { $lte: now },
-    endTime: { $gt: now },
+    auctionStatus: "live",
+    allowBid: true,
+    auctionStartTime: { $lte: now },
+    auctionEnd: { $gt: now },
   };
 
-  const [auctions, total] = await Promise.all([
-    Auction.find(filter)
-      .sort({ endTime: 1 })
-      .skip(skip)
-      .limit(limit)
-      .populate({
-        path: "carId",
-        select: "title brand model year price images fuel transmission mileage location currentBid bidsCount",
-      })
-      .lean(),
-    Auction.countDocuments(filter),
+  const [cars, total] = await Promise.all([
+    Car.find(filter).sort({ auctionEnd: 1 }).skip(skip).limit(limit).lean(),
+    Car.countDocuments(filter),
   ]);
 
   res.json({
     success: true,
-    auctions: auctions.map((a) => ({ ...a, car: a.carId })),
+    auctions: cars.map(toAuctionResponse),
     pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 };
