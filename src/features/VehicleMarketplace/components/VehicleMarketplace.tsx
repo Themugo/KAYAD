@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
 import FloatingAdRail from '../../../components/FloatingAdRail';
@@ -58,17 +58,6 @@ interface VehicleMarketplaceProps {
   onRetryLoad?: () => void;
 }
 
-interface SavedSearchPreset {
-  id: string;
-  name: string;
-  make: string;
-  model: string;
-  maxPrice: number;
-  bodyStyle: string;
-  fuel: string;
-  location: string;
-  createdDate: string;
-}
 
 export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   vehicles,
@@ -157,8 +146,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverTotalPages, setServerTotalPages] = useState<number>(1);
   const [serverLoading, setServerLoading] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [simulatedLoading, setIsLoading] = useState<boolean>(false);
-  const isLoading = isLoadingReal || serverLoading || simulatedLoading;
+  const isLoading = isLoadingReal || serverLoading;
 
   const serverQuery = useMemo<GetCarsParams>(() => {
     const query: GetCarsParams = {
@@ -245,27 +233,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     onQuickView(vehicle);
   }, [onQuickView]);
 
-  // Saved Searches State
-  const [savedPresets, setSavedPresets] = useState<SavedSearchPreset[]>([]);
-  const [newPresetName, setNewPresetName] = useState<string>('');
-  const [showSaveSearchModal, setShowSaveSearchModal] = useState<boolean>(false);
-
   // Show Toast
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
-
-  // Brief skeleton loading animation on filter changes
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 180);
-    return () => clearTimeout(timer);
-  }, [
-    searchQuery, selectedCounty, selectedMake, selectedModel, selectedBodyStyle, 
-    selectedFuel, selectedTransmission, selectedCondition, selectedSellerType, 
-    minPrice, maxPrice, minYear, maxYear, maxMileage, onlyAuction, sortBy
-  ]);
 
   // Dynamic Filter Options Extracted directly from backend dataset
   const makes = useMemo(() => {
@@ -344,36 +316,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     onCountyChange('All East Africa');
   }, [onSearchChange, onCountyChange]);
 
-  // Save current filter preset
-  const handleSaveCurrentPreset = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPresetName.trim()) return;
-    const preset: SavedSearchPreset = {
-      id: `p-${Date.now()}`,
-      name: newPresetName.trim(),
-      make: selectedMake,
-      model: selectedModel,
-      maxPrice,
-      bodyStyle: selectedBodyStyle,
-      fuel: selectedFuel,
-      location: selectedCounty,
-      createdDate: new Date().toISOString().split('T')[0]
-    };
-    setSavedPresets((prev) => [preset, ...prev]);
-    setNewPresetName('');
-    setShowSaveSearchModal(false);
-    showToast(`Saved search "${preset.name}". You will receive instant notifications when new matching inventory arrives!`);
-  };
-
-  const applyPreset = (preset: SavedSearchPreset) => {
-    setSelectedMake(preset.make);
-    setSelectedModel(preset.model || 'All');
-    setMaxPrice(preset.maxPrice);
-    setSelectedBodyStyle(preset.bodyStyle);
-    setSelectedFuel(preset.fuel);
-    if (preset.location) onCountyChange(preset.location);
-    showToast(`Applied saved search: "${preset.name}"`);
-  };
 
   // Compute active removable chips for Summary Bar
   const activeFilters = useMemo(() => {
@@ -1186,43 +1128,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       )}
 
-      {/* 9. SAVE SEARCH MODAL */}
-      {showSaveSearchModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowSaveSearchModal(false)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-base font-bold text-[#1E3063] mb-3">Save this search</h3>
-            <form onSubmit={handleSaveCurrentPreset} className="space-y-3">
-              <input
-                value={newPresetName}
-                onChange={(e) => setNewPresetName(e.target.value)}
-                placeholder="e.g. Under Ksh 3.5M SUVs"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                autoFocus
-              />
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setShowSaveSearchModal(false)} className="flex-1 border border-slate-200 rounded-lg py-2 text-xs font-semibold text-slate-600">
-                  Cancel
-                </button>
-                <button type="submit" className="flex-1 bg-[#1E3063] text-white rounded-lg py-2 text-xs font-bold">
-                  Save Search
-                </button>
-              </div>
-            </form>
-            {savedPresets.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-100 space-y-1.5">
-                <p className="text-[10px] font-bold uppercase text-slate-400 mb-1.5">Saved Searches</p>
-                {savedPresets.map((p) => (
-                  <button key={p.id} onClick={() => applyPreset(p)} className="w-full text-left text-xs text-slate-600 hover:text-[#C85A32] flex items-center gap-1.5">
-                    <Bookmark className="w-3 h-3 shrink-0" /> {p.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 10. MOBILE FULL-SCREEN FILTER DRAWER */}
+      {/* MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden">
           <div className="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
