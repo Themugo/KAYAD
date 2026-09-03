@@ -10,6 +10,8 @@ import PriceAlertsModal from './components/PriceAlertsModal';
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
+import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
@@ -584,9 +586,13 @@ function AppInner() {
 export function App() {
   return (
     <AuthProvider>
-      <CompareProvider>
-        <AppInner />
-      </CompareProvider>
+      <SocketProvider>
+        <NotificationProvider>
+          <CompareProvider>
+            <AppInner />
+          </CompareProvider>
+        </NotificationProvider>
+      </SocketProvider>
     </AuthProvider>
   );
 }

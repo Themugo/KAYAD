@@ -44,22 +44,9 @@ interface BidData {
   isAutoBid?: boolean;
 }
 
-interface NotificationItemData {
-  id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'bid' | 'outbid' | 'auction_won' | 'escrow' | 'message' | 'system' | 'price_alert' | 'price_drop' | 'status_change';
-  isRead: boolean;
-  createdAt: string;
-  linkUrl?: string;
-  vehicleId?: string;
-}
 
 export interface EscrowContractLocal extends EscrowContractData {}
 export interface BidLocal extends BidData {}
-export interface NotificationItemLocal extends NotificationItemData {}
-
 interface Advert {
   id: string;
   title: string;
@@ -167,9 +154,6 @@ interface MarketplaceContextType {
   escrowContracts: EscrowContractLocal[];
   initiateEscrow: (vehicle: Vehicle, buyerId: string, buyerName: string) => EscrowContractLocal;
   updateEscrowStep: (contractId: string, nextStep: number) => void;
-  notifications: NotificationItemLocal[];
-  unreadNotifsCount: number;
-  markNotificationRead: (id: string) => void;
   isChatOpen: boolean;
   openChat: (vehicleId?: string) => void;
   closeChat: () => void;
@@ -220,7 +204,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [bids, setBids] = useState<BidLocal[]>([]);
   const [escrowContracts, setEscrowContracts] = useState<EscrowContractLocal[]>([]);
-  const [notifications, setNotifications] = useState<NotificationItemLocal[]>([]);
   
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [activeChatVehicleId, setActiveChatVehicleId] = useState<string | null>(null);
@@ -343,18 +326,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
       })
     );
 
-    // Trigger Notification
-    const newNotif: NotificationItemLocal = {
-      id: `notif_${Date.now()}`,
-      userId: bidderId,
-      title: 'Bid Placed Successfully',
-      message: `Your bid of $${amount.toLocaleString()} on ${target.title} was recorded.`,
-      type: 'bid',
-      isRead: false,
-      createdAt: 'Just now'
-    };
-    setNotifications(prev => [newNotif, ...prev]);
-
     return true;
   };
 
@@ -391,20 +362,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
 
     setEscrowContracts(prev => [newContract, ...prev]);
     
-    // Add notification
-    setNotifications(prev => [
-      {
-        id: `notif_${Date.now()}`,
-        userId: buyerId,
-        title: 'Escrow Initiated',
-        message: `Escrow contract ${newContract.id} created for ${vehicle.title}.`,
-        type: 'escrow',
-        isRead: false,
-        createdAt: 'Just now'
-      },
-      ...prev
-    ]);
-
     return newContract;
   };
 
@@ -437,12 +394,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
         return contract;
       })
     );
-  };
-
-  const unreadNotifsCount = useMemo(() => notifications.filter(n => !n.isRead).length, [notifications]);
-
-  const markNotificationRead = (id: string) => {
-    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, isRead: true } : n)));
   };
 
   const openChat = (vehicleId?: string) => {
@@ -536,18 +487,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
       setPriceAlerts(prev => [newAlert, ...prev]);
     }
 
-    // Post a notification confirming alert activation
-    const notif: NotificationItemLocal = {
-      id: `notif_${Date.now()}`,
-      userId: alertData.userId,
-      title: 'Price Alert Set',
-      message: `Alert configured for ${alertData.vehicleTitle}. We will notify you if price drops below KSh ${alertData.targetPrice.toLocaleString()}.`,
-      type: 'price_alert',
-      isRead: false,
-      createdAt: 'Just now',
-      vehicleId: alertData.vehicleId
-    };
-    setNotifications(prev => [notif, ...prev]);
 
     return newAlert;
   };
@@ -583,9 +522,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
         escrowContracts,
         initiateEscrow,
         updateEscrowStep,
-        notifications,
-        unreadNotifsCount,
-        markNotificationRead,
         isChatOpen,
         openChat,
         closeChat,

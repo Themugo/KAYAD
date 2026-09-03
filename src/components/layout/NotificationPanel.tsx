@@ -1,6 +1,20 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, ExternalLink, ShieldCheck, Gavel, MessageSquare, X, TrendingDown, Tag, BellRing } from 'lucide-react';
-import { useMarketplace } from '../../context/MarketplaceContext';
+import { useNotifications } from '../../context/NotificationContext';
+import { useNavigate } from 'react-router-dom';
+
+const timeAgo = (date: string) => {
+  const timestamp = new Date(date).getTime();
+  if (!Number.isFinite(timestamp)) return 'Time unavailable';
+  const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -8,7 +22,8 @@ interface NotificationPanelProps {
 }
 
 export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }) => {
-  const { notifications, markNotificationRead, navigateTo } = useMarketplace();
+  const { notifications, markAsRead } = useNotifications();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
@@ -63,20 +78,20 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
           ) : (
             notifications.map(notif => (
               <div
-                key={notif.id}
+                key={notif._id}
                 onClick={() => {
-                  markNotificationRead(notif.id);
-                  if (notif.vehicleId) {
-                    navigateTo('vehicle_detail', notif.vehicleId);
+                  markAsRead(notif._id);
+                  if (notif.link) {
+                    navigate(notif.link);
                   } else if (notif.type === 'escrow') {
-                    navigateTo('escrow');
-                  } else if (notif.type === 'bid') {
-                    navigateTo('auctions');
+                    navigate('/escrow');
+                  } else if (notif.type === 'bid' || notif.type === 'auction') {
+                    navigate('/auction');
                   }
                   onClose();
                 }}
                 className={`p-3 rounded-xl cursor-pointer transition-colors ${
-                  notif.isRead
+                  notif.read
                     ? 'opacity-70 hover:bg-[#FCF9F4] dark:hover:bg-[#1A2A4E]/40'
                     : 'bg-[#F0A500]/8 hover:bg-[#F0A500]/12 border-l-2 border-[#F0A500]'
                 }`}
@@ -91,7 +106,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
                         {notif.title}
                       </p>
                       <span className="text-[10px] text-[#6B7A99] whitespace-nowrap ml-2">
-                        {notif.createdAt}
+                        {timeAgo(notif.createdAt)}
                       </span>
                     </div>
                     <p className="text-xs text-[#3D4F6F] dark:text-[#94A3B8] mt-0.5 line-clamp-2">
@@ -107,7 +122,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
         <div className="p-3 border-t border-[#E8E1D5] dark:border-[#1A2A4E] text-center bg-[#F6F1E8]/50 dark:bg-[#0B1628]/50">
           <button
             onClick={() => {
-              navigateTo('dashboard');
+              navigate('/dashboard');
               onClose();
             }}
             className="text-xs font-semibold text-[#F0A500] hover:text-[#F0A500] inline-flex items-center gap-1"
