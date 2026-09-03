@@ -167,6 +167,11 @@ export const useAuth = (): AuthContextValue => {
   return ctx;
 };
 
+/** Optional auth access for legacy/context boundaries that may also be mounted
+ * in isolated tests or unauthenticated shells. It never throws when AuthProvider
+ * is absent; authenticated application paths still use useAuth(). */
+export const useOptionalAuth = (): AuthContextValue | null => useContext(AuthCtx);
+
 interface RequireAuthProps {
   children: ReactNode;
 }

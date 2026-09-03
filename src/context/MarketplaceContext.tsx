@@ -2,6 +2,8 @@ import type React from 'react';
 import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Vehicle, BodyStyle } from '../types';
+import { useOptionalAuth } from './AuthContext';
+import { useVehicleCollections } from '../hooks/useVehicleCollections';
 import { getCars, mapBackendCarToVehicle } from '../services/vehicleApi';
 import { bidsAPI } from '../api/api';
 import type { FC } from 'react';
@@ -200,7 +202,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [savedVehicleIds, setSavedVehicleIds] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [bids, setBids] = useState<BidLocal[]>([]);
   const [escrowContracts, setEscrowContracts] = useState<EscrowContractLocal[]>([]);
@@ -210,6 +211,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const navigate = useNavigate();
+  const auth = useOptionalAuth();
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
@@ -279,11 +281,13 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     return selectedVehicleId ? vehicles.find(v => v.id === selectedVehicleId) || null : null;
   }, [vehicles, selectedVehicleId]);
 
-  const toggleSaveVehicle = (id: string) => {
-    setSavedVehicleIds(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
+  // Phase 52: favorites have one frontend source of truth. Reuse the
+  // established collection hook rather than maintaining a second local
+  // saved-ID store inside this legacy context. Authenticated users therefore
+  // read/write the real favorites API here too; isolated unauthenticated
+  // mounts retain the hook's explicitly documented anonymous behavior.
+  const { savedVehicles: savedVehicleIds, handleToggleSave: toggleSaveVehicle } =
+    useVehicleCollections(vehicles, auth?.user?.id ?? null);
 
   const resetFilters = () => setFilters(initialFilters);
 

@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Search, X, Mic, Clock, TrendingUp } from 'lucide-react';
-
-const RECENT_KEY = 'kayad_recent_searches';
-const MAX_RECENT = 5;
+import { useRecentSearches } from '../../hooks/useRecentSearches';
 
 const BRAND_SUGGESTIONS = [
   { type: 'brand', value: 'Toyota', icon: '🚗' },
@@ -58,7 +56,7 @@ function MobileSearchBar({
   const inputRef = useRef(null);
   const containerRef = useRef(null);
   const [focused, setFocused] = useState(false);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const { recentSearches, addRecentSearch, clearRecentSearches } = useRecentSearches();
   const [suggestions, setSuggestions] = useState([]);
   const [isListening, setIsListening] = useState(false);
 
@@ -66,7 +64,6 @@ function MobileSearchBar({
     if (autoFocus && inputRef.current) {
       inputRef.current.focus();
     }
-    setRecentSearches(getRecentSearches());
   }, [autoFocus]);
 
   // Filter suggestions based on input
@@ -100,8 +97,7 @@ function MobileSearchBar({
     if (query.trim()) {
       onSubmit?.(query);
       addRecentSearch(query);
-      setRecentSearches(getRecentSearches());
-      inputRef.current?.blur();
+        inputRef.current?.blur();
     }
   }, [value, onSubmit]);
 
@@ -142,8 +138,7 @@ function MobileSearchBar({
 
   const handleClearRecent = useCallback((e) => {
     e.stopPropagation();
-    clearRecentSearches();
-    setRecentSearches([]);
+    void clearRecentSearches();
   }, []);
 
   const showDropdown = focused && showSuggestions;

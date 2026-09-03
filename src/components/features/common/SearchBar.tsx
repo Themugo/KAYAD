@@ -1,26 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { Search, X, Clock } from 'lucide-react';
+import { useRecentSearches } from '../../../hooks/useRecentSearches';
+
+const MAX_RECENT = 8;
 
 const DEFAULT_BRANDS = [
   'BMW', 'Mercedes', 'Toyota', 'Nissan', 'Subaru',
   'Audi', 'Lexus', 'Range Rover', 'Volkswagen', 'Mazda',
 ];
-
-const RECENT_KEY = 'kayad_recent_searches';
-const MAX_RECENT = 5;
-
-function getRecentSearches() {
-  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function addRecentSearch(query) {
-  try {
-    const existing = getRecentSearches().filter(s => s.toLowerCase() !== query.toLowerCase());
-    existing.unshift(query);
-    localStorage.setItem(RECENT_KEY, JSON.stringify(existing.slice(0, MAX_RECENT)));
-  } catch {}
-}
 
 interface SearchBarProps {
   value?: string;
@@ -43,11 +30,10 @@ export default function SearchBar({
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const { recentSearches, addRecentSearch, clearRecentSearches } = useRecentSearches();
 
   useEffect(() => {
     if (autoFocus && inputRef.current) inputRef.current.focus();
-    setRecentSearches(getRecentSearches());
   }, [autoFocus]);
 
   const matched = value
@@ -60,14 +46,12 @@ export default function SearchBar({
     onChange?.(query);
     onSubmit?.(query);
     addRecentSearch(query);
-    setRecentSearches(getRecentSearches());
     inputRef.current?.blur();
   };
 
   const clearRecent = (e) => {
     e.stopPropagation();
-    localStorage.removeItem(RECENT_KEY);
-    setRecentSearches([]);
+    void clearRecentSearches();
   };
 
   const padY = size === 'sm' ? 9 : size === 'lg' ? 15 : 12;
@@ -109,8 +93,7 @@ export default function SearchBar({
               if (value.trim()) {
                 onSubmit?.(value);
                 addRecentSearch(value);
-                setRecentSearches(getRecentSearches());
-              }
+                          }
               inputRef.current?.blur();
             }
           }}
