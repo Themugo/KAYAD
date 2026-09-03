@@ -6,6 +6,7 @@
 import User from "../models/User.js";
 import Review from "../models/Review.js";
 import LoanApplication from "../models/LoanApplication.js";
+import InspectionOrder from "../models/InspectionOrder.js";
 import DealerSubscription from "../models/DealerSubscription.js";
 import DealerAnalytics from "../models/DealerAnalytics.js";
 import Car from "../models/Car.js";
@@ -421,83 +422,59 @@ export async function createCampaign(req, res) {
 // ============================================================
 
 export async function getDealerAnalytics(req, res) {
-  const analytics = {
-    overview: {
-      totalViews: 12845,
-      viewsChange: 15,
-      totalLeads: 156,
-      leadsChange: 23,
-      totalSales: 45,
-      salesChange: 12,
-      totalRevenue: 187500000,
-      revenueChange: 18,
-    },
-    performance: {
-      responseRate: 94,
-      responseTime: 2.3,
-      leadConversion: 29,
-      avgDealSize: 4166667,
-      avgDaysToSell: 23,
-      customerSatisfaction: 4.7,
-    },
-    inventoryHealth: {
-      total: 47,
-      fastMoving: 15,
-      slowMoving: 8,
-      averageAge: 18,
-      priceReductions: 12,
-    },
-    topVehicles: [
-      { id: '1', title: 'Toyota Land Cruiser 300', views: 456, leads: 12, sales: 3, revenue: 9600000 },
-      { id: '2', title: 'Mercedes-Benz GLE', views: 389, leads: 9, sales: 2, revenue: 3700000 },
-      { id: '3', title: 'BMW X5', views: 345, leads: 7, sales: 2, revenue: 3300000 },
-    ],
-    leadSources: [
-      { source: 'KAYAD Website', count: 67, percentage: 43 },
-      { source: 'WhatsApp', count: 38, percentage: 24 },
-      { source: 'Phone', count: 23, percentage: 15 },
-      { source: 'Referral', count: 18, percentage: 12 },
-      { source: 'Social Media', count: 10, percentage: 6 },
-    ],
-    salesTrend: [
-      { month: 'Sep', sales: 5, revenue: 21000000 },
-      { month: 'Oct', sales: 7, revenue: 29000000 },
-      { month: 'Nov', sales: 6, revenue: 25000000 },
-      { month: 'Dec', sales: 8, revenue: 33000000 },
-      { month: 'Jan', sales: 9, revenue: 37500000 },
-      { month: 'Feb', sales: 10, revenue: 42000000 },
-    ],
-    marketComparison: {
-      avgPriceVsMarket: -3,
-      avgDaysVsMarket: -5,
-      listingQuality: 92,
-    },
-  };
+  try {
+    const dealerId = req.user.id;
+    const [listings, leads, releasedEscrows] = await Promise.all([
+      Car.find({ dealer: dealerId }),
+      Lead.find({ dealer: dealerId }),
+      Escrow.find({ seller: dealerId, status: "released" }),
+    ]);
 
-  res.json({ success: true, data: analytics });
-}
+    const totalViews = listings.reduce((sum, car) => sum + Number(car.views || 0), 0);
+    const totalSales = releasedEscrows.length;
+    const totalRevenue = releasedEscrows.reduce((sum, escrow) => sum + Number(escrow.sellerAmount || escrow.amount || 0), 0);
+    const avgDealSize = totalSales ? Math.round(totalRevenue / totalSales) : 0;
+    const activeListings = listings.filter((car) => ["available", "active"].includes(car.status)).length;
+    const slowMoving = listings.filter((car) => Number(car.views || 0) < 5).length;
+    const fastMoving = listings.filter((car) => Number(car.views || 0) >= 20).length;
 
-export async function getAIRecommendations(req, res) {
-  const recommendations = {
-    pricing: [
-      { vehicle: 'Toyota Land Cruiser 300', currentPrice: 3200000, recommendedPrice: 3150000, reason: 'Market data shows similar vehicles priced 2-5% lower', impact: 'high' },
-    ],
-    inventory: [
-      { type: 'reduce', message: 'Consider reducing price on 3 slow-moving SUVs', vehicles: ['Audi Q7', 'Volvo XC90', 'Lexus RX'], urgency: 'medium' },
-    ],
-    marketing: [
-      { type: 'opportunity', message: ' SUVs are in high demand this month', action: 'Create featured campaign for your 3 SUV listings', impact: 'high' },
-    ],
-    leads: [
-      { type: 'followUp', message: '3 high-scored leads haven\'t been contacted in 24 hours', urgency: 'high' },
-    ],
-    performance: [
-      { type: 'insight', message: 'Your response rate is 94% - above industry average of 78%', positive: true },
-      { type: 'insight', message: 'Wednesday and Thursday mornings show highest lead activity', tip: 'Schedule more follow-ups during these times' },
-    ],
-  };
+    const byMonth = new Map();
+    for (const escrow of releasedEscrows) {
+      const date = new Date(escrow.createdAt || escrow.updatedAt || Date.now());
+      const month = date.toLocaleString("en-US", { month: "short" });
+      const current = byMonth.get(month) || { month, sales: 0, revenue: 0 };
+      current.sales += 1;
+      current.revenue += Number(escrow.sellerAmount || escrow.amount || 0);
+      byMonth.set(month, current);
+    }
 
-  res.json({ success: true, data: recommendations });
+    const topVehicles = [...listings]
+      .sort((a, b) => Number(b.views || 0) - Number(a.views || 0))
+      .slice(0, 5)
+      .map((car) => ({
+        id: car.id,
+        title: car.title,
+        views: Number(car.views || 0),
+        leads: leads.filter((lead) => lead.vehicle === car.id).length,
+      }));
+
+    res.json({
+      success: true,
+      data: {
+        overview: { totalViews, totalLeads: leads.length, totalSales, totalRevenue },
+        performance: {
+          avgDealSize,
+          leadConversion: leads.length ? Math.round((totalSales / leads.length) * 100) : 0,
+        },
+        inventoryHealth: { total: listings.length, active: activeListings, fastMoving, slowMoving },
+        topVehicles: topVehicles,
+        salesTrend: Array.from(byMonth.values()).sort((a, b) => a.month.localeCompare(b.month)),
+      },
+    });
+  } catch (err) {
+    logError("Error fetching dealer analytics:", err);
+    res.status(500).json({ success: false, message: "Failed to load dealer analytics" });
+  }
 }
 
 // ============================================================
@@ -723,16 +700,34 @@ export async function getCustomerTimeline(req, res) {
 // ============================================================
 
 export async function getAuctionInventory(req, res) {
-  const auctions = {
-    items: [
-      { id: '1', title: 'Mercedes-Benz GLE 450', startingBid: 1500000, reservePrice: 1800000, currentBid: 1650000, bidsCount: 7, endsIn: 86400, status: 'live', views: 234 },
-      { id: '2', title: 'BMW X5 M Sport', startingBid: 1400000, reservePrice: 1600000, currentBid: 0, bidsCount: 0, startsIn: 172800, status: 'upcoming', views: 156 },
-      { id: '3', title: 'Porsche Cayenne S', startingBid: 2000000, reservePrice: 2400000, currentBid: 2350000, bidsCount: 12, endedAt: '2024-02-15', status: 'ended', winner: 'David K.', settlementStatus: 'pending' },
-    ],
-    stats: { total: 3, live: 1, upcoming: 1, ended: 1, totalRevenue: 2350000 },
-  };
-
-  res.json({ success: true, data: auctions });
+  try {
+    const dealerId = req.user.id;
+    const cars = await Car.find({ dealer: dealerId, auctionStatus: { $ne: "none" } }).sort({ auctionEnd: 1 });
+    const items = cars.map((car) => {
+      const end = car.auctionEnd ? new Date(car.auctionEnd) : null;
+      let status = car.auctionStatus || "none";
+      if (status === "live" && end && end <= new Date()) status = "ended";
+      return {
+        id: car.id,
+        title: car.title,
+        startingBid: Number(car.startingBid || 0),
+        reservePrice: Number(car.reservePrice || 0),
+        currentBid: Number(car.currentBid || 0),
+        bidsCount: Number(car.bidsCount || 0),
+        auctionEnd: car.auctionEnd || null,
+        status,
+        views: Number(car.views || 0),
+      };
+    });
+    const live = items.filter((item) => item.status === "live").length;
+    const upcoming = items.filter((item) => item.status === "upcoming").length;
+    const ended = items.filter((item) => item.status === "ended").length;
+    const totalRevenue = items.filter((item) => item.status === "ended").reduce((sum, item) => sum + item.currentBid, 0);
+    res.json({ success: true, data: { items, stats: { total: items.length, live, upcoming, ended, totalRevenue } } });
+  } catch (err) {
+    logError("Error fetching dealer auctions:", err);
+    res.status(500).json({ success: false, message: "Failed to load auctions" });
+  }
 }
 
 // ============================================================
@@ -765,16 +760,41 @@ export async function getFinanceApplications(req, res) {
 // ============================================================
 
 export async function getInspectionOrders(req, res) {
-  const inspections = {
-    items: [
-      { id: 'GC-A1B2C3', vehicle: 'Mercedes-Benz GLE 450', package: '150-Point Inspection', status: 'completed', score: 94, inspector: 'John Kamau', bookedAt: '2024-02-15', completedAt: '2024-02-16', report: 'https://ghostcheckers.co.ke/report/GC-A1B2C3' },
-      { id: 'GC-D4E5F6', vehicle: 'BMW X5 M Sport', package: '150-Point Inspection', status: 'in_progress', inspector: 'John Kamau', bookedAt: '2024-02-20', estimatedCompletion: '2024-02-21' },
-      { id: 'GC-G7H8I9', vehicle: 'Audi Q7', package: 'Standard Inspection', status: 'scheduled', bookedAt: '2024-02-22', inspector: 'Mary Wanjiku' },
-    ],
-    stats: { total: 23, completed: 18, inProgress: 3, scheduled: 2, certified: 15 },
-  };
-
-  res.json({ success: true, data: inspections });
+  try {
+    const dealerId = req.user.id;
+    const cars = await Car.find({ dealer: dealerId });
+    const carIds = cars.map((car) => car.id);
+    if (!carIds.length) {
+      return res.json({ success: true, data: { items: [], stats: { total: 0, completed: 0, inProgress: 0, scheduled: 0 } } });
+    }
+    const inspections = await InspectionOrder.find({ carId: { $in: carIds } }).sort({ createdAt: -1 });
+    const items = inspections.map((inspection) => ({
+      id: inspection.id,
+      vehicleId: inspection.carId,
+      vehicle: cars.find((car) => car.id === inspection.carId)?.title || "Vehicle",
+      status: inspection.status,
+      scheduledAt: inspection.scheduledAt || null,
+      completedAt: inspection.completedAt || null,
+      report: inspection.report || null,
+      notes: inspection.notes || null,
+      createdAt: inspection.createdAt,
+    }));
+    res.json({
+      success: true,
+      data: {
+        items,
+        stats: {
+          total: items.length,
+          completed: items.filter((item) => item.status === "completed").length,
+          inProgress: items.filter((item) => ["in_progress", "in-progress", "started"].includes(item.status)).length,
+          scheduled: items.filter((item) => ["requested", "booked", "scheduled"].includes(item.status)).length,
+        },
+      },
+    });
+  } catch (err) {
+    logError("Error fetching dealer inspections:", err);
+    res.status(500).json({ success: false, message: "Failed to load inspections" });
+  }
 }
 
 // ============================================================

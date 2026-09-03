@@ -6,4 +6,9 @@ export const updateLead = (leadId, body) => api.put(`/dealer-platform/leads/${le
 export const getCustomers = () => api.get('/dealer-platform/customers').then(r => r.data);
 export const getMarketingCampaigns = () => api.get('/dealer-platform/marketing').then(r => r.data);
 export const createCampaign = (body) => api.post('/dealer-platform/marketing', body).then(r => r.data);
+export const getAuctionInventory = () => api.get('/dealer-platform/auctions').then(r => r.data);
+export const getFinanceApplications = () => api.get('/dealer-platform/finance').then(r => r.data);
+export const getInspectionOrders = () => api.get('/dealer-platform/inspections').then(r => r.data);
+export const getTeamMembers = () => api.get('/dealer-platform/team').then(r => r.data);
+export const getDealerAnalytics = () => api.get('/dealer-platform/analytics').then(r => r.data);
 

@@ -259,6 +259,26 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   // genuinely persisted via a new real table - performance metrics
   // (impressions, clicks, ROI) are intentionally not shown, since no
   // real ad-tracking infrastructure exists to back them honestly.
+  const [operations, setOperations] = useState({});
+  const [operationsLoading, setOperationsLoading] = useState(false);
+  const [operationsError, setOperationsError] = useState(null);
+
+  useEffect(() => {
+    const loaders = {
+      auctions: dealerApi.getAuctionInventory,
+      inspections: dealerApi.getInspectionOrders,
+      analytics: dealerApi.getDealerAnalytics,
+    };
+    const loader = loaders[activeSection];
+    if (!loader || !user || operations[activeSection]) return;
+    setOperationsLoading(true);
+    setOperationsError(null);
+    loader()
+      .then((response) => setOperations((prev) => ({ ...prev, [activeSection]: response.data })))
+      .catch(() => setOperationsError(`Could not load ${activeSection}. Please try again.`))
+      .finally(() => setOperationsLoading(false));
+  }, [activeSection, user, operations]);
+
   const [campaigns, setCampaigns] = useState([]);
   const [campaignsLoading, setCampaignsLoading] = useState(false);
   const [campaignsError, setCampaignsError] = useState(null);
@@ -430,28 +450,28 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               <div className="grid grid-cols-4 gap-4 mb-8">
                 <StatCard
                   title="Total Listings"
-                  value={dashboard?.overview?.totalListings || 47}
+                  value={dashboard?.overview?.totalListings ?? 0}
                   change={12}
                   icon={Car}
                   color={colors.softBlue}
                 />
                 <StatCard
                   title="Total Views"
-                  value={dashboard?.overview?.totalViews?.toLocaleString() || '12,845'}
+                  value={(dashboard?.overview?.totalViews ?? 0).toLocaleString()}
                   change={15}
                   icon={Eye}
                   color={colors.purple}
                 />
                 <StatCard
                   title="Active Leads"
-                  value={dashboard?.overview?.leads?.total || 156}
+                  value={dashboard?.overview?.leads?.total ?? 0}
                   change={23}
                   icon={Users}
                   color={colors.emerald}
                 />
                 <StatCard
                   title="Revenue (This Month)"
-                  value={`Ksh ${((dashboard?.overview?.revenue?.thisMonth || 28500000) / 1000000).toFixed(1)}M`}
+                  value={`Ksh ${((dashboard?.overview?.revenue?.total ?? 0) / 1000000).toFixed(1)}M`}
                   change={18}
                   icon={DollarSign}
                   color={colors.navy}
@@ -466,20 +486,20 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     <button className="text-sm text-purple-600 font-medium hover:text-purple-700">View All</button>
                   </div>
                   <div className="grid grid-cols-4 gap-3">
-                    <PipelineStage stage="New" count={dashboard?.overview?.leads?.new || 12} color={colors.softBlue} />
-                    <PipelineStage stage="Contacted" count={dashboard?.overview?.leads?.contacted || 34} color={colors.purple} />
-                    <PipelineStage stage="Negotiating" count={dashboard?.overview?.leads?.negotiating || 28} color={colors.amber} />
-                    <PipelineStage stage="Reserved" count={dashboard?.overview?.leads?.reserved || 8} color={colors.emerald} />
+                    <PipelineStage stage="New" count={dashboard?.overview?.leads?.new ?? 0} color={colors.softBlue} />
+                    <PipelineStage stage="Contacted" count={dashboard?.overview?.leads?.contacted ?? 0} color={colors.purple} />
+                    <PipelineStage stage="Negotiating" count={dashboard?.overview?.leads?.negotiating ?? 0} color={colors.amber} />
+                    <PipelineStage stage="Reserved" count={dashboard?.overview?.leads?.reserved ?? 0} color={colors.emerald} />
                   </div>
                   <div className="mt-4 p-4 bg-slate-50 rounded-xl">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-slate-500">Conversion Rate</p>
-                        <p className="text-2xl font-bold text-emerald-600">{dashboard?.overview?.performance?.leadConversion || 29}%</p>
+                        <p className="text-2xl font-bold text-emerald-600">{dashboard?.overview?.performance?.leadConversion ?? 0}%</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-slate-500">Avg Response Rate</p>
-                        <p className="text-2xl font-bold text-purple-600">{dashboard?.overview?.performance?.responseRate || 94}%</p>
+                        <p className="text-2xl font-bold text-purple-600">{dashboard?.overview?.performance?.responseRate ?? 0}%</p>
                       </div>
                     </div>
                   </div>
@@ -833,15 +853,48 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             </div>
           )}
 
+          {['auctions', 'finance', 'inspections', 'team', 'settings'].includes(activeSection) && (
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-bold text-slate-800 capitalize mb-2">{activeSection}</h3>
+              {['finance', 'team', 'settings'].includes(activeSection) ? (
+                <div className="py-12 text-center">
+                  <p className="text-sm text-slate-500">This dealer capability is not backed by a canonical dealer-scoped data contract yet.</p>
+                  <p className="text-xs text-slate-400 mt-2">KAYAD will not display simulated records here.</p>
+                </div>
+              ) : operationsLoading ? (
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-purple-600 animate-spin" /></div>
+              ) : operationsError ? (
+                <div className="py-12 text-center"><p className="text-sm text-slate-500 mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, [activeSection]: undefined }))} className="text-xs font-bold text-purple-600">Try Again</button></div>
+              ) : activeSection === 'auctions' ? (
+                <div className="space-y-3">
+                  {(operations.auctions?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No auctions found for this dealership.</p> : (operations.auctions.items || []).map((auction) => (
+                    <div key={auction.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                      <div><p className="font-medium text-slate-800">{auction.title}</p><p className="text-xs text-slate-500">{auction.bidsCount} bids • {auction.views} views</p></div>
+                      <div className="text-right"><p className="font-bold text-slate-800">Ksh {Number(auction.currentBid || auction.startingBid || 0).toLocaleString()}</p><span className="text-xs capitalize text-slate-500">{auction.status}</span></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(operations.inspections?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No inspection orders found for this dealership.</p> : (operations.inspections.items || []).map((inspection) => (
+                    <div key={inspection.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl"><div><p className="font-medium text-slate-800">{inspection.vehicle}</p><p className="text-xs text-slate-500">{inspection.id}</p></div><span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs capitalize">{inspection.status}</span></div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {activeSection === 'analytics' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-4 gap-4">
-                <StatCard title="Total Revenue" value="Ksh 187.5M" change={18} icon={DollarSign} color={colors.emerald} />
-                <StatCard title="Total Sales" value="45" change={12} icon={ShoppingCart} color={colors.navy} />
-                <StatCard title="Avg Deal Size" value="Ksh 4.2M" change={5} icon={Target} color={colors.purple} />
-                <StatCard title="Customer Rating" value="4.7 ★" change={2} icon={Star} color={colors.amber} />
-              </div>
-              <AICopilot />
+              {operationsLoading ? <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-purple-600 animate-spin" /></div> : operationsError ? <div className="py-12 text-center"><p className="text-sm text-slate-500 mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, analytics: undefined }))} className="text-xs font-bold text-purple-600">Try Again</button></div> : <>
+                <div className="grid grid-cols-4 gap-4">
+                  <StatCard title="Total Revenue" value={`Ksh ${Number(operations.analytics?.overview?.totalRevenue || 0).toLocaleString()}`} icon={DollarSign} color={colors.emerald} />
+                  <StatCard title="Total Sales" value={operations.analytics?.overview?.totalSales || 0} icon={ShoppingCart} color={colors.navy} />
+                  <StatCard title="Avg Deal Size" value={`Ksh ${Number(operations.analytics?.performance?.avgDealSize || 0).toLocaleString()}`} icon={Target} color={colors.purple} />
+                  <StatCard title="Total Views" value={operations.analytics?.overview?.totalViews || 0} icon={Eye} color={colors.amber} />
+                </div>
+                <div className="bg-white rounded-xl border border-slate-100 p-6"><h3 className="font-bold text-slate-800 mb-4">Top Vehicles by Views</h3>{(operations.analytics?.topVehicles || []).length ? (operations.analytics.topVehicles.map((vehicle) => <div key={vehicle.id} className="flex justify-between py-3 border-b last:border-0 border-slate-100"><span className="text-sm text-slate-700">{vehicle.title}</span><span className="text-sm font-semibold text-slate-800">{vehicle.views} views</span></div>)) : <p className="text-sm text-slate-400">No vehicle analytics yet.</p>}</div>
+              </>}
             </div>
           )}
         </div>
