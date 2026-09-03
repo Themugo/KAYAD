@@ -1,0 +1,21 @@
+import { jest } from '@jest/globals';
+const find = jest.fn();
+const countDocuments = jest.fn();
+jest.unstable_mockModule('../../models/Payment.js', () => ({ default: { find, countDocuments } }));
+jest.unstable_mockModule('../../utils/logger.js', () => ({ logInfo: jest.fn() }));
+jest.unstable_mockModule('../../infrastructure/logging/index.js', () => ({ logError: jest.fn() }));
+jest.unstable_mockModule('../../db/index.js', () => ({ findOne: jest.fn(), findById: jest.fn() }));
+jest.unstable_mockModule('../../services/paymentService.js', () => ({ initiatePayment: jest.fn() }));
+jest.unstable_mockModule('../../services/paymentCallback.service.js', () => ({ handleMpesaCallback: jest.fn() }));
+const { getUserPayments } = await import('../../controllers/paymentController.js');
+test('getUserPayments uses canonical model and authenticated scope', async () => {
+  const chain = { select: jest.fn().mockReturnThis(), populate: jest.fn().mockReturnThis(), sort: jest.fn().mockReturnThis(), skip: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([{ id: 'p1' }]) };
+  find.mockReturnValue(chain); countDocuments.mockResolvedValue(1);
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+  await getUserPayments({ user: { id: 'u1' }, query: { page: '1', limit: '10', status: 'success' } }, res);
+  expect(find).toHaveBeenCalledWith({ user: 'u1', status: 'success' });
+  expect(countDocuments).toHaveBeenCalledWith({ user: 'u1', status: 'success' });
+  expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('mpesaReceipt'));
+  expect(chain.populate).toHaveBeenCalledWith('car', 'title brand model year');
+  expect(chain.sort).toHaveBeenCalledWith({ createdAt: -1 });
+});

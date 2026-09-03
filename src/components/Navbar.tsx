@@ -262,6 +262,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>Escrow</span>
               </button>
 
+              {user && (
+                <button onClick={() => handleNavSelect('payments')} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${activeNav === 'payments' ? 'bg-[#1E3063] text-white font-bold shadow-2xs' : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'}`}>
+                  <CreditCard className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                  <span>Payment History</span>
+                </button>
+              )}
+
               <button
                 onClick={() => handleNavSelect('support')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
@@ -749,6 +756,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   )}
                 </button>
               </div>
+
+              <button onClick={() => handleNavSelect('payments')} className="w-full mt-2 p-2.5 bg-slate-800/80 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-slate-400" />
+                <span>Payment History</span>
+              </button>
 
               {/* Role Specific Mobile Links */}
               {user.role === 'dealer' && (

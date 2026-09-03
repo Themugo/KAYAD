@@ -27,6 +27,7 @@ import PrivateSellerDashboardView from './features/PrivateSellerDashboardView';
 import ChatView from './features/ChatView';
 import AdminView from './features/AdminView';
 import SupportView from './features/SupportView';
+import PaymentHistoryView from './features/PaymentHistoryView';
 import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
 import KAYADLive from './pages/KAYADLive';
 import { BuyerPlatform } from './features/OwnershipPlatform';
@@ -355,6 +356,8 @@ function AppInner() {
               onQuickViewVehicle={handleOpenVehicleDetails}
             />
           )}
+
+          {activeNav === 'payments' && user && <PaymentHistoryView />}
 
           {activeNav === 'escrow' && (
             <EscrowView

@@ -1,7 +1,7 @@
 // backend/controllers/paymentController.js
 
 import { findOne, findById } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
+import Payment from "../models/Payment.js";
 import { isValidId } from "../utils/validateId.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
@@ -237,30 +237,25 @@ export const getUserPayments = async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
-
-    const sb = getSupabase();
-    // H-2 FIX: Whitelist safe fields instead of using select("*") which
-    // may expose internal M-Pesa callback data and status flags.
-    const SAFE_PAYMENT_FIELDS = "id, user, amount, currency, status, type, method, reference, description, createdAt, updatedAt";
-    const { data: payments, count: total } = await sb
-      .from("payments")
-      .select(SAFE_PAYMENT_FIELDS, { count: "exact" })
-      .eq("user", req.user.id)
-      .order("createdAt", { ascending: false })
-      .range(skip, skip + limit - 1);
-
-    res.json({
-      success: true,
-      payments,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    });
+    const filters = { user: req.user.id };
+    const VALID_STATUSES = ["pending", "success", "failed", "cancelled"];
+    const VALID_TYPES = ["bid", "auction_win", "buy", "listing", "subscription", "escrow"];
+    if (req.query.status && VALID_STATUSES.includes(req.query.status)) filters.status = req.query.status;
+    if (req.query.type && VALID_TYPES.includes(req.query.type)) filters.type = req.query.type;
+    const [payments, total] = await Promise.all([
+      Payment.find(filters)
+        .select("id user car amount type phone status mpesaReceipt checkoutRequestId createdAt updatedAt referenceId referenceModel mode processed paidAt metadata platformFee dealerAmount")
+        .populate("car", "title brand model year")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Payment.countDocuments(filters),
+    ]);
+    res.json({ success: true, payments, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (err) {
     logError("USER PAYMENTS ERROR", err);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch payments",
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch payments" });
   }
 };
 
@@ -272,32 +267,25 @@ export const getAllPayments = async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
-
-    const sb = getSupabase();
-    const SAFE_PAYMENT_FIELDS = "id, user, amount, currency, status, type, method, reference, description, createdAt, updatedAt";
-    let query = sb.from("payments").select(SAFE_PAYMENT_FIELDS, { count: "exact" });
-
+    const filters = {};
     const VALID_STATUSES = ["pending", "success", "failed", "cancelled"];
     const VALID_TYPES = ["bid", "auction_win", "buy", "listing", "subscription", "escrow"];
-    if (req.query.status && VALID_STATUSES.includes(req.query.status)) query = query.eq("status", req.query.status);
-    if (req.query.type && VALID_TYPES.includes(req.query.type)) query = query.eq("type", req.query.type);
-
-    const { data: payments, count: total } = await query
-      .order("createdAt", { ascending: false })
-      .range(skip, skip + limit - 1);
-
-    res.json({
-      success: true,
-      payments,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    });
+    if (req.query.status && VALID_STATUSES.includes(req.query.status)) filters.status = req.query.status;
+    if (req.query.type && VALID_TYPES.includes(req.query.type)) filters.type = req.query.type;
+    const [payments, total] = await Promise.all([
+      Payment.find(filters)
+        .select("id user car amount type phone status mpesaReceipt checkoutRequestId createdAt updatedAt referenceId referenceModel mode processed paidAt metadata platformFee dealerAmount")
+        .populate("car", "title brand model year")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Payment.countDocuments(filters),
+    ]);
+    res.json({ success: true, payments, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (err) {
     logError("ALL PAYMENTS ERROR", err);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch payments",
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch payments" });
   }
 };
 
