@@ -9,7 +9,7 @@ const routes = read('backend/routes/savedSearchRoutes.js');
 
 const checks = [
   ['Browse imports savedSearchAPI', browse.includes("import { carsAPI, BRANDS, savedSearchAPI } from '../api/api';")],
-  ['Browse creates saved searches through API', browse.includes('savedSearchAPI.create({ name, filters, notifyOnNewMatch: true })')],
+  ['Browse creates saved searches through API', browse.includes('savedSearchAPI.create({ name, filters: savedFilters, notifyOnNewMatch: true })')],
   ['Browse no longer writes saved searches to localStorage', !browse.includes('kayad_saved_searches')],
   ['Buyer dashboard imports savedSearchAPI', buyer.includes('savedSearchAPI')],
   ['Buyer dashboard loads server saved searches', buyer.includes('savedSearchAPI.list()')],

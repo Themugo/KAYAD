@@ -95,7 +95,17 @@ export default function BrowsePage() {
   const handleSaveSearch = async () => {
     const name = searchName || filters.search || `${filters.brand !== 'All' ? filters.brand : ''} ${filters.bodyType !== 'All' ? filters.bodyType : ''}`.trim() || 'My Search';
     try {
-      await savedSearchAPI.create({ name, filters, notifyOnNewMatch: true });
+      const savedFilters = {
+        keyword: filters.search || undefined,
+        brand: filters.brand !== 'All' ? filters.brand : undefined,
+        body: filters.bodyType !== 'All' ? filters.bodyType : undefined,
+        fuel: filters.fuel !== 'All' ? filters.fuel : undefined,
+        transmission: filters.transmission !== 'All' ? filters.transmission : undefined,
+        priceMax: filters.priceMax < 20000000 ? filters.priceMax : undefined,
+        mileageMax: filters.mileageMax < 200000 ? filters.mileageMax : undefined,
+        filter: filters.auctionOnly ? 'auction' : undefined,
+      };
+      await savedSearchAPI.create({ name, filters: savedFilters, notifyOnNewMatch: true });
       toast('Search saved! You\'ll see it on your dashboard.', 'success');
       setShowSaveSearch(false);
       setSearchName('');

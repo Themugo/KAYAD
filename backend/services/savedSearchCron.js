@@ -10,23 +10,46 @@ const CHECK_INTERVAL = 10 * 60 * 1000;
 const matches = (car, filters) => {
   if (!filters || typeof filters !== "object") return true;
   const f = filters;
+  const keyword = String(f.keyword ?? f.search ?? "").trim().toLowerCase();
+  const brand = String(f.brand ?? "").trim().toLowerCase();
+  const model = String(f.model ?? "").trim().toLowerCase();
+  const location = String(f.location ?? f.city ?? "").trim().toLowerCase();
+  const body = String(f.body ?? f.bodyType ?? "").trim().toLowerCase();
+  const fuel = String(f.fuel ?? "").trim().toLowerCase();
+  const transmission = String(f.transmission ?? "").trim().toLowerCase();
+  const color = String(f.color ?? "").trim().toLowerCase();
+  const haystack = `${car.title || ""} ${car.brand || ""} ${car.model || ""}`.toLowerCase();
 
-  if (f.brand && car.brand?.toLowerCase() !== f.brand.toLowerCase()) return false;
-  if (f.location && car.location?.city?.toLowerCase() !== f.location.toLowerCase()) return false;
-  if (f.body && car.bodyType?.toLowerCase() !== f.body.toLowerCase()) return false;
-  if (f.fuel && car.fuel?.toLowerCase() !== f.fuel.toLowerCase()) return false;
-  if (f.transmission && car.transmission?.toLowerCase() !== f.transmission.toLowerCase()) return false;
-  if (f.color && car.color?.toLowerCase() !== f.color.toLowerCase()) return false;
+  if (keyword && !haystack.includes(keyword)) return false;
+  if (brand && car.brand?.toLowerCase() !== brand) return false;
+  if (model && car.model?.toLowerCase() !== model) return false;
+  if (location && car.location?.city?.toLowerCase() !== location) return false;
+  if (body && car.bodyType?.toLowerCase() !== body) return false;
+  if (fuel && car.fuel?.toLowerCase() !== fuel) return false;
+  if (transmission && car.transmission?.toLowerCase() !== transmission) return false;
+  if (color && car.color?.toLowerCase() !== color) return false;
 
-  if (f.priceMin && (car.price || 0) < Number(f.priceMin)) return false;
-  if (f.priceMax && (car.price || 0) > Number(f.priceMax)) return false;
-  if (f.yearMin && (car.year || 0) < Number(f.yearMin)) return false;
-  if (f.yearMax && (car.year || 0) > Number(f.yearMax)) return false;
-  if (f.mileageMin && (car.mileage || 0) < Number(f.mileageMin)) return false;
-  if (f.mileageMax && (car.mileage || 0) > Number(f.mileageMax)) return false;
+  const priceMin = f.priceMin ?? f.minPrice;
+  const priceMax = f.priceMax ?? f.maxPrice;
+  const yearMin = f.yearMin ?? f.minYear;
+  const yearMax = f.yearMax ?? f.maxYear;
+  const mileageMin = f.mileageMin ?? f.minMileage;
+  const mileageMax = f.mileageMax ?? f.maxMileage;
 
-  if (f.filter === "auction" && car.auctionStatus !== "live" && !car.allowBid) return false;
-  if (f.filter === "fixed" && (car.allowBid || car.auctionStatus === "live")) return false;
+  if (priceMin !== undefined && priceMin !== "" && (car.price || 0) < Number(priceMin)) return false;
+  if (priceMax !== undefined && priceMax !== "" && (car.price || 0) > Number(priceMax)) return false;
+  if (yearMin !== undefined && yearMin !== "" && (car.year || 0) < Number(yearMin)) return false;
+  if (yearMax !== undefined && yearMax !== "" && (car.year || 0) > Number(yearMax)) return false;
+  if (mileageMin !== undefined && mileageMin !== "" && (car.mileage || 0) < Number(mileageMin)) return false;
+  if (mileageMax !== undefined && mileageMax !== "" && (car.mileage || 0) > Number(mileageMax)) return false;
+
+  if (f.filter === "auction" || f.auctionOnly === true) {
+    if (car.auctionStatus !== "live" && !car.allowBid) return false;
+  }
+  if (f.filter === "fixed") {
+    if (car.allowBid || car.auctionStatus === "live") return false;
+  }
+  if (f.verifiedOnly === true && car.isVerifiedDealer !== true) return false;
 
   return true;
 };
@@ -49,7 +72,7 @@ export const startSavedSearchCron = () => {
       const since = new Date(Date.now() - CHECK_INTERVAL).toISOString();
       const newCars = await findAll("cars", {
         filters: { createdAt: { $gte: since } },
-        select: "title,brand,price,year,mileage,fuel,transmission,bodyType,color,location,auctionStatus,allowBid,createdAt",
+        select: "title,brand,model,price,year,mileage,fuel,transmission,bodyType,color,location,auctionStatus,allowBid,isVerifiedDealer,createdAt",
       });
 
       if (newCars.length === 0) return;

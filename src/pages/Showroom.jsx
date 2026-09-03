@@ -350,7 +350,7 @@ export default function Showroom() {
   const handleDeleteSaved = async saved => {
     if (!window.confirm(`Delete "${saved.name}"?`)) return;
     try {
-      await savedSearchAPI.delete(saved._id);
+      await savedSearchAPI.remove(saved._id);
       setSavedSearches(prev => prev.filter(s => s._id !== saved._id));
     } catch { toast('Could not delete', 'error'); }
   };
