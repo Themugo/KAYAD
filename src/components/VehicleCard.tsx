@@ -2,13 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Vehicle } from '../types';
 import { isEscrowApplicable } from '../utils/escrow';
 import { 
-  ShieldCheck, 
   CheckCircle2, 
   MapPin, 
   Heart, 
   ArrowRightLeft, 
-  Lock,
-  Landmark,
   Gavel,
   Building2,
   UserCheck
@@ -89,7 +86,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
   const displayPrice = vehicle.currentBid ?? vehicle.price;
 
   // Seller display text
-  const sellerDisplayName = vehicle.dealerName || vehicle.sellerName || (vehicle.sellerType === 'Private Seller' ? 'Private Seller' : 'Verified Dealer');
+  const sellerDisplayName = vehicle.dealerName || vehicle.sellerName || (vehicle.sellerType === 'Private Seller' ? 'Private Seller' : 'Seller information unavailable');
 
   // Formatted mileage
   const formattedMileage = vehicle.mileage >= 1000 
@@ -112,12 +109,18 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
     >
       {/* 1. VEHICLE IMAGE CONTAINER */}
       <div className="relative h-32 overflow-hidden bg-slate-100">
-        <LazyImage 
-          src={vehicle.image} 
-          alt={vehicle.title} 
-          wrapperClassName="w-full h-full"
-          className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out"
-        />
+        {vehicle.image ? (
+          <LazyImage
+            src={vehicle.image}
+            alt={vehicle.title}
+            wrapperClassName="w-full h-full"
+            className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-slate-500">
+            Vehicle image unavailable
+          </div>
+        )}
 
         {/* Dynamic Top Overlay Badges (Max 3) */}
         <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 max-w-[78%] pointer-events-none z-10">
@@ -200,7 +203,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
         <div className="space-y-1 pt-1 border-t border-slate-100 text-xs">
           {/* Row 1: Single compact metadata line */}
           <p className="font-bold text-slate-800 text-[12px] truncate">
-            {vehicle.year} • {formattedMileage} • {vehicle.fuelType} • {vehicle.transmission || 'Automatic'}
+            {vehicle.year} • {formattedMileage} • {vehicle.fuelType || 'Fuel type unavailable'} • {vehicle.transmission || 'Transmission unavailable'}
           </p>
 
           {/* Row 2: Location */}
@@ -216,9 +219,9 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             {vehicle.sellerType === 'Private Seller' ? (
               <UserCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            ) : (
+            ) : vehicle.sellerType === 'Verified Dealer' ? (
               <Building2 className="w-3.5 h-3.5 text-[#1E3063] shrink-0" />
-            )}
+            ) : null}
             <span className="text-xs font-bold text-slate-700 truncate">
               {sellerDisplayName}
             </span>

@@ -6,9 +6,8 @@ import { Vehicle } from '../../types';
 /**
  * KAYAD Phase 1 (architecture hardening) - first coverage for this
  * hook, extracted verbatim from App.tsx. Verifies the moved logic
- * preserves the real collection contract (empty initial state,
- * toggle add/remove, the existing max-4 compare limit, and that the
- * derived lists correctly filter the passed-in vehicle array).
+ * preserves the saved-vehicle contract. Phase 47 moves comparison out
+ * of this hook into the app's single persisted CompareContext source.
  */
 
 function makeVehicle(id: string): Vehicle {
@@ -48,7 +47,6 @@ describe('useVehicleCollections', () => {
   it('starts with an empty saved collection and no seeded vehicle IDs', () => {
     const { result } = renderHook(() => useVehicleCollections([]));
     expect(result.current.savedVehicles).toEqual([]);
-    expect(result.current.comparedVehicles).toEqual([]);
   });
 
   it('toggling save adds an unsaved ID and removes an already-saved one', () => {
@@ -61,33 +59,13 @@ describe('useVehicleCollections', () => {
     expect(result.current.savedVehicles).not.toContain('v3');
   });
 
-  it('toggling compare respects the existing max-4 limit', () => {
-    const { result } = renderHook(() => useVehicleCollections([]));
-
-    act(() => {
-      result.current.handleToggleCompare('a');
-      result.current.handleToggleCompare('b');
-      result.current.handleToggleCompare('c');
-      result.current.handleToggleCompare('d');
-    });
-    expect(result.current.comparedVehicles).toHaveLength(4);
-
-    act(() => result.current.handleToggleCompare('e'));
-    // A 5th addition is silently rejected - the same behavior the
-    // original inline logic had, moved verbatim.
-    expect(result.current.comparedVehicles).toHaveLength(4);
-    expect(result.current.comparedVehicles).not.toContain('e');
-  });
-
-  it('savedVehiclesList/comparedVehiclesList correctly derive from the passed-in vehicles array', () => {
+  it('savedVehiclesList correctly derives from the passed-in vehicles array', () => {
     const vehicles = [makeVehicle('v1'), makeVehicle('v2'), makeVehicle('v9')];
     const { result } = renderHook(() => useVehicleCollections(vehicles));
-
-    // No seeded/demo IDs are present, so the derived list starts empty.
     expect(result.current.savedVehiclesList).toEqual([]);
 
-    act(() => result.current.handleToggleCompare('v9'));
-    expect(result.current.comparedVehiclesList.map((v) => v.id)).toEqual(['v9']);
+    act(() => result.current.handleToggleSave('v9'));
+    expect(result.current.savedVehiclesList.map((v) => v.id)).toEqual(['v9']);
   });
 });
 

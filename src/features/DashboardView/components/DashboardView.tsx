@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile, SavedSearch } from '../../../types';
 import { Heart, Lock, Bell, Gavel, ArrowRight, ShieldCheck, CheckCircle2, Clock, TrendingDown, Eye, Sparkles, Zap, Building2, UserCheck, Car, Calculator, Wrench, Bookmark, AlertTriangle, Upload, FileCheck, MessageSquare, Trash2, ChevronRight, Scale } from 'lucide-react';
 import { Card, Badge, Button, LazyImage, Modal } from '../../../components/ui';
+import { savedSearchAPI } from '../../../api/api';
 
 interface DashboardViewProps {
   savedVehicles: string[];
@@ -56,9 +57,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Notifications Filter Tag State
   const [notifFilter, setNotifFilter] = useState<'all' | 'escrow' | 'price' | 'auction' | 'finance'>('all');
 
-  // Saved-search persistence is not yet connected to a server-backed contract.
-  // Keep this dashboard truthful instead of showing invented searches.
+  // Saved searches are server-authoritative for the signed-in user.
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+
+  useEffect(() => {
+    if (!user?.id) { setSavedSearches([]); return undefined; }
+    let cancelled = false;
+    savedSearchAPI.list()
+      .then((data) => {
+        if (cancelled) return;
+        setSavedSearches((data.searches || []).map((item: any) => ({
+          id: item._id || item.id,
+          title: item.name || 'Saved Search',
+          filters: item.filters || {},
+          notifyOnNewListing: item.notify !== false,
+          createdAt: item.createdAt || '',
+        })));
+      })
+      .catch(() => { if (!cancelled) setSavedSearches([]); });
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  const handleToggleNewListingAlert = async (item: SavedSearch) => {
+    const next = !item.notifyOnNewListing;
+    try {
+      await savedSearchAPI.toggleAlerts(item.id, next);
+      setSavedSearches(prev => prev.map(s => s.id === item.id ? { ...s, notifyOnNewListing: next } : s));
+      showToast(next ? 'New listing alerts enabled.' : 'New listing alerts disabled.');
+    } catch {
+      showToast('Failed to update alert preference.');
+    }
+  };
 
   // Derived Saved Vehicle Objects
   const savedItems = useMemo(() => {
@@ -693,7 +722,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         >
           <div className="p-6 space-y-4 text-xs">
             <p className="text-slate-600 font-medium">
-              Manage your saved search queries and price drop notifications. KAYAD sends instant email and push alerts when matching vehicles are listed.
+              Manage your saved search queries and new-listing notifications. KAYAD can notify you when matching vehicles are listed.
             </p>
 
             <div className="space-y-3">
@@ -725,24 +754,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
                       <input
                         type="checkbox"
-                        checked={item.notifyOnPriceDrop}
-                        onChange={() => {
-                          setSavedSearches(prev => prev.map(s => s.id === item.id ? { ...s, notifyOnPriceDrop: !s.notifyOnPriceDrop } : s));
-                          showToast('Updated price drop alert preference.');
-                        }}
-                        className="rounded text-[#1E3063] accent-[#1E3063]"
-                      />
-                      <span>Price Drop Alerts</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-                      <input
-                        type="checkbox"
                         checked={item.notifyOnNewListing}
-                        onChange={() => {
-                          setSavedSearches(prev => prev.map(s => s.id === item.id ? { ...s, notifyOnNewListing: !s.notifyOnNewListing } : s));
-                          showToast('Updated new listing alert preference.');
-                        }}
+                        onChange={() => { void handleToggleNewListingAlert(item); }}
                         className="rounded text-[#1E3063] accent-[#1E3063]"
                       />
                       <span>New Listing Alerts</span>

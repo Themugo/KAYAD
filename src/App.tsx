@@ -10,6 +10,7 @@ import PriceAlertsModal from './components/PriceAlertsModal';
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 
@@ -213,27 +214,62 @@ function AppInner() {
     };
   }, [vehicles]);
 
-  // Toggle Save
-  // Fixed (Final Integration - real data integration): savedVehicles
-  // was local-only state starting from hardcoded, fake IDs (['v1',
-  // 'v2']) that never match any real vehicle, with no connection to
-  // the real, already-built favorites backend (verified end-to-end
-  // this pass: real toggle, real fetch, real persisted result,
-  // survives refresh). A complete, already-built hook
-  // (useVehicleCollections) already wires this correctly - real API
-  // for logged-in users, honest local-only behavior for anonymous
-  // ones (the backend has no anonymous-favorites concept at all) -
-  // it simply was never connected to App.tsx. comparedVehicles has no
-  // backend concept at all (confirmed: no such endpoint exists
-  // anywhere) and correctly stays local-only in both cases.
+  // Saved vehicles are server-authoritative for authenticated users.
   const {
     savedVehicles,
-    comparedVehicles,
     savedVehiclesList,
-    comparedVehiclesList,
     handleToggleSave,
-    handleToggleCompare,
   } = useVehicleCollections(vehicles, user?.id ?? null);
+
+  // Phase 47: comparison is client-owned state, but it must still have one
+  // authoritative client source. CompareContext already persists IDs to
+  // localStorage, so App consumes that instead of maintaining a second,
+  // non-persisted comparedVehicles array inside useVehicleCollections.
+  const { compareIds: comparedVehicles, toggleCar: handleToggleCompare, removeCar: removeComparedVehicle } = useCompare();
+  const [resolvedComparedVehicles, setResolvedComparedVehicles] = useState<Record<string, Vehicle>>({});
+
+  // A persisted comparison can contain a vehicle outside the current inventory
+  // page/slice. Resolve those IDs through the real single-vehicle API so the
+  // compare modal survives refreshes and marketplace pagination honestly.
+  useEffect(() => {
+    let cancelled = false;
+    const availableIds = new Set(vehicles.map((vehicle) => vehicle.id));
+    const missingIds = comparedVehicles.filter(
+      (id) => !availableIds.has(id) && !resolvedComparedVehicles[id]
+    );
+
+    if (missingIds.length === 0) return () => { cancelled = true; };
+
+    void Promise.all(missingIds.map(async (id) => {
+      try {
+        const car = await getCarById(id);
+        return car ? [id, mapBackendCarToVehicle(car)] as const : [id, null] as const;
+      } catch {
+        return [id, null] as const;
+      }
+    })).then((results) => {
+      if (cancelled) return;
+      setResolvedComparedVehicles((prev) => {
+        const next = { ...prev };
+        for (const [id, vehicle] of results) {
+          if (vehicle) next[id] = vehicle;
+        }
+        return next;
+      });
+      for (const [id, vehicle] of results) {
+        if (!vehicle) removeComparedVehicle(id);
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [comparedVehicles, vehicles, resolvedComparedVehicles, removeComparedVehicle]);
+
+  const comparedVehiclesList = useMemo(() => {
+    const currentById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+    return comparedVehicles
+      .map((id) => currentById.get(id) || resolvedComparedVehicles[id])
+      .filter((vehicle): vehicle is Vehicle => Boolean(vehicle));
+  }, [comparedVehicles, vehicles, resolvedComparedVehicles]);
 
   // Add Vehicle Handler
   const handleAddVehicle = useCallback((_newVehicle: Vehicle) => {
@@ -548,7 +584,9 @@ function AppInner() {
 export function App() {
   return (
     <AuthProvider>
-      <AppInner />
+      <CompareProvider>
+        <AppInner />
+      </CompareProvider>
     </AuthProvider>
   );
 }

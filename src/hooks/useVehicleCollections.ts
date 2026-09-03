@@ -27,16 +27,12 @@ import { getFavorites, toggleFavorite, FavoriteApiError } from '../services/favo
  *   fallback for a failure, it's the correct, permanent behavior for
  *   a user the backend has no way to persist anything for.
  *
- * comparedVehicles remains entirely local/client-side in both cases -
- * there is no backend "compared vehicles" concept at all (confirmed:
- * no such endpoint exists anywhere in the 92 real route files this
- * program has audited) - out of scope for this phase's "connect
- * existing APIs" mission, since there is no existing API to connect to
- * for this specific piece of state.
+ * Comparison selection is intentionally not owned here. Phase 47 consolidates
+ * comparison into CompareContext, the app's existing persisted client-state
+ * boundary, so favorites and comparison no longer have competing sources.
  */
 export function useVehicleCollections(vehicles: Vehicle[], userId?: string | null) {
   const [savedVehicles, setSavedVehicles] = useState<string[]>([]);
-  const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
   const [isFetchingFavorites, setIsFetchingFavorites] = useState<boolean>(false);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
   // Tracks in-flight optimistic toggles by car ID, so a rapid
@@ -144,32 +140,14 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
       });
   }, [userId, savedVehicles]);
 
-  // Toggle Compare - unchanged from Phase 1, entirely local/client-side
-  // (no backend "compared vehicles" concept exists - see this file's
-  // own header comment).
-  const handleToggleCompare = useCallback((id: string) => {
-    setComparedVehicles((prev) => {
-      if (prev.includes(id)) return prev.filter((item) => item !== id);
-      if (prev.length >= 4) return prev; // max 4
-      return [...prev, id];
-    });
-  }, []);
-
   const savedVehiclesList = useMemo(() => {
     return vehicles.filter((v) => savedVehicles.includes(v.id));
   }, [vehicles, savedVehicles]);
 
-  const comparedVehiclesList = useMemo(() => {
-    return vehicles.filter((v) => comparedVehicles.includes(v.id));
-  }, [vehicles, comparedVehicles]);
-
   return {
     savedVehicles,
-    comparedVehicles,
     savedVehiclesList,
-    comparedVehiclesList,
     handleToggleSave,
-    handleToggleCompare,
     isFetchingFavorites,
     favoritesError,
   };

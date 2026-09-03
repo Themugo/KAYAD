@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { carsAPI, BRANDS } from '../api/api';
+import { carsAPI, BRANDS, savedSearchAPI } from '../api/api';
 import CarCard from '../components/CarCard';
 import { Button, Badge, FilterChip, RangeSlider, EmptyState, Skeleton, Segmented, Drawer } from '../components/ui';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -92,21 +92,15 @@ export default function BrowsePage() {
            filters.auctionOnly || filters.verifiedOnly || filters.inspectedOnly;
   }, [filters]);
 
-  const handleSaveSearch = () => {
+  const handleSaveSearch = async () => {
+    const name = searchName || filters.search || `${filters.brand !== 'All' ? filters.brand : ''} ${filters.bodyType !== 'All' ? filters.bodyType : ''}`.trim() || 'My Search';
     try {
-      const stored = JSON.parse(localStorage.getItem('kayad_saved_searches') || '[]');
-      const newSearch = {
-        ...filters,
-        name: searchName || filters.search || `${filters.brand !== 'All' ? filters.brand : ''} ${filters.bodyType !== 'All' ? filters.bodyType : ''}`.trim() || 'My Search',
-        savedAt: new Date().toISOString(),
-      };
-      stored.unshift(newSearch);
-      localStorage.setItem('kayad_saved_searches', JSON.stringify(stored.slice(0, 20)));
+      await savedSearchAPI.create({ name, filters, notifyOnNewMatch: true });
       toast('Search saved! You\'ll see it on your dashboard.', 'success');
       setShowSaveSearch(false);
       setSearchName('');
     } catch {
-      toast('Failed to save search', 'error');
+      toast('Please sign in to save this search, or try again.', 'error');
     }
   };
 

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, bidsAPI } from '../api/api';
+import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, bidsAPI, savedSearchAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import { EnterpriseCard, EnterpriseKPI, EnterpriseTimeline, EnterpriseQuickActions, EnterpriseTable, EnterpriseMetricRow, DashboardHeader } from '../components/enterprise/EnterpriseDashboard';
 
@@ -115,31 +115,39 @@ export default function BuyerDashboard() {
     tryFetchBids();
   }, []);
 
-  // Load saved searches from localStorage
+  // Saved searches are server-authoritative for authenticated buyers.
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('kayad_saved_searches') || '[]');
-      setSavedSearches(stored);
-    } catch {
-      setSavedSearches([]);
-    }
+    let cancelled = false;
+    savedSearchAPI.list()
+      .then((data) => {
+        if (!cancelled) setSavedSearches(data.searches || []);
+      })
+      .catch(() => {
+        if (!cancelled) setSavedSearches([]);
+      });
+    return () => { cancelled = true; };
   }, []);
 
-  const handleDeleteSavedSearch = (index) => {
-    const updated = savedSearches.filter((_, i) => i !== index);
-    setSavedSearches(updated);
-    localStorage.setItem('kayad_saved_searches', JSON.stringify(updated));
-    toast('Saved search removed', 'info');
+  const handleDeleteSavedSearch = async (search) => {
+    const id = search?._id || search?.id;
+    if (!id) { toast('Saved search cannot be removed because its server ID is unavailable', 'error'); return; }
+    try {
+      await savedSearchAPI.remove(id);
+      setSavedSearches(prev => prev.filter(item => (item._id || item.id) !== id));
+      toast('Saved search removed', 'info');
+    } catch {
+      toast('Failed to remove saved search', 'error');
+    }
   };
 
   const handleRunSavedSearch = (search) => {
     const params = new URLSearchParams();
-    if (search.brand && search.brand !== 'All') params.set('brand', search.brand);
-    if (search.bodyType && search.bodyType !== 'All') params.set('bodyType', search.bodyType);
-    if (search.priceMax) params.set('priceMax', search.priceMax);
-    if (search.fuel && search.fuel !== 'All') params.set('fuel', search.fuel);
-    if (search.transmission && search.transmission !== 'All') params.set('transmission', search.transmission);
-    if (search.search) params.set('search', search.search);
+    const filters = search.filters && typeof search.filters === 'object' ? search.filters : search;
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && String(value).length > 0 && value !== 'All') {
+        params.set(key, String(value));
+      }
+    });
     navigate(`/browse?${params.toString()}`);
   };
 
@@ -320,7 +328,7 @@ export default function BuyerDashboard() {
             {savedSearches.length > 0 && (
               <EnterpriseCard header="🔔 Saved Searches" action={<Link to="/browse" style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Browse All →</Link>}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {savedSearches.slice(0, 5).map((search, index) => (
+                  {savedSearches.slice(0, 5).map((search) => (
                     <div key={index} style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -333,23 +341,23 @@ export default function BuyerDashboard() {
                     }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 600, fontSize: 13, color: '#fff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {search.name || search.search || `${search.brand || 'All brands'} ${search.bodyType || ''}`.trim()}
+                          {search.name || search.search || `${search.filters?.brand || 'All brands'} ${search.filters?.bodyType || ''}`.trim()}
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          {search.brand && search.brand !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.brand}</span>
+                          {search.filters?.brand && search.filters.brand !== 'All' && (
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.filters.brand}</span>
                           )}
-                          {search.bodyType && search.bodyType !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.bodyType}</span>
+                          {search.filters?.bodyType && search.filters.bodyType !== 'All' && (
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.filters.bodyType}</span>
                           )}
-                          {search.priceMax && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>Under KES {(Number(search.priceMax) / 1000000).toFixed(0)}M</span>
+                          {search.filters?.priceMax && (
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>Under KES {(Number(search.filters.priceMax) / 1000000).toFixed(0)}M</span>
                           )}
-                          {search.fuel && search.fuel !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.fuel}</span>
+                          {search.filters?.fuel && search.filters.fuel !== 'All' && (
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.filters.fuel}</span>
                           )}
-                          {search.transmission && search.transmission !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.transmission}</span>
+                          {search.filters?.transmission && search.filters.transmission !== 'All' && (
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.filters.transmission}</span>
                           )}
                         </div>
                       </div>
@@ -370,7 +378,7 @@ export default function BuyerDashboard() {
                           Run
                         </button>
                         <button
-                          onClick={() => handleDeleteSavedSearch(index)}
+                          onClick={() => handleDeleteSavedSearch(search)}
                           style={{
                             padding: '6px 8px',
                             background: 'transparent',
