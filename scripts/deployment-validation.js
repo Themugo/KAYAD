@@ -7,6 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { execFileSync } from 'child_process';
 import http from 'http';
 import https from 'https';
 import { URL } from 'url';
@@ -32,13 +33,12 @@ function logSection(title) {
   console.log('='.repeat(60));
 }
 
-// Required environment variables for frontend
-const FRONTEND_REQUIRED_VARS = [
-  'VITE_PLATFORM_NAME',
-  'VITE_DOMAIN',
-  'VITE_SOCKET_URL',
-  'VITE_APP_NAME',
-  'VITE_APP_VERSION',
+// Frontend Vite variables are build-time inputs and are documented in .env.example.
+// They must not be treated as server-process environment requirements here.
+const FRONTEND_DOCUMENTED_VARS = [
+  'VITE_API_URL',
+  'VITE_SUPABASE_URL',
+  'VITE_SUPABASE_ANON_KEY',
 ];
 
 // Required environment variables for backend
@@ -69,15 +69,22 @@ function validateEnvironmentVariables() {
   const errors = [];
   const warnings = [];
   
-  // Check frontend variables
-  log('\nFrontend Variables:', 'blue');
-  FRONTEND_REQUIRED_VARS.forEach(varName => {
-    const value = process.env[varName];
-    if (!value) {
-      errors.push(`Missing frontend variable: ${varName}`);
-      log(`  ✗ ${varName} - MISSING`, 'red');
+  // Check frontend contract documentation. Vite variables are injected at build time,
+  // so this validator must not require them in the Node deployment process.
+  log('\nFrontend Build Contract:', 'blue');
+  let frontendEnv = '';
+  try {
+    frontendEnv = fs.readFileSync('.env.example', 'utf8');
+  } catch {
+    errors.push('Missing frontend environment template: .env.example');
+  }
+  FRONTEND_DOCUMENTED_VARS.forEach(varName => {
+    const documented = new RegExp(`^${varName}=`, 'm').test(frontendEnv);
+    if (!documented) {
+      errors.push(`Frontend contract missing documented variable: ${varName}`);
+      log(`  ✗ ${varName} - NOT DOCUMENTED`, 'red');
     } else {
-      log(`  ✓ ${varName} - ${maskSensitive(varName, value)}`, 'green');
+      log(`  ✓ ${varName} - documented`, 'green');
     }
   });
   
@@ -140,10 +147,9 @@ function validateConfigurationFiles() {
     log(`  ✓ vercel.json - Vercel configuration`, 'green');
     try {
       const vercelConfig = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
-      if (!vercelConfig.env || Object.keys(vercelConfig.env).length < 5) {
-        warnings.push('vercel.json may be missing environment variables');
-        log(`  ⚠ vercel.json - Environment variables may be incomplete`, 'yellow');
-      }
+      // Environment values are intentionally managed by the hosting platform;
+      // vercel.json does not need to contain secrets or runtime env values.
+      log(`  ✓ vercel.json - environment values managed by deployment platform`, 'green');
     } catch (e) {
       errors.push('vercel.json is not valid JSON');
       log(`  ✗ vercel.json - Invalid JSON`, 'red');
@@ -211,10 +217,15 @@ function validateBuildConfiguration() {
 async function checkAPIHealth() {
   logSection('API Health Check');
   
-  const apiUrl = process.env.VITE_API_URL || process.env.API_URL;
+  const apiUrl = process.env.API_URL || process.env.VITE_API_URL;
   if (!apiUrl) {
     log('  ⚠ API URL not configured - skipping health check', 'yellow');
     return { errors: [], warnings: ['API URL not configured'] };
+  }
+
+  if (String(apiUrl).startsWith('/')) {
+    log('  ⚠ Relative API URL detected; browser proxy URL cannot be health-checked from Node', 'yellow');
+    return { errors: [], warnings: ['Relative API URL cannot be probed from Node'] };
   }
   
   return new Promise((resolve) => {
@@ -279,11 +290,20 @@ function validateGitStatus() {
     if (fs.existsSync('.git')) {
       log(`  ✓ Git repository detected`, 'green');
       
-      // Check for uncommitted changes (simplified check)
-      if (fs.existsSync('.git/index')) {
-        log(`  ⚠ Uncommitted changes may exist - consider committing`, 'yellow');
+      // Use Git's porcelain output rather than checking for .git/index, which exists
+    // even in a perfectly clean repository.
+    try {
+      const status = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' });
+      if (status.trim()) {
+        log(`  ⚠ Uncommitted changes detected`, 'yellow');
         warnings.push('Uncommitted changes detected');
+      } else {
+        log(`  ✓ Working tree clean`, 'green');
       }
+    } catch {
+      warnings.push('Could not determine Git working-tree status');
+      log(`  ⚠ Could not determine Git working-tree status`, 'yellow');
+    }
     } else {
       warnings.push('Not a git repository');
       log(`  ⚠ Not a git repository`, 'yellow');
