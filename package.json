@@ -27,7 +27,7 @@
     "validate:communications": "node scripts/validate-communications-initiative.mjs"
   },
   "dependencies": {
-    "@sentry/react": "10.69.0",
+    "@sentry/react": "10.73.0",
     "@supabase/supabase-js": "2.111.0",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.0.5",
