@@ -204,6 +204,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [bids, setBids] = useState<BidLocal[]>([]);
+  const [bidLoadError, setBidLoadError] = useState<string | null>(null);
   const [escrowContracts, setEscrowContracts] = useState<EscrowContractLocal[]>([]);
   
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -231,6 +232,36 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     return () => { cancelled = true; };
   }, []);
 
+
+  useEffect(() => {
+    if (!auth?.user?.id) {
+      setBids([]);
+      setBidLoadError(null);
+      return;
+    }
+    let cancelled = false;
+    setBidLoadError(null);
+    bidsAPI.myBids()
+      .then((response: any) => {
+        if (cancelled) return;
+        const rows = Array.isArray(response?.bids) ? response.bids : [];
+        setBids(rows.map((bid: any): BidLocal => ({
+          id: String(bid.id || bid._id),
+          vehicleId: String(bid.carId?.id || bid.carId?._id || bid.car?.id || bid.car?._id || bid.carId || ''),
+          bidderId: String(bid.user?.id || bid.user?._id || bid.user || auth.user.id),
+          bidderName: String(bid.user?.name || auth.user.name || 'KAYAD member'),
+          amount: Number(bid.amount || 0),
+          placedAt: bid.createdAt || bid.created_at || new Date().toISOString(),
+        })).filter((bid: BidLocal) => Boolean(bid.vehicleId)));
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBids([]);
+          setBidLoadError('Unable to load your bids right now.');
+        }
+      });
+    return () => { cancelled = true; };
+  }, [auth?.user?.id, auth?.user?.name]);
 
   const navigateTo = (page: PageView, vehicleId?: string) => {
     if (vehicleId) {
@@ -306,29 +337,33 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
       return false;
     }
 
-    const newBid: BidLocal = {
-      id: `bid_${Date.now()}`,
-      vehicleId,
-      bidderId,
-      bidderName,
-      amount,
-      placedAt: new Date().toISOString()
-    };
-
-    setBids(prev => [newBid, ...prev]);
-
-    setVehicles(prev =>
-      prev.map(v => {
-        if (v.id === vehicleId) {
-          return {
-            ...v,
-            currentBid: amount,
-            bidsCount: (v.bidsCount || 0) + 1
-          };
-        }
-        return v;
-      })
-    );
+    // The response is intentionally not converted into a synthetic local bid.
+    // Re-read the authoritative car and current user's bids so pending/failed
+    // M-Pesa state cannot be presented as a confirmed auction mutation.
+    try {
+      const [latestCar, latestBids] = await Promise.all([
+        import('../services/vehicleApi').then(({ getCarById }) => getCarById(vehicleId)),
+        bidsAPI.myBids(),
+      ]);
+      if (latestCar) {
+        const mapped = mapBackendCarToVehicle(latestCar);
+        setVehicles(prev => prev.map(v => v.id === mapped.id ? mapped : v));
+      }
+      const rows = Array.isArray((latestBids as any)?.bids) ? (latestBids as any).bids : [];
+      setBids(rows.map((bid: any): BidLocal => ({
+        id: String(bid.id || bid._id),
+        vehicleId: String(bid.carId?.id || bid.carId?._id || bid.car?.id || bid.car?._id || bid.carId || ''),
+        bidderId: String(bid.user?.id || bid.user?._id || bid.user || bidderId),
+        bidderName: String(bid.user?.name || bidderName || 'KAYAD member'),
+        amount: Number(bid.amount || 0),
+        placedAt: bid.createdAt || bid.created_at || new Date().toISOString(),
+      })).filter((bid: BidLocal) => Boolean(bid.vehicleId)));
+      setBidLoadError(null);
+    } catch {
+      // The bid request itself succeeded; failure to refresh the read model
+      // must not fabricate a local success state. The next authoritative
+      // refresh will reconcile the UI.
+    }
 
     return true;
   };
