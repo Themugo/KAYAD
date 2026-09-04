@@ -4,9 +4,9 @@
 // ============================================================
 
 import User from "../models/User.js";
+import Dealer from "../models/Dealer.js";
 import Review from "../models/Review.js";
 import InspectionOrder from "../models/InspectionOrder.js";
-import DealerSubscription from "../models/DealerSubscription.js";
 import DealerAnalytics from "../models/DealerAnalytics.js";
 import Car from "../models/Car.js";
 import Lead from "../models/Lead.js";
@@ -80,8 +80,11 @@ export async function getDealerDashboard(req, res) {
 export async function getDealerProfile(req, res) {
   try {
     const { dealerId } = req.params;
-    const dealer = await User.findById(dealerId);
-    if (!dealer || dealer.role !== 'dealer') {
+    const [dealerUser, dealerRecord] = await Promise.all([
+      User.findById(dealerId),
+      Dealer.findOne({ user: dealerId }),
+    ]);
+    if (!dealerUser || dealerUser.role !== 'dealer') {
       return res.status(404).json({ success: false, message: 'Dealer not found' });
     }
 
@@ -97,13 +100,13 @@ export async function getDealerProfile(req, res) {
     res.json({
       success: true,
       data: {
-        id: dealer.id,
-        businessName: dealer.businessName || dealer.name,
-        name: dealer.name,
-        bio: dealer.bio || null,
-        location: dealer.location || null,
-        approved: Boolean(dealer.approved),
-        memberSince: dealer.createdAt || null,
+        id: dealerUser.id,
+        businessName: dealerRecord?.businessName || dealerUser.businessName || dealerUser.name,
+        name: dealerUser.name,
+        bio: dealerUser.bio || null,
+        location: dealerRecord?.location || dealerUser.location || null,
+        approved: Boolean(dealerRecord?.approved),
+        memberSince: dealerRecord?.createdAt || dealerUser.createdAt || null,
         stats: {
           activeListings: listings.filter((car) => ['available', 'active'].includes(car.status)).length,
           totalListings: listings.length,
@@ -119,10 +122,63 @@ export async function getDealerProfile(req, res) {
 }
 
 export async function updateDealerProfile(req, res) {
-  const { dealerId } = req.params;
-  const updates = req.body;
-  
-  res.json({ success: true, data: { id: dealerId, ...updates, updatedAt: new Date().toISOString() } });
+  try {
+    const { dealerId } = req.params;
+
+    if (req.user.id !== dealerId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own dealer profile",
+      });
+    }
+
+    const allowed = ["businessName", "location", "phone", "bio"];
+    const updates = {};
+    for (const field of allowed) {
+      if (req.body?.[field] !== undefined) {
+        updates[field] = String(req.body[field]).trim();
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(dealerId, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!user || user.role !== "dealer") {
+      return res.status(404).json({ success: false, message: "Dealer not found" });
+    }
+
+    const dealerUpdates = {};
+    if (updates.businessName !== undefined) dealerUpdates.businessName = updates.businessName;
+    if (updates.location !== undefined) dealerUpdates.location = updates.location;
+
+    let dealer = await Dealer.findOne({ user: dealerId });
+    if (dealerUpdates.businessName !== undefined || dealerUpdates.location !== undefined) {
+      if (dealer) {
+        dealer = await Dealer.findByIdAndUpdate(dealer.id, dealerUpdates, {
+          new: true,
+          runValidators: true,
+        });
+      }
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        id: user.id,
+        businessName: user.businessName || dealer?.businessName || null,
+        location: user.location || dealer?.location || null,
+        phone: user.phone || null,
+        bio: user.bio || null,
+        approved: Boolean(dealer?.approved),
+        updatedAt: user.updatedAt || new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    logError("Error updating dealer profile:", err);
+    return res.status(500).json({ success: false, message: "Failed to update dealer profile" });
+  }
 }
 
 // ============================================================
@@ -512,49 +568,11 @@ export async function updateTeamMember(req, res) {
 // ============================================================
 
 export async function getSubscription(req, res) {
-  const subscription = {
-    id: 'sub_dealer_001',
-    plan: {
-      id: 'platinum',
-      name: 'Platinum Dealer',
-      price: 49999,
-      billingCycle: 'monthly',
-      features: [
-        'Unlimited vehicle listings',
-        'Featured listings (10/month)',
-        'Priority placement in search',
-        'Advanced analytics dashboard',
-        'CRM with unlimited leads',
-        'Team management (up to 10 users)',
-        'Marketing campaigns (20/month)',
-        'Ghost Certified badge',
-        'Dedicated support',
-      ],
-    },
-    usage: {
-      listings: { used: 47, limit: 999 },
-      featuredListings: { used: 8, limit: 10 },
-      teamMembers: { used: 4, limit: 10 },
-      marketingCampaigns: { used: 12, limit: 20 },
-      leads: { used: 156, limit: 999 },
-    },
-    billing: {
-      nextBillingDate: '2024-03-15',
-      amount: 49999,
-      paymentMethod: 'M-Pesa',
-      autoRenew: true,
-    },
-    invoices: [
-      { id: 'inv_001', date: '2024-02-15', amount: 49999, status: 'paid' },
-      { id: 'inv_002', date: '2024-01-15', amount: 49999, status: 'paid' },
-      { id: 'inv_003', date: '2023-12-15', amount: 49999, status: 'paid' },
-    ],
-    upgradeOptions: [
-      { id: 'enterprise', name: 'Enterprise', price: 99999, features: 'Everything in Platinum + API access, custom branding, white-label portal' },
-    ],
-  };
-
-  res.json({ success: true, data: subscription });
+  return res.status(501).json({
+    success: false,
+    code: "DEALER_SUBSCRIPTION_UNAVAILABLE",
+    message: "Dealer subscription management is not available because the authoritative migration chain does not define a dealer subscription contract.",
+  });
 }
 
 // ============================================================
