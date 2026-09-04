@@ -24,6 +24,7 @@ describe("escrow state machine", () => {
     expect(validateTransition(STATES.VEHICLE_CONFIRMED, STATES.DELIVERED, "seller").allowed).toBe(true);
     const delivered = { deliveryConfirmed: true };
     expect(validateTransition(STATES.DELIVERED, STATES.RELEASED, "admin", delivered).allowed).toBe(true);
+    expect(validateTransition(STATES.DELIVERED, STATES.RELEASED, "admin", { deliveredAt: new Date() }).allowed).toBe(true);
     expect(validateTransition(STATES.RELEASED, STATES.CLOSED, "admin").allowed).toBe(true);
   });
 

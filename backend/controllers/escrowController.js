@@ -333,7 +333,7 @@ export const closeEscrowHandler = async (req, res) => {
     if (!escrow) throw new Error("Escrow not found");
 
     const role = ["admin", "superadmin"].includes(req.user.role) ? "admin" : "system";
-    const updated = await serviceClose(escrow._id, req.user.id, role, { req });
+    const updated = await serviceClose(escrow._id, req.user.id, role, { idempotencyKey: req.idempotencyKey });
 
     res.json({ success: true, message: "Escrow closed", data: updated });
   } catch (err) {
