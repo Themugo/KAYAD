@@ -5,7 +5,6 @@
 
 import User from "../models/User.js";
 import Review from "../models/Review.js";
-import LoanApplication from "../models/LoanApplication.js";
 import InspectionOrder from "../models/InspectionOrder.js";
 import DealerSubscription from "../models/DealerSubscription.js";
 import DealerAnalytics from "../models/DealerAnalytics.js";
@@ -482,41 +481,30 @@ export async function getDealerAnalytics(req, res) {
 // ============================================================
 
 export async function getTeamMembers(req, res) {
-  const members = {
-    items: [
-      { id: '1', name: 'John Kamau', email: 'john@nairobiautohub.co.ke', role: 'admin', phone: '+254 712 345 678', avatar: null, status: 'active', lastActive: new Date().toISOString(), performance: { leads: 45, sales: 12, revenue: 50000000 } },
-      { id: '2', name: 'Mary Wanjiku', email: 'mary@nairobiautohub.co.ke', role: 'sales_manager', phone: '+254 723 456 789', avatar: null, status: 'active', lastActive: new Date().toISOString(), performance: { leads: 67, sales: 18, revenue: 75000000 } },
-      { id: '3', name: 'Peter Otieno', email: 'peter@nairobiautohub.co.ke', role: 'finance_officer', phone: '+254 734 567 890', avatar: null, status: 'active', lastActive: new Date().toISOString(), performance: { leads: 23, sales: 8, revenue: 33000000 } },
-      { id: '4', name: 'Grace Achieng', email: 'grace@nairobiautohub.co.ke', role: 'sales_executive', phone: '+254 745 678 901', avatar: null, status: 'active', lastActive: new Date().toISOString(), performance: { leads: 21, sales: 7, revenue: 29500000 } },
-    ],
-    stats: { total: 4, active: 4, admins: 1, sales: 3 },
-  };
-
-  res.json({ success: true, data: members });
+  // dealer_teams is referenced by legacy routes/models but is not defined
+  // by the authoritative migration chain. Keep the endpoint explicit
+  // rather than returning invented members or making an unbacked query.
+  return res.status(501).json({
+    success: false,
+    code: "DEALER_TEAM_UNAVAILABLE",
+    message: "Dealer team management is not available because no canonical dealer-scoped team data contract exists yet.",
+  });
 }
 
 export async function inviteTeamMember(req, res) {
-  const { email, name, role } = req.body;
-  
-  res.status(201).json({ 
-    success: true, 
-    data: { 
-      id: `inv_${Date.now()}`,
-      email, 
-      name, 
-      role, 
-      status: 'pending',
-      invitedAt: new Date().toISOString(),
-      inviteLink: `https://kayad.co.ke/invite/${Date.now()}`,
-    } 
+  return res.status(501).json({
+    success: false,
+    code: "DEALER_TEAM_UNAVAILABLE",
+    message: "Dealer team invitations are not available because no canonical dealer-scoped team data contract exists yet.",
   });
 }
 
 export async function updateTeamMember(req, res) {
-  const { memberId } = req.params;
-  const updates = req.body;
-  
-  res.json({ success: true, data: { id: memberId, ...updates, updatedAt: new Date().toISOString() } });
+  return res.status(501).json({
+    success: false,
+    code: "DEALER_TEAM_UNAVAILABLE",
+    message: "Dealer team management is not available because no canonical dealer-scoped team data contract exists yet.",
+  });
 }
 
 // ============================================================
@@ -735,24 +723,15 @@ export async function getAuctionInventory(req, res) {
 // ============================================================
 
 export async function getFinanceApplications(req, res) {
-  try {
-    const applications = (await LoanApplication.find({}).populate('car')).filter((application) => application.car?.dealer === req.user.id);
-    res.json({
-      success: true,
-      data: {
-        items: applications,
-        stats: {
-          total: applications.length,
-          approved: applications.filter((a) => a.status === 'approved').length,
-          pending: applications.filter((a) => ['submitted', 'under_review'].includes(a.status)).length,
-          rejected: applications.filter((a) => a.status === 'declined').length,
-        },
-      },
-    });
-  } catch (err) {
-    logError('Error fetching finance applications:', err);
-    res.status(500).json({ success: false, message: 'Failed to load finance applications' });
-  }
+  // The repository's authoritative migration chain does not define a
+  // loan_applications table. Do not query the compatibility model here:
+  // doing so would turn an unavailable capability into a misleading 500
+  // or, worse, fabricated dealer finance records.
+  return res.status(501).json({
+    success: false,
+    code: "DEALER_FINANCE_UNAVAILABLE",
+    message: "Dealer finance is not available because no canonical dealer-scoped finance data contract exists yet.",
+  });
 }
 
 // ============================================================

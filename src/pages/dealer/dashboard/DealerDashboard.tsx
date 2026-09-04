@@ -34,7 +34,19 @@ const colors = {
 // ============================================================
 
 /** Stat Card */
-const StatCard = ({ title, value, change, icon: Icon, color = colors.navy }) => (
+type DealerOperationResponse = {
+  auctions?: { items?: Array<{ id: string; title: string; bidsCount?: number; views?: number; currentBid?: number; startingBid?: number; status?: string }> };
+  inspections?: { items?: Array<{ id: string; vehicle?: string; status?: string }> };
+  analytics?: {
+    overview?: { totalRevenue?: number; totalSales?: number; totalViews?: number };
+    performance?: { avgDealSize?: number };
+    topVehicles?: Array<{ id: string; title?: string; views?: number }>;
+  };
+};
+
+type StatCardProps = { title: string; value: React.ReactNode; change?: number; icon: React.ElementType; color?: string };
+
+const StatCard = ({ title, value, change, icon: Icon, color = colors.navy }: StatCardProps) => (
   <div className="bg-white rounded-xl border border-slate-100 p-5 hover:shadow-md transition-shadow">
     <div className="flex items-start justify-between">
       <div>
@@ -259,7 +271,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   // genuinely persisted via a new real table - performance metrics
   // (impressions, clicks, ROI) are intentionally not shown, since no
   // real ad-tracking infrastructure exists to back them honestly.
-  const [operations, setOperations] = useState({});
+  const [operations, setOperations] = useState<DealerOperationResponse>({});
   const [operationsLoading, setOperationsLoading] = useState(false);
   const [operationsError, setOperationsError] = useState(null);
 
