@@ -66,10 +66,10 @@ try {
     const nodeVersion = execSync('node --version', { encoding: 'utf8' }).trim();
     log(`Node version: ${nodeVersion}`, 'blue');
     const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
-    if (majorVersion >= 18) {
-      log('✅ Node version meets requirements (>=18)', 'green');
+    if (majorVersion >= 22) {
+      log('✅ Node version meets requirements (>=22)', 'green');
     } else {
-      log('❌ Node version too old (requires >=18)', 'red');
+      log('❌ Node version too old (requires >=22)', 'red');
       hasErrors = true;
     }
   } catch (e) {
@@ -111,11 +111,11 @@ try {
 
   logStep('Step 6: Build Test (Dry Run)');
   try {
-    log('Running type check...', 'blue');
-    execSync('npm run typecheck', { stdio: 'inherit' });
-    log('✅ Type check passed', 'green');
+    log('Running TypeScript validation...', 'blue');
+    execSync('npm run lint', { stdio: 'inherit' });
+    log('✅ TypeScript validation passed', 'green');
   } catch (e) {
-    log('⚠️  Type check failed or not configured', 'yellow');
+    log('⚠️  TypeScript validation failed or not configured', 'yellow');
   }
 
   logStep('Summary');

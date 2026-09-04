@@ -7,7 +7,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import http from 'http';
 import https from 'https';
+import { URL } from 'url';
 
 // ANSI color codes for terminal output
 const colors = {
@@ -216,10 +218,28 @@ async function checkAPIHealth() {
   }
   
   return new Promise((resolve) => {
-    const healthUrl = `${apiUrl}/health`;
+    const healthUrl = `${apiUrl.replace(/\/$/, '')}/health`;
     log(`  Checking: ${healthUrl}`, 'blue');
+
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(healthUrl);
+    } catch {
+      const err = `API health check skipped: invalid API URL`;
+      log(`  ✗ ${err}`, 'red');
+      resolve({ errors: [err], warnings: [] });
+      return;
+    }
+
+    const transport = parsedUrl.protocol === 'http:' ? http : parsedUrl.protocol === 'https:' ? https : null;
+    if (!transport) {
+      const err = `API health check skipped: unsupported URL protocol ${parsedUrl.protocol}`;
+      log(`  ✗ ${err}`, 'red');
+      resolve({ errors: [err], warnings: [] });
+      return;
+    }
     
-    const req = https.get(healthUrl, (res) => {
+    const req = transport.get(healthUrl, (res) => {
       if (res.statusCode === 200) {
         log(`  ✓ API is healthy (status: ${res.statusCode})`, 'green');
         resolve({ errors: [], warnings: [] });
