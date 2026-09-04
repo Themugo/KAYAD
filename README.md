@@ -1,20 +1,42 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# KAYAD
 
-# Run and deploy your AI Studio app
+KAYAD is a production automotive marketplace for Kenya. The repository contains the React/Vite frontend, Node/Express backend, Supabase/Postgres migrations, deployment configuration, and production validation tooling.
 
-This contains everything you need to run your app locally.
+## Runtime contract
 
-View your app in AI Studio: https://ai.studio/apps/acc4ec54-c8b9-41c5-8298-c0ae5f11f3c4
+- Node.js: `>=22.22.2` (see `.nvmrc` and both package manifests)
+- Frontend: Vite on port `3000`
+- Backend: Node/Express on port `5000` by default
+- Database: Supabase/Postgres, with schema defined by `supabase/migrations/`
+- Authentication: KAYAD's application authentication (`users` / `user_auth`); this project does not use Supabase Auth as its application identity layer.
 
-## Run Locally
+## Local development
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
+1. Install frontend dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+2. Configure the frontend environment from `.env.example`.
+3. Install backend dependencies:
+   `cd backend && npm install`
+4. Configure backend environment from `backend/.env.example`.
+5. Start the backend and frontend using the repository's startup scripts or the package scripts.
+
+The normal local frontend URL is `http://localhost:3000`.
+
+## Validation
+
+From the repository root:
+
+```text
+node scripts/validate-phase58.mjs
+node scripts/validate-phase59.mjs
+npm run lint
+npm run build
+```
+
+Backend tests run from `backend` with `npm test`.
+
+## Production deployment truth
+
+Deployment readiness is never inferred from a stale template, demo environment, or external service that has not actually been checked. Use the deployment validation scripts and the target hosting provider's environment configuration as the source of deployment state.
+
+Secrets must be supplied through the deployment environment. Do not commit `.env` files or real credentials.
