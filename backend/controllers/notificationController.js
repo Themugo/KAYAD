@@ -1,100 +1,97 @@
 // backend/controllers/notificationController.js
-import Notification from "../models/Notification.js";
+import { findAll, count, create, updateMany, removeMany, findById } from "../db/index.js";
 import { getIO } from "../utils/io.js";
 import { logError, logInfo } from "../utils/logger.js";
 
-// GET /api/notifications
+const mapNotification = (n) => ({
+  ...n,
+  _id: n.id,
+  createdAt: n.createdAt || n.created_at,
+  read: Boolean(n.read),
+});
+
 export const getNotifications = async (req, res) => {
   try {
     const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.min(Number(req.query.limit) || 20, 50);
-    const skip = (page - 1) * limit;
-
+    const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 50);
+    const offset = (page - 1) * limit;
     const [notifications, total, unread] = await Promise.all([
-      Notification.find({ user: req.user.id }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Notification.countDocuments({ user: req.user.id }),
-      Notification.countDocuments({ user: req.user.id, read: false }),
+      findAll("notifications", { filters: { user: req.user.id, }, orderBy: "createdAt", ascending: false, limit, offset }),
+      count("notifications", { user: req.user.id }),
+      count("notifications", { user: req.user.id, read: false }),
     ]);
-
-    res.json({
-      success: true,
-      notifications,
-      unreadCount: unread,
-      pagination: { total, page, limit, pages: Math.ceil(total / limit) },
-    });
+    res.json({ success: true, notifications: notifications.map(mapNotification), unreadCount: unread || 0, pagination: { total: total || 0, page, limit, pages: Math.ceil((total || 0) / limit) } });
   } catch (err) {
     logError("getNotifications error:", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to fetch notifications" });
   }
 };
 
-// =============================
-// 🔔 CREATE REMINDER
-// =============================
 export const createReminder = async (req, res) => {
   try {
     const { type, targetId, remindAt } = req.body;
-    const reminder = await Notification.create({
+    const reminder = await create("notifications", {
       user: req.user.id,
       title: "Reminder",
       message: `Reminder for ${type}`,
-      type: "reminder",
-      data: { type, targetId, remindAt: remindAt || new Date() },
+      type: "info",
+      read: false,
+      data: { type, targetId, remindAt: remindAt || new Date().toISOString() },
     });
     logInfo("Reminder created", { userId: req.user.id, type, targetId });
-    res.status(201).json({ success: true, reminder });
+    res.status(201).json({ success: true, reminder: mapNotification(reminder) });
   } catch (err) {
     logError("createReminder error:", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to create reminder" });
   }
 };
 
-// POST /api/notifications/:id/read
 export const markAsRead = async (req, res) => {
   try {
-    await Notification.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, { read: true, readAt: new Date() });
+    const notification = await findById("notifications", req.params.id);
+    if (!notification || String(notification.user) !== String(req.user.id)) return res.status(404).json({ success: false, message: "Notification not found" });
+    await updateMany("notifications", { id: req.params.id, user: req.user.id }, { read: true });
     res.json({ success: true, message: "Marked as read" });
   } catch (err) {
-    logError("❌ markAsRead error:", err.message);
+    logError("markAsRead error:", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to mark as read" });
   }
 };
 
-// POST /api/notifications/read-all
 export const markAllAsRead = async (req, res) => {
   try {
-    await Notification.updateMany({ user: req.user.id, read: false }, { read: true, readAt: new Date() });
+    await updateMany("notifications", { user: req.user.id, read: false }, { read: true });
     res.json({ success: true, message: "All notifications marked as read" });
   } catch (err) {
-    logError("❌ markAllAsRead error:", err.message);
-    res.status(500).json({ success: false, message: "Failed to mark all as read" });
+    logError("markAllAsRead error:", { error: err.message });
+    res.status(500).json({ success: false, message: "Failed to mark all notifications as read" });
   }
 };
 
-// DELETE /api/notifications/:id
 export const deleteNotification = async (req, res) => {
   try {
-    await Notification.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    const notification = await findById("notifications", req.params.id);
+    if (!notification || String(notification.user) !== String(req.user.id)) return res.status(404).json({ success: false, message: "Notification not found" });
+    await removeMany("notifications", { id: req.params.id, user: req.user.id });
     res.json({ success: true, message: "Notification deleted" });
   } catch (err) {
-    logError("❌ deleteNotification error:", err.message);
+    logError("deleteNotification error:", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to delete notification" });
   }
 };
 
-// Helper: create a notification (used by other controllers)
-export const createNotification = async ({ user, title, message, type = "info", data = {} }) => {
+export const createNotification = async ({ user, title, message, type = "info", data = {}, link }) => {
   try {
-    const notif = await Notification.create({ user, title, message, type, data });
-
-    // Push via socket.io
+    const notif = await create("notifications", { user, title, message, type, read: false, data, link });
+    const payload = mapNotification(notif);
     const io = getIO();
     if (io) {
-      io.to(`user_${user}`).emit("notification", notif);
+      io.to(`user_${user}`).emit("notification", payload);
+      io.to(String(user)).emit("notification", payload);
     }
-
     return notif;
   } catch (err) {
-    logError("Failed to create notification:", err.message);
+    logError("Failed to create notification:", { error: err.message, user });
+    return null;
   }
 };

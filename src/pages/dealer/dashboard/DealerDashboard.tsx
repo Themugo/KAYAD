@@ -404,7 +404,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             </div>
             <div>
               <h1 className="font-bold text-slate-800">Dealer Hub</h1>
-              <p className="text-xs text-slate-500">Nairobi Auto Hub</p>
+              <p className="text-xs text-slate-500">{user?.businessName || user?.name || "Dealer account"}</p>
             </div>
           </div>
         </div>
@@ -426,11 +426,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           <div className="p-4 bg-gradient-to-r from-purple-100 to-purple-50 rounded-xl">
             <div className="flex items-center gap-3 mb-3">
               <Shield className="w-5 h-5 text-purple-600" />
-              <span className="font-semibold text-purple-800">Platinum Plan</span>
+              <span className="font-semibold text-purple-800">Dealer account</span>
             </div>
-            <p className="text-xs text-purple-600 mb-3">38/999 listings used</p>
+            <p className="text-xs text-purple-600 mb-3">Plan information is not available.</p>
             <button className="w-full py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700">
-              Upgrade Plan
+              Plan unavailable
             </button>
           </div>
         </div>
@@ -443,7 +443,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
-              <p className="text-slate-500">Welcome back, John</p>
+              <p className="text-slate-500">Welcome back, {user?.name || "dealer"}</p>
             </div>
             <div className="flex items-center gap-3">
               <button className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">
@@ -463,28 +463,24 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 <StatCard
                   title="Total Listings"
                   value={dashboard?.overview?.totalListings ?? 0}
-                  change={12}
                   icon={Car}
                   color={colors.softBlue}
                 />
                 <StatCard
                   title="Total Views"
                   value={(dashboard?.overview?.totalViews ?? 0).toLocaleString()}
-                  change={15}
                   icon={Eye}
                   color={colors.purple}
                 />
                 <StatCard
                   title="Active Leads"
                   value={dashboard?.overview?.leads?.total ?? 0}
-                  change={23}
                   icon={Users}
                   color={colors.emerald}
                 />
                 <StatCard
                   title="Revenue (This Month)"
                   value={`Ksh ${((dashboard?.overview?.revenue?.total ?? 0) / 1000000).toFixed(1)}M`}
-                  change={18}
                   icon={DollarSign}
                   color={colors.navy}
                 />
@@ -557,10 +553,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 <div className="bg-white rounded-xl border border-slate-100 p-6">
                   <h3 className="font-bold text-slate-800 mb-4">Quick Actions</h3>
                   <div className="grid grid-cols-2 gap-3">
-                    <QuickAction icon={Plus} label="Add Listing" color={colors.emerald} onClick={() => {}} />
+                    <QuickAction icon={Plus} label="Add Listing" color={colors.emerald} onClick={() => onNavigate?.('seller-platform')} />
                     <QuickAction icon={Users} label="View Leads" color={colors.purple} onClick={() => setActiveSection('leads')} />
                     <QuickAction icon={Car} label="Manage Inventory" color={colors.softBlue} onClick={() => setActiveSection('inventory')} />
-                    <QuickAction icon={Calendar} label="Book Inspection" color={colors.amber} onClick={() => {}} />
+                    <QuickAction icon={Calendar} label="Inspections" color={colors.amber} onClick={() => setActiveSection('inspections')} />
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@ import { stkPush } from "./mpesaService.js";
 import { sendDigitalReceipt } from "./receiptService.js";
 import { getIO } from "../utils/io.js";
 import { logWarn } from "../utils/logger.js";
+import { recordPaymentEvent, recordPaymentAttempt } from "./paymentFinancialLifecycle.service.js";
 import { findById, findOne, create, update } from "../db/index.js";
 
 const formatPhone = (phone) => {
@@ -40,6 +41,7 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     referenceModel: "Car",
     phone: formattedPhone,
     status: "pending",
+    processed: false,
     checkoutRequestId: checkoutID,
     mode,
     // Fixed (Final Integration Phase 3 - real auction & bidding
@@ -60,12 +62,27 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
   });
 
   await create("mpesa_transactions", {
-    checkoutRequestID: checkoutID,
+    checkoutRequestId: checkoutID,
     phone: formattedPhone,
     amount,
     status: payment.status,
     carId,
   }).catch((e) => console.warn("⚠️ Payment notification failed:", e.message));
+
+  const attempt = await recordPaymentAttempt({
+    paymentId: payment.id,
+    checkoutRequestId: checkoutID,
+    status: "pending",
+  }).catch((e) => {
+    logWarn("Payment attempt audit record failed", { error: e.message, paymentId: payment.id });
+    return null;
+  });
+  await recordPaymentEvent({
+    paymentId: payment.id,
+    attemptId: attempt?.id || null,
+    eventType: "stk_initiated",
+    payload: { checkoutRequestId: checkoutID, amount, type, carId },
+  }).catch((e) => logWarn("Payment initiation event audit failed", { error: e.message }));
 
   return {
     success: true,
@@ -95,9 +112,12 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     paidAt: new Date().toISOString(),
   });
 
-  await update("mpesa_transactions", payment.id, { status: "success", mpesaReceipt: receipt }).catch(
-    (e) => console.warn("⚠️ Payment service notification failed:", e.message),
-  );
+  const mpesaTxn = await findOne("mpesa_transactions", { checkoutRequestId: checkoutRequestID });
+  if (mpesaTxn) {
+    await update("mpesa_transactions", mpesaTxn.id, { status: "success", mpesaReceipt: receipt }).catch(
+      (e) => console.warn("⚠️ Payment service notification failed:", e.message),
+    );
+  }
 
   // 📧 Payment confirmed email (fire-and-forget)
   try {

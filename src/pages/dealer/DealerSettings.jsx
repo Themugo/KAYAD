@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { authAPI } from '../../api/api';
+import * as dealerApi from '../../services/dealerPlatformApi';
 
 export default function DealerSettings() {
   const { user } = useAuth();
@@ -20,26 +20,32 @@ export default function DealerSettings() {
 
 
 
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+
   useEffect(() => {
-    if (!user) return;
-    setBusiness({
-      businessName: user.businessName || '',
-      location: user.location || '',
-      phone: user.phone || '',
-      bio: user.bio || '',
-    });
-  }, [user]);
+    if (!user?.id) return;
+    setLoading(true);
+    setLoadError(null);
+    dealerApi.getDealerProfile(user.id)
+      .then(({ data }) => {
+        const profile = data?.data || {};
+        setBusiness({
+          businessName: profile.businessName || '',
+          location: profile.location || '',
+          phone: profile.phone || '',
+          bio: profile.bio || '',
+        });
+      })
+      .catch(() => setLoadError('Could not load your dealer profile. Please try again.'))
+      .finally(() => setLoading(false));
+  }, [user?.id]);
 
   const handleSave = async () => {
     if (tab !== 'business') return;
     setSaving(true);
     try {
-      await authAPI.updateProfile({
-        businessName: business.businessName,
-        location: business.location,
-        phone: business.phone,
-        bio: business.bio,
-      });
+      await dealerApi.updateDealerProfile(user.id, business);
       toast('Business profile saved successfully', 'success');
     } catch {
       toast('Failed to save business profile', 'error');
@@ -83,25 +89,26 @@ export default function DealerSettings() {
               </p>
             </div>
           )}
+          {loadError && <div style={{ padding: 18, border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-muted)', marginBottom: 16 }}>{loadError}</div>}
           {tab === 'business' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, opacity: loading ? 0.6 : 1 }}>
               <h3 style={{ marginBottom: 4 }}>Business Profile</h3>
               <Field label="Business Name">
-                <input className="input" value={business.businessName}
+                <input disabled={loading} className="input" value={business.businessName}
                   onChange={e => setBusiness(p => ({ ...p, businessName: e.target.value }))} />
               </Field>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <Field label="Location / City">
-                  <input className="input" value={business.location}
+                  <input disabled={loading} className="input" value={business.location}
                     onChange={e => setBusiness(p => ({ ...p, location: e.target.value }))} />
                 </Field>
                 <Field label="Phone Number">
-                  <input className="input" value={business.phone}
+                  <input disabled={loading} className="input" value={business.phone}
                     onChange={e => setBusiness(p => ({ ...p, phone: e.target.value }))} />
                 </Field>
               </div>
               <Field label="About / Bio">
-                <textarea className="input" rows={3} value={business.bio}
+                <textarea disabled={loading} className="input" rows={3} value={business.bio}
                   onChange={e => setBusiness(p => ({ ...p, bio: e.target.value }))} />
               </Field>
 
@@ -122,6 +129,7 @@ export default function DealerSettings() {
             </div>
           )}
 
+          {loadError && <div style={{ padding: 18, border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-muted)', marginBottom: 16 }}>{loadError}</div>}
           {tab === 'business' && (
             <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
               <button className="btn btn-gold btn-lg" onClick={handleSave} disabled={saving}>

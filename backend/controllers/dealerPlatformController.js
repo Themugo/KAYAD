@@ -12,6 +12,7 @@ import Car from "../models/Car.js";
 import Lead from "../models/Lead.js";
 import Escrow from "../models/Escrow.js";
 import MarketingCampaign from "../models/MarketingCampaign.js";
+import { createCar, updateCar, deleteCar } from "./carController.js";
 import { logError } from "../utils/logger.js";
 
 // ============================================================
@@ -186,72 +187,52 @@ export async function updateDealerProfile(req, res) {
 // ============================================================
 
 export async function getInventory(req, res) {
-  const { status, page = 1, limit = 20 } = req.query;
-
-  const inventory = {
-    items: [
-      { id: '1', title: 'Toyota Land Cruiser 300 GX-R', price: 3200000, status: 'published', views: 456, leads: 12, createdAt: '2024-01-15', daysInStock: 23 },
-      { id: '2', title: 'Mercedes-Benz GLE 450 4MATIC', price: 1850000, status: 'published', views: 389, leads: 9, createdAt: '2024-01-20', daysInStock: 18 },
-      { id: '3', title: 'BMW X5 M Sport', price: 1650000, status: 'published', views: 345, leads: 7, createdAt: '2024-02-01', daysInStock: 12 },
-      { id: '4', title: 'Porsche Cayenne S', price: 2450000, status: 'reserved', views: 289, leads: 5, createdAt: '2024-01-10', daysInStock: 28 },
-      { id: '5', title: 'Range Rover Autobiography', price: 3200000, status: 'sold', views: 512, leads: 15, createdAt: '2023-12-15', daysInStock: 45, soldAt: '2024-01-30' },
-      { id: '6', title: 'Audi Q7 S Line', price: 1950000, status: 'draft', views: 0, leads: 0, createdAt: '2024-02-20', daysInStock: 0 },
-      { id: '7', title: 'Ford Ranger Wildtrak', price: 850000, status: 'pending', views: 156, leads: 3, createdAt: '2024-02-18', daysInStock: 5 },
-    ],
-    pagination: {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      total: 47,
-      pages: 3,
-    },
-    stats: {
-      total: 47,
-      published: 38,
-      draft: 5,
-      pending: 2,
-      reserved: 4,
-      sold: 23,
-      archived: 3,
-    },
-  };
-
-  res.json({ success: true, data: inventory });
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 20));
+    const filter = { dealer: req.user.id };
+    if (status) filter.status = status;
+    const all = await Car.find(filter).sort({ createdAt: -1 });
+    const total = all.length;
+    const items = all.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+    const stats = { total: all.length, published: 0, draft: 0, pending: 0, reserved: 0, sold: 0, archived: 0 };
+    for (const car of all) {
+      if (Object.prototype.hasOwnProperty.call(stats, car.status)) stats[car.status]++;
+    }
+    res.json({ success: true, data: { items, pagination: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) }, stats } });
+  } catch (err) {
+    logError("Error fetching dealer inventory:", err);
+    res.status(500).json({ success: false, message: "Failed to load dealer inventory" });
+  }
 }
 
-export async function createListing(req, res) {
-  const listing = {
-    id: `lst_${Date.now()}`,
-    ...req.body,
-    status: 'draft',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  res.status(201).json({ success: true, data: listing });
-}
-
-export async function updateListing(req, res) {
-  const { listingId } = req.params;
-  
-  res.json({ success: true, data: { id: listingId, ...req.body, updatedAt: new Date().toISOString() } });
-}
-
-export async function deleteListing(req, res) {
-  const { listingId } = req.params;
-  res.json({ success: true, message: 'Listing deleted successfully' });
-}
+// Listing mutations use the canonical car controller so dealer inventory
+// cannot drift into a second persistence implementation.
+export async function createListing(req, res) { return createCar(req, res); }
+export async function updateListing(req, res) { req.params.id = req.params.listingId; return updateCar(req, res); }
+export async function deleteListing(req, res) { req.params.id = req.params.listingId; return deleteCar(req, res); }
 
 export async function bulkUpdateListings(req, res) {
-  const { ids, action, data } = req.body;
-  
-  res.json({ 
-    success: true, 
-    data: { 
-      updated: ids.length,
-      action,
-      timestamp: new Date().toISOString()
-    } 
-  });
+  try {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const action = req.body?.action;
+    const allowedStatuses = new Set(["available", "active", "draft", "pending", "reserved", "sold", "archived"]);
+    if (!ids.length || !action) return res.status(400).json({ success: false, message: "ids and action are required" });
+    if (action !== "status") return res.status(400).json({ success: false, message: "Only status bulk updates are supported" });
+    const status = req.body?.data?.status;
+    if (!allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid listing status" });
+    const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id });
+    if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });
+    for (const car of owned) {
+      car.status = status;
+      await car.save();
+    }
+    res.json({ success: true, data: { updated: owned.length, status } });
+  } catch (err) {
+    logError("Error bulk updating dealer inventory:", err);
+    res.status(500).json({ success: false, message: "Failed to update dealer inventory" });
+  }
 }
 
 // ============================================================
@@ -332,38 +313,11 @@ export async function updateLead(req, res) {
 }
 
 export async function addLeadNote(req, res) {
-  const { leadId } = req.params;
-  const { note, type = 'note' } = req.body;
-  
-  res.status(201).json({ 
-    success: true, 
-    data: { 
-      id: `note_${Date.now()}`, 
-      leadId, 
-      note, 
-      type,
-      createdAt: new Date().toISOString() 
-    } 
-  });
+  return res.status(501).json({ success: false, code: "DEALER_CRM_NOTE_UNAVAILABLE", message: "Dealer lead notes are not available because the canonical schema does not define a dealer-scoped lead note contract." });
 }
 
 export async function createTask(req, res) {
-  const { leadId } = req.params;
-  const { title, dueDate, assignedTo, priority = 'medium' } = req.body;
-  
-  res.status(201).json({ 
-    success: true, 
-    data: { 
-      id: `task_${Date.now()}`, 
-      leadId, 
-      title, 
-      dueDate, 
-      assignedTo, 
-      priority,
-      status: 'pending',
-      createdAt: new Date().toISOString() 
-    } 
-  });
+  return res.status(501).json({ success: false, code: "DEALER_CRM_TASK_UNAVAILABLE", message: "Dealer lead tasks are not available because the canonical schema does not define a dealer-scoped lead task contract." });
 }
 
 // ============================================================
@@ -434,47 +388,12 @@ export async function getSalesPipeline(req, res) {
 // type, budget, status, start date) is genuinely persisted via a new
 // real table.
 export async function getMarketingCampaigns(req, res) {
-  try {
-    const campaigns = await MarketingCampaign.find({ dealer: req.user.id }).sort({ createdAt: -1 });
-    res.json({
-      success: true,
-      data: {
-        items: campaigns,
-        stats: {
-          activeCampaigns: campaigns.filter((c) => c.status === "active").length,
-          totalBudget: campaigns.reduce((sum, c) => sum + Number(c.budget || 0), 0),
-        },
-      },
-    });
-  } catch (err) {
-    logError("Error fetching campaigns:", err);
-    res.status(500).json({ success: false, message: "Failed to load campaigns" });
-  }
+  return res.status(501).json({ success: false, code: "DEALER_MARKETING_UNAVAILABLE", message: "Dealer marketing is not available because the canonical migration chain does not define a marketing campaign contract." });
 }
 
 export async function createCampaign(req, res) {
-  try {
-    const { name, campaignType, budget, startDate } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ success: false, message: "Campaign name is required" });
-    }
-    const campaign = await MarketingCampaign.create({
-      dealer: req.user.id,
-      name: name.trim(),
-      campaignType,
-      budget,
-      startDate,
-    });
-    res.status(201).json({ success: true, data: campaign });
-  } catch (err) {
-    logError("Error creating campaign:", err);
-    res.status(500).json({ success: false, message: "Failed to create campaign" });
-  }
+  return res.status(501).json({ success: false, code: "DEALER_MARKETING_UNAVAILABLE", message: "Dealer marketing is not available because the canonical migration chain does not define a marketing campaign contract." });
 }
-
-// ============================================================
-// ANALYTICS & INSIGHTS
-// ============================================================
 
 export async function getDealerAnalytics(req, res) {
   try {
@@ -532,6 +451,11 @@ export async function getDealerAnalytics(req, res) {
   }
 }
 
+
+export async function getAIRecommendations(req, res) {
+  return res.status(501).json({ success: false, code: "DEALER_AI_RECOMMENDATIONS_UNAVAILABLE", message: "Dealer AI recommendations are not available because no authoritative intelligence contract is defined for this deployment." });
+}
+
 // ============================================================
 // TEAM MANAGEMENT
 // ============================================================
@@ -580,54 +504,13 @@ export async function getSubscription(req, res) {
 // ============================================================
 
 export async function askDealerCopilot(req, res) {
-  const { question, context } = req.body;
-
-  const responses = {
-    'promote': 'Based on your inventory and market data, I recommend promoting your Toyota Land Cruiser 300 and Mercedes-Benz GLE. They have the highest view-to-lead conversion rates (12% and 9%) and are priced competitively.',
-    'overpriced': 'Your Audi Q7 (Ksh 1.95M) is priced 8% above similar listings. Consider reducing by Ksh 100,000-150,000 to improve competitiveness.',
-    'forecast': 'Based on historical data and current market trends, I forecast 12-15 vehicle sales this month with revenue between Ksh 50-65 million.',
-    'followup': '3 high-priority leads need follow-up: James Mwangi (Toyota Land Cruiser, score 85, last contact 2 days ago), Sarah Ochieng (Mercedes GLE, score 72, last contact yesterday), Michael Otieno (BMW X5, score 91, inspection booked).',
-    'sell': 'Based on demand patterns, these vehicles are likely to sell within 14 days: Toyota Land Cruiser 300, Mercedes-Benz GLE, BMW X5. Consider featuring them prominently.',
-    'report': 'Your February report shows: 45 sales (+12% MoM), Ksh 187.5M revenue (+18% MoM), 94% response rate, 29% lead conversion. Top performer: Mary Wanjiku with 18 sales.',
-    'default': 'I\'m here to help you optimize your dealership. Ask me about promoting vehicles, pricing recommendations, sales forecasts, lead follow-ups, or generating reports.',
-  };
-
-  const intent = question.toLowerCase();
-  let response;
-
-  if (intent.includes('promote') || intent.includes('advertis') || intent.includes('feature')) {
-    response = responses.promote;
-  } else if (intent.includes('overpriced') || intent.includes('price')) {
-    response = responses.overpriced;
-  } else if (intent.includes('forecast') || intent.includes('predict') || intent.includes('sales this month')) {
-    response = responses.forecast;
-  } else if (intent.includes('follow-up') || intent.includes('leads')) {
-    response = responses.followup;
-  } else if (intent.includes('sell') || intent.includes('likely')) {
-    response = responses.sell;
-  } else if (intent.includes('report') || intent.includes('inventory report')) {
-    response = responses.report;
-  } else {
-    response = responses.default;
-  }
-
-  res.json({ 
-    success: true, 
-    data: { 
-      answer: response,
-      suggestions: [
-        'What vehicles should I promote?',
-        'Which vehicles are overpriced?',
-        'Predict my sales this month',
-        'Which leads need follow-up?',
-      ],
-    } 
-  });
+  return res.status(501).json({ success: false, code: "DEALER_COPILOT_UNAVAILABLE", message: "Dealer AI recommendations are not enabled because no authoritative intelligence contract is defined for this deployment." });
 }
 
 // ============================================================
 // CUSTOMER DATABASE
 // ============================================================
+
 
 // Customer records are derived from real released escrow deals.
 // No lender identity is inferred or advertised by this endpoint.
@@ -799,33 +682,14 @@ export async function getInspectionOrders(req, res) {
 // ============================================================
 
 export async function getReputation(req, res) {
-  const reputation = {
-    overall: {
-      rating: 4.8,
-      totalReviews: 342,
-      responseRate: 98,
-      avgResponseTime: '< 1 hour',
-    },
-    breakdown: {
-      productQuality: { rating: 4.7, count: 298 },
-      customerService: { rating: 4.9, count: 342 },
-      valueForMoney: { rating: 4.6, count: 267 },
-      buyingProcess: { rating: 4.8, count: 312 },
-    },
-    recentReviews: [
-      { id: '1', name: 'David M.', rating: 5, text: 'Excellent service! The team was professional...', vehicle: 'Toyota Land Cruiser', date: '2024-02-15', response: 'Thank you David!' },
-      { id: '2', name: 'Sarah K.', rating: 5, text: 'Very transparent process...', vehicle: 'BMW X5', date: '2024-01-20', response: null },
-      { id: '3', name: 'Michael O.', rating: 4, text: 'Good selection and competitive financing...', vehicle: 'Mercedes GLE', date: '2024-01-05', response: 'Thank you for your feedback Michael!' },
-    ],
-    trends: [
-      { month: 'Sep', rating: 4.6 },
-      { month: 'Oct', rating: 4.7 },
-      { month: 'Nov', rating: 4.7 },
-      { month: 'Dec', rating: 4.8 },
-      { month: 'Jan', rating: 4.8 },
-      { month: 'Feb', rating: 4.8 },
-    ],
-  };
-
-  res.json({ success: true, data: reputation });
+  try {
+    const reviews = await Review.find({ dealer: req.user.id }).populate("buyer", "name").populate("car", "title").sort({ createdAt: -1 });
+    const ratings = reviews.map((r) => Number(r.rating)).filter((n) => Number.isFinite(n));
+    const overall = ratings.length ? Number((ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2)) : null;
+    res.json({ success: true, data: { overall: { rating: overall, totalReviews: reviews.length }, recentReviews: reviews.slice(0, 10).map((r) => ({ id: r.id, name: r.buyer?.name || "Buyer", rating: Number(r.rating), text: r.comment || r.review || null, vehicle: r.car?.title || null, date: r.createdAt || null })) } });
+  } catch (err) {
+    logError("Error fetching dealer reputation:", err);
+    res.status(500).json({ success: false, message: "Failed to load dealer reputation" });
+  }
 }
+

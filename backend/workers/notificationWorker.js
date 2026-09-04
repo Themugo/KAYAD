@@ -5,8 +5,8 @@
 // ─────────────────────────────────────────────────────────────
 
 import { getWorker } from "../config/queue.js";
-import Notification from "../models/Notification.js";
-import User from "../models/User.js";
+import { findById } from "../db/index.js";
+import { sendNotification } from "../services/notification.service.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.js";
@@ -20,44 +20,26 @@ const processNotification = async (job) => {
   const { userId, title, message, type = "info", data = {}, channels = ["push"] } = job.data;
 
   try {
-    // Create in-app notification
-    const notification = await Notification.create({
-      user: userId,
-      title,
-      message,
-      type,
-      data,
-    });
-
-    // Get user preferences
-    const user = await User.findById(userId);
+    const user = await findById("users", userId, "id,email,phone");
     if (!user) {
       logWarn("User not found for notification", { userId });
-      return notification;
+      return null;
     }
 
-    // Send via configured channels
-    const channelResults = {};
-
-    if (channels.includes("push") && user.pushEnabled !== false) {
-      channelResults.push = await sendPushNotification(userId, title, message, data);
-    }
-
-    if (channels.includes("email") && user.emailEnabled !== false && user.email) {
-      channelResults.email = await sendEmailNotification(user.email, title, message, data);
-    }
-
-    if (channels.includes("sms") && user.smsEnabled !== false && user.phone) {
-      channelResults.sms = await sendSMSNotification(user.phone, title, message, data);
-    }
-
-    if (channels.includes("whatsapp") && user.whatsappEnabled !== false && user.phone) {
-      channelResults.whatsapp = await sendWhatsAppNotification(user.phone, title, message, data);
-    }
+    const notification = await sendNotification({
+      userId, title, message, type, data,
+      email: channels.includes("email") && user.email ? user.email : undefined,
+      phone: channels.includes("sms") && user.phone ? user.phone : undefined,
+    });
+    const channelResults = { in_app: Boolean(notification) };
+    if (channels.includes("push")) channelResults.push = await sendPushNotification(userId, title, message, data);
+    if (channels.includes("email")) channelResults.email = Boolean(user.email);
+    if (channels.includes("sms")) channelResults.sms = Boolean(user.phone);
+    if (channels.includes("whatsapp")) channelResults.whatsapp = "not_configured";
 
     const processingTime = Date.now() - startTime;
     logInfo("Notification processed successfully", {
-      notificationId: notification._id,
+      notificationId: notification?.id,
       userId,
       processingTime,
       channelResults,

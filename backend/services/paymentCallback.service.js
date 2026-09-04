@@ -4,6 +4,8 @@ import { sendDigitalReceipt } from "../services/receiptService.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { atomicSettleBidPayment, atomicSettlePurchasePayment } from "../utils/atomicTransactions.js";
+import { fundEscrow } from "./escrow.service.js";
+import { recordPaymentEvent, recordWebhookReceipt, markWebhookProcessed, markAttemptByCheckout } from "./paymentFinancialLifecycle.service.js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -20,15 +22,26 @@ const retry = async (fn, retries = MAX_RETRIES, delay = RETRY_DELAY_MS) => {
   }
 };
 
+const markPaymentEventSafe = async (paymentId, eventType, payload) =>
+  recordPaymentEvent({ paymentId, eventType, payload }).catch(() => null);
+
 export const handleMpesaCallback = async (callbackData) => {
   // Tracks a claimed-but-unfinished payment so the outer catch can
   // release the claim and let a provider retry reprocess it.
   let claimedPaymentId = null;
+  let webhookEventId = null;
   let finalized = false;
   try {
     const stk = callbackData.Body?.stkCallback;
 
     if (!stk) throw new Error("Invalid callback format");
+
+    const webhook = await recordWebhookReceipt(callbackData);
+    if (webhook.duplicate) {
+      logInfo("M-Pesa webhook replay ignored", { checkoutId: stk.CheckoutRequestID });
+      return;
+    }
+    webhookEventId = webhook.event.id;
 
     const checkoutId = stk.CheckoutRequestID;
     const success = stk.ResultCode === 0;
@@ -47,6 +60,7 @@ export const handleMpesaCallback = async (callbackData) => {
     if (!claimed || claimed.length === 0) {
       const existing = await findOne("payments", { checkoutRequestId: checkoutId });
       if (existing && existing.status === "success") {
+        await markWebhookProcessed(webhookEventId);
         logInfo("Callback idempotent: payment already succeeded", { checkoutId });
         return existing;
       }
@@ -56,6 +70,11 @@ export const handleMpesaCallback = async (callbackData) => {
 
     const payment = claimed[0];
     claimedPaymentId = payment.id;
+    await recordPaymentEvent({
+      paymentId: payment.id,
+      eventType: "callback_received",
+      payload: { checkoutRequestId: checkoutId, resultCode: stk.ResultCode },
+    }).catch((e) => logWarn("Payment callback event audit failed", { error: e.message }));
 
     // If processing fails after the claim (provider sent incomplete
     // data, a downstream write failed, etc.), release the claim so a
@@ -91,6 +110,9 @@ export const handleMpesaCallback = async (callbackData) => {
             reason: stk.ResultDesc || "M-Pesa transaction failed",
           });
       }
+      await markPaymentEventSafe(payment.id, "marked_failed", { reason: stk.ResultDesc || "M-Pesa transaction failed" });
+      await markAttemptByCheckout(checkoutId, "failed", { failureReason: stk.ResultDesc || "M-Pesa transaction failed" }).catch(() => {});
+      await markWebhookProcessed(webhookEventId);
       return;
     }
 
@@ -121,7 +143,9 @@ export const handleMpesaCallback = async (callbackData) => {
       return;
     }
 
-    if (!['bid', 'purchase'].includes(payment.type)) {
+    await markPaymentEventSafe(payment.id, "amount_verified", { expected: Number(payment.amount), reported: Number(amount), receipt });
+
+    if (!['bid', 'purchase', 'escrow'].includes(payment.type)) {
       await update("payments", payment.id, {
         status: "success",
         mpesaReceipt: receipt,
@@ -152,9 +176,20 @@ export const handleMpesaCallback = async (callbackData) => {
           message: "Your payment was received, but the seller could not be verified. A refund has been queued for processing.",
           type: "payment",
         }).catch((e) => logWarn("Refund-required notification failed", { error: e.message }));
+        await recordPaymentEvent({ paymentId: payment.id, eventType: "refund_required", payload: settlement }).catch(() => {});
+        await markWebhookProcessed(webhookEventId);
         finalized = true;
         return payment;
       }
+    }
+
+    if (payment.type === "escrow") {
+      const escrow = await findOne("escrows", { payment: payment.id });
+      if (!escrow) throw new Error("Escrow payment has no escrow record");
+      await update("payments", payment.id, { status: "success", mpesaReceipt: receipt, paidAt: new Date() });
+      const funded = await fundEscrow(escrow.id, { idempotencyKey: `payment-callback:${checkoutId}` });
+      await recordPaymentEvent({ paymentId: payment.id, eventType: "escrow_funded", payload: { escrowId: escrow.id } }).catch(() => {});
+      if (funded) logInfo("Escrow funded from confirmed M-Pesa payment", { paymentId: payment.id, escrowId: escrow.id });
     }
 
     await sendNotification({
@@ -191,6 +226,9 @@ export const handleMpesaCallback = async (callbackData) => {
 
     // All authoritative settlement paths have completed successfully. Only
     // now is the callback considered finalized; duplicates remain harmless.
+    await markPaymentEventSafe(payment.id, "marked_paid", { receipt });
+    await markAttemptByCheckout(checkoutId, "success", { providerReference: receipt }).catch(() => {});
+    await markWebhookProcessed(webhookEventId);
     finalized = true;
     return payment;
   } catch (err) {
@@ -200,6 +238,9 @@ export const handleMpesaCallback = async (callbackData) => {
       await update("payments", claimedPaymentId, { processed: false }).catch((e) =>
         logError("Failed to release payment claim", e, { paymentId: claimedPaymentId }),
       );
+    }
+    if (webhookEventId) {
+      await markWebhookProcessed(webhookEventId, { error: err.message }).catch(() => {});
     }
     logError("CALLBACK ERROR", err);
     throw err;

@@ -1,286 +1,66 @@
+import { findOne, create, update } from "../db/index.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import UserPreference from "../models/UserPreference.js";
 
-// =============================
-// 🎨 GET USER PREFERENCES
-// =============================
-export const getUserPreferences = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+const defaults = {
+  theme: "system", language: "en", locale: "en", notifications: {}, privacy: {}, display: {},
+  bidding: {}, search: { recentSearches: [] }, accessibility: {}, lastSeen: {},
+};
 
-  const preferences = await UserPreference.getOrCreate(userId);
+async function getOrCreatePreferences(userId) {
+  let preferences = await findOne("user_preferences", { user: userId });
+  if (!preferences) preferences = await create("user_preferences", { user: userId, ...defaults });
+  return preferences;
+}
 
-  res.json({
-    success: true,
-    data: preferences,
-  });
-});
+export const getUserPreferences = asyncHandler(async (req, res) => res.json({ success: true, data: await getOrCreatePreferences(req.user.id) }));
 
-// =============================
-// ✏️ UPDATE USER PREFERENCES
-// =============================
 export const updateUserPreferences = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const updates = req.body;
-
-  const preferences = await UserPreference.getOrCreate(userId);
-
-  // Update allowed fields
-  const allowedFields = [
-    "theme",
-    "themeColor",
-    "language",
-    "locale",
-    "timezone",
-    "dateFormat",
-    "currency",
-    "notifications",
-    "privacy",
-    "display",
-    "bidding",
-    "search",
-    "accessibility",
-  ];
-
-  for (const field of allowedFields) {
-    if (updates[field] !== undefined) {
-      if (typeof updates[field] === "object" && !Array.isArray(updates[field])) {
-        // Merge nested objects
-        preferences[field] = { ...preferences[field], ...updates[field] };
-      } else {
-        preferences[field] = updates[field];
-      }
-    }
+  const current = await getOrCreatePreferences(req.user.id);
+  const allowed = ["theme","themeColor","language","locale","timezone","dateFormat","currency","notifications","privacy","display","bidding","search","accessibility"];
+  const updates = {};
+  for (const field of allowed) if (req.body[field] !== undefined) {
+    const value = req.body[field];
+    updates[field] = value && typeof value === "object" && !Array.isArray(value) ? { ...(current[field] || {}), ...value } : value;
   }
-
-  await preferences.save();
-
-  res.json({
-    success: true,
-    data: preferences,
-  });
+  const data = Object.keys(updates).length ? await update("user_preferences", current.id, updates) : current;
+  res.json({ success: true, data });
 });
 
-// =============================
-// 🌙 SET THEME
-// =============================
 export const setTheme = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const { theme } = req.body;
-
-  if (!["light", "dark", "system"].includes(theme)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid theme. Use 'light', 'dark', or 'system'",
-    });
-  }
-
-  const preferences = await UserPreference.getOrCreate(userId);
-  await preferences.setTheme(theme);
-
-  res.json({
-    success: true,
-    data: {
-      theme: preferences.theme,
-      isDarkMode: preferences.theme === "dark",
-    },
-  });
+  if (!["light","dark","system"].includes(req.body.theme)) return res.status(400).json({ success:false, message:"Invalid theme. Use 'light', 'dark', or 'system'" });
+  const current = await getOrCreatePreferences(req.user.id); const data = await update("user_preferences", current.id, { theme: req.body.theme });
+  res.json({ success:true, data:{ theme:data.theme, isDarkMode:data.theme === "dark" } });
 });
 
-// =============================
-// 🔄 TOGGLE DARK MODE
-// =============================
 export const toggleDarkMode = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-
-  const preferences = await UserPreference.getOrCreate(userId);
-
-  // Toggle between dark and light (respecting system preference)
-  const currentTheme = preferences.theme;
-  const newTheme = currentTheme === "dark" ? "light" : currentTheme === "light" ? "system" : "dark";
-
-  await preferences.setTheme(newTheme);
-
-  res.json({
-    success: true,
-    data: {
-      theme: preferences.theme,
-      previousTheme: currentTheme,
-      isDarkMode: preferences.theme === "dark",
-    },
-  });
+  const current = await getOrCreatePreferences(req.user.id); const theme = current.theme === "dark" ? "light" : current.theme === "light" ? "system" : "dark";
+  const data = await update("user_preferences", current.id, { theme }); res.json({ success:true, data:{ theme:data.theme, previousTheme:current.theme, isDarkMode:data.theme === "dark" } });
 });
 
-// =============================
-// 🌍 SET LANGUAGE
-// =============================
 export const setLanguage = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const { language } = req.body;
-
-  if (!["en", "sw", "ar", "zh", "de", "fr", "es", "pt"].includes(language)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid language code",
-    });
-  }
-
-  const preferences = await UserPreference.getOrCreate(userId);
-  await preferences.setLanguage(language);
-
-  res.json({
-    success: true,
-    data: {
-      language: preferences.language,
-      locale: preferences.locale,
-    },
-  });
+  if (!["en","sw","ar","zh","de","fr","es","pt"].includes(req.body.language)) return res.status(400).json({ success:false, message:"Invalid language code" });
+  const current = await getOrCreatePreferences(req.user.id); const data = await update("user_preferences", current.id, { language:req.body.language, locale:req.body.language });
+  res.json({ success:true, data:{ language:data.language, locale:data.locale } });
 });
 
-// =============================
-// 🔔 UPDATE NOTIFICATION SETTINGS
-// =============================
 export const updateNotificationSettings = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const { channel, settings } = req.body;
-
-  if (!["email", "push", "sms"].includes(channel)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid notification channel",
-    });
-  }
-
-  const preferences = await UserPreference.getOrCreate(userId);
-  await preferences.updateNotifications(channel, settings);
-
-  res.json({
-    success: true,
-    data: preferences.notifications,
-  });
+  if (!["email","push","sms"].includes(req.body.channel)) return res.status(400).json({ success:false, message:"Invalid notification channel" });
+  const current = await getOrCreatePreferences(req.user.id);
+  const notifications = { ...(current.notifications || {}), [req.body.channel]: req.body.settings || {} };
+  const data = await update("user_preferences", current.id, { notifications }); res.json({ success:true, data:data.notifications });
 });
 
-// =============================
-// 🔍 ADD RECENT SEARCH
-// =============================
 export const addRecentSearch = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const { query } = req.body;
-
-  if (!query) {
-    return res.status(400).json({
-      success: false,
-      message: "Query is required",
-    });
-  }
-
-  const preferences = await UserPreference.getOrCreate(userId);
-  await preferences.addRecentSearch(query);
-
-  res.json({
-    success: true,
-    data: {
-      recentSearches: preferences.search.recentSearches,
-    },
-  });
+  if (!req.body.query) return res.status(400).json({ success:false, message:"Query is required" });
+  const current = await getOrCreatePreferences(req.user.id); const recent = Array.isArray(current.search?.recentSearches) ? current.search.recentSearches : [];
+  const recentSearches = [req.body.query, ...recent.filter(q => q !== req.body.query)].slice(0, 20);
+  const data = await update("user_preferences", current.id, { search:{ ...(current.search || {}), recentSearches } }); res.json({ success:true, data:{ recentSearches:data.search.recentSearches } });
 });
 
-// =============================
-// 🗑️ CLEAR RECENT SEARCHES
-// =============================
-export const clearRecentSearches = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+export const clearRecentSearches = asyncHandler(async (req, res) => { const c=await getOrCreatePreferences(req.user.id); const d=await update("user_preferences", c.id,{search:{...(c.search||{}),recentSearches:[]}}); res.json({success:true,data:{recentSearches:d.search.recentSearches}}); });
 
-  const preferences = await UserPreference.getOrCreate(userId);
-  await preferences.clearRecentSearches();
+export const updateAccessibility = asyncHandler(async (req,res)=>{ const c=await getOrCreatePreferences(req.user.id); const a={...(c.accessibility||{})}; for(const k of ["reducedMotion","highContrast","fontSize","screenReader"]) if(req.body[k]!==undefined)a[k]=req.body[k]; const d=await update("user_preferences",c.id,{accessibility:a}); res.json({success:true,data:d.accessibility}); });
 
-  res.json({
-    success: true,
-    data: {
-      recentSearches: [],
-    },
-  });
-});
+export const updateLastSeen = asyncHandler(async (req,res)=>{ const c=await getOrCreatePreferences(req.user.id); const platform=req.body.platform === "mobile" ? "mobile" : "web"; const lastSeen={...(c.lastSeen||{}),[platform]:new Date().toISOString()}; const d=await update("user_preferences",c.id,{lastSeen}); res.json({success:true,data:{lastSeen:d.lastSeen}}); });
 
-// =============================
-// ♿ UPDATE ACCESSIBILITY
-// =============================
-export const updateAccessibility = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const { reducedMotion, highContrast, fontSize, screenReader } = req.body;
-
-  const preferences = await UserPreference.getOrCreate(userId);
-
-  if (reducedMotion !== undefined) preferences.accessibility.reducedMotion = reducedMotion;
-  if (highContrast !== undefined) preferences.accessibility.highContrast = highContrast;
-  if (fontSize) preferences.accessibility.fontSize = fontSize;
-  if (screenReader !== undefined) preferences.accessibility.screenReader = screenReader;
-
-  await preferences.save();
-
-  res.json({
-    success: true,
-    data: preferences.accessibility,
-  });
-});
-
-// =============================
-// 📱 UPDATE LAST SEEN
-// =============================
-export const updateLastSeen = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const { platform = "web" } = req.body;
-
-  const preferences = await UserPreference.getOrCreate(userId);
-
-  if (platform === "mobile") {
-    preferences.lastSeen.mobile = new Date();
-  } else {
-    preferences.lastSeen.web = new Date();
-  }
-
-  await preferences.save();
-
-  res.json({
-    success: true,
-    data: {
-      lastSeen: preferences.lastSeen,
-    },
-  });
-});
-
-// =============================
-// 📊 GET PREFERENCE STATISTICS
-// =============================
-export const getPreferenceStats = asyncHandler(async (req, res) => {
-  const stats = await UserPreference.aggregate([
-    {
-      $group: {
-        _id: null,
-        totalUsers: { $sum: 1 },
-        themes: {
-          light: { $sum: { $cond: [{ $eq: ["$theme", "light"] }, 1, 0] } },
-          dark: { $sum: { $cond: [{ $eq: ["$theme", "dark"] }, 1, 0] } },
-          system: { $sum: { $cond: [{ $eq: ["$theme", "system"] }, 1, 0] } },
-        },
-        languages: { $addToSet: "$language" },
-        pushEnabled: { $sum: { $cond: ["$notifications.push.enabled", 1, 0] } },
-        emailNotifications: { $sum: { $cond: ["$notifications.email.bids", 1, 0] } },
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        totalUsers: 1,
-        themes: 1,
-        uniqueLanguages: { $size: "$languages" },
-        pushEnabled: 1,
-        emailNotifications: 1,
-      },
-    },
-  ]);
-
-  res.json({
-    success: true,
-    data: stats[0] || {},
-  });
-});
+export const getPreferenceStats = asyncHandler(async (_req,res)=>res.status(501).json({success:false,code:"PREFERENCE_STATS_UNAVAILABLE",message:"Preference statistics are not part of the canonical user-preference contract."}));

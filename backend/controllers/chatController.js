@@ -3,7 +3,6 @@
 import crypto from "node:crypto";
 import { findById, create, update, remove } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
-import { sendSMS } from "../utils/sms.js";
 import { getIO } from "../utils/io.js";
 import { findOrCreateLeadFromChat, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logError } from '../infrastructure/logging/index.js';
@@ -34,12 +33,14 @@ export const startChat = async (req, res) => {
     }
 
     const participants = [req.user.id, participantId].sort();
+    if (String(participantId) === String(req.user.id)) return res.status(400).json({ success: false, message: "Cannot start a chat with yourself" });
 
     const sb = getSupabase();
     let query = sb.from("chats").select(CHAT_FIELDS).contains("participants", participants);
     if (carId) query = query.eq("car", carId);
 
     const { data: existing } = await query;
+    if (existing?.some((c) => c.isBlocked)) return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
     let chat = existing?.find((c) => c.participants?.length === participants.length) || null;
 
     if (!chat) {
@@ -148,6 +149,10 @@ export const sendMessage = async (req, res) => {
       return res.status(404).json({ success: false, message: "Chat not found" });
     }
 
+    if (chat.isBlocked) {
+      return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
+    }
+
     if (!chat.participants.some((p) => p.toString() === req.user.id)) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
@@ -198,33 +203,12 @@ export const sendMessage = async (req, res) => {
         });
     }
 
-    // 📧 Email + 📱 SMS (fire-and-forget)
     try {
-      const { sendNewMessageEmail } = await import("../services/email.service.js");
-      const { findById: findUser } = await import("../db/index.js");
+      const { sendNotification } = await import("../services/notification.service.js");
       const otherUserId = chat.participants.find((p) => String(p) !== String(req.user.id));
-      if (otherUserId) {
-        const otherUser = await findUser("users", otherUserId, "email,name,phone,notifications");
-        if (
-          otherUser?.email &&
-          otherUser?.notifications?.email !== false &&
-          typeof sendNewMessageEmail === "function"
-        ) {
-          const fromUser = await findUser("users", req.user.id, "name");
-          sendNewMessageEmail(otherUser, fromUser?.name || "A user", chat.car?.title || null).catch((e) =>
-            console.warn("⚠️ New message email failed:", e.message),
-          );
-        }
-        if (otherUser?.phone && otherUser?.notifications?.sms !== false) {
-          const fromUser = await findUser("users", req.user.id, "name");
-          sendSMS(
-            otherUser.phone,
-            `New message from ${fromUser?.name || "a user"} on Kayad${chat.car?.title ? ` about ${chat.car.title}` : ""}.`,
-          ).catch((e) => console.warn("⚠️ SMS notification failed:", e.message));
-        }
-      }
-    } catch (notifErr) {
-      console.warn("⚠️ Failed to send notification for new message:", notifErr.message);
+      if (otherUserId) await sendNotification({ userId: otherUserId, title: "New message", message: msgText, type: "chat", data: { chatId, messageId } });
+    } catch (notificationError) {
+      console.warn("New message in-app notification failed:", notificationError.message);
     }
 
     res.status(201).json({
@@ -250,6 +234,8 @@ export const getMessages = async (req, res) => {
     if (!chat) {
       return res.status(404).json({ success: false, message: "Chat not found" });
     }
+
+    if (chat.isBlocked) return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
 
     if (!chat.participants.some((p) => p.toString() === req.user.id)) {
       return res.status(403).json({ success: false, message: "Not authorized" });
@@ -285,6 +271,8 @@ export const markAsSeen = async (req, res) => {
     if (!chat) {
       return res.status(404).json({ success: false, message: "Chat not found" });
     }
+
+    if (!chat.participants.some((p) => String(p) === String(req.user.id))) return res.status(403).json({ success: false, message: "Not authorized" });
 
     const messages = (chat.messages || []).map((m) => {
       if (m.sender !== req.user.id && (!m.seenBy || !m.seenBy.includes(req.user.id))) {

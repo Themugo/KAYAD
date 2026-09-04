@@ -113,6 +113,24 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     return () => { cancelled = true; };
   }, [user]);
 
+  // Keep inbox and active conversation synchronized with the authoritative API.
+  // This is deliberately polling rather than a second local event store because
+  // the current custom-auth stack does not expose Supabase Auth-scoped realtime.
+  useEffect(() => {
+    if (!user) return;
+    const timer = window.setInterval(async () => {
+      try {
+        const chats = await getMyChats();
+        const mapped = chats.map((c) => mapBackendChatToThread(c, user.id));
+        setThreads(prev => mapped.map(next => {
+          const existing = prev.find(t => t.id === next.id);
+          return existing && existing.id === selectedThreadId ? { ...next, messages: existing.messages } : next;
+        }));
+      } catch { /* keep the last authoritative snapshot on transient failures */ }
+    }, 10000);
+    return () => window.clearInterval(timer);
+  }, [user, selectedThreadId]);
+
   // Filter & Search State
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');

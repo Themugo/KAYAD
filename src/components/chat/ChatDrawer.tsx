@@ -1,10 +1,11 @@
-import { useState, type FC, type FormEvent } from 'react';
+import { useState, useEffect, type FC, type FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquareText, X, Send, ShieldCheck, DollarSign, Car, ExternalLink } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { chatAPI } from '../../api/api';
 
 export const ChatDrawer: FC = () => {
   const { isChatOpen, closeChat, activeChatVehicleId, vehicles, navigateTo, initiateEscrow } = useMarketplace();
@@ -13,65 +14,57 @@ export const ChatDrawer: FC = () => {
   const [messageText, setMessageText] = useState('');
   const [offerModalOpen, setOfferModalOpen] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
 
   const targetVehicle = vehicles.find(v => v.id === activeChatVehicleId) || vehicles[0];
 
-  const [chatHistory, setChatHistory] = useState([
-    {
-      id: 'msg_1',
-      sender: 'dealer',
-      text: `Hello ${user?.name || 'there'}! I am the concierge manager for ${targetVehicle?.title || 'this vehicle'}. How can I assist you with inspection details or escrow terms?`,
-      time: '10:00 AM'
-    }
-  ]);
+  useEffect(() => {
+    if (!isChatOpen || !user || !targetVehicle?.sellerId || targetVehicle.sellerId === user.id) return;
+    let cancelled = false;
+    setChatLoading(true); setChatError(null);
+    chatAPI.start({ recipientId: targetVehicle.sellerId, carId: targetVehicle.id }).then(async (result: any) => {
+      const id = result?.chat?.id || result?.chat?._id;
+      if (!id || cancelled) return;
+      setChatId(id);
+      const data = await chatAPI.messages(id, { limit: 100 });
+      if (!cancelled) setChatHistory(data.messages || data.data || []);
+    }).catch((error: any) => {
+      if (!cancelled) setChatError(error?.response?.data?.message || error?.message || 'Unable to load conversation.');
+    }).finally(() => { if (!cancelled) setChatLoading(false); });
+    return () => { cancelled = true; };
+  }, [isChatOpen, user?.id, targetVehicle?.id, targetVehicle?.sellerId]);
+
+  useEffect(() => {
+    if (!isChatOpen || !chatId) return;
+    const timer = window.setInterval(async () => {
+      try { const data = await chatAPI.messages(chatId, { limit: 100 }); setChatHistory(data.messages || data.data || []); } catch { /* retain last good snapshot */ }
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [isChatOpen, chatId]);
 
   if (!isChatOpen) return null;
 
-  const handleSend = (e: FormEvent) => {
+
+  const handleSend = async (e: FormEvent) => {
     e.preventDefault();
-    if (!messageText.trim()) return;
-
-    setChatHistory(prev => [
-      ...prev,
-      {
-        id: `msg_${Date.now()}`,
-        sender: 'user',
-        text: messageText,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ]);
-    setMessageText('');
-
-    // Simulate dealer response
-    setTimeout(() => {
-      setChatHistory(prev => [
-        ...prev,
-        {
-          id: `msg_${Date.now() + 1}`,
-          sender: 'dealer',
-          text: `Thank you for your message! Our team at ${targetVehicle.sellerName} has received your inquiry regarding the ${targetVehicle.title}. All title documents and 150-point inspection reports are verified under KAYAD Escrow.`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-    }, 1200);
+    if (!messageText.trim() || !chatId) return;
+    const text = messageText.trim(); setMessageText('');
+    try {
+      const result = await chatAPI.send(chatId, { content: text });
+      const sent = result?.message?.id ? result.message : result;
+      setChatHistory(prev => [...prev, sent]);
+    } catch (error: any) {
+      setMessageText(text); setChatError(error?.message || 'Failed to send message.');
+    }
   };
 
   const handleMakeOffer = () => {
-    const val = parseFloat(offerAmount);
-    if (!val || val <= 0) return;
-
-    setChatHistory(prev => [
-      ...prev,
-      {
-        id: `msg_${Date.now()}`,
-        sender: 'user',
-        text: `OFFER SUBMITTED: $${val.toLocaleString()} via KAYAD Escrow Hold.`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ]);
-
     setOfferModalOpen(false);
     setOfferAmount('');
+    setChatError('Direct offers are not part of the current chat API contract. Use the supported bidding or purchase flow instead.');
   };
 
   return (
@@ -152,10 +145,12 @@ export const ChatDrawer: FC = () => {
 
           {/* Messages Body */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FCF9F4]">
+            {chatLoading && <div className="text-center text-xs text-slate-400 py-4">Loading conversation…</div>}
+            {chatError && <div className="text-center text-xs text-rose-500 py-3">{chatError}</div>}
             {chatHistory.map(msg => (
               <div
                 key={msg.id}
-                className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
+                className={`flex flex-col ${(msg.sender === 'user' || msg.sender === user?.id || msg.sender?.id === user?.id) ? 'items-end' : 'items-start'}`}
               >
                 <div
                   className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${
@@ -164,9 +159,9 @@ export const ChatDrawer: FC = () => {
                       : 'bg-white text-[#1E3063] font-medium rounded-tl-none border border-[#E2D8C7] shadow-xs'
                   }`}
                 >
-                  {msg.text}
+                  {msg.message || msg.text || msg.content}
                 </div>
-                <span className="text-[10px] text-[#6B7A99] font-mono font-semibold mt-1 px-1">{msg.time}</span>
+                <span className="text-[10px] text-[#6B7A99] font-mono font-semibold mt-1 px-1">{msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
               </div>
             ))}
           </div>

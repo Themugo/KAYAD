@@ -37,78 +37,39 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const normalizeNotification = useCallback((n: any): Notification => ({
+    ...n,
+    _id: n._id || n.id,
+    createdAt: n.createdAt || n.created_at,
+  }), []);
+
   const fetchNotifications = useCallback(async (params = {}) => {
     if (!isAuth) { setNotifications([]); setUnreadCount(0); return; }
     setLoading(true);
     try {
       const d = await notifAPI.list({ limit: 50, ...params });
-      const list = d.notifications || [];
+      const list = (d.notifications || []).map(normalizeNotification);
       setNotifications(list);
       setUnreadCount(list.filter(n => !n.read).length);
     } catch (error) {
       console.warn('Unable to fetch notifications', error);
     } finally { setLoading(false); }
-  }, [isAuth]);
+  }, [isAuth, normalizeNotification]);
 
-  const prependNotification = useCallback((n: Notification) => {
-    setNotifications(prev => [n, ...prev.slice(0, 49)]);
-    if (!n.read) setUnreadCount(c => c + 1);
-  }, []);
-
-  // Load on auth change
+  // Socket events are wake-up signals only. Notification rows remain authoritative
+  // in the backend, so domain events trigger a fresh read instead of creating
+  // local notification records that cannot be marked read or deleted.
   useEffect(() => {
-    if (isAuth) fetchNotifications();
+    if (isAuth) void fetchNotifications();
   }, [isAuth, fetchNotifications]);
 
-  // Socket listener for "notification" event
   useEffect(() => {
     if (!isAuth || !on) return;
-    const off = on('notification', prependNotification);
-
-    const offEscrowReleased = on('escrowReleased', (data) => {
-      prependNotification({
-        _id: `local_escrow_released_${Date.now()}`,
-        title: 'Escrow Released',
-        message: 'Funds have been released to the seller.',
-        type: 'escrow', read: false, createdAt: new Date().toISOString(),
-      });
-    });
-
-    const offEscrowRefunded = on('escrowRefunded', (data) => {
-      prependNotification({
-        _id: `local_escrow_refunded_${Date.now()}`,
-        title: 'Escrow Refunded',
-        message: 'Funds have been refunded to your account.',
-        type: 'escrow', read: false, createdAt: new Date().toISOString(),
-      });
-    });
-
-    const offEscrowDisputed = on('escrowDisputed', (data) => {
-      prependNotification({
-        _id: `local_dispute_${Date.now()}`,
-        title: 'Escrow Disputed',
-        message: 'A dispute has been opened. Admin will review.',
-        type: 'escrow', read: false, createdAt: new Date().toISOString(),
-      });
-    });
-
-    const offPaymentSuccess = on('paymentSuccess', (data) => {
-      prependNotification({
-        _id: `local_pay_${Date.now()}`,
-        title: 'Payment Confirmed',
-        message: data.receipt ? `Receipt: ${data.receipt}` : 'Payment successful.',
-        type: 'payment', read: false, createdAt: new Date().toISOString(),
-      });
-    });
-
-    return () => {
-      off();
-      offEscrowReleased();
-      offEscrowRefunded();
-      offEscrowDisputed();
-      offPaymentSuccess();
-    };
-  }, [isAuth, on, prependNotification]);
+    const off = on('notification', () => { void fetchNotifications(); });
+    const events = ['escrowReleased', 'escrowRefunded', 'escrowDisputed', 'paymentSuccess'];
+    const offs = events.map(event => on(event, () => { void fetchNotifications(); }));
+    return () => { off(); offs.forEach(unsub => unsub()); };
+  }, [isAuth, on, fetchNotifications]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {
