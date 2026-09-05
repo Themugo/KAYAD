@@ -308,8 +308,10 @@ export const disputeEscrow = async (req, res) => {
     const isStaff = ["admin", "superadmin", "moderator"].includes(req.user.role);
     if (!isParty && !isStaff) return res.status(403).json({ success: false, message: "Not authorized" });
 
-    const role = isStaff ? "admin" : "buyer";
-    const updated = await serviceDispute(escrow._id, userId, role, reason, { req });
+    const role = isStaff ? "admin" : String(escrow.seller) === userId ? "seller" : "buyer";
+    const updated = await serviceDispute(escrow._id, userId, role, reason, {
+      idempotencyKey: req.idempotencyKey,
+    });
 
     if (getIO()) {
       getIO().to(`user_${escrow.buyer}`).emit("escrowDisputed", { escrowId: escrow._id });

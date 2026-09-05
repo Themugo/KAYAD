@@ -103,10 +103,10 @@ export const refundEscrow = async (escrowId, adminId, reason, { idempotencyKey }
   return escrow || result;
 };
 
-export const disputeEscrow = async (escrowId, userId, role, reason) => {
+export const disputeEscrow = async (escrowId, userId, role, reason, { idempotencyKey } = {}) => {
   await atomicTransitionEscrow({
     escrowId, nextStatus: STATES.DISPUTED, actorId: userId, role,
-    reason,
+    idempotencyKey, reason,
   });
   return findById("escrows", escrowId);
 };
