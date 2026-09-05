@@ -1,56 +1,36 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 const root = process.cwd();
-const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
-const failures = [];
-const assert = (condition, message) => { if (!condition) failures.push(message); };
+const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
+const checks = [];
+const pass = (name, ok, detail = "") => checks.push({ name, ok, detail });
 
-const apiExports = read('src/api/api.exports.ts');
-const authApi = read('src/services/authApi.ts');
-const api = read('src/api/api.ts');
-const csrf = read('src/utils/csrf.ts');
+const migration = read("supabase/migrations/20260905050000_phase14_refund_reconciliation_integrity.sql");
+const reconciliation = read("backend/services/reconciliationService.js");
+const escrow = read("backend/services/escrow.service.js");
+const controller = read("backend/controllers/escrowController.js");
+const atomic = read("backend/utils/atomicTransactions.js");
 
-assert(apiExports.includes("'/v1/auth/refresh'"), 'authAPI.refresh must use the canonical /api/v1/auth route');
-for (const route of ['/api/v1/auth/login', '/api/v1/auth/register', '/api/v1/auth/me', '/api/v1/auth/profile']) {
-  assert(authApi.includes(route), `authApi.ts missing canonical route ${route}`);
+pass("Phase 14 migration exists", migration.includes("Phase 14: refund + payment reconciliation integrity"));
+pass("Refund amount is constrained positive", migration.includes("refunds_amount_positive") && migration.includes("CHECK (amount > 0)"));
+pass("Only one live refund per payment", migration.includes("idx_refunds_one_active_per_payment") && migration.includes("status IN ('pending', 'processing')"));
+pass("Escrow refund creates canonical refunds row", migration.includes("INSERT INTO refunds (payment_id, escrow_id, amount, reason, status, initiated_by"));
+pass("Escrow refund is pending until provider settlement", migration.includes("'pending', p_actor_id"));
+pass("Refund amount must equal payment amount", migration.includes("Refund/payment amount mismatch"));
+pass("Completed duplicate refund is rejected", migration.includes("A completed refund already exists for payment"));
+pass("Refund transition remains idempotent", migration.includes("v_escrow.lastActionKey = p_idempotency_key"));
+pass("Reconciliation uses canonical refunds table", reconciliation.includes('findAll("refunds"'));
+pass("Reconciliation checks original payment", reconciliation.includes('findById("payments", refund.payment)'));
+pass("Reconciliation detects over-refunds", reconciliation.includes("refund_exceeds_original"));
+pass("Refund endpoint is truthful", controller.includes("Escrow refund queued for processing"));
+pass("Service forwards idempotency key", escrow.includes("idempotencyKey, reason"));
+pass("Atomic RPC forwards idempotency key", atomic.includes("p_idempotency_key: idempotencyKey"));
+
+let failed = 0;
+for (const c of checks) {
+  console.log(`${c.ok ? "PASS" : "FAIL"} ${c.name}${c.detail ? ` — ${c.detail}` : ""}`);
+  if (!c.ok) failed++;
 }
-assert(apiExports.includes("from '../services/authApi'"), 'api.exports.ts must delegate auth to services/authApi.ts');
-assert(api.includes('api.interceptors.request.use'), 'Axios API client must install a request interceptor');
-assert(api.includes('getCsrfHeaders(method)'), 'Axios API client must attach CSRF headers to state-changing requests');
-assert(csrf.includes('XSRF-TOKEN'), 'CSRF helper must read the backend XSRF-TOKEN cookie');
-assert(csrf.includes('X-CSRF-Token'), 'CSRF helper must emit X-CSRF-Token');
-
-const criticalClients = [
-  'src/services/favoriteApi.ts',
-  'src/services/bidApi.ts',
-  'src/services/escrowApi.ts',
-  'src/services/chatApi.ts',
-  'src/services/vehicleApi.ts',
-  'src/services/inspectionApi.ts',
-  'src/services/loanApi.ts',
-  'src/services/supportApi.ts',
-  'src/services/phoneVerificationApi.ts',
-];
-for (const file of criticalClients) {
-  const text = read(file);
-  assert(text.includes('getCsrfHeaders'), `${file} is missing the shared CSRF helper`);
-}
-
-const legacyAuth = /api\.(?:get|post|put|patch|delete)\(['"`]\/auth\//;
-assert(!legacyAuth.test(apiExports.split('// ── CARS')[0]), 'legacy authAPI transport must not call /api/auth directly');
-
-const phase13 = read('PHASE_13_COMPLETE.md');
-assert(phase13.includes('Truthful Buyer Dashboard'), 'Phase 13 baseline documentation missing');
-
-if (failures.length) {
-  console.error('PHASE 14 CONTRACT VALIDATION: FAIL');
-  for (const failure of failures) console.error(`- ${failure}`);
-  process.exit(1);
-}
-
-console.log('PHASE 14 CONTRACT VALIDATION: PASS');
-console.log(`Critical clients checked: ${criticalClients.length}`);
-console.log('Canonical auth transport: /api/v1/auth');
-console.log('CSRF propagation: enabled for browser state-changing requests');
-console.log(`Node baseline: ${read('.nvmrc').trim()}`);
+console.log(`\nPhase 14 validation: ${checks.length - failed}/${checks.length} PASS`);
+if (failed) process.exit(1);

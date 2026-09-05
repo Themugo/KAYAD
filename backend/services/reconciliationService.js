@@ -557,33 +557,36 @@ export const reconcilePaymentSubscription = async (startDate, endDate, report) =
 // =============================
 export const reconcileRefunds = async (startDate, endDate, report) => {
   try {
-    const refundPayments = await findAll("payments", { filters: {
-      type: "refund",
+    // The canonical refund ledger is `refunds`; historical payment rows with
+    // type=refund are not the authoritative refund instruction model.
+    const refunds = await findAll("refunds", { filters: {
       createdAt: { $gte: startDate, $lte: endDate },
     } });
 
-    let total = refundPayments.length;
+    let total = refunds.length;
     let reconciled = 0;
     let unreconciled = 0;
     let overpaid = 0;
     let overpaidTotal = 0;
 
-    for (const refund of refundPayments) {
-      const originalPayment = await findOne("payments", { _id: refund.referenceId });
+    for (const refund of refunds) {
+      const originalPayment = refund.payment
+        ? await findById("payments", refund.payment)
+        : null;
 
       if (!originalPayment) {
         await report.addIssue({
           type: "orphan_transaction",
           severity: "high",
-          description: `Refund without corresponding original payment`,
+          description: "Refund without corresponding original payment",
           transactionId: refund.id,
-          transactionModel: "Payment",
+          transactionModel: "Refund",
           amountDifference: refund.amount,
         });
         await createRecord(report.id, {
           source: "refund",
-          actualType: "escrow_refund",
-          actualId: refund.id, actualModel: "Payment",
+          actualType: "refund",
+          actualId: refund.id, actualModel: "Refund",
           actualAmount: refund.amount,
           outcome: "unmatched",
         });
@@ -591,8 +594,8 @@ export const reconcileRefunds = async (startDate, endDate, report) => {
         continue;
       }
 
-      if (refund.amount > originalPayment.amount) {
-        const excess = refund.amount - originalPayment.amount;
+      if (Number(refund.amount) > Number(originalPayment.amount)) {
+        const excess = Number(refund.amount) - Number(originalPayment.amount);
         overpaid++;
         overpaidTotal += excess;
         await report.addIssue({
@@ -600,18 +603,18 @@ export const reconcileRefunds = async (startDate, endDate, report) => {
           severity: "critical",
           description: `Refund amount exceeds original payment: ${refund.amount} > ${originalPayment.amount} by ${excess}`,
           transactionId: refund.id,
-          transactionModel: "Payment",
+          transactionModel: "Refund",
           relatedTransactionId: originalPayment.id,
           relatedTransactionModel: "Payment",
           amountDifference: excess,
         });
         await createRecord(report.id, {
           source: "refund",
-          expectedType: "escrow_refund",
+          expectedType: "payment",
           expectedId: originalPayment.id, expectedModel: "Payment",
           expectedAmount: originalPayment.amount,
-          actualType: "escrow_refund",
-          actualId: refund.id, actualModel: "Payment",
+          actualType: "refund",
+          actualId: refund.id, actualModel: "Refund",
           actualAmount: refund.amount,
           outcome: "overpaid",
           amountDifference: excess,
@@ -620,21 +623,21 @@ export const reconcileRefunds = async (startDate, endDate, report) => {
         continue;
       }
 
-      if (refund.status === "pending") {
+      if (["pending", "processing"].includes(refund.status)) {
         const hoursPending = (Date.now() - new Date(refund.createdAt).getTime()) / (1000 * 60 * 60);
         if (hoursPending > 48) {
           await report.addIssue({
             type: "stuck_transaction",
             severity: "high",
-            description: `Refund pending for ${hoursPending.toFixed(1)} hours`,
+            description: `Refund ${refund.status} for ${hoursPending.toFixed(1)} hours`,
             transactionId: refund.id,
-            transactionModel: "Payment",
+            transactionModel: "Refund",
             amountDifference: refund.amount,
           });
           await createRecord(report.id, {
             source: "refund",
-            actualType: "escrow_refund",
-            actualId: refund.id, actualModel: "Payment",
+            actualType: "refund",
+            actualId: refund.id, actualModel: "Refund",
             actualAmount: refund.amount,
             outcome: "unmatched",
             statusActual: refund.status,

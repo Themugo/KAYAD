@@ -286,7 +286,7 @@ export const refundEscrow = async (req, res) => {
     });
     await logEscrowRefunded(updated, req.user, req);
 
-    res.json({ success: true, message: "Escrow refunded" });
+    res.json({ success: true, message: "Escrow refund queued for processing" });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || "Refund failed" });
   }

@@ -7,7 +7,7 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
 
 describe("Phase 12 transaction integrity contracts", () => {
   test("escrow close cannot regress to application-side read/validate/write", () => {
-    const source = read("backend/services/escrow.service.js");
+    const source = read("services/escrow.service.js");
     const start = source.indexOf("export const closeEscrow");
     expect(start).toBeGreaterThanOrEqual(0);
     const close = source.slice(start);
@@ -20,7 +20,7 @@ describe("Phase 12 transaction integrity contracts", () => {
   });
 
   test("escrow callback does not finalize payment before atomic funding", () => {
-    const source = read("backend/services/paymentCallback.service.js");
+    const source = read("services/paymentCallback.service.js");
     const start = source.indexOf('if (payment.type === "escrow")');
     expect(start).toBeGreaterThanOrEqual(0);
     const block = source.slice(start, source.indexOf("\n    }", start) + 6);
