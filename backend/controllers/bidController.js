@@ -132,7 +132,7 @@ export const placeBid = async (req, res) => {
 
   try {
     const { id: carId } = req.params;
-    const { amount, phone, maxBid } = req.body;
+    const { amount, maxBid } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -195,8 +195,8 @@ export const placeBid = async (req, res) => {
     }
 
     // 📱 Require verified phone for bids
-    const bidder = await User.findById(userId).select("phone emailVerified phone");
-    if (!bidder?.phone || bidder.phone.length < 8) {
+    const bidder = await User.findById(userId).select("phone phoneVerified emailVerified");
+    if (!bidder?.phone || bidder.phone.length < 8 || bidder.phoneVerified === false) {
       return res.status(400).json({
         success: false,
         message: "A verified phone number is required to place bids. Update your profile.",
@@ -242,7 +242,7 @@ export const placeBid = async (req, res) => {
       carId,
       type: "bid",
       amount: 1,
-      phone,
+      phone: bidder.phone,
       metadata: { bidAmount: amount },
     });
 

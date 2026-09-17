@@ -2,6 +2,14 @@ import SupportTicket from "../models/SupportTicket.js";
 import User from "../models/User.js";
 import { logError } from '../infrastructure/logging/index.js';
 import { emitCommunication, COMMUNICATION_EVENTS } from '../services/communicationEvents.service.js';
+import { getSupabase } from '../utils/supabase.js';
+
+const canAccessTicket = (ticket, user) => {
+  const userId = String(user?.id || user?._id || '');
+  const ticketUserId = String(ticket?.user?.id || ticket?.user?._id || ticket?.user || '');
+  const role = String(user?.role || '').toLowerCase();
+  return Boolean(userId) && (userId === ticketUserId || ['admin', 'superadmin', 'support', 'staff'].includes(role));
+};
 
 // =============================
 // 🎫 CREATE SUPPORT TICKET
@@ -111,6 +119,9 @@ export const getTicket = async (req, res) => {
     if (!ticket) {
       return res.status(404).json({ success: false, message: "Ticket not found" });
     }
+    if (!canAccessTicket(ticket, req.user)) {
+      return res.status(403).json({ success: false, message: "You do not have access to this support ticket" });
+    }
 
     res.json({ success: true, ticket });
   } catch (error) {
@@ -126,78 +137,49 @@ export const getTicket = async (req, res) => {
 export const addMessage = async (req, res) => {
   try {
     const { ticketId } = req.params;
-    const { content, isInternal, attachments } = req.body;
+    const { content, isInternal = false, attachments = [] } = req.body;
     const userId = req.user.id || req.user._id;
     const userRole = req.user.role;
 
     const ticket = await SupportTicket.findById(ticketId);
-    if (!ticket) {
-      return res.status(404).json({ success: false, message: "Ticket not found" });
+    if (!ticket) return res.status(404).json({ success: false, message: "Ticket not found" });
+
+    if (!canAccessTicket(ticket, req.user)) {
+      return res.status(403).json({ success: false, message: "You do not have access to this support ticket" });
     }
 
-    // Update first response SLA if this is the first agent response
-    if (userRole !== "user" && !ticket.sla.firstResponseActual) {
-      ticket.sla.firstResponseActual = new Date();
-      ticket.sla.firstResponseMet = ticket.sla.firstResponseActual <= ticket.sla.firstResponseTarget;
+    // Internal notes are operator-only; customers cannot create hidden
+    // messages by toggling a browser-supplied flag.
+    if (isInternal && !['admin', 'superadmin', 'support', 'staff'].includes(String(userRole || '').toLowerCase())) {
+      return res.status(403).json({ success: false, message: "Internal messages are restricted to support staff" });
     }
 
-    ticket.messages.push({
-      sender: userId,
-      senderRole: userRole,
-      content,
-      isInternal: isInternal || false,
-      attachments: attachments || [],
+    const { data: message, error } = await getSupabase().rpc('kayad_append_support_message', {
+      p_ticket_id: String(ticketId),
+      p_sender_id: String(userId),
+      p_sender_role: String(userRole || 'user'),
+      p_content: String(content || ''),
+      p_is_internal: Boolean(isInternal),
+      p_attachments: Array.isArray(attachments) ? attachments : [],
     });
+    if (error) throw error;
 
-    // Update status based on message
-    if (userRole === "user") {
-      ticket.status = "waiting_on_internal";
-    } else {
-      ticket.status = "in_progress";
-    }
+    const updatedTicket = await SupportTicket.findById(ticketId)
+      .populate("user", "name email phone")
+      .populate("assignedTo", "name email")
+      .populate("escalatedTo", "name email")
+      .lean();
 
-    await ticket.save();
+    await emitCommunication({
+      userId: String(ticket.user),
+      eventType: COMMUNICATION_EVENTS.SUPPORT_CASE_UPDATED,
+      title: "Support case updated",
+      message: `Your support case has been updated to ${updatedTicket?.status || 'in_progress'}.`,
+      channels: ["in_app", "email", "sms", "whatsapp"],
+      metadata: { ticketId, status: updatedTicket?.status || 'in_progress' },
+    }).catch(() => {});
 
-    // Use aggregation to avoid N+1 query - fetch only the last message with populated sender
-    const updatedTicket = await SupportTicket.aggregate([
-      { $match: { _id: ticket._id } },
-      {
-        $project: {
-          user: 1,
-          status: 1,
-          priority: 1,
-          category: 1,
-          subject: 1,
-          description: 1,
-          createdAt: 1,
-          sla: 1,
-          assignedTo: 1,
-          escalatedTo: 1,
-          relatedEscrow: 1,
-          relatedCar: 1,
-          relatedPayment: 1,
-          satisfactionRating: 1,
-          resolutionNotes: 1,
-          closedAt: 1,
-          closedBy: 1,
-          messages: { $slice: ["$messages", -1] },
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "messages.sender",
-          foreignField: "_id",
-          as: "messages.sender",
-        },
-      },
-      {
-        $unwind: "$messages.sender",
-      },
-    ]);
-
-    await emitCommunication({ userId: String(ticket.user), eventType: COMMUNICATION_EVENTS.SUPPORT_CASE_UPDATED, title: "Support case updated", message: `Your support case has been updated to ${status || ticket.status}.`, channels: ["in_app", "email", "sms", "whatsapp"], metadata: { ticketId: ticket._id, status: status || ticket.status } }).catch(() => {});
-    res.json({ success: true, ticket: updatedTicket[0] || ticket });
+    res.json({ success: true, message, ticket: updatedTicket });
   } catch (error) {
     logError("Error adding message:", error);
     res.status(500).json({ success: false, message: "Failed to add message" });

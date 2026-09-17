@@ -81,7 +81,9 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
     setError(null);
     try {
       const result = await fetchActiveAuctions({ page: 1, limit: 100 });
-      setAuctions((result?.auctions || []) as AuctionRecord[]);
+      const refreshedAuctions = (result?.auctions || []) as AuctionRecord[];
+      setAuctions(refreshedAuctions);
+      return refreshedAuctions;
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Unable to load live auctions from KAYAD.');
       setAuctions([]);
@@ -144,10 +146,14 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
     try {
       const result = await placeBid(selected.carId, amount, user.phone || '');
       if (result.success) {
-        setMessage('Bid submitted successfully and accepted by the server.');
+        setMessage(result.message || 'M-Pesa prompt sent. Your bid remains pending until payment confirmation.');
         setBidAmount('');
-        await loadAuctions();
-        setSelected((current) => current ? { ...current, highestBid: Math.max(current.highestBid, amount), bidCount: current.bidCount + 1 } : current);
+        const currentCarId = selected.carId;
+        const refreshedAuctions = await loadAuctions();
+        setSelected((current) => {
+          const refreshed = refreshedAuctions.find((auction) => String(auction.carId) === String(currentCarId));
+          return refreshed || null;
+        });
       } else {
         setMessage(result.message || 'The server did not accept this bid.');
       }

@@ -14,6 +14,12 @@ import { logInfo } from '../../utils/logger.js';
 class OwnershipService {
 
   // ============================================================
+  async requireOwnedVehicle(userId, vehicleId) {
+    const vehicle = await db.findOne('owner_vehicles', { id: vehicleId, owner_id: userId, status: 'active' });
+    if (!vehicle) throw new AppError('Vehicle not found', 404);
+    return vehicle;
+  }
+
   // OWNER PROFILE
   // ============================================================
 
@@ -50,7 +56,7 @@ class OwnershipService {
       db.find('owner_vehicles', { owner_id: userId, ownership_type: 'favourite' }),
       db.find('owner_vehicles', { owner_id: userId, ownership_type: 'recently_viewed' }, { limit: 10 }),
       this.getUpcomingReminders(userId),
-      db.find('ownership_alerts', { status: 'unread' }, { limit: 10 }),
+      db.find('ownership_alerts', { owner_vehicle_id: { $in: currentVehicles.map(v => v.id) }, status: 'unread' }, { limit: 10 }),
       this.getExpenseSummary(userId),
     ]);
 
@@ -178,11 +184,8 @@ class OwnershipService {
   /**
    * Get vehicle details with full history
    */
-  async getVehicleDetails(vehicleId) {
-    const vehicle = await db.findById('owner_vehicles', vehicleId);
-    if (!vehicle) {
-      throw new AppError('Vehicle not found', 404);
-    }
+  async getVehicleDetails(userId, vehicleId) {
+    const vehicle = await this.requireOwnedVehicle(userId, vehicleId);
 
     const [services, reminders, documents, alerts, expenses, valueHistory] = await Promise.all([
       this.getVehicleServices(vehicleId),
@@ -211,11 +214,8 @@ class OwnershipService {
   /**
    * Add service record
    */
-  async addServiceRecord(vehicleId, serviceData) {
-    const vehicle = await db.findById('owner_vehicles', vehicleId);
-    if (!vehicle) {
-      throw new AppError('Vehicle not found', 404);
-    }
+  async addServiceRecord(userId, vehicleId, serviceData) {
+    const vehicle = await this.requireOwnedVehicle(userId, vehicleId);
 
     const service = await db.create('ownership_service_records', {
       owner_vehicle_id: vehicleId,
@@ -298,11 +298,12 @@ class OwnershipService {
   /**
    * Complete reminder
    */
-  async completeReminder(reminderId, serviceRecordId) {
+  async completeReminder(userId, reminderId, serviceRecordId) {
     const reminder = await db.findById('ownership_reminders', reminderId);
     if (!reminder) {
       throw new AppError('Reminder not found', 404);
     }
+    await this.requireOwnedVehicle(userId, reminder.owner_vehicle_id);
 
     const updates = {
       status: 'completed',
@@ -349,7 +350,8 @@ class OwnershipService {
   /**
    * Add expense
    */
-  async addExpense(vehicleId, expenseData) {
+  async addExpense(userId, vehicleId, expenseData) {
+    await this.requireOwnedVehicle(userId, vehicleId);
     return db.create('ownership_expenses', {
       owner_vehicle_id: vehicleId,
       expense_date: expenseData.expenseDate,
@@ -401,20 +403,19 @@ class OwnershipService {
   }
 
   async getExpensesTotal(vehicleIds, startDate, endDate) {
-    // Simplified - would calculate from database
-    return 0;
+    if (!vehicleIds.length) return 0;
+    const rows = await db.find('ownership_expenses', { owner_vehicle_id: { $in: vehicleIds }, expense_date: { $gte: startDate, $lte: endDate } });
+    return rows.reduce((total, row) => total + Number(row.amount || 0), 0);
   }
 
   async getExpensesByCategory(vehicleIds, startDate, endDate) {
-    // Simplified - would aggregate from database
-    return {
-      fuel: 0,
-      maintenance: 0,
-      insurance: 0,
-      finance: 0,
-      taxes: 0,
-      other: 0,
-    };
+    if (!vehicleIds.length) return {};
+    const rows = await db.find('ownership_expenses', { owner_vehicle_id: { $in: vehicleIds }, expense_date: { $gte: startDate, $lte: endDate } });
+    return rows.reduce((summary, row) => {
+      const category = String(row.category || row.expense_type || 'other').toLowerCase();
+      summary[category] = Number(summary[category] || 0) + Number(row.amount || 0);
+      return summary;
+    }, {});
   }
 
   // ============================================================
@@ -424,7 +425,8 @@ class OwnershipService {
   /**
    * Add document
    */
-  async addDocument(vehicleId, documentData) {
+  async addDocument(userId, vehicleId, documentData) {
+    await this.requireOwnedVehicle(userId, vehicleId);
     return db.create('ownership_documents', {
       owner_vehicle_id: vehicleId,
       document_type: documentData.documentType,
@@ -492,11 +494,8 @@ class OwnershipService {
   /**
    * Mark vehicle as sold
    */
-  async markVehicleSold(vehicleId, saleData) {
-    const vehicle = await db.findById('owner_vehicles', vehicleId);
-    if (!vehicle) {
-      throw new AppError('Vehicle not found', 404);
-    }
+  async markVehicleSold(userId, vehicleId, saleData) {
+    const vehicle = await this.requireOwnedVehicle(userId, vehicleId);
 
     await db.update('owner_vehicles', vehicleId, {
       ownership_type: 'sold',
@@ -557,7 +556,8 @@ class OwnershipService {
   /**
    * Add trip
    */
-  async addTrip(vehicleId, tripData) {
+  async addTrip(userId, vehicleId, tripData) {
+    await this.requireOwnedVehicle(userId, vehicleId);
     return db.create('travel_logs', {
       owner_vehicle_id: vehicleId,
       trip_date: tripData.tripDate,

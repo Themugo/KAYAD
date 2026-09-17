@@ -6,7 +6,7 @@ const checks = [
   ['canonical regional service exists', 'backend/services/regionalConfiguration.service.js'],
   ['canonical controller exists', 'backend/controllers/regionalConfigurationController.js'],
   ['canonical routes exist', 'backend/routes/regionalConfigurationRoutes.js'],
-  ['regional migration exists', 'supabase/migrations/20260908010000_regional_configuration_localization_domain.sql'],
+  ['regional migration exists', 'supabase/migrations/20260908010100_regional_configuration_localization_domain.sql'],
   ['frontend regional API exists', 'src/services/regionalConfigurationApi.ts'],
   ['canonical localization service exists', 'backend/services/localization.service.js'],
   ['canonical localization frontend API exists', 'src/services/localizationApi.ts'],
@@ -19,7 +19,7 @@ for (const [name, rel] of checks) {
 }
 const service = fs.readFileSync(path.join(root, 'backend/services/regionalConfiguration.service.js'), 'utf8');
 const dashboard = fs.readFileSync(path.join(root, 'src/features/MultiCountry/pages/RegionalDashboard.tsx'), 'utf8');
-const migration = fs.readFileSync(path.join(root, 'supabase/migrations/20260908010000_regional_configuration_localization_domain.sql'), 'utf8');
+const migration = fs.readFileSync(path.join(root, 'supabase/migrations/20260908010100_regional_configuration_localization_domain.sql'), 'utf8');
 const assertions = [
   ['currency conversion requires configured rate', /No active exchange rate configured/ .test(service)],
   ['no hardcoded FX table remains', !/const rates\s*=/.test(service)],

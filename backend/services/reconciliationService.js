@@ -13,6 +13,57 @@ import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { findAll, findById, findOne, create, aggregate } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 
+const generateReportId = () => `RECON-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+const attachReportPersistence = (report) => {
+  report.issues = Array.isArray(report.issues) ? report.issues : [];
+  report.addIssue = async (issue) => {
+    report.issues.push({ ...issue, createdAt: new Date().toISOString(), resolved: false });
+    await update("reconciliation_reports", report.id, { issues: report.issues });
+  };
+  report.calculateSuccessRate = async () => {
+    report.successRate = report.totalTransactions > 0
+      ? Number(((report.reconciled / report.totalTransactions) * 100).toFixed(2))
+      : 100;
+    return report.successRate;
+  };
+  report.getCriticalIssues = () => report.issues.filter((issue) => issue.severity === "critical" && !issue.resolved);
+  report.save = async () => {
+    const saved = await update("reconciliation_reports", report.id, {
+      reportId: report.reportId,
+      reportType: report.reportType,
+      startTime: report.startTime,
+      endTime: report.endTime,
+      status: report.status,
+      totalTransactions: report.totalTransactions || 0,
+      reconciled: report.reconciled || 0,
+      unreconciled: report.unreconciled || 0,
+      matched: report.matched || 0,
+      unmatched: report.unmatched || 0,
+      missing: report.missing || 0,
+      overpaid: report.overpaid || 0,
+      underpaid: report.underpaid || 0,
+      financials: report.financials || {},
+      issues: report.issues || [],
+      financialIntegrityScore: report.financialIntegrityScore ?? null,
+      successRate: report.successRate ?? null,
+      duration: report.duration ?? null,
+      errorMessage: report.errorMessage ?? null,
+    });
+    Object.assign(report, saved || {});
+    return report;
+  };
+  report.resolveIssue = async (issueIndex, userId, notes) => {
+    const issue = report.issues[issueIndex];
+    if (!issue) throw new Error("Reconciliation issue not found");
+    report.issues[issueIndex] = { ...issue, resolved: true, resolvedAt: new Date().toISOString(), resolvedBy: userId, resolutionNotes: notes || null };
+    await update("reconciliation_reports", report.id, { issues: report.issues });
+    return report.issues[issueIndex];
+  };
+  return report;
+};
+
+
 // =============================
 // 🔄 RUN RECONCILIATION
 // =============================
@@ -20,15 +71,16 @@ export const runReconciliation = async (reportType, timeRange) => {
   const startTime = new Date(timeRange.startTime);
   const endTime = new Date(timeRange.endTime);
 
-  const reportId = ReconciliationReport.generateReportId();
-  const report = await create("reconciliation_reports", {
+  const reportId = generateReportId();
+  const report = attachReportPersistence(await create("reconciliation_reports", {
     reportId,
     reportType,
     startTime,
     endTime,
     status: "in_progress",
-    generatedBy: "system",
-  });
+    generatedBy: null,
+    issues: [],
+  }));
 
   const reconciliationStartTime = Date.now();
 
@@ -81,6 +133,7 @@ export const runReconciliation = async (reportType, timeRange) => {
     }
 
     if (runType("escrow_vault")) {
+      const r = await reconcilePaymentEscrow(startTime, endTime, report);
       total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
       matched += r.matched || 0; unmatched += r.unmatched || 0;
       missing += r.missing || 0;
@@ -1213,11 +1266,12 @@ export const resolveIssue = async (reportId, issueIndex, resolution, userId) => 
     });
 
     if (record) {
-      record.resolved = true;
-      record.resolvedAt = new Date();
-      record.resolvedBy = userId;
-      record.resolutionNotes = resolution.notes;
-      await record.save();
+      await update("reconciliation_records", record.id, {
+        resolved: true,
+        resolvedAt: new Date().toISOString(),
+        resolvedBy: userId,
+        resolutionNotes: resolution.notes,
+      });
     }
 
     logInfo("Reconciliation issue resolved", { reportId, issueIndex, resolvedBy: userId });

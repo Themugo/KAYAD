@@ -25,6 +25,7 @@ import axios from "axios";
 import https from "https";
 import { logInfo } from "../utils/logger.js";
 import { findById, update } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // ── CONFIG ────────────────────────────────────────────────────
 const MPESA_ENV = process.env.MPESA_ENV || "sandbox";
@@ -65,15 +66,18 @@ export const disburseB2C = async ({
   phone,
   amount,
   escrowId,
+  payoutId = null,
   sellerName,
   idempotencyKey,
 }) => {
-  // ── DEDUP: check lastActionKey on escrow ──────────────────
-  if (escrowId && idempotencyKey) {
-    const escrow = await findById("escrows", escrowId);
-    if (!escrow) throw new Error(`Escrow ${escrowId} not found`);
-    if (escrow.status === "released" || escrow.lastActionKey === idempotencyKey) {
-      return { success: true, idempotent: true, message: "B2C already processed for this escrow" };
+  // Released escrow is the prerequisite for payout, not proof that payout
+  // already happened. Idempotency is owned by dealer_payouts, never by the
+  // escrow status itself.
+  if (payoutId) {
+    const { data: existing, error } = await getSupabase().from("dealer_payouts").select("id,status,conversation_id,transaction_id").eq("id", payoutId).maybeSingle();
+    if (error) throw error;
+    if (existing?.status === "paid" || existing?.status === "processing") {
+      return { success: true, idempotent: true, payout: existing, message: "Dealer payout is already processing or paid" };
     }
   }
 
@@ -100,9 +104,16 @@ export const disburseB2C = async ({
     Occasion: B2C_OCCASION,
   };
 
-  // ── Record idempotency key BEFORE API call (prevents double-disbursement) ──
-  if (escrowId && idempotencyKey) {
-    await update("escrows", escrowId, { lastActionKey: idempotencyKey }).catch(() => {});
+  // ── Mark canonical payout processing BEFORE provider call ──
+  if (payoutId) {
+    const { error } = await getSupabase().rpc("kayad_mark_dealer_payout_atomic", {
+      p_payout: payoutId,
+      p_status: "processing",
+      p_conversation_id: null,
+      p_transaction_id: idempotencyKey || null,
+      p_failure_reason: null,
+    });
+    if (error) throw error;
   }
 
   const res = await axios.post(`${MPESA_BASE}/mpesa/b2c/v1/paymentrequest`, payload, {
@@ -117,6 +128,15 @@ export const disburseB2C = async ({
   const data = res.data;
 
   if (data.ErrorCode) {
+    if (payoutId) {
+      await getSupabase().rpc("kayad_mark_dealer_payout_atomic", {
+        p_payout: payoutId,
+        p_status: "failed",
+        p_conversation_id: data.OriginatorConversationID || null,
+        p_transaction_id: null,
+        p_failure_reason: `${data.ErrorMessage || "M-Pesa B2C error"} (${data.ErrorCode})`,
+      }).catch(() => {});
+    }
     throw new Error(`M-Pesa B2C Error: ${data.ErrorMessage} (${data.ErrorCode})`);
   }
 

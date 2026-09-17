@@ -177,8 +177,22 @@ export const b2cCallback = async (req, res) => {
   try {
     const { handleB2CCallback } = await import("../services/mpesaB2C.service.js");
     const result = await handleB2CCallback(req.body);
+    const { getSupabase } = await import("../utils/supabase.js");
+    const sb = getSupabase();
+    const conversationId = result.conversationID;
+    if (conversationId) {
+      const { data: payout } = await sb.from("dealer_payouts").select("id,status").eq("conversation_id", conversationId).maybeSingle();
+      if (payout) {
+        await sb.rpc("kayad_mark_dealer_payout_atomic", {
+          p_payout: payout.id,
+          p_status: result.success ? "paid" : "failed",
+          p_conversation_id: conversationId,
+          p_transaction_id: result.transactionId || null,
+          p_failure_reason: result.success ? null : (result.resultDesc || "M-Pesa B2C payout failed"),
+        });
+      }
+    }
     if (result.success) {
-      // Log successful disbursement
       logInfo("B2C disbursement succeeded", {
         conversationID: result.conversationID,
         transactionId: result.transactionId,

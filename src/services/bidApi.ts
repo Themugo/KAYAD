@@ -64,11 +64,11 @@ export interface PlaceBidResponse {
  * authoritative - this function does not duplicate or pre-empt it,
  * it surfaces exactly what the real backend decides, success or
  * rejection, to the caller. */
-export async function placeBid(carId: string, amount: number, phone: string): Promise<PlaceBidResponse> {
+export async function placeBid(carId: string, amount: number, phone?: string): Promise<PlaceBidResponse> {
   try {
     return await request<PlaceBidResponse>(`/api/bids/${carId}/bid`, {
       method: 'POST',
-      body: JSON.stringify({ amount, phone }),
+      body: JSON.stringify({ amount, ...(phone ? { phone } : {}) }),
     });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
@@ -77,3 +77,28 @@ export async function placeBid(carId: string, amount: number, phone: string): Pr
   }
 
 }
+
+export async function fetchMyBids() {
+  return request<{ success?: boolean; bids: Array<Record<string, unknown>>; pagination?: Record<string, unknown> }>('/api/bids/my');
+}
+
+export async function fetchAdminBids(params: Record<string, string | number | boolean | undefined> = {}) {
+  return request<{ success?: boolean; bids: Array<Record<string, unknown>>; pagination?: Record<string, unknown> }>('/api/bids/admin/all', {
+    method: 'GET',
+    // GET query parameters are handled by the request client when supplied here.
+    params,
+  });
+}
+
+export async function fetchSuspiciousBids() {
+  return request<{ success?: boolean; bids: Array<Record<string, unknown>> }>('/api/bids/admin/suspicious');
+}
+
+export async function setBidWinner(bidId: string) {
+  if (!bidId) throw new BidApiError('Bid ID is required.', 'validation');
+  return request<Record<string, unknown>>(`/api/bids/admin/${encodeURIComponent(bidId)}/set-winner`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+}
+

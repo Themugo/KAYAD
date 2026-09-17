@@ -29,6 +29,7 @@ import {
 import { findAll, findById, findOne, create, update, remove, paginate } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 import { closeAuction } from "../services/auctionClose.service.js";
+import { startAuction } from "../services/auctionLifecycle.service.js";
 import { getVehicleValuation } from "../services/vehicleValuation.service.js";
 
 const router = express.Router();
@@ -425,12 +426,16 @@ router.post(
       });
     }
 
-    const updated = await update("cars", req.params.id, {
-      auctionStatus: "live",
-      auctionEnd: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    const result = await startAuction({
+      carId: req.params.id,
+      durationMs: 60 * 60 * 1000,
+      startingBid: Number(car.startingBid || car.price || 0),
+      reservePrice: car.reservePrice ?? null,
+      reserveMode: car.reserveMode || "none",
+      req,
     });
 
-    res.json({ success: true, data: updated });
+    res.json({ success: true, result });
   }),
 );
 

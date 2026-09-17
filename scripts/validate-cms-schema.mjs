@@ -3,7 +3,6 @@ import path from 'node:path';
 
 const root = process.cwd();
 const migration = path.join(root, 'supabase', 'migrations', '20260907200000_cms_website_builder_domain.sql');
-const service = path.join(root, 'backend', 'cms', 'services', 'cmsService.js');
 
 function read(file) { return fs.readFileSync(file, 'utf8'); }
 function assert(condition, message) {
@@ -12,7 +11,6 @@ function assert(condition, message) {
 }
 
 const sql = read(migration);
-const svc = read(service);
 
 const requiredTables = [
   'cms_pages','cms_page_sections','cms_navigation','cms_nav_items','cms_hero_sections',
@@ -32,7 +30,8 @@ assert(/create\s+trigger\s+trg_kayad_sync_cms_page_name/i.test(sql), 'CMS page s
 assert(/alter\s+table\s+public\.cms_pages\s+enable\s+row\s+level\s+security/i.test(sql), 'cms_pages RLS enabled');
 assert(/create\s+policy\s+cms_pages_public_read/i.test(sql), 'cms_pages public read policy exists');
 assert(/create\s+index\s+if\s+not\s+exists/i.test(sql), 'CMS bootstrap indexes are rerunnable');
-assert(!/cms_navigations/.test(svc), 'CMS service no longer uses divergent cms_navigations table');
-assert(/db\.(findOne|create|update)\('cms_navigation'/.test(svc), 'CMS service uses canonical cms_navigation table');
-assert(/db\.(findOne|create|update)\('website_settings'/.test(svc), 'legacy website settings service has a real persistence table');
+assert(!fs.existsSync(path.join(root, 'backend/cms')), 'obsolete duplicate CMS service tree removed');
+const cmsController = read(path.join(root, 'backend', 'controllers', 'cmsController.js'));
+assert(!/cms_navigations/.test(cmsController), 'CMS controller does not use divergent cms_navigations table');
+assert(!/cms_navigations/.test(cmsController), 'CMS controller has no retired navigation table reference');
 console.log('CMS schema validation: PASS');

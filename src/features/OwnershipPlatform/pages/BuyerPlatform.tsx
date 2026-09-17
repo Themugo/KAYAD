@@ -3,6 +3,7 @@ import { Heart, ShoppingBag, ClipboardCheck, Loader2 } from 'lucide-react';
 import { getFavorites, BackendFavoriteCar } from '../../../services/favoriteApi';
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
 import { getMyInspections, BackendInspectionOrder } from '../../../services/inspectionApi';
+import { getOwnershipDashboard, OwnershipVehicle } from '../../../services/ownershipApi';
 import type { UserProfile } from '../../../types';
 
 /**
@@ -40,6 +41,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
   const [favorites, setFavorites] = useState<BackendFavoriteCar[]>([]);
   const [escrows, setEscrows] = useState<BackendEscrow[]>([]);
   const [inspections, setInspections] = useState<BackendInspectionOrder[]>([]);
+  const [ownedVehicles, setOwnedVehicles] = useState<OwnershipVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,11 +52,13 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
       getFavorites().catch(() => ({ favorites: [] as BackendFavoriteCar[] })),
       getMyEscrows().catch(() => [] as BackendEscrow[]),
       getMyInspections().catch(() => ({ orders: [] as BackendInspectionOrder[] })),
-    ]).then(([favRes, escrowRes, inspRes]) => {
+      getOwnershipDashboard().catch(() => ({ currentVehicles: [] as OwnershipVehicle[] })),
+    ]).then(([favRes, escrowRes, inspRes, ownershipRes]) => {
       if (cancelled) return;
       setFavorites(favRes.favorites || []);
       setEscrows(escrowRes || []);
       setInspections((inspRes as { orders?: BackendInspectionOrder[] }).orders || []);
+      setOwnedVehicles((ownershipRes as { currentVehicles?: OwnershipVehicle[] }).currentVehicles || []);
     }).catch(() => { if (!cancelled) setError('Could not load your garage.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };

@@ -813,24 +813,25 @@ router.post(
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    if (action === "approve") {
-      user.role = "dealer";
-      user.verificationStatus = "verified";
-      user.approved = true;
-    } else if (action === "reject") {
-      user.verificationStatus = "rejected";
-    } else {
+    if (!['approve', 'reject'].includes(action)) {
       return res.status(400).json({ success: false, message: "Action must be 'approve' or 'reject'" });
     }
 
-    await user.save();
+    const { data: result, error } = await getSupabase().rpc('kayad_apply_dealer_verification_atomic', {
+      p_user: String(req.params.id),
+      p_action: action,
+      p_admin: String(req.user.id),
+      p_reason: req.body.reason || null,
+    });
+    if (error) throw error;
+
     await AuditLog.create({
       action: `Dealer verification: ${action} for ${user.email}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
     });
 
-    res.json({ success: true, message: `Dealer ${action}d successfully.` });
+    res.json({ success: true, message: `Dealer ${action}d successfully.`, result });
   }),
 );
 

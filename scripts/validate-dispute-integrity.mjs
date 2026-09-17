@@ -1,23 +1,22 @@
 import fs from 'node:fs';
-import path from 'node:path';
 
-const root = process.cwd();
+const read = (p) => fs.readFileSync(p, 'utf8');
+const controller = read('backend/controllers/disputeController.js');
+const routes = read('backend/routes/disputeRoutes.js');
 const checks = [
-  ['canonical dispute UI has real API-backed evidence upload', 'src/components/EvidenceUpload.jsx', /disputeAPI\.uploadEvidence/],
-  ['canonical dispute UI has real mediation API', 'src/components/MediationPanel.jsx', /disputeAPI\.startMediation|disputeAPI\.completeMediation/],
-  ['canonical dispute UI has real resolution API', 'src/components/ResolutionPanel.jsx', /disputeAPI\.resolve/],
-  ['canonical dispute UI has real appeal API', 'src/components/AppealPanel.jsx', /disputeAPI\.appeal|disputeAPI\.reviewAppeal/],
-  ['evidence item route enforces dispute-party/admin access', 'backend/controllers/disputeController.js', /const dispute = await Dispute\.findById\(id\)\.select\("openedBy openedAgainst status"\)/],
-  ['evidence mutations remain scoped to the requested dispute', 'backend/controllers/disputeController.js', /Evidence\.findOne\(\{ _id: evidenceId, dispute: id, deletedAt: null \}\)/],
-  ['successful mediation transitions to resolved', 'backend/controllers/disputeController.js', /dispute\.status = STATES\.RESOLVED;/],
-  ['common duplicate TS dispute panels removed', 'src/components/features/common/MediationPanel.tsx', null],
+  ['canonical dispute UI has real API-backed evidence upload', /disputeAPI\.uploadEvidence/.test(read('src/components/EvidenceUpload.jsx'))],
+  ['canonical dispute UI has real mediation API', /disputeAPI\.startMediation|disputeAPI\.completeMediation/.test(read('src/components/MediationPanel.jsx'))],
+  ['canonical dispute UI has real resolution API', /disputeAPI\.resolve/.test(read('src/components/ResolutionPanel.jsx'))],
+  ['canonical dispute UI has real appeal API', /disputeAPI\.appeal|disputeAPI\.reviewAppeal/.test(read('src/components/AppealPanel.jsx'))],
+  ['dispute details enforce party/staff access', /involved\(e,actor\(req\)\).*staff\.includes\(role\(req\)\)/.test(controller)],
+  ['evidence item remains scoped to requested escrow dispute', /getEscrow\(req\.params\.id\).*disputeEvidence/.test(controller)],
+  ['evidence mutations remain scoped to requested escrow', /eq\('id',e\.id\)/.test(controller)],
+  ['successful mediation transitions to resolved', /buyerSatisfied&&sellerSatisfied.*p_next_status:'resolved'/.test(controller)],
+  ['common duplicate TS dispute panels removed', !fs.existsSync('src/components/features/common/MediationPanel.tsx')],
+  ['legacy Mongoose dispute implementation is absent from active controller', !/from ['"].*models\/Dispute/.test(controller) && !/from ['"].*models\/Evidence/.test(controller)],
+  ['dispute routes expose canonical escrow-centric workflow', /kayad_transition_dispute_atomic/.test(controller) && /kayad_resolve_dispute_atomic/.test(controller) && /\/evidence/.test(routes)],
 ];
-let passed = 0;
-for (const [label, file, pattern] of checks) {
-  const exists = fs.existsSync(path.join(root, file));
-  const ok = pattern === null ? !exists : exists && pattern.test(fs.readFileSync(path.join(root, file), 'utf8'));
-  console.log(`${ok ? 'PASS' : 'FAIL'}: ${label}`);
-  if (ok) passed++;
-}
-console.log(`\nDispute integrity: ${passed}/${checks.length} checks passed`);
-process.exitCode = passed === checks.length ? 0 : 1;
+let failed=0;
+for(const [name,ok] of checks){console.log(`${ok?'PASS':'FAIL'}: ${name}`);if(!ok)failed++;}
+console.log(`\nDispute integrity: ${checks.length-failed}/${checks.length} checks passed`);
+process.exitCode=failed?1:0;

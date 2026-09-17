@@ -7,7 +7,7 @@ const routes = read('backend/routes/searchRoutes.js');
 const server = read('backend/server.js');
 const saved = read('backend/routes/savedSearchRoutes.js');
 const map = read('backend/utils/fieldMap.js');
-const migration = read('supabase/migrations/20260908000000_search_discovery_domain.sql');
+const migration = read('supabase/migrations/20260908000100_search_discovery_domain.sql');
 const ui = read('src/components/features/common/SearchBar.tsx');
 const api = read('src/services/searchApi.ts');
 assert.match(service, /db\.findAll\('cars'/); assert.match(service, /status: 'available'/); assert.match(service, /levenshtein/);

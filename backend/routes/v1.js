@@ -29,7 +29,6 @@ import referralRoutes from "./referralRoutes.js";
 import contactRoutes from "./contactRoutes.js";
 import marketRoutes from "./marketRoutes.js";
 import bidLogRoutes from "./bidLogRoutes.js";
-import transactionLedgerRoutes from "./transactionLedgerRoutes.js";
 import localizationRoutes from "./localizationRoutes.js";
 import userPreferenceRoutes from "./userPreferenceRoutes.js";
 import regionalConfigurationRoutes from "./regionalConfigurationRoutes.js";
@@ -69,8 +68,6 @@ router.use("/market", marketRoutes);
 // Bid Logs
 router.use("/bid-logs", bidLogRoutes);
 
-// Transaction Ledger (Immutable)
-router.use("/ledger", transactionLedgerRoutes);
 
 // Localization / i18n
 router.use("/localization", localizationRoutes);

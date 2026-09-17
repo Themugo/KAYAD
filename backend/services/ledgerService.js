@@ -306,3 +306,16 @@ export async function getReconciliationReport({ startDate, endDate }) {
 export async function seedAccounts() {
   return ensureAccounts();
 }
+
+// Read-only integrity check used by reconciliation/release gates. The
+// canonical ledger is append-only; this verifies that every entry has the
+// minimum immutable transaction identity and a positive amount.
+export async function verifyLedgerIntegrity({ startDate = null, endDate = null } = {}) {
+  const filters = {};
+  if (startDate || endDate) filters.created_at = {};
+  if (startDate) filters.created_at.$gte = new Date(startDate).toISOString();
+  if (endDate) filters.created_at.$lte = new Date(endDate).toISOString();
+  const entries = await findAll("ledger_entries", filters);
+  const invalid = entries.filter((entry) => !entry?.transaction_id || !entry?.external_reference || Number(entry?.amount) <= 0 || !entry?.currency);
+  return { valid: invalid.length === 0, checked: entries.length, invalid: invalid.map((entry) => entry.id) };
+}

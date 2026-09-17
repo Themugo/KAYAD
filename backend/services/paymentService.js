@@ -21,18 +21,13 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
   const formattedPhone = formatPhone(phone);
   if (!formattedPhone) return { success: false, message: "Invalid Safaricom number" };
 
-  const existing = await findOne("payments", {
-    user: userId, car: carId, status: "pending", type,
-  });
-  if (existing) {
-    return { success: false, message: "Payment already in progress", payment: existing };
-  }
+  const existing = await findOne("payments", { user: userId, car: carId, status: "pending", type });
+  if (existing) return { success: false, message: "Payment already in progress", payment: existing };
 
-  const stkRes = await stkPush(formattedPhone, amount);
-  const checkoutID = stkRes?.CheckoutRequestID;
-  if (!checkoutID) throw new Error("M-Pesa did not return a checkout request ID");
-  const mode = "mpesa";
-
+  // Create the authoritative payment record BEFORE calling M-Pesa.
+  // Establish the authoritative local payment intent before touching M-Pesa.
+  // This makes provider initiation recoverable and ensures a failed STK
+  // request cannot leave an untracked external payment attempt.
   let payment;
   try {
     payment = await create("payments", {
@@ -45,33 +40,33 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
       phone: formattedPhone,
       status: "pending",
       processed: false,
-      checkoutRequestId: checkoutID,
-      mode,
-      // Fixed (Final Integration Phase 3 - real auction & bidding
-    // integration): was `...metadata` - spreading a caller's metadata
-    // object's own keys directly as top-level row columns. Confirmed
-    // by reproducing the real failure directly against a real
-    // database: every real bid attempt (which passes
-    // { bidAmount: amount } here) failed with "Could not find the
-    // 'bid_amount' column of 'payments'", since no such column
-    // exists, nor should one - metadata is meant to be stored as one,
-    // real, nested value, matching how it's already read elsewhere in
-    // this same codebase (paymentCallback.service.js's own
-    // `payment.metadata?.planId`, which only works against a real,
-    // single nested field, not spread top-level columns). Stored as
-    // the real, correct shape now, into the real payments.metadata
-    // JSONB column (added in the same migration as this fix).
+      checkoutRequestId: null,
+      mode: "mpesa",
       metadata,
     });
   } catch (error) {
-    // The partial unique pending-operation index is the final concurrency
-    // guard. If another request won the race, return its authoritative row.
     if (error?.code === "23505") {
-      const existing = await findOne("payments", { user: userId, car: carId, status: "pending", type });
-      if (existing) return { success: false, message: "Payment already in progress", payment: existing };
+      const raced = await findOne("payments", { user: userId, car: carId, status: "pending", type });
+      if (raced) return { success: false, message: "Payment already in progress", payment: raced };
     }
     throw error;
   }
+
+  let stkRes;
+  try {
+    stkRes = await stkPush(formattedPhone, amount);
+  } catch (error) {
+    await update("payments", payment.id, { status: "failed", resultDesc: error.message || "M-Pesa STK initiation failed" }).catch((e) => logWarn("Failed to finalize STK initiation failure", { error: e.message, paymentId: payment.id }));
+    throw error;
+  }
+
+  const checkoutID = stkRes?.CheckoutRequestID;
+  if (!checkoutID) {
+    await update("payments", payment.id, { status: "failed", resultDesc: "M-Pesa did not return a checkout request ID" });
+    throw new Error("M-Pesa did not return a checkout request ID");
+  }
+
+  payment = await update("payments", payment.id, { checkoutRequestId: checkoutID });
 
   await create("mpesa_transactions", {
     checkoutRequestId: checkoutID,
@@ -81,24 +76,15 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     carId,
   }).catch((e) => console.warn("⚠️ Payment notification failed:", e.message));
 
-  const attempt = await recordPaymentAttempt({
-    paymentId: payment.id,
-    checkoutRequestId: checkoutID,
-    status: "pending",
-  }).catch((e) => {
+  const attempt = await recordPaymentAttempt({ paymentId: payment.id, checkoutRequestId: checkoutID, status: "pending" }).catch((e) => {
     logWarn("Payment attempt audit record failed", { error: e.message, paymentId: payment.id });
     return null;
   });
-  await recordPaymentEvent({
-    paymentId: payment.id,
-    attemptId: attempt?.id || null,
-    eventType: "stk_initiated",
-    payload: { checkoutRequestId: checkoutID, amount, type, carId },
-  }).catch((e) => logWarn("Payment initiation event audit failed", { error: e.message }));
+  await recordPaymentEvent({ paymentId: payment.id, attemptId: attempt?.id || null, eventType: "stk_initiated", payload: { checkoutRequestId: checkoutID, amount, type, carId } }).catch((e) => logWarn("Payment initiation event audit failed", { error: e.message }));
 
   return {
     success: true,
-    mode,
+    mode: "mpesa",
     checkoutID,
     checkoutRequestID: checkoutID,
     payment,

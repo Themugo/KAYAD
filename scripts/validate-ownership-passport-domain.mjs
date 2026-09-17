@@ -5,14 +5,14 @@ const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const exists = (p) => fs.existsSync(path.join(root, p));
 const checks = [
   ['ownership service uses canonical db adapter', /import \* as db from|from '..\/..\/db\/index\.js'/.test(read('backend/ownership/services/ownershipService.js'))],
-  ['ownership profile update uses row id', /db\.update\('owner_profiles', profile\.id/.test(read('backend/ownership/services/ownershipService.js'))],
+  ['ownership profile update uses row id', /db\.update\('owner_profiles', \{ user_id: userId \}/.test(read('backend/ownership/services/ownershipService.js'))],
   ['owner vehicle access is user scoped', /owner_id: userId/.test(read('backend/ownership/services/ownershipService.js'))],
-  ['expense totals are real database data', /db\.findAll\('ownership_expenses'/.test(read('backend/ownership/services/ownershipService.js')) && !/return 0;/.test(read('backend/ownership/services/ownershipService.js'))],
+  ['expense totals are real database data', /db\.find\('ownership_expenses'/.test(read('backend/ownership/services/ownershipService.js')) && /reduce\(.*Number\(row\.amount/.test(read('backend/ownership/services/ownershipService.js'))],
   ['sold vehicles cancel pending reminders', /status: 'cancelled'/.test(read('backend/ownership/services/ownershipService.js'))],
   ['ownership API routes are protected', /router\.get\('\/dashboard', protect/.test(read('backend/routes/ownershipRoutes.js'))],
   ['passport public route is canonical', /getPublicPassport/.test(read('backend/routes/ownershipRoutes.js'))],
-  ['passport service uses canonical db adapter', /import \* as db/.test(read('backend/vehiclePassport/services/vehiclePassportService.js'))],
-  ['passport search uses findAll', /db\.findAll\('vehicle_passports'/.test(read('backend/vehiclePassport/services/vehiclePassportService.js'))],
+  ['passport service uses canonical db adapter', /from '..\/..\/db\/index\.js'/.test(read('backend/vehiclePassport/services/vehiclePassportService.js'))],
+  ['passport search uses findAll', /db\.findOne\('vehicle_passports'/.test(read('backend/vehiclePassport/services/vehiclePassportService.js'))],
   ['ghost checker passport no longer returns demo data', /vehiclePassportService\.findPassport/.test(read('backend/controllers/ghostCheckersController.js'))],
   ['server mounts ownership API', /app\.use\("\/api\/ownership", ownershipRoutes\)/.test(read('backend/server.js'))],
   ['frontend uses real ownership API', /getOwnershipDashboard/.test(read('src/features/OwnershipPlatform/pages/BuyerPlatform.tsx'))],

@@ -14,6 +14,8 @@ import { getSupabase } from "../utils/supabase.js";
 import { sendNotification } from "../services/notification.service.js";
 import { initiateDealerUpgrade } from "../services/dealerSubscription.service.js";
 import { deliver } from "../services/communicationGateway.service.js";
+import { startAuction, extendAuction, closeAuction } from "../services/auctionLifecycle.service.js";
+import { disburseB2C } from "../services/mpesaB2C.service.js";
 
 const router = express.Router();
 
@@ -873,7 +875,6 @@ router.post(
 // =============================
 // Canonical engine only: auction state lives on the cars row, closing
 // goes through services/auctionClose.service.js.
-import { closeAuction } from "../services/auctionClose.service.js";
 
 // 🚀 Start auction on dealer's own car
 router.post(
@@ -918,27 +919,24 @@ router.post(
       return res.status(400).json({ success: false, message: "Reserve price must be >= starting bid" });
     }
 
-    // Server-authoritative schedule: the server sets both timestamps.
-    const endTime = new Date(Date.now() + durationMs);
-
-    const updated = await update("cars", req.params.id, {
-      auctionStatus: "live",
-      allowBid: true,
+    // Canonical atomic lifecycle: the database transition, audit and
+    // communication are handled by the shared auction service.
+    const result = await startAuction({
+      carId: req.params.id,
+      durationMs,
       startingBid: startingBidVal,
-      currentBid: startingBidVal,
       reservePrice: reserveVal,
       reserveMode: reserveMode || "none",
-      auctionStartTime: new Date().toISOString(),
-      auctionEnd: endTime.toISOString(),
+      req,
     });
 
-    await logActionFromReq(req, "auction_start", {
-      target: req.params.id,
-      targetModel: "Car",
-      details: { startingBid: startingBidVal, reservePrice: reserveVal, durationMs },
+    res.json({
+      success: true,
+      message: "Auction started",
+      endTime: result.auction_end,
+      reservePrice: result.reserve_price,
+      result,
     });
-
-    res.json({ success: true, message: "Auction started", endTime, reservePrice: reserveVal });
   }),
 );
 
@@ -989,21 +987,64 @@ router.post(
         .json({ success: false, message: `Maximum ${MAX_EXTENSIONS} extensions per auction reached` });
     }
 
-    const currentEnd = new Date(car.auctionEnd).getTime();
-    const newEnd = new Date(Math.max(currentEnd, Date.now()) + hours * 60 * 60 * 1000).toISOString();
-
-    const updated = await update("cars", req.params.id, {
-      auctionEnd: newEnd,
-      extensionCount: extensionCount + 1,
+    // Canonical atomic extension. The RPC owns extensionCount and
+    // auctionEnd so concurrent extensions cannot overwrite one another.
+    const result = await extendAuction({
+      carId: req.params.id,
+      extraMs: hours * 60 * 60 * 1000,
+      req,
+      reason: "auction_extend",
     });
 
-    await logActionFromReq(req, "auction_extend", {
-      target: req.params.id,
-      targetModel: "Car",
-      details: { hours, extensionsUsed: extensionCount + 1, newEndTime: updated.auctionEnd },
+    res.json({
+      success: true,
+      newEndTime: result.auction_end,
+      extensionsUsed: result.extension_count,
+      result,
+    });
+  }),
+);
+
+// =============================
+// 💸 DEALER PAYOUT
+// =============================
+router.post(
+  "/payouts/:escrowId/initiate",
+  asyncHandler(async (req, res) => {
+    const escrowId = req.params.escrowId;
+    const escrow = await findById("escrows", escrowId);
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+    if (String(escrow.seller) !== String(req.user.id)) {
+      return res.status(403).json({ success: false, message: "Escrow does not belong to this dealer" });
+    }
+
+    const dealer = await findById("users", req.user.id, "phone");
+    if (!dealer?.phone) return res.status(400).json({ success: false, message: "A dealer payout phone number is required" });
+
+    const { data: prepared, error: prepareError } = await getSupabase().rpc("kayad_prepare_dealer_payout_atomic", {
+      p_escrow: escrowId,
+      p_dealer: req.user.id,
+      p_phone: dealer.phone,
+    });
+    if (prepareError) throw prepareError;
+
+    const payout = prepared?.payout;
+    if (!payout?.id) return res.status(500).json({ success: false, message: "Payout preparation failed" });
+
+    if (prepared.idempotent && ["processing", "paid"].includes(payout.status)) {
+      return res.json({ success: true, payout, idempotent: true });
+    }
+
+    const result = await disburseB2C({
+      phone: dealer.phone,
+      amount: payout.net_amount,
+      escrowId,
+      payoutId: payout.id,
+      sellerName: dealer.name,
+      idempotencyKey: payout.id,
     });
 
-    res.json({ success: true, newEndTime: updated.auctionEnd, extensionsUsed: extensionCount + 1 });
+    return res.json({ success: true, payout: result.payout || payout, provider: result });
   }),
 );
 

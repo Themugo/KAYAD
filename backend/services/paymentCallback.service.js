@@ -143,7 +143,17 @@ export const handleMpesaCallback = async (callbackData) => {
         reported: amount,
         receipt,
       });
-      return;
+      await markPaymentEventSafe(payment.id, "amount_mismatch", {
+        expected: Number(payment.amount),
+        reported: Number(amount),
+        receipt,
+      });
+      await markAttemptByCheckout(checkoutId, "failed", {
+        failureReason: `Amount mismatch: expected ${payment.amount}, provider reported ${amount}`,
+      }).catch(() => {});
+      await markWebhookProcessed(webhookEventId);
+      finalized = true;
+      return payment;
     }
 
     await markPaymentEventSafe(payment.id, "amount_verified", { expected: Number(payment.amount), reported: Number(amount), receipt });

@@ -63,6 +63,7 @@ import securityLogRoutes from "./routes/securityLogRoutes.js";
 import smsBiddingRoutes from "./routes/smsBiddingRoutes.js";
 import inspectorApplicationRoutes from "./routes/inspectorApplicationRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import ownershipRoutes from "./routes/ownershipRoutes.js";
 import conversionFunnelRoutes from "./routes/conversionFunnelRoutes.js";
 import disputeRoutes from "./routes/disputeRoutes.js";
 import { startDisputeCron } from "./services/disputeCron.js";
@@ -810,6 +811,7 @@ app.use("/api/platform-factory", platformFactoryRoutes);
 app.use("/api/ghost-checkers", ghostCheckersRoutes);
 app.use("/api/dealer-platform", dealerPlatformRoutes);
 app.use("/api/countries", regionalConfigurationRoutes);
+app.use("/api/ownership", ownershipRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────

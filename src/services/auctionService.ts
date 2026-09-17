@@ -62,4 +62,25 @@ export async function fetchMyAuctions(params: { page?: number; limit?: number } 
   return auctionRequest<{ auctions: Auction[]; pagination?: Record<string, unknown> }>(`/api/auctions/my${query.toString() ? `?${query}` : ''}`);
 }
 
-export default { fetchList, fetchAuction, fetchActiveAuctions, fetchMyAuctions };
+export async function fetchAuctionBids(carId: string) {
+  if (!carId) throw new HttpRequestError('Vehicle ID is required.');
+  return auctionRequest<{ success?: boolean; bids: Array<Record<string, unknown>> }>(`/api/bids/${encodeURIComponent(carId)}/bids`);
+}
+
+export async function startDealerAuction(carId: string, body: { durationMs: number; startingBid: number; reservePrice?: number | null; reserveMode?: string }) {
+  if (!carId) throw new HttpRequestError('Vehicle ID is required.');
+  return auctionRequest<Record<string, unknown>>(`/api/dealer/cars/${encodeURIComponent(carId)}/auction/start`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function setAuctionWinner(bidId: string) {
+  if (!bidId) throw new HttpRequestError('Bid ID is required.');
+  return auctionRequest<Record<string, unknown>>(`/api/bids/admin/${encodeURIComponent(bidId)}/set-winner`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+}
+
+export default { fetchList, fetchAuction, fetchActiveAuctions, fetchMyAuctions, fetchAuctionBids, startDealerAuction, setAuctionWinner };
