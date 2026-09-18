@@ -69,7 +69,13 @@ export interface BackendEscrow {
   releasedAt?: string | null;
   closedAt?: string | null;
   disputeReason?: string | null;
+  disputeTitle?: string | null;
+  disputeDescription?: string | null;
   disputedAt?: string | null;
+  disputedBy?: string | null;
+  disputeWorkflowStatus?: 'open' | 'under_review' | 'mediation' | 'resolved' | 'appealed' | 'closed' | null;
+  disputeEvidence?: Array<{ _id?: string; type?: string; fileName?: string; mimeType?: string; size?: number; url?: string; thumbnailUrl?: string; description?: string; uploadedBy?: string; uploadedByRole?: string; createdAt?: string; verified?: boolean; verifiedBy?: string; verifiedAt?: string }>;
+  disputeTimeline?: Array<{ action?: string; actor?: string; assigneeId?: string; at?: string; note?: string; fromStatus?: string; toStatus?: string }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -96,6 +102,18 @@ export async function getMyEscrows(): Promise<BackendEscrow[]> {
 export async function confirmVehicle(escrowId: string): Promise<BackendEscrow> {
   const body = await escrowFetch<{ data: BackendEscrow }>(`/api/escrow/${escrowId}/confirm-vehicle`, { method: 'POST' });
   return body.data;
+}
+
+/** POST /api/escrow/:id/confirm-delivery - seller confirms delivery. */
+export async function confirmDelivery(escrowId: string): Promise<BackendEscrow> {
+  const body = await escrowFetch<{ data: BackendEscrow }>(`/api/escrow/${escrowId}/confirm-delivery`, { method: 'POST' });
+  return body.data;
+}
+
+/** POST /api/escrow/:id/request-release - buyer requests admin release. */
+export async function requestRelease(escrowId: string): Promise<{ message: string }> {
+  const body = await escrowFetch<{ message: string }>(`/api/escrow/${escrowId}/request-release`, { method: 'POST' });
+  return { message: body.message };
 }
 
 /** POST /api/escrow/:id/dispute - buyer, seller, or staff raises a
@@ -174,5 +192,24 @@ export function mapBackendEscrowToTransaction(e: BackendEscrow): EscrowTransacti
     bankReference: undefined,
     vaultHolder: undefined,
     whoControlsFunds: e.status === 'released' || e.status === 'closed' ? 'Released' : 'KAYAD Escrow (Neutral Hold)',
+    ...(e.status === 'disputed' || e.disputeWorkflowStatus ? {
+      dispute: {
+        id: e.id,
+        openedAt: e.disputedAt || e.updatedAt,
+        openedBy: e.disputedBy && String(e.disputedBy) === String(e.buyer?.id) ? 'Buyer' : 'Seller',
+        reason: e.disputeDescription || e.disputeReason || 'Dispute opened',
+        status: ({ open: 'Under Review', under_review: 'Under Review', mediation: 'Mediation In Progress', appealed: 'Evidence Gathering', resolved: e.status === 'refunded' ? 'Resolved - Refunded' : 'Resolved - Released', closed: 'Resolved - Released' } as const)[e.disputeWorkflowStatus || 'open'],
+        evidence: (e.disputeEvidence || []).map((item) => ({
+          title: item.fileName || item.type || 'Evidence file',
+          fileType: item.mimeType || item.type || 'unknown',
+          uploadedAt: item.createdAt || e.updatedAt,
+        })),
+        updates: (e.disputeTimeline || []).map((item, index) => ({
+          timestamp: item.at || e.updatedAt,
+          note: item.note || item.action || 'Dispute updated',
+          author: item.actor ? `${item.actor}${item.action ? ` — ${item.action}` : ''}` : item.action || `Update ${index + 1}`,
+        })),
+      },
+    } : {}),
   };
 }

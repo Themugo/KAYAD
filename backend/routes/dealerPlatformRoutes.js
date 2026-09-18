@@ -1,5 +1,6 @@
 import express from "express";
-import { protect, allowRoles, dealerOnly } from "../middleware/auth.js";
+import { protect, dealerOnly } from "../middleware/auth.js";
+import { dealerOrgAccess } from "../middleware/dealerOrgAccess.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import upload, { handleUploadError } from "../middleware/upload.js";
 import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
@@ -89,9 +90,9 @@ router.get("/analytics", protect, dealerOnly, asyncHandler(getDealerAnalytics));
 router.get("/analytics/recommendations", protect, dealerOnly, asyncHandler(getAIRecommendations));
 
 // Team
-router.get("/team", protect, dealerOnly, asyncHandler(getTeamMembers));
-router.post("/team/invite", protect, dealerOnly, asyncHandler(inviteTeamMember));
-router.put("/team/:memberId", protect, dealerOnly, createLimiter, asyncHandler(updateTeamMember));
+router.get("/team", protect, dealerOrgAccess(), asyncHandler(getTeamMembers));
+router.post("/team/invite", protect, dealerOrgAccess("canManageTeam"), asyncHandler(inviteTeamMember));
+router.put("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamMember));
 router.post("/team/accept", protect, asyncHandler(acceptTeamInvite));
 
 // Subscription

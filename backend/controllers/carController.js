@@ -11,6 +11,9 @@ import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
 import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
 import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/dealerSubscription.service.js";
+import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
+import { randomUUID } from "node:crypto";
+import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
 
@@ -429,16 +432,53 @@ export const createCar = async (req, res) => {
     body.coverImage =
       !isNaN(requestedCover) && requestedCover >= 0 && requestedCover < totalImages ? requestedCover : 0;
 
-    // ── CREATE CAR (before incrementing listing count for atomicity) ──
-    const car = await Car.create(body);
-
-    // ── INCREMENT LISTING COUNT (only after successful Car.create) ──
-    if (shouldIncrementListingCount) {
-      const updateOps = { $inc: { listingCount: 1 } };
-      if (isSeller && !seller.firstVehicleUsed) {
-        updateOps.firstVehicleUsed = true;
+    // ── CREATE CAR / ENTITLEMENT ATOMICALLY ─────────────────────
+    // Dealer listing creation and subscription capacity are one database
+    // transaction. The legacy read-count-then-insert sequence was raceable
+    // under concurrent requests and could over-consume a plan.
+    let car;
+    if (isDealer) {
+      const listingPayload = {
+        ...body,
+        slug: body.slug || undefined,
+        body_type: body.bodyType,
+        location_city: body.city,
+        is_verified_dealer: body.isVerifiedDealer,
+        is_promoted: body.isPromoted,
+        auction_status: body.auctionStatus,
+        auction_end: body.auctionEnd,
+        current_bid: body.currentBid,
+        bids_count: body.bidsCount,
+        highest_bidder_id: body.highestBidderId,
+        allow_bid: body.allowBid,
+        allow_buy: body.allowBuy,
+        cover_image: body.coverImage,
+        trust_score: body.trustScore,
+        escrow_enabled: body.escrowEnabled,
+        price_history: body.priceHistory,
+        starting_bid: body.startingBid,
+        reserve_price: body.reservePrice,
+        reserve_mode: body.reserveMode,
+        promotion_expires_at: body.promotionExpiresAt,
+        dealer_phone: body.dealerPhone,
+        ntsa_verified: body.ntsaVerified,
+        duty_status: body.dutyStatus,
+        logbook_verified: body.logbookVerified,
+      };
+      const result = await atomicCreateDealerListing({
+        dealerId: req.user.id,
+        listing: listingPayload,
+        idempotencyKey: req.get("Idempotency-Key") || `listing:${req.user.id}:${randomUUID()}`,
+      });
+      car = await Car.findById(result?.listing?.id);
+      if (!car) throw new Error("Atomic listing creation returned no persisted listing");
+    } else {
+      car = await Car.create(body);
+      if (shouldIncrementListingCount) {
+        const updateOps = { $inc: { listingCount: 1 } };
+        if (isSeller && !seller.firstVehicleUsed) updateOps.firstVehicleUsed = true;
+        await User.findByIdAndUpdate(req.user.id, updateOps);
       }
-      await User.findByIdAndUpdate(req.user.id, updateOps);
     }
 
     await cacheDelPattern("cars:list:*");
@@ -483,15 +523,39 @@ export const createCar = async (req, res) => {
     // ── BACKGROUND: Upload images to Cloudinary after response ──
     if (pendingFiles && cloudinaryConfigured) {
       setImmediate(async () => {
-        for (let attempt = 1; attempt <= 3; attempt++) {
+        const recoveryJobs = [];
+        for (const file of pendingFiles) {
           try {
-            const uploaded = await uploadMultiple(pendingFiles, "kayad/cars");
-            await Car.findByIdAndUpdate(car._id, { $set: { images: uploaded } });
-            cleanupFiles(pendingFiles);
-            break;
+            const job = await registerMediaUploadJob({
+              listingId: car._id,
+              ownerId: req.user.id,
+              sourcePath: file.path,
+              metadata: { originalName: file.originalname, mimeType: file.mimetype },
+            });
+            recoveryJobs.push({ file, job });
           } catch (e) {
-            logWarn(`Cloudinary upload attempt ${attempt}/3 failed:`, { error: e.message });
-            if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 2000));
+            logWarn("Media recovery job registration failed", { error: e.message, listingId: car._id });
+          }
+        }
+
+        for (const { file, job } of recoveryJobs) {
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              const uploaded = await uploadMultiple([file], "kayad/cars");
+              const item = uploaded?.[0];
+              if (!item?.url || !item?.public_id) throw new Error("Cloudinary returned incomplete media metadata");
+              const current = await Car.findById(car._id);
+              const images = Array.isArray(current?.images) ? current.images : [];
+              const nextImages = images.map((img) => img?._pending && img?.url?.endsWith(`/uploads/${path.basename(file.path)}`) ? item : img);
+              await Car.findByIdAndUpdate(car._id, { $set: { images: nextImages } });
+              await completeMediaUpload({ jobId: job?.id, publicId: item.public_id, remoteUrl: item.url, metadata: { width: item.width, height: item.height, bytes: item.bytes } });
+              cleanupFiles([file]);
+              break;
+            } catch (e) {
+              logWarn(`Cloudinary upload attempt ${attempt}/3 failed:`, { error: e.message, listingId: car._id });
+              if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 2000));
+              else await registerMediaUploadFailure({ listingId: car._id, ownerId: req.user.id, sourcePath: file.path, error: e, metadata: { originalName: file.originalname, mimeType: file.mimetype } }).catch((recoveryError) => logWarn("Media failure persistence failed", { error: recoveryError.message, listingId: car._id }));
+            }
           }
         }
       });

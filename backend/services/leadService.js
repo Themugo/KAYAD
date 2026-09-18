@@ -5,9 +5,8 @@
 // ─────────────────────────────────────────────────────────────
 
 import { addTimelineEvent, getLeadTimeline } from "./leadTimelineService.js";
-import { logInfo, logError, logWarn } from "../utils/logger.js";
-import { findAll, findById, findOne, create, count, aggregate } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
+import { logInfo, logError } from "../utils/logger.js";
+import { findAll, findById, findOne, create, update, count, aggregate } from "../db/index.js";
 
 // =============================
 // ➕ CREATE LEAD
@@ -73,9 +72,12 @@ export const updateLeadStage = async (leadId, newStage, actorId) => {
       throw new Error("Lead not found");
     }
 
-    await lead.updateStage(newStage, actorId);
+    const allowedStages = new Set(["new", "contacted", "negotiating", "inspectionBooked", "reserved", "sold", "lost", "escrow_started"]);
+    if (!allowedStages.has(newStage)) throw new Error("Invalid lead stage");
+    const updated = await update("leads", leadId, { stage: newStage, lastActivityAt: new Date() });
+    await addTimelineEvent(leadId, "stage_changed", actorId, "dealer", `Lead stage changed to ${newStage}`, { stage: newStage });
     logInfo("Lead stage updated", { leadId, newStage, actorId });
-    return lead;
+    return updated;
   } catch (err) {
     logError("Failed to update lead stage", err, { leadId, newStage });
     throw err;
@@ -93,15 +95,12 @@ export const addLeadActivity = async (leadId, type, actorId, details) => {
       throw new Error("Lead not found");
     }
 
-    await lead.addActivity(type, actorId, "dealer", details.description, details.metadata);
-
-    if (details.totalMessages) {
-      lead.totalMessages = details.totalMessages;
-      await lead.save();
-    }
-
-    logInfo("Lead activity added", { leadId, type, actorId });
-    return lead;
+    const activity = await create("lead_activities", { lead: leadId, type, actor: actorId ? "dealer" : "system", actorId, description: details.description, metadata: details.metadata || {} });
+    const updates = { lastActivityAt: new Date() };
+    if (details.totalMessages !== undefined) updates.totalMessages = details.totalMessages;
+    const updated = await update("leads", leadId, updates);
+    logInfo("Lead activity added", { leadId, type, actorId, activityId: activity.id });
+    return updated;
   } catch (err) {
     logError("Failed to add lead activity", err, { leadId, type });
     throw err;
@@ -114,7 +113,7 @@ export const addLeadActivity = async (leadId, type, actorId, details) => {
 
 export const getDealerLeads = async (dealerId, filters = {}) => {
   try {
-    const leads = await Lead.getDealerLeads(dealerId, filters);
+    const leads = await findAll("leads", { filters: { dealer: dealerId, ...filters }, orderBy: "createdAt", ascending: false, limit: 500 });
     return leads;
   } catch (err) {
     logError("Failed to get dealer leads", err, { dealerId });
@@ -155,9 +154,10 @@ export const archiveLead = async (leadId, actorId) => {
       throw new Error("Lead not found");
     }
 
-    await lead.archive(actorId);
+    const updated = await update("leads", leadId, { archived: true, lastActivityAt: new Date() });
+    await addTimelineEvent(leadId, "lead_archived", actorId, "dealer", "Lead archived", {});
     logInfo("Lead archived", { leadId, actorId });
-    return lead;
+    return updated;
   } catch (err) {
     logError("Failed to archive lead", err, { leadId });
     throw err;
@@ -175,9 +175,10 @@ export const markLeadAsHot = async (leadId, actorId) => {
       throw new Error("Lead not found");
     }
 
-    await lead.markAsHot(actorId);
+    const updated = await update("leads", leadId, { isHot: true, lastActivityAt: new Date() });
+    await addTimelineEvent(leadId, "lead_marked_hot", actorId, "dealer", "Lead marked as hot", {});
     logInfo("Lead hot status updated", { leadId, actorId });
-    return lead;
+    return updated;
   } catch (err) {
     logError("Failed to mark lead as hot", err, { leadId });
     throw err;
@@ -260,8 +261,10 @@ export const calculateResponseTime = async (dealerId, startDate, endDate) => {
 
 export const getLeadPipeline = async (dealerId) => {
   try {
-    const pipeline = await Lead.getLeadPipeline(dealerId);
-    return pipeline;
+    const leads = await findAll("leads", { filters: { dealer: dealerId, archived: false }, limit: 1000 });
+    const stages = {};
+    for (const lead of leads) { const key = lead.stage || "new"; stages[key] = (stages[key] || 0) + 1; }
+    return Object.entries(stages).map(([stage, count]) => ({ stage, count }));
   } catch (err) {
     logError("Failed to get lead pipeline", err, { dealerId });
     throw err;
@@ -338,9 +341,12 @@ export const findOrCreateLeadFromChat = async (chatId) => {
       throw new Error("Chat not found");
     }
 
-    const buyerId = chat.participants.find((p) => p.toString() !== chat.car?.dealer?.toString());
-    const dealerId = chat.car?.dealer;
-    const vehicleId = chat.car?._id;
+    const participants = Array.isArray(chat.participants) ? chat.participants : [];
+    const carId = chat.car || chat.carId;
+    const vehicle = carId ? await findById("cars", carId) : null;
+    const dealerId = vehicle?.dealer;
+    const buyerId = participants.find((p) => String(p) !== String(dealerId));
+    const vehicleId = vehicle?.id || carId;
 
     if (!buyerId || !dealerId) {
       throw new Error("Invalid chat participants");
@@ -389,7 +395,7 @@ export const findOrCreateLeadFromEscrow = async (escrowId) => {
 
     const buyerId = escrow.buyer;
     const dealerId = escrow.seller;
-    const vehicleId = escrow.car?._id;
+    const vehicleId = escrow.car?.id || escrow.car || null;
 
     const lead = await createLead(buyerId, dealerId, vehicleId, "chat", null);
 

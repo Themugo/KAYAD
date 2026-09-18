@@ -238,7 +238,9 @@ interface EmptyStateProps {
   icon?: React.ReactNode;
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  desc?: string;
+  action?: React.ReactNode | (() => void);
+  actionLabel?: string;
   secondaryAction?: React.ReactNode;
   className?: string;
 }
@@ -247,7 +249,9 @@ export function EmptyState({
   icon,
   title,
   description,
+  desc,
   action,
+  actionLabel,
   secondaryAction,
   className = '',
 }: EmptyStateProps) {
@@ -263,13 +267,17 @@ export function EmptyState({
         {title}
       </h3>
 
-      {description && (
+      {(description || desc) && (
         <p className="font-sans text-sm text-warm-500 max-w-sm mb-6">
-          {description}
+          {description || desc}
         </p>
       )}
 
-      {action && <div className="mt-2">{action}</div>}
+      {typeof action === 'function' ? (
+        <button type="button" className="mt-2 rounded-xl bg-[#1E3063] px-4 py-2.5 text-xs font-bold text-white" onClick={action}>
+          {actionLabel || 'Continue'}
+        </button>
+      ) : action ? <div className="mt-2">{action}</div> : null}
 
       {secondaryAction && (
         <div className="mt-3">{secondaryAction}</div>

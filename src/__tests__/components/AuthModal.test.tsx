@@ -109,13 +109,15 @@ describe('AuthModal - real backend authentication (Phase 3)', () => {
     renderModal();
     await waitFor(() => expect(screen.getByText('Sign In to KAYAD')).toBeTruthy());
 
-    fireEvent.click(screen.getByText('Create Account', { selector: 'button' }));
+    fireEvent.click(screen.getByText('Create a KAYAD account', { selector: 'button' }));
     await waitFor(() => expect(screen.getByText('Create Your KAYAD Account')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Dealer' }));
+    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+    await waitFor(() => expect(screen.getByPlaceholderText('Jane Wanjiru')).toBeTruthy());
 
     authMocks.register.mockResolvedValue({ id: 'u2', name: 'New Dealer', email: 'dealer@kayad.co.ke', role: 'dealer' });
 
     fireEvent.change(screen.getByPlaceholderText('Jane Wanjiru'), { target: { value: 'New Dealer' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Dealer' }));
     fireEvent.change(screen.getByPlaceholderText('name@example.co.ke'), { target: { value: 'dealer@kayad.co.ke' } });
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'securepass1' } });
     // "Create Account" appears twice - the mode tab and the submit

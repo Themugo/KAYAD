@@ -5,6 +5,8 @@ export interface AvatarProps {
   src?: string;
   alt?: string;
   name?: string;
+  initials?: string;
+  variant?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   shape?: 'circle' | 'square';
   status?: 'online' | 'offline' | 'away' | 'busy';
@@ -73,6 +75,7 @@ export function Avatar({
   src,
   alt,
   name = 'User',
+  initials,
   size = 'md',
   shape = 'circle',
   status,
@@ -80,7 +83,7 @@ export function Avatar({
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = src && !imageError;
-  const initials = getInitials(name);
+  const displayInitials = initials || getInitials(name);
   const bgColor = getColorFromName(name);
 
   const shapeClass = shape === 'circle' ? 'rounded-full' : 'rounded-lg';
@@ -110,7 +113,7 @@ export function Avatar({
             font-semibold text-white
           `}
         >
-          {initials || <User size={Number(size.replace('xl', '16').replace('lg', '12').replace('md', '10').replace('sm', '8').replace('xs', '6'))} />}
+          {displayInitials || <User size={Number(size.replace('xl', '16').replace('lg', '12').replace('md', '10').replace('sm', '8').replace('xs', '6'))} />}
         </div>
       )}
 

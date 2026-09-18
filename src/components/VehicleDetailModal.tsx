@@ -140,12 +140,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       return { safety: [], comfort: [], technology: [], utility: [] } as Record<string, string[]>;
     }
 
-    const rawFeatures = vehicle.features || [
-      'EyeSight Driver Assist', 'Lane Departure Warning', 'ABS Brakes', 'Multiple Airbags',
-      'Heated Seats', 'Dual Climate Control', 'Leather Interior', 'Sunroof',
-      'Apple CarPlay', 'Bluetooth Connectivity', 'Premium Audio System', 'Reverse Camera',
-      'Roof Rails', 'Power Tailgate', 'Cargo Cover', 'Alloy Wheels'
-    ];
+    const rawFeatures = Array.isArray(vehicle.features) ? vehicle.features : [];
 
     const safety: string[] = [];
     const comfort: string[] = [];

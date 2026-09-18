@@ -45,15 +45,17 @@ for (const file of sourceFiles) {
   if (forbiddenImports.test(text)) fail(`source references retired module: ${path.relative(root, file)}`);
 }
 
-const seller = read('src/features/PrivateSellerDashboardView/components/PrivateSellerDashboardView.tsx');
+const seller = read('src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx');
 for (const token of ['SAMPLE_', 'KDG 492A', 'Jimmy Mugo', '7,300,000', 'setListings', 'buyerProgress', 'requiredAction']) {
   if (seller.includes(token)) fail(`active private seller dashboard contains stale/fabricated token: ${token}`);
 }
-if (!seller.includes('Private-seller listing creation is not exposed by the current backend contract.')) fail('private seller listing creation is not fail-closed');
-if (!seller.includes('No seller offer feed is currently exposed by the backend.')) fail('private seller offer flow is not truthful');
+if (!/createCar\b/.test(seller)) fail('private seller listing creation is not wired to canonical vehicle service');
+if (!/getMyListings\b/.test(seller)) fail('private seller inventory does not use canonical own-listings service');
+if (!/publishedCarId/.test(seller) || !/publishError/.test(seller)) fail('private seller publication state is not fail-closed');
+if (/MOCK_|SAMPLE_/i.test(seller)) fail('active private seller platform contains fabricated data language');
 
 const activeAuction = read('src/features/AuctionsView.tsx');
-if (!activeAuction.includes('auctionAPI.active')) fail('active auction page is not backend-driven');
+if (!activeAuction.includes('fetchActiveAuctions')) fail('active auction page is not backend-driven');
 if (activeAuction.includes('SAMPLE_') || activeAuction.includes('MOCK_')) fail('active auction page contains local sample data');
 
 const buyerIndex = read('src/features/OwnershipPlatform/index.ts');

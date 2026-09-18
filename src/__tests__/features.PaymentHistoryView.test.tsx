@@ -6,7 +6,7 @@ const paymentMocks = vi.hoisted(() => ({ myPayments: vi.fn(), status: vi.fn() })
 const myPayments = paymentMocks.myPayments;
 const status = paymentMocks.status;
 
-vi.mock('../api/api', () => ({ paymentsAPI: paymentMocks }));
+vi.mock('../services/paymentApi', () => ({ getMyPayments: paymentMocks.myPayments, getPaymentStatus: paymentMocks.status }));
 vi.mock('../utils/helpers', () => ({
   formatKES: (value: number | string) => `KES ${Number(value).toLocaleString('en-KE')}`,
   timeAgo: () => 'today',
@@ -27,7 +27,7 @@ describe('PaymentHistoryView', () => {
         status: 'success',
         mpesaReceipt: 'QAB123',
         createdAt: '2026-09-03T08:00:00Z',
-        car: { title: 'Toyota Land Cruiser' },
+        carDetails: { title: 'Toyota Land Cruiser' },
       }],
       pagination: { page: 1, limit: 10, total: 1, pages: 1 },
     });
@@ -36,7 +36,7 @@ describe('PaymentHistoryView', () => {
 
     expect(await screen.findByText('Toyota Land Cruiser')).toBeInTheDocument();
     expect(screen.getAllByText('KES 125,000').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText('Completed')).toBeInTheDocument();
+    expect(screen.getByText('Completed', { selector: 'span' })).toBeInTheDocument();
     expect(screen.getByText('QAB123')).toBeInTheDocument();
     expect(myPayments).toHaveBeenCalledWith({ page: 1, limit: 10 });
   });

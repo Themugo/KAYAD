@@ -259,7 +259,7 @@ export const placeBid = async (req, res) => {
       userId,
       amount,
       maxBid: maxBid || null,
-      phone,
+      phone: bidder.phone,
       bidderTag: generatePseudonym(userId, carId),
       status: bidStatus,
       checkoutRequestId,

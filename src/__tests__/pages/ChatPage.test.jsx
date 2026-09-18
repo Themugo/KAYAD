@@ -16,6 +16,6 @@ describe('Canonical ChatView', () => {
   afterEach(() => cleanup());
   it('renders the unified communication surface', async () => {
     render(<ChatView user={{ id: 'u1', name: 'Test User', role: 'buyer' }} />);
-    expect(await screen.findByText(/messages/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Unified Operations Communication Center/i)).toBeInTheDocument();
   });
 });

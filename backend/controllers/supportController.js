@@ -195,6 +195,10 @@ export const updateTicketStatus = async (req, res) => {
     const { ticketId } = req.params;
     const { status, assignedTo, escalatedTo, priority } = req.body;
     const userId = req.user.id || req.user._id;
+    const allowedStatuses = new Set(["open", "in_progress", "pending_customer", "escalated", "resolved", "closed"]);
+    const allowedPriorities = new Set(["low", "normal", "high", "urgent"]);
+    if (status !== undefined && !allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid support ticket status" });
+    if (priority !== undefined && !allowedPriorities.has(priority)) return res.status(400).json({ success: false, message: "Invalid support ticket priority" });
 
     const ticket = await SupportTicket.findById(ticketId);
     if (!ticket) {

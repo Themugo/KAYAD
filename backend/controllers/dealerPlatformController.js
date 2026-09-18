@@ -19,6 +19,7 @@ import { getDealerEntitlement } from "../services/dealerSubscription.service.js"
 import { create, findAll, findOne, update } from "../db/index.js";
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
+import { sendTeamInviteEmail } from "../services/email.service.js";
 
 // ============================================================
 // DEALER DASHBOARD
@@ -531,7 +532,8 @@ export async function getAIRecommendations(req, res) {
 // ============================================================
 
 export async function getTeamMembers(req, res) {
-  const rows = await findAll("dealer_teams", { filters: { dealer: req.user.id }, orderBy: "createdAt", ascending: false, limit: 200 });
+  const dealerId = req.dealerId || req.user.id;
+  const rows = await findAll("dealer_teams", { filters: { dealer: dealerId }, orderBy: "createdAt", ascending: false, limit: 200 });
   const memberIds = rows.map(r => r.member).filter(Boolean);
   const users = memberIds.length ? await User.find({ id: { $in: memberIds } }) : [];
   const byId = new Map(users.map(u => [u.id, u]));
@@ -543,17 +545,20 @@ export async function inviteTeamMember(req, res) {
   const role = String(req.body?.role || "sales_agent");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ success: false, message: "Valid email is required" });
   if (!["manager","sales_agent","lot_agent","finance_officer","viewer"].includes(role)) return res.status(400).json({ success: false, message: "Invalid team role" });
-  const existing = await findOne("dealer_teams", { dealer: req.user.id, inviteEmail: email });
+  const dealerId = req.dealerId || req.user.id;
+  const existing = await findOne("dealer_teams", { dealer: dealerId, inviteEmail: email });
   if (existing && existing.status !== "removed") return res.status(409).json({ success: false, message: "An active or pending invitation already exists for this email" });
   const token = crypto.randomBytes(32).toString("hex");
   const hash = crypto.createHash("sha256").update(token).digest("hex");
-  const row = existing ? await update("dealer_teams", existing.id, { member: null, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id }) : await create("dealer_teams", { dealer: req.user.id, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id });
+  const row = existing ? await update("dealer_teams", existing.id, { member: null, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id }) : await create("dealer_teams", { dealer: dealerId, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id });
+  await sendTeamInviteEmail(email, req.user.name || "KAYAD Dealer", role, token).catch(() => {});
   await logAuditEvent({ action: "dealer_team_invitation_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", details: { email, role }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.status(201).json({ success: true, data: { ...row, inviteToken: token } });
+  return res.status(201).json({ success: true, data: { ...row, inviteToken: undefined } });
 }
 
 export async function updateTeamMember(req, res) {
-  const existing = await findOne("dealer_teams", { id: req.params.memberId, dealer: req.user.id });
+  const dealerId = req.dealerId || req.user.id;
+  const existing = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
   if (!existing) return res.status(404).json({ success: false, message: "Team member not found" });
   const updates = {};
   if (req.body?.role !== undefined) { if (!["manager","sales_agent","lot_agent","finance_officer","viewer"].includes(req.body.role)) return res.status(400).json({ success: false, message: "Invalid team role" }); updates.role = req.body.role; }
@@ -743,11 +748,11 @@ export async function getInspectionOrders(req, res) {
     if (!carIds.length) {
       return res.json({ success: true, data: { items: [], stats: { total: 0, completed: 0, inProgress: 0, scheduled: 0 } } });
     }
-    const inspections = await InspectionOrder.find({ carId: { $in: carIds } }).sort({ createdAt: -1 });
+    const inspections = await InspectionOrder.find({ car: { $in: carIds } }).sort({ createdAt: -1 });
     const items = inspections.map((inspection) => ({
       id: inspection.id,
-      vehicleId: inspection.carId,
-      vehicle: cars.find((car) => car.id === inspection.carId)?.title || "Vehicle",
+      vehicleId: inspection.car,
+      vehicle: cars.find((car) => car.id === inspection.car)?.title || "Vehicle",
       status: inspection.status,
       scheduledAt: inspection.scheduledAt || null,
       completedAt: inspection.completedAt || null,

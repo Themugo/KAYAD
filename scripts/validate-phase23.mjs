@@ -17,7 +17,7 @@ for (const root of ['backend','scripts']) {
 const production = files.map(p => read(p)).join('\n');
 const migrationText = readdirSync('supabase/migrations').filter(f => f.endsWith('.sql') || f.endsWith('.sql.sql')).map(f => read(join('supabase/migrations',f))).join('\n');
 
-if (/findById\(['"]auctions|find(?:All|One)\(['"]auctions|count\(['"]auctions|from\(['"]auctions/.test(production)) throw new Error('Production backend still queries auctions table');
+if (/findAll\((['\"])auctions\1|findById\((['\"])auctions\2|findOne\((['\"])auctions\3|count\((['\"])auctions\4/.test(production)) throw new Error('Production backend still queries auctions table');
 if (/auction_id\s+[^\n]*REFERENCES\s+auctions/i.test(migrationText)) throw new Error('Migration chain still references separate auctions table');
 if (/CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?\s+auctions/i.test(migrationText)) throw new Error('Migration chain creates separate auctions table');
 if (/mode === ['"]mock['"]|Mock payment|B2C mock|MOCK SMS|SMS_PROVIDER=mock/.test(production)) throw new Error('Production payment/SMS mock-success path remains');

@@ -7,16 +7,20 @@ import { X } from 'lucide-react';
 
 // --- BUTTON COMPONENT ---
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'danger' | 'coral';
+  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'danger' | 'coral' | 'success';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   fullWidth?: boolean;
+  full?: boolean;
+  icon?: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   fullWidth = false,
+  full = false,
+  icon,
   children,
   className = '',
   disabled,
@@ -31,7 +35,8 @@ export const Button: React.FC<ButtonProps> = ({
     outline: 'border border-slate-300 hover:bg-slate-50 text-slate-700',
     ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
     danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
-    coral: 'bg-[#D96B43] hover:bg-[#c65a34] text-white shadow-sm'
+    coral: 'bg-[#D96B43] hover:bg-[#c65a34] text-white shadow-sm',
+    success: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
   };
 
   const sizeStyles = {
@@ -40,7 +45,7 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'text-sm px-5 py-3 rounded-xl gap-2.5'
   };
 
-  const widthStyle = fullWidth ? 'w-full' : '';
+  const widthStyle = fullWidth || full ? 'w-full' : '';
 
   return (
     <button
@@ -48,6 +53,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       {...props}
     >
+      {icon && <span aria-hidden="true">{icon}</span>}
       {children}
     </button>
   );
@@ -55,7 +61,7 @@ export const Button: React.FC<ButtonProps> = ({
 
 // --- BADGE COMPONENT ---
 export interface BadgeProps {
-  variant?: 'verified' | 'inspected' | 'escrow' | 'live' | 'accent' | 'neutral' | 'success' | 'warning' | 'danger' | 'outline' | 'secondary';
+  variant?: 'verified' | 'inspected' | 'escrow' | 'live' | 'accent' | 'neutral' | 'success' | 'warning' | 'danger' | 'outline' | 'secondary' | 'blue' | 'green' | 'orange' | 'premium' | 'info' | 'amber';
   size?: 'sm' | 'md';
   children: React.ReactNode;
   className?: string;
@@ -80,7 +86,13 @@ export const Badge: React.FC<BadgeProps> = ({
     warning: 'bg-amber-50 text-amber-800 border border-amber-200',
     danger: 'bg-rose-50 text-rose-700 border border-rose-200',
     outline: 'bg-transparent text-slate-600 border border-slate-300',
-    secondary: 'bg-slate-200 text-slate-800 border border-slate-300'
+    secondary: 'bg-slate-200 text-slate-800 border border-slate-300',
+    blue: 'bg-blue-50 text-blue-700 border border-blue-200',
+    green: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    orange: 'bg-orange-50 text-orange-700 border border-orange-200',
+    premium: 'bg-amber-50 text-amber-800 border border-amber-200',
+    info: 'bg-sky-50 text-sky-700 border border-sky-200',
+    amber: 'bg-amber-50 text-amber-800 border border-amber-200'
   };
 
   const sizeStyles = {
@@ -500,3 +512,9 @@ export const Image: React.FC<LazyImageProps> = ({
 
 // Export Image as LazyImage for backward compatibility
 export const LazyImage = Image;
+
+// Canonical shared primitives used by legacy-compatible marketplace pages.
+export { Avatar } from './Avatar';
+export { Progress } from './Progress';
+export { Skeleton, EmptyState } from './Skeleton';
+export { Breadcrumb, PriceTag, MapPlaceholder, FilterChip, RangeSlider, Segmented, Drawer, StatCard } from './MarketplacePrimitives';

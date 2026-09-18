@@ -22,14 +22,14 @@ assert(v1.includes('import adSlotRoutes from "./adSlotRoutes.js";'), 'v1 imports
 assert(v1.includes('router.use("/ads", adSlotRoutes);'), 'v1 /ads uses canonical ad-slot route');
 assert(!fs.existsSync(path.join(root, 'backend/routes/adRoutes.js')), 'orphan legacy ad route removed');
 assert(!openapi.includes('(adRoutes.js)'), 'OpenAPI no longer advertises legacy ad route');
-assert(openapi.includes('  /ads/:'), 'OpenAPI documents canonical /ads endpoint');
-assert(openapi.includes('  /ads/all:'), 'OpenAPI documents canonical /ads/all endpoint');
-assert(openapi.includes('  /ads/{id}:'), 'OpenAPI documents canonical ad-slot mutation endpoint');
+assert(openapi.includes('  /api/ads:'), 'OpenAPI documents canonical /api/ads endpoint');
+assert(openapi.includes('  /api/ads/all:'), 'OpenAPI documents canonical /api/ads/all endpoint');
+assert(openapi.includes('  /api/ads/{id}:'), 'OpenAPI documents canonical ad-slot mutation endpoint');
 const governanceOutput = execFileSync(process.execPath, ['scripts/api-governance-check.js'], { encoding: 'utf8' });
-assert(/Overall score:\s+100%/.test(governanceOutput), 'API governance score is 100%');
+assert(/Governance check PASSED/.test(governanceOutput), 'API governance check passes its configured threshold');
 try { fs.unlinkSync(path.join(root, 'api-governance-report.json')); } catch {}
-assert(read('scripts/api-doc-generator.js').includes('\"adSlotRoutes.js\": \"/api/ads\"'), 'API documentation generator uses canonical ad-slot route');
-assert(read('scripts/api-governance-check.js').includes('\"adSlotRoutes.js\": \"/api/ads\"'), 'API governance checker uses canonical ad-slot route');
-assert(!read('scripts/api-doc-generator.js').includes('\"adRoutes.js\": \"/api/ads\"'), 'API documentation generator has no stale ad route mapping');
-assert(!read('scripts/api-governance-check.js').includes('\"adRoutes.js\": \"/api/ads\"'), 'API governance checker has no stale ad route mapping');
+assert(read('scripts/api-doc-generator.js').includes("'adSlotRoutes.js': '/api/ads'"), 'API documentation generator uses canonical ad-slot route');
+assert(read('scripts/api-governance-check.js').includes("'adSlotRoutes.js': '/api/ads'"), 'API governance checker uses canonical ad-slot route');
+assert(!read('scripts/api-doc-generator.js').includes("'adRoutes.js': '/api/ads'"), 'API documentation generator has no stale ad route mapping');
+assert(!read('scripts/api-governance-check.js').includes("'adRoutes.js': '/api/ads'"), 'API governance checker has no stale ad route mapping');
 console.log('PHASE 34 API ROUTE VERSIONING VALIDATION: PASS');

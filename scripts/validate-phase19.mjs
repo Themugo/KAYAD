@@ -18,7 +18,7 @@ if (/from ["']\.\.\/models\/Auction\.js["']/.test(controller)) throw new Error('
 if (/from ["'].*auctionEnrichment|auctionSync\.service|services\/auction\.service/.test(view + controller)) throw new Error('Legacy auction service dependency remains');
 if (!controller.includes('auctionStatus: "live"')) throw new Error('Canonical live auction filter missing');
 if (!controller.includes('Car.find(filter)')) throw new Error('Public auction list is not backed by cars');
-if (!view.includes('auctionAPI.active')) throw new Error('Auction UI is not using the live auction API');
+if (!view.includes('fetchActiveAuctions')) throw new Error('Auction UI is not using the canonical live auction API');
 if (!view.includes('placeBid')) throw new Error('Auction UI is not wired to canonical bid placement');
 if (view.includes('setSessions') || view.includes('MOCK_') || view.includes('SAMPLE_')) throw new Error('Legacy local auction-session state remains');
 

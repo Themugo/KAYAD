@@ -52,10 +52,16 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         setComplete({ kind: 'application' });
         return;
       }
-      const user = await authRegister({
-        name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), password: form.password,
-        role, businessName: isSeller ? form.businessName.trim() : undefined, location: isSeller ? form.location.trim() : undefined,
-      });
+      const registration = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        role,
+        ...(form.phone.trim() ? { phone: form.phone.trim() } : {}),
+        ...(isSeller && form.businessName.trim() ? { businessName: form.businessName.trim() } : {}),
+        ...(isSeller && form.location.trim() ? { location: form.location.trim() } : {}),
+      };
+      const user = await authRegister(registration);
       setComplete({ kind: 'account', user });
       onComplete?.(user);
     } catch (err) {
@@ -89,7 +95,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   return (
     <div className="p-5 sm:p-7">
       <div className="mb-6 flex items-start justify-between gap-4">
-        <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">KAYAD onboarding</p><h2 className="mt-1 text-2xl font-black text-[#17244B]">Set up the right account</h2><p className="mt-1 text-xs text-slate-500">One onboarding path, with the correct registration and verification route for each platform category.</p></div>
+        <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">KAYAD onboarding</p><h2 className="mt-1 text-2xl font-black text-[#17244B]">Create Your KAYAD Account</h2><p className="mt-1 text-xs text-slate-500">One onboarding path, with the correct registration and verification route for each platform category.</p></div>
         {onClose && <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close">×</button>}
       </div>
       <div className="mb-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><span className={step >= 1 ? 'text-[#17244B]' : ''}>1. Account type</span><span className="h-px flex-1 bg-slate-200"/><span className={step >= 2 ? 'text-[#17244B]' : ''}>2. Details</span><span className="h-px flex-1 bg-slate-200"/><span>3. Complete</span></div>
@@ -98,7 +104,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         <div className="grid gap-3 sm:grid-cols-2">
           {ROLE_OPTIONS.map((option) => {
             const Icon = option.icon; const active = role === option.id;
-            return <button key={option.id} onClick={() => { setRole(option.id); setError(''); }} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#17244B] bg-[#17244B] text-white shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+            return <button key={option.id} type="button" aria-label={option.title} onClick={() => { setRole(option.id); setError(''); }} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#17244B] bg-[#17244B] text-white shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
               <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${active ? 'bg-white/10 text-amber-300' : 'bg-slate-100 text-[#17244B]'}`}><Icon size={20}/></div>
               <div className="text-sm font-black">{option.title}</div><div className={`mt-1 text-xs leading-5 ${active ? 'text-slate-300' : 'text-slate-500'}`}>{option.description}</div>
             </button>;
@@ -111,10 +117,10 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         <div className="space-y-4">
           <div className="rounded-2xl bg-slate-50 p-4"><div className="text-sm font-black text-[#17244B]">{selected.title}</div><div className="mt-1 text-xs text-slate-500">{selected.description}</div></div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="text-xs font-bold text-slate-600">Full name<input className={inputClass} value={form.name} onChange={e=>set('name',e.target.value)} autoComplete="name" required /></label>
-            <label className="text-xs font-bold text-slate-600">Email<input className={inputClass} type="email" value={form.email} onChange={e=>set('email',e.target.value)} autoComplete="email" required /></label>
+            <label className="text-xs font-bold text-slate-600">Full name<input className={inputClass} value={form.name} placeholder="Jane Wanjiru" onChange={e=>set('name',e.target.value)} autoComplete="name" required /></label>
+            <label className="text-xs font-bold text-slate-600">Email<input className={inputClass} type="email" value={form.email} placeholder="name@example.co.ke" onChange={e=>set('email',e.target.value)} autoComplete="email" required /></label>
             <label className="text-xs font-bold text-slate-600">Phone<input className={inputClass} value={form.phone} onChange={e=>set('phone',e.target.value)} autoComplete="tel" required /></label>
-            {role !== 'inspector' && <label className="text-xs font-bold text-slate-600">Password<input className={inputClass} type="password" value={form.password} onChange={e=>set('password',e.target.value)} autoComplete="new-password" required /></label>}
+            {role !== 'inspector' && <label className="text-xs font-bold text-slate-600">Password<input className={inputClass} type="password" value={form.password} placeholder="••••••••" onChange={e=>set('password',e.target.value)} autoComplete="new-password" required /></label>}
             {isSeller && <>
               <label className="text-xs font-bold text-slate-600">{role === 'dealer' ? 'Business name' : 'Trading name (optional)'}<input className={inputClass} value={form.businessName} onChange={e=>set('businessName',e.target.value)} required={role==='dealer'} /></label>
               <label className="text-xs font-bold text-slate-600">Location / city<input className={inputClass} value={form.location} onChange={e=>set('location',e.target.value)} required={role==='dealer'} /></label>

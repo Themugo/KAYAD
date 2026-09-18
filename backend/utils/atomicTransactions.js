@@ -5,6 +5,17 @@ import { getSupabase } from "./supabase.js";
  * These are PostgreSQL functions invoked through Supabase RPC. They must not
  * be replaced with application-side read/validate/write sequences.
  */
+
+export async function atomicCreateDealerListing({ dealerId, listing, idempotencyKey }) {
+  const { data, error } = await getSupabase().rpc("kayad_create_dealer_listing_atomic", {
+    p_dealer_id: dealerId,
+    p_listing: listing,
+    p_idempotency_key: idempotencyKey,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function atomicPlaceBid({
   carId,
   userId,

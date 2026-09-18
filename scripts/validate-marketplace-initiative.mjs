@@ -12,7 +12,7 @@ check('central marketplace read service exists', fs.existsSync(path.join(root,'s
 check('marketplace vehicle reads use canonical GET /api/cars', vehicle.includes("/api/cars"));
 check('marketplace mapper is the canonical vehicle mapper', core.includes('mapBackendCarToVehicle'));
 check('live auctions use canonical auction API', core.includes('fetchActiveAuctions'));
-check('my bids use canonical backend API', core.includes('bidsAPI.myBids'));
+check('my bids use canonical backend API', core.includes('myBids()') && core.includes("from './bidApi'"));
 check('authenticated bid history is loaded from server', ctx.includes('fetchMyBids()') || ctx.includes('bidsAPI.myBids()'));
 check('logout clears prior user bid read model', ctx.includes('if (!auth?.user?.id)') && ctx.includes('setBids([])'));
 check('bid placement does not synthesize a bid ID', !ctx.includes('id: `bid_${Date.now()}`'));

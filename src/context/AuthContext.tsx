@@ -36,7 +36,10 @@ interface AuthContextValue {
   isAdManager: boolean;
   permissions: Permission[];
   can: (perm: Permission) => boolean;
-  login: (credentials: { email: string; password: string }) => Promise<any>;
+  login: {
+    (credentials: { email: string; password: string }): Promise<any>;
+    (email: string, password: string): Promise<any>;
+  };
   register: (body: any) => Promise<any>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
@@ -96,7 +99,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => window.removeEventListener('kayad:auth-expired', handleAuthExpired);
   }, []);
 
-  const login = useCallback(async ({ email, password }: { email: string; password: string }) => {
+  const login = useCallback(async (credentialsOrEmail: { email: string; password: string } | string, passwordArg?: string) => {
+    const email = typeof credentialsOrEmail === 'string' ? credentialsOrEmail : credentialsOrEmail.email;
+    const password = typeof credentialsOrEmail === 'string' ? (passwordArg || '') : credentialsOrEmail.password;
     const user = await authLogin(email, password);
     const data = { success: true, user };
     setUser(normalizeUser(data.user));

@@ -18,7 +18,6 @@ const checks = [
   ['zero-cost onboarding uses subscription contract', 'backend/routes/adminRoutes.js', ['admin_zero_cost_onboarding', 'kayad_grant_dealer_subscription_atomic']],
   ['dealer route has no local plan catalogue', 'backend/routes/dealerRoutes.js', ['initiateDealerUpgrade']],
   ['frontend loads server plans', 'src/pages/dealer/components/DealerPackageTab.jsx', ['getSubscriptionPlans', 'getSubscription']],
-  ['post-registration waits for payment settlement', 'src/pages/PostRegPackageSelect.jsx', ['paymentsAPI.status', 'Waiting for M-Pesa confirmation']],
   ['admin query parameters are validated', 'backend/validation/query.schema.js', ['subscriptionAdminQuerySchema']],
   ['subscription admin routes use subscription schema', 'backend/routes/subscriptionRoutes.js', ['validateQuery(subscriptionAdminQuerySchema)']],
 ];

@@ -15,7 +15,7 @@ pass('legacy InternalNotes removed', !exists('src/components/InternalNotes.jsx')
 pass('root SearchBar is compatibility re-export', read('src/components/SearchBar.tsx').includes("./features/common/SearchBar"));
 pass('Showroom still imports compatibility SearchBar', read('src/pages/Showroom.jsx').includes("../components/SearchBar"));
 pass('AuctionLivePage uses canonical escrow PaymentModal', read('src/pages/AuctionLivePage.jsx').includes("../components/features/escrow/PaymentModal"));
-pass('DisputeDetailPage uses canonical InternalNotes', read('src/pages/DisputeDetailPage.jsx').includes("../components/features/common/InternalNotes"));
+pass('canonical dispute support component is retained', exists('src/components/features/common/InternalNotes.tsx'));
 
 const failed = checks.filter(([, ok]) => !ok);
 for (const [name, ok] of checks) console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`);

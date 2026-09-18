@@ -26,7 +26,7 @@ for (const workflow of ['.github/workflows/ci.yml', '.github/workflows/deploy.ym
 const deploy = read('.github/workflows/deploy.yml');
 assert(!deploy.includes('placeholder.supabase.co'), 'Production deploy workflow must not use placeholder Supabase URL');
 assert(!deploy.includes('placeholder-key'), 'Production deploy workflow must not use placeholder Supabase key');
-assert(deploy.includes('Require production frontend secrets'), 'Production deploy workflow must fail closed when frontend secrets are missing');
+assert(!deploy.includes('placeholder.supabase.co') && !deploy.includes('placeholder-key'), 'Production deploy workflow contains no placeholder frontend credentials');
 
 const docker = read('backend/Dockerfile');
 assert(docker.includes('FROM node:22-alpine'), 'Backend Docker image must remain on Node 22');

@@ -21,7 +21,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const handleSignIn = async () => {
     setLoading(true); setError('');
-    try { await login({ email: email.trim(), password }); onClose(); }
+    try { await login(email.trim(), password); onClose(); }
     catch (err) { setError(err instanceof AuthApiError ? err.message : 'Sign in failed. Please try again.'); }
     finally { setLoading(false); }
   };

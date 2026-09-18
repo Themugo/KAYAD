@@ -26,8 +26,6 @@ const EscrowView = React.lazy(() => import('./features/EscrowView'));
 const InspectionsView = React.lazy(() => import('./features/InspectionsView'));
 const FinancingView = React.lazy(() => import('./features/FinancingView'));
 const DealersView = React.lazy(() => import('./features/DealersView'));
-const DashboardView = React.lazy(() => import('./features/DashboardView'));
-const PrivateSellerDashboardView = React.lazy(() => import('./features/PrivateSellerDashboardView'));
 const ChatView = React.lazy(() => import('./features/ChatView'));
 const AdminView = React.lazy(() => import('./features/AdminView'));
 const SupportView = React.lazy(() => import('./features/SupportView'));
@@ -415,32 +413,6 @@ function AppInner() {
             <DashboardHub user={authUser} vehicles={vehicles} onNavigate={(nav) => setActiveNav(nav)} />
           )}
 
-          {activeNav === 'dashboard-legacy' && (
-            <DashboardView
-              savedVehicles={savedVehicles}
-              vehicles={vehicles}
-              // Fixed: this dashboard widget's own escrow-deals list is
-              // a separate integration from the real Escrow page
-              // (src/features/EscrowView.tsx, now connected to real
-              // data) - out of today's explicit scope. Passing an
-              // honest empty list rather than continuing to show fake
-              // sample deals here.
-              deals={[]}
-              user={user}
-              messages={[]}
-              comparedVehicles={comparedVehicles}
-              onNavigate={(nav) => setActiveNav(nav)}
-              onQuickViewVehicle={handleOpenVehicleDetails}
-              onToggleSave={handleToggleSave}
-              onToggleCompare={handleToggleCompare}
-              onStartEscrow={handleStartEscrow}
-              onContactSeller={handleContactSeller}
-              onOpenCompareModal={() => setShowCompareModal(true)}
-              onOpenAlertsModal={() => setShowAlertsModal(true)}
-              onOpenAuthModal={() => setShowAuthModal(true)}
-            />
-          )}
-
           {activeNav === 'chat' && (
             <ChatView
               messages={[]}
@@ -496,9 +468,6 @@ function AppInner() {
             <BuyerPlatform user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
-          {activeNav === 'seller-platform' && (
-            <PrivateSellerPlatform user={user} onOpenAuth={() => setShowAuthModal(true)} />
-          )}
 
           {activeNav === 'dealer-dashboard' && (
             <DealerDashboard user={user} onOpenAuth={() => setShowAuthModal(true)} onNavigate={(nav) => setActiveNav(nav)} />
@@ -528,19 +497,8 @@ function AppInner() {
             />
           )}
 
-          {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard') && (
-            <PrivateSellerDashboardView
-              vehicles={vehicles}
-              user={user}
-              // Fixed: same as DashboardView above - a separate
-              // integration, out of today's explicit scope. Honest
-              // empty list instead of fake sample deals.
-              deals={[]}
-              messages={[]}
-              onNavigate={(nav) => setActiveNav(nav)}
-              onQuickViewVehicle={handleOpenVehicleDetails}
-              onOpenAuthModal={() => setShowAuthModal(true)}
-            />
+          {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard' || activeNav === 'seller-platform') && (
+            <PrivateSellerPlatform user={user} onOpenAuth={() => setShowAuthModal(true)} />
           )}
         </Suspense>
         </main>

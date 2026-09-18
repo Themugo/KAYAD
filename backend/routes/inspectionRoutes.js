@@ -1,6 +1,5 @@
 import express from "express";
 import User from "../models/User.js";
-import GlobalSettings from "../models/GlobalSettings.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
@@ -43,8 +42,7 @@ router.post(
 
     // Fixed (Final Integration Phase 4 - inspection frontend
     // integration): confirmed by reproducing the real failure
-    // directly - GlobalSettings maps to a table (global_settings)
-    // that does not exist. The real, only settings-like table
+    // directly - the old global-settings model targeted a table that does not exist. The real settings table
     // (system_settings) is a genuinely different, key/value shape (one
     // row per named setting, e.g. dealer_commission_pct,
     // min_bid_increment) with no ghostCheckFee key anywhere in it -
@@ -58,13 +56,19 @@ router.post(
     // are unavailable. Wrapped so a missing/broken settings lookup
     // degrades to that already-correct default instead of failing the
     // entire, otherwise-working inspection-order request.
-    let settings = null;
+    let fee = 2500;
     try {
-      settings = await GlobalSettings.findOne().lean();
+      const { data: feeSetting, error: feeError } = await getSupabase()
+        .from("system_settings")
+        .select("value")
+        .eq("key", "ghostCheckFee")
+        .maybeSingle();
+      if (feeError) throw feeError;
+      const configuredFee = Number(feeSetting?.value);
+      if (Number.isFinite(configuredFee) && configuredFee > 0) fee = configuredFee;
     } catch (err) {
-      logWarn("GlobalSettings lookup failed, using default inspection fee", { error: err.message });
+      logWarn("Inspection fee setting lookup failed, using default inspection fee", { error: err.message });
     }
-    const fee = settings?.ghostCheckFee || 2500;
 
     let payment;
     try {

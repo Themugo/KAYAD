@@ -7,12 +7,10 @@
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist server.js",
+    "clean": "node scripts/clean.mjs",
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "validate:phase32": "node scripts/validate-phase32.mjs",
-    "validate:phase33": "node scripts/validate-phase33.mjs",
     "validate:phase34": "node scripts/validate-phase34.mjs",
     "validate:phase35": "node scripts/validate-phase35.mjs",
     "validate:phase36": "node scripts/validate-phase36.mjs",
@@ -47,7 +45,10 @@
     "validate:deployment-readiness": "node scripts/validate-deployment-readiness.mjs",
     "validate:backend-runtime-contracts": "node scripts/validate-backend-runtime-contracts.mjs",
     "validate:production-backend": "node scripts/validate-production-backend.mjs",
-    "validate:runtime-integrity": "node scripts/validate-runtime-integrity.mjs"
+    "validate:runtime-integrity": "node scripts/validate-runtime-integrity.mjs",
+    "validate:release": "node scripts/validate-release.mjs",
+    "validate:wave2-invariants": "node scripts/validate-wave2-invariants.mjs",
+    "validate:wave3-convergence": "node scripts/validate-wave3-convergence.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

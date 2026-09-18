@@ -35,11 +35,13 @@ export async function dealers(days = 30) {
 
 export async function auctions(days=30) {
   const safe=clampDays(days), start=new Date(Date.now()-safe*DAY).toISOString();
-  const [auctions,bids]=await Promise.all([
-    findAll('auctions',{filters:{createdAt:{$gte:start}},limit:20000}),
+  const [auctionCars,bids]=await Promise.all([
+    findAll('cars',{filters:{createdAt:{$gte:start},auctionStatus:{$ne:'none'}},select:'id auctionStatus auctionEnd createdAt',limit:20000}),
     findAll('bids',{filters:{createdAt:{$gte:start}},select:'id amount createdAt carId car',limit:50000})
   ]);
-  return {periodDays:safe,auctions:{created:auctions.length,active:auctions.filter(a=>['active','open','running'].includes(String(a.status).toLowerCase())).length,completed:auctions.filter(a=>['completed','ended','closed'].includes(String(a.status).toLowerCase())).length},bids:{count:bids.length,value:sum(bids,'amount'),average:bids.length?sum(bids,'amount')/bids.length:0}};
+  const active=auctionCars.filter(a=>String(a.auctionStatus||'').toLowerCase()==='live').length;
+  const completed=auctionCars.filter(a=>['ended','closed','completed'].includes(String(a.auctionStatus||'').toLowerCase())).length;
+  return {periodDays:safe,auctions:{created:auctionCars.length,active,completed},bids:{count:bids.length,value:sum(bids,'amount'),average:bids.length?sum(bids,'amount')/bids.length:0},source:'live_cars_and_bids'};
 }
 
 export async function finance(days=30) {
