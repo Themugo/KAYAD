@@ -1,0 +1,58 @@
+{
+  "canonical_aliases": {
+    "Partner": "partner_organizations",
+    "Webhook": "webhook_configs",
+    "Plugin": "integration_plugins",
+    "APIKey": "api_credentials",
+    "Campaign": "marketing_campaigns",
+    "Inspector": "inspection_staff",
+    "Inspection": "vehicle_inspections",
+    "DealerProfile": "dealers"
+  },
+  "operational_tables": [
+    "transactions",
+    "market_data",
+    "marketplace_health",
+    "conversion_funnels",
+    "escrow_anomalies",
+    "escrow_risk_scores",
+    "escrow_audits",
+    "auction_integrity_flags",
+    "auction_risk_profiles",
+    "contacts",
+    "ntsa_verification_requests",
+    "inspector_applications",
+    "idempotency_audit_logs",
+    "job_failures",
+    "bid_logs",
+    "sms_bidders",
+    "dealer_health_scores",
+    "dealer_analytics",
+    "notification_audit"
+  ],
+  "gated_route_modules": [
+    "automationRoutes",
+    "configurationRoutes",
+    "lowCodeRoutes",
+    "vxpRoutes",
+    "xosRoutes",
+    "aiPlatformRoutes",
+    "digitalTwinRoutes",
+    "platformFactoryRoutes"
+  ],
+  "unused_model_mappings": [
+    "BrandDepreciation",
+    "ErrorBudget",
+    "DemandSignals",
+    "PlatformMetric",
+    "ExecutiveMetric",
+    "Forecast",
+    "Benchmark",
+    "OperationLog",
+    "CommandAction",
+    "WarRoom",
+    "DashboardWidget",
+    "ProductHealth",
+    "ObjectData"
+  ]
+}

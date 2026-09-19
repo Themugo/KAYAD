@@ -118,7 +118,7 @@ const TABLE_MAP = {
   VXStyle: "vx_styles",
   // Experience Orchestration Platform (XOS) Models
   Experience: "experiences",
-  Campaign: "campaigns",
+  Campaign: "marketing_campaigns",
   Audience: "audiences",
   Journey: "journeys",
   SeasonalTheme: "seasonal_themes",
@@ -144,11 +144,11 @@ const TABLE_MAP = {
   SelfHealingAction: "self_healing_actions",
   // Enterprise Integration Platform Models
   APIEndpoint: "api_endpoints",
-  Partner: "partners",
-  Webhook: "webhooks",
-  Plugin: "plugins",
+  Partner: "partner_organizations",
+  Webhook: "webhook_configs",
+  Plugin: "integration_plugins",
   IntegrationTemplate: "integration_templates",
-  APIKey: "api_keys",
+  APIKey: "api_credentials",
   // Enterprise Governance Platform Models
   GovernancePolicy: "governance_policies",
   ChangeRequest: "change_requests",
@@ -182,11 +182,11 @@ const TABLE_MAP = {
   PlatformBrand: "platform_brands",
   // Ghost Checkers Models
   InspectionPackage: "inspection_packages",
-  Inspector: "inspectors",
-  Inspection: "inspections",
+  Inspector: "inspection_staff",
+  Inspection: "vehicle_inspections",
   VehiclePassport: "vehicle_passports",
   // Dealer Platform Models
-  DealerProfile: "dealer_profiles",
+  DealerProfile: "dealers",
   DealerSubscription: "dealer_subscriptions",
   DealerAnalytics: "dealer_analytics",
 };
