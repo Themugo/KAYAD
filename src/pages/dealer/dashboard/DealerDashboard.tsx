@@ -222,7 +222,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     setLeadsLoading(true);
     setLeadsError(null);
     dealerApi.getLeads({ limit: 100 })
-      .then(({ data }) => { setLeads(data.data.items); setLeadsLoaded(true); })
+      .then((response) => { setLeads(response.data.items); setLeadsLoaded(true); })
       .catch(() => setLeadsError('Could not load your leads. Please try again.'))
       .finally(() => setLeadsLoading(false));
   };
@@ -236,8 +236,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const advanceLeadStage = async (leadId, nextStage) => {
     setLeadUpdating(leadId);
     try {
-      const { data } = await dealerApi.updateLead(leadId, { stage: nextStage });
-      setLeads((prev) => prev.map((l) => l.id === leadId ? data.data : l));
+      const response = await dealerApi.updateLead(leadId, { stage: nextStage });
+      setLeads((prev) => prev.map((l) => l.id === leadId ? response.data : l));
     } catch {
       setLeadsError('Could not update this lead. Please try again.');
     } finally {
@@ -258,7 +258,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       setCustomersLoading(true);
       setCustomersError(null);
       dealerApi.getCustomers()
-        .then(({ data }) => { setCustomers(data.data.items); setCustomersLoaded(true); })
+        .then((response) => { setCustomers(response.data.items); setCustomersLoaded(true); })
         .catch(() => setCustomersError('Could not load your customers. Please try again.'))
         .finally(() => setCustomersLoading(false));
     }
@@ -302,7 +302,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     setCampaignsLoading(true);
     setCampaignsError(null);
     dealerApi.getMarketingCampaigns()
-      .then(({ data }) => { setCampaigns(data.data.items); setCampaignsLoaded(true); })
+      .then((response) => { setCampaigns(response.data.items); setCampaignsLoaded(true); })
       .catch(() => setCampaignsError('Could not load your campaigns. Please try again.'))
       .finally(() => setCampaignsLoading(false));
   };
@@ -331,8 +331,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const loadDashboard = async () => {
     setLoadError(null);
     try {
-      const { data } = await dealerApi.getDealerDashboard();
-      setDashboard(data.data);
+      const response = await dealerApi.getDealerDashboard();
+      setDashboard(response.data);
     } catch (error) {
       // Fixed: this previously silently substituted the exact same
       // fake numbers (47 listings, KES 187,500,000 revenue, 156
