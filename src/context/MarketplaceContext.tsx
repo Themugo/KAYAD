@@ -332,7 +332,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
 
     try {
       const res = await placeBidApi(vehicleId, amount);
-      if (!res?.data?.success) return false;
+      if (!res?.success) return false;
     } catch {
       return false;
     }

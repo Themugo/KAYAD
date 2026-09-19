@@ -227,7 +227,7 @@ export const getInspectionCategories = asyncHandler(async (req, res) => {
 
 // Process payment
 export const processPayment = asyncHandler(async (req, res) => {
-  const result = await settlementService.processPayment(req.params.bookingId, req.body);
+  const result = await settlementService.processPayment(req.params.bookingId, req.body, req.user.id);
   response.success(res, result);
 });
 
@@ -247,10 +247,22 @@ export const generateSettlement = asyncHandler(async (req, res) => {
   const result = await settlementService.generateSettlement(
     req.params.providerId,
     periodStart,
-    periodEnd
+    periodEnd,
+    req.user.id
   );
   response.created(res, result);
 });
+
+
+export const markSettlementPaid = asyncHandler(async (req, res) => {
+  const result = await settlementService.markSettlementPaid(
+    req.params.settlementId,
+    req.body,
+    req.user.id
+  );
+  response.success(res, result);
+});
+
 
 // Get transactions
 export const getTransactions = asyncHandler(async (req, res) => {
@@ -353,6 +365,7 @@ export default {
   processPayment,
   processRefund,
   generateSettlement,
+  markSettlementPaid,
   getTransactions,
   getSettlements,
   getEarningsSummary,

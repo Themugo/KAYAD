@@ -1,4 +1,4 @@
-import { httpRequest } from "../api/httpRequest";
+import { request as apiRequest } from "../api/httpRequest";
 
 export interface LeadListParams {
   stage?: string;
@@ -11,8 +11,8 @@ export interface LeadListParams {
   limit?: number;
 }
 
-const request = async <T>(path: string, options?: Parameters<typeof httpRequest>[1]) => {
-  const response = await httpRequest<T>(path, options);
+const request = async <T>(path: string, options?: Parameters<typeof apiRequest>[1]) => {
+  const response = await apiRequest<T>(path, options);
   return (response as any)?.data ?? response;
 };
 
@@ -27,7 +27,7 @@ const withParams = (path: string, params: Record<string, unknown> = {}) => {
 
 export const leadApi = {
   async list(params: LeadListParams = {}) {
-    return request<{ leads: any[]; count: number; pagination: any }>(withParams("/api/leads", params), {
+    return request<{ leads: any[]; count: number; pagination: any }>(withParams("/api/leads", params as unknown as Record<string, unknown>), {
       method: "GET",
     });
   },

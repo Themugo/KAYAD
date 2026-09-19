@@ -1,4 +1,4 @@
-import { httpRequest } from '../api/httpRequest';
+import { request } from '../api/httpRequest';
 
 export interface CreateReviewInput {
   dealer: string;
@@ -8,13 +8,13 @@ export interface CreateReviewInput {
 }
 
 export const createReview = (input: CreateReviewInput) =>
-  httpRequest('/reviews', { method: 'POST', body: input });
+  request('/reviews', { method: 'POST', body: input });
 
 export const getDealerReviews = (dealerId: string, params: Record<string, unknown> = {}) =>
-  httpRequest(`/reviews/dealer/${dealerId}`, { method: 'GET', params });
+  request(`/reviews/dealer/${dealerId}`, { method: 'GET', params });
 
 export const getMyReviews = (params: Record<string, unknown> = {}) =>
-  httpRequest('/reviews/my', { method: 'GET', params });
+  request('/reviews/my', { method: 'GET', params });
 
 export const deleteReview = (id: string) =>
-  httpRequest(`/reviews/${id}`, { method: 'DELETE' });
+  request(`/reviews/${id}`, { method: 'DELETE' });

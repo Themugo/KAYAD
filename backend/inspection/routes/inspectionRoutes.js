@@ -100,6 +100,9 @@ router.get('/provider/:providerId/settlements', requireAuth, requireProviderOwne
 // Generate settlement
 router.post('/provider/:providerId/settlements', requireAuth, requireProviderOwnership, controller.generateSettlement);
 
+// Mark settlement paid (admin/service-controlled financial operation)
+router.post('/provider/:providerId/settlements/:settlementId/pay', requireAuth, requireRole(['admin']), controller.markSettlementPaid);
+
 // Get earnings summary
 router.get('/provider/:providerId/earnings', requireAuth, requireProviderOwnership, controller.getEarningsSummary);
 

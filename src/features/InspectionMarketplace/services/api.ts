@@ -92,7 +92,7 @@ export const inspectionApi = {
       '/api/inspection/providers',
       { params }
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<{ items: InspectionProvider[]; total: number }>(response);
   },
 
   /**
@@ -102,7 +102,7 @@ export const inspectionApi = {
     const response = await apiClient.get<InspectionProvider>(
       `/api/inspection/providers/${providerId}`
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<InspectionProvider>(response);
   },
 
   /**
@@ -113,7 +113,7 @@ export const inspectionApi = {
       `/api/inspection/providers/${providerId}/reviews`,
       { params: { limit } }
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<{ reviews: any[] }>(response);
   },
 
   /**
@@ -124,7 +124,7 @@ export const inspectionApi = {
       `/api/inspection/providers/${providerId}/slots`,
       { params: { date, staffId } }
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<{ slots: TimeSlot[]; date: string }>(response);
   },
 
   /**
@@ -134,7 +134,7 @@ export const inspectionApi = {
     const response = await apiClient.get<ProviderDashboard>(
       `/api/inspection/provider/${providerId}/dashboard`
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<ProviderDashboard>(response);
   },
 
   /**
@@ -145,7 +145,7 @@ export const inspectionApi = {
       `/api/inspection/provider/${providerId}/earnings-summary`,
       { params: { period } }
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<EarningsSummary>(response);
   },
 
   // ============================================================
@@ -157,7 +157,7 @@ export const inspectionApi = {
    */
   createBooking: async (params: CreateBookingParams) => {
     const response = await apiClient.post<Booking>('/api/inspection/bookings', params);
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<Booking>(response);
   },
 
   /**
@@ -168,7 +168,7 @@ export const inspectionApi = {
       '/api/inspection/bookings',
       { params }
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<{ bookings: Booking[] }>(response);
   },
 
   /**
@@ -178,7 +178,7 @@ export const inspectionApi = {
     const response = await apiClient.get<Booking>(
       `/api/inspection/bookings/${reference}`
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<Booking>(response);
   },
 
   /**
@@ -214,7 +214,7 @@ export const inspectionApi = {
       limit: number;
       totalPages: number;
     }>(`/api/inspection/provider/${providerId}/bookings`, { params });
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<{ items: Booking[]; total: number; page: number; limit: number; totalPages: number }>(response);
   },
 
   /**
