@@ -1,1 +1,1 @@
-export { default } from './components/DealersView';
+export { default } from '../DealersView';
