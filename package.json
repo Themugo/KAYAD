@@ -52,7 +52,7 @@
     "validate:p0a-schema-contract": "node scripts/validate-p0a-schema-contract.mjs"
   },
   "dependencies": {
-    "@sentry/react": "10.69.0",
+    "@sentry/react": "10.74.0",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.0.5",
     "axios": "1.19.0",
