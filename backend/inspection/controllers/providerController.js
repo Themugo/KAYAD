@@ -5,6 +5,7 @@
 import asyncHandler from '../../middleware/asyncHandler.js';
 import { response } from '../../utils/response.js';
 import { providerService, bookingService, reportService, settlementService } from '../services/index.js';
+import phase22Service from '../services/phase22Service.js';
 
 /**
  * ============================================================
@@ -227,7 +228,7 @@ export const getInspectionCategories = asyncHandler(async (req, res) => {
 
 // Process payment
 export const processPayment = asyncHandler(async (req, res) => {
-  const result = await settlementService.processPayment(req.params.bookingId, req.body, req.user.id);
+  const result = await settlementService.processPayment(req.params.bookingId, req.body);
   response.success(res, result);
 });
 
@@ -301,25 +302,7 @@ export const getEarningsSummary = asyncHandler(async (req, res) => {
 export const submitReview = asyncHandler(async (req, res) => {
   const { bookingId, ratings, reviewText } = req.body;
 
-  const review = {
-    booking_id: bookingId,
-    provider_id: req.body.providerId,
-    customer_id: req.user.id,
-    overall_rating: ratings.overall,
-    professionalism_rating: ratings.professionalism,
-    thoroughness_rating: ratings.thoroughness,
-    timeliness_rating: ratings.timeliness,
-    communication_rating: ratings.communication,
-    review_text: reviewText,
-    is_verified: true,
-    created_at: new Date(),
-  };
-
-  const result = await db.create('inspection_reviews', review);
-
-  // Update provider ratings
-  await providerService.updateProviderRatings(req.body.providerId);
-
+  const result = await phase22Service.submitReview(bookingId, req.user.id, Number(ratings.overall), reviewText);
   response.created(res, result);
 });
 

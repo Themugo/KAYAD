@@ -92,7 +92,7 @@ export const inspectionApi = {
       '/api/inspection/providers',
       { params }
     );
-    return unwrapInspectionResponse<{ items: InspectionProvider[]; total: number }>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -102,7 +102,7 @@ export const inspectionApi = {
     const response = await apiClient.get<InspectionProvider>(
       `/api/inspection/providers/${providerId}`
     );
-    return unwrapInspectionResponse<InspectionProvider>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -113,7 +113,7 @@ export const inspectionApi = {
       `/api/inspection/providers/${providerId}/reviews`,
       { params: { limit } }
     );
-    return unwrapInspectionResponse<{ reviews: any[] }>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -124,7 +124,7 @@ export const inspectionApi = {
       `/api/inspection/providers/${providerId}/slots`,
       { params: { date, staffId } }
     );
-    return unwrapInspectionResponse<{ slots: TimeSlot[]; date: string }>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -134,7 +134,7 @@ export const inspectionApi = {
     const response = await apiClient.get<ProviderDashboard>(
       `/api/inspection/provider/${providerId}/dashboard`
     );
-    return unwrapInspectionResponse<ProviderDashboard>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -145,7 +145,7 @@ export const inspectionApi = {
       `/api/inspection/provider/${providerId}/earnings-summary`,
       { params: { period } }
     );
-    return unwrapInspectionResponse<EarningsSummary>(response);
+    return unwrapInspectionResponse(response);
   },
 
   // ============================================================
@@ -157,7 +157,7 @@ export const inspectionApi = {
    */
   createBooking: async (params: CreateBookingParams) => {
     const response = await apiClient.post<Booking>('/api/inspection/bookings', params);
-    return unwrapInspectionResponse<Booking>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -168,7 +168,7 @@ export const inspectionApi = {
       '/api/inspection/bookings',
       { params }
     );
-    return unwrapInspectionResponse<{ bookings: Booking[] }>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -178,7 +178,7 @@ export const inspectionApi = {
     const response = await apiClient.get<Booking>(
       `/api/inspection/bookings/${reference}`
     );
-    return unwrapInspectionResponse<Booking>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -214,7 +214,7 @@ export const inspectionApi = {
       limit: number;
       totalPages: number;
     }>(`/api/inspection/provider/${providerId}/bookings`, { params });
-    return unwrapInspectionResponse<{ items: Booking[]; total: number; page: number; limit: number; totalPages: number }>(response);
+    return unwrapInspectionResponse(response);
   },
 
   /**
@@ -383,3 +383,12 @@ export const inspectionApi = {
 };
 
 export default inspectionApi;
+
+export const phase22InspectionApi = {
+  registerProvider: async (profile: Record<string, unknown>) => unwrapInspectionResponse(await apiClient.post('/api/phase22/providers/register', profile)),
+  nearbyProviders: async (params: { lat: number; lon: number; serviceType?: string; radiusKm?: number }) => unwrapInspectionResponse(await apiClient.get('/api/phase22/providers/nearby', { params })),
+  getReportAccess: async (reportId: string) => unwrapInspectionResponse(await apiClient.get(`/api/phase22/reports/${reportId}/access`)),
+  purchaseReport: async (reportId: string, paymentReference: string) => unwrapInspectionResponse(await apiClient.post(`/api/phase22/reports/${reportId}/purchase`, { paymentReference })),
+  openDispute: async (bookingId: string, body: { type: string; description: string }) => unwrapInspectionResponse(await apiClient.post(`/api/phase22/bookings/${bookingId}/disputes`, body)),
+  addDisputeEvidence: async (disputeId: string, body: { type: string; evidence: unknown }) => unwrapInspectionResponse(await apiClient.post(`/api/phase22/disputes/${disputeId}/evidence`, body)),
+};

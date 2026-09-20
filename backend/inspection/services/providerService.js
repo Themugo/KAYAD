@@ -16,49 +16,22 @@ class ProviderService {
    * Create a new inspection provider
    */
   async createProvider(providerData, userId) {
-    const provider = {
-      user_id: userId,
-      company_name: providerData.companyName,
-      trading_name: providerData.tradingName,
-      registration_number: providerData.registrationNumber,
-      tax_id: providerData.taxId,
-      business_type: providerData.businessType,
-      email: providerData.email,
-      phone: providerData.phone,
-      whatsapp: providerData.whatsapp,
-      website: providerData.website,
-      country: providerData.country || 'Kenya',
-      county: providerData.county,
-      town: providerData.town,
-      address: providerData.address,
-      latitude: providerData.latitude,
-      longitude: providerData.longitude,
-      service_radius_km: providerData.serviceRadius || 50,
-      description: providerData.description,
-      has_workshop: providerData.hasWorkshop || false,
-      offers_mobile: providerData.offersMobile !== false,
-      mobile_inspection_fee: providerData.mobileInspectionFee || 0,
-      weekend_available: providerData.weekendAvailable !== false,
-      same_day_available: providerData.sameDayAvailable !== false,
-      languages: providerData.languages || ['English', 'Swahili'],
-      vehicle_types: providerData.vehicleTypes || ['cars', 'suvs'],
-      inspection_types: providerData.inspectionTypes || [],
-      commercial_vehicles: providerData.commercialVehicles || false,
-      electric_vehicles: providerData.electricVehicles || false,
-      luxury_vehicles: providerData.luxuryVehicles || false,
-      years_in_business: providerData.yearsInBusiness || 0,
-      status: 'pending',
-      verification_status: 'unverified',
-      commission_rate: providerData.commissionRate || 15.0,
-      payment_methods: providerData.paymentMethods || ['bank_transfer', 'mpesa'],
-      created_at: new Date(),
-      updated_at: new Date(),
+    const { getSupabase } = await import('../../utils/supabase.js');
+    const profile = {
+      companyName: providerData.companyName, tradingName: providerData.tradingName,
+      businessType: providerData.businessType, email: providerData.email, phone: providerData.phone,
+      county: providerData.county, town: providerData.town, address: providerData.address,
+      latitude: providerData.latitude, longitude: providerData.longitude, serviceRadiusKm: providerData.serviceRadius || 50,
+      offersMobile: providerData.offersMobile !== false, hasWorkshop: providerData.hasWorkshop || false,
+      inspectionTypes: providerData.inspectionTypes || [],
+      serviceTerms: providerData.serviceTerms || {},
     };
-
-    const result = await db.create(providersCollection, provider);
-    logInfo('Inspection provider created', { providerId: result.id, companyName: provider.company_name });
-
-    return result;
+    const { data, error } = await getSupabase().rpc('kayad_create_inspection_provider_application', {
+      p_user_id: userId, p_profile: profile,
+    });
+    if (error) throw new AppError(error.message || 'Inspection provider registration failed', 409);
+    logInfo('Inspection provider application submitted', { providerId: data, userId });
+    return this.getProviderById(data);
   }
 
   /**

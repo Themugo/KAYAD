@@ -45,7 +45,7 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
       } else if (role === 'dealer') {
         const result = await dealerApi.getDealerDashboard(); setSnapshot(result?.data || result);
       } else if (role === 'user' || role === 'buyer') {
-        const result = await getOwnershipDashboard(); setSnapshot(result);
+        const result = await getOwnershipDashboard(); setSnapshot(result?.data || result);
       } else if (role === 'ghost_checker') {
         const result = await inspectionAPI.myOrders?.(); setSnapshot(result?.data || result);
       }

@@ -2,14 +2,12 @@ import { request } from '../api/httpRequest';
 
 const unwrap = <T>(response: any): T => response?.data ?? response;
 
-export interface TranslationPayload { locale: string; namespace: string; translations: Record<string, unknown> }
-
-export async function getTranslations(locale?: string, namespace = 'common'): Promise<TranslationPayload> {
+export async function getTranslations(locale?: string, namespace = 'common') {
   const params = new URLSearchParams();
   if (locale) params.set('locale', locale);
   if (namespace) params.set('namespace', namespace);
-  const response = await request<{ data: TranslationPayload }>(`/localization?${params}`);
-  return response.data;
+  const response = await request<{ data: { locale: string; namespace: string; translations: Record<string, unknown> } }>(`/localization?${params}`);
+  return unwrap(response);
 }
 
 export async function getAllTranslations(locale?: string) {

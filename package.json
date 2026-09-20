@@ -48,8 +48,7 @@
     "validate:runtime-integrity": "node scripts/validate-runtime-integrity.mjs",
     "validate:release": "node scripts/validate-release.mjs",
     "validate:wave2-invariants": "node scripts/validate-wave2-invariants.mjs",
-    "validate:wave3-convergence": "node scripts/validate-wave3-convergence.mjs",
-    "validate:p0a-schema-contract": "node scripts/validate-p0a-schema-contract.mjs"
+    "validate:wave3-convergence": "node scripts/validate-wave3-convergence.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

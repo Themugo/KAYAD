@@ -81,27 +81,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
     setError(null);
     try {
       const result = await fetchActiveAuctions({ page: 1, limit: 100 });
-      const refreshedAuctions: AuctionRecord[] = (result?.auctions || []).map((auction) => {
-        const car = auction.car || {};
-        return {
-          ...auction,
-          reservePrice: auction.reservePrice ?? null,
-          car: {
-            _id: String((car as Record<string, unknown>)._id ?? (car as Record<string, unknown>).id ?? auction.carId),
-            title: String((car as Record<string, unknown>).title ?? ((`${String((car as Record<string, unknown>).brand ?? '')} ${String((car as Record<string, unknown>).model ?? '')}`).trim() || 'Vehicle')),
-            brand: typeof (car as Record<string, unknown>).brand === 'string' ? (car as Record<string, unknown>).brand as string : undefined,
-            model: typeof (car as Record<string, unknown>).model === 'string' ? (car as Record<string, unknown>).model as string : undefined,
-            year: typeof (car as Record<string, unknown>).year === 'number' ? (car as Record<string, unknown>).year as number : undefined,
-            price: typeof (car as Record<string, unknown>).price === 'number' ? (car as Record<string, unknown>).price as number : undefined,
-            images: Array.isArray((car as Record<string, unknown>).images) ? ((car as Record<string, unknown>).images as Array<{ url?: string } | string>) : undefined,
-            location: typeof (car as Record<string, unknown>).location === 'string' ? (car as Record<string, unknown>).location as string : undefined,
-            dealer: typeof (car as Record<string, unknown>).dealer === 'string' ? (car as Record<string, unknown>).dealer as string : undefined,
-            currentBid: typeof (car as Record<string, unknown>).currentBid === 'number' ? (car as Record<string, unknown>).currentBid as number : undefined,
-            bidsCount: typeof (car as Record<string, unknown>).bidsCount === 'number' ? (car as Record<string, unknown>).bidsCount as number : undefined,
-            auctionStatus: typeof (car as Record<string, unknown>).auctionStatus === 'string' ? (car as Record<string, unknown>).auctionStatus as string : undefined,
-          },
-        };
-      });
+      const refreshedAuctions = (result?.auctions || []) as AuctionRecord[];
       setAuctions(refreshedAuctions);
       return refreshedAuctions;
     } catch (err: any) {

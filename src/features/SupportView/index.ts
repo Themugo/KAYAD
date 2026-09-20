@@ -1,1 +1,1 @@
-export { default } from '../SupportView';
+export { default } from './components/SupportView';

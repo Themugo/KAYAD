@@ -37,12 +37,6 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 import { initSupabase, isSupabaseConnected } from "./utils/supabase.js";
 
-
-// P0-A schema boundary: extension/admin platform surfaces whose backing
-// schemas are not part of the canonical marketplace production contract
-// are disabled unless explicitly enabled in a separately provisioned env.
-const ENABLE_PLATFORM_EXTENSION_ROUTES = process.env.ENABLE_PLATFORM_EXTENSION_ROUTES === "true";
-
 // ─── Routes ───────────────────────────────────────────────────
 import authRoutes from "./routes/authRoutes.js";
 import carRoutes from "./routes/carRoutes.js";
@@ -801,20 +795,20 @@ app.use("/api/cms", cmsRoutes);
 app.use("/api/ads", adSlotRoutes);
 app.use("/api/hero", heroSlideRoutes);
 app.use("/api/loans", loanApplicationRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/automation", automationRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/config", configurationRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/lowcode", lowCodeRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/vxp", vxpRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/xos", xosRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/ai", aiPlatformRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/digital-twin", digitalTwinRoutes);
+app.use("/api/automation", automationRoutes);
+app.use("/api/config", configurationRoutes);
+app.use("/api/lowcode", lowCodeRoutes);
+app.use("/api/vxp", vxpRoutes);
+app.use("/api/xos", xosRoutes);
+app.use("/api/ai", aiPlatformRoutes);
+app.use("/api/digital-twin", digitalTwinRoutes);
 app.use("/api/ecp", ecpRoutes);
 app.use("/api/integration", eipRoutes);
 app.use("/api/governance", governanceRoutes);
 app.use("/api/intelligence", intelligenceRoutes);
 app.use("/api/command-center", commandCenterRoutes);
 app.use("/api/improvement", improvementRoutes);
-if (ENABLE_PLATFORM_EXTENSION_ROUTES) app.use("/api/platform-factory", platformFactoryRoutes);
+app.use("/api/platform-factory", platformFactoryRoutes);
 app.use("/api/dealer-platform", dealerPlatformRoutes);
 app.use("/api/countries", regionalConfigurationRoutes);
 app.use("/api/ownership", ownershipRoutes);

@@ -35,12 +35,12 @@ class SettlementService {
   /**
    * Process payment for booking
    */
-  async processPayment(bookingId, paymentData, userId = null) {
+  async processPayment(bookingId, paymentData) {
     const { data, error } = await getSupabase().rpc('kayad_process_inspection_payment_atomic', {
       p_booking_id: bookingId,
       p_payment_method: paymentData.method || null,
       p_payment_reference: paymentData.reference || null,
-      p_user_id: userId || paymentData.userId || null,
+      p_user_id: paymentData.userId || null,
     });
     if (error) {
       logError('Inspection payment failed', error, { bookingId });

@@ -22,7 +22,7 @@ export default function PaymentHistoryView() {
   const load = useCallback(async (nextPage = page, nextFilter = filter, background = false) => {
     if (background) setRefreshing(true); else setLoading(true);
     setError(null);
-    try { const result = await getMyPayments({ page: nextPage, limit: 10, ...(nextFilter ? { status: nextFilter } : {}) }); const mapped: PaymentRecord[] = (result.payments || []).map((payment) => ({ ...payment, car: payment.carDetails ?? null })); setPayments(mapped); setTotal(result.pagination?.total || 0); setPages(Math.max(1, result.pagination?.pages || 1)); }
+    try { const result = await getMyPayments({ page: nextPage, limit: 10, ...(nextFilter ? { status: nextFilter } : {}) }); setPayments(result.payments || []); setTotal(result.pagination?.total || 0); setPages(Math.max(1, result.pagination?.pages || 1)); }
     catch (err: any) { setError(err?.message || 'Could not load your payment history.'); }
     finally { setLoading(false); setRefreshing(false); }
   }, [filter, page]);
