@@ -147,14 +147,6 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     }
   } catch (e) { logWarn("Digital receipt notification failed", { error: e.message }); }
 
-  // If escrow payment, mark escrow as held
-  if (payment.type === "escrow") {
-    const escrow = await findOne("escrows", { payment: payment.id });
-    if (escrow && escrow.status === "pending") {
-      await update("escrows", escrow.id, { status: "funded", fundedAt: new Date().toISOString() });
-    }
-  }
-
   // If no escrow record exists (escrow disabled on car), mark car sold directly
   if (payment.car) {
     const car = await findById("cars", payment.car);

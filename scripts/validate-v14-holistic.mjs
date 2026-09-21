@@ -11,10 +11,10 @@ check("canonical lead service atomic transition", read("backend/services/leadSer
 check("dealer platform has no Lead model import", !read("backend/controllers/dealerPlatformController.js").includes('from "../models/Lead.js"'));
 check("escrow custody mapping", read("backend/models/_base.js").includes('EscrowAccount: "escrow_accounts"'));
 check("escrow funding is bank-only", read("backend/services/escrowConfiguration.service.js").includes('fundingMethods: ["bank_transfer"]') && read("backend/services/paymentCallback.service.js").includes("Vehicle escrow cannot be funded through M-Pesa STK"));
-check("inspection provider payable account", read("supabase/migrations/20260921120000_v14_holistic_financial_corrections.sql").includes("5100"));
-check("inspection payout uses bank cash account", read("supabase/migrations/20260921120000_v14_holistic_financial_corrections.sql").includes("'5100','1000'"));
-check("inspection payout requires closed reported bookings", read("supabase/migrations/20260921120000_v14_holistic_financial_corrections.sql").includes("b.status<>'closed'") && read("supabase/migrations/20260921120000_v14_holistic_financial_corrections.sql").includes("r.id IS NULL"));
-check("inspection payout idempotency", read("supabase/migrations/20260921120000_v14_holistic_financial_corrections.sql").includes("Settlement already paid with a different payment reference"));
+check("inspection provider payable account", read("supabase/migrations/20260921134954_v14_holistic_financial_corrections.sql").includes("5100"));
+check("inspection payout uses bank cash account", read("supabase/migrations/20260921134954_v14_holistic_financial_corrections.sql").includes("'5100','1000'"));
+check("inspection payout requires closed reported bookings", read("supabase/migrations/20260921134954_v14_holistic_financial_corrections.sql").includes("b.status<>'closed'") && read("supabase/migrations/20260921134954_v14_holistic_financial_corrections.sql").includes("r.id IS NULL"));
+check("inspection payout idempotency", read("supabase/migrations/20260921134954_v14_holistic_financial_corrections.sql").includes("Settlement already paid with a different payment reference"));
 check("dealer OTP converges on canonical challenge service", read("backend/services/dealerVerificationService.js").includes("createOtpChallenge") && read("backend/services/dealerVerificationService.js").includes("verifyOtpChallenge"));
 check("digital inspection workflow is mounted", read("backend/inspection/routes/inspectionRoutes.js").includes("digitalController.startWorkflow") && read("backend/inspection/routes/inspectionRoutes.js").includes("digitalController.generateWorkflowReport"));
 check("digital inspection start enforces full payment", read("backend/inspection/controllers/digitalInspectionController.js").includes("booking.payment_status !== 'fully_paid'"));
