@@ -15,7 +15,7 @@ import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.
 // 📢 NOTIFICATION PROCESSOR
 // =============================
 
-const processNotification = async (job) => {
+export const processNotification = async (job) => {
   const startTime = Date.now();
   const { userId, title, message, type = "info", data = {}, channels = ["push"] } = job.data;
 
@@ -33,12 +33,12 @@ const processNotification = async (job) => {
 
     const processingTime = Date.now() - startTime;
     logInfo("Notification processed successfully", {
-      notificationId: notification?.id,
+      notificationIds: results.map((item) => item?.id).filter(Boolean),
       userId,
       processingTime,
       channelResults,
     });
-    return { notification, processingTime, channelResults };
+    return { deliveries: results, processingTime, channelResults };
   } catch (err) {
     const processingTime = Date.now() - startTime;
     logError("Failed to process notification", err, { userId, title, processingTime });
@@ -59,12 +59,13 @@ const processNotification = async (job) => {
 const sendPushNotification = async (userId, title, message, data) => {
   try {
     const io = getIO();
-    if (io) {
-      io.to(`user_${userId}`).emit("notification", { title, message, data });
-      logInfo("Push notification sent", { userId });
-    }
+    if (!io) return false;
+    io.to(`user_${userId}`).emit("notification", { title, message, data });
+    logInfo("Push notification sent", { userId });
+    return true;
   } catch (err) {
     logError("Failed to send push notification", err, { userId });
+    return false;
   }
 };
 

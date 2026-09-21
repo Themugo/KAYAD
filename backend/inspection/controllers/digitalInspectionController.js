@@ -23,6 +23,9 @@ export const getWorkflow = asyncHandler(async (req, res) => {
 
 export const startWorkflow = asyncHandler(async (req, res) => {
   const booking = await getBooking(req.params.bookingId);
+  if (booking.payment_status !== 'fully_paid') {
+    throw new AppError('Inspection must be fully paid before field work can start', 409);
+  }
   const staff = await assertInspectorAccess(booking, req.user.id, req.user.role);
   if (String(staff.user_id) !== String(req.user.id) && !['admin','superadmin'].includes(req.user.role)) {
     throw new AppError('Only the assigned inspector can start field work', 403);

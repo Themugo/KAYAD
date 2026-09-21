@@ -38,6 +38,12 @@ jobs:
       - name: Validate frontend runtime contracts
         run: npm run validate:frontend-runtime-contracts
 
+      - name: Validate V14 release candidate
+        run: npm run validate:v14:release-candidate
+
+      - name: Validate V14 runtime preflight
+        run: npm run validate:v14:runtime-preflight
+
       - name: Build
         run: npm run build
 
@@ -98,6 +104,12 @@ jobs:
 
       - name: Validate frontend runtime contracts
         run: npm run validate:frontend-runtime-contracts
+
+      - name: Validate V14 release candidate
+        run: npm run validate:v14:release-candidate
+
+      - name: Validate V14 runtime preflight
+        run: npm run validate:v14:runtime-preflight
 
       - name: Build
         run: npm run build

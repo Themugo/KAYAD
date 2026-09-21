@@ -8,7 +8,6 @@ import Dealer from "../models/Dealer.js";
 import InspectionOrder from "../models/InspectionOrder.js";
 import DealerAnalytics from "../models/DealerAnalytics.js";
 import Car from "../models/Car.js";
-import Lead from "../models/Lead.js";
 import Escrow from "../models/Escrow.js";
 import MarketingCampaign from "../models/MarketingCampaign.js";
 import { listDealerReviews } from '../services/review.service.js';
@@ -16,6 +15,7 @@ import { listDealerReviews } from '../services/review.service.js';
 import { createCar, updateCar, deleteCar } from "./carController.js";
 import { logError } from "../utils/logger.js";
 import { getDealerEntitlement } from "../services/dealerSubscription.service.js";
+import { getDealerLeads, getLeadById, updateLeadStage as serviceUpdateLeadStage, addLeadActivity as serviceAddLeadActivity } from "../services/leadService.js";
 import { create, findAll, findOne, update } from "../db/index.js";
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
@@ -41,7 +41,7 @@ export async function getDealerDashboard(req, res) {
     const dealerId = req.user.id;
     const [listings, leads, releasedEscrows] = await Promise.all([
       Car.find({ dealer: dealerId }),
-      Lead.find({ dealer: dealerId }),
+      getDealerLeads(dealerId),
       Escrow.find({ seller: dealerId, status: "released" }),
     ]);
 
@@ -254,100 +254,58 @@ export async function getLeads(req, res) {
   try {
     const { stage, page = 1, limit = 20 } = req.query;
     const dealerId = req.user.id;
-    const filter = { dealer: dealerId };
-    if (stage) filter.stage = stage;
-
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
-    const [leads, allLeads] = await Promise.all([
-      Lead.find(filter)
-        .populate("buyer", "name email phone")
-        .populate("vehicle", "title")
-        .sort({ createdAt: -1 })
-        .skip((pageNum - 1) * limitNum)
-        .limit(limitNum),
-      Lead.find({ dealer: dealerId }),
-    ]);
-
-    const stats = { total: allLeads.length, new: 0, contacted: 0, negotiating: 0, inspectionBooked: 0, reserved: 0, sold: 0, lost: 0 };
-    for (const lead of allLeads) {
-      if (Object.prototype.hasOwnProperty.call(stats, lead.stage)) stats[lead.stage]++;
-    }
-
-    res.json({
-      success: true,
-      data: {
-        items: leads,
-        pagination: { page: pageNum, limit: limitNum, total: allLeads.length, pages: Math.ceil(allLeads.length / limitNum) },
-        stats,
-      },
-    });
-  } catch (err) {
-    logError("Error fetching leads:", err);
-    res.status(500).json({ success: false, message: "Failed to load leads" });
-  }
+    const all = await getDealerLeads(dealerId, stage ? { stage } : {});
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
+    const items = all.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+    const stats = { total: all.length, new: 0, contacted: 0, negotiating: 0, inspectionBooked: 0, reserved: 0, sold: 0, lost: 0 };
+    for (const lead of all) if (Object.prototype.hasOwnProperty.call(stats, lead.stage)) stats[lead.stage]++;
+    return res.json({ success: true, data: { items, pagination: { page: pageNum, limit: limitNum, total: all.length, pages: Math.ceil(all.length / limitNum) }, stats } });
+  } catch (err) { logError("Error fetching leads:", err); return res.status(500).json({ success: false, message: "Failed to load leads" }); }
 }
 
 export async function updateLead(req, res) {
   try {
-    const { leadId } = req.params;
-    const existing = await Lead.findById(leadId);
-    if (!existing) {
-      return res.status(404).json({ success: false, message: "Lead not found" });
-    }
-    // Fixed: this previously just echoed back req.body without ever
-    // writing to the database at all - a dealer changing a lead's
-    // stage (e.g. dragging a card in a real pipeline view) would see
-    // a confident success response while nothing was actually saved.
-    if (existing.dealer !== req.user.id) {
-      return res.status(403).json({ success: false, message: "Not authorized to update this lead" });
-    }
-    const allowedFields = ["stage", "isHot", "archived", "estimatedValue"];
+    const lead = await getLeadById(req.params.leadId);
+    if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
+    if (String(lead.dealer) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized to update this lead" });
+    let updated = lead;
+    if (req.body?.stage !== undefined) updated = await serviceUpdateLeadStage(lead.id, req.body.stage, req.user.id);
     const updates = {};
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) updates[field] = req.body[field];
-    }
-    updates.lastActivityAt = new Date().toISOString();
-    const updated = await Lead.findByIdAndUpdate(leadId, updates, { new: true });
-    res.json({ success: true, data: updated });
-  } catch (err) {
-    logError("Error updating lead:", err);
-    res.status(500).json({ success: false, message: "Failed to update lead" });
-  }
+    for (const field of ["isHot", "archived", "estimatedValue"]) if (req.body?.[field] !== undefined) updates[field] = req.body[field];
+    if (Object.keys(updates).length) updated = await update("leads", lead.id, { ...updates, lastActivityAt: new Date().toISOString() });
+    return res.json({ success: true, data: updated });
+  } catch (err) { logError("Error updating lead:", err); return res.status(err.statusCode || 500).json({ success: false, message: err.statusCode ? err.message : "Failed to update lead" }); }
 }
 
 export async function addLeadNote(req, res) {
-  const lead = await Lead.findById(req.params.leadId);
+  const lead = await getLeadById(req.params.leadId);
   if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
-  if (lead.dealer !== req.user.id) return res.status(403).json({ success: false, message: "Not authorized to access this lead" });
+  if (String(lead.dealer) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized to access this lead" });
   const text = String(req.body?.note || req.body?.description || "").trim();
   if (text.length < 1 || text.length > 4000) return res.status(400).json({ success: false, message: "Note must be between 1 and 4000 characters" });
-  const row = await create("lead_activities", { lead: lead.id, type: "note", actor: req.user.id, actorType: "dealer", description: text, metadata: {} });
-  await Lead.findByIdAndUpdate(lead.id, { lastActivityAt: new Date().toISOString() }, { new: true });
-  await logAuditEvent({ action: "dealer_lead_note_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: lead.id, targetModel: "Lead", details: { activityId: row.id }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.status(201).json({ success: true, data: row });
+  const updated = await serviceAddLeadActivity(lead.id, "note", req.user.id, { description: text, metadata: {} });
+  return res.status(201).json({ success: true, data: updated });
 }
 
 export async function getLeadActivities(req, res) {
-  const lead = await Lead.findById(req.params.leadId);
+  const lead = await getLeadById(req.params.leadId);
   if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
-  if (lead.dealer !== req.user.id) return res.status(403).json({ success: false, message: "Not authorized to access this lead" });
+  if (String(lead.dealer) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized to access this lead" });
   const rows = await findAll("lead_activities", { filters: { lead: lead.id }, orderBy: "createdAt", ascending: false, limit: 100 });
   return res.json({ success: true, data: { items: rows } });
 }
 
 export async function createTask(req, res) {
-  const lead = await Lead.findById(req.params.leadId);
+  const lead = await getLeadById(req.params.leadId);
   if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
-  if (lead.dealer !== req.user.id) return res.status(403).json({ success: false, message: "Not authorized to access this lead" });
+  if (String(lead.dealer) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized to access this lead" });
   const title = String(req.body?.title || req.body?.task || "").trim();
   if (title.length < 2 || title.length > 200) return res.status(400).json({ success: false, message: "Task title must be between 2 and 200 characters" });
   const dueAt = req.body?.dueAt ? new Date(req.body.dueAt) : null;
   if (dueAt && Number.isNaN(dueAt.getTime())) return res.status(400).json({ success: false, message: "Invalid due date" });
-  const row = await create("lead_activities", { lead: lead.id, type: "task", actor: req.user.id, actorType: "dealer", description: title, metadata: { dueAt: dueAt?.toISOString() || null, priority: ["low","normal","high"].includes(req.body?.priority) ? req.body.priority : "normal", status: "open" } });
-  await Lead.findByIdAndUpdate(lead.id, { lastActivityAt: new Date().toISOString() }, { new: true });
-  await logAuditEvent({ action: "dealer_lead_task_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: lead.id, targetModel: "Lead", details: { activityId: row.id }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.status(201).json({ success: true, data: row });
+  const updated = await serviceAddLeadActivity(lead.id, "task", req.user.id, { description: title, metadata: { dueAt: dueAt?.toISOString() || null, priority: ["low","normal","high"].includes(req.body?.priority) ? req.body.priority : "normal", status: "open" } });
+  return res.status(201).json({ success: true, data: updated });
 }
 
 // ============================================================
@@ -358,7 +316,7 @@ export async function getSalesPipeline(req, res) {
   try {
     const dealerId = req.user.id;
     const [leads, releasedEscrows] = await Promise.all([
-      Lead.find({ dealer: dealerId }),
+      getDealerLeads(dealerId),
       Escrow.find({ seller: dealerId, status: "released" }),
     ]);
 
@@ -459,7 +417,7 @@ export async function getDealerAnalytics(req, res) {
     const dealerId = req.user.id;
     const [listings, leads, releasedEscrows] = await Promise.all([
       Car.find({ dealer: dealerId }),
-      Lead.find({ dealer: dealerId }),
+      getDealerLeads(dealerId),
       Escrow.find({ seller: dealerId, status: "released" }),
     ]);
 
@@ -513,7 +471,7 @@ export async function getDealerAnalytics(req, res) {
 
 export async function getAIRecommendations(req, res) {
   const dealerId = req.user.id;
-  const [listings, leads, entitlement] = await Promise.all([Car.find({ dealer: dealerId }), Lead.find({ dealer: dealerId }), getDealerEntitlement(dealerId)]);
+  const [listings, leads, entitlement] = await Promise.all([Car.find({ dealer: dealerId }), getDealerLeads(dealerId), getDealerEntitlement(dealerId)]);
   const recommendations = [];
   const slow = listings.filter((car) => Number(car.views || 0) < 5 && ["available","active"].includes(car.status));
   const hot = leads.filter((lead) => lead.isHot && !["sold","lost"].includes(lead.stage));
@@ -622,7 +580,7 @@ export async function askDealerCopilot(req, res) {
   const question = String(req.body?.question || "").trim();
   if (question.length < 3 || question.length > 1000) return res.status(400).json({ success: false, message: "Question must be between 3 and 1000 characters" });
   const dealerId = req.user.id;
-  const [listings, leads, escrows, entitlement] = await Promise.all([Car.find({ dealer: dealerId }), Lead.find({ dealer: dealerId }), Escrow.find({ seller: dealerId, status: "released" }), getDealerEntitlement(dealerId)]);
+  const [listings, leads, escrows, entitlement] = await Promise.all([Car.find({ dealer: dealerId }), getDealerLeads(dealerId), Escrow.find({ seller: dealerId, status: "released" }), getDealerEntitlement(dealerId)]);
   const q = question.toLowerCase();
   let answer;
   if (q.includes("listing") || q.includes("inventory")) answer = { type: "inventory", totalListings: listings.length, activeListings: listings.filter(x => ["available","active"].includes(x.status)).length, totalViews: listings.reduce((n,x) => n + Number(x.views || 0), 0) };

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { dealerAPI } from '../../../api/api';
+import leadApi from '../../../services/leadApi';
 import { MessageSquare, Mail, Phone, Search, X, Archive } from 'lucide-react';
 import { timeAgo } from './DashboardWidgets';
 
@@ -28,8 +28,8 @@ export default function DealerLeadsTab({ toast }) {
     const params = {};
     if (filter) params.stage = filter;
     if (search) params.search = search;
-    dealerAPI.leads(params)
-      .then(res => { setLeads(res.leads || []); })
+    leadApi.list(params)
+      .then(res => { setLeads(res.leads || res.items || []); })
       .catch(() => toast('Failed to load leads', 'error'))
       .finally(() => setLoading(false));
     // search also drives client-side filtering below; it doesn't need to re-trigger a fetch
@@ -40,8 +40,8 @@ export default function DealerLeadsTab({ toast }) {
 
   const handleStageChange = async (leadId, stage) => {
     try {
-      await dealerAPI.updateLeadStage(leadId, { stage });
-      setLeads(p => p.map(l => l._id === leadId ? { ...l, stage } : l));
+      await leadApi.updateStage(leadId, stage);
+      setLeads(p => p.map(l => String(l.id || l._id) === String(leadId) ? { ...l, stage } : l));
       toast(`Moved to ${STAGE_CONFIG[stage]?.label || stage}`, 'success');
     } catch {
       toast('Failed to update stage', 'error');
@@ -51,8 +51,8 @@ export default function DealerLeadsTab({ toast }) {
   const handleArchive = async (leadId) => {
     if (!confirm('Archive this lead?')) return;
     try {
-      await dealerAPI.archiveLead(leadId);
-      setLeads(p => p.filter(l => l._id !== leadId));
+      await leadApi.archive(leadId);
+      setLeads(p => p.filter(l => String(l.id || l._id) !== String(leadId)));
       toast('Lead archived', 'info');
     } catch {
       toast('Failed to archive', 'error');
@@ -122,7 +122,7 @@ export default function DealerLeadsTab({ toast }) {
             const SourceIcon = SOURCE_ICONS[lead.source] || MessageSquare;
 
             return (
-              <div key={lead._id} style={{
+              <div key={lead.id || lead._id} style={{
                 background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)',
                 borderRadius: 14, padding: '14px 18px',
                 display: 'grid', gridTemplateColumns: '1fr auto', gap: 12,
@@ -172,7 +172,7 @@ export default function DealerLeadsTab({ toast }) {
                 </div>
 
                 <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                  <select value={lead.stage} onChange={e => handleStageChange(lead._id, e.target.value)}
+                  <select value={lead.stage} onChange={e => handleStageChange(lead.id || lead._id, e.target.value)}
                     style={{ padding: '5px 8px', borderRadius: 6, background: 'var(--card)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 10, outline: 'none', cursor: 'pointer' }}>
                     {STAGE_ORDER.map(s => (
                       <option key={s} value={s}>{STAGE_CONFIG[s]?.label || s}</option>

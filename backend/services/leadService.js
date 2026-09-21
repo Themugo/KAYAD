@@ -6,7 +6,8 @@
 
 import { addTimelineEvent, getLeadTimeline } from "./leadTimelineService.js";
 import { logInfo, logError } from "../utils/logger.js";
-import { findAll, findById, findOne, create, update, count, aggregate } from "../db/index.js";
+import { findAll, findById, findOne, create, update, updateMany, count, aggregate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // ➕ CREATE LEAD
@@ -14,46 +15,21 @@ import { findAll, findById, findOne, create, update, count, aggregate } from "..
 
 export const createLead = async (buyerId, dealerId, vehicleId, source, referenceId) => {
   try {
-    // Check if lead already exists for this combination
-    const existingLead = await findOne("leads", {
-      buyer: buyerId,
-      dealer: dealerId,
-      vehicle: vehicleId,
-      source,
-      sourceReference: referenceId,
-    });
-
-    if (existingLead) {
-      logInfo("Lead already exists", { buyerId, dealerId, vehicleId, source });
-      return existingLead;
-    }
-
-    // Get vehicle details for estimated value
     let estimatedValue = 0;
     if (vehicleId) {
       const vehicle = await findById("cars", vehicleId);
-      if (vehicle) {
-        estimatedValue = vehicle.price || 0;
-      }
+      if (vehicle) estimatedValue = Number(vehicle.price || 0);
     }
-
-    const lead = await create("leads", {
-      buyer: buyerId,
-      dealer: dealerId,
-      vehicle: vehicleId,
-      source,
-      sourceReference: referenceId,
-      estimatedValue,
-      lastActivityAt: new Date(),
+    const { data, error } = await getSupabase().rpc("kayad_create_lead_atomic", {
+      p_buyer: buyerId || null, p_dealer: dealerId || null, p_vehicle: vehicleId || null,
+      p_source: source || null, p_source_reference: referenceId || null, p_estimated_value: estimatedValue,
     });
-
-    // Add creation activity
-    await addTimelineEvent(lead.id, "lead_created", buyerId, "buyer", `Lead created from ${source}`, {
-      source,
-      referenceId,
-    });
-
-    logInfo("Lead created", { leadId: lead.id, buyerId, dealerId, source });
+    if (error) throw error;
+    const lead = data?.lead || data;
+    if (data?.created !== false) {
+      await addTimelineEvent(lead.id, "lead_created", buyerId, "buyer", `Lead created from ${source}`, { source, referenceId });
+    }
+    logInfo("Lead resolved", { leadId: lead.id, buyerId, dealerId, source, created: data?.created !== false });
     return lead;
   } catch (err) {
     logError("Failed to create lead", err, { buyerId, dealerId, source });
@@ -67,15 +43,11 @@ export const createLead = async (buyerId, dealerId, vehicleId, source, reference
 
 export const updateLeadStage = async (leadId, newStage, actorId) => {
   try {
-    const lead = await findById("leads", leadId);
-    if (!lead) {
-      throw new Error("Lead not found");
-    }
-
-    const allowedStages = new Set(["new", "contacted", "negotiating", "inspectionBooked", "reserved", "sold", "lost", "escrow_started"]);
-    if (!allowedStages.has(newStage)) throw new Error("Invalid lead stage");
-    const updated = await update("leads", leadId, { stage: newStage, lastActivityAt: new Date() });
-    await addTimelineEvent(leadId, "stage_changed", actorId, "dealer", `Lead stage changed to ${newStage}`, { stage: newStage });
+    const { data, error } = await getSupabase().rpc("kayad_transition_lead_atomic", {
+      p_lead_id: leadId, p_new_stage: newStage, p_actor_id: actorId || null,
+    });
+    if (error) throw Object.assign(new Error(error.message), { statusCode: 409 });
+    const updated = data?.lead || data;
     logInfo("Lead stage updated", { leadId, newStage, actorId });
     return updated;
   } catch (err) {

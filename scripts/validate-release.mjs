@@ -97,6 +97,7 @@ const maintainedValidators = [
   'validate-wave2-invariants.mjs',
   'validate-wave3-convergence.mjs',
   'validate-automation-domain-v12.mjs',
+  'validate-v14-production-activation.mjs',
   'validate-phase34.mjs',
   'validate-phase19.mjs',
   'validate-phase21.mjs',

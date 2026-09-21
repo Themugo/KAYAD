@@ -35,6 +35,8 @@ import { sendNotification } from "../services/notification.service.js";
 import { getDealerPlans } from "../services/dealerSubscription.service.js";
 import { getSupabase } from "../utils/supabase.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
+import { getEscrowRules, getActiveEscrowAccounts, saveEscrowAccount, removeEscrowAccount } from "../services/escrowConfiguration.service.js";
+
 
 // Routes that only admin/superadmin can access
 const adminOrSuper = authorize("admin", "superadmin");
@@ -2087,48 +2089,29 @@ router.get(
 );
 
 // =============================
-// 🔐 ESCROW MANAGEMENT (dealers)
-// =============================
+// 🔐 ESCROW CUSTODY ADMINISTRATION
+// Vehicle escrow eligibility is no longer controlled per-dealer.
+// Administrators configure the canonical custody bank account and rules.
 
-// Toggle escrow approval for dealers
-router.put(
-  "/users/:id/escrow-approve",
-  adminOrSuper,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role !== "dealer")
-      return res.status(400).json({ success: false, message: "Only dealers can be escrow-approved" });
-    user.escrowApproved = !user.escrowApproved;
-    await user.save();
-    res.json({
-      success: true,
-      user,
-      message: `Escrow ${user.escrowApproved ? "approved" : "revoked"} for ${user.name || user.email}`,
-    });
-  }),
-);
+router.get("/escrow/config", adminOrSuper, asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await getEscrowRules() });
+}));
 
-// Force escrow on dealers who violate trust
-router.put(
-  "/users/:id/escrow-force",
-  adminOrSuper,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role !== "dealer")
-      return res.status(400).json({ success: false, message: "Only dealers can be escrow-forced" });
-    user.escrowForced = !user.escrowForced;
-    if (user.escrowForced) user.escrowApproved = true;
-    await user.save();
-    res.json({
-      success: true,
-      user,
-      message: `Escrow ${user.escrowForced ? "forced" : "unforced"} for ${user.name || user.email}`,
-    });
-  }),
-);
+router.get("/escrow/accounts", adminOrSuper, asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await getActiveEscrowAccounts() });
+}));
+
+router.post("/escrow/accounts", adminOrSuper, asyncHandler(async (req, res) => {
+  res.status(201).json({ success: true, data: await saveEscrowAccount(req.body || {}) });
+}));
+
+router.patch("/escrow/accounts/:id", adminOrSuper, validateObjectId, asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await saveEscrowAccount(req.body || {}, req.params.id) });
+}));
+
+router.delete("/escrow/accounts/:id", adminOrSuper, validateObjectId, asyncHandler(async (req, res) => {
+  await removeEscrowAccount(req.params.id);
+  res.json({ success: true });
+}));
 
 export default router;

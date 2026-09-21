@@ -373,16 +373,11 @@ export const createCar = async (req, res) => {
     }
 
     // ── ESCROW ENFORCEMENT ─────────────────────────────────
-    // individual_seller: escrow is always enabled (enforced in payment)
-    // dealer: if escrowForced -> auto-enable; if not approved/forced -> disable
-    if (isDealer) {
-      const dealerUser = seller; // seller is the dealer
-      if (dealerUser.escrowForced) {
-        req.body.escrowEnabled = true;
-      } else if (!dealerUser.escrowApproved && !dealerUser.escrowForced) {
-        req.body.escrowEnabled = false;
-      }
-    }
+    // Vehicle escrow is a private-seller custody product only. Dealer
+    // approval/force flags are legacy compatibility fields and never grant
+    // vehicle escrow eligibility.
+    if (isDealer) req.body.escrowEnabled = false;
+    if (isSeller) req.body.escrowEnabled = true;
 
     const body = {
       ...req.body,
@@ -608,18 +603,10 @@ export const updateCar = async (req, res) => {
     }
 
     // ── ESCROW ENFORCEMENT ON UPDATE ─────────────────────
-    // When a dealer updates a car, enforce escrow rules
-    const updaterIsDealer = req.user.role === "dealer";
-    if (updaterIsDealer || isOwner) {
-      const seller = await User.findById(req.user.id).select("role escrowApproved escrowForced");
-      if (seller) {
-        if (seller.escrowForced) {
-          car.escrowEnabled = true;
-        } else if (!seller.escrowApproved && !seller.escrowForced) {
-          car.escrowEnabled = false;
-        }
-      }
-    }
+    // Vehicle escrow is a private-seller custody product only. Legacy
+    // dealer approval/force flags cannot enable it.
+    if (req.user.role === "dealer") car.escrowEnabled = false;
+    if (req.user.role === "individual_seller") car.escrowEnabled = true;
 
     // Preserve existing coverImage if caller didn't explicitly send one
     const incomingCover = req.body.coverImage;

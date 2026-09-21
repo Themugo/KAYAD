@@ -12,6 +12,8 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateResponse, escrowResponseSchema } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
+import { findById } from "../db/index.js";
+import { getEscrowRules, getPrimaryEscrowAccount, sanitizeEscrowAccount, verifyEscrowFunding } from "../services/escrowConfiguration.service.js";
 
 import {
   getAllEscrows,
@@ -245,6 +247,26 @@ router.post(
   validateObjectId,
   asyncHandler(closeEscrowHandler),
 );
+
+// =============================
+// 🏦 BANK FUNDING INSTRUCTIONS / VERIFICATION
+// =============================
+router.get("/:id/funding-instructions", protect, validateObjectId, asyncHandler(async (req, res) => {
+  const escrow = await findById("escrows", req.params.id);
+  if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+  const isParty = String(escrow.buyer) === String(req.user.id) || String(escrow.seller) === String(req.user.id);
+  if (!isParty && !["admin", "superadmin", "moderator", "escrow_officer"].includes(req.user.role)) return res.status(403).json({ success: false, message: "Not authorized" });
+  const rules = await getEscrowRules();
+  const account = await getPrimaryEscrowAccount();
+  return res.json({ success: true, data: { fundingMethod: "bank_transfer", rules: { releaseDays: rules.releaseDays, minimumAmount: rules.minimumAmount, maximumAmount: rules.maximumAmount }, account: sanitizeEscrowAccount(account), amount: escrow.amount, reference: escrow.fundingReference || `KAYAD-ESCROW-${escrow.id}` } });
+}));
+
+router.post("/:id/verify-funding", protect, adminOnly, idempotencyCheck, validateObjectId, asyncHandler(async (req, res) => {
+  const reference = String(req.body?.fundingReference || "").trim();
+  if (!reference) return res.status(400).json({ success: false, message: "Funding reference is required" });
+  const result = await verifyEscrowFunding(req.params.id, req.user.id, reference);
+  return res.json({ success: true, data: result });
+}));
 
 // =============================
 // 🚨 FALLBACK

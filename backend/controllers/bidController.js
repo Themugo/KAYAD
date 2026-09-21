@@ -33,7 +33,7 @@ const generatePseudonym = (userId, carId) => {
 const createLeadFromBid = async (userId, carId) => {
   try {
     const lead = await findOrCreateLeadFromAuction(carId, userId);
-    await addLeadActivity(lead._id, "bid_placed", userId, {
+    await addLeadActivity(lead.id, "bid_placed", userId, {
       description: "Bid placed on auction",
       metadata: { carId },
     });

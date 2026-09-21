@@ -236,6 +236,18 @@ export const FIELD_ALIASES = {
   user_preferences: {
     user: "user_id",
   },
+  loan_applications: {
+    car: "vehicle",
+    vehiclePrice: "vehicle_price",
+    depositAmount: "deposit_amount",
+    loanAmount: "loan_amount",
+    termMonths: "term_months",
+    monthlyIncome: "monthly_income",
+    employmentStatus: "employment_status",
+    reviewerNotes: "reviewer_notes",
+    reviewedBy: "reviewed_by",
+    reviewedAt: "reviewed_at",
+  },
   bid_logs: {
     bid: "bid_id",
     user: "user_id",

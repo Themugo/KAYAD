@@ -103,6 +103,11 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     throw new Error(`Amount mismatch: expected ${payment.amount}, got ${amount}`);
   }
 
+  if (payment.type === "escrow") {
+    await update("payments", payment.id, { status: "failed", resultDesc: "Vehicle escrow cannot be funded through M-Pesa STK" });
+    throw new Error("Vehicle escrow cannot be funded through M-Pesa STK");
+  }
+
   const updatedPayment = await update("payments", payment.id, {
     status: "success",
     mpesaReceiptNumber: receipt,

@@ -134,3 +134,43 @@ export async function createInspectionOrder(
     body: JSON.stringify({ carId, phone, location }),
   });
 }
+
+export interface DigitalInspectionWorkflowResponse {
+  success: boolean;
+  booking?: unknown;
+  inspection?: unknown;
+  inspector?: unknown;
+  message?: string;
+}
+
+export async function getInspectionWorkflow(bookingId: string): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/bookings/${bookingId}/workflow`, { method: 'GET' });
+}
+
+export async function startInspectionWorkflow(bookingId: string): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/bookings/${bookingId}/workflow/start`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export async function updateInspectionStage(inspectionId: string, stageName: string, status = 'in_progress'): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/workflow/${inspectionId}/stages/${encodeURIComponent(stageName)}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+}
+
+export async function recordInspectionPoint(inspectionId: string, point: Record<string, unknown>): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/workflow/${inspectionId}/points`, { method: 'POST', body: JSON.stringify(point) });
+}
+
+export async function addInspectionEvidence(pointId: string, evidence: Record<string, unknown>): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/workflow/points/${pointId}/evidence`, { method: 'POST', body: JSON.stringify(evidence) });
+}
+
+export async function completeInspectionWorkflow(inspectionId: string): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/workflow/${inspectionId}/complete`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export async function submitInspectionWorkflow(inspectionId: string): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/workflow/${inspectionId}/submit`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export async function generateInspectionWorkflowReport(inspectionId: string): Promise<DigitalInspectionWorkflowResponse> {
+  return inspectionFetch<DigitalInspectionWorkflowResponse>(`/api/inspections/workflow/${inspectionId}/report`, { method: 'POST', body: JSON.stringify({}) });
+}

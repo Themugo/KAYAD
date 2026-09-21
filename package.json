@@ -54,7 +54,15 @@
     "validate:local-runtime": "node scripts/validate-local-runtime.mjs",
     "validate:live-runtime": "node scripts/validate-live-runtime.mjs",
     "validate:runtime-deep-v11": "node scripts/validate-runtime-deep-v11.mjs",
-    "validate:automation-domain-v12": "node scripts/validate-automation-domain-v12.mjs"
+    "validate:automation-domain-v12": "node scripts/validate-automation-domain-v12.mjs",
+    "validate:v14-production-activation": "node scripts/validate-v14-production-activation.mjs",
+    "certify:v14:live-api": "node scripts/certify-v14-live-api.mjs",
+    "validate:v14:next-phase": "node scripts/validate-v14-next-phase.mjs",
+    "validate:v14:holistic": "node scripts/validate-v14-holistic.mjs",
+    "validate:v14:live-certification-contract": "node scripts/validate-v14-live-certification-contract.mjs",
+    "validate:v14:runtime-preflight": "node scripts/validate-v14-runtime-preflight.mjs",
+    "validate:v14:release-candidate": "node scripts/validate-v14-release-candidate.mjs",
+    "certify:v14:production-runtime": "node scripts/certify-v14-production-runtime.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
@@ -94,10 +102,10 @@
     "vite": "8.2.0",
     "vitest": "4.1.11"
   },
-  "engines": {
-    "node": ">=22.22.2"
-  },
   "overrides": {
     "undici": "8.10.2"
+  },
+  "engines": {
+    "node": ">=22.22.2"
   }
 }

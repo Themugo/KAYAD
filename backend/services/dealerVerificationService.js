@@ -1,6 +1,5 @@
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
 import { create, findOne, findById, update, findAll, count } from "../db/index.js";
+import { createOtpChallenge, verifyOtpChallenge } from "./otpService.js";
 
 export const VERIFICATION_STATUSES = Object.freeze(["pending", "approved", "rejected", "suspended"]);
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -57,45 +56,41 @@ export const submitDealerVerification = async (userId, documents = {}) => {
 export const requestDealerOtp = async (userId, phoneNumber) => {
   const verification = await getDealerVerification(userId);
   if (!verification) throw Object.assign(new Error("Submit dealer verification before phone verification"), { statusCode: 400 });
-  const otp = String(crypto.randomInt(100000, 1000000));
-  const otpHash = await bcrypt.hash(otp, 10);
+
+  const challenge = await createOtpChallenge({
+    userId,
+    purpose: "dealer_phone_verification",
+    channel: "sms",
+    recipient: phoneNumber,
+    eventType: "otp",
+  });
+
   const documents = { ...(verification.documents || {}) };
   documents.phoneVerification = {
     ...(documents.phoneVerification || {}),
     phoneNumber,
     verified: false,
   };
-  const updated = await update("dealer_verifications", verification.id, {
-    documents,
-    otpHash,
-    otpExpiresAt: new Date(Date.now() + OTP_TTL_MS).toISOString(),
-    otpAttempts: 0,
-  });
-  return { verification: updated, otp };
+  const updated = await update("dealer_verifications", verification.id, { documents });
+  return { verification: updated, expiresAt: challenge.expiresAt, challengeId: challenge.challengeId };
 };
 
 export const verifyDealerOtp = async (userId, otp) => {
   const verification = await getDealerVerification(userId);
-  if (!verification?.otpHash) throw Object.assign(new Error("Phone verification not initiated"), { statusCode: 400 });
-  if (verification.otpExpiresAt && new Date(verification.otpExpiresAt).getTime() < Date.now()) {
-    throw Object.assign(new Error("Verification code expired"), { statusCode: 400 });
-  }
-  const attempts = Number(verification.otpAttempts || 0);
-  if (attempts >= OTP_MAX_ATTEMPTS) throw Object.assign(new Error("Maximum verification attempts exceeded"), { statusCode: 429 });
-  const valid = await bcrypt.compare(String(otp), verification.otpHash);
-  if (!valid) {
-    await update("dealer_verifications", verification.id, { otpAttempts: attempts + 1 });
-    return { valid: false, remainingAttempts: Math.max(0, OTP_MAX_ATTEMPTS - attempts - 1) };
-  }
+  if (!verification) throw Object.assign(new Error("Submit dealer verification before phone verification"), { statusCode: 400 });
+
+  const result = await verifyOtpChallenge({
+    userId,
+    purpose: "dealer_phone_verification",
+    code: otp,
+  });
+
+  if (!result.valid) return result;
+
   const documents = { ...(verification.documents || {}) };
   documents.phoneVerification = { ...(documents.phoneVerification || {}), verified: true };
-  const updated = await update("dealer_verifications", verification.id, {
-    documents,
-    otpHash: null,
-    otpExpiresAt: null,
-    otpAttempts: 0,
-  });
-  return { valid: true, verification: updated };
+  const updated = await update("dealer_verifications", verification.id, { documents });
+  return { valid: true, verification: updated, challengeId: result.challengeId };
 };
 
 export const listDealerVerifications = async ({ status, page = 1, limit = 20 } = {}) => {

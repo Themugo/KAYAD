@@ -6,15 +6,43 @@ import { logError } from "../infrastructure/logging/index.js";
 // =============================
 export const createLoanApplication = async (req, res) => {
   try {
-    const { car, vehiclePrice, depositAmount, loanAmount, termMonths, monthlyIncome, employmentStatus } = req.body;
+    const { car, vehiclePrice, depositAmount = 0, loanAmount, termMonths = 36, monthlyIncome, employmentStatus } = req.body;
+    const price = Number(vehiclePrice);
+    const deposit = Number(depositAmount);
+    const requestedLoan = Number(loanAmount);
+    const term = Number(termMonths);
 
-    if (!vehiclePrice || !loanAmount) {
-      return res.status(400).json({ success: false, message: "Vehicle price and loan amount are required" });
+    if (!Number.isFinite(price) || price <= 0) {
+      return res.status(400).json({ success: false, message: "Vehicle price must be greater than zero" });
+    }
+    if (!Number.isFinite(deposit) || deposit < 0 || deposit >= price) {
+      return res.status(400).json({ success: false, message: "Deposit must be zero or more and less than the vehicle price" });
+    }
+    if (!Number.isFinite(requestedLoan) || requestedLoan <= 0 || requestedLoan > price - deposit) {
+      return res.status(400).json({ success: false, message: "Loan amount must be positive and cannot exceed the financed vehicle balance" });
+    }
+    if (!Number.isInteger(term) || term < 1 || term > 120) {
+      return res.status(400).json({ success: false, message: "Term must be a whole number of months between 1 and 120" });
+    }
+    if (monthlyIncome !== undefined && monthlyIncome !== null && (!Number.isFinite(Number(monthlyIncome)) || Number(monthlyIncome) < 0)) {
+      return res.status(400).json({ success: false, message: "Monthly income must be zero or greater" });
+    }
+    const allowedEmployment = new Set(["employed", "self_employed", "business_owner", "salaried", "sme"]);
+    if (employmentStatus && !allowedEmployment.has(employmentStatus)) {
+      return res.status(400).json({ success: false, message: "Invalid employment status" });
     }
 
     const application = await LoanApplication.create({
       applicant: req.user.id,
-      car, vehiclePrice, depositAmount, loanAmount, termMonths, monthlyIncome, employmentStatus,
+      dealer: null,
+      car: car || null,
+      vehiclePrice: price,
+      depositAmount: deposit,
+      loanAmount: requestedLoan,
+      requestedAmount: requestedLoan,
+      termMonths: term,
+      monthlyIncome: monthlyIncome === undefined || monthlyIncome === null ? null : Number(monthlyIncome),
+      employmentStatus: employmentStatus || null,
       status: "submitted",
     });
 
@@ -66,17 +94,33 @@ export const updateLoanApplicationStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, reviewerNotes } = req.body;
+    const allowed = new Set(["submitted", "under_review", "approved", "declined", "withdrawn", "disbursed"]);
+
+    if (status && !allowed.has(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
+    }
 
     const existing = await LoanApplication.findById(id);
     if (!existing) {
       return res.status(404).json({ success: false, message: "Application not found" });
     }
-    if (status && !["submitted", "under_review", "approved", "declined", "withdrawn"].includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid status" });
+
+    if (status) {
+      const transitions = {
+        submitted: new Set(["under_review", "declined", "withdrawn"]),
+        under_review: new Set(["approved", "declined", "withdrawn"]),
+        approved: new Set(["disbursed"]),
+        declined: new Set([]),
+        withdrawn: new Set([]),
+        disbursed: new Set([]),
+      };
+      if (status !== existing.status && !transitions[existing.status]?.has(status)) {
+        return res.status(409).json({ success: false, message: `Cannot move application from ${existing.status} to ${status}` });
+      }
     }
 
     const updates = {};
-    if (status) updates.status = status;
+    if (status && status !== existing.status) updates.status = status;
     if (reviewerNotes !== undefined) updates.reviewerNotes = reviewerNotes;
     if (status && status !== "submitted") {
       updates.reviewedBy = req.user.id;

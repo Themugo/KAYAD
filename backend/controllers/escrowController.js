@@ -166,7 +166,7 @@ export const confirmDelivery = async (req, res) => {
     // Update lead
     try {
       const lead = await findOrCreateLeadFromEscrow(escrow._id);
-      await updateLeadStage(lead._id, "sold", req.user.id);
+      await updateLeadStage(lead.id, "sold", req.user.id);
     } catch (leadErr) {
       logWarn("Lead update failed", { error: leadErr.message });
     }

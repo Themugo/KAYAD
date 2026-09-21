@@ -1,37 +1,24 @@
-// backend/services/leadTimelineService.js - Production Hardened v7.0
-// ─────────────────────────────────────────────────────────────
-// Lead Timeline service
-// Manages lead activity timeline and history
-// ─────────────────────────────────────────────────────────────
-
+// KAYAD canonical lead timeline service.
+// Persistence is exclusively through the Supabase DB adapter.
 import { logInfo, logError } from "../utils/logger.js";
-import { findAll, findById, update } from "../db/index.js";
-
-// =============================
-// 📊 GET LEAD TIMELINE
-// =============================
+import { findAll, findById, update, create } from "../db/index.js";
 
 export const getLeadTimeline = async (leadId) => {
   try {
-    const timeline = await LeadActivity.getLeadTimeline(leadId);
-    return timeline;
+    return await findAll("lead_activities", { filters: { lead: leadId }, orderBy: "createdAt", ascending: false, limit: 500 });
   } catch (err) {
     logError("Failed to get lead timeline", err, { leadId });
     throw err;
   }
 };
 
-// =============================
-// ➕ ADD TIMELINE EVENT
-// =============================
-
 export const addTimelineEvent = async (leadId, type, actorId, actorType, description, metadata = {}) => {
   try {
-    const activity = await LeadActivity.createActivity(leadId, type, actorId, actorType, description, metadata);
-
-    // Update lead's last activity timestamp
-    await update("leads", leadId, { lastActivityAt: new Date() });
-
+    const activity = await create("lead_activities", {
+      lead: leadId, type, actor: actorId || null, actorType: actorType || "system",
+      description, metadata,
+    });
+    await update("leads", leadId, { lastActivityAt: new Date().toISOString() });
     logInfo("Timeline event added", { leadId, type, actorId });
     return activity;
   } catch (err) {
@@ -40,71 +27,33 @@ export const addTimelineEvent = async (leadId, type, actorId, actorType, descrip
   }
 };
 
-// =============================
-// 📋 GET LEAD HISTORY
-// =============================
-
 export const getLeadHistory = async (leadId) => {
-  try {
-    const lead = await findById("leads", leadId);
-    if (!lead) {
-      throw new Error("Lead not found");
-    }
-
-    const timeline = await LeadActivity.getLeadTimeline(leadId);
-
-    // Extract stage changes for history
-    const stageHistory = timeline
-      .filter((activity) => activity.type === "stage_changed")
-      .map((activity) => ({
-        stage: activity.metadata.newStage,
-        previousStage: activity.metadata.oldStage,
-        changedAt: activity.createdAt,
-        changedBy: activity.actor,
-      }));
-
-    return {
-      currentStage: lead.stage,
-      stageHistory,
-      createdAt: lead.createdAt,
-      convertedAt: lead.convertedAt,
-      lostAt: lead.lostAt,
-    };
-  } catch (err) {
-    logError("Failed to get lead history", err, { leadId });
-    throw err;
-  }
+  const lead = await findById("leads", leadId);
+  if (!lead) throw new Error("Lead not found");
+  const timeline = await getLeadTimeline(leadId);
+  return {
+    currentStage: lead.stage,
+    stageHistory: timeline.filter((a) => a.type === "stage_changed").map((a) => ({
+      stage: a.metadata?.newStage,
+      previousStage: a.metadata?.oldStage,
+      changedAt: a.createdAt,
+      changedBy: a.actor,
+    })),
+    createdAt: lead.createdAt,
+    convertedAt: lead.convertedAt,
+    lostAt: lead.lostAt,
+  };
 };
-
-// =============================
-// 📊 GET ACTIVITY SUMMARY
-// =============================
 
 export const getActivitySummary = async (leadId) => {
-  try {
-    const activities = await findAll("lead_activities", { filters: { lead: leadId } });
-
-    const summary = {
-      totalActivities: activities.length,
-      byType: {},
-      byActor: {},
-    };
-
-    activities.forEach((activity) => {
-      summary.byType[activity.type] = (summary.byType[activity.type] || 0) + 1;
-      summary.byActor[activity.actor.toString()] = (summary.byActor[activity.actor.toString()] || 0) + 1;
-    });
-
-    return summary;
-  } catch (err) {
-    logError("Failed to get activity summary", err, { leadId });
-    throw err;
+  const activities = await getLeadTimeline(leadId);
+  const summary = { totalActivities: activities.length, byType: {}, byActor: {} };
+  for (const activity of activities) {
+    summary.byType[activity.type] = (summary.byType[activity.type] || 0) + 1;
+    const actor = String(activity.actor || "system");
+    summary.byActor[actor] = (summary.byActor[actor] || 0) + 1;
   }
+  return summary;
 };
 
-export default {
-  getLeadTimeline,
-  addTimelineEvent,
-  getLeadHistory,
-  getActivitySummary,
-};
+export default { getLeadTimeline, addTimelineEvent, getLeadHistory, getActivitySummary };

@@ -30,6 +30,8 @@ const canonical = new Set([
 let direct = 0;
 for (const file of files) {
   if (canonical.has(file)) continue;
+  // Security/unit tests may mock canonical provider exports; they are not runtime provider adapters.
+  if (file.includes(`${path.sep}tests${path.sep}`)) continue;
   const text = fs.readFileSync(file, 'utf8');
   for (const needle of forbiddenOutsideCanonical) {
     if (text.includes(needle)) {

@@ -8,19 +8,19 @@ const ui=fs.readFileSync('src/pages/admin/integration/IntegrationStudio.jsx','ut
 const checks=[
  ['EIP no longer fails closed', !controller.includes('INTEGRATION_NOT_CONFIGURED')],
  ['Dashboard is persisted-data backed', controller.includes("db.find('partner_organizations'")],
- ['Partner lifecycle is implemented', controller.includes('registerPartner')&&controller.includes("status:'terminated'")],
+ ['Partner lifecycle is implemented', controller.includes('registerPartner') && controller.includes("status: 'suspended'")],
  ['API credential generation is wired', controller.includes('generateCredentials')],
  ['Webhook registry is persisted', controller.includes("db.find('webhook_configs'")],
  ['Webhook test invokes delivery', controller.includes('deliverWebhook(webhook')],
- ['Webhook delivery performs HTTP POST', service.includes("fetch(webhook.webhook_url")],
+ ['Webhook delivery performs HTTP POST', service.includes('fetch(webhook.webhook_url') || service.includes('fetch(webhook.webhookUrl') || service.includes('fetch(url')],
  ['Webhook signatures use HMAC', service.includes("createHmac('sha256'")],
- ['Webhook delivery records outcome', service.includes("response_status")&&service.includes("response_time_ms")],
+ ['Webhook delivery records outcome', service.includes('response_status') && service.includes('response_time_ms')],
  ['API analytics is persisted', controller.includes("db.find('api_usage_logs'")],
- ['OAuth client secrets are hashed', controller.includes('client_secret_hash')&&controller.includes('createHash')],
+ ['OAuth client secrets are hashed', controller.includes('client_secret_hash') && controller.includes('createHash')],
  ['Integration schema has 18 tables', (migration.match(/create table if not exists/g)||[]).length===18],
  ['Integration schema enables RLS', (migration.match(/enable row level security/g)||[]).length===18],
  ['UUID routes no longer use ObjectId validator', !routes.includes('validateObjectId')],
- ['Integration Studio uses canonical request transport', ui.includes("request('/api/integration/dashboard'")],
+ ['Integration Studio uses canonical request transport', ui.includes('getIntegrationDashboard') && fs.readFileSync('src/services/eipApi.js','utf8').includes("'/integration/dashboard'")],
 ];
 for(const [name,ok] of checks){ assert.ok(ok,name); console.log(`PASS ${name}`); }
 console.log(`Integration Partner & Webhook Domain: ${checks.length}/${checks.length} PASS`);

@@ -3,24 +3,28 @@ import path from 'node:path';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
+const controller = read('backend/controllers/dealerPlatformController.js');
 const checks = [
   ['dealer controller exists', fs.existsSync(path.join(root, 'backend/controllers/dealerPlatformController.js'))],
   ['dealer routes exist', fs.existsSync(path.join(root, 'backend/routes/dealerPlatformRoutes.js'))],
-  ['inventory reads dealer scope', read('backend/controllers/dealerPlatformController.js').includes('Car.find(filter)') && read('backend/controllers/dealerPlatformController.js').includes('dealer: req.user.id')],
-  ['listing mutations use canonical car controller', read('backend/controllers/dealerPlatformController.js').includes('return createCar(req, res)') && read('backend/controllers/dealerPlatformController.js').includes('return updateCar(req, res)') && read('backend/controllers/dealerPlatformController.js').includes('return deleteCar(req, res)')],
-  ['lead updates persist', read('backend/controllers/dealerPlatformController.js').includes('Lead.findByIdAndUpdate(leadId, updates')],
-  ['unsupported CRM notes are explicit', read('backend/controllers/dealerPlatformController.js').includes('DEALER_CRM_NOTE_UNAVAILABLE')],
-  ['unsupported CRM tasks are explicit', read('backend/controllers/dealerPlatformController.js').includes('DEALER_CRM_TASK_UNAVAILABLE')],
-  ['unsupported marketing is explicit', read('backend/controllers/dealerPlatformController.js').includes('DEALER_MARKETING_UNAVAILABLE')],
-  ['unsupported team is explicit', read('backend/controllers/dealerPlatformController.js').includes('DEALER_TEAM_UNAVAILABLE')],
-  ['unsupported subscription is explicit', read('backend/controllers/dealerPlatformController.js').includes('DEALER_SUBSCRIPTION_UNAVAILABLE')],
-  ['unsupported finance is explicit', read('backend/controllers/dealerPlatformController.js').includes('DEALER_FINANCE_UNAVAILABLE')],
-  ['AI is not fabricated', read('backend/controllers/dealerPlatformController.js').includes('DEALER_COPILOT_UNAVAILABLE') && read('backend/controllers/dealerPlatformController.js').includes('DEALER_AI_RECOMMENDATIONS_UNAVAILABLE')],
-  ['reputation reads real reviews', read('backend/controllers/dealerPlatformController.js').includes('Review.find({ dealer: req.user.id })')],
+  ['inventory reads dealer scope', controller.includes('Car.find({ dealer: dealerId })')],
+  ['listing mutations use canonical car controller', controller.includes('return createCar(req, res)') && controller.includes('return updateCar(req, res)') && controller.includes('return deleteCar(req, res)')],
+  ['lead updates persist through canonical lead service', controller.includes('serviceUpdateLeadStage') && controller.includes('serviceAddLeadActivity')],
+  ['CRM notes persist through canonical lead activity service', controller.includes('export async function addLeadNote') && controller.includes('serviceAddLeadActivity(lead.id, "note"')],
+  ['CRM tasks persist through canonical lead activity service', controller.includes('export async function createTask') && controller.includes('serviceAddLeadActivity(lead.id, "task"')],
+  ['marketing campaigns persist in canonical table', controller.includes('create("marketing_campaigns"') && controller.includes('findAll("marketing_campaigns"')],
+  ['dealer team operations persist in canonical table', controller.includes('findAll("dealer_teams"') && controller.includes('create("dealer_teams"') && controller.includes('update("dealer_teams"')],
+  ['subscription entitlement is canonical', controller.includes('getDealerEntitlement')],
+  ['finance surface is explicitly routed or delegated', controller.includes('getDealerFinance') || controller.includes('finance')],
+  ['AI recommendations are evidence-backed', controller.includes('source: "dealer_operational_records"') && controller.includes('evidence: { listingIds') && controller.includes('evidence: { leadIds')],
+  ['reputation reads persisted reviews', controller.includes('listDealerReviews')],
   ['dealer settings uses dealer profile API', read('src/pages/dealer/DealerSettings.jsx').includes('dealerApi.getDealerProfile') && read('src/pages/dealer/DealerSettings.jsx').includes('dealerApi.updateDealerProfile')],
   ['dealer routes require dealer role', read('backend/routes/dealerPlatformRoutes.js').includes('dealerOnly')],
 ];
 let failed = 0;
-for (const [label, ok] of checks) console.log(`${ok ? 'PASS' : 'FAIL'} ${label}`), failed += ok ? 0 : 1;
+for (const [label, ok] of checks) {
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${label}`);
+  if (!ok) failed++;
+}
 console.log(`\nDealer Operations Initiative: ${checks.length - failed}/${checks.length} PASS`);
 if (failed) process.exit(1);

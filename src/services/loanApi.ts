@@ -7,7 +7,7 @@ import { request, HttpRequestError } from '../api/httpRequest';
  */
 
 
-export type LoanStatus = 'submitted' | 'under_review' | 'approved' | 'declined' | 'withdrawn';
+export type LoanStatus = 'submitted' | 'under_review' | 'approved' | 'declined' | 'withdrawn' | 'disbursed';
 
 export interface LoanApplication {
   id: string;
@@ -70,4 +70,24 @@ export async function createLoanApplication(input: LoanApplicationInput): Promis
 export async function getMyLoanApplications(): Promise<LoanApplication[]> {
   const body = await loanFetch<{ data: LoanApplication[] }>('/api/loans/my');
   return body.data || [];
+}
+
+/** GET /api/loans/all - admin review queue. */
+export async function getAllLoanApplications(status?: LoanStatus): Promise<LoanApplication[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  const body = await loanFetch<{ data: LoanApplication[] }>(`/api/loans/all${query}`);
+  return body.data || [];
+}
+
+/** PUT /api/loans/:id/status - admin lifecycle transition. */
+export async function updateLoanApplicationStatus(
+  id: string,
+  status: LoanStatus,
+  reviewerNotes?: string,
+): Promise<LoanApplication> {
+  const body = await loanFetch<{ data: LoanApplication }>(`/api/loans/${encodeURIComponent(id)}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status, reviewerNotes }),
+  });
+  return body.data;
 }

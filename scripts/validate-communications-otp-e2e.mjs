@@ -8,7 +8,7 @@ const checks = [
   ["OTP stored hashed", read("backend/services/otpService.js").includes("codeHash: hash(code)")],
   ["OTP expiry and attempts enforced", read("backend/services/otpService.js").includes("maxAttempts") && read("backend/services/otpService.js").includes("expiresAt")],
   ["phone auth uses canonical OTP", read("backend/controllers/phoneVerificationController.js").includes("createOtpChallenge") && read("backend/controllers/phoneVerificationController.js").includes("verifyOtpChallenge")],
-  ["dealer phone verification uses canonical OTP", read("backend/controllers/verificationController.js").includes("createOtpChallenge") && read("backend/controllers/verificationController.js").includes("verifyOtpChallenge")],
+  ["dealer phone verification uses canonical OTP service", read("backend/services/dealerVerificationService.js").includes("createOtpChallenge") && read("backend/services/dealerVerificationService.js").includes("verifyOtpChallenge")],
   ["WhatsApp is real provider path", read("backend/services/communicationGateway.service.js").includes("twilio") && !read("backend/workers/notificationWorker.js").includes('channelResults.whatsapp = "not_configured"')],
   ["provider callbacks exist", read("backend/routes/communicationWebhookRoutes.js").includes("/twilio/status") && read("backend/routes/communicationWebhookRoutes.js").includes("/sendgrid/events") && read("backend/routes/communicationWebhookRoutes.js").includes("/africastalking/status")],
   ["delivery ledger migration exists", fs.existsSync(path.join(root,"supabase/migrations/20260909143000_communications_otp_delivery_control.sql"))],

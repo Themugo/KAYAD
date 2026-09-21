@@ -28,8 +28,8 @@ pass('stage state machine is constrained', migration.includes("escrow_started' T
 pass('lead activity table has FK and index', migration.includes('REFERENCES leads(id) ON DELETE CASCADE') && migration.includes('idx_lead_activities_lead_created'));
 pass('lead business identity is concurrency-indexed', migration.includes('idx_leads_business_identity') && migration.includes('pg_advisory_xact_lock'));
 pass('lead RLS enabled', migration.includes('ALTER TABLE lead_activities ENABLE ROW LEVEL SECURITY') && migration.includes('ALTER TABLE leads ENABLE ROW LEVEL SECURITY'));
-pass('lead controller validates authorization', controller.includes('authorizedLead') && controller.includes('Not authorized to access this lead'));
-pass('dealer platform delegates to canonical lead service', dealerController.includes('getDealerLeads') && dealerController.includes('updateLeadStage') && dealerController.includes('serviceAddLeadNote'));
+pass('lead controller validates authorization', controller.includes('Not authorized to view this lead') && controller.includes('Not authorized to update this lead') && controller.includes('Not authorized to archive this lead'));
+pass('dealer platform delegates to canonical lead service', dealerController.includes('getDealerLeads') && dealerController.includes('serviceUpdateLeadStage') && dealerController.includes('serviceAddLeadActivity'));
 pass('canonical frontend lead API exists', client.includes('export const leadApi'));
 pass('dealer leads UI uses canonical lead API', leadsTab.includes('leadApi.list') && leadsTab.includes('leadApi.updateStage') && leadsTab.includes('leadApi.archive'));
 

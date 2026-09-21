@@ -370,16 +370,69 @@ class PartnerPlatformService {
         created_at: new Date(),
       });
 
-      // Queue only: the delivery worker is the component that performs outbound HTTP.
-      // Never mark a queued delivery as delivered before an external response exists.
-      await db.update('webhook_configs', webhook.id, {
-        delivery_attempts: Number(webhook.delivery_attempts || 0) + 1,
-        last_delivery_at: new Date(),
-        last_delivery_status: 'queued',
-      });
-
-      logInfo('Webhook delivered', { deliveryCode, eventType });
-      return delivery;
+      const startedAt = Date.now();
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      let responseStatus = null;
+      let responseBody = null;
+      try {
+        const response = await fetch(webhook.webhook_url, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'user-agent': 'KAYAD-Webhook/1.0',
+            'x-kayad-event': eventType,
+            'x-kayad-delivery': deliveryCode,
+            'x-kayad-signature': signature,
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+        responseStatus = response.status;
+        responseBody = (await response.text()).slice(0, 4000);
+        const elapsed = Date.now() - startedAt;
+        const delivered = response.ok;
+        const updatedDelivery = await db.update('webhook_deliveries', delivery.id, {
+          request_headers: {
+            'content-type': 'application/json',
+            'user-agent': 'KAYAD-Webhook/1.0',
+            'x-kayad-event': eventType,
+            'x-kayad-delivery': deliveryCode,
+            'x-kayad-signature': signature,
+          },
+          response_status: responseStatus,
+          response_body: responseBody,
+          response_time_ms: elapsed,
+          status: delivered ? 'delivered' : 'failed',
+          delivered_at: delivered ? new Date() : null,
+        });
+        await db.update('webhook_configs', webhook.id, {
+          delivery_attempts: Number(webhook.delivery_attempts || 0) + 1,
+          success_count: Number(webhook.success_count || 0) + (delivered ? 1 : 0),
+          failure_count: Number(webhook.failure_count || 0) + (delivered ? 0 : 1),
+          last_delivery_at: new Date(),
+          last_delivery_status: delivered ? 'delivered' : 'failed',
+        });
+        logInfo('Webhook delivery completed', { deliveryCode, eventType, responseStatus, elapsed, delivered });
+        return updatedDelivery;
+      } catch (error) {
+        const elapsed = Date.now() - startedAt;
+        await db.update('webhook_deliveries', delivery.id, {
+          response_status: responseStatus,
+          response_body: String(error?.message || 'Webhook request failed').slice(0, 4000),
+          response_time_ms: elapsed,
+          status: 'failed',
+        }).catch(() => {});
+        await db.update('webhook_configs', webhook.id, {
+          delivery_attempts: Number(webhook.delivery_attempts || 0) + 1,
+          failure_count: Number(webhook.failure_count || 0) + 1,
+          last_delivery_at: new Date(),
+          last_delivery_status: 'failed',
+        }).catch(() => {});
+        throw error;
+      } finally {
+        clearTimeout(timeout);
+      }
     } catch (error) {
       logError('Webhook delivery failed', { webhookId: webhook.id, error: error.message });
 

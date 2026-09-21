@@ -24,7 +24,7 @@ for (const [label, rel] of checks) {
 }
 const contentChecks = [
   ["paymentService", "backend/services/paymentService.js", ["recordPaymentAttempt", "stk_initiated", "checkoutRequestId"]],
-  ["callback", "backend/services/paymentCallback.service.js", ["recordWebhookReceipt", "callback_received", "amount_verified", "escrow_funded", "markWebhookProcessed"]],
+  ["callback", "backend/services/paymentCallback.service.js", ["recordWebhookReceipt", "callback_received", "amount_verified", "escrow_mpesa_rejected", "markWebhookProcessed"]],
   ["validation", "backend/validation/payment.schema.js", ["bid", "purchase", "escrow"]],
 ];
 for (const [label, rel, needles] of contentChecks) {

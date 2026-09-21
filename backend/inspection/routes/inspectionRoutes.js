@@ -4,6 +4,7 @@
 
 import express from 'express';
 import * as controller from '../controllers/providerController.js';
+import * as digitalController from './digitalInspectionController.js';
 import { requireAuth, optionalAuth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/auth.js';
 import requireProviderOwnership from '../middleware/requireProviderOwnership.js';
@@ -59,6 +60,17 @@ router.post('/bookings/:bookingId/cancel', requireAuth, controller.cancelBooking
 
 // Submit review
 router.post('/reviews', requireAuth, controller.submitReview);
+
+// Canonical digital inspection workflow (reuses the existing digital controller).
+router.get('/bookings/:bookingId/workflow', requireAuth, digitalController.getWorkflow);
+router.post('/bookings/:bookingId/workflow/start', requireAuth, digitalController.startWorkflow);
+router.patch('/workflow/:inspectionId/stages/:stageName', requireAuth, digitalController.updateStage);
+router.post('/workflow/:inspectionId/points', requireAuth, digitalController.recordPoint);
+router.post('/workflow/points/:pointId/evidence', requireAuth, digitalController.addEvidence);
+router.post('/workflow/:inspectionId/complete', requireAuth, digitalController.completeWorkflow);
+router.post('/workflow/:inspectionId/submit', requireAuth, digitalController.submitWorkflow);
+router.post('/workflow/:inspectionId/report', requireAuth, digitalController.generateWorkflowReport);
+router.post('/workflow/:inspectionId/customer-review', requireAuth, digitalController.customerReviewWorkflow);
 
 /**
  * ============================================================
