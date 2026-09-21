@@ -28,8 +28,20 @@ if errorlevel 1 (
 )
 
 for /f "tokens=1" %%V in ('node -p "process.versions.node"') do set NODE_VERSION=%%V
-for /f "tokens=1 delims=." %%M in ("%NODE_VERSION%") do set NODE_MAJOR=%%M
+for /f "tokens=1-3 delims=." %%A in ("%NODE_VERSION%") do (
+    set NODE_MAJOR=%%A
+    set NODE_MINOR=%%B
+    set NODE_PATCH=%%C
+)
 if %NODE_MAJOR% LSS 22 (
+    echo ERROR: KAYAD requires Node.js 22.22.2 or newer. Detected %NODE_VERSION%.
+    exit /b 1
+)
+if %NODE_MAJOR% EQU 22 if %NODE_MINOR% LSS 22 (
+    echo ERROR: KAYAD requires Node.js 22.22.2 or newer. Detected %NODE_VERSION%.
+    exit /b 1
+)
+if %NODE_MAJOR% EQU 22 if %NODE_MINOR% EQU 22 if %NODE_PATCH% LSS 2 (
     echo ERROR: KAYAD requires Node.js 22.22.2 or newer. Detected %NODE_VERSION%.
     exit /b 1
 )

@@ -8,7 +8,7 @@ services:
     region: oregon
     plan: starter
     buildCommand: cd backend && npm ci
-    startCommand: cd backend && node server.js
+    startCommand: cd backend && node bootstrap.js
     healthCheckPath: /health/live
     autoDeploy: true
     disk:
@@ -26,7 +26,7 @@ services:
         value: staging.kayad.space
       - key: SUPABASE_URL
         sync: false
-      - key: SUPABASE_SERVICE_KEY
+      - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: JWT_SECRET
         sync: false

@@ -7,6 +7,11 @@ import * as controller from '../controllers/providerController.js';
 import { requireAuth, optionalAuth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/auth.js';
 import requireProviderOwnership from '../middleware/requireProviderOwnership.js';
+import { validate } from '../../middleware/validate.js';
+import { inspectionPaymentSchema, inspectionPaymentInitiateSchema } from '../../validation/phase22.schema.js';
+import { csrfProtection } from '../../middleware/csrf.js';
+import { idempotencyCheck } from '../../middleware/idempotency.js';
+import { paymentLimiter } from '../../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -116,7 +121,8 @@ router.get('/provider/:providerId/earnings-summary', requireAuth, requireProvide
  */
 
 // Process payment (admin)
-router.post('/bookings/:bookingId/payment', requireRole(['admin']), controller.processPayment);
+router.post('/bookings/:bookingId/payment/initiate', requireAuth, paymentLimiter, csrfProtection, idempotencyCheck, validate(inspectionPaymentInitiateSchema), controller.initiateInspectionPayment);
+router.post('/bookings/:bookingId/payment', requireRole(['admin']), validate(inspectionPaymentSchema), controller.processPayment);
 
 // Process refund (admin)
 router.post('/bookings/:bookingId/refund', requireRole(['admin']), controller.processRefund);

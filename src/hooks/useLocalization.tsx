@@ -46,8 +46,9 @@ export const LocalizationProvider: React.FC<LocalizationProviderProps> = ({
   const loadTranslations = useCallback(async (lang: string) => {
     setLoading(true);
     try {
-      const data = await getTranslations(lang);
-      setTranslations(data.translations || data || {});
+      const data = await getTranslations(lang) as { translations?: Translations } | Translations;
+      const payload = data as { translations?: Translations };
+      setTranslations(payload.translations || (data as Translations) || {});
     } catch (error) {
       console.error('Failed to load translations:', error);
       // Fallback to empty object

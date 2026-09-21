@@ -141,7 +141,7 @@ contexts:
   - name: Platform Config
     domain: generic
     models:
-      - GlobalSettings (backend/models/GlobalSettings.js)
+      - system_settings (system_status key)
       - PlatformConfig (backend/models/PlatformConfig.js)
       - SystemHealth (backend/models/SystemHealth.js)
     services:
@@ -149,7 +149,7 @@ contexts:
       - featureFlagService.js (embodied in configService)
     routes: /api/admin/settings*
     notes: >
-      GlobalSettings and PlatformConfig are near-identical —
+      system_settings and PlatformConfig are separate configuration stores —
       must merge. Conflicting commission defaults (2.5% vs 3.0%).
 
 # ── Duplication Clusters (7) ──
@@ -213,7 +213,7 @@ conflicts:
     conflict: >
       feeService.js (Auctions context) computes commission at 2.5%.
       Payment processing in escrowService.js uses 3.0%.
-      GlobalSettings has defaultCommission: 3.0.
+      system_settings stores named key/value settings.
       PlatformConfig has commissionRate: 2.8.
     impact: Dealers charged inconsistent commission depending on path
     action: >
@@ -273,7 +273,7 @@ fragmented_truths:
     action: FraudAlert as source, others reference by ID
 
   - concept: "Commission rate"
-    storage: GlobalSettings.defaultCommission (3.0), PlatformConfig.commissionRate (2.8)
+    storage: system_settings dealer_commission_pct, PlatformConfig.dealerCommission
     action: PlatformConfig wins
 
   - concept: "Auction state"
@@ -302,7 +302,7 @@ dependency_risks:
 
 consolidation_plan:
   - priority: 1
-    task: "Merge GlobalSettings + PlatformConfig into PlatformConfig"
+    task: "Keep system_settings (key/value) and PlatformConfig (singleton config) as distinct canonical stores"
     risk: LOW — config-only, no runtime impact
     files_affected: 2 models, 1 service
 

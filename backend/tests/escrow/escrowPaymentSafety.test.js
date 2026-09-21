@@ -189,8 +189,9 @@ describe("handleMpesaCallback", () => {
   test("successful callback marks the payment success with the provider receipt", async () => {
     seedPayment();
     await handleMpesaCallback(makeCallback());
-    expect(payments[0].status).toBe("success");
-    expect(payments[0].mpesaReceipt).toBe("QGH12345");
+    expect(payments[0].status).toBe("failed");
+    expect(payments[0].resultDesc).toMatch(/escrow.*cannot be funded through M-Pesa STK/i);
+    expect(payments[0].mpesaReceipt).toBeUndefined();
     expect(payments[0].processed).toBe(true);
   });
 

@@ -92,9 +92,11 @@ const maintainedValidators = [
   'validate-socket-contract.mjs',
   'validate-backend-runtime-contracts.mjs',
   'validate-production-backend.mjs',
+  'validate-startup-convergence.mjs',
   'validate-runtime-integrity.mjs',
   'validate-wave2-invariants.mjs',
   'validate-wave3-convergence.mjs',
+  'validate-automation-domain-v12.mjs',
   'validate-phase34.mjs',
   'validate-phase19.mjs',
   'validate-phase21.mjs',
@@ -104,8 +106,8 @@ const maintainedValidators = [
 for (const file of maintainedValidators) {
   const full = path.join(root, 'scripts', file);
   if (!fs.existsSync(full)) { failures.push(`missing validator ${file}`); continue; }
-  try { execFileSync(process.execPath, [full], { cwd: root, stdio: 'pipe', timeout: 15000 }); console.log(`PASS validator ${file}`); }
-  catch (err) { console.error(`FAIL validator ${file}`); const output = String(err.stdout || err.stderr || '').trim().split(/\r?\n/).slice(-3).join(' | '); if (output) console.error(output); failures.push(`validator ${file}`); }
+  try { execFileSync(process.execPath, [full], { cwd: root, stdio: 'pipe', timeout: 30000 }); console.log(`PASS validator ${file}`); }
+  catch (err) { console.error(`FAIL validator ${file}`); const stdout = String(err.stdout || '').trim(); const stderr = String(err.stderr || '').trim(); const output = [stdout, stderr].filter(Boolean).join('\n'); if (output) console.error(output); failures.push(`validator ${file}`); }
 }
 
 try { fs.rmSync(path.join(root, 'api-governance-report.json'), { force: true }); } catch {}

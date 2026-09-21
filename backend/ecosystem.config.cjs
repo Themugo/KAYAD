@@ -6,7 +6,7 @@ module.exports = {
   apps: [
     {
       name: 'kayad-api',
-      script: 'server.js',
+      script: 'bootstrap.js',
       instances: 'max', // Use all available CPU cores
       exec_mode: 'cluster',
       autorestart: true,

@@ -63,6 +63,15 @@ export interface CreateBookingParams {
   discount?: number;
 }
 
+export interface InspectionPaymentInitiation {
+  success?: boolean;
+  paymentStatus?: string;
+  checkoutRequestID?: string;
+  checkoutID?: string;
+  payment?: Record<string, unknown>;
+  message?: string;
+}
+
 export interface SubmitReviewParams {
   bookingId: string;
   providerId: string;
@@ -80,6 +89,18 @@ export interface SubmitReviewParams {
  * Inspection Marketplace API
  */
 export const inspectionApi = {
+  /** Canonical Phase 22 provider application. */
+  registerProvider: async (profile: Record<string, unknown>) => {
+    const response = await apiClient.post('/api/v1/phase22/providers/register', profile);
+    return unwrapInspectionResponse(response);
+  },
+
+  /** Canonical geospatial provider discovery. */
+  findNearbyProviders: async (params: { lat: number; lon: number; serviceType?: string; radiusKm?: number }) => {
+    const response = await apiClient.get('/api/v1/phase22/providers/nearby', { params });
+    return unwrapInspectionResponse(response);
+  },
+
   // ============================================================
   // PROVIDER ENDPOINTS
   // ============================================================
@@ -87,7 +108,7 @@ export const inspectionApi = {
   /**
    * Search inspection providers
    */
-  searchProviders: async (params: SearchProvidersParams) => {
+  searchProviders: async (params: SearchProvidersParams): Promise<{ items: InspectionProvider[]; total: number }> => {
     const response = await apiClient.get<{ items: InspectionProvider[]; total: number }>(
       '/api/inspection/providers',
       { params }
@@ -98,7 +119,7 @@ export const inspectionApi = {
   /**
    * Get provider profile
    */
-  getProviderProfile: async (providerId: string) => {
+  getProviderProfile: async (providerId: string): Promise<InspectionProvider> => {
     const response = await apiClient.get<InspectionProvider>(
       `/api/inspection/providers/${providerId}`
     );
@@ -119,7 +140,7 @@ export const inspectionApi = {
   /**
    * Get available time slots
    */
-  getAvailableSlots: async (providerId: string, date: string, staffId?: string) => {
+  getAvailableSlots: async (providerId: string, date: string, staffId?: string): Promise<{ slots: TimeSlot[]; date: string }> => {
     const response = await apiClient.get<{ slots: TimeSlot[]; date: string }>(
       `/api/inspection/providers/${providerId}/slots`,
       { params: { date, staffId } }
@@ -130,7 +151,7 @@ export const inspectionApi = {
   /**
    * Get provider dashboard
    */
-  getProviderDashboard: async (providerId: string) => {
+  getProviderDashboard: async (providerId: string): Promise<ProviderDashboard> => {
     const response = await apiClient.get<ProviderDashboard>(
       `/api/inspection/provider/${providerId}/dashboard`
     );
@@ -140,7 +161,7 @@ export const inspectionApi = {
   /**
    * Get provider earnings
    */
-  getProviderEarnings: async (providerId: string, period = 'monthly') => {
+  getProviderEarnings: async (providerId: string, period = 'monthly'): Promise<EarningsSummary> => {
     const response = await apiClient.get<EarningsSummary>(
       `/api/inspection/provider/${providerId}/earnings-summary`,
       { params: { period } }
@@ -155,8 +176,60 @@ export const inspectionApi = {
   /**
    * Create a new booking
    */
-  createBooking: async (params: CreateBookingParams) => {
+  createBooking: async (params: CreateBookingParams): Promise<Booking> => {
     const response = await apiClient.post<Booking>('/api/inspection/bookings', params);
+    return unwrapInspectionResponse(response);
+  },
+
+  /**
+   * Initiate a real M-Pesa STK payment. The backend derives the amount from
+   * the booking and the verified callback settles the canonical inspection
+   * payment RPC; the browser never marks a booking paid by itself.
+   */
+  initiatePayment: async (bookingId: string, phone: string): Promise<InspectionPaymentInitiation> => {
+    const response = await apiClient.post(`/api/inspection/bookings/${bookingId}/payment/initiate`, { phone });
+    return unwrapInspectionResponse(response);
+  },
+
+  getPaymentStatus: async (paymentId: string) => {
+    const response = await apiClient.get(`/api/payments/status/${paymentId}`);
+    return unwrapInspectionResponse(response);
+  },
+
+  /**
+   * Get canonical report entitlement/access state.
+   */
+  getReportAccess: async (reportId: string) => {
+    const response = await apiClient.get(`/api/v1/phase22/reports/${reportId}/access`);
+    return unwrapInspectionResponse(response);
+  },
+
+  /**
+   * Purchase second-buyer report access using a real payment reference.
+   */
+  purchaseReport: async (reportId: string, paymentReference: string) => {
+    const response = await apiClient.post(`/api/v1/phase22/reports/${reportId}/purchase`, { paymentReference });
+    return unwrapInspectionResponse(response);
+  },
+
+  /**
+   * Submit a review through the canonical atomic review RPC.
+   */
+  submitReviewAtomic: async (params: SubmitReviewParams) => {
+    const response = await apiClient.post('/api/inspection/reviews', params);
+    return unwrapInspectionResponse(response);
+  },
+
+  /**
+   * Open/evidence an inspection dispute through the Phase 22 RPC boundary.
+   */
+  openDispute: async (bookingId: string, type: string, description: string) => {
+    const response = await apiClient.post(`/api/v1/phase22/bookings/${bookingId}/disputes`, { type, description });
+    return unwrapInspectionResponse(response);
+  },
+
+  addDisputeEvidence: async (disputeId: string, type: string, evidence: Record<string, unknown>) => {
+    const response = await apiClient.post(`/api/v1/phase22/disputes/${disputeId}/evidence`, { type, evidence });
     return unwrapInspectionResponse(response);
   },
 
@@ -206,7 +279,13 @@ export const inspectionApi = {
       page?: number;
       limit?: number;
     }
-  ) => {
+  ): Promise<{
+    items: Booking[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> => {
     const response = await apiClient.get<{
       items: Booking[];
       total: number;
@@ -214,7 +293,13 @@ export const inspectionApi = {
       limit: number;
       totalPages: number;
     }>(`/api/inspection/provider/${providerId}/bookings`, { params });
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<{
+      items: Booking[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>(response);
   },
 
   /**
@@ -383,12 +468,3 @@ export const inspectionApi = {
 };
 
 export default inspectionApi;
-
-export const phase22InspectionApi = {
-  registerProvider: async (profile: Record<string, unknown>) => unwrapInspectionResponse(await apiClient.post('/api/phase22/providers/register', profile)),
-  nearbyProviders: async (params: { lat: number; lon: number; serviceType?: string; radiusKm?: number }) => unwrapInspectionResponse(await apiClient.get('/api/phase22/providers/nearby', { params })),
-  getReportAccess: async (reportId: string) => unwrapInspectionResponse(await apiClient.get(`/api/phase22/reports/${reportId}/access`)),
-  purchaseReport: async (reportId: string, paymentReference: string) => unwrapInspectionResponse(await apiClient.post(`/api/phase22/reports/${reportId}/purchase`, { paymentReference })),
-  openDispute: async (bookingId: string, body: { type: string; description: string }) => unwrapInspectionResponse(await apiClient.post(`/api/phase22/bookings/${bookingId}/disputes`, body)),
-  addDisputeEvidence: async (disputeId: string, body: { type: string; evidence: unknown }) => unwrapInspectionResponse(await apiClient.post(`/api/phase22/disputes/${disputeId}/evidence`, body)),
-};

@@ -560,6 +560,9 @@ export async function updateTeamMember(req, res) {
   const dealerId = req.dealerId || req.user.id;
   const existing = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
   if (!existing) return res.status(404).json({ success: false, message: "Team member not found" });
+  if (String(existing.member || "") === String(req.user.id)) {
+    return res.status(403).json({ success: false, message: "You cannot change your own role, permissions, or status" });
+  }
   const updates = {};
   if (req.body?.role !== undefined) { if (!["manager","sales_agent","lot_agent","finance_officer","viewer"].includes(req.body.role)) return res.status(400).json({ success: false, message: "Invalid team role" }); updates.role = req.body.role; }
   if (req.body?.status !== undefined) { if (!["invited","active","suspended","removed"].includes(req.body.status)) return res.status(400).json({ success: false, message: "Invalid team status" }); updates.status = req.body.status; }
@@ -567,6 +570,23 @@ export async function updateTeamMember(req, res) {
   if (!Object.keys(updates).length) return res.status(400).json({ success: false, message: "No valid team changes supplied" });
   const row = await update("dealer_teams", existing.id, updates);
   await logAuditEvent({ action: "dealer_team_member_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: existing, newValue: row, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  return res.json({ success: true, data: row });
+}
+
+export async function removeTeamMember(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  const existing = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
+  if (!existing) return res.status(404).json({ success: false, message: "Team member not found" });
+  if (String(existing.member || "") === String(req.user.id)) {
+    return res.status(403).json({ success: false, message: "You cannot remove yourself from the dealer team" });
+  }
+  const row = await update("dealer_teams", existing.id, { status: "removed", inviteTokenHash: null, inviteExpiresAt: null });
+  await logAuditEvent({
+    action: "dealer_team_member_removed",
+    actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email,
+    target: row.id, targetModel: "DealerTeam", oldValue: existing, newValue: row,
+    ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id,
+  });
   return res.json({ success: true, data: row });
 }
 

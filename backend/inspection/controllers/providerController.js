@@ -4,8 +4,10 @@
 
 import asyncHandler from '../../middleware/asyncHandler.js';
 import { response } from '../../utils/response.js';
+import { AppError } from '../../utils/AppError.js';
 import { providerService, bookingService, reportService, settlementService } from '../services/index.js';
 import phase22Service from '../services/phase22Service.js';
+import { initiatePayment } from '../../services/paymentService.js';
 
 /**
  * ============================================================
@@ -226,9 +228,31 @@ export const getInspectionCategories = asyncHandler(async (req, res) => {
  * ============================================================
  */
 
-// Process payment
+// Initiate the real M-Pesa payment for an inspection booking. The amount is
+// derived from the booking; the browser cannot choose the amount. The payment
+// callback later invokes the canonical inspection financial RPC.
+export const initiateInspectionPayment = asyncHandler(async (req, res) => {
+  const booking = await bookingService.getBookingById(req.params.bookingId);
+  if (String(booking.customer_id) !== String(req.user.id)) {
+    throw new AppError('You do not have access to this booking', 403);
+  }
+  if (booking.payment_status === 'fully_paid') {
+    return response.success(res, { paymentStatus: 'fully_paid', bookingId: booking.id });
+  }
+  const result = await initiatePayment({
+    userId: req.user.id,
+    carId: null,
+    type: 'inspection',
+    amount: Number(booking.total_price),
+    phone: req.body.phone,
+    metadata: { bookingId: booking.id, bookingReference: booking.booking_reference },
+  });
+  response.success(res, result);
+});
+
+// Process payment (service-controlled callback/reconciliation path)
 export const processPayment = asyncHandler(async (req, res) => {
-  const result = await settlementService.processPayment(req.params.bookingId, req.body);
+  const result = await settlementService.processPayment(req.params.bookingId, { ...req.body, userId: req.user.id });
   response.success(res, result);
 });
 
@@ -345,6 +369,7 @@ export default {
   revokeReportShare,
   getInspectionCategories,
   // Payment
+  initiateInspectionPayment,
   processPayment,
   processRefund,
   generateSettlement,

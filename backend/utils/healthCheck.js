@@ -8,13 +8,14 @@
 import { isRedisConnected } from "./cache.js";
 import { isPostHogEnabled } from "./posthog.js";
 import { getQueueMetrics, connection as queueConnection } from "../config/queue.js";
-import { isSupabaseConnected } from "./supabase.js";
+import { checkSupabaseReadiness, isSupabaseConnected } from "./supabase.js";
 
 const START_TIME = Date.now();
 
 // ── SHALLOW CHECK — for load balancers (fast) ─────────────────
 const shallowHealth = (req, res) => {
   const dbReady = isSupabaseConnected();
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.json({
     status: dbReady ? "ok" : "degraded",
     service: "Kayad API",
@@ -131,20 +132,31 @@ export const registerHealthRoutes = (app) => {
   }, deepHealth);
 
   // Kubernetes liveness probe
-  app.get("/health/live", (_, res) => res.json({ status: "ok" }));
-  app.get("/api/health/live", (_, res) => res.json({ status: "ok" }));
+  app.get("/health/live", (_, res) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.json({ status: "ok" });
+  });
+  app.get("/api/health/live", (_, res) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.json({ status: "ok" });
+  });
 
   // Kubernetes readiness probe
-  app.get("/health/ready", async (_, res) => {
-    const dbReady = isSupabaseConnected();
-    if (!dbReady) return res.status(503).json({ status: "not ready", reason: "db" });
-    res.json({ status: "ready" });
-  });
-  app.get("/api/health/ready", async (_, res) => {
-    const dbReady = isSupabaseConnected();
-    if (!dbReady) return res.status(503).json({ status: "not ready", reason: "db" });
-    res.json({ status: "ready" });
-  });
+  const readiness = async (_, res) => {
+    const result = await checkSupabaseReadiness();
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    if (!result.ready) {
+      return res.status(503).json({
+        status: "not ready",
+        reason: "db",
+        detail: result.reason,
+      });
+    }
+    return res.json({ status: "ready" });
+  };
+
+  app.get("/health/ready", readiness);
+  app.get("/api/health/ready", readiness);
 
   console.log("🏥 Health checks: /health  /health/deep  /health/live  /health/ready");
 };

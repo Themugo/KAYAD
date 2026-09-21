@@ -5,6 +5,7 @@ import { BURN_RATE_POLICIES, ERROR_BUDGET_CONFIG } from "./reliability.js";
 import { triggerAlert, ALERT_LEVELS, ALERT_CHANNELS } from "./alerting.js";
 import ErrorBudget from "../models/ErrorBudget.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 // =============================
 // 🔥 BURN RATE EVALUATION
@@ -15,6 +16,7 @@ import { logInfo, logError } from "../utils/logger.js";
 
 export async function evaluateBurnRateAlerts() {
   const alerts = [];
+  if (!isSupabaseConnected()) return alerts;
 
   for (const policy of BURN_RATE_POLICIES) {
     try {
@@ -106,6 +108,7 @@ export async function evaluateBurnRateAlerts() {
 // =============================
 
 export async function evaluateErrorBudgetStatusAlerts() {
+  if (!isSupabaseConnected()) return [];
   const budgets = await ErrorBudget.find();
   const alerts = [];
 

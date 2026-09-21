@@ -15,9 +15,10 @@ if (!server.includes('if (!IS_DEVELOPMENT && !IS_TEST) return cb(null, false);')
 if (!server.includes('if (IS_DEVELOPMENT || IS_TEST) return cb(null, true);')) fail("CORS development/test boundary missing");
 if (server.includes('if (false && NODE_ENV !== "production"')) fail("Dead legacy CORS branch remains");
 
-for (const key of ["SUPABASE_URL", "SUPABASE_SERVICE_KEY", "JWT_SECRET", "REFRESH_TOKEN_SECRET", "SESSION_SECRET", "FRONTEND_URL", "BACKEND_URL"]) {
+for (const key of ["SUPABASE_URL", "JWT_SECRET", "REFRESH_TOKEN_SECRET", "SESSION_SECRET", "FRONTEND_URL", "BACKEND_URL"]) {
   if (!env.includes(`{ key: "${key}"`)) fail(`Production-required env missing: ${key}`);
 }
+if (!env.includes("SUPABASE_SERVICE_ROLE_KEY") || !env.includes("SUPABASE_SERVICE_KEY")) fail("Supabase service-role key contract/legacy alias missing");
 if (!env.includes("must be at least 32 characters in production")) fail("Production secret length guard missing");
 if (!env.includes("must use HTTPS in production")) fail("Production HTTPS URL guard missing");
 

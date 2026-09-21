@@ -36,6 +36,7 @@ import {
   getTeamMembers,
   inviteTeamMember,
   updateTeamMember,
+  removeTeamMember,
   acceptTeamInvite,
   // Subscription
   getSubscription,
@@ -93,6 +94,7 @@ router.get("/analytics/recommendations", protect, dealerOnly, asyncHandler(getAI
 router.get("/team", protect, dealerOrgAccess(), asyncHandler(getTeamMembers));
 router.post("/team/invite", protect, dealerOrgAccess("canManageTeam"), asyncHandler(inviteTeamMember));
 router.put("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamMember));
+router.delete("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(removeTeamMember));
 router.post("/team/accept", protect, asyncHandler(acceptTeamInvite));
 
 // Subscription

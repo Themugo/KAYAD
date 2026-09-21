@@ -1,12 +1,13 @@
 import { findAll } from "../db/index.js";
 import { deliver } from "./communicationGateway.service.js";
 import { logInfo, logWarn } from "../utils/logger.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 const INTERVAL = 5 * 60 * 1000;
 let running = false;
 
 export const runCommunicationRetries = async () => {
-  if (running) return;
+  if (running || !isSupabaseConnected()) return;
   running = true;
   try {
     const now = new Date().toISOString();

@@ -31,6 +31,31 @@ async function fetchWithTimeout(url, options = {}) {
   }
 }
 
+async function checkReleaseIdentity() {
+  const expectedCommit = String(process.env.EXPECTED_COMMIT || '').trim();
+  if (!expectedCommit) {
+    warnings.push('Release identity: EXPECTED_COMMIT not supplied; commit match was not asserted');
+    return;
+  }
+  try {
+    const response = await fetchWithTimeout(`${deploymentUrl}/release.json`, {
+      headers: { accept: 'application/json', 'user-agent': 'KAYAD-production-verifier/1.0' },
+    });
+    if (!response.ok) {
+      failures.push(`Release identity: HTTP ${response.status} for /release.json`);
+      return;
+    }
+    const payload = await response.json();
+    if (payload?.commit !== expectedCommit) {
+      failures.push(`Release identity: expected ${expectedCommit}, deployed ${payload?.commit || 'unknown'}`);
+      return;
+    }
+    console.log(`PASS Release identity: deployed commit ${expectedCommit}`);
+  } catch (error) {
+    failures.push(`Release identity: ${error.name === 'AbortError' ? `timeout after ${timeoutMs}ms` : error.message}`);
+  }
+}
+
 async function checkFrontend(name, baseUrl) {
   if (!baseUrl) return;
   try {
@@ -117,6 +142,7 @@ if (!deploymentUrl) failures.push('Deployment URL: deployment command returned n
 
 if (!failures.length) {
   await checkFrontend('Vercel deployment', deploymentUrl);
+  await checkReleaseIdentity();
   await checkFrontend('Public production domain', publicUrl);
   await checkApi();
 }

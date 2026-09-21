@@ -100,7 +100,7 @@ Already established, cited rather than re-derived:
 Node/npm: Node >=20.x (backend package.json engines field), .nvmrc specifies 22. Frontend package.json has no engines field - inherits the same Node version by convention, not enforced. This sandbox runs Node v22.22.2/npm 10.9.7, consistent with .nvmrc.
 
 Required production environment variables (from render.yaml, the authoritative deployment config):
-NODE_ENV, PORT, SUPABASE_URL, SUPABASE_SERVICE_KEY, SESSION_SECRET, JWT_SECRET, REFRESH_TOKEN_SECRET, FRONTEND_URL, BACKEND_URL, MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE, MPESA_PASSKEY, MPESA_CALLBACK_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, WEBHOIST_EMAIL, ADMIN_EMAIL.
+NODE_ENV, PORT, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET, JWT_SECRET, REFRESH_TOKEN_SECRET, FRONTEND_URL, BACKEND_URL, MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE, MPESA_PASSKEY, MPESA_CALLBACK_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, WEBHOIST_EMAIL, ADMIN_EMAIL.
 
 Notably absent from render.yaml: any REDIS_URL/REDIS_HOST variable. .env.example documents Redis as optional with an in-memory fallback when unset - but this sandbox's own server-start test (Phase 0 of this session) showed the live process hanging on basic requests alongside repeated Redis connection failures, which is not obviously consistent with a clean, complete in-memory fallback for every Redis-dependent code path (queues in particular). This inconsistency is not resolved in this document - flagged as a P0 item (section 3) requiring live investigation, not assumed safe either way.
 

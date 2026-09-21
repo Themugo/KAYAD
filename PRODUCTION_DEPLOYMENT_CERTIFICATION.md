@@ -23,7 +23,7 @@ Scope: Verify the actual deployment chain end-to-end. **No optimistic certificat
 | Variable | Status |
 | --- | --- |
 | Vercel `VITE_*` env vars (dashboard) | NOT VERIFIED — no Vercel access; `deploy.yml` fails pulling project info |
-| Render env vars (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL`, M-Pesa, Cloudinary, Redis…) | NOT VERIFIED — no Render access. `render.yaml` declares them `sync: false` (dashboard-set); the 502s are consistent with missing/invalid required env but that is a hypothesis, not a verification |
+| Render env vars (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL`, M-Pesa, Cloudinary, Redis…) | NOT VERIFIED — no Render access. `render.yaml` declares them `sync: false` (dashboard-set); the 502s are consistent with missing/invalid required env but that is a hypothesis, not a verification |
 | GitHub Actions secrets (`VERCEL_TOKEN`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) | ❌ PARTIALLY VERIFIED BROKEN — deploy workflow fails at Vercel credentials step |
 | Backend `validateEnv()` on boot | VERIFIED in code (PORT required; warns on missing secrets) — runtime behavior NOT VERIFIED (service down) |
 
@@ -92,7 +92,7 @@ The certification gate "CI passes" required fixing what was actually failing. Al
 
 **Minimum actions before re-certification (owner-side, require dashboard access):**
 1. Restore/re-link the Vercel project (or remove the stale DNS), set `VITE_API_URL=https://api.kayad.space`, fix `VERCEL_TOKEN` + project secrets for `deploy.yml`.
-2. Fix the Render service crash (check deploy logs; verify `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL` are set).
+2. Fix the Render service crash (check deploy logs; verify `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL` are set).
 3. Renew the `*.kayad.space` certificate (www).
 4. Then: run smoke tests (`/health` 200, `/api/cars` 200, register→login→browse→detail→save flows) and the full `e2e/` P0 suite against the live deployment, and re-run this certification.
 

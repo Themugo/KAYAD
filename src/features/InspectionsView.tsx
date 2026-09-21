@@ -120,7 +120,8 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   user,
   onOpenAuth,
   initialSelectedVehicle,
-  onViewVehicleDetails
+  onViewVehicleDetails,
+  onOpenInspectionMarketplace
 }) => {
   // State
   const socket = useSocket();

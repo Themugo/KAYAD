@@ -133,7 +133,7 @@ PORT=5000
 
 # Database
 SUPABASE_URL=https://<project>.supabase.co
-SUPABASE_SERVICE_KEY=<service-role-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 
 # Security
 JWT_SECRET=<generate-32-char-string>

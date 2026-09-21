@@ -4,8 +4,21 @@ import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
+  const releaseCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || process.env.KAYAD_RELEASE_COMMIT || 'unknown';
+  const releaseSource = process.env.VERCEL_ENV || process.env.NODE_ENV || 'production';
+  const releasePlugin = {
+    name: 'kayad-release-identity',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'release.json',
+        source: JSON.stringify({ application: 'KAYAD', commit: releaseCommit, source: releaseSource, generatedAt: new Date().toISOString() }, null, 2),
+      });
+    },
+  };
+
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), releasePlugin],
     resolve: {
       alias: {
         '@': import.meta.dirname

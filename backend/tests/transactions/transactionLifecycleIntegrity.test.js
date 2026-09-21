@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const root = path.resolve(process.cwd());
+const root = path.resolve(new URL("../../..", import.meta.url).pathname);
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 
 describe("Transaction lifecycle integrity contracts", () => {

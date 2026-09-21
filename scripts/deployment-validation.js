@@ -45,7 +45,7 @@ const BACKEND_REQUIRED_VARS = [
   'NODE_ENV',
   'PORT',
   'SUPABASE_URL',
-  'SUPABASE_SERVICE_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
   'JWT_SECRET',
   'REFRESH_TOKEN_SECRET',
   'FRONTEND_URL',
@@ -54,7 +54,7 @@ const BACKEND_REQUIRED_VARS = [
 // Critical environment variables (will fail deployment if missing)
 const CRITICAL_VARS = [
   'SUPABASE_URL',
-  'SUPABASE_SERVICE_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
   'JWT_SECRET',
   'FRONTEND_URL',
 ];
@@ -88,9 +88,11 @@ function validateEnvironmentVariables() {
   });
 
   // Check backend variables
+  // Canonical Supabase service-role key; accept the legacy alias for backward compatibility.
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
   log('\nBackend Variables:', 'blue');
   BACKEND_REQUIRED_VARS.forEach(varName => {
-    const value = process.env[varName];
+    const value = varName === 'SUPABASE_SERVICE_ROLE_KEY' ? serviceRoleKey : process.env[varName];
     if (!value) {
       if (CRITICAL_VARS.includes(varName)) {
         errors.push(`Missing critical backend variable: ${varName}`);

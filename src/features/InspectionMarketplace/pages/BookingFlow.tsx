@@ -17,6 +17,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { inspectionApi } from '../services/api';
+import { getPaymentStatus } from '../../../services/paymentApi';
 import type {
   InspectionProvider,
   InspectionPackage,
@@ -151,7 +152,31 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
         staffId: formData.selectedStaff,
         notes: formData.notes,
       });
-      onComplete?.(booking.id);
+      const payment = await inspectionApi.initiatePayment(booking.id, formData.customerPhone);
+      if (payment?.paymentStatus === 'fully_paid') {
+        onComplete?.(booking.id);
+        return;
+      }
+      const checkoutRequestId = payment?.checkoutRequestID || payment?.checkoutID;
+      if (!checkoutRequestId) {
+        throw new Error('Payment prompt could not be started. Your booking remains pending payment.');
+      }
+
+      // The STK initiation response only proves that a prompt was sent.
+      // Completion is authoritative only after the backend payment record is
+      // settled by the M-Pesa callback and the inspection atomic RPC.
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const status = await getPaymentStatus(checkoutRequestId);
+        if (status.status === 'success') {
+          onComplete?.(booking.id);
+          return;
+        }
+        if (['failed', 'cancelled', 'refunded'].includes(status.status)) {
+          throw new Error('M-Pesa payment was not completed. Your booking remains pending payment.');
+        }
+      }
+      throw new Error('Payment is still pending. Please wait for the M-Pesa confirmation before leaving this screen.');
     } catch (error) {
       console.error('Booking failed:', error);
     } finally {
@@ -172,7 +197,7 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
       case 4: // Confirm
         return formData.customerName && formData.customerEmail && formData.customerPhone;
       case 5: // Payment
-        return true;
+        return Boolean(formData.customerPhone);
       default:
         return false;
     }
@@ -349,7 +374,7 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
                 color: KAYAD_COLORS.white
               }}
             >
-              {loading ? 'Processing...' : `Pay KES ${totalPrice.toLocaleString()}`}
+              {loading ? 'Starting payment...' : `Pay KES ${totalPrice.toLocaleString()}`}
             </button>
           )}
         </div>
@@ -717,9 +742,9 @@ function PaymentStep({ formData, totalPrice, onSubmit, loading }: any) {
         </p>
 
         <p style={{ color: KAYAD_COLORS.softBlue }}>
-          Payment will be processed securely via M-PESA or card.
+          A secure M-PESA payment prompt will be sent to the customer's phone number.
           <br />
-          You will receive an SMS confirmation after payment.
+          The booking is not marked paid until the verified provider callback settles it.
         </p>
       </div>
 
@@ -732,7 +757,7 @@ function PaymentStep({ formData, totalPrice, onSubmit, loading }: any) {
           color: KAYAD_COLORS.white
         }}
       >
-        {loading ? 'Processing...' : 'Proceed to Payment'}
+        {loading ? 'Starting payment...' : 'Send M-PESA Prompt'}
       </button>
     </div>
   );

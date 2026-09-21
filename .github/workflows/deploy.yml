@@ -59,30 +59,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Check Vercel token
-        id: vercel
+      - name: Require Vercel deployment credentials
         run: |
-          if [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then echo "configured=true" >> "$GITHUB_OUTPUT"; else echo "configured=false" >> "$GITHUB_OUTPUT"; echo "::warning::VERCEL_TOKEN is not configured; Vercel CLI deployment is skipped. Configure it to enable this workflow's CLI deployment."; fi
+          test -n "${{ secrets.VERCEL_TOKEN }}" || { echo "::error::VERCEL_TOKEN is required for production deployment; refusing to report success while production could remain stale."; exit 1; }
       - name: Setup Node.js
-        if: steps.vercel.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22.22.2'
           cache: 'npm'
       - name: Install Vercel CLI
-        if: steps.vercel.outputs.configured == 'true'
         run: npm install -g vercel
       - name: Pull Vercel project
-        if: steps.vercel.outputs.configured == 'true'
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build with Vercel
-        if: steps.vercel.outputs.configured == 'true'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy production artifact
-        if: steps.vercel.outputs.configured == 'true'
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        id: deploy
+        shell: bash
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} | tail -n 1)
+          test -n "$DEPLOYMENT_URL" || { echo "::error::Vercel did not return a deployment URL"; exit 1; }
+          echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
       - name: Verify deployed production
-        if: steps.vercel.outputs.configured == 'true' && env.DEPLOYMENT_URL != ''
         run: npm run verify:production
         env:
-          DEPLOYMENT_URL: ${{ secrets.DEPLOYMENT_URL }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+          EXPECTED_COMMIT: ${{ github.sha }}
+          PUBLIC_URL: https://kayad.space
+          API_URL: https://api.kayad.space

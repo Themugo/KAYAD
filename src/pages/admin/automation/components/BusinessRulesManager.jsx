@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { getBusinessRules, createBusinessRule, updateBusinessRule, deleteBusinessRule } from '../../../../services/automationApi';
+import { unwrap } from '../../../../api/httpClient';
 import {
   Shield, Plus, Edit, Trash2, Play, Pause, Search, Filter,
   ChevronRight, CheckCircle, XCircle, AlertCircle, GripVertical,
@@ -99,6 +101,9 @@ export default function BusinessRulesManager() {
   const [rules, setRules] = useState(initialRules);
   const [selectedRule, setSelectedRule] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [showBuilder, setShowBuilder] = useState(false);
   const [filterCategory, setFilterCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,9 +118,34 @@ export default function BusinessRulesManager() {
     actions: [{ type: '', config: {} }],
   });
 
+  const normalizeRule = (raw) => ({
+    ...raw,
+    conditions: Array.isArray(raw.conditions) ? raw.conditions : JSON.parse(raw.conditions || '[]'),
+    actions: Array.isArray(raw.actions) ? raw.actions : JSON.parse(raw.actions || '[]'),
+    executions: Number(raw.executions || 0),
+    priority: Number(raw.priority || 0),
+  });
+
+  const loadRules = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await getBusinessRules({ limit: 100 });
+      const payload = unwrap(response);
+      const rows = Array.isArray(payload?.data) ? payload.data : [];
+      setRules(rows.map(normalizeRule));
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || 'Unable to load business rules.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { void loadRules(); }, [loadRules]);
+
   const filteredRules = rules.filter(rule => {
     if (filterCategory !== 'all' && rule.category !== filterCategory) return false;
-    if (searchQuery && !rule.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (searchQuery && !String(rule.name || '').toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
@@ -161,12 +191,64 @@ export default function BusinessRulesManager() {
     }));
   };
 
-  const saveRule = () => {
-    console.warn('[BusinessRulesManager] Backend CRUD integration is not connected; rule was not persisted.');
+  const saveRule = async () => {
+    const name = String(editingRule.name || '').trim();
+    const conditions = editingRule.conditions.filter(c => c.field);
+    const actions = editingRule.actions.filter(a => a.type);
+    if (!name || !conditions.length || !actions.length) {
+      setError('Rule name, at least one condition, and at least one action are required.');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      const payload = { ...editingRule, name, conditions, actions };
+      const response = selectedRule?.id
+        ? await updateBusinessRule(selectedRule.id, payload)
+        : await createBusinessRule(payload);
+      const saved = normalizeRule(unwrap(response)?.data || {});
+      if (!saved.id) throw new Error('The server did not return a saved rule.');
+      setRules(prev => selectedRule?.id
+        ? prev.map(rule => rule.id === saved.id ? saved : rule)
+        : [saved, ...prev]);
+      setSelectedRule(saved);
+      setEditingRule(saved);
+      setShowBuilder(false);
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || 'Unable to save business rule.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const toggleRuleStatus = () => {
-    console.warn('[BusinessRulesManager] Backend CRUD integration is not connected; status was not changed.');
+  const toggleRuleStatus = async (id) => {
+    const rule = rules.find(item => item.id === id);
+    if (!rule) return;
+    const status = rule.status === 'active' ? 'paused' : 'active';
+    try {
+      const response = await updateBusinessRule(id, { status });
+      const saved = normalizeRule(unwrap(response)?.data || {});
+      setRules(prev => prev.map(item => item.id === id ? saved : item));
+      if (selectedRule?.id === id) setSelectedRule(saved);
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || 'Unable to change rule status.');
+    }
+  };
+
+  const removeRule = async (id) => {
+    try {
+      await deleteBusinessRule(id);
+      setRules(prev => prev.filter(rule => rule.id !== id));
+      if (selectedRule?.id === id) { setSelectedRule(null); setShowBuilder(false); }
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || 'Unable to delete business rule.');
+    }
+  };
+
+  const editRule = (rule) => {
+    setSelectedRule(rule);
+    setEditingRule({ ...rule });
+    setShowBuilder(true);
   };
 
   return (
@@ -224,6 +306,9 @@ export default function BusinessRulesManager() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {error && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
+          {loading && <div className="rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">Loading business rules…</div>}
+          {!loading && !filteredRules.length && !error && <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">No business rules found.</div>}
           {filteredRules.map((rule) => (
             <div
               key={rule.id}
@@ -247,6 +332,12 @@ export default function BusinessRulesManager() {
                   >
                     {rule.status === 'active' ? <Pause size={16} className="text-slate-500" /> : <Play size={16} className="text-slate-500" />}
                   </button>
+                  <button onClick={(e) => { e.stopPropagation(); editRule(rule); }} className="p-1.5 hover:bg-slate-100 rounded-lg" aria-label="Edit rule">
+                    <Edit size={16} className="text-slate-500" />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); void removeRule(rule.id); }} className="p-1.5 hover:bg-red-50 rounded-lg" aria-label="Delete rule">
+                    <Trash2 size={16} className="text-red-500" />
+                  </button>
                 </div>
               </div>
 
@@ -266,7 +357,7 @@ export default function BusinessRulesManager() {
                   <span className="font-medium text-slate-600">{rule.actions.length}</span>
                 </div>
                 <div className="ml-auto text-slate-400">
-                  {rule.executions} executions
+                  {Number(rule.executions || 0).toLocaleString()} executions
                 </div>
               </div>
 
@@ -316,7 +407,7 @@ export default function BusinessRulesManager() {
                 className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
               >
                 <Save size={18} />
-                Save Rule
+                {saving ? 'Saving…' : 'Save Rule'}
               </button>
             </div>
           </div>

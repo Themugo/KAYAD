@@ -1,6 +1,7 @@
 // src/api/api.exports.ts
 // All the per-route API objects.
 import { api, unwrap } from "./httpClient";
+import { getTeamMembers, inviteTeamMember, updateTeamMember, removeTeamMember } from '../services/dealerPlatformApi';
 
 // ── AUTH ──────────────────────────────────────────────
 import {
@@ -137,10 +138,10 @@ export const dealerAPI = {
   bulkStatus: (body: any)         => api.patch('/dealer/cars/bulk-status', body).then(unwrap),
   bulkDelete: (ids: string[])     => api.post('/dealer/cars/bulk-delete', { ids }).then(unwrap),
   exportCSV:  (params: any)       => api.get('/dealer/cars', { params, responseType: 'blob' }).then(r => r.data),
-  getTeam:        ()             => api.get('/dealer/team').then(unwrap),
-  inviteMember:   (body: any)         => api.post('/dealer/team/invite', body).then(unwrap),
-  updateMember:   (memberId: string, body: any) => api.patch(`/dealer/team/${memberId}`, body).then(unwrap),
-  removeMember:   (memberId: string)     => api.delete(`/dealer/team/${memberId}`).then(unwrap),
+  getTeam:        ()             => getTeamMembers(),
+  inviteMember:   (body: any)         => inviteTeamMember(body),
+  updateMember:   (memberId: string, body: any) => updateTeamMember(memberId, body),
+  removeMember:   (memberId: string)     => removeTeamMember(memberId),
   getSettlement:  ()             => api.get('/dealer/settlement').then(unwrap),
   updateSettlement: (body: any)       => api.put('/dealer/settlement', body).then(unwrap),
   getMyActivityLog: (params: any)     => api.get('/security-logs/my', { params }).then(unwrap),
@@ -463,16 +464,6 @@ export const supportAPI = {
   analytics:     ()             => api.get('/support/analytics').then(unwrap),
   myTickets:     (params?: any) => api.get('/support/my-tickets', { params }).then(unwrap),
   create:        (body: any)    => api.post('/support', body).then(unwrap),
-};
-
-// ── SUPPORT TICKET ADMIN ──────────────────────────────
-export const supportTicketAdminAPI = {
-  stats:      ()            => api.get('/admin/support-tickets/stats').then(unwrap),
-  list:       (params?: any) => api.get('/admin/support-tickets', { params }).then(unwrap),
-  get:        (id: string)  => api.get(`/admin/support-tickets/${id}`).then(unwrap),
-  updateStatus: (id: string, body: any) => api.patch(`/admin/support-tickets/${id}/status`, body).then(unwrap),
-  assign:     (id: string, body: any) => api.patch(`/admin/support-tickets/${id}/assign`, body).then(unwrap),
-  addMessage: (id: string, body: any) => api.post(`/admin/support-tickets/${id}/messages`, body).then(unwrap),
 };
 
 // ── REPORTS ───────────────────────────────────────────

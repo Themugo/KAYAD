@@ -48,7 +48,13 @@
     "validate:runtime-integrity": "node scripts/validate-runtime-integrity.mjs",
     "validate:release": "node scripts/validate-release.mjs",
     "validate:wave2-invariants": "node scripts/validate-wave2-invariants.mjs",
-    "validate:wave3-convergence": "node scripts/validate-wave3-convergence.mjs"
+    "validate:wave3-convergence": "node scripts/validate-wave3-convergence.mjs",
+    "validate:phase59": "node scripts/validate-phase59.mjs",
+    "validate:startup-convergence": "node scripts/validate-startup-convergence.mjs",
+    "validate:local-runtime": "node scripts/validate-local-runtime.mjs",
+    "validate:live-runtime": "node scripts/validate-live-runtime.mjs",
+    "validate:runtime-deep-v11": "node scripts/validate-runtime-deep-v11.mjs",
+    "validate:automation-domain-v12": "node scripts/validate-automation-domain-v12.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

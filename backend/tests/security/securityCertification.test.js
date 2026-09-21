@@ -50,6 +50,7 @@ jest.unstable_mockModule("../../services/email.service.js", () => ({
   sendVerificationReminderEmail: jest.fn().mockResolvedValue({}),
   sendPasswordResetEmail: jest.fn().mockResolvedValue({}),
   sendWelcomeEmail: jest.fn().mockResolvedValue({}),
+  sendRawEmail: jest.fn().mockResolvedValue({}),
 }));
 jest.unstable_mockModule("../../utils/logger.js", () => ({
   logInfo: jest.fn(),

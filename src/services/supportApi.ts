@@ -78,3 +78,18 @@ export async function createSupportTicket(
 export async function getMySupportTickets(): Promise<{ success: boolean; tickets: SupportTicket[] }> {
   return supportFetch('/api/support/my-tickets', { method: 'GET' });
 }
+
+export async function getAdminSupportTickets(params: Record<string, string | number | undefined> = {}): Promise<{ success: boolean; tickets: SupportTicket[] }> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') query.set(key, String(value));
+  });
+  return supportFetch(`/api/support/all${query.toString() ? `?${query.toString()}` : ''}`, { method: 'GET' });
+}
+
+export async function updateSupportTicketStatus(ticketId: string, body: { status?: string; assignedTo?: string; escalatedTo?: string; priority?: string }): Promise<{ success: boolean; ticket: SupportTicket }> {
+  return supportFetch(`/api/support/${ticketId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}

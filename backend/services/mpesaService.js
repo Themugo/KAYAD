@@ -70,7 +70,7 @@ const loadConfig = async (overrides = {}) => {
   };
 
   try {
-    const db = await findOne("platform_configs", {});
+    const db = await findOne("platform_config", {});
     if (db?.daraja) {
       cfg = { ...cfg, ...db.daraja };
     }

@@ -69,6 +69,49 @@ export async function searchVehicles(params = {}) {
   return { data: result.data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit), hasMore: offset + result.data.length < total } };
 }
 
+
+export async function getSearchFacets(params = {}) {
+  const filters = buildFilters(params);
+  const cacheKey = `kayad:search:facets:${JSON.stringify(Object.fromEntries(Object.entries(params).sort(([a], [b]) => a.localeCompare(b))))}`;
+  const cached = await cacheGet(cacheKey);
+  if (cached) return cached;
+
+  // Do not derive facets from an arbitrary first page. A 500-row cap made
+  // facet values disappear as inventory grew. The canonical DB adapter has a
+  // distinct() primitive, so each facet is now calculated across the full
+  // filtered result set while the count is obtained independently.
+  const [total, brands, models, locations, bodyTypes, fuels, transmissions, colors, conditions] = await Promise.all([
+    db.count('cars', filters),
+    db.distinct('cars', 'brand', filters),
+    db.distinct('cars', 'model', filters),
+    db.distinct('cars', 'locationCity', filters),
+    db.distinct('cars', 'bodyType', filters),
+    db.distinct('cars', 'fuel', filters),
+    db.distinct('cars', 'transmission', filters),
+    db.distinct('cars', 'color', filters),
+    db.distinct('cars', 'condition', filters),
+  ]);
+
+  const unique = (values) => [...new Set(values.filter(Boolean).map((value) => String(value).trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b))
+    .map((value) => ({ value, label: value }));
+
+  const result = {
+    total: total || 0,
+    brands: unique(brands),
+    models: unique(models),
+    locations: unique(locations),
+    bodyTypes: unique(bodyTypes),
+    fuels: unique(fuels),
+    transmissions: unique(transmissions),
+    colors: unique(colors),
+    conditions: unique(conditions),
+  };
+
+  await cacheSet(cacheKey, result, 60);
+  return result;
+}
+
 export async function getSearchSuggestions(query, limit = MAX_AUTOCOMPLETE) {
   const q = clean(query);
   if (!q || q.length < 2) return [];

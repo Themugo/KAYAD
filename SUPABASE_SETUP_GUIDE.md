@@ -58,7 +58,7 @@ Update `backend/.env` with your Supabase credentials:
 ```env
 # From Supabase Dashboard → Settings → API
 SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_SERVICE_KEY=your-service-role-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 SUPABASE_BUCKET=kayad-images
 ```
 
@@ -274,7 +274,7 @@ Open http://localhost:3000
 
 ### "Storage not configured" Error
 
-1. Verify `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` are set correctly
+1. Verify `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set correctly
 2. Ensure bucket `kayad-images` exists and is public
 3. Check storage policies are configured
 

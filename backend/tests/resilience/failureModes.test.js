@@ -248,7 +248,8 @@ describe("payment initiation failure modes", () => {
     await expect(
       initiatePayment({ userId: "u1", carId: "c1", phone: "0712345678", amount: 500000, type: "escrow" }),
     ).rejects.toThrow();
-    expect(dbMock.create).not.toHaveBeenCalled();
+    expect(dbMock.create).toHaveBeenCalledWith("payments", expect.objectContaining({ status: "pending", type: "escrow" }));
+    expect(dbMock.update).toHaveBeenCalledWith(expect.any(String), expect.anything(), expect.objectContaining({ status: "failed" }));
   }, 60000);
 });
 

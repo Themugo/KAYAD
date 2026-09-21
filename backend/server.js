@@ -834,9 +834,15 @@ const connectDB = () => {
   initSupabase();
   if (isSupabaseConnected()) {
     logInfo("Supabase connected");
-  } else {
-    logWarn("Supabase not configured — running without database");
+    return true;
   }
+
+  // Development can intentionally boot without database credentials, but
+  // must never report a successful database connection. Production is
+  // rejected by validateEnv() before this point when the DB contract is
+  // incomplete.
+  logWarn("Supabase not configured — database-backed routes will return a controlled degraded response");
+  return false;
 };
 
 
@@ -870,26 +876,32 @@ const startBackgroundServices = async (io) => {
       catch (err) { logError("Failed to start price alert cron", err); console.log("❌ Failed to start price alert cron:", err); }
     })(),
     (async () => {
+      if (!isSupabaseConnected()) { console.log("ℹ️ Communication retry cron skipped: Supabase not connected"); return; }
       try { startCommunicationRetryCron(); console.log("✅ Communication retry cron started"); }
       catch (err) { logError("Failed to start communication retry cron", err); console.log("❌ Failed to start communication retry cron:", err); }
     })(),
     (async () => {
+      if (!isSupabaseConnected()) { console.log("ℹ️ Health score scheduler skipped: Supabase not connected"); return; }
       try { startHealthScoreScheduler(); console.log("✅ Health score scheduler started"); }
       catch (err) { logError("Failed to start health score scheduler", err); console.log("❌ Failed to start health score scheduler:", err); }
     })(),
     (async () => {
+      if (!isSupabaseConnected()) { console.log("ℹ️ Market trend scheduler skipped: Supabase not connected"); return; }
       try { startMarketTrendScheduler(); console.log("✅ Market trend scheduler started"); }
       catch (err) { logError("Failed to start market trend scheduler", err); console.log("❌ Failed to start market trend scheduler:", err); }
     })(),
     (async () => {
+      if (!isSupabaseConnected()) { console.log("ℹ️ Marketplace health scheduler skipped: Supabase not connected"); return; }
       try { startMarketplaceHealthScheduler(); console.log("✅ Marketplace health scheduler started"); }
       catch (err) { logError("Failed to start marketplace health scheduler", err); console.log("❌ Failed to start marketplace health scheduler:", err); }
     })(),
     (async () => {
+      if (!isSupabaseConnected()) { console.log("ℹ️ Reliability/SLI scheduler skipped: Supabase not connected"); return; }
       try { startSliScheduler(); console.log("✅ Reliability/SLI scheduler started"); }
       catch (err) { logError("Failed to start SLI scheduler", err); console.log("❌ Failed to start SLI scheduler:", err); }
     })(),
     (async () => {
+      if (!isSupabaseConnected()) { console.log("ℹ️ Reconciliation crons skipped: Supabase not connected"); return; }
       try { startAllReconciliationCrons(); console.log("✅ Reconciliation crons started (rapid/hourly/daily/deep)"); }
       catch (err) { logError("Failed to start reconciliation crons", err); console.log("❌ Failed to start reconciliation crons:", err); }
     })(),
@@ -958,8 +970,8 @@ const bootstrap = async () => {
     console.log("🔧 Starting bootstrap process...");
     validateEnv();
     console.log("✅ Environment validated");
-    await connectDB();
-    console.log("✅ Database connected");
+    const databaseConnected = connectDB();
+    console.log(databaseConnected ? "✅ Database connected" : "ℹ️ Database unavailable in local development");
 
     await initCache();
 

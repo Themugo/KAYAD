@@ -266,7 +266,7 @@ pm2 reload ecosystem.config.cjs
 - Verify Supabase connection
 
 **Database Connection Fails**
-- Verify SUPABASE_URL and SUPABASE_SERVICE_KEY
+- Verify SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
 - Check Supabase project status/quota
 - Verify network connectivity
 

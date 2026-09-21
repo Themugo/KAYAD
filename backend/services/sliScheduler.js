@@ -5,6 +5,7 @@ import { computeAllSlis } from "./sliTrackingService.js";
 import { updateErrorBudgets } from "./sliTrackingService.js";
 import { evaluateAllAlertPolicies } from "../config/alertPolicies.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 let intervalHandle = null;
 
@@ -56,6 +57,11 @@ async function alertEvalCycle() {
 }
 
 export function startSliScheduler() {
+  if (!isSupabaseConnected()) {
+    logInfo("SLI scheduler skipped: Supabase not connected");
+    return false;
+  }
+
   if (intervalHandle) {
     logInfo("SLI scheduler already running");
     return;
@@ -86,6 +92,7 @@ export function startSliScheduler() {
   setInterval(alertEvalCycle, ALERT_EVAL_INTERVAL_MS);
 
   intervalHandle = true; // track that we started
+  return true;
 }
 
 export function stopSliScheduler() {

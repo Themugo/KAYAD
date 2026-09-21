@@ -7,6 +7,7 @@ WORKDIR /app
 COPY backend/package*.json ./
 COPY backend/package-lock.json ./
 COPY backend/server.js ./
+COPY backend/bootstrap.js ./
 COPY backend/ecosystem.config.cjs ./
 COPY backend/config ./config
 COPY backend/controllers ./controllers
@@ -68,4 +69,4 @@ USER nodeuser
 
 EXPOSE 5000
 
-CMD ["node", "server.js"]
+CMD ["node", "bootstrap.js"]

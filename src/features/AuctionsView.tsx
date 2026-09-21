@@ -81,7 +81,24 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
     setError(null);
     try {
       const result = await fetchActiveAuctions({ page: 1, limit: 100 });
-      const refreshedAuctions = (result?.auctions || []) as AuctionRecord[];
+      const refreshedAuctions: AuctionRecord[] = (result?.auctions || []).filter((auction): auction is typeof auction & { car: Record<string, unknown> } => !!auction.car).map((auction) => ({
+        ...auction,
+        reservePrice: auction.reservePrice ?? null,
+        car: {
+          _id: String(auction.car?._id ?? auction.car?.id ?? auction.carId),
+          title: String(auction.car?.title ?? ''),
+          brand: typeof auction.car?.brand === 'string' ? auction.car.brand : undefined,
+          model: typeof auction.car?.model === 'string' ? auction.car.model : undefined,
+          year: typeof auction.car?.year === 'number' ? auction.car.year : undefined,
+          price: typeof auction.car?.price === 'number' ? auction.car.price : undefined,
+          images: Array.isArray(auction.car?.images) ? auction.car.images as AuctionRecord['car']['images'] : undefined,
+          location: typeof auction.car?.location === 'string' ? auction.car.location : undefined,
+          dealer: typeof auction.car?.dealer === 'string' ? auction.car.dealer : undefined,
+          currentBid: typeof auction.car?.currentBid === 'number' ? auction.car.currentBid : undefined,
+          bidsCount: typeof auction.car?.bidsCount === 'number' ? auction.car.bidsCount : undefined,
+          auctionStatus: typeof auction.car?.auctionStatus === 'string' ? auction.car.auctionStatus : undefined,
+        },
+      }));
       setAuctions(refreshedAuctions);
       return refreshedAuctions;
     } catch (err: any) {

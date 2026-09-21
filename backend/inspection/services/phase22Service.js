@@ -3,8 +3,21 @@ import { AppError } from '../../utils/AppError.js';
 
 const rpc = async (name, args, message) => {
   const { data, error } = await getSupabase().rpc(name, args);
-  if (error) throw new AppError(error.message || message, 409);
-  return data;
+  if (!error) return data;
+
+  // Keep database failures observable at the HTTP boundary. Postgres/Supabase
+  // codes are mapped to the semantic class the browser can act on; unknown
+  // infrastructure failures remain 500 so they are not disguised as client
+  // conflicts.
+  const code = String(error.code || '').toUpperCase();
+  let status = 500;
+  if (code === '42501') status = 403; // insufficient_privilege
+  else if (code === 'PGRST116') status = 404; // no rows / resource absent
+  else if (code === '23505') status = 409; // unique violation / idempotency conflict
+  else if (code === '23503' || code === '23514' || code.startsWith('22')) status = 400; // FK/check/data errors
+  else if (code === 'P0001') status = 409; // domain invariant raised by canonical RPC
+
+  throw new AppError(status >= 500 ? message : (error.message || message), status, { rpc: name, code: code || 'UNKNOWN' });
 };
 
 export class Phase22Service {

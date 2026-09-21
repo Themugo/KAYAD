@@ -1,7 +1,7 @@
 // Extracted from DealerDashboard.jsx for maintainability
 
 import { useState, useEffect } from 'react';
-import { dealerAPI } from '../../../api/api';
+import { getTeamMembers, inviteTeamMember, updateTeamMember, removeTeamMember } from '../../../services/dealerPlatformApi';
 import { Shield, UserPlus, Mail, X, Check, Users } from 'lucide-react';
 
 export const DEALER_ROLES = [
@@ -40,7 +40,7 @@ export default function TeamTab({ toast }) {
   const [expanded,   setExpanded]   = useState(null);
 
   useEffect(() => {
-    dealerAPI.getTeam().then(d => setTeam(d.members || d.team || [])).catch(() => {}).finally(() => setLoading(false));
+    getTeamMembers().then(d => setTeam(d.members || d.team || [])).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const invite = async () => {
@@ -48,7 +48,7 @@ export default function TeamTab({ toast }) {
     setInviting(true);
     try {
       const perms = ROLE_DEFAULTS[invRole] || ROLE_DEFAULTS.sales_agent;
-      const d = await dealerAPI.inviteMember({ email: invEmail.trim(), role: invRole, permissions: perms });
+      const d = await inviteTeamMember({ email: invEmail.trim(), role: invRole, permissions: perms });
       setTeam(p => [...p, d.member]);
       setInvEmail('');
       toast(`Invitation sent to ${invEmail}`, 'success');
@@ -59,7 +59,7 @@ export default function TeamTab({ toast }) {
   const updateRole = async (memberId, role) => {
     const perms = ROLE_DEFAULTS[role] || {};
     try {
-      await dealerAPI.updateMember(memberId, { role, permissions: perms });
+      await updateTeamMember(memberId, { role, permissions: perms });
       setTeam(p => p.map(m => m._id === memberId ? { ...m, role, permissions: perms } : m));
       toast('Role updated', 'success');
     } catch { toast('Failed to update role', 'error'); }
@@ -70,7 +70,7 @@ export default function TeamTab({ toast }) {
     if (!member) return;
     const updated = { ...member.permissions, [permKey]: !member.permissions[permKey] };
     try {
-      await dealerAPI.updateMember(memberId, { permissions: updated });
+      await updateTeamMember(memberId, { permissions: updated });
       setTeam(p => p.map(m => m._id === memberId ? { ...m, permissions: updated } : m));
     } catch { toast('Failed', 'error'); }
   };
@@ -78,7 +78,7 @@ export default function TeamTab({ toast }) {
   const remove = async (memberId) => {
     if (!confirm('Remove this team member?')) return;
     try {
-      await dealerAPI.removeMember(memberId);
+      await removeTeamMember(memberId);
       setTeam(p => p.filter(m => m._id !== memberId));
       toast('Member removed', 'info');
     } catch { toast('Failed to remove', 'error'); }

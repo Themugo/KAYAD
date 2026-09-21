@@ -27,7 +27,7 @@ Complete step-by-step guide to configure all services for KAYAD. Follow each ste
 
 ```
 SUPABASE_URL = https://xxxxxxxxxxxx.supabase.co
-SUPABASE_SERVICE_KEY = eyJhbGc...  (service_role secret)
+SUPABASE_SERVICE_ROLE_KEY = eyJhbGc...  (service_role secret)
 ```
 
 ### 1.3 Create Storage Bucket
@@ -54,14 +54,14 @@ SUPABASE_SERVICE_KEY = eyJhbGc...  (service_role secret)
 1. Go to **Settings** → **API**
 2. Under "Project API keys", copy:
    - `anon public` key for VITE_SUPABASE_ANON_KEY
-   - `service_role` secret for SUPABASE_SERVICE_KEY
+   - `service_role` secret for SUPABASE_SERVICE_ROLE_KEY
 
 ### 📋 Values for .env
 
 ```env
 # Backend (backend/.env)
 SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
-SUPABASE_SERVICE_KEY=eyJhbGc...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
 SUPABASE_BUCKET=kayad-images
 
 # Frontend (.env)
@@ -461,7 +461,7 @@ PORT=5000
 
 # ─── SUPABASE ────────────────────────────────────────────────────
 SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
-SUPABASE_SERVICE_KEY=eyJhbGc...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
 SUPABASE_BUCKET=kayad-images
 
 # ─── AUTH TOKENS ─────────────────────────────────────────────────
@@ -584,7 +584,7 @@ Before going live:
 
 - [ ] All placeholder values replaced with real keys
 - [ ] Secrets stored in environment variables (not in code)
-- [ ] SUPABASE_SERVICE_KEY kept server-side only
+- [ ] SUPABASE_SERVICE_ROLE_KEY kept server-side only
 - [ ] REDIS password set if using production Redis
 - [ ] M-Pesa IP whitelist configured for production
 - [ ] HTTPS enabled on all domains

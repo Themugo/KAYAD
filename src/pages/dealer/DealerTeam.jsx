@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { dealerAPI } from '../../api/api';
+import { getTeamMembers, inviteTeamMember, updateTeamMember, removeTeamMember } from '../../services/dealerPlatformApi';
 import { useToast } from '../../context/ToastContext';
 import { Users, Mail, Shield, ChevronDown, Trash2, Plus, RefreshCw, Settings, Eye, Edit3, DollarSign, MessageCircle } from 'lucide-react';
 
@@ -59,7 +59,7 @@ export default function DealerTeam() {
 
   const load = () => {
     setLoading(true);
-    dealerAPI.getTeam().then(d => setMembers(d.members || [])).catch(() => {}).finally(() => setLoading(false));
+    getTeamMembers().then(d => setMembers(d.members || [])).catch(() => {}).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -68,7 +68,7 @@ export default function DealerTeam() {
     if (!invite.email) { toast('Enter an email address', 'error'); return; }
     setInviting(true);
     try {
-      await dealerAPI.inviteMember({ email: invite.email, role: invite.role, permissions: customPerms });
+      await inviteTeamMember({ email: invite.email, role: invite.role, permissions: customPerms });
       toast(`Invite sent to ${invite.email}`, 'success');
       setInvite({ email: '', role: 'sales_agent' });
       setCustomPerms({});
@@ -81,7 +81,7 @@ export default function DealerTeam() {
 
   const handleRoleChange = async (memberId, newRole) => {
     try {
-      await dealerAPI.updateMember(memberId, { role: newRole, permissions: ROLE_DEFAULTS[newRole] });
+      await updateTeamMember(memberId, { role: newRole, permissions: ROLE_DEFAULTS[newRole] });
       setMembers(p => p.map(m => m._id === memberId ? { ...m, role: newRole, permissions: ROLE_DEFAULTS[newRole] } : m));
       toast('Role updated', 'success');
     } catch { toast('Failed', 'error'); }
@@ -89,7 +89,7 @@ export default function DealerTeam() {
 
   const handlePermToggle = async (memberId, permKey, current) => {
     try {
-      await dealerAPI.updateMember(memberId, { permissions: { [permKey]: !current } });
+      await updateTeamMember(memberId, { permissions: { [permKey]: !current } });
       setMembers(p => p.map(m => m._id === memberId ? { ...m, permissions: { ...m.permissions, [permKey]: !current } } : m));
     } catch { toast('Failed', 'error'); }
   };
@@ -97,7 +97,7 @@ export default function DealerTeam() {
   const handleRemove = async (memberId, name) => {
     if (!confirm(`Remove ${name} from your team?`)) return;
     try {
-      await dealerAPI.removeMember(memberId);
+      await removeTeamMember(memberId);
       setMembers(p => p.filter(m => m._id !== memberId));
       toast('Removed from team', 'info');
     } catch { toast('Failed', 'error'); }
@@ -106,7 +106,7 @@ export default function DealerTeam() {
   const handleSuspend = async (memberId, current) => {
     try {
       const next = current === 'active' ? 'suspended' : 'active';
-      await dealerAPI.updateMember(memberId, { status: next });
+      await updateTeamMember(memberId, { status: next });
       setMembers(p => p.map(m => m._id === memberId ? { ...m, status: next } : m));
       toast(next === 'suspended' ? 'Member suspended' : 'Member reinstated', 'info');
     } catch { toast('Failed', 'error'); }

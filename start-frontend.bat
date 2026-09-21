@@ -1,4 +1,6 @@
 @echo off
+setlocal
+cd /d "%~dp0"
 echo Starting KAYAD Frontend...
-cd /d "%~dp0frontend"
-npm run dev
+call npm run dev
+endlocal

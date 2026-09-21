@@ -1,4 +1,4 @@
-import { searchVehicles, getSearchSuggestions } from '../services/searchService.js';
+import { searchVehicles, getSearchSuggestions, getSearchFacets } from '../services/searchService.js';
 import { trackSearch } from '../services/searchInsightsService.js';
 
 export async function search(req, res) {
@@ -10,4 +10,9 @@ export async function search(req, res) {
 export async function autocomplete(req, res) {
   const suggestions = await getSearchSuggestions(req.query.q, Math.min(Number(req.query.limit) || 8, 8));
   res.json({ success: true, data: suggestions });
+}
+
+export async function facets(req, res) {
+  const result = await getSearchFacets(req.query);
+  res.json({ success: true, ...result });
 }

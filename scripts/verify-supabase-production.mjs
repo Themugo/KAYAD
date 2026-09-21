@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const baseUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
-const serviceKey = process.env.SUPABASE_SERVICE_KEY || '';
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
 const requiredTables = [
   'users', 'profiles', 'cars', 'bids', 'favorites', 'saved_searches',
   'payments', 'escrow_transactions', 'vehicle_inspections',
@@ -10,7 +10,7 @@ const requiredTables = [
 ];
 
 if (!baseUrl || !serviceKey) {
-  console.error('SUPABASE_URL and SUPABASE_SERVICE_KEY are required.');
+  console.error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or legacy SUPABASE_SERVICE_KEY) are required.');
   process.exit(1);
 }
 

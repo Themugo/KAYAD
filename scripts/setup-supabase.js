@@ -22,12 +22,12 @@ const http = require('http');
 require('dotenv').config({ path: path.join(__dirname, '../backend/.env') });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY ||
     SUPABASE_URL.includes('your-project') ||
     SUPABASE_SERVICE_KEY.includes('your-service')) {
-  console.error('❌ Please configure SUPABASE_URL and SUPABASE_SERVICE_KEY in backend/.env');
+  console.error('❌ Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or legacy SUPABASE_SERVICE_KEY) in backend/.env');
   console.error('   Get these from: https://supabase.com/dashboard → Settings → API');
   process.exit(1);
 }

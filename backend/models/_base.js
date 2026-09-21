@@ -45,23 +45,6 @@ const TABLE_MAP = {
   Event: "events", DuplicateVehicleLog: "duplicate_vehicle_logs",
   Referral: "referrals", Feedback: "feedback",
   DemandSignals: "demand_signals",
-  // Fixed (Final Integration Phase 4 - inspection frontend
-  // integration): was "global_settings" - confirmed directly against
-  // a real, migrated database (\dt) that no such table exists at all.
-  // The real, existing settings table is "system_settings" - found
-  // reproducing the real crash ("relation \"public.global_settings\"
-  // does not exist") tracing why the real inspection-order endpoint
-  // failed on every request. Note: system_settings is a real
-  // key/value store (one row per setting key), not a single flat
-  // settings document - GlobalSettings.findOne() (no filter) will
-  // return an arbitrary row, so a direct field like `.ghostCheckFee`
-  // will not be populated from this table's real shape. The one real
-  // caller of this (backend/routes/inspectionRoutes.js's order
-  // creation) already has its own safe fallback
-  // (`settings?.ghostCheckFee || 2500`), so this remains correct,
-  // graceful behavior - not a redesign of the settings table, which
-  // is out of this phase's own scope.
-  GlobalSettings: "system_settings",
   Localization: "localization_strings",
   UserPreference: "user_preferences",
   BidLog: "bid_logs",
@@ -664,6 +647,31 @@ export function createModel(name) {
         return row;
       };
       return q;
+    },
+
+    // Compatibility aliases for the legacy controller surface.
+    // Several admin/automation controllers were written against the
+    // former Mongoose-style model API (`findAll`, `update`, `delete`).
+    // Keep one canonical Supabase implementation underneath so these
+    // callers cannot silently drift onto a second data-access path.
+    async findAll(options = {}) {
+      const filters = options.filters || {};
+      let query = model.find(filters);
+      if (options.select) query = query.select(options.select);
+      if (options.orderBy) {
+        query = query.sort({ [options.orderBy]: options.order === 'asc' ? 1 : -1 });
+      }
+      if (options.offset) query = query.skip(Number(options.offset));
+      if (options.limit) query = query.limit(Number(options.limit));
+      return query.lean();
+    },
+
+    async update(id, data, options = {}) {
+      return model.findByIdAndUpdate(id, data, { ...options, new: options.new !== false });
+    },
+
+    async delete(id) {
+      return model.findByIdAndDelete(id);
     },
 
     async create(data) {

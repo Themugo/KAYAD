@@ -35,7 +35,7 @@ Once your project is ready:
 ### Backend Credentials (for `backend/.env`)
 ```
 SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_SERVICE_KEY=eyJhbGc...  ← service_role secret
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...  ← service_role secret
 SUPABASE_BUCKET=kayad-images
 ```
 
@@ -90,7 +90,7 @@ FOR INSERT WITH CHECK (
 ```env
 # Copy from Supabase Dashboard → Settings → API
 SUPABASE_URL=https://xxxxx.supabase.co
-SUPABASE_SERVICE_KEY=eyJhbGc...  # service_role secret
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...  # service_role secret
 SUPABASE_BUCKET=kayad-images
 ```
 
@@ -131,7 +131,7 @@ Check browser console for any Supabase connection errors.
 
 ### Error: "Storage not configured"
 
-- Verify `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` are set correctly
+- Verify `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set correctly
 - Ensure there are no extra spaces or quotes in `.env` values
 
 ### Error: "Bucket not found"

@@ -5,6 +5,7 @@ import { cacheDelPattern } from "../utils/cache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 import { logWarn, logError } from "../utils/logger.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
@@ -29,6 +30,16 @@ const toNumber = (val, def) => {
 // 📦 GET ALL CARS (SERVER-SIDE FILTERING + PAGINATION)
 // =============================
 export const getCars = async (req, res) => {
+  if (!isSupabaseConnected()) {
+    return res.status(503).json({
+      success: false,
+      code: "DATABASE_UNAVAILABLE",
+      message: "Marketplace data is temporarily unavailable because the database is not configured.",
+      data: [],
+      cars: [],
+    });
+  }
+
   // Fixed (re-applied - this project's own earlier hardening work
   // already found and fixed this exact defect; confirmed reverted):
   // query/pageNum/limitNum/sortOption were all declared with
@@ -466,7 +477,7 @@ export const createCar = async (req, res) => {
         logbook_verified: body.logbookVerified,
       };
       const result = await atomicCreateDealerListing({
-        dealerId: req.user.id,
+        dealerId: req.dealerId || req.user.id,
         listing: listingPayload,
         idempotencyKey: req.get("Idempotency-Key") || `listing:${req.user.id}:${randomUUID()}`,
       });

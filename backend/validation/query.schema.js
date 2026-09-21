@@ -40,6 +40,28 @@ export const carListQuerySchema = z.object({
   drivetrain: z.enum(["FWD", "RWD", "AWD", "4WD"]).optional(),
 });
 
+
+export const searchFacetsQuerySchema = z.object({
+  q: z.string().trim().max(100).optional(),
+  keyword: z.string().trim().max(100).optional(),
+  brand: z.string().optional(),
+  model: z.string().optional(),
+  city: z.string().optional(),
+  minPrice: z.coerce.number().positive().optional(),
+  maxPrice: z.coerce.number().positive().optional(),
+  yearMin: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1).optional(),
+  yearMax: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1).optional(),
+  body: z.string().optional(),
+  bodyType: z.string().optional(),
+  fuel: z.string().optional(),
+  fuelType: z.string().optional(),
+  transmission: z.string().optional(),
+  color: z.string().optional(),
+  condition: z.string().optional(),
+  mileageMax: z.coerce.number().positive().optional(),
+  dealerId: z.string().optional(),
+});
+
 export const carSearchQuerySchema = z.object({
   q: z.string().min(1).max(100).optional(),
   page: z.coerce.number().int().positive().default(1),

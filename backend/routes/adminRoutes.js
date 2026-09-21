@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
+import protectAccount from "../middleware/protectAccount.js";
 import { authorize } from "../middleware/role.js";
 import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
@@ -20,7 +21,7 @@ import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
 import Ad from "../models/Ad.js";
 import AdminAlert from "../models/AdminAlert.js";
-import GlobalSettings from "../models/GlobalSettings.js";
+import { invalidateSystemStatusCache } from "../middleware/systemCheck.js";
 import Referral from "../models/Referral.js";
 import { listAdminReviews, moderateReview, deleteReview as deleteDealerReview } from "../services/review.service.js";
 import Transaction from "../models/Transaction.js";
@@ -708,23 +709,40 @@ router.post(
   asyncHandler(async (req, res) => {
     const { type } = req.body;
 
-    let settings = await GlobalSettings.findOne();
-    if (!settings) settings = await GlobalSettings.create({});
+    const { data: existing, error: readError } = await getSupabase()
+      .from("system_settings")
+      .select("value")
+      .eq("key", "system_status")
+      .maybeSingle();
+    if (readError) throw readError;
+
+    const systemStatus = {
+      isAuctionActive: true,
+      isPaymentsActive: true,
+      isGhostCheckActive: true,
+      isMaintenanceMode: false,
+      emergencyMessage: "System under scheduled maintenance.",
+      ...(existing?.value || {}),
+    };
 
     if (type === "auctions") {
-      settings.systemStatus.isAuctionActive = false;
+      systemStatus.isAuctionActive = false;
     } else if (type === "payments") {
-      settings.systemStatus.isPaymentsActive = false;
+      systemStatus.isPaymentsActive = false;
     } else if (type === "ghost_check") {
-      settings.systemStatus.isGhostCheckActive = false;
+      systemStatus.isGhostCheckActive = false;
     } else if (type === "full_maintenance") {
-      settings.systemStatus.isMaintenanceMode = true;
-      if (req.body.message) settings.systemStatus.emergencyMessage = req.body.message;
+      systemStatus.isMaintenanceMode = true;
+      if (req.body.message) systemStatus.emergencyMessage = req.body.message;
     } else {
       return res.status(400).json({ success: false, message: "Invalid kill-switch type" });
     }
 
-    await settings.save();
+    const { error: writeError } = await getSupabase()
+      .from("system_settings")
+      .upsert({ key: "system_status", value: systemStatus }, { onConflict: "key" });
+    if (writeError) throw writeError;
+    invalidateSystemStatusCache();
     await AuditLog.create({
       action: `Kill-switch activated: ${type}`,
       admin: req.user.name || req.user.email,
@@ -744,26 +762,44 @@ router.post(
   asyncHandler(async (req, res) => {
     const { type } = req.body;
 
-    let settings = await GlobalSettings.findOne();
-    if (!settings) settings = await GlobalSettings.create({});
+    const { data: existing, error: readError } = await getSupabase()
+      .from("system_settings")
+      .select("value")
+      .eq("key", "system_status")
+      .maybeSingle();
+    if (readError) throw readError;
+
+    const systemStatus = {
+      isAuctionActive: true,
+      isPaymentsActive: true,
+      isGhostCheckActive: true,
+      isMaintenanceMode: false,
+      emergencyMessage: "System under scheduled maintenance.",
+      ...(existing?.value || {}),
+    };
 
     if (type === "all") {
-      settings.systemStatus = {
+      Object.assign(systemStatus, {
         isAuctionActive: true,
         isPaymentsActive: true,
         isGhostCheckActive: true,
         isMaintenanceMode: false,
-        emergencyMessage: "System under scheduled maintenance.",
-      };
+      });
     } else if (type === "auctions") {
-      settings.systemStatus.isAuctionActive = true;
+      systemStatus.isAuctionActive = true;
     } else if (type === "payments") {
-      settings.systemStatus.isPaymentsActive = true;
+      systemStatus.isPaymentsActive = true;
     } else if (type === "maintenance") {
-      settings.systemStatus.isMaintenanceMode = false;
+      systemStatus.isMaintenanceMode = false;
+    } else {
+      return res.status(400).json({ success: false, message: "Invalid recovery type" });
     }
 
-    await settings.save();
+    const { error: writeError } = await getSupabase()
+      .from("system_settings")
+      .upsert({ key: "system_status", value: systemStatus }, { onConflict: "key" });
+    if (writeError) throw writeError;
+    invalidateSystemStatusCache();
     await AuditLog.create({
       action: `System recovered: ${type}`,
       admin: req.user.name || req.user.email,

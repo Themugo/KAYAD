@@ -706,7 +706,7 @@ export const reconcileCommissions = async (startDate, endDate, report) => {
     let feeMismatchTotal = 0;
 
     for (const payment of payments) {
-      const platformConfig = await findOne("platform_configs");
+      const platformConfig = await findOne("platform_config");
       const rate = platformConfig?.dealerCommission ? platformConfig.dealerCommission / 100 : 0.05;
       const expectedCommission = payment.amount * rate;
       const actualCommission = payment.platformFee;

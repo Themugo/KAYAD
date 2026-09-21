@@ -68,7 +68,7 @@ PASS = the layers listed actually executed and were asserted. Levels: **API** = 
 
 - **Certified (API level, all passing):** all 17 workflows' server-side behavior — authentication, authorization, validation, idempotency, state machines, payment/escrow/dispute logic — 335 backend tests green across Phases 9–12.
 - **Certified (UI level, real browser):** build integrity, shell rendering, navigation, routing resilience, refresh recovery, network-failure fail-safe, responsive layout — 8/8 Playwright tests green.
-- **NOT certified (environment-blocked, honestly reported):** the complete UI → live API → backend → database → UI round trip. No Supabase instance exists in this environment; the frontend dev server does not proxy `/api`; existing workflow specs require a provisioned staging DB to execute. To close this gap, provision a Supabase project with `supabase/migrations/`, set `SUPABASE_URL`/`SUPABASE_SERVICE_KEY`, add a `/api` proxy (or run the built frontend behind the backend), then re-run the existing `e2e/tests/*` suites.
+- **NOT certified (environment-blocked, honestly reported):** the complete UI → live API → backend → database → UI round trip. No Supabase instance exists in this environment; the frontend dev server does not proxy `/api`; existing workflow specs require a provisioned staging DB to execute. To close this gap, provision a Supabase project with `supabase/migrations/`, set `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`, add a `/api` proxy (or run the built frontend behind the backend), then re-run the existing `e2e/tests/*` suites.
 
 ---
 

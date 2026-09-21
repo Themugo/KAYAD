@@ -79,6 +79,7 @@ import { createReviewSchema } from "../validation/platform.schema.js";
 import {
   carListQuerySchema,
   carSearchQuerySchema,
+  searchFacetsQuerySchema,
   userListQuerySchema,
   dealerListQuerySchema,
   analyticsQuerySchema,
@@ -351,6 +352,7 @@ export {
   // Query Schemas
   carListQuerySchema,
   carSearchQuerySchema,
+  searchFacetsQuerySchema,
   userListQuerySchema,
   dealerListQuerySchema,
   analyticsQuerySchema,

@@ -45,7 +45,7 @@ const PRODUCTION_REQUIRED_VARS = [
   { key: "FRONTEND_URL", desc: "Public frontend origin (CORS, email links)" },
   { key: "BACKEND_URL", desc: "Public backend origin (payment callbacks)" },
   { key: "SUPABASE_URL", desc: "Supabase project URL" },
-  { key: "SUPABASE_SERVICE_KEY", desc: "Supabase service-role key" },
+  { key: "SUPABASE_SERVICE_ROLE_KEY", desc: "Supabase service-role key (SUPABASE_SERVICE_KEY is accepted as a legacy alias)" },
   { key: "JWT_SECRET", desc: "JWT signing secret" },
   { key: "REFRESH_TOKEN_SECRET", desc: "Refresh-token signing secret" },
   { key: "SESSION_SECRET", desc: "Express session secret" },
@@ -87,7 +87,7 @@ const warnMissingSecrets = () => {
   const secrets = [
     { key: "JWT_SECRET", desc: "JWT signing secret" },
     { key: "SUPABASE_URL", desc: "Supabase project URL" },
-    { key: "SUPABASE_SERVICE_KEY", desc: "Supabase service_role key (not anon)" },
+    { key: "SUPABASE_SERVICE_ROLE_KEY", desc: "Supabase service_role key (not anon)" },
     { key: "SESSION_SECRET", desc: "Express session secret for secure cookies" },
     { key: "REFRESH_TOKEN_SECRET", desc: "Refresh token secret" },
     { key: "FRONTEND_URL", desc: "Frontend URL for CORS" },
@@ -95,7 +95,10 @@ const warnMissingSecrets = () => {
   ];
 
   for (const { key, desc } of secrets) {
-    if (!process.env[key]) {
+    const configured = key === "SUPABASE_SERVICE_ROLE_KEY"
+      ? (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)
+      : process.env[key];
+    if (!configured) {
       console.warn(`  ⚠️  ${key} not set — using fallback for ${desc}`);
     }
   }
@@ -144,7 +147,9 @@ export const validateEnv = (opts = { silent: false }) => {
 
   // ─── PRODUCTION-ONLY REQUIRED ────────────────────────────────
   if (process.env.NODE_ENV === "production") {
+    const hasServiceRoleKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
     for (const { key, desc } of PRODUCTION_REQUIRED_VARS) {
+      if (key === "SUPABASE_SERVICE_ROLE_KEY" && hasServiceRoleKey) continue;
       if (!process.env[key]) {
         console.error(`  ❌ Missing production-required env: ${key} (${desc})`);
         hasError = true;
