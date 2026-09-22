@@ -4,9 +4,9 @@ import path from 'node:path';
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const checks = [
-  ['canonical marketplace router imported', read('backend/server.js').includes('import inspectionMarketplaceRoutes from "./inspection/routes/inspectionRoutes.js";')],
-  ['canonical marketplace mounted at /api/inspection', read('backend/server.js').includes('app.use("/api/inspection", inspectionMarketplaceRoutes);')],
-  ['legacy inspection router retained only at /api/inspections', read('backend/server.js').includes('app.use("/api/inspections", inspectionRoutes);')],
+  ['canonical inspection router imported', read('backend/server.js').includes('import inspectionRoutes from "./inspection/routes/inspectionRoutes.js";')],
+  ['canonical inspection router mounted at /api/inspection', read('backend/server.js').includes('app.use("/api/inspection", inspectionRoutes);')],
+  ['backward-compatible inspection alias mounted at /api/inspections', read('backend/server.js').includes('app.use("/api/inspections", inspectionRoutes);')],
   ['inspection payment supports booking binding', read('backend/inspection/controllers/providerController.js').includes('req.params.bookingId') && read('backend/inspection/controllers/providerController.js').includes("type: 'inspection'")],
   ['inspection payment amount is server derived', read('backend/inspection/controllers/providerController.js').includes('amount: Number(booking.total_price)')],
   ['inspection callback uses atomic settlement RPC', read('backend/services/paymentCallback.service.js').includes('kayad_process_inspection_payment_atomic')],

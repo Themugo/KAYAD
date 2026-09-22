@@ -11,7 +11,7 @@ const bid = read("backend/routes/bidRoutes.js");
 const payment = read("backend/routes/paymentRoutes.js");
 const escrow = read("backend/routes/escrowRoutes.js");
 const dispute = read("backend/routes/disputeRoutes.js");
-const inspection = read("backend/routes/inspectionRoutes.js");
+const inspection = read("backend/inspection/routes/inspectionRoutes.js");
 const loan = read("backend/routes/loanApplicationRoutes.js");
 const subscription = read("backend/routes/subscriptionRoutes.js");
 const auction = read("backend/routes/auctionRoutes.js");
@@ -25,7 +25,7 @@ const checks = [
   ["v1 payments my route exists", v1.includes('router.use("/payments",') && payment.includes('router.get("/my", protect')],
   ["v1 escrow my route exists", v1.includes('router.use("/escrow",') && escrow.includes('router.get("/my", protect')],
   ["dispute my route exists", server.includes('app.use("/api/disputes",') && dispute.includes('router.get("/my", protect')],
-  ["inspection my route exists", server.includes('app.use("/api/inspections", inspectionRoutes)') && inspection.includes('router.use(protect)') && inspection.includes('router.get(\n  "/my"')],
+  ["inspection my route exists", server.includes('app.use("/api/inspections", inspectionRoutes)') && inspection.includes("router.get('/my', requireAuth")],
   ["loan my route exists", server.includes('app.use("/api/loans", loanApplicationRoutes)') && loan.includes('router.get("/my", protect')],
   ["subscription routes exist", server.includes('app.use("/api/subscriptions", subscriptionRoutes)') && subscription.includes('router.get("/my-subscription", protect') && subscription.includes('router.get("/all", protect, adminOnly')],
   ["public auction catalogue route exists", server.includes('app.use("/api/auctions",') || v1.includes('router.use("/auctions", auctionRoutes)')],

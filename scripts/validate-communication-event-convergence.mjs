@@ -10,7 +10,7 @@ const required = [
   ['backend/services/auctionLifecycle.service.js', ['COMMUNICATION_EVENTS.AUCTION_STARTED','COMMUNICATION_EVENTS.AUCTION_EXTENDED']],
   ['backend/services/auctionClose.service.js', ['emitAuctionOutcome','COMMUNICATION_EVENTS']],
   ['backend/controllers/bidController.js', ['COMMUNICATION_EVENTS.BID_CONFIRMED','COMMUNICATION_EVENTS.OUTBID']],
-  ['backend/routes/inspectionRoutes.js', ['COMMUNICATION_EVENTS.INSPECTION_BOOKED','COMMUNICATION_EVENTS.INSPECTION_COMPLETED']],
+  ['backend/inspection/controllers/legacyCompatibilityController.js', ['COMMUNICATION_EVENTS.INSPECTION_BOOKED','COMMUNICATION_EVENTS.INSPECTION_COMPLETED']],
   ['backend/controllers/disputeController.js', ['COMMUNICATION_EVENTS.DISPUTE_OPENED','COMMUNICATION_EVENTS.DISPUTE_RESOLVED']],
   ['backend/services/dealerSubscription.service.js', ['COMMUNICATION_EVENTS.SUBSCRIPTION_ACTIVATED']],
   ['backend/controllers/supportController.js', ['COMMUNICATION_EVENTS.SUPPORT_CASE_CREATED','COMMUNICATION_EVENTS.SUPPORT_CASE_UPDATED']],

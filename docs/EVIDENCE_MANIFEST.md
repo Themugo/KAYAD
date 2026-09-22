@@ -5,10 +5,10 @@ Certified commit:
 
 Relevant source artifacts inspected:
 
-- backend/db/digitalInspection.schema.sql
+- REMOVED: backend/db/digitalInspection.schema.sql (dormant schema removed from shipping tree)
 - backend/db/inspection.schema.sql
-- backend/digitalInspection/services/inspectionWorkflowService.js
-- backend/digitalInspection/services/reportGenerationService.js
+- REMOVED: backend/digitalInspection/services/inspectionWorkflowService.js (collapsed into canonical vehicle_inspections compatibility controller)
+- REMOVED: backend/digitalInspection/services/reportGenerationService.js (canonical report service is backend/inspection/services/reportService.js)
 - backend/inspection/routes/inspectionRoutes.js
 - backend/routes/inspectionRoutes.js
 - backend/server.js

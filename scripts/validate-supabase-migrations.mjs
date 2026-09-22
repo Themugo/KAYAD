@@ -23,9 +23,10 @@ const files = fs.readdirSync(dir)
 
 const failures = [];
 const warnings = [];
-const migrationPattern = /^(\d{14})_[A-Za-z0-9][A-Za-z0-9_-]*\.sql(?:\.sql)?$/;
+const migrationPattern = /^(\d{14})_[A-Za-z0-9][A-Za-z0-9_-]*\.sql$/;
 const versions = new Map();
 for (const file of files) {
+  if (file.endsWith(".sql.sql")) failures.push(`Malformed migration extension: ${file}; rename to a single .sql extension.`);
   const match = file.match(migrationPattern);
   if (!match) failures.push(`Invalid migration filename: ${file}`);
   else {
@@ -94,16 +95,17 @@ if (warnings.length) {
   for (const warning of warnings) console.log(`- ${warning}`);
 }
 
+const all = files.map((f) => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
+for (const required of ['cars', 'favorites', 'saved_searches']) {
+  const ddl = new RegExp(`\\bCREATE\\s+TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:public\\.)?${required}\\b`, 'i');
+  if (!ddl.test(all)) failures.push(`Required production table DDL missing: ${required}`);
+}
+
 if (failures.length) {
   console.error("\nFAIL:");
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
 
-console.log("\nPASS: no forbidden demo content or old project references detected.");
+console.log("\nPASS: migration filenames, versions, required production DDL, and forbidden-content checks passed.");
 console.log("Next required validation is a real PostgreSQL/Supabase migration reset.");
-
-const all = files.map((f) => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
-for (const required of ['CREATE TABLE IF NOT EXISTS cars', 'CREATE TABLE IF NOT EXISTS favorites', 'CREATE TABLE IF NOT EXISTS saved_searches']) {
-  if (!new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(all)) failures.push(`Required production table DDL missing: ${required}`);
-}

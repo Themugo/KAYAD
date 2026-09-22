@@ -7,6 +7,7 @@ import { response } from '../../utils/response.js';
 import { AppError } from '../../utils/AppError.js';
 import { providerService, bookingService, reportService, settlementService } from '../services/index.js';
 import phase22Service from '../services/phase22Service.js';
+import db from '../services/dbAdapter.js';
 import { initiatePayment } from '../../services/paymentService.js';
 
 /**

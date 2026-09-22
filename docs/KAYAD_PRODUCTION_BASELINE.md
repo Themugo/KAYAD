@@ -58,7 +58,7 @@ Already established, cited rather than re-derived:
 - Duplicated types: src/types.ts vs src/types/index.ts - UserProfile genuinely duplicated (2 conflicting definitions); Vehicle is correctly re-exported, not duplicated (phase-04-vehicles.md section 3, correcting an earlier imprecise claim).
 - Duplicated role definitions: fixed this program (Phase 2) - was a real, silent role-identity collapse (individual_seller to buyer, superadmin to admin), now resolved with dedicated regression tests.
 - Duplicated business logic: services/paymentService.js's confirmPayment()/failPayment() are confirmed dead code, duplicating the real paymentCallback.service.js flow (Phase 7) - flagged, not deleted (9-step verification not yet run).
-- Dead/unused code: services/auction.service.js deleted this program after full verification (phase-01-results.md); inspectionBusinessCenter/, digitalInspection/ deprecated (real, unfinished work, not obsolete - kept, not deleted).
+- Dead/unused code: services/auction.service.js deleted this program after full verification (phase-01-results.md); inspectionBusinessCenter/ remains separate business analytics; digitalInspection/ was collapsed into the canonical inspection domain.
 - Frontend orphans: 5 components + 2 route aliases already removed in prior sessions (8,522 lines), confirmed still absent.
 - Incomplete integrations: vehicleApi.ts built and tested but only wired into the top-level vehicle list (Phase 7) - auctions, bids, escrow, inspections, admin all remain unconnected.
 - Frontend-only state representing business data: the entire admin panel (escrow rules, home/auction page config) is localStorage-only with no backend equivalent called.

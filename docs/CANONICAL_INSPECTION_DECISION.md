@@ -1,62 +1,24 @@
-# Canonical Inspection Model Reconciliation
+# Canonical Inspection Decision
 
-## Decision
+## Production architecture
 
-**Production canonical execution record: `public.vehicle_inspections`.**
+KAYAD has one canonical inspection domain under `backend/inspection/`.
 
-The five-table digital inspection subsystem is **not introduced into production**.
+- `inspection_bookings` is the customer/provider booking lifecycle.
+- `vehicle_inspections` is the canonical inspection execution record.
+- `inspection_reports` is the canonical report record.
+- `inspection_settlements` and the canonical financial RPCs own settlement and payout effects.
+- Phase 22 RPCs own provider registration, reviews, report entitlements and dispute consequences.
+- The existing inspection/chat bridge uses `vehicle_inspections` and the canonical chat transport.
+- `/api/inspection/*` is the canonical API namespace.
+- `/api/inspections/*` remains as a compatibility alias to the same router so existing clients do not break.
 
-## Evidence
+## Removed architecture
 
-1. `backend/db/digitalInspection.schema.sql` contains a complete dormant schema for
-   `digital_inspections`, `inspection_stages`, `inspection_points`,
-   `inspection_evidence`, `inspection_defects`, and `inspection_audit_logs`.
-   This proves the five requested tables were intentionally designed for KAYAD;
-   they were not random names.
+The dormant `digital_inspections`, `inspection_stages`, `inspection_points`, `inspection_evidence`, `inspection_defects`, and `inspection_audit_logs` implementation is not part of the shipping application and has been removed from the source tree.
 
-2. The production application, however, explicitly converged on `vehicle_inspections`.
-   `supabase/migrations/20260909092000_inspection_chat_realtime_bridge.sql` states:
-   "vehicle_inspections is the production canonical inspection execution table."
+The API field name `digitalInspectionId` may remain in compatibility responses because it is an established client contract. It is an alias of the canonical `vehicle_inspections.id`, not a reference to a second table or service.
 
-3. That same bridge function returns:
-   `vehicleInspectionId = v_vi.id` and `digitalInspectionId = v_vi.id`.
-   Therefore `digitalInspectionId` is currently an API/domain alias for the
-   canonical `vehicle_inspections` record, not evidence of a second production table.
+## Migration rule
 
-4. The production server mounts `backend/routes/inspectionRoutes.js` and
-   `backend/inspection/routes/inspectionRoutes.js`. The dormant
-   `backend/digitalInspection` workflow service is not mounted as an independent
-   production route tree.
-
-5. The active route flow creates an inspection order, bridges it into
-   `vehicle_inspections`, establishes the inspection chat, assigns the inspector,
-   starts the inspection, and writes completion data back to `vehicle_inspections`.
-
-6. The live `vehicle_inspections` schema already contains the execution fields:
-   `checklist`, `evidence`, `current_stage`, `stage_progress`,
-   `condition_rating`, `overall_score`, `overall_grade`, `inspector_notes`,
-   `chat_id`, `inspector_id`, `requester_id`, and lifecycle timestamps.
-
-7. The live database currently contains zero `vehicle_inspections` rows and zero
-   of the five dormant digital-inspection tables. This makes the reconciliation
-   clean: no production digital-inspection data needs migration.
-
-## Consequence
-
-The source migration `20260908070000_inspection_workforce_digital_lifecycle_hardening.sql`
-is not suitable for direct production execution. Its requirements must be mapped to
-the canonical `vehicle_inspections` model instead.
-
-The only directly compatible missing hardening fields are:
-- inspector_signature
-- inspector_signed_at
-- customer_reviewed_at
-- customer_review_notes
-
-The stage/evidence/defect/audit requirements remain represented by the existing
-canonical JSONB execution model and inspection-domain tables rather than creating
-a second execution graph.
-
-## Safety
-
-No production migration was applied during this reconciliation.
+The old dormant-schema migrations remain historical evidence only. They are not to be reintroduced into the production schema. New database hardening is forward-only and must target the canonical tables/RPCs.

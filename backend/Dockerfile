@@ -29,7 +29,6 @@ COPY backend/ai ./ai
 COPY backend/communications ./communications
 COPY backend/countries ./countries
 COPY backend/dataExchange ./dataExchange
-COPY backend/digitalInspection ./digitalInspection
 COPY backend/governance ./governance
 COPY backend/inspection ./inspection
 COPY backend/mediaEventEngine ./mediaEventEngine

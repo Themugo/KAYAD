@@ -1,0 +1,1113 @@
+{
+  "project_ref": "ubvgixwhfybbyjuvxboj",
+  "generated": "2026-09-22",
+  "local_migration_count": 102,
+  "remote_migration_count": 131,
+  "matched": 97,
+  "remote_only": [
+    {
+      "semantic": "harden_dispute_rpc_execute_privileges",
+      "remote_version": "20260919080655",
+      "remote_name": "20260919100000_harden_dispute_rpc_execute_privileges"
+    },
+    {
+      "semantic": "p0a_market_transaction_schema_reconciliation",
+      "remote_version": "20260919102636",
+      "remote_name": "p0a_market_transaction_schema_reconciliation_20260919"
+    },
+    {
+      "semantic": "p0a_operational_schema_reconciliation",
+      "remote_version": "20260919102410",
+      "remote_name": "p0a_operational_schema_reconciliation_20260919"
+    },
+    {
+      "semantic": "phase15_admin_identity_control",
+      "remote_version": "20260920082107",
+      "remote_name": "phase15_admin_identity_control_20260920"
+    },
+    {
+      "semantic": "phase15_admin_identity_control_fix",
+      "remote_version": "20260920082140",
+      "remote_name": "phase15_admin_identity_control_fix_20260920"
+    },
+    {
+      "semantic": "phase16_dealer_admin_control_hardening",
+      "remote_version": "20260920082224",
+      "remote_name": "phase16_dealer_admin_control_hardening_20260920"
+    },
+    {
+      "semantic": "phase17_admin_listing_control",
+      "remote_version": "20260920082513",
+      "remote_name": "phase17_admin_listing_control_20260920"
+    },
+    {
+      "semantic": "phase18_admin_auction_control",
+      "remote_version": "20260920082805",
+      "remote_name": "phase18_admin_auction_control_20260920"
+    },
+    {
+      "semantic": "phase19_admin_payment_control",
+      "remote_version": "20260920083055",
+      "remote_name": "phase19_admin_payment_control_20260920"
+    },
+    {
+      "semantic": "phase20_escrow_admin_executor_fix",
+      "remote_version": "20260920083823",
+      "remote_name": "phase20_escrow_admin_executor_fix_20260920"
+    },
+    {
+      "semantic": "phase20_escrow_eligibility_fix",
+      "remote_version": "20260920083803",
+      "remote_name": "phase20_escrow_eligibility_fix_20260920"
+    },
+    {
+      "semantic": "phase20_escrow_optional_partner_ready",
+      "remote_version": "20260920083755",
+      "remote_name": "phase20_escrow_optional_partner_ready_20260920"
+    },
+    {
+      "semantic": "phase21_inspection_direct_provider_fix",
+      "remote_version": "20260920085330",
+      "remote_name": "phase21_inspection_direct_provider_fix_20260920"
+    },
+    {
+      "semantic": "phase21_inspection_marketplace_economics",
+      "remote_version": "20260920085258",
+      "remote_name": "phase21_inspection_marketplace_economics_20260920"
+    },
+    {
+      "semantic": "phase21b_inspection_service_market_report_reuse",
+      "remote_version": "20260920092129",
+      "remote_name": "phase21b_inspection_service_market_report_reuse_20260920"
+    },
+    {
+      "semantic": "phase21b_report_download_fix",
+      "remote_version": "20260920092138",
+      "remote_name": "phase21b_report_download_fix_20260920"
+    },
+    {
+      "semantic": "phase22_dispute_resolution_financial_controls",
+      "remote_version": "20260920094543",
+      "remote_name": "phase22_dispute_resolution_financial_controls_20260920"
+    },
+    {
+      "semantic": "phase22_provider_registration_ambiguity_fix",
+      "remote_version": "20260920095922",
+      "remote_name": "phase22_provider_registration_ambiguity_fix_20260920"
+    },
+    {
+      "semantic": "phase22_provider_scorecard_risk_consequences",
+      "remote_version": "20260920094632",
+      "remote_name": "phase22_provider_scorecard_risk_consequences_20260920"
+    },
+    {
+      "semantic": "phase22_refund_ledger_account_fix",
+      "remote_version": "20260920094609",
+      "remote_name": "phase22_refund_ledger_account_fix_20260920"
+    },
+    {
+      "semantic": "phase22_review_closed_status_consistency",
+      "remote_version": "20260920100032",
+      "remote_name": "phase22_review_closed_status_consistency_20260920"
+    },
+    {
+      "semantic": "phase22_service_job_disputes",
+      "remote_version": "20260920100157",
+      "remote_name": "phase22_service_job_disputes_20260920"
+    },
+    {
+      "semantic": "phase22_settlement_ledger_account_fix",
+      "remote_version": "20260920095845",
+      "remote_name": "phase22_settlement_ledger_account_fix_20260920"
+    },
+    {
+      "semantic": "phase22_trust_dispute_service_hardening",
+      "remote_version": "20260920094425",
+      "remote_name": "phase22_trust_dispute_service_hardening_20260920"
+    },
+    {
+      "semantic": "phase22_trust_evidence_reviews_risk",
+      "remote_version": "20260920094451",
+      "remote_name": "phase22_trust_evidence_reviews_risk_20260920"
+    },
+    {
+      "semantic": "phase2_runtime_canonicalization",
+      "remote_version": "20260919123200",
+      "remote_name": "phase2_runtime_canonicalization_20260919"
+    },
+    {
+      "semantic": "phase4_dealer_rls_role_hardening",
+      "remote_version": "20260919130150",
+      "remote_name": "phase4_dealer_rls_role_hardening_20260919"
+    },
+    {
+      "semantic": "phase5_finance_payout_ledger_integrity",
+      "remote_version": "20260919130936",
+      "remote_name": "phase5_finance_payout_ledger_integrity_20260919"
+    },
+    {
+      "semantic": "phase6_support_lead_security",
+      "remote_version": "20260919132826",
+      "remote_name": "phase6_support_lead_security_20260919"
+    },
+    {
+      "semantic": "phase7_listing_integrity",
+      "remote_version": "20260920070130",
+      "remote_name": "phase7_listing_integrity_20260920"
+    },
+    {
+      "semantic": "phase7_support_rpc_privilege_regression",
+      "remote_version": "20260920070155",
+      "remote_name": "phase7_support_rpc_privilege_regression_20260920"
+    },
+    {
+      "semantic": "phase8_auction_bid_payment_correlation_integrity",
+      "remote_version": "20260920071338",
+      "remote_name": "phase8_auction_bid_payment_correlation_integrity_20260920"
+    },
+    {
+      "semantic": "phase9_escrow_transition_identifier_correction",
+      "remote_version": "20260920072529",
+      "remote_name": "phase9_escrow_transition_identifier_correction_20260920"
+    },
+    {
+      "semantic": "phase9_payment_escrow_financial_integrity",
+      "remote_version": "20260920071901",
+      "remote_name": "phase9_payment_escrow_financial_integrity_20260920"
+    }
+  ],
+  "local_only": [
+    {
+      "semantic": "canonical_system_status_control_plane",
+      "local_version": "20260920203000",
+      "local_name": "20260920203000_canonical_system_status_control_plane.sql"
+    },
+    {
+      "semantic": "communications_support_lifecycle_hardening",
+      "local_version": "20260908113000",
+      "local_name": "20260908113000_communications_support_lifecycle_hardening.sql"
+    },
+    {
+      "semantic": "governance_lifecycle_hardening",
+      "local_version": "20260908080000",
+      "local_name": "20260908080000_governance_lifecycle_hardening.sql"
+    },
+    {
+      "semantic": "inspection_workforce_digital_lifecycle_hardening",
+      "local_version": "20260908070000",
+      "local_name": "20260908070000_inspection_workforce_digital_lifecycle_hardening.sql"
+    },
+    {
+      "semantic": "phase22_reconciliation",
+      "local_version": "20260920220000",
+      "local_name": "20260920220000_phase22_reconciliation.sql"
+    }
+  ],
+  "policy": "Do not repair/remove remote history until schema-effect equivalence is proven.",
+  "matches": [
+    {
+      "semantic": "add_payments_metadata_column",
+      "remote_version": "20260828030000",
+      "remote_name": "add_payments_metadata_column.sql",
+      "local_version": "20260828030000",
+      "local_name": "20260828030000_add_payments_metadata_column.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "add_payments_processed_column",
+      "remote_version": "20260827090000",
+      "remote_name": "add_payments_processed_column.sql",
+      "local_version": "20260827090000",
+      "local_name": "20260827090000_add_payments_processed_column.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "advertising_domain_end_to_end",
+      "remote_version": "20260908000000",
+      "remote_name": "advertising_domain_end_to_end",
+      "local_version": "20260908000000",
+      "local_name": "20260908000000_advertising_domain_end_to_end.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "ai_decision_governance",
+      "remote_version": "20260907235000",
+      "remote_name": "ai_decision_governance",
+      "local_version": "20260907235000",
+      "local_name": "20260907235000_ai_decision_governance.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "auction_lifecycle_atomicity",
+      "remote_version": "20260907140000",
+      "remote_name": "auction_lifecycle_atomicity",
+      "local_version": "20260907140000",
+      "local_name": "20260907140000_auction_lifecycle_atomicity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "auction_payment_escrow_e2e",
+      "remote_version": "20260909080841",
+      "remote_name": "20260909091000_auction_payment_escrow_e2e",
+      "local_version": "20260909091000",
+      "local_name": "20260909091000_auction_payment_escrow_e2e.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "auction_settlement_reserve_rules",
+      "remote_version": "20260907143000",
+      "remote_name": "auction_settlement_reserve_rules",
+      "local_version": "20260907143000",
+      "local_name": "20260907143000_auction_settlement_reserve_rules.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "audited_missing_columns",
+      "remote_version": "20260710044700",
+      "remote_name": "20260710090000_audited_missing_columns.sql",
+      "local_version": "20260710044700",
+      "local_name": "20260710044700_20260710090000_audited_missing_columns.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "automation_business_rules_domain",
+      "remote_version": "20260921061339",
+      "remote_name": "automation_business_rules_domain",
+      "local_version": "20260921061339",
+      "local_name": "20260921061339_automation_business_rules_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "canonical_authorization_helpers",
+      "remote_version": "20260907240500",
+      "remote_name": "canonical_authorization_helpers",
+      "local_version": "20260907240500",
+      "local_name": "20260907240500_canonical_authorization_helpers.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "canonical_inspection_booking_execution_link",
+      "remote_version": "20260922045609",
+      "remote_name": "canonical_inspection_booking_execution_link",
+      "local_version": "20260921232000",
+      "local_name": "20260921232000_canonical_inspection_booking_execution_link.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "canonical_inspection_lifecycle_hardening",
+      "remote_version": "20260918143950",
+      "remote_name": "20260918120000_canonical_inspection_lifecycle_hardening",
+      "local_version": "20260918120000",
+      "local_name": "20260918120000_canonical_inspection_lifecycle_hardening.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "car_listing_flow",
+      "remote_version": "20260710045100",
+      "remote_name": "20260710130000_car_listing_flow.sql",
+      "local_version": "20260710045100",
+      "local_name": "20260710045100_20260710130000_car_listing_flow.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "chat_concurrency_integrity",
+      "remote_version": "20260907173000",
+      "remote_name": "chat_concurrency_integrity",
+      "local_version": "20260907173000",
+      "local_name": "20260907173000_chat_concurrency_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "chats_escrows_userauth_real_tables",
+      "remote_version": "20260710044600",
+      "remote_name": "20260710080000_chats_escrows_userauth_real_tables.sql",
+      "local_version": "20260710044600",
+      "local_name": "20260710044600_20260710080000_chats_escrows_userauth_real_tables.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "cms_website_builder_domain",
+      "remote_version": "20260907200000",
+      "remote_name": "cms_website_builder_domain",
+      "local_version": "20260907200000",
+      "local_name": "20260907200000_cms_website_builder_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "command_center_domain_end_to_end",
+      "remote_version": "20260908033000",
+      "remote_name": "command_center_domain_end_to_end",
+      "local_version": "20260908033000",
+      "local_name": "20260908033000_command_center_domain_end_to_end.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "communications_control_plane",
+      "remote_version": "20260909113015",
+      "remote_name": "communications_control_plane",
+      "local_version": "20260909150000",
+      "local_name": "20260909150000_communications_control_plane.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "communications_otp_delivery_control",
+      "remote_version": "20260909110809",
+      "remote_name": "communications_otp_delivery_control",
+      "local_version": "20260909143000",
+      "local_name": "20260909143000_communications_otp_delivery_control.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "communications_password_reset_control",
+      "remote_version": "20260909124238",
+      "remote_name": "communications_password_reset_control",
+      "local_version": "20260909173000",
+      "local_name": "20260909173000_communications_password_reset_control.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "communications_provider_rollout_controls",
+      "remote_version": "20260909123918",
+      "remote_name": "communications_provider_rollout_controls",
+      "local_version": "20260909170000",
+      "local_name": "20260909170000_communications_provider_rollout_controls.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "continuous_improvement_domain",
+      "remote_version": "20260908003000",
+      "remote_name": "continuous_improvement_domain",
+      "local_version": "20260908003000",
+      "local_name": "20260908003000_continuous_improvement_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dealer_commercial_entitlement_hardening",
+      "remote_version": "20260908060000",
+      "remote_name": "dealer_commercial_entitlement_hardening",
+      "local_version": "20260908060000",
+      "local_name": "20260908060000_dealer_commercial_entitlement_hardening.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dealer_commercial_payout_lifecycle",
+      "remote_version": "20260909091703",
+      "remote_name": "20260909102000_dealer_commercial_payout_lifecycle",
+      "local_version": "20260909102000",
+      "local_name": "20260909102000_dealer_commercial_payout_lifecycle.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "dealer_platform_domain_end_to_end",
+      "remote_version": "20260908043000",
+      "remote_name": "dealer_platform_domain_end_to_end",
+      "local_version": "20260908043000",
+      "local_name": "20260908043000_dealer_platform_domain_end_to_end.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dealer_subscription_commercial_controls",
+      "remote_version": "20260907230000",
+      "remote_name": "dealer_subscription_commercial_controls",
+      "local_version": "20260907230000",
+      "local_name": "20260907230000_dealer_subscription_commercial_controls.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dealer_verification_onboarding_integrity",
+      "remote_version": "20260907190000",
+      "remote_name": "dealer_verification_onboarding_integrity",
+      "local_version": "20260907190000",
+      "local_name": "20260907190000_dealer_verification_onboarding_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dealer_verification_referrals",
+      "remote_version": "20260710045200",
+      "remote_name": "20260710140000_dealer_verification_referrals.sql",
+      "local_version": "20260710045200",
+      "local_name": "20260710045200_20260710140000_dealer_verification_referrals.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dealer_workforce_access_control",
+      "remote_version": "20260907220000",
+      "remote_name": "dealer_workforce_access_control",
+      "local_version": "20260907220000",
+      "local_name": "20260907220000_dealer_workforce_access_control.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dispute_canonical_escrow_lifecycle",
+      "remote_version": "20260909084443",
+      "remote_name": "20260909100000_dispute_canonical_escrow_lifecycle",
+      "local_version": "20260909100000",
+      "local_name": "20260909100000_dispute_canonical_escrow_lifecycle.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "dispute_chat_inspection_linkage",
+      "remote_version": "20260909084559",
+      "remote_name": "20260909100500_dispute_chat_inspection_linkage",
+      "local_version": "20260909100500",
+      "local_name": "20260909100500_dispute_chat_inspection_linkage.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "dispute_escrow_consolidation",
+      "remote_version": "20260907190100",
+      "remote_name": "dispute_escrow_consolidation",
+      "local_version": "20260907190100",
+      "local_name": "20260907190100_dispute_escrow_consolidation.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "dispute_link_column_naming",
+      "remote_version": "20260909084842",
+      "remote_name": "20260909101000_dispute_link_column_naming",
+      "local_version": "20260909101000",
+      "local_name": "20260909101000_dispute_link_column_naming.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "dispute_link_function_case_fix",
+      "remote_version": "20260909084850",
+      "remote_name": "20260909101100_dispute_link_function_case_fix",
+      "local_version": "20260909101100",
+      "local_name": "20260909101100_dispute_link_function_case_fix.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "duplicate_vin_prevention",
+      "remote_version": "20260815070000",
+      "remote_name": "duplicate_vin_prevention.sql",
+      "local_version": "20260815070000",
+      "local_name": "20260815070000_duplicate_vin_prevention.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "enterprise_control_plane_domain",
+      "remote_version": "20260908010000",
+      "remote_name": "enterprise_control_plane_domain",
+      "local_version": "20260908010000",
+      "local_name": "20260908010000_enterprise_control_plane_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "escrow_custody_admin_configuration",
+      "remote_version": "20260907150000",
+      "remote_name": "escrow_custody_admin_configuration",
+      "local_version": "20260907150000",
+      "local_name": "20260907150000_escrow_custody_admin_configuration.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "executive_intelligence_domain",
+      "remote_version": "20260908020000",
+      "remote_name": "executive_intelligence_domain",
+      "local_version": "20260908020000",
+      "local_name": "20260908020000_executive_intelligence_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "financial_ledger_reconciliation_domain",
+      "remote_version": "20260907233000",
+      "remote_name": "financial_ledger_reconciliation_domain",
+      "local_version": "20260907233000",
+      "local_name": "20260907233000_financial_ledger_reconciliation_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "fix_profiles_role_check_constraint",
+      "remote_version": "20260824070000",
+      "remote_name": "fix_profiles_role_check_constraint.sql",
+      "local_version": "20260824070000",
+      "local_name": "20260824070000_fix_profiles_role_check_constraint.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "foundational_tables",
+      "remote_version": "20260710043200",
+      "remote_name": "20260710005000_foundational_tables.sql",
+      "local_version": "20260710043200",
+      "local_name": "20260710043200_20260710005000_foundational_tables.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "gari_motors_full_schema",
+      "remote_version": "20260710043238",
+      "remote_name": "20260710010000_gari_motors_full_schema.sql",
+      "local_version": "20260710043238",
+      "local_name": "20260710043238_20260710010000_gari_motors_full_schema.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "governance_domain",
+      "remote_version": "20260907240000",
+      "remote_name": "governance_domain",
+      "local_version": "20260907240000",
+      "local_name": "20260907240000_governance_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "harden_inspection_report_immutability_guard",
+      "remote_version": "20260921061403",
+      "remote_name": "harden_inspection_report_immutability_guard",
+      "local_version": "20260921061403",
+      "local_name": "20260921061403_harden_inspection_report_immutability_guard.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "harden_loan_application_contract_v14",
+      "remote_version": "20260921093540",
+      "remote_name": "harden_loan_application_contract_v14",
+      "local_version": "20260921093540",
+      "local_name": "20260921093540_harden_loan_application_contract_v14.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "idempotency_softdelete",
+      "remote_version": "20260710045400",
+      "remote_name": "20260710160000_idempotency_softdelete.sql",
+      "local_version": "20260710045400",
+      "local_name": "20260710045400_20260710160000_idempotency_softdelete.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "inspection_chat_realtime_bridge",
+      "remote_version": "20260909083431",
+      "remote_name": "20260909092000_inspection_chat_realtime_bridge",
+      "local_version": "20260909092000",
+      "local_name": "20260909092000_inspection_chat_realtime_bridge.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "inspection_domain_model_corrections",
+      "remote_version": "20260816200000",
+      "remote_name": "inspection_domain_model_corrections.sql",
+      "local_version": "20260816200000",
+      "local_name": "20260816200000_inspection_domain_model_corrections.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "inspection_domain_rls_hardening",
+      "remote_version": "20260918144000",
+      "remote_name": "20260918130000_inspection_domain_rls_hardening",
+      "local_version": "20260918130000",
+      "local_name": "20260918130000_inspection_domain_rls_hardening.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "inspection_financial_workflow_completion",
+      "remote_version": "20260918144230",
+      "remote_name": "20260918150000_inspection_financial_workflow_completion",
+      "local_version": "20260918150000",
+      "local_name": "20260918150000_inspection_financial_workflow_completion.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "inspection_marketplace_activation",
+      "remote_version": "20260816180000",
+      "remote_name": "inspection_marketplace_activation.sql",
+      "local_version": "20260816180000",
+      "local_name": "20260816180000_inspection_marketplace_activation.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "inspection_marketplace_integrity",
+      "remote_version": "20260907070000",
+      "remote_name": "inspection_marketplace_integrity",
+      "local_version": "20260907070000",
+      "local_name": "20260907070000_inspection_marketplace_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "inspection_settlement_ledger_integrity",
+      "remote_version": "20260907190200",
+      "remote_name": "inspection_settlement_ledger_integrity",
+      "local_version": "20260907190200",
+      "local_name": "20260907190200_inspection_settlement_ledger_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "integration_domain_hardening",
+      "remote_version": "20260908050000",
+      "remote_name": "integration_domain_hardening",
+      "local_version": "20260908050000",
+      "local_name": "20260908050000_integration_domain_hardening.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "integration_partner_webhook_domain",
+      "remote_version": "20260907240100",
+      "remote_name": "integration_partner_webhook_domain",
+      "local_version": "20260907240100",
+      "local_name": "20260907240100_integration_partner_webhook_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "lead_crm_domain_end_to_end",
+      "remote_version": "20260907200100",
+      "remote_name": "lead_crm_domain_end_to_end",
+      "local_version": "20260907200100",
+      "local_name": "20260907200100_lead_crm_domain_end_to_end.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "leads_and_escrow_columns",
+      "remote_version": "20260710044900",
+      "remote_name": "20260710110000_leads_and_escrow_columns.sql",
+      "local_version": "20260710044900",
+      "local_name": "20260710044900_20260710110000_leads_and_escrow_columns.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "missing_fk_indexes",
+      "remote_version": "20260710044400",
+      "remote_name": "20260710060000_missing_fk_indexes.sql",
+      "local_version": "20260710044400",
+      "local_name": "20260710044400_20260710060000_missing_fk_indexes.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "ownership_passport_domain",
+      "remote_version": "20260907190300",
+      "remote_name": "ownership_passport_domain",
+      "local_version": "20260907190300",
+      "local_name": "20260907190300_ownership_passport_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "payment_architecture_extension",
+      "remote_version": "20260815060000",
+      "remote_name": "payment_architecture_extension.sql",
+      "local_version": "20260815060000",
+      "local_name": "20260815060000_payment_architecture_extension.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "payment_escrow_domain_integrity",
+      "remote_version": "20260907120000",
+      "remote_name": "payment_escrow_domain_integrity",
+      "local_version": "20260907120000",
+      "local_name": "20260907120000_payment_escrow_domain_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "payment_gateway_lifecycle_integrity",
+      "remote_version": "20260907190400",
+      "remote_name": "payment_gateway_lifecycle_integrity",
+      "local_version": "20260907190400",
+      "local_name": "20260907190400_payment_gateway_lifecycle_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "phase10_operational_data_contract",
+      "remote_version": "20260902090000",
+      "remote_name": "phase10_operational_data_contract",
+      "local_version": "20260902090000",
+      "local_name": "20260902090000_phase10_operational_data_contract.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "phase11_production_demo_cleanup",
+      "remote_version": "20260902110000",
+      "remote_name": "phase11_production_demo_cleanup",
+      "local_version": "20260902110000",
+      "local_name": "20260902110000_phase11_production_demo_cleanup.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "phase14_refund_reconciliation_integrity",
+      "remote_version": "20260905050000",
+      "remote_name": "phase14_refund_reconciliation_integrity",
+      "local_version": "20260905050000",
+      "local_name": "20260905050000_phase14_refund_reconciliation_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "phase29_auth_boundary_reconciliation",
+      "remote_version": "20260902130000",
+      "remote_name": "phase29_auth_boundary_reconciliation",
+      "local_version": "20260902130000",
+      "local_name": "20260902130000_phase29_auth_boundary_reconciliation.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "phase8_bids_status_alignment",
+      "remote_version": "20260824100000",
+      "remote_name": "phase8_bids_status_alignment",
+      "local_version": "20260824100000",
+      "local_name": "20260824100000_phase8_bids_status_alignment.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "phase8_transaction_atomicity",
+      "remote_version": "20260901210000",
+      "remote_name": "phase8_transaction_atomicity",
+      "local_version": "20260901210000",
+      "local_name": "20260901210000_phase8_transaction_atomicity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "platform_config",
+      "remote_version": "20260710044800",
+      "remote_name": "20260710100000_platform_config.sql",
+      "local_version": "20260710044800",
+      "local_name": "20260710044800_20260710100000_platform_config.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "platform_config_admin_fields",
+      "remote_version": "20260710045300",
+      "remote_name": "20260710150000_platform_config_admin_fields.sql",
+      "local_version": "20260710045300",
+      "local_name": "20260710045300_20260710150000_platform_config_admin_fields.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "production_advisor_hardening",
+      "remote_version": "20260909073141",
+      "remote_name": "20260909080000_production_advisor_hardening",
+      "local_version": "20260909080000",
+      "local_name": "20260909080000_production_advisor_hardening.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "provider_lifecycle_state_machine",
+      "remote_version": "20260817050000",
+      "remote_name": "provider_lifecycle_state_machine.sql",
+      "local_version": "20260817050000",
+      "local_name": "20260817050000_provider_lifecycle_state_machine.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "reconcile_governance_lifecycle_hardening",
+      "remote_version": "20260922045606",
+      "remote_name": "reconcile_governance_lifecycle_hardening",
+      "local_version": "20260921231000",
+      "local_name": "20260921231000_reconcile_governance_lifecycle_hardening.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "reconcile_system_status_control_plane",
+      "remote_version": "20260922045554",
+      "remote_name": "reconcile_system_status_control_plane",
+      "local_version": "20260921230000",
+      "local_name": "20260921230000_reconcile_system_status_control_plane.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "refresh_tokens",
+      "remote_version": "20260710045000",
+      "remote_name": "20260710120000_refresh_tokens.sql",
+      "local_version": "20260710045000",
+      "local_name": "20260710045000_20260710120000_refresh_tokens.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "regional_configuration_localization_domain",
+      "remote_version": "20260908010100",
+      "remote_name": "regional_configuration_localization_domain",
+      "local_version": "20260908010100",
+      "local_name": "20260908010100_regional_configuration_localization_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "remove_historical_demo_vehicles",
+      "remote_version": "20260901220000",
+      "remote_name": "remove_historical_demo_vehicles",
+      "local_version": "20260901220000",
+      "local_name": "20260901220000_remove_historical_demo_vehicles.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "review_domain_end_to_end",
+      "remote_version": "20260907234500",
+      "remote_name": "review_domain_end_to_end",
+      "local_version": "20260907234500",
+      "local_name": "20260907234500_review_domain_end_to_end.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "runtime_integration_hardening",
+      "remote_version": "20260909070742",
+      "remote_name": "runtime_integration_hardening_20260909",
+      "local_version": "20260909070742",
+      "local_name": "20260909070742_runtime_integration_hardening.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "search_discovery_domain",
+      "remote_version": "20260908000100",
+      "remote_name": "search_discovery_domain",
+      "local_version": "20260908000100",
+      "local_name": "20260908000100_search_discovery_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "security_function_execute_privilege_hardening",
+      "remote_version": "20260909072046",
+      "remote_name": "security_function_execute_privilege_hardening_20260909",
+      "local_version": "20260909072046",
+      "local_name": "20260909072046_security_function_execute_privilege_hardening.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "security_function_search_path_hardening",
+      "remote_version": "20260909071751",
+      "remote_name": "security_function_search_path_hardening_20260909",
+      "local_version": "20260909071751",
+      "local_name": "20260909071751_security_function_search_path_hardening.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "seed_demo_vehicles",
+      "remote_version": "20260710044329",
+      "remote_name": "20260710050000_seed_demo_vehicles.sql",
+      "local_version": "20260710044329",
+      "local_name": "20260710044329_20260710050000_seed_demo_vehicles.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "seed_system_settings",
+      "remote_version": "20260710043248",
+      "remote_name": "20260710020000_seed_system_settings.sql",
+      "local_version": "20260710043248",
+      "local_name": "20260710043248_20260710020000_seed_system_settings.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "subscription_entitlement_lifecycle",
+      "remote_version": "20260907233100",
+      "remote_name": "subscription_entitlement_lifecycle",
+      "local_version": "20260907233100",
+      "local_name": "20260907233100_subscription_entitlement_lifecycle.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "support_case_management_domain",
+      "remote_version": "20260907213000",
+      "remote_name": "support_case_management_domain",
+      "local_version": "20260907213000",
+      "local_name": "20260907213000_support_case_management_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "support_tickets_table",
+      "remote_version": "20260817130000",
+      "remote_name": "support_tickets_table.sql",
+      "local_version": "20260817130000",
+      "local_name": "20260817130000_support_tickets_table.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "sync_profiles_trigger",
+      "remote_version": "20260710043210",
+      "remote_name": "20260710005500_sync_profiles_trigger.sql",
+      "local_version": "20260710043210",
+      "local_name": "20260710043210_20260710005500_sync_profiles_trigger.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "transaction_lifecycle_integrity",
+      "remote_version": "20260905060000",
+      "remote_name": "transaction_lifecycle_integrity",
+      "local_version": "20260905060000",
+      "local_name": "20260905060000_transaction_lifecycle_integrity.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "update_car_bid_stats",
+      "remote_version": "20260710043558",
+      "remote_name": "20260710030000_update_car_bid_stats.sql",
+      "local_version": "20260710043558",
+      "local_name": "20260710043558_20260710030000_update_car_bid_stats.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "user_preferences",
+      "remote_version": "20260710045500",
+      "remote_name": "20260710170000_user_preferences.sql",
+      "local_version": "20260710045500",
+      "local_name": "20260710045500_20260710170000_user_preferences.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "v14_holistic_financial_corrections",
+      "remote_version": "20260921134954",
+      "remote_name": "v14_holistic_financial_corrections",
+      "local_version": "20260921134954",
+      "local_name": "20260921134954_v14_holistic_financial_corrections.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "vehicle_identity_registry",
+      "remote_version": "20260909074048",
+      "remote_name": "20260909090001_vehicle_identity_registry",
+      "local_version": "20260909090001",
+      "local_name": "20260909090001_vehicle_identity_registry.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "vehicle_identity_trigger_correctness",
+      "remote_version": "20260909074124",
+      "remote_name": "20260909090002_vehicle_identity_trigger_correctness",
+      "local_version": "20260909090002",
+      "local_name": "20260909090002_vehicle_identity_trigger_correctness.sql",
+      "version_same": false
+    },
+    {
+      "semantic": "vehicle_inspections_complete_columns",
+      "remote_version": "20260815080000",
+      "remote_name": "vehicle_inspections_complete_columns.sql",
+      "local_version": "20260815080000",
+      "local_name": "20260815080000_vehicle_inspections_complete_columns.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "vehicle_valuation_domain",
+      "remote_version": "20260907190500",
+      "remote_name": "vehicle_valuation_domain",
+      "local_version": "20260907190500",
+      "local_name": "20260907190500_vehicle_valuation_domain.sql",
+      "version_same": true
+    },
+    {
+      "semantic": "wave2_transaction_invariants",
+      "remote_version": "20260918143944",
+      "remote_name": "20260918100000_wave2_transaction_invariants",
+      "local_version": "20260918100000",
+      "local_name": "20260918100000_wave2_transaction_invariants.sql",
+      "version_same": false
+    }
+  ],
+  "timestamp_remaps": [
+    [
+      "20260909091000_auction_payment_escrow_e2e.sql",
+      "20260909080841_auction_payment_escrow_e2e.sql",
+      "20260909080841",
+      "20260909091000_auction_payment_escrow_e2e"
+    ],
+    [
+      "20260921232000_canonical_inspection_booking_execution_link.sql",
+      "20260922045609_canonical_inspection_booking_execution_link.sql",
+      "20260922045609",
+      "canonical_inspection_booking_execution_link"
+    ],
+    [
+      "20260918120000_canonical_inspection_lifecycle_hardening.sql",
+      "20260918143950_canonical_inspection_lifecycle_hardening.sql",
+      "20260918143950",
+      "20260918120000_canonical_inspection_lifecycle_hardening"
+    ],
+    [
+      "20260909150000_communications_control_plane.sql",
+      "20260909113015_communications_control_plane.sql",
+      "20260909113015",
+      "communications_control_plane"
+    ],
+    [
+      "20260909143000_communications_otp_delivery_control.sql",
+      "20260909110809_communications_otp_delivery_control.sql",
+      "20260909110809",
+      "communications_otp_delivery_control"
+    ],
+    [
+      "20260909173000_communications_password_reset_control.sql",
+      "20260909124238_communications_password_reset_control.sql",
+      "20260909124238",
+      "communications_password_reset_control"
+    ],
+    [
+      "20260909170000_communications_provider_rollout_controls.sql",
+      "20260909123918_communications_provider_rollout_controls.sql",
+      "20260909123918",
+      "communications_provider_rollout_controls"
+    ],
+    [
+      "20260909102000_dealer_commercial_payout_lifecycle.sql",
+      "20260909091703_dealer_commercial_payout_lifecycle.sql",
+      "20260909091703",
+      "20260909102000_dealer_commercial_payout_lifecycle"
+    ],
+    [
+      "20260909100000_dispute_canonical_escrow_lifecycle.sql",
+      "20260909084443_dispute_canonical_escrow_lifecycle.sql",
+      "20260909084443",
+      "20260909100000_dispute_canonical_escrow_lifecycle"
+    ],
+    [
+      "20260909100500_dispute_chat_inspection_linkage.sql",
+      "20260909084559_dispute_chat_inspection_linkage.sql",
+      "20260909084559",
+      "20260909100500_dispute_chat_inspection_linkage"
+    ],
+    [
+      "20260909101000_dispute_link_column_naming.sql",
+      "20260909084842_dispute_link_column_naming.sql",
+      "20260909084842",
+      "20260909101000_dispute_link_column_naming"
+    ],
+    [
+      "20260909101100_dispute_link_function_case_fix.sql",
+      "20260909084850_dispute_link_function_case_fix.sql",
+      "20260909084850",
+      "20260909101100_dispute_link_function_case_fix"
+    ],
+    [
+      "20260909092000_inspection_chat_realtime_bridge.sql",
+      "20260909083431_inspection_chat_realtime_bridge.sql",
+      "20260909083431",
+      "20260909092000_inspection_chat_realtime_bridge"
+    ],
+    [
+      "20260918130000_inspection_domain_rls_hardening.sql",
+      "20260918144000_inspection_domain_rls_hardening.sql",
+      "20260918144000",
+      "20260918130000_inspection_domain_rls_hardening"
+    ],
+    [
+      "20260918150000_inspection_financial_workflow_completion.sql",
+      "20260918144230_inspection_financial_workflow_completion.sql",
+      "20260918144230",
+      "20260918150000_inspection_financial_workflow_completion"
+    ],
+    [
+      "20260909080000_production_advisor_hardening.sql",
+      "20260909073141_production_advisor_hardening.sql",
+      "20260909073141",
+      "20260909080000_production_advisor_hardening"
+    ],
+    [
+      "20260921231000_reconcile_governance_lifecycle_hardening.sql",
+      "20260922045606_reconcile_governance_lifecycle_hardening.sql",
+      "20260922045606",
+      "reconcile_governance_lifecycle_hardening"
+    ],
+    [
+      "20260921230000_reconcile_system_status_control_plane.sql",
+      "20260922045554_reconcile_system_status_control_plane.sql",
+      "20260922045554",
+      "reconcile_system_status_control_plane"
+    ],
+    [
+      "20260909090001_vehicle_identity_registry.sql",
+      "20260909074048_vehicle_identity_registry.sql",
+      "20260909074048",
+      "20260909090001_vehicle_identity_registry"
+    ],
+    [
+      "20260909090002_vehicle_identity_trigger_correctness.sql",
+      "20260909074124_vehicle_identity_trigger_correctness.sql",
+      "20260909074124",
+      "20260909090002_vehicle_identity_trigger_correctness"
+    ],
+    [
+      "20260918100000_wave2_transaction_invariants.sql",
+      "20260918143944_wave2_transaction_invariants.sql",
+      "20260918143944",
+      "20260918100000_wave2_transaction_invariants"
+    ]
+  ]
+}

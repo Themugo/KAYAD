@@ -4,7 +4,7 @@
 
 import express from 'express';
 import * as controller from '../controllers/providerController.js';
-import * as digitalController from './digitalInspectionController.js';
+import * as legacy from '../controllers/legacyCompatibilityController.js';
 import { requireAuth, optionalAuth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/auth.js';
 import requireProviderOwnership from '../middleware/requireProviderOwnership.js';
@@ -61,16 +61,6 @@ router.post('/bookings/:bookingId/cancel', requireAuth, controller.cancelBooking
 // Submit review
 router.post('/reviews', requireAuth, controller.submitReview);
 
-// Canonical digital inspection workflow (reuses the existing digital controller).
-router.get('/bookings/:bookingId/workflow', requireAuth, digitalController.getWorkflow);
-router.post('/bookings/:bookingId/workflow/start', requireAuth, digitalController.startWorkflow);
-router.patch('/workflow/:inspectionId/stages/:stageName', requireAuth, digitalController.updateStage);
-router.post('/workflow/:inspectionId/points', requireAuth, digitalController.recordPoint);
-router.post('/workflow/points/:pointId/evidence', requireAuth, digitalController.addEvidence);
-router.post('/workflow/:inspectionId/complete', requireAuth, digitalController.completeWorkflow);
-router.post('/workflow/:inspectionId/submit', requireAuth, digitalController.submitWorkflow);
-router.post('/workflow/:inspectionId/report', requireAuth, digitalController.generateWorkflowReport);
-router.post('/workflow/:inspectionId/customer-review', requireAuth, digitalController.customerReviewWorkflow);
 
 /**
  * ============================================================
@@ -147,5 +137,23 @@ router.post('/bookings/:bookingId/refund', requireRole(['admin']), controller.pr
 
 // Get report
 router.get('/reports/:reportId', requireAuth, controller.getReport);
+
+/**
+ * ============================================================
+ * LEGACY API COMPATIBILITY
+ * ============================================================
+ * These aliases preserve existing client contracts while delegating to the
+ * canonical vehicle_inspections execution record. No legacy model or
+ * digital-inspection storage is used.
+ */
+router.get('/my', requireAuth, legacy.listMine);
+router.post('/order', requireAuth, legacy.createOrder);
+router.post('/confirm-payment', requireAuth, legacy.confirmPayment);
+router.get('/available-inspectors', requireAuth, requireRole(['admin', 'superadmin']), legacy.availableInspectors);
+router.get('/car/:carId', requireAuth, legacy.getByCar);
+router.get('/:id', requireAuth, legacy.getById);
+router.post('/:id/assign', requireAuth, requireRole(['admin', 'superadmin']), legacy.assign);
+router.post('/:id/start', requireAuth, legacy.start);
+router.post('/:id/submit', requireAuth, legacy.submit);
 
 export default router;

@@ -73,7 +73,7 @@ This repository contains **two fully-built, independently-developed systems that
 ## 5. Duplicate/Legacy/Dead Code Status (carried forward, not re-audited)
 
 Full detail in `docs/fusion/06-duplicate-map.md` and `07-dead-code-map.md`. Summary:
-- `inspectionBusinessCenter/`, `digitalInspection/` — real, substantial, deliberately-built code with zero HTTP entry point anywhere. **DEPRECATE** classification (not deleted — see `phase-01-results.md` for the full reasoning).
+- `inspectionBusinessCenter/ remains a supporting analytics layer; digitalInspection/ has been removed from the shipping tree after canonical convergence.
 - `services/auction.service.js` — confirmed duplicate of the actively-used `realtime/auctionEngine.js`. **DELETED** (`phase-01-results.md`).
 - Frontend: 5 orphaned components + 2 dead route aliases, already removed in prior sessions (8,522 lines).
 - `src/types/index.ts` vs `src/types.ts` — `UserProfile` has two genuinely conflicting definitions (only one used); `Vehicle` is correctly re-exported, not duplicated (`phase-04-vehicles.md` §3). Not resolved — flagged.

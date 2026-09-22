@@ -62,7 +62,8 @@
     "validate:v14:live-certification-contract": "node scripts/validate-v14-live-certification-contract.mjs",
     "validate:v14:runtime-preflight": "node scripts/validate-v14-runtime-preflight.mjs",
     "validate:v14:release-candidate": "node scripts/validate-v14-release-candidate.mjs",
-    "certify:v14:production-runtime": "node scripts/certify-v14-production-runtime.mjs"
+    "certify:v14:production-runtime": "node scripts/certify-v14-production-runtime.mjs",
+    "validate:canonical-architecture": "node scripts/validate-canonical-architecture.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

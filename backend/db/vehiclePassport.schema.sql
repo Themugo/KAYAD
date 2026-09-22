@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS inspection_history (
   passport_id UUID REFERENCES vehicle_passports(id) ON DELETE CASCADE,
 
   -- Inspection Reference
-  inspection_id UUID, -- Reference to digital_inspections table
+  inspection_id UUID, -- Reference to canonical vehicle_inspections table
   inspection_report_id UUID, -- Reference to inspection_reports table
 
   -- Inspection Details
