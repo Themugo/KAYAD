@@ -4,8 +4,10 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
+.env
+.env.*
 !.env.example
+!.env.production.example
 *.tsbuildinfo
 bolt-v5/
 temp_repo/

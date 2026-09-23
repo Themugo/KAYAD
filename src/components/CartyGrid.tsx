@@ -1,6 +1,5 @@
 import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Gauge, MapPin, ArrowRight } from 'lucide-react';
 import LazyImage from './LazyImage';
 
@@ -78,16 +77,16 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
   if (listView) {
     return (
       <Link to={detailTo} className="block group">
-        <motion.div
-          whileHover={{ backgroundColor: '#111' }}
+        <div
+          className="transition-colors duration-200 hover:bg-[#111]"
           style={{
             display: 'flex', flexDirection: isMobile ? 'column' : 'row',
             background: '#0C0C0C', borderRadius: 14,
             border: '1px solid rgba(255,255,255,0.06)',
             overflow: 'hidden',
           }}
-          onHoverStart={() => setHovered(true)}
-          onHoverEnd={() => setHovered(false)}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
         >
           <div style={{
             width: isMobile ? '100%' : 300, height: isMobile ? 200 : 200,
@@ -126,18 +125,16 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </Link>
     );
   }
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3 }}
-      className="group"
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
+    <div
+      className="group transition-transform duration-300 hover:-translate-y-1"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <Link to={detailTo} className="block no-underline">
         <div className="overflow-hidden rounded-xl" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
@@ -206,7 +203,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 });
 
