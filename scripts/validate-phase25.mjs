@@ -29,7 +29,7 @@ assert(!deploy.includes('placeholder-key'), 'Production deploy workflow must not
 assert(!deploy.includes('placeholder.supabase.co') && !deploy.includes('placeholder-key'), 'Production deploy workflow contains no placeholder frontend credentials');
 
 const docker = read('backend/Dockerfile');
-assert(docker.includes('FROM node:22-alpine'), 'Backend Docker image must remain on Node 22');
+assert(docker.includes('FROM node:22.22.2-alpine'), 'Backend Docker image must remain pinned to Node 22.22.2');
 assert(docker.includes('RUN npm ci --omit=dev'), 'Backend Docker image must use npm ci');
 assert(docker.includes('USER nodeuser'), 'Backend Docker image must run as non-root');
 
