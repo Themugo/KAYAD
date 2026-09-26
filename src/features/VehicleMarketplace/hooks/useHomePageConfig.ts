@@ -97,9 +97,9 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
   },
   accentTheme: 'slate',
   heroFallbackVehicles: [
-    { id: 'hero-land-cruiser', make: 'Toyota', model: 'Land Cruiser', year: 2022, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Built for journeys that matter.', image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1200&q=85' },
-    { id: 'hero-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2021, fuelType: 'Petrol', transmission: 'Automatic', tagline: 'Luxury that moves you.', image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=85' },
-    { id: 'hero-toyota-prado', make: 'Toyota', model: 'Prado', year: 2020, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Confidence for every road.', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=85' },
+    { id: 'hero-land-cruiser', make: 'Toyota', model: 'Land Cruiser', year: 2022, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Built for journeys that matter.', image: '/hero/kayad-land-cruiser.png' },
+    { id: 'hero-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2021, fuelType: 'Petrol', transmission: 'Automatic', tagline: 'Luxury that moves you.', image: '/hero/kayad-mercedes-gle.png' },
+    { id: 'hero-toyota-prado', make: 'Toyota', model: 'Prado', year: 2020, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Confidence for every road.', image: '/hero/kayad-prado.png' },
   ],
   inventoryLayout: {
     viewMode: 'grid',
