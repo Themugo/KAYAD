@@ -110,15 +110,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="h-10 w-auto max-w-[180px] object-contain shrink-0"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-xl bg-[#0B1D3A] text-white flex items-center justify-center font-black shadow-sm group-hover:bg-[#10284C] transition-colors shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-[#1F2937] text-white flex items-center justify-center font-black shadow-sm group-hover:bg-[#12576D] transition-colors shrink-0">
                   <Car className="w-5 h-5 stroke-[2]" />
                 </div>
               )}
               {branding.logoType !== 'image' && (
                 <div className="flex min-w-0 flex-col text-left">
-                  <span className="font-black text-[clamp(1.2rem,2vw,1.55rem)] tracking-tight text-[#0B1D3A] font-display leading-none flex items-center gap-1.5 truncate">
+                  <span className="font-black text-[clamp(1.2rem,2vw,1.55rem)] tracking-tight text-[#1F2937] font-display leading-none flex items-center gap-1.5 truncate">
                     {branding.logoText || 'KAYAD'}
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#EAF4FF] text-[#0F6ED8] border border-[#CFE5FB] font-sans font-extrabold shrink-0">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#E7F4F2] text-[#12576D] border border-[#CFE5FB] font-sans font-extrabold shrink-0">
                       EA
                     </span>
                   </span>
@@ -137,8 +137,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('marketplace')}
                 className={`px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'marketplace'
-                    ? 'bg-[#0B1D3A] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#0B1D3A] hover:bg-[#F4F8FC]'
+                    ? 'bg-[#1F2937] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1F2937] hover:bg-[#F3F8F7]'
                 }`}
               >
                 Marketplace
@@ -148,8 +148,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('discovery')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'discovery'
-                    ? 'bg-[#0B1D3A] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#0B1D3A] hover:bg-[#F4F8FC]'
+                    ? 'bg-[#1F2937] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1F2937] hover:bg-[#F3F8F7]'
                 }`}
               >
                 <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
@@ -160,8 +160,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('inspections')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'inspections'
-                    ? 'bg-[#0B1D3A] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#0B1D3A] hover:bg-[#F4F8FC]'
+                    ? 'bg-[#1F2937] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1F2937] hover:bg-[#F3F8F7]'
                 }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[1.75]" />
@@ -172,8 +172,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('escrow')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'escrow'
-                    ? 'bg-[#0B1D3A] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#0B1D3A] hover:bg-[#F4F8FC]'
+                    ? 'bg-[#1F2937] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1F2937] hover:bg-[#F3F8F7]'
                 }`}
               >
                 <Lock className="w-3.5 h-3.5 text-blue-600 shrink-0 stroke-[1.75]" />
@@ -181,7 +181,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {user && (
-                <button onClick={() => handleNavSelect('payments')} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${activeNav === 'payments' ? 'bg-[#0B1D3A] text-white font-bold shadow-2xs' : 'hover:text-[#0B1D3A] hover:bg-[#F4F8FC]'}`}>
+                <button onClick={() => handleNavSelect('payments')} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${activeNav === 'payments' ? 'bg-[#1F2937] text-white font-bold shadow-2xs' : 'hover:text-[#1F2937] hover:bg-[#F3F8F7]'}`}>
                   <CreditCard className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
                   <span>Payment History</span>
                 </button>
@@ -191,8 +191,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('support')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'support'
-                    ? 'bg-[#0B1D3A] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#0B1D3A] hover:bg-[#F4F8FC]'
+                    ? 'bg-[#1F2937] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1F2937] hover:bg-[#F3F8F7]'
                 }`}
               >
                 <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0 stroke-[1.75]" />
@@ -206,8 +206,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Communication Hub Button */}
             <button
               onClick={() => handleNavSelect('chat')}
-              className={`p-2 rounded-xl text-slate-600 hover:text-[#0B1D3A] hover:bg-[#F4F8FC] transition-colors relative ${
-                activeNav === 'chat' ? 'bg-[#0B1D3A] text-white' : ''
+              className={`p-2 rounded-xl text-slate-600 hover:text-[#1F2937] hover:bg-[#F3F8F7] transition-colors relative ${
+                activeNav === 'chat' ? 'bg-[#1F2937] text-white' : ''
               }`}
               title="Unified Communication Hub"
             >
@@ -221,7 +221,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   in this same component's dropdown menu - this badge
                   just wasn't wired to it. */}
               {effectiveUnread > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[9px] font-black rounded-full bg-[#20C4F4] text-[#071426] shadow-2xs">
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[9px] font-black rounded-full bg-[#13B8A6] text-[#071426] shadow-2xs">
                   {effectiveUnread}
                 </span>
               )}
@@ -238,14 +238,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             {user && (
               <button
                 onClick={() => handleNavSelect('saved')}
-                className={`p-2 rounded-xl text-slate-600 hover:text-[#0B1D3A] hover:bg-[#F4F8FC] transition-colors relative ${
-                  activeNav === 'saved' ? 'bg-[#EAF4FF] text-[#0B1D3A]' : ''
+                className={`p-2 rounded-xl text-slate-600 hover:text-[#1F2937] hover:bg-[#F3F8F7] transition-colors relative ${
+                  activeNav === 'saved' ? 'bg-[#E7F4F2] text-[#1F2937]' : ''
                 }`}
                 title="Saved Vehicles"
               >
                 <Heart className="w-5 h-5 text-slate-600 stroke-[1.75]" />
                 {savedCount > 0 && (
-                  <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-[#1684FF] text-white shadow-2xs">
+                  <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-[#176B87] text-white shadow-2xs">
                     {savedCount}
                   </span>
                 )}
@@ -255,7 +255,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* List Vehicle Button (Primary CTA: Muted Terracotta) */}
             <button
               onClick={() => handleNavSelect('seller-platform')}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-bold text-xs bg-[#1684FF] hover:bg-[#0F6ED8] text-white transition-all shadow-2xs active:scale-[0.98] shrink-0"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-bold text-xs bg-[#176B87] hover:bg-[#12576D] text-white transition-all shadow-2xs active:scale-[0.98] shrink-0"
               id="cta-sell-car"
             >
               <PlusCircle className="w-4 h-4 stroke-[2]" />
@@ -267,21 +267,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="relative" ref={userRef}>
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl hover:bg-[#F4F8FC] border border-slate-200 transition-all focus:outline-none"
+                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl hover:bg-[#F3F8F7] border border-slate-200 transition-all focus:outline-none"
                   id="user-profile-menu-button"
                 >
                   <div className="relative">
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="w-7 h-7 rounded-full object-cover border border-[#0B1D3A]/30 shadow-2xs"
+                      className="w-7 h-7 rounded-full object-cover border border-[#1F2937]/30 shadow-2xs"
                     />
                     {hasNotifications && (
                       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
                     )}
                   </div>
                   <div className="hidden sm:flex flex-col text-left">
-                    <span className="text-xs font-bold text-[#0B1D3A] leading-none">{user.name}</span>
+                    <span className="text-xs font-bold text-[#1F2937] leading-none">{user.name}</span>
                     <span className="text-[10px] text-slate-500 capitalize">{user.role}</span>
                   </div>
                   <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
@@ -291,12 +291,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {showUserDropdown && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-fade-in text-xs">
                     {/* User Header Info */}
-                    <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3 bg-[#EAF4FF]/60 rounded-t-2xl">
-                      <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-[#0B1D3A]/30" />
+                    <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3 bg-[#E7F4F2]/60 rounded-t-2xl">
+                      <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-[#1F2937]/30" />
                       <div className="overflow-hidden">
                         <p className="font-bold text-slate-900 truncate">{user.name}</p>
                         <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-[#0B1D3A] text-white font-semibold text-[9px] rounded uppercase">
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-[#1F2937] text-white font-semibold text-[9px] rounded uppercase">
                           {user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Private Seller / Buyer'}
                         </span>
                       </div>
@@ -306,7 +306,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="py-1">
                       <button
                         onClick={() => handleNavSelect('dashboard')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <LayoutDashboard className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>Buyer Command Center</span>
@@ -314,7 +314,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('seller-dashboard')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-bold text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-bold text-[#1F2937]"
                       >
                         <Car className="w-4 h-4 text-amber-600 stroke-[1.75]" />
                         <span>Private Seller Dashboard</span>
@@ -322,7 +322,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('chat')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center justify-between font-bold text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center justify-between font-bold text-[#1F2937]"
                       >
                         <div className="flex items-center gap-2.5">
                           <MessageSquare className="w-4 h-4 text-blue-600 stroke-[1.75]" />
@@ -337,7 +337,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('seller-platform')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>Sell Vehicle</span>
@@ -345,7 +345,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('saved')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center justify-between font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center justify-between font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <div className="flex items-center gap-2.5">
                           <Heart className="w-4 h-4 text-slate-500 stroke-[1.75]" />
@@ -358,7 +358,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('saved')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <Bookmark className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>Saved Searches</span>
@@ -366,7 +366,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('kayadlive')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <Sparkles className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>KAYAD Live</span>
@@ -374,7 +374,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('buyer-platform')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>My Garage</span>
@@ -382,7 +382,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('finance')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <CreditCard className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>Vehicle Financing</span>
@@ -390,7 +390,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('dashboard')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0B1D3A]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1F2937]"
                       >
                         <Settings className="w-4 h-4 text-slate-500 stroke-[1.75]" />
                         <span>Account Settings</span>
@@ -399,29 +399,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     {/* ROLE-SPECIFIC OPTIONS */}
                     {user.role === 'dealer' && (
-                      <div className="border-t border-slate-100 pt-1.5 mt-1.5 bg-[#EAF4FF]/50 pb-1">
+                      <div className="border-t border-slate-100 pt-1.5 mt-1.5 bg-[#E7F4F2]/50 pb-1">
                         <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                           Dealer Management
                         </div>
                         <button
                           onClick={() => handleNavSelect('dealer-dashboard')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-bold text-[#0B1D3A]"
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-bold text-[#1F2937]"
                         >
-                          <Building2 className="w-4 h-4 text-[#0B1D3A]" />
+                          <Building2 className="w-4 h-4 text-[#1F2937]" />
                           <span>Dealer Dashboard</span>
                         </button>
                         <button
                           onClick={() => handleNavSelect('dealers')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-bold text-[#0B1D3A]"
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-bold text-[#1F2937]"
                         >
-                          <Layers className="w-4 h-4 text-[#0B1D3A]" />
+                          <Layers className="w-4 h-4 text-[#1F2937]" />
                           <span>Dealer Inventory</span>
                         </button>
                         <button
                           onClick={() => handleNavSelect('dashboard')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F4F8FC] flex items-center gap-2.5 font-bold text-[#0B1D3A]"
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F3F8F7] flex items-center gap-2.5 font-bold text-[#1F2937]"
                         >
-                          <BarChart3 className="w-4 h-4 text-[#0B1D3A]" />
+                          <BarChart3 className="w-4 h-4 text-[#1F2937]" />
                           <span>Dealer Analytics</span>
                         </button>
                       </div>
@@ -519,7 +519,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-white hover:bg-[#F4F8FC] text-[#0B1D3A] border border-[#0B1D3A] transition-all shadow-2xs"
+                className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-white hover:bg-[#F3F8F7] text-[#1F2937] border border-[#1F2937] transition-all shadow-2xs"
                 id="btn-sign-in-main"
               >
                 <User className="w-3.5 h-3.5" />
@@ -530,10 +530,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-700 hover:bg-[#F4F8FC] rounded-xl focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="lg:hidden p-2 text-slate-700 hover:bg-[#F3F8F7] rounded-xl focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Toggle navigation menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6 text-[#0B1D3A]" /> : <Menu className="w-6 h-6 text-[#0B1D3A]" />}
+              {mobileMenuOpen ? <X className="w-6 h-6 text-[#1F2937]" /> : <Menu className="w-6 h-6 text-[#1F2937]" />}
             </button>
           </div>
 
@@ -548,7 +548,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {user ? (
             <div className="p-3 bg-slate-800/90 rounded-2xl border border-slate-700 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-[#0B1D3A]" />
+                <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-[#1F2937]" />
                 <div>
                   <p className="font-bold text-xs text-white">{user.name}</p>
                   <p className="text-[10px] text-slate-400">{user.email}</p>
@@ -566,7 +566,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
           ) : (
-            <div className="p-3 bg-[#0B1D3A] rounded-2xl border border-slate-700 flex items-center justify-between">
+            <div className="p-3 bg-[#1F2937] rounded-2xl border border-slate-700 flex items-center justify-between">
               <div>
                 <p className="font-bold text-xs text-white">Guest Visitor</p>
                 <p className="text-[10px] text-slate-300">Sign in to access Escrow & Saved Vehicles</p>
@@ -576,7 +576,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onOpenAuth();
                   setMobileMenuOpen(false);
                 }}
-                className="px-3 py-1.5 bg-[#1684FF] text-white font-bold rounded-xl text-xs"
+                className="px-3 py-1.5 bg-[#176B87] text-white font-bold rounded-xl text-xs"
               >
                 Sign In
               </button>
@@ -596,7 +596,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={() => handleNavSelect('marketplace')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'marketplace' ? 'bg-[#0B1D3A] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'marketplace' ? 'bg-[#1F2937] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <Car className="w-4 h-4" />
@@ -606,7 +606,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={() => handleNavSelect('discovery')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'discovery' ? 'bg-[#0B1D3A] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'discovery' ? 'bg-[#1F2937] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <Gavel className="w-4 h-4" />
@@ -616,7 +616,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={() => handleNavSelect('inspections')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'inspections' ? 'bg-[#0B1D3A] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'inspections' ? 'bg-[#1F2937] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -626,7 +626,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={() => handleNavSelect('escrow')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'escrow' ? 'bg-[#0B1D3A] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'escrow' ? 'bg-[#1F2937] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <Lock className="w-4 h-4 text-blue-400" />
@@ -644,7 +644,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={() => handleNavSelect('seller-platform')}
-              className="w-full p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 bg-[#1684FF] text-white"
+              className="w-full p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 bg-[#176B87] text-white"
               id="mobile-cta-sell-car"
             >
               <PlusCircle className="w-4 h-4" />

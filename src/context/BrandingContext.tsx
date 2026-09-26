@@ -9,8 +9,8 @@ interface Branding {
   logoUrl: string;
   brandTagline: string;
 
-  // Primary color palette (KAYAD navy/blue theme)
-  primaryColor: string;      // Main brand color (green: #1684FF)
+  // Primary color palette (KAYAD Slate Teal theme)
+  primaryColor: string;      // Main brand color
   primaryLight: string;     // Lighter variant (#20C4F4)
   primaryDark: string;      // Darker variant (#0B1D3A)
   primaryGlow: string;       // Glow effect (rgba)
@@ -44,7 +44,7 @@ interface BrandingContextValue {
   getCSSVariables: () => Record<string, string>;
 }
 
-// Default KAYAD navy/blue scheme for the refined marketplace presentation
+// Default KAYAD Slate Teal scheme for the refined marketplace presentation
 const DEFAULT_BRANDING: Branding = {
   logoType: 'icon',
   logoText: 'KAYAD',
@@ -52,29 +52,29 @@ const DEFAULT_BRANDING: Branding = {
   brandTagline: 'Premium Automotive Marketplace',
 
   // Primary KAYAD navy/blue palette
-  primaryColor: '#1684FF',      // Main brand blue
-  primaryLight: '#20C4F4',      // Lighter cyan
-  primaryDark: '#0B1D3A',       // Deep navy
-  primaryGlow: 'rgba(22, 132, 255, 0.25)',
+  primaryColor: '#176B87',      // Slate teal primary
+  primaryLight: '#13B8A6',      // Teal accent
+  primaryDark: '#1F2937',       // Deep navy
+  primaryGlow: 'rgba(23, 107, 135, 0.22)',
 
-  accentColor: '#3B82F6',       // Blue accent
+  accentColor: '#13B8A6',       // Teal accent
 
   // Cool neutral background palette
-  backgroundColor: '#F7F9FC',   // Main background
-  surfaceColor: '#EEF4FA',      // Surface color
+  backgroundColor: '#F6FAF9',   // Main background
+  surfaceColor: '#EDF5F4',      // Surface color
   cardColor: '#FFFFFF',        // Card color
 
   // Cool navy/slate text palette
-  textColor: '#0B1D3A',         // Primary text
+  textColor: '#1F2937',         // Primary text
   textMutedColor: '#64748B',    // Muted text
   textDimColor: '#94A3B8',     // Dim text
 
   // Border and status colors
-  borderColor: '#D7E4F5',
+  borderColor: '#D7E7E4',
   successColor: '#10B981',
   dangerColor: '#EF4444',
   warningColor: '#F59E0B',
-  infoColor: '#3B82F6',
+  infoColor: '#176B87',
 };
 
 const BrandingCtx = createContext<BrandingContextValue | null>(null);

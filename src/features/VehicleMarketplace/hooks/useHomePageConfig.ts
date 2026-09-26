@@ -43,6 +43,16 @@ export interface HomePageConfig {
    * stays internally consistent rather than admins picking an arbitrary
    * hex that only some elements would pick up. */
   accentTheme: 'blue' | 'cyan' | 'slate';
+  heroFallbackVehicles: Array<{
+    id: string;
+    make: string;
+    model: string;
+    year: number;
+    fuelType: string;
+    transmission: string;
+    tagline: string;
+    image: string;
+  }>;
   inventoryLayout: {
     viewMode: 'grid' | 'list';
     columns: 3 | 4 | 5;
@@ -54,7 +64,7 @@ export interface HomePageConfig {
 export const ACCENT_THEME_OPTIONS: { id: HomePageConfig['accentTheme']; label: string; swatch: string }[] = [
   { id: 'blue', label: 'Electric Blue', swatch: '#1684FF' },
   { id: 'cyan', label: 'Cyan', swatch: '#20C4F4' },
-  { id: 'slate', label: 'Cool Slate', swatch: '#64748B' },
+  { id: 'slate', label: 'Slate Teal', swatch: '#176B87' },
 ];
 
 /** Tailwind class fragments for each accent theme, keyed by the same
@@ -69,7 +79,7 @@ export const ACCENT_THEME_CLASSES: Record<HomePageConfig['accentTheme'], {
 }> = {
   blue: { text400: 'text-[#1684FF]', text500: 'text-[#1684FF]', text600: 'text-[#0F6ED8]', bg400: 'bg-[#1684FF]', bg400Hover: 'hover:bg-[#0F6ED8]', border400: 'border-[#1684FF]/25', bg400Subtle: 'bg-[#1684FF]/10' },
   cyan: { text400: 'text-[#20C4F4]', text500: 'text-[#20C4F4]', text600: 'text-[#159BC7]', bg400: 'bg-[#20C4F4]', bg400Hover: 'hover:bg-[#159BC7]', border400: 'border-[#20C4F4]/25', bg400Subtle: 'bg-[#20C4F4]/10' },
-  slate: { text400: 'text-slate-400', text500: 'text-slate-500', text600: 'text-slate-600', bg400: 'bg-slate-400', bg400Hover: 'hover:bg-slate-500', border400: 'border-slate-400/25', bg400Subtle: 'bg-slate-400/10' },
+  slate: { text400: 'text-[#176B87]', text500: 'text-[#176B87]', text600: 'text-[#12576D]', bg400: 'bg-[#176B87]', bg400Hover: 'hover:bg-[#12576D]', border400: 'border-[#176B87]/25', bg400Subtle: 'bg-[#176B87]/10' },
 };
 
 export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
@@ -85,7 +95,12 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     inspection: { heading: '150-Point Inspection', subtext: 'On certified listings only - look for the badge' },
     auctions: { heading: 'Live Auctions', subtext: 'Bid live on select auction vehicles' },
   },
-  accentTheme: 'blue',
+  accentTheme: 'slate',
+  heroFallbackVehicles: [
+    { id: 'hero-land-cruiser', make: 'Toyota', model: 'Land Cruiser', year: 2022, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Built for journeys that matter.', image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1200&q=85' },
+    { id: 'hero-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2021, fuelType: 'Petrol', transmission: 'Automatic', tagline: 'Luxury that moves you.', image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=85' },
+    { id: 'hero-toyota-prado', make: 'Toyota', model: 'Prado', year: 2020, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Confidence for every road.', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=85' },
+  ],
   inventoryLayout: {
     viewMode: 'grid',
     columns: 5,
@@ -108,13 +123,21 @@ function loadConfig(): HomePageConfig {
     return {
       ...DEFAULT_HOME_PAGE_CONFIG,
       ...parsed,
-      accentTheme: parsed.accentTheme === 'cyan' || parsed.accentTheme === 'slate' ? parsed.accentTheme : 'blue',
+      accentTheme: parsed.accentTheme === 'cyan' ? 'cyan' : 'slate',
       sectionVisibility: { ...DEFAULT_HOME_PAGE_CONFIG.sectionVisibility, ...parsed.sectionVisibility },
       trustPillars: {
         escrow: { ...DEFAULT_HOME_PAGE_CONFIG.trustPillars.escrow, ...parsed.trustPillars?.escrow },
         inspection: { ...DEFAULT_HOME_PAGE_CONFIG.trustPillars.inspection, ...parsed.trustPillars?.inspection },
         auctions: { ...DEFAULT_HOME_PAGE_CONFIG.trustPillars.auctions, ...parsed.trustPillars?.auctions },
       },
+      heroFallbackVehicles: Array.isArray(parsed.heroFallbackVehicles) && parsed.heroFallbackVehicles.length
+        ? parsed.heroFallbackVehicles.slice(0, 6).map((item: any, index: number) => ({
+            id: String(item?.id || `hero-fallback-${index + 1}`),
+            make: String(item?.make || ''), model: String(item?.model || ''),
+            year: Number(item?.year) || 2026, fuelType: String(item?.fuelType || ''),
+            transmission: String(item?.transmission || ''), tagline: String(item?.tagline || ''), image: String(item?.image || ''),
+          }))
+        : DEFAULT_HOME_PAGE_CONFIG.heroFallbackVehicles,
       inventoryLayout: {
         ...DEFAULT_HOME_PAGE_CONFIG.inventoryLayout,
         ...parsed.inventoryLayout,

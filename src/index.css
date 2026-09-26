@@ -24,18 +24,18 @@
 
   --shadow-card: 0 2px 8px -1px rgba(30, 48, 99, 0.06), 0 1px 4px -1px rgba(30, 48, 99, 0.04);
   --shadow-card-hover: 0 12px 24px -4px rgba(11, 29, 58, 0.12), 0 4px 8px -2px rgba(11, 29, 58, 0.06);
-  --kayad-navy: #0B1D3A;
-  --kayad-deep-navy: #071426;
-  --kayad-blue: #1684FF;
-  --kayad-cyan: #20C4F4;
-  --kayad-surface: #F7F9FC;
+  --kayad-navy: #1F2937;
+  --kayad-deep-navy: #163D49;
+  --kayad-blue: #176B87;
+  --kayad-cyan: #13B8A6;
+  --kayad-surface: #F6FAF9;
   --kayad-card: #FFFFFF;
-  --kayad-border: #D7E4F5;
+  --kayad-border: #D7E7E4;
 }
 
 @layer base {
   body {
-    background-color: #F6F1E8;
+    background-color: #F6FAF9;
     color: #1E293B;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
@@ -51,7 +51,7 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F6F1E8;
+  background: #F6FAF9;
 }
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
@@ -120,6 +120,19 @@
 .kayad-homepage .homepage-control-group select,
 .kayad-homepage .homepage-control-group button {
   min-height: 40px;
+}
+
+/* KAYAD Slate Teal visual system: softer than the previous electric-blue treatment. */
+.kayad-homepage {
+  --kayad-navy: #1F2937;
+  --kayad-blue: #176B87;
+  --kayad-cyan: #13B8A6;
+  --kayad-surface: #F6FAF9;
+  --kayad-border: #D7E7E4;
+  color: #1F2937;
+}
+.kayad-homepage .font-display {
+  letter-spacing: -0.035em;
 }
 .kayad-homepage .kayad-inventory-results {
   overflow: visible;

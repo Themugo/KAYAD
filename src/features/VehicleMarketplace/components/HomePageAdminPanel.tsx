@@ -116,8 +116,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
       >
         <div className="flex items-center justify-between p-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
           <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-[#0B1D3A]" />
-            <h2 className="text-sm font-black text-[#0B1D3A]">Customize Home Page (Admin)</h2>
+            <Settings className="w-4 h-4 text-[#1F2937]" />
+            <h2 className="text-sm font-black text-[#1F2937]">Customize Home Page (Admin)</h2>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
             <X className="w-4 h-4" />
@@ -153,7 +153,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   key={opt.id}
                   onClick={() => onUpdate((prev) => ({ ...prev, accentTheme: opt.id }))}
                   className={`flex-1 flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all ${
-                    config.accentTheme === opt.id ? 'border-[#1684FF] bg-[#EAF4FF]' : 'border-slate-200'
+                    config.accentTheme === opt.id ? 'border-[#176B87] bg-[#E7F4F2]' : 'border-slate-200'
                   }`}
                 >
                   <span className="w-5 h-5 rounded-full border border-black/10" style={{ backgroundColor: opt.swatch }} />
@@ -164,21 +164,21 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
           </div>
 
           {/* Hero featured vehicle selection - uses real promoted listings only. */}
-          <div className="space-y-3 rounded-2xl border border-[#B9D8F8] bg-[#F8FBFF] p-3.5">
+          <div className="space-y-3 rounded-2xl border border-[#B8D9D6] bg-[#F8FBFF] p-3.5">
             <div className="flex items-start gap-2">
-              <CarFront className="mt-0.5 h-4 w-4 text-[#1684FF] shrink-0" />
+              <CarFront className="mt-0.5 h-4 w-4 text-[#176B87] shrink-0" />
               <div>
-                <h3 className="font-bold text-[#0B1D3A] uppercase text-[10px] tracking-wide">Hero Featured Vehicles</h3>
+                <h3 className="font-bold text-[#1F2937] uppercase text-[10px] tracking-wide">Hero Featured Vehicles</h3>
                 <p className="text-[11px] leading-relaxed text-slate-500 mt-1">The hero pulls real vehicles marked Featured/Promoted. Choose all featured vehicles or a selective set.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setHeroMode('all')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'all' ? 'border-[#1684FF] bg-white text-[#0F6ED8]' : 'border-slate-200 bg-white text-slate-600'}`}>
+              <button type="button" onClick={() => setHeroMode('all')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'all' ? 'border-[#176B87] bg-white text-[#12576D]' : 'border-slate-200 bg-white text-slate-600'}`}>
                 <span className="block text-xs font-black">All featured</span>
                 <span className="block text-[10px] mt-0.5 text-slate-400">Auto-use every promoted car</span>
               </button>
-              <button type="button" onClick={() => setHeroMode('selected')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'selected' ? 'border-[#1684FF] bg-white text-[#0F6ED8]' : 'border-slate-200 bg-white text-slate-600'}`}>
+              <button type="button" onClick={() => setHeroMode('selected')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'selected' ? 'border-[#176B87] bg-white text-[#12576D]' : 'border-slate-200 bg-white text-slate-600'}`}>
                 <span className="block text-xs font-black">Selective</span>
                 <span className="block text-[10px] mt-0.5 text-slate-400">Choose exact hero cars</span>
               </button>
@@ -190,10 +190,10 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   <p className="p-3 text-[11px] text-slate-500">No promoted vehicles are currently available.</p>
                 ) : featuredVehicles.map((vehicle) => (
                   <label key={vehicle.id} className="flex cursor-pointer items-center gap-2 rounded-lg p-2 hover:bg-[#F8FBFF]">
-                    <input type="checkbox" checked={heroIds.includes(vehicle.id)} onChange={() => toggleHeroVehicle(vehicle.id)} className="accent-[#1684FF]" />
+                    <input type="checkbox" checked={heroIds.includes(vehicle.id)} onChange={() => toggleHeroVehicle(vehicle.id)} className="accent-[#176B87]" />
                     <img src={vehicle.images?.[0]} alt="" className="h-9 w-12 rounded-md object-cover bg-slate-100" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[11px] font-bold text-[#0B1D3A]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
+                      <span className="block truncate text-[11px] font-bold text-[#1F2937]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
                       <span className="block truncate text-[10px] text-slate-400">{vehicle.location || 'Location not specified'} · {formatAdminPrice(vehicle.price)}</span>
                     </span>
                   </label>
@@ -201,9 +201,51 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
               </div>
             )}
 
-            <button type="button" disabled={savingHeroSelection || (heroMode === 'selected' && heroIds.length === 0)} onClick={() => void saveHeroSelection()} className="w-full rounded-xl bg-[#0B1D3A] px-3 py-2.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
+            <button type="button" disabled={savingHeroSelection || (heroMode === 'selected' && heroIds.length === 0)} onClick={() => void saveHeroSelection()} className="w-full rounded-xl bg-[#176B87] px-3 py-2.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
               {savingHeroSelection ? 'Saving hero selection…' : 'Save hero vehicle selection'}
             </button>
+          </div>
+
+          {/* Fallback hero showcase: used only while no real Featured/Promoted vehicles exist. */}
+          <div className="space-y-3 rounded-2xl border border-[#B8D9D6] bg-[#F4FAF9] p-3.5">
+            <div className="flex items-start gap-2">
+              <CarFront className="mt-0.5 h-4 w-4 text-[#176B87] shrink-0" />
+              <div>
+                <h3 className="font-bold text-[#1F2937] uppercase text-[10px] tracking-wide">Hero Showcase Defaults</h3>
+                <p className="text-[11px] leading-relaxed text-slate-500 mt-1">These sample vehicles appear only when the marketplace has no real Featured/Promoted vehicles. Edit them here without touching code.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {config.heroFallbackVehicles.slice(0, 3).map((vehicle, index) => (
+                <div key={vehicle.id} className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#176B87]">Showcase {index + 1}</span>
+                    <span className="text-[10px] text-slate-400">Fallback only</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['make','model','year','fuelType','transmission','tagline'] as const).map((field) => (
+                      <label key={field} className={field === 'tagline' ? 'col-span-2' : ''}>
+                        <span className="mb-1 block text-[9px] font-bold uppercase tracking-wide text-slate-500">{field === 'fuelType' ? 'Fuel' : field === 'transmission' ? 'Transmission' : field}</span>
+                        <input
+                          value={String(vehicle[field])}
+                          onChange={(e) => onUpdate((prev) => ({ ...prev, heroFallbackVehicles: prev.heroFallbackVehicles.map((item, i) => i === index ? { ...item, [field]: field === 'year' ? Number(e.target.value) || 2026 : e.target.value } : item) }))}
+                          className="w-full rounded-lg border border-slate-200 bg-[#FBFDFC] px-2.5 py-2 text-[11px] font-semibold text-slate-700 outline-none focus:border-[#176B87]"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <label>
+                    <span className="mb-1 block text-[9px] font-bold uppercase tracking-wide text-slate-500">Image URL</span>
+                    <input
+                      value={vehicle.image}
+                      onChange={(e) => onUpdate((prev) => ({ ...prev, heroFallbackVehicles: prev.heroFallbackVehicles.map((item, i) => i === index ? { ...item, image: e.target.value } : item) }))}
+                      className="w-full rounded-lg border border-slate-200 bg-[#FBFDFC] px-2.5 py-2 text-[10px] text-slate-600 outline-none focus:border-[#176B87]"
+                      placeholder="https://…"
+                    />
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Inventory presentation - existing marketplace controls only */}
@@ -225,7 +267,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                     key={option.value}
                     type="button"
                     onClick={() => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, viewMode: option.value } }))}
-                    className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-colors ${active ? 'border-[#1684FF] bg-[#1684FF]/10 text-[#0F6ED8]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                    className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-colors ${active ? 'border-[#176B87] bg-[#176B87]/10 text-[#12576D]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
                     <span className="text-xs font-bold">{option.label}</span>
@@ -241,7 +283,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   aria-label="Desktop inventory columns"
                   value={config.inventoryLayout.columns}
                   onChange={(e) => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, columns: Number(e.target.value) as 3 | 4 | 5 } }))}
-                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                 >
                   <option value={3}>3 columns</option>
                   <option value={4}>4 columns</option>
@@ -254,7 +296,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   aria-label="Inventory card density"
                   value={config.inventoryLayout.cardDensity}
                   onChange={(e) => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, cardDensity: e.target.value as HomePageConfig['inventoryLayout']['cardDensity'] } }))}
-                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                 >
                   <option value="compact">Compact · more cars</option>
                   <option value="standard">Standard · balanced</option>
@@ -263,15 +305,15 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
               </div>
             </div>
 
-            <div className="w-full flex items-center justify-between p-3 rounded-xl border border-[#1684FF]/20 bg-[#1684FF]/5">
+            <div className="w-full flex items-center justify-between p-3 rounded-xl border border-[#176B87]/20 bg-[#176B87]/5">
               <span className="flex items-center gap-2">
-                <PanelLeftOpen className="w-4 h-4 text-[#1684FF]" />
+                <PanelLeftOpen className="w-4 h-4 text-[#176B87]" />
                 <span className="text-left">
                   <span className="block text-xs font-bold text-slate-700">Desktop filter sidebar</span>
                   <span className="block text-[10px] text-slate-500 mt-0.5">Required marketplace panel · always visible on desktop</span>
                 </span>
               </span>
-              <span className="text-[10px] font-black px-2 py-1 rounded-full bg-[#1684FF] text-white">ON</span>
+              <span className="text-[10px] font-black px-2 py-1 rounded-full bg-[#176B87] text-white">ON</span>
             </div>
           </div>
 
@@ -311,7 +353,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                     aria-label="Verified dealer escrow requirement"
                     value={escrowConfig.dealerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, dealerRequirement: e.target.value as SellerEscrowRequirement })}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   >
                     {REQUIREMENT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -324,7 +366,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                     aria-label="Private seller escrow requirement"
                     value={escrowConfig.privateSellerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, privateSellerRequirement: e.target.value as SellerEscrowRequirement })}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   >
                     {REQUIREMENT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -375,13 +417,13 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                 <input
                   value={config.trustPillars[pillar].heading}
                   onChange={(e) => updatePillarText(pillar, 'heading', e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   placeholder="Heading"
                 />
                 <input
                   value={config.trustPillars[pillar].subtext}
                   onChange={(e) => updatePillarText(pillar, 'subtext', e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   placeholder="Subtext"
                 />
               </div>
@@ -398,7 +440,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-[#1684FF] hover:bg-[#0F6ED8] text-white rounded-xl font-bold text-xs"
+            className="px-4 py-2 bg-[#176B87] hover:bg-[#12576D] text-white rounded-xl font-bold text-xs"
           >
             Done
           </button>
