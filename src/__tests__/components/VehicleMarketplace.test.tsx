@@ -75,7 +75,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   // asserting removed UI.
   it('shows the real, current vehicle count in the inventory heading', () => {
     render(<VehicleMarketplace {...baseProps} />);
-    const heading = screen.getByText(/Vehicle Inventory/i);
+    const heading = screen.getByRole('heading', { name: /Vehicle Inventory/i });
     expect(heading.textContent).toContain(String(INITIAL_VEHICLES.length));
   });
 
@@ -87,16 +87,13 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     }, { timeout: 2000 });
   });
 
-  // Fixed: the redesigned grid uses 3 columns with the sidebar showing
-  // (the sidebar is visible by default) and 4 without it - not the
-  // previous single "4, never 5" consolidated mode, since the sidebar
-  // itself now takes real, dedicated width in this layout.
-  it('renders a real grid with the sidebar-aware column count (xl:grid-cols-3 while the sidebar shows)', async () => {
-    const { container } = render(<VehicleMarketplace {...baseProps} />);
+  it('renders the full-width inventory grid using the admin presentation defaults', async () => {
+    render(<VehicleMarketplace {...baseProps} />);
     await waitFor(() => {
-      const grids = Array.from(container.querySelectorAll('.grid'));
-      const inventoryGrid = grids.find((g) => /xl:grid-cols-3/.test(g.className));
-      expect(inventoryGrid).toBeTruthy();
+      const inventoryGrid = screen.getByTestId('inventory-grid');
+      expect(inventoryGrid.getAttribute('data-view-mode')).toBe('grid');
+      expect(inventoryGrid.getAttribute('data-columns')).toBe('5');
+      expect(inventoryGrid.className).toMatch(/2xl:grid-cols-5/);
     }, { timeout: 2000 });
   });
 
@@ -106,7 +103,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       expect(screen.queryAllByText(/Sponsored|^Partner$|Featured Dealer/).length).toBeGreaterThan(0);
     }, { timeout: 2000 });
     expect(INITIAL_VEHICLES.length).toBeGreaterThan(4);
-    const heading = screen.getByText(/Vehicle Inventory/i);
+    const heading = screen.getByRole('heading', { name: /Vehicle Inventory/i });
     expect(heading.textContent).toContain(INITIAL_VEHICLES.length.toString());
   });
 
@@ -117,7 +114,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   it('defaults the page-size control to 24, not 12', () => {
     render(<VehicleMarketplace {...baseProps} />);
     const button24 = screen.getByText('24');
-    expect(button24.className).toMatch(/bg-\[#1E3063\]/);
+    expect(button24.className).toMatch(/bg-\[#0B1D3A\]/);
   });
 });
 
@@ -152,58 +149,39 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     onOpenCompareModal: () => {},
   };
 
-  // Found a real duplicate: the sticky top bar and the desktop filter
-  // sidebar each had their own physical <select> for the same
-  // selectedMake state - both visible simultaneously on desktop with
-  // the sidebar open (its default state), pure wasted space, not just
-  // a visual redundancy. First fix attempt used a plain JS conditional
-  // to remove the sticky-bar copy from the DOM whenever
-  // showDesktopSidebar was true - caught before shipping that this
-  // state isn't screen-size-aware and defaults to true regardless of
-  // viewport, so that fix would have made the Make filter completely
-  // unreachable below the lg: breakpoint (where the sidebar is always
-  // CSS-hidden via `hidden lg:block` no matter what the state says).
-  // Corrected to a CSS class driven by the same state, verified
-  // directly here across both toggle states rather than re-trusting
-  // the same reasoning that got it wrong once already.
-  it('hides the top card Make selector via lg:hidden only when the sidebar is showing, not via JS removal', async () => {
+  // The inventory defaults to an edge-to-edge presentation so the
+  // catalogue can use the available desktop width. The existing sidebar
+  // remains an optional presentation control.
+  it('keeps the inventory full-width by default and reveals the sidebar only when toggled', async () => {
     const { container } = render(<VehicleMarketplace {...baseProps} />);
     await waitFor(() => {
       const selects = container.querySelectorAll('select');
       expect(selects.length).toBeGreaterThan(0);
     });
 
-    // Sidebar defaults to open - the top card's own Make <select>
-    // must still be IN THE DOM (never JS-removed, so it's reachable
-    // below lg: where the sidebar can't render), just carrying the
-    // lg:hidden class so it's only actually hidden at that breakpoint.
-    // Identifies it by which one actually carries lg:hidden, not by a
-    // background-color className match - that heuristic broke once the
-    // top card's own background changed (dark navy card merge), since
-    // the sidebar's Make select happened to keep the exact background
-    // class the heuristic was originally matching against.
+    // The new default is the edge-to-edge inventory layout: the desktop
+    // sidebar is collapsed so the catalog can use the available width.
     const makeSelects = Array.from(container.querySelectorAll('select')).filter((s) =>
       Array.from(s.options).some((o) => o.textContent === 'All Makes')
     );
-    expect(makeSelects.length).toBe(2);
-    const topCardMakeSelect = makeSelects.find((s) => s.className.includes('lg:hidden'));
-    expect(topCardMakeSelect).toBeTruthy();
+    expect(makeSelects.length).toBe(1);
+    expect(makeSelects[0].className).not.toMatch(/lg:hidden/);
 
-    // Toggle the sidebar closed - the top card's Make selector must
-    // no longer carry lg:hidden, since with the sidebar gone it's the
-    // only Make control left at any screen size.
+    // The existing sidebar toggle remains a presentation-only control.
     fireEvent.click(screen.getByTitle('Toggle filter sidebar'));
     await waitFor(() => {
       const selectsAfter = Array.from(container.querySelectorAll('select')).filter((s) =>
         Array.from(s.options).some((o) => o.textContent === 'All Makes')
       );
-      expect(selectsAfter.length).toBe(1);
+      expect(selectsAfter.length).toBe(2);
     });
-    const selectsAfter = Array.from(container.querySelectorAll('select')).filter((s) =>
-      Array.from(s.options).some((o) => o.textContent === 'All Makes')
+
+    const topCardMakeSelect = Array.from(container.querySelectorAll('select')).find((s) =>
+      Array.from(s.options).some((o) => o.textContent === 'All Makes') && s.className.includes('lg:hidden')
     );
-    expect(selectsAfter[0].className).not.toMatch(/lg:hidden/);
+    expect(topCardMakeSelect).toBeTruthy();
   });
+
 });
 
 // Fixed: this describe block previously tested the trust strip (3
@@ -255,15 +233,13 @@ describe('VehicleMarketplace - toolbar controls (redesigned layout)', () => {
     onOpenCompareModal: () => {},
   };
 
-  // Fixed: the redesigned toolbar (matching the uploaded reference
-  // layout) has no "Show:"/"Sort:" text labels - "Show" appears as
-  // plain text before the real page-size button group, and sort is a
-  // bare <select> with no separate label. Verifies the real controls
-  // by their actual, current text/value instead of removed labels.
+  // The toolbar keeps explicit, readable labels for the existing
+  // presentation controls so every control remains understandable.
   it('Show and Sort controls are real and functional in the redesigned toolbar', () => {
     render(<VehicleMarketplace {...baseProps} />);
     expect(screen.getByText('Show')).toBeTruthy();
-    expect(screen.getByDisplayValue('Newest First')).toBeTruthy();
+    const sortControl = screen.getByRole('combobox', { name: 'Sort inventory' });
+    expect(sortControl).toHaveValue('newest');
   });
 });
 
@@ -332,6 +308,25 @@ describe('VehicleMarketplace - admin home page customization', () => {
     expect(button).toBeTruthy();
     fireEvent.click(button);
     expect(screen.getByText('Customize Home Page (Admin)')).toBeTruthy();
+  });
+
+  it('lets an admin change inventory layout without code and persists the presentation settings', async () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    fireEvent.click(screen.getByText('Customize Home Page'));
+
+    const columns = screen.getByLabelText('Desktop inventory columns') as HTMLSelectElement;
+    const density = screen.getByLabelText('Inventory card density') as HTMLSelectElement;
+    expect(columns.value).toBe('5');
+    expect(density.value).toBe('compact');
+
+    fireEvent.change(columns, { target: { value: '4' } });
+    fireEvent.change(density, { target: { value: 'standard' } });
+    fireEvent.click(screen.getByText('List view'));
+
+    await waitFor(() => {
+      const saved = JSON.parse(localStorage.getItem('kayad_home_page_config_v1') || '{}');
+      expect(saved.inventoryLayout).toMatchObject({ columns: 4, cardDensity: 'standard', viewMode: 'list' });
+    });
   });
 
   it('toggling a section off in the admin panel actually hides that section on the page', async () => {
@@ -433,9 +428,11 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
   it('clicking the Escrow Live Mode toggle in the real panel flips it from OFF to ON and logs the change', async () => {
     render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
     fireEvent.click(screen.getByText('Customize Home Page'));
-    expect(screen.getByText('OFF')).toBeTruthy();
+    const escrowToggle = screen.getByRole('button', { name: /Escrow Live Mode/i });
+    expect(escrowToggle).toBeTruthy();
+    expect(escrowToggle).toHaveTextContent('OFF');
 
-    fireEvent.click(screen.getByText('Escrow Live Mode'));
+    fireEvent.click(escrowToggle);
     await waitFor(() => {
       expect(screen.getByText('ON')).toBeTruthy();
     });

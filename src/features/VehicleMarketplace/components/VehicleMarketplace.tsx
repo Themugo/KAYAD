@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
 import FloatingAdRail from '../../../components/FloatingAdRail';
@@ -118,13 +118,41 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // not just a column-count variation. Defaults to 'grid' (the
   // consolidated mode) rather than requiring a toggle click to reach
   // the standard dense layout.
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [gridColumns, setGridColumns] = useState<2 | 3 | 4>(3);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(homeConfig.inventoryLayout.viewMode);
+  const [gridColumns, setGridColumns] = useState<3 | 4 | 5>(homeConfig.inventoryLayout.columns);
   const [sortBy, setSortBy] = useState<
     'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'most-viewed' | 'auction-ending'
   >('newest');
-  const [showDesktopSidebar, setShowDesktopSidebar] = useState<boolean>(true);
+  const [showDesktopSidebar, setShowDesktopSidebar] = useState<boolean>(homeConfig.inventoryLayout.showSidebar);
   const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
+
+  // Admin presentation settings are the default layout. Visitor toolbar
+  // controls can still make a temporary local change without changing the
+  // saved admin configuration. When an admin changes the presentation in
+  // the panel, the live page follows it immediately.
+  useEffect(() => {
+    setViewMode(homeConfig.inventoryLayout.viewMode);
+    setGridColumns(homeConfig.inventoryLayout.columns);
+    setShowDesktopSidebar(homeConfig.inventoryLayout.showSidebar);
+  }, [homeConfig.inventoryLayout.viewMode, homeConfig.inventoryLayout.columns, homeConfig.inventoryLayout.showSidebar]);
+
+  const inventoryDensity = {
+    compact: {
+      gap: 'gap-3', image: 'h-32 sm:h-36', body: 'p-3', title: 'text-[13px]', price: 'text-[15px]', meta: 'text-[10px]', detail: 'py-2',
+    },
+    standard: {
+      gap: 'gap-4', image: 'h-36 sm:h-40', body: 'p-3.5', title: 'text-sm', price: 'text-base', meta: 'text-[11px]', detail: 'py-2.5',
+    },
+    comfortable: {
+      gap: 'gap-5', image: 'h-44 sm:h-48', body: 'p-4', title: 'text-[15px]', price: 'text-lg', meta: 'text-xs', detail: 'py-3',
+    },
+  }[homeConfig.inventoryLayout.cardDensity];
+
+  const gridColumnClasses: Record<3 | 4 | 5, string> = {
+    3: 'xl:grid-cols-3',
+    4: 'xl:grid-cols-4',
+    5: 'xl:grid-cols-4 2xl:grid-cols-5',
+  };
 
   // Toast / Notification State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -529,15 +557,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     <div className="space-y-0 pb-16">
       {/* TOAST NOTIFICATION FLOATER */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 bg-[#1E3063] text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
-          <Bell className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="fixed top-20 right-4 z-50 bg-[#0B1D3A] text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
+          <Bell className="w-4 h-4 text-[#20C4F4] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Redesigned per an uploaded HTML reference layout - same original
-          KAYAD palette throughout (navy #1E3063/#17244B, terracotta
-          #C85A32, cream #F5F2EB), no new colors introduced. Every section
+      {/* Redesigned to align the marketplace with the premium hero system:
+          navy #0B1D3A, electric blue #1684FF, cyan #20C4F4 and cool
+          surfaces. No product features or business rules are introduced;
+          this pass is presentation-only and keeps existing data/actions. Every section
           below reuses this component's own real state/logic (filters,
           sort, pagination, saved/compare, admin config) - only the visual
           layer changed, not the data or behavior. */}
@@ -651,7 +680,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         <div className="bg-white rounded-2xl shadow-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end max-w-5xl mx-auto">
           <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
             <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Search</label>
-            <div className="border border-slate-200 rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F5F2EB]/40">
+            <div className="border border-slate-200 rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F8FBFF]">
               <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <input
                 value={searchQuery}
@@ -674,7 +703,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={selectedMake}
               onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }}
-              className={`border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
+              className={`border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
             >
               {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
             </select>
@@ -684,7 +713,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none"
+              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
             >
               <option value={20000000}>All</option>
               <option value={2500000}>Ksh 2.5M</option>
@@ -697,7 +726,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={minYear}
               onChange={(e) => setMinYear(Number(e.target.value))}
-              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none"
+              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
             >
               <option value={2005}>2005 – 2026</option>
               <option value={2020}>2020 – 2026</option>
@@ -709,14 +738,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={selectedBodyStyle}
               onChange={(e) => setSelectedBodyStyle(e.target.value)}
-              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F5F2EB]/40 outline-none"
+              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
             >
               {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
             </select>
           </div>
           <button
             onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-[#C85A32] hover:bg-[#B34E29] text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap"
+            className="bg-[#1684FF] hover:bg-[#0F6ED8] text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap"
           >
             Filter Vehicles
           </button>
@@ -724,12 +753,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       </div>
       )}
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 flex gap-5 items-start" id="market-results">
+      <div className="w-full px-3 sm:px-5 lg:px-7 2xl:px-10 pt-5 flex gap-4 items-start" id="market-results">
         {/* Left floating ad rail - its own column, never overlapping
             the search/filter/grid content next to it. */}
-        <FloatingAdRail placement="left_rail" />
+        <div className="hidden 2xl:block shrink-0 w-16"><FloatingAdRail placement="left_rail" /></div>
 
-        <div className="max-w-7xl mx-auto flex-1 min-w-0">
+        <div className="w-full flex-1 min-w-0">
         {/* 4. FILTER SUMMARY CHIPS */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -737,148 +766,166 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <button
                 key={f.id}
                 onClick={f.onClear}
-                className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-[#C85A32] hover:text-[#C85A32] transition-colors"
+                className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-[#1684FF] hover:text-[#1684FF] transition-colors"
               >
                 {f.label}
                 <X className="w-3 h-3" />
 
               </button>
             ))}
-            <button onClick={resetFilters} className="text-[11px] font-bold text-[#C85A32] hover:underline px-1">
+            <button onClick={resetFilters} className={`text-[11px] font-bold ${accent.text600} hover:underline px-1`}>
               Clear all
             </button>
           </div>
         )}
 
         {/* 5. MARKET HEAD */}
-        <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
-          <div>
-            <h2 className="text-xl font-bold text-[#1E3063] font-display">
-              Vehicle Inventory — {serverTotal} listing{serverTotal === 1 ? '' : 's'}
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Showing inspected marketplace listings in {selectedCounty}
-            </p>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              Show
-              <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div className="mb-5 rounded-2xl border border-[#D7E4F5] bg-white shadow-[0_10px_30px_rgba(11,29,58,0.06)]">
+          <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF4FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#0F6ED8]">
+                  <LayoutGrid className="h-3.5 w-3.5" /> Marketplace inventory
+                </span>
+                <span className="text-[11px] font-semibold text-slate-400">{selectedCounty}</span>
+              </div>
+              <h2 className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-[#0B1D3A]">
+                <span>Vehicle Inventory</span>
+                <span className="inline-flex items-center rounded-full bg-[#EAF4FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#0F6ED8]">
+                  {serverTotal.toLocaleString()} vehicle{serverTotal === 1 ? '' : 's'}
+                </span>
+              </h2>
+              <p className="mt-1 max-w-2xl text-xs sm:text-[13px] leading-relaxed text-slate-500">
+                Compare verified marketplace listings, inspection status, pricing and auction availability in one clear view.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Results per page">
+                <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Show</span>
                 {[12, 24, 48].map((n) => (
                   <button
                     key={n}
                     onClick={() => setPageSize(n)}
-                    className={`px-2.5 py-1.5 text-xs ${pageSize === n ? 'bg-[#1E3063] text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                    aria-pressed={pageSize === n}
+                    className={`min-w-9 rounded-lg px-2.5 py-2 text-[11px] font-extrabold transition-colors ${pageSize === n ? 'bg-[#0B1D3A] text-white shadow-sm' : 'text-slate-500 hover:bg-white hover:text-[#0B1D3A]'}`}
                   >
                     {n}
                   </button>
                 ))}
               </div>
-            </div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="border border-slate-200 bg-white rounded-lg px-2.5 py-1.5 text-xs text-slate-700"
-            >
-              <option value="newest">Newest First</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="mileage">Lowest Mileage</option>
-              <option value="year">Year: Newest First</option>
-              <option value="most-viewed">Most Viewed</option>
-              <option value="auction-ending">Auction Ending Soon</option>
-            </select>
-            {viewMode === 'grid' && (
-              <div className="hidden sm:flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden" title="Grid density">
-                {[2, 3, 4].map((n) => (
-                  <button key={n} onClick={() => setGridColumns(n as 2 | 3 | 4)} className={`px-2 py-1.5 text-[10px] font-bold ${gridColumns === n ? 'bg-[#1E3063] text-white' : 'text-slate-500 hover:bg-slate-50'}`} title={`${n} columns`}>
-                    {n}×
-                  </button>
-                ))}
+
+              <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Sort</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  aria-label="Sort inventory"
+                  className="min-w-[145px] bg-transparent text-xs font-bold text-[#0B1D3A] outline-none"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="price-asc">Price: low to high</option>
+                  <option value="price-desc">Price: high to low</option>
+                  <option value="mileage">Lowest mileage</option>
+                  <option value="year">Newest model year</option>
+                  <option value="most-viewed">Most viewed</option>
+                  <option value="auction-ending">Auction ending soon</option>
+                </select>
+              </label>
+
+              {viewMode === 'grid' && (
+                <div className="hidden sm:flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
+                  {[3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setGridColumns(n as 3 | 4 | 5)}
+                      aria-pressed={gridColumns === n}
+                      className={`min-w-9 rounded-lg px-2 py-2 text-[10px] font-black transition-colors ${gridColumns === n ? 'bg-[#1684FF] text-white' : 'text-slate-500 hover:bg-white hover:text-[#0B1D3A]'}`}
+                      title={`${n} columns`}
+                    >
+                      {n}×
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1" aria-label="Inventory view">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  aria-pressed={viewMode === 'grid'}
+                  title="Grid view"
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#EAF4FF] text-[#0F6ED8]' : 'text-slate-400 hover:text-slate-700'}`}
+                >
+                  <Grid className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Grid</span>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  aria-pressed={viewMode === 'list'}
+                  title="List view"
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#EAF4FF] text-[#0F6ED8]' : 'text-slate-400 hover:text-slate-700'}`}
+                >
+                  <ListIcon className="w-3.5 h-3.5" /> <span className="hidden xl:inline">List</span>
+                </button>
               </div>
-            )}
-            <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
+
               <button
-                onClick={() => setViewMode('grid')}
-                title="Grid view"
-                className={`p-2 ${viewMode === 'grid' ? 'bg-[#EAF0FD] text-[#1E3063]' : 'text-slate-400'}`}
+                onClick={() => setShowDesktopSidebar((s) => !s)}
+                className="hidden lg:flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 hover:border-[#B9D8F8] hover:bg-[#F8FBFF]"
+                title="Toggle filter sidebar"
               >
-                <Grid className="w-3.5 h-3.5" />
+                {showDesktopSidebar ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
+                <span className="hidden 2xl:inline">{showDesktopSidebar ? 'Hide filters' : 'Show filters'}</span>
               </button>
+
               <button
-                onClick={() => setViewMode('list')}
-                title="List view"
-                className={`p-2 ${viewMode === 'list' ? 'bg-[#EAF0FD] text-[#1E3063]' : 'text-slate-400'}`}
+                onClick={() => setShowMobileFilterDrawer(true)}
+                className="lg:hidden flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600"
               >
-                <ListIcon className="w-3.5 h-3.5" />
+                <Filter className="w-3.5 h-3.5" /> Filters
               </button>
+
+              {isAdmin && (
+                <button onClick={() => setShowAdminPanel(true)} className="flex items-center gap-1.5 rounded-xl bg-[#0B1D3A] px-3 py-2 text-[10px] font-bold text-white shadow-sm hover:bg-[#10284C]" title="Customize Home Page">
+                  <Settings className="w-3.5 h-3.5" /> <span>Customize Home Page</span>
+                </button>
+              )}
+              {isAdmin && (
+                <button onClick={() => setShowAdManager(true)} className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 hover:bg-[#F8FBFF]" title="Manage Ads">
+                  <Megaphone className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Ads</span>
+                </button>
+              )}
+              {isAdmin && (
+                <button onClick={() => setShowHeroEditor(true)} className="flex items-center gap-1.5 rounded-xl border border-[#B9D8F8] bg-[#EAF4FF] px-3 py-2 text-[10px] font-bold text-[#0F6ED8] hover:bg-[#DCEEFF]" title="Edit Hero">
+                  <ImageIcon className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Hero</span>
+                </button>
+              )}
             </div>
-            <button
-              onClick={() => setShowDesktopSidebar((s) => !s)}
-              className="hidden lg:flex p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"
-              title="Toggle filter sidebar"
-            >
-              {showDesktopSidebar ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
-            </button>
-            <button
-              onClick={() => setShowMobileFilterDrawer(true)}
-              className="lg:hidden flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-600 text-xs font-semibold"
-            >
-              <Filter className="w-3.5 h-3.5" /> Filters
-            </button>
-            {isAdmin && (
-              <button
-                onClick={() => setShowAdminPanel(true)}
-                className="flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 text-xs font-semibold"
-                title="Customize Home Page"
-              >
-                <Settings className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Customize Home Page</span>
-              </button>
-            )}
-            {isAdmin && (
-              <button
-                onClick={() => setShowAdManager(true)}
-                className="flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 text-xs font-semibold"
-                title="Manage Ads"
-              >
-                <Megaphone className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Manage Ads</span>
-              </button>
-            )}
-            {isAdmin && (
-              <button
-                onClick={() => setShowHeroEditor(true)}
-                className="flex items-center gap-1.5 p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 text-xs font-semibold"
-                title="Edit Hero"
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Edit Hero</span>
-              </button>
-            )}
           </div>
         </div>
 
         {/* 6. MARKET BODY: SIDEBAR + RESULTS GRID */}
-        <div className={`grid ${showDesktopSidebar ? 'lg:grid-cols-[266px_1fr]' : 'lg:grid-cols-1'} gap-6 items-start`}>
+        <div className={`grid ${showDesktopSidebar ? 'lg:grid-cols-[236px_minmax(0,1fr)]' : 'lg:grid-cols-1'} gap-6 items-start`}>
           {/* SIDEBAR */}
           {showDesktopSidebar && (
           <aside className="hidden lg:block bg-white border border-slate-200 rounded-2xl p-5 sticky top-20">
             <div className="flex items-center justify-between mb-3.5">
-              <h3 className="text-sm font-bold text-[#1E3063]">Filter Vehicles</h3>
-              <button onClick={resetFilters} className="text-[11px] font-semibold text-[#C85A32] hover:underline">Reset</button>
+              <div>
+                <h3 className="text-sm font-extrabold text-[#0B1D3A]">Refine inventory</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Narrow the marketplace without leaving the page.</p>
+              </div>
+              <button onClick={resetFilters} className="text-[11px] font-bold text-[#1684FF] hover:underline">Reset all</button>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
-              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Model</label>
-              <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+              <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
@@ -906,7 +953,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <button
                     key={c.label}
                     onClick={() => setMaxPrice(c.v)}
-                    className={`border rounded-full px-2.5 py-1 text-[10.5px] font-medium ${maxPrice === c.v ? 'border-[#C85A32] bg-[#FBEDE7] text-[#C85A32]' : 'border-slate-200 text-slate-500'}`}
+                    className={`border rounded-full px-2.5 py-1 text-[10.5px] font-medium ${maxPrice === c.v ? 'border-[#1684FF] bg-[#EAF4FF] text-[#1684FF]' : 'border-slate-200 text-slate-500'}`}
                   >
                     {c.label}
                   </button>
@@ -936,34 +983,34 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body Style</label>
-              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel Type</label>
-              <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+              <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Transmission</label>
-              <select value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+              <select value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Seller Type</label>
-              <select value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F5F2EB]/40">
+              <select value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
             </div>
 
-            <button onClick={resetFilters} className="w-full bg-[#1E3063] hover:bg-[#17244B] text-white font-bold text-xs rounded-lg py-2.5 mt-3">
-              Apply Filters
+            <button onClick={resetFilters} className="w-full bg-[#0B1D3A] hover:bg-[#10284C] text-white font-bold text-xs rounded-xl py-2.5 mt-3">
+              Reset all filters
             </button>
 
             {sidebarAds.length > 0 && (
@@ -993,10 +1040,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             ) : (loadError || serverError) ? (
               <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
-                <h4 className="text-sm font-bold text-[#1E3063] mb-1">Couldn't load vehicles</h4>
+                <h4 className="text-sm font-bold text-[#0B1D3A] mb-1">Couldn't load vehicles</h4>
                 <p className="text-xs text-slate-500 mb-4">{loadError || serverError}</p>
                 {onRetryLoad && !serverError && (
-                  <button onClick={onRetryLoad} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-4 py-2">
+                  <button onClick={onRetryLoad} className="bg-[#0B1D3A] text-white text-xs font-bold rounded-lg px-4 py-2">
                     Try Again
                   </button>
                 )}
@@ -1004,23 +1051,28 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             ) : filteredVehicles.length === 0 ? (
               <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                <h4 className="text-sm font-bold text-[#1E3063] mb-1">No vehicles match your filters</h4>
+                <h4 className="text-sm font-bold text-[#0B1D3A] mb-1">No vehicles match your filters</h4>
                 <p className="text-xs text-slate-500 mb-4">Try widening your price range or clearing a filter to see more results.</p>
-                <button onClick={resetFilters} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-4 py-2">
+                <button onClick={resetFilters} className="bg-[#0B1D3A] text-white text-xs font-bold rounded-lg px-4 py-2">
                   Reset Filters
                 </button>
               </div>
             ) : (
-              <div className={viewMode === 'grid'
-                ? `grid grid-cols-1 sm:grid-cols-2 ${gridColumns === 2 ? 'xl:grid-cols-2' : gridColumns === 4 ? 'xl:grid-cols-4' : 'xl:grid-cols-3'} gap-4`
-                : 'flex flex-col gap-3'
-              }>
+              <div
+                data-testid="inventory-grid"
+                data-view-mode={viewMode}
+                data-columns={viewMode === 'grid' ? gridColumns : undefined}
+                className={viewMode === 'grid'
+                  ? `grid grid-cols-1 sm:grid-cols-2 ${gridColumnClasses[gridColumns]} ${inventoryDensity.gap}`
+                  : `flex flex-col ${inventoryDensity.gap}`
+                }
+              >
                 {onlyAuction === false && paginatedVehicles.some((v) => v.isAuction) === false && filteredVehicles.some((v) => v.isAuction) && viewMode === 'grid' && (
-                  <div className="bg-gradient-to-br from-[#1E3063] to-[#17244B] rounded-2xl text-white p-5 flex flex-col relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-[#0B1D3A] to-[#10284C] rounded-2xl text-white p-5 flex flex-col relative overflow-hidden">
                     <span className="self-start bg-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3">🔴 LIVE</span>
                     <h3 className="text-lg font-bold mb-2">Live Vehicle Auctions</h3>
                     <p className="text-xs text-slate-300 mb-4">Bid on quality vehicles from trusted, verified sellers across East Africa.</p>
-                    <button onClick={() => onNavigate('discovery')} className="self-start bg-[#C85A32] hover:bg-[#B34E29] text-white text-xs font-bold px-4 py-2 rounded-lg mt-auto">
+                    <button onClick={() => onNavigate('discovery')} className="self-start bg-[#1684FF] hover:bg-[#0F6ED8] text-white text-xs font-bold px-4 py-2 rounded-lg mt-auto">
                       View Auctions →
                     </button>
                   </div>
@@ -1034,65 +1086,93 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   const ribbon = v.inspectionPassed
                     ? { label: 'Report Available', cls: 'bg-emerald-600' }
                     : v.isAuction
-                    ? { label: '🔴 Live Auction', cls: 'bg-rose-600' }
+                    ? { label: '🔴 Live Auction', cls: 'bg-[#0F6ED8]' }
                     : v.badge
-                    ? { label: `★ ${v.badge}`, cls: 'bg-[#1E3063]' }
+                    ? { label: `★ ${v.badge}`, cls: 'bg-[#0B1D3A]' }
                     : null;
                   return (
-                    <div
+                    <article
                       key={v.id}
-                      className={`bg-white border border-slate-200 rounded-2xl overflow-hidden flex hover:shadow-lg hover:-translate-y-0.5 transition-all ${viewMode === 'list' ? 'flex-row' : 'flex-col'}`}
+                      className={`group bg-white border border-[#D7E4F5] rounded-2xl overflow-hidden flex shadow-[0_6px_22px_rgba(11,29,58,0.055)] hover:shadow-[0_14px_34px_rgba(11,29,58,0.12)] hover:-translate-y-0.5 transition-all duration-200 ${viewMode === 'list' ? 'flex-row' : 'flex-col'}`}
                     >
-                      <div className={`relative bg-gradient-to-br from-slate-200 to-slate-300 shrink-0 ${viewMode === 'list' ? 'w-56' : 'h-40'}`}>
-                        {v.images?.[0] && (
-                          <img src={v.images[0]} alt={v.title} className="w-full h-full object-cover" />
+                      <div className={`relative bg-[#EEF4FA] shrink-0 overflow-hidden ${viewMode === 'list' ? 'w-52 sm:w-64' : inventoryDensity.image}`}>
+                        {v.images?.[0] ? (
+                          <img
+                            src={v.images[0]}
+                            alt={v.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <LayoutGrid className="w-8 h-8" />
+                          </div>
                         )}
-                        {ribbon && (
-                          <span className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-1 rounded-md text-white ${ribbon.cls}`}>
-                            {ribbon.label}
-                          </span>
-                        )}
-                        <button
-                          onClick={() => onToggleSave(v.id)}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center"
-                          title={isSaved ? 'Remove from saved' : 'Save vehicle'}
-                        >
-                          {isSaved ? '♥' : '♡'}
-                        </button>
+                        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
+                          {ribbon ? (
+                            <span className={`text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm ${ribbon.cls}`}>
+                              {ribbon.label}
+                            </span>
+                          ) : <span />}
+                          <button
+                            onClick={() => onToggleSave(v.id)}
+                            className="w-8 h-8 rounded-full bg-[#0B1D3A]/75 hover:bg-[#0B1D3A] text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                            title={isSaved ? 'Remove from saved' : 'Save vehicle'}
+                            aria-label={isSaved ? `Remove ${v.title} from saved vehicles` : `Save ${v.title}`}
+                          >
+                            <span className="text-base leading-none">{isSaved ? '♥' : '♡'}</span>
+                          </button>
+                        </div>
                         {v.isAuction && v.currentBid && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-[10px] font-mono px-2.5 py-1.5 flex justify-between">
-                            <span>Current bid: Ksh {(v.currentBid / 1000000).toFixed(2)}M</span>
+                          <div className="absolute bottom-0 left-0 right-0 bg-[#0B1D3A]/90 backdrop-blur-sm text-white text-[10px] px-3 py-2 flex items-center justify-between gap-2">
+                            <span className="font-semibold text-slate-200">Current bid</span>
+                            <span className="font-black">{formatPriceM(v.currentBid)}</span>
                           </div>
                         )}
                       </div>
-                      <div className="p-3.5 border-t border-slate-100 flex-1 flex flex-col">
-                        <h4 className="text-sm font-semibold text-[#1E3063] mb-1">{v.year} {v.make} {v.model}</h4>
-                        <div className="font-mono font-bold text-base text-[#1E3063] mb-2">{formatPriceM(v.price)}</div>
-                        <div className="flex flex-wrap gap-2.5 text-[11px] text-slate-500 mb-2">
-                          <span>{v.mileage.toLocaleString()} km</span>
-                          <span>{v.fuelType}</span>
-                          <span>{v.transmission}</span>
+
+                      <div className={`${inventoryDensity.body} flex-1 flex flex-col min-w-0`}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[9px] font-black uppercase tracking-[0.13em] text-[#1684FF] mb-1">{v.isAuction ? 'Live auction' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
+                            <h4 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-[#0B1D3A] line-clamp-2`}>
+                              {v.year} {v.make} {v.model}
+                            </h4>
+                          </div>
+                          {v.verified && <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" aria-label="Verified listing" />}
                         </div>
-                        <div className="text-[11px] text-slate-400 mb-2">{v.location}</div>
-                        {v.inspectionPassed ? (
-                          <div className="text-[11px] rounded-lg px-2 py-1.5 mb-2.5 bg-emerald-50 text-emerald-800 flex items-center gap-1.5">
-                            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                            <span>Inspection report available</span>
-                          </div>
-                        ) : (
-                          <div className="text-[11px] rounded-lg px-2 py-1.5 mb-2.5 bg-slate-100 text-slate-500 flex items-center justify-between">
-                            <span>No inspection report yet</span>
-                            <button onClick={() => onNavigate('inspections')} className="text-[#C85A32] font-semibold">Request one →</button>
-                          </div>
-                        )}
+
+                        <div className={`mt-2 ${inventoryDensity.price} font-black tracking-tight text-[#0B1D3A]`}>{formatPriceM(v.price)}</div>
+
+                        <div className={`mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5 ${inventoryDensity.meta} font-medium text-slate-500`}>
+                          <span className="inline-flex items-center gap-1.5 min-w-0"><Gauge className="w-3 h-3 text-[#1684FF] shrink-0" />{v.mileage.toLocaleString()} km</span>
+                          <span className="inline-flex items-center gap-1.5 min-w-0"><Fuel className="w-3 h-3 text-[#20C4F4] shrink-0" />{v.fuelType}</span>
+                          <span className="inline-flex items-center gap-1.5 min-w-0"><ArrowRightLeft className="w-3 h-3 text-slate-400 shrink-0" />{v.transmission}</span>
+                          <span className="inline-flex items-center gap-1.5 min-w-0 truncate"><MapPin className="w-3 h-3 text-slate-400 shrink-0" />{v.location}</span>
+                        </div>
+
+                        <div className={`mt-3 rounded-xl border ${v.inspectionPassed ? 'border-emerald-100 bg-emerald-50/70' : 'border-slate-200 bg-[#F8FBFF]'} px-2.5 ${inventoryDensity.detail}`}>
+                          {v.inspectionPassed ? (
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-700">
+                              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                              <span>Inspection report available</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
+                              <span>No inspection report yet</span>
+                              <button onClick={() => onNavigate('inspections')} className="text-[#1684FF] font-bold hover:text-[#0F6ED8] whitespace-nowrap">Request →</button>
+                            </div>
+                          )}
+                        </div>
+
                         <button
                           onClick={() => handleVehicleSelect(v)}
-                          className="mt-auto w-full text-center border border-slate-200 hover:bg-[#EAF0FD] hover:border-[#EAF0FD] rounded-lg py-2 text-xs font-semibold text-[#1E3063]"
+                          className="mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#B9D8F8] bg-white hover:bg-[#EAF4FF] hover:border-[#1684FF]/40 py-2.5 text-[11px] font-extrabold text-[#0F6ED8] transition-colors"
                         >
-                          View Details →
+                          View vehicle details <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                    </div>
+                    </article>
                   );
                 })}
               </div>
@@ -1124,14 +1204,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
         {/* Right floating ad rail - its own column, never overlapping
             the grid next to it. */}
-        <FloatingAdRail placement="right_rail" />
+        <div className="hidden 2xl:block shrink-0 w-16"><FloatingAdRail placement="right_rail" /></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="w-full px-3 sm:px-5 lg:px-7 2xl:px-10">
         {/* 7. CTA BANDS */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 mt-12 rounded-2xl overflow-hidden">
-          <div className="bg-gradient-to-br from-[#17244B] to-[#1E3063] text-white p-8 sm:p-10 flex flex-col justify-center gap-4">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">Buy with more confidence</span>
+          <div className="bg-gradient-to-br from-[#10284C] to-[#0B1D3A] text-white p-8 sm:p-10 flex flex-col justify-center gap-4">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#20C4F4]">Buy with more confidence</span>
             <h3 className="text-xl sm:text-2xl font-bold font-display max-w-md">A registered local mechanic inspects it. The report stays on file — for you and every buyer after you.</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs text-slate-300">
               <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Registered mechanic near the vehicle</div>
@@ -1139,14 +1219,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Report uploaded to the listing</div>
               <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Later buyers can unlock it</div>
             </div>
-            <button onClick={() => onNavigate('inspections')} className="self-start bg-[#C85A32] hover:bg-[#B34E29] text-white text-sm font-bold px-5 py-2.5 rounded-full mt-1">
+            <button onClick={() => onNavigate('inspections')} className="self-start bg-[#1684FF] hover:bg-[#0F6ED8] text-white text-sm font-bold px-5 py-2.5 rounded-full mt-1">
               Request an Inspection →
             </button>
           </div>
-          <div className="bg-[#F5F2EB] p-8 sm:p-9 flex flex-col justify-center">
-            <h4 className="text-lg font-bold text-[#1E3063] mb-2 max-w-xs">Ready to sell your vehicle?</h4>
+          <div className="bg-[#F4F8FC] p-8 sm:p-9 flex flex-col justify-center">
+            <h4 className="text-lg font-bold text-[#0B1D3A] mb-2 max-w-xs">Ready to sell your vehicle?</h4>
             <p className="text-xs text-slate-600 mb-4 max-w-xs">Reach verified buyers across East Africa through the KAYAD marketplace and escrow network.</p>
-            <button onClick={() => onNavigate('seller-platform')} className="self-start bg-[#1E3063] hover:bg-[#17244B] text-white text-sm font-bold px-5 py-2.5 rounded-full">
+            <button onClick={() => onNavigate('seller-platform')} className="self-start bg-[#0B1D3A] hover:bg-[#10284C] text-white text-sm font-bold px-5 py-2.5 rounded-full">
               Sell Your Vehicle →
             </button>
           </div>
@@ -1155,10 +1235,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 8. FLOATING COMPARISON TRAY */}
       {comparedVehicles.length > 0 && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-[#1E3063] text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4">
-          <ArrowRightLeft className="w-4 h-4 text-amber-400" />
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-[#0B1D3A] text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4">
+          <ArrowRightLeft className="w-4 h-4 text-[#20C4F4]" />
           <span className="text-xs font-semibold">{comparedVehicles.length} vehicle{comparedVehicles.length > 1 ? 's' : ''} selected to compare</span>
-          <button onClick={onOpenCompareModal} className="bg-[#C85A32] text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+          <button onClick={onOpenCompareModal} className="bg-[#1684FF] text-white text-xs font-bold px-3 py-1.5 rounded-lg">
             Compare Now
           </button>
         </div>
@@ -1168,36 +1248,77 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {showMobileFilterDrawer && (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden">
           <div className="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#1E3063]">Filter Vehicles</h3>
+            <div><h3 className="text-sm font-extrabold text-[#0B1D3A]">Refine inventory</h3><p className="text-[10px] text-slate-400 mt-0.5">Adjust any filter, then return to the results.</p></div>
             <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5">
               <X className="w-5 h-5 text-slate-500" />
             </button>
           </div>
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 pb-8">
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
-              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body Style</label>
-              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Model</label>
+              <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Min price</label>
+                <input type="number" value={minPrice || ''} onChange={(e) => setMinPrice(Number(e.target.value) || 0)} placeholder="Ksh 50K" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Max price</label>
+                <input type="number" value={maxPrice === 20000000 ? '' : maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)} placeholder="Ksh 20M" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">From year</label>
+                <input type="number" value={minYear === 2005 ? '' : minYear} onChange={(e) => setMinYear(Number(e.target.value) || 2005)} placeholder="2005" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">To year</label>
+                <input type="number" value={maxYear === 2026 ? '' : maxYear} onChange={(e) => setMaxYear(Number(e.target.value) || 2026)} placeholder="2026" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body style</label>
+              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel type</label>
+                <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                  {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Transmission</label>
+                <select value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                  {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
+                </select>
+              </div>
+            </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel Type</label>
-              <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
-                {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Seller type</label>
+              <select value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
             </div>
-            <div className="flex flex-col gap-2.5 pt-2">
-              <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-[#C85A32] w-4 h-4" /> Live Auction Listings</label>
-            </div>
+            <label className="flex items-center gap-3 rounded-xl border border-[#D7E4F5] bg-[#F8FBFF] px-3 py-3 text-sm font-semibold text-slate-700">
+              <input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-[#1684FF] w-4 h-4" />
+              <span><span className="block text-xs font-bold text-[#0B1D3A]">Live auction listings</span><span className="block text-[10px] font-normal text-slate-500 mt-0.5">Show vehicles currently available for bidding.</span></span>
+            </label>
             <div className="flex gap-2 pt-2">
-              <button onClick={resetFilters} className="flex-1 border border-slate-200 rounded-lg py-2.5 text-xs font-bold text-slate-600">Reset</button>
-              <button onClick={() => setShowMobileFilterDrawer(false)} className="flex-1 bg-[#1E3063] text-white rounded-lg py-2.5 text-xs font-bold">Show Results</button>
+              <button onClick={resetFilters} className="flex-1 border border-slate-200 rounded-xl py-3 text-xs font-bold text-slate-600 hover:bg-slate-50">Reset all</button>
+              <button onClick={() => setShowMobileFilterDrawer(false)} className="flex-1 bg-[#0B1D3A] hover:bg-[#10284C] text-white rounded-xl py-3 text-xs font-bold">Show results</button>
             </div>
           </div>
         </div>

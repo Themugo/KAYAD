@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History } from 'lucide-react';
+import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History, LayoutGrid, List, PanelLeftOpen, PanelLeftClose } from 'lucide-react';
 import { HomePageConfig, ACCENT_THEME_OPTIONS } from '../hooks/useHomePageConfig';
 import {
   EscrowRulesConfig,
@@ -88,8 +88,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
       >
         <div className="flex items-center justify-between p-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
           <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-[#1E3063]" />
-            <h2 className="text-sm font-black text-[#1E3063]">Customize Home Page (Admin)</h2>
+            <Settings className="w-4 h-4 text-[#0B1D3A]" />
+            <h2 className="text-sm font-black text-[#0B1D3A]">Customize Home Page (Admin)</h2>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
             <X className="w-4 h-4" />
@@ -125,7 +125,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
                   key={opt.id}
                   onClick={() => onUpdate((prev) => ({ ...prev, accentTheme: opt.id }))}
                   className={`flex-1 flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all ${
-                    config.accentTheme === opt.id ? 'border-[#1E3063] bg-slate-50' : 'border-slate-200'
+                    config.accentTheme === opt.id ? 'border-[#1684FF] bg-[#EAF4FF]' : 'border-slate-200'
                   }`}
                 >
                   <span className="w-5 h-5 rounded-full border border-black/10" style={{ backgroundColor: opt.swatch }} />
@@ -135,6 +135,81 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
             </div>
           </div>
 
+          {/* Inventory presentation - existing marketplace controls only */}
+          <div className="space-y-3">
+            <div>
+              <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide">Inventory Presentation</h3>
+              <p className="text-[11px] leading-relaxed text-slate-500 mt-1">Choose how the existing vehicle inventory is arranged. These settings change presentation only; vehicle data, filters and business rules stay untouched.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: 'grid', label: 'Dense grid', icon: LayoutGrid },
+                { value: 'list', label: 'List view', icon: List },
+              ] as const).map((option) => {
+                const Icon = option.icon;
+                const active = config.inventoryLayout.viewMode === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, viewMode: option.value } }))}
+                    className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-colors ${active ? 'border-[#1684FF] bg-[#1684FF]/10 text-[#0F6ED8]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-bold">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">Desktop columns</label>
+                <select
+                  aria-label="Desktop inventory columns"
+                  value={config.inventoryLayout.columns}
+                  onChange={(e) => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, columns: Number(e.target.value) as 3 | 4 | 5 } }))}
+                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                >
+                  <option value={3}>3 columns</option>
+                  <option value={4}>4 columns</option>
+                  <option value={5}>5 columns</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">Card density</label>
+                <select
+                  aria-label="Inventory card density"
+                  value={config.inventoryLayout.cardDensity}
+                  onChange={(e) => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, cardDensity: e.target.value as HomePageConfig['inventoryLayout']['cardDensity'] } }))}
+                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
+                >
+                  <option value="compact">Compact · more cars</option>
+                  <option value="standard">Standard · balanced</option>
+                  <option value="comfortable">Comfortable · larger cards</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, showSidebar: !prev.inventoryLayout.showSidebar } }))}
+              className={`w-full flex items-center justify-between p-3 rounded-xl border transition-colors ${config.inventoryLayout.showSidebar ? 'border-[#1684FF]/30 bg-[#1684FF]/5' : 'border-slate-200'}`}
+            >
+              <span className="flex items-center gap-2">
+                {config.inventoryLayout.showSidebar ? <PanelLeftOpen className="w-4 h-4 text-[#1684FF]" /> : <PanelLeftClose className="w-4 h-4 text-slate-400" />}
+                <span className="text-left">
+                  <span className="block text-xs font-bold text-slate-700">Desktop filter sidebar</span>
+                  <span className="block text-[10px] text-slate-500 mt-0.5">{config.inventoryLayout.showSidebar ? 'Visible by default' : 'Collapsed by default for more inventory width'}</span>
+                </span>
+              </span>
+              <span className={`text-[10px] font-black px-2 py-1 rounded-full ${config.inventoryLayout.showSidebar ? 'bg-[#1684FF] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                {config.inventoryLayout.showSidebar ? 'ON' : 'OFF'}
+              </span>
+            </button>
+          </div>
+
           {/* Escrow rules & activation */}
           <div className="space-y-2">
             <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide flex items-center gap-1.5">
@@ -142,6 +217,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
             </h3>
             <div className="p-2.5 rounded-xl border border-slate-200 space-y-2.5">
               <button
+                type="button"
+                aria-label={`Escrow Live Mode: ${escrowConfig.liveMode ? 'ON' : 'OFF'}`}
                 onClick={() => updateEscrowConfig({ ...escrowConfig, liveMode: !escrowConfig.liveMode })}
                 className={`w-full flex items-center justify-between p-2 rounded-lg border ${
                   escrowConfig.liveMode ? 'border-emerald-300 bg-emerald-50' : 'border-amber-300 bg-amber-50'
@@ -168,7 +245,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
                   <select
                     value={escrowConfig.dealerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, dealerRequirement: e.target.value as SellerEscrowRequirement })}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E3063]"
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
                   >
                     {REQUIREMENT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -180,7 +257,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
                   <select
                     value={escrowConfig.privateSellerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, privateSellerRequirement: e.target.value as SellerEscrowRequirement })}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E3063]"
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
                   >
                     {REQUIREMENT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -231,13 +308,13 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
                 <input
                   value={config.trustPillars[pillar].heading}
                   onChange={(e) => updatePillarText(pillar, 'heading', e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1E3063]"
+                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
                   placeholder="Heading"
                 />
                 <input
                   value={config.trustPillars[pillar].subtext}
                   onChange={(e) => updatePillarText(pillar, 'subtext', e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#1E3063]"
+                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
                   placeholder="Subtext"
                 />
               </div>
@@ -254,7 +331,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-[#1E3063] hover:bg-[#17244B] text-white rounded-xl font-bold text-xs"
+            className="px-4 py-2 bg-[#1684FF] hover:bg-[#0F6ED8] text-white rounded-xl font-bold text-xs"
           >
             Done
           </button>

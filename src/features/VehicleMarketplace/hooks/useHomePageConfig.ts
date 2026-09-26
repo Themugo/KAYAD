@@ -2,10 +2,11 @@ import { useState, useCallback } from 'react';
 
 /**
  * Admin-editable configuration for the home/marketplace page. Deliberately
- * scoped, not a general page builder: lets an admin toggle which of the
- * EXISTING sections are visible, edit the EXISTING trust-pillar text, and
- * choose from a small set of PRESET accent colors - not arbitrary new
- * components, arbitrary custom colors, or arbitrary layout reordering.
+ * scoped, not a general page builder: lets an admin control the presentation
+ * of the EXISTING marketplace sections, edit EXISTING trust-pillar text,
+ * and choose from a small set of PRESET cool accent themes. Inventory
+ * presentation controls below only change layout/density/sidebar defaults;
+ * they never change vehicle data, filtering rules, or business logic.
  * A true "add/remove any component, any layout, any color" system would
  * be a genuinely different, much larger project (a real CMS/page-builder
  * with a component registry, a layout engine, and a full color-token
@@ -41,28 +42,34 @@ export interface HomePageConfig {
    * every accent usage across the page (badges, buttons, highlights)
    * stays internally consistent rather than admins picking an arbitrary
    * hex that only some elements would pick up. */
-  accentTheme: 'amber' | 'emerald' | 'sky';
+  accentTheme: 'blue' | 'cyan' | 'slate';
+  inventoryLayout: {
+    viewMode: 'grid' | 'list';
+    columns: 3 | 4 | 5;
+    showSidebar: boolean;
+    cardDensity: 'compact' | 'standard' | 'comfortable';
+  };
 }
 
 export const ACCENT_THEME_OPTIONS: { id: HomePageConfig['accentTheme']; label: string; swatch: string }[] = [
-  { id: 'amber', label: 'Amber (default)', swatch: '#FBBF24' },
-  { id: 'emerald', label: 'Emerald', swatch: '#34D399' },
-  { id: 'sky', label: 'Sky Blue', swatch: '#38BDF8' },
+  { id: 'blue', label: 'Electric Blue', swatch: '#1684FF' },
+  { id: 'cyan', label: 'Cyan', swatch: '#20C4F4' },
+  { id: 'slate', label: 'Cool Slate', swatch: '#64748B' },
 ];
 
 /** Tailwind class fragments for each accent theme, keyed by the same
  * semantic roles used throughout the page (400/500/600 weight, text vs
  * background). Centralizing this mapping here means a page component
  * asks for `accentClasses.text400` etc. instead of hardcoding
- * `amber-400` directly, so the whole page's accent actually changes
+ * the old warm accent token directly, so the whole page's accent actually changes
  * together when the admin picks a different theme. */
 export const ACCENT_THEME_CLASSES: Record<HomePageConfig['accentTheme'], {
   text400: string; text500: string; text600: string;
   bg400: string; bg400Hover: string; border400: string; bg400Subtle: string;
 }> = {
-  amber: { text400: 'text-amber-400', text500: 'text-amber-500', text600: 'text-amber-600', bg400: 'bg-amber-400', bg400Hover: 'hover:bg-amber-500', border400: 'border-amber-400/25', bg400Subtle: 'bg-amber-400/15' },
-  emerald: { text400: 'text-emerald-400', text500: 'text-emerald-500', text600: 'text-emerald-600', bg400: 'bg-emerald-400', bg400Hover: 'hover:bg-emerald-500', border400: 'border-emerald-400/25', bg400Subtle: 'bg-emerald-400/15' },
-  sky: { text400: 'text-sky-400', text500: 'text-sky-500', text600: 'text-sky-600', bg400: 'bg-sky-400', bg400Hover: 'hover:bg-sky-500', border400: 'border-sky-400/25', bg400Subtle: 'bg-sky-400/15' },
+  blue: { text400: 'text-[#1684FF]', text500: 'text-[#1684FF]', text600: 'text-[#0F6ED8]', bg400: 'bg-[#1684FF]', bg400Hover: 'hover:bg-[#0F6ED8]', border400: 'border-[#1684FF]/25', bg400Subtle: 'bg-[#1684FF]/10' },
+  cyan: { text400: 'text-[#20C4F4]', text500: 'text-[#20C4F4]', text600: 'text-[#159BC7]', bg400: 'bg-[#20C4F4]', bg400Hover: 'hover:bg-[#159BC7]', border400: 'border-[#20C4F4]/25', bg400Subtle: 'bg-[#20C4F4]/10' },
+  slate: { text400: 'text-slate-400', text500: 'text-slate-500', text600: 'text-slate-600', bg400: 'bg-slate-400', bg400Hover: 'hover:bg-slate-500', border400: 'border-slate-400/25', bg400Subtle: 'bg-slate-400/10' },
 };
 
 export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
@@ -78,7 +85,13 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     inspection: { heading: '150-Point Inspection', subtext: 'On certified listings only - look for the badge' },
     auctions: { heading: 'Live Auctions', subtext: 'Bid live on select auction vehicles' },
   },
-  accentTheme: 'amber',
+  accentTheme: 'blue',
+  inventoryLayout: {
+    viewMode: 'grid',
+    columns: 5,
+    showSidebar: false,
+    cardDensity: 'compact',
+  },
 };
 
 const STORAGE_KEY = 'kayad_home_page_config_v1';
@@ -95,11 +108,22 @@ function loadConfig(): HomePageConfig {
     return {
       ...DEFAULT_HOME_PAGE_CONFIG,
       ...parsed,
+      accentTheme: parsed.accentTheme === 'cyan' || parsed.accentTheme === 'slate' ? parsed.accentTheme : 'blue',
       sectionVisibility: { ...DEFAULT_HOME_PAGE_CONFIG.sectionVisibility, ...parsed.sectionVisibility },
       trustPillars: {
         escrow: { ...DEFAULT_HOME_PAGE_CONFIG.trustPillars.escrow, ...parsed.trustPillars?.escrow },
         inspection: { ...DEFAULT_HOME_PAGE_CONFIG.trustPillars.inspection, ...parsed.trustPillars?.inspection },
         auctions: { ...DEFAULT_HOME_PAGE_CONFIG.trustPillars.auctions, ...parsed.trustPillars?.auctions },
+      },
+      inventoryLayout: {
+        ...DEFAULT_HOME_PAGE_CONFIG.inventoryLayout,
+        ...parsed.inventoryLayout,
+        viewMode: parsed.inventoryLayout?.viewMode === 'list' ? 'list' : 'grid',
+        columns: [3, 4, 5].includes(parsed.inventoryLayout?.columns) ? parsed.inventoryLayout.columns : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.columns,
+        showSidebar: parsed.inventoryLayout?.showSidebar === true,
+        cardDensity: ['compact', 'standard', 'comfortable'].includes(parsed.inventoryLayout?.cardDensity)
+          ? parsed.inventoryLayout.cardDensity
+          : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.cardDensity,
       },
     };
   } catch {
