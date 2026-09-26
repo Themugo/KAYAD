@@ -304,6 +304,8 @@ function AppInner() {
     setActiveNav('marketplace');
   }, []);
 
+  const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
+
   return (
     <div className="min-h-screen bg-[#F6F1E8] text-slate-800 flex flex-col font-sans">
       {/* 0. Top notice/advertisement strip - real, backend-driven,
@@ -327,8 +329,8 @@ function AppInner() {
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
       <main
         className={
-          activeNav === 'marketplace' || activeNav === 'saved'
-            ? 'flex-1 w-full px-0 py-0 space-y-0'
+          isMarketplaceSurface
+            ? 'flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 space-y-0 overflow-x-clip'
             : 'flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6'
         }
       >

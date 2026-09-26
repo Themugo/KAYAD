@@ -89,7 +89,7 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
   inventoryLayout: {
     viewMode: 'grid',
     columns: 5,
-    showSidebar: true,
+    showSidebar: false,
     cardDensity: 'compact',
   },
 };
@@ -120,7 +120,7 @@ function loadConfig(): HomePageConfig {
         ...parsed.inventoryLayout,
         viewMode: parsed.inventoryLayout?.viewMode === 'list' ? 'list' : 'grid',
         columns: [3, 4, 5].includes(parsed.inventoryLayout?.columns) ? parsed.inventoryLayout.columns : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.columns,
-        showSidebar: parsed.inventoryLayout?.showSidebar !== false,
+        showSidebar: parsed.inventoryLayout?.showSidebar === true,
         cardDensity: ['compact', 'standard', 'comfortable'].includes(parsed.inventoryLayout?.cardDensity)
           ? parsed.inventoryLayout.cardDensity
           : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.cardDensity,

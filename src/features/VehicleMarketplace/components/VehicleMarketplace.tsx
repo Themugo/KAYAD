@@ -554,7 +554,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [paginatedVehicles, homeConfig.sectionVisibility.sponsorCardsInGrid, midGridAds]);
 
   return (
-    <div className="space-y-0 pb-16">
+    <div className="w-full min-w-0 space-y-0 pb-16">
       {/* TOAST NOTIFICATION FLOATER */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 bg-[#0B1D3A] text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
@@ -676,8 +676,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-      <div className="relative z-10 -mt-12 px-4 sm:px-6">
-        <div className="bg-white rounded-2xl shadow-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end max-w-5xl mx-auto">
+      <div className="relative z-10 -mt-12 w-full px-3 sm:px-5 lg:px-8">
+        <div className="w-full bg-white rounded-2xl shadow-xl p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
           <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
             <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Search</label>
             <div className="border border-slate-200 rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F8FBFF]">
@@ -753,12 +753,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       </div>
       )}
 
-      <div className="w-full px-3 sm:px-5 lg:px-7 2xl:px-10 pt-5 flex gap-4 items-start" id="market-results">
+      <div className="w-full min-w-0 px-0 pt-5 flex gap-0 lg:gap-4 items-start" id="market-results">
         {/* Left floating ad rail - its own column, never overlapping
             the search/filter/grid content next to it. */}
         <div className="hidden 2xl:block shrink-0 w-16"><FloatingAdRail placement="left_rail" /></div>
 
-        <div className="w-full flex-1 min-w-0">
+        <div className="w-full flex-1 min-w-0 px-3 sm:px-5 lg:px-8 2xl:px-10">
         {/* 4. FILTER SUMMARY CHIPS */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -790,7 +790,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <span className="text-[11px] font-semibold text-slate-400">{selectedCounty}</span>
               </div>
               <h2 className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-[#0B1D3A]">
-                <span>Vehicle Inventory</span>
+                Vehicle Inventory
                 <span className="inline-flex items-center rounded-full bg-[#EAF4FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#0F6ED8]">
                   {serverTotal.toLocaleString()} vehicle{serverTotal === 1 ? '' : 's'}
                 </span>
@@ -823,7 +823,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   aria-label="Sort inventory"
                   className="min-w-[145px] bg-transparent text-xs font-bold text-[#0B1D3A] outline-none"
                 >
-                  <option value="newest">Newest first</option>
+                  <option value="newest">Newest First</option>
                   <option value="price-asc">Price: low to high</option>
                   <option value="price-desc">Price: high to low</option>
                   <option value="mileage">Lowest mileage</option>
@@ -1036,7 +1036,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           {/* RESULTS */}
           <div className="min-h-[400px]">
             {isLoading ? (
-              <SkeletonGrid count={pageSize} columns={gridColumns} />
+              <SkeletonGrid count={pageSize} />
             ) : (loadError || serverError) ? (
               <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
