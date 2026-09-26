@@ -200,6 +200,7 @@ initOpenTelemetry();
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || "0.0.0.0";
 const NODE_ENV = process.env.NODE_ENV || "production";
 const IS_DEVELOPMENT = NODE_ENV === "development";
 const IS_TEST = NODE_ENV === "test";
@@ -214,7 +215,8 @@ const parseOriginHostname = (origin) => {
 const FRONTEND_HOSTNAME = parseOriginHostname(FRONTEND);
 
 // ─── POSTHOG ──────────────────────────────────────────────────
-await initPostHog();
+// PostHog is optional. It is initialized after the HTTP listener binds so
+// telemetry setup can never delay the liveness contract.
 
 // ─── TRUST PROXY ──────────────────────────────────────────────
 app.set("trust proxy", 1);
@@ -274,6 +276,30 @@ app.use((req, res, next) => {
 });
 
 app.use(extraHeaders());
+
+// ─── FAST HEALTH PROBES ────────────────────────────────────────
+// Register liveness/readiness health endpoints before session, CSRF,
+// body parsing, Redis-backed session persistence, and other request
+// middleware. Probes must remain reachable even when optional runtime
+// dependencies are degraded or unavailable.
+registerHealthRoutes(app);
+
+// ─── ISOLATED DEGRADED INVENTORY CONTRACT ────────────────────
+// Local certification intentionally runs without Supabase/Redis. Keep the
+// canonical public inventory failure response ahead of optional middleware
+// so missing infrastructure cannot turn a controlled 503 into a timeout.
+app.use("/api/cars", (req, res, next) => {
+  if (req.method === "GET" && req.path === "/" && !isSupabaseConnected()) {
+    return res.status(503).json({
+      success: false,
+      code: "DATABASE_UNAVAILABLE",
+      message: "Marketplace data is temporarily unavailable because the database is not configured.",
+      data: [],
+      cars: [],
+    });
+  }
+  next();
+});
 
 // ─── REQUEST LOGGER (assigns requestId to every request) ──────
 app.use(requestLogger);
@@ -437,8 +463,7 @@ app.use(paginationCap()); // Cap ?limit and ?page params
 // ─── SLI CAPTURE (per-request latency, status, error tracking) ──
 app.use(sliMiddleware);
 
-// ─── HEALTH CHECKS (before other routes, no auth) ────────────
-registerHealthRoutes(app);
+// Health probes are registered above the request/session middleware stack.
 
 // ─── METRICS (Issue #7: time-windowed to prevent memory leak) ──
 const metrics = { requests: 0, windowStart: Date.now(), startedAt: Date.now() };
@@ -968,18 +993,24 @@ const bootstrap = async () => {
     console.log("🔧 Starting bootstrap process...");
     validateEnv();
     console.log("✅ Environment validated");
-    const databaseConnected = connectDB();
-    console.log(databaseConnected ? "✅ Database connected" : "ℹ️ Database unavailable in local development");
+    // Bind the HTTP listener before optional database/telemetry/cache/background initialization.
+    // This keeps /health/live reachable even if a non-authoritative integration stalls.
 
-    await initCache();
-
-    // Start listening BEFORE auto-seed so Render detects the open port
-    try {
-      console.log("🚀 Starting server on port", PORT);
-      server.listen(PORT, async () => {
+    // Liveness must remain available even if non-authoritative infrastructure
+    // initialization is slow or degraded.
+    await new Promise((resolve, reject) => {
+      const onError = (listenErr) => {
+        server.off("listening", onListening);
+        logError("Failed to start server", listenErr);
+        console.log("❌ Failed to start server:", listenErr);
+        reject(listenErr);
+      };
+      const onListening = () => {
+        server.off("error", onError);
         console.log("✅ Server listening callback triggered");
         logInfo("Kayad API started", {
-          url: `http://localhost:${PORT}`,
+          url: `http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`,
+          host: HOST,
           env: NODE_ENV,
           cors: FRONTEND,
           routes: "16 + v1 (versioned)",
@@ -991,18 +1022,35 @@ const bootstrap = async () => {
           backup: process.env.BACKUP_ENABLED === "true" ? "enabled" : "disabled",
           cardPayment: process.env.CARD_PAYMENT_ENABLED === "true" ? "enabled" : "disabled",
         });
+        resolve();
+      };
+      server.once("error", onError);
+      server.once("listening", onListening);
+      console.log("🚀 Starting server on", `${HOST}:${PORT}`);
+      server.listen(PORT, HOST);
+    });
 
-        if (process.env.SENTRY_DSN) {
-          await triggerAlert("Server Started", `KAYAD backend server started successfully on port ${PORT}`, ALERT_LEVELS.LOW, { port: PORT, host: "localhost", environment: NODE_ENV });
-        }
-
-        await startBackgroundServices(io);
-      });
-    } catch (listenErr) {
-      logError("Failed to start server", listenErr);
-      console.log("❌ Failed to start server:", listenErr);
-      process.exit(1);
+    try {
+      await initPostHog();
+    } catch (err) {
+      logWarn("PostHog initialization skipped", { error: err?.message });
     }
+
+    const databaseConnected = connectDB();
+    console.log(databaseConnected ? "✅ Database connected" : "ℹ️ Database unavailable in local development");
+
+    await initCache();
+
+    // The isolated runtime validator certifies HTTP/API behavior without
+    // external infrastructure. Do not start production background jobs in
+    // that mode: they are non-authoritative for the API contract and can
+    // consume the same event loop while the certification probe is running.
+    if (process.env.KAYAD_ISOLATED_RUNTIME === "true") {
+      console.log("ℹ️ KAYAD isolated runtime: background services disabled for certification");
+      return;
+    }
+
+    await startBackgroundServices(io);
   } catch (err) {
     logError("Bootstrap failed", err);
     process.exit(1);

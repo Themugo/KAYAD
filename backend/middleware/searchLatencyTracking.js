@@ -7,7 +7,7 @@
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 
 // =============================
-// 📊 LATENCY TRACKING STORAGE
+// LATENCY
 // =============================
 
 const latencyMetrics = {
@@ -19,7 +19,7 @@ const latencyMetrics = {
 const MAX_METRICS = 1000; // Keep last 1000 metrics per search type
 
 // =============================
-// 📊 CALCULATE PERCENTILES
+// CALCULATE
 // =============================
 
 const calculatePercentile = (arr, percentile) => {
@@ -30,7 +30,7 @@ const calculatePercentile = (arr, percentile) => {
 };
 
 // =============================
-// 📊 TRACK LATENCY MIDDLEWARE
+// TRACK
 // =============================
 
 export const trackSearchLatency = (searchType = "general") => {
@@ -56,7 +56,7 @@ export const trackSearchLatency = (searchType = "general") => {
       }
 
       // Add latency to response (for debugging)
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "development" && data && typeof data === "object" && !Array.isArray(data)) {
         data.searchLatency = latency;
       }
 
@@ -79,7 +79,7 @@ export const trackSearchLatency = (searchType = "general") => {
 };
 
 // =============================
-// 📊 GET LATENCY METRICS
+// GET
 // =============================
 
 export const getLatencyMetrics = (searchType) => {
@@ -111,7 +111,7 @@ export const getLatencyMetrics = (searchType) => {
 };
 
 // =============================
-// 📊 GET ALL LATENCY METRICS
+// GET
 // =============================
 
 export const getAllLatencyMetrics = () => {
@@ -123,7 +123,7 @@ export const getAllLatencyMetrics = () => {
 };
 
 // =============================
-// 📊 RESET LATENCY METRICS
+// RESET
 // =============================
 
 export const resetLatencyMetrics = (searchType) => {
@@ -137,7 +137,7 @@ export const resetLatencyMetrics = (searchType) => {
 };
 
 // =============================
-// 📊 PRE-CONFIGURED LATENCY TRACKING MIDDLEWARE
+// PRE-CONFIGURED
 // =============================
 
 export const trackVehicleSearchLatency = trackSearchLatency("vehicleSearch");

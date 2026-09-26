@@ -27,7 +27,7 @@ import {
 } from "../controllers/carController.js";
 
 import { findAll, findById, findOne, create, update, remove, paginate } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
+import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
 import { closeAuction } from "../services/auctionClose.service.js";
 import { startAuction } from "../services/auctionLifecycle.service.js";
 import { getVehicleValuation } from "../services/vehicleValuation.service.js";
@@ -148,7 +148,33 @@ router.get(
 // exists in this file that would otherwise capture "/my-listings".
 router.get("/my-listings", protect, asyncHandler(getMyListings));
 
-router.get("/", validateQuery(carListQuerySchema), validateResponse(carListResponseSchema), cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
+const requireCarsDatabase = (req, res, next) => {
+  // The public inventory endpoint is database-backed. In intentionally
+  // degraded/local mode, terminate here before optional cache/analytics
+  // middleware can touch external infrastructure. Production behavior is
+  // unchanged because a configured Supabase connection falls through.
+  if (!isSupabaseConnected()) {
+    return res.status(503).json({
+      success: false,
+      code: "DATABASE_UNAVAILABLE",
+      message: "Marketplace data is temporarily unavailable because the database is not configured.",
+      data: [],
+      cars: [],
+    });
+  }
+  next();
+};
+
+router.get(
+  "/",
+  requireCarsDatabase,
+  validateQuery(carListQuerySchema),
+  validateResponse(carListResponseSchema),
+  cacheVehicleSearch,
+  trackVehicleSearchLatency,
+  trackCarSearch,
+  asyncHandler(getCars),
+);
 
 // 🔎 GET SINGLE CAR
 /**

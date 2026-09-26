@@ -8,12 +8,12 @@ import { trackSearch } from "../services/searchInsightsService.js";
 import { logInfo, logError } from "../utils/logger.js";
 
 // =============================
-// 🔍 EXTRACT SEARCH FILTERS
+// EXTRACT
 // =============================
 
 export const extractSearchFilters = (req) => {
-  const query = req.query;
-  const body = req.body;
+  const query = req.query || {};
+  const body = req.body || {};
 
   // Extract filters from query or body
   const filters = {
@@ -55,7 +55,7 @@ export const extractSearchFilters = (req) => {
 };
 
 // =============================
-// 🔤 NORMALIZE SEARCH TERM
+// NORMALIZE
 // =============================
 
 export const normalizeSearchTerm = (term) => {
@@ -64,11 +64,11 @@ export const normalizeSearchTerm = (term) => {
 };
 
 // =============================
-// 🔍 TRACK SEARCH MIDDLEWARE
+// TRACK
 // =============================
 
 export const trackSearchMiddleware = (options = {}) => {
-  return async (req, res, next) => {
+  return (req, res, next) => {
     // Store original json method
     const originalJson = res.json.bind(res);
 
@@ -77,7 +77,7 @@ export const trackSearchMiddleware = (options = {}) => {
       // Track search after response is sent
       process.nextTick(async () => {
         try {
-          const searchTerm = req.query.keyword || req.body.keyword || "";
+          const searchTerm = req.query?.keyword || req.body?.keyword || "";
           const filters = extractSearchFilters(req);
           const resultCount = data?.data?.length || data?.cars?.length || data?.results?.length || 0;
 
@@ -109,7 +109,7 @@ export const trackSearchMiddleware = (options = {}) => {
 };
 
 // =============================
-// 🔍 TRACK CAR SEARCH MIDDLEWARE
+// TRACK
 // =============================
 
 export const trackCarSearch = trackSearchMiddleware({
@@ -118,7 +118,7 @@ export const trackCarSearch = trackSearchMiddleware({
 });
 
 // =============================
-// 🔍 TRACK AUCTION SEARCH MIDDLEWARE
+// TRACK
 // =============================
 
 export const trackAuctionSearch = trackSearchMiddleware({
@@ -127,7 +127,7 @@ export const trackAuctionSearch = trackSearchMiddleware({
 });
 
 // =============================
-// 🔍 TRACK ADVANCED SEARCH MIDDLEWARE
+// TRACK
 // =============================
 
 export const trackAdvancedSearch = trackSearchMiddleware({
@@ -136,7 +136,7 @@ export const trackAdvancedSearch = trackSearchMiddleware({
 });
 
 // =============================
-// 🔍 TRACK SAVED SEARCH MIDDLEWARE
+// TRACK
 // =============================
 
 export const trackSavedSearch = trackSearchMiddleware({

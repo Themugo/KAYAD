@@ -21,8 +21,8 @@ vi.mock('@sentry/react', () => ({
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...p }) => React.createElement('div', p, children),
-    button: ({ children, ...p }) => React.createElement('button', p, children),
+    div: ({ children, whileHover, whileTap, whileFocus, whileDrag, onHoverStart, onHoverEnd, transition, variants, initial, animate, exit, layout, layoutId, ...p }) => React.createElement('div', p, children),
+    button: ({ children, whileHover, whileTap, whileFocus, whileDrag, onHoverStart, onHoverEnd, transition, variants, initial, animate, exit, layout, layoutId, ...p }) => React.createElement('button', p, children),
     span: ({ children, ...p }) => React.createElement('span', p, children),
     img: (p) => React.createElement('img', p),
     section: ({ children, ...p }) => React.createElement('section', p, children),

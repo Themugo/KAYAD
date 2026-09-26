@@ -113,27 +113,40 @@ export const cacheDelPattern = async (pattern) => {
 };
 
 export const cacheMiddleware = (ttlSeconds = 60, keyFn = null) => {
-  return async (req, res, next) => {
+  return (req, res, next) => {
     if (req.headers.authorization) return next();
 
     const key = keyFn ? keyFn(req) : `cache:${req.method}:${req.originalUrl}`;
 
-    const cached = await cacheGet(key);
-    if (cached) {
-      res.setHeader("X-Cache", "HIT");
-      return res.json(cached);
-    }
+    // Cache infrastructure is an optimization, never a request dependency.
+    // Bound the lookup so Redis/network degradation cannot stall an API route.
+    const lookup = Promise.race([
+      cacheGet(key),
+      new Promise((resolve) => {
+        const timer = setTimeout(() => resolve(null), 250);
+        timer.unref?.();
+      }),
+    ]).catch(() => null);
 
-    const origJson = res.json.bind(res);
-    res.json = async (data) => {
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        await cacheSet(key, data, ttlSeconds);
+    lookup.then((cached) => {
+      if (cached !== null && cached !== undefined) {
+        res.setHeader("X-Cache", "HIT");
+        res.json(cached);
+        return;
       }
-      res.setHeader("X-Cache", "MISS");
-      return origJson(data);
-    };
 
-    next();
+      const origJson = res.json.bind(res);
+      res.json = (data) => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          // Cache writes must never become part of the HTTP response lifecycle.
+          void cacheSet(key, data, ttlSeconds);
+        }
+        res.setHeader("X-Cache", "MISS");
+        return origJson(data);
+      };
+
+      next();
+    });
   };
 };
 

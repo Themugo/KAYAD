@@ -1,4 +1,4 @@
-import { getSupabase } from "../utils/supabase.js";
+import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
 
 let cachedSettings = null;
 let cachedAt = 0;
@@ -23,6 +23,11 @@ const loadSystemStatus = async () => {
 };
 
 export const checkSystemStatus = async (req, res, next) => {
+  // In intentionally degraded/local mode there is no control-plane database
+  // to consult. Fail open here; database-backed routes retain their own
+  // explicit degraded response contract instead of waiting on this middleware.
+  if (!isSupabaseConnected()) return next();
+
   try {
     const now = Date.now();
     if (!cachedSettings || now - cachedAt > SETTINGS_TTL_MS) {

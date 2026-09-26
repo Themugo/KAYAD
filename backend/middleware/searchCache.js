@@ -7,7 +7,7 @@
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 
 // =============================
-// 📊 SEARCH CACHE TTL CONSTANTS
+// SEARCH
 // =============================
 
 export const SEARCH_CACHE_TTL = {
@@ -31,7 +31,7 @@ export const SEARCH_CACHE_TTL = {
 };
 
 // =============================
-// 📊 SEARCH CACHE KEY GENERATORS
+// SEARCH
 // =============================
 
 export const generateSearchCacheKey = (req, prefix = "search") => {
@@ -76,7 +76,7 @@ export const generateAuctionSearchKey = (searchParams) => {
 };
 
 // =============================
-// 📊 SEARCH CACHE MIDDLEWARE FACTORY
+// SEARCH
 // =============================
 
 export const cacheSearch = (ttl, keyPrefix = "search") => {
@@ -92,7 +92,7 @@ export const cacheSearch = (ttl, keyPrefix = "search") => {
 };
 
 // =============================
-// 📊 PRE-CONFIGURED SEARCH CACHE MIDDLEWARE
+// PRE-CONFIGURED
 // =============================
 
 export const cacheVehicleSearch = cacheSearch(SEARCH_CACHE_TTL.VEHICLE_SEARCH, "vehicle_search");
@@ -106,7 +106,7 @@ export const cacheSearchAnalytics = cacheSearch(SEARCH_CACHE_TTL.SEARCH_ANALYTIC
 export const cacheSearchSummary = cacheSearch(SEARCH_CACHE_TTL.SEARCH_SUMMARY, "search_summary");
 
 // =============================
-// 📊 SEARCH CACHE INVALIDATION
+// SEARCH
 // =============================
 
 export const invalidateSearchCache = async (pattern) => {

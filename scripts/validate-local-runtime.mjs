@@ -4,8 +4,20 @@ import path from "node:path";
 
 const root = process.cwd();
 const backendDir = path.join(root, "backend");
-const env = { ...process.env, NODE_ENV: "development", PORT: "5099", LOG_SILENT: "true" };
-for (const key of ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY"]) delete env[key];
+const env = { ...process.env, NODE_ENV: "development", PORT: "5099", HOST: "127.0.0.1", LOG_SILENT: "true", DISABLE_REDIS: "true", KAYAD_ISOLATED_RUNTIME: "true" };
+// Keep local degraded-mode certification deterministic and independent of
+// developer-machine infrastructure. Production/live certification covers
+// real Supabase/Redis integrations separately.
+// Use empty sentinels rather than deleting these keys. bootstrap.js loads .env
+// before importing the server; an absent key would therefore be repopulated from
+// a developer's machine and make this supposedly isolated certification depend on
+// local infrastructure. dotenv does not overwrite explicitly supplied values.
+for (const key of [
+  "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY",
+  "VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY",
+  "REDIS_URL", "REDIS_URI", "REDIS_HOST", "REDIS_PORT",
+  "POSTHOG_API_KEY", "SENTRY_DSN",
+]) env[key] = "";
 
 const child = spawn(process.execPath, ["bootstrap.js"], { cwd: backendDir, env, stdio: ["ignore", "pipe", "pipe"] });
 let output = "";
@@ -14,7 +26,14 @@ child.stderr.on("data", d => { output += d.toString(); });
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const get = pathName => new Promise((resolve, reject) => {
-  const req = request({ hostname: "127.0.0.1", port: 5099, path: pathName, method: "GET", timeout: 3000 }, res => {
+  const req = request({
+    hostname: "127.0.0.1",
+    port: 5099,
+    path: pathName,
+    method: "GET",
+    timeout: 3000,
+    headers: { Connection: "close" },
+  }, res => {
     let body = "";
     res.setEncoding("utf8");
     res.on("data", chunk => { body += chunk; });
@@ -30,15 +49,22 @@ try {
     try {
       const live = await get("/health/live");
       if (live.status === 200) break;
-    } catch {}
+    } catch (err) {
+      if (child.exitCode !== null) throw new Error(`backend exited early (${child.exitCode})\n${output}`);
+      if (i === 119) throw new Error(`local runtime never became reachable: ${err.message}\n${output}`);
+    }
     await sleep(250);
-    if (child.exitCode !== null) throw new Error(`backend exited early (${child.exitCode})\n${output}`);
   }
 
   const live = await get("/health/live");
   const health = await get("/health");
   const ready = await get("/health/ready");
-  const cars = await get("/api/cars");
+  let cars;
+  try {
+    cars = await get("/api/cars");
+  } catch (err) {
+    throw new Error(`cars endpoint failed: ${err.message}\n${output}`);
+  }
 
   const parsedHealth = JSON.parse(health.body);
   const parsedReady = JSON.parse(ready.body);
