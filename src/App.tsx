@@ -325,7 +325,13 @@ function AppInner() {
       />
 
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main
+        className={
+          activeNav === 'marketplace' || activeNav === 'saved'
+            ? 'flex-1 w-full px-0 py-0 space-y-0'
+            : 'flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6'
+        }
+      >
         <Suspense fallback={
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">

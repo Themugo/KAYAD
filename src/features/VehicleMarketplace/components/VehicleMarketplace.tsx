@@ -1036,7 +1036,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           {/* RESULTS */}
           <div className="min-h-[400px]">
             {isLoading ? (
-              <SkeletonGrid count={pageSize} />
+              <SkeletonGrid count={pageSize} columns={gridColumns} />
             ) : (loadError || serverError) ? (
               <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
