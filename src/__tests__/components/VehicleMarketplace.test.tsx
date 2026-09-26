@@ -462,4 +462,3 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
     });
   });
 });
-

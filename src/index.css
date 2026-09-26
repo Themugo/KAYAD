@@ -105,22 +105,41 @@
 }
 
 /* KAYAD marketplace inventory grid contract.
- * The selected 3/4/5 desktop layout is controlled by a CSS variable rather
- * than dynamically generated utility classes. This makes the visitor toolbar
- * deterministic across production builds while preserving mobile fallbacks. */
+ * The 3/4/5 selector controls the desktop target, while the grid itself
+ * responds to the actual available result-column width. Container queries
+ * are used because the inventory can sit beside the mandatory filter sidebar;
+ * viewport-only breakpoints can make five cards unusably narrow. */
 .kayad-inventory-grid {
+  --kayad-grid-columns: 5;
+  container-type: inline-size;
+  container-name: kayad-inventory;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
 }
 
-@media (min-width: 640px) {
+@container kayad-inventory (min-width: 520px) {
   .kayad-inventory-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 768px) {
-  .kayad-inventory-grid {
-    grid-template-columns: repeat(var(--kayad-grid-columns, 5), minmax(0, 1fr));
+@container kayad-inventory (min-width: 700px) {
+  .kayad-inventory-grid[data-columns="3"],
+  .kayad-inventory-grid[data-columns="4"],
+  .kayad-inventory-grid[data-columns="5"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container kayad-inventory (min-width: 900px) {
+  .kayad-inventory-grid[data-columns="4"],
+  .kayad-inventory-grid[data-columns="5"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@container kayad-inventory (min-width: 1120px) {
+  .kayad-inventory-grid[data-columns="5"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
