@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History, LayoutGrid, List, PanelLeftOpen, PanelLeftClose } from 'lucide-react';
+import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History, LayoutGrid, List, PanelLeftOpen } from 'lucide-react';
 import { HomePageConfig, ACCENT_THEME_OPTIONS } from '../hooks/useHomePageConfig';
 import {
   EscrowRulesConfig,
@@ -192,22 +192,16 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, showSidebar: !prev.inventoryLayout.showSidebar } }))}
-              className={`w-full flex items-center justify-between p-3 rounded-xl border transition-colors ${config.inventoryLayout.showSidebar ? 'border-[#1684FF]/30 bg-[#1684FF]/5' : 'border-slate-200'}`}
-            >
+            <div className="w-full flex items-center justify-between p-3 rounded-xl border border-[#1684FF]/20 bg-[#1684FF]/5">
               <span className="flex items-center gap-2">
-                {config.inventoryLayout.showSidebar ? <PanelLeftOpen className="w-4 h-4 text-[#1684FF]" /> : <PanelLeftClose className="w-4 h-4 text-slate-400" />}
+                <PanelLeftOpen className="w-4 h-4 text-[#1684FF]" />
                 <span className="text-left">
                   <span className="block text-xs font-bold text-slate-700">Desktop filter sidebar</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">{config.inventoryLayout.showSidebar ? 'Visible by default' : 'Collapsed by default for more inventory width'}</span>
+                  <span className="block text-[10px] text-slate-500 mt-0.5">Required marketplace panel · always visible on desktop</span>
                 </span>
               </span>
-              <span className={`text-[10px] font-black px-2 py-1 rounded-full ${config.inventoryLayout.showSidebar ? 'bg-[#1684FF] text-white' : 'bg-slate-100 text-slate-500'}`}>
-                {config.inventoryLayout.showSidebar ? 'ON' : 'OFF'}
-              </span>
-            </button>
+              <span className="text-[10px] font-black px-2 py-1 rounded-full bg-[#1684FF] text-white">ON</span>
+            </div>
           </div>
 
           {/* Escrow rules & activation */}

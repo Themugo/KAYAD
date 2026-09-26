@@ -93,7 +93,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       const inventoryGrid = screen.getByTestId('inventory-grid');
       expect(inventoryGrid.getAttribute('data-view-mode')).toBe('grid');
       expect(inventoryGrid.getAttribute('data-columns')).toBe('5');
-      expect(inventoryGrid.className).toMatch(/2xl:grid-cols-5/);
+      expect(inventoryGrid.className).toMatch(/lg:grid-cols-5/);
     }, { timeout: 2000 });
   });
 
@@ -115,6 +115,18 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     render(<VehicleMarketplace {...baseProps} />);
     const button24 = screen.getByText('24');
     expect(button24.className).toMatch(/bg-\[#0B1D3A\]/);
+  });
+
+  it('changes the live inventory grid between 3, 4 and 5 columns', async () => {
+    render(<VehicleMarketplace {...baseProps} />);
+    const grid = await screen.findByTestId('inventory-grid');
+    for (const columns of [3, 4, 5]) {
+      fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
+      await waitFor(() => {
+        expect(grid.getAttribute('data-columns')).toBe(String(columns));
+        expect(grid.className).toContain(`lg:grid-cols-${columns}`);
+      });
+    }
   });
 });
 
@@ -150,36 +162,27 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
   };
 
   // The inventory defaults to an edge-to-edge presentation so the
-  // catalogue can use the available desktop width. The existing sidebar
-  // remains an optional presentation control.
-  it('keeps the inventory full-width by default and reveals the sidebar only when toggled', async () => {
+  // The filter panel is a required desktop element; it is visible by default.
+  it('keeps the inventory full-width and shows the required sidebar by default', async () => {
     const { container } = render(<VehicleMarketplace {...baseProps} />);
     await waitFor(() => {
       const selects = container.querySelectorAll('select');
       expect(selects.length).toBeGreaterThan(0);
     });
 
-    // The new default is the edge-to-edge inventory layout: the desktop
-    // sidebar is collapsed so the catalog can use the available width.
-    const makeSelects = Array.from(container.querySelectorAll('select')).filter((s) =>
-      Array.from(s.options).some((o) => o.textContent === 'All Makes')
-    );
-    expect(makeSelects.length).toBe(1);
-    expect(makeSelects[0].className).not.toMatch(/lg:hidden/);
+    // The catalog remains edge-to-edge while the required desktop sidebar is visible.
+    const sidebarHeading = screen.getByText('Refine inventory');
+    const sidebar = sidebarHeading.closest('aside');
+    expect(sidebar).toBeTruthy();
+    const sidebarMakeSelect = sidebar?.querySelector('select');
+    expect(sidebarMakeSelect).toBeTruthy();
+    expect(Array.from(sidebarMakeSelect?.options ?? []).some((o) => o.textContent === 'All Makes')).toBe(true);
+    expect(sidebarMakeSelect?.className).not.toMatch(/lg:hidden/);
 
-    // The existing sidebar toggle remains a presentation-only control.
-    fireEvent.click(screen.getByTitle('Toggle filter sidebar'));
-    await waitFor(() => {
-      const selectsAfter = Array.from(container.querySelectorAll('select')).filter((s) =>
-        Array.from(s.options).some((o) => o.textContent === 'All Makes')
-      );
-      expect(selectsAfter.length).toBe(2);
-    });
 
-    const topCardMakeSelect = Array.from(container.querySelectorAll('select')).find((s) =>
-      Array.from(s.options).some((o) => o.textContent === 'All Makes') && s.className.includes('lg:hidden')
-    );
-    expect(topCardMakeSelect).toBeTruthy();
+    expect(sidebarHeading).toBeTruthy();
+    expect(screen.getByText('Reset all filters')).toBeTruthy();
+    expect(screen.queryByTitle('Toggle filter sidebar')).toBeNull();
   });
 
 });
@@ -433,7 +436,8 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
 
     fireEvent.click(escrowToggle);
     await waitFor(() => {
-      expect(screen.getByText('ON')).toBeTruthy();
+      expect(escrowToggle).toHaveTextContent('ON');
+      expect(escrowToggle).not.toHaveTextContent('OFF');
     });
 
     // Confirms the audit log viewer, once opened, shows a real entry

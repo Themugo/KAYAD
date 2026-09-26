@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
 import FloatingAdRail from '../../../components/FloatingAdRail';
@@ -123,7 +123,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [sortBy, setSortBy] = useState<
     'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'most-viewed' | 'auction-ending'
   >('newest');
-  const [showDesktopSidebar, setShowDesktopSidebar] = useState<boolean>(homeConfig.inventoryLayout.showSidebar);
+  // The desktop filter panel is a core marketplace surface and remains visible.
+  const showDesktopSidebar = true;
   const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
 
   // Admin presentation settings are the default layout. Visitor toolbar
@@ -133,25 +134,24 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   useEffect(() => {
     setViewMode(homeConfig.inventoryLayout.viewMode);
     setGridColumns(homeConfig.inventoryLayout.columns);
-    setShowDesktopSidebar(homeConfig.inventoryLayout.showSidebar);
   }, [homeConfig.inventoryLayout.viewMode, homeConfig.inventoryLayout.columns, homeConfig.inventoryLayout.showSidebar]);
 
   const inventoryDensity = {
     compact: {
-      gap: 'gap-3', image: 'h-32 sm:h-36', body: 'p-3', title: 'text-[13px]', price: 'text-[15px]', meta: 'text-[10px]', detail: 'py-2',
+      gap: 'gap-3', image: 'h-32 sm:h-36', body: 'p-3.5', title: 'text-sm', price: 'text-base', meta: 'text-[11px]', detail: 'py-2.5',
     },
     standard: {
-      gap: 'gap-4', image: 'h-36 sm:h-40', body: 'p-3.5', title: 'text-sm', price: 'text-base', meta: 'text-[11px]', detail: 'py-2.5',
+      gap: 'gap-4', image: 'h-36 sm:h-40', body: 'p-4', title: 'text-[15px]', price: 'text-lg', meta: 'text-xs', detail: 'py-3',
     },
     comfortable: {
-      gap: 'gap-5', image: 'h-44 sm:h-48', body: 'p-4', title: 'text-[15px]', price: 'text-lg', meta: 'text-xs', detail: 'py-3',
+      gap: 'gap-5', image: 'h-44 sm:h-48', body: 'p-5', title: 'text-base', price: 'text-xl', meta: 'text-[13px]', detail: 'py-3.5',
     },
   }[homeConfig.inventoryLayout.cardDensity];
 
   const gridColumnClasses: Record<3 | 4 | 5, string> = {
-    3: 'xl:grid-cols-3',
-    4: 'xl:grid-cols-4',
-    5: 'xl:grid-cols-4 2xl:grid-cols-5',
+    3: 'lg:grid-cols-3',
+    4: 'lg:grid-cols-4',
+    5: 'lg:grid-cols-5',
   };
 
   // Toast / Notification State
@@ -554,7 +554,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [paginatedVehicles, homeConfig.sectionVisibility.sponsorCardsInGrid, midGridAds]);
 
   return (
-    <div className="w-full min-w-0 space-y-0 pb-16">
+    <div className="kayad-homepage w-full min-w-0 space-y-0 pb-16">
       {/* TOAST NOTIFICATION FLOATER */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 bg-[#0B1D3A] text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
@@ -868,14 +868,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </button>
               </div>
 
-              <button
-                onClick={() => setShowDesktopSidebar((s) => !s)}
-                className="hidden lg:flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 hover:border-[#B9D8F8] hover:bg-[#F8FBFF]"
-                title="Toggle filter sidebar"
-              >
-                {showDesktopSidebar ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
-                <span className="hidden 2xl:inline">{showDesktopSidebar ? 'Hide filters' : 'Show filters'}</span>
-              </button>
+
 
               <button
                 onClick={() => setShowMobileFilterDrawer(true)}
@@ -1134,7 +1127,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <div className={`${inventoryDensity.body} flex-1 flex flex-col min-w-0`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="text-[9px] font-black uppercase tracking-[0.13em] text-[#1684FF] mb-1">{v.isAuction ? 'Live auction' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#1684FF] mb-1">{v.isAuction ? 'Live auction' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
                             <h4 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-[#0B1D3A] line-clamp-2`}>
                               {v.year} {v.make} {v.model}
                             </h4>
@@ -1153,12 +1146,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                         <div className={`mt-3 rounded-xl border ${v.inspectionPassed ? 'border-emerald-100 bg-emerald-50/70' : 'border-slate-200 bg-[#F8FBFF]'} px-2.5 ${inventoryDensity.detail}`}>
                           {v.inspectionPassed ? (
-                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-700">
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
                               <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                               <span>Inspection report available</span>
                             </div>
                           ) : (
-                            <div className="flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
+                            <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-slate-500">
                               <span>No inspection report yet</span>
                               <button onClick={() => onNavigate('inspections')} className="text-[#1684FF] font-bold hover:text-[#0F6ED8] whitespace-nowrap">Request →</button>
                             </div>
@@ -1167,7 +1160,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                         <button
                           onClick={() => handleVehicleSelect(v)}
-                          className="mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#B9D8F8] bg-white hover:bg-[#EAF4FF] hover:border-[#1684FF]/40 py-2.5 text-[11px] font-extrabold text-[#0F6ED8] transition-colors"
+                          className="mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#B9D8F8] bg-white hover:bg-[#EAF4FF] hover:border-[#1684FF]/40 py-2.5 text-xs font-extrabold text-[#0F6ED8] transition-colors"
                         >
                           View vehicle details <ChevronRight className="w-3.5 h-3.5" />
                         </button>

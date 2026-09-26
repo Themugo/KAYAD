@@ -53,3 +53,53 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+
+/* KAYAD homepage typography system: larger, clearer, consistent type across
+   hero, search, inventory controls, filters, vehicle cards and supporting cards. */
+.kayad-homepage {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+}
+.kayad-homepage h1,
+.kayad-homepage h2,
+.kayad-homepage h3,
+.kayad-homepage h4,
+.kayad-homepage h5,
+.kayad-homepage h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+.kayad-homepage p {
+  line-height: 1.55;
+}
+.kayad-homepage input,
+.kayad-homepage select,
+.kayad-homepage button {
+  font-family: var(--font-sans);
+}
+.kayad-homepage input,
+.kayad-homepage select {
+  font-size: 13px;
+}
+.kayad-homepage article h3 {
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+.kayad-homepage article p {
+  line-height: 1.45;
+}
+.kayad-homepage [data-testid="inventory-grid"] article {
+  min-width: 0;
+}
+.kayad-homepage [data-testid="inventory-grid"] article .text-\[9px\] {
+  font-size: 10px;
+}
+@media (min-width: 1024px) {
+  .kayad-homepage {
+    font-size: 15.5px;
+  }
+}
