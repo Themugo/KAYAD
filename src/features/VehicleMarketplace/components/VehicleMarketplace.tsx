@@ -494,23 +494,57 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   })), [homeConfig.heroFallbackVehicles]);
   const heroSourceVehicles = heroVehicles.length ? heroVehicles : heroFallbackVehicles;
   const [heroPairIndex, setHeroPairIndex] = useState(0);
+  const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
+  const [heroTransitioning, setHeroTransitioning] = useState(false);
+  const [heroIncomingVisible, setHeroIncomingVisible] = useState(true);
 
   useEffect(() => {
     setHeroPairIndex(0);
+    setHeroPreviousPairIndex(0);
+    setHeroTransitioning(false);
+    setHeroIncomingVisible(true);
   }, [heroSourceVehicles.map((vehicle) => vehicle.id).join('|')]);
+
+  // Change the pair as a single visual state. The previous pair stays mounted
+  // underneath the incoming pair so transparent PNGs never disappear between
+  // frames or expose a half-rendered vehicle while the browser swaps sources.
+  const changeHeroPair = (nextIndex: number) => {
+    const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
+    const normalized = ((nextIndex % pairCount) + pairCount) % pairCount;
+    if (normalized === heroPairIndex || pairCount < 2) return;
+    setHeroPreviousPairIndex(heroPairIndex);
+    setHeroPairIndex(normalized);
+    setHeroIncomingVisible(false);
+    setHeroTransitioning(true);
+  };
+
+  useEffect(() => {
+    if (!heroTransitioning) return;
+    const frame = window.requestAnimationFrame(() => setHeroIncomingVisible(true));
+    const timer = window.setTimeout(() => setHeroTransitioning(false), 720);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [heroTransitioning]);
 
   useEffect(() => {
     if (heroSourceVehicles.length < 2) return;
-    const timer = setInterval(() => {
-      setHeroPairIndex((index) => (index + 1) % Math.max(1, Math.ceil(heroSourceVehicles.length / 2)));
+    const timer = window.setInterval(() => {
+      const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
+      changeHeroPair((heroPairIndex + 1) % pairCount);
     }, 6500);
-    return () => clearInterval(timer);
-  }, [heroSourceVehicles.length]);
+    return () => window.clearInterval(timer);
+  }, [heroSourceVehicles.length, heroPairIndex]);
 
   const heroLeftVehicle = heroSourceVehicles.length ? heroSourceVehicles[(heroPairIndex * 2) % heroSourceVehicles.length] : undefined;
   const heroRightVehicle = heroSourceVehicles.length > 1
     ? heroSourceVehicles[(heroPairIndex * 2 + 1) % heroSourceVehicles.length]
     : heroLeftVehicle;
+  const heroPreviousLeftVehicle = heroSourceVehicles.length ? heroSourceVehicles[(heroPreviousPairIndex * 2) % heroSourceVehicles.length] : undefined;
+  const heroPreviousRightVehicle = heroSourceVehicles.length > 1
+    ? heroSourceVehicles[(heroPreviousPairIndex * 2 + 1) % heroSourceVehicles.length]
+    : heroPreviousLeftVehicle;
 
   const heroVehicleNarration = (vehicle?: Vehicle) => {
     if (!vehicle) return '';
@@ -562,6 +596,18 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (vehicle.id === 'hero-toyota-prado') return '/hero/kayad-prado.png';
     return vehicle.images?.[0] || vehicle.image || '';
   };
+
+  // Warm the complete hero artwork before it is ever displayed. This is
+  // intentionally limited to hero assets so the rest of the marketplace is
+  // untouched.
+  useEffect(() => {
+    const urls = heroSourceVehicles.map(heroImageForVehicle).filter(Boolean);
+    urls.forEach((src) => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = src;
+    });
+  }, [heroSourceVehicles]);
 
   const heroVehicleDetails = (vehicle?: Vehicle) => {
     if (!vehicle) return [];
@@ -711,21 +757,33 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             />
           )}
 
-          <div className="relative mx-auto h-[360px] w-full max-w-[1680px] px-4 sm:h-[390px] sm:px-8 lg:px-10">
+          <div className="relative mx-auto h-[390px] w-full max-w-[1680px] px-4 sm:h-[420px] sm:px-8 lg:px-10">
             <div className="relative h-full">
               {/* Left vehicle artwork */}
               <div className="absolute inset-y-0 left-0 z-10 hidden w-[31%] min-w-[250px] lg:block">
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/4 sm:-translate-x-1/8 lg:translate-x-0">
                   <button type="button" onClick={() => heroLeftVehicle && handleVehicleSelect(heroLeftVehicle)} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6CC8BE]" aria-label={heroLeftVehicle ? `View ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : 'Featured vehicle'}>
-                    {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
-                      <img
-                        key={`hero-left-${heroLeftVehicle.id}`}
-                        src={heroImageForVehicle(heroLeftVehicle)}
-                        alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
-                        className="h-[270px] w-[430px] max-w-none object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] animate-kayad-hero-fade sm:h-[300px] sm:w-[480px] lg:h-[330px] lg:w-[540px]"
-                        loading="eager"
-                      />
-                    )}
+                    <div className="relative h-[300px] w-[500px] max-w-none sm:h-[330px] sm:w-[560px] lg:h-[360px] lg:w-[600px]" aria-live="polite">
+                      {heroPreviousLeftVehicle && heroImageForVehicle(heroPreviousLeftVehicle) && (
+                        <img
+                          src={heroImageForVehicle(heroPreviousLeftVehicle)}
+                          alt=""
+                          aria-hidden="true"
+                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
+                          loading="eager"
+                          decoding="async"
+                        />
+                      )}
+                      {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
+                        <img
+                          src={heroImageForVehicle(heroLeftVehicle)}
+                          alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
+                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
+                          loading="eager"
+                          decoding="async"
+                        />
+                      )}
+                    </div>
                   </button>
                 </div>
                 <div className="absolute left-0 top-14 w-[170px] text-left sm:w-[205px]">
@@ -749,14 +807,34 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center rounded-full bg-[#176B87] px-6 py-3 text-xs font-black text-white shadow-[0_12px_28px_rgba(23,107,135,.28)] transition hover:bg-[#12576D]">Browse Inventory <ChevronRight className="ml-1 h-4 w-4" /></button>
                   <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')} className="inline-flex items-center rounded-full border border-[#0B1D3A]/45 bg-white/10 px-6 py-3 text-xs font-black text-[#0B1D3A] backdrop-blur-sm transition hover:bg-white/25">How It Works <span className="ml-2 text-sm">▶</span></button>
                 </div>
-                {heroSourceVehicles.length > 2 && <div className="mt-6 flex items-center gap-2" aria-label="Featured vehicle slides">{Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => setHeroPairIndex(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-2 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#176B87]' : 'w-2 bg-white/80'}`} />)}</div>}
+                {heroSourceVehicles.length > 2 && <div className="mt-6 flex items-center gap-2" aria-label="Featured vehicle slides">{Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-2 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#176B87]' : 'w-2 bg-white/80'}`} />)}</div>}
               </div>
 
               {/* Right vehicle artwork */}
               <div className="absolute inset-y-0 right-0 z-10 hidden w-[31%] min-w-[250px] lg:block">
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 sm:translate-x-1/8 lg:translate-x-0">
                   <button type="button" onClick={() => heroRightVehicle && handleVehicleSelect(heroRightVehicle)} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6CC8BE]" aria-label={heroRightVehicle ? `View ${heroRightVehicle.make} ${heroRightVehicle.model}` : 'Featured vehicle'}>
-                    {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && <img key={`hero-right-${heroRightVehicle.id}`} src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="h-[270px] w-[430px] max-w-none object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] animate-kayad-hero-fade sm:h-[300px] sm:w-[480px] lg:h-[330px] lg:w-[540px]" loading="eager" />}
+                    <div className="relative h-[300px] w-[500px] max-w-none sm:h-[330px] sm:w-[560px] lg:h-[360px] lg:w-[600px]">
+                      {heroPreviousRightVehicle && heroImageForVehicle(heroPreviousRightVehicle) && (
+                        <img
+                          src={heroImageForVehicle(heroPreviousRightVehicle)}
+                          alt=""
+                          aria-hidden="true"
+                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
+                          loading="eager"
+                          decoding="async"
+                        />
+                      )}
+                      {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
+                        <img
+                          src={heroImageForVehicle(heroRightVehicle)}
+                          alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`}
+                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
+                          loading="eager"
+                          decoding="async"
+                        />
+                      )}
+                    </div>
                   </button>
                 </div>
                 <div className="absolute right-0 top-14 w-[170px] text-right sm:w-[205px]">
@@ -768,8 +846,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               </div>
 
-              <button type="button" onClick={() => setHeroPairIndex((heroPairIndex - 1 + Math.ceil(heroSourceVehicles.length / 2)) % Math.max(1, Math.ceil(heroSourceVehicles.length / 2)))} className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/40 bg-[#0B1D3A]/65 p-3 text-white backdrop-blur-sm transition hover:bg-[#176B87]" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>
-              <button type="button" onClick={() => setHeroPairIndex((heroPairIndex + 1) % Math.max(1, Math.ceil(heroSourceVehicles.length / 2)))} className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/40 bg-[#0B1D3A]/65 p-3 text-white backdrop-blur-sm transition hover:bg-[#176B87]" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>
+              <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/40 bg-[#0B1D3A]/65 p-3 text-white backdrop-blur-sm transition hover:bg-[#176B87]" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>
+              <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/40 bg-[#0B1D3A]/65 p-3 text-white backdrop-blur-sm transition hover:bg-[#176B87]" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>
             </div>
           </div>
         </section>

@@ -213,12 +213,3 @@
   }
 }
 
-@keyframes kayad-hero-fade {
-  0% { opacity: 0; transform: translateY(8px) scale(.985); }
-  18%, 82% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-4px) scale(1.005); }
-}
-
-.animate-kayad-hero-fade {
-  animation: kayad-hero-fade 1.35s cubic-bezier(.22,.61,.36,1) both;
-}
