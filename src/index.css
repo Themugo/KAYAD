@@ -103,3 +103,24 @@
     font-size: 15.5px;
   }
 }
+
+/* KAYAD marketplace inventory grid contract.
+ * The selected 3/4/5 desktop layout is controlled by a CSS variable rather
+ * than dynamically generated utility classes. This makes the visitor toolbar
+ * deterministic across production builds while preserving mobile fallbacks. */
+.kayad-inventory-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 640px) {
+  .kayad-inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .kayad-inventory-grid {
+    grid-template-columns: repeat(var(--kayad-grid-columns, 5), minmax(0, 1fr));
+  }
+}

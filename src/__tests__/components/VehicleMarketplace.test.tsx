@@ -93,7 +93,8 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       const inventoryGrid = screen.getByTestId('inventory-grid');
       expect(inventoryGrid.getAttribute('data-view-mode')).toBe('grid');
       expect(inventoryGrid.getAttribute('data-columns')).toBe('5');
-      expect(inventoryGrid.className).toMatch(/lg:grid-cols-5/);
+      expect(inventoryGrid.className).toContain('kayad-inventory-grid');
+      expect(inventoryGrid.style.getPropertyValue('--kayad-grid-columns')).toBe('5');
     }, { timeout: 2000 });
   });
 
@@ -124,7 +125,8 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
       await waitFor(() => {
         expect(grid.getAttribute('data-columns')).toBe(String(columns));
-        expect(grid.className).toContain(`lg:grid-cols-${columns}`);
+        expect(grid.className).toContain('kayad-inventory-grid');
+        expect(grid.style.getPropertyValue('--kayad-grid-columns')).toBe(String(columns));
       });
     }
   });
@@ -179,7 +181,7 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     expect(Array.from(sidebarMakeSelect?.options ?? []).some((o) => o.textContent === 'All Makes')).toBe(true);
     expect(sidebarMakeSelect?.className).not.toMatch(/lg:hidden/);
 
-
+    
     expect(sidebarHeading).toBeTruthy();
     expect(screen.getByText('Reset all filters')).toBeTruthy();
     expect(screen.queryByTitle('Toggle filter sidebar')).toBeNull();
@@ -460,3 +462,4 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
     });
   });
 });
+

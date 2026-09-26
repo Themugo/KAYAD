@@ -237,6 +237,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 mb-1">Verified Dealers</label>
                   <select
+                    aria-label="Verified dealer escrow requirement"
                     value={escrowConfig.dealerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, dealerRequirement: e.target.value as SellerEscrowRequirement })}
                     className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"
@@ -249,6 +250,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 mb-1">Private Sellers</label>
                   <select
+                    aria-label="Private seller escrow requirement"
                     value={escrowConfig.privateSellerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, privateSellerRequirement: e.target.value as SellerEscrowRequirement })}
                     className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1684FF]"

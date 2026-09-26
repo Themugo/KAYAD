@@ -25,9 +25,9 @@ export default defineConfig({
   // PRODUCTION_READINESS_MATRIX.md ("DB-loop not verified"). They
   // currently fail at setup (no /api backend reachable, plus stale UI
   // contracts), so by default only the executable workflow-certification
-  // suite runs. Set E2E_WITH_BACKEND=1 to run everything once a staging
+  // suites run. Set E2E_WITH_BACKEND=1 to run everything once a staging
   // backend exists.
-  grep: process.env.E2E_WITH_BACKEND ? undefined : /Workflow certification/,
+  grep: process.env.E2E_WITH_BACKEND ? undefined : /Workflow certification|KAYAD marketplace controls/,
 
   // Run tests in files in parallel
   fullyParallel: true,

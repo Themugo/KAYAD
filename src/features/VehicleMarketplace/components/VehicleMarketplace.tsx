@@ -148,11 +148,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     },
   }[homeConfig.inventoryLayout.cardDensity];
 
-  const gridColumnClasses: Record<3 | 4 | 5, string> = {
-    3: 'lg:grid-cols-3',
-    4: 'lg:grid-cols-4',
-    5: 'lg:grid-cols-5',
-  };
+  // The selected desktop column count is rendered through a dedicated CSS
+  // contract instead of dynamically assembled Tailwind grid classes. This
+  // keeps the 3/4/5 control deterministic in production builds and at every
+  // responsive breakpoint, while still allowing the mobile/tablet fallbacks.
 
   // Toast / Notification State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -175,6 +174,18 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverLoading, setServerLoading] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const isLoading = isLoadingReal || serverLoading;
+
+  // Keep filter options stable while the paginated backend result changes.
+  // The current page alone is not a valid source of all selector options;
+  // combine the initial authoritative snapshot with the latest server page
+  // so a query cannot make previously available options disappear.
+  const filterSourceVehicles = useMemo(() => {
+    const byId = new Map<string, Vehicle>();
+    [...vehicles, ...serverVehicles].forEach((vehicle) => {
+      if (vehicle?.id) byId.set(vehicle.id, vehicle);
+    });
+    return Array.from(byId.values());
+  }, [vehicles, serverVehicles]);
 
   const serverQuery = useMemo<GetCarsParams>(() => {
     const query: GetCarsParams = {
@@ -269,41 +280,41 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // Dynamic Filter Options Extracted directly from backend dataset
   const makes = useMemo(() => {
-    const list = Array.from(new Set(serverVehicles.map((v) => v.make).filter(Boolean))).sort();
+    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.make).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [serverVehicles]);
+  }, [filterSourceVehicles]);
 
   const models = useMemo(() => {
     const source = selectedMake === 'All'
-      ? serverVehicles
-      : serverVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
+      ? filterSourceVehicles
+      : filterSourceVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
     const list = Array.from(new Set(source.map((v) => v.model).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [serverVehicles, selectedMake]);
+  }, [filterSourceVehicles, selectedMake]);
 
   const bodyStyles = useMemo(() => {
-    const list = Array.from(new Set(vehicles.map((v) => v.bodyStyle).filter(Boolean))).sort();
+    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.bodyStyle).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [serverVehicles]);
+  }, [filterSourceVehicles]);
 
   const fuelTypes = useMemo(() => {
-    const list = Array.from(new Set(serverVehicles.map((v) => v.fuelType).filter(Boolean))).sort();
+    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.fuelType).filter(Boolean))).sort();
     return ['All', ...list];
-  }, [serverVehicles]);
+  }, [filterSourceVehicles]);
 
   const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
   const conditionOptions = ['All', 'Foreign Used', 'Locally Used', 'Brand New'];
   const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
 
   const locations = useMemo(() => {
-    const list = Array.from(new Set(serverVehicles.map((v) => v.county || v.location).filter(Boolean))).sort();
+    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.county || v.location).filter(Boolean))).sort();
     return ['All East Africa', ...list];
-  }, [serverVehicles]);
+  }, [filterSourceVehicles]);
 
   const availableYears = useMemo(() => {
-    const list = Array.from(new Set(serverVehicles.map((v) => v.year).filter((y): y is number => Boolean(y)))).sort((a: number, b: number) => b - a);
+    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.year).filter((y): y is number => Boolean(y)))).sort((a: number, b: number) => b - a);
     return list;
-  }, [serverVehicles]);
+  }, [filterSourceVehicles]);
 
   // Phase 44: never post-filter a server-paginated page with feature flags
   // that lack an authoritative backend query contract. The backend response
@@ -703,6 +714,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={selectedMake}
               onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }}
+              aria-label="Hero make filter"
               className={`border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
             >
               {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
@@ -713,6 +725,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
+              aria-label="Hero maximum price filter"
               className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
             >
               <option value={20000000}>All</option>
@@ -726,6 +739,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={minYear}
               onChange={(e) => setMinYear(Number(e.target.value))}
+              aria-label="Hero year filter"
               className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
             >
               <option value={2005}>2005 – 2026</option>
@@ -738,6 +752,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={selectedBodyStyle}
               onChange={(e) => setSelectedBodyStyle(e.target.value)}
+              aria-label="Hero body style filter"
               className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
             >
               {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
@@ -834,7 +849,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </label>
 
               {viewMode === 'grid' && (
-                <div className="hidden sm:flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
+                <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
                   {[3, 4, 5].map((n) => (
                     <button
                       key={n}
@@ -911,14 +926,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
-              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+              <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Model</label>
-              <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+              <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
@@ -976,28 +991,28 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body Style</label>
-              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+              <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel Type</label>
-              <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+              <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Transmission</label>
-              <select value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+              <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
               </select>
             </div>
 
             <div className="border-b border-slate-100 py-3.5">
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Seller Type</label>
-              <select value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+              <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
             </div>
@@ -1056,9 +1071,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 data-view-mode={viewMode}
                 data-columns={viewMode === 'grid' ? gridColumns : undefined}
                 className={viewMode === 'grid'
-                  ? `grid grid-cols-1 sm:grid-cols-2 ${gridColumnClasses[gridColumns]} ${inventoryDensity.gap}`
+                  ? `kayad-inventory-grid ${inventoryDensity.gap}`
                   : `flex flex-col ${inventoryDensity.gap}`
                 }
+                style={viewMode === 'grid' ? ({ '--kayad-grid-columns': gridColumns } as React.CSSProperties) : undefined}
               >
                 {onlyAuction === false && paginatedVehicles.some((v) => v.isAuction) === false && filteredVehicles.some((v) => v.isAuction) && viewMode === 'grid' && (
                   <div className="bg-gradient-to-br from-[#0B1D3A] to-[#10284C] rounded-2xl text-white p-5 flex flex-col relative overflow-hidden">
@@ -1249,13 +1265,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           <div className="p-4 space-y-4 pb-8">
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
-              <select value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <select aria-label="Mobile make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Model</label>
-              <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <select aria-label="Mobile model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
@@ -1281,27 +1297,27 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body style</label>
-              <select value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <select aria-label="Mobile body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel type</label>
-                <select value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                <select aria-label="Mobile fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                   {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Transmission</label>
-                <select value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                <select aria-label="Mobile transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                   {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
                 </select>
               </div>
             </div>
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Seller type</label>
-              <select value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <select aria-label="Mobile seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
             </div>
