@@ -115,6 +115,21 @@
   container-name: kayad-inventory;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  width: 100%;
+}
+
+/* Never allow marketplace controls to create horizontal overflow.
+ * The selected 3/4/5 target remains authoritative once the result column
+ * has enough physical width; below that width the grid gracefully steps down. */
+.kayad-marketplace-controls {
+  min-width: 0;
+  width: 100%;
+}
+
+.kayad-marketplace-controls select,
+.kayad-marketplace-controls button {
+  max-width: 100%;
 }
 
 @container kayad-inventory (min-width: 520px) {

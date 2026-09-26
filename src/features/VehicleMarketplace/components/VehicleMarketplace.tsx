@@ -796,7 +796,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
         {/* 5. MARKET HEAD */}
         <div className="mb-5 rounded-2xl border border-[#D7E4F5] bg-white shadow-[0_10px_30px_rgba(11,29,58,0.06)]">
-          <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 p-4 sm:p-5">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF4FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#0F6ED8]">
@@ -815,8 +815,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Results per page">
+            <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end">
+              <div className="flex min-w-0 w-full items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1 sm:w-auto" aria-label="Results per page">
                 <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Show</span>
                 {[12, 24, 48].map((n) => (
                   <button
@@ -830,13 +830,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 ))}
               </div>
 
-              <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <label className="flex min-w-0 w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 sm:w-auto">
                 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Sort</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                   aria-label="Sort inventory"
-                  className="min-w-[145px] bg-transparent text-xs font-bold text-[#0B1D3A] outline-none"
+                  className="min-w-0 flex-1 bg-transparent text-xs font-bold text-[#0B1D3A] outline-none sm:min-w-[145px] sm:flex-none"
                 >
                   <option value="newest">Newest First</option>
                   <option value="price-asc">Price: low to high</option>
@@ -849,13 +849,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </label>
 
               {viewMode === 'grid' && (
-                <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
+                <div className="flex w-full shrink-0 items-center justify-between gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1 sm:w-auto sm:justify-start" aria-label="Grid columns">
                   {[3, 4, 5].map((n) => (
                     <button
                       key={n}
                       onClick={() => setGridColumns(n as 3 | 4 | 5)}
                       aria-pressed={gridColumns === n}
-                      className={`min-w-9 rounded-lg px-2 py-2 text-[10px] font-black transition-colors ${gridColumns === n ? 'bg-[#1684FF] text-white' : 'text-slate-500 hover:bg-white hover:text-[#0B1D3A]'}`}
+                      className={`min-w-0 flex-1 rounded-lg px-3 py-2 text-[10px] font-black transition-colors sm:min-w-9 sm:flex-none ${gridColumns === n ? 'bg-[#1684FF] text-white' : 'text-slate-500 hover:bg-white hover:text-[#0B1D3A]'}`}
                       title={`${n} columns`}
                     >
                       {n}×
@@ -864,12 +864,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               )}
 
-              <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1" aria-label="Inventory view">
+              <div className="flex w-full items-center rounded-xl border border-slate-200 bg-white p-1 sm:w-auto" aria-label="Inventory view">
                 <button
                   onClick={() => setViewMode('grid')}
                   aria-pressed={viewMode === 'grid'}
                   title="Grid view"
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#EAF4FF] text-[#0F6ED8]' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors sm:flex-none ${viewMode === 'grid' ? 'bg-[#EAF4FF] text-[#0F6ED8]' : 'text-slate-400 hover:text-slate-700'}`}
                 >
                   <Grid className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Grid</span>
                 </button>
@@ -877,7 +877,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   onClick={() => setViewMode('list')}
                   aria-pressed={viewMode === 'list'}
                   title="List view"
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#EAF4FF] text-[#0F6ED8]' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors sm:flex-none ${viewMode === 'list' ? 'bg-[#EAF4FF] text-[#0F6ED8]' : 'text-slate-400 hover:text-slate-700'}`}
                 >
                   <ListIcon className="w-3.5 h-3.5" /> <span className="hidden xl:inline">List</span>
                 </button>

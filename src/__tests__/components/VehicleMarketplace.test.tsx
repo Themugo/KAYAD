@@ -181,7 +181,6 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     expect(Array.from(sidebarMakeSelect?.options ?? []).some((o) => o.textContent === 'All Makes')).toBe(true);
     expect(sidebarMakeSelect?.className).not.toMatch(/lg:hidden/);
 
-    
     expect(sidebarHeading).toBeTruthy();
     expect(screen.getByText('Reset all filters')).toBeTruthy();
     expect(screen.queryByTitle('Toggle filter sidebar')).toBeNull();
