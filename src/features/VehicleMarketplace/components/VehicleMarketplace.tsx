@@ -5,7 +5,6 @@ import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRigh
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
 import FloatingAdRail from '../../../components/FloatingAdRail';
-import CarSilhouette from '../../../components/CarSilhouette';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { getCars, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
@@ -442,10 +441,22 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     subheadline: 'Quality vehicles, live auctions, and inspection reports from registered local mechanics — all verified through one escrow-protected marketplace built for East Africa.',
     ctaPrimaryText: 'Explore Vehicles →',
     ctaSecondaryText: 'Sell Your Vehicle',
-    backgroundType: 'gradient',
-    overlayColor: '#1E3063',
-    overlayOpacity: 100,
+    backgroundType: 'image',
+    backgroundValue: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Nairobi_City_Skyline.jpg',
+    overlayColor: '#0B2A5B',
+    overlayOpacity: 78,
     displayMode: 'boxed',
+    layout: 'four-corner',
+    mediaConfig: {
+      leftTopImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Toyota_Probox_(53526709295).jpg',
+      leftTopLabel: 'Toyota Probox',
+      leftBottomImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Prado_imported_from_japan_to_kenya.jpg',
+      leftBottomLabel: 'Land Cruiser Prado',
+      rightTopImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Subaru-Forester.jpg',
+      rightTopLabel: 'Subaru Forester',
+      rightBottomImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Toyota_Premio_01.jpg',
+      rightBottomLabel: 'Toyota Premio',
+    },
     isVisible: true,
     sortOrder: 0,
     createdAt: '',
@@ -466,6 +477,28 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => clearInterval(timer);
   }, [heroSlides.length]);
   const activeHeroSlide = heroSlides[heroSlideIndex % heroSlides.length];
+  const heroLayout = activeHeroSlide.layout || 'four-corner';
+
+  const fallbackHeroMedia = DEFAULT_HERO_SLIDE.mediaConfig || {};
+  const findInventoryImage = useCallback((make: string, model: string) => {
+    const match = serverVehicles.find((vehicle) =>
+      vehicle.make.toLowerCase().includes(make.toLowerCase()) &&
+      vehicle.model.toLowerCase().includes(model.toLowerCase()) &&
+      vehicle.images?.[0]
+    );
+    return match?.images?.[0] || '';
+  }, [serverVehicles]);
+
+  const heroMedia = {
+    leftTopImage: activeHeroSlide.mediaConfig?.leftTopImage || findInventoryImage('toyota', 'probox') || fallbackHeroMedia.leftTopImage,
+    leftTopLabel: activeHeroSlide.mediaConfig?.leftTopLabel || fallbackHeroMedia.leftTopLabel || 'Toyota Probox',
+    leftBottomImage: activeHeroSlide.mediaConfig?.leftBottomImage || findInventoryImage('toyota', 'land cruiser') || fallbackHeroMedia.leftBottomImage,
+    leftBottomLabel: activeHeroSlide.mediaConfig?.leftBottomLabel || fallbackHeroMedia.leftBottomLabel || 'Land Cruiser Prado',
+    rightTopImage: activeHeroSlide.mediaConfig?.rightTopImage || findInventoryImage('subaru', 'forester') || fallbackHeroMedia.rightTopImage,
+    rightTopLabel: activeHeroSlide.mediaConfig?.rightTopLabel || fallbackHeroMedia.rightTopLabel || 'Subaru Forester',
+    rightBottomImage: activeHeroSlide.mediaConfig?.rightBottomImage || findInventoryImage('toyota', 'premio') || fallbackHeroMedia.rightBottomImage,
+    rightBottomLabel: activeHeroSlide.mediaConfig?.rightBottomLabel || fallbackHeroMedia.rightBottomLabel || 'Toyota Premio',
+  };
 
   const mapAdSlotToMarketingCard = (slot: AdSlot): MarketingCardData => ({
     id: slot.id,
@@ -509,114 +542,107 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           sort, pagination, saved/compare, admin config) - only the visual
           layer changed, not the data or behavior. */}
 
-      {/* 1. HERO - redesigned and compacted (~30% less vertical space
-          than before), with popular-in-Kenya car silhouettes flanking
-          the text on wide screens. Fully driven by real,
-          backend-persisted content (activeHeroSlide) - text, CTAs,
-          background layer, and overlay color/opacity are all
-          admin-editable through the real Hero Editor panel, not
-          hardcoded. Supports a real slider: when the admin adds more
-          than one slide, this auto-rotates between them. */}
+      {/* 1. HERO - premium visual refinement of the existing hero contract.
+          No new homepage module is introduced: the existing text, two CTAs,
+          slider, background and admin editor remain the source of truth. */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-      <section
-        className={`relative -mx-4 sm:-mx-6 lg:-mx-8 text-white overflow-hidden ${activeHeroSlide.displayMode === 'fullscreen' ? 'min-h-[70vh] flex items-center' : ''}`}
-        style={activeHeroSlide.backgroundType === 'image' && activeHeroSlide.backgroundValue ? {
-          backgroundImage: `url(${activeHeroSlide.backgroundValue})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : activeHeroSlide.backgroundType === 'color' && activeHeroSlide.backgroundValue ? {
-          backgroundColor: activeHeroSlide.backgroundValue,
-        } : undefined}
-      >
-        {/* Base gradient layer - only shown when no real image/color
-            background has been set, so a genuine admin-chosen
-            background is never fought by this default underneath it. */}
-        {(activeHeroSlide.backgroundType === 'gradient' || !activeHeroSlide.backgroundValue) && (
-          <div className="absolute inset-0 bg-gradient-to-b from-[#17244B] to-[#1E3063]" />
-        )}
-        {/* Overlay layer - admin-controlled color + opacity, sits above
-            the background layer and below the text/CTA content. */}
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: activeHeroSlide.overlayColor, opacity: activeHeroSlide.overlayOpacity / 100 }}
-        />
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(600px 400px at 85% 10%, rgba(200,90,50,.18), transparent 60%), radial-gradient(500px 350px at 100% 60%, rgba(251,191,36,.10), transparent 60%)'
-        }} />
+        <section
+          className={`relative left-1/2 -translate-x-1/2 w-screen text-white overflow-hidden bg-[#0B1D3A] ${activeHeroSlide.displayMode === 'fullscreen' ? 'min-h-[70vh] flex items-center' : ''}`}
+          style={{ backgroundColor: '#0B1D3A' }}
+        >
+          {activeHeroSlide.backgroundType === 'image' && activeHeroSlide.backgroundValue && (
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${activeHeroSlide.backgroundValue})` }}
+              aria-hidden="true"
+            />
+          )}
+          {activeHeroSlide.backgroundType === 'color' && activeHeroSlide.backgroundValue && (
+            <div className="absolute inset-0" style={{ backgroundColor: activeHeroSlide.backgroundValue }} aria-hidden="true" />
+          )}
+          {(activeHeroSlide.backgroundType === 'gradient' || !activeHeroSlide.backgroundValue) && (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0B1D3A] via-[#173A73] to-[#102B59]" aria-hidden="true" />
+          )}
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: activeHeroSlide.overlayColor || '#0B2A5B', opacity: activeHeroSlide.overlayOpacity / 100 }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(600px 360px at 50% 25%, rgba(22,132,255,.20), transparent 68%), radial-gradient(420px 320px at 50% 100%, rgba(20,184,166,.12), transparent 70%)'
+            }}
+            aria-hidden="true"
+          />
 
-        <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 py-7 flex items-center gap-6">
-          {/* Left car silhouettes - popular Kenyan road vehicles,
-              hidden below xl: where there isn't real room for them
-              without crowding the text. */}
-          <div className="hidden xl:flex flex-col gap-6 w-28 shrink-0 text-[#E08A6B]">
-            <CarSilhouette label="Toyota Probox" />
-            <CarSilhouette label="Land Cruiser Prado" />
-          </div>
+          <div className={`relative w-full mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-11 ${heroLayout === 'centered' ? 'max-w-5xl' : 'max-w-[1600px]'}`}>
+            {heroLayout === 'centered' ? (
+              <div className="mx-auto max-w-4xl text-center">
+                <div className="mb-4 flex flex-wrap items-center justify-center gap-3">
+                  {heroMedia.leftTopImage && (
+                    <img src={heroMedia.leftTopImage} alt={heroMedia.leftTopLabel} className="h-16 w-24 object-contain drop-shadow-[0_14px_18px_rgba(0,0,0,.35)] sm:h-20 sm:w-32" loading="eager" />
+                  )}
+                  {activeHeroSlide.eyebrowText && <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#20C4F4]">● {activeHeroSlide.eyebrowText}</span>}
+                  {heroMedia.rightTopImage && (
+                    <img src={heroMedia.rightTopImage} alt={heroMedia.rightTopLabel} className="h-16 w-24 object-contain drop-shadow-[0_14px_18px_rgba(0,0,0,.35)] sm:h-20 sm:w-32" loading="eager" />
+                  )}
+                </div>
+                <h1 className="font-display text-[clamp(2rem,5vw,4rem)] font-bold leading-[1.02] tracking-[-0.035em] mb-4">{activeHeroSlide.headline}</h1>
+                {activeHeroSlide.subheadline && <p className="text-sm sm:text-base text-slate-200/90 max-w-3xl mx-auto mb-6 leading-relaxed">{activeHeroSlide.subheadline}</p>}
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {activeHeroSlide.ctaPrimaryText && (
+                    <button onClick={() => activeHeroSlide.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#1684FF] hover:bg-[#0F6ED8] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full transition-colors shadow-lg shadow-[#1684FF]/20">{activeHeroSlide.ctaPrimaryText}</button>
+                  )}
+                  {activeHeroSlide.ctaSecondaryText && (
+                    <button onClick={() => activeHeroSlide.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')} className="border border-white/35 hover:border-white/70 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full transition-colors">{activeHeroSlide.ctaSecondaryText}</button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={`grid items-center gap-5 lg:gap-8 ${heroLayout === 'media-left' ? 'lg:grid-cols-[minmax(0,1fr)_minmax(360px,1.05fr)]' : heroLayout === 'media-right' ? 'lg:grid-cols-[minmax(360px,1.05fr)_minmax(0,1fr)]' : 'lg:grid-cols-[220px_minmax(0,1fr)_220px]'}`}>
+                {(heroLayout === 'four-corner' || heroLayout === 'media-left') && (
+                  <div className={`hidden sm:grid ${heroLayout === 'four-corner' ? 'lg:grid-cols-1 gap-5' : 'grid-cols-2 gap-4 order-2 lg:order-1'}`}>
+                    {[['leftTopImage', 'leftTopLabel'], ['leftBottomImage', 'leftBottomLabel']].map(([imageKey, labelKey]) => {
+                      const image = heroMedia[imageKey as keyof typeof heroMedia];
+                      const label = heroMedia[labelKey as keyof typeof heroMedia];
+                      return image ? <div key={imageKey} className="relative h-28 sm:h-32 lg:h-36 flex items-end justify-center"><img src={image} alt={String(label)} className="max-h-full w-full object-contain drop-shadow-[0_18px_22px_rgba(0,0,0,.4)]" loading="eager" /><span className="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#0B1D3A]/90 px-3 py-1 text-[9px] font-bold text-white shadow-lg">{label}</span></div> : null;
+                    })}
+                  </div>
+                )}
 
-          <div className="flex-1 text-center px-0 sm:px-2">
-            {activeHeroSlide.eyebrowText && (
-              <div className="inline-flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase text-amber-400 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                {activeHeroSlide.eyebrowText}
+                <div className={`text-center ${heroLayout === 'media-left' ? 'order-1 lg:order-2' : heroLayout === 'media-right' ? 'order-1' : ''}`}>
+                  {activeHeroSlide.eyebrowText && <div className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.16em] uppercase text-[#20C4F4] mb-4"><span className="w-1.5 h-1.5 rounded-full bg-[#20C4F4]" />{activeHeroSlide.eyebrowText}</div>}
+                  <h1 className="font-display text-[clamp(2rem,4.3vw,3.8rem)] font-bold leading-[1.03] tracking-[-0.03em] mb-4">{activeHeroSlide.headline}</h1>
+                  {activeHeroSlide.subheadline && <p className="text-sm sm:text-base text-slate-200/90 max-w-2xl mx-auto mb-6 leading-relaxed">{activeHeroSlide.subheadline}</p>}
+                  <div className="flex flex-wrap items-center justify-center gap-3 mb-5">
+                    {activeHeroSlide.ctaPrimaryText && <button onClick={() => activeHeroSlide.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#1684FF] hover:bg-[#0F6ED8] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full transition-colors shadow-lg shadow-[#1684FF]/20">{activeHeroSlide.ctaPrimaryText}</button>}
+                    {activeHeroSlide.ctaSecondaryText && <button onClick={() => activeHeroSlide.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')} className="border border-white/35 hover:border-white/70 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full transition-colors">{activeHeroSlide.ctaSecondaryText}</button>}
+                  </div>
+                  {heroSlides.length > 1 && <div className="flex items-center justify-center gap-2 pt-1">{heroSlides.map((slide, i) => <button key={slide.id} onClick={() => setHeroSlideIndex(i)} className={`h-1.5 rounded-full transition-all ${i === heroSlideIndex ? 'w-6 bg-[#20C4F4]' : 'w-1.5 bg-white/35'}`} aria-label={`Go to slide ${i + 1}`} />)}</div>}
+                </div>
+
+                {(heroLayout === 'four-corner' || heroLayout === 'media-right') && (
+                  <div className={`hidden sm:grid ${heroLayout === 'four-corner' ? 'lg:grid-cols-1 gap-5' : 'grid-cols-2 gap-4 order-2 lg:order-2'}`}>
+                    {[['rightTopImage', 'rightTopLabel'], ['rightBottomImage', 'rightBottomLabel']].map(([imageKey, labelKey]) => {
+                      const image = heroMedia[imageKey as keyof typeof heroMedia];
+                      const label = heroMedia[labelKey as keyof typeof heroMedia];
+                      return image ? <div key={imageKey} className="relative h-28 sm:h-32 lg:h-36 flex items-end justify-center"><img src={image} alt={String(label)} className="max-h-full w-full object-contain drop-shadow-[0_18px_22px_rgba(0,0,0,.4)]" loading="eager" /><span className="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#0B1D3A]/90 px-3 py-1 text-[9px] font-bold text-white shadow-lg">{label}</span></div> : null;
+                    })}
+                  </div>
+                )}
+
+                <div className="sm:hidden col-span-full flex items-center justify-center gap-3 pt-2">
+                  {[['leftTopImage', 'leftTopLabel'], ['rightTopImage', 'rightTopLabel']].map(([imageKey, labelKey]) => {
+                    const image = heroMedia[imageKey as keyof typeof heroMedia];
+                    const label = heroMedia[labelKey as keyof typeof heroMedia];
+                    return image ? <div key={imageKey} className="relative h-24 w-[45%] flex items-end justify-center"><img src={image} alt={String(label)} className="max-h-full w-full object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,.35)]" loading="eager" /><span className="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#0B1D3A]/90 px-2.5 py-1 text-[8px] font-bold text-white">{label}</span></div> : null;
+                  })}
+                </div>
               </div>
             )}
-            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-3">
-              {activeHeroSlide.headline}
-            </h1>
-            {activeHeroSlide.subheadline && (
-              <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto mb-5">
-                {activeHeroSlide.subheadline}
-              </p>
-            )}
-            <div className="flex items-center justify-center gap-3 mb-5">
-              {activeHeroSlide.ctaPrimaryText && (
-                <button
-                  onClick={() => activeHeroSlide.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="bg-[#C85A32] hover:bg-[#B34E29] text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-full transition-colors flex items-center gap-2"
-                >
-                  {activeHeroSlide.ctaPrimaryText}
-                </button>
-              )}
-              {activeHeroSlide.ctaSecondaryText && (
-                <button
-                  onClick={() => activeHeroSlide.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')}
-                  className="border border-white/35 hover:border-white text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-full transition-colors"
-                >
-                  {activeHeroSlide.ctaSecondaryText}
-                </button>
-              )}
-            </div>
-            <div className="flex items-center justify-center gap-3 text-[11px] text-slate-300">
-              <div className="flex">
-                {['JM', 'AN', 'TK'].map((initials, i) => (
-                  <span key={initials} className={`w-6 h-6 rounded-full border-2 border-[#17244B] bg-gradient-to-br from-[#C85A32] to-[#E08A6B] flex items-center justify-center text-[9px] font-bold ${i > 0 ? '-ml-2' : ''}`}>
-                    {initials}
-                  </span>
-                ))}
-              </div>
-              <span>Trusted by verified sellers across East Africa</span>
-              <span className="text-amber-400 font-bold">★ 4.8/5</span>
-            </div>
-            {heroSlides.length > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-4">
-                {heroSlides.map((s, i) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setHeroSlideIndex(i)}
-                    className={`h-1.5 rounded-full transition-all ${i === heroSlideIndex ? 'w-5 bg-amber-400' : 'w-1.5 bg-white/30'}`}
-                    aria-label={`Go to slide ${i + 1}`}
-                  />
-                ))}
-              </div>
-            )}
           </div>
-
-          <div className="hidden xl:flex flex-col gap-6 w-28 shrink-0 text-[#E08A6B]">
-            <CarSilhouette label="Subaru Forester" flip />
-            <CarSilhouette label="Toyota Premio" flip />
-          </div>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}

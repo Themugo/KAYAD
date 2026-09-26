@@ -12,6 +12,7 @@ import { request, HttpRequestError } from '../api/httpRequest';
 
 
 export type AdPlacement = 'top_ticker' | 'left_rail' | 'right_rail' | 'mid_grid' | 'sidebar';
+export type AdDisplayMode = 'scroll' | 'fade';
 
 export interface AdSlot {
   id: string;
@@ -24,6 +25,9 @@ export interface AdSlot {
   backgroundColor: string;
   textColor: string;
   opacity: number;
+  displayMode: AdDisplayMode;
+  scrollDurationSeconds: number;
+  fadeDurationMs: number;
   isVisible: boolean;
   sortOrder: number;
   createdAt: string;
@@ -40,6 +44,9 @@ export interface AdSlotInput {
   backgroundColor?: string;
   textColor?: string;
   opacity?: number;
+  displayMode?: AdDisplayMode;
+  scrollDurationSeconds?: number;
+  fadeDurationMs?: number;
   sortOrder?: number;
 }
 

@@ -36,7 +36,7 @@ export const createHeroSlide = async (req, res) => {
       eyebrowText, headline, subheadline,
       ctaPrimaryText, ctaPrimaryLink, ctaSecondaryText, ctaSecondaryLink,
       backgroundType, backgroundValue, overlayColor, overlayOpacity,
-      displayMode, sortOrder,
+      displayMode, layout, mediaConfig, sortOrder,
     } = req.body;
 
     if (!headline || !headline.trim()) {
@@ -48,12 +48,15 @@ export const createHeroSlide = async (req, res) => {
     if (displayMode && !["boxed", "fullscreen"].includes(displayMode)) {
       return res.status(400).json({ success: false, message: "Invalid display mode" });
     }
+    if (layout && !["four-corner", "media-left", "media-right", "centered"].includes(layout)) {
+      return res.status(400).json({ success: false, message: "Invalid hero layout" });
+    }
 
     const slide = await HeroSlide.create({
       eyebrowText, headline: headline.trim(), subheadline,
       ctaPrimaryText, ctaPrimaryLink, ctaSecondaryText, ctaSecondaryLink,
       backgroundType, backgroundValue, overlayColor, overlayOpacity,
-      displayMode, sortOrder,
+      displayMode, layout, mediaConfig, sortOrder,
       createdBy: req.user.id,
     });
 
@@ -79,7 +82,7 @@ export const updateHeroSlide = async (req, res) => {
       "eyebrowText", "headline", "subheadline",
       "ctaPrimaryText", "ctaPrimaryLink", "ctaSecondaryText", "ctaSecondaryLink",
       "backgroundType", "backgroundValue", "overlayColor", "overlayOpacity",
-      "displayMode", "isVisible", "sortOrder",
+      "displayMode", "layout", "mediaConfig", "isVisible", "sortOrder",
     ];
     const updates = {};
     for (const field of allowedFields) {
@@ -90,6 +93,9 @@ export const updateHeroSlide = async (req, res) => {
     }
     if (updates.displayMode && !["boxed", "fullscreen"].includes(updates.displayMode)) {
       return res.status(400).json({ success: false, message: "Invalid display mode" });
+    }
+    if (updates.layout && !["four-corner", "media-left", "media-right", "centered"].includes(updates.layout)) {
+      return res.status(400).json({ success: false, message: "Invalid hero layout" });
     }
 
     const updated = await HeroSlide.findByIdAndUpdate(id, updates, { new: true });

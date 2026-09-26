@@ -12,6 +12,18 @@ import { request, HttpRequestError } from '../api/httpRequest';
 
 export type HeroBackgroundType = 'color' | 'gradient' | 'image';
 export type HeroDisplayMode = 'boxed' | 'fullscreen';
+export type HeroLayout = 'four-corner' | 'media-left' | 'media-right' | 'centered';
+
+export interface HeroMediaConfig {
+  leftTopImage?: string;
+  leftTopLabel?: string;
+  leftBottomImage?: string;
+  leftBottomLabel?: string;
+  rightTopImage?: string;
+  rightTopLabel?: string;
+  rightBottomImage?: string;
+  rightBottomLabel?: string;
+}
 
 export interface HeroSlide {
   id: string;
@@ -27,6 +39,8 @@ export interface HeroSlide {
   overlayColor: string;
   overlayOpacity: number;
   displayMode: HeroDisplayMode;
+  layout?: HeroLayout;
+  mediaConfig?: HeroMediaConfig;
   isVisible: boolean;
   sortOrder: number;
   createdAt: string;
@@ -46,6 +60,8 @@ export interface HeroSlideInput {
   overlayColor?: string;
   overlayOpacity?: number;
   displayMode?: HeroDisplayMode;
+  layout?: HeroLayout;
+  mediaConfig?: HeroMediaConfig;
   sortOrder?: number;
 }
 

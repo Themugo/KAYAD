@@ -25,7 +25,6 @@ import {
   Calendar,
   FileText,
   Sliders,
-  CheckCircle2,
   Landmark,
   Sparkles,
 } from 'lucide-react';
@@ -59,28 +58,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [trustIndex, setTrustIndex] = useState(0);
-
   const countyRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
-
-  const counties = ['All East Africa', 'Nairobi', 'Mombasa', 'Nakuru', 'Kiambu', 'Eldoret', 'Kisumu'];
-
-  const trustMessages = [
-    "Verified Dealers Across East Africa",
-    "Secure Private Sales with Escrow",
-    "150-Point Certified Vehicles",
-    "Live Vehicle Auctions",
-    "Trusted Automotive Marketplace"
-  ];
-
-  // Rotate trust messages slowly every 5 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTrustIndex((prev) => (prev + 1) % trustMessages.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [trustMessages.length]);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -107,81 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200/70 shadow-2xs text-slate-800">
-      {/* Top Utility Bar - Slim Brand Identity & Rotating Trust Strip */}
-      <div className="bg-[#101935] border-b border-slate-800/80 text-[11px] py-1 px-4 sm:px-6 lg:px-8 text-slate-300">
-        <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
-          {/* Left: Rotating Brand Trust Message */}
-          <div className="flex items-center space-x-2.5 min-w-0 overflow-hidden">
-            <span className="text-[#E0D8CB] font-bold text-[10px] uppercase tracking-wider shrink-0 bg-white/10 px-2 py-0.5 rounded border border-white/15">
-              KAYAD EA
-            </span>
-            <div className="flex items-center gap-1.5 font-medium text-slate-200 truncate transition-opacity duration-700 ease-in-out">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="truncate text-slate-200 font-medium">{trustMessages[trustIndex]}</span>
-            </div>
-          </div>
-
-          {/* Right: Region Selector & Account/Alerts */}
-          <div className="flex items-center space-x-3 shrink-0">
-            <div className="relative hidden md:block" ref={countyRef}>
-              <button
-                onClick={() => setShowCountyDropdown(!showCountyDropdown)}
-                className="flex items-center gap-1.5 hover:text-white transition-colors py-0.5 px-2.5 rounded bg-slate-800/80 border border-slate-700/60"
-                id="county-selector-top"
-              >
-                <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                <span>Region: <strong className="text-white font-semibold">{selectedCounty}</strong></span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
-
-              {showCountyDropdown && (
-                <div className="absolute right-0 mt-1 w-48 bg-white text-slate-800 rounded-xl shadow-lg border border-slate-200 py-1 z-50 text-xs animate-fade-in">
-                  {counties.map((county) => (
-                    <button
-                      key={county}
-                      onClick={() => {
-                        onCountyChange(county);
-                        setShowCountyDropdown(false);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-[#F5F2EB] flex items-center justify-between transition-colors ${
-                        selectedCounty === county ? 'font-bold text-[#1E3063] bg-[#F5F2EB]' : ''
-                      }`}
-                    >
-                      {county}
-                      {selectedCounty === county && <span className="w-1.5 h-1.5 rounded-full bg-[#1E3063]"></span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={onOpenAlerts}
-              className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors font-medium hidden sm:flex"
-            >
-              <Bell className="w-3.5 h-3.5 text-slate-400" />
-              <span>Price Alerts</span>
-            </button>
-
-            <span className="text-slate-700 hidden sm:inline">|</span>
-
-            {user ? (
-              <span className="text-slate-300 flex items-center gap-1.5 font-medium text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span className="hidden sm:inline">Signed in as</span> <strong className="text-white truncate max-w-[110px]">{user.name}</strong>
-              </span>
-            ) : (
-              <button
-                onClick={onOpenAuth}
-                className="flex items-center gap-1 hover:text-white transition-colors font-semibold text-slate-200"
-              >
-                <User className="w-3.5 h-3.5 text-slate-400" />
-                <span>Sign In</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
 
       {/* Main Navigation Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

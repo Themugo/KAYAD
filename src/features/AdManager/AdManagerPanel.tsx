@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, Trash2, Plus, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { AdSlot, AdPlacement, AdSlotInput, AdStat, getAllAdSlots, getAdStats, createAdSlot, updateAdSlot, deleteAdSlot, AdApiError } from '../../services/adApi';
+import { AdSlot, AdPlacement, AdDisplayMode, AdSlotInput, AdStat, getAllAdSlots, getAdStats, createAdSlot, updateAdSlot, deleteAdSlot, AdApiError } from '../../services/adApi';
 
 interface AdManagerPanelProps {
   onClose: () => void;
@@ -25,6 +25,9 @@ const EMPTY_DRAFT: AdSlotInput = {
   textColor: '#FFFFFF',
   opacity: 100,
   sortOrder: 0,
+  displayMode: 'scroll',
+  scrollDurationSeconds: 28,
+  fadeDurationMs: 4500,
 };
 
 /**
@@ -78,6 +81,9 @@ export const AdManagerPanel: React.FC<AdManagerPanelProps> = ({ onClose }) => {
         opacity: slot.opacity,
         isVisible: slot.isVisible,
         sortOrder: slot.sortOrder,
+        displayMode: slot.displayMode,
+        scrollDurationSeconds: slot.scrollDurationSeconds,
+        fadeDurationMs: slot.fadeDurationMs,
       });
       setSlots((prev) => prev.map((s) => s.id === updated.id ? updated : s));
     } catch (err) {
@@ -225,6 +231,57 @@ export const AdManagerPanel: React.FC<AdManagerPanelProps> = ({ onClose }) => {
                     placeholder="Button Link (https://...)"
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
                   />
+
+                  {slot.placement === 'top_ticker' && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Top notice board behaviour</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">Choose the TV-style presentation used by the notice strip above the navbar.</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className="text-xs text-slate-600">
+                          <span className="block mb-1 font-semibold">Animation</span>
+                          <select
+                            value={slot.displayMode || 'scroll'}
+                            onChange={(e) => handleFieldChange(slot.id, 'displayMode', e.target.value as AdDisplayMode)}
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs bg-white"
+                          >
+                            <option value="scroll">Scroll right → left</option>
+                            <option value="fade">Fade between notices</option>
+                          </select>
+                        </label>
+                        {(slot.displayMode || 'scroll') === 'scroll' ? (
+                          <label className="text-xs text-slate-600">
+                            <span className="block mb-1 font-semibold">Scroll duration</span>
+                            <select
+                              value={slot.scrollDurationSeconds || 28}
+                              onChange={(e) => handleFieldChange(slot.id, 'scrollDurationSeconds', Number(e.target.value))}
+                              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs bg-white"
+                            >
+                              <option value={18}>Fast · 18s</option>
+                              <option value={28}>Normal · 28s</option>
+                              <option value={40}>Slow · 40s</option>
+                              <option value={55}>Very slow · 55s</option>
+                            </select>
+                          </label>
+                        ) : (
+                          <label className="text-xs text-slate-600">
+                            <span className="block mb-1 font-semibold">Fade duration</span>
+                            <select
+                              value={slot.fadeDurationMs || 4500}
+                              onChange={(e) => handleFieldChange(slot.id, 'fadeDurationMs', Number(e.target.value))}
+                              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs bg-white"
+                            >
+                              <option value={2500}>Fast · 2.5s</option>
+                              <option value={4500}>Normal · 4.5s</option>
+                              <option value={6500}>Slow · 6.5s</option>
+                              <option value={9000}>Very slow · 9s</option>
+                            </select>
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-4 flex-wrap">
                     <label className="flex items-center gap-2 text-xs text-slate-600">

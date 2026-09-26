@@ -19,6 +19,8 @@ const EMPTY_DRAFT: HeroSlideInput = {
   overlayColor: '#1E3063',
   overlayOpacity: 40,
   displayMode: 'boxed',
+  layout: 'four-corner',
+  mediaConfig: {},
   sortOrder: 0,
 };
 
@@ -59,6 +61,10 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
     setSlides((prev) => prev.map((s) => s.id === id ? { ...s, [field]: value } : s));
   };
 
+  const handleMediaChange = (id: string, field: string, value: string) => {
+    setSlides((prev) => prev.map((s) => s.id === id ? { ...s, mediaConfig: { ...(s.mediaConfig || {}), [field]: value } } : s));
+  };
+
   const handleSave = async (slide: HeroSlide) => {
     setSavingId(slide.id);
     try {
@@ -75,6 +81,8 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
         overlayColor: slide.overlayColor,
         overlayOpacity: slide.overlayOpacity,
         displayMode: slide.displayMode,
+        layout: slide.layout,
+        mediaConfig: slide.mediaConfig,
         isVisible: slide.isVisible,
         sortOrder: slide.sortOrder,
       });
@@ -132,7 +140,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
         <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-[#1E3063]">Hero Editor</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Edit the hero card's text, add slides for a real slider, choose windowed or fit-to-screen display, and layer background/overlay colors and opacity.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Edit the existing hero content, vehicle imagery, promotion copy, and presentation layout. All changes are persisted for every visitor.</p>
           </div>
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg">
             <X className="w-5 h-5 text-slate-500" />
@@ -298,6 +306,51 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                     </label>
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+                    <label className="flex flex-col gap-1 text-xs text-slate-600">
+                      Hero layout
+                      <select
+                        value={slide.layout || 'four-corner'}
+                        onChange={(e) => handleFieldChange(slide.id, 'layout', e.target.value)}
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                      >
+                        <option value="four-corner">Four-corner vehicle layout</option>
+                        <option value="media-left">Vehicle media left</option>
+                        <option value="media-right">Vehicle media right</option>
+                        <option value="centered">Centered hero</option>
+                      </select>
+                    </label>
+                    <div className="text-[11px] text-slate-500 self-end">Use the same existing hero content fields for promotions, feature messages and calls to action; no new homepage modules are required.</div>
+                  </div>
+
+                  <div className="border-t border-slate-100 pt-3 space-y-2">
+                    <div className="text-xs font-bold text-[#1E3063]">Vehicle imagery</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {[
+                        ['leftTopImage', 'leftTopLabel', 'Left top vehicle'],
+                        ['leftBottomImage', 'leftBottomLabel', 'Left bottom vehicle'],
+                        ['rightTopImage', 'rightTopLabel', 'Right top vehicle'],
+                        ['rightBottomImage', 'rightBottomLabel', 'Right bottom vehicle'],
+                      ].map(([imageKey, labelKey, label]) => (
+                        <div key={imageKey} className="rounded-lg border border-slate-200 p-2 space-y-2">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</div>
+                          <input
+                            value={String((slide.mediaConfig as Record<string, string> | undefined)?.[imageKey] || '')}
+                            onChange={(e) => handleMediaChange(slide.id, imageKey, e.target.value)}
+                            placeholder="Image URL (https://...)"
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                          />
+                          <input
+                            value={String((slide.mediaConfig as Record<string, string> | undefined)?.[labelKey] || '')}
+                            onChange={(e) => handleMediaChange(slide.id, labelKey, e.target.value)}
+                            placeholder="Vehicle label"
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => handleSave(slide)}
                     disabled={savingId === slide.id}
@@ -309,7 +362,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
               ))}
 
               {showAddForm ? (
-                <form onSubmit={handleCreate} className="border-2 border-dashed border-[#C85A32]/40 rounded-xl p-4 space-y-3">
+                <form onSubmit={handleCreate} className="border-2 border-dashed border-[#1684FF]/40 rounded-xl p-4 space-y-3">
                   <input
                     value={draft.headline}
                     onChange={(e) => setDraft((d) => ({ ...d, headline: e.target.value }))}
@@ -324,7 +377,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
                   />
                   <div className="flex gap-2">
-                    <button type="submit" disabled={creating} className="bg-[#C85A32] hover:bg-[#B34E29] text-white text-xs font-bold rounded-lg px-4 py-2 disabled:opacity-50">
+                    <button type="submit" disabled={creating} className="bg-[#1684FF] hover:bg-[#0F6ED8] text-white text-xs font-bold rounded-lg px-4 py-2 disabled:opacity-50">
                       {creating ? 'Creating…' : 'Add Slide'}
                     </button>
                     <button type="button" onClick={() => setShowAddForm(false)} className="text-xs font-semibold text-slate-500 px-4 py-2">
@@ -335,7 +388,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
               ) : (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="w-full border-2 border-dashed border-slate-200 hover:border-[#C85A32] rounded-xl py-3 text-xs font-bold text-slate-500 hover:text-[#C85A32] flex items-center justify-center gap-1.5"
+                  className="w-full border-2 border-dashed border-slate-200 hover:border-[#1684FF] rounded-xl py-3 text-xs font-bold text-slate-500 hover:text-[#1684FF] flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" /> Add Slide
                 </button>

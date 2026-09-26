@@ -28,6 +28,15 @@ function normalizeInput(input = {}) {
     output.opacity = Number(output.opacity);
     if (!Number.isFinite(output.opacity) || output.opacity < 0 || output.opacity > 100) throw new Error('Opacity must be between 0 and 100');
   }
+  if (output.displayMode !== undefined && !['scroll', 'fade'].includes(output.displayMode)) throw new Error('Invalid display mode');
+  if (output.scrollDurationSeconds !== undefined) {
+    output.scrollDurationSeconds = Number(output.scrollDurationSeconds);
+    if (!Number.isInteger(output.scrollDurationSeconds) || output.scrollDurationSeconds < 10 || output.scrollDurationSeconds > 120) throw new Error('Scroll duration must be between 10 and 120 seconds');
+  }
+  if (output.fadeDurationMs !== undefined) {
+    output.fadeDurationMs = Number(output.fadeDurationMs);
+    if (!Number.isInteger(output.fadeDurationMs) || output.fadeDurationMs < 1200 || output.fadeDurationMs > 15000) throw new Error('Fade duration must be between 1200 and 15000 milliseconds');
+  }
   if (output.sortOrder !== undefined) {
     output.sortOrder = Number(output.sortOrder);
     if (!Number.isInteger(output.sortOrder)) throw new Error('sortOrder must be an integer');
@@ -60,6 +69,9 @@ export const advertisingService = {
       textColor: data.textColor || '#FFFFFF',
       opacity: data.opacity ?? 100,
       sortOrder: data.sortOrder ?? 0,
+      displayMode: data.displayMode || 'scroll',
+      scrollDurationSeconds: data.scrollDurationSeconds ?? 28,
+      fadeDurationMs: data.fadeDurationMs ?? 4500,
       impressions: 0,
       clicks: 0,
       createdBy: actorId,
