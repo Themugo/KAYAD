@@ -39,7 +39,14 @@ export default function MonetizationCenter() {
       const sponsorIds = sponsorCarIds.split(',').map(s => s.trim()).filter(Boolean);
       const dealerIds = sponsorDealers.split(',').map(s => s.trim()).filter(Boolean);
       const featuredDealers = featuredDealerIds.split(',').map(s => s.trim()).filter(Boolean);
-      await adminAPI.updateConfig({ ...config, heroCarIds: heroIds, sponsorCarIds: sponsorIds, sponsorDealers: dealerIds, featuredDealerIds: featuredDealers });
+      await adminAPI.updateConfig({
+        ...config,
+        heroCarIds: heroIds,
+        heroFeaturedMode: heroIds.length > 0 ? 'selected' : 'all',
+        sponsorCarIds: sponsorIds,
+        sponsorDealers: dealerIds,
+        featuredDealerIds: featuredDealers,
+      });
       toast('Monetization settings saved', 'success');
     } catch { toast('Failed to save', 'error'); }
     finally { setSaving(false); }

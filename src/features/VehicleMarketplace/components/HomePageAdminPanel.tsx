@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History, LayoutGrid, List, PanelLeftOpen } from 'lucide-react';
+import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History, LayoutGrid, List, PanelLeftOpen, CarFront } from 'lucide-react';
 import { HomePageConfig, ACCENT_THEME_OPTIONS } from '../hooks/useHomePageConfig';
 import {
   EscrowRulesConfig,
@@ -8,6 +8,7 @@ import {
   writeEscrowRulesConfig,
 } from '../../Admin/hooks/escrowRulesConfig';
 import { readLogEntries } from '../../Admin/hooks/adminAuditLog';
+import type { Vehicle } from '../../../types';
 
 interface HomePageAdminPanelProps {
   config: HomePageConfig;
@@ -18,6 +19,10 @@ interface HomePageAdminPanelProps {
    * changes in the immutable audit log - not stored or modified by
    * this panel otherwise. */
   adminUser: { id: string; name: string };
+  featuredVehicles: Vehicle[];
+  heroFeaturedMode: 'all' | 'selected';
+  heroFeaturedIds: string[];
+  onSaveHeroVehicleSelection: (mode: 'all' | 'selected', ids: string[]) => Promise<void>;
 }
 
 const SECTION_LABELS: Record<keyof HomePageConfig['sectionVisibility'], string> = {
@@ -41,7 +46,14 @@ const REQUIREMENT_OPTIONS: { value: SellerEscrowRequirement; label: string }[] =
  * control here maps to a real, working piece of HomePageConfig; nothing
  * in this panel is decorative or non-functional.
  */
-export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, onUpdate, onReset, onClose, adminUser }) => {
+function formatAdminPrice(value: number) {
+  if (value >= 1000000) return `Ksh ${(value / 1000000).toFixed(value % 1000000 === 0 ? 0 : 1)}M`;
+  return `Ksh ${Math.round(value / 1000)}K`;
+}
+
+export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
+  config, onUpdate, onReset, onClose, adminUser, featuredVehicles, heroFeaturedMode, heroFeaturedIds, onSaveHeroVehicleSelection
+}) => {
   // Escrow rules have their own separate config/storage/audit-log
   // mechanism from HomePageConfig (readEscrowRulesConfig/
   // writeEscrowRulesConfig in escrowRulesConfig.ts) since
@@ -53,6 +65,22 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
   // display setting.
   const [escrowConfig, setEscrowConfig] = useState<EscrowRulesConfig>(readEscrowRulesConfig);
   const [showAuditLog, setShowAuditLog] = useState(false);
+  const [heroMode, setHeroMode] = useState<'all' | 'selected'>(heroFeaturedMode);
+  const [heroIds, setHeroIds] = useState<string[]>(heroFeaturedIds);
+  const [savingHeroSelection, setSavingHeroSelection] = useState(false);
+
+  const toggleHeroVehicle = (id: string) => {
+    setHeroIds((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
+  };
+
+  const saveHeroSelection = async () => {
+    setSavingHeroSelection(true);
+    try {
+      await onSaveHeroVehicleSelection(heroMode, heroIds);
+    } finally {
+      setSavingHeroSelection(false);
+    }
+  };
 
   const updateEscrowConfig = (next: EscrowRulesConfig) => {
     writeEscrowRulesConfig(next, adminUser); // also appends the immutable audit log entry
@@ -133,6 +161,49 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({ config, 
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Hero featured vehicle selection - uses real promoted listings only. */}
+          <div className="space-y-3 rounded-2xl border border-[#B9D8F8] bg-[#F8FBFF] p-3.5">
+            <div className="flex items-start gap-2">
+              <CarFront className="mt-0.5 h-4 w-4 text-[#1684FF] shrink-0" />
+              <div>
+                <h3 className="font-bold text-[#0B1D3A] uppercase text-[10px] tracking-wide">Hero Featured Vehicles</h3>
+                <p className="text-[11px] leading-relaxed text-slate-500 mt-1">The hero pulls real vehicles marked Featured/Promoted. Choose all featured vehicles or a selective set.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setHeroMode('all')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'all' ? 'border-[#1684FF] bg-white text-[#0F6ED8]' : 'border-slate-200 bg-white text-slate-600'}`}>
+                <span className="block text-xs font-black">All featured</span>
+                <span className="block text-[10px] mt-0.5 text-slate-400">Auto-use every promoted car</span>
+              </button>
+              <button type="button" onClick={() => setHeroMode('selected')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'selected' ? 'border-[#1684FF] bg-white text-[#0F6ED8]' : 'border-slate-200 bg-white text-slate-600'}`}>
+                <span className="block text-xs font-black">Selective</span>
+                <span className="block text-[10px] mt-0.5 text-slate-400">Choose exact hero cars</span>
+              </button>
+            </div>
+
+            {heroMode === 'selected' && (
+              <div className="max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
+                {featuredVehicles.length === 0 ? (
+                  <p className="p-3 text-[11px] text-slate-500">No promoted vehicles are currently available.</p>
+                ) : featuredVehicles.map((vehicle) => (
+                  <label key={vehicle.id} className="flex cursor-pointer items-center gap-2 rounded-lg p-2 hover:bg-[#F8FBFF]">
+                    <input type="checkbox" checked={heroIds.includes(vehicle.id)} onChange={() => toggleHeroVehicle(vehicle.id)} className="accent-[#1684FF]" />
+                    <img src={vehicle.images?.[0]} alt="" className="h-9 w-12 rounded-md object-cover bg-slate-100" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[11px] font-bold text-[#0B1D3A]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
+                      <span className="block truncate text-[10px] text-slate-400">{vehicle.location || 'Location not specified'} · {formatAdminPrice(vehicle.price)}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            <button type="button" disabled={savingHeroSelection || (heroMode === 'selected' && heroIds.length === 0)} onClick={() => void saveHeroSelection()} className="w-full rounded-xl bg-[#0B1D3A] px-3 py-2.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
+              {savingHeroSelection ? 'Saving hero selection…' : 'Save hero vehicle selection'}
+            </button>
           </div>
 
           {/* Inventory presentation - existing marketplace controls only */}

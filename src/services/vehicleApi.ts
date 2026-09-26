@@ -311,6 +311,7 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
     // 'active' as the closest equivalent; anything else not in the
     // frontend union falls back to 'active' rather than crashing.
     status: car.status === 'sold' ? 'sold' : car.status === 'pending' ? 'pending' : car.status === 'draft' ? 'draft' : 'active',
+    isFeatured: Boolean(car.is_promoted),
     createdAt: car.created_at || '',
   };
 }

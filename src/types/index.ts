@@ -337,6 +337,8 @@ export interface Vehicle {
   listingFreshness?: string;
   marketPriceAvg?: number;
   isNewArrival?: boolean;
+  /** Backend cars.is_promoted / isPromoted signal used for homepage featured vehicles. */
+  isFeatured?: boolean;
   badge?: string;
   status: 'active' | 'sold' | 'pending' | 'draft';
   createdAt: string;

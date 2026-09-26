@@ -105,56 +105,59 @@
 }
 
 /* KAYAD marketplace inventory grid contract.
- * The 3/4/5 selector controls the desktop target, while the grid itself
- * responds to the actual available result-column width. Container queries
- * are used because the inventory can sit beside the mandatory filter sidebar;
- * viewport-only breakpoints can make five cards unusably narrow. */
+ * IMPORTANT: container queries must be evaluated from a PARENT container.
+ * The previous implementation named the grid itself, so the grid could
+ * never reliably respond to its own container query. The result surface
+ * below is now the query container and the actual grid is its descendant.
+ * This makes the 3/4/5 selector work with the real width left after the
+ * mandatory desktop filter sidebar, not merely the browser viewport. */
+.kayad-inventory-results {
+  container-type: inline-size;
+  container-name: kayad-inventory-results;
+  min-width: 0;
+  width: 100%;
+}
+
 .kayad-inventory-grid {
   --kayad-grid-columns: 5;
-  container-type: inline-size;
-  container-name: kayad-inventory;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
-  width: 100%;
 }
 
-/* Never allow marketplace controls to create horizontal overflow.
- * The selected 3/4/5 target remains authoritative once the result column
- * has enough physical width; below that width the grid gracefully steps down. */
-.kayad-marketplace-controls {
-  min-width: 0;
-  width: 100%;
-}
-
-.kayad-marketplace-controls select,
-.kayad-marketplace-controls button {
-  max-width: 100%;
-}
-
-@container kayad-inventory (min-width: 520px) {
+/* Phones: one readable card; small tablets: two when there is enough room. */
+@container kayad-inventory-results (min-width: 500px) {
   .kayad-inventory-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@container kayad-inventory (min-width: 700px) {
-  .kayad-inventory-grid[data-columns="3"],
-  .kayad-inventory-grid[data-columns="4"],
-  .kayad-inventory-grid[data-columns="5"] {
+/* Selected desktop layout. The thresholds are based on actual result-area
+ * width, so the sidebar and page gutters are already accounted for. */
+@container kayad-inventory-results (min-width: 650px) {
+  .kayad-inventory-grid[data-columns="3"] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@container kayad-inventory (min-width: 900px) {
+@container kayad-inventory-results (min-width: 760px) {
   .kayad-inventory-grid[data-columns="4"],
   .kayad-inventory-grid[data-columns="5"] {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-@container kayad-inventory (min-width: 1120px) {
+@container kayad-inventory-results (min-width: 980px) {
   .kayad-inventory-grid[data-columns="5"] {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+}
+
+@keyframes kayad-hero-fade {
+  0%, 100% { opacity: 0; transform: translateY(6px) scale(.985); }
+  14%, 86% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-kayad-hero-fade {
+  animation: kayad-hero-fade 1.1s ease both;
 }

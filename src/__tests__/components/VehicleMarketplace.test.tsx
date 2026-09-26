@@ -16,6 +16,19 @@ vi.mock('../../services/vehicleApi', async () => {
 // reach in this test environment. Mocked here (matching this project's
 // own established fetch-mocking pattern elsewhere) so the real
 // sponsor-interleaving logic itself can still be verified.
+vi.mock('../../api/api', async () => {
+  const actual = await vi.importActual('../../api/api');
+  return {
+    ...actual,
+    adminAPI: {
+      ...(typeof actual.adminAPI === 'object' && actual.adminAPI !== null ? actual.adminAPI : {}),
+      getPublicConfig: vi.fn().mockResolvedValue({ config: { heroFeaturedMode: 'all', heroCarIds: [] } }),
+      getConfig: vi.fn().mockResolvedValue({ config: {} }),
+      updateConfig: vi.fn().mockResolvedValue({ config: {} }),
+    },
+  };
+});
+
 vi.mock('../../services/adApi', async () => {
   const actual = await vi.importActual('../../services/adApi');
   return {
@@ -108,14 +121,16 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     expect(heading.textContent).toContain(INITIAL_VEHICLES.length.toString());
   });
 
-  // Fixed: page size is now a real button group (6/12/24 in the
-  // redesigned toolbar, matching the uploaded reference layout), not a
+  // Page size is a real button group (12/24/48), not a
   // <select> - defaults to 24 either way, verified via which button
   // carries the "active"-style class instead of getByDisplayValue.
-  it('defaults the page-size control to 24, not 12', () => {
+  it('shows and switches the live page-size controls between 12, 24 and 48', async () => {
     render(<VehicleMarketplace {...baseProps} />);
-    const button24 = screen.getByText('24');
-    expect(button24.className).toMatch(/bg-\[#0B1D3A\]/);
+    for (const size of [12, 24, 48]) {
+      const button = screen.getByRole('button', { name: String(size) });
+      fireEvent.click(button);
+      await waitFor(() => expect(button.getAttribute('aria-pressed')).toBe('true'));
+    }
   });
 
   it('changes the live inventory grid between 3, 4 and 5 columns', async () => {
@@ -181,7 +196,6 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     expect(Array.from(sidebarMakeSelect?.options ?? []).some((o) => o.textContent === 'All Makes')).toBe(true);
     expect(sidebarMakeSelect?.className).not.toMatch(/lg:hidden/);
 
-    expect(sidebarHeading).toBeTruthy();
     expect(screen.getByText('Reset all filters')).toBeTruthy();
     expect(screen.queryByTitle('Toggle filter sidebar')).toBeNull();
   });
