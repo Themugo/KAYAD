@@ -9,10 +9,10 @@ interface Branding {
   logoUrl: string;
   brandTagline: string;
 
-  // Primary color palette (green/mint theme)
-  primaryColor: string;      // Main brand color (green: #16C4A4)
-  primaryLight: string;     // Lighter variant (#2DD9BE)
-  primaryDark: string;      // Darker variant (#0C7B68)
+  // Primary color palette (KAYAD navy/blue theme)
+  primaryColor: string;      // Main brand color (green: #1684FF)
+  primaryLight: string;     // Lighter variant (#20C4F4)
+  primaryDark: string;      // Darker variant (#0B1D3A)
   primaryGlow: string;       // Glow effect (rgba)
 
   // Accent colors
@@ -44,33 +44,33 @@ interface BrandingContextValue {
   getCSSVariables: () => Record<string, string>;
 }
 
-// Default green/mint color scheme - maintaining the existing KAYAD green theme
+// Default KAYAD navy/blue scheme for the refined marketplace presentation
 const DEFAULT_BRANDING: Branding = {
   logoType: 'icon',
   logoText: 'KAYAD',
   logoUrl: '',
   brandTagline: 'Premium Automotive Marketplace',
 
-  // Primary green/mint palette
-  primaryColor: '#16C4A4',      // Main brand green
-  primaryLight: '#2DD9BE',      // Lighter mint
-  primaryDark: '#0C7B68',       // Darker green
-  primaryGlow: 'rgba(22, 196, 164, 0.25)',
+  // Primary KAYAD navy/blue palette
+  primaryColor: '#1684FF',      // Main brand blue
+  primaryLight: '#20C4F4',      // Lighter cyan
+  primaryDark: '#0B1D3A',       // Deep navy
+  primaryGlow: 'rgba(22, 132, 255, 0.25)',
 
   accentColor: '#3B82F6',       // Blue accent
 
-  // Background colors (warm cream theme)
-  backgroundColor: '#FDFAF5',   // Main background
-  surfaceColor: '#F7F2E8',      // Surface color
+  // Cool neutral background palette
+  backgroundColor: '#F7F9FC',   // Main background
+  surfaceColor: '#EEF4FA',      // Surface color
   cardColor: '#FFFFFF',        // Card color
 
-  // Text colors (warm gray-brown)
-  textColor: '#2E2B28',         // Primary text
-  textMutedColor: '#9A9088',    // Muted text
-  textDimColor: '#C8BFB0',     // Dim text
+  // Cool navy/slate text palette
+  textColor: '#0B1D3A',         // Primary text
+  textMutedColor: '#64748B',    // Muted text
+  textDimColor: '#94A3B8',     // Dim text
 
   // Border and status colors
-  borderColor: '#E0D8C8',
+  borderColor: '#D7E4F5',
   successColor: '#10B981',
   dangerColor: '#EF4444',
   warningColor: '#F59E0B',
@@ -158,11 +158,8 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     getCSSVariables: branding ? () => getCSSVariables(branding) : () => getCSSVariables(DEFAULT_BRANDING),
   }), [branding, loading, hydrated]);
 
-  // Don't render children until hydrated to prevent flash
-  if (!hydrated) {
-    return null;
-  }
-
+  // Render immediately with the local default palette; public configuration
+  // hydrates after mount without leaving the entire application blank.
   return (
     <BrandingCtx.Provider value={value}>
       {children}

@@ -2,6 +2,7 @@ import React, { Component, type ReactNode, type ErrorInfo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { BrandingProvider } from './context/BrandingContext';
 import './index.css';
 
 // Simple error boundary for the entire app
@@ -67,7 +68,9 @@ if (root) {
     <React.StrictMode>
       <ErrorBoundary>
         <BrowserRouter>
-          <App />
+          <BrandingProvider>
+            <App />
+          </BrandingProvider>
         </BrowserRouter>
       </ErrorBoundary>
     </React.StrictMode>

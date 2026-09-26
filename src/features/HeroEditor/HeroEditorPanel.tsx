@@ -16,7 +16,7 @@ const EMPTY_DRAFT: HeroSlideInput = {
   ctaSecondaryLink: '',
   backgroundType: 'gradient',
   backgroundValue: '',
-  overlayColor: '#1E3063',
+  overlayColor: '#0B1D3A',
   overlayOpacity: 40,
   displayMode: 'boxed',
   layout: 'four-corner',
@@ -139,7 +139,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
       <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto shadow-2xl">
         <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-[#1E3063]">Hero Editor</h2>
+            <h2 className="text-base font-bold text-[#0B1D3A]">Hero Editor</h2>
             <p className="text-xs text-slate-500 mt-0.5">Edit the existing hero content, vehicle imagery, promotion copy, and presentation layout. All changes are persisted for every visitor.</p>
           </div>
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg">
@@ -169,7 +169,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
               {slides.map((slide) => (
                 <div key={slide.id} className="border border-slate-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#1E3063]">Slide</span>
+                    <span className="text-xs font-bold text-[#0B1D3A]">Slide</span>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleVisible(slide)}
@@ -267,7 +267,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                       Background color
                       <input
                         type="color"
-                        value={slide.backgroundValue || '#1E3063'}
+                        value={slide.backgroundValue || '#0B1D3A'}
                         onChange={(e) => handleFieldChange(slide.id, 'backgroundValue', e.target.value)}
                         className="w-8 h-8 rounded border border-slate-200 cursor-pointer"
                       />
@@ -324,7 +324,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                   </div>
 
                   <div className="border-t border-slate-100 pt-3 space-y-2">
-                    <div className="text-xs font-bold text-[#1E3063]">Vehicle imagery</div>
+                    <div className="text-xs font-bold text-[#0B1D3A]">Vehicle imagery</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {[
                         ['leftTopImage', 'leftTopLabel', 'Left top vehicle'],
@@ -354,7 +354,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                   <button
                     onClick={() => handleSave(slide)}
                     disabled={savingId === slide.id}
-                    className="bg-[#1E3063] hover:bg-[#17244B] text-white text-xs font-bold rounded-lg px-4 py-2 disabled:opacity-50"
+                    className="bg-[#0B1D3A] hover:bg-[#10284C] text-white text-xs font-bold rounded-lg px-4 py-2 disabled:opacity-50"
                   >
                     {savingId === slide.id ? 'Saving…' : 'Save Changes'}
                   </button>

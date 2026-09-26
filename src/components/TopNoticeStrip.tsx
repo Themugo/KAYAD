@@ -47,7 +47,7 @@ export const TopNoticeStrip: React.FC = () => {
   if (!loaded || slots.length === 0) {
     return (
       <div
-        className="w-full h-9 bg-[#0B0D12] border-b border-white/10"
+        className="w-full h-9 bg-[#071426] border-b border-white/10"
         role="region"
         aria-label="KAYAD notices"
       />
@@ -73,7 +73,7 @@ export const TopNoticeStrip: React.FC = () => {
     const slot = slots[fadeIndex];
     return (
       <div
-        className="w-full h-9 overflow-hidden bg-[#0B0D12] border-b border-white/10"
+        className="w-full h-9 overflow-hidden bg-[#071426] border-b border-white/10"
         role="region"
         aria-label="KAYAD notices"
         aria-live="polite"
@@ -83,7 +83,7 @@ export const TopNoticeStrip: React.FC = () => {
           key={slot.id}
           style={{
             opacity: (fadeVisible ? 1 : 0) * (slot.opacity / 100),
-            backgroundColor: slot.backgroundColor || '#0B0D12',
+            backgroundColor: slot.backgroundColor || '#071426',
             color: slot.textColor || '#FFFFFF',
           }}
         >
@@ -96,7 +96,7 @@ export const TopNoticeStrip: React.FC = () => {
   const loopItems = [...slots, ...slots];
   return (
     <div
-      className="w-full h-9 overflow-hidden bg-[#0B0D12] border-b border-white/10"
+      className="w-full h-9 overflow-hidden bg-[#071426] border-b border-white/10"
       role="region"
       aria-label="KAYAD notices"
     >
@@ -108,7 +108,7 @@ export const TopNoticeStrip: React.FC = () => {
           <span
             key={`${slot.id}-${index}`}
             style={{
-              backgroundColor: slot.backgroundColor || '#0B0D12',
+              backgroundColor: slot.backgroundColor || '#071426',
               color: slot.textColor || '#FFFFFF',
               opacity: slot.opacity / 100,
             }}

@@ -23,7 +23,14 @@
   --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
   --shadow-card: 0 2px 8px -1px rgba(30, 48, 99, 0.06), 0 1px 4px -1px rgba(30, 48, 99, 0.04);
-  --shadow-card-hover: 0 12px 24px -4px rgba(30, 48, 99, 0.12), 0 4px 8px -2px rgba(30, 48, 99, 0.06);
+  --shadow-card-hover: 0 12px 24px -4px rgba(11, 29, 58, 0.12), 0 4px 8px -2px rgba(11, 29, 58, 0.06);
+  --kayad-navy: #0B1D3A;
+  --kayad-deep-navy: #071426;
+  --kayad-blue: #1684FF;
+  --kayad-cyan: #20C4F4;
+  --kayad-surface: #F7F9FC;
+  --kayad-card: #FFFFFF;
+  --kayad-border: #D7E4F5;
 }
 
 @layer base {
@@ -60,6 +67,8 @@
 .kayad-homepage {
   font-family: var(--font-sans);
   font-size: 15px;
+  color: var(--kayad-navy);
+  background: var(--kayad-surface);
   line-height: 1.5;
   letter-spacing: -0.005em;
 }
@@ -104,6 +113,42 @@
   }
 }
 
+/* Homepage responsive visual system: keep existing controls usable at every width. */
+.kayad-homepage .homepage-control-group {
+  min-width: 0;
+}
+.kayad-homepage .homepage-control-group select,
+.kayad-homepage .homepage-control-group button {
+  min-height: 40px;
+}
+.kayad-homepage .kayad-inventory-results {
+  overflow: visible;
+}
+.kayad-homepage .kayad-market-toolbar {
+  min-width: 0;
+}
+.kayad-homepage .kayad-market-toolbar > * {
+  min-width: 0;
+}
+.kayad-homepage .kayad-vehicle-card {
+  min-width: 0;
+}
+.kayad-homepage .kayad-vehicle-card img {
+  max-width: 100%;
+}
+@media (max-width: 639px) {
+  .kayad-homepage { font-size: 14px; }
+  .kayad-homepage .kayad-market-toolbar { gap: .625rem; }
+  .kayad-homepage .kayad-market-toolbar .kayad-toolbar-control { width: 100%; }
+  .kayad-homepage .kayad-market-toolbar .kayad-toolbar-control > * { width: 100%; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kayad-homepage .kayad-market-toolbar { align-items: stretch; }
+}
+@media (min-width: 1024px) {
+  .kayad-homepage .kayad-vehicle-card { min-height: 100%; }
+}
+
 /* KAYAD marketplace inventory grid contract.
  * IMPORTANT: container queries must be evaluated from a PARENT container.
  * The previous implementation named the grid itself, so the grid could
@@ -123,10 +168,12 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
+  width: 100%;
+  align-items: stretch;
 }
 
 /* Phones: one readable card; small tablets: two when there is enough room. */
-@container kayad-inventory-results (min-width: 500px) {
+@container kayad-inventory-results (min-width: 520px) {
   .kayad-inventory-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -134,30 +181,31 @@
 
 /* Selected desktop layout. The thresholds are based on actual result-area
  * width, so the sidebar and page gutters are already accounted for. */
-@container kayad-inventory-results (min-width: 650px) {
+@container kayad-inventory-results (min-width: 680px) {
   .kayad-inventory-grid[data-columns="3"] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@container kayad-inventory-results (min-width: 760px) {
+@container kayad-inventory-results (min-width: 860px) {
   .kayad-inventory-grid[data-columns="4"],
   .kayad-inventory-grid[data-columns="5"] {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-@container kayad-inventory-results (min-width: 980px) {
+@container kayad-inventory-results (min-width: 1120px) {
   .kayad-inventory-grid[data-columns="5"] {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
 @keyframes kayad-hero-fade {
-  0%, 100% { opacity: 0; transform: translateY(6px) scale(.985); }
-  14%, 86% { opacity: 1; transform: translateY(0) scale(1); }
+  0% { opacity: 0; transform: translateY(8px) scale(.985); }
+  18%, 82% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-4px) scale(1.005); }
 }
 
 .animate-kayad-hero-fade {
-  animation: kayad-hero-fade 1.1s ease both;
+  animation: kayad-hero-fade 1.35s cubic-bezier(.22,.61,.36,1) both;
 }
