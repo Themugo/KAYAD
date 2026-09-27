@@ -211,8 +211,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
             <div className="flex items-start gap-2">
               <CarFront className="mt-0.5 h-4 w-4 text-[#176B87] shrink-0" />
               <div>
-                <h3 className="font-bold text-[#1F2937] uppercase text-[10px] tracking-wide">Hero Showcase Defaults</h3>
-                <p className="text-[11px] leading-relaxed text-slate-500 mt-1">These sample vehicles appear only when the marketplace has no real Featured/Promoted vehicles. Edit them here without touching code.</p>
+                <h3 className="font-bold text-[#1F2937] uppercase text-[10px] tracking-wide">Hero Fallback Vehicles</h3>
+                <p className="text-[11px] leading-relaxed text-slate-500 mt-1">These fallback rows are used only when the marketplace has no real Featured/Promoted vehicles. Configure the vehicle identity and clean image URL here without touching code.</p>
               </div>
             </div>
             <div className="space-y-3">
@@ -223,12 +223,12 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                     <span className="text-[10px] text-slate-400">Fallback only</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    {(['make','model','year','fuelType','transmission','tagline'] as const).map((field) => (
+                    {(['make','model','year','price','mileage','fuelType','transmission','bodyStyle','location','condition','tagline'] as const).map((field) => (
                       <label key={field} className={field === 'tagline' ? 'col-span-2' : ''}>
-                        <span className="mb-1 block text-[9px] font-bold uppercase tracking-wide text-slate-500">{field === 'fuelType' ? 'Fuel' : field === 'transmission' ? 'Transmission' : field}</span>
+                        <span className="mb-1 block text-[9px] font-bold uppercase tracking-wide text-slate-500">{field === 'fuelType' ? 'Fuel' : field === 'transmission' ? 'Transmission' : field === 'bodyStyle' ? 'Body Style' : field === 'price' ? 'Price (Ksh)' : field === 'mileage' ? 'Mileage (km)' : field}</span>
                         <input
                           value={String(vehicle[field])}
-                          onChange={(e) => onUpdate((prev) => ({ ...prev, heroFallbackVehicles: prev.heroFallbackVehicles.map((item, i) => i === index ? { ...item, [field]: field === 'year' ? Number(e.target.value) || 2026 : e.target.value } : item) }))}
+                          onChange={(e) => onUpdate((prev) => ({ ...prev, heroFallbackVehicles: prev.heroFallbackVehicles.map((item, i) => i === index ? { ...item, [field]: ['year','price','mileage'].includes(field) ? Number(e.target.value) || 0 : e.target.value } : item) }))}
                           className="w-full rounded-lg border border-slate-200 bg-[#FBFDFC] px-2.5 py-2 text-[11px] font-semibold text-slate-700 outline-none focus:border-[#176B87]"
                         />
                       </label>

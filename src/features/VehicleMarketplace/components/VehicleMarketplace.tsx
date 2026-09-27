@@ -461,38 +461,59 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     model: item.model,
     year: item.year,
     vin: `KAYAD-${item.id}`,
-    price: 0,
+    price: item.price,
     currency: 'KES',
-    mileage: 0,
-    location: 'Nairobi',
-    county: 'Nairobi',
-    bodyStyle: 'SUV',
+    mileage: item.mileage,
+    location: item.location,
+    county: item.location,
+    bodyStyle: item.bodyStyle as Vehicle['bodyStyle'],
     transmission: item.transmission as Vehicle['transmission'],
     fuelType: item.fuelType as Vehicle['fuelType'],
-    engine: 'Showcase vehicle',
+    engine: '',
     horsepower: 0,
-    exteriorColor: 'Not specified',
-    interiorColor: 'Not specified',
-    condition: 'Excellent',
+    exteriorColor: '',
+    interiorColor: '',
+    condition: item.condition as Vehicle['condition'],
     listingType: 'fixed',
     images: [item.image],
     image: item.image,
     description: item.tagline,
     features: [],
-    sellerId: 'kayad-showcase',
-    sellerName: 'KAYAD Showcase',
-    sellerRating: 5,
-    sellerType: 'Verified Dealer',
+    sellerId: '',
+    sellerName: '',
+    sellerRating: 0,
+    sellerType: 'Private Seller',
     isFeatured: false,
     isAuction: false,
-    isDealerCertified: true,
-    inspectionPassed: true,
+    isDealerCertified: false,
+    inspectionPassed: false,
     viewsCount: 0,
     savedCount: 0,
     status: 'active',
     createdAt: new Date(0).toISOString(),
   })), [homeConfig.heroFallbackVehicles]);
-  const heroSourceVehicles = heroVehicles.length ? heroVehicles : heroFallbackVehicles;
+  // The hero is data-driven: real Featured/Promoted inventory is authoritative.
+  // Admin-configured fallback rows are used only when they contain an explicit
+  // image URL; there is no bundled/composite vehicle artwork and no vehicle
+  // identity is selected by this component.
+  const heroSourceVehicles = useMemo(
+    () => {
+      if (heroVehicles.length) return heroVehicles;
+      return heroFallbackVehicles.filter((vehicle) => Boolean(
+        vehicle.images?.[0] &&
+        vehicle.make &&
+        vehicle.model &&
+        vehicle.year > 0 &&
+        vehicle.price > 0 &&
+        vehicle.fuelType &&
+        vehicle.transmission &&
+        vehicle.bodyStyle &&
+        vehicle.location &&
+        vehicle.condition
+      ));
+    },
+    [heroVehicles, heroFallbackVehicles],
+  );
   const [heroPairIndex, setHeroPairIndex] = useState(0);
   const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
   const [heroTransitioning, setHeroTransitioning] = useState(false);
@@ -548,7 +569,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   const heroVehicleNarration = (vehicle?: Vehicle) => {
     if (!vehicle) return '';
-    if (vehicle.id.startsWith('hero-') && vehicle.description) return vehicle.description;
     const facts = [
       vehicle.badge || (vehicle.isFeatured ? 'Featured vehicle' : ''),
       vehicle.inspectionPassed ? 'Inspection passed' : '',
@@ -589,13 +609,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         ? { backgroundImage: activeHeroSlide.backgroundValue }
         : { backgroundImage: `url(\"${KICC_HERO_BACKGROUND}\")`, backgroundSize: 'cover', backgroundPosition: 'center center' };
 
-  const heroImageForVehicle = (vehicle?: Vehicle) => {
-    if (!vehicle) return '';
-    if (vehicle.id === 'hero-land-cruiser') return '/hero/kayad-land-cruiser.png';
-    if (vehicle.id === 'hero-mercedes-gle') return '/hero/kayad-mercedes-gle.png';
-    if (vehicle.id === 'hero-toyota-prado') return '/hero/kayad-prado.png';
-    return vehicle.images?.[0] || vehicle.image || '';
-  };
+  // Vehicle artwork always comes from the vehicle record/configuration.
+  // No vehicle-specific asset mapping lives in the hero component.
+  const heroImageForVehicle = (vehicle?: Vehicle) => vehicle?.images?.[0] || vehicle?.image || '';
 
   // Warm the complete hero artwork before it is ever displayed. This is
   // intentionally limited to hero assets so the rest of the marketplace is
@@ -612,9 +628,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const heroVehicleDetails = (vehicle?: Vehicle) => {
     if (!vehicle) return [];
     return [
-      vehicle.year ? String(vehicle.year) : '',
+      vehicle.year > 0 ? String(vehicle.year) : '',
+      vehicle.price > 0 ? formatPriceM(vehicle.price) : '',
+      vehicle.mileage > 0 ? `${vehicle.mileage.toLocaleString()} km` : '',
       vehicle.fuelType || '',
       vehicle.transmission || '',
+      vehicle.bodyStyle || '',
       vehicle.location || '',
     ].filter(Boolean).slice(0, 4);
   };
@@ -769,7 +788,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                           src={heroImageForVehicle(heroPreviousLeftVehicle)}
                           alt=""
                           aria-hidden="true"
-                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
+                          className={`absolute inset-0 h-full w-full rounded-none bg-transparent object-contain object-center shadow-none will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
                           loading="eager"
                           decoding="async"
                         />
@@ -778,7 +797,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         <img
                           src={heroImageForVehicle(heroLeftVehicle)}
                           alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
-                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
+                          className={`absolute inset-0 h-full w-full rounded-none bg-transparent object-contain object-center shadow-none will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
                           loading="eager"
                           decoding="async"
                         />
@@ -820,7 +839,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                           src={heroImageForVehicle(heroPreviousRightVehicle)}
                           alt=""
                           aria-hidden="true"
-                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
+                          className={`absolute inset-0 h-full w-full rounded-none bg-transparent object-contain object-center shadow-none will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
                           loading="eager"
                           decoding="async"
                         />
@@ -829,7 +848,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         <img
                           src={heroImageForVehicle(heroRightVehicle)}
                           alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`}
-                          className={`absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_30px_28px_rgba(0,0,0,.38)] will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
+                          className={`absolute inset-0 h-full w-full rounded-none bg-transparent object-contain object-center shadow-none will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
                           loading="eager"
                           decoding="async"
                         />

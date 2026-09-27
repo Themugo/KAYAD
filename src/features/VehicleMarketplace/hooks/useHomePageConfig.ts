@@ -48,9 +48,14 @@ export interface HomePageConfig {
     make: string;
     model: string;
     year: number;
+    price: number;
+    mileage: number;
     fuelType: string;
     transmission: string;
+    bodyStyle: string;
+    location: string;
     tagline: string;
+    condition: string;
     image: string;
   }>;
   inventoryLayout: {
@@ -96,10 +101,13 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     auctions: { heading: 'Live Auctions', subtext: 'Bid live on select auction vehicles' },
   },
   accentTheme: 'slate',
+  // No sample vehicle identity or composite artwork is hardcoded into the hero.
+  // Admin can configure fallback rows from Home Page Admin; real Featured/
+  // Promoted inventory remains the authoritative source whenever available.
   heroFallbackVehicles: [
-    { id: 'hero-land-cruiser', make: 'Toyota', model: 'Land Cruiser', year: 2022, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Built for journeys that matter.', image: '/hero/kayad-land-cruiser.png' },
-    { id: 'hero-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2021, fuelType: 'Petrol', transmission: 'Automatic', tagline: 'Luxury that moves you.', image: '/hero/kayad-mercedes-gle.png' },
-    { id: 'hero-toyota-prado', make: 'Toyota', model: 'Prado', year: 2020, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'Confidence for every road.', image: '/hero/kayad-prado.png' },
+    { id: 'hero-fallback-1', make: '', model: '', year: 0, price: 0, mileage: 0, fuelType: '', transmission: '', bodyStyle: '', location: '', tagline: '', condition: '', image: '' },
+    { id: 'hero-fallback-2', make: '', model: '', year: 0, price: 0, mileage: 0, fuelType: '', transmission: '', bodyStyle: '', location: '', tagline: '', condition: '', image: '' },
+    { id: 'hero-fallback-3', make: '', model: '', year: 0, price: 0, mileage: 0, fuelType: '', transmission: '', bodyStyle: '', location: '', tagline: '', condition: '', image: '' },
   ],
   inventoryLayout: {
     viewMode: 'grid',
@@ -134,8 +142,12 @@ function loadConfig(): HomePageConfig {
         ? parsed.heroFallbackVehicles.slice(0, 6).map((item: any, index: number) => ({
             id: String(item?.id || `hero-fallback-${index + 1}`),
             make: String(item?.make || ''), model: String(item?.model || ''),
-            year: Number(item?.year) || 2026, fuelType: String(item?.fuelType || ''),
-            transmission: String(item?.transmission || ''), tagline: String(item?.tagline || ''), image: String(item?.image || ''),
+            year: Number(item?.year) || 0, price: Number(item?.price) || 0, mileage: Number(item?.mileage) || 0,
+            fuelType: String(item?.fuelType || ''), transmission: String(item?.transmission || ''),
+            bodyStyle: String(item?.bodyStyle || ''), location: String(item?.location || ''),
+            tagline: String(item?.tagline || ''),
+            condition: String(item?.condition || ''),
+            image: String(item?.image || '').startsWith('/hero/kayad-') ? '' : String(item?.image || ''),
           }))
         : DEFAULT_HOME_PAGE_CONFIG.heroFallbackVehicles,
       inventoryLayout: {
