@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Loader2, Phone } from 'lucide-react';
+import { ShieldCheck, Loader2, Phone, MessageCircle } from 'lucide-react';
 import {
   sendPhoneOTP,
   verifyPhoneOTP,
@@ -26,6 +26,7 @@ export const PhoneVerification: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [otpInput, setOtpInput] = useState('');
   const [verifying, setVerifying] = useState(false);
+  const [channel, setChannel] = useState<'sms' | 'whatsapp'>('sms');
 
   const loadStatus = () => {
     setStatus('loading');
@@ -47,7 +48,7 @@ export const PhoneVerification: React.FC = () => {
     setSending(true);
     setError(null);
     try {
-      await sendPhoneOTP();
+      await sendPhoneOTP(channel);
       setCodeSent(true);
     } catch (err) {
       setError(err instanceof PhoneVerificationError ? err.message : 'Could not send a verification code. Please try again.');
@@ -125,17 +126,40 @@ export const PhoneVerification: React.FC = () => {
       )}
 
       {!codeSent ? (
-        <button
-          onClick={handleSendCode}
-          disabled={sending}
-          className="bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2.5 disabled:opacity-50"
-        >
-          {sending ? 'Sending…' : 'Send Verification Code'}
-        </button>
+        <div className="space-y-3">
+          <div>
+            <label htmlFor="phone-verification-channel" className="text-xs font-bold text-slate-600 block mb-1.5">
+              Verification method
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setChannel('sms')}
+                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold ${channel === 'sms' ? 'border-[#176B87] bg-[#EAF5F8] text-[#176B87]' : 'border-slate-200 text-slate-500'}`}
+              >
+                <Phone className="w-3.5 h-3.5" /> SMS
+              </button>
+              <button
+                type="button"
+                onClick={() => setChannel('whatsapp')}
+                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold ${channel === 'whatsapp' ? 'border-[#176B87] bg-[#EAF5F8] text-[#176B87]' : 'border-slate-200 text-slate-500'}`}
+              >
+                <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={handleSendCode}
+            disabled={sending}
+            className="bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2.5 disabled:opacity-50"
+          >
+            {sending ? 'Sending…' : `Send Code via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'}`}
+          </button>
+        </div>
       ) : (
         <form onSubmit={handleVerify} className="space-y-3">
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1.5">Enter the 4-digit code sent to {phone}</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1.5">Enter the 4-digit code sent via {channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} to {phone}</label>
             <input
               type="text"
               inputMode="numeric"

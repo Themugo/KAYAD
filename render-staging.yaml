@@ -79,23 +79,29 @@ services:
         sync: false
       - key: AT_USERNAME
         sync: false
-      - key: SENDGRID_API_KEY
+      - key: BREVO_API_KEY
         sync: false
-      - key: EMAIL_FROM
+      - key: BREVO_FROM_EMAIL
         value: staging@kayad.space
-      - key: EMAIL_HOST
+      - key: BREVO_FROM_NAME
+        value: KAYAD Staging
+      - key: BREVO_WEBHOOK_TOKEN
         sync: false
-      - key: EMAIL_PORT
-        value: "587"
-      - key: EMAIL_USER
-        sync: false
-      - key: EMAIL_PASS
-        sync: false
+      - key: REQUIRE_EMAIL_VERIFICATION
+        value: "true"
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: TWILIO_WHATSAPP_CONTENT_SID
+        sync: false
+      - key: TWILIO_WHATSAPP_CONTENT_VARIABLES
+        sync: false
+      - key: TWILIO_STATUS_CALLBACK_URL
+        sync: false
+      - key: COMMUNICATION_WEBHOOK_SECRET
         sync: false
       - key: ESCROW_ACCOUNT_NUMBER
         sync: false

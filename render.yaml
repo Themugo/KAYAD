@@ -57,6 +57,8 @@ services:
         value: KAYAD
       - key: BREVO_WEBHOOK_TOKEN
         sync: false
+      - key: REQUIRE_EMAIL_VERIFICATION
+        value: "true"
       - key: AT_API_KEY
         sync: false
       - key: AT_USERNAME
