@@ -85,7 +85,7 @@ export const getDeliveryHistory = async ({ userId, channel, category, status, li
 
 export const getProviderHealth = async () => {
   const configured = {
-    resend: Boolean(process.env.RESEND_API_KEY),
+    brevo: Boolean(process.env.BREVO_API_KEY),
     africastalking: Boolean(process.env.AT_API_KEY),
     twilio_whatsapp: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_NUMBER),
   };

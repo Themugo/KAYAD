@@ -109,7 +109,7 @@ export const deliver = async ({
   }
 
   const provider = channel === "email"
-    ? "resend"
+    ? "brevo"
     : channel === "sms"
       ? "africastalking"
       : channel === "whatsapp"

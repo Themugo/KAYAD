@@ -171,7 +171,7 @@ tail -f backend/logs/app.log | grep -i cache
 
 #### Steps:
 1. **Verify In-Memory Fallback is Active**
-   - Application should automatically use in-memory fallback
+   - Non-production environments may use the existing in-memory fallback; production must restore managed Redis before queue-backed operations resume
    - Check application logs for fallback activation
 
 2. **Monitor Database Load**
@@ -204,7 +204,7 @@ redis-cli ping
 redis-cli info
 
 # Test application cache
-curl https://api.kayad.co.ke/api/v1/cars
+curl ${BACKEND_URL:-https://api.kayad.space}/api/v1/cars
 # Check response time
 ```
 
@@ -233,7 +233,7 @@ redis-cli info clients
 
 ## Note
 
-**Cache failure is non-critical.** The application can operate with the in-memory fallback that is already implemented. The fallback provides basic caching functionality while Redis is being restored.
+**Production rule:** Redis is a required managed dependency for queue-backed operations. Restore Redis before declaring production healthy. The existing in-memory fallback is for non-production/degraded development only.
 
 ## Escalation
 

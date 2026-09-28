@@ -129,8 +129,8 @@ tail -100 backend/logs/app.log | grep -i deploy
    tail -f backend/logs/app.log
 
    # Test critical endpoints
-   curl https://api.kayad.co.ke/health
-   curl https://api.kayad.co.ke/api/v1/cars
+   curl ${BACKEND_URL:-https://api.kayad.space}/health
+   curl ${BACKEND_URL:-https://api.kayad.space}/api/v1/cars
    ```
 
 ### Scenario 3: Database Rollback (if needed)
@@ -192,27 +192,27 @@ tail -100 backend/logs/app.log | grep -i deploy
 ### Health Checks
 ```bash
 # Run application health check
-curl https://api.kayad.co.ke/health
+curl ${BACKEND_URL:-https://api.kayad.space}/health
 
 # Run deep health check
-curl https://api.kayad.co.ke/health/deep
+curl ${BACKEND_URL:-https://api.kayad.space}/health/deep
 
 # Check frontend
-curl https://kayad.co.ke
+curl ${FRONTEND_URL:-https://kayad.space}
 ```
 
 ### Critical Endpoints
 ```bash
 # Test car listings
-curl https://api.kayad.co.ke/api/v1/cars
+curl ${BACKEND_URL:-https://api.kayad.space}/api/v1/cars
 
 # Test authentication
-curl -X POST https://api.kayad.co.ke/api/v1/auth/login \
+curl -X POST ${BACKEND_URL:-https://api.kayad.space}/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"test"}'
 
 # Test dealer operations
-curl https://api.kayad.co.ke/api/v1/dealer/analytics \
+curl ${BACKEND_URL:-https://api.kayad.space}/api/v1/dealer/analytics \
   -H "Authorization: Bearer <token>"
 ```
 

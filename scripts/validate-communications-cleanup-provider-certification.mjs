@@ -46,7 +46,7 @@ const required = [
   ['backend/services/auctionReminderCron.js', ['COMMUNICATION_EVENTS.AUCTION_ENDING_SOON', 'emitCommunication']],
   ['backend/services/savedSearchCron.js', ['COMMUNICATION_EVENTS.SAVED_SEARCH_MATCH', 'category: "marketing"']],
   ['backend/services/reminderAutomationService.js', ['COMMUNICATION_EVENTS.REMINDER', 'emitCommunication']],
-  ['backend/routes/communicationWebhookRoutes.js', ['/twilio/status', '/sendgrid/events', '/africastalking/status', '/resend/events']],
+  ['backend/routes/communicationWebhookRoutes.js', ['/twilio/status', '/sendgrid/events', '/africastalking/status', '/brevo/events']],
   ['backend/services/communicationControl.service.js', ['getProviderHealth', 'retryDelivery']],
   ['backend/services/communicationGateway.service.js', ['handleProviderStatus', 'communicationDeliveryUpdated']],
 ];
@@ -58,7 +58,7 @@ for (const [file, needles] of required) {
 console.log('PASS no direct provider calls outside canonical adapters');
 console.log('PASS scheduled communications use canonical event gateway');
 console.log('PASS provider callbacks and retry reconciliation are wired');
-console.log(`Provider configuration: Resend=${Boolean(process.env.RESEND_API_KEY)}, AfricaTalking=${Boolean(process.env.AT_API_KEY && process.env.AT_USERNAME)}, TwilioWhatsApp=${Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_NUMBER)}`);
-if (!process.env.RESEND_API_KEY && !process.env.AT_API_KEY && !process.env.TWILIO_ACCOUNT_SID) {
+console.log(`Provider configuration: Brevo=${Boolean(process.env.BREVO_API_KEY)}, AfricaTalking=${Boolean(process.env.AT_API_KEY && process.env.AT_USERNAME)}, TwilioWhatsApp=${Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_NUMBER)}`);
+if (!process.env.BREVO_API_KEY && !process.env.AT_API_KEY && !process.env.TWILIO_ACCOUNT_SID) {
   console.log('INFO live provider credential certification skipped: no provider secrets are available in this runtime');
 }

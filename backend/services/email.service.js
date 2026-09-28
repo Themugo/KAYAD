@@ -4,7 +4,7 @@ import { addEmailJob } from "../queues/emailQueue.js";
 
 const APP_NAME = process.env.APP_NAME || "Kayad";
 const APP_URL = process.env.FRONTEND_URL || "https://www.kayad.space";
-const FROM = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || `noreply@kayad.space`;
+const FROM = process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM || `noreply@kayad.space`;
 const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
 const layout = (content, title = APP_NAME) => `
@@ -73,20 +73,20 @@ const divider = () => `<hr style="border:none;border-top:1px solid #1E2530;margi
 // Export raw email function for queue worker
 export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => {
   const startTime = Date.now();
-  if (!process.env.RESEND_API_KEY) {
+  if (!process.env.BREVO_API_KEY) {
     incrementCounter("email_disabled");
-    logWarn("Resend provider is not configured", { subject, to });
-    return { success: false, disabled: true, error: "Resend provider is not configured" };
+    logWarn("Brevo provider is not configured", { subject, to });
+    return { success: false, disabled: true, error: "Brevo provider is not configured" };
   }
 
   try {
-    const { sendResendEmail } = await import("./emailProvider.service.js");
-    const info = await sendResendEmail({ to, subject, html, text: text || subject, from });
+    const { sendBrevoEmail } = await import("./emailProvider.service.js");
+    const info = await sendBrevoEmail({ to, subject, html, text: text || subject, from });
     const duration = Date.now() - startTime;
     recordMetric("email_send_duration", duration);
     incrementCounter("email_send_success");
     logInfo("Email sent successfully", { subject, to, messageId: info.id });
-    return { success: true, id: info.id, provider: "resend" };
+    return { success: true, id: info.id, provider: "brevo" };
   } catch (err) {
     recordMetric("email_send_duration", Date.now() - startTime, { status: "error" });
     incrementCounter("email_send_failure", { error_type: err.code || "unknown" });

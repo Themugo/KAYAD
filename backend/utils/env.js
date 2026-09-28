@@ -69,8 +69,8 @@ const FEATURE_GROUPS = [
     vars: ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN"],
   },
   {
-    label: "Resend (email)",
-    vars: ["RESEND_API_KEY", "RESEND_FROM_EMAIL"],
+    label: "Brevo (transactional email)",
+    vars: ["BREVO_API_KEY", "BREVO_FROM_EMAIL"],
   },
   {
     label: "Redis (caching)",
@@ -155,6 +155,40 @@ export const validateEnv = (opts = { silent: false }) => {
         hasError = true;
       }
     }
+
+    // Launch-critical provider/infrastructure contracts. These are deliberately
+    // hard requirements in production so the application cannot start in a
+    // partially configured state and silently degrade payments, communications,
+    // uploads, or durable queues.
+    const launchRequired = [
+      ["MPESA_CONSUMER_KEY", "M-Pesa consumer key"],
+      ["MPESA_CONSUMER_SECRET", "M-Pesa consumer secret"],
+      ["MPESA_SHORTCODE", "M-Pesa shortcode"],
+      ["MPESA_PASSKEY", "M-Pesa passkey"],
+      ["CLOUDINARY_CLOUD_NAME", "Cloudinary cloud name"],
+      ["CLOUDINARY_API_KEY", "Cloudinary API key"],
+      ["CLOUDINARY_API_SECRET", "Cloudinary API secret"],
+      ["BREVO_API_KEY", "Brevo API key"],
+      ["BREVO_FROM_EMAIL", "Brevo sender email"],
+      ["AT_API_KEY", "Africa's Talking API key"],
+      ["AT_USERNAME", "Africa's Talking username"],
+      ["TWILIO_ACCOUNT_SID", "Twilio account SID"],
+      ["TWILIO_AUTH_TOKEN", "Twilio auth token"],
+      ["TWILIO_WHATSAPP_NUMBER", "Twilio WhatsApp sender"],
+      ["REDIS_URL", "Managed Redis connection"],
+      ["WEBHOIST_EMAIL", "Platform owner email"],
+    ];
+    for (const [key, desc] of launchRequired) {
+      if (!process.env[key]) {
+        console.error(`  ❌ Missing launch-critical env: ${key} (${desc})`);
+        hasError = true;
+      }
+    }
+    if (process.env.DISABLE_REDIS === "true") {
+      console.error("  ❌ DISABLE_REDIS=true is forbidden in production");
+      hasError = true;
+    }
+
   }
 
   // ─── WARN ABOUT MISSING SECRETS ─────────────────────────────

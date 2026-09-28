@@ -37,7 +37,7 @@ const liveApiReady = Boolean(process.env.KAYAD_CERT_EMAIL && process.env.KAYAD_C
 const providerChannels = String(process.env.PROVIDER_CERT_CHANNELS || "email,sms")
   .split(",").map((x) => x.trim()).filter(Boolean);
 const providerConfigured = {
-  email: Boolean(process.env.RESEND_API_KEY && process.env.PROVIDER_CERT_EMAIL),
+  email: Boolean(process.env.BREVO_API_KEY && process.env.PROVIDER_CERT_EMAIL),
   sms: Boolean(process.env.AT_API_KEY && process.env.AT_USERNAME && process.env.PROVIDER_CERT_PHONE),
   whatsapp: Boolean(
     process.env.TWILIO_ACCOUNT_SID &&

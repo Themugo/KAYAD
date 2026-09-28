@@ -4,6 +4,7 @@
 // an admin-configured KAYAD escrow account.
 
 import { findById, findOne, findAll, create, update, remove } from "../db/index.js";
+import { emitToUsers, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 
 const DEFAULT_RULES = Object.freeze({
   enabled: false,
@@ -105,5 +106,24 @@ export function sanitizeEscrowAccount(account) {
 
 export async function verifyEscrowFunding(escrowId, actorId, fundingReference) {
   const { atomicVerifyEscrowFunding } = await import("../utils/atomicTransactions.js");
-  return atomicVerifyEscrowFunding(escrowId, actorId, fundingReference);
+  const result = await atomicVerifyEscrowFunding(escrowId, actorId, fundingReference);
+
+  const escrow = await findById("escrows", escrowId);
+  const recipients = [escrow?.buyer, escrow?.seller].filter(Boolean);
+  if (recipients.length) {
+    await emitToUsers(recipients, {
+      eventType: COMMUNICATION_EVENTS.ESCROW_FUNDED,
+      category: "transactional",
+      title: "Escrow funded",
+      message: `KAYAD has verified the escrow funding for KES ${Number(escrow?.amount || 0).toLocaleString("en-KE")}. Funds are now held under the configured custody process.`,
+      channels: ["in_app", "email", "sms", "whatsapp"],
+      metadata: {
+        escrowId,
+        fundingReference,
+        carId: escrow?.car || null,
+      },
+    });
+  }
+
+  return result;
 }

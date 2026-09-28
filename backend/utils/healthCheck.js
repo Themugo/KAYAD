@@ -84,7 +84,7 @@ const deepHealth = async (req, res) => {
       } catch (err) {
         queueDetails[name] = {
           status: "error",
-          error: err.message,
+          error: "Internal dependency check failed",
         };
       }
     }
@@ -97,7 +97,7 @@ const deepHealth = async (req, res) => {
   } catch (err) {
     checks.queue = {
       status: "error",
-      error: err.message,
+      error: "Internal dependency check failed",
     };
   }
 
@@ -149,7 +149,7 @@ export const registerHealthRoutes = (app) => {
       return res.status(503).json({
         status: "not ready",
         reason: "db",
-        detail: result.reason,
+        detail: "Database readiness check failed",
       });
     }
     return res.json({ status: "ready" });

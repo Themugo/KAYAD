@@ -139,7 +139,7 @@ grep -i "database\|connection\|timeout" logs/backend.log
 ### Health Checks
 ```bash
 # Run application health check
-curl https://api.kayad.co.ke/health
+curl ${BACKEND_URL:-https://api.kayad.space}/health
 
 # Test database connectivity
 curl -s -H "apikey: $SUPABASE_ANON_KEY" \
@@ -149,15 +149,15 @@ curl -s -H "apikey: $SUPABASE_ANON_KEY" \
 ### Critical Queries
 ```bash
 # Test car listings
-curl https://api.kayad.co.ke/api/v1/cars
+curl ${BACKEND_URL:-https://api.kayad.space}/api/v1/cars
 
 # Test user authentication
-curl -X POST https://api.kayad.co.ke/api/v1/auth/login \
+curl -X POST ${BACKEND_URL:-https://api.kayad.space}/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"test"}'
 
 # Test dealer operations
-curl https://api.kayad.co.ke/api/v1/dealer/analytics \
+curl ${BACKEND_URL:-https://api.kayad.space}/api/v1/dealer/analytics \
   -H "Authorization: Bearer <token>"
 ```
 

@@ -22,11 +22,24 @@ export const sendTwilioWhatsApp = async ({ phone, message }) => {
     throw new Error("Twilio WhatsApp provider is not configured");
   }
   const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-  const result = await client.messages.create({
+  const payload = {
     from: String(process.env.TWILIO_WHATSAPP_NUMBER).startsWith("whatsapp:") ? process.env.TWILIO_WHATSAPP_NUMBER : `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
     to: `whatsapp:${to}`,
-    body: String(message || ""),
     statusCallback: process.env.TWILIO_STATUS_CALLBACK_URL || undefined,
-  });
+  };
+
+  // Production WhatsApp notifications may require an approved Content Template.
+  // Keep the existing free-form body behavior for sandbox/service-window usage,
+  // while allowing certification to exercise the approved template path.
+  if (process.env.TWILIO_WHATSAPP_CONTENT_SID) {
+    payload.contentSid = process.env.TWILIO_WHATSAPP_CONTENT_SID;
+    if (process.env.TWILIO_WHATSAPP_CONTENT_VARIABLES) {
+      payload.contentVariables = process.env.TWILIO_WHATSAPP_CONTENT_VARIABLES;
+    }
+  } else {
+    payload.body = String(message || "");
+  }
+
+  const result = await client.messages.create(payload);
   return { id: result.sid, provider: "twilio_whatsapp", status: result.status, raw: result };
 };

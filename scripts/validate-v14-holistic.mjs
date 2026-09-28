@@ -19,7 +19,7 @@ check("dealer OTP converges on canonical challenge service", read("backend/servi
 check("canonical inspection router has no dormant digital workflow dependency", !read("backend/inspection/routes/inspectionRoutes.js").includes("digitalController") && !fs.existsSync(path.join(root,"backend","digitalInspection")));
 check("canonical inspection compatibility uses vehicle_inspections", read("backend/inspection/controllers/legacyCompatibilityController.js").includes("vehicle_inspections") && !read("backend/inspection/controllers/legacyCompatibilityController.js").includes("digital_inspections"));
 check("partner webhooks perform real outbound HTTP", read("backend/partnerPlatform/services/partnerPlatformService.js").includes("method: 'POST'") && read("backend/partnerPlatform/services/partnerPlatformService.js").includes("response_status"));
-check("no backend 501 placeholders", ![...fs.readdirSync(path.join(root,"backend"),{recursive:true})].filter(String).filter(f=>f.endsWith(".js")).some(f=>read(path.join("backend",f)).includes("res.status(501)")));
+check("no backend 501 placeholders", ![...fs.readdirSync(path.join(root,"backend"),{recursive:true})].filter(String).filter(f=>f.endsWith(".js")).filter(f=>fs.statSync(path.join(root,"backend",f)).isFile()).some(f=>read(path.join("backend",f)).includes("res.status(501)")));
 check("live certification contract converged", read("scripts/certify-v14-live-api.mjs").includes("/api/v1/auth/profile") && !read("scripts/certify-v14-live-api.mjs").includes("/api/v1/auth/me") && read("scripts/validate-v14-live-certification-contract.mjs").includes("V14 live certification contract"));
 const failed=checks.filter(([,ok])=>!ok);
 for(const [n,ok] of checks) console.log(`${ok?"PASS":"FAIL"} ${n}`);

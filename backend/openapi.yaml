@@ -5237,12 +5237,12 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /api/communications/webhooks/resend/events:
+  /api/communications/webhooks/brevo/events:
     post:
       tags:
       - Api
-      summary: POST /api/communications/webhooks/resend/events
-      description: 'Route contract: POST /api/communications/webhooks/resend/events'
+      summary: POST /api/communications/webhooks/brevo/events
+      description: 'Route contract: POST /api/communications/webhooks/brevo/events'
       operationId: postApiCommunicationsWebhooksResendEvents
       responses:
         '200':

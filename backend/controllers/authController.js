@@ -354,7 +354,7 @@ export const login = async (req, res) => {
     // isn't configured there is no way to receive the
     // verification link, so blocking login would lock everyone out.
     // Override explicitly with REQUIRE_EMAIL_VERIFICATION=true|false.
-    const emailConfigured = !!process.env.RESEND_API_KEY;
+    const emailConfigured = !!process.env.BREVO_API_KEY;
     const requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION
       ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
       : emailConfigured;

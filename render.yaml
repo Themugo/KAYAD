@@ -49,7 +49,47 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_FROM_EMAIL
+        value: noreply@kayad.space
+      - key: BREVO_FROM_NAME
+        value: KAYAD
+      - key: BREVO_WEBHOOK_TOKEN
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_USERNAME
+        sync: false
+      - key: AT_SENDER_ID
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: TWILIO_WHATSAPP_CONTENT_SID
+        sync: false
+      - key: TWILIO_WHATSAPP_CONTENT_VARIABLES
+        sync: false
+      - key: TWILIO_STATUS_CALLBACK_URL
+        sync: false
+      - key: COMMUNICATION_WEBHOOK_SECRET
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: kayad-redis
+          property: connectionString
       - key: WEBHOIST_EMAIL
         sync: false
       - key: ADMIN_EMAIL
         sync: false
+
+  - type: keyvalue
+    name: kayad-redis
+    region: oregon
+    plan: starter
+    ipAllowList: []
+    maxmemoryPolicy: allkeys-lru

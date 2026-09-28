@@ -92,7 +92,7 @@ const alertRules = {
 
 const sendEmailAlert = async (alert) => {
   try {
-    if (!process.env.ALERT_EMAIL_TO || !process.env.RESEND_API_KEY) {
+    if (!process.env.ALERT_EMAIL_TO || !process.env.BREVO_API_KEY) {
       logWarn("Email alert not configured");
       return;
     }
@@ -191,14 +191,26 @@ const sendWebhookAlert = async (alert) => {
 // 🚨 TRIGGER ALERT
 // =============================
 
-export const triggerAlert = async (title, message, level = ALERT_LEVELS.MEDIUM, metadata = {}) => {
+export const triggerAlert = async (titleOrAlert, message, level = ALERT_LEVELS.MEDIUM, metadata = {}) => {
+  // Accept both the established positional contract and the structured
+  // alert objects already emitted by Sentry/Redis/failover services.
+  // Normalise here so observability failures never become secondary runtime
+  // failures because of a mismatched alert-call shape.
+  const structured = titleOrAlert && typeof titleOrAlert === "object" && !Array.isArray(titleOrAlert);
+  const sourceAlert = structured ? titleOrAlert : {};
+  const normalizedLevel = String(structured ? sourceAlert.level : level).toLowerCase();
+  const safeLevel = Object.values(ALERT_LEVELS).includes(normalizedLevel)
+    ? normalizedLevel
+    : ALERT_LEVELS.MEDIUM;
   const alert = {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    title,
-    message,
-    level,
-    timestamp: Date.now(),
-    metadata,
+    title: structured ? (sourceAlert.title || sourceAlert.source || "KAYAD Alert") : titleOrAlert,
+    message: structured ? (sourceAlert.message || "Operational alert triggered") : message,
+    level: safeLevel,
+    timestamp: sourceAlert.timestamp || Date.now(),
+    metadata: structured
+      ? { ...sourceAlert.metadata, source: sourceAlert.source, metrics: sourceAlert.metrics }
+      : metadata,
   };
 
   logError("Alert triggered", { alert });

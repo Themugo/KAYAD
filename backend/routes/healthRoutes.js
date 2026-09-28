@@ -29,11 +29,11 @@ router.get("/", async (req, res) => {
     if (!dbError) {
       health.checks.database = { status: "healthy" };
     } else {
-      health.checks.database = { status: "unhealthy", error: dbError.message };
+      health.checks.database = { status: "unhealthy", error: "Database check failed" };
       health.status = "degraded";
     }
   } catch (error) {
-    health.checks.database = { status: "error", error: error.message };
+    health.checks.database = { status: "error", error: "Database check failed" };
     health.status = "unhealthy";
   }
 
@@ -55,7 +55,7 @@ router.get("/", async (req, res) => {
   } catch (error) {
     health.checks.redis = {
       status: "error",
-      error: error.message,
+      error: "Redis check failed",
     };
     health.status = "degraded";
   }
@@ -104,11 +104,11 @@ router.get("/detailed", protect, adminOnly, async (req, res) => {
     if (!dbError) {
       health.checks.database = { status: "healthy" };
     } else {
-      health.checks.database = { status: "unhealthy", error: dbError.message };
+      health.checks.database = { status: "unhealthy", error: "Database check failed" };
       health.status = "degraded";
     }
   } catch (error) {
-    health.checks.database = { status: "error", error: error.message };
+    health.checks.database = { status: "error", error: "Database check failed" };
     health.status = "unhealthy";
   }
 
@@ -130,7 +130,7 @@ router.get("/detailed", protect, adminOnly, async (req, res) => {
   } catch (error) {
     health.checks.redis = {
       status: "error",
-      error: error.message,
+      error: "Redis check failed",
     };
     health.status = "degraded";
   }

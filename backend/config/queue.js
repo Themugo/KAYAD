@@ -15,6 +15,17 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 const DISABLE_REDIS = process.env.DISABLE_REDIS === "true";
 
 const redisUrl = process.env.REDIS_URL;
+const isProduction = process.env.NODE_ENV === "production";
+
+// Production queues must use the managed Redis provisioned by Render.
+// Never silently fall back to localhost in production: a missing REDIS_URL
+// would otherwise make notification/payment-adjacent jobs appear healthy while
+// no durable queue is actually available. Local development keeps the existing
+// REDIS_HOST/REDIS_PORT behavior.
+if (isProduction && !redisUrl && process.env.DISABLE_REDIS !== "true") {
+  throw new Error("Production queue startup requires REDIS_URL. Configure the managed KAYAD Redis service before deployment.");
+}
+
 const retryStrategy = (times) => {
   if (times > 3) {
     logError("Redis connection failed after 3 retries");

@@ -48,7 +48,7 @@ export class ApiHelper {
     email: string,
     password: string
   ): Promise<string> {
-    const response = await request.post('/api/auth/login', {
+    const response = await request.post('/api/v1/auth/login', {
       data: JSON.stringify({ email, password }),
       headers: { 'Content-Type': 'application/json' },
     });
@@ -68,7 +68,7 @@ export class ApiHelper {
     request: APIRequestContext,
     userData: any
   ): Promise<any> {
-    const response = await request.post('/api/auth/register', {
+    const response = await request.post('/api/v1/auth/register', {
       data: JSON.stringify(userData),
       headers: { 'Content-Type': 'application/json' },
     });
@@ -91,7 +91,7 @@ export class ApiHelper {
     const response = await this.authenticatedRequest(
       request,
       'POST',
-      '/api/cars',
+      '/api/v1/cars',
       token,
       vehicleData
     );
@@ -114,7 +114,7 @@ export class ApiHelper {
     const response = await this.authenticatedRequest(
       request,
       'POST',
-      '/api/auctions',
+      '/api/v1/auctions',
       token,
       auctionData
     );
@@ -138,7 +138,7 @@ export class ApiHelper {
     const response = await this.authenticatedRequest(
       request,
       'POST',
-      `/api/bids`,
+      `/api/v1/bids`,
       token,
       { auctionId, amount }
     );
@@ -161,7 +161,7 @@ export class ApiHelper {
     const response = await this.authenticatedRequest(
       request,
       'POST',
-      '/api/escrow',
+      '/api/v1/escrow',
       token,
       escrowData
     );
@@ -184,7 +184,7 @@ export class ApiHelper {
     const response = await this.authenticatedRequest(
       request,
       'POST',
-      '/api/payments/initiate',
+      '/api/v1/payments/initiate',
       token,
       paymentData
     );
@@ -209,7 +209,7 @@ export class ApiHelper {
         await this.authenticatedRequest(
           request,
           'DELETE',
-          `/api/admin/test-data/${id}`,
+          `/api/v1/admin/test-data/${id}`,
           token
         );
       } catch (error) {

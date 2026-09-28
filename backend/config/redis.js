@@ -10,6 +10,18 @@ import { triggerAlert } from "./alerting.js";
 const redisUrl = process.env.REDIS_URL;
 const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
+const isProduction = process.env.NODE_ENV === "production";
+
+// Production must use the managed Redis contract. Caching/session fallbacks are
+// acceptable for local/degraded development, but silently running without the
+// authoritative production Redis service can make queues, locks and rate limits
+// behave differently from the release environment.
+if (isProduction && process.env.DISABLE_REDIS === "true") {
+  throw new Error("Production Redis cannot be disabled. Remove DISABLE_REDIS=true and configure the managed REDIS_URL.");
+}
+if (isProduction && !redisUrl) {
+  throw new Error("Production Redis requires REDIS_URL. Configure the managed KAYAD Redis service before deployment.");
+}
 
 // Temporarily disable Redis auto-connect for debugging
 const DISABLE_REDIS = false;

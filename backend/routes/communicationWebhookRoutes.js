@@ -11,23 +11,12 @@ const timingSafeEqual = (a, b) => {
   return aa.length === bb.length && crypto.timingSafeEqual(aa, bb);
 };
 
-const verifyResendWebhook = (req) => {
-  const secret = process.env.RESEND_WEBHOOK_SECRET;
-  const id = req.get("svix-id");
-  const timestamp = req.get("svix-timestamp");
-  const signatureHeader = req.get("svix-signature");
-  if (!secret || !id || !timestamp || !signatureHeader || !Buffer.isBuffer(req.body)) return false;
-  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (!Number.isFinite(age) || age > 300) return false;
-  const encodedSecret = secret.startsWith("whsec_") ? secret.slice(6) : secret;
-  let key;
-  try { key = Buffer.from(encodedSecret, "base64"); } catch { return false; }
-  const signed = `${id}.${timestamp}.${req.body.toString("utf8")}`;
-  const expected = crypto.createHmac("sha256", key).update(signed).digest("base64");
-  return signatureHeader.split(" ").some((entry) => {
-    const value = entry.includes(",") ? entry.split(",").pop() : entry;
-    return timingSafeEqual(value, expected);
-  });
+const verifyBrevoWebhook = (req) => {
+  const token = process.env.BREVO_WEBHOOK_TOKEN;
+  if (!token) return false;
+  const authorization = req.get("authorization") || "";
+  const supplied = authorization.startsWith("Bearer ") ? authorization.slice(7) : (req.get("x-brevo-webhook-token") || "");
+  return timingSafeEqual(supplied, token);
 };
 
 const requireWebhookSecret = (req, res, next) => {
@@ -38,22 +27,36 @@ const requireWebhookSecret = (req, res, next) => {
   next();
 };
 
+router.post("/brevo/events", asyncHandler(async (req, res) => {
+  if (!verifyBrevoWebhook(req)) return res.status(401).json({ success: false, message: "Unauthorized Brevo webhook" });
 
-router.post("/resend/events", asyncHandler(async (req, res) => {
-  if (!verifyResendWebhook(req)) return res.status(401).json({ success: false, message: "Invalid Resend webhook signature" });
-  let event;
-  try { event = JSON.parse(req.body.toString("utf8")); } catch { return res.status(400).json({ success: false, message: "Invalid JSON" }); }
-  const type = event?.type || "";
-  const status = type === "email.delivered" ? "delivered" : type === "email.bounced" ? "bounced" : type === "email.failed" ? "failed" : type === "email.sent" ? "sent" : type === "email.delivery_delayed" ? "queued" : type === "email.opened" || type === "email.clicked" ? "read" : null;
+  const event = req.body || {};
+  const type = String(event?.event || "").toLowerCase();
+  const status = type === "delivered" ? "delivered"
+    : type === "request" || type === "sent" ? "sent"
+      : ["opened", "uniqueopened", "click"].includes(type) ? "read"
+        : ["hardbounce", "softbounce"].includes(type) ? "bounced"
+          : ["invalid", "blocked", "spam", "error", "unsubscribed"].includes(type) ? "failed"
+            : type === "deferred" ? "queued"
+              : null;
+
   if (!status) return res.json({ success: true, matched: false, ignored: true });
-  const data = event?.data || {};
+
+  const providerMessageId = event?.["message-id"] || event?.messageId || event?.id;
   const result = await handleProviderStatus({
-    provider: "resend",
-    providerMessageId: data.email_id,
+    provider: "brevo",
+    providerMessageId,
     status,
-    error: data?.bounce?.message || data?.error?.message || null,
-    providerEventId: event?.id || data.email_id,
-    metadata: { type, created_at: event?.created_at, to: data.to, subject: data.subject },
+    error: event?.reason || event?.error || null,
+    providerEventId: event?.id || providerMessageId,
+    metadata: {
+      event: event?.event,
+      email: event?.email,
+      subject: event?.subject,
+      tags: event?.tags,
+      ts: event?.ts,
+      ts_event: event?.ts_event,
+    },
   });
   return res.json({ success: true, matched: Boolean(result) });
 }));

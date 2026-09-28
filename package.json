@@ -63,7 +63,19 @@
     "validate:v14:runtime-preflight": "node scripts/validate-v14-runtime-preflight.mjs",
     "validate:v14:release-candidate": "node scripts/validate-v14-release-candidate.mjs",
     "certify:v14:production-runtime": "node scripts/certify-v14-production-runtime.mjs",
-    "validate:canonical-architecture": "node scripts/validate-canonical-architecture.mjs"
+    "validate:canonical-architecture": "node scripts/validate-canonical-architecture.mjs",
+    "typecheck": "tsc --noEmit",
+    "validate:phase3-infrastructure": "node scripts/validate-phase3-infrastructure.mjs",
+    "bootstrap:supabase:staging": "node scripts/bootstrap-supabase-staging.mjs",
+    "validate:phase4-transaction-certification": "node scripts/validate-phase4-transaction-certification.mjs",
+    "certify:phase4:lifecycle": "node scripts/certify-phase4-lifecycle.mjs",
+    "validate:phase5-e2e": "node scripts/validate-phase5-e2e.mjs",
+    "certify:phase5:browser-contract": "node scripts/certify-phase5-browser-contract.mjs",
+    "validate:phase6-release": "node scripts/validate-phase6-release.mjs",
+    "certify:phase6:live": "node scripts/certify-phase6-live.mjs",
+    "validate:phase7-security-release": "node scripts/validate-phase7-security-release.mjs",
+    "validate:phase8-operations": "node scripts/validate-phase8-operations.mjs",
+    "verify:backup": "node scripts/verify-backup-artifact.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
@@ -108,5 +120,6 @@
   },
   "engines": {
     "node": ">=22.22.2"
-  }
+  },
+  "certify:phase5:browser-contract": "node scripts/certify-phase5-browser-contract.mjs"
 }

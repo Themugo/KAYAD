@@ -18,7 +18,7 @@ tags: [general]
 ### Critical Services
 - **M-Pesa** (payments) - Critical
 - **Cloudinary** (images) - Medium
-- **SendGrid** (emails) - Low
+- **Brevo** (emails) - Low
 - **Twilio** (SMS) - Low
 - **Sentry** (error tracking) - Low
 
@@ -144,7 +144,7 @@ export MPESA_MAINTENANCE_MODE=false
 - Update status page if extended outage
 - Notify stakeholders if critical
 
-## SendGrid Outage (Low)
+## Brevo Outage (Low)
 
 ### Severity: Low
 ### RTO: 4 hours
@@ -157,9 +157,9 @@ export MPESA_MAINTENANCE_MODE=false
 
 ### Immediate Actions
 
-#### 1. Check SendGrid Status
-- Visit SendGrid status page
-- Check SendGrid Twitter for announcements
+#### 1. Check Brevo Status
+- Visit Brevo status page
+- Check Brevo Twitter for announcements
 
 #### 2. Queue Emails
 - Queue failed emails for retry
@@ -173,12 +173,12 @@ export MPESA_MAINTENANCE_MODE=false
 
 ### Recovery Steps
 
-#### 1. Monitor SendGrid Status
-- Continuously check SendGrid status
+#### 1. Monitor Brevo Status
+- Continuously check Brevo status
 - Monitor for service restoration
 
 #### 2. Process Queued Emails
-- Once SendGrid is restored
+- Once Brevo is restored
 - Process queued emails
 - Respect rate limits
 - Monitor delivery success
@@ -296,8 +296,8 @@ curl https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest
 # Test Cloudinary connectivity
 curl https://api.cloudinary.com/v1_1/<cloud_name>/health
 
-# Test SendGrid connectivity
-curl https://api.sendgrid.com/v3/user/profile
+# Test Brevo connectivity
+curl https://api.brevo.com/v3/user/profile
 
 # Test Twilio connectivity
 curl https://api.twilio.com/2010-04-01/Accounts/<account_sid>

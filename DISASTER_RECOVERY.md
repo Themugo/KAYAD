@@ -125,7 +125,7 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
    - Monitor cache warmup
 
 3. **If Redis is unavailable:**
-   - Application will use in-memory fallback (already implemented)
+   - Non-production environments may use the existing in-memory fallback; production requires managed Redis and fails closed when it is unavailable
    - Monitor database load increase
    - Restore Redis service when available
 
@@ -134,7 +134,7 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 - Monitor API response times
 - Verify database load decreases
 
-**Note:** Cache failure is non-critical. Application can operate with in-memory fallback.
+**Note:** Cache degradation is recoverable, but production queue/notification infrastructure must restore managed Redis before treating the service as healthy.
 
 ### Third-Party Outage Runbook
 
@@ -145,8 +145,8 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 **Third-Party Services:**
 - M-Pesa (payments)
 - Cloudinary (images)
-- SendGrid (emails)
-- Twilio (SMS)
+- Brevo (transactional email)
+- Africa's Talking (SMS) and Twilio (WhatsApp)
 - Sentry (error tracking)
 
 **M-Pesa Outage (Critical):**
@@ -162,7 +162,7 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 3. Monitor Cloudinary status
 4. Re-upload images if needed after restoration
 
-**SendGrid/Twilio Outage (Low):**
+**Brevo/Africa's Talking/Twilio Outage (Low):**
 1. Queue notifications
 2. Retry with exponential backoff
 3. Log failed deliveries
@@ -420,7 +420,7 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 ### Third-Party Support
 - **M-Pesa**: [Contact]
 - **Cloudinary**: [Contact]
-- **SendGrid**: [Contact]
+- **Brevo**: [Contact]
 - **Twilio**: [Contact]
 
 ## References
