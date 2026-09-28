@@ -49,8 +49,10 @@ describe('AuthProvider', () => {
 });
 
 describe('useAuth', () => {
-  it('returns context within provider', () => {
+  it('returns context within provider', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(() => Promise.resolve());
+    await act(() => Promise.resolve());
     expect(result.current).toBeDefined();
     expect(result.current.isAuth).toBeDefined();
   });

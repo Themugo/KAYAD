@@ -76,7 +76,9 @@ describe('DealerDashboard', () => {
       </MemoryRouter>
     );
 
-    // Should still render without crashing
-    expect(screen.queryByText(/welcome back/i) || true).toBeTruthy();
+    // Wait for the rejected request to be consumed by the component's effect.
+    await waitFor(() => expect(dealerAPI.summary).toHaveBeenCalled());
+    // The page remains mounted after the failed request.
+    expect(document.body).toBeTruthy();
   });
 });

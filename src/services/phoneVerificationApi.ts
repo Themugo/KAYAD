@@ -34,13 +34,8 @@ async function phoneFetch<T>(path: string, options: RequestInit = {}): Promise<T
 /** POST /api/auth/send-otp - sends a real 4-digit code to the real,
  * signed-in user's phone on file. Rate-limited on the backend
  * (otpLimiter) - a 429 surfaces here as kind: 'rate_limited'. */
-export type PhoneVerificationChannel = 'sms' | 'whatsapp';
-
-export async function sendPhoneOTP(channel: PhoneVerificationChannel = 'sms'): Promise<void> {
-  await phoneFetch('/api/auth/send-otp', {
-    method: 'POST',
-    body: JSON.stringify({ channel }),
-  });
+export async function sendPhoneOTP(): Promise<void> {
+  await phoneFetch('/api/auth/send-otp', { method: 'POST' });
 }
 
 /** POST /api/auth/verify-phone - checks a real 4-digit code against

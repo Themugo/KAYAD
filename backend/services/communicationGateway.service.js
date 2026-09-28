@@ -72,7 +72,7 @@ export const updateDelivery = async (id, patch) => {
   return delivery;
 };
 
-const sendWhatsApp = async (phone, body, metadata = {}) => sendTwilioWhatsApp({ phone, message: body, metadata });
+const sendWhatsApp = async (phone, body) => sendTwilioWhatsApp({ phone, message: body });
 
 const preferenceAllows = async (userId, channel, category) => {
   if (!userId || channel === "in_app" || category === "otp" || category === "system") return true;
@@ -148,7 +148,7 @@ export const deliver = async ({
       result = await sendSMS(recipient, message || text || "");
       if (!result) throw new Error("SMS provider rejected delivery");
     } else {
-      result = await sendWhatsApp(recipient, message || text || "", metadata);
+      result = await sendWhatsApp(recipient, message || text || "");
     }
 
     const updated = await updateDelivery(delivery.id, {

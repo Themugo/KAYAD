@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import EscrowPage from '../../pages/EscrowPage';
 
@@ -30,14 +30,14 @@ vi.mock('../../context/SocketContext', () => ({
 describe('EscrowPage', () => {
   afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
-  it('renders escrow heading', () => {
+  it('renders escrow heading', async () => {
     render(<MemoryRouter><EscrowPage /></MemoryRouter>);
-    expect(screen.getByText('🔒 Escrow Vault')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('🔒 Escrow Vault')).toBeInTheDocument());
   });
 
-  it('renders description', () => {
+  it('renders description', async () => {
     render(<MemoryRouter><EscrowPage /></MemoryRouter>);
-    expect(screen.getByText(/protected by M-Pesa escrow/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/protected by M-Pesa escrow/i)).toBeInTheDocument());
   });
 
   it('displays escrow transactions', async () => {

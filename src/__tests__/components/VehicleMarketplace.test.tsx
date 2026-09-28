@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
 import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
@@ -29,6 +30,8 @@ vi.mock('../../api/api', async () => {
   };
 });
 
+vi.mock('../../components/FloatingAdRail', () => ({ default: () => null }));
+
 vi.mock('../../services/adApi', async () => {
   const actual = await vi.importActual('../../services/adApi');
   return {
@@ -40,6 +43,15 @@ vi.mock('../../services/adApi', async () => {
     ),
   };
 });
+
+
+type MarketplaceProps = ComponentProps<typeof VehicleMarketplace>;
+
+const renderMarketplace = async (props: MarketplaceProps) => {
+  const result = render(<VehicleMarketplace {...props} />);
+  await waitFor(() => expect(screen.getByText(/Vehicle Inventory/i)).toBeInTheDocument(), { timeout: 3000 });
+  return result;
+};
 
 describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   beforeEach(() => {
@@ -72,8 +84,9 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     onOpenCompareModal: () => {},
   };
 
-  it('renders without throwing against the real mock dataset', () => {
-    render(<VehicleMarketplace {...baseProps} />);
+
+  it('renders without throwing against the real mock dataset', async () => {
+    await renderMarketplace({ ...baseProps  });
     expect(screen.getByText(/Vehicle Inventory/i)).toBeTruthy();
   });
 
@@ -86,22 +99,22 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   // rendered in this specific layout) - these tests are updated to
   // verify the real behavior the new layout actually has instead of
   // asserting removed UI.
-  it('shows the real, current vehicle count in the inventory heading', () => {
-    render(<VehicleMarketplace {...baseProps} />);
+  it('shows the real, current vehicle count in the inventory heading', async () => {
+    await renderMarketplace({ ...baseProps  });
     const heading = screen.getByText(/Vehicle Inventory/i);
     expect(heading.textContent).toContain(String(INITIAL_VEHICLES.length));
   });
 
   it('renders empty vehicles list without crashing, showing a real empty state', async () => {
     vehicleApiMocks.getCars.mockResolvedValueOnce({ success: true, data: [], pagination: { page: 1, limit: 24, total: 0, pages: 1 } });
-    render(<VehicleMarketplace {...baseProps} vehicles={[]} />);
+    await renderMarketplace({ ...baseProps, vehicles: [] });
     await waitFor(() => {
       expect(screen.getByText(/No vehicles match your filters/i)).toBeTruthy();
     }, { timeout: 2000 });
   });
 
   it('renders the full-width inventory grid using the admin presentation defaults', async () => {
-    render(<VehicleMarketplace {...baseProps} />);
+    await renderMarketplace({ ...baseProps  });
     await waitFor(() => {
       const inventoryGrid = screen.getByTestId('inventory-grid');
       expect(inventoryGrid.getAttribute('data-view-mode')).toBe('grid');
@@ -112,7 +125,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   });
 
   it('interleaves a real sponsor card into the grid without inflating the vehicle count', async () => {
-    render(<VehicleMarketplace {...baseProps} />);
+    await renderMarketplace({ ...baseProps  });
     await waitFor(() => {
       expect(screen.queryAllByText(/Sponsored|^Partner$|Featured Dealer/).length).toBeGreaterThan(0);
     }, { timeout: 2000 });
@@ -125,7 +138,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   // <select> - defaults to 24 either way, verified via which button
   // carries the "active"-style class instead of getByDisplayValue.
   it('shows and switches the live page-size controls between 12, 24 and 48', async () => {
-    render(<VehicleMarketplace {...baseProps} />);
+    await renderMarketplace({ ...baseProps  });
     for (const size of [12, 24, 48]) {
       const button = screen.getByRole('button', { name: String(size) });
       fireEvent.click(button);
@@ -134,7 +147,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   });
 
   it('changes the live inventory grid between 3, 4 and 5 columns', async () => {
-    render(<VehicleMarketplace {...baseProps} />);
+    await renderMarketplace({ ...baseProps  });
     const grid = await screen.findByTestId('inventory-grid');
     for (const columns of [3, 4, 5]) {
       fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
@@ -181,7 +194,7 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
   // The inventory defaults to an edge-to-edge presentation so the
   // The filter panel is a required desktop element; it is visible by default.
   it('keeps the inventory full-width and shows the required sidebar by default', async () => {
-    const { container } = render(<VehicleMarketplace {...baseProps} />);
+    const { container } = await renderMarketplace({ ...baseProps  });
     await waitFor(() => {
       const selects = container.querySelectorAll('select');
       expect(selects.length).toBeGreaterThan(0);
@@ -253,8 +266,8 @@ describe('VehicleMarketplace - toolbar controls (redesigned layout)', () => {
 
   // The toolbar keeps explicit, readable labels for the existing
   // presentation controls so every control remains understandable.
-  it('Show and Sort controls are real and functional in the redesigned toolbar', () => {
-    render(<VehicleMarketplace {...baseProps} />);
+  it('Show and Sort controls are real and functional in the redesigned toolbar', async () => {
+    await renderMarketplace({ ...baseProps  });
     expect(screen.getByText('Show')).toBeTruthy();
     expect(screen.getByDisplayValue('Newest First')).toBeTruthy();
   });
@@ -309,18 +322,18 @@ describe('VehicleMarketplace - admin home page customization', () => {
     localStorage.clear();
   });
 
-  it('does not show the Customize button for a non-admin user, even on the real home page', () => {
-    render(<VehicleMarketplace {...baseProps} user={buyerUser} isHomePage />);
+  it('does not show the Customize button for a non-admin user, even on the real home page', async () => {
+    await renderMarketplace({ ...baseProps, user: buyerUser, isHomePage: true });
     expect(screen.queryByText('Customize Home Page')).toBeNull();
   });
 
-  it('does not show the Customize button for an admin user when this is NOT the real home page (the reused "saved vehicles" view)', () => {
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage={false} />);
+  it('does not show the Customize button for an admin user when this is NOT the real home page (the reused "saved vehicles" view)', async () => {
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: false });
     expect(screen.queryByText('Customize Home Page')).toBeNull();
   });
 
-  it('shows the Customize button only for an admin user on the real home page, and opens the panel on click', () => {
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+  it('shows the Customize button only for an admin user on the real home page, and opens the panel on click', async () => {
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     const button = screen.getByText('Customize Home Page');
     expect(button).toBeTruthy();
     fireEvent.click(button);
@@ -328,7 +341,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
   });
 
   it('lets an admin change inventory layout without code and persists the presentation settings', async () => {
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
 
     const columns = screen.getByLabelText('Desktop inventory columns') as HTMLSelectElement;
@@ -347,7 +360,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
   });
 
   it('toggling a section off in the admin panel actually hides that section on the page', async () => {
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
     // Fixed: previously checked for "Escrow Protection" (the trust
     // strip's own heading) - removed per explicit direction along
@@ -373,7 +386,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
   // rendering surface.
 
   it('persists the config to localStorage so a page reload (a fresh render) keeps the admin\'s changes', async () => {
-    const { unmount } = render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    const { unmount } = await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
     fireEvent.click(screen.getByText('Search & Trust Info Card'));
     await waitFor(() => expect(screen.queryByPlaceholderText(/Make, model or keyword/)).toBeNull());
@@ -381,12 +394,12 @@ describe('VehicleMarketplace - admin home page customization', () => {
 
     // Fresh render, simulating a reload - reads from the same
     // localStorage the first render just wrote to.
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     expect(screen.queryByPlaceholderText(/Make, model or keyword/)).toBeNull();
   });
 
   it('Reset to Defaults in the admin panel restores hidden sections and edited text', async () => {
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
     fireEvent.click(screen.getByText('Search & Trust Info Card'));
     await waitFor(() => expect(screen.queryByPlaceholderText(/Make, model or keyword/)).toBeNull());
@@ -443,7 +456,7 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
   });
 
   it('clicking the Escrow Live Mode toggle in the real panel flips it from OFF to ON and logs the change', async () => {
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
     const escrowToggle = screen.getByRole('button', { name: /Escrow Live Mode/i });
     expect(escrowToggle).toBeTruthy();
@@ -464,7 +477,7 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
   });
 
   it('changing the Private Sellers requirement dropdown in the real panel updates the config that isEscrowApplicable reads', async () => {
-    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
 
     const dropdown = screen.getByDisplayValue('Mandatory');

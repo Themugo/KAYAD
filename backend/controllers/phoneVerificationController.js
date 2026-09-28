@@ -1,6 +1,5 @@
 import User from "../models/User.js";
 import { createOtpChallenge, verifyOtpChallenge } from "../services/otpService.js";
-import { COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
 import * as R from "../utils/response.js";
 import { logInfo } from "../utils/logger.js";
 import { logError } from '../infrastructure/logging/index.js';
@@ -13,16 +12,12 @@ export const sendPhoneOTP = async (req, res) => {
     if (!user.phone) return R.error(res, "No phone number on account", 400);
     if (user.phoneVerified) return R.success(res, null, "Phone already verified");
 
-    const requestedChannel = String(req.body?.channel || "sms").toLowerCase();
-    const channel = requestedChannel === "whatsapp" ? "whatsapp" : requestedChannel === "sms" ? "sms" : null;
-    if (!channel) return R.error(res, "Unsupported verification channel", 400);
-
     const result = await createOtpChallenge({
       userId: user.id || user._id,
       purpose: "phone_verification",
-      channel,
+      channel: "sms",
       recipient: user.phone,
-      eventType: COMMUNICATION_EVENTS.PHONE_VERIFICATION,
+      eventType: "phone_verification",
     });
 
     logInfo("Phone OTP challenge created", { userId: user._id, challengeId: result.challengeId });

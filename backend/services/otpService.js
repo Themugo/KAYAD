@@ -54,10 +54,10 @@ export const createOtpChallenge = async ({ userId, purpose, channel, recipient, 
     text: message,
     html: `<p>Your KAYAD verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes. Do not share this code.</p>`,
     category: "otp",
-    metadata: { otpChallengeId: challenge.id, purpose, message, text: message, subject: "Your KAYAD verification code", contentVariables: channel === "whatsapp" ? { "1": code } : undefined, ipHash: ip ? hash(ip) : null, userAgentHash: userAgent ? hash(userAgent) : null },
+    metadata: { otpChallengeId: challenge.id, purpose, message, text: message, subject: "Your KAYAD verification code", ipHash: ip ? hash(ip) : null, userAgentHash: userAgent ? hash(userAgent) : null },
   });
 
-  if (!delivery || delivery.status === "failed") {
+  if (delivery?.status === "failed") {
     await update("otp_challenges", challenge.id, { status: "delivery_failed", lastSentAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
     throw new Error("Verification code could not be delivered");
   }

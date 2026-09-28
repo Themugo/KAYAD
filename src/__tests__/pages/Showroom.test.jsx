@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Showroom from '../../pages/Showroom';
 
@@ -27,14 +27,14 @@ vi.mock('../../components/features/common/SeoStructuredData', () => ({
 describe('Showroom', () => {
   afterEach(() => { cleanup(); });
 
-  it('renders page heading', () => {
+  it('renders page heading', async () => {
     render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText(/Kenya's Premium Automotive Gallery/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/Kenya's Premium Automotive Gallery/)).toBeInTheDocument());
   });
 
-  it('renders The Gallery title', () => {
+  it('renders The Gallery title', async () => {
     render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText('The Gallery')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('The Gallery')).toBeInTheDocument());
   });
 
   it('shows the honest empty state when the real API returns no vehicles', async () => {
