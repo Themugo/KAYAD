@@ -75,7 +75,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
             onClick={() => setViewMode('platform')}
             className={`px-5 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               viewMode === 'platform'
-                ? 'bg-[#1E3063] text-white shadow-md'
+                ? 'bg-[#176B87] text-white shadow-md'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -88,7 +88,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
             onClick={() => setViewMode('directory')}
             className={`px-5 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               viewMode === 'directory'
-                ? 'bg-[#1E3063] text-white shadow-md'
+                ? 'bg-[#176B87] text-white shadow-md'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -124,7 +124,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
       <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-2 scrollbar-none">
         {[
           { id: 'All', label: 'All Verified Sellers', icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
-          { id: 'Enterprise Dealer', label: 'Verified Enterprise Dealerships', icon: <Building2 className="w-4 h-4 text-[#1E3063]" /> },
+          { id: 'Enterprise Dealer', label: 'Verified Enterprise Dealerships', icon: <Building2 className="w-4 h-4 text-[#176B87]" /> },
           { id: 'Private Seller', label: 'Verified Private Individual Owners', icon: <UserCheck className="w-4 h-4 text-emerald-600" /> }
         ].map((tab) => (
           <button
@@ -132,7 +132,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
             onClick={() => setSellerTypeFilter(tab.id as any)}
             className={`px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all whitespace-nowrap ${
               sellerTypeFilter === tab.id
-                ? 'bg-[#1E3063] text-white shadow-md'
+                ? 'bg-[#176B87] text-white shadow-md'
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
@@ -159,7 +159,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
           <select
             value={selectedCounty}
             onChange={(e) => setSelectedCounty(e.target.value)}
-            className="bg-transparent font-bold text-[#1E3063] focus:outline-none cursor-pointer"
+            className="bg-transparent font-bold text-[#176B87] focus:outline-none cursor-pointer"
           >
             <option value="All">All Counties</option>
             <option value="Nairobi">Nairobi</option>
@@ -222,7 +222,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
                       </Badge>
                     </div>
 
-                    <h3 className="text-lg font-extrabold text-[#1E3063] font-display">{d.name}</h3>
+                    <h3 className="text-lg font-extrabold text-[#176B87] font-display">{d.name}</h3>
                     <p className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-1">
                       <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0" /> {d.location} ({d.county})
                     </p>
@@ -262,7 +262,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
                 <div className="pt-3 border-t border-slate-100 space-y-3 text-xs">
                   <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                     <span className="text-slate-600 font-bold">Showroom Inventory:</span>
-                    <span className="font-extrabold text-[#1E3063] bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-md">
+                    <span className="font-extrabold text-[#176B87] bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-md">
                       {d.activeListingsCount} Vehicles
                     </span>
                   </div>

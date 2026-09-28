@@ -64,22 +64,22 @@ export const tokens = {
     full: '9999px',
   },
 
-  // Colors - Brand (Green)
+  // Colors - Brand (Slate Teal)
   colors: {
     brand: {
-      50: '#ECFDF5',
-      100: '#D1FAE5',
-      200: '#A7F3D0',
-      300: '#6EE7B7',
-      400: '#2DD9BE',
-      500: '#16C4A4',
-      600: '#109E85',
-      700: '#0C7B68',
-      800: '#065F46',
-      900: '#064E3B',
-      DEFAULT: '#16C4A4',
-      light: '#2DD9BE',
-      dark: '#0C7B68',
+      50: '#F3FAF9',
+      100: '#DDF4F0',
+      200: '#BDE5DE',
+      300: '#91CEC5',
+      400: '#5AAFA4',
+      500: '#176B87',
+      600: '#12576D',
+      700: '#0E4655',
+      800: '#0A3340',
+      900: '#0A3340',
+      DEFAULT: '#176B87',
+      light: '#13B8A6',
+      dark: '#12576D',
     },
     // Surface (Dark)
     surface: {
@@ -97,12 +97,12 @@ export const tokens = {
     },
     // Background (Light)
     background: {
-      base: '#FDFAF5',
-      primary: '#FDFAF5',
-      secondary: '#F7F2E8',
-      tertiary: '#EDE7D9',
+      base: '#F6FAF9',
+      primary: '#F6FAF9',
+      secondary: '#EEF7F5',
+      tertiary: '#DDF4F0',
       elevated: '#FFFFFF',
-      muted: '#EDE7D9',
+      muted: '#DDF4F0',
     },
     // Status
     status: {
@@ -121,8 +121,8 @@ export const tokens = {
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06)',
     '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
-    brand: '0 4px 14px rgba(22, 196, 164, 0.25)',
-    'brand-lg': '0 8px 30px rgba(22, 196, 164, 0.35)',
+    brand: '0 4px 14px rgba(19, 184, 166, 0.24)',
+    'brand-lg': '0 8px 30px rgba(19, 184, 166, 0.30)',
   },
 
   // Z-Index

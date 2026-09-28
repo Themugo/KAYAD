@@ -19,10 +19,10 @@ export function DataTable<T>({
   emptyMessage = 'No records found',
 }: DataTableProps<T>) {
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-[#1A2A4E]/60 bg-[#1E3063]/90 backdrop-blur-md shadow-md">
+    <div className="w-full overflow-x-auto rounded-xl border border-[#0A3340]/60 bg-[#176B87]/90 backdrop-blur-md shadow-md">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="border-b border-[#1A2A4E]/80 bg-[#1E3063]/60 text-slate-300 text-xs uppercase tracking-wider font-semibold">
+          <tr className="border-b border-[#0A3340]/80 bg-[#176B87]/60 text-slate-300 text-xs uppercase tracking-wider font-semibold">
             {columns.map((col, idx) => (
               <th key={idx} className="px-5 py-3.5">
                 {col.header}
@@ -30,7 +30,7 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#0B1628]/60 text-sm text-slate-200">
+        <tbody className="divide-y divide-[#0A3340]/60 text-sm text-slate-200">
           {data.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="px-5 py-8 text-center text-slate-400">

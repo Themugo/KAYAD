@@ -15,9 +15,9 @@
      most important dashboard, given 500 dealers onboarding — matches
      the rest of the product instead of being its own dark-gold
      identity. */
-  --dealer-gold: #16C4A4;
+  --dealer-gold: #176B87;
   --dealer-gold-light: #2DD9BE;
-  --dealer-gold-dark: #0C7B68;
+  --dealer-gold-dark: #12576D;
   --dealer-gold-glow: rgba(22, 196, 164, 0.12);
 
   /* Dealer backgrounds */

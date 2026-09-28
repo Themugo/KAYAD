@@ -17,8 +17,8 @@ import { getMyListings } from '../../../services/vehicleApi';
 // ============================================================
 
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -357,7 +357,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-sm text-slate-600 mb-4">Sign in to manage your dealership.</p>
-          <button onClick={onOpenAuth} className="bg-[#17244B] text-white text-xs font-bold rounded-lg px-5 py-2.5">
+          <button onClick={onOpenAuth} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5">
             Sign In
           </button>
         </div>
@@ -370,7 +370,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center max-w-sm">
           <p className="text-sm text-slate-600 mb-4">{loadError}</p>
-          <button onClick={loadDashboard} className="bg-[#17244B] text-white text-xs font-bold rounded-lg px-5 py-2.5">
+          <button onClick={loadDashboard} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5">
             Try Again
           </button>
         </div>

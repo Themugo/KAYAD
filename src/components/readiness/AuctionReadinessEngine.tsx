@@ -167,7 +167,7 @@ const CheckItem: React.FC<{
         </div>
         <p className="text-xs text-slate-500 mt-0.5">{check.description}</p>
         {!check.isComplete && check.actionLabel && (
-          <button className="text-xs text-[#C85A32] font-medium mt-1 hover:underline flex items-center gap-1">
+          <button className="text-xs text-[#176B87] font-medium mt-1 hover:underline flex items-center gap-1">
             {check.actionLabel}
             <ExternalLink className="w-3 h-3" />
           </button>
@@ -217,7 +217,7 @@ const ReadinessSectionAccordion: React.FC<{
           {SECTION_ICONS[section.icon] || <Settings className="w-5 h-5" />}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-bold text-[#1E3063]">{section.title}</h4>
+          <h4 className="font-bold text-[#176B87]">{section.title}</h4>
           <p className="text-xs text-slate-500">
             {completedCount} of {totalCount} completed
           </p>
@@ -312,7 +312,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
   return (
     <div className="space-y-6">
       {/* Header Dashboard */}
-      <Card className="p-6 bg-gradient-to-r from-[#101935] to-[#1a2a4a] text-white border-none">
+      <Card className="p-6 bg-gradient-to-r from-[#0A3340] to-[#1a2a4a] text-white border-none">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <ScoreRing score={result.score} size="lg" />
 
@@ -430,7 +430,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
       {/* QA Validation Results */}
       {isAdminView && (
         <Card className="p-6 bg-white border-slate-200">
-          <h4 className="font-bold text-[#1E3063] mb-4 flex items-center gap-2">
+          <h4 className="font-bold text-[#176B87] mb-4 flex items-center gap-2">
             <ClipboardCheck className="w-5 h-5" />
             Quality Assurance Validation
           </h4>

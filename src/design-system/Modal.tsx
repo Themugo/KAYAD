@@ -40,9 +40,9 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
       <div
-        className={`bg-[#1E3063] border border-[#1A2A4E]/80 rounded-2xl w-full ${maxWidthClasses[maxWidth]} overflow-hidden shadow-2xl transition-all transform scale-100`}
+        className={`bg-[#176B87] border border-[#0A3340]/80 rounded-2xl w-full ${maxWidthClasses[maxWidth]} overflow-hidden shadow-2xl transition-all transform scale-100`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A2A4E]/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#0A3340]/60">
           {title && <h3 className="text-lg font-bold text-white font-serif">{title}</h3>}
           <button
             onClick={onClose}

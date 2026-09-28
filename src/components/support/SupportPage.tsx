@@ -88,17 +88,17 @@ export const SupportPage: React.FC = () => {
   ];
 
   return (
-    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#FCF9F4] text-[#1E3063] font-sans">
+    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#F6FAF9] text-[#176B87] font-sans">
 
       {/* 1. Header / Hero Section */}
-      <div className="p-5 sm:p-6 lg:p-7 rounded-2xl bg-[#1E3063] text-white border border-[#1E3063] shadow-lg relative overflow-hidden space-y-5">
+      <div className="p-5 sm:p-6 lg:p-7 rounded-2xl bg-[#176B87] text-white border border-[#176B87] shadow-lg relative overflow-hidden space-y-5">
         {/* Glowing Background Accents */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#00C9CE]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-[#00C9CE]/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#13B8A6]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-[#13B8A6]/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 space-y-3.5 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C9CE]/20 text-[#00C9CE] text-[11px] font-mono font-black uppercase tracking-wider border border-[#00C9CE]/40 shadow-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#00C9CE]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#13B8A6]/20 text-[#13B8A6] text-[11px] font-mono font-black uppercase tracking-wider border border-[#13B8A6]/40 shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
             <span>KAYAD OFFICIAL RESOLUTION DESK</span>
           </div>
 
@@ -112,13 +112,13 @@ export const SupportPage: React.FC = () => {
 
           <div className="pt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs text-slate-200">
             <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-white/15 text-xs font-semibold shadow-2xs">
-              <Lock className="w-3.5 h-3.5 text-[#00C9CE]" /> CBK-Regulated Escrow
+              <Lock className="w-3.5 h-3.5 text-[#13B8A6]" /> CBK-Regulated Escrow
             </span>
             <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-white/15 text-xs font-semibold shadow-2xs">
               <Clock className="w-3.5 h-3.5 text-[#2ECC71]" /> 7 Days a Week (8am – 8pm EAT)
             </span>
             <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-white/15 text-xs font-semibold shadow-2xs">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#00C9CE]" /> Dedicated Audit Desk
+              <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" /> Dedicated Audit Desk
             </span>
           </div>
         </div>
@@ -133,7 +133,7 @@ export const SupportPage: React.FC = () => {
 
           <div className="space-y-4 relative z-10">
             <div className="flex items-center justify-between gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#1E3063] text-[#00C9CE] flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-[#176B87] text-[#13B8A6] flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
                 <Phone className="w-6 h-6" />
               </div>
               <span className="px-3 py-1 rounded-full bg-amber-100/90 text-amber-900 border border-amber-300/60 text-[10px] font-mono font-black uppercase tracking-wider shadow-2xs">
@@ -142,22 +142,22 @@ export const SupportPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-lg font-black text-[#1E3063] font-serif tracking-tight">
+              <h3 className="text-lg font-black text-[#176B87] font-serif tracking-tight">
                 Hotline & Escrow Desk
               </h3>
-              <p className="text-xs text-[#6B7A99] font-medium leading-relaxed">
+              <p className="text-xs text-[#66808A] font-medium leading-relaxed">
                 Direct phone access for active Escrow Vault releases, inspection disputes & handover emergencies.
               </p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]/80 space-y-1">
-              <span className="text-[10px] font-mono font-bold text-[#6B7A99] uppercase tracking-wider block">Toll-Free Direct Line</span>
-              <p className="text-base sm:text-lg font-black font-mono text-[#1E3063]">
+            <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]/80 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-[#66808A] uppercase tracking-wider block">Toll-Free Direct Line</span>
+              <p className="text-base sm:text-lg font-black font-mono text-[#176B87]">
                 +254 700 000 000
               </p>
             </div>
 
-            <p className="text-[11px] text-[#6B7A99] font-semibold flex items-center gap-1.5 pt-0.5">
+            <p className="text-[11px] text-[#66808A] font-semibold flex items-center gap-1.5 pt-0.5">
               <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               <span>Available Mon–Sun: 8:00 AM – 8:00 PM EAT</span>
             </p>
@@ -165,20 +165,20 @@ export const SupportPage: React.FC = () => {
 
           <a
             href="tel:+254700000000"
-            className="relative z-10 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#1E3063] hover:bg-[#0B1628] text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer border border-[#1E3063]"
+            className="relative z-10 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#176B87] hover:bg-[#0A3340] text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer border border-[#176B87]"
           >
             <span>Call Direct Hotline</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#00C9CE]" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#13B8A6]" />
           </a>
         </div>
 
         {/* Live Chat Channel */}
-        <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#00C9CE]/40 shadow-xs hover:shadow-md hover:border-[#00C9CE] transition-all space-y-5 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-28 h-28 bg-[#00C9CE]/10 rounded-full blur-xl pointer-events-none" />
+        <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#13B8A6]/40 shadow-xs hover:shadow-md hover:border-[#13B8A6] transition-all space-y-5 flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-[#13B8A6]/10 rounded-full blur-xl pointer-events-none" />
 
           <div className="space-y-4 relative z-10">
             <div className="flex items-center justify-between gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#00C9CE] text-[#1E3063] flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-[#13B8A6] text-[#176B87] flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
                 <MessageSquare className="w-6 h-6" />
               </div>
               <span className="px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-900 border border-emerald-300/60 text-[10px] font-mono font-black uppercase tracking-wider shadow-2xs flex items-center gap-1.5">
@@ -188,93 +188,93 @@ export const SupportPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-lg font-black text-[#1E3063] font-serif tracking-tight">
+              <h3 className="text-lg font-black text-[#176B87] font-serif tracking-tight">
                 Live In-App Concierge
               </h3>
-              <p className="text-xs text-[#6B7A99] font-medium leading-relaxed">
+              <p className="text-xs text-[#66808A] font-medium leading-relaxed">
                 Real-time assistance with bidding strategy, vehicle specifications, inspection reports & seller inquiry.
               </p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-[#00C9CE]/10 border border-[#00C9CE]/30 space-y-1">
-              <span className="text-[10px] font-mono font-bold text-[#1E3063] uppercase tracking-wider block">Messenger SLA</span>
-              <p className="text-sm font-extrabold text-[#1E3063]">
+            <div className="p-3 rounded-2xl bg-[#13B8A6]/10 border border-[#13B8A6]/30 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-[#176B87] uppercase tracking-wider block">Messenger SLA</span>
+              <p className="text-sm font-extrabold text-[#176B87]">
                 Typical Wait Time: &lt; 2 Minutes
               </p>
             </div>
 
-            <p className="text-[11px] text-[#6B7A99] font-semibold flex items-center gap-1.5 pt-0.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#00C9CE] shrink-0" />
+            <p className="text-[11px] text-[#66808A] font-semibold flex items-center gap-1.5 pt-0.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6] shrink-0" />
               <span>Encrypted Session with Official Specialist</span>
             </p>
           </div>
 
           <button
             onClick={() => openChat()}
-            className="relative z-10 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#00C9CE] hover:bg-[#00b8bc] text-[#1E3063] font-black text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer border border-[#00C9CE]"
+            className="relative z-10 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#13B8A6] hover:bg-[#00b8bc] text-[#176B87] font-black text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer border border-[#13B8A6]"
           >
             <span>Launch Live Messenger</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#1E3063]" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#176B87]" />
           </button>
         </div>
 
         {/* Email Channel */}
-        <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#E2D8C7] shadow-xs hover:shadow-md hover:border-[#1E3063] transition-all space-y-5 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-28 h-28 bg-[#1E3063]/5 rounded-full blur-xl pointer-events-none" />
+        <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#D7E7E4] shadow-xs hover:shadow-md hover:border-[#176B87] transition-all space-y-5 flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-[#176B87]/5 rounded-full blur-xl pointer-events-none" />
 
           <div className="space-y-4 relative z-10">
             <div className="flex items-center justify-between gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#1E3063] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-                <Mail className="w-6 h-6 text-[#00C9CE]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#176B87] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                <Mail className="w-6 h-6 text-[#13B8A6]" />
               </div>
-              <span className="px-3 py-1 rounded-full bg-[#1E3063]/10 text-[#1E3063] border border-[#1E3063]/20 text-[10px] font-mono font-black uppercase tracking-wider shadow-2xs">
+              <span className="px-3 py-1 rounded-full bg-[#176B87]/10 text-[#176B87] border border-[#176B87]/20 text-[10px] font-mono font-black uppercase tracking-wider shadow-2xs">
                 Legal & Audit
               </span>
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-lg font-black text-[#1E3063] font-serif tracking-tight">
+              <h3 className="text-lg font-black text-[#176B87] font-serif tracking-tight">
                 Documentation Desk
               </h3>
-              <p className="text-xs text-[#6B7A99] font-medium leading-relaxed">
+              <p className="text-xs text-[#66808A] font-medium leading-relaxed">
                 Formal submission of KRA tax entry forms, legal logbook transfer files & compliance verification.
               </p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]/80 space-y-1">
-              <span className="text-[10px] font-mono font-bold text-[#6B7A99] uppercase tracking-wider block">Official Support Email</span>
-              <p className="text-sm sm:text-base font-bold font-mono text-[#1E3063]">
+            <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]/80 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-[#66808A] uppercase tracking-wider block">Official Support Email</span>
+              <p className="text-sm sm:text-base font-bold font-mono text-[#176B87]">
                 support@kayad.co.ke
               </p>
             </div>
 
-            <p className="text-[11px] text-[#6B7A99] font-semibold flex items-center gap-1.5 pt-0.5">
-              <Clock className="w-3.5 h-3.5 text-[#00C9CE] shrink-0" />
+            <p className="text-[11px] text-[#66808A] font-semibold flex items-center gap-1.5 pt-0.5">
+              <Clock className="w-3.5 h-3.5 text-[#13B8A6] shrink-0" />
               <span>Formal Response Guarantee: Within 2 Hours</span>
             </p>
           </div>
 
           <a
             href="mailto:support@kayad.co.ke"
-            className="relative z-10 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#F6F1E8] hover:bg-[#E2D8C7] text-[#1E3063] font-extrabold text-xs uppercase tracking-wider transition-all border border-[#E2D8C7]"
+            className="relative z-10 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#EEF7F5] hover:bg-[#D7E7E4] text-[#176B87] font-extrabold text-xs uppercase tracking-wider transition-all border border-[#D7E7E4]"
           >
             <span>Email Audit Desk</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#00C9CE]" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#13B8A6]" />
           </a>
         </div>
       </div>
 
       {/* 3. Transaction FAQ Section */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E2D8C7] shadow-sm space-y-6">
-        <div className="space-y-1 pb-4 border-b border-[#E8E1D5]">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E3063]/10 text-[#1E3063] text-xs font-bold uppercase tracking-wider">
-            <HelpCircle className="w-3.5 h-3.5 text-[#00C9CE]" />
+      <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#D7E7E4] shadow-sm space-y-6">
+        <div className="space-y-1 pb-4 border-b border-[#D7E7E4]">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#176B87]/10 text-[#176B87] text-xs font-bold uppercase tracking-wider">
+            <HelpCircle className="w-3.5 h-3.5 text-[#13B8A6]" />
             <span>Resolution & Knowledge Base</span>
           </div>
-          <h2 className="text-2xl font-black text-[#1E3063] font-serif tracking-tight">
+          <h2 className="text-2xl font-black text-[#176B87] font-serif tracking-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-xs text-[#6B7A99] font-medium">
+          <p className="text-xs text-[#66808A] font-medium">
             Clear guidelines on Escrow Vault security, vehicle inspection records, auction compliance, and legal transfers.
           </p>
         </div>
@@ -285,27 +285,27 @@ export const SupportPage: React.FC = () => {
             return (
               <div
                 key={index}
-                className="rounded-xl border border-[#E2D8C7] bg-[#FCF9F4] overflow-hidden transition-all"
+                className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] overflow-hidden transition-all"
               >
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full px-5 py-3.5 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-[#1E3063] hover:bg-[#F6F1E8] transition-colors cursor-pointer"
+                  className="w-full px-5 py-3.5 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-[#176B87] hover:bg-[#EEF7F5] transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="px-2 py-0.5 rounded bg-[#1E3063]/10 text-[#1E3063] text-[9px] font-black uppercase shrink-0">
+                    <span className="px-2 py-0.5 rounded bg-[#176B87]/10 text-[#176B87] text-[9px] font-black uppercase shrink-0">
                       {faq.category}
                     </span>
                     <span className="font-serif">{faq.q}</span>
                   </div>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-[#00C9CE] shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-[#13B8A6] shrink-0" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-[#6B7A99] shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-[#66808A] shrink-0" />
                   )}
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-4 pt-2 text-xs text-[#3D4F6F] font-medium leading-relaxed border-t border-[#E8E1D5] bg-white">
+                  <div className="px-5 pb-4 pt-2 text-xs text-[#365563] font-medium leading-relaxed border-t border-[#D7E7E4] bg-white">
                     {faq.a}
                   </div>
                 )}
@@ -319,31 +319,31 @@ export const SupportPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
         {/* Direct Case Inquiry Form */}
-        <div className="lg:col-span-7 p-6 sm:p-8 rounded-2xl bg-white border border-[#E2D8C7] shadow-sm space-y-6">
-          <div className="space-y-1 pb-4 border-b border-[#E8E1D5]">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E3063]/10 text-[#1E3063] text-xs font-bold uppercase tracking-wider">
-              <Mail className="w-3.5 h-3.5 text-[#00C9CE]" />
+        <div className="lg:col-span-7 p-6 sm:p-8 rounded-2xl bg-white border border-[#D7E7E4] shadow-sm space-y-6">
+          <div className="space-y-1 pb-4 border-b border-[#D7E7E4]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#176B87]/10 text-[#176B87] text-xs font-bold uppercase tracking-wider">
+              <Mail className="w-3.5 h-3.5 text-[#13B8A6]" />
               <span>Resolution Form</span>
             </div>
-            <h2 className="text-2xl font-black text-[#1E3063] font-serif tracking-tight">
+            <h2 className="text-2xl font-black text-[#176B87] font-serif tracking-tight">
               Submit Transaction Case
             </h2>
-            <p className="text-xs text-[#6B7A99] font-medium">
+            <p className="text-xs text-[#66808A] font-medium">
               Submit a formal inquiry or dispute request directly to our Resolution Desk.
             </p>
           </div>
 
           {formSuccessMsg ? (
-            <div className="p-8 rounded-2xl bg-[#2ECC71]/15 text-[#1E3063] border border-[#2ECC71]/40 text-xs sm:text-sm font-bold text-center space-y-3">
+            <div className="p-8 rounded-2xl bg-[#2ECC71]/15 text-[#176B87] border border-[#2ECC71]/40 text-xs sm:text-sm font-bold text-center space-y-3">
               <CheckCircle2 className="w-12 h-12 text-[#2ECC71] mx-auto" />
-              <h3 className="text-lg font-extrabold font-serif text-[#1E3063]">Case Logged Successfully</h3>
+              <h3 className="text-lg font-extrabold font-serif text-[#176B87]">Case Logged Successfully</h3>
               <p className="max-w-md mx-auto leading-relaxed">{formSuccessMsg}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmitMessage} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1.5">
                     Full Name *
                   </label>
                   <input
@@ -352,12 +352,12 @@ export const SupportPage: React.FC = () => {
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. John Mwangi"
-                    className="w-full px-3.5 py-2.5 bg-[#FCF9F4] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:bg-white focus:border-[#00C9CE] focus:ring-1 focus:ring-[#00C9CE]"
+                    className="w-full px-3.5 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-bold text-[#176B87] focus:outline-none focus:bg-white focus:border-[#13B8A6] focus:ring-1 focus:ring-[#13B8A6]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1.5">
                     Email Address *
                   </label>
                   <input
@@ -366,14 +366,14 @@ export const SupportPage: React.FC = () => {
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                     placeholder="you@example.com"
-                    className="w-full px-3.5 py-2.5 bg-[#FCF9F4] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:bg-white focus:border-[#00C9CE] focus:ring-1 focus:ring-[#00C9CE]"
+                    className="w-full px-3.5 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-bold text-[#176B87] focus:outline-none focus:bg-white focus:border-[#13B8A6] focus:ring-1 focus:ring-[#13B8A6]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1.5">
                     Phone Number
                   </label>
                   <input
@@ -381,12 +381,12 @@ export const SupportPage: React.FC = () => {
                     value={formData.phone}
                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+254 700 000 000"
-                    className="w-full px-3.5 py-2.5 bg-[#FCF9F4] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:bg-white focus:border-[#00C9CE] focus:ring-1 focus:ring-[#00C9CE]"
+                    className="w-full px-3.5 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-bold text-[#176B87] focus:outline-none focus:bg-white focus:border-[#13B8A6] focus:ring-1 focus:ring-[#13B8A6]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1.5">
                     Escrow Contract / VIN (Optional)
                   </label>
                   <input
@@ -394,20 +394,20 @@ export const SupportPage: React.FC = () => {
                     value={formData.transactionId}
                     onChange={e => setFormData({ ...formData, transactionId: e.target.value })}
                     placeholder="e.g. ESC-88902 or VIN"
-                    className="w-full px-3.5 py-2.5 bg-[#FCF9F4] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:bg-white focus:border-[#00C9CE] focus:ring-1 focus:ring-[#00C9CE]"
+                    className="w-full px-3.5 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-bold text-[#176B87] focus:outline-none focus:bg-white focus:border-[#13B8A6] focus:ring-1 focus:ring-[#13B8A6]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1.5">
                   Topic / Area of Support *
                 </label>
                 <select
                   required
                   value={formData.subject}
                   onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-[#FCF9F4] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:bg-white focus:border-[#00C9CE] focus:ring-1 focus:ring-[#00C9CE]"
+                  className="w-full px-3.5 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-bold text-[#176B87] focus:outline-none focus:bg-white focus:border-[#13B8A6] focus:ring-1 focus:ring-[#13B8A6]"
                 >
                   <option value="" disabled>Select inquiry topic…</option>
                   <option value="Escrow Vault Support">Escrow Vault Payment & Clearance</option>
@@ -420,7 +420,7 @@ export const SupportPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1.5">
                   Detailed Case Description *
                 </label>
                 <textarea
@@ -429,7 +429,7 @@ export const SupportPage: React.FC = () => {
                   value={formData.message}
                   onChange={e => setFormData({ ...formData, message: e.target.value })}
                   placeholder="Provide transaction context, vehicle details, or specific question…"
-                  className="w-full px-3.5 py-2.5 bg-[#FCF9F4] border border-[#E2D8C7] rounded-xl text-xs font-semibold text-[#1E3063] focus:outline-none focus:bg-white focus:border-[#00C9CE] focus:ring-1 focus:ring-[#00C9CE]"
+                  className="w-full px-3.5 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-semibold text-[#176B87] focus:outline-none focus:bg-white focus:border-[#13B8A6] focus:ring-1 focus:ring-[#13B8A6]"
                 />
               </div>
 
@@ -437,8 +437,8 @@ export const SupportPage: React.FC = () => {
                 type="submit"
                 disabled={isSubmitting}
                 variant="primary"
-                className="w-full sm:w-auto bg-[#1E3063] hover:bg-[#0B1628] text-white font-extrabold text-xs py-3 px-7 uppercase tracking-wider shadow-md cursor-pointer"
-                leftIcon={<Send className="w-4 h-4 text-[#00C9CE]" />}
+                className="w-full sm:w-auto bg-[#176B87] hover:bg-[#0A3340] text-white font-extrabold text-xs py-3 px-7 uppercase tracking-wider shadow-md cursor-pointer"
+                leftIcon={<Send className="w-4 h-4 text-[#13B8A6]" />}
               >
                 {isSubmitting ? 'Logging Case...' : 'Submit Resolution Case'}
               </Button>
@@ -447,10 +447,10 @@ export const SupportPage: React.FC = () => {
         </div>
 
         {/* Regional Resolution Center & Verification Office */}
-        <div className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-[#121D33] text-white border border-white/10 shadow-xl space-y-6">
+        <div className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-[#12576D] text-white border border-white/10 shadow-xl space-y-6">
           <div className="space-y-1 pb-4 border-b border-white/10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C9CE]/20 text-[#00C9CE] text-xs font-extrabold uppercase tracking-wider border border-[#00C9CE]/30">
-              <Building2 className="w-4 h-4 text-[#00C9CE]" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#13B8A6]/20 text-[#13B8A6] text-xs font-extrabold uppercase tracking-wider border border-[#13B8A6]/30">
+              <Building2 className="w-4 h-4 text-[#13B8A6]" />
               <span>Headquarters</span>
             </div>
             <h2 className="text-2xl font-black font-serif text-white">
@@ -463,7 +463,7 @@ export const SupportPage: React.FC = () => {
 
           <div className="space-y-4">
             <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-              <MapPin className="w-5 h-5 text-[#00C9CE] shrink-0 mt-0.5" />
+              <MapPin className="w-5 h-5 text-[#13B8A6] shrink-0 mt-0.5" />
               <div>
                 <span className="text-[10px] font-extrabold text-slate-300 uppercase block">Office Location</span>
                 <p className="text-xs sm:text-sm font-bold text-white leading-relaxed">
@@ -483,7 +483,7 @@ export const SupportPage: React.FC = () => {
             </div>
 
             <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-              <ShieldCheck className="w-5 h-5 text-[#00C9CE] shrink-0 mt-0.5" />
+              <ShieldCheck className="w-5 h-5 text-[#13B8A6] shrink-0 mt-0.5" />
               <div>
                 <span className="text-[10px] font-extrabold text-slate-300 uppercase block">Verification Desk</span>
                 <p className="text-xs text-slate-200 font-medium">
@@ -497,10 +497,10 @@ export const SupportPage: React.FC = () => {
             href="https://maps.google.com/?q=Westgate+Mall+Nairobi"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-[#00C9CE] hover:bg-[#00b8bc] text-[#121D33] font-black text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-[#13B8A6] hover:bg-[#00b8bc] text-[#12576D] font-black text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
           >
             <span>Get Office Directions</span>
-            <ArrowRight className="w-4 h-4 text-[#121D33]" />
+            <ArrowRight className="w-4 h-4 text-[#12576D]" />
           </a>
         </div>
       </div>

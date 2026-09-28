@@ -174,8 +174,8 @@ interface ListingDraft {
 // ============================================================
 
 const KAYAD_THEME = {
-  navy: '#0A1628',
-  navyLight: '#1e3a5f',
+  navy: '#0A3340',
+  navyLight: '#12576D',
   gold: '#D4AF37',
   goldLight: '#F5E6B3',
   emerald: '#10B981',
@@ -248,7 +248,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSelle
     return (
       <div className="text-center py-20">
         <p className="text-sm text-slate-500 mb-4">Sign in to list and manage your own vehicles.</p>
-        <button onClick={onOpenAuth} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-5 py-2.5">
+        <button onClick={onOpenAuth} className="bg-[#176B87] text-white text-xs font-bold rounded-lg px-5 py-2.5">
           Sign In
         </button>
       </div>

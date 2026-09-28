@@ -116,8 +116,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
       >
         <div className="flex items-center justify-between p-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
           <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-[#1F2937]" />
-            <h2 className="text-sm font-black text-[#1F2937]">Customize Home Page (Admin)</h2>
+            <Settings className="w-4 h-4 text-[#0A3340]" />
+            <h2 className="text-sm font-black text-[#0A3340]">Customize Home Page (Admin)</h2>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
             <X className="w-4 h-4" />
@@ -153,7 +153,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   key={opt.id}
                   onClick={() => onUpdate((prev) => ({ ...prev, accentTheme: opt.id }))}
                   className={`flex-1 flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all ${
-                    config.accentTheme === opt.id ? 'border-[#176B87] bg-[#E7F4F2]' : 'border-slate-200'
+                    config.accentTheme === opt.id ? 'border-[#176B87] bg-[#DDF4F0]' : 'border-slate-200'
                   }`}
                 >
                   <span className="w-5 h-5 rounded-full border border-black/10" style={{ backgroundColor: opt.swatch }} />
@@ -168,7 +168,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
             <div className="flex items-start gap-2">
               <CarFront className="mt-0.5 h-4 w-4 text-[#176B87] shrink-0" />
               <div>
-                <h3 className="font-bold text-[#1F2937] uppercase text-[10px] tracking-wide">Hero Featured Vehicles</h3>
+                <h3 className="font-bold text-[#0A3340] uppercase text-[10px] tracking-wide">Hero Featured Vehicles</h3>
                 <p className="text-[11px] leading-relaxed text-slate-500 mt-1">The hero pulls real vehicles marked Featured/Promoted. Choose all featured vehicles or a selective set.</p>
               </div>
             </div>
@@ -193,7 +193,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                     <input type="checkbox" checked={heroIds.includes(vehicle.id)} onChange={() => toggleHeroVehicle(vehicle.id)} className="accent-[#176B87]" />
                     <img src={vehicle.images?.[0]} alt="" className="h-9 w-12 rounded-md object-cover bg-slate-100" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[11px] font-bold text-[#1F2937]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
+                      <span className="block truncate text-[11px] font-bold text-[#0A3340]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
                       <span className="block truncate text-[10px] text-slate-400">{vehicle.location || 'Location not specified'} · {formatAdminPrice(vehicle.price)}</span>
                     </span>
                   </label>
@@ -211,7 +211,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
             <div className="flex items-start gap-2">
               <CarFront className="mt-0.5 h-4 w-4 text-[#176B87] shrink-0" />
               <div>
-                <h3 className="font-bold text-[#1F2937] uppercase text-[10px] tracking-wide">Hero Fallback Vehicles</h3>
+                <h3 className="font-bold text-[#0A3340] uppercase text-[10px] tracking-wide">Hero Fallback Vehicles</h3>
                 <p className="text-[11px] leading-relaxed text-slate-500 mt-1">These fallback rows are used only when the marketplace has no real Featured/Promoted vehicles. Configure the vehicle identity and clean image URL here without touching code.</p>
               </div>
             </div>
@@ -223,12 +223,12 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                     <span className="text-[10px] text-slate-400">Fallback only</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    {(['make','model','year','price','mileage','fuelType','transmission','bodyStyle','location','condition','tagline'] as const).map((field) => (
+                    {(['make','model','year','fuelType','transmission','tagline'] as const).map((field) => (
                       <label key={field} className={field === 'tagline' ? 'col-span-2' : ''}>
-                        <span className="mb-1 block text-[9px] font-bold uppercase tracking-wide text-slate-500">{field === 'fuelType' ? 'Fuel' : field === 'transmission' ? 'Transmission' : field === 'bodyStyle' ? 'Body Style' : field === 'price' ? 'Price (Ksh)' : field === 'mileage' ? 'Mileage (km)' : field}</span>
+                        <span className="mb-1 block text-[9px] font-bold uppercase tracking-wide text-slate-500">{field === 'fuelType' ? 'Fuel' : field === 'transmission' ? 'Transmission' : field}</span>
                         <input
                           value={String(vehicle[field])}
-                          onChange={(e) => onUpdate((prev) => ({ ...prev, heroFallbackVehicles: prev.heroFallbackVehicles.map((item, i) => i === index ? { ...item, [field]: ['year','price','mileage'].includes(field) ? Number(e.target.value) || 0 : e.target.value } : item) }))}
+                          onChange={(e) => onUpdate((prev) => ({ ...prev, heroFallbackVehicles: prev.heroFallbackVehicles.map((item, i) => i === index ? { ...item, [field]: field === 'year' ? Number(e.target.value) || 2026 : e.target.value } : item) }))}
                           className="w-full rounded-lg border border-slate-200 bg-[#FBFDFC] px-2.5 py-2 text-[11px] font-semibold text-slate-700 outline-none focus:border-[#176B87]"
                         />
                       </label>

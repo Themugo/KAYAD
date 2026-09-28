@@ -242,7 +242,7 @@ export default function EditCarPage() {
                   <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', position: 'relative', background: 'var(--surface)' }}>
                     <img src={img.url || img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     {i === 0 && (
-                      <div style={{ position: 'absolute', top: 4, left: 4, background: 'var(--gold)', color: '#0A1628', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>MAIN</div>
+                      <div style={{ position: 'absolute', top: 4, left: 4, background: 'var(--gold)', color: '#0A3340', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>MAIN</div>
                     )}
                   </div>
                 ))}

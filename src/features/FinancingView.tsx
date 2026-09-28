@@ -169,7 +169,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   const handleOpenApply = () => {
     setSelectedBankForApply({
       id: 'kayad-financing', name: 'KAYAD Financing Request', shortName: 'KAYAD',
-      logoBg: 'bg-[#1E3063] text-white', rateRange: 'Not quoted', baseRate: annualInterestRate,
+      logoBg: 'bg-[#176B87] text-white', rateRange: 'Not quoted', baseRate: annualInterestRate,
       maxFinancing: 'Subject to lender terms', minDepositPercent: depositPercent, maxTermMonths: tenureMonths,
       approvalTime: 'Not quoted', earlyRepaymentPolicy: 'Subject to lender terms',
       eligibilitySummary: 'Submitting this request does not imply lender approval or a lender offer.', badge: 'Request', features: []
@@ -235,7 +235,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="bg-[#101935] border-b border-amber-400/30 px-4 py-3 text-xs shadow-md rounded-2xl">
+      <div className="bg-[#0A3340] border-b border-amber-400/30 px-4 py-3 text-xs shadow-md rounded-2xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <span className="text-amber-400 font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">
             KAYAD Financing Marketplace
@@ -249,7 +249,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       {/* ==========================================
           1. HERO SECTION
           ========================================== */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#17244B] via-[#1E3063] to-slate-900 text-white p-8 sm:p-12 border border-amber-400/20 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A3340] via-[#176B87] to-slate-900 text-white p-8 sm:p-12 border border-amber-400/20 shadow-lg">
         {/* Subtle Decorative Backdrop Elements */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -277,7 +277,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               onClick={scrollToCalculator}
               className="shadow-md text-sm font-black tracking-wide"
             >
-              <CheckCircle2 className="w-5 h-5 text-[#17244B]" />
+              <CheckCircle2 className="w-5 h-5 text-[#0A3340]" />
               <span>Check Your Eligibility</span>
             </Button>
 
@@ -339,7 +339,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-3 border-b-2 text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === tab.id
-                ? 'border-[#1E3063] text-[#1E3063] bg-amber-50/60 rounded-t-xl'
+                ? 'border-[#176B87] text-[#176B87] bg-amber-50/60 rounded-t-xl'
                 : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
@@ -354,7 +354,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           ========================================== */}
       <div ref={calculatorRef} className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
+          <h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2">
             <Calculator className="w-5 h-5 text-amber-500" />
             Interactive Vehicle Finance Estimator
           </h2>
@@ -370,7 +370,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
 
             {/* Employment Type Selector */}
             <div className="space-y-2">
-              <label className="text-xs font-extrabold text-[#1E3063] uppercase tracking-wider font-display">
+              <label className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display">
                 Employment / Income Category
               </label>
               <div className="grid grid-cols-3 gap-2 text-xs">
@@ -384,7 +384,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                     onClick={() => setEmploymentType(type.id as any)}
                     className={`p-3 rounded-xl font-bold border flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                       employmentType === type.id
-                        ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
+                        ? 'bg-[#176B87] text-white border-[#176B87] shadow-xs'
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
@@ -408,7 +408,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                     step={100000}
                     value={vehiclePrice}
                     onChange={(e) => setVehiclePrice(Math.max(0, Number(e.target.value)))}
-                    className="w-28 text-right font-black text-[#1E3063] bg-transparent outline-none text-sm"
+                    className="w-28 text-right font-black text-[#176B87] bg-transparent outline-none text-sm"
                   />
                 </div>
               </div>
@@ -419,7 +419,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                 step={250000}
                 value={vehiclePrice}
                 onChange={(e) => setVehiclePrice(Number(e.target.value))}
-                className="w-full accent-[#1E3063] cursor-pointer"
+                className="w-full accent-[#176B87] cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
                 <span>Ksh 1,000,000</span>
@@ -454,7 +454,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-bold">
                 <span className="text-slate-600">Loan Repayment Term</span>
-                <span className="text-[#1E3063] font-black text-sm">{tenureMonths} Months ({(tenureMonths / 12).toFixed(1)} Yrs)</span>
+                <span className="text-[#176B87] font-black text-sm">{tenureMonths} Months ({(tenureMonths / 12).toFixed(1)} Yrs)</span>
               </div>
               <div className="grid grid-cols-5 gap-2 text-xs">
                 {[12, 24, 36, 48, 60].map((m) => (
@@ -463,7 +463,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                     onClick={() => setTenureMonths(m)}
                     className={`py-2.5 rounded-xl font-extrabold border transition-all cursor-pointer ${
                       tenureMonths === m
-                        ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
+                        ? 'bg-[#176B87] text-white border-[#176B87] shadow-xs'
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
@@ -493,7 +493,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           </Card>
 
           {/* Results Display Panel (5 Cols) */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#1E3063] via-[#17244B] to-slate-900 text-white rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-6 border border-amber-400/30">
+          <div className="lg:col-span-5 bg-gradient-to-br from-[#176B87] via-[#0A3340] to-slate-900 text-white rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-6 border border-amber-400/30">
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-xs font-extrabold text-amber-400 uppercase tracking-wider font-display flex items-center gap-1.5">
@@ -562,7 +562,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
+            <h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2">
               <Landmark className="w-5 h-5 text-amber-500" />
               Verified Lender Feed
             </h2>
@@ -573,33 +573,33 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             size="sm"
             onClick={() => setActiveTab('comparison')}
           >
-            <Sliders className="w-4 h-4 text-[#1E3063]" />
+            <Sliders className="w-4 h-4 text-[#176B87]" />
             <span>View Comparison Matrix ({selectedBankIds.length})</span>
           </Button>
         </div>
 
         <Card className="p-6 bg-slate-50 border-slate-200">
-          <div className="flex items-start gap-3"><Info className="w-5 h-5 text-amber-600 shrink-0" /><div><p className="font-extrabold text-[#1E3063]">Verified lender offers are not connected yet</p><p className="text-sm text-slate-600 mt-1">KAYAD will not display invented lender rates, fees, approval times, or eligibility claims. Submit a real financing request instead.</p></div></div>
+          <div className="flex items-start gap-3"><Info className="w-5 h-5 text-amber-600 shrink-0" /><div><p className="font-extrabold text-[#176B87]">Verified lender offers are not connected yet</p><p className="text-sm text-slate-600 mt-1">KAYAD will not display invented lender rates, fees, approval times, or eligibility claims. Submit a real financing request instead.</p></div></div>
         </Card>
       </div>
 
       {/* ==========================================
           5. COMPARE FINANCING OFFERS
           ========================================== */}
-      {activeTab === 'comparison' && <Card className="p-6 bg-slate-50 border-slate-200"><div className="flex items-start gap-3"><Info className="w-5 h-5 text-amber-600" /><div><h2 className="text-xl font-black text-[#1E3063]">Lender comparison unavailable</h2><p className="text-sm text-slate-600 mt-1">A verified lender-offer feed is not connected yet. No synthetic comparison data is shown.</p></div></div></Card>}
+      {activeTab === 'comparison' && <Card className="p-6 bg-slate-50 border-slate-200"><div className="flex items-start gap-3"><Info className="w-5 h-5 text-amber-600" /><div><h2 className="text-xl font-black text-[#176B87]">Lender comparison unavailable</h2><p className="text-sm text-slate-600 mt-1">A verified lender-offer feed is not connected yet. No synthetic comparison data is shown.</p></div></div></Card>}
 
       {/* ==========================================
           6. APPLICATION JOURNEY & STATUS TRACKER
           ========================================== */}
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div><h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2"><Clock className="w-5 h-5 text-amber-500" />Application Journey & Live Tracker</h2><p className="text-xs text-slate-500 font-medium">Status is read from your real backend loan application.</p></div>
+          <div><h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2"><Clock className="w-5 h-5 text-amber-500" />Application Journey & Live Tracker</h2><p className="text-xs text-slate-500 font-medium">Status is read from your real backend loan application.</p></div>
           <div className="text-[11px] text-slate-500 font-semibold px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200">Backend-authoritative</div>
         </div>
         {currentApplication ? (
           <Card className="p-6 bg-slate-50 border-slate-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2"><div><p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Application {currentApplication.id}</p><h3 className="text-base font-extrabold text-[#1E3063]">Vehicle Financing Request</h3></div><Badge variant={currentAppStatus === 'Approved' ? 'success' : currentAppStatus === 'Declined' ? 'danger' : 'escrow'} size="md">Current Status: {currentAppStatus}</Badge></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs"><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Vehicle Asset Value</p><p className="font-extrabold text-[#1E3063]">Ksh {Number(currentApplication.vehiclePrice || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Requested Loan</p><p className="font-extrabold text-emerald-700">Ksh {Number(currentApplication.loanAmount || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Submitted</p><p className="font-extrabold text-[#1E3063]">{new Date(currentApplication.createdAt).toLocaleString('en-KE')}</p></div></div>
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2"><div><p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Application {currentApplication.id}</p><h3 className="text-base font-extrabold text-[#176B87]">Vehicle Financing Request</h3></div><Badge variant={currentAppStatus === 'Approved' ? 'success' : currentAppStatus === 'Declined' ? 'danger' : 'escrow'} size="md">Current Status: {currentAppStatus}</Badge></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs"><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Vehicle Asset Value</p><p className="font-extrabold text-[#176B87]">Ksh {Number(currentApplication.vehiclePrice || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Requested Loan</p><p className="font-extrabold text-emerald-700">Ksh {Number(currentApplication.loanAmount || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-slate-200"><p className="text-slate-400">Submitted</p><p className="font-extrabold text-[#176B87]">{new Date(currentApplication.createdAt).toLocaleString('en-KE')}</p></div></div>
             <p className="text-xs text-slate-500">KAYAD does not fabricate lender-side approvals, document verification, disbursement, or callback promises.</p>
           </Card>
         ) : (
@@ -612,7 +612,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           ========================================== */}
       <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
+          <h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2">
             <FileText className="w-5 h-5 text-amber-500" />
             Secure Underwriting Document Center
           </h2>
@@ -634,14 +634,14 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               <Card key={doc.key} className="p-5 space-y-4 bg-white border-slate-200 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="p-2 rounded-xl bg-slate-100 text-[#1E3063]">
+                    <span className="p-2 rounded-xl bg-slate-100 text-[#176B87]">
                       <FileSpreadsheet className="w-5 h-5" />
                     </span>
                     <Badge variant={isUploaded ? 'success' : 'neutral'} size="sm">
                       {isUploaded ? 'Verified ✓' : 'Pending'}
                     </Badge>
                   </div>
-                  <h3 className="font-extrabold text-[#1E3063] text-sm">{doc.title}</h3>
+                  <h3 className="font-extrabold text-[#176B87] text-sm">{doc.title}</h3>
                   <p className="text-[11px] font-bold text-amber-900">{doc.req}</p>
                   <p className="text-slate-500 text-[11px]">{doc.desc}</p>
                 </div>
@@ -665,7 +665,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           8. ELIGIBILITY GUIDANCE
           ========================================== */}
       <div className="space-y-4 pt-4">
-        <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
+        <h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2">
           <UserCheck className="w-5 h-5 text-amber-500" />
           General Partner Lender Eligibility Guidance
         </h2>
@@ -673,7 +673,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
 
           <Card className="p-5 space-y-3 bg-white border-slate-200">
-            <div className="flex items-center gap-2 font-extrabold text-[#1E3063] text-sm font-display">
+            <div className="flex items-center gap-2 font-extrabold text-[#176B87] text-sm font-display">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               General Requirements
             </div>
@@ -686,7 +686,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           </Card>
 
           <Card className="p-5 space-y-3 bg-white border-slate-200">
-            <div className="flex items-center gap-2 font-extrabold text-[#1E3063] text-sm font-display">
+            <div className="flex items-center gap-2 font-extrabold text-[#176B87] text-sm font-display">
               <DollarSign className="w-4 h-4 text-blue-600" />
               Income & Down Payment
             </div>
@@ -699,7 +699,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           </Card>
 
           <Card className="p-5 space-y-3 bg-white border-slate-200">
-            <div className="flex items-center gap-2 font-extrabold text-[#1E3063] text-sm font-display">
+            <div className="flex items-center gap-2 font-extrabold text-[#176B87] text-sm font-display">
               <Briefcase className="w-4 h-4 text-amber-600" />
               Supported Employment
             </div>
@@ -719,7 +719,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           ========================================== */}
       <div className="space-y-4 pt-4">
         <div>
-          <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
+          <h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2">
             <Car className="w-5 h-5 text-amber-500" />
             Recently Financed Vehicles on KAYAD
           </h2>
@@ -734,7 +734,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           10. FREQUENTLY ASKED QUESTIONS (FAQ)
           ========================================== */}
       <div className="space-y-4 pt-4">
-        <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
+        <h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2">
           <HelpCircle className="w-5 h-5 text-amber-500" />
           Frequently Asked Questions About Vehicle Financing
         </h2>
@@ -747,7 +747,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               <div key={idx} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
                 <button
                   onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                  className="w-full p-4 text-left flex items-center justify-between font-bold text-xs text-[#1E3063] hover:bg-slate-50 cursor-pointer"
+                  className="w-full p-4 text-left flex items-center justify-between font-bold text-xs text-[#176B87] hover:bg-slate-50 cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black flex items-center justify-center">?</span>
@@ -769,7 +769,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       {/* ==========================================
           MOBILE STICKY APPLY BAR
           ========================================== */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-[#17244B] text-white p-3 border-t border-amber-400/20 lg:hidden shadow-lg flex items-center justify-between">
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-[#0A3340] text-white p-3 border-t border-amber-400/20 lg:hidden shadow-lg flex items-center justify-between">
         <div>
           <p className="text-[10px] text-amber-400 font-bold uppercase">Est. Monthly</p>
           <p className="text-base font-black font-display text-white">Ksh {estimatedMonthly.toLocaleString()} / mo</p>
@@ -781,7 +781,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           onClick={scrollToCalculator}
         >
           <span>Calculate & Apply</span>
-          <ArrowRight className="w-4 h-4 text-[#17244B]" />
+          <ArrowRight className="w-4 h-4 text-[#0A3340]" />
         </Button>
       </div>
 
@@ -803,7 +803,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               <Badge variant="verified" size="sm">
                 KAYAD Financing Request
               </Badge>
-              <h3 className="text-xl font-black text-[#1E3063] font-display">
+              <h3 className="text-xl font-black text-[#176B87] font-display">
                 Submit a Financing Request
               </h3>
               <p className="text-xs text-slate-500">
@@ -839,7 +839,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                   <div className="flex justify-between font-bold text-slate-700">
                     <span>Vehicle Asset Value:</span>
-                    <span className="text-[#1E3063] font-black">Ksh {vehiclePrice.toLocaleString()}</span>
+                    <span className="text-[#176B87] font-black">Ksh {vehiclePrice.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between font-bold text-slate-700">
                     <span>Deposit ({depositPercent}%):</span>
@@ -865,7 +865,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                       placeholder="e.g. 120000"
                       value={monthlyIncome || ''}
                       onChange={(e) => setMonthlyIncome(Number(e.target.value) || 0)}
-                      className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 font-medium text-slate-800 outline-none focus:border-[#1E3063]"
+                      className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 font-medium text-slate-800 outline-none focus:border-[#176B87]"
                     />
                   </div>
                 </div>
@@ -880,7 +880,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                     disabled={applicationSubmitting}
                   >
                     <span>{applicationSubmitting ? 'Submitting…' : 'Submit Financing Request'}</span>
-                    <ArrowRight className="w-4 h-4 text-[#17244B]" />
+                    <ArrowRight className="w-4 h-4 text-[#0A3340]" />
                   </Button>
                 </div>
               </form>

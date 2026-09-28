@@ -8,12 +8,12 @@ export const PartnerEcosystem: FC = () => {
     { name: 'KAYAD Inspections', role: 'Inspection Workflow', icon: <ShieldCheck className="w-5 h-5 text-slate-400" /> },
   ];
   return (
-    <section className="py-10 bg-[#F6F1E8] dark:bg-[#080E1A] border-b border-[#E8E1D5] dark:border-white/10 transition-colors">
+    <section className="py-10 bg-[#EEF7F5] dark:bg-[#080E1A] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
         {/* Header Label */}
         <div className="text-center">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#6B7A99] dark:text-slate-400">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#66808A] dark:text-slate-400">
             Verified Integrations & Services
           </span>
         </div>
@@ -23,15 +23,15 @@ export const PartnerEcosystem: FC = () => {
           {services.map((partner, idx) => (
             <div
               key={idx}
-              className="p-3.5 rounded-2xl bg-white dark:bg-[#121D33] border border-[#E2D8C7] dark:border-white/10 flex flex-col items-center justify-center text-center space-y-1 hover:border-[#1E3063] dark:hover:border-[#00C9CE] transition-all grayscale hover:grayscale-0 group shadow-2xs"
+              className="p-3.5 rounded-2xl bg-white dark:bg-[#12576D] border border-[#D7E7E4] dark:border-white/10 flex flex-col items-center justify-center text-center space-y-1 hover:border-[#176B87] dark:hover:border-[#13B8A6] transition-all grayscale hover:grayscale-0 group shadow-2xs"
             >
-              <div className="w-8 h-8 rounded-xl bg-[#1E3063]/10 dark:bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-xl bg-[#176B87]/10 dark:bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform">
                 {partner.icon}
               </div>
-              <span className="text-xs font-serif font-black text-[#1E3063] dark:text-slate-200 line-clamp-1">
+              <span className="text-xs font-serif font-black text-[#176B87] dark:text-slate-200 line-clamp-1">
                 {partner.name}
               </span>
-              <span className="text-[9px] font-mono text-[#6B7A99] dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-[9px] font-mono text-[#66808A] dark:text-slate-400 uppercase tracking-wider">
                 {partner.role}
               </span>
             </div>

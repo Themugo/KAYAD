@@ -116,16 +116,16 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E2D8C7] text-[#2E4080]"
+          className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#D7E7E4] text-[#176B87]"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-5 bg-[#2E4080] text-white border-b border-white/10">
+          <div className="flex items-center justify-between p-5 bg-[#176B87] text-white border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#23EBFF]/20 border border-[#23EBFF]/40 flex items-center justify-center text-[#23EBFF] shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-[#13B8A6]/20 border border-[#13B8A6]/40 flex items-center justify-center text-[#13B8A6] shrink-0">
                 <BellRing className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#23EBFF] block">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#13B8A6] block">
                   KAYAD Market Sentinel
                 </span>
                 <h3 className="text-lg font-black font-serif text-white">
@@ -144,7 +144,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
           <form onSubmit={handleSaveAlert} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
 
             {/* Vehicle Summary Banner */}
-            <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
+            <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
               <img
                 src={vehicle.images[0] || 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=300&q=80'}
                 alt={vehicle.title}
@@ -153,11 +153,11 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                 className="w-16 h-16 rounded-xl object-cover shrink-0 border border-white/60 shadow-xs"
               />
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-[#2E4080] truncate">{vehicle.title}</h4>
-                <p className="text-xs text-[#6B7A99]">VIN: {vehicle.vin}</p>
+                <h4 className="text-sm font-bold text-[#176B87] truncate">{vehicle.title}</h4>
+                <p className="text-xs text-[#66808A]">VIN: {vehicle.vin}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs font-semibold text-[#6B7A99]">Current Listed Price:</span>
-                  <span className="text-sm font-black text-[#2E4080] font-serif">
+                  <span className="text-xs font-semibold text-[#66808A]">Current Listed Price:</span>
+                  <span className="text-sm font-black text-[#176B87] font-serif">
                     KSh {currentPrice.toLocaleString()}
                   </span>
                 </div>
@@ -167,8 +167,8 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
             {/* Target Price Threshold Input */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-extrabold uppercase tracking-wider text-[#2E4080] flex items-center gap-1.5">
-                  <TrendingDown className="w-4 h-4 text-[#23EBFF]" />
+                <label className="text-xs font-extrabold uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
+                  <TrendingDown className="w-4 h-4 text-[#13B8A6]" />
                   <span>Alert Target Price Threshold (KSh)</span>
                 </label>
                 {numericTarget > 0 && isTargetBelowCurrent && (
@@ -179,14 +179,14 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
               </div>
 
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-[#6B7A99] font-mono">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-[#66808A] font-mono">
                   KSh
                 </span>
                 <input
                   type="number"
                   value={targetPrice}
                   onChange={e => setTargetPrice(e.target.value)}
-                  className="w-full pl-14 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-2xl text-base font-extrabold text-[#2E4080] font-mono focus:outline-none focus:ring-2 focus:ring-[#23EBFF]"
+                  className="w-full pl-14 pr-4 py-3 bg-[#EEF7F5] border border-[#D7E7E4] rounded-2xl text-base font-extrabold text-[#176B87] font-mono focus:outline-none focus:ring-2 focus:ring-[#13B8A6]"
                   placeholder="e.g. 1300000"
                   required
                 />
@@ -194,32 +194,32 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
 
               {/* Quick Discount Presets */}
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-[11px] font-bold text-[#6B7A99]">Quick Target Presets:</span>
+                <span className="text-[11px] font-bold text-[#66808A]">Quick Target Presets:</span>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(0)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#176B87] hover:text-white border border-[#D7E7E4] transition-all cursor-pointer"
                 >
                   Any Price Drop
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(5)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#176B87] hover:text-white border border-[#D7E7E4] transition-all cursor-pointer"
                 >
                   -5% Drop
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(10)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#176B87] hover:text-white border border-[#D7E7E4] transition-all cursor-pointer"
                 >
                   -10% Drop
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(15)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#176B87] hover:text-white border border-[#D7E7E4] transition-all cursor-pointer"
                 >
                   -15% Drop
                 </button>
@@ -227,43 +227,43 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
             </div>
 
             {/* Notification Triggers Checkboxes */}
-            <div className="space-y-3 pt-2 border-t border-[#E8E1D5]">
-              <label className="text-xs font-extrabold uppercase tracking-wider text-[#2E4080] block">
+            <div className="space-y-3 pt-2 border-t border-[#D7E7E4]">
+              <label className="text-xs font-extrabold uppercase tracking-wider text-[#176B87] block">
                 Notification Triggers
               </label>
 
               <div className="space-y-2.5">
-                <label className="flex items-start gap-3 p-3 rounded-2xl bg-[#F6F1E8]/70 hover:bg-[#F6F1E8] border border-[#E2D8C7] transition-colors cursor-pointer">
+                <label className="flex items-start gap-3 p-3 rounded-2xl bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] border border-[#D7E7E4] transition-colors cursor-pointer">
                   <input
                     type="checkbox"
                     checked={alertOnPriceDrop}
                     onChange={e => setAlertOnPriceDrop(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-[#23EBFF] rounded accent-[#23EBFF] cursor-pointer"
+                    className="mt-1 w-4 h-4 text-[#13B8A6] rounded accent-[#13B8A6] cursor-pointer"
                   />
                   <div>
-                    <span className="text-xs font-extrabold text-[#2E4080] block flex items-center gap-1.5">
-                      <TrendingDown className="w-3.5 h-3.5 text-[#23EBFF]" />
+                    <span className="text-xs font-extrabold text-[#176B87] block flex items-center gap-1.5">
+                      <TrendingDown className="w-3.5 h-3.5 text-[#13B8A6]" />
                       <span>Notify when Price Drops below threshold</span>
                     </span>
-                    <span className="text-[11px] text-[#6B7A99]">
+                    <span className="text-[11px] text-[#66808A]">
                       Receive instant notification if seller reduces price or auction reserve lowers.
                     </span>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-3 rounded-2xl bg-[#F6F1E8]/70 hover:bg-[#F6F1E8] border border-[#E2D8C7] transition-colors cursor-pointer">
+                <label className="flex items-start gap-3 p-3 rounded-2xl bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] border border-[#D7E7E4] transition-colors cursor-pointer">
                   <input
                     type="checkbox"
                     checked={alertOnStatusChange}
                     onChange={e => setAlertOnStatusChange(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-[#23EBFF] rounded accent-[#23EBFF] cursor-pointer"
+                    className="mt-1 w-4 h-4 text-[#13B8A6] rounded accent-[#13B8A6] cursor-pointer"
                   />
                   <div>
-                    <span className="text-xs font-extrabold text-[#2E4080] block flex items-center gap-1.5">
+                    <span className="text-xs font-extrabold text-[#176B87] block flex items-center gap-1.5">
                       <Tag className="w-3.5 h-3.5 text-[#E67E22]" />
                       <span>Notify when Vehicle Status Changes</span>
                     </span>
-                    <span className="text-[11px] text-[#6B7A99]">
+                    <span className="text-[11px] text-[#66808A]">
                       Alert when marked as Sold, Reserved under Escrow, or Live Auction Floor opens.
                     </span>
                   </div>
@@ -272,8 +272,8 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
             </div>
 
             {/* Notification Delivery Method */}
-            <div className="space-y-3 pt-2 border-t border-[#E8E1D5]">
-              <label className="text-xs font-extrabold uppercase tracking-wider text-[#2E4080] block">
+            <div className="space-y-3 pt-2 border-t border-[#D7E7E4]">
+              <label className="text-xs font-extrabold uppercase tracking-wider text-[#176B87] block">
                 Alert Delivery Channels
               </label>
 
@@ -283,11 +283,11 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                   onClick={() => setNotifyMethod('in_app')}
                   className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     notifyMethod === 'in_app'
-                      ? 'bg-[#2E4080] text-white border-[#2E4080] shadow-xs'
-                      : 'bg-[#F6F1E8] text-[#2E4080] border-[#E2D8C7] hover:border-[#2E4080]'
+                      ? 'bg-[#176B87] text-white border-[#176B87] shadow-xs'
+                      : 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4] hover:border-[#176B87]'
                   }`}
                 >
-                  <Bell className="w-4 h-4 text-[#23EBFF]" />
+                  <Bell className="w-4 h-4 text-[#13B8A6]" />
                   <span className="text-xs font-bold">In-App Bell</span>
                 </button>
 
@@ -296,11 +296,11 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                   onClick={() => setNotifyMethod('email')}
                   className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     notifyMethod === 'email'
-                      ? 'bg-[#2E4080] text-white border-[#2E4080] shadow-xs'
-                      : 'bg-[#F6F1E8] text-[#2E4080] border-[#E2D8C7] hover:border-[#2E4080]'
+                      ? 'bg-[#176B87] text-white border-[#176B87] shadow-xs'
+                      : 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4] hover:border-[#176B87]'
                   }`}
                 >
-                  <Mail className="w-4 h-4 text-[#23EBFF]" />
+                  <Mail className="w-4 h-4 text-[#13B8A6]" />
                   <span className="text-xs font-bold">Email Digest</span>
                 </button>
 
@@ -309,11 +309,11 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                   onClick={() => setNotifyMethod('both')}
                   className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     notifyMethod === 'both'
-                      ? 'bg-[#2E4080] text-white border-[#2E4080] shadow-xs'
-                      : 'bg-[#F6F1E8] text-[#2E4080] border-[#E2D8C7] hover:border-[#2E4080]'
+                      ? 'bg-[#176B87] text-white border-[#176B87] shadow-xs'
+                      : 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4] hover:border-[#176B87]'
                   }`}
                 >
-                  <Smartphone className="w-4 h-4 text-[#23EBFF]" />
+                  <Smartphone className="w-4 h-4 text-[#13B8A6]" />
                   <span className="text-xs font-bold">In-App + SMS</span>
                 </button>
               </div>
@@ -334,7 +334,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-3 rounded-xl bg-[#F6F1E8] hover:bg-[#E8E1D5] text-[#2E4080] font-bold text-xs transition-all cursor-pointer"
+                  className="px-4 py-3 rounded-xl bg-[#EEF7F5] hover:bg-[#D7E7E4] text-[#176B87] font-bold text-xs transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -342,7 +342,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
 
               <button
                 type="submit"
-                className="flex-1 py-3.5 px-6 rounded-2xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 py-3.5 px-6 rounded-2xl bg-[#13B8A6] hover:bg-[#13B8A6] text-[#176B87] font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Save Price Alert</span>

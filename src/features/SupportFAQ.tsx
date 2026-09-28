@@ -158,7 +158,7 @@ export const FAQ_DATA: FAQItem[] = [
     id: 'faq-fin-1',
     category: 'financing',
     categoryLabel: 'Bank Auto Loans',
-    categoryIcon: <Landmark className="w-4 h-4 text-[#1E3063]" />,
+    categoryIcon: <Landmark className="w-4 h-4 text-[#176B87]" />,
     question: 'What are the requirements for KAYAD Auto Loan pre-approval in Kenya?',
     answer: 'To apply for asset financing through KAYAD, you typically need: 1) 6-month certified bank or M-Pesa statement, 2) National ID & KRA PIN Certificate, 3) 10% to 20% deposit commitment, and 4) Proof of income or business registration. Exact requirements vary by financing partner.',
     keyPoints: [
@@ -173,7 +173,7 @@ export const FAQ_DATA: FAQItem[] = [
     id: 'faq-fin-2',
     category: 'financing',
     categoryLabel: 'Bank Auto Loans',
-    categoryIcon: <Landmark className="w-4 h-4 text-[#1E3063]" />,
+    categoryIcon: <Landmark className="w-4 h-4 text-[#176B87]" />,
     question: 'How does bank financing work through KAYAD?',
     answer: 'You can compare financing offers, interest rates, and monthly repayment schedules directly on the Bank Financing Portal before committing to a purchase.',
     keyPoints: [
@@ -185,7 +185,7 @@ export const FAQ_DATA: FAQItem[] = [
     id: 'faq-fin-3',
     category: 'financing',
     categoryLabel: 'Bank Auto Loans',
-    categoryIcon: <Landmark className="w-4 h-4 text-[#1E3063]" />,
+    categoryIcon: <Landmark className="w-4 h-4 text-[#176B87]" />,
     question: 'Can I finance both imported (foreign) and locally used Kenyan vehicles?',
     answer: 'Yes! Partner banks finance foreign imports up to 8 years old (e.g. 2018–2026 models) and local Kenyan units up to 10 years old. All financed units must pass a KAYAD Pre-Purchase Inspection.',
     keyPoints: [
@@ -198,7 +198,7 @@ export const FAQ_DATA: FAQItem[] = [
     id: 'faq-fin-4',
     category: 'financing',
     categoryLabel: 'Bank Auto Loans',
-    categoryIcon: <Landmark className="w-4 h-4 text-[#1E3063]" />,
+    categoryIcon: <Landmark className="w-4 h-4 text-[#176B87]" />,
     question: 'How fast is the loan underwriting approval process?',
     answer: 'KAYAD automated credit engine provides instant pre-qualification feedback. Official bank underwriting sanction letters are issued within 4 to 24 hours of statement upload.',
     keyPoints: [
@@ -273,7 +273,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
     { id: 'all', label: 'All Queries', icon: <HelpCircle className="w-3.5 h-3.5" /> },
     { id: 'inspections', label: '150-Pt Inspections', icon: <ClipboardCheck className="w-3.5 h-3.5 text-emerald-500" /> },
     { id: 'escrow', label: 'CBK Escrow Vault', icon: <Lock className="w-3.5 h-3.5 text-amber-500" /> },
-    { id: 'financing', label: 'Bank Auto Loans', icon: <Landmark className="w-3.5 h-3.5 text-[#1E3063]" /> },
+    { id: 'financing', label: 'Bank Auto Loans', icon: <Landmark className="w-3.5 h-3.5 text-[#176B87]" /> },
     { id: 'ntsa', label: 'NTSA TIMS Logbook', icon: <FileText className="w-3.5 h-3.5 text-indigo-500" /> }
   ];
 
@@ -282,12 +282,12 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
       {/* ==========================================
           HEADER & SEARCH CONSOLE
           ========================================== */}
-      <Card className="p-6 bg-gradient-to-r from-[#101935] via-[#1E3063] to-[#101935] text-white border-amber-400/20 shadow-xl relative overflow-hidden">
+      <Card className="p-6 bg-gradient-to-r from-[#0A3340] via-[#176B87] to-[#0A3340] text-white border-amber-400/20 shadow-xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <Badge variant="accent" size="md" className="bg-amber-400 text-[#17244B] font-black">
-                <HelpCircle className="w-3.5 h-3.5 text-[#17244B]" /> Instant Knowledge Base
+              <Badge variant="accent" size="md" className="bg-amber-400 text-[#0A3340] font-black">
+                <HelpCircle className="w-3.5 h-3.5 text-[#0A3340]" /> Instant Knowledge Base
               </Badge>
               <Badge variant="verified" size="md" className="bg-emerald-500/20 text-emerald-300 border-emerald-400/40">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Kenya Market Compliant
@@ -335,14 +335,14 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
-                    ? 'bg-[#1E3063] text-white shadow-md'
+                    ? 'bg-[#176B87] text-white shadow-md'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 {cat.icon}
                 <span>{cat.label}</span>
                 <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
-                  isSelected ? 'bg-amber-400 text-[#17244B]' : 'bg-slate-200 text-slate-700'
+                  isSelected ? 'bg-amber-400 text-[#0A3340]' : 'bg-slate-200 text-slate-700'
                 }`}>
                   {count}
                 </span>
@@ -355,7 +355,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
         <div className="flex items-center justify-end gap-2 text-xs border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
           <button
             onClick={handleExpandAll}
-            className="text-[11px] font-bold text-[#1E3063] hover:underline px-2 py-1 rounded hover:bg-slate-100 cursor-pointer"
+            className="text-[11px] font-bold text-[#176B87] hover:underline px-2 py-1 rounded hover:bg-slate-100 cursor-pointer"
           >
             Expand All
           </button>
@@ -375,7 +375,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
       {filteredFaqs.length === 0 ? (
         <Card className="p-12 text-center text-slate-500 space-y-3 bg-white">
           <HelpCircle className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="font-extrabold text-sm text-[#1E3063]">No matching FAQ questions found</h3>
+          <h3 className="font-extrabold text-sm text-[#176B87]">No matching FAQ questions found</h3>
           <p className="text-xs max-w-md mx-auto text-slate-400">
             Try searching for terms like "deposit", "M-Pesa", "KAYAD", "audit", "TIMS", or select a different category tab.
           </p>
@@ -397,7 +397,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
                 key={faq.id}
                 className={`transition-all duration-200 border ${
                   isExpanded
-                    ? 'border-[#1E3063]/30 shadow-md bg-white'
+                    ? 'border-[#176B87]/30 shadow-md bg-white'
                     : 'border-slate-200 hover:border-slate-300 bg-white'
                 }`}
               >
@@ -420,14 +420,14 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
                       )}
                     </div>
 
-                    <h3 className="text-sm sm:text-base font-black text-[#1E3063] font-display leading-snug">
+                    <h3 className="text-sm sm:text-base font-black text-[#176B87] font-display leading-snug">
                       {faq.question}
                     </h3>
                   </div>
 
                   {/* Expand / Collapse Icon */}
                   <div className={`p-1.5 rounded-full shrink-0 transition-colors ${
-                    isExpanded ? 'bg-[#1E3063] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                    isExpanded ? 'bg-[#176B87] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                   }`}>
                     {isExpanded ? (
                       <ChevronUp className="w-4 h-4" />
@@ -447,7 +447,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
                     {/* Key Highlights Bullet List */}
                     {faq.keyPoints && faq.keyPoints.length > 0 && (
                       <div className="space-y-2 pt-1">
-                        <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1E3063] flex items-center gap-1.5">
+                        <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Key Highlights & Verification Rules:
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -464,7 +464,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
                     {/* Quick Escalation Link */}
                     <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100">
                       <span>Was this answer helpful?</span>
-                      <div className="flex items-center gap-3 font-bold text-[#1E3063]">
+                      <div className="flex items-center gap-3 font-bold text-[#176B87]">
                         {/* Fixed: this previously claimed "Thank you
                             for your feedback!" via a browser alert,
                             but recorded nothing anywhere - a real,
@@ -513,8 +513,8 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
           ========================================== */}
       <Card className="p-6 bg-slate-900 text-white rounded-2xl border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-amber-400 text-[#17244B] flex items-center justify-center shrink-0 font-extrabold shadow-md">
-            <PhoneCall className="w-6 h-6 text-[#17244B]" />
+          <div className="w-12 h-12 rounded-2xl bg-amber-400 text-[#0A3340] flex items-center justify-center shrink-0 font-extrabold shadow-md">
+            <PhoneCall className="w-6 h-6 text-[#0A3340]" />
           </div>
           <div>
             <h4 className="font-extrabold text-sm text-white">Still have questions regarding an active deal?</h4>
@@ -530,16 +530,16 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport }) => {
               variant="accent"
               size="md"
               onClick={onContactSupport}
-              className="bg-amber-400 text-[#17244B] font-extrabold w-full sm:w-auto"
+              className="bg-amber-400 text-[#0A3340] font-extrabold w-full sm:w-auto"
             >
-              <MessageSquare className="w-4 h-4 text-[#17244B]" /> Contact Support Agent
+              <MessageSquare className="w-4 h-4 text-[#0A3340]" /> Contact Support Agent
             </Button>
           ) : (
             <a
               href="tel:+254700000999"
-              className="bg-amber-400 text-[#17244B] px-4 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 hover:bg-amber-500 transition-all shadow-sm w-full sm:w-auto justify-center"
+              className="bg-amber-400 text-[#0A3340] px-4 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 hover:bg-amber-500 transition-all shadow-sm w-full sm:w-auto justify-center"
             >
-              <PhoneCall className="w-4 h-4 text-[#17244B]" /> Call +254 700 000 999
+              <PhoneCall className="w-4 h-4 text-[#0A3340]" /> Call +254 700 000 999
             </a>
           )}
         </div>

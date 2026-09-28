@@ -155,7 +155,7 @@ function mapCarToAuction(car: BackendCar): Auction {
 const HeroSummary: React.FC<{ liveCount: number; scheduledCount: number; totalBidsToday: number; nextAuctionTime: string }> = ({
   liveCount, scheduledCount, totalBidsToday, nextAuctionTime
 }) => (
-  <div className="bg-gradient-to-br from-[#1E3063] to-[#2a4080] py-12">
+  <div className="bg-gradient-to-br from-[#176B87] to-[#2a4080] py-12">
     <div className="max-w-7xl mx-auto px-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
         {[
@@ -204,12 +204,12 @@ const LiveAuctionCard: React.FC<{ auction: Auction; onWatch: () => void }> = ({ 
       </div>
     </div>
     <div className="p-4">
-      <h3 className="font-bold text-[#1E3063] text-sm mb-2 line-clamp-1">{auction.vehicle.title}</h3>
+      <h3 className="font-bold text-[#176B87] text-sm mb-2 line-clamp-1">{auction.vehicle.title}</h3>
       <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
         <MapPin className="w-3 h-3" />
         <span>{auction.vehicle.location}</span>
       </div>
-      <div className="bg-gradient-to-br from-[#1E3063] to-[#2a4080] rounded-lg p-3 text-white mb-3">
+      <div className="bg-gradient-to-br from-[#176B87] to-[#2a4080] rounded-lg p-3 text-white mb-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-300">Current Bid</p>
@@ -226,14 +226,14 @@ const LiveAuctionCard: React.FC<{ auction: Auction; onWatch: () => void }> = ({ 
       </div>
       {auction.organizerName && (
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-6 h-6 rounded-full bg-[#1E3063] flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-6 h-6 rounded-full bg-[#176B87] flex items-center justify-center text-white text-xs font-bold">
             {auction.organizerName.charAt(0)}
           </div>
           <span className="text-xs text-slate-600 truncate">{auction.organizerName}</span>
           {auction.organizerVerified && <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
         </div>
       )}
-      <Button className="w-full bg-[#C85A32] hover:bg-[#a84a28]" onClick={onWatch}>
+      <Button className="w-full bg-[#176B87] hover:bg-[#a84a28]" onClick={onWatch}>
         <Play className="w-4 h-4 mr-2" /> Watch Live
       </Button>
     </div>
@@ -256,7 +256,7 @@ const UpcomingAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
             </Badge>
           )}
         </div>
-        <h3 className="font-bold text-[#1E3063] text-sm mb-1">{auction.vehicle.title}</h3>
+        <h3 className="font-bold text-[#176B87] text-sm mb-1">{auction.vehicle.title}</h3>
         <p className="text-xs text-slate-500 mb-2">{auction.vehicle.year} {auction.vehicle.mileage && `• ${auction.vehicle.mileage}`}</p>
         {auction.organizerName && (
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -273,7 +273,7 @@ const UpcomingAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
       <div className="px-4 pb-4 border-t border-slate-100 pt-3">
         <div className="flex items-center justify-between text-xs">
           <span className="text-slate-500">Starting Bid</span>
-          <span className="font-bold text-[#1E3063]">{formatCurrency(auction.startingBid)}</span>
+          <span className="font-bold text-[#176B87]">{formatCurrency(auction.startingBid)}</span>
         </div>
       </div>
     )}
@@ -291,7 +291,7 @@ const CompletedAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
           </Badge>
           {auction.endsAt && <span className="text-xs text-slate-500">{formatDate(auction.endsAt)}</span>}
         </div>
-        <h3 className="font-bold text-[#1E3063] text-sm mb-1">{auction.vehicle.title}</h3>
+        <h3 className="font-bold text-[#176B87] text-sm mb-1">{auction.vehicle.title}</h3>
         {auction.organizerName && (
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Building2 className="w-3 h-3" />
@@ -304,7 +304,7 @@ const CompletedAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="text-xs text-slate-500">Final Price</p>
-          <p className="text-lg font-black text-[#1E3063]">{formatCurrency(auction.currentBid)}</p>
+          <p className="text-lg font-black text-[#176B87]">{formatCurrency(auction.currentBid)}</p>
         </div>
       </div>
       <div className="flex items-center justify-between text-xs text-slate-500">
@@ -322,7 +322,7 @@ const LearningArticleCard: React.FC<{ article: LearningArticle }> = ({ article }
         {article.icon}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-[#1E3063] text-sm mb-1 group-hover:text-[#C85A32] transition-colors">{article.title}</h3>
+        <h3 className="font-bold text-[#176B87] text-sm mb-1 group-hover:text-[#176B87] transition-colors">{article.title}</h3>
         <p className="text-xs text-slate-500 mb-2 line-clamp-2">{article.description}</p>
         <span className="text-xs text-slate-400">{article.readTime} read</span>
       </div>
@@ -338,7 +338,7 @@ const NewsletterSection: React.FC = () => {
     if (email) setSubscribed(true);
   };
   return (
-    <div className="bg-gradient-to-br from-[#C85A32] to-[#a84a28] py-12">
+    <div className="bg-gradient-to-br from-[#176B87] to-[#a84a28] py-12">
       <div className="max-w-2xl mx-auto px-4 text-center">
         <Mail className="w-12 h-12 text-white/80 mx-auto mb-4" />
         <h2 className="text-2xl font-black text-white mb-2">Stay in the Loop</h2>
@@ -357,7 +357,7 @@ const NewsletterSection: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
             />
-            <Button type="submit" className="bg-white text-[#C85A32] hover:bg-white/90 px-6">Subscribe</Button>
+            <Button type="submit" className="bg-white text-[#176B87] hover:bg-white/90 px-6">Subscribe</Button>
           </form>
         )}
       </div>
@@ -451,7 +451,7 @@ const WatchLiveModal: React.FC<{
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b border-slate-200">
-          <h2 className="font-bold text-[#1E3063] flex items-center gap-2">
+          <h2 className="font-bold text-[#176B87] flex items-center gap-2">
             <Radio className="w-4 h-4 text-red-500" /> Watch Live
           </h2>
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg">
@@ -473,12 +473,12 @@ const WatchLiveModal: React.FC<{
           <div className="p-4 space-y-4">
             <img src={auction.vehicle.image} alt={auction.vehicle.title} className="w-full h-40 object-cover rounded-xl" />
             <div>
-              <h3 className="font-bold text-[#1E3063]">{auction.vehicle.title}</h3>
+              <h3 className="font-bold text-[#176B87]">{auction.vehicle.title}</h3>
               <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                 <MapPin className="w-3 h-3" /> {auction.vehicle.location}
               </p>
             </div>
-            <div className="bg-gradient-to-br from-[#1E3063] to-[#2a4080] rounded-xl p-4 text-white grid grid-cols-3 gap-2 text-center">
+            <div className="bg-gradient-to-br from-[#176B87] to-[#2a4080] rounded-xl p-4 text-white grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-[10px] text-slate-300">Current Bid</p>
                 <p className="text-base font-black">{formatCurrency(auction.currentBid)}</p>
@@ -511,7 +511,7 @@ const WatchLiveModal: React.FC<{
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                 />
                 {bidError && <p className="text-xs text-rose-600">{bidError}</p>}
-                <Button type="submit" disabled={placing} className="w-full bg-[#C85A32] hover:bg-[#a84a28]">
+                <Button type="submit" disabled={placing} className="w-full bg-[#176B87] hover:bg-[#a84a28]">
                   {placing ? 'Placing Bid…' : user ? 'Place Bid' : 'Sign In to Bid'}
                 </Button>
               </form>
@@ -578,7 +578,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
   const totalBids = liveAuctions.reduce((sum, a) => sum + a.bidsCount, 0);
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       <HeroSummary
         liveCount={liveAuctions.length}
         scheduledCount={upcomingAuctions.length}
@@ -595,7 +595,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
               placeholder="Search auctions by vehicle or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/30"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/30"
             />
           </div>
         </div>
@@ -617,7 +617,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
             {/* Live Now */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-black text-[#1E3063] flex items-center gap-2">
+                <h2 className="text-2xl font-black text-[#176B87] flex items-center gap-2">
                   <Radio className="w-5 h-5 text-red-500" /> Live Now
                 </h2>
                 <span className="text-xs text-slate-500">{filteredLive.length} active auctions</span>
@@ -636,7 +636,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
             {/* Starting Soon */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-black text-[#1E3063]">Starting Soon</h2>
+                <h2 className="text-2xl font-black text-[#176B87]">Starting Soon</h2>
                 <span className="text-xs text-slate-500">Beginning soon</span>
               </div>
               {filteredUpcoming.length === 0 ? (
@@ -651,7 +651,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
             {/* Recently Completed */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-black text-[#1E3063]">Recently Completed</h2>
+                <h2 className="text-2xl font-black text-[#176B87]">Recently Completed</h2>
               </div>
               {filteredCompleted.length === 0 ? (
                 <p className="text-sm text-slate-400 py-6 text-center">No completed auctions to show yet.</p>
@@ -666,7 +666,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <BookOpen className="w-5 h-5 text-emerald-600" />
-                <h2 className="text-2xl font-black text-[#1E3063]">Auction Learning Center</h2>
+                <h2 className="text-2xl font-black text-[#176B87]">Auction Learning Center</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {LEARNING_ARTICLES.map((a) => <LearningArticleCard key={a.id} article={a} />)}

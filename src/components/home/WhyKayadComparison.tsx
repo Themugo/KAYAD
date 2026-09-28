@@ -39,13 +39,13 @@ export const WhyKayadComparison: FC = () => {
   ];
 
   return (
-    <section className="py-14 sm:py-20 bg-[#0B1628] dark:bg-[#060B14] text-white border-b border-white/10 relative overflow-hidden">
+    <section className="py-14 sm:py-20 bg-[#0A3340] dark:bg-[#060B14] text-white border-b border-white/10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-[#00C9CE] font-mono font-black text-xs uppercase tracking-wider">
-            <Award className="w-4 h-4 text-[#00C9CE]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-[#13B8A6] font-mono font-black text-xs uppercase tracking-wider">
+            <Award className="w-4 h-4 text-[#13B8A6]" />
             <span>THE UNMATCHED KAYAD SECURITY ADVANTAGE</span>
           </div>
 
@@ -59,17 +59,17 @@ export const WhyKayadComparison: FC = () => {
         </div>
 
         {/* Comparison Table / Matrix */}
-        <div className="bg-[#1E3063]/80 border border-white/15 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
+        <div className="bg-[#176B87]/80 border border-white/15 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
 
           {/* Table Header */}
-          <div className="grid grid-cols-1 md:grid-cols-3 bg-[#121D33] p-4 sm:p-6 border-b border-white/15 text-xs font-mono font-black uppercase tracking-wider text-slate-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 bg-[#12576D] p-4 sm:p-6 border-b border-white/15 text-xs font-mono font-black uppercase tracking-wider text-slate-300">
             <div className="hidden md:block text-slate-400">Marketplace Standard</div>
             <div className="text-rose-400 flex items-center gap-2">
               <X className="w-4 h-4 text-rose-500 stroke-[3]" />
               <span>Traditional Classifieds</span>
             </div>
-            <div className="text-[#00C9CE] flex items-center gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
-              <Shield className="w-4 h-4 text-[#00C9CE]" />
+            <div className="text-[#13B8A6] flex items-center gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
+              <Shield className="w-4 h-4 text-[#13B8A6]" />
               <span>KAYAD Regulated Marketplace</span>
             </div>
           </div>
@@ -93,8 +93,8 @@ export const WhyKayadComparison: FC = () => {
                 </div>
 
                 {/* KAYAD */}
-                <div className="flex items-start gap-2 text-xs sm:text-sm text-[#00C9CE] font-sans font-bold bg-[#00C9CE]/10 p-2.5 rounded-2xl border border-[#00C9CE]/20">
-                  <Check className="w-4 h-4 text-[#00C9CE] shrink-0 mt-0.5 stroke-[3]" />
+                <div className="flex items-start gap-2 text-xs sm:text-sm text-[#13B8A6] font-sans font-bold bg-[#13B8A6]/10 p-2.5 rounded-2xl border border-[#13B8A6]/20">
+                  <Check className="w-4 h-4 text-[#13B8A6] shrink-0 mt-0.5 stroke-[3]" />
                   <span>{row.kayad}</span>
                 </div>
               </div>
@@ -107,10 +107,10 @@ export const WhyKayadComparison: FC = () => {
         <div className="text-center pt-2">
           <button
             onClick={() => navigateTo('escrow')}
-            className="px-8 py-4 bg-[#00C9CE] hover:bg-[#00B0B5] text-[#1E3063] font-mono font-black text-xs uppercase tracking-wider rounded-2xl inline-flex items-center gap-2 shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
+            className="px-8 py-4 bg-[#13B8A6] hover:bg-[#00B0B5] text-[#176B87] font-mono font-black text-xs uppercase tracking-wider rounded-2xl inline-flex items-center gap-2 shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
           >
             <span>Experience Escrow-Protected Trading</span>
-            <ArrowRight className="w-4 h-4 text-[#1E3063]" />
+            <ArrowRight className="w-4 h-4 text-[#176B87]" />
           </button>
         </div>
 

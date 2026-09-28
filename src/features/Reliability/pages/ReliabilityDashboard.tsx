@@ -26,11 +26,11 @@ import {
 } from 'lucide-react';
 
 const KAYAD_COLORS = {
-  lightNavy: '#1e3a5f',
-  warmBeige: '#f5f0e8',
+  lightNavy: '#12576D',
+  warmBeige: '#EEF7F5',
   white: '#ffffff',
   emerald: '#10b981',
-  mutedTerracotta: '#c4a484',
+  mutedTerracotta: '#5AAFA4',
   softBlue: '#64748b',
   amber: '#f59e0b',
   red: '#ef4444',

@@ -225,7 +225,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
               <div className="p-5 space-y-4">
                 <div>
                   <div className="flex items-center justify-between gap-2"><Badge variant="accent">LIVE</Badge><span className="text-xs text-slate-500">{timeRemaining(auction.endTime)}</span></div>
-                  <h3 className="font-bold text-[#1E3063] mt-2">{auction.car.title}</h3>
+                  <h3 className="font-bold text-[#176B87] mt-2">{auction.car.title}</h3>
                   <p className="text-xs text-slate-500">{[auction.car.year, auction.car.brand, auction.car.model, auction.car.location].filter(Boolean).join(' • ')}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -246,7 +246,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between gap-4">
-              <div><Badge variant="accent">LIVE AUCTION</Badge><h2 className="text-xl font-black text-[#1E3063] mt-2">{selected.car.title}</h2></div>
+              <div><Badge variant="accent">LIVE AUCTION</Badge><h2 className="text-xl font-black text-[#176B87] mt-2">{selected.car.title}</h2></div>
               <button onClick={() => setSelected(null)} className="text-slate-400">✕</button>
             </div>
             <div className="grid grid-cols-2 gap-4">

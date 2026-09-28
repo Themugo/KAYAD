@@ -11,8 +11,8 @@ import * as automationApi from '../../../services/automationApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -79,7 +79,7 @@ export default function AutomationStudio() {
         <h2 className="text-2xl font-bold text-slate-800">Automation Overview</h2>
         <button
           onClick={() => setActiveModule('workflows')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] transition-colors"
         >
           <Plus size={18} />
           Create Workflow
@@ -115,7 +115,7 @@ export default function AutomationStudio() {
             <h3 className="text-lg font-semibold text-slate-800">Recent Executions</h3>
             <button
               onClick={() => setActiveModule('logs')}
-              className="text-sm text-[#17244B] hover:underline"
+              className="text-sm text-[#0A3340] hover:underline"
             >
               View All
             </button>
@@ -150,7 +150,7 @@ export default function AutomationStudio() {
             <h3 className="text-lg font-semibold text-slate-800">Task Queue</h3>
             <button
               onClick={() => setActiveModule('tasks')}
-              className="text-sm text-[#17244B] hover:underline"
+              className="text-sm text-[#0A3340] hover:underline"
             >
               View All
             </button>
@@ -190,7 +190,7 @@ export default function AutomationStudio() {
               <p className="text-sm text-slate-500">Recommendations based on platform patterns</p>
             </div>
           </div>
-          <button className="text-sm text-[#17244B] hover:underline flex items-center gap-1">
+          <button className="text-sm text-[#0A3340] hover:underline flex items-center gap-1">
             <RefreshCw size={14} />
             Refresh
           </button>
@@ -201,7 +201,7 @@ export default function AutomationStudio() {
             { title: 'Auction Approval Bottleneck', desc: 'Avg 4.2 hours approval time', impact: '+3 hrs/day' },
             { title: 'Vehicle Expiry Reminders', desc: '60% lower engagement on stale listings', impact: '+1 hr/day' },
           ].map((sug, i) => (
-            <div key={i} className="p-4 rounded-lg border border-slate-200 hover:border-[#17244B] transition-colors cursor-pointer">
+            <div key={i} className="p-4 rounded-lg border border-slate-200 hover:border-[#0A3340] transition-colors cursor-pointer">
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-medium text-slate-800">{sug.title}</h4>
                 <ArrowUpRight size={16} className="text-slate-400" />
@@ -227,7 +227,7 @@ export default function AutomationStudio() {
             <FlaskConical size={18} />
             Use Template
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
             <Plus size={18} />
             Create Workflow
           </button>
@@ -244,7 +244,7 @@ export default function AutomationStudio() {
           { name: 'Subscription Renewal', category: 'billing', status: 'draft', runs: 0, success: 0 },
           { name: 'Finance Approval', category: 'finance', status: 'active', runs: 78, success: 96 },
         ].map((workflow, i) => (
-          <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#17244B] transition-colors">
+          <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#0A3340] transition-colors">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
@@ -289,7 +289,7 @@ export default function AutomationStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Automation Tasks</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           Create Task
         </button>
@@ -304,16 +304,16 @@ export default function AutomationStudio() {
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
           />
         </div>
-        <select className="px-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none">
+        <select className="px-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none">
           <option>All Status</option>
           <option>Pending</option>
           <option>In Progress</option>
           <option>Completed</option>
         </select>
-        <select className="px-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none">
+        <select className="px-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none">
           <option>All Priority</option>
           <option>High</option>
           <option>Medium</option>
@@ -375,7 +375,7 @@ export default function AutomationStudio() {
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     {task.status === 'pending' && (
-                      <button className="px-3 py-1 text-xs bg-[#17244B] text-white rounded hover:bg-[#1e3054]">
+                      <button className="px-3 py-1 text-xs bg-[#0A3340] text-white rounded hover:bg-[#12576D]">
                         Start
                       </button>
                     )}
@@ -401,7 +401,7 @@ export default function AutomationStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Business Rules</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           Create Rule
         </button>
@@ -457,7 +457,7 @@ export default function AutomationStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Notification Templates</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           Create Template
         </button>
@@ -503,7 +503,7 @@ export default function AutomationStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Scheduled Jobs</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           Create Scheduled Job
         </button>
@@ -583,14 +583,14 @@ export default function AutomationStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <Zap size={20} className="text-white" />
                 </div>
                 <div>
@@ -624,7 +624,7 @@ export default function AutomationStudio() {
                   onClick={() => setActiveModule(module.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-[#17244B] text-white'
+                      ? 'bg-[#0A3340] text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >

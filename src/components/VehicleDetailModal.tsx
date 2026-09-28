@@ -182,7 +182,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             <Badge variant="danger" size="md">
               <AlertCircle className="w-3.5 h-3.5" /> 404 Listing Not Found
             </Badge>
-            <h3 className="text-2xl font-black text-[#1E3063] font-display">
+            <h3 className="text-2xl font-black text-[#176B87] font-display">
               Vehicle #{notFoundId} Not Available
             </h3>
             <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
@@ -191,7 +191,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           </div>
 
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-xs text-slate-700 space-y-2 max-w-md mx-auto">
-            <p className="font-bold text-[#1E3063]">Recommended Next Steps:</p>
+            <p className="font-bold text-[#176B87]">Recommended Next Steps:</p>
             <ul className="list-disc list-inside space-y-1 text-slate-600">
               <li>Explore verified inventory in the active marketplace</li>
               <li>Filter by make, model, county, or budget</li>
@@ -280,7 +280,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const modalTitle = (
     <div className="flex items-center justify-between w-full pr-8">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[#1E3063] font-black text-lg font-display tracking-tight">
+        <span className="text-[#176B87] font-black text-lg font-display tracking-tight">
           {vehicle.year} {vehicle.make} {vehicle.model}
         </span>
         <span className="text-slate-400 font-medium text-xs">| Ref #{vehicle.id}</span>
@@ -341,7 +341,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </div>
 
                 {/* Floating Location Overlay */}
-                <div className="absolute bottom-4 left-4 bg-[#1E3063]/90 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 backdrop-blur-md shadow-md z-10">
+                <div className="absolute bottom-4 left-4 bg-[#176B87]/90 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 backdrop-blur-md shadow-md z-10">
                   <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span>{vehicle.location}, {vehicle.county}</span>
                 </div>
@@ -403,7 +403,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       key={idx}
                       onClick={() => setActiveImage(img)}
                       className={`h-20 w-28 shrink-0 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        activeImage === img ? 'border-[#1E3063] ring-2 ring-[#1E3063]/20 scale-95 shadow-xs' : 'border-slate-200 opacity-70 hover:opacity-100'
+                        activeImage === img ? 'border-[#176B87] ring-2 ring-[#176B87]/20 scale-95 shadow-xs' : 'border-slate-200 opacity-70 hover:opacity-100'
                       }`}
                     >
                       <LazyImage src={img} alt={`Thumb ${idx + 1}`} wrapperClassName="w-full h-full" className="w-full h-full object-cover" />
@@ -426,7 +426,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       {statusChip.label}
                     </Badge>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-[#1E3063] font-display tracking-tight leading-snug">
+                  <h1 className="text-2xl sm:text-3xl font-black text-[#176B87] font-display tracking-tight leading-snug">
                     {vehicle.title}
                   </h1>
                 </div>
@@ -440,7 +440,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                         {isAuction ? 'Current Highest Bid' : 'Listed Price'}
                       </p>
-                      <span className="text-3xl font-black text-[#1E3063] font-display tracking-tight">
+                      <span className="text-3xl font-black text-[#176B87] font-display tracking-tight">
                         Ksh {displayPrice.toLocaleString()}
                       </span>
                     </div>
@@ -462,7 +462,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       <span className="text-slate-600 font-bold flex items-center gap-1.5">
                         <Landmark className="w-4 h-4 text-blue-600" /> Estimated Monthly Finance:
                       </span>
-                      <span className="font-black text-[#1E3063] text-sm font-display">
+                      <span className="font-black text-[#176B87] text-sm font-display">
                         Ksh {Math.round(monthlyPayment).toLocaleString()} / mo
                       </span>
                     </div>
@@ -475,12 +475,12 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-[#1E3063] text-amber-400 font-black flex items-center justify-center font-display text-base shadow-xs">
+                      <div className="w-11 h-11 rounded-2xl bg-[#176B87] text-amber-400 font-black flex items-center justify-center font-display text-base shadow-xs">
                         {vehicle.sellerName.charAt(0)}
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h4 className="font-extrabold text-[#1E3063] text-sm font-display">{vehicle.sellerName}</h4>
+                          <h4 className="font-extrabold text-[#176B87] text-sm font-display">{vehicle.sellerName}</h4>
                           <ShieldCheck className="w-4 h-4 text-amber-500" />
                         </div>
                         <p className="text-[11px] text-slate-500 font-medium">
@@ -506,7 +506,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       size="sm"
                       onClick={() => onContactSeller(vehicle)}
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-[#1E3063]" />
+                      <MessageSquare className="w-3.5 h-3.5 text-[#176B87]" />
                       <span>Contact Dealer</span>
                     </Button>
                   </div>
@@ -524,7 +524,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     onClick={() => (onViewAuctionLot ? onViewAuctionLot(vehicle) : onContactSeller(vehicle))}
                     className="shadow-md font-black text-sm"
                   >
-                    <Gavel className="w-5 h-5 text-[#17244B]" />
+                    <Gavel className="w-5 h-5 text-[#0A3340]" />
                     <span>Place Bid / Submit Auction Offer</span>
                   </Button>
                 ) : isPrivateSeller || isEscrowActive ? (
@@ -559,18 +559,18 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               4. VEHICLE HIGHLIGHTS (Elegant Specification Chips)
               ========================================== */}
           <div className="space-y-3 pt-2">
-            <h3 className="text-xs font-extrabold text-[#1E3063] uppercase tracking-wider font-display">
+            <h3 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display">
               Vehicle Highlights
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 text-xs">
               {[
-                { label: 'Year', val: vehicle.year, icon: <Calendar className="w-4 h-4 text-[#1E3063]" /> },
-                { label: 'Mileage', val: `${vehicle.mileage.toLocaleString()} km`, icon: <Gauge className="w-4 h-4 text-[#1E3063]" /> },
-                { label: 'Fuel', val: vehicle.fuelType, icon: <Fuel className="w-4 h-4 text-[#1E3063]" /> },
-                { label: 'Trans', val: vehicle.transmission.replace('Automatic', 'Auto'), icon: <Sliders className="w-4 h-4 text-[#1E3063]" /> },
-                { label: 'Drive', val: vehicle.driveType || 'AWD / 4WD', icon: <Car className="w-4 h-4 text-[#1E3063]" /> },
-                { label: 'Engine', val: vehicle.engineSize || '2500 cc', icon: <Zap className="w-4 h-4 text-[#1E3063]" /> },
-                { label: 'Condition', val: vehicle.condition || 'Foreign Used', icon: <Award className="w-4 h-4 text-[#1E3063]" /> },
+                { label: 'Year', val: vehicle.year, icon: <Calendar className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Mileage', val: `${vehicle.mileage.toLocaleString()} km`, icon: <Gauge className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Fuel', val: vehicle.fuelType, icon: <Fuel className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Trans', val: vehicle.transmission.replace('Automatic', 'Auto'), icon: <Sliders className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Drive', val: vehicle.driveType || 'AWD / 4WD', icon: <Car className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Engine', val: vehicle.engineSize || '2500 cc', icon: <Zap className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Condition', val: vehicle.condition || 'Foreign Used', icon: <Award className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Verification', val: vehicle.verified ? 'Verified' : 'Pending verification', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> }
               ].map((chip, idx) => (
                 <div key={idx} className="p-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-2xl border border-slate-200/80 text-center space-y-1 transition-colors">
@@ -585,7 +585,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           {/* ==========================================
               5. BUYER ASSURANCE (KAYAD Purchase Protection)
               ========================================== */}
-          <div className="p-6 bg-gradient-to-r from-slate-900 via-[#1E3063] to-slate-900 text-white rounded-3xl shadow-md space-y-4 border border-amber-400/20">
+          <div className="p-6 bg-gradient-to-r from-slate-900 via-[#176B87] to-slate-900 text-white rounded-3xl shadow-md space-y-4 border border-amber-400/20">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-sm font-black text-amber-400 uppercase tracking-wider font-display flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-amber-400" /> KAYAD Purchase Protection
@@ -615,7 +615,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               6. VEHICLE STORY (Cards instead of raw paragraphs)
               ========================================== */}
           <div className="space-y-4">
-            <h3 className="text-sm font-black text-[#1E3063] uppercase tracking-wider font-display flex items-center gap-2">
+            <h3 className="text-sm font-black text-[#176B87] uppercase tracking-wider font-display flex items-center gap-2">
               <Compass className="w-4 h-4 text-amber-500" />
               The Vehicle Story & Detailed Assessment
             </h3>
@@ -623,7 +623,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
 
               <Card className="p-5 space-y-2 bg-white border-slate-200">
-                <div className="flex items-center gap-2 text-[#1E3063] font-black text-sm font-display">
+                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
                   <Car className="w-4 h-4 text-amber-500" />
                   <span>Vehicle Overview</span>
                 </div>
@@ -633,7 +633,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </Card>
 
               <Card className="p-5 space-y-2 bg-white border-slate-200">
-                <div className="flex items-center gap-2 text-[#1E3063] font-black text-sm font-display">
+                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
                   <Wrench className="w-4 h-4 text-emerald-600" />
                   <span>Maintenance History</span>
                 </div>
@@ -643,7 +643,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </Card>
 
               <Card className="p-5 space-y-2 bg-white border-slate-200">
-                <div className="flex items-center gap-2 text-[#1E3063] font-black text-sm font-display">
+                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
                   <ShieldCheck className="w-4 h-4 text-blue-600" />
                   <span>Ownership History</span>
                 </div>
@@ -653,7 +653,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </Card>
 
               <Card className="p-5 space-y-2 bg-white border-slate-200">
-                <div className="flex items-center gap-2 text-[#1E3063] font-black text-sm font-display">
+                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <span>Why This Vehicle Stands Out</span>
                 </div>
@@ -663,7 +663,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </Card>
 
               <Card className="p-5 space-y-2 bg-white border-slate-200 md:col-span-2 lg:col-span-2">
-                <div className="flex items-center gap-2 text-[#1E3063] font-black text-sm font-display">
+                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
                   <CheckSquare className="w-4 h-4 text-emerald-600" />
                   <span>Condition Summary</span>
                 </div>
@@ -682,7 +682,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               7. CATEGORIZED FEATURE GROUPS (Collapsible)
               ========================================== */}
           <div className="space-y-4">
-            <h3 className="text-sm font-black text-[#1E3063] uppercase tracking-wider font-display">
+            <h3 className="text-sm font-black text-[#176B87] uppercase tracking-wider font-display">
               Categorized Factory Features & Equipment
             </h3>
 
@@ -692,7 +692,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('safety')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#1E3063] cursor-pointer"
+                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-rose-600" /> Safety Systems ({featureGroups.safety.length})
@@ -715,7 +715,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('comfort')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#1E3063] cursor-pointer"
+                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-500" /> Comfort & Interior ({featureGroups.comfort.length})
@@ -738,7 +738,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('technology')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#1E3063] cursor-pointer"
+                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-blue-600" /> Technology & Infotainment ({featureGroups.technology.length})
@@ -761,7 +761,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('utility')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#1E3063] cursor-pointer"
+                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-emerald-600" /> Utility & Exterior ({featureGroups.utility.length})
@@ -804,22 +804,22 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
               <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#1E3063]">1. Engine & Mechanical</p>
+                <p className="font-extrabold text-[#176B87]">1. Engine & Mechanical</p>
                 <p className="text-emerald-700 font-extrabold text-[11px]">100% Compression Pass</p>
               </div>
 
               <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#1E3063]">2. Transmission & Drivetrain</p>
+                <p className="font-extrabold text-[#176B87]">2. Transmission & Drivetrain</p>
                 <p className="text-emerald-700 font-extrabold text-[11px]">100% Shift Smoothness</p>
               </div>
 
               <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#1E3063]">3. Structural Frame</p>
+                <p className="font-extrabold text-[#176B87]">3. Structural Frame</p>
                 <p className="text-emerald-700 font-extrabold text-[11px]">Accident-Free Structure</p>
               </div>
 
               <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#1E3063]">4. TIMS Logbook Clear</p>
+                <p className="font-extrabold text-[#176B87]">4. TIMS Logbook Clear</p>
                 <p className="text-emerald-700 font-extrabold text-[11px]">Zero Bank Encumbrances</p>
               </div>
             </div>
@@ -879,7 +879,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#1E3063] to-[#17244B] text-white p-6 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
+              <div className="bg-gradient-to-br from-[#176B87] to-[#0A3340] text-white p-6 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
                 <div>
                   <p className="text-[10px] text-amber-400 font-extrabold uppercase tracking-wider">Estimated Monthly Payment</p>
                   <p className="text-3xl font-black text-white font-display mt-1">
@@ -907,14 +907,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               10. TECHNICAL SPECIFICATIONS (Moved Further Down)
               ========================================== */}
           <div className="space-y-3">
-            <h3 className="text-sm font-black text-[#1E3063] uppercase tracking-wider font-display">
+            <h3 className="text-sm font-black text-[#176B87] uppercase tracking-wider font-display">
               Technical Specifications & Chassis Data
             </h3>
 
             <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
               <button
                 onClick={() => toggleSpecSection('powertrain')}
-                className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#1E3063] cursor-pointer"
+                className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
               >
                 <span className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-amber-500" /> Powertrain & Engine Specifications
@@ -949,7 +949,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               ========================================== */}
           {relatedVehicles.length > 0 && (
             <div className="pt-6 border-t border-slate-200 space-y-4">
-              <h4 className="text-sm font-black text-[#1E3063] uppercase tracking-wider font-display flex items-center gap-2">
+              <h4 className="text-sm font-black text-[#176B87] uppercase tracking-wider font-display flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
                 Similar Verified Showroom Vehicles
               </h4>
@@ -962,7 +962,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   >
                     <LazyImage src={rel.image} alt={rel.title} wrapperClassName="w-20 h-16 rounded-xl shrink-0 overflow-hidden" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     <div className="min-w-0 flex-1 space-y-0.5">
-                      <p className="font-extrabold text-[#1E3063] truncate group-hover:text-amber-800">{rel.title}</p>
+                      <p className="font-extrabold text-[#176B87] truncate group-hover:text-amber-800">{rel.title}</p>
                       <p className="text-xs font-black text-slate-800">Ksh {rel.price.toLocaleString()}</p>
                       <p className="text-[10px] text-slate-400 font-medium">{rel.location}</p>
                     </div>
@@ -981,7 +981,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 lg:hidden shadow-lg flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-bold text-slate-400 uppercase">{isAuction ? 'Current Highest Bid' : 'Listed Price'}</p>
-          <p className="text-base font-black text-[#1E3063] font-display">
+          <p className="text-base font-black text-[#176B87] font-display">
             Ksh {displayPrice.toLocaleString()}
           </p>
         </div>
@@ -992,7 +992,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             size="sm"
             onClick={() => onContactSeller(vehicle)}
           >
-            <MessageSquare className="w-3.5 h-3.5 text-[#1E3063]" />
+            <MessageSquare className="w-3.5 h-3.5 text-[#176B87]" />
             <span>Chat</span>
           </Button>
 

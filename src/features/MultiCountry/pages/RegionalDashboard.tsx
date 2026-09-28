@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Globe, MapPin, RefreshCw, CheckCircle, AlertTriangle, DollarSign, Languages, Building2 } from 'lucide-react';
 import { listCountries, type Country } from '../../../services/regionalConfigurationApi';
 
-const COLORS = { navy: '#1e3a5f', soft: '#64748b', green: '#10b981', amber: '#f59e0b', red: '#ef4444' };
+const COLORS = { navy: '#12576D', soft: '#64748b', green: '#10b981', amber: '#f59e0b', red: '#ef4444' };
 
 type Tab = 'overview' | 'countries' | 'payments' | 'compliance';
 

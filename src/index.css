@@ -1,36 +1,55 @@
 @import "tailwindcss";
 
-@theme {
-  --color-navy-50: #F0F4F9;
-  --color-navy-100: #E1E9F3;
-  --color-navy-200: #C3D3E7;
-  --color-navy-300: #A5BDDC;
-  --color-navy-400: #6A92C5;
-  --color-navy-500: #3067AF;
-  --color-navy-600: #255190;
-  --color-navy-700: #1E3063;
-  --color-navy-800: #17244B;
-  --color-navy-900: #0F1833;
+:root {
+  /* KAYAD Slate Teal — single shared brand contract */
+  --kayad-brand-deep: #0A3340;
+  --kayad-brand-dark: #12576D;
+  --kayad-brand: #176B87;
+  --kayad-brand-accent: #13B8A6;
+  --kayad-brand-muted: #5AAFA4;
+  --kayad-brand-soft: #DDF4F0;
+  --kayad-brand-surface: #F6FAF9;
+  --kayad-brand-border: #D7E7E4;
+}
 
-  --color-beige-50: #FAF7F2;
-  --color-beige-100: #F6F1E8;
-  --color-beige-200: #ECE3D4;
-  --color-beige-300: #E2D5C0;
-  --color-beige-400: #CDBA98;
-  --color-beige-500: #B89F70;
+@theme {
+  /* Slate Teal brand scale. Legacy navy/beige utility names remain as compatibility aliases. */
+  --color-navy-50: #F3FAF9;
+  --color-navy-100: #DDF4F0;
+  --color-navy-200: #BDE5DE;
+  --color-navy-300: #91CEC5;
+  --color-navy-400: #5AAFA4;
+  --color-navy-500: #2F8F87;
+  --color-navy-600: #176B87;
+  --color-navy-700: #12576D;
+  --color-navy-800: #0E4655;
+  --color-navy-900: #0A3340;
+
+  --color-beige-50: #F6FAF9;
+  --color-beige-100: #EEF7F5;
+  --color-beige-200: #DDF4F0;
+  --color-beige-300: #BDE5DE;
+  --color-beige-400: #91CEC5;
+  --color-beige-500: #5AAFA4;
 
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
-  --shadow-card: 0 2px 8px -1px rgba(30, 48, 99, 0.06), 0 1px 4px -1px rgba(30, 48, 99, 0.04);
-  --shadow-card-hover: 0 12px 24px -4px rgba(11, 29, 58, 0.12), 0 4px 8px -2px rgba(11, 29, 58, 0.06);
-  --kayad-navy: #1F2937;
-  --kayad-deep-navy: #163D49;
+  --shadow-card: 0 2px 8px -1px rgba(10, 51, 64, 0.06), 0 1px 4px -1px rgba(10, 51, 64, 0.04);
+  --shadow-card-hover: 0 12px 24px -4px rgba(10, 51, 64, 0.12), 0 4px 8px -2px rgba(10, 51, 64, 0.06);
+  --kayad-navy: #0A3340;
+  --kayad-deep-navy: #12576D;
   --kayad-blue: #176B87;
   --kayad-cyan: #13B8A6;
   --kayad-surface: #F6FAF9;
   --kayad-card: #FFFFFF;
   --kayad-border: #D7E7E4;
+  --kayad-brand-deep: #0A3340;
+  --kayad-brand-dark: #12576D;
+  --kayad-brand: #176B87;
+  --kayad-brand-accent: #13B8A6;
+  --kayad-brand-muted: #5AAFA4;
+  --kayad-brand-soft: #DDF4F0;
 }
 
 @layer base {
@@ -124,12 +143,18 @@
 
 /* KAYAD Slate Teal visual system: softer than the previous electric-blue treatment. */
 .kayad-homepage {
-  --kayad-navy: #1F2937;
+  --kayad-navy: #0A3340;
   --kayad-blue: #176B87;
   --kayad-cyan: #13B8A6;
   --kayad-surface: #F6FAF9;
   --kayad-border: #D7E7E4;
-  color: #1F2937;
+  --kayad-brand-deep: #0A3340;
+  --kayad-brand-dark: #12576D;
+  --kayad-brand: #176B87;
+  --kayad-brand-accent: #13B8A6;
+  --kayad-brand-muted: #5AAFA4;
+  --kayad-brand-soft: #DDF4F0;
+  color: #0A3340;
 }
 .kayad-homepage .font-display {
   letter-spacing: -0.035em;

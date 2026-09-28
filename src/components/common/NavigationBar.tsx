@@ -34,15 +34,15 @@ export const NavigationBar: FC<NavigationBarProps> = ({
   const prevTitle = previousPage ? pageTitles[previousPage] : 'Showroom';
 
   return (
-    <div className={`flex flex-wrap items-center justify-between gap-3 bg-[#F4EFE6]/90 backdrop-blur-md border border-[#E2D8C7] px-4 py-2.5 rounded-2xl shadow-2xs ${className}`}>
+    <div className={`flex flex-wrap items-center justify-between gap-3 bg-[#EEF7F5]/90 backdrop-blur-md border border-[#D7E7E4] px-4 py-2.5 rounded-2xl shadow-2xs ${className}`}>
       {/* Left Group: Primary Back Button & Breadcrumb */}
       <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
         <button
           onClick={goBack}
-          className="px-3.5 py-1.5 rounded-xl bg-[#2E4080] text-white hover:bg-[#2E4080] font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer group"
+          className="px-3.5 py-1.5 rounded-xl bg-[#176B87] text-white hover:bg-[#176B87] font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer group"
           title={`Go back to ${prevTitle}`}
         >
-          <ArrowLeft className="w-3.5 h-3.5 text-[#23EBFF] group-hover:-translate-x-0.5 transition-transform" />
+          <ArrowLeft className="w-3.5 h-3.5 text-[#13B8A6] group-hover:-translate-x-0.5 transition-transform" />
           <span>Back</span>
           <span className="hidden md:inline font-normal text-slate-300 text-[11px] ml-0.5">({prevTitle})</span>
         </button>
@@ -50,7 +50,7 @@ export const NavigationBar: FC<NavigationBarProps> = ({
         {canGoForward && (
           <button
             onClick={goForward}
-            className="p-1.5 rounded-xl bg-[#EFE8DA] hover:bg-[#E2D8C7] text-[#2E4080] font-bold text-xs flex items-center transition-all cursor-pointer"
+            className="p-1.5 rounded-xl bg-[#DDF4F0] hover:bg-[#D7E7E4] text-[#176B87] font-bold text-xs flex items-center transition-all cursor-pointer"
             title="Go Forward"
           >
             <ArrowRight className="w-3.5 h-3.5" />
@@ -61,7 +61,7 @@ export const NavigationBar: FC<NavigationBarProps> = ({
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 overflow-x-auto py-0.5">
             <button
               onClick={() => navigateTo('home')}
-              className="flex items-center gap-1 text-[#2E4080] hover:text-[#23EBFF] transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-[#176B87] hover:text-[#13B8A6] transition-colors cursor-pointer"
             >
               <Home className="w-3.5 h-3.5 text-slate-400" />
               <span className="hidden sm:inline font-bold">Home</span>
@@ -71,16 +71,16 @@ export const NavigationBar: FC<NavigationBarProps> = ({
 
             <button
               onClick={() => navigateTo('gallery')}
-              className="flex items-center gap-1 text-[#2E4080] hover:text-[#23EBFF] transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-[#176B87] hover:text-[#13B8A6] transition-colors cursor-pointer"
             >
-              <Car className="w-3.5 h-3.5 text-[#23EBFF]" />
+              <Car className="w-3.5 h-3.5 text-[#13B8A6]" />
               <span className="font-bold">Showroom</span>
             </button>
 
             {activePage !== 'gallery' && (
               <>
                 <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-                <span className="font-extrabold text-[#2E4080] truncate max-w-[180px] sm:max-w-[280px]">
+                <span className="font-extrabold text-[#176B87] truncate max-w-[180px] sm:max-w-[280px]">
                   {currentTitle || pageTitles[activePage]}
                 </span>
               </>
@@ -93,9 +93,9 @@ export const NavigationBar: FC<NavigationBarProps> = ({
       <div className="flex items-center gap-2 text-xs">
         <button
           onClick={() => navigateTo('gallery')}
-          className="px-2.5 py-1 rounded-lg bg-white/80 hover:bg-white text-[#2E4080] font-extrabold border border-[#E2D8C7] transition-all cursor-pointer hidden sm:flex items-center gap-1"
+          className="px-2.5 py-1 rounded-lg bg-white/80 hover:bg-white text-[#176B87] font-extrabold border border-[#D7E7E4] transition-all cursor-pointer hidden sm:flex items-center gap-1"
         >
-          <Sparkles className="w-3 h-3 text-[#23EBFF]" />
+          <Sparkles className="w-3 h-3 text-[#13B8A6]" />
           <span>All Cars</span>
         </button>
       </div>

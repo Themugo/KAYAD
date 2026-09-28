@@ -11,8 +11,8 @@ interface Branding {
 
   // Primary color palette (KAYAD Slate Teal theme)
   primaryColor: string;      // Main brand color
-  primaryLight: string;     // Lighter variant (#20C4F4)
-  primaryDark: string;      // Darker variant (#0B1D3A)
+  primaryLight: string;     // Lighter variant (#13B8A6)
+  primaryDark: string;      // Darker variant (#0A3340)
   primaryGlow: string;       // Glow effect (rgba)
 
   // Accent colors
@@ -54,7 +54,7 @@ const DEFAULT_BRANDING: Branding = {
   // Primary KAYAD navy/blue palette
   primaryColor: '#176B87',      // Slate teal primary
   primaryLight: '#13B8A6',      // Teal accent
-  primaryDark: '#1F2937',       // Deep navy
+  primaryDark: '#0A3340',       // Deep navy
   primaryGlow: 'rgba(23, 107, 135, 0.22)',
 
   accentColor: '#13B8A6',       // Teal accent
@@ -65,7 +65,7 @@ const DEFAULT_BRANDING: Branding = {
   cardColor: '#FFFFFF',        // Card color
 
   // Cool navy/slate text palette
-  textColor: '#1F2937',         // Primary text
+  textColor: '#0A3340',         // Primary text
   textMutedColor: '#64748B',    // Muted text
   textDimColor: '#94A3B8',     // Dim text
 

@@ -10,8 +10,8 @@ import * as pfApi from '../../../services/platformFactoryApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -123,7 +123,7 @@ export default function PlatformFactory() {
           <h2 className="text-2xl font-bold text-slate-800">Platform Factory Dashboard</h2>
           <p className="text-slate-500">Manage and generate new digital products</p>
         </div>
-        <button onClick={() => setShowGenerator(true)} className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button onClick={() => setShowGenerator(true)} className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           Generate Product
         </button>
@@ -234,7 +234,7 @@ export default function PlatformFactory() {
         {templates.map((template) => (
           <div key={template.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow cursor-pointer">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-12 h-12 bg-[#17244B] rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-[#0A3340] rounded-lg flex items-center justify-center">
                 <ShoppingCart size={24} className="text-white" />
               </div>
               <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">{template.category}</span>
@@ -246,7 +246,7 @@ export default function PlatformFactory() {
                 <TrendingUp size={14} className="text-emerald-600" />
                 <span className="text-sm text-emerald-600">{template.popularity}%</span>
               </div>
-              <button className="text-sm text-[#17244B] font-medium hover:underline">
+              <button className="text-sm text-[#0A3340] font-medium hover:underline">
                 View Details
               </button>
             </div>
@@ -264,7 +264,7 @@ export default function PlatformFactory() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Product Registry</h2>
-        <button onClick={() => setShowGenerator(true)} className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button onClick={() => setShowGenerator(true)} className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Product
         </button>
@@ -341,7 +341,7 @@ export default function PlatformFactory() {
         {components.map((comp) => (
           <div key={comp.id} className="bg-white rounded-lg p-4 shadow-sm border border-slate-100">
             <div className="flex items-center gap-2 mb-2">
-              <Layers size={16} className="text-[#17244B]" />
+              <Layers size={16} className="text-[#0A3340]" />
               <span className="text-sm font-medium text-slate-800">{comp.name}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -366,7 +366,7 @@ export default function PlatformFactory() {
         {services.map((service) => (
           <div key={service.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-[#17244B] rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#0A3340] rounded-lg flex items-center justify-center">
                 <Cpu size={20} className="text-white" />
               </div>
               <span className="flex items-center gap-1 text-xs text-emerald-600">
@@ -461,7 +461,7 @@ export default function PlatformFactory() {
                 <span>{env === 'Production' ? 'Auto' : 'Manual'}</span>
               </div>
             </div>
-            <button className="w-full mt-4 px-3 py-2 bg-[#17244B] text-white rounded-lg text-sm hover:bg-[#1e3054]">
+            <button className="w-full mt-4 px-3 py-2 bg-[#0A3340] text-white rounded-lg text-sm hover:bg-[#12576D]">
               Manage
             </button>
           </div>
@@ -520,7 +520,7 @@ export default function PlatformFactory() {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="p-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#17244B] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#0A3340] rounded-lg flex items-center justify-center">
               <Bot size={20} className="text-white" />
             </div>
             <div>
@@ -538,7 +538,7 @@ export default function PlatformFactory() {
               value={productDescription}
               onChange={(e) => setProductDescription(e.target.value)}
               placeholder="e.g., I want a heavy machinery marketplace for construction equipment..."
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#17244B] h-32"
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A3340] h-32"
             />
           </div>
           <div className="bg-slate-50 rounded-lg p-4 mb-4">
@@ -580,7 +580,7 @@ export default function PlatformFactory() {
             <button
               onClick={handleGenerateProduct}
               disabled={!productDescription.trim()}
-              className="flex-1 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Rocket size={18} />
               Generate Product
@@ -606,14 +606,14 @@ export default function PlatformFactory() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#17244B] to-[#2a3a6e] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0A3340] to-[#2a3a6e] flex items-center justify-center">
                   <Factory size={20} className="text-white" />
                 </div>
                 <div>
@@ -647,7 +647,7 @@ export default function PlatformFactory() {
                   key={mod.id}
                   onClick={() => setActiveModule(mod.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                    isActive ? 'bg-[#17244B] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    isActive ? 'bg-[#0A3340] text-white' : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
                   <Icon size={18} />

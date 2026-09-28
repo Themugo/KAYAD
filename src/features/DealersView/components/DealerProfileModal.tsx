@@ -212,7 +212,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
         {/* TOAST FLOATING BANNER */}
         {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-[#1E3063] text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
+          <div className="fixed top-20 right-6 z-50 bg-[#176B87] text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
             <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{toastMessage}</span>
           </div>
@@ -221,7 +221,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
         {/* ========================================================================= */}
         {/* 1. DIGITAL SHOWROOM / PRIVATE SELLER HEADER BANNER */}
         {/* ========================================================================= */}
-        <div className="relative rounded-3xl overflow-hidden border border-slate-200/80 shadow-md bg-[#1E3063]">
+        <div className="relative rounded-3xl overflow-hidden border border-slate-200/80 shadow-md bg-[#176B87]">
 
           {/* Background Cover Image with Sophisticated Navy Gradient */}
           <div className="h-44 sm:h-56 w-full relative">
@@ -231,7 +231,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               wrapperClassName="w-full h-full"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1E3063] via-[#1E3063]/85 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#176B87] via-[#176B87]/85 to-transparent" />
           </div>
 
           {/* Header Content Overlay */}
@@ -338,7 +338,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                         setShowContactModal(true);
                       }
                     }}
-                    className="bg-[#C85A32] hover:bg-[#B44E28] text-white text-xs font-bold shadow-sm"
+                    className="bg-[#176B87] hover:bg-[#B44E28] text-white text-xs font-bold shadow-sm"
                   >
                     <Lock className="w-3.5 h-3.5 text-amber-300" />
                     <span>Start Secure Purchase</span>
@@ -348,7 +348,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     variant="primary"
                     size="sm"
                     onClick={() => setShowContactModal(true)}
-                    className="bg-[#C85A32] hover:bg-[#B44E28] text-white text-xs font-bold shadow-sm"
+                    className="bg-[#176B87] hover:bg-[#B44E28] text-white text-xs font-bold shadow-sm"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>Contact Dealer</span>
@@ -392,7 +392,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                       setToastMessage('Escrow initiated! Select vehicle below to proceed.');
                     }
                   }}
-                  className="bg-[#C85A32] hover:bg-[#B44E28] text-white font-bold shrink-0 shadow-sm"
+                  className="bg-[#176B87] hover:bg-[#B44E28] text-white font-bold shrink-0 shadow-sm"
                 >
                   <Lock className="w-4 h-4 text-amber-300" />
                   <span>Start Secure Purchase (Escrow Vault)</span>
@@ -420,7 +420,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   onClick={() => setShowContactModal(true)}
                   className="text-slate-700 hover:bg-slate-50 font-bold shrink-0"
                 >
-                  <MessageSquare className="w-4 h-4 text-[#1E3063]" />
+                  <MessageSquare className="w-4 h-4 text-[#176B87]" />
                   <span>Chat with Seller (Secure Platform)</span>
                 </Button>
               </>
@@ -434,7 +434,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     const el = document.getElementById('showroom-inventory-anchor');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="bg-[#1E3063] text-white font-bold shrink-0"
+                  className="bg-[#176B87] text-white font-bold shrink-0"
                 >
                   <Car className="w-4 h-4 text-amber-300" />
                   <span>Browse Stock ({dealerVehicles.length} Vehicles)</span>
@@ -444,9 +444,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   variant="secondary"
                   size="md"
                   onClick={() => setShowTestDriveModal(true)}
-                  className="bg-amber-50 text-[#1E3063] hover:bg-amber-100 border border-amber-200 font-extrabold shrink-0"
+                  className="bg-amber-50 text-[#176B87] hover:bg-amber-100 border border-amber-200 font-extrabold shrink-0"
                 >
-                  <Calendar className="w-4 h-4 text-[#C85A32]" />
+                  <Calendar className="w-4 h-4 text-[#176B87]" />
                   <span>Book Test Drive</span>
                 </Button>
 
@@ -478,7 +478,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
               {isPrivateSeller ? 'Escrow Deals' : 'Vehicles Sold'}
             </p>
-            <p className="text-2xl font-black text-[#1E3063] font-display">
+            <p className="text-2xl font-black text-[#176B87] font-display">
               {dealer.completedEscrowDeals || 7} <span className="text-xs text-emerald-600 font-bold">Closed</span>
             </p>
             <p className="text-[10px] text-slate-500 font-medium">100% Protected through KAYAD</p>
@@ -486,7 +486,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-1">
             <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Seller Trust Score</p>
-            <p className="text-2xl font-black text-[#1E3063] font-display flex items-center gap-1">
+            <p className="text-2xl font-black text-[#176B87] font-display flex items-center gap-1">
               <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
               {dealer.rating} <span className="text-xs text-slate-400 font-normal">/ 5.0</span>
             </p>
@@ -504,7 +504,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-1">
             <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Buyer Protection</p>
-            <p className="text-2xl font-black text-[#1E3063] font-display">
+            <p className="text-2xl font-black text-[#176B87] font-display">
               {dealer.buyerSatisfaction || 100}%
             </p>
             <p className="text-[10px] text-slate-500 font-medium">Zero-fraud guarantee</p>
@@ -521,14 +521,14 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             { id: 'trust', label: 'Trust & Verification Matrix', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> },
             { id: 'reviews', label: `Buyer Reviews (${reviewsList.length})`, icon: <Star className="w-4 h-4 text-amber-500" /> },
             { id: 'gallery', label: 'Showroom Gallery', icon: <Eye className="w-4 h-4 text-blue-600" /> },
-            { id: 'location', label: 'Yard Location & Directions', icon: <MapPin className="w-4 h-4 text-[#C85A32]" /> }
+            { id: 'location', label: 'Yard Location & Directions', icon: <MapPin className="w-4 h-4 text-[#176B87]" /> }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-4 py-3 border-b-2 text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
                 activeTab === tab.id
-                  ? 'border-[#1E3063] text-[#1E3063] bg-amber-50/60 rounded-t-xl'
+                  ? 'border-[#176B87] text-[#176B87] bg-amber-50/60 rounded-t-xl'
                   : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
               }`}
             >
@@ -556,7 +556,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     value={invSearch}
                     onChange={(e) => setInvSearch(e.target.value)}
                     placeholder={`Search within ${dealer.name}'s inventory...`}
-                    className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:bg-white"
+                    className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white"
                   />
                   {invSearch && (
                     <button onClick={() => setInvSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -570,7 +570,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <select
                     value={invMake}
                     onChange={(e) => setInvMake(e.target.value)}
-                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#1E3063] focus:outline-none cursor-pointer"
+                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#176B87] focus:outline-none cursor-pointer"
                   >
                     {dealerMakes.map((m) => (
                       <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>
@@ -581,7 +581,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <select
                     value={invBodyStyle}
                     onChange={(e) => setInvBodyStyle(e.target.value)}
-                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#1E3063] focus:outline-none cursor-pointer"
+                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#176B87] focus:outline-none cursor-pointer"
                   >
                     {dealerBodyStyles.map((b) => (
                       <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>
@@ -592,7 +592,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <select
                     value={invFuel}
                     onChange={(e) => setInvFuel(e.target.value)}
-                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#1E3063] focus:outline-none cursor-pointer"
+                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#176B87] focus:outline-none cursor-pointer"
                   >
                     <option value="All">All Fuels</option>
                     <option value="Diesel">Diesel</option>
@@ -605,34 +605,34 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
               {/* Boolean Badging Quick Toggles */}
               <div className="flex flex-wrap items-center gap-4 text-xs pt-1 border-t border-slate-100 font-semibold text-slate-700">
-                <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#1E3063]">
+                <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#176B87]">
                   <input
                     type="checkbox"
                     checked={invOnlyInspected}
                     onChange={(e) => setInvOnlyInspected(e.target.checked)}
-                    className="rounded accent-[#1E3063]"
+                    className="rounded accent-[#176B87]"
                   />
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   <span>150-Pt Inspected</span>
                 </label>
 
-                <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#1E3063]">
+                <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#176B87]">
                   <input
                     type="checkbox"
                     checked={invOnlyEscrow}
                     onChange={(e) => setInvOnlyEscrow(e.target.checked)}
-                    className="rounded accent-[#1E3063]"
+                    className="rounded accent-[#176B87]"
                   />
                   <Lock className="w-3.5 h-3.5 text-amber-600" />
                   <span>Escrow Eligible</span>
                 </label>
 
-                <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#1E3063]">
+                <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#176B87]">
                   <input
                     type="checkbox"
                     checked={invOnlyFinance}
                     onChange={(e) => setInvOnlyFinance(e.target.checked)}
-                    className="rounded accent-[#1E3063]"
+                    className="rounded accent-[#176B87]"
                   />
                   <Landmark className="w-3.5 h-3.5 text-blue-600" />
                   <span>Asset Finance Available</span>
@@ -686,7 +686,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
           <div className="space-y-6 animate-fade-in text-xs">
             {/* Description */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-xs">
-              <h3 className="text-sm font-extrabold text-[#1E3063] font-display uppercase tracking-wider">
+              <h3 className="text-sm font-extrabold text-[#176B87] font-display uppercase tracking-wider">
                 Dealership Overview & Business Identity
               </h3>
               <p className="text-slate-700 leading-relaxed text-sm">
@@ -697,12 +697,12 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             {/* Specializations & Languages */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
-                <h4 className="font-extrabold text-[#1E3063] flex items-center gap-1.5">
+                <h4 className="font-extrabold text-[#176B87] flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-500" /> Business Specializations
                 </h4>
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {(dealer.specializations || ['Luxury SUVs', 'Japanese Direct Imports', 'German Sedans', 'Verified Commercial Fleets']).map((spec, i) => (
-                    <span key={i} className="bg-slate-100 text-[#1E3063] font-bold px-3 py-1 rounded-xl border border-slate-200">
+                    <span key={i} className="bg-slate-100 text-[#176B87] font-bold px-3 py-1 rounded-xl border border-slate-200">
                       • {spec}
                     </span>
                   ))}
@@ -710,7 +710,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               </div>
 
               <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
-                <h4 className="font-extrabold text-[#1E3063] flex items-center gap-1.5">
+                <h4 className="font-extrabold text-[#176B87] flex items-center gap-1.5">
                   <Globe className="w-4 h-4 text-blue-600" /> Languages Spoken by Sales Team
                 </h4>
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -726,7 +726,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             {/* Operating Hours & Payment Methods */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
-                <h4 className="font-extrabold text-[#1E3063] flex items-center gap-1.5">
+                <h4 className="font-extrabold text-[#176B87] flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-emerald-600" /> Showroom Operating Hours
                 </h4>
                 <p className="text-slate-700 font-bold text-sm bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -735,8 +735,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               </div>
 
               <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
-                <h4 className="font-extrabold text-[#1E3063] flex items-center gap-1.5">
-                  <CreditCard className="w-4 h-4 text-[#C85A32]" /> Accepted Payment Channels
+                <h4 className="font-extrabold text-[#176B87] flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-[#176B87]" /> Accepted Payment Channels
                 </h4>
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {(dealer.paymentMethods || ['KAYAD Escrow Vault', 'M-Pesa Business Till', 'Bank Wire (RTGS)', 'Bank Asset Finance']).map((pm, i) => (
@@ -750,7 +750,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
             {/* Services Offered Grid */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-3">
-              <h3 className="text-xs font-extrabold text-[#1E3063] uppercase tracking-wider font-display">
+              <h3 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display">
                 Services Offered by {dealer.name}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -763,7 +763,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   'Port Direct Clearance'
                 ]).map((srv, idx) => (
                   <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                    <p className="font-extrabold text-[#1E3063] flex items-center gap-1.5">
+                    <p className="font-extrabold text-[#176B87] flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       {srv}
                     </p>
@@ -781,12 +781,12 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             {/* Top Verification Header */}
             <div className={`p-5 rounded-2xl border space-y-3 ${
               isPrivateSeller
-                ? 'bg-[#1E3063] text-white border-slate-700'
+                ? 'bg-[#176B87] text-white border-slate-700'
                 : 'bg-emerald-50 border-emerald-200 text-emerald-950'
             }`}>
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-3">
-                  <div className={`p-3 rounded-xl shadow-xs ${isPrivateSeller ? 'bg-[#C85A32] text-white' : 'bg-emerald-600 text-white'}`}>
+                  <div className={`p-3 rounded-xl shadow-xs ${isPrivateSeller ? 'bg-[#176B87] text-white' : 'bg-emerald-600 text-white'}`}>
                     <ShieldCheck className="w-6 h-6" />
                   </div>
                   <div>
@@ -818,14 +818,14 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
             {/* 5-Pillar Trust Indicators */}
             <div className="space-y-3">
-              <h4 className="text-xs font-extrabold text-[#1E3063] uppercase tracking-wider font-display flex items-center gap-1.5">
+              <h4 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
                 {isPrivateSeller ? '5 Core Private Transaction Trust Indicators' : 'Verification Compliance Standards'}
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-                  <div className="flex items-center gap-2 font-extrabold text-[#1E3063]">
+                  <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <UserCheck className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
                     <span>1. Identity Verified</span>
                   </div>
@@ -836,7 +836,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-                  <div className="flex items-center gap-2 font-extrabold text-[#1E3063]">
+                  <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <Lock className="w-4.5 h-4.5 text-amber-600 shrink-0" />
                     <span>2. Escrow Protected</span>
                   </div>
@@ -847,7 +847,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-                  <div className="flex items-center gap-2 font-extrabold text-[#1E3063]">
+                  <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <FileCheck className="w-4.5 h-4.5 text-blue-600 shrink-0" />
                     <span>3. Independent Inspection</span>
                   </div>
@@ -858,7 +858,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-                  <div className="flex items-center gap-2 font-extrabold text-[#1E3063]">
+                  <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
                     <span>4. Ownership Verification</span>
                   </div>
@@ -869,8 +869,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-xs sm:col-span-2 md:col-span-2">
-                  <div className="flex items-center gap-2 font-extrabold text-[#1E3063]">
-                    <Sparkles className="w-4.5 h-4.5 text-[#C85A32] shrink-0" />
+                  <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
+                    <Sparkles className="w-4.5 h-4.5 text-[#176B87] shrink-0" />
                     <span>5. TIMS Transfer Guarantee & Fraud Protection</span>
                   </div>
                   <p className="text-slate-600 leading-relaxed text-[11px]">
@@ -883,9 +883,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
             {/* VISUAL PURCHASE PROCESS TIMELINE */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
-              <h4 className="text-xs font-extrabold text-[#1E3063] uppercase tracking-wider font-display flex items-center justify-between">
+              <h4 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
-                  <ArrowRight className="w-4 h-4 text-[#C85A32]" />
+                  <ArrowRight className="w-4 h-4 text-[#176B87]" />
                   Secure 6-Step Private Purchase Workflow
                 </span>
                 <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold">
@@ -898,18 +898,18 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   { step: '1', title: 'Contact Seller', desc: 'Initiate encrypted in-platform chat to discuss vehicle details & schedule meet-up.', icon: <MessageSquare className="w-4 h-4 text-blue-600" /> },
                   { step: '2', title: 'Book Pre-Purchase Inspection', desc: 'Request 150-point independent mechanic audit at a verified public inspection hub.', icon: <FileCheck className="w-4 h-4 text-emerald-600" /> },
                   { step: '3', title: 'Escrow Deposit', desc: 'Deposit funds safely into bank-backed KAYAD Escrow Vault. Seller sees deposit locked.', icon: <Lock className="w-4 h-4 text-amber-500" /> },
-                  { step: '4', title: 'Physical Inspection & Test Drive', desc: 'Meet seller at verified public hub, inspect car, test drive, and verify engine numbers.', icon: <Car className="w-4 h-4 text-[#1E3063]" /> },
+                  { step: '4', title: 'Physical Inspection & Test Drive', desc: 'Meet seller at verified public hub, inspect car, test drive, and verify engine numbers.', icon: <Car className="w-4 h-4 text-[#176B87]" /> },
                   { step: '5', title: 'Logbook Transfer', desc: 'Execute instant electronic logbook transfer via NTSA TIMS portal.', icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" /> },
-                  { step: '6', title: 'Seller Paid', desc: 'Click "Release Funds" in buyer portal. Escrow releases money to seller instantly.', icon: <Sparkles className="w-4 h-4 text-[#C85A32]" /> }
+                  { step: '6', title: 'Seller Paid', desc: 'Click "Release Funds" in buyer portal. Escrow releases money to seller instantly.', icon: <Sparkles className="w-4 h-4 text-[#176B87]" /> }
                 ].map((s) => (
-                  <div key={s.step} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1 relative group hover:border-[#1E3063] transition-colors">
+                  <div key={s.step} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1 relative group hover:border-[#176B87] transition-colors">
                     <div className="flex items-center justify-between">
-                      <span className="w-6 h-6 rounded-full bg-[#1E3063] text-white font-extrabold text-xs flex items-center justify-center font-display">
+                      <span className="w-6 h-6 rounded-full bg-[#176B87] text-white font-extrabold text-xs flex items-center justify-center font-display">
                         {s.step}
                       </span>
                       {s.icon}
                     </div>
-                    <p className="font-extrabold text-[#1E3063] text-xs pt-1">{s.title}</p>
+                    <p className="font-extrabold text-[#176B87] text-xs pt-1">{s.title}</p>
                     <p className="text-[11px] text-slate-500 leading-normal">{s.desc}</p>
                   </div>
                 ))}
@@ -918,30 +918,30 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
             {/* BUYER PROTECTION HIGHLIGHTS GRID */}
             <div className="bg-amber-50/70 border border-amber-200 p-5 rounded-2xl space-y-3">
-              <h4 className="text-xs font-extrabold text-[#17244B] uppercase tracking-wider font-display flex items-center gap-1.5">
+              <h4 className="text-xs font-extrabold text-[#0A3340] uppercase tracking-wider font-display flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-amber-600" />
                 KAYAD Buyer Protection Highlights
               </h4>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
-                  <p className="font-extrabold text-[#1E3063] text-xs">Verified Ownership</p>
+                  <p className="font-extrabold text-[#176B87] text-xs">Verified Ownership</p>
                   <p className="text-[10px] text-slate-500">TIMS Registry cross-checked</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
-                  <p className="font-extrabold text-[#1E3063] text-xs">Inspection Marketplace</p>
+                  <p className="font-extrabold text-[#176B87] text-xs">Inspection Marketplace</p>
                   <p className="text-[10px] text-slate-500">150-Point mechanic audit</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
-                  <p className="font-extrabold text-[#1E3063] text-xs">Escrow Protection</p>
+                  <p className="font-extrabold text-[#176B87] text-xs">Escrow Protection</p>
                   <p className="text-[10px] text-slate-500">Bank vault security</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
-                  <p className="font-extrabold text-[#1E3063] text-xs">Fraud Prevention</p>
+                  <p className="font-extrabold text-[#176B87] text-xs">Fraud Prevention</p>
                   <p className="text-[10px] text-slate-500">Verified seller ID</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
-                  <p className="font-extrabold text-[#1E3063] text-xs">Secure Payment</p>
+                  <p className="font-extrabold text-[#176B87] text-xs">Secure Payment</p>
                   <p className="text-[10px] text-slate-500">M-Pesa & RTGS Wire</p>
                 </div>
               </div>
@@ -956,11 +956,11 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             {/* Reviews Header & Sorting */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200">
               <div>
-                <h3 className="text-base font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                <h3 className="text-base font-extrabold text-[#176B87] font-display flex items-center gap-2">
                   <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
                   Verified Buyer Reviews ({reviewsList.length})
                 </h3>
-                <p className="text-slate-500 text-xs">Overall Score: <strong className="text-[#1E3063]">{dealer.rating} / 5.0</strong> based on {dealer.reviewsCount} closed escrow deals</p>
+                <p className="text-slate-500 text-xs">Overall Score: <strong className="text-[#176B87]">{dealer.rating} / 5.0</strong> based on {dealer.reviewsCount} closed escrow deals</p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -968,7 +968,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 <select
                   value={reviewsSortBy}
                   onChange={(e: any) => setReviewsSortBy(e.target.value)}
-                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#1E3063] focus:outline-none cursor-pointer"
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#176B87] focus:outline-none cursor-pointer"
                 >
                   <option value="recent">Most Recent</option>
                   <option value="highest">Highest Rating</option>
@@ -983,11 +983,11 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 <div key={rev.id} className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-[#1E3063] text-amber-300 font-extrabold flex items-center justify-center text-xs font-display">
+                      <div className="w-9 h-9 rounded-full bg-[#176B87] text-amber-300 font-extrabold flex items-center justify-center text-xs font-display">
                         {rev.buyerName.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-extrabold text-[#1E3063]">{rev.buyerName}</p>
+                        <p className="font-extrabold text-[#176B87]">{rev.buyerName}</p>
                         <p className="text-[10px] text-slate-400">{rev.date}</p>
                       </div>
                     </div>
@@ -1024,7 +1024,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
         {/* TAB 5: SHOWROOM GALLERY */}
         {activeTab === 'gallery' && (
           <div className="space-y-4 animate-fade-in text-xs">
-            <h3 className="text-base font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+            <h3 className="text-base font-extrabold text-[#176B87] font-display flex items-center gap-2">
               <Eye className="w-5 h-5 text-blue-600" />
               Showroom & Yard Photo Gallery
             </h3>
@@ -1056,8 +1056,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
-                  <h3 className="text-base font-extrabold text-[#1E3063] font-display flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-[#C85A32]" />
+                  <h3 className="text-base font-extrabold text-[#176B87] font-display flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#176B87]" />
                     Showroom Physical Address & Yard Location
                   </h3>
                   <p className="text-slate-600 text-xs mt-1">{dealer.address || `${dealer.location} (${dealer.county})`}</p>
@@ -1067,7 +1067,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   variant="primary"
                   size="md"
                   onClick={() => setShowDirectionsModal(true)}
-                  className="bg-[#1E3063] text-white font-bold"
+                  className="bg-[#176B87] text-white font-bold"
                 >
                   <Navigation className="w-4 h-4 text-amber-300" /> Get GPS Directions
                 </Button>
@@ -1082,7 +1082,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   className="w-full h-full object-cover"
                 />
 
-                <div className="absolute z-10 bg-[#1E3063] text-white p-4 rounded-2xl shadow-2xl border border-amber-400/50 text-center space-y-2 max-w-xs">
+                <div className="absolute z-10 bg-[#176B87] text-white p-4 rounded-2xl shadow-2xl border border-amber-400/50 text-center space-y-2 max-w-xs">
                   <MapPin className="w-8 h-8 text-amber-400 mx-auto animate-bounce" />
                   <p className="font-extrabold text-sm">{dealer.name}</p>
                   <p className="text-[11px] text-slate-200">{dealer.landmark || dealer.address}</p>
@@ -1094,8 +1094,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
               {dealer.landmark && (
                 <div className="bg-amber-50 p-3.5 rounded-xl border border-amber-200 text-slate-800">
-                  <p className="font-bold flex items-center gap-1.5 text-xs text-[#1E3063]">
-                    <Compass className="w-4 h-4 text-[#C85A32]" /> Nearby Landmarks & Directions:
+                  <p className="font-bold flex items-center gap-1.5 text-xs text-[#176B87]">
+                    <Compass className="w-4 h-4 text-[#176B87]" /> Nearby Landmarks & Directions:
                   </p>
                   <p className="text-xs text-slate-700 mt-1">{dealer.landmark}</p>
                 </div>
@@ -1109,7 +1109,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
         {/* ========================================================================= */}
         {relatedDealers.length > 0 && (
           <div className="pt-6 border-t border-slate-200 space-y-3">
-            <h4 className="text-xs font-extrabold text-[#1E3063] uppercase tracking-wider font-display flex items-center gap-2">
+            <h4 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display flex items-center gap-2">
               <Building2 className="w-4 h-4 text-emerald-600" />
               Similar Verified Enterprise Showrooms in Kenya
             </h4>
@@ -1123,7 +1123,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <div className="flex items-center gap-2.5">
                     <LazyImage src={rel.logo} alt={rel.name} wrapperClassName="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-slate-200" className="w-full h-full object-cover" />
                     <div className="min-w-0 flex-1">
-                      <p className="font-extrabold text-[#1E3063] truncate">{rel.name}</p>
+                      <p className="font-extrabold text-[#176B87] truncate">{rel.name}</p>
                       <p className="text-[10px] text-slate-500 truncate">{rel.location}</p>
                     </div>
                   </div>
@@ -1153,7 +1153,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   setShowContactModal(true);
                 }
               }}
-              className="flex-1 py-2.5 bg-[#C85A32] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
+              className="flex-1 py-2.5 bg-[#176B87] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
             >
               <Lock className="w-3.5 h-3.5 text-amber-300" /> Start Escrow
             </button>
@@ -1173,7 +1173,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
             <button
               onClick={() => setShowContactModal(true)}
-              className="flex-1 py-2.5 bg-[#1E3063] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
+              className="flex-1 py-2.5 bg-[#176B87] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
             >
               <MessageSquare className="w-3.5 h-3.5 text-amber-300" /> Secure Chat
             </button>
@@ -1182,21 +1182,21 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
           <>
             <a
               href={`tel:${dealer.phone}`}
-              className="flex-1 py-2.5 bg-slate-100 text-[#1E3063] font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-slate-200"
+              className="flex-1 py-2.5 bg-slate-100 text-[#176B87] font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-slate-200"
             >
               <Phone className="w-3.5 h-3.5 text-emerald-600" /> Call
             </a>
 
             <button
               onClick={() => setShowTestDriveModal(true)}
-              className="flex-1 py-2.5 bg-amber-100 text-[#1E3063] font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-amber-300"
+              className="flex-1 py-2.5 bg-amber-100 text-[#176B87] font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-amber-300"
             >
-              <Calendar className="w-3.5 h-3.5 text-[#C85A32]" /> Test Drive
+              <Calendar className="w-3.5 h-3.5 text-[#176B87]" /> Test Drive
             </button>
 
             <button
               onClick={() => setShowContactModal(true)}
-              className="flex-1 py-2.5 bg-[#1E3063] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
+              className="flex-1 py-2.5 bg-[#176B87] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
             >
               <MessageSquare className="w-3.5 h-3.5 text-amber-300" /> Chat
             </button>
@@ -1213,7 +1213,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             {isPrivateSeller ? (
               <>
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1 text-slate-700">
-                  <div className="flex items-center gap-1.5 font-bold text-[#1E3063]">
+                  <div className="flex items-center gap-1.5 font-bold text-[#176B87]">
                     <Lock className="w-4 h-4 text-amber-600 shrink-0" />
                     <span>Private Seller Privacy & Protection Policy</span>
                   </div>
@@ -1232,7 +1232,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                         setToastMessage('Opened secure encrypted chat with seller.');
                       }
                     }}
-                    className="w-full p-3.5 bg-[#1E3063] hover:bg-[#17244B] text-white rounded-xl font-bold flex items-center justify-between transition-colors shadow-sm text-left"
+                    className="w-full p-3.5 bg-[#176B87] hover:bg-[#0A3340] text-white rounded-xl font-bold flex items-center justify-between transition-colors shadow-sm text-left"
                   >
                     <div className="flex items-center gap-3">
                       <MessageSquare className="w-5 h-5 text-amber-300" />
@@ -1253,7 +1253,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                         setToastMessage('Escrow vault initialized for this deal!');
                       }
                     }}
-                    className="w-full p-3.5 bg-[#C85A32] hover:bg-[#B44E28] text-white rounded-xl font-bold flex items-center justify-between transition-colors shadow-sm text-left"
+                    className="w-full p-3.5 bg-[#176B87] hover:bg-[#B44E28] text-white rounded-xl font-bold flex items-center justify-between transition-colors shadow-sm text-left"
                   >
                     <div className="flex items-center gap-3">
                       <Lock className="w-5 h-5 text-amber-300" />
@@ -1322,7 +1322,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
                   <a
                     href={`mailto:${dealer.email}`}
-                    className="p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-[#1E3063] flex items-center justify-between transition-colors"
+                    className="p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-[#176B87] flex items-center justify-between transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <Mail className="w-5 h-5 text-slate-500" />
@@ -1359,7 +1359,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <select
                     value={testDriveVehicleId}
                     onChange={(e) => setTestDriveVehicleId(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#1E3063]"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#176B87]"
                   >
                     <option value="">Any Vehicle / Showroom Visit</option>
                     {dealerVehicles.map((v) => (
@@ -1419,7 +1419,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   />
                 </div>
 
-                <Button variant="primary" size="lg" fullWidth type="submit" className="bg-[#1E3063] text-white">
+                <Button variant="primary" size="lg" fullWidth type="submit" className="bg-[#176B87] text-white">
                   Confirm Test Drive Booking
                 </Button>
               </>
@@ -1434,7 +1434,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
       {showDirectionsModal && (
         <Modal isOpen={true} onClose={() => setShowDirectionsModal(false)} title={`Directions to ${dealer.name}`} maxWidth="md">
           <div className="space-y-4 p-2 text-xs">
-            <div className="p-4 bg-[#1E3063] text-white rounded-2xl space-y-2">
+            <div className="p-4 bg-[#176B87] text-white rounded-2xl space-y-2">
               <p className="font-extrabold text-sm flex items-center gap-1.5 text-amber-300">
                 <MapPin className="w-4 h-4" /> Yard Address:
               </p>

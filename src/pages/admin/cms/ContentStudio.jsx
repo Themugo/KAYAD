@@ -14,8 +14,8 @@ import PublishingCalendar from './components/PublishingCalendar';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -127,7 +127,7 @@ export default function ContentStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Content Overview</h2>
-        <button onClick={createNewPage} className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] transition-colors">
+        <button onClick={createNewPage} className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] transition-colors">
           <Plus size={18} />
           Create Page
         </button>
@@ -161,7 +161,7 @@ export default function ContentStudio() {
         <h3 className="text-lg font-semibold text-slate-800 mb-4">This Week's Performance</h3>
         <div className="grid grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-[#17244B]">{stats?.analytics?.weekViews?.toLocaleString() || 0}</div>
+            <div className="text-3xl font-bold text-[#0A3340]">{stats?.analytics?.weekViews?.toLocaleString() || 0}</div>
             <div className="text-sm text-slate-500 mt-1">Page Views</div>
           </div>
           <div className="text-center">
@@ -192,7 +192,7 @@ export default function ContentStudio() {
             <button
               key={i}
               onClick={() => setActiveModule(action.module)}
-              className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#17244B] hover:bg-[#17244B]/5 transition-all"
+              className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all"
             >
               <action.icon size={20} className="text-slate-600" />
               <span className="text-sm font-medium text-slate-700">{action.label}</span>
@@ -221,14 +221,14 @@ export default function ContentStudio() {
                 <h2 className="text-2xl font-bold text-slate-800">{activeModule === 'landing' ? 'Landing Pages' : 'Pages'}</h2>
                 <p className="text-sm text-slate-500">Build and publish real site pages from persisted content.</p>
               </div>
-              <button onClick={createNewPage} className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg"><Plus size={18} /> New Page</button>
+              <button onClick={createNewPage} className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg"><Plus size={18} /> New Page</button>
             </div>
             {pageError && <div className="mt-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">{pageError}</div>}
           </div>
           <div className="flex flex-1 min-h-0">
             <aside className="w-80 bg-white border-r border-slate-200 overflow-y-auto p-4">
               {pagesLoading ? <div className="text-sm text-slate-400 p-4">Loading pages…</div> : filteredPages.length === 0 ? <div className="text-sm text-slate-400 p-4">No pages found.</div> : filteredPages.map((page) => (
-                <button key={page.id} onClick={() => setSelectedPage(page)} className={`w-full text-left p-4 rounded-lg mb-2 border ${selectedPage?.id === page.id ? 'border-[#17244B] bg-[#17244B]/5' : 'border-slate-200 hover:border-slate-300'}`}>
+                <button key={page.id} onClick={() => setSelectedPage(page)} className={`w-full text-left p-4 rounded-lg mb-2 border ${selectedPage?.id === page.id ? 'border-[#0A3340] bg-[#0A3340]/5' : 'border-slate-200 hover:border-slate-300'}`}>
                   <div className="font-medium text-slate-800 truncate">{page.title || page.pageName || 'Untitled page'}</div>
                   <div className="text-xs text-slate-500 mt-1 truncate">/{page.slug}</div>
                   <span className={`inline-flex mt-2 px-2 py-0.5 rounded-full text-xs ${statusColors[page.status] || statusColors.draft}`}>{page.status || 'draft'}</span>
@@ -257,7 +257,7 @@ export default function ContentStudio() {
               <p className="text-sm text-slate-500">Manage your {module?.label?.toLowerCase()} content</p>
             </div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] transition-colors">
             <Plus size={18} />
             New {module?.label.replace('s', '').replace(' Pages', ' Page')}
           </button>
@@ -272,13 +272,13 @@ export default function ContentStudio() {
               placeholder={`Search ${module?.label.toLowerCase()}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none transition-all"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+            className="px-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
           >
             <option value="all">All Status</option>
             <option value="draft">Draft</option>
@@ -304,14 +304,14 @@ export default function ContentStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <Palette size={20} className="text-white" />
                 </div>
                 <div>
@@ -326,7 +326,7 @@ export default function ContentStudio() {
                 <input
                   type="text"
                   placeholder="Quick search..."
-                  className="pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none w-64"
+                  className="pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none w-64"
                 />
               </div>
               <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
@@ -353,7 +353,7 @@ export default function ContentStudio() {
                   onClick={() => setActiveModule(module.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-[#17244B] text-white'
+                      ? 'bg-[#0A3340] text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >

@@ -93,16 +93,16 @@ export const FilterSidebar: FC = () => {
   };
 
   return (
-    <aside className="w-full lg:w-72 bg-white border border-[#E2D8C7] rounded-2xl p-4 sm:p-5 space-y-5 shrink-0 h-fit shadow-xs text-[#2E4080]">
+    <aside className="w-full lg:w-72 bg-white border border-[#D7E7E4] rounded-2xl p-4 sm:p-5 space-y-5 shrink-0 h-fit shadow-xs text-[#176B87]">
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#EFE8DA]">
-        <div className="flex items-center gap-2 font-bold text-[#2E4080] font-serif text-sm uppercase tracking-wide">
-          <Filter className="w-4 h-4 text-[#23EBFF]" />
+      <div className="flex items-center justify-between pb-3 border-b border-[#DDF4F0]">
+        <div className="flex items-center gap-2 font-bold text-[#176B87] font-serif text-sm uppercase tracking-wide">
+          <Filter className="w-4 h-4 text-[#13B8A6]" />
           <span>MARKET FILTERS</span>
         </div>
         <button
           onClick={resetFilters}
-          className="text-xs text-[#23EBFF] hover:underline font-bold flex items-center gap-1 transition-colors cursor-pointer"
+          className="text-xs text-[#13B8A6] hover:underline font-bold flex items-center gap-1 transition-colors cursor-pointer"
         >
           <RotateCcw className="w-3 h-3" />
           <span>Reset</span>
@@ -110,13 +110,13 @@ export const FilterSidebar: FC = () => {
       </div>
 
       {/* FULL MARKET CATALOG SUMMARY BOX */}
-      <div className="space-y-1.5 bg-[#2E4080]/5 p-3.5 rounded-2xl border border-[#2E4080]/10">
-        <div className="flex items-center justify-between text-xs font-bold text-[#2E4080]">
+      <div className="space-y-1.5 bg-[#176B87]/5 p-3.5 rounded-2xl border border-[#176B87]/10">
+        <div className="flex items-center justify-between text-xs font-bold text-[#176B87]">
           <span className="flex items-center gap-1.5 font-serif text-sm">
-            <Sparkles className="w-3.5 h-3.5 text-[#23EBFF]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#13B8A6]" />
             Full Market Catalog
           </span>
-          <span className="text-[11px] font-mono font-bold bg-[#2E4080] text-white px-2 py-0.5 rounded-lg">
+          <span className="text-[11px] font-mono font-bold bg-[#176B87] text-white px-2 py-0.5 rounded-lg">
             {totalCount} Cars
           </span>
         </div>
@@ -127,21 +127,21 @@ export const FilterSidebar: FC = () => {
 
       {/* FILTERS SECTION ACCORDIONS */}
       <div className="space-y-3 pt-1">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#6B7A99] block">
+        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#66808A] block">
           SPECIFICATIONS
         </span>
 
         {/* Brand Accordion */}
-        <div className="border border-[#E2D8C7] rounded-xl overflow-hidden bg-[#F4EFE6]/40 shadow-2xs">
+        <div className="border border-[#D7E7E4] rounded-xl overflow-hidden bg-[#EEF7F5]/40 shadow-2xs">
           <button
             onClick={() => toggleSection('brand')}
-            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#2E4080] bg-[#F4EFE6]/70 hover:bg-[#F4EFE6] transition-colors cursor-pointer"
+            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">Brand / Manufacturer</span>
             <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.brand ? 'rotate-180' : ''}`} />
           </button>
           {openSection.brand && (
-            <div className="p-2 space-y-1 max-h-48 overflow-y-auto no-scrollbar border-t border-[#E2D8C7]/60 bg-white">
+            <div className="p-2 space-y-1 max-h-48 overflow-y-auto no-scrollbar border-t border-[#D7E7E4]/60 bg-white">
               {availableMakes.map(make => {
                 const isChecked = filters.makes.includes(make);
                 return (
@@ -149,11 +149,11 @@ export const FilterSidebar: FC = () => {
                     key={make}
                     onClick={() => handleMakeToggle(make)}
                     className={`w-full flex items-center justify-between p-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-left cursor-pointer ${
-                      isChecked ? 'bg-[#2E4080] text-white shadow-2xs' : 'text-[#2E4080] hover:bg-[#F4EFE6]'
+                      isChecked ? 'bg-[#176B87] text-white shadow-2xs' : 'text-[#176B87] hover:bg-[#EEF7F5]'
                     }`}
                   >
                     <span>{make}</span>
-                    {isChecked && <Check className="w-3.5 h-3.5 text-[#23EBFF]" />}
+                    {isChecked && <Check className="w-3.5 h-3.5 text-[#13B8A6]" />}
                   </button>
                 );
               })}
@@ -162,15 +162,15 @@ export const FilterSidebar: FC = () => {
         </div>
 
         {/* Transmission Accordion */}
-        <div className="border border-[#E2D8C7] rounded-xl overflow-hidden bg-[#F4EFE6]/40 shadow-2xs">
+        <div className="border border-[#D7E7E4] rounded-xl overflow-hidden bg-[#EEF7F5]/40 shadow-2xs">
           <button
             onClick={() => toggleSection('transmission')}
-            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#2E4080] bg-[#F4EFE6]/70 hover:bg-[#F4EFE6] transition-colors cursor-pointer"
+            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="flex items-center gap-1.5 font-serif">
               <span>Transmission</span>
               {filters.transmission && filters.transmission.length > 0 && (
-                <span className="px-1.5 py-0.5 bg-[#23EBFF] text-[#2E4080] rounded-full text-[10px] font-mono font-bold">
+                <span className="px-1.5 py-0.5 bg-[#13B8A6] text-[#176B87] rounded-full text-[10px] font-mono font-bold">
                   {filters.transmission.length}
                 </span>
               )}
@@ -178,7 +178,7 @@ export const FilterSidebar: FC = () => {
             <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.transmission ? 'rotate-180' : ''}`} />
           </button>
           {openSection.transmission && (
-            <div className="p-2 space-y-1 border-t border-[#E2D8C7]/60 bg-white">
+            <div className="p-2 space-y-1 border-t border-[#D7E7E4]/60 bg-white">
               {transmissions.map(trans => {
                 const isSelected = filters.transmission?.includes(trans);
                 return (
@@ -186,11 +186,11 @@ export const FilterSidebar: FC = () => {
                     key={trans}
                     onClick={() => handleTransmissionToggle(trans)}
                     className={`w-full flex items-center justify-between p-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                      isSelected ? 'bg-[#2E4080] text-white shadow-2xs' : 'text-[#2E4080] hover:bg-[#F4EFE6]'
+                      isSelected ? 'bg-[#176B87] text-white shadow-2xs' : 'text-[#176B87] hover:bg-[#EEF7F5]'
                     }`}
                   >
                     <span>{trans}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#23EBFF]" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#13B8A6]" />}
                   </button>
                 );
               })}
@@ -199,16 +199,16 @@ export const FilterSidebar: FC = () => {
         </div>
 
         {/* Body Type Accordion */}
-        <div className="border border-[#E2D8C7] rounded-xl overflow-hidden bg-[#F4EFE6]/40 shadow-2xs">
+        <div className="border border-[#D7E7E4] rounded-xl overflow-hidden bg-[#EEF7F5]/40 shadow-2xs">
           <button
             onClick={() => toggleSection('body')}
-            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#2E4080] bg-[#F4EFE6]/70 hover:bg-[#F4EFE6] transition-colors cursor-pointer"
+            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">Body Configuration</span>
             <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.body ? 'rotate-180' : ''}`} />
           </button>
           {openSection.body && (
-            <div className="p-2.5 flex flex-wrap gap-1.5 border-t border-[#E2D8C7]/60 bg-white">
+            <div className="p-2.5 flex flex-wrap gap-1.5 border-t border-[#D7E7E4]/60 bg-white">
               {bodyStyles.map(style => {
                 const isSelected = filters.bodyStyles.includes(style);
                 return (
@@ -217,8 +217,8 @@ export const FilterSidebar: FC = () => {
                     onClick={() => handleBodyStyleToggle(style)}
                     className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#2E4080] text-white shadow-2xs'
-                        : 'border border-[#E2D8C7] text-[#2E4080] hover:bg-[#F4EFE6]'
+                        ? 'bg-[#176B87] text-white shadow-2xs'
+                        : 'border border-[#D7E7E4] text-[#176B87] hover:bg-[#EEF7F5]'
                     }`}
                   >
                     {style}
@@ -230,16 +230,16 @@ export const FilterSidebar: FC = () => {
         </div>
 
         {/* Fuel Accordion */}
-        <div className="border border-[#E2D8C7] rounded-xl overflow-hidden bg-[#F4EFE6]/40 shadow-2xs">
+        <div className="border border-[#D7E7E4] rounded-xl overflow-hidden bg-[#EEF7F5]/40 shadow-2xs">
           <button
             onClick={() => toggleSection('fuel')}
-            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#2E4080] bg-[#F4EFE6]/70 hover:bg-[#F4EFE6] transition-colors cursor-pointer"
+            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">Fuel & Powertrain</span>
             <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.fuel ? 'rotate-180' : ''}`} />
           </button>
           {openSection.fuel && (
-            <div className="p-2 space-y-1 border-t border-[#E2D8C7]/60 bg-white">
+            <div className="p-2 space-y-1 border-t border-[#D7E7E4]/60 bg-white">
               {fuelTypes.map(f => {
                 const isSelected = filters.fuelType?.includes(f.id);
                 return (
@@ -247,11 +247,11 @@ export const FilterSidebar: FC = () => {
                     key={f.id}
                     onClick={() => handleFuelToggle(f.id)}
                     className={`w-full flex items-center justify-between p-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                      isSelected ? 'bg-[#2E4080] text-white shadow-2xs' : 'text-[#2E4080] hover:bg-[#F4EFE6]'
+                      isSelected ? 'bg-[#176B87] text-white shadow-2xs' : 'text-[#176B87] hover:bg-[#EEF7F5]'
                     }`}
                   >
                     <span>{f.label}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#23EBFF]" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#13B8A6]" />}
                   </button>
                 );
               })}
@@ -260,16 +260,16 @@ export const FilterSidebar: FC = () => {
         </div>
 
         {/* City / Location Accordion */}
-        <div className="border border-[#E2D8C7] rounded-xl overflow-hidden bg-[#F4EFE6]/40 shadow-2xs">
+        <div className="border border-[#D7E7E4] rounded-xl overflow-hidden bg-[#EEF7F5]/40 shadow-2xs">
           <button
             onClick={() => toggleSection('city')}
-            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#2E4080] bg-[#F4EFE6]/70 hover:bg-[#F4EFE6] transition-colors cursor-pointer"
+            className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">City / Hub</span>
             <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.city ? 'rotate-180' : ''}`} />
           </button>
           {openSection.city && (
-            <div className="p-2 space-y-1 border-t border-[#E2D8C7]/60 bg-white">
+            <div className="p-2 space-y-1 border-t border-[#D7E7E4]/60 bg-white">
               {cities.map(city => {
                 const isSelected = filters.searchQuery.toLowerCase() === city.toLowerCase();
                 return (
@@ -277,14 +277,14 @@ export const FilterSidebar: FC = () => {
                     key={city}
                     onClick={() => setFilters(prev => ({ ...prev, searchQuery: isSelected ? '' : city }))}
                     className={`w-full flex items-center justify-between p-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                      isSelected ? 'bg-[#2E4080] text-white shadow-2xs' : 'text-[#2E4080] hover:bg-[#F4EFE6]'
+                      isSelected ? 'bg-[#176B87] text-white shadow-2xs' : 'text-[#176B87] hover:bg-[#EEF7F5]'
                     }`}
                   >
                     <span className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-[#23EBFF]" />
+                      <MapPin className="w-3.5 h-3.5 text-[#13B8A6]" />
                       {city}
                     </span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#23EBFF]" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#13B8A6]" />}
                   </button>
                 );
               })}
@@ -293,10 +293,10 @@ export const FilterSidebar: FC = () => {
         </div>
 
         {/* Max Price Slider */}
-        <div className="border border-[#E2D8C7] rounded-xl p-3.5 bg-[#F4EFE6]/60 space-y-2.5 shadow-2xs">
+        <div className="border border-[#D7E7E4] rounded-xl p-3.5 bg-[#EEF7F5]/60 space-y-2.5 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs sm:text-sm font-bold text-[#2E4080] font-serif">Max Budget</span>
-            <span className="font-mono font-bold text-xs text-[#2E4080] bg-[#23EBFF]/20 border border-[#23EBFF]/40 px-2 py-0.5 rounded-lg">
+            <span className="text-xs sm:text-sm font-bold text-[#176B87] font-serif">Max Budget</span>
+            <span className="font-mono font-bold text-xs text-[#176B87] bg-[#13B8A6]/20 border border-[#13B8A6]/40 px-2 py-0.5 rounded-lg">
               {filters.maxPrice < 1000000
                 ? `KES ${(filters.maxPrice / 1000).toLocaleString()}K`
                 : `KES ${(filters.maxPrice / 1000000).toFixed(1)}M`}
@@ -309,12 +309,12 @@ export const FilterSidebar: FC = () => {
             step="500000"
             value={filters.maxPrice}
             onChange={e => setFilters(prev => ({ ...prev, maxPrice: parseFloat(e.target.value) }))}
-            className="w-full accent-[#2E4080] cursor-pointer h-2 bg-[#E2D8C7] rounded-lg"
+            className="w-full accent-[#176B87] cursor-pointer h-2 bg-[#D7E7E4] rounded-lg"
           />
         </div>
 
         {/* Ghost Check Verification Toggle */}
-        <label className="flex items-center justify-between text-xs sm:text-sm font-bold text-[#2E4080] cursor-pointer p-3 rounded-xl bg-[#F4EFE6] border border-[#E2D8C7] shadow-2xs hover:border-[#2E4080] transition-all">
+        <label className="flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] cursor-pointer p-3 rounded-xl bg-[#EEF7F5] border border-[#D7E7E4] shadow-2xs hover:border-[#176B87] transition-all">
           <span className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             150-Pt Inspected Vehicles
@@ -323,7 +323,7 @@ export const FilterSidebar: FC = () => {
             type="checkbox"
             checked={filters.certifiedOnly}
             onChange={e => setFilters(prev => ({ ...prev, certifiedOnly: e.target.checked }))}
-            className="w-4 h-4 accent-[#2E4080] rounded cursor-pointer"
+            className="w-4 h-4 accent-[#176B87] rounded cursor-pointer"
           />
         </label>
       </div>

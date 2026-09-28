@@ -31,7 +31,7 @@ export default function AppInstallPrompt() {
         background: 'var(--gold)', padding: '8px 14px', borderRadius: '2rem',
         display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
         boxShadow: '0 4px 20px rgba(0,0,0,0.3)', fontSize: 11,
-        fontWeight: 700, color: '#0A1628', textTransform: 'uppercase',
+        fontWeight: 700, color: '#0A3340', textTransform: 'uppercase',
         letterSpacing: '0.04em', whiteSpace: 'nowrap',
       }}>
         <span style={{ fontSize: 14 }}>+</span>

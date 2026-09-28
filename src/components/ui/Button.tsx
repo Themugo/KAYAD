@@ -79,7 +79,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     // Stitch Design: Primary gradient with teal glow
     const variantStyles: Record<string, React.CSSProperties> = {
       primary: {
-        background: 'linear-gradient(135deg, #16C4A4, #0C7B68)',
+        background: 'linear-gradient(135deg, #176B87, #12576D)',
         color: '#ffffff',
         borderColor: 'transparent',
         // Stitch: Primary glow shadow
@@ -106,7 +106,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         borderColor: 'var(--border, #cbd5e1)',
       },
       accent: {
-        background: 'var(--color-accent, #C85A32)',
+        background: 'var(--color-accent, #176B87)',
         color: '#ffffff',
         borderColor: 'transparent',
       },

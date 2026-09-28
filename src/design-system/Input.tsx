@@ -32,9 +32,9 @@ export const Input: React.FC<InputProps> = ({
         )}
         <input
           id={inputId}
-          className={`w-full bg-[#1A2A4E] border ${
-            error ? 'border-[#DC3545]' : 'border-[#1A2A4E]/80 focus:border-[#00C9CE]'
-          } rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-400 transition-colors focus:outline-none focus:ring-1 focus:ring-[#00C9CE] ${
+          className={`w-full bg-[#0A3340] border ${
+            error ? 'border-[#DC3545]' : 'border-[#0A3340]/80 focus:border-[#13B8A6]'
+          } rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-400 transition-colors focus:outline-none focus:ring-1 focus:ring-[#13B8A6] ${
             leftIcon ? 'pl-10' : ''
           } ${rightIcon ? 'pr-10' : ''} ${className}`}
           {...props}

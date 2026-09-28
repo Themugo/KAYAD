@@ -348,7 +348,7 @@
 }
 .quick-bid-chip.active {
   background: var(--gold);
-  color: #0A1628;
+  color: #0A3340;
   border-color: var(--gold);
   font-weight: 700;
 }

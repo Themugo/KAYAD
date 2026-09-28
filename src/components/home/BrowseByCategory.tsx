@@ -21,7 +21,7 @@ export const BrowseByCategory: FC = () => {
       title: 'SUV',
       desc: 'All-terrain 4x4s & family luxury crossovers',
       image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
-      icon: <Compass className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Compass className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({ ...prev, bodyStyles: ['SUV' as BodyStyle] }));
@@ -33,7 +33,7 @@ export const BrowseByCategory: FC = () => {
       title: 'Sedan',
       desc: 'Refined comfort, executive saloons & city drivers',
       image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80',
-      icon: <Car className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Car className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({ ...prev, bodyStyles: ['Sedan' as BodyStyle] }));
@@ -45,7 +45,7 @@ export const BrowseByCategory: FC = () => {
       title: 'Pickup',
       desc: 'High-payload double cabs & heavy-duty utilities',
       image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?auto=format&fit=crop&w=800&q=80',
-      icon: <Truck className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Truck className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({ ...prev, bodyStyles: ['Truck' as BodyStyle] }));
@@ -85,7 +85,7 @@ export const BrowseByCategory: FC = () => {
       title: 'Commercial',
       desc: 'Fleet transporters, cargo vans & business haulers',
       image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=800&q=80',
-      icon: <Briefcase className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Briefcase className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({ ...prev, searchQuery: 'commercial' }));
@@ -97,7 +97,7 @@ export const BrowseByCategory: FC = () => {
       title: 'Electric',
       desc: '100% zero-emission next-generation EVs',
       image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80',
-      icon: <Zap className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Zap className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({ ...prev, fuelType: ['Electric'] }));
@@ -107,20 +107,20 @@ export const BrowseByCategory: FC = () => {
   ];
 
   return (
-    <section className="py-14 sm:py-20 bg-[#FCF9F4] text-[#1E3063] border-b border-[#E8E1D5] transition-colors">
+    <section className="py-14 sm:py-20 bg-[#F6FAF9] text-[#176B87] border-b border-[#D7E7E4] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 pb-6 border-b border-[#E2D8C7]">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 pb-6 border-b border-[#D7E7E4]">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E3063]/10 border border-[#1E3063]/20 text-[#1E3063] font-mono font-bold text-xs uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-[#00C9CE]" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#176B87]/10 border border-[#176B87]/20 text-[#176B87] font-mono font-bold text-xs uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-[#13B8A6]" />
               <span>CATEGORIES</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#1E3063] font-serif tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#176B87] font-serif tracking-tight">
               Browse by Category
             </h2>
-            <p className="text-xs sm:text-sm text-[#6B7A99] font-sans font-medium">
+            <p className="text-xs sm:text-sm text-[#66808A] font-sans font-medium">
               Filter Kenya's verified inventory by body style and drive type.
             </p>
           </div>
@@ -130,10 +130,10 @@ export const BrowseByCategory: FC = () => {
               resetFilters();
               navigateTo('gallery');
             }}
-            className="px-6 py-3 bg-[#1E3063] hover:bg-[#121D33] text-white font-mono font-black text-xs uppercase tracking-wider rounded-2xl border border-[#1E3063] shadow-md inline-flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]"
+            className="px-6 py-3 bg-[#176B87] hover:bg-[#12576D] text-white font-mono font-black text-xs uppercase tracking-wider rounded-2xl border border-[#176B87] shadow-md inline-flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]"
           >
             <span>View All Categories</span>
-            <ArrowRight className="w-4 h-4 text-[#00C9CE]" />
+            <ArrowRight className="w-4 h-4 text-[#13B8A6]" />
           </button>
         </div>
 
@@ -143,7 +143,7 @@ export const BrowseByCategory: FC = () => {
             <div
               key={cat.id}
               onClick={cat.action}
-              className="group relative h-56 rounded-3xl overflow-hidden border border-[#E2D8C7] shadow-xs hover:border-[#00C9CE] hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-end p-5"
+              className="group relative h-56 rounded-3xl overflow-hidden border border-[#D7E7E4] shadow-xs hover:border-[#13B8A6] hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-end p-5"
             >
               {/* Background Image */}
               <img
@@ -156,7 +156,7 @@ export const BrowseByCategory: FC = () => {
               />
 
               {/* Dark Vignette Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1628]/95 via-[#0B1628]/60 to-transparent transition-opacity group-hover:opacity-90" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A3340]/95 via-[#0A3340]/60 to-transparent transition-opacity group-hover:opacity-90" />
 
               {/* Content */}
               <div className="relative z-10 space-y-1.5">
@@ -164,12 +164,12 @@ export const BrowseByCategory: FC = () => {
                   <div className="w-8 h-8 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center">
                     {cat.icon}
                   </div>
-                  <span className="text-[10px] font-mono font-black px-2.5 py-1 rounded-full bg-[#00C9CE]/20 text-[#00C9CE] uppercase tracking-wider group-hover:bg-[#00C9CE] group-hover:text-[#1E3063] transition-colors">
+                  <span className="text-[10px] font-mono font-black px-2.5 py-1 rounded-full bg-[#13B8A6]/20 text-[#13B8A6] uppercase tracking-wider group-hover:bg-[#13B8A6] group-hover:text-[#176B87] transition-colors">
                     Explore →
                   </span>
                 </div>
 
-                <h3 className="text-xl font-serif font-black text-white group-hover:text-[#00C9CE] transition-colors">
+                <h3 className="text-xl font-serif font-black text-white group-hover:text-[#13B8A6] transition-colors">
                   {cat.title}
                 </h3>
 

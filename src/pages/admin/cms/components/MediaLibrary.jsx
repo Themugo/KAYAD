@@ -9,8 +9,8 @@ import * as cmsApi from '../../../../services/cmsApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -86,14 +86,14 @@ export default function MediaLibrary() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <FolderOpen size={20} className="text-white" />
                 </div>
                 <div>
@@ -105,7 +105,7 @@ export default function MediaLibrary() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowUploadModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] transition-colors"
               >
                 <Upload size={18} />
                 Upload Files
@@ -122,7 +122,7 @@ export default function MediaLibrary() {
           <nav className="space-y-1">
             <button
               onClick={() => setCurrentFolder('/')}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${currentFolder === '/' ? 'bg-[#17244B] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${currentFolder === '/' ? 'bg-[#0A3340] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               <FolderOpen size={16} />
               All Media
@@ -131,7 +131,7 @@ export default function MediaLibrary() {
               <button
                 key={folder}
                 onClick={() => setCurrentFolder(folder)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${currentFolder === folder ? 'bg-[#17244B] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${currentFolder === folder ? 'bg-[#0A3340] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
               >
                 <FolderOpen size={16} />
                 <span className="capitalize">{folder}</span>
@@ -140,7 +140,7 @@ export default function MediaLibrary() {
           </nav>
 
           <div className="mt-6 pt-6 border-t border-slate-100">
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:text-[#17244B] transition-colors">
+            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:text-[#0A3340] transition-colors">
               <FolderPlus size={16} />
               New Folder
             </button>
@@ -174,7 +174,7 @@ export default function MediaLibrary() {
                   placeholder="Search files..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none w-64"
+                  className="pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none w-64"
                 />
               </div>
 
@@ -219,7 +219,7 @@ export default function MediaLibrary() {
                 <button
                   key={type.id}
                   onClick={() => setSelectedType(type.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedType === type.id ? 'bg-[#17244B] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-[#17244B]'}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedType === type.id ? 'bg-[#0A3340] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-[#0A3340]'}`}
                 >
                   <Icon size={16} />
                   {type.label}
@@ -240,7 +240,7 @@ export default function MediaLibrary() {
                 return (
                   <div
                     key={item.id}
-                    className={`group relative bg-white rounded-lg border-2 overflow-hidden transition-all cursor-pointer ${isSelected ? 'border-[#17244B]' : 'border-transparent hover:border-slate-200'}`}
+                    className={`group relative bg-white rounded-lg border-2 overflow-hidden transition-all cursor-pointer ${isSelected ? 'border-[#0A3340]' : 'border-transparent hover:border-slate-200'}`}
                     onClick={() => setSelectedMedia(item)}
                   >
                     <div className="aspect-square bg-slate-100 flex items-center justify-center">
@@ -259,7 +259,7 @@ export default function MediaLibrary() {
                       className={`absolute top-2 left-2 p-1 rounded transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                     >
                       {isSelected ? (
-                        <div className="w-5 h-5 bg-[#17244B] rounded flex items-center justify-center">
+                        <div className="w-5 h-5 bg-[#0A3340] rounded flex items-center justify-center">
                           <CheckSquare size={14} className="text-white" />
                         </div>
                       ) : (
@@ -301,12 +301,12 @@ export default function MediaLibrary() {
                     return (
                       <tr
                         key={item.id}
-                        className={`hover:bg-slate-50 cursor-pointer ${isSelected ? 'bg-[#17244B]/5' : ''}`}
+                        className={`hover:bg-slate-50 cursor-pointer ${isSelected ? 'bg-[#0A3340]/5' : ''}`}
                         onClick={() => setSelectedMedia(item)}
                       >
                         <td className="px-4 py-3">
                           <button onClick={(e) => { e.stopPropagation(); toggleSelect(item.id); }}>
-                            {isSelected ? <CheckSquare size={16} className="text-[#17244B]" /> : <Square size={16} className="text-slate-400" />}
+                            {isSelected ? <CheckSquare size={16} className="text-[#0A3340]" /> : <Square size={16} className="text-slate-400" />}
                           </button>
                         </td>
                         <td className="px-4 py-3">
@@ -363,7 +363,7 @@ export default function MediaLibrary() {
                 <X size={20} />
               </button>
             </div>
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-12 text-center hover:border-[#17244B] transition-colors cursor-pointer">
+            <div className="border-2 border-dashed border-slate-300 rounded-xl p-12 text-center hover:border-[#0A3340] transition-colors cursor-pointer">
               <Upload size={48} className="mx-auto text-slate-300 mb-4" />
               <p className="text-lg font-medium text-slate-700 mb-2">Drop files here or click to upload</p>
               <p className="text-sm text-slate-500">Supports: JPG, PNG, GIF, SVG, MP4, PDF (max 50MB)</p>
@@ -377,7 +377,7 @@ export default function MediaLibrary() {
               </select>
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+                className="px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
               >
                 Upload
               </button>
@@ -449,7 +449,7 @@ export default function MediaLibrary() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100">
-                  <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] text-sm">
+                  <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] text-sm">
                     <Edit size={14} />
                     Edit
                   </button>

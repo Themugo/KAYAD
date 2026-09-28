@@ -68,8 +68,8 @@ export const PriceAlertsModal: React.FC<PriceAlertsModalProps> = ({ isOpen, onCl
             {alerts.map((alert, index) => {
               const id = String(alert.id || alert._id || alert.name || `saved-search-${index}`);
               const active = Boolean(alert.notify ?? alert.notifyOnNewMatch);
-              return <button type="button" key={id} onClick={() => void toggleAlert(alert)} className={`w-full text-left p-3 rounded-xl border flex items-center justify-between transition-all ${active ? 'bg-amber-50/80 border-amber-300 text-[#1E3063]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
-                <span className="font-bold">{alert.name || 'Saved search'}</span><span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${active ? 'bg-[#1E3063] text-amber-400' : 'bg-slate-200 text-slate-400'}`}>{active ? '✓' : ''}</span>
+              return <button type="button" key={id} onClick={() => void toggleAlert(alert)} className={`w-full text-left p-3 rounded-xl border flex items-center justify-between transition-all ${active ? 'bg-amber-50/80 border-amber-300 text-[#176B87]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                <span className="font-bold">{alert.name || 'Saved search'}</span><span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${active ? 'bg-[#176B87] text-amber-400' : 'bg-slate-200 text-slate-400'}`}>{active ? '✓' : ''}</span>
               </button>;
             })}
           </div>

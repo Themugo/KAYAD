@@ -142,7 +142,7 @@ const ComplianceItemCard: React.FC<{
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h4 className="font-bold text-[#1E3063] truncate">
+            <h4 className="font-bold text-[#176B87] truncate">
               {session?.id || item.auctionId}
             </h4>
             <Badge
@@ -158,7 +158,7 @@ const ComplianceItemCard: React.FC<{
           </p>
         </div>
         <div className="text-right">
-          <div className="text-lg font-black text-[#1E3063]">{summary.percentage}%</div>
+          <div className="text-lg font-black text-[#176B87]">{summary.percentage}%</div>
           <div className="text-[10px] text-slate-500">
             {summary.requiredCompleted}/{summary.required} required
           </div>
@@ -177,7 +177,7 @@ const ComplianceItemCard: React.FC<{
           <div>
             <div className="flex justify-between text-xs mb-1">
               <span className="text-slate-600">Compliance Progress</span>
-              <span className="font-bold text-[#1E3063]">{summary.percentage}%</span>
+              <span className="font-bold text-[#176B87]">{summary.percentage}%</span>
             </div>
             <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
               <div
@@ -445,7 +445,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
               placeholder="Search by auction ID or organizer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/20 focus:border-[#1E3063]"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20 focus:border-[#176B87]"
             />
           </div>
 
@@ -455,7 +455,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ComplianceStatus | 'all')}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/20"
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
             >
               <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
@@ -471,7 +471,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as ComplianceCategory | 'all')}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/20"
+            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
           >
             <option value="all">All Categories</option>
             {Object.entries(COMPLIANCE_CATEGORIES).map(([key, cat]) => (
@@ -498,7 +498,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
       {/* Compliance Items List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-[#1E3063]">
+          <h3 className="font-bold text-[#176B87]">
             Compliance Items ({filteredItems.length})
           </h3>
         </div>

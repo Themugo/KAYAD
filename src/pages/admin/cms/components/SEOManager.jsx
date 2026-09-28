@@ -8,8 +8,8 @@ import {
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -70,14 +70,14 @@ export default function SEOManager() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <Globe size={20} className="text-white" />
                 </div>
                 <div>
@@ -91,7 +91,7 @@ export default function SEOManager() {
                 <RefreshCw size={18} />
                 Refresh
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+              <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
                 <Save size={18} />
                 Save Changes
               </button>
@@ -110,7 +110,7 @@ export default function SEOManager() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${activeTab === tab.id ? 'bg-[#17244B] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${activeTab === tab.id ? 'bg-[#0A3340] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
                 >
                   <Icon size={18} />
                   {tab.label}
@@ -131,7 +131,7 @@ export default function SEOManager() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600">Active Redirects</span>
-                <span className="text-sm font-semibold text-[#17244B]">{redirects.length}</span>
+                <span className="text-sm font-semibold text-[#0A3340]">{redirects.length}</span>
               </div>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function SEOManager() {
                         <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => setSelectedPage(page)}
-                            className="px-3 py-1.5 text-sm text-[#17244B] hover:bg-[#17244B]/10 rounded-lg"
+                            className="px-3 py-1.5 text-sm text-[#0A3340] hover:bg-[#0A3340]/10 rounded-lg"
                           >
                             Edit
                           </button>
@@ -300,7 +300,7 @@ export default function SEOManager() {
                 <h2 className="text-xl font-bold text-slate-800">URL Redirects</h2>
                 <button
                   onClick={() => setShowAddRedirect(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
                 >
                   <Plus size={18} />
                   Add Redirect
@@ -362,7 +362,7 @@ export default function SEOManager() {
 
               <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
                 <div className="flex items-center gap-3 mb-4">
-                  <Sitemap size={24} className="text-[#17244B]" />
+                  <Sitemap size={24} className="text-[#0A3340]" />
                   <div>
                     <h3 className="font-semibold text-slate-800">Sitemap Status</h3>
                     <p className="text-sm text-slate-500">Last generated: 2 hours ago</p>
@@ -433,7 +433,7 @@ Crawl-delay: 10`}
                 </div>
 
                 <div className="mt-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
                     <Save size={16} />
                     Save robots.txt
                   </button>
@@ -478,7 +478,7 @@ Crawl-delay: 10`}
                 <input
                   type="text"
                   defaultValue={selectedPage.metaTitle}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                   placeholder="Enter page title for search engines"
                 />
                 <p className="text-xs text-slate-400 mt-1">Recommended: 50-60 characters</p>
@@ -488,7 +488,7 @@ Crawl-delay: 10`}
                 <textarea
                   defaultValue={selectedPage.metaDescription}
                   rows={3}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none resize-none"
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none resize-none"
                   placeholder="Enter page description for search engines"
                 />
                 <p className="text-xs text-slate-400 mt-1">Recommended: 150-160 characters</p>
@@ -498,7 +498,7 @@ Crawl-delay: 10`}
                 <input
                   type="text"
                   defaultValue={selectedPage.url}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                 />
               </div>
               <div>
@@ -524,7 +524,7 @@ Crawl-delay: 10`}
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+              <button className="px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
                 Save Changes
               </button>
             </div>

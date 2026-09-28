@@ -8,10 +8,10 @@ import { Link } from 'react-router-dom';
 // Design Tokens - Unified across all enterprise components
 export const EnterpriseTokens = {
   // Brand Colors (KAYAD Design System)
-  navy: '#17244B',
-  navyLight: '#1e3054',
+  navy: '#0A3340',
+  navyLight: '#12576D',
   navyDark: '#0f1833',
-  beige: '#F6F1E8',
+  beige: '#EEF7F5',
   beigeLight: '#FAF7F2',
   white: '#FFFFFF',
 
@@ -64,7 +64,7 @@ export const EnterpriseTokens = {
   textDisabled: '#94A3B8',
 
   // Backgrounds
-  bg: '#F6F1E8',
+  bg: '#EEF7F5',
   bgLight: '#FAF7F2',
   card: '#FFFFFF',
   surface: '#F8FAFC',
@@ -74,7 +74,7 @@ export const EnterpriseTokens = {
   border: 'rgba(15, 23, 42, 0.08)',
   borderLight: 'rgba(15, 23, 42, 0.05)',
   borderMedium: 'rgba(15, 23, 42, 0.12)',
-  borderFocus: '#17244B',
+  borderFocus: '#0A3340',
 
   // Shadows
   shadow: '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',

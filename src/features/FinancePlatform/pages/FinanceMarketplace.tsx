@@ -92,15 +92,15 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       <div className="text-center py-6">
-        <h1 className="text-2xl font-bold text-[#1E3063] font-display">Vehicle Financing</h1>
+        <h1 className="text-2xl font-bold text-[#176B87] font-display">Vehicle Financing</h1>
         <p className="text-sm text-slate-500 mt-1">Estimate your monthly payment and apply for financing</p>
       </div>
 
       {/* CALCULATOR - honest, local arithmetic, no named lenders */}
       <section className="bg-white border border-slate-200 rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Calculator className="w-4 h-4 text-[#C85A32]" />
-          <h2 className="text-sm font-bold text-[#1E3063]">Affordability Calculator</h2>
+          <Calculator className="w-4 h-4 text-[#176B87]" />
+          <h2 className="text-sm font-bold text-[#176B87]">Affordability Calculator</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <label className="text-xs text-slate-600">
@@ -128,15 +128,15 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
         <div className="bg-[#F5F2EB] rounded-xl p-4 flex flex-wrap gap-6">
           <div>
             <p className="text-[10px] text-slate-500 uppercase font-bold">Loan Amount</p>
-            <p className="text-sm font-bold text-[#1E3063]">Ksh {loanAmount.toLocaleString()}</p>
+            <p className="text-sm font-bold text-[#176B87]">Ksh {loanAmount.toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-500 uppercase font-bold">Est. Monthly Payment</p>
-            <p className="text-sm font-bold text-[#1E3063]">Ksh {Math.round(monthlyPayment).toLocaleString()}</p>
+            <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(monthlyPayment).toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-500 uppercase font-bold">Total Cost</p>
-            <p className="text-sm font-bold text-[#1E3063]">Ksh {Math.round(totalCost).toLocaleString()}</p>
+            <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(totalCost).toLocaleString()}</p>
           </div>
         </div>
         <p className="text-[10px] text-slate-400 mt-2">Estimate only - actual rates and terms depend on the lender's own assessment.</p>
@@ -145,8 +145,8 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
       {/* REAL APPLICATION FORM */}
       <section className="bg-white border border-slate-200 rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <FileText className="w-4 h-4 text-[#C85A32]" />
-          <h2 className="text-sm font-bold text-[#1E3063]">Apply for Financing</h2>
+          <FileText className="w-4 h-4 text-[#176B87]" />
+          <h2 className="text-sm font-bold text-[#176B87]">Apply for Financing</h2>
         </div>
         {submitted ? (
           <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900">
@@ -174,7 +174,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
               </label>
             </div>
             <p className="text-[10px] text-slate-400">Uses the vehicle price, deposit, and term from the calculator above.</p>
-            <button type="submit" disabled={submitting} className="bg-[#1E3063] hover:bg-[#17244B] text-white text-xs font-bold rounded-lg px-5 py-2.5 disabled:opacity-50">
+            <button type="submit" disabled={submitting} className="bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5 disabled:opacity-50">
               {submitting ? 'Submitting…' : user ? 'Submit Application' : 'Sign In to Apply'}
             </button>
           </form>
@@ -185,8 +185,8 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
       {user && (
         <section className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
-            <ClipboardList className="w-4 h-4 text-[#C85A32]" />
-            <h2 className="text-sm font-bold text-[#1E3063]">My Applications</h2>
+            <ClipboardList className="w-4 h-4 text-[#176B87]" />
+            <h2 className="text-sm font-bold text-[#176B87]">My Applications</h2>
           </div>
           {loadingApps ? (
             <div className="flex items-center justify-center py-8">
@@ -199,7 +199,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
               {myApplications.map((app) => (
                 <div key={app.id} className="border border-slate-200 rounded-xl p-3.5 flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-[#1E3063]">Ksh {app.loanAmount.toLocaleString()} over {app.termMonths} months</p>
+                    <p className="text-xs font-semibold text-[#176B87]">Ksh {app.loanAmount.toLocaleString()} over {app.termMonths} months</p>
                     <p className="text-[11px] text-slate-500">Submitted {new Date(app.createdAt).toLocaleDateString()}</p>
                   </div>
                   <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${

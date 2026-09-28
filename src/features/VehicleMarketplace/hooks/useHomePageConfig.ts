@@ -48,14 +48,9 @@ export interface HomePageConfig {
     make: string;
     model: string;
     year: number;
-    price: number;
-    mileage: number;
     fuelType: string;
     transmission: string;
-    bodyStyle: string;
-    location: string;
     tagline: string;
-    condition: string;
     image: string;
   }>;
   inventoryLayout: {
@@ -67,8 +62,8 @@ export interface HomePageConfig {
 }
 
 export const ACCENT_THEME_OPTIONS: { id: HomePageConfig['accentTheme']; label: string; swatch: string }[] = [
-  { id: 'blue', label: 'Electric Blue', swatch: '#1684FF' },
-  { id: 'cyan', label: 'Cyan', swatch: '#20C4F4' },
+  { id: 'blue', label: 'Electric Blue', swatch: '#176B87' },
+  { id: 'cyan', label: 'Cyan', swatch: '#13B8A6' },
   { id: 'slate', label: 'Slate Teal', swatch: '#176B87' },
 ];
 
@@ -82,8 +77,8 @@ export const ACCENT_THEME_CLASSES: Record<HomePageConfig['accentTheme'], {
   text400: string; text500: string; text600: string;
   bg400: string; bg400Hover: string; border400: string; bg400Subtle: string;
 }> = {
-  blue: { text400: 'text-[#1684FF]', text500: 'text-[#1684FF]', text600: 'text-[#0F6ED8]', bg400: 'bg-[#1684FF]', bg400Hover: 'hover:bg-[#0F6ED8]', border400: 'border-[#1684FF]/25', bg400Subtle: 'bg-[#1684FF]/10' },
-  cyan: { text400: 'text-[#20C4F4]', text500: 'text-[#20C4F4]', text600: 'text-[#159BC7]', bg400: 'bg-[#20C4F4]', bg400Hover: 'hover:bg-[#159BC7]', border400: 'border-[#20C4F4]/25', bg400Subtle: 'bg-[#20C4F4]/10' },
+  blue: { text400: 'text-[#176B87]', text500: 'text-[#176B87]', text600: 'text-[#0F6ED8]', bg400: 'bg-[#176B87]', bg400Hover: 'hover:bg-[#0F6ED8]', border400: 'border-[#176B87]/25', bg400Subtle: 'bg-[#176B87]/10' },
+  cyan: { text400: 'text-[#13B8A6]', text500: 'text-[#13B8A6]', text600: 'text-[#159BC7]', bg400: 'bg-[#13B8A6]', bg400Hover: 'hover:bg-[#159BC7]', border400: 'border-[#13B8A6]/25', bg400Subtle: 'bg-[#13B8A6]/10' },
   slate: { text400: 'text-[#176B87]', text500: 'text-[#176B87]', text600: 'text-[#12576D]', bg400: 'bg-[#176B87]', bg400Hover: 'hover:bg-[#12576D]', border400: 'border-[#176B87]/25', bg400Subtle: 'bg-[#176B87]/10' },
 };
 
@@ -105,9 +100,9 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
   // Admin can configure fallback rows from Home Page Admin; real Featured/
   // Promoted inventory remains the authoritative source whenever available.
   heroFallbackVehicles: [
-    { id: 'hero-fallback-1', make: '', model: '', year: 0, price: 0, mileage: 0, fuelType: '', transmission: '', bodyStyle: '', location: '', tagline: '', condition: '', image: '' },
-    { id: 'hero-fallback-2', make: '', model: '', year: 0, price: 0, mileage: 0, fuelType: '', transmission: '', bodyStyle: '', location: '', tagline: '', condition: '', image: '' },
-    { id: 'hero-fallback-3', make: '', model: '', year: 0, price: 0, mileage: 0, fuelType: '', transmission: '', bodyStyle: '', location: '', tagline: '', condition: '', image: '' },
+    { id: 'hero-fallback-1', make: '', model: '', year: 2026, fuelType: '', transmission: '', tagline: '', image: '' },
+    { id: 'hero-fallback-2', make: '', model: '', year: 2026, fuelType: '', transmission: '', tagline: '', image: '' },
+    { id: 'hero-fallback-3', make: '', model: '', year: 2026, fuelType: '', transmission: '', tagline: '', image: '' },
   ],
   inventoryLayout: {
     viewMode: 'grid',
@@ -142,11 +137,8 @@ function loadConfig(): HomePageConfig {
         ? parsed.heroFallbackVehicles.slice(0, 6).map((item: any, index: number) => ({
             id: String(item?.id || `hero-fallback-${index + 1}`),
             make: String(item?.make || ''), model: String(item?.model || ''),
-            year: Number(item?.year) || 0, price: Number(item?.price) || 0, mileage: Number(item?.mileage) || 0,
-            fuelType: String(item?.fuelType || ''), transmission: String(item?.transmission || ''),
-            bodyStyle: String(item?.bodyStyle || ''), location: String(item?.location || ''),
-            tagline: String(item?.tagline || ''),
-            condition: String(item?.condition || ''),
+            year: Number(item?.year) || 2026, fuelType: String(item?.fuelType || ''),
+            transmission: String(item?.transmission || ''), tagline: String(item?.tagline || ''),
             image: String(item?.image || '').startsWith('/hero/kayad-') ? '' : String(item?.image || ''),
           }))
         : DEFAULT_HOME_PAGE_CONFIG.heroFallbackVehicles,

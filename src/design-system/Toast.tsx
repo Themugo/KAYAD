@@ -14,13 +14,13 @@ export const Toast: React.FC<ToastProps> = ({
   const icons = {
     success: <CheckCircle2 className="w-5 h-5 text-[#2ECC71]" />,
     error: <AlertCircle className="w-5 h-5 text-[#DC3545]" />,
-    info: <Info className="w-5 h-5 text-[#00C9CE]" />,
+    info: <Info className="w-5 h-5 text-[#13B8A6]" />,
   };
 
   const bgStyles = {
-    success: 'bg-[#1E3063] border-[#2ECC71]/40 text-white',
-    error: 'bg-[#1E3063] border-[#DC3545]/40 text-white',
-    info: 'bg-[#1E3063] border-[#00C9CE]/40 text-white',
+    success: 'bg-[#176B87] border-[#2ECC71]/40 text-white',
+    error: 'bg-[#176B87] border-[#DC3545]/40 text-white',
+    info: 'bg-[#176B87] border-[#13B8A6]/40 text-white',
   };
 
   return (

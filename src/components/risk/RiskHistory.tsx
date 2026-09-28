@@ -199,7 +199,7 @@ export const RiskHistory: React.FC<RiskHistoryProps> = ({
               placeholder="Search by risk title or code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/20 focus:border-[#1E3063]"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20 focus:border-[#176B87]"
             />
           </div>
 
@@ -209,7 +209,7 @@ export const RiskHistory: React.FC<RiskHistoryProps> = ({
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value as typeof dateRange)}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/20"
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
             >
               <option value="all">All Time</option>
               <option value="7days">Last 7 Days</option>
@@ -224,7 +224,7 @@ export const RiskHistory: React.FC<RiskHistoryProps> = ({
             <select
               value={selectedAction || ''}
               onChange={(e) => setSelectedAction(e.target.value || null)}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/20"
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
             >
               <option value="">All Actions</option>
               <option value="created">Detected</option>

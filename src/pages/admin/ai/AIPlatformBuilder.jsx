@@ -12,8 +12,8 @@ import * as aiApi from '../../../services/aiApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -166,7 +166,7 @@ export default function AIPlatformBuilder() {
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] rounded-2xl p-4 ${
               msg.role === 'user'
-                ? 'bg-[#17244B] text-white rounded-br-md'
+                ? 'bg-[#0A3340] text-white rounded-br-md'
                 : msg.isError
                   ? 'bg-red-50 text-red-800 border border-red-200 rounded-bl-md'
                   : msg.isSuccess
@@ -175,7 +175,7 @@ export default function AIPlatformBuilder() {
             }`}>
               {msg.role === 'assistant' && (
                 <div className="flex items-center gap-2 mb-2">
-                  <Bot size={16} className="text-[#17244B]" />
+                  <Bot size={16} className="text-[#0A3340]" />
                   <span className="text-xs font-medium text-slate-500">KAYAD AI</span>
                 </div>
               )}
@@ -256,7 +256,7 @@ export default function AIPlatformBuilder() {
             <button
               key={i}
               onClick={() => handleQuickAction(action.command)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm whitespace-nowrap hover:bg-slate-50 hover:border-[#17244B] transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm whitespace-nowrap hover:bg-slate-50 hover:border-[#0A3340] transition-colors"
             >
               <action.icon size={14} />
               {action.label}
@@ -274,12 +274,12 @@ export default function AIPlatformBuilder() {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Type your command or question..."
-            className="flex-1 px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#17244B] focus:border-transparent"
+            className="flex-1 px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A3340] focus:border-transparent"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="px-4 py-3 bg-[#17244B] text-white rounded-xl hover:bg-[#1e3054] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-3 bg-[#0A3340] text-white rounded-xl hover:bg-[#12576D] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Send size={20} />
           </button>
@@ -317,7 +317,7 @@ export default function AIPlatformBuilder() {
           { id: 'card', name: 'Card Designs', icon: FileCode, count: 32, color: colors.softBlue },
           { id: 'form', name: 'Forms', icon: FileCode, count: 24, color: colors.mutedOrange },
         ].map((cat) => (
-          <div key={cat.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#17244B] cursor-pointer transition-colors">
+          <div key={cat.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#0A3340] cursor-pointer transition-colors">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: `${cat.color}20` }}>
               <cat.icon size={24} style={{ color: cat.color }} />
             </div>
@@ -359,7 +359,7 @@ export default function AIPlatformBuilder() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">AI Automation Builder</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Automation
         </button>
@@ -377,8 +377,8 @@ export default function AIPlatformBuilder() {
         ].map((automation, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-[#17244B]/10 flex items-center justify-center">
-                <automation.icon size={24} className="text-[#17244B]" />
+              <div className="w-12 h-12 rounded-xl bg-[#0A3340]/10 flex items-center justify-center">
+                <automation.icon size={24} className="text-[#0A3340]" />
               </div>
               <button className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm hover:bg-slate-50">
                 <Play size={14} className="inline mr-1" />
@@ -396,7 +396,7 @@ export default function AIPlatformBuilder() {
         <h3 className="font-semibold text-slate-800 mb-4">Create Custom Automation</h3>
         <textarea
           placeholder="Describe your automation... e.g., 'When a dealer is approved, send a welcome email, create their showroom, assign a support manager, and schedule onboarding.'"
-          className="w-full h-32 p-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#17244B]"
+          className="w-full h-32 p-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A3340]"
         />
         <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#8B5CF6] text-white rounded-lg hover:bg-[#7c3aed]">
           <Sparkles size={18} />
@@ -414,7 +414,7 @@ export default function AIPlatformBuilder() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Prompt Studio</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Prompt
         </button>
@@ -457,7 +457,7 @@ export default function AIPlatformBuilder() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">AI Knowledge Base</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           Add Knowledge
         </button>
@@ -564,10 +564,10 @@ export default function AIPlatformBuilder() {
             {[65, 85, 72, 90, 88, 95, 78].map((value, i) => (
               <div key={i} className="flex flex-col items-center gap-2">
                 <div
-                  className="w-8 bg-[#17244B]/20 rounded-t"
+                  className="w-8 bg-[#0A3340]/20 rounded-t"
                   style={{ height: `${value}%` }}
                 >
-                  <div className="w-full bg-[#17244B] rounded-t h-full" />
+                  <div className="w-full bg-[#0A3340] rounded-t h-full" />
                 </div>
                 <span className="text-xs text-slate-500">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}
@@ -608,7 +608,7 @@ export default function AIPlatformBuilder() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => { setInput(suggestion.command); setActiveModule('assistant'); }}
-                className="flex-1 px-3 py-2 bg-[#17244B] text-white rounded-lg text-sm hover:bg-[#1e3054]"
+                className="flex-1 px-3 py-2 bg-[#0A3340] text-white rounded-lg text-sm hover:bg-[#12576D]"
               >
                 Apply Suggestion
               </button>
@@ -799,7 +799,7 @@ export default function AIPlatformBuilder() {
                 onClick={() => { setInput(cmd); setActiveModule('assistant'); }}
                 className="p-3 bg-slate-50 rounded-lg text-left hover:bg-slate-100 transition-colors flex items-center gap-3"
               >
-                <ArrowRight size={16} className="text-[#17244B]" />
+                <ArrowRight size={16} className="text-[#0A3340]" />
                 <span className="text-sm text-slate-700">{cmd}</span>
               </button>
             ))}
@@ -826,7 +826,7 @@ export default function AIPlatformBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">

@@ -43,10 +43,10 @@ export const PaymentTransparency: React.FC<PaymentTransparencyProps> = ({
   // Compact variant - single row
   if (variant === 'compact') {
     return (
-      <div className="flex items-center gap-3 px-3 py-2 bg-[#1E3063]/5 border border-[#1E3063]/10 rounded-lg">
-        <Building2 className="w-4 h-4 text-[#1E3063]" />
+      <div className="flex items-center gap-3 px-3 py-2 bg-[#176B87]/5 border border-[#176B87]/10 rounded-lg">
+        <Building2 className="w-4 h-4 text-[#176B87]" />
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-[#1E3063] truncate">
+          <p className="text-xs font-bold text-[#176B87] truncate">
             Pay to: {organizerName}
           </p>
           {paymentDetails?.paybill && (
@@ -63,7 +63,7 @@ export const PaymentTransparency: React.FC<PaymentTransparencyProps> = ({
   // Full variant - standalone card
   if (variant === 'full') {
     return (
-      <Card className="p-6 bg-gradient-to-br from-[#101935] to-[#1a2a4a] text-white border-none">
+      <Card className="p-6 bg-gradient-to-br from-[#0A3340] to-[#1a2a4a] text-white border-none">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -171,7 +171,7 @@ export const PaymentTransparency: React.FC<PaymentTransparencyProps> = ({
 
   // Card variant - default
   return (
-    <Card className="p-4 bg-[#101935] text-white border-none">
+    <Card className="p-4 bg-[#0A3340] text-white border-none">
       <div className="flex items-center gap-2 mb-4">
         <Banknote className="w-5 h-5 text-amber-400" />
         <span className="font-black text-sm">Organizer Payment Details</span>
@@ -227,22 +227,22 @@ export const PaymentSummaryInline: React.FC<{
   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
     <div className="flex items-center justify-between">
       <span className="text-xs text-slate-600 font-medium">Payment To</span>
-      <span className="text-sm font-bold text-[#1E3063]">{organizerName}</span>
+      <span className="text-sm font-bold text-[#176B87]">{organizerName}</span>
     </div>
     <div className="flex items-center justify-between">
       <span className="text-xs text-slate-600 font-medium">Amount</span>
-      <span className="text-sm font-mono font-bold text-[#1E3063]">Ksh {amount.toLocaleString()}</span>
+      <span className="text-sm font-mono font-bold text-[#176B87]">Ksh {amount.toLocaleString()}</span>
     </div>
     {paymentMethod === 'paybill' && paymentDetails?.paybill && (
       <div className="flex items-center justify-between">
         <span className="text-xs text-slate-600 font-medium">Paybill</span>
-        <span className="text-xs font-mono font-bold text-[#C85A32]">{paymentDetails.paybill}</span>
+        <span className="text-xs font-mono font-bold text-[#176B87]">{paymentDetails.paybill}</span>
       </div>
     )}
     {paymentMethod === 'till' && paymentDetails?.tillNumber && (
       <div className="flex items-center justify-between">
         <span className="text-xs text-slate-600 font-medium">Till Number</span>
-        <span className="text-xs font-mono font-bold text-[#C85A32]">{paymentDetails.tillNumber}</span>
+        <span className="text-xs font-mono font-bold text-[#176B87]">{paymentDetails.tillNumber}</span>
       </div>
     )}
   </div>

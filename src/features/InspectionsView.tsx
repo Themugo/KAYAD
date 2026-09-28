@@ -318,17 +318,17 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-slate-800 pb-16 space-y-6">
+    <div className="min-h-screen bg-[#F6FAF9] text-slate-800 pb-16 space-y-6">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#1E3063] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-white/20 animate-fade-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#176B87] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-white/20 animate-fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toast}</span>
         </div>
       )}
 
       {/* Service scope banner */}
-      <div className="bg-[#101935] border-b border-amber-400/30 px-4 py-3 text-xs shadow-md rounded-2xl">
+      <div className="bg-[#0A3340] border-b border-amber-400/30 px-4 py-3 text-xs shadow-md rounded-2xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-amber-400 font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">KAYAD Inspection Orders</span>
@@ -338,7 +338,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       </div>
 
       {/* Hero Header Banner */}
-      <div className="bg-[#1E3063] text-white pt-8 pb-10 px-4 sm:px-6 lg:px-8 shadow-md">
+      <div className="bg-[#176B87] text-white pt-8 pb-10 px-4 sm:px-6 lg:px-8 shadow-md">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
@@ -454,7 +454,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               onClick={() => setActiveTab('packages')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
                 activeTab === 'packages'
-                  ? 'bg-[#1E3063] text-white shadow-xs'
+                  ? 'bg-[#176B87] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
@@ -466,7 +466,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               onClick={() => setActiveTab('reports')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
                 activeTab === 'reports'
-                  ? 'bg-[#1E3063] text-white shadow-xs'
+                  ? 'bg-[#176B87] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
@@ -478,7 +478,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               onClick={() => setActiveTab('bookings')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
                 activeTab === 'bookings'
-                  ? 'bg-[#1E3063] text-white shadow-xs'
+                  ? 'bg-[#176B87] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
@@ -521,14 +521,14 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     </div>
 
                     <div>
-                      <h3 className="text-lg font-bold text-[#1E3063] font-display">{pkg.name}</h3>
+                      <h3 className="text-lg font-bold text-[#176B87] font-display">{pkg.name}</h3>
                       <p className="text-xs text-slate-500 mt-1 leading-relaxed">{pkg.description}</p>
                     </div>
 
-                    <div className="bg-[#FDFBF7] p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <div className="bg-[#F6FAF9] p-4 rounded-xl border border-slate-200 flex items-center justify-between">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Package Fee:</span>
-                        <span className="text-2xl font-black text-[#1E3063] font-mono">{pkg.price !== undefined ? `Ksh ${pkg.price.toLocaleString()}` : 'Server-priced'}</span>
+                        <span className="text-2xl font-black text-[#176B87] font-mono">{pkg.price !== undefined ? `Ksh ${pkg.price.toLocaleString()}` : 'Server-priced'}</span>
                       </div>
                       <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                         {pkg.pointsCount} Checkpoints
@@ -585,7 +585,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 <Card key={rep.id} hoverable className="flex flex-col justify-between">
                   <div className="p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-[#1E3063] bg-slate-100 px-2.5 py-1 rounded-md">
+                      <span className="text-xs font-mono font-bold text-[#176B87] bg-slate-100 px-2.5 py-1 rounded-md">
                         {rep.id}
                       </span>
                       <Badge variant={rep.verdict.includes('Passed') ? 'success' : 'warning'}>
@@ -600,7 +600,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                       </p>
                     </div>
 
-                    <div className="bg-[#1E3063] text-white p-4 rounded-xl flex items-center justify-between shadow-xs">
+                    <div className="bg-[#176B87] text-white p-4 rounded-xl flex items-center justify-between shadow-xs">
                       <div>
                         <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">Health Score</span>
                         <span className="text-2xl font-black font-mono text-amber-300">{rep.overallScore}/100</span>
@@ -655,7 +655,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             <Card>
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-[#1E3063]" /> Active & Completed Inspection Bookings ({bookings.length})
+                  <Clock className="w-5 h-5 text-[#176B87]" /> Active & Completed Inspection Bookings ({bookings.length})
                 </CardTitle>
 
                 <Button variant="accent" size="sm" onClick={() => handleOpenBooking()}>
@@ -679,7 +679,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   <TableBody>
                     {bookings.map((b) => (
                       <TableRow key={b.id}>
-                        <TableCell className="font-mono font-bold text-[#1E3063]">
+                        <TableCell className="font-mono font-bold text-[#176B87]">
                           {b.id}
                         </TableCell>
 
@@ -703,7 +703,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                         </TableCell>
 
                         <TableCell>
-                          <div className="font-mono font-extrabold text-[#1E3063] text-xs">
+                          <div className="font-mono font-extrabold text-[#176B87] text-xs">
                             Ksh {b.totalFee.toLocaleString()}
                           </div>
                           <Badge variant={b.paymentStatus === 'Released to Mechanic' ? 'success' : 'escrow'}>
@@ -766,7 +766,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         >
           <div className="space-y-6">
             {/* Header: Vehicle & Verdict */}
-            <div className="bg-[#1E3063] text-white p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="bg-[#176B87] text-white p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <span className="text-[10px] font-mono font-bold text-slate-300 uppercase tracking-wider block">
                   Inspection ID: {selectedReport.id} • {selectedReport.inspectionDate}
@@ -795,13 +795,13 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             </div>
 
             <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-xs text-slate-700">
-              <div className="font-bold text-[#1E3063]">Backend-provided inspection data</div>
+              <div className="font-bold text-[#176B87]">Backend-provided inspection data</div>
               <p className="mt-1">VIN, chassis, logbook verification flags and fixed category scores are not part of the current buyer report API, so no verification result or invented sub-score is displayed here.</p>
             </div>
 
             {/* Inspector Summary */}
-            <div className="space-y-2 bg-[#FDFBF7] p-5 rounded-2xl border border-slate-200">
-              <h4 className="text-xs font-bold text-[#1E3063] uppercase tracking-wider">Inspector Final Summary</h4>
+            <div className="space-y-2 bg-[#F6FAF9] p-5 rounded-2xl border border-slate-200">
+              <h4 className="text-xs font-bold text-[#176B87] uppercase tracking-wider">Inspector Final Summary</h4>
               <p className="text-xs text-slate-700 font-medium leading-relaxed">
                 "{selectedReport.inspectorSummary}"
               </p>
@@ -868,7 +868,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   key={s.step}
                   className={`flex items-center gap-1.5 ${
                     bookingStep === s.step
-                      ? 'text-[#1E3063] font-extrabold'
+                      ? 'text-[#176B87] font-extrabold'
                       : bookingStep > s.step
                         ? 'text-emerald-700'
                         : 'text-slate-400'
@@ -876,7 +876,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 >
                   <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                     bookingStep === s.step
-                      ? 'bg-[#1E3063] text-white'
+                      ? 'bg-[#176B87] text-white'
                       : bookingStep > s.step
                         ? 'bg-emerald-600 text-white'
                         : 'bg-slate-200 text-slate-600'
@@ -892,14 +892,14 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 2: SELECT VEHICLE */}
             {bookingStep === 2 && (
               <div className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 2: Select Vehicle to Inspect</h3>
+                <h3 className="text-base font-bold text-[#176B87] font-display">Step 2: Select Vehicle to Inspect</h3>
 
                 <div className="space-y-3">
                   <label className="text-xs font-bold text-slate-600 block">KAYAD Marketplace Vehicles:</label>
                   <select
                     value={targetVehicleId}
                     onChange={(e) => setTargetVehicleId(e.target.value)}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#1E3063]"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#176B87]"
                   >
                     {vehicles.map((v) => (
                       <option key={v.id} value={v.id}>
@@ -928,7 +928,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 3: CHOOSE PACKAGE */}
             {bookingStep === 3 && (
               <div className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 3: Review Inspection Service</h3>
+                <h3 className="text-base font-bold text-[#176B87] font-display">Step 3: Review Inspection Service</h3>
 
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                   {inspectionPackages.map((pkg) => (
@@ -937,13 +937,13 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                       onClick={() => setPackageType(pkg.id as any)}
                       className={`p-4 rounded-xl border cursor-pointer transition-all space-y-1 ${
                         packageType === pkg.id
-                          ? 'border-2 border-[#1E3063] bg-amber-50/20 shadow-xs'
+                          ? 'border-2 border-[#176B87] bg-amber-50/20 shadow-xs'
                           : 'border-slate-200 bg-white hover:border-slate-300'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold text-[#1E3063]">{pkg.name}</h4>
-                        <span className="text-sm font-black font-mono text-[#1E3063]">
+                        <h4 className="text-xs font-bold text-[#176B87]">{pkg.name}</h4>
+                        <span className="text-sm font-black font-mono text-[#176B87]">
                           {pkg.price !== undefined ? `Ksh ${pkg.price.toLocaleString()}` : 'Server-priced'}
                         </span>
                       </div>
@@ -966,7 +966,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 4: SCHEDULE DATE & TIME */}
             {bookingStep === 4 && (
               <div className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 4: Preferred Timing (Not Submitted)</h3>
+                <h3 className="text-base font-bold text-[#176B87] font-display">Step 4: Preferred Timing (Not Submitted)</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
@@ -981,7 +981,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     <select
                       value={scheduledTime}
                       onChange={(e) => setScheduledTime(e.target.value)}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#1E3063]"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#176B87]"
                     >
                       <option value="09:00 AM">Morning Slot (09:00 AM)</option>
                       <option value="11:00 AM">Late Morning Slot (11:00 AM)</option>
@@ -1005,7 +1005,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 5: CONTACT DETAILS */}
             {bookingStep === 5 && (
               <div className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 5: Your Contact Details</h3>
+                <h3 className="text-base font-bold text-[#176B87] font-display">Step 5: Your Contact Details</h3>
 
                 <div className="space-y-3">
                   <Input
@@ -1042,7 +1042,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {/* STEP 6: PAYMENT & ESCROW */}
             {bookingStep === 6 && (
               <form onSubmit={handleConfirmBooking} className="space-y-4">
-                <h3 className="text-base font-bold text-[#1E3063] font-display">Step 6: Confirm Inspection Request</h3>
+                <h3 className="text-base font-bold text-[#176B87] font-display">Step 6: Confirm Inspection Request</h3>
 
                 {/* Transparent Price Breakdown */}
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
@@ -1058,7 +1058,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     <span>Inspector Payout:</span>
                     <strong className="text-slate-700">Not provided</strong>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-extrabold text-[#1E3063]">
+                  <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-extrabold text-[#176B87]">
                     <span>Payment / Escrow Status:</span>
                     <span className="font-mono text-slate-600">Not provided</span>
                   </div>
@@ -1090,7 +1090,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-extrabold text-[#1E3063] font-display">Inspection Request Confirmed!</h3>
+                  <h3 className="text-xl font-extrabold text-[#176B87] font-display">Inspection Request Confirmed!</h3>
                   <p className="text-xs text-slate-500 mt-1">
                     Booking Reference: <strong className="font-mono text-slate-800">{newBookingId || 'Pending'}</strong>
                   </p>

@@ -462,7 +462,7 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
               placeholder="Search risks by title, description, or code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3063]/20 focus:border-[#1E3063]"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20 focus:border-[#176B87]"
             />
           </div>
 
@@ -506,7 +506,7 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
                 type="checkbox"
                 checked={showResolved}
                 onChange={(e) => setShowResolved(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063]/20"
+                className="w-4 h-4 rounded border-slate-300 text-[#176B87] focus:ring-[#176B87]/20"
               />
               <span className="text-sm text-slate-600">Show resolved</span>
             </label>
@@ -548,7 +548,7 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
                   >
                     {CATEGORY_ICONS[category]}
                   </div>
-                  <h3 className="font-bold text-[#1E3063]">{catInfo.label}</h3>
+                  <h3 className="font-bold text-[#176B87]">{catInfo.label}</h3>
                   <Badge variant="neutral" size="sm">{categoryRisks.length}</Badge>
                 </div>
                 <div className="space-y-2">

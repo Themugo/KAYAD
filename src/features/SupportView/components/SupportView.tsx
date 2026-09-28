@@ -88,7 +88,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth }) =>
         {/* Help Form */}
         <Card className="p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#1E3063] font-display flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#176B87] font-display flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-amber-500" />
               Submit Ticket or Open Dispute
             </h3>
@@ -173,7 +173,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth }) =>
             docs/INSPECTION_DOMAIN_MODEL.md's inspection_refunds table
             and its real pending/approved/processed workflow - refunds
             go through review, they are not literally instant/automatic). */}
-        <div className="bg-[#1E3063] text-white rounded-2xl p-6 shadow-card space-y-4 flex flex-col justify-between">
+        <div className="bg-[#176B87] text-white rounded-2xl p-6 shadow-card space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4" /> Buyer Protection

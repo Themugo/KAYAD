@@ -15,8 +15,8 @@ import * as vxpApi from '../../../services/vxpApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -50,7 +50,7 @@ const componentLibrary = [
 ];
 
 const sectionTemplates = [
-  { id: 'hero', name: 'Hero Section', category: 'Hero', preview: '#17244B' },
+  { id: 'hero', name: 'Hero Section', category: 'Hero', preview: '#0A3340' },
   { id: 'hero_search', name: 'Hero with Search', category: 'Hero', preview: '#60A5FA' },
   { id: 'featured', name: 'Featured Cars', category: 'Cars', preview: '#10B981' },
   { id: 'latest', name: 'Latest Listings', category: 'Cars', preview: '#C77B58' },
@@ -61,7 +61,7 @@ const sectionTemplates = [
   { id: 'newsletter', name: 'Newsletter', category: 'Marketing', preview: colors.softBlue },
   { id: 'faq', name: 'FAQ Accordion', category: 'Support', preview: colors.emerald },
   { id: 'blog', name: 'Blog Grid', category: 'Blog', preview: colors.terracotta },
-  { id: 'footer', name: 'Footer', category: 'Footer', preview: '#1F2937' },
+  { id: 'footer', name: 'Footer', category: 'Footer', preview: '#0A3340' },
 ];
 
 const cardTypes = [
@@ -131,7 +131,7 @@ export default function VisualExperienceStudio() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowNewPageModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+            className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
           >
             <Plus size={18} />
             New Page
@@ -147,19 +147,19 @@ export default function VisualExperienceStudio() {
               onClick={() => setDevicePreview('desktop')}
               className={`p-2 rounded-lg ${devicePreview === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
-              <Monitor size={18} className={devicePreview === 'desktop' ? 'text-[#17244B]' : 'text-slate-500'} />
+              <Monitor size={18} className={devicePreview === 'desktop' ? 'text-[#0A3340]' : 'text-slate-500'} />
             </button>
             <button
               onClick={() => setDevicePreview('tablet')}
               className={`p-2 rounded-lg ${devicePreview === 'tablet' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
-              <Tablet size={18} className={devicePreview === 'tablet' ? 'text-[#17244B]' : 'text-slate-500'} />
+              <Tablet size={18} className={devicePreview === 'tablet' ? 'text-[#0A3340]' : 'text-slate-500'} />
             </button>
             <button
               onClick={() => setDevicePreview('mobile')}
               className={`p-2 rounded-lg ${devicePreview === 'mobile' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
-              <Smartphone size={18} className={devicePreview === 'mobile' ? 'text-[#17244B]' : 'text-slate-500'} />
+              <Smartphone size={18} className={devicePreview === 'mobile' ? 'text-[#0A3340]' : 'text-slate-500'} />
             </button>
           </div>
           <div className="flex items-center gap-1">
@@ -174,7 +174,7 @@ export default function VisualExperienceStudio() {
           <div className="w-px h-6 bg-slate-200 mx-2" />
           <button
             onClick={() => setPreviewMode(!previewMode)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${previewMode ? 'bg-[#17244B] text-white' : 'border border-slate-200 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${previewMode ? 'bg-[#0A3340] text-white' : 'border border-slate-200 hover:bg-slate-50'}`}
           >
             <Eye size={18} />
             {previewMode ? 'Edit Mode' : 'Preview'}
@@ -197,7 +197,7 @@ export default function VisualExperienceStudio() {
                     {group.items.map((item) => (
                       <button
                         key={item}
-                        className="p-2 text-left text-sm rounded-lg border border-slate-200 hover:border-[#17244B] hover:bg-[#17244B]/5 transition-all"
+                        className="p-2 text-left text-sm rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all"
                       >
                         {item}
                       </button>
@@ -237,14 +237,14 @@ export default function VisualExperienceStudio() {
               </div>
 
               {/* Canvas Content */}
-              <div className="p-8 min-h-[600px] bg-[#F6F1E8]">
+              <div className="p-8 min-h-[600px] bg-[#EEF7F5]">
                 {/* Hero Section Placeholder */}
-                <div className="bg-gradient-to-r from-[#17244B] to-[#2a3a6b] rounded-xl p-12 mb-6 text-white">
+                <div className="bg-gradient-to-r from-[#0A3340] to-[#2a3a6b] rounded-xl p-12 mb-6 text-white">
                   <div className="max-w-2xl mx-auto text-center">
                     <h1 className="text-4xl font-bold mb-4">Hero Section</h1>
                     <p className="text-lg opacity-80 mb-8">Click to edit this section</p>
                     <div className="flex items-center justify-center gap-4">
-                      <button className="px-6 py-3 bg-white text-[#17244B] rounded-lg font-medium hover:bg-opacity-90">
+                      <button className="px-6 py-3 bg-white text-[#0A3340] rounded-lg font-medium hover:bg-opacity-90">
                         Get Started
                       </button>
                       <button className="px-6 py-3 border-2 border-white rounded-lg font-medium hover:bg-white/10">
@@ -258,7 +258,7 @@ export default function VisualExperienceStudio() {
                 {['Featured Cars', 'Latest Listings', 'Statistics', 'Call to Action'].map((section, i) => (
                   <div
                     key={i}
-                    className="bg-white rounded-xl border-2 border-dashed border-slate-300 p-8 mb-6 text-center cursor-pointer hover:border-[#17244B] transition-colors"
+                    className="bg-white rounded-xl border-2 border-dashed border-slate-300 p-8 mb-6 text-center cursor-pointer hover:border-[#0A3340] transition-colors"
                     onClick={() => setSelectedElement(section)}
                   >
                     <Layers3 size={32} className="mx-auto text-slate-400 mb-2" />
@@ -355,7 +355,7 @@ export default function VisualExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Theme Designer</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Theme
         </button>
@@ -398,8 +398,8 @@ export default function VisualExperienceStudio() {
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h3 className="font-semibold text-slate-800 mb-4">Preview</h3>
           <div className="space-y-3">
-            <button className="w-full px-4 py-2 bg-[#17244B] text-white rounded-lg">Primary Button</button>
-            <button className="w-full px-4 py-2 border border-[#17244B] text-[#17244B] rounded-lg">Secondary</button>
+            <button className="w-full px-4 py-2 bg-[#0A3340] text-white rounded-lg">Primary Button</button>
+            <button className="w-full px-4 py-2 border border-[#0A3340] text-[#0A3340] rounded-lg">Secondary</button>
             <button className="w-full px-4 py-2 bg-[#C77B58] text-white rounded-lg">Accent</button>
             <div className="p-3 bg-emerald-100 text-emerald-700 rounded-lg text-sm text-center">Success</div>
             <div className="p-3 bg-softBlue-100 text-softBlue-700 rounded-lg text-sm text-center">Info</div>
@@ -490,7 +490,7 @@ export default function VisualExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Card Designer</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Card
         </button>
@@ -506,7 +506,7 @@ export default function VisualExperienceStudio() {
                 key={type.id}
                 onClick={() => setSelectedCard(type.id)}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
-                  selectedCard === type.id ? 'bg-[#17244B] text-white' : 'hover:bg-slate-50'
+                  selectedCard === type.id ? 'bg-[#0A3340] text-white' : 'hover:bg-slate-50'
                 }`}
               >
                 <CreditCard size={18} />
@@ -519,14 +519,14 @@ export default function VisualExperienceStudio() {
         {/* Card Preview */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h3 className="font-semibold text-slate-800 mb-4">Preview</h3>
-          <div className="bg-[#F6F1E8] p-6 rounded-xl">
+          <div className="bg-[#EEF7F5] p-6 rounded-xl">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="h-40 bg-gradient-to-br from-slate-200 to-slate-300" />
               <div className="p-4">
                 <h4 className="font-bold text-slate-800 mb-1">Toyota Land Cruiser 2023</h4>
                 <p className="text-sm text-slate-500 mb-2">Nairobi, Kenya</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-[#17244B]">KES 18,500,000</span>
+                  <span className="text-lg font-bold text-[#0A3340]">KES 18,500,000</span>
                   <span className="text-xs text-slate-400">45,000 km</span>
                 </div>
                 <div className="flex gap-2 mt-3">
@@ -563,7 +563,7 @@ export default function VisualExperienceStudio() {
           <div className="mt-4 pt-4 border-t border-slate-200">
             <h4 className="text-sm font-medium text-slate-600 mb-2">Layout</h4>
             <div className="grid grid-cols-2 gap-2">
-              <button className="p-2 text-xs border border-[#17244B] bg-[#17244B]/5 rounded">Compact</button>
+              <button className="p-2 text-xs border border-[#0A3340] bg-[#0A3340]/5 rounded">Compact</button>
               <button className="p-2 text-xs border border-slate-200 rounded hover:bg-slate-50">Standard</button>
               <button className="p-2 text-xs border border-slate-200 rounded hover:bg-slate-50">Expanded</button>
               <button className="p-2 text-xs border border-slate-200 rounded hover:bg-slate-50">Gallery</button>
@@ -582,7 +582,7 @@ export default function VisualExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Section Library</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           Create Section
         </button>
@@ -593,7 +593,7 @@ export default function VisualExperienceStudio() {
           <button
             key={cat}
             className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              cat === 'All' ? 'bg-[#17244B] text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'
+              cat === 'All' ? 'bg-[#0A3340] text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'
             }`}
           >
             {cat}
@@ -603,7 +603,7 @@ export default function VisualExperienceStudio() {
 
       <div className="grid grid-cols-4 gap-4">
         {sectionTemplates.map((template) => (
-          <div key={template.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-[#17244B] transition-colors cursor-pointer">
+          <div key={template.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-[#0A3340] transition-colors cursor-pointer">
             <div className="h-32 relative" style={{ backgroundColor: template.preview }}>
               <div className="absolute inset-0 flex items-center justify-center">
                 <Layers3 size={32} className="text-white/50" />
@@ -627,7 +627,7 @@ export default function VisualExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Advertisement Studio</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Advertisement
         </button>
@@ -720,7 +720,7 @@ export default function VisualExperienceStudio() {
         </div>
 
         <textarea
-          className="w-full p-4 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none resize-none"
+          className="w-full p-4 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none resize-none"
           rows={4}
           placeholder="Example: Make the homepage look more premium with larger images and less text. Create a modern navigation bar with a mega menu. Design three new hero layouts for the auction section."
           value={aiPrompt}
@@ -753,7 +753,7 @@ export default function VisualExperienceStudio() {
           { title: 'Hero Layout B', description: 'Split screen with image', preview: colors.terracotta },
           { title: 'Hero Layout C', description: 'Centered with gradient', preview: colors.softBlue },
         ].map((suggestion, i) => (
-          <div key={i} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-[#17244B] transition-colors cursor-pointer">
+          <div key={i} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-[#0A3340] transition-colors cursor-pointer">
             <div className="h-32 relative" style={{ backgroundColor: suggestion.preview }}>
               <div className="absolute inset-0 flex items-center justify-center">
                 <Layout size={32} className="text-white/50" />
@@ -786,9 +786,9 @@ export default function VisualExperienceStudio() {
             { version: 'v9', date: '1 week ago', user: 'Admin', changes: 'Redesigned footer layout' },
             { version: 'v8', date: '2 weeks ago', user: 'Admin', changes: 'Updated color palette' },
           ].map((v, i) => (
-            <div key={i} className={`flex items-center justify-between p-4 rounded-lg ${i === 0 ? 'bg-[#17244B]/5 border border-[#17244B]/20' : 'bg-slate-50'}`}>
+            <div key={i} className={`flex items-center justify-between p-4 rounded-lg ${i === 0 ? 'bg-[#0A3340]/5 border border-[#0A3340]/20' : 'bg-slate-50'}`}>
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${i === 0 ? 'bg-[#17244B] text-white' : 'bg-slate-200 text-slate-600'}`}>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${i === 0 ? 'bg-[#0A3340] text-white' : 'bg-slate-200 text-slate-600'}`}>
                   <History size={18} />
                 </div>
                 <div>
@@ -807,7 +807,7 @@ export default function VisualExperienceStudio() {
                   </button>
                 )}
                 {i !== 0 && (
-                  <button className="px-3 py-1.5 text-sm text-[#17244B] border border-[#17244B] rounded-lg hover:bg-[#17244B]/5">
+                  <button className="px-3 py-1.5 text-sm text-[#0A3340] border border-[#0A3340] rounded-lg hover:bg-[#0A3340]/5">
                     Restore
                   </button>
                 )}
@@ -833,14 +833,14 @@ export default function VisualExperienceStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <Layout size={20} className="text-white" />
                 </div>
                 <div>
@@ -878,7 +878,7 @@ export default function VisualExperienceStudio() {
                   onClick={() => setActiveSection(section.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-[#17244B] text-white'
+                      ? 'bg-[#0A3340] text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
@@ -954,7 +954,7 @@ export default function VisualExperienceStudio() {
                 <label className="block text-sm font-medium text-slate-600 mb-1">Template</label>
                 <div className="grid grid-cols-3 gap-2">
                   {['Blank', 'With Hero', 'With Search'].map((t) => (
-                    <button key={t} className="p-3 border border-slate-200 rounded-lg text-sm hover:border-[#17244B]">
+                    <button key={t} className="p-3 border border-slate-200 rounded-lg text-sm hover:border-[#0A3340]">
                       {t}
                     </button>
                   ))}
@@ -965,7 +965,7 @@ export default function VisualExperienceStudio() {
               <button onClick={() => setShowNewPageModal(false)} className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+              <button className="px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
                 Create Page
               </button>
             </div>

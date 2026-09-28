@@ -24,11 +24,11 @@ import { inspectionApi } from '../services/api';
 import type { ProviderDashboard, Booking, EarningsSummary, BookingStatus } from '../types/inspection';
 
 const KAYAD_COLORS = {
-  lightNavy: '#1e3a5f',
-  warmBeige: '#f5f0e8',
+  lightNavy: '#12576D',
+  warmBeige: '#EEF7F5',
   white: '#ffffff',
   emerald: '#10b981',
-  mutedTerracotta: '#c4a484',
+  mutedTerracotta: '#5AAFA4',
   softBlue: '#64748b',
 };
 

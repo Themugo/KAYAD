@@ -16,7 +16,7 @@ export interface DealerBusinessViewProps {
  */
 export const DealerBusinessView: React.FC<DealerBusinessViewProps> = () => (
   <div className="p-8 text-center">
-    <h2 className="text-xl font-bold text-[#1E3063]">Dealer management unavailable</h2>
+    <h2 className="text-xl font-bold text-[#176B87]">Dealer management unavailable</h2>
     <p className="mt-2 text-sm text-slate-500">Authenticated dealer data and the required backend operational contracts must be available before this console can display records.</p>
   </div>
 );

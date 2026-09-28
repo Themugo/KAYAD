@@ -39,7 +39,7 @@ export const VehicleCollectionsSection: FC = () => {
       title: '4x4 & SUV Command',
       subtitle: 'Land Cruiser Prado, V8, Defender & Safari Utility',
       image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
-      icon: <Compass className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Compass className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({
@@ -69,7 +69,7 @@ export const VehicleCollectionsSection: FC = () => {
       title: 'Dealer Certified',
       subtitle: 'Official Franchise Dealership Listings with Warranty',
       image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
-      icon: <ShieldCheck className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <ShieldCheck className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({
@@ -99,7 +99,7 @@ export const VehicleCollectionsSection: FC = () => {
       title: 'Commercial Fleet',
       subtitle: 'Hilux Pickups, Double Cabs & Utility Transporters',
       image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?auto=format&fit=crop&w=800&q=80',
-      icon: <Truck className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Truck className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({
@@ -112,22 +112,22 @@ export const VehicleCollectionsSection: FC = () => {
   ];
 
   return (
-    <section className="py-14 sm:py-20 bg-[#F6F1E8] dark:bg-[#080E1A] text-[#1E3063] dark:text-slate-100 border-b border-[#E8E1D5] dark:border-white/10 transition-colors">
+    <section className="py-14 sm:py-20 bg-[#EEF7F5] dark:bg-[#080E1A] text-[#176B87] dark:text-slate-100 border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 pb-6 border-b border-[#E2D8C7] dark:border-white/10">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 pb-6 border-b border-[#D7E7E4] dark:border-white/10">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1E3063]/10 dark:bg-white/10 border border-[#1E3063]/20 dark:border-white/20 text-[#1E3063] dark:text-slate-100 font-mono font-black text-xs uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-[#00C9CE]" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-slate-100 font-mono font-black text-xs uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-[#13B8A6]" />
               <span>CURATED COLLECTIONS</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl font-black text-[#1E3063] dark:text-white font-serif tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#176B87] dark:text-white font-serif tracking-tight">
               Explore Vehicle Categories
             </h2>
 
-            <p className="text-xs sm:text-sm text-[#6B7A99] dark:text-slate-300 font-sans font-medium">
+            <p className="text-xs sm:text-sm text-[#66808A] dark:text-slate-300 font-sans font-medium">
               Find exactly what you need with our hand-curated vehicle categories across Kenya.
             </p>
           </div>
@@ -137,10 +137,10 @@ export const VehicleCollectionsSection: FC = () => {
               resetFilters();
               navigateTo('gallery');
             }}
-            className="px-6 py-3 bg-[#1E3063] dark:bg-[#1E293B] hover:bg-[#121D33] text-white font-mono font-black text-xs uppercase tracking-wider rounded-2xl border border-[#1E3063] dark:border-white/20 shadow-md inline-flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]"
+            className="px-6 py-3 bg-[#176B87] dark:bg-[#1E293B] hover:bg-[#12576D] text-white font-mono font-black text-xs uppercase tracking-wider rounded-2xl border border-[#176B87] dark:border-white/20 shadow-md inline-flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]"
           >
             <span>View All Categories</span>
-            <ArrowRight className="w-4 h-4 text-[#00C9CE]" />
+            <ArrowRight className="w-4 h-4 text-[#13B8A6]" />
           </button>
         </div>
 
@@ -150,7 +150,7 @@ export const VehicleCollectionsSection: FC = () => {
             <div
               key={item.id}
               onClick={item.action}
-              className="group relative h-64 rounded-3xl overflow-hidden border border-[#E2D8C7] dark:border-white/10 shadow-md hover:border-[#00C9CE] hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-end p-6"
+              className="group relative h-64 rounded-3xl overflow-hidden border border-[#D7E7E4] dark:border-white/10 shadow-md hover:border-[#13B8A6] hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-end p-6"
             >
               {/* Background Image */}
               <img
@@ -162,7 +162,7 @@ export const VehicleCollectionsSection: FC = () => {
               />
 
               {/* Gradient Vignette Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1628]/95 via-[#0B1628]/60 to-transparent transition-opacity group-hover:opacity-90" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A3340]/95 via-[#0A3340]/60 to-transparent transition-opacity group-hover:opacity-90" />
 
               {/* Content */}
               <div className="relative z-10 space-y-2">
@@ -170,12 +170,12 @@ export const VehicleCollectionsSection: FC = () => {
                   <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center">
                     {item.icon}
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-[#00C9CE]/20 border border-[#00C9CE]/40 text-[#00C9CE] text-[10px] font-mono font-black uppercase tracking-wider group-hover:bg-[#00C9CE] group-hover:text-[#1E3063] transition-colors">
+                  <span className="px-3 py-1 rounded-full bg-[#13B8A6]/20 border border-[#13B8A6]/40 text-[#13B8A6] text-[10px] font-mono font-black uppercase tracking-wider group-hover:bg-[#13B8A6] group-hover:text-[#176B87] transition-colors">
                     Explore Inventory →
                   </span>
                 </div>
 
-                <h3 className="text-xl font-serif font-black text-white group-hover:text-[#00C9CE] transition-colors">
+                <h3 className="text-xl font-serif font-black text-white group-hover:text-[#13B8A6] transition-colors">
                   {item.title}
                 </h3>
 

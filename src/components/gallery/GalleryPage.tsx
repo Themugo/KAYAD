@@ -119,17 +119,17 @@ export const GalleryPage: FC = () => {
     (filters.fuelType?.length || 0);
 
   return (
-    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#FCF9F4] text-[#2E4080] font-sans min-h-screen">
+    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#F6FAF9] text-[#176B87] font-sans min-h-screen">
 
       {/* KAYAD Premium Showroom Hero Card */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#2E4080] text-white border border-white/10 shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#176B87] text-white border border-white/10 shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#23EBFF]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#13B8A6]/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 space-y-1.5 max-w-2xl text-center md:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#23EBFF]/20 text-[#23EBFF] text-[10px] font-mono font-black uppercase tracking-[0.2em] border border-[#23EBFF]/30">
-            <Sparkles className="w-3 h-3 text-[#23EBFF]" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#13B8A6]/20 text-[#13B8A6] text-[10px] font-mono font-black uppercase tracking-[0.2em] border border-[#13B8A6]/30">
+            <Sparkles className="w-3 h-3 text-[#13B8A6]" />
             <span>KENYA'S EXCLUSIVE AUTOMOTIVE MARKETPLACE</span>
           </div>
 
@@ -145,17 +145,17 @@ export const GalleryPage: FC = () => {
         {/* Right side trust badges */}
         <div className="relative z-10 flex sm:flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto">
           <div className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-2.5 text-xs text-white">
-            <ShieldCheck className="w-4 h-4 text-[#23EBFF] shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-[#13B8A6] shrink-0" />
             <div>
-              <p className="font-mono font-black text-[9px] uppercase text-[#23EBFF] leading-none">M-Pesa Escrow</p>
+              <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">M-Pesa Escrow</p>
               <p className="text-[11px] font-medium text-slate-200">100% Guaranteed</p>
             </div>
           </div>
 
           <div className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-2.5 text-xs text-white">
-            <Car className="w-4 h-4 text-[#3ddb72] shrink-0" />
+            <Car className="w-4 h-4 text-[#13B8A6] shrink-0" />
             <div>
-              <p className="font-mono font-black text-[9px] uppercase text-[#3ddb72] leading-none">150-Pt Audited</p>
+              <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">150-Pt Audited</p>
               <p className="text-[11px] font-medium text-slate-200">Verified Condition</p>
             </div>
           </div>
@@ -209,24 +209,24 @@ export const GalleryPage: FC = () => {
         <div className="flex-1 min-w-0 space-y-5">
 
           {/* Results Count Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 pb-2 border-b border-[#E2D8C7]/70">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 pb-2 border-b border-[#D7E7E4]/70">
             <div className="flex items-center gap-3">
-              <span className="text-base sm:text-lg font-serif font-black text-[#2E4080]">
+              <span className="text-base sm:text-lg font-serif font-black text-[#176B87]">
                 {filteredVehicles.length} {filteredVehicles.length === 1 ? 'vehicle' : 'vehicles'} available
               </span>
               {activeFiltersCount > 0 && (
                 <button
                   onClick={resetFilters}
-                  className="text-xs font-bold text-[#23EBFF] hover:underline flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-xs font-bold text-[#13B8A6] hover:underline flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   Clear filters ({activeFiltersCount})
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-[#6B7A99] font-bold">
-              <span className="flex items-center gap-1.5 text-[#2E4080] bg-white px-3 py-1 rounded-full border border-[#E2D8C7] shadow-2xs">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#23EBFF]" />
+            <div className="flex items-center gap-2 text-xs text-[#66808A] font-bold">
+              <span className="flex items-center gap-1.5 text-[#176B87] bg-white px-3 py-1 rounded-full border border-[#D7E7E4] shadow-2xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
                 100% Escrow Protected
               </span>
             </div>
@@ -234,11 +234,11 @@ export const GalleryPage: FC = () => {
 
           {/* Grid Layout */}
           {filteredVehicles.length === 0 ? (
-            <div className="p-12 text-center bg-white border border-[#E2D8C7] rounded-3xl space-y-4 shadow-sm my-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-[#2E4080]/10 flex items-center justify-center text-[#2E4080]">
-                <Car className="w-8 h-8 text-[#23EBFF]" />
+            <div className="p-12 text-center bg-white border border-[#D7E7E4] rounded-3xl space-y-4 shadow-sm my-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-[#176B87]/10 flex items-center justify-center text-[#176B87]">
+                <Car className="w-8 h-8 text-[#13B8A6]" />
               </div>
-              <h3 className="text-xl font-black text-[#2E4080] font-serif">
+              <h3 className="text-xl font-black text-[#176B87] font-serif">
                 No matching vehicles were found. Adjust your filters or explore our latest certified arrivals.
               </h3>
               <p className="text-sm text-slate-600 max-w-md mx-auto">
@@ -246,7 +246,7 @@ export const GalleryPage: FC = () => {
               </p>
               <button
                 onClick={resetFilters}
-                className="mt-2 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#2E4080] text-white font-extrabold text-xs shadow-md hover:bg-[#1B2647] transition-all cursor-pointer"
+                className="mt-2 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#176B87] text-white font-extrabold text-xs shadow-md hover:bg-[#0A3340] transition-all cursor-pointer"
               >
                 Reset All Filters
               </button>

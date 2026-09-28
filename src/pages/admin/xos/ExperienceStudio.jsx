@@ -11,8 +11,8 @@ import * as xosApi from '../../../services/xosApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -246,7 +246,7 @@ export default function ExperienceStudio() {
         <h2 className="text-2xl font-bold text-slate-800">Campaign Manager</h2>
         <button
           onClick={() => setShowModal('campaign')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
         >
           <Plus size={18} />
           New Campaign
@@ -350,7 +350,7 @@ export default function ExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Audience Manager</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Audience
         </button>
@@ -366,10 +366,10 @@ export default function ExperienceStudio() {
           { id: 'interest', name: 'By Interest', icon: Target, description: 'SUV, Sedan, Truck, Electric' },
           { id: 'time', name: 'By Time', icon: Calendar, description: 'Seasonal, Time-based rules' },
         ].map((segment) => (
-          <div key={segment.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#17244B] transition-colors cursor-pointer">
+          <div key={segment.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#0A3340] transition-colors cursor-pointer">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-[#17244B]/10 flex items-center justify-center">
-                <segment.icon size={20} className="text-[#17244B]" />
+              <div className="w-10 h-10 rounded-lg bg-[#0A3340]/10 flex items-center justify-center">
+                <segment.icon size={20} className="text-[#0A3340]" />
               </div>
               <h3 className="font-semibold text-slate-800">{segment.name}</h3>
             </div>
@@ -385,7 +385,7 @@ export default function ExperienceStudio() {
           {audienceSegments.map((seg) => (
             <div key={seg.id} className="p-4 bg-slate-50 rounded-lg">
               <p className="font-medium text-slate-800">{seg.name}</p>
-              <p className="text-2xl font-bold text-[#17244B]">{seg.count?.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-[#0A3340]">{seg.count?.toLocaleString()}</p>
               <p className="text-xs text-slate-500">users</p>
             </div>
           ))}
@@ -402,7 +402,7 @@ export default function ExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Journey Designer</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Journey
         </button>
@@ -418,7 +418,7 @@ export default function ExperienceStudio() {
           { id: 'inspection', name: 'Inspection Journey', icon: ClipboardCheck, color: colors.mutedOrange },
           { id: 'seller', name: 'Seller Journey', icon: Tag, color: '#8B5CF6' },
         ].map((type) => (
-          <div key={type.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#17244B] transition-colors cursor-pointer">
+          <div key={type.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#0A3340] transition-colors cursor-pointer">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: `${type.color}20` }}>
               <type.icon size={24} style={{ color: type.color }} />
             </div>
@@ -435,8 +435,8 @@ export default function ExperienceStudio() {
           {journeys.map((journey) => (
             <div key={journey.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#17244B]/10 rounded-lg flex items-center justify-center">
-                  <Map size={20} className="text-[#17244B]" />
+                <div className="w-10 h-10 bg-[#0A3340]/10 rounded-lg flex items-center justify-center">
+                  <Map size={20} className="text-[#0A3340]" />
                 </div>
                 <div>
                   <p className="font-medium text-slate-800">{journey.name}</p>
@@ -468,7 +468,7 @@ export default function ExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Seasonal Themes</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Theme
         </button>
@@ -479,7 +479,7 @@ export default function ExperienceStudio() {
         <h3 className="font-semibold text-slate-800 mb-4">Quick Start Templates</h3>
         <div className="grid grid-cols-4 gap-4">
           {seasonalTemplates.map((template) => (
-            <div key={template.id} className="p-4 rounded-xl border border-slate-200 hover:border-[#17244B] cursor-pointer transition-colors">
+            <div key={template.id} className="p-4 rounded-xl border border-slate-200 hover:border-[#0A3340] cursor-pointer transition-colors">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${template.color}20` }}>
                 <template.icon size={24} style={{ color: template.color }} />
               </div>
@@ -543,7 +543,7 @@ export default function ExperienceStudio() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Homepage Variants</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Variant
         </button>
@@ -554,7 +554,7 @@ export default function ExperienceStudio() {
       {/* Variant Types */}
       <div className="grid grid-cols-3 gap-4">
         {homepageVariantTypes.map((type) => (
-          <div key={type.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#17244B] cursor-pointer transition-colors">
+          <div key={type.id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#0A3340] cursor-pointer transition-colors">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: `${type.color}20` }}>
               <Home size={24} style={{ color: type.color }} />
             </div>
@@ -654,7 +654,7 @@ export default function ExperienceStudio() {
                   <span className="text-sm text-slate-500">{item.rate}%</span>
                 </div>
                 <div className="w-full bg-slate-200 rounded-full h-2">
-                  <div className="bg-[#17244B] h-2 rounded-full" style={{ width: `${item.rate}%` }} />
+                  <div className="bg-[#0A3340] h-2 rounded-full" style={{ width: `${item.rate}%` }} />
                 </div>
                 <p className="text-xs text-slate-500 mt-1">{item.impressions?.toLocaleString()} impressions</p>
               </div>
@@ -694,7 +694,7 @@ export default function ExperienceStudio() {
             ].map((item, i) => (
               <div key={item.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#17244B]/10 flex items-center justify-center text-xs font-medium text-[#17244B]">
+                  <span className="w-6 h-6 rounded-full bg-[#0A3340]/10 flex items-center justify-center text-xs font-medium text-[#0A3340]">
                     {i + 1}
                   </span>
                   <span className="font-medium text-slate-800">{item.name}</span>
@@ -734,7 +734,7 @@ export default function ExperienceStudio() {
             <h3 className="font-semibold text-slate-800 mb-2">{rec.title}</h3>
             <p className="text-sm text-slate-600 mb-4">{rec.description}</p>
             <div className="flex items-center gap-2">
-              <button className="flex-1 px-3 py-2 border border-[#17244B] text-[#17244B] rounded-lg text-sm hover:bg-[#17244B]/5">
+              <button className="flex-1 px-3 py-2 border border-[#0A3340] text-[#0A3340] rounded-lg text-sm hover:bg-[#0A3340]/5">
                 Apply Suggestion
               </button>
               <button className="px-3 py-2 text-slate-500 text-sm hover:text-slate-700">
@@ -762,14 +762,14 @@ export default function ExperienceStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <Target size={20} className="text-white" />
                 </div>
                 <div>
@@ -803,7 +803,7 @@ export default function ExperienceStudio() {
                   onClick={() => setActiveModule(mod.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-[#17244B] text-white'
+                      ? 'bg-[#0A3340] text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >

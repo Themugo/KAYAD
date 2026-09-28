@@ -26,12 +26,12 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#1E3063]/50 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]';
+  const baseStyles = 'inline-flex items-center justify-center font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#176B87]/50 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]';
 
   const variantStyles = {
-    primary: 'bg-[#1E3063] hover:bg-[#17244B] text-white shadow-sm',
+    primary: 'bg-[#176B87] hover:bg-[#0A3340] text-white shadow-sm',
     secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/80',
-    accent: 'bg-amber-400 hover:bg-amber-500 text-[#17244B] shadow-sm',
+    accent: 'bg-amber-400 hover:bg-amber-500 text-[#0A3340] shadow-sm',
     outline: 'border border-slate-300 hover:bg-slate-50 text-slate-700',
     ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
     danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
@@ -76,11 +76,11 @@ export const Badge: React.FC<BadgeProps> = ({
   const baseStyles = 'inline-flex items-center font-bold rounded-md backdrop-blur-md select-none';
 
   const variantStyles = {
-    verified: 'bg-[#1E3063]/90 text-white border border-[#1E3063]',
+    verified: 'bg-[#176B87]/90 text-white border border-[#176B87]',
     inspected: 'bg-emerald-600/95 text-white',
-    escrow: 'bg-amber-500/95 text-[#17244B]',
+    escrow: 'bg-amber-500/95 text-[#0A3340]',
     live: 'bg-rose-600 text-white animate-pulse',
-    accent: 'bg-amber-400 text-[#17244B]',
+    accent: 'bg-amber-400 text-[#0A3340]',
     neutral: 'bg-slate-100 text-slate-700 border border-slate-200',
     success: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     warning: 'bg-amber-50 text-amber-800 border border-amber-200',
@@ -132,7 +132,7 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ chi
 );
 
 export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ children, className = '', ...props }) => (
-  <h3 className={`text-base font-bold text-[#1E3063] font-display ${className}`} {...props}>
+  <h3 className={`text-base font-bold text-[#176B87] font-display ${className}`} {...props}>
     {children}
   </h3>
 );
@@ -172,7 +172,7 @@ export const Input: React.FC<InputProps> = ({ label, error, icon, className = ''
     <div className="relative flex items-center">
       {icon && <div className="absolute left-3.5 text-slate-400 pointer-events-none">{icon}</div>}
       <input
-        className={`w-full px-3.5 py-2.5 bg-slate-50 text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:bg-white transition-all ${
+        className={`w-full px-3.5 py-2.5 bg-slate-50 text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white transition-all ${
           icon ? 'pl-10' : ''
         } ${error ? 'border-rose-400 ring-rose-200' : ''} ${className}`}
         {...props}
@@ -196,7 +196,7 @@ export const Select: React.FC<SelectProps> = ({ label, options, children, classN
       </label>
     )}
     <select
-      className={`w-full px-3.5 py-2.5 bg-slate-50 text-slate-800 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:bg-white cursor-pointer transition-all ${className}`}
+      className={`w-full px-3.5 py-2.5 bg-slate-50 text-slate-800 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white cursor-pointer transition-all ${className}`}
       {...props}
     >
       {options
@@ -222,7 +222,7 @@ export const Textarea: React.FC<TextareaProps> = ({ label, className = '', ...pr
       </label>
     )}
     <textarea
-      className={`w-full p-3 bg-slate-50 text-slate-800 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:bg-white transition-all ${className}`}
+      className={`w-full p-3 bg-slate-50 text-slate-800 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white transition-all ${className}`}
       {...props}
     />
   </div>
@@ -301,7 +301,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div className={`bg-white rounded-2xl w-full ${widthStyles[maxWidth]} max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 relative animate-fade-in`}>
         {title && (
           <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <div className="font-bold text-[#1E3063] font-display text-base">{title}</div>
+            <div className="font-bold text-[#176B87] font-display text-base">{title}</div>
             <button
               onClick={onClose}
               className="p-1.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
@@ -336,7 +336,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   if (variant === 'navy') {
     return (
-      <div className="bg-[#1E3063] text-white rounded-2xl p-6 md:p-8 shadow-card flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-[#176B87] text-white rounded-2xl p-6 md:p-8 shadow-card flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
             {badgeIcon} {badgeText}
@@ -352,10 +352,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-card flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <div className="flex items-center gap-2 text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1">
           {badgeIcon} {badgeText}
         </div>
-        <h2 className="text-2xl font-extrabold text-[#1E3063] font-display">{title}</h2>
+        <h2 className="text-2xl font-extrabold text-[#176B87] font-display">{title}</h2>
         <p className="text-slate-600 text-xs mt-1 max-w-xl">{description}</p>
       </div>
       {rightElement && <div className="shrink-0">{rightElement}</div>}
@@ -414,7 +414,7 @@ export const StatWidget: React.FC<StatWidgetProps> = ({ label, value, icon, subt
         <span className="text-[10px] uppercase font-bold tracking-wider">{label}</span>
         <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
       </div>
-      <p className="text-2xl font-black text-[#1E3063] font-display">{value}</p>
+      <p className="text-2xl font-black text-[#176B87] font-display">{value}</p>
       {trend && <p className={`text-[10px] font-bold ${trendColor}`}>{trend}</p>}
       {!trend && subtext && <p className="text-[10px] text-slate-500 font-medium">{subtext}</p>}
     </div>

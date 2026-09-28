@@ -58,12 +58,12 @@ export const CompareModal: React.FC<CompareModalProps> = ({
             Comparing specifications side-by-side across East Africa certified inventory
           </span>
 
-          <label className="flex items-center gap-2 font-bold text-[#1E3063] cursor-pointer select-none">
+          <label className="flex items-center gap-2 font-bold text-[#176B87] cursor-pointer select-none">
             <input
               type="checkbox"
               checked={highlightDifferences}
               onChange={(e) => setHighlightDifferences(e.target.checked)}
-              className="accent-[#1E3063] w-4 h-4 rounded"
+              className="accent-[#176B87] w-4 h-4 rounded"
             />
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Highlight Differences</span>
@@ -104,7 +104,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                         className="cursor-pointer group"
                         onClick={() => onQuickViewVehicle?.(v)}
                       >
-                        <p className="font-extrabold text-[#1E3063] line-clamp-1 text-xs font-display group-hover:text-amber-600 transition-colors">{v.title}</p>
+                        <p className="font-extrabold text-[#176B87] line-clamp-1 text-xs font-display group-hover:text-amber-600 transition-colors">{v.title}</p>
                         <p className="text-[10px] text-slate-500 font-medium">{v.location} ({v.county})</p>
                       </div>
                     </div>
@@ -118,7 +118,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               <TableRow className={highlightDifferences && areValuesDifferent((v) => v.price) ? 'bg-amber-50/70' : ''}>
                 <TableCell className="font-bold text-slate-600 bg-slate-50/50">Price (Ksh)</TableCell>
                 {vehicles.map((v) => (
-                  <TableCell key={v.id} className="font-black text-base text-[#1E3063] font-display">
+                  <TableCell key={v.id} className="font-black text-base text-[#176B87] font-display">
                     Ksh {v.price.toLocaleString()}
                     {v.marketPriceAvg && (
                       <span className="block text-[10px] text-slate-400 font-normal line-through">

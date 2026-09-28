@@ -16,8 +16,8 @@ export const DealerProfilePage: FC = () => {
   if (!dealer) {
     return (
       <div className="py-16 px-6 text-center max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-[#2E4080]">Dealer profile unavailable</h1>
-        <p className="mt-2 text-sm text-[#6B7A99]">A real dealer profile must be loaded from the KAYAD backend before inventory is displayed.</p>
+        <h1 className="text-2xl font-bold text-[#176B87]">Dealer profile unavailable</h1>
+        <p className="mt-2 text-sm text-[#66808A]">A real dealer profile must be loaded from the KAYAD backend before inventory is displayed.</p>
       </div>
     );
   }
@@ -49,21 +49,21 @@ export const DealerProfilePage: FC = () => {
   };
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10 bg-[#FCF9F4]">
+    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10 bg-[#F6FAF9]">
       {/* Dealer Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden border border-[#2E4080] bg-[#2E4080] text-white shadow-xl">
+      <div className="relative rounded-3xl overflow-hidden border border-[#176B87] bg-[#176B87] text-white shadow-xl">
         <img src={dealer.bannerImage} alt={dealer.name} className="w-full h-64 object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#2E4080] via-[#2E4080]/70 to-transparent p-6 sm:p-8 flex flex-col justify-end">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#176B87] via-[#176B87]/70 to-transparent p-6 sm:p-8 flex flex-col justify-end">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
             <div className="flex items-center gap-4">
-              <img src={dealer.logo} alt={dealer.name} className="w-20 h-20 rounded-2xl object-cover border-2 border-[#23EBFF] shadow-xl" />
+              <img src={dealer.logo} alt={dealer.name} className="w-20 h-20 rounded-2xl object-cover border-2 border-[#13B8A6] shadow-xl" />
               <div>
-                <span className="px-2.5 py-1 text-[10px] font-extrabold bg-[#23EBFF] text-[#2E4080] rounded-md uppercase tracking-wider">
+                <span className="px-2.5 py-1 text-[10px] font-extrabold bg-[#13B8A6] text-[#176B87] rounded-md uppercase tracking-wider">
                   {dealer.badge}
                 </span>
                 <h1 className="text-2xl sm:text-4xl font-extrabold text-white font-serif mt-1">{dealer.name}</h1>
                 <p className="text-xs text-slate-300 flex items-center gap-1 mt-1 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-[#23EBFF]" /> {dealer.address}
+                  <MapPin className="w-3.5 h-3.5 text-[#13B8A6]" /> {dealer.address}
                 </p>
               </div>
             </div>
@@ -82,12 +82,12 @@ export const DealerProfilePage: FC = () => {
 
       {/* Inventory Grid */}
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#E8E1D5]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#D7E7E4]">
           <div>
-            <h2 className="text-2xl font-extrabold text-[#2E4080] font-serif">
+            <h2 className="text-2xl font-extrabold text-[#176B87] font-serif">
               Certified Dealership Inventory ({dealerVehicles.length})
             </h2>
-            <p className="text-xs text-[#6B7A99] font-medium mt-0.5">
+            <p className="text-xs text-[#66808A] font-medium mt-0.5">
               Verified luxury stock, guaranteed titles, and concierge pre-inspections.
             </p>
           </div>
@@ -128,9 +128,9 @@ export const DealerProfilePage: FC = () => {
       >
         {testDriveSuccess ? (
           <div className="p-6 text-center space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-[#3ddb72] mx-auto" />
-            <h4 className="text-base font-bold text-[#2E4080] font-serif">Appointment Requested</h4>
-            <p className="text-xs text-[#3D4F6F] font-medium">
+            <CheckCircle2 className="w-12 h-12 text-[#13B8A6] mx-auto" />
+            <h4 className="text-base font-bold text-[#176B87] font-serif">Appointment Requested</h4>
+            <p className="text-xs text-[#365563] font-medium">
               The concierge team at {dealer.name} will contact you shortly to confirm your private viewing.
             </p>
           </div>

@@ -35,7 +35,7 @@ export const ScrollToTopButton: FC = () => {
           transition={{ duration: 0.2 }}
           onClick={scrollToTop}
           aria-label="Scroll to top"
-          className="fixed bottom-6 right-6 z-40 p-3 bg-[#1E3063] hover:bg-[#2A3B7A] text-[#00C9CE] rounded-full shadow-xl border border-[#00C9CE]/30 hover:border-[#00C9CE]/60 hover:scale-105 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"
+          className="fixed bottom-6 right-6 z-40 p-3 bg-[#176B87] hover:bg-[#12576D] text-[#13B8A6] rounded-full shadow-xl border border-[#13B8A6]/30 hover:border-[#13B8A6]/60 hover:scale-105 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#13B8A6]"
         >
           <ArrowUp className="w-5 h-5 stroke-[2.5] group-hover:-translate-y-0.5 transition-transform" />
         </motion.button>

@@ -26,11 +26,11 @@ export const DealerMetric = memo(function DealerMetric({
   className = ''
 }) {
   const iconColors = {
-    gold: { bg: 'rgba(22, 196, 164, 0.12)', color: '#16C4A4' },
+    gold: { bg: 'rgba(22, 196, 164, 0.12)', color: '#176B87' },
     views: { bg: 'rgba(59, 130, 246, 0.15)', color: '#60A5FA' },
     leads: { bg: 'rgba(168, 85, 247, 0.15)', color: '#C084FC' },
     sales: { bg: 'rgba(34, 197, 94, 0.15)', color: '#22C55E' },
-    revenue: { bg: 'rgba(22, 196, 164, 0.12)', color: '#16C4A4' },
+    revenue: { bg: 'rgba(22, 196, 164, 0.12)', color: '#176B87' },
     inventory: { bg: 'rgba(251, 146, 60, 0.15)', color: '#FB923C' },
     rating: { bg: 'rgba(236, 72, 153, 0.15)', color: '#EC4899' },
   };

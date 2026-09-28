@@ -34,7 +34,7 @@
   --vc-card-text: var(--color-text-primary, #1a1a1a);
   --vc-card-text-secondary: var(--color-text-secondary, #666666);
   --vc-card-text-muted: var(--color-text-muted, #999999);
-  --vc-card-brand: var(--color-brand, #16C4A4);
+  --vc-card-brand: var(--color-brand, #176B87);
   --vc-card-brand-light: var(--color-brand-light, #80EDD8);
   --vc-card-brand-subtle: var(--color-brand-subtle, rgba(22, 196, 164, 0.1));
 
@@ -574,7 +574,7 @@
 }
 
 .vc-card__btn--primary {
-  background: linear-gradient(135deg, var(--vc-card-brand) 0%, var(--color-brand-dark, #0C7B68) 100%);
+  background: linear-gradient(135deg, var(--vc-card-brand) 0%, var(--color-brand-dark, #12576D) 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(22, 196, 164, 0.3);
 }

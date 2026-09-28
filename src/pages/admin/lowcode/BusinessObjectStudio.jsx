@@ -12,8 +12,8 @@ import * as lowCodeApi from '../../../services/lowCodeApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -177,7 +177,7 @@ export default function BusinessObjectStudio() {
         <h2 className="text-2xl font-bold text-slate-800">Platform Overview</h2>
         <button
           onClick={openNewObjectModal}
-          className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
         >
           <Plus size={18} />
           New Business Object
@@ -211,7 +211,7 @@ export default function BusinessObjectStudio() {
           <button
             key={mod.id}
             onClick={() => setActiveModule(mod.id)}
-            className="p-6 rounded-xl border border-slate-200 hover:border-[#17244B] hover:bg-[#17244B]/5 transition-all text-left"
+            className="p-6 rounded-xl border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
           >
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: `${mod.color}20` }}>
               <mod.icon size={24} style={{ color: mod.color }} />
@@ -230,7 +230,7 @@ export default function BusinessObjectStudio() {
         <h2 className="text-2xl font-bold text-slate-800">Business Objects</h2>
         <button
           onClick={openNewObjectModal}
-          className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
         >
           <Plus size={18} />
           New Object
@@ -246,7 +246,7 @@ export default function BusinessObjectStudio() {
             placeholder="Search objects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
           />
         </div>
         <select className="px-4 py-2.5 rounded-lg border border-slate-200 outline-none">
@@ -274,7 +274,7 @@ export default function BusinessObjectStudio() {
               <div
                 key={obj.id}
                 onClick={() => setSelectedObject(obj)}
-                className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#17244B] cursor-pointer transition-all"
+                className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:border-[#0A3340] cursor-pointer transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -336,7 +336,7 @@ export default function BusinessObjectStudio() {
           <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">
             <Upload size={18} />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
             <Save size={18} />
             Save Schema
           </button>
@@ -351,7 +351,7 @@ export default function BusinessObjectStudio() {
             {fieldTypes.map((type) => (
               <button
                 key={type.id}
-                className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:border-[#17244B] hover:bg-[#17244B]/5 transition-all text-left"
+                className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
               >
                 <div className="w-8 h-8 rounded" style={{ backgroundColor: `${type.color}20` }} />
                 <span className="text-sm font-medium text-slate-700">{type.name}</span>
@@ -366,7 +366,7 @@ export default function BusinessObjectStudio() {
             <h3 className="font-semibold text-slate-800">Fields</h3>
             <button
               onClick={addField}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#17244B] hover:bg-[#17244B]/10 rounded-lg"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#0A3340] hover:bg-[#0A3340]/10 rounded-lg"
             >
               <Plus size={16} />
               Add Field
@@ -455,7 +455,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
         </div>
 
         <textarea
-          className="w-full p-4 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none resize-none"
+          className="w-full p-4 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none resize-none"
           rows={4}
           placeholder="Example: Create a Fleet Management module with vehicle assignments, maintenance schedules and driver allocation. Each vehicle should track mileage, insurance expiry, and service history."
         />
@@ -557,14 +557,14 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <Layers size={20} className="text-white" />
                 </div>
                 <div>
@@ -598,7 +598,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
                   onClick={() => setActiveModule(mod.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-[#17244B] text-white'
+                      ? 'bg-[#0A3340] text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
@@ -641,7 +641,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
                       type="text"
                       value={newObject.name}
                       onChange={(e) => setNewObject(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                       placeholder="e.g., Vehicle Rental"
                     />
                   </div>
@@ -666,7 +666,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
                       type="text"
                       value={newObject.singularName}
                       onChange={(e) => setNewObject(prev => ({ ...prev, singularName: e.target.value }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                     />
                   </div>
                   <div>
@@ -675,7 +675,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
                       type="text"
                       value={newObject.pluralName}
                       onChange={(e) => setNewObject(prev => ({ ...prev, pluralName: e.target.value }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                     />
                   </div>
                 </div>
@@ -684,7 +684,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
                   <textarea
                     value={newObject.description}
                     onChange={(e) => setNewObject(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none resize-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none resize-none"
                     rows={2}
                   />
                 </div>
@@ -694,7 +694,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-slate-800">Fields</h3>
-                  <button onClick={addField} className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#17244B] hover:bg-[#17244B]/10 rounded-lg">
+                  <button onClick={addField} className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#0A3340] hover:bg-[#0A3340]/10 rounded-lg">
                     <Plus size={16} />
                     Add Field
                   </button>
@@ -742,7 +742,7 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
               <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">
                 Cancel
               </button>
-              <button onClick={saveObject} className="px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+              <button onClick={saveObject} className="px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
                 {editingObject ? 'Update' : 'Create'} Object
               </button>
             </div>

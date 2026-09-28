@@ -190,7 +190,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
     const primary = branding.primaryColor;
     // Simple lightening/darkening logic
     const lightVariant = primary + '80'; // Add transparency
-    const darkVariant = '#0C7B68'; // Default dark variant
+    const darkVariant = '#12576D'; // Default dark variant
     const glowVariant = primary + '40'; // Glow effect
 
     setBranding(p => ({

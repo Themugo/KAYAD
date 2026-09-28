@@ -120,7 +120,7 @@ export default function EscrowPage() {
     <div className="page">
       {/* ── Hero banner ── */}
       <div style={{
-        background: 'linear-gradient(135deg, #0A1628 0%, #0d1f3c 100%)',
+        background: 'linear-gradient(135deg, #0A3340 0%, #0d1f3c 100%)',
         padding: '64px 0 48px',
         borderBottom: '1px solid var(--border)',
       }}>

@@ -19,8 +19,8 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
     >
       <div className="space-y-8 text-slate-800 dark:text-slate-200">
         {/* Executive Summary */}
-        <div className="p-5 rounded-2xl bg-[#00C9A7]/10 border border-[#00C9A7]/20">
-          <div className="flex items-center gap-2 text-[#00C9A7] font-bold mb-2">
+        <div className="p-5 rounded-2xl bg-[#13B8A6]/10 border border-[#13B8A6]/20">
+          <div className="flex items-center gap-2 text-[#13B8A6] font-bold mb-2">
             <ShieldCheck className="w-5 h-5" />
             <span>Executive Architecture Declaration</span>
           </div>
@@ -33,12 +33,12 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
         {/* 1. Component Mapping Matrix */}
         <div>
           <h4 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
-            <Layers className="w-5 h-5 text-[#00C9A7]" />
+            <Layers className="w-5 h-5 text-[#13B8A6]" />
             <span>1. Core System Architecture & Module Matrix</span>
           </h4>
-          <div className="overflow-x-auto border border-slate-200 dark:border-[#1A2A4E] rounded-2xl">
+          <div className="overflow-x-auto border border-slate-200 dark:border-[#0A3340] rounded-2xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F6F1E8] dark:bg-[#1A2A4E]/80 text-slate-700 dark:text-[#94A3B8] font-bold uppercase tracking-wider">
+              <thead className="bg-[#EEF7F5] dark:bg-[#0A3340]/80 text-slate-700 dark:text-[#94A3B8] font-bold uppercase tracking-wider">
                 <tr>
                   <th className="p-3">KAYAD Functional Module</th>
                   <th className="p-3">UI Component Implementation</th>
@@ -46,7 +46,7 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
                   <th className="p-3">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-[#1A2A4E]/60">
+              <tbody className="divide-y divide-slate-100 dark:divide-[#0A3340]/60">
                 <tr>
                   <td className="p-3 font-semibold text-slate-900 dark:text-white">Vehicle Listing Grid</td>
                   <td className="p-3"><code>/components/gallery/VehicleCard.tsx</code></td>
@@ -85,10 +85,10 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
         {/* 2. Folder Restructuring Plan */}
         <div>
           <h4 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
-            <Server className="w-5 h-5 text-[#00C9A7]" />
+            <Server className="w-5 h-5 text-[#13B8A6]" />
             <span>2. Folder Structure & Architecture</span>
           </h4>
-          <pre className="bg-[#0B132B] text-slate-100 p-4 rounded-2xl text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+          <pre className="bg-[#0A3340] text-slate-100 p-4 rounded-2xl text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
 {`/src
 ├── components/
 │   ├── ui/               # Design System Core (Button, Badge, Modal, Card, Input, Tabs)
@@ -112,7 +112,7 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
 
         {/* 3. Migration Sequence & Risk Analysis */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-2xl bg-[#F6F1E8] dark:bg-[#1A2A4E]/80 border border-slate-200 dark:border-[#1A2A4E]">
+          <div className="p-4 rounded-2xl bg-[#EEF7F5] dark:bg-[#0A3340]/80 border border-slate-200 dark:border-[#0A3340]">
             <h5 className="font-bold text-xs uppercase tracking-wider text-[#F0A500] mb-2">
               Migration Execution Sequence
             </h5>
@@ -126,7 +126,7 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
             </ol>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#F6F1E8] dark:bg-[#1A2A4E]/80 border border-slate-200 dark:border-[#1A2A4E]">
+          <div className="p-4 rounded-2xl bg-[#EEF7F5] dark:bg-[#0A3340]/80 border border-slate-200 dark:border-[#0A3340]">
             <h5 className="font-bold text-xs uppercase tracking-wider text-[#DC3545] mb-2">
               Risk Mitigation & Audit Score
             </h5>

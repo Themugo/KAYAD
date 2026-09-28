@@ -39,19 +39,19 @@ export const TrustMetricsBar: FC = () => {
       label: 'Protected in Escrow',
       value: `KES ${escrowAmount.toFixed(1)}B+`,
       subtitle: 'CBK-Regulated Bank Vaults',
-      icon: <ShieldCheck className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <ShieldCheck className="w-5 h-5 text-[#13B8A6]" />,
     },
     {
       label: 'Verified Members',
       value: `${members.toLocaleString()}+`,
       subtitle: 'KRA & ID Verified Buyers/Sellers',
-      icon: <Users className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Users className="w-5 h-5 text-[#13B8A6]" />,
     },
     {
       label: 'Audited Vehicles',
       value: `${vehicles.toLocaleString()}+`,
       subtitle: '150-Point Structural Audits',
-      icon: <Car className="w-5 h-5 text-[#00C9CE]" />,
+      icon: <Car className="w-5 h-5 text-[#13B8A6]" />,
     },
     {
       label: 'Successful Releases',
@@ -62,13 +62,13 @@ export const TrustMetricsBar: FC = () => {
   ];
 
   return (
-    <section className="py-10 bg-[#0B1628] dark:bg-[#080E1A] text-white border-y border-white/10 relative overflow-hidden">
+    <section className="py-10 bg-[#0A3340] dark:bg-[#080E1A] text-white border-y border-white/10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header Label */}
         <div className="text-center mb-6">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[11px] font-mono font-bold uppercase tracking-widest">
-            <Award className="w-3.5 h-3.5 text-[#00C9CE]" />
+            <Award className="w-3.5 h-3.5 text-[#13B8A6]" />
             PROVEN MARKETPLACE TRUST AT SCALE
           </span>
         </div>
@@ -80,7 +80,7 @@ export const TrustMetricsBar: FC = () => {
               key={idx}
               className="p-4 sm:p-5 rounded-2xl bg-white/5 dark:bg-white/3 border border-white/10 backdrop-blur-md flex flex-col items-center text-center space-y-2 hover:bg-white/10 transition-colors group"
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#1E3063] flex items-center justify-center border border-[#00C9CE]/30 group-hover:scale-110 transition-transform shadow-md">
+              <div className="w-10 h-10 rounded-2xl bg-[#176B87] flex items-center justify-center border border-[#13B8A6]/30 group-hover:scale-110 transition-transform shadow-md">
                 {item.icon}
               </div>
 
@@ -88,7 +88,7 @@ export const TrustMetricsBar: FC = () => {
                 <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white block">
                   {item.value}
                 </span>
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#00C9CE] block">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#13B8A6] block">
                   {item.label}
                 </span>
               </div>

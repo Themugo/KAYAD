@@ -67,7 +67,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth }) =>
         rightElement={
           <div className="text-right hidden sm:block">
             <p className="text-xs text-slate-400 font-semibold uppercase">Resolution Hotline</p>
-            <p className="text-sm font-extrabold text-[#1E3063]">+254 700 000 999</p>
+            <p className="text-sm font-extrabold text-[#176B87]">+254 700 000 999</p>
           </div>
         }
       />
@@ -80,7 +80,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth }) =>
         {/* Help Form */}
         <Card className="p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#1E3063] font-display flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#176B87] font-display flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-amber-500" />
               Submit Ticket or Open Dispute
             </h3>
@@ -143,7 +143,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth }) =>
         </Card>
 
         {/* Guarantee Info */}
-        <div className="bg-[#1E3063] text-white rounded-2xl p-6 shadow-card space-y-4 flex flex-col justify-between">
+        <div className="bg-[#176B87] text-white rounded-2xl p-6 shadow-card space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4" /> 100% Buyer Protection Guarantee

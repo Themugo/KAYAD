@@ -12,10 +12,10 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   const variantStyles = {
     success: 'bg-[#2ECC71]/15 text-[#2ECC71] border-[#2ECC71]/30',
-    aqua: 'bg-[#00C9CE]/15 text-[#00C9CE] border-[#00C9CE]/30',
+    aqua: 'bg-[#13B8A6]/15 text-[#13B8A6] border-[#13B8A6]/30',
     warning: 'bg-[#F0A500]/15 text-[#F0A500] border-[#F0A500]/30',
     danger: 'bg-[#DC3545]/15 text-[#DC3545] border-[#DC3545]/30',
-    navy: 'bg-[#2A3B7A] text-slate-200 border-slate-600/50',
+    navy: 'bg-[#12576D] text-slate-200 border-slate-600/50',
   };
 
   return (

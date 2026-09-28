@@ -1,25 +1,25 @@
 export const AuctionTheme = {
   navy: {
-    deepest: '#0B1628',
-    deep: '#121D33',
-    primary: '#1E3063',
-    secondary: '#2A3B7A',
-    highlight: '#344999',
+    deepest: '#0A3340',
+    deep: '#12576D',
+    primary: '#176B87',
+    secondary: '#12576D',
+    highlight: '#13B8A6',
   },
   gold: {
-    primary: '#00C9CE',
+    primary: '#13B8A6',
     light: '#E0FAF9',
-    amber: '#00C9CE',
+    amber: '#13B8A6',
   },
   cream: {
-    primary: '#FCF9F4',
-    sand: '#F5EFE6',
-    warmAccent: '#EFE8DA',
-    border: '#E2D8C7',
+    primary: '#F6FAF9',
+    sand: '#EEF7F5',
+    warmAccent: '#DDF4F0',
+    border: '#D7E7E4',
   },
   accent: {
-    teal: '#00C9CE',
-    emerald: '#166534',
+    teal: '#13B8A6',
+    emerald: '#176B87',
     crimson: '#991B1B',
   },
 } as const;
@@ -31,10 +31,10 @@ export const ThemeDesignTokens = {
     cream: AuctionTheme.cream,
     accent: AuctionTheme.accent,
     text: {
-      primary: '#1E3063',
-      body: '#2B3B5C',
-      muted: '#6B7A99',
-      light: '#FCF9F4',
+      primary: '#176B87',
+      body: '#365563',
+      muted: '#66808A',
+      light: '#F6FAF9',
     }
   },
   typography: {
@@ -43,9 +43,9 @@ export const ThemeDesignTokens = {
     fontMono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   },
   shadows: {
-    subtle: "0 1px 2px 0 rgba(11, 22, 40, 0.05)",
-    card: "0 4px 20px -2px rgba(11, 22, 40, 0.08)",
-    hover: "0 10px 25px -5px rgba(11, 22, 40, 0.12)",
+    subtle: "0 1px 2px 0 rgba(10, 51, 64, 0.05)",
+    card: "0 4px 20px -2px rgba(10, 51, 64, 0.08)",
+    hover: "0 10px 25px -5px rgba(10, 51, 64, 0.12)",
   }
 } as const;
 
@@ -58,12 +58,12 @@ export const ThemeTokens = {
     backgroundLight: AuctionTheme.cream.primary,
     backgroundSand: AuctionTheme.cream.sand,
     textDark: AuctionTheme.navy.primary,
-    textBody: '#2B3B5C',
-    textMuted: '#6B7A99',
+    textBody: '#365563',
+    textMuted: '#66808A',
     crimsonRed: AuctionTheme.accent.crimson,
-    navActive: '#00C9CE',
+    navActive: '#13B8A6',
     warningAmber: AuctionTheme.gold.amber,
-    azureTeal: '#00C9CE',
+    azureTeal: '#13B8A6',
     deepestNavy: AuctionTheme.navy.deepest,
     deepNavy: AuctionTheme.navy.deep,
     navyHighlight: AuctionTheme.navy.highlight,

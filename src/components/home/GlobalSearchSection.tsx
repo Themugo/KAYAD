@@ -75,20 +75,20 @@ export const GlobalSearchSection: FC = () => {
 
   return (
     <section className="relative z-30 -mt-8 sm:-mt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-      <div className="bg-[#1E3063] dark:bg-[#121D33] text-white rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/20 dark:border-white/10 backdrop-blur-xl space-y-4">
+      <div className="bg-[#176B87] dark:bg-[#12576D] text-white rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/20 dark:border-white/10 backdrop-blur-xl space-y-4">
 
         {/* Top Search Input & Quick Filters */}
         <form onSubmit={handleSearch} className="flex flex-col lg:flex-row items-center gap-3">
 
           {/* Main Keyword Search */}
           <div className="relative flex-1 w-full">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[#00C9CE]" />
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[#13B8A6]" />
             <input
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="Search by make, model, VIN, or keyword (e.g. Prado TX, Land Cruiser V8)..."
-              className="w-full pl-12 pr-4 py-3.5 bg-[#2A3B7A] dark:bg-[#0B132B] text-white placeholder-slate-300 dark:placeholder-slate-400 rounded-2xl text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-[#00C9CE] border border-white/15 transition-all"
+              className="w-full pl-12 pr-4 py-3.5 bg-[#12576D] dark:bg-[#0A3340] text-white placeholder-slate-300 dark:placeholder-slate-400 rounded-2xl text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-[#13B8A6] border border-white/15 transition-all"
             />
           </div>
 
@@ -99,11 +99,11 @@ export const GlobalSearchSection: FC = () => {
             <select
               value={selectedMake}
               onChange={(e) => setSelectedMake(e.target.value)}
-              className="px-3 py-3 bg-[#2A3B7A] dark:bg-[#0B132B] text-white rounded-2xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#00C9CE] border border-white/15 cursor-pointer"
+              className="px-3 py-3 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-2xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#13B8A6] border border-white/15 cursor-pointer"
             >
-              <option value="all" className="bg-[#1E3063] text-white">All Brands</option>
+              <option value="all" className="bg-[#176B87] text-white">All Brands</option>
               {makes.map((make) => (
-                <option key={make} value={make} className="bg-[#1E3063] text-white">
+                <option key={make} value={make} className="bg-[#176B87] text-white">
                   {make}
                 </option>
               ))}
@@ -113,27 +113,27 @@ export const GlobalSearchSection: FC = () => {
             <select
               value={selectedPriceRange}
               onChange={(e) => setSelectedPriceRange(e.target.value)}
-              className="px-3 py-3 bg-[#2A3B7A] dark:bg-[#0B132B] text-white rounded-2xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#00C9CE] border border-white/15 cursor-pointer"
+              className="px-3 py-3 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-2xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#13B8A6] border border-white/15 cursor-pointer"
             >
-              <option value="all" className="bg-[#1E3063] text-white">Any Budget</option>
-              <option value="under_2m" className="bg-[#1E3063] text-white">Under KES 2M</option>
-              <option value="2m_5m" className="bg-[#1E3063] text-white">KES 2M - 5M</option>
-              <option value="5m_10m" className="bg-[#1E3063] text-white">KES 5M - 10M</option>
-              <option value="above_10m" className="bg-[#1E3063] text-white">Above KES 10M</option>
+              <option value="all" className="bg-[#176B87] text-white">Any Budget</option>
+              <option value="under_2m" className="bg-[#176B87] text-white">Under KES 2M</option>
+              <option value="2m_5m" className="bg-[#176B87] text-white">KES 2M - 5M</option>
+              <option value="5m_10m" className="bg-[#176B87] text-white">KES 5M - 10M</option>
+              <option value="above_10m" className="bg-[#176B87] text-white">Above KES 10M</option>
             </select>
 
             {/* Body Style */}
             <select
               value={selectedBodyStyle}
               onChange={(e) => setSelectedBodyStyle(e.target.value)}
-              className="px-3 py-3 bg-[#2A3B7A] dark:bg-[#0B132B] text-white rounded-2xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#00C9CE] border border-white/15 cursor-pointer col-span-2 sm:col-span-1"
+              className="px-3 py-3 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-2xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#13B8A6] border border-white/15 cursor-pointer col-span-2 sm:col-span-1"
             >
-              <option value="all" className="bg-[#1E3063] text-white">All Body Styles</option>
-              <option value="SUV" className="bg-[#1E3063] text-white">SUV / 4x4</option>
-              <option value="Sedan" className="bg-[#1E3063] text-white">Sedan / Luxury</option>
-              <option value="Truck" className="bg-[#1E3063] text-white">Pickup / Commercial</option>
-              <option value="Coupe" className="bg-[#1E3063] text-white">Coupe / Sports</option>
-              <option value="Hatchback" className="bg-[#1E3063] text-white">Hatchback</option>
+              <option value="all" className="bg-[#176B87] text-white">All Body Styles</option>
+              <option value="SUV" className="bg-[#176B87] text-white">SUV / 4x4</option>
+              <option value="Sedan" className="bg-[#176B87] text-white">Sedan / Luxury</option>
+              <option value="Truck" className="bg-[#176B87] text-white">Pickup / Commercial</option>
+              <option value="Coupe" className="bg-[#176B87] text-white">Coupe / Sports</option>
+              <option value="Hatchback" className="bg-[#176B87] text-white">Hatchback</option>
             </select>
           </div>
 
@@ -144,8 +144,8 @@ export const GlobalSearchSection: FC = () => {
               onClick={() => setIsExpandedFilters(!isExpandedFilters)}
               className={`p-3.5 rounded-2xl border transition-colors cursor-pointer flex items-center justify-center ${
                 isExpandedFilters
-                  ? 'bg-[#00C9CE] text-[#1E3063] border-[#00C9CE]'
-                  : 'bg-[#2A3B7A] text-slate-200 border-white/15 hover:bg-white/10'
+                  ? 'bg-[#13B8A6] text-[#176B87] border-[#13B8A6]'
+                  : 'bg-[#12576D] text-slate-200 border-white/15 hover:bg-white/10'
               }`}
               title="More Filters"
             >
@@ -154,7 +154,7 @@ export const GlobalSearchSection: FC = () => {
 
             <button
               type="submit"
-              className="flex-1 lg:flex-none px-6 py-3.5 bg-[#00C9CE] hover:bg-[#00B0B5] text-[#1E3063] font-mono font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02] cursor-pointer shrink-0"
+              className="flex-1 lg:flex-none px-6 py-3.5 bg-[#13B8A6] hover:bg-[#00B0B5] text-[#176B87] font-mono font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02] cursor-pointer shrink-0"
             >
               <span>Search Verified Vehicles</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
@@ -174,7 +174,7 @@ export const GlobalSearchSection: FC = () => {
               <select
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
-                className="w-full px-3 py-2 bg-[#2A3B7A] dark:bg-[#0B132B] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
+                className="w-full px-3 py-2 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
               >
                 <option value="all">All Kenya</option>
                 {locations.map((loc) => (
@@ -190,7 +190,7 @@ export const GlobalSearchSection: FC = () => {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-full px-3 py-2 bg-[#2A3B7A] dark:bg-[#0B132B] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
+                className="w-full px-3 py-2 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
               >
                 <option value="all">Any Year</option>
                 <option value="2024">2024+</option>
@@ -208,7 +208,7 @@ export const GlobalSearchSection: FC = () => {
               <select
                 value={selectedFuel}
                 onChange={(e) => setSelectedFuel(e.target.value)}
-                className="w-full px-3 py-2 bg-[#2A3B7A] dark:bg-[#0B132B] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
+                className="w-full px-3 py-2 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
               >
                 <option value="all">Any Fuel</option>
                 <option value="Gasoline">Petrol / Gasoline</option>
@@ -225,7 +225,7 @@ export const GlobalSearchSection: FC = () => {
               <select
                 value={selectedCondition}
                 onChange={(e) => setSelectedCondition(e.target.value)}
-                className="w-full px-3 py-2 bg-[#2A3B7A] dark:bg-[#0B132B] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
+                className="w-full px-3 py-2 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
               >
                 <option value="all">Any Condition</option>
                 <option value="New">Brand New</option>
@@ -240,8 +240,8 @@ export const GlobalSearchSection: FC = () => {
 
         {/* Footer info pill inside search card */}
         <div className="flex items-center justify-between text-[11px] text-slate-300 pt-1 font-sans">
-          <div className="flex items-center gap-1.5 text-[#00C9CE]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#00C9CE]" />
+          <div className="flex items-center gap-1.5 text-[#13B8A6]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
             <span className="font-mono font-bold">100% Verified Inventory • CBK Bank Escrow Protected</span>
           </div>
           <span className="hidden sm:inline text-slate-400 font-mono">

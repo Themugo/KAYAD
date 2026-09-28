@@ -87,7 +87,7 @@ const TrustIndicatorItem: React.FC<{
       {icon}
     </div>
     <div>
-      <p className="text-xs font-bold text-[#1E3063]">{value || 'Yes'}</p>
+      <p className="text-xs font-bold text-[#176B87]">{value || 'Yes'}</p>
       <p className="text-[10px] text-slate-500">{label}</p>
     </div>
   </div>
@@ -127,8 +127,8 @@ const TrustMetricsGrid: React.FC<{ metrics: TrustMetrics; compact?: boolean }> =
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {metrics.totalAuctions !== undefined && (
         <div className="text-center p-3 bg-slate-50 rounded-xl">
-          <GavelIcon className="w-5 h-5 text-[#1E3063] mx-auto mb-1" />
-          <div className="text-lg font-black text-[#1E3063]">{metrics.totalAuctions}</div>
+          <GavelIcon className="w-5 h-5 text-[#176B87] mx-auto mb-1" />
+          <div className="text-lg font-black text-[#176B87]">{metrics.totalAuctions}</div>
           <div className="text-[10px] text-slate-500">Auctions</div>
         </div>
       )}
@@ -183,7 +183,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
   if (variant === 'minimal') {
     return (
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#1E3063] flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
+        <div className="w-10 h-10 rounded-xl bg-[#176B87] flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
           {organizer.logo ? (
             <img src={organizer.logo} alt={organizer.name} className="w-full h-full object-cover" />
           ) : (
@@ -192,7 +192,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm text-[#1E3063] truncate">{organizer.name}</span>
+            <span className="font-bold text-sm text-[#176B87] truncate">{organizer.name}</span>
             {organizer.isVerified && (
               <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             )}
@@ -217,7 +217,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
       <Card className="p-4 bg-white border-slate-200 space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-[#1E3063] flex items-center justify-center text-white font-bold text-xl overflow-hidden shadow-md">
+          <div className="w-14 h-14 rounded-2xl bg-[#176B87] flex items-center justify-center text-white font-bold text-xl overflow-hidden shadow-md">
             {organizer.logo ? (
               <img src={organizer.logo} alt={organizer.name} className="w-full h-full object-cover" />
             ) : (
@@ -226,7 +226,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-black text-[#1E3063] truncate">{organizer.name}</h3>
+              <h3 className="font-black text-[#176B87] truncate">{organizer.name}</h3>
               {organizer.isVerified && (
                 <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               )}
@@ -253,20 +253,20 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
         {organizer.contact && (
           <div className="space-y-2 pt-3 border-t border-slate-100">
             {organizer.contact.phone && (
-              <a href={`tel:${organizer.contact.phone}`} className="flex items-center gap-2 text-xs text-slate-600 hover:text-[#1E3063]">
-                <Phone className="w-3.5 h-3.5 text-[#C85A32]" />
+              <a href={`tel:${organizer.contact.phone}`} className="flex items-center gap-2 text-xs text-slate-600 hover:text-[#176B87]">
+                <Phone className="w-3.5 h-3.5 text-[#176B87]" />
                 {organizer.contact.phone}
               </a>
             )}
             {organizer.contact.email && (
-              <a href={`mailto:${organizer.contact.email}`} className="flex items-center gap-2 text-xs text-slate-600 hover:text-[#1E3063]">
-                <Mail className="w-3.5 h-3.5 text-[#C85A32]" />
+              <a href={`mailto:${organizer.contact.email}`} className="flex items-center gap-2 text-xs text-slate-600 hover:text-[#176B87]">
+                <Mail className="w-3.5 h-3.5 text-[#176B87]" />
                 {organizer.contact.email}
               </a>
             )}
             {organizer.contact.address && (
               <div className="flex items-start gap-2 text-xs text-slate-600">
-                <MapPin className="w-3.5 h-3.5 text-[#C85A32] flex-shrink-0 mt-0.5" />
+                <MapPin className="w-3.5 h-3.5 text-[#176B87] flex-shrink-0 mt-0.5" />
                 {organizer.contact.address}
               </div>
             )}
@@ -297,7 +297,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
             href={organizer.profileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-2 bg-[#1E3063] text-white rounded-lg font-bold text-xs hover:bg-[#17244B] transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2 bg-[#176B87] text-white rounded-lg font-bold text-xs hover:bg-[#0A3340] transition-colors"
           >
             View Organizer Profile
             <ExternalLink className="w-3.5 h-3.5" />
@@ -313,7 +313,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
       <Card className="p-5 bg-white border-slate-200 space-y-5">
         {/* Header */}
         <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#1E3063] flex items-center justify-center text-white font-bold text-2xl overflow-hidden shadow-md flex-shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-[#176B87] flex items-center justify-center text-white font-bold text-2xl overflow-hidden shadow-md flex-shrink-0">
             {organizer.logo ? (
               <img src={organizer.logo} alt={organizer.name} className="w-full h-full object-cover" />
             ) : (
@@ -322,7 +322,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-black text-lg text-[#1E3063]">{organizer.name}</h3>
+              <h3 className="font-black text-lg text-[#176B87]">{organizer.name}</h3>
               {organizer.isVerified && (
                 <Badge variant="success" size="sm" className="bg-emerald-100 text-emerald-800 border-emerald-200">
                   <ShieldCheck className="w-3 h-3 mr-0.5" />
@@ -353,32 +353,32 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
           <div className="grid grid-cols-2 gap-3">
             {organizer.contact.phone && (
               <a href={`tel:${organizer.contact.phone}`} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                <Phone className="w-4 h-4 text-[#C85A32]" />
-                <span className="text-xs font-medium text-[#1E3063]">{organizer.contact.phone}</span>
+                <Phone className="w-4 h-4 text-[#176B87]" />
+                <span className="text-xs font-medium text-[#176B87]">{organizer.contact.phone}</span>
               </a>
             )}
             {organizer.contact.email && (
               <a href={`mailto:${organizer.contact.email}`} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                <Mail className="w-4 h-4 text-[#C85A32]" />
-                <span className="text-xs font-medium text-[#1E3063] truncate">{organizer.contact.email}</span>
+                <Mail className="w-4 h-4 text-[#176B87]" />
+                <span className="text-xs font-medium text-[#176B87] truncate">{organizer.contact.email}</span>
               </a>
             )}
             {organizer.contact.address && (
               <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl col-span-2">
-                <MapPin className="w-4 h-4 text-[#C85A32]" />
-                <span className="text-xs font-medium text-[#1E3063]">{organizer.contact.address}</span>
+                <MapPin className="w-4 h-4 text-[#176B87]" />
+                <span className="text-xs font-medium text-[#176B87]">{organizer.contact.address}</span>
               </div>
             )}
             {organizer.contact.operatingRegion && (
               <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl col-span-2">
-                <Landmark className="w-4 h-4 text-[#C85A32]" />
-                <span className="text-xs font-medium text-[#1E3063]">Operating: {organizer.contact.operatingRegion}</span>
+                <Landmark className="w-4 h-4 text-[#176B87]" />
+                <span className="text-xs font-medium text-[#176B87]">Operating: {organizer.contact.operatingRegion}</span>
               </div>
             )}
             {organizer.contact.businessHours && (
               <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl col-span-2">
-                <Clock className="w-4 h-4 text-[#C85A32]" />
-                <span className="text-xs font-medium text-[#1E3063]">{organizer.contact.businessHours}</span>
+                <Clock className="w-4 h-4 text-[#176B87]" />
+                <span className="text-xs font-medium text-[#176B87]">{organizer.contact.businessHours}</span>
               </div>
             )}
           </div>
@@ -408,7 +408,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
             href={organizer.profileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1E3063] text-white rounded-xl font-bold text-sm hover:bg-[#17244B] transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#176B87] text-white rounded-xl font-bold text-sm hover:bg-[#0A3340] transition-colors"
           >
             View Full Organizer Profile
             <ExternalLink className="w-4 h-4" />

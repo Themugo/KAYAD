@@ -68,7 +68,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
     return (
       <div className="text-center py-20">
         <p className="text-sm text-slate-500 mb-4">Sign in to see your saved vehicles, purchases, and inspection reports.</p>
-        <button onClick={onOpenAuth} className="bg-[#1E3063] text-white text-xs font-bold rounded-lg px-5 py-2.5">
+        <button onClick={onOpenAuth} className="bg-[#176B87] text-white text-xs font-bold rounded-lg px-5 py-2.5">
           Sign In
         </button>
       </div>
@@ -78,7 +78,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
   return (
     <div className="space-y-8 pb-12">
       <div className="text-center py-6">
-        <h1 className="text-2xl font-bold text-[#1E3063] font-display">My Garage</h1>
+        <h1 className="text-2xl font-bold text-[#176B87] font-display">My Garage</h1>
         <p className="text-sm text-slate-500 mt-1">Your saved vehicles, purchases, and inspection reports</p>
       </div>
 
@@ -97,8 +97,8 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
           {/* WATCHLIST - real, from the real favorites system */}
           <section>
             <div className="flex items-center gap-2 mb-4">
-              <Heart className="w-4 h-4 text-[#C85A32]" />
-              <h2 className="text-base font-bold text-[#1E3063]">Saved Vehicles</h2>
+              <Heart className="w-4 h-4 text-[#176B87]" />
+              <h2 className="text-base font-bold text-[#176B87]">Saved Vehicles</h2>
             </div>
             {favorites.length === 0 ? (
               <p className="text-xs text-slate-400">No saved vehicles yet.</p>
@@ -114,7 +114,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
                       {f.images?.[0]?.url && <img src={f.images[0].url} alt={f.title} className="w-full h-full object-cover" />}
                     </div>
                     <div className="p-2.5">
-                      <p className="text-xs font-semibold text-[#1E3063] truncate">{f.title}</p>
+                      <p className="text-xs font-semibold text-[#176B87] truncate">{f.title}</p>
                       <p className="text-[11px] text-slate-500">Ksh {(f.price / 1000000).toFixed(2)}M</p>
                     </div>
                   </button>
@@ -126,8 +126,8 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
           {/* PURCHASES - real, from the real escrow system */}
           <section>
             <div className="flex items-center gap-2 mb-4">
-              <ShoppingBag className="w-4 h-4 text-[#C85A32]" />
-              <h2 className="text-base font-bold text-[#1E3063]">My Purchases</h2>
+              <ShoppingBag className="w-4 h-4 text-[#176B87]" />
+              <h2 className="text-base font-bold text-[#176B87]">My Purchases</h2>
             </div>
             {escrows.length === 0 ? (
               <p className="text-xs text-slate-400">No purchases yet.</p>
@@ -140,10 +140,10 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
                     className="w-full text-left bg-white border border-slate-200 rounded-xl p-3.5 flex items-center justify-between hover:shadow-md transition-shadow"
                   >
                     <div>
-                      <p className="text-xs font-semibold text-[#1E3063]">{e.car?.title || 'Vehicle'}</p>
+                      <p className="text-xs font-semibold text-[#176B87]">{e.car?.title || 'Vehicle'}</p>
                       <p className="text-[11px] text-slate-500 capitalize">{e.status.replace('_', ' ')}</p>
                     </div>
-                    <p className="text-xs font-bold text-[#1E3063]">Ksh {(e.amount / 1000000).toFixed(2)}M</p>
+                    <p className="text-xs font-bold text-[#176B87]">Ksh {(e.amount / 1000000).toFixed(2)}M</p>
                   </button>
                 ))}
               </div>
@@ -153,8 +153,8 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
           {/* INSPECTION REPORTS - real, from the real inspection system */}
           <section>
             <div className="flex items-center gap-2 mb-4">
-              <ClipboardCheck className="w-4 h-4 text-[#C85A32]" />
-              <h2 className="text-base font-bold text-[#1E3063]">My Inspection Reports</h2>
+              <ClipboardCheck className="w-4 h-4 text-[#176B87]" />
+              <h2 className="text-base font-bold text-[#176B87]">My Inspection Reports</h2>
             </div>
             {inspections.length === 0 ? (
               <p className="text-xs text-slate-400">No inspection reports yet.</p>
@@ -167,11 +167,11 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
                     className="w-full text-left bg-white border border-slate-200 rounded-xl p-3.5 flex items-center justify-between hover:shadow-md transition-shadow"
                   >
                     <div>
-                      <p className="text-xs font-semibold text-[#1E3063]">{insp.car?.title || 'Vehicle'}</p>
+                      <p className="text-xs font-semibold text-[#176B87]">{insp.car?.title || 'Vehicle'}</p>
                       <p className="text-[11px] text-slate-500 capitalize">{insp.status.replace('_', ' ')}</p>
                     </div>
                     {insp.overallScore != null && (
-                      <p className="text-xs font-bold text-[#1E3063]">{insp.overallScore}/100</p>
+                      <p className="text-xs font-bold text-[#176B87]">{insp.overallScore}/100</p>
                     )}
                   </button>
                 ))}

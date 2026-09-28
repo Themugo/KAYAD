@@ -117,7 +117,7 @@ const ComplianceCheckItem: React.FC<{
             href={check.documentUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-[#C85A32] font-medium mt-1 flex items-center gap-1 hover:underline"
+            className="text-xs text-[#176B87] font-medium mt-1 flex items-center gap-1 hover:underline"
           >
             View Document
             <ExternalLink className="w-3 h-3" />
@@ -161,11 +161,11 @@ const ComplianceCategorySection: React.FC<{
           {CATEGORY_ICONS[category]}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-bold text-[#1E3063]">{categoryInfo.label}</h4>
+          <h4 className="font-bold text-[#176B87]">{categoryInfo.label}</h4>
           <p className="text-xs text-slate-500">{categoryInfo.description}</p>
         </div>
         <div className="text-right">
-          <div className="text-lg font-black text-[#1E3063]">{completedCount}/{totalCount}</div>
+          <div className="text-lg font-black text-[#176B87]">{completedCount}/{totalCount}</div>
           {requiredCount > 0 && (
             <div className="text-[10px] text-slate-500">
               {requiredComplete}/{requiredCount} required
@@ -231,7 +231,7 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
   return (
     <div className="space-y-6">
       {/* Progress Header */}
-      <Card className="p-5 bg-gradient-to-r from-[#101935] to-[#1a2a4a] text-white border-none">
+      <Card className="p-5 bg-gradient-to-r from-[#0A3340] to-[#1a2a4a] text-white border-none">
         <div className="flex flex-col md:flex-row items-center gap-6">
           {/* Progress Ring */}
           <div className="relative w-24 h-24">

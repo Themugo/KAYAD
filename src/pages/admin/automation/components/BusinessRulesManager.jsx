@@ -9,8 +9,8 @@ import {
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -252,7 +252,7 @@ export default function BusinessRulesManager() {
   };
 
   return (
-    <div className="flex h-full bg-[#F6F1E8]">
+    <div className="flex h-full bg-[#EEF7F5]">
       {/* Rules List */}
       <div className={`${showBuilder ? 'w-1/2' : 'w-full'} bg-white border-r border-slate-200 flex flex-col transition-all`}>
         <div className="p-4 border-b border-slate-200">
@@ -272,7 +272,7 @@ export default function BusinessRulesManager() {
                 setSelectedRule(null);
                 setShowBuilder(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+              className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
             >
               <Plus size={18} />
               Create Rule
@@ -287,13 +287,13 @@ export default function BusinessRulesManager() {
                 placeholder="Search rules..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
               />
             </div>
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+              className="px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
             >
               <option value="all">All Categories</option>
               <option value="dealer">Dealer</option>
@@ -314,7 +314,7 @@ export default function BusinessRulesManager() {
               key={rule.id}
               onClick={() => setSelectedRule(rule)}
               className={`bg-white rounded-xl border-2 p-4 cursor-pointer transition-all ${
-                selectedRule?.id === rule.id ? 'border-[#17244B]' : 'border-slate-100 hover:border-slate-200'
+                selectedRule?.id === rule.id ? 'border-[#0A3340]' : 'border-slate-100 hover:border-slate-200'
               }`}
             >
               <div className="flex items-start justify-between mb-3">
@@ -390,7 +390,7 @@ export default function BusinessRulesManager() {
 
       {/* Rule Builder */}
       {showBuilder && (
-        <div className="w-1/2 flex flex-col bg-[#F6F1E8]">
+        <div className="w-1/2 flex flex-col bg-[#EEF7F5]">
           <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-800">
               {selectedRule ? 'Edit Rule' : 'Create New Rule'}
@@ -404,7 +404,7 @@ export default function BusinessRulesManager() {
               </button>
               <button
                 onClick={saveRule}
-                className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+                className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
               >
                 <Save size={18} />
                 {saving ? 'Saving…' : 'Save Rule'}
@@ -423,7 +423,7 @@ export default function BusinessRulesManager() {
                     type="text"
                     value={editingRule.name}
                     onChange={(e) => setEditingRule(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                     placeholder="Enter rule name"
                   />
                 </div>
@@ -432,7 +432,7 @@ export default function BusinessRulesManager() {
                   <textarea
                     value={editingRule.description}
                     onChange={(e) => setEditingRule(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none resize-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none resize-none"
                     rows={2}
                     placeholder="Describe what this rule does"
                   />
@@ -443,7 +443,7 @@ export default function BusinessRulesManager() {
                     <select
                       value={editingRule.category}
                       onChange={(e) => setEditingRule(prev => ({ ...prev, category: e.target.value }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                     >
                       <option value="dealer">Dealer</option>
                       <option value="vehicle">Vehicle</option>
@@ -459,7 +459,7 @@ export default function BusinessRulesManager() {
                     <select
                       value={editingRule.priority}
                       onChange={(e) => setEditingRule(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                     >
                       <option value="1">1 - Highest</option>
                       <option value="2">2 - High</option>
@@ -473,7 +473,7 @@ export default function BusinessRulesManager() {
                     <select
                       value={editingRule.status}
                       onChange={(e) => setEditingRule(prev => ({ ...prev, status: e.target.value }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                     >
                       <option value="draft">Draft</option>
                       <option value="active">Active</option>
@@ -490,7 +490,7 @@ export default function BusinessRulesManager() {
                 <h3 className="font-semibold text-slate-800">Conditions</h3>
                 <button
                   onClick={addCondition}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#17244B] hover:bg-[#17244B]/10 rounded-lg"
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#0A3340] hover:bg-[#0A3340]/10 rounded-lg"
                 >
                   <Plus size={16} />
                   Add Condition
@@ -553,7 +553,7 @@ export default function BusinessRulesManager() {
                 <h3 className="font-semibold text-slate-800">Actions</h3>
                 <button
                   onClick={addAction}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#17244B] hover:bg-[#17244B]/10 rounded-lg"
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#0A3340] hover:bg-[#0A3340]/10 rounded-lg"
                 >
                   <Plus size={16} />
                   Add Action

@@ -100,8 +100,8 @@ export const PhoneVerification: React.FC = () => {
     return (
       <div className="p-5 bg-white border border-slate-200 rounded-2xl">
         <div className="flex items-center gap-2 mb-2">
-          <Phone className="w-4 h-4 text-[#C85A32]" />
-          <h3 className="text-sm font-bold text-[#1E3063]">Phone Verification</h3>
+          <Phone className="w-4 h-4 text-[#176B87]" />
+          <h3 className="text-sm font-bold text-[#176B87]">Phone Verification</h3>
         </div>
         <p className="text-xs text-slate-500">Add a phone number to your account in Account Settings before you can verify it.</p>
       </div>
@@ -111,8 +111,8 @@ export const PhoneVerification: React.FC = () => {
   return (
     <div className="p-5 bg-white border border-slate-200 rounded-2xl space-y-4">
       <div className="flex items-center gap-2">
-        <Phone className="w-4 h-4 text-[#C85A32]" />
-        <h3 className="text-sm font-bold text-[#1E3063]">Phone Verification</h3>
+        <Phone className="w-4 h-4 text-[#176B87]" />
+        <h3 className="text-sm font-bold text-[#176B87]">Phone Verification</h3>
       </div>
       <p className="text-xs text-slate-500">
         Verify <span className="font-semibold text-slate-700">{phone}</span> to add a real trust badge to your listings.
@@ -128,7 +128,7 @@ export const PhoneVerification: React.FC = () => {
         <button
           onClick={handleSendCode}
           disabled={sending}
-          className="bg-[#1E3063] hover:bg-[#17244B] text-white text-xs font-bold rounded-lg px-4 py-2.5 disabled:opacity-50"
+          className="bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2.5 disabled:opacity-50"
         >
           {sending ? 'Sending…' : 'Send Verification Code'}
         </button>
@@ -151,7 +151,7 @@ export const PhoneVerification: React.FC = () => {
             <button
               type="submit"
               disabled={verifying}
-              className="bg-[#1E3063] hover:bg-[#17244B] text-white text-xs font-bold rounded-lg px-4 py-2.5 disabled:opacity-50"
+              className="bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2.5 disabled:opacity-50"
             >
               {verifying ? 'Verifying…' : 'Verify'}
             </button>
@@ -159,7 +159,7 @@ export const PhoneVerification: React.FC = () => {
               type="button"
               onClick={handleSendCode}
               disabled={sending}
-              className="text-xs font-bold text-[#C85A32] hover:underline disabled:opacity-50"
+              className="text-xs font-bold text-[#176B87] hover:underline disabled:opacity-50"
             >
               {sending ? 'Resending…' : 'Resend code'}
             </button>

@@ -7,8 +7,8 @@ import {
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -89,14 +89,14 @@ export default function PublishingCalendar() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#17244B] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3340] flex items-center justify-center">
                   <Calendar size={20} className="text-white" />
                 </div>
                 <div>
@@ -108,7 +108,7 @@ export default function PublishingCalendar() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowEventModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+                className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
               >
                 <Plus size={18} />
                 Schedule Content
@@ -170,9 +170,9 @@ export default function PublishingCalendar() {
               return (
                 <div
                   key={index}
-                  className={`min-h-[120px] border-b border-r border-slate-100 p-2 ${!day.isCurrentMonth ? 'bg-slate-50' : 'bg-white hover:bg-slate-50/50'} ${day.isToday ? 'ring-2 ring-inset ring-[#17244B]' : ''}`}
+                  className={`min-h-[120px] border-b border-r border-slate-100 p-2 ${!day.isCurrentMonth ? 'bg-slate-50' : 'bg-white hover:bg-slate-50/50'} ${day.isToday ? 'ring-2 ring-inset ring-[#0A3340]' : ''}`}
                 >
-                  <div className={`text-sm font-medium mb-1 ${!day.isCurrentMonth ? 'text-slate-300' : day.isToday ? 'text-[#17244B]' : 'text-slate-700'}`}>
+                  <div className={`text-sm font-medium mb-1 ${!day.isCurrentMonth ? 'text-slate-300' : day.isToday ? 'text-[#0A3340]' : 'text-slate-700'}`}>
                     {day.date.getDate()}
                   </div>
                   <div className="space-y-1">
@@ -274,13 +274,13 @@ export default function PublishingCalendar() {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Content Title</label>
                 <input
                   type="text"
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                   placeholder="Enter content title"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Content Type</label>
-                <select className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none">
+                <select className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none">
                   {Object.entries(contentTypes).map(([key, type]) => (
                     <option key={key} value={key}>{type?.label}</option>
                   ))}
@@ -291,14 +291,14 @@ export default function PublishingCalendar() {
                   <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
                   <input
                     type="date"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Time</label>
                   <input
                     type="time"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#17244B] outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
                   />
                 </div>
               </div>
@@ -310,7 +310,7 @@ export default function PublishingCalendar() {
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+              <button className="px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
                 Schedule
               </button>
             </div>

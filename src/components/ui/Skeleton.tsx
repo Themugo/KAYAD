@@ -274,7 +274,7 @@ export function EmptyState({
       )}
 
       {typeof action === 'function' ? (
-        <button type="button" className="mt-2 rounded-xl bg-[#1E3063] px-4 py-2.5 text-xs font-bold text-white" onClick={action}>
+        <button type="button" className="mt-2 rounded-xl bg-[#176B87] px-4 py-2.5 text-xs font-bold text-white" onClick={action}>
           {actionLabel || 'Continue'}
         </button>
       ) : action ? <div className="mt-2">{action}</div> : null}
@@ -288,7 +288,7 @@ export function EmptyState({
 
 export function FeaturedVehiclesSkeleton() {
   return (
-    <section className="bg-[#FCF9F4] py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
+    <section className="bg-[#F6FAF9] py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
         <div className="text-center space-y-3">
           <div className="h-6 w-40 bg-warm-200 rounded-full mx-auto animate-pulse" />
@@ -296,7 +296,7 @@ export function FeaturedVehiclesSkeleton() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-3xl overflow-hidden border border-[#E8E1D5] bg-white">
+            <div key={i} className="rounded-3xl overflow-hidden border border-[#D7E7E4] bg-white">
               <div className="h-40 bg-warm-200 animate-pulse" />
               <div className="p-4 space-y-2">
                 <div className="h-4 w-3/4 bg-warm-200 rounded animate-pulse" />
@@ -312,12 +312,12 @@ export function FeaturedVehiclesSkeleton() {
 
 export function LiveAuctionsSkeleton() {
   return (
-    <section className="py-10 sm:py-14 bg-[#F6F1E8] px-4 sm:px-6 lg:px-8">
+    <section className="py-10 sm:py-14 bg-[#EEF7F5] px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
         <div className="h-8 w-72 bg-warm-200 rounded animate-pulse" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="rounded-3xl overflow-hidden border border-[#E2D8C7] bg-white grid grid-cols-1 md:grid-cols-2">
+            <div key={i} className="rounded-3xl overflow-hidden border border-[#D7E7E4] bg-white grid grid-cols-1 md:grid-cols-2">
               <div className="h-64 bg-warm-200 animate-pulse" />
               <div className="p-6 space-y-3">
                 <div className="h-4 w-1/2 bg-warm-200 rounded animate-pulse" />

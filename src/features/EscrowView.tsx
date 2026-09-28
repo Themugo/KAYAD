@@ -314,10 +314,10 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
   const currentContext = selectedDeal ? getWorkflowContext(selectedDeal) : null;
 
   return (
-    <div className="space-y-6 bg-[#FDFBF7] min-h-screen pb-12">
+    <div className="space-y-6 bg-[#F6FAF9] min-h-screen pb-12">
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-[#1E3063] text-white px-4 py-3 rounded-2xl shadow-xl border border-amber-400/40 flex items-center gap-2 animate-bounce">
+        <div className="fixed top-20 right-6 z-50 bg-[#176B87] text-white px-4 py-3 rounded-2xl shadow-xl border border-amber-400/40 flex items-center gap-2 animate-bounce">
           <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
           <span className="text-xs font-bold">{toastMessage}</span>
         </div>
@@ -335,7 +335,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               variant={activeTab === 'journey' ? 'primary' : 'outline'}
               size="md"
               onClick={() => setActiveTab('journey')}
-              className="bg-[#1E3063] text-white font-bold"
+              className="bg-[#176B87] text-white font-bold"
             >
               <Lock className="w-4 h-4 text-amber-400" />
               <span>Escrow Purchase Journey</span>
@@ -355,7 +355,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               onClick={() => setActiveTab('create')}
               className="font-bold text-slate-700"
             >
-              <PlusCircle className="w-4 h-4 text-[#C85A32]" />
+              <PlusCircle className="w-4 h-4 text-[#176B87]" />
               <span>Escrow Flow</span>
             </Button>
           </div>
@@ -399,7 +399,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
 
       <Card className="p-4 border border-slate-200 bg-white">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-          <UserCheck className="w-4 h-4 text-[#1E3063]" />
+          <UserCheck className="w-4 h-4 text-[#176B87]" />
           <span>Current perspective: {userRole}</span>
           <span className="font-normal text-slate-500">(derived from the signed-in user and selected real escrow)</span>
         </div>
@@ -410,8 +410,8 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         <div className="space-y-6">
           {/* DEAL SELECTOR ROW */}
           <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#1E3063] shrink-0">
-              <Car className="w-4 h-4 text-[#C85A32]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-[#176B87] shrink-0">
+              <Car className="w-4 h-4 text-[#176B87]" />
               <span>Select Active Deal:</span>
             </div>
 
@@ -422,7 +422,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                   onClick={() => setSelectedDealId(d.id)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-extrabold shrink-0 border transition-all flex items-center gap-2 ${
                     selectedDeal?.id === d.id
-                      ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
+                      ? 'bg-[#176B87] text-white border-[#176B87] shadow-xs'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
@@ -437,7 +437,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
           </div>
 
           {/* 1. SINGLE CLEAR TRANSACTION STATUS BANNER */}
-          <Card className="p-5 bg-gradient-to-r from-[#1E3063] via-[#17244B] to-slate-900 text-white border border-slate-700 shadow-md space-y-3">
+          <Card className="p-5 bg-gradient-to-r from-[#176B87] via-[#0A3340] to-slate-900 text-white border border-slate-700 shadow-md space-y-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <Badge variant={currentContext.badgeVariant} size="md">
@@ -508,7 +508,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
           {/* 2. VISUAL ESCROW TIMELINE STEPPER */}
           <Card className="p-6 bg-white border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+              <h3 className="text-sm font-extrabold text-[#176B87] font-display flex items-center gap-2">
                 <ShieldCheck className="w-4.5 h-4.5 text-emerald-600" />
                 Package-Tracking Visual Escrow Progress Timeline
               </h3>
@@ -539,7 +539,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                           isDone
                             ? 'bg-emerald-600 text-white'
                             : isCurrent
-                            ? 'bg-[#1E3063] text-amber-300'
+                            ? 'bg-[#176B87] text-amber-300'
                             : 'bg-slate-200 text-slate-500'
                         }`}>
                           {isDone ? <Check className="w-3.5 h-3.5" /> : st.step}
@@ -551,7 +551,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                       </div>
 
                       <p className={`font-extrabold text-xs font-display ${
-                        isDone ? 'text-emerald-950' : isCurrent ? 'text-[#1E3063]' : 'text-slate-600'
+                        isDone ? 'text-emerald-950' : isCurrent ? 'text-[#176B87]' : 'text-slate-600'
                       }`}>
                         {st.title}
                       </p>
@@ -578,8 +578,8 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               {/* VEHICLE SUMMARY CARD */}
               {realUserRole && <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
-                    <Car className="w-4.5 h-4.5 text-[#C85A32]" />
+                  <h3 className="text-sm font-extrabold text-[#176B87] font-display flex items-center gap-2">
+                    <Car className="w-4.5 h-4.5 text-[#176B87]" />
                     Protected Vehicle Item Summary
                   </h3>
                   <Badge variant="neutral" size="sm" className="font-mono">
@@ -604,13 +604,13 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                   <div className="space-y-2 flex-1 text-xs">
                     <div>
                       <span className="text-[10px] text-slate-400 font-bold uppercase">Vehicle Title</span>
-                      <h4 className="text-lg font-black text-[#1E3063] font-display">{selectedDeal.vehicleTitle}</h4>
+                      <h4 className="text-lg font-black text-[#176B87] font-display">{selectedDeal.vehicleTitle}</h4>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-1">
                       <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                         <p className="text-[10px] text-slate-400 font-bold uppercase">Agreed Sale Price</p>
-                        <p className="text-base font-black text-[#1E3063]">
+                        <p className="text-base font-black text-[#176B87]">
                           Ksh {selectedDeal.amount.toLocaleString()}
                         </p>
                       </div>
@@ -635,7 +635,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               {/* PAYMENT & CUSTODY SECTION */}
               <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-[#176B87] font-display flex items-center gap-2">
                     <Landmark className="w-4.5 h-4.5 text-emerald-600" />
                     Custodial Payment Details & Vault Balance
                   </h3>
@@ -647,13 +647,13 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Deposit Date & Time</p>
-                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.depositDate ? new Date(selectedDeal.depositDate).toLocaleString() : 'Not yet deposited'}</p>
+                    <p className="font-extrabold text-[#176B87]">{selectedDeal.depositDate ? new Date(selectedDeal.depositDate).toLocaleString() : 'Not yet deposited'}</p>
                     <p className="text-[10px] text-slate-500">Timestamped Audit Record</p>
                   </div>
 
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Payment Channel</p>
-                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.paymentMethod || 'Payment method not provided'}</p>
+                    <p className="font-extrabold text-[#176B87]">{selectedDeal.paymentMethod || 'Payment method not provided'}</p>
                     {/* Only display a payment reference when the backend actually returns one. */}
                     {selectedDeal.bankReference && (
                       <p className="text-[10px] text-slate-500">Ref: {selectedDeal.bankReference}</p>
@@ -687,7 +687,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               {/* ROLE-AWARE CONTEXTUAL ACTION BUTTONS PANEL */}
               {realUserRole && <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-[#176B87] font-display flex items-center gap-2">
                     <UserCheck className="w-4 h-4 text-amber-500" />
                     {userRole} Contextual Workflow Actions
                   </h3>
@@ -740,7 +740,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                               triggerToast(err instanceof EscrowApiError ? err.message : 'Could not submit the release request. Please try again.');
                             }
                           }}
-                          className="bg-[#1E3063] text-white font-extrabold shadow-xs"
+                          className="bg-[#176B87] text-white font-extrabold shadow-xs"
                         >
                           <Lock className="w-4 h-4 text-amber-300" />
                           <span>Request Release of Escrow Funds</span>
@@ -779,7 +779,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                               triggerToast(err instanceof EscrowApiError ? err.message : 'Could not confirm delivery. Please try again.');
                             }
                           }}
-                          className="bg-[#1E3063] text-white font-extrabold shadow-xs"
+                          className="bg-[#176B87] text-white font-extrabold shadow-xs"
                         >
                           <CheckCircle2 className="w-4 h-4 text-amber-300" />
                           <span>Confirm Vehicle Delivery</span>
@@ -844,9 +844,9 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                               triggerToast(err instanceof EscrowApiError ? err.message : 'Could not release funds. Please try again.');
                             }
                           }}
-                          className="bg-amber-100 text-[#17244B] border border-amber-300 font-bold"
+                          className="bg-amber-100 text-[#0A3340] border border-amber-300 font-bold"
                         >
-                          <ShieldCheck className="w-4 h-4 text-[#C85A32]" />
+                          <ShieldCheck className="w-4 h-4 text-[#176B87]" />
                           <span>Resolve Dispute & Release Funds</span>
                         </Button>
                       )}
@@ -882,7 +882,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                     <div className="space-y-1.5">
                       {selectedDeal.dispute.evidence.map((ev, i) => (
                         <div key={i} className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between text-[11px]">
-                          <span className="font-bold text-[#1E3063] flex items-center gap-1.5">
+                          <span className="font-bold text-[#176B87] flex items-center gap-1.5">
                             <FileText className="w-3.5 h-3.5 text-blue-600" />
                             {ev.title}
                           </span>
@@ -923,7 +923,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               ) : (
                 <Card className="p-5 bg-slate-50 border border-slate-200 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-extrabold text-[#1E3063] font-display flex items-center gap-1.5">
+                    <h4 className="text-xs font-extrabold text-[#176B87] font-display flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
                       Dispute Guarantee Shield Active
                     </h4>
@@ -940,7 +940,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               {/* NOTIFICATIONS & AUDIT TIMELINE LOG */}
               {realUserRole && <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-[#176B87] font-display flex items-center gap-2">
                     <History className="w-4.5 h-4.5 text-blue-600" />
                     Transaction Activity & Notification Audit Log
                   </h3>
@@ -964,7 +964,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
 
                       <div className="space-y-0.5 flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="font-extrabold text-[#1E3063]">{log.title}</p>
+                          <p className="font-extrabold text-[#176B87]">{log.title}</p>
                           <span className="text-[10px] text-slate-400 font-mono">{log.timestamp}</span>
                         </div>
                         <p className="text-[11px] text-slate-600 leading-relaxed">{log.description}</p>
@@ -976,12 +976,12 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               </Card>}
 
               {/* SUPPORT CONTACT SHORTCUT */}
-              <div className="p-4 bg-[#1E3063] text-white rounded-2xl border border-slate-700 flex items-center justify-between gap-3 text-xs">
+              <div className="p-4 bg-[#176B87] text-white rounded-2xl border border-slate-700 flex items-center justify-between gap-3 text-xs">
                 <div>
                   <p className="font-extrabold text-amber-300 font-display">Need escrow assistance?</p>
                   <p className="text-[11px] text-slate-300">Open the real KAYAD support workflow to create or review a support case.</p>
                 </div>
-                <a href="/support" className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3 py-2 text-[11px] font-black text-[#17244B] hover:bg-amber-300 shrink-0">
+                <a href="/support" className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3 py-2 text-[11px] font-black text-[#0A3340] hover:bg-amber-300 shrink-0">
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Contact Support</span>
                 </a>
@@ -1016,7 +1016,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
 
           <Card className="overflow-hidden bg-white border border-slate-200">
             <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 flex flex-row items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2 text-[#1E3063]">
+              <CardTitle className="text-base flex items-center gap-2 text-[#176B87]">
                 <Lock className="w-4 h-4 text-amber-500" />
                 Live Escrow Vault Transaction Queue ({filteredDeals.length})
               </CardTitle>
@@ -1041,8 +1041,8 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                       selectedDeal?.id === d.id ? 'bg-amber-50/50' : ''
                     }`}
                   >
-                    <TableCell className="font-mono font-extrabold text-xs text-[#1E3063]">{d.id}</TableCell>
-                    <TableCell className="font-extrabold text-xs text-[#1E3063]">{d.vehicleTitle}</TableCell>
+                    <TableCell className="font-mono font-extrabold text-xs text-[#176B87]">{d.id}</TableCell>
+                    <TableCell className="font-extrabold text-xs text-[#176B87]">{d.vehicleTitle}</TableCell>
                     <TableCell className="font-black text-xs text-slate-900">Ksh {d.amount.toLocaleString()}</TableCell>
                     <TableCell className="font-medium text-xs text-slate-600">
                       <div className="space-y-0.5">
@@ -1095,7 +1095,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
       {activeTab === 'create' && (
         <Card className="p-6 max-w-3xl mx-auto space-y-4 bg-white border border-slate-200">
           <Badge variant="escrow" size="md"><Lock className="w-4 h-4 text-amber-500" /> Escrow Flow</Badge>
-          <h3 className="text-2xl font-black text-[#1E3063] font-display">How a real KAYAD escrow starts</h3>
+          <h3 className="text-2xl font-black text-[#176B87] font-display">How a real KAYAD escrow starts</h3>
           <p className="text-xs text-slate-600 leading-relaxed">A standalone escrow agreement cannot be created from this screen. The backend creates and persists escrow records inside the real purchase/payment workflow.</p>
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-xs text-slate-700 space-y-2">
             <p><strong>1.</strong> A real vehicle purchase/payment flow creates the transaction.</p>
@@ -1127,7 +1127,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-extrabold text-[#1E3063]">Reason for Dispute</label>
+              <label className="font-extrabold text-[#176B87]">Reason for Dispute</label>
               <textarea
                 rows={4}
                 placeholder="Describe the defect, unmentioned issue, or non-compliance found during inspection..."
@@ -1138,7 +1138,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
             </div>
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 space-y-1">
-              <p className="font-bold text-[#1E3063]">Automatic Evidence Attached:</p>
+              <p className="font-bold text-[#176B87]">Automatic Evidence Attached:</p>
               <p>✓ 150-Point Mechanic Inspection Audit Log</p>
               <p>✓ KAYAD Escrow Vault Bank Deposit Statement</p>
             </div>

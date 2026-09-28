@@ -39,7 +39,7 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
           </div>
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-2">
-              <h4 className="font-black text-[#1E3063] text-sm">Buyer Protection Notice</h4>
+              <h4 className="font-black text-[#176B87] text-sm">Buyer Protection Notice</h4>
               <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
                 ACTIVE
               </span>
@@ -73,8 +73,8 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
   return (
     <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
       <div className="flex items-center gap-2">
-        <Shield className="w-5 h-5 text-[#1E3063]" />
-        <span className="font-black text-sm text-[#1E3063]">Auction Transparency Notice</span>
+        <Shield className="w-5 h-5 text-[#176B87]" />
+        <span className="font-black text-sm text-[#176B87]">Auction Transparency Notice</span>
       </div>
       <p className="text-xs text-slate-600 leading-relaxed">
         {showReadMore ? fullText : baseText}

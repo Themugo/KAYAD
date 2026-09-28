@@ -26,7 +26,7 @@ export function PriceTag({ value = 0, size = 'md', sub }: { value?: number; size
   const sizes = { sm: 'text-sm', md: 'text-xl', lg: 'text-2xl' };
   return (
     <div>
-      <div className={`font-black text-[#1E3063] ${sizes[size]}`}>KES {Number(value || 0).toLocaleString('en-KE')}</div>
+      <div className={`font-black text-[#176B87] ${sizes[size]}`}>KES {Number(value || 0).toLocaleString('en-KE')}</div>
       {sub && <div className="text-xs text-slate-500 mt-1">{sub}</div>}
     </div>
   );
@@ -43,7 +43,7 @@ export function MapPlaceholder({ label = 'Location unavailable', pin = '📍', h
 export function FilterChip({ label, active = false, onToggle, onRemove }: { label: string; active?: boolean; onToggle?: () => void; onRemove?: () => void }) {
   return (
     <button type="button" onClick={onToggle || onRemove} aria-pressed={active}
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${active ? 'border-[#1E3063] bg-[#1E3063] text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${active ? 'border-[#176B87] bg-[#176B87] text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
       {label}{active && onRemove && <span aria-hidden="true">×</span>}
     </button>
   );
@@ -65,7 +65,7 @@ export function Segmented({ options, value, onChange }: { options: Array<{ id: s
     <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1" role="group">
       {options.map(option => (
         <button key={option.id} type="button" onClick={() => onChange(option.id)} aria-pressed={value === option.id}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold ${value === option.id ? 'bg-[#1E3063] text-white' : 'text-slate-500 hover:bg-slate-50'}`}>
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold ${value === option.id ? 'bg-[#176B87] text-white' : 'text-slate-500 hover:bg-slate-50'}`}>
           {option.icon}{option.label && <span className="ml-1">{option.label}</span>}
         </button>
       ))}
@@ -88,5 +88,5 @@ export function Drawer({ open, onClose, title, children, footer }: { open: boole
 }
 
 export function StatCard({ icon, label, value }: { icon?: React.ReactNode; label: string; value: React.ReactNode }) {
-  return <div className="rounded-xl border border-slate-200 bg-white p-4"><div className="text-xs text-slate-500">{icon} {label}</div><div className="mt-1 text-xl font-black text-[#1E3063]">{value}</div></div>;
+  return <div className="rounded-xl border border-slate-200 bg-white p-4"><div className="text-xs text-slate-500">{icon} {label}</div><div className="mt-1 text-xl font-black text-[#176B87]">{value}</div></div>;
 }

@@ -307,7 +307,7 @@ function AppInner() {
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#EEF7F5] text-slate-800 flex flex-col font-sans">
       {/* 0. Top notice/advertisement strip - real, backend-driven,
           admin-managed entirely through the Ad Manager panel, no code
           changes needed to add/edit/recolor/remove an entry. */}
@@ -512,10 +512,10 @@ function AppInner() {
         </main>
 
       {/* 3. Footer */}
-      <footer className="bg-[#17244B] text-slate-300 text-xs py-8 border-t border-navy-600/40 mt-12">
+      <footer className="bg-[#0A3340] text-slate-300 text-xs py-8 border-t border-navy-600/40 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-400 text-[#17244B] font-black flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-amber-400 text-[#0A3340] font-black flex items-center justify-center">
               K
             </div>
             <div>

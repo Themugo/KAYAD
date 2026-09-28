@@ -72,7 +72,7 @@ export default function AddCarStepPricing({ form, set, user }) {
                 background: form[opt.key] ? 'var(--gold)' : 'transparent',
                 border: `2px solid ${form[opt.key] ? 'var(--gold)' : 'var(--border)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#0A1628', fontSize: 12, fontWeight: 700,
+                color: '#0A3340', fontSize: 12, fontWeight: 700,
               }}>
                 {form[opt.key] && '✓'}
               </div>

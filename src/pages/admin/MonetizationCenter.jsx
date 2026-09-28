@@ -73,7 +73,7 @@ export default function MonetizationCenter() {
             background: 'linear-gradient(135deg, var(--gold), #e6c288)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <DollarSign size={24} style={{ color: '#0A1628' }} />
+            <DollarSign size={24} style={{ color: '#0A3340' }} />
           </div>
           <div>
             <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
@@ -144,7 +144,7 @@ export default function MonetizationCenter() {
           style={{
             padding: '12px 32px', borderRadius: 10, fontWeight: 700, fontSize: 14,
             background: 'linear-gradient(135deg, var(--gold), #e6c288)',
-            color: '#0A1628', border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
+            color: '#0A3340', border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
             transition: 'all 0.2s', opacity: saving ? 0.6 : 1,
           }}
           onMouseEnter={e => { if (!saving) e.currentTarget.style.opacity = '0.9'; }}

@@ -11,8 +11,8 @@ import {
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -86,7 +86,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
     switch (block.type) {
       case 'hero':
         return (
-          <div className="bg-gradient-to-r from-[#17244B] to-[#2a3d6b] rounded-lg p-8 text-white">
+          <div className="bg-gradient-to-r from-[#0A3340] to-[#2a3d6b] rounded-lg p-8 text-white">
             <h1 className="text-3xl font-bold mb-2">{block.props.title}</h1>
             <p className="text-lg opacity-90 mb-4">{block.props.subtitle}</p>
             <button className="px-6 py-2 bg-[#C77B58] rounded-lg font-medium hover:bg-[#b06a48] transition-colors">
@@ -117,8 +117,8 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
         );
       case 'button': {
         const buttonStyles = {
-          primary: 'bg-[#17244B] text-white hover:bg-[#1e3054]',
-          secondary: 'bg-white text-[#17244B] border border-[#17244B] hover:bg-slate-50',
+          primary: 'bg-[#0A3340] text-white hover:bg-[#12576D]',
+          secondary: 'bg-white text-[#0A3340] border border-[#0A3340] hover:bg-slate-50',
           accent: 'bg-[#C77B58] text-white hover:bg-[#b06a48]',
         };
         return (
@@ -149,7 +149,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {(block.props.stats || []).map((stat, i) => (
                 <div key={i} className="text-center">
-                  <div className="text-3xl font-bold text-[#17244B]">{stat.value}</div>
+                  <div className="text-3xl font-bold text-[#0A3340]">{stat.value}</div>
                   <div className="text-sm text-slate-500">{stat.label}</div>
                 </div>
               ))}
@@ -190,10 +190,10 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
   };
 
   return (
-    <div onClick={onSelect} className={`group relative rounded-lg border-2 transition-all cursor-pointer ${isSelected ? 'border-[#C77B58] ring-2 ring-[#C77B58]/20' : isEditing ? 'border-[#17244B] ring-2 ring-[#17244B]/20' : 'border-transparent hover:border-slate-200'}`}>
+    <div onClick={onSelect} className={`group relative rounded-lg border-2 transition-all cursor-pointer ${isSelected ? 'border-[#C77B58] ring-2 ring-[#C77B58]/20' : isEditing ? 'border-[#0A3340] ring-2 ring-[#0A3340]/20' : 'border-transparent hover:border-slate-200'}`}>
       {/* Block Controls */}
       {isEditing && (
-        <div className="absolute -top-12 left-0 right-0 flex items-center justify-between bg-[#17244B] rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="absolute -top-12 left-0 right-0 flex items-center justify-between bg-[#0A3340] rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <div className="flex items-center gap-1">
             <button className="p-1.5 rounded hover:bg-white/20 text-white" title="Drag to reorder">
               <GripVertical size={14} />
@@ -349,7 +349,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
   })).filter(category => category.blocks.length > 0);
 
   return (
-    <div className="flex h-screen bg-[#F6F1E8]">
+    <div className="flex h-screen bg-[#EEF7F5]">
       {/* Block Library Panel */}
       <aside className="w-72 bg-white border-r border-slate-200 flex flex-col">
         <div className="p-4 border-b border-slate-200">
@@ -361,7 +361,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
               placeholder="Search blocks..."
               value={searchBlocks}
               onChange={(e) => setSearchBlocks(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+              className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
             />
           </div>
         </div>
@@ -379,7 +379,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
                     <button
                       key={block.type}
                       onClick={() => addBlock(block.type)}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#17244B] hover:bg-[#17244B]/5 transition-all text-left"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
                     >
                       <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
                         <Icon size={16} className="text-slate-600" />
@@ -419,7 +419,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
             <div className="w-px h-6 bg-slate-200 mx-2" />
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isEditing ? 'bg-[#17244B] text-white' : 'bg-slate-100 text-slate-600'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isEditing ? 'bg-[#0A3340] text-white' : 'bg-slate-100 text-slate-600'}`}
             >
               {isEditing ? 'Editing' : 'Viewing'}
             </button>
@@ -456,7 +456,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
               <Eye size={16} />
               Preview
             </button>
-            <button onClick={savePage} disabled={saving || !page?.id} className="px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] flex items-center gap-2 text-sm font-medium disabled:opacity-40">
+            <button onClick={savePage} disabled={saving || !page?.id} className="px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] flex items-center gap-2 text-sm font-medium disabled:opacity-40">
               <Save size={16} />
               {saving ? 'Saving…' : 'Save Page'}
             </button>
@@ -532,7 +532,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
                       type="text"
                       value={value}
                       onChange={(e) => updateBlock(selectedBlock, { [key]: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                     />
                   )
                 ) : typeof value === 'boolean' ? (
@@ -550,7 +550,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
                     type="number"
                     value={value}
                     onChange={(e) => updateBlock(selectedBlock, { [key]: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                   />
                 ) : (
                   <pre className="text-xs bg-slate-50 p-2 rounded overflow-auto">

@@ -12,8 +12,8 @@ import * as dtApi from '../../../services/digitalTwinApi';
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -189,7 +189,7 @@ export default function DigitalTwinCenter() {
         <h2 className="text-2xl font-bold text-slate-800">Executive Decision Dashboard</h2>
         <button
           onClick={() => setActiveModule('whatif')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
         >
           <Lightbulb size={18} />
           Ask What-If
@@ -222,7 +222,7 @@ export default function DigitalTwinCenter() {
             <button
               key={type.id}
               onClick={() => handleRunSimulation(type.id)}
-              className="p-4 rounded-xl border border-slate-200 hover:border-[#17244B] transition-colors text-left"
+              className="p-4 rounded-xl border border-slate-200 hover:border-[#0A3340] transition-colors text-left"
             >
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${type.color}20` }}>
                 <type.icon size={24} style={{ color: type.color }} />
@@ -274,7 +274,7 @@ export default function DigitalTwinCenter() {
       </div>
 
       {/* AI Recommendations */}
-      <div className="bg-gradient-to-r from-[#17244B] to-[#2a3a6e] rounded-xl p-6 text-white">
+      <div className="bg-gradient-to-r from-[#0A3340] to-[#2a3a6e] rounded-xl p-6 text-white">
         <div className="flex items-center gap-3 mb-4">
           <Sparkles size={24} />
           <h3 className="font-semibold text-lg">AI Decision Recommendations</h3>
@@ -321,7 +321,7 @@ export default function DigitalTwinCenter() {
         </div>
         <button
           onClick={() => handleRunSimulation(type)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]"
         >
           <Play size={18} />
           Run Simulation
@@ -367,7 +367,7 @@ export default function DigitalTwinCenter() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">Scenario Library</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054]">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D]">
           <Plus size={18} />
           New Scenario
         </button>
@@ -378,17 +378,17 @@ export default function DigitalTwinCenter() {
         <h3 className="font-semibold text-slate-800 mb-4">Ready-to-Run Templates</h3>
         <div className="grid grid-cols-3 gap-4">
           {templates.map((template) => (
-            <div key={template.id} className="p-4 border border-slate-200 rounded-xl hover:border-[#17244B] cursor-pointer transition-colors">
+            <div key={template.id} className="p-4 border border-slate-200 rounded-xl hover:border-[#0A3340] cursor-pointer transition-colors">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-[#17244B]/10 flex items-center justify-center">
-                  <BookOpen size={16} className="text-[#17244B]" />
+                <div className="w-8 h-8 rounded-lg bg-[#0A3340]/10 flex items-center justify-center">
+                  <BookOpen size={16} className="text-[#0A3340]" />
                 </div>
                 <h4 className="font-medium text-slate-800">{template.name}</h4>
               </div>
               <p className="text-sm text-slate-500 mb-3">{template.description}</p>
               <button
                 onClick={() => handleRunScenario(template.id)}
-                className="w-full px-3 py-2 bg-[#17244B] text-white rounded-lg text-sm hover:bg-[#1e3054]"
+                className="w-full px-3 py-2 bg-[#0A3340] text-white rounded-lg text-sm hover:bg-[#12576D]"
               >
                 Run Scenario
               </button>
@@ -411,7 +411,7 @@ export default function DigitalTwinCenter() {
                 <span className="text-sm text-slate-500">{scenario.usageCount || 0} runs</span>
                 <button
                   onClick={() => handleRunScenario(scenario.id)}
-                  className="px-3 py-1.5 bg-[#17244B] text-white rounded-lg text-sm hover:bg-[#1e3054]"
+                  className="px-3 py-1.5 bg-[#0A3340] text-white rounded-lg text-sm hover:bg-[#12576D]"
                 >
                   Run
                 </button>
@@ -442,12 +442,12 @@ export default function DigitalTwinCenter() {
             onChange={(e) => setWhatIfQuestion(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleWhatIf()}
             placeholder="e.g., What happens if we launch Uganda next month?"
-            className="flex-1 px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#17244B]"
+            className="flex-1 px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A3340]"
           />
           <button
             onClick={handleWhatIf}
             disabled={loading || !whatIfQuestion.trim()}
-            className="px-6 py-3 bg-[#17244B] text-white rounded-xl hover:bg-[#1e3054] disabled:opacity-50"
+            className="px-6 py-3 bg-[#0A3340] text-white rounded-xl hover:bg-[#12576D] disabled:opacity-50"
           >
             {loading ? 'Analyzing...' : 'Analyze'}
           </button>
@@ -620,7 +620,7 @@ export default function DigitalTwinCenter() {
           { name: 'Market Trends', icon: LineChart, color: colors.purple },
           { name: 'Risk Analysis', icon: AlertTriangle, color: colors.mutedCrimson },
         ].map((type, i) => (
-          <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 cursor-pointer hover:border-[#17244B]">
+          <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 cursor-pointer hover:border-[#0A3340]">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: `${type.color}20` }}>
               <type.icon size={20} style={{ color: type.color }} />
             </div>
@@ -640,13 +640,13 @@ export default function DigitalTwinCenter() {
           ].map((pred, i) => (
             <div key={i} className="p-4 bg-slate-50 rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="px-2 py-0.5 bg-[#17244B]/10 text-[#17244B] rounded text-xs font-medium capitalize">{pred.type}</span>
+                <span className="px-2 py-0.5 bg-[#0A3340]/10 text-[#0A3340] rounded text-xs font-medium capitalize">{pred.type}</span>
                 <span className="text-xs text-slate-500">{pred.date}</span>
               </div>
               <p className="text-sm text-slate-700 mb-2">{pred.prediction}</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-slate-200 rounded-full h-2">
-                  <div className="bg-[#17244B] h-2 rounded-full" style={{ width: `${pred.confidence}%` }} />
+                  <div className="bg-[#0A3340] h-2 rounded-full" style={{ width: `${pred.confidence}%` }} />
                 </div>
                 <span className="text-xs font-medium text-slate-600">{pred.confidence}%</span>
               </div>
@@ -674,14 +674,14 @@ export default function DigitalTwinCenter() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E8]">
+    <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#17244B] to-[#2a3a6e] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0A3340] to-[#2a3a6e] flex items-center justify-center">
                   <Binary size={20} className="text-white" />
                 </div>
                 <div>
@@ -716,7 +716,7 @@ export default function DigitalTwinCenter() {
                   onClick={() => setActiveModule(mod.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-[#17244B] text-white'
+                      ? 'bg-[#0A3340] text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >

@@ -49,7 +49,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
           )}
           <div className="flex-1 space-y-4">
             <div>
-              <h4 className="font-black text-[#1E3063] text-lg mb-2">
+              <h4 className="font-black text-[#176B87] text-lg mb-2">
                 Auction Transparency Notice
               </h4>
               <p className="text-sm text-slate-700 leading-relaxed">
@@ -111,11 +111,11 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
             </div>
 
             {/* Important Notice */}
-            <div className="p-4 bg-[#1E3063]/5 rounded-lg border border-[#1E3063]/20">
+            <div className="p-4 bg-[#176B87]/5 rounded-lg border border-[#176B87]/20">
               <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-[#1E3063] flex-shrink-0 mt-0.5" />
+                <Info className="w-5 h-5 text-[#176B87] flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold text-[#1E3063] mb-1">
+                  <p className="text-sm font-bold text-[#176B87] mb-1">
                     Important Payment Information
                   </p>
                   <p className="text-xs text-slate-600 leading-relaxed">
@@ -143,7 +143,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
           </div>
         )}
         <div className="flex-1">
-          <h4 className="font-bold text-[#1E3063] mb-2">
+          <h4 className="font-bold text-[#176B87] mb-2">
             Auction Disclaimer
           </h4>
           <div className="space-y-2 text-sm text-slate-600">

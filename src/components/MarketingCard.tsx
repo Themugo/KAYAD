@@ -14,7 +14,7 @@ export interface MarketingCardData {
   ctaLabel: string;
   ctaUrl?: string;
   icon: LucideIcon;
-  /** Tailwind color token, e.g. '#1E3063' or 'emerald' - used for the
+  /** Tailwind color token, e.g. '#176B87' or 'emerald' - used for the
    * icon badge and accent border so different sponsor categories are
    * visually distinguishable from each other, not just from real cars. */
   accentColor: string;
@@ -53,7 +53,7 @@ export const MarketingCard: React.FC<MarketingCardProps> = React.memo(({ data })
       role={data.ctaUrl ? 'button' : undefined}
       tabIndex={data.ctaUrl ? 0 : undefined}
       aria-label={`${data.label}: ${data.name}`}
-      className="relative bg-gradient-to-br from-slate-50 to-white rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 hover:border-slate-300 transition-all flex flex-col justify-between p-4 h-full min-h-[220px] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:ring-offset-2"
+      className="relative bg-gradient-to-br from-slate-50 to-white rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 hover:border-slate-300 transition-all flex flex-col justify-between p-4 h-full min-h-[220px] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2"
     >
       {/* Always-visible disclosure label - top right, high contrast,
           never smaller or lower-contrast than any other badge on a real
@@ -74,7 +74,7 @@ export const MarketingCard: React.FC<MarketingCardProps> = React.memo(({ data })
           <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-0.5">
             {data.category}
           </p>
-          <h3 className="text-sm font-black text-[#1E3063] font-display leading-snug">
+          <h3 className="text-sm font-black text-[#176B87] font-display leading-snug">
             {data.name}
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-1 leading-snug">

@@ -144,7 +144,7 @@ export default function AdminDisputes() {
               style={{
                 padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
                 background: filter === s ? 'var(--gold)' : 'transparent',
-                color: filter === s ? '#0A1628' : 'rgba(255,255,255,0.5)',
+                color: filter === s ? '#0A3340' : 'rgba(255,255,255,0.5)',
                 border: 'none', cursor: 'pointer', transition: 'all 0.2s',
               }}
               onMouseEnter={e => { if (filter !== s) e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
@@ -239,7 +239,7 @@ export default function AdminDisputes() {
               style={{
                 width: 40, height: 40, borderRadius: 10, fontSize: 13, fontWeight: 600,
                 background: page === p ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
-                color: page === p ? '#0A1628' : 'rgba(255,255,255,0.5)',
+                color: page === p ? '#0A3340' : 'rgba(255,255,255,0.5)',
                 border: 'none', cursor: 'pointer', transition: 'all 0.2s',
               }}
               onMouseEnter={e => { if (page !== p) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}

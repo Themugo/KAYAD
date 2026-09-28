@@ -31,12 +31,12 @@ class ErrorBoundary extends Component<
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#F6F1E8',
+          backgroundColor: '#EEF7F5',
           fontFamily: 'system-ui, sans-serif',
           padding: '20px',
         }}>
           <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-            <h1 style={{ color: '#17244B', marginBottom: '16px' }}>Something went wrong</h1>
+            <h1 style={{ color: '#0A3340', marginBottom: '16px' }}>Something went wrong</h1>
             <p style={{ color: '#64748B', marginBottom: '16px' }}>
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
@@ -44,7 +44,7 @@ class ErrorBoundary extends Component<
               onClick={() => window.location.reload()}
               style={{
                 padding: '10px 20px',
-                backgroundColor: '#17244B',
+                backgroundColor: '#0A3340',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',

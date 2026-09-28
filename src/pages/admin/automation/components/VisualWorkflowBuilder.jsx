@@ -10,8 +10,8 @@ import {
 
 // Design System Colors
 const colors = {
-  navy: '#17244B',
-  beige: '#F6F1E8',
+  navy: '#0A3340',
+  beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
   terracotta: '#C77B58',
@@ -70,7 +70,7 @@ const WorkflowNode = ({ node, isSelected, onSelect, onDelete, canvasOffset }) =>
   return (
     <div
       className={`absolute w-48 bg-white rounded-xl shadow-lg border-2 cursor-move transition-all ${
-        isSelected ? 'border-[#17244B] ring-2 ring-[#17244B]/20' : 'border-slate-200 hover:border-slate-300'
+        isSelected ? 'border-[#0A3340] ring-2 ring-[#0A3340]/20' : 'border-slate-200 hover:border-slate-300'
       }`}
       style={{
         left: node.position?.x || 100,
@@ -112,8 +112,8 @@ const WorkflowNode = ({ node, isSelected, onSelect, onDelete, canvasOffset }) =>
       </div>
 
       {/* Connection Points */}
-      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-slate-300 hover:border-[#17244B] cursor-crosshair" />
-      <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-slate-300 hover:border-[#17244B] cursor-crosshair" />
+      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-slate-300 hover:border-[#0A3340] cursor-crosshair" />
+      <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-slate-300 hover:border-[#0A3340] cursor-crosshair" />
     </div>
   );
 };
@@ -296,7 +296,7 @@ export default function VisualWorkflowBuilder() {
   };
 
   return (
-    <div className="flex h-screen bg-[#F6F1E8]">
+    <div className="flex h-screen bg-[#EEF7F5]">
       {/* Node Library Panel */}
       {showNodePanel && (
         <aside className="w-72 bg-white border-r border-slate-200 flex flex-col">
@@ -309,7 +309,7 @@ export default function VisualWorkflowBuilder() {
                 placeholder="Search nodes..."
                 value={searchNodes}
                 onChange={(e) => setSearchNodes(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#17244B] focus:ring-2 focus:ring-[#17244B]/20 outline-none"
+                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
               />
             </div>
           </div>
@@ -327,7 +327,7 @@ export default function VisualWorkflowBuilder() {
                       <button
                         key={node.type}
                         onClick={() => addNode(node.type)}
-                        className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#17244B] hover:bg-[#17244B]/5 transition-all text-left"
+                        className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
                       >
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${node.color}20` }}>
                           <Icon size={16} style={{ color: node.color }} />
@@ -368,7 +368,7 @@ export default function VisualWorkflowBuilder() {
             <div className="w-px h-6 bg-slate-200 mx-2" />
             <button
               onClick={() => setShowNodePanel(!showNodePanel)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${showNodePanel ? 'bg-[#17244B] text-white' : 'bg-slate-100 text-slate-600'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${showNodePanel ? 'bg-[#0A3340] text-white' : 'bg-slate-100 text-slate-600'}`}
             >
               Nodes
             </button>
@@ -401,7 +401,7 @@ export default function VisualWorkflowBuilder() {
               <Eye size={16} />
               Preview
             </button>
-            <button className="px-4 py-2 bg-[#17244B] text-white rounded-lg hover:bg-[#1e3054] flex items-center gap-2 text-sm font-medium">
+            <button className="px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] flex items-center gap-2 text-sm font-medium">
               <Save size={16} />
               Save Workflow
             </button>

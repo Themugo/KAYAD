@@ -17,11 +17,11 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = 'inline-flex items-center justify-center font-mono font-black uppercase tracking-wider rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
   const variantStyles = {
-    primary: 'bg-[#1E3063] text-white hover:bg-[#121D33] focus:ring-[#00C9CE]/40 shadow-md hover:scale-[1.02]',
-    gold: 'bg-[#00C9CE] text-[#1E3063] hover:bg-[#00b5b9] focus:ring-[#00C9CE]/40 shadow-md hover:scale-[1.02]',
-    secondary: 'bg-[#2A3B7A] text-white hover:bg-[#1E3063] focus:ring-[#00C9CE]/40 shadow-sm',
-    aqua: 'bg-[#00C9CE] text-[#0B1628] hover:bg-[#00b0b4] focus:ring-[#00C9CE]/40 shadow-md hover:scale-[1.02]',
-    outline: 'border border-[#E2D8C7] text-[#1E3063] hover:bg-[#F6F1E8] focus:ring-[#1E3063]/20 bg-white',
+    primary: 'bg-[#176B87] text-white hover:bg-[#12576D] focus:ring-[#13B8A6]/40 shadow-md hover:scale-[1.02]',
+    gold: 'bg-[#13B8A6] text-[#176B87] hover:bg-[#0F8F82] focus:ring-[#13B8A6]/40 shadow-md hover:scale-[1.02]',
+    secondary: 'bg-[#12576D] text-white hover:bg-[#176B87] focus:ring-[#13B8A6]/40 shadow-sm',
+    aqua: 'bg-[#13B8A6] text-[#0A3340] hover:bg-[#0F8F82] focus:ring-[#13B8A6]/40 shadow-md hover:scale-[1.02]',
+    outline: 'border border-[#D7E7E4] text-[#176B87] hover:bg-[#EEF7F5] focus:ring-[#176B87]/20 bg-white',
     ghost: 'text-slate-300 hover:text-white hover:bg-white/10 focus:ring-white/20',
     danger: 'bg-[#991B1B] text-white hover:bg-[#7f1717] focus:ring-red-500/40 shadow-sm',
   };

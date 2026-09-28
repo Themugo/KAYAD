@@ -184,7 +184,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
           </div>
 
           <Card className="p-5">
-            <h3 className="font-bold text-[#1E3063]">Operational queues</h3>
+            <h3 className="font-bold text-[#176B87]">Operational queues</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
               {[
                 ['Pending dealers', stat('pendingDealers')],
@@ -195,7 +195,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 ['Disputes', stat('pendingReports')],
                 ['Pending reviews', stat('pendingReviews')],
                 ['Unread alerts', stat('activeAlerts')],
-              ].map(([label, value]) => <div key={label} className="p-3 rounded-xl bg-slate-50 border border-slate-200"><div className="text-[10px] uppercase font-bold text-slate-500">{label}</div><div className="text-xl font-black text-[#1E3063] mt-1">{value}</div></div>)}
+              ].map(([label, value]) => <div key={label} className="p-3 rounded-xl bg-slate-50 border border-slate-200"><div className="text-[10px] uppercase font-bold text-slate-500">{label}</div><div className="text-xl font-black text-[#176B87] mt-1">{value}</div></div>)}
             </div>
           </Card>
         </>
