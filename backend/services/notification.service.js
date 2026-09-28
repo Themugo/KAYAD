@@ -1,4 +1,4 @@
-import { create, findOne } from "../db/index.js";
+import { create } from "../db/index.js";
 import { sendUserCommunication } from "./communicationGateway.service.js";
 import { withRetry } from "../utils/retry.js";
 import { getIO } from "../utils/io.js";
@@ -16,19 +16,25 @@ export const sendNotification = async ({ userId, title, message, type = "info", 
       getIO().to(`user_${String(userId)}`).emit("notification", payload);
     }
 
-    // Delivery channels are opt-in and read from the same authoritative user record.
-    // Callers may still provide explicit contact details for transactional sends.
-    let preferences = null;
-    try { preferences = await findOne("user_preferences", { user: userId }); } catch { /* in-app notification remains authoritative */ }
-    const emailEnabled = preferences?.notifications?.email?.enabled !== false;
-    const smsEnabled = preferences?.notifications?.sms?.enabled !== false;
-    const channels = ["in_app"];
-    if (emailEnabled && email) channels.push("email");
-    if (smsEnabled && phone) channels.push("sms");
-    if (channels.length > 1) {
-      sendUserCommunication({ userId, channels: channels.slice(1), eventType: normalizedType, category: "transactional", title, message, metadata: { link, data } })
-        .catch((e) => console.warn("Notification channel delivery failed:", e.message));
-    }
+    // Channel policy is owned by communicationGateway.service.js.
+    // Do not maintain a second preference model here: the gateway resolves
+    // communication_preferences, rollout controls, provider selection, and
+    // delivery/audit state for every optional channel.
+    const channels = ["email", "sms"];
+    sendUserCommunication({
+      userId,
+      channels,
+      eventType: normalizedType,
+      category: "transactional",
+      title,
+      message,
+      metadata: {
+        link,
+        data,
+        ...(email ? { explicitEmail: email } : {}),
+        ...(phone ? { explicitPhone: phone } : {}),
+      },
+    }).catch((e) => console.warn("Notification channel delivery failed:", e.message));
     return notification;
   } catch (err) {
     console.error("NOTIFICATION ERROR:", err);

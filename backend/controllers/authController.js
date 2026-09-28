@@ -618,8 +618,8 @@ export const changePassword = async (req, res) => {
     if (!/\d/.test(newPassword)) {
       return R.error(res, "New password must contain at least one number", 400);
     }
-    if (!/[@$!%*?&]/.test(newPassword)) {
-      return R.error(res, "New password must contain at least one special character (@$!%*?&)", 400);
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      return R.error(res, "New password must contain at least one special character", 400);
     }
 
     const user = await User.findById(req.user.id);

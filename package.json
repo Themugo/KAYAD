@@ -75,7 +75,8 @@
     "certify:phase6:live": "node scripts/certify-phase6-live.mjs",
     "validate:phase7-security-release": "node scripts/validate-phase7-security-release.mjs",
     "validate:phase8-operations": "node scripts/validate-phase8-operations.mjs",
-    "verify:backup": "node scripts/verify-backup-artifact.mjs"
+    "verify:backup": "node scripts/verify-backup-artifact.mjs",
+    "validate:c1-c5-convergence": "node scripts/validate-c1-c5-convergence.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
