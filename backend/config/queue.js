@@ -35,17 +35,32 @@ const retryStrategy = (times) => {
 };
 
 // Create Redis connection (supports REDIS_URL or REDIS_HOST/REDIS_PORT)
-const connection = DISABLE_REDIS ? null : redisUrl
-  ? new IORedis(redisUrl, { maxRetriesPerRequest: 3, retryStrategy, lazyConnect: true })
-  : new IORedis({
-      host: process.env.REDIS_HOST || "localhost",
-      port: parseInt(process.env.REDIS_PORT || "6379"),
-      password: process.env.REDIS_PASSWORD || undefined,
-      db: parseInt(process.env.REDIS_DB || "0"),
-      maxRetriesPerRequest: 3,
-      retryStrategy,
-      lazyConnect: true,
-    });
+const createRedisConnection = (maxRetriesPerRequest) => {
+  if (DISABLE_REDIS) return null;
+
+  const options = {
+    maxRetriesPerRequest,
+    retryStrategy,
+    lazyConnect: true,
+  };
+
+  return redisUrl
+    ? new IORedis(redisUrl, options)
+    : new IORedis({
+        host: process.env.REDIS_HOST || "localhost",
+        port: parseInt(process.env.REDIS_PORT || "6379"),
+        password: process.env.REDIS_PASSWORD || undefined,
+        db: parseInt(process.env.REDIS_DB || "0"),
+        ...options,
+      });
+};
+
+// BullMQ queues may use a bounded retry policy, but Workers must use a
+// connection with maxRetriesPerRequest=null so blocking commands are not
+// interrupted by ioredis request retry exhaustion. Keep these connections
+// separate so queue producers and workers have the correct reliability model.
+const connection = createRedisConnection(3);
+const workerConnection = createRedisConnection(null);
 
 if (connection) {
   connection.on("connect", () => {
@@ -58,6 +73,16 @@ if (connection) {
 
   connection.on("close", () => {
     logWarn("Redis connection closed");
+  });
+}
+
+if (workerConnection) {
+  workerConnection.on("error", (err) => {
+    logError("Redis worker connection error", err);
+  });
+
+  workerConnection.on("close", () => {
+    logWarn("Redis worker connection closed");
   });
 } else {
   console.log("⚠️ Queue Redis disabled for debugging");
@@ -249,7 +274,7 @@ export const getWorker = (queueName, processor, concurrency = 5) => {
 
   const options = queueOptions[queueName] || queueOptions.notification;
   const worker = new Worker(queueName, processor, {
-    connection,
+    connection: workerConnection,
     concurrency,
     defaultJobOptions: options.defaultJobOptions,
   });
@@ -276,7 +301,9 @@ export const getWorker = (queueName, processor, concurrency = 5) => {
 
 export const closeQueues = async () => {
   await Promise.all(Object.values(queues).map((queue) => queue.close()));
-  logInfo("All queues closed");
+  connection?.disconnect();
+  workerConnection?.disconnect();
+  logInfo("All queues and Redis connections closed");
 };
 
 export const closeDeadLetterQueues = async () => {

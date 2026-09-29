@@ -944,12 +944,11 @@ const startBackgroundServices = async (io) => {
       logError("Failed to initialize queues", err);
       console.log("⚠️ Queue infrastructure init failed (non-fatal)");
     }
-    try {
-      startAllWorkers();
+    const workerStartup = startAllWorkers();
+    if (workerStartup.failed.length) {
+      console.log("⚠️ Background workers started with failures:", workerStartup.failed.join(", "));
+    } else {
       console.log("✅ Background workers started");
-    } catch (err) {
-      logError("Failed to start workers", err);
-      console.log("⚠️ Worker startup failed (non-fatal)");
     }
   } else {
     console.log("⚠️ Redis not configured — queues/workers disabled");
