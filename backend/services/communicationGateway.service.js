@@ -72,6 +72,17 @@ export const updateDelivery = async (id, patch) => {
   return delivery;
 };
 
+const providerConfigured = (channel) => {
+  if (channel === "email") return Boolean(process.env.BREVO_API_KEY && process.env.BREVO_FROM_EMAIL);
+  if (channel === "sms") return Boolean(process.env.AT_API_KEY && process.env.AT_USERNAME);
+  if (channel === "whatsapp") return Boolean(
+    process.env.TWILIO_ACCOUNT_SID &&
+    process.env.TWILIO_AUTH_TOKEN &&
+    process.env.TWILIO_WHATSAPP_NUMBER
+  );
+  return true;
+};
+
 const sendWhatsApp = async (phone, body) => sendTwilioWhatsApp({ phone, message: body });
 
 const preferenceAllows = async (userId, channel, category) => {
@@ -191,6 +202,17 @@ export const sendUserCommunication = async ({
   if (!user) throw new Error("User not found");
   const results = [];
   for (const channel of channels) {
+    // Optional providers must be capability-aware. Missing SMS/WhatsApp
+    // credentials should not create failed deliveries for unrelated
+    // notifications while those integrations are intentionally inactive.
+    if ((channel === "sms" || channel === "whatsapp") && !providerConfigured(channel)) {
+      logInfo("Communication channel skipped because provider is not configured", { channel });
+      continue;
+    }
+    if (channel === "email" && !providerConfigured(channel)) {
+      logInfo("Email channel skipped because Brevo is not configured", { channel });
+      continue;
+    }
     if (channel === "in_app") {
       results.push(await deliver({ userId, channel, eventType, category, templateCode, subject: title, message, metadata }));
     } else if (channel === "email" && user.email) {

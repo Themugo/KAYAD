@@ -11,10 +11,10 @@ const checks = [
   ["payment transaction uses checkout request id", "backend/services/paymentService.js"],
   ["atomic bid settlement remains authoritative", "backend/utils/atomicTransactions.js"],
   ["atomic escrow transitions remain authoritative", "backend/services/escrow.service.js"],
-  ["payment attempts schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql.sql"],
-  ["payment events schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql.sql"],
-  ["refund schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql.sql"],
-  ["webhook dedupe schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql.sql"],
+  ["payment attempts schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql"],
+  ["payment events schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql"],
+  ["refund schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql"],
+  ["webhook dedupe schema is present", "supabase/migrations/20260815060000_payment_architecture_extension.sql"],
 ];
 let passed = 0;
 for (const [label, rel] of checks) {

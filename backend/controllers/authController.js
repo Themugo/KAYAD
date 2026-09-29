@@ -42,6 +42,18 @@ const isOwnerEmail = (email) =>
 // hashes so a database leak does not expose usable tokens.
 const hashToken = (token) => crypto.createHash("sha256").update(String(token)).digest("hex");
 
+const requiresEmailVerification = () =>
+  process.env.REQUIRE_EMAIL_VERIFICATION === "true" ||
+  (!process.env.REQUIRE_EMAIL_VERIFICATION && Boolean(process.env.BREVO_API_KEY));
+
+const assertEmailDeliverySucceeded = (delivery, purpose) => {
+  if (!delivery || delivery.status !== "sent") {
+    const reason = delivery?.lastError || "Brevo did not confirm the email delivery";
+    throw new Error(`${purpose} email delivery failed: ${reason}`);
+  }
+  return delivery;
+};
+
 // H-1 FIX: Strip sensitive fields before sending user data in any response.
 // Without this, bankAccount, mpesaBusiness, paymentDetails, phoneOTP, emailVerifyToken,
 // password reset tokens, and internal flags leak to the client.
@@ -223,21 +235,33 @@ export const register = async (req, res) => {
 
     // Email verification token — only the SHA-256 hash is stored; the raw
     // token goes out in the verification email. Login/API access stays open
-    // unless verification is enforced (Resend configured or
+    // unless verification is enforced (Brevo configured or
     // REQUIRE_EMAIL_VERIFICATION=true), matching the login gate.
     const verifyToken = crypto.randomBytes(32).toString("hex");
 
-    const userAuth = await UserAuth.create({
-      user: user._id,
-      password: await bcrypt.hash(password, 12),
-      tokenVersion: 0,
-      emailVerifyToken: hashToken(verifyToken),
-      emailVerifyExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    });
+    let userAuth;
+    try {
+      userAuth = await UserAuth.create({
+        user: user._id,
+        password: await bcrypt.hash(password, 12),
+        tokenVersion: 0,
+        emailVerifyToken: hashToken(verifyToken),
+        emailVerifyExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+    } catch (authErr) {
+      // Registration is a two-record identity write (users + user_auth).
+      // Never leave a half-created account if the credential row cannot be
+      // persisted.  This is the same fail-closed principle used below when
+      // required Brevo verification cannot be delivered.
+      await User.deleteOne({ _id: user._id }).catch((cleanupErr) =>
+        console.warn("⚠️ Registration user cleanup failed:", cleanupErr.message),
+      );
+      throw authErr;
+    }
 
     try {
       const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${verifyToken}`;
-      await deliver({
+      const verificationDelivery = await deliver({
         userId: user.id || user._id,
         channel: "email",
         eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
@@ -248,7 +272,17 @@ export const register = async (req, res) => {
         html: `<p>Hi ${user.name || "there"},</p><p>Verify your KAYAD email to unlock your account.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
         metadata: { verification: true },
       });
-    } catch (e) { console.warn("⚠️ Verification email failed:", e.message); }
+      if (requiresEmailVerification()) assertEmailDeliverySucceeded(verificationDelivery, "Verification");
+    } catch (e) {
+      console.warn("⚠️ Verification email failed:", e.message);
+      if (requiresEmailVerification()) {
+        await Promise.allSettled([
+          UserAuth.deleteOne({ _id: userAuth._id }),
+          User.deleteOne({ _id: user._id }),
+        ]);
+        return R.error(res, "Registration could not be completed because the verification email service is temporarily unavailable. Please try again.", 503);
+      }
+    }
 
     if (referredBy) {
       const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
@@ -696,15 +730,17 @@ export const resendVerification = async (req, res) => {
       return res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
     }
 
-    // Generate new token (hash stored, raw token emailed)
+    // Generate the replacement token in memory first. Do not persist it until
+    // Brevo has accepted the replacement email; otherwise a process crash between
+    // the database write and provider acceptance could invalidate the only usable
+    // verification link without delivering the replacement.
     const verifyToken = crypto.randomBytes(32).toString("hex");
-    userAuth.emailVerifyToken = hashToken(verifyToken);
-    userAuth.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-    await userAuth.save();
+    const nextVerifyTokenHash = hashToken(verifyToken);
+    const nextVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
     try {
       const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${verifyToken}`;
-      await deliver({
+      const verificationDelivery = await deliver({
         userId: user.id || user._id,
         channel: "email",
         eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
@@ -715,7 +751,17 @@ export const resendVerification = async (req, res) => {
         html: `<p>Hi ${user.name || "there"},</p><p>Your new KAYAD verification link is ready.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
         metadata: { verification: true, resend: true },
       });
-    } catch (e) { console.warn("⚠️ Verification email failed:", e.message); }
+      if (requiresEmailVerification()) assertEmailDeliverySucceeded(verificationDelivery, "Verification");
+
+      // Provider acceptance is the commit point for the replacement token.
+      userAuth.emailVerifyToken = nextVerifyTokenHash;
+      userAuth.emailVerifyExpire = nextVerifyExpire;
+      await userAuth.save();
+    } catch (e) {
+      console.warn("⚠️ Verification email failed:", e.message);
+      // The persisted token was never changed, so the previous verification link
+      // remains valid. The response remains generic to prevent account enumeration.
+    }
 
     res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
   } catch (err) {

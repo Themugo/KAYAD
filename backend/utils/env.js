@@ -156,33 +156,78 @@ export const validateEnv = (opts = { silent: false }) => {
       }
     }
 
-    // Launch-critical provider/infrastructure contracts. These are deliberately
-    // hard requirements in production so the application cannot start in a
-    // partially configured state and silently degrade payments, communications,
-    // uploads, or durable queues.
-    const launchRequired = [
-      ["MPESA_CONSUMER_KEY", "M-Pesa consumer key"],
-      ["MPESA_CONSUMER_SECRET", "M-Pesa consumer secret"],
-      ["MPESA_SHORTCODE", "M-Pesa shortcode"],
-      ["MPESA_PASSKEY", "M-Pesa passkey"],
+    // Core production integrations required for the current marketplace launch.
+    // These are hard requirements because the current first-dealer journey needs
+    // durable data, media uploads, transactional email and managed queue/rate-limit
+    // infrastructure.
+    const coreRequired = [
       ["CLOUDINARY_CLOUD_NAME", "Cloudinary cloud name"],
       ["CLOUDINARY_API_KEY", "Cloudinary API key"],
       ["CLOUDINARY_API_SECRET", "Cloudinary API secret"],
       ["BREVO_API_KEY", "Brevo API key"],
       ["BREVO_FROM_EMAIL", "Brevo sender email"],
-      ["AT_API_KEY", "Africa's Talking API key"],
-      ["AT_USERNAME", "Africa's Talking username"],
-      ["TWILIO_ACCOUNT_SID", "Twilio account SID"],
-      ["TWILIO_AUTH_TOKEN", "Twilio auth token"],
-      ["TWILIO_WHATSAPP_NUMBER", "Twilio WhatsApp sender"],
       ["REDIS_URL", "Managed Redis connection"],
-      ["WEBHOIST_EMAIL", "Platform owner email"],
     ];
-    for (const [key, desc] of launchRequired) {
+    for (const [key, desc] of coreRequired) {
       if (!process.env[key]) {
-        console.error(`  ❌ Missing launch-critical env: ${key} (${desc})`);
+        console.error(`  ❌ Missing core production env: ${key} (${desc})`);
         hasError = true;
       }
+    }
+
+    // Payment/SMS/WhatsApp are real integrations, but they are not prerequisites
+    // for registration, email verification or the first non-payment marketplace
+    // listing. Their absence must therefore not prevent the API from starting.
+    // When a deployment explicitly marks one of these capabilities as required,
+    // fail closed until the complete provider credential set is present.
+    const optionalFeatureGroups = [
+      {
+        flag: "REQUIRE_MPESA",
+        label: "M-Pesa",
+        vars: [
+          ["MPESA_CONSUMER_KEY", "M-Pesa consumer key"],
+          ["MPESA_CONSUMER_SECRET", "M-Pesa consumer secret"],
+          ["MPESA_SHORTCODE", "M-Pesa shortcode"],
+          ["MPESA_PASSKEY", "M-Pesa passkey"],
+        ],
+      },
+      {
+        flag: "REQUIRE_SMS",
+        label: "Africa's Talking SMS",
+        vars: [
+          ["AT_API_KEY", "Africa's Talking API key"],
+          ["AT_USERNAME", "Africa's Talking username"],
+        ],
+      },
+      {
+        flag: "REQUIRE_WHATSAPP",
+        label: "Twilio WhatsApp",
+        vars: [
+          ["TWILIO_ACCOUNT_SID", "Twilio account SID"],
+          ["TWILIO_AUTH_TOKEN", "Twilio auth token"],
+          ["TWILIO_WHATSAPP_NUMBER", "Twilio WhatsApp sender"],
+        ],
+      },
+    ];
+
+    for (const group of optionalFeatureGroups) {
+      if (process.env[group.flag] !== "true") continue;
+      for (const [key, desc] of group.vars) {
+        if (!process.env[key]) {
+          console.error(`  ❌ ${group.flag}=true but ${key} is missing (${desc})`);
+          hasError = true;
+        }
+      }
+    }
+
+    const optionalProviderState = [
+      ["M-Pesa", ["MPESA_CONSUMER_KEY", "MPESA_CONSUMER_SECRET", "MPESA_SHORTCODE", "MPESA_PASSKEY"]],
+      ["Africa's Talking", ["AT_API_KEY", "AT_USERNAME"]],
+      ["Twilio WhatsApp", ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_WHATSAPP_NUMBER"]],
+    ];
+    for (const [label, vars] of optionalProviderState) {
+      const configured = vars.every((key) => Boolean(process.env[key]));
+      if (!configured) console.warn(`  ℹ️  ${label} unavailable — optional integration is not configured`);
     }
     if (process.env.DISABLE_REDIS === "true") {
       console.error("  ❌ DISABLE_REDIS=true is forbidden in production");

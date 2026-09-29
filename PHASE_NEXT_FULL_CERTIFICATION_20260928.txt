@@ -1,0 +1,341 @@
+===== KAYAD NEXT FOUNDATION CERTIFICATION =====
+Mon Sep 28 19:38:13 UTC 2026
+
+Foundation: KAYAD-NEXT-VERIFICATION-RELIABILITY-FOUNDATION-20260928
+Next change: atomic resend verification commit-point hardening
+
+===== TARGETED CERTIFICATION =====
+PASS Brevo is the canonical email provider
+PASS M-Pesa is optional by default
+PASS Optional providers fail closed when explicitly required
+PASS Generic communication skips unavailable SMS/WhatsApp
+PASS Registration sends verification through email only
+PASS Required email verification fails closed when Brevo delivery fails
+PASS Registration rolls back the user when the auth credential row cannot be created
+PASS Verification resend preserves the previous token when replacement delivery fails
+PASS Registration sends welcome email through canonical gateway
+PASS Communication defaults remain in-app plus email
+PASS Render keeps optional provider credentials available for later activation
+
+EMAIL-ONLY LAUNCH CONTRACT: 11/11 PASS
+PASS registration creates UserAuth before verification delivery
+PASS registration rolls back both records when required verification delivery fails
+PASS required verification treats non-sent delivery as failure
+PASS resend generates replacement token without persisting it first
+PASS resend commits replacement token only after provider acceptance
+PASS resend leaves persisted token untouched on delivery failure
+PASS optional SMS/WhatsApp cannot block generic email communication
+PASS optional providers are not production startup requirements unless explicitly enabled
+
+EMAIL RELIABILITY CONTRACT: 8/8 PASS
+PASS optional provider routing is capability-aware
+PASS missing SMS/WhatsApp providers are skipped for generic user communication
+PASS Brevo remains explicitly configuration-gated
+OPTIONAL PROVIDER ROUTING VALIDATION: 3/3 PASS
+  ✅ Env validated
+PASS production starts with optional M-Pesa/SMS/WhatsApp integrations absent
+PASS REQUIRE_MPESA=true fails closed without credentials
+PASS REQUIRE_SMS=true fails closed without credentials
+PASS REQUIRE_WHATSAPP=true fails closed without credentials
+PRODUCTION OPTIONAL-INTEGRATION VALIDATION: 4/4 PASS
+PASS C1 registration role contract — schema matches controller-supported seller roles
+PASS C2 password special-character contract — change-password accepts the same special-character class as the canonical schema
+PASS C2 password reset token hashing — reset token is hashed at rest and expiry is enforced
+PASS C1 email verification token hashing — verification token is hashed at rest and expiry is enforced
+PASS C3 canonical Brevo adapter — email provider is Brevo-backed
+PASS C5 canonical preference control plane — gateway owns preference and rollout decisions
+PASS C5 notification service does not maintain a second preference store — notification service delegates channel policy to the gateway
+PASS C3 provider delivery audit — delivery state and provider status are persisted
+PASS C2 verification route is rate-limited — verification endpoints use auth rate limiting
+
+C1-C5 convergence validation: 9/9 PASS
+
+===== CORE SOURCE GATES =====
+PASS notification controller uses canonical db
+PASS notification controller has owner-scoped read
+PASS notification service writes canonical notifications
+PASS chat blocked state enforced
+PASS chat create contract uses recipientId
+PASS preferences use canonical db
+PASS frontend notifications do not synthesize domain IDs
+PASS canonical chat surface has no simulated dealer response
+PASS communications polling is API-backed
+Communications initiative static gate complete.
+PASS No stale Mongo session cleanup remains in bid controller
+PASS Auto-bid uses atomic RPC
+PASS Atomic auto-bid RPC wrapper exists
+PASS Atomic auction close RPC wrapper exists
+PASS Auction close service delegates settlement to DB
+PASS Auction close supports forced winner atomically
+PASS Canonical refund ledger migration exists
+PASS Refund duplicate protection exists
+PASS Auto-bid function locks car row
+PASS Close function locks car row
+PASS Close function marks winner and losers
+PASS Reconciliation uses refunds table
+PASS Refund endpoint is truthful
+PASS Favorite controller has no stale transaction session
+
+Transaction integrity validation: 14/14 PASS
+PASS inspection services use the real DB adapter
+PASS canonical singular inspection API is mounted
+PASS plural inspection API remains backward compatible
+PASS provider routes enforce ownership
+PASS private report lookup requires authentication
+PASS customer booking lookup is access checked
+PASS customer cancellation passes the correct argument order
+PASS provider booking mutations verify provider ownership
+PASS report mutations verify provider/customer/admin access
+PASS booking slots are provider-aware
+PASS booking race is backed by a DB unique active-slot index
+PASS payment double-processing is backed by a DB unique index
+PASS settlement writes have matching payment columns
+PASS inspection API unwraps the shared response envelope
+PASS provider search returns the shape consumed by the marketplace UI
+PASS provider price sorting uses a real provider-level starting price
+PASS provider starting price stays synchronized with active packages
+PASS provider search does not query a nonexistent deleted_at column
+PASS marketplace is reachable from the main inspection view
+PASS provider card uses an in-app selection callback instead of a dead href
+PASS fake marketplace headline stats were removed
+
+Inspection marketplace validation: 21/21 PASS
+PASS: canonical dispute UI has real API-backed evidence upload
+PASS: canonical dispute UI has real mediation API
+PASS: canonical dispute UI has real resolution API
+PASS: canonical dispute UI has real appeal API
+PASS: dispute details enforce party/staff access
+PASS: evidence item remains scoped to requested escrow dispute
+PASS: evidence mutations remain scoped to requested escrow
+PASS: successful mediation transitions to resolved
+PASS: common duplicate TS dispute panels removed
+PASS: legacy Mongoose dispute implementation is absent from active controller
+PASS: dispute routes expose canonical escrow-centric workflow
+
+Dispute integrity: 11/11 checks passed
+PASS authoritative plan catalogue
+PASS subscription history table
+PASS atomic activation retires previous active entitlement
+PASS RLS blocks dealer direct mutation
+PASS single active entitlement invariant
+PASS atomic cancel/reactivate
+PASS atomic admin grant/revoke
+PASS payment uses verified subscription activation
+PASS payment cannot activate from client success response
+PASS dealer listing gate uses subscription entitlement
+PASS admin package route uses atomic contract
+PASS zero-cost onboarding uses subscription contract
+PASS dealer route has no local plan catalogue
+PASS frontend loads server plans
+PASS admin query parameters are validated
+PASS subscription admin routes use subscription schema
+
+Subscription domain E2E: 16/16 PASS
+PASS notification worker exposes testable canonical processor
+PASS notification worker has no undefined notification return path
+PASS notification worker returns canonical communication deliveries
+PASS push delivery reports an explicit success boolean
+PASS notification worker regression coverage exists
+PASS V14 finance migration is versioned in source
+PASS finance field mapping uses the canonical data access layer
+PASS finance API validates application amounts server-side
+PASS finance API enforces lifecycle transitions server-side
+PASS finance client exposes admin review transport
+PASS finance domain validator is current
+PASS dispute validator targets the current canonical surface
+PASS obsolete Dispute model removed
+PASS obsolete Evidence model removed
+PASS obsolete resolution service removed
+PASS single canonical notification worker remains
+
+V14 production activation validation: 16/16 PASS
+PASS canonical notification worker
+PASS notification regression test
+PASS canonical dealer verification service
+PASS canonical lead service atomic create
+PASS canonical lead service atomic transition
+PASS dealer platform has no Lead model import
+PASS escrow custody mapping
+PASS escrow funding is bank-only
+PASS inspection provider payable account
+PASS inspection payout uses bank cash account
+PASS inspection payout requires closed reported bookings
+PASS inspection payout idempotency
+PASS dealer OTP converges on canonical challenge service
+PASS canonical inspection router has no dormant digital workflow dependency
+PASS canonical inspection compatibility uses vehicle_inspections
+PASS partner webhooks perform real outbound HTTP
+PASS no backend 501 placeholders
+PASS live certification contract converged
+V14 holistic source gate: 18/18 PASS
+PASS live harness uses canonical auth profile endpoint
+PASS v1 auth router mounted
+PASS auth profile route exists
+PASS v1 bids my route exists
+PASS v1 payments my route exists
+PASS v1 escrow my route exists
+PASS dispute my route exists
+PASS inspection my route exists
+PASS loan my route exists
+PASS subscription routes exist
+PASS public auction catalogue route exists
+PASS public subscription plans route exists
+PASS dealer certification routes exist
+PASS admin escrow route exists
+PASS admin disputes route exists
+V14 live certification contract: 15/15 PASS
+PASS Node contract
+PASS Vercel API before SPA
+PASS Vercel uses reproducible install
+PASS production env contract
+PASS browser Supabase removed
+PASS Socket.IO client contract
+PASS Socket cookie auth
+PASS Socket leave contract
+PASS Docker context contains backend
+PASS backend bootstrap entrypoint is used by deployment launchers
+PASS production verifier registered
+PASS release identity verification
+PASS release identity emitted
+PASS deployment cannot silently skip Vercel
+PASS canonical Supabase service-role env
+Deployment readiness validation: PASS
+PASS obsolete browser Supabase clients removed
+PASS SocketContext uses canonical backend Socket.IO transport
+PASS production API fallback is same-origin
+PASS user preference stats no longer returns 501
+PASS src/main.tsx exists
+PASS src/App.tsx exists
+PASS src/api/httpRequest.ts exists
+Runtime integrity validation passed: 7/7
+PASS backend bootstrap exists
+PASS frontend dev launcher remains canonical
+PASS Windows frontend launcher targets root Vite app
+PASS Windows combined launcher targets root Vite app
+PASS backend package main uses bootstrap
+PASS backend dev uses bootstrap
+PASS backend start uses bootstrap
+PASS admin routes has no encoded newline corruption
+PASS development bootstrap supplies default PORT
+PASS admin routes imports protectAccount
+PASS admin routes has no GlobalSettings dependency
+PASS bootstrap dynamically loads server after environment setup
+Startup convergence validation: PASS
+PASS Wave 2 migration exists
+PASS listing entitlement reservation table
+PASS atomic dealer listing RPC
+PASS dealer listing controller uses atomic RPC
+PASS media recovery job table
+PASS media retry/dead-letter RPCs
+PASS media recovery service integrated
+PASS auction payment posts canonical ledger event
+PASS inspection payout requires report
+PASS dispute resolution posts financial consequences
+PASS structural escrow invariants
+PASS structural inspection settlement invariant
+PASS wave 2 invariant audit RPC
+PASS atomic listing helper exposed in backend
+
+KAYAD Wave 2 invariant gate: PASS
+PASS obsolete implementation absent: src/features/DashboardView
+PASS obsolete implementation absent: src/features/PrivateSellerDashboardView
+PASS obsolete implementation absent: src/pages/car
+PASS obsolete implementation absent: src/pages/CarDetail.tsx
+PASS obsolete implementation absent: src/pages/CarDetailPage.jsx
+PASS obsolete implementation absent: src/pages/DealerProfile.tsx
+PASS obsolete implementation absent: src/pages/DealerProfilePage.jsx
+PASS obsolete implementation absent: src/pages/EscrowPage.tsx
+PASS obsolete implementation absent: src/pages/ProfilePage.jsx
+PASS obsolete implementation absent: src/pages/Home.tsx
+PASS obsolete implementation absent: src/pages/BrowsePage.jsx
+PASS obsolete implementation absent: src/pages/mobile/MobileBrowsePage.jsx
+PASS obsolete implementation absent: src/pages/SignIn.tsx
+PASS obsolete implementation absent: src/pages/Payments.tsx
+PASS obsolete implementation absent: src/pages/Notifications.tsx
+PASS obsolete implementation absent: src/pages/Favorites.tsx
+PASS obsolete implementation absent: src/components/CarCard.jsx
+PASS obsolete implementation absent: src/components/AdminTableRow.jsx
+PASS obsolete implementation absent: src/components/Skeleton.jsx
+PASS obsolete implementation absent: lib/api-spec/openapi.yaml
+PASS App has no legacy DashboardView surface
+PASS App uses canonical escrow surface
+PASS App uses canonical inspection surface
+PASS App uses canonical support surface
+PASS App uses canonical payment-history surface
+PASS private seller navigation converges on seller-platform
+PASS obsolete phase validator 17 removed
+PASS obsolete phase validator 18 removed
+PASS obsolete phase validator 20 removed
+PASS obsolete phase validator 22 removed
+PASS obsolete phase validator 24 removed
+PASS obsolete phase validator 26 removed
+PASS obsolete phase validator 27 removed
+PASS obsolete phase validator 28 removed
+PASS obsolete phase validator 29 removed
+PASS obsolete phase validator 30 removed
+PASS obsolete phase validator 31 removed
+PASS obsolete phase validator 32 removed
+PASS obsolete phase validator 33 removed
+PASS obsolete phase validator 41 removed
+PASS obsolete phase validator 42 removed
+PASS obsolete phase validator 43 removed
+PASS obsolete phase validator 44 removed
+PASS obsolete phase validator 45 removed
+PASS obsolete phase validator 46 removed
+PASS obsolete phase validator 47 removed
+PASS obsolete phase validator 48 removed
+PASS obsolete phase validator 49 removed
+PASS obsolete phase validator 52 removed
+PASS obsolete phase validator 53 removed
+PASS obsolete phase validator 54 removed
+PASS obsolete phase validator 55 removed
+PASS obsolete phase validator 56 removed
+PASS obsolete phase validator 57 removed
+PASS single maintained OpenAPI source
+PASS OpenAPI uses current KAYAD domain
+PASS OpenAPI exposes full Express paths
+PASS OpenAPI documents all mapped routes (1105/1105)
+
+KAYAD Wave 3 convergence: PASS
+PASS response facade export exists
+PASS response facade includes created
+PASS response facade preserves existing named helpers
+PASS requireAuth compatibility alias exists
+PASS requireRole compatibility middleware exists
+PASS requireRole normalizes array role declarations
+PASS email compatibility sender export exists
+PASS atomic auction start adapter exists
+PASS atomic auction extend adapter exists
+PASS auction start RPC exists
+PASS auction extend RPC exists
+PASS subscription admin query schema is re-exported
+PASS no backend HTTP 501 placeholder responses remain
+PASS obsolete Supabase JS duplicate remains absent
+
+Backend runtime contract validation: 14/14 passed.
+PASS single canonical inspection router import
+PASS singular inspection API uses canonical router
+PASS plural inspection API is an alias of the canonical router
+PASS no second inspection router implementation is mounted
+PASS dormant digital inspection source removed
+PASS canonical inspection controller has no dormant-table references
+PASS legacy compatibility uses canonical vehicle_inspections
+PASS production env contract exists
+PASS migration chain contains only .sql files
+PASS canonical reconciliation migrations exist
+
+KAYAD canonical architecture validation: PASS
+
+===== BUILD ENVIRONMENT =====
+Production Node contract: >=22.22.2
+v22.16.0
+10.9.2
+Frontend dependency/build status: BLOCKED in isolated runner because runner Node is below repository engine contract and npm dependency installation timed out.
+TypeScript status: global tsc available, but project type definitions are unavailable because node_modules is incomplete.
+Production live runtime: NOT CLAIMED from isolated runner.
+
+===== INTEGRITY =====
+c19a8ca462798e259113a2b7807f723077a5234263e208116749091a096d739f  backend/controllers/authController.js
+061abe9692fbff2415dd728ff14d92fb10af59821c8649020f3d67e4fdb35ea6  scripts/validate-email-only-launch.mjs
+1bdc6d5aad0bf5d41690453ef8ae0a7fe31a5da1d30247fce35b61ab016bb7c2  scripts/validate-email-reliability.mjs
+8d1170a50f6f9166f8df66496429747c18ee481fa4ad1d54c60f92d6e1c8dbfd  package.json

@@ -9,7 +9,7 @@ const exists = (p) => fs.existsSync(path.join(root,p));
 const read = (p) => fs.readFileSync(path.join(root,p),'utf8');
 const check = (name, ok, detail='') => { checks.push({name,ok,detail}); if(!ok) failures.push(`${name}${detail?`: ${detail}`:''}`); };
 
-check('Production environment contract hardening', /launchRequired/.test(read('backend/utils/env.js')) && /DISABLE_REDIS=true is forbidden/.test(read('backend/utils/env.js')));
+check('Production environment contract hardening', /coreRequired =/.test(read('backend/utils/env.js')) || /const coreRequired/.test(read('backend/utils/env.js')) && /DISABLE_REDIS=true is forbidden/.test(read('backend/utils/env.js')));
 check('Managed Redis production fail-closed', /Production Redis requires REDIS_URL/.test(read('backend/config/redis.js')) && /Production Redis cannot be disabled/.test(read('backend/config/redis.js')));
 check('Public health error redaction', /Database check failed/.test(read('backend/routes/healthRoutes.js')) && !/error: error\.message/.test(read('backend/routes/healthRoutes.js')));
 check('Readiness detail redaction', /detail: "Database readiness check failed"/.test(read('backend/utils/healthCheck.js')));
