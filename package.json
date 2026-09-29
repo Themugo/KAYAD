@@ -81,7 +81,8 @@
     "validate:email-only-launch": "node scripts/validate-email-only-launch.mjs",
     "validate:email-reliability": "node scripts/validate-email-reliability.mjs",
     "validate:production-runtime-corrections": "node scripts/validate-production-runtime-corrections.mjs",
-    "validate:worker-runtime": "node scripts/validate-worker-runtime.mjs"
+    "validate:worker-runtime": "node scripts/validate-worker-runtime.mjs",
+    "validate:session-availability": "node scripts/validate-session-availability.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
