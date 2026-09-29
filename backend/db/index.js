@@ -17,6 +17,11 @@ import { mapKeyOut, mapRowIn, SEARCHABLE_FIELDS, normalizeSelect } from '../util
 // users from matching broader patterns than intended.
 const escapeLike = (s) => String(s).replace(/[%_]/g, (ch) => `\\${ch}`);
 
+// Normalize Date values in every PostgREST filter path. Nested Mongo-style operators
+// previously passed native Date objects through and could serialize to Date.toString(),
+// which PostgreSQL rejects for timestamptz columns.
+const normalizeFilterValue = (value) => value instanceof Date ? value.toISOString() : value;
+
 const applyFilters = (query, filters, table) => {
   if (!filters) return query;
   for (const [key, value] of Object.entries(filters)) {
@@ -41,7 +46,7 @@ const applyFilters = (query, filters, table) => {
             const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, '');
             return `${col}.ilike.*${escapeLike(term)}*`;
           }
-          return `${col}.eq.${fv}`;
+          return `${col}.eq.${normalizeFilterValue(fv)}`;
         }).join(',')
       ).join(',');
       query = query.or(orExpr);
@@ -50,7 +55,7 @@ const applyFilters = (query, filters, table) => {
 
     if (key === '$and') {
       for (const cond of value) {
-        for (const [fk, fv] of Object.entries(cond)) query = query.eq(mapKeyOut(table, fk), fv);
+        for (const [fk, fv] of Object.entries(cond)) query = query.eq(mapKeyOut(table, fk), normalizeFilterValue(fv));
       }
       continue;
     }
@@ -65,14 +70,14 @@ const applyFilters = (query, filters, table) => {
       // Handle legacy query operators.
       for (const [op, val] of Object.entries(value)) {
         switch (op) {
-          case '$eq': case 'eq': query = query.eq(col, val); break;
-          case '$ne': case 'ne': query = query.neq(col, val); break;
-          case '$gt': case 'gt': query = query.gt(col, val); break;
-          case '$gte': case 'gte': query = query.gte(col, val); break;
-          case '$lt': case 'lt': query = query.lt(col, val); break;
-          case '$lte': case 'lte': query = query.lte(col, val); break;
-          case '$in': case 'in': query = query.in(col, Array.isArray(val) ? val : [val]); break;
-          case '$nin': case 'nin': query = query.not(col, 'in', `(${(Array.isArray(val) ? val : [val]).join(',')})`); break;
+          case '$eq': case 'eq': query = query.eq(col, normalizeFilterValue(val)); break;
+          case '$ne': case 'ne': query = query.neq(col, normalizeFilterValue(val)); break;
+          case '$gt': case 'gt': query = query.gt(col, normalizeFilterValue(val)); break;
+          case '$gte': case 'gte': query = query.gte(col, normalizeFilterValue(val)); break;
+          case '$lt': case 'lt': query = query.lt(col, normalizeFilterValue(val)); break;
+          case '$lte': case 'lte': query = query.lte(col, normalizeFilterValue(val)); break;
+          case '$in': case 'in': query = query.in(col, (Array.isArray(val) ? val : [val]).map(normalizeFilterValue)); break;
+          case '$nin': case 'nin': query = query.not(col, 'in', `(${(Array.isArray(val) ? val : [val]).map(normalizeFilterValue).join(',')})`); break;
           case '$like': case 'like': query = query.like(col, val); break;
           case '$ilike': case 'ilike': query = query.ilike(col, val); break;
           case '$regex': case 'regex': {
@@ -90,7 +95,7 @@ const applyFilters = (query, filters, table) => {
             break;
           default:
             // If it's not a known operator, treat as a nested object or eq
-            query = query.eq(col, val);
+            query = query.eq(col, normalizeFilterValue(val));
         }
       }
     } else {

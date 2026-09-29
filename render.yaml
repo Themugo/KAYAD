@@ -92,4 +92,4 @@ services:
     region: oregon
     plan: starter
     ipAllowList: []
-    maxmemoryPolicy: allkeys-lru
+    maxmemoryPolicy: noeviction
