@@ -1,9 +1,11 @@
 import crypto from "crypto";
 import { AppError } from "../utils/AppError.js";
 
-// Generate CSRF token
+// Generate CSRF token. The token is deliberately independent of express-session
+// so anonymous API requests never require a Redis-backed session write just to
+// obtain browser CSRF state.
 export const generateCsrfToken = () => {
-  return crypto.randomBytes(32).toString('hex');
+  return crypto.randomBytes(32).toString("hex");
 };
 
 // External callbacks are authenticated by their own signature/API-key/IP controls.
@@ -24,7 +26,9 @@ const CSRF_EXEMPT_PATHS = [
 const isCsrfExemptPath = (path = "") =>
   CSRF_EXEMPT_PATHS.some((prefix) => path === prefix || path.startsWith(prefix));
 
-// Validate CSRF token
+// Validate CSRF token using the stateless double-submit-cookie contract.
+// Browser state-changing requests must present the same unpredictable token in
+// both the XSRF cookie and request header/body. JWT requests remain exempt.
 export const csrfProtection = (req, res, next) => {
   const sensitiveMethods = ["POST", "PUT", "PATCH", "DELETE"];
 
@@ -38,24 +42,25 @@ export const csrfProtection = (req, res, next) => {
 
   const token = req.headers["x-csrf-token"] || req.body?._csrf;
   const cookieToken = req.cookies?.["XSRF-TOKEN"];
-  const sessionToken = req.session?.csrfToken;
 
-  if (!token || !cookieToken || !sessionToken || token !== cookieToken || token !== sessionToken) {
+  if (!token || !cookieToken || token !== cookieToken) {
     return next(AppError.forbidden("CSRF token validation failed"));
   }
 
   next();
 };
 
-// Middleware to generate and send CSRF token.
-// Keep one token for the lifetime of the server-side session instead of
-// rotating it on every request; rotating on every GET can race with browser
-// mutations and creates an unnecessary session write for every request.
+// Middleware to generate and send a CSRF token.
+//
+// This is intentionally a stateless double-submit-cookie implementation. CSRF
+// protection must not turn anonymous API availability into a Redis/session
+// dependency. express-session remains available for workflows that explicitly
+// need a server-side session, while ordinary browser/API requests do not create
+// or persist a session merely to obtain a CSRF token.
 export const csrfToken = (req, res, next) => {
-  const token = req.session?.csrfToken || generateCsrfToken();
-  if (req.session && !req.session.csrfToken) req.session.csrfToken = token;
-
   const cookieToken = req.cookies?.["XSRF-TOKEN"];
+  const token = cookieToken || generateCsrfToken();
+
   if (cookieToken !== token) {
     res.cookie("XSRF-TOKEN", token, {
       httpOnly: false,
@@ -65,6 +70,7 @@ export const csrfToken = (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
   }
+
   res.setHeader("Cache-Control", "no-store");
   res.locals.csrfToken = token;
   next();
