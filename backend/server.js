@@ -316,8 +316,8 @@ app.use((req, res, next) => {
 
 // ─── PERFORMANCE MONITORING MIDDLEWARE
 app.use(performanceMonitor);
-app.use(memoryMonitor);
-app.use(cpuMonitor);
+app.use(memoryMonitor());
+app.use(cpuMonitor());
 
 // ─── SENTRY REQUEST HANDLER
 // Note: In newer Sentry versions, handlers are auto-instrumented
