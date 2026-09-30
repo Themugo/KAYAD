@@ -6,11 +6,15 @@ const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').replace(/\/$
 // accepting either an API origin or an origin that already ends in `/api`.
 const API_URL = configuredApiUrl ? configuredApiUrl.replace(/\/api$/, '') : '/api';
 
-// Auth routes are mounted under /api/v1 on the canonical backend. When the
-// frontend is configured with a direct backend origin (production/staging),
-// include that /api prefix explicitly; when same-origin Vite uses /api as the
-// baseURL, keep the request relative to that base.
-const CSRF_BOOTSTRAP_PATH = '/api/v1/auth/csrf';
+// Auth routes are mounted under /api/v1 on the canonical backend. The
+// transport has two supported base-url shapes:
+//   - no VITE_API_URL: baseURL=/api, so the request path must be /v1/...
+//   - VITE_API_URL set: baseURL is the API origin (or empty for /api), so
+//     the request path must include /api/v1/... explicitly.
+// Keep this distinction here so Axios never composes /api/api/v1/... in the
+// same-origin deployment while direct api.kayad.space deployments remain
+// correct.
+const CSRF_BOOTSTRAP_PATH = configuredApiUrl ? '/api/v1/auth/csrf' : '/v1/auth/csrf';
 
 export const api = axios.create({
   baseURL: API_URL,

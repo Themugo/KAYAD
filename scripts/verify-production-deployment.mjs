@@ -88,6 +88,33 @@ async function checkFrontend(name, baseUrl) {
   }
 }
 
+async function checkAuthCsrf() {
+  try {
+    const response = await fetchWithTimeout(`${apiUrl}/api/v1/auth/csrf`, {
+      headers: { accept: 'application/json', 'user-agent': 'KAYAD-production-verifier/1.0' },
+    });
+    const text = await response.text();
+    let payload;
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      failures.push(`API CSRF bootstrap: expected JSON, received ${text.slice(0, 120)}`);
+      return;
+    }
+    if (!response.ok) {
+      failures.push(`API CSRF bootstrap: HTTP ${response.status}, message=${payload?.message || 'unknown'}`);
+      return;
+    }
+    if (payload?.success !== true || typeof payload?.csrfToken !== 'string' || payload.csrfToken.length < 32) {
+      failures.push('API CSRF bootstrap: response did not contain a valid csrfToken');
+      return;
+    }
+    console.log(`PASS API CSRF bootstrap: HTTP ${response.status}, token contract present`);
+  } catch (error) {
+    failures.push(`API CSRF bootstrap: ${error.name === 'AbortError' ? `timeout after ${timeoutMs}ms` : error.message}`);
+  }
+}
+
 async function checkApi() {
   try {
     const response = await fetchWithTimeout(`${apiUrl}/health`, {
@@ -145,6 +172,7 @@ if (!failures.length) {
   await checkReleaseIdentity();
   await checkFrontend('Public production domain', publicUrl);
   await checkApi();
+  await checkAuthCsrf();
 }
 
 for (const warning of warnings) console.log(`WARN ${warning}`);

@@ -23,8 +23,11 @@ const checks = [
   })()],
   ['welcome email is non-blocking', /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/.test(read('backend/controllers/authController.js'))],
 
-  ['canonical CSRF bootstrap route is versioned', /const CSRF_BOOTSTRAP_PATH = '\/api\/v1\/auth\/csrf'/.test(read('src/api/httpClient.ts')) && !read('src/api/httpClient.ts').includes("'/auth/csrf'" ) && !read('src/api/httpClient.ts').includes("'/v1/auth/csrf'" )],
+  ['CSRF bootstrap path matches the configured API base contract', /const CSRF_BOOTSTRAP_PATH = configuredApiUrl \? '\/api\/v1\/auth\/csrf' : '\/v1\/auth\/csrf'/.test(read('src/api/httpClient.ts')) && read('src/api/httpRequest.ts').includes("path.slice(4)")],
   ['CSRF bootstrap token is retained for cross-subdomain requests', /setCSRFToken\(token\)/.test(read('src/api/httpClient.ts')) && /export function setCSRFToken/.test(read('src/utils/csrf.ts'))],
+  ['backend mounts the canonical versioned auth router', /app\.use\("\/api\/v1", v1Routes\)/.test(read('backend/server.js')) && /router\.use\("\/auth", authLimiter, authRoutes\)/.test(read('backend/routes/v1.js'))],
+  ['backend exposes the CSRF route on the auth router', /router\.get\("\/csrf"/.test(read('backend/routes/authRoutes.js'))],
+  ['production verifier probes the canonical CSRF endpoint', /auth\/csrf/.test(read('scripts/verify-production-deployment.mjs'))],
   ['registration duplicate email returns 409', /An account with that email already exists/.test(read('backend/controllers/authController.js')) && /return R\.error\(res, "An account with that email already exists", 409\)/.test(read('backend/controllers/authController.js'))],
   ['registration referral side effect is non-blocking', /void \(async \(\) => \{/.test(read('backend/controllers/authController.js')) && /Referral credit failed/.test(read('backend/controllers/authController.js'))],
   ['buyer onboarding uses canonical user role', /role === 'buyer' \? 'user' : role/.test(read('src/components/OnboardingFlow.tsx'))],
