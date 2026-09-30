@@ -278,30 +278,26 @@ export const register = async (req, res) => {
       void notifyAdminsOfPendingSeller(user).catch(() => {});
     }
 
-    try {
-      const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
-      const verificationDelivery = await deliver({
-        userId: user.id || user._id,
-        channel: "email",
-        eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
-        templateCode: "account_verification_email",
-        recipient: user.email,
-        subject: "Verify Your Email — KAYAD",
-        text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
-        html: `<p>Hi ${user.name || "there"},</p><p>Verify your KAYAD email to unlock your account.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
-        metadata: { verification: true },
-      });
-      if (requiresEmailVerification()) assertEmailDeliverySucceeded(verificationDelivery, "Verification");
-    } catch (e) {
-      console.warn("⚠️ Verification email failed:", e.message);
-      if (requiresEmailVerification()) {
-        await Promise.allSettled([
-          UserAuth.deleteOne({ _id: userAuth._id }),
-          User.deleteOne({ _id: user._id }),
-        ]);
-        return R.error(res, "Registration could not be completed because the verification email service is temporarily unavailable. Please try again.", 503);
-      }
-    }
+    // IMPORTANT: email delivery must never sit in the registration request.
+    // Brevo/network delivery has its own timeout/retry policy and can otherwise
+    // consume the browser's 30s HTTP budget before the account/session response
+    // is returned. The account remains email-unverified until the link is used,
+    // so this preserves the verification gate without coupling account creation
+    // to an external provider's latency.
+    const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
+    void deliver({
+      userId: user.id || user._id,
+      channel: "email",
+      eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
+      templateCode: "account_verification_email",
+      recipient: user.email,
+      subject: "Verify Your Email — KAYAD",
+      text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
+      html: `<p>Hi ${user.name || "there"},</p><p>Verify your KAYAD email to unlock your account.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
+      metadata: { verification: true },
+    }).catch((e) => {
+      console.warn("⚠️ Verification email dispatch failed:", e.message);
+    });
 
     if (referredBy) {
       const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
@@ -321,19 +317,22 @@ export const register = async (req, res) => {
       }
     }
 
-    try {
-      await deliver({
-        userId: user.id || user._id,
-        channel: "email",
-        eventType: COMMUNICATION_EVENTS.REGISTRATION,
-        templateCode: "account_welcome_email",
-        recipient: user.email,
-        subject: "Welcome to KAYAD — Drive Your Dream Today",
-        text: `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
-        html: `<p>Welcome to KAYAD, ${user.name || "there"}.</p><p>Your account is ready. Browse vehicles, join auctions and use secure transaction workflows.</p>`,
-        metadata: { welcome: true },
-      });
-    } catch { /* welcome delivery must not block registration */ }
+    // Welcome email is also best-effort and deliberately outside the
+    // registration response path. Verification is the only account-state
+    // requirement; welcome mail must never make onboarding appear frozen.
+    void deliver({
+      userId: user.id || user._id,
+      channel: "email",
+      eventType: COMMUNICATION_EVENTS.REGISTRATION,
+      templateCode: "account_welcome_email",
+      recipient: user.email,
+      subject: "Welcome to KAYAD — Drive Your Dream Today",
+      text: `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
+      html: `<p>Welcome to KAYAD, ${user.name || "there"}.</p><p>Your account is ready. Browse vehicles, join auctions and use secure transaction workflows.</p>`,
+      metadata: { welcome: true },
+    }).catch((e) => {
+      console.warn("⚠️ Welcome email dispatch failed:", e.message);
+    });
 
 
     try {

@@ -68,6 +68,16 @@ describe("registration onboarding integration contract", () => {
     expect(source).toMatch(/\/verify-email\?token=\$\{encodeURIComponent\(verifyToken\)\}/);
   });
 
+
+  it("does not await external verification email delivery inside registration", () => {
+    const source = fs.readFileSync(new URL("../../controllers/authController.js", import.meta.url), "utf8");
+    const register = source.slice(source.indexOf('export const register'), source.indexOf('// =============================\\n// 🔑 LOGIN'));
+    expect(register).toMatch(/void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/);
+    expect(register).toMatch(/void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/);
+    expect(register).not.toMatch(/await deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/);
+    expect(register).not.toMatch(/await deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/);
+  });
+
   it("frontend has a verification page and the API uses the token path contract", () => {
     const page = fs.readFileSync(new URL("../../../src/pages/VerifyEmailPage.tsx", import.meta.url), "utf8");
     const api = fs.readFileSync(new URL("../../../src/services/authApi.ts", import.meta.url), "utf8");

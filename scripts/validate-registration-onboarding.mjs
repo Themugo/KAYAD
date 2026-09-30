@@ -16,6 +16,12 @@ const checks = [
   ['login handles email verification gate', /verificationRequired/.test(read('src/pages/LoginPage.jsx')) && /resendVerification/.test(read('src/pages/LoginPage.jsx'))],
   ['registration response issues httpOnly auth cookies', /sendAccessToken\(res, accessToken\)/.test(read('backend/controllers/authController.js')) && /sendRefreshToken\(res, newRefreshToken\)/.test(read('backend/controllers/authController.js'))],
   ['registration duplicate email returns conflict', /An account with that email already exists/.test(read('backend/controllers/authController.js')) && /409/.test(read('backend/controllers/authController.js'))],
+  ['verification email is non-blocking', (() => {
+    const source = read('backend/controllers/authController.js');
+    const register = source.slice(source.indexOf('export const register'), source.indexOf('// =============================\n// 🔑 LOGIN'));
+    return /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/.test(register) && !/await deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/.test(register);
+  })()],
+  ['welcome email is non-blocking', /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/.test(read('backend/controllers/authController.js'))],
 ];
 let passed = 0;
 for (const [name, ok] of checks) {
