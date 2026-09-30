@@ -12,7 +12,7 @@ const checks = [
   ["session set is bounded", /withTimeout\(cacheSet\(`session:\$\{sid\}`/.test(sessionStore)],
   ["session destroy is bounded", /withTimeout\(cacheDel\(`session:\$\{sid\}`/.test(sessionStore)],
   ["health routes precede session middleware", server.indexOf("registerHealthRoutes(app);") < server.indexOf("store: new CacheStore()")],
-  ["global limiter remains before CORS", server.indexOf("app.use(globalLimiter);") < server.search(/app\.use\(\s*cors\(\{/)],
+  ["global limiter remains before CORS", server.indexOf("app.use(globalLimiter);") < server.search(/app\.use\(\s*cors\(\{/ )],
   ["CSRF still bypasses safe methods", /if \(!sensitiveMethods\.includes\(req\.method\)\) return next\(\);/.test(csrf)],
 ];
 

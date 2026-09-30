@@ -2,6 +2,9 @@ import { logError, logWarn } from "../utils/logger.js";
 import { AppError } from "../utils/AppError.js";
 
 const errorHandler = (err, req, res, next) => {
+  if (res.headersSent || res.writableEnded) return next(err);
+  // Once headers are committed, delegate to Express instead of sending again.
+  if (res.headersSent || res.writableEnded) return next(err);
   let statusCode = err.statusCode || res.statusCode || 500;
   if (statusCode === 200) statusCode = 500;
 

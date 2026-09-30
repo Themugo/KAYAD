@@ -14,7 +14,8 @@ const notFound = (req, res, next) => {
   // =============================
   // 📦 RESPONSE (DIRECT - NO NEXT)
   // =============================
-  res.status(404).json({
+  if (res.headersSent || res.writableEnded) return next();
+  return res.status(404).json({
     success: false,
     message,
     ...(process.env.NODE_ENV !== "production" && {

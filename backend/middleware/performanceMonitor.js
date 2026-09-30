@@ -12,57 +12,27 @@ import { logInfo, logWarn, logError } from "../utils/logger.js";
  * Tracks request duration and response times
  */
 export const performanceMonitor = (req, res, next) => {
-  const startTime = Date.now();
-  const originalEnd = res.end;
-
-  // Hook into response end
-  res.end = function (...args) {
-    const duration = Date.now() - startTime;
-
-    // Record metrics
+  const started = process.hrtime.bigint();
+  let recorded = false;
+  const capture = () => {
+    if (recorded) return;
+    recorded = true;
+    const duration = Number(process.hrtime.bigint() - started) / 1e6;
     recordHttpRequest(req.method, req.path, res.statusCode, duration);
     recordHistogram("http_response_time_ms", duration, {
-      method: req.method,
-      path: req.path,
-      status: res.statusCode,
+      method: req.method, path: req.path, status: res.statusCode,
     });
-
-    // Log slow requests (> 1 second)
     if (duration > 1000) {
-      logWarn("Slow request detected", {
-        method: req.method,
-        path: req.path,
-        duration: `${duration}ms`,
-        status: res.statusCode,
-        requestId: req.requestId,
-      });
-      incrementCounter("slow_requests_total", 1, {
-        method: req.method,
-        path: req.path,
-      });
+      logWarn("Slow request detected", { method: req.method, path: req.path, duration: `${duration}ms`, status: res.statusCode, requestId: req.requestId });
+      incrementCounter("slow_requests_total", 1, { method: req.method, path: req.path });
     }
-
-    // Log very slow requests (> 5 seconds)
     if (duration > 5000) {
-      logError("Very slow request detected", {
-        method: req.method,
-        path: req.path,
-        duration: `${duration}ms`,
-        status: res.statusCode,
-        requestId: req.requestId,
-      });
-      incrementCounter("very_slow_requests_total", 1, {
-        method: req.method,
-        path: req.path,
-      });
+      logError("Very slow request detected", { method: req.method, path: req.path, duration: `${duration}ms`, status: res.statusCode, requestId: req.requestId });
+      incrementCounter("very_slow_requests_total", 1, { method: req.method, path: req.path });
     }
-
-    // Add performance header
-    res.setHeader("X-Response-Time", `${duration}ms`);
-
-    originalEnd.apply(res, args);
   };
-
+  res.once("finish", capture);
+  res.once("close", capture);
   next();
 };
 
