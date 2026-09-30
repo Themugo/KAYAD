@@ -463,6 +463,11 @@ app.use(paginationCap()); // Cap ?limit and ?page params
 // ─── SLI CAPTURE (per-request latency, status, error tracking) ──
 app.use(sliMiddleware);
 
+// Install the JSON response contract before every API route, including v2 and
+// dashboard routes. Response instrumentation is centralized in responseHooks
+// so no route can accidentally create a second response wrapper.
+app.use(responseWrapper);
+
 // Health probes are registered above the request/session middleware stack.
 
 // ─── METRICS (Issue #7: time-windowed to prevent memory leak) ──
@@ -698,7 +703,7 @@ io.on("connection", (socket) => {
     if (!isRateLimited("leaveInspection") && isValidId(inspectionId)) socket.leave(`inspection_${inspectionId}`);
   });
   socket.on("typing", ({ chatId } = {}) => {
-    if (!socket.user || !isRateLimited("typing") || !isValidId(String(chatId || ""))) return;
+    if (!socket.user || isRateLimited("typing") || !isValidId(String(chatId || ""))) return;
 
     // A socket can only type into a room it was authorized to join. Never
     // trust client-supplied userId/name because those values can impersonate
@@ -730,9 +735,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-// ─── RESPONSE WRAPPER (ensures every JSON response has `success` field) ──
-app.use(responseWrapper);
 
 // ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
 app.use("/api", checkSystemStatus);

@@ -1,7 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 const root=process.cwd();
-const read=(f)=>fs.readFileSync(path.join(root,f),"utf8");
+const read=(f)=>{
+  const target=path.join(root,f);
+  const stat=fs.statSync(target);
+  if(!stat.isFile()) throw new Error(`Expected file but found ${stat.isDirectory()?"directory":"non-file"}: ${f}`);
+  return fs.readFileSync(target,"utf8");
+};
 const checks=[]; const check=(name,ok)=>checks.push([name,Boolean(ok)]);
 check("canonical notification worker", read("backend/workers/notificationWorker.js").includes("results.map((item) => item?.id)") && read("backend/workers/notificationWorker.js").includes("return { deliveries: results"));
 check("notification regression test", fs.existsSync(path.join(root,"tests/notificationWorker.test.js")));

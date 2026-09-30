@@ -4,6 +4,7 @@
 // Tracks user search behavior for analytics
 // ─────────────────────────────────────────────────────────────
 
+import { onJsonResponse } from "../utils/responseHooks.js";
 import { trackSearch } from "../services/searchInsightsService.js";
 import { logInfo, logError } from "../utils/logger.js";
 
@@ -69,40 +70,20 @@ export const normalizeSearchTerm = (term) => {
 
 export const trackSearchMiddleware = (options = {}) => {
   return (req, res, next) => {
-    // Store original json method
-    const originalJson = res.json.bind(res);
-
-    // Override json method to capture response
-    res.json = function (data) {
-      // Track search after response is sent
+    onJsonResponse(res, (data) => {
       process.nextTick(async () => {
         try {
           const searchTerm = req.query?.keyword || req.body?.keyword || "";
           const filters = extractSearchFilters(req);
           const resultCount = data?.data?.length || data?.cars?.length || data?.results?.length || 0;
-
-          const searchData = {
-            searchTerm,
-            filters,
-            userId: req.user?._id,
-            userRole: req.user?.role,
-            ipAddress: req.ip || req.connection.remoteAddress,
-            userAgent: req.get("user-agent"),
-            searchType: options.searchType || "quick_search",
-            category: options.category || "all",
-            resultCount,
-          };
-
-          await trackSearch(searchData);
-        } catch (err) {
-          logError("Failed to track search in middleware", err);
-          // Don't throw error to avoid breaking response
-        }
+          await trackSearch({
+            searchTerm, filters, resultCount, userId: req.user?._id, userRole: req.user?.role,
+            ipAddress: req.ip || req.connection.remoteAddress, userAgent: req.get("user-agent"),
+            searchType: options.searchType || "quick_search", category: options.category || "all",
+          });
+        } catch (err) { logError("Failed to track search in middleware", err); }
       });
-
-      // Call original json method
-      return originalJson(data);
-    };
+    });
 
     next();
   };

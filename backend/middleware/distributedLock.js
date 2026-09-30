@@ -84,15 +84,14 @@ export async function lockMiddleware(resourceFn) {
       req.lockHolder = lock.id;
       req.lockResource = resourceId;
 
-      const originalJson = res.json.bind(res);
-      res.json = function (data) {
+      let released = false;
+      const release = () => {
+        if (released) return;
+        released = true;
         releaseLock(resourceId, lock.id).catch(() => {});
-        return originalJson(data);
       };
-
-      res.on("finish", () => {
-        releaseLock(resourceId, lock.id).catch(() => {});
-      });
+      res.once("finish", release);
+      res.once("close", release);
 
       next();
     } catch (err) {

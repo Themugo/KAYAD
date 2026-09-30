@@ -1,3 +1,4 @@
+import { onJsonResponse } from "../utils/responseHooks.js";
 // backend/middleware/idempotency.js - Fintech Idempotency Middleware v2.0
 // ─────────────────────────────────────────────────────────────
 // Enterprise-grade idempotency for all payment operations.
@@ -217,44 +218,21 @@ export const idempotencyCheck = async (req, res, next) => {
       ip: req.ip,
     }).catch(() => {});
 
-    // ── Intercept response to cache it ────────────────────────
-    const originalJson = res.json.bind(res);
-
-    res.json = function (data) {
+    onJsonResponse(res, (data) => {
       IdempotencyKey.record({
-        key: idempotencyKey,
-        operationType,
-        user: req.user?.id,
-        requestParams: req.body,
-        responseData: data,
-        responseStatus: res.statusCode,
-        success: data?.success !== false,
+        key: idempotencyKey, operationType, user: req.user?.id, requestParams: req.body,
+        responseData: data, responseStatus: res.statusCode, success: data?.success !== false,
         errorMessage: data?.message || null,
-        resourceIds: data?.payment
-          ? { paymentId: data.payment._id }
-          : data?.escrowId
-            ? { escrowId: data.escrowId }
-            : data?.bid
-              ? { bidId: data.bid._id }
-              : {},
-      })
-        .then(() => {
-          recordIdempotencyCache(operationType, true);
-        })
-        .catch((err) => {
-          logError("Failed to cache idempotency response", err, { idempotencyKey });
-          recordIdempotencyCache(operationType, false);
-          recordIdempotencyError(operationType, "cache_failure");
-        });
-
+        resourceIds: data?.payment ? { paymentId: data.payment._id } : data?.escrowId ? { escrowId: data.escrowId } : data?.bid ? { bidId: data.bid._id } : {},
+      }).then(() => recordIdempotencyCache(operationType, true)).catch((err) => {
+        logError("Failed to cache idempotency response", err, { idempotencyKey });
+        recordIdempotencyCache(operationType, false); recordIdempotencyError(operationType, "cache_failure");
+      });
       IdempotencyAuditLog.findOneAndUpdate(
         { key: idempotencyKey, status: "attempted" },
         { $set: { status: data?.success !== false ? "completed" : "failed", durationMs: Date.now() - startTime } },
       ).catch(() => {});
-
-      return originalJson(data);
-    };
-
+    });
     next();
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -313,31 +291,17 @@ export const withIdempotency = (operationType) => {
         return res.status(cachedResponse.responseStatus || 200).json(cachedResponse.responseData);
       }
 
-      const originalJson = res.json.bind(res);
-
-      res.json = function (data) {
+      onJsonResponse(res, (data) => {
         IdempotencyKey.record({
-          key: idempotencyKey,
-          operationType,
-          user: req.user?.id,
-          requestParams: req.body,
-          responseData: data,
-          responseStatus: res.statusCode,
-          success: data?.success !== false,
-          errorMessage: data?.message || null,
-          resourceIds: {},
-        }).catch((err) => {
-          logError("Failed to cache idempotency response", err, { idempotencyKey });
-        });
-
+          key: idempotencyKey, operationType, user: req.user?.id, requestParams: req.body,
+          responseData: data, responseStatus: res.statusCode, success: data?.success !== false,
+          errorMessage: data?.message || null, resourceIds: {},
+        }).catch((err) => logError("Failed to cache idempotency response", err, { idempotencyKey }));
         IdempotencyAuditLog.findOneAndUpdate(
           { key: idempotencyKey, status: "attempted" },
           { $set: { status: data?.success !== false ? "completed" : "failed", durationMs: Date.now() - startTime } },
         ).catch(() => {});
-
-        return originalJson(data);
-      };
-
+      });
       next();
     } catch (error) {
       logError("Idempotency check error", error, { idempotencyKey, operationType });

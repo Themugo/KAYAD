@@ -18,9 +18,7 @@ import AuditLog from "../models/AuditLog.js";
  */
 export const auditLog = (action) => (req, res, next) => {
   // Hook into response finish to log after the handler completes
-  const originalEnd = res.end;
-
-  res.end = function (...args) {
+  res.once("finish", () => {
     // Only log if the request was successful (2xx/3xx)
     if (res.statusCode < 400) {
       const entry = {
@@ -40,9 +38,7 @@ export const auditLog = (action) => (req, res, next) => {
       // Fire and forget — don't block the response
       AuditLog.create(entry).catch((err) => console.warn("⚠️ Audit log write failed:", err.message));
     }
-
-    originalEnd.apply(res, args);
-  };
+  });
 
   next();
 };

@@ -37,42 +37,18 @@ export const trackSearchLatency = (searchType = "general") => {
   return (req, res, next) => {
     const startTime = Date.now();
 
-    // Store original json method
-    const originalJson = res.json.bind(res);
-
-    // Override json method to capture response time
-    res.json = function (data) {
-      const endTime = Date.now();
-      const latency = endTime - startTime;
-
-      // Store latency metric
+    const recordLatency = () => {
+      const latency = Date.now() - startTime;
       if (latencyMetrics[searchType]) {
         latencyMetrics[searchType].push(latency);
-
-        // Keep only last MAX_METRICS
-        if (latencyMetrics[searchType].length > MAX_METRICS) {
-          latencyMetrics[searchType].shift();
-        }
+        if (latencyMetrics[searchType].length > MAX_METRICS) latencyMetrics[searchType].shift();
       }
-
-      // Add latency to response (for debugging)
-      if (process.env.NODE_ENV === "development" && data && typeof data === "object" && !Array.isArray(data)) {
-        data.searchLatency = latency;
-      }
-
-      // Log slow searches (> 1000ms)
       if (latency > 1000) {
-        logWarn("Slow search detected", {
-          searchType,
-          latency,
-          path: req.path,
-          query: req.query,
-        });
+        logWarn("Slow search detected", { searchType, latency, path: req.path, query: req.query });
       }
-
-      // Call original json method
-      return originalJson(data);
     };
+    res.once("finish", recordLatency);
+    res.once("close", recordLatency);
 
     next();
   };

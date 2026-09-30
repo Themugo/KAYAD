@@ -1,3 +1,4 @@
+import { onJsonResponse } from "../utils/responseHooks.js";
 // backend/services/cacheService.js
 // ─────────────────────────────────────────────────────────────
 // Cache Service for Systematic Caching
@@ -113,15 +114,9 @@ class CacheService {
         return res.json(cached);
       }
 
-      // Intercept res.json to cache response
-      const originalJson = res.json.bind(res);
-      res.json = async (data) => {
-        // Only cache successful GET requests
-        if (req.method === "GET" && res.statusCode === 200) {
-          await this.set(key, data, ttl);
-        }
-        return originalJson(data);
-      };
+      onJsonResponse(res, async (data) => {
+        if (req.method === "GET" && res.statusCode === 200) await this.set(key, data, ttl);
+      });
 
       next();
     };

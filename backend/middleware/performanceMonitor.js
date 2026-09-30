@@ -82,17 +82,16 @@ export const dbPerformanceMonitor = (operation, collection) => {
  */
 export const externalApiMonitor = (serviceName) => {
   return async (req, res, next) => {
-    const startTime = Date.now();
-    const originalJson = res.json;
-
-    res.json = function (data) {
-      const duration = Date.now() - startTime;
-
+    const startTime = process.hrtime.bigint();
+    let recorded = false;
+    const capture = () => {
+      if (recorded) return;
+      recorded = true;
+      const duration = Number(process.hrtime.bigint() - startTime) / 1e6;
       recordHistogram("external_api_duration_ms", duration, {
         service: serviceName,
         status: res.statusCode,
       });
-
       if (duration > 5000) {
         logWarn("Slow external API call detected", {
           service: serviceName,
@@ -104,10 +103,9 @@ export const externalApiMonitor = (serviceName) => {
           service: serviceName,
         });
       }
-
-      return originalJson.call(this, data);
     };
-
+    res.once("finish", capture);
+    res.once("close", capture);
     next();
   };
 };

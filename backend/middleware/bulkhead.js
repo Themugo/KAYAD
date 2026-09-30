@@ -118,16 +118,16 @@ export const createBulkheadMiddleware = (name, maxConcurrent, timeoutMs = 30000)
         }
       }, timeoutMs);
 
-      // Override res.end to release semaphore
-      const originalEnd = res.end.bind(res);
-      res.end = function (...args) {
+      // Release the semaphore from the response lifecycle rather than overriding res.end.
+      const release = () => {
         clearTimeout(timeoutId);
         if (acquired) {
           bulkhead.release();
           acquired = false;
         }
-        originalEnd(...args);
       };
+      res.once("finish", release);
+      res.once("close", release);
 
       next();
     } catch (error) {

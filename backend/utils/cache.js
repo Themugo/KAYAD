@@ -1,3 +1,4 @@
+import { onJsonResponse } from "./responseHooks.js";
 // backend/utils/cache.js
 // ─────────────────────────────────────────────────────────────
 // Redis caching with in-memory fallback.
@@ -135,15 +136,10 @@ export const cacheMiddleware = (ttlSeconds = 60, keyFn = null) => {
         return;
       }
 
-      const origJson = res.json.bind(res);
-      res.json = (data) => {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          // Cache writes must never become part of the HTTP response lifecycle.
-          void cacheSet(key, data, ttlSeconds);
-        }
-        res.setHeader("X-Cache", "MISS");
-        return origJson(data);
-      };
+      onJsonResponse(res, (data) => {
+        if (res.statusCode >= 200 && res.statusCode < 300) void cacheSet(key, data, ttlSeconds);
+        if (!res.headersSent) res.setHeader("X-Cache", "MISS");
+      });
 
       next();
     });

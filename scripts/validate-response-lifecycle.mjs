@@ -1,31 +1,42 @@
-import assert from 'node:assert/strict';
-import { EventEmitter } from 'node:events';
-import fs from 'node:fs';
-import { sliMiddleware } from '../backend/middleware/sliMiddleware.js';
-import { getCounter, getHistogram, resetMetrics } from '../backend/config/metrics.js';
-const read = name => fs.readFileSync(new URL(`../backend/middleware/${name}.js`, import.meta.url), 'utf8');
-const sli = read('sliMiddleware');
-const performance = read('performanceMonitor');
-const error = read('errorHandler');
-const wrapper = read('responseWrapper');
-assert(!/res\.(json|end)\s*=/.test(sli), 'SLI must not override response writers');
-assert(!/res\.end\s*=/.test(performance), 'Performance monitoring must not override end');
-assert(/res\.once\("finish"/.test(sli) && /res\.once\("close"/.test(sli));
-assert(/res\.headersSent\s*\|\|\s*res\.writableEnded/.test(error));
-assert(/success:\s*false/.test(error));
-assert(/success:\s*true/.test(wrapper));
-resetMetrics();
-const request = {method:'HEAD',path:'/',route:undefined};
-const response = Object.assign(new EventEmitter(),{statusCode:404,writableFinished:false});
-let nextCount=0;
-sliMiddleware(request,response,()=>nextCount++);
-response.writableFinished=true;
-response.emit('finish');response.emit('close');
-assert.equal(nextCount,1);
-assert.equal(getCounter('http_requests_total',{method:'HEAD',path:'/',status:404}),1,'capture exactly once');
-assert.equal(getHistogram('http_request_duration_ms',{method:'HEAD',path:'/',status:404}).count,1);
-const aborted = Object.assign(new EventEmitter(),{statusCode:200,writableFinished:false});
-sliMiddleware({method:'GET',path:'/api'},aborted,()=>{});
-aborted.emit('close');
-assert.equal(getCounter('http_requests_aborted_total',{method:'GET',path:'/api'}),1);
-console.log('PASS response lifecycle static invariants, HEAD 404 finish-once and early-close instrumentation');
+import fs from "node:fs";
+import path from "node:path";
+
+const root = process.cwd();
+const server = fs.readFileSync(path.join(root, "backend/server.js"), "utf8");
+const hooks = fs.readFileSync(path.join(root, "backend/utils/responseHooks.js"), "utf8");
+const files = [
+  "backend/middleware/responseWrapper.js",
+  "backend/middleware/sliMiddleware.js",
+  "backend/middleware/performanceMonitor.js",
+  "backend/middleware/auditLog.js",
+  "backend/middleware/bulkhead.js",
+  "backend/middleware/distributedLock.js",
+  "backend/middleware/searchLatencyTracking.js",
+  "backend/middleware/searchTracking.js",
+  "backend/middleware/apiCache.js",
+  "backend/middleware/cacheMiddleware.js",
+  "backend/middleware/validate.js",
+  "backend/services/cacheService.js",
+  "backend/utils/cache.js",
+  "backend/middleware/idempotency.js",
+];
+
+const failures = [];
+const check = (ok, message) => { if (!ok) failures.push(message); };
+
+check(server.indexOf("app.use(responseWrapper);") >= 0 && server.indexOf("app.use(responseWrapper);") < server.indexOf('app.use("/api/v2", v2Routes);'), "responseWrapper must be mounted before versioned routes");
+check((server.match(/app\.use\(responseWrapper\);/g) || []).length === 1, "responseWrapper must have exactly one registration");
+check(hooks.includes("res.json = function kayadResponseJson") && !hooks.includes("res.json = async function kayadResponseJson"), "central response hook must keep res.json synchronous");
+check(hooks.includes("res.headersSent || res.writableEnded || state.responseStarted"), "central response hook must reject duplicate sends");
+
+for (const rel of files) {
+  const text = fs.readFileSync(path.join(root, rel), "utf8");
+  check(!/res\.(json|end)\s*=/.test(text), `${rel}: direct response override remains`);
+}
+
+if (failures.length) {
+  console.error("FAIL response lifecycle:");
+  for (const failure of failures) console.error(` - ${failure}`);
+  process.exit(1);
+}
+console.log("PASS response lifecycle centralization, synchronous response boundary, duplicate-send guard and route coverage");

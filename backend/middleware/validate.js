@@ -1,3 +1,4 @@
+import { onJsonResponse } from "../utils/responseHooks.js";
 import { validationError, error } from "../utils/response.js";
 import { z } from "zod";
 import {
@@ -198,21 +199,13 @@ export const validateObjectId = (req, res, next) => {
  * In production, logs errors but doesn't block responses to avoid breaking the app
  */
 export const validateResponse = (schema) => (req, res, next) => {
-  const originalJson = res.json.bind(res);
-
-  res.json = function (data) {
+  onJsonResponse(res, (data) => {
     const result = schema.safeParse(data);
     if (!result.success) {
       console.error("Response validation error:", result.error.flatten().fieldErrors);
-      // In development, you might want to throw an error
-      // In production, we log but still send the response to avoid breaking the app
-      if (process.env.NODE_ENV === "development") {
-        console.error("Response validation failed for:", req.path);
-      }
+      if (process.env.NODE_ENV === "development") console.error("Response validation failed for:", req.path);
     }
-    return originalJson(data);
-  };
-
+  });
   next();
 };
 

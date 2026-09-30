@@ -4,6 +4,7 @@
 // Provides standardized caching for GET endpoints
 // ─────────────────────────────────────────────────────────────
 
+import { onJsonResponse } from "../utils/responseHooks.js";
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 
 // =============================
@@ -61,14 +62,9 @@ export const cacheResponse = (ttl, keyPrefix = "") => {
 
 export const invalidateCache = (pattern) => {
   return async (req, res, next) => {
-    const originalJson = res.json;
-
-    res.json = function (data) {
-      if (pattern) {
-        cacheDelPattern(pattern);
-      }
-      return originalJson.call(this, data);
-    };
+    onJsonResponse(res, () => {
+      if (pattern) cacheDelPattern(pattern);
+    });
 
     next();
   };

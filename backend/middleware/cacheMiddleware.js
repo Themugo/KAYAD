@@ -4,6 +4,7 @@
 // Provides middleware for caching and cache invalidation
 // ─────────────────────────────────────────────────────────────
 
+import { onJsonResponse } from "../utils/responseHooks.js";
 import cacheService from "../services/cacheService.js";
 
 // Cache response middleware
@@ -14,14 +15,9 @@ export const cacheResponse = (ttl = 3600) => {
 // Invalidate cache by pattern on successful operations
 export const invalidateCache = (pattern) => {
   return async (req, res, next) => {
-    const originalJson = res.json.bind(res);
-    res.json = async (data) => {
-      // Only invalidate on successful operations
-      if (res.statusCode < 400) {
-        await cacheService.invalidate(pattern);
-      }
-      return originalJson(data);
-    };
+    onJsonResponse(res, async () => {
+      if (res.statusCode < 400) await cacheService.invalidate(pattern);
+    });
     next();
   };
 };
@@ -40,13 +36,9 @@ export const cacheByUser = (ttl = 3600) => {
       return res.json(cached);
     }
 
-    const originalJson = res.json.bind(res);
-    res.json = async (data) => {
-      if (req.method === "GET" && res.statusCode === 200) {
-        await cacheService.set(key, data, ttl);
-      }
-      return originalJson(data);
-    };
+    onJsonResponse(res, async (data) => {
+      if (req.method === "GET" && res.statusCode === 200) await cacheService.set(key, data, ttl);
+    });
 
     next();
   };
@@ -55,16 +47,12 @@ export const cacheByUser = (ttl = 3600) => {
 // Invalidate user cache
 export const invalidateUserCache = (userId) => {
   return async (req, res, next) => {
-    const originalJson = res.json.bind(res);
-    res.json = async (data) => {
+    onJsonResponse(res, async () => {
       if (res.statusCode < 400) {
         const uid = userId || req.user?.id || req.params?.userId;
-        if (uid) {
-          await cacheService.invalidate(`cache:user:${uid}:*`);
-        }
+        if (uid) await cacheService.invalidate(`cache:user:${uid}:*`);
       }
-      return originalJson(data);
-    };
+    });
     next();
   };
 };
@@ -84,13 +72,9 @@ export const cacheByDealer = (ttl = 3600) => {
       return res.json(cached);
     }
 
-    const originalJson = res.json.bind(res);
-    res.json = async (data) => {
-      if (req.method === "GET" && res.statusCode === 200) {
-        await cacheService.set(key, data, ttl);
-      }
-      return originalJson(data);
-    };
+    onJsonResponse(res, async (data) => {
+      if (req.method === "GET" && res.statusCode === 200) await cacheService.set(key, data, ttl);
+    });
 
     next();
   };
@@ -99,16 +83,12 @@ export const cacheByDealer = (ttl = 3600) => {
 // Invalidate dealer cache
 export const invalidateDealerCache = (dealerId) => {
   return async (req, res, next) => {
-    const originalJson = res.json.bind(res);
-    res.json = async (data) => {
+    onJsonResponse(res, async () => {
       if (res.statusCode < 400) {
         const did = dealerId || req.user?.id || req.params?.dealerId;
-        if (did) {
-          await cacheService.invalidate(`cache:dealer:${did}:*`);
-        }
+        if (did) await cacheService.invalidate(`cache:dealer:${did}:*`);
       }
-      return originalJson(data);
-    };
+    });
     next();
   };
 };
