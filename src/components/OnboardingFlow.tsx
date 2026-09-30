@@ -43,10 +43,17 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       if (role === 'inspector') {
         const specialties = form.specialties.split(',').map((x) => x.trim()).filter(Boolean);
         const preferredRegions = form.preferredRegions.split(',').map((x) => x.trim()).filter(Boolean);
+        if (!form.name.trim() || form.name.trim().length < 2) throw new Error('Enter your full name.');
+        if (!form.email.trim()) throw new Error('Enter your email address.');
+        if (!form.phone.trim()) throw new Error('Enter your phone number.');
+        if (!form.idNumber.trim()) throw new Error('Enter your identification number.');
+        if (!form.location.trim()) throw new Error('Enter your location or city.');
+        const years = Number(form.yearsOfExperience);
+        if (!Number.isFinite(years) || years < 0) throw new Error('Enter valid years of inspection experience.');
         if (specialties.length === 0) throw new Error('Add at least one inspection specialty.');
         await inspectorAPI.apply({
           fullName: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), idNumber: form.idNumber.trim(),
-          location: form.location.trim(), yearsOfExperience: Number(form.yearsOfExperience), specialties, preferredRegions,
+          location: form.location.trim(), yearsOfExperience: years, specialties, preferredRegions,
           toolsAvailable: form.toolsAvailable.trim(),
         });
         setComplete({ kind: 'application' });
@@ -71,6 +78,9 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       if (role === 'dealer' && !form.businessName.trim()) throw new Error('Enter your dealership business name.');
       if (role === 'dealer' && !form.location.trim()) throw new Error('Enter your dealership location or city.');
       const user = await authRegister(registration);
+      // Registration is account creation, not authentication. The backend does
+      // not issue access/refresh cookies here; verification and explicit login
+      // are separate lifecycle steps.
       setComplete({ kind: 'account', user });
       onComplete?.(user);
     } catch (err) {

@@ -3,7 +3,7 @@ import { request, HttpRequestError } from '../api/httpRequest';
  * Real backend phone-verification client - send a real OTP, verify
  * it, and check real verification status, via the real, now-fixed
  * backend (backend/controllers/phoneVerificationController.js,
- * mounted at /api/auth/send-otp, /verify-phone, /phone-status).
+ * mounted at /api/v1/auth/send-otp, /verify-phone, /phone-status).
  * Following the same fetch-client pattern already established
  * elsewhere in this project.
  */
@@ -31,17 +31,17 @@ async function phoneFetch<T>(path: string, options: RequestInit = {}): Promise<T
   }
 }
 
-/** POST /api/auth/send-otp - sends a real 4-digit code to the real,
+/** POST /api/v1/auth/send-otp - sends a real 4-digit code to the real,
  * signed-in user's phone on file. Rate-limited on the backend
  * (otpLimiter) - a 429 surfaces here as kind: 'rate_limited'. */
 export async function sendPhoneOTP(): Promise<void> {
-  await phoneFetch('/api/auth/send-otp', { method: 'POST' });
+  await phoneFetch('/api/v1/auth/send-otp', { method: 'POST' });
 }
 
-/** POST /api/auth/verify-phone - checks a real 4-digit code against
+/** POST /api/v1/auth/verify-phone - checks a real 4-digit code against
  * the real one just sent. */
 export async function verifyPhoneOTP(otp: string): Promise<void> {
-  await phoneFetch('/api/auth/verify-phone', {
+  await phoneFetch('/api/v1/auth/verify-phone', {
     method: 'POST',
     body: JSON.stringify({ otp }),
   });
@@ -52,9 +52,9 @@ export interface PhoneVerificationStatus {
   verified: boolean;
 }
 
-/** GET /api/auth/phone-status - the real, current verification state
+/** GET /api/v1/auth/phone-status - the real, current verification state
  * of the signed-in user's phone. */
 export async function getPhoneVerificationStatus(): Promise<PhoneVerificationStatus> {
-  const body = await phoneFetch<{ data: PhoneVerificationStatus }>('/api/auth/phone-status');
+  const body = await phoneFetch<{ data: PhoneVerificationStatus }>('/api/v1/auth/phone-status');
   return body.data;
 }

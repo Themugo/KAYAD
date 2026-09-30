@@ -1,20 +1,23 @@
 import axios from 'axios';
-import { getCSRFToken, getCsrfHeaders, setCSRFToken } from '../utils/csrf';
+import { clearCSRFToken, getCSRFToken, getCsrfHeaders, setCSRFToken } from '../utils/csrf';
 
-const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-// Keep the established `/api` same-origin fallback for service prefixes while
-// accepting either an API origin or an origin that already ends in `/api`.
-const API_URL = configuredApiUrl ? configuredApiUrl.replace(/\/api$/, '') : '/api';
+const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').trim().replace(/\/$/, '');
 
-// Auth routes are mounted under /api/v1 on the canonical backend. The
-// transport has two supported base-url shapes:
-//   - no VITE_API_URL: baseURL=/api, so the request path must be /v1/...
-//   - VITE_API_URL set: baseURL is the API origin (or empty for /api), so
-//     the request path must include /api/v1/... explicitly.
-// Keep this distinction here so Axios never composes /api/api/v1/... in the
-// same-origin deployment while direct api.kayad.space deployments remain
-// correct.
-const CSRF_BOOTSTRAP_PATH = configuredApiUrl ? '/api/v1/auth/csrf' : '/v1/auth/csrf';
+// One transport contract for every browser API call:
+//   - unset VITE_API_URL -> same-origin /api
+//   - VITE_API_URL=/api -> same-origin /api
+//   - VITE_API_URL=https://api.kayad.space -> https://api.kayad.space/api
+//   - VITE_API_URL=https://api.kayad.space/api -> same canonical API origin
+// All service modules therefore keep using their existing /cars, /auth, etc.
+// paths while the adapter normalizes /api-prefixed auth paths in httpRequest.
+const apiOrigin = configuredApiUrl.replace(/\/api$/, '');
+const API_URL = configuredApiUrl && apiOrigin && /^https?:\/\//i.test(apiOrigin)
+  ? `${apiOrigin}/api`
+  : '/api';
+
+// Auth routes are mounted at /api/v1/auth on the backend. Axios already has
+// /api in its baseURL, so the request path is /v1/auth/... in every deployment.
+const CSRF_BOOTSTRAP_PATH = '/v1/auth/csrf';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -28,6 +31,7 @@ export const api = axios.create({
 });
 
 let csrfBootstrapPromise: Promise<void> | null = null;
+let refreshSessionPromise: Promise<void> | null = null;
 
 const ensureCsrfToken = async (): Promise<void> => {
   if (typeof document === 'undefined') return;
@@ -68,19 +72,92 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Auth endpoints return 401 as a normal part of their own flows
-// (bad credentials, "not logged in" probes) — those must NOT trigger
-// a global session-expired event.
-const isAuthEndpoint = (url: string = '') => /\/auth\/(login|register|refresh|me|profile)/.test(url);
+// Authentication endpoints have different 401 semantics. Do not collapse
+// login failures, registration failures, session probes and refresh failures
+// into one generic "session expired" path.
+type AuthEndpointKind =
+  | 'login'
+  | 'register'
+  | 'refresh'
+  | 'session-probe'
+  | 'logout'
+  | 'verification'
+  | 'recovery'
+  | 'other';
+
+const classifyAuthEndpoint = (url: string = ''): AuthEndpointKind => {
+  const path = String(url).split('?')[0];
+  if (/\/auth\/(login)(?:$|\?)/.test(path)) return 'login';
+  if (/\/auth\/(register)(?:$|\?)/.test(path)) return 'register';
+  if (/\/auth\/(refresh)(?:$|\?)/.test(path)) return 'refresh';
+  if (/\/auth\/(me|profile)(?:$|\?)/.test(path)) return 'session-probe';
+  if (/\/auth\/logout(?:$|\?)/.test(path)) return 'logout';
+  if (/\/auth\/(verify-email|resend-verification)(?:\/|$)/.test(path)) return 'verification';
+  if (/\/auth\/(forgot-password|reset-password)(?:$|\?)/.test(path)) return 'recovery';
+  return 'other';
+};
+
+const shouldAttemptRefresh = (kind: AuthEndpointKind) =>
+  kind === 'other' || kind === 'session-probe';
+
+const shouldDispatchAuthExpired = (kind: AuthEndpointKind) =>
+  kind === 'other' || kind === 'refresh';
+
+const refreshSession = async (): Promise<void> => {
+  if (!refreshSessionPromise) {
+    refreshSessionPromise = api
+      .post('/v1/auth/refresh')
+      .then(() => undefined)
+      .finally(() => {
+        refreshSessionPromise = null;
+      });
+  }
+  await refreshSessionPromise;
+};
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Expired/revoked session: clear local state so the app stops
-    // firing doomed authenticated requests, and notify AuthContext
-    // (it listens for this event) instead of silently showing stale
-    // or empty data.
-    if (error?.response?.status === 401 && !isAuthEndpoint(error?.config?.url)) {
+  async (error) => {
+    const original = error?.config as (typeof error.config & { _kayadRetried?: boolean; _kayadCsrfRetried?: boolean }) | undefined;
+    const status = error?.response?.status;
+
+    // A stale/missing double-submit token is recoverable. Clear only the
+    // in-memory copy, bootstrap a fresh server-issued token, and retry the
+    // mutation once. This is deliberately separate from authentication expiry.
+    if (status === 403 && original && !original._kayadCsrfRetried && /csrf token validation failed/i.test(String(error?.response?.data?.message || error?.message || ''))) {
+      original._kayadCsrfRetried = true;
+      try {
+        clearCSRFToken();
+        await ensureCsrfToken();
+        return api.request(original);
+      } catch {
+        return Promise.reject(error);
+      }
+    }
+
+    // Access cookies are intentionally short-lived. On the first 401 from a
+    // normal authenticated endpoint, rotate the refresh cookie and retry the
+    // original request once. Login/register/refresh failures remain terminal
+    // auth errors and never recurse through this path.
+    const endpointKind = classifyAuthEndpoint(original?.url || error?.config?.url || '');
+
+    if (status === 401 && original && !original._kayadRetried && shouldAttemptRefresh(endpointKind)) {
+      original._kayadRetried = true;
+      try {
+        await refreshSession();
+        return api.request(original);
+      } catch {
+        // A normal login/registration/session-probe failure must not be
+        // converted into a global redirect signal. A refresh failure is the
+        // explicit session-expiry boundary.
+        if (shouldDispatchAuthExpired(endpointKind)) {
+          window.dispatchEvent(new Event('kayad:auth-expired'));
+        }
+        return Promise.reject(error);
+      }
+    }
+
+    if (status === 401 && shouldDispatchAuthExpired(endpointKind)) {
       window.dispatchEvent(new Event('kayad:auth-expired'));
     }
     return Promise.reject(error);

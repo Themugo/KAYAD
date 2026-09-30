@@ -7,11 +7,11 @@ const csrf = read("backend/middleware/csrf.js");
 const server = read("backend/server.js");
 
 const checks = [
-  ["CSRF token is session-stable", /req\.session\?\.csrfToken \|\| generateCsrfToken\(\)/.test(csrf)],
+  ["CSRF token is stateless", !/req\.session\?\.csrfToken/.test(csrf) && /generateCsrfToken\(\)/.test(csrf)],
   ["CSRF cookie path is root", /path:\s*["']\/["']/.test(csrf)],
   ["CSRF cookie is SameSite strict", /sameSite:\s*["']strict["']/.test(csrf)],
   ["CSRF cookie is not HTTP-only", /httpOnly:\s*false/.test(csrf)],
-  ["CSRF validation binds cookie and session token", /token !== cookieToken \|\| token !== sessionToken/.test(csrf)],
+  ["CSRF validation binds request token to cookie token", /token !== cookieToken/.test(csrf) && !/sessionToken/.test(csrf)],
   ["CSRF responses are not cacheable", /Cache-Control.*no-store/.test(csrf)],
   ["Session uses explicit KAYAD cookie name", /name:\s*["']kayad\.sid["']/.test(server)],
   ["Session cookie is SameSite strict", /sameSite:\s*["']strict["']/.test(server)],

@@ -33,7 +33,7 @@ export function LoginPage() {
       navigate(dest, { replace: true });
     } catch (err) {
       const message = err instanceof AuthApiError ? err.message : err?.response?.data?.message || 'Unable to sign in. Please try again.';
-      const requiresVerification = err instanceof AuthApiError && err.status === 403 && /verify your email/i.test(err.message);
+      const requiresVerification = err instanceof AuthApiError && (err.kind === 'email_verification_required' || (err.status === 403 && /verify your email/i.test(err.message)));
       setVerificationRequired(requiresVerification);
       toast(message, 'error');
     } finally {

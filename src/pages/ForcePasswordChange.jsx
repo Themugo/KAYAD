@@ -31,7 +31,13 @@ export default function ForcePasswordChange() {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });
-      setUser(data.user);
+      if (data?.user) setUser(data.user);
+      else {
+        // change-password rotates tokenVersion and returns the refreshed user
+        // in the canonical auth response; keep a safe fallback for older
+        // deployments while immediately clearing the forced-change state.
+        setUser({ ...(user || {}), mustChangePassword: false });
+      }
       toast('🔐 System ownership verified. Password updated.', 'success');
       navigate('/admin/settings', { replace: true });
     } catch (err) {

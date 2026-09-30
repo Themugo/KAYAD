@@ -119,7 +119,9 @@ describe('AuthModal - real backend authentication (Phase 3)', () => {
 
     fireEvent.change(screen.getByPlaceholderText('Jane Wanjiru'), { target: { value: 'New Dealer' } });
     fireEvent.change(screen.getByPlaceholderText('name@example.co.ke'), { target: { value: 'dealer@kayad.co.ke' } });
-    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'securepass1' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'Securepass1!' } });
+    fireEvent.change(screen.getByLabelText('Business name'), { target: { value: 'New Dealer Motors' } });
+    fireEvent.change(screen.getByLabelText('Location / city'), { target: { value: 'Nairobi' } });
     // "Create Account" appears twice - the mode tab and the submit
     // button - disambiguated by picking the actual <button> submit
     // element (type is not "button" for the tab... both share the same
@@ -128,7 +130,7 @@ describe('AuthModal - real backend authentication (Phase 3)', () => {
     const createAccountButtons = screen.getAllByRole('button', { name: 'Create Account' });
     fireEvent.click(createAccountButtons[createAccountButtons.length - 1]);
 
-    await waitFor(() => expect(authMocks.register).toHaveBeenCalledWith({ name: 'New Dealer', email: 'dealer@kayad.co.ke', password: 'securepass1', role: 'dealer' }));
+    await waitFor(() => expect(authMocks.register).toHaveBeenCalledWith({ name: 'New Dealer', email: 'dealer@kayad.co.ke', password: 'Securepass1!', role: 'dealer', businessName: 'New Dealer Motors', location: 'Nairobi' }));
   });
 });
 

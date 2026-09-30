@@ -16,9 +16,7 @@ test.describe('Vehicle Listing Workflow', () => {
     // Login as dealer
     const credentials = AuthHelper.getTestUser('dealer');
     dealerToken = await ApiHelper.loginApi(request, credentials.email, credentials.password);
-    await page.addInitScript((token) => {
-      window.localStorage.setItem('token', token);
-    }, dealerToken);
+    await AuthHelper.loginWithRole(page, 'dealer');
 
     await page.goto('/dealer/dashboard');
   });

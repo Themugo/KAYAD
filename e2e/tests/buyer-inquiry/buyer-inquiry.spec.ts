@@ -30,9 +30,7 @@ test.describe('Buyer Inquiry Workflow', () => {
     // Login as buyer
     const buyerCredentials = AuthHelper.getTestUser('buyer');
     buyerToken = await ApiHelper.loginApi(request, buyerCredentials.email, buyerCredentials.password);
-    await page.addInitScript((authToken) => {
-      window.localStorage.setItem('token', authToken);
-    }, buyerToken);
+    await AuthHelper.loginWithRole(page, 'buyer');
   });
 
   test.describe('Happy Path', () => {
@@ -58,9 +56,7 @@ test.describe('Buyer Inquiry Workflow', () => {
 
     test('should submit inquiry as anonymous user', async ({ page }) => {
       // Clear auth token
-      await page.evaluate(() => {
-        window.localStorage.removeItem('token');
-      });
+      await page.context().clearCookies();
 
       await page.goto(`/vehicles/${vehicleId}`);
       await page.click('button:has-text("Contact Dealer")');

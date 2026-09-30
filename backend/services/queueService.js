@@ -88,7 +88,7 @@ const startWorkers = (connection) => {
     async (job) => {
       const { to, subject, html, text } = job.data;
       logDebug("Sending email", { to, subject });
-      // Integrate with email service (SendGrid, Mailgun, etc.)
+      // Route email work through the canonical Brevo communication gateway
       // await sgMail.send({ to, from: 'noreply@kayad.co.ke', subject, html, text });
       return { success: true };
     },

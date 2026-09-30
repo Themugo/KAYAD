@@ -49,6 +49,7 @@ export interface BackendUser {
   phoneVerified?: boolean;
   verificationStatus?: string;
   isOwner?: boolean;
+  mustChangePassword?: boolean;
 }
 
 export interface AuthResponse {
@@ -61,7 +62,7 @@ export interface AuthResponse {
  * between, rather than a single generic "it failed" - a login attempt
  * needs to tell "wrong password" apart from "server unreachable" to
  * show the right message. */
-export type AuthErrorKind = 'invalid_credentials' | 'csrf' | 'validation' | 'conflict' | 'network' | 'server' | 'unknown';
+export type AuthErrorKind = 'invalid_credentials' | 'email_verification_required' | 'forbidden' | 'rate_limited' | 'csrf' | 'validation' | 'conflict' | 'network' | 'server' | 'unknown';
 
 export class AuthApiError extends Error {
   kind: AuthErrorKind;
@@ -80,15 +81,21 @@ async function authFetch(path: string, options: RequestInit = {}): Promise<AuthR
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     const kind: AuthErrorKind = error.status === 403 && /csrf/i.test(error.message)
       ? 'csrf'
-      : error.status === 400
-        ? 'validation'
-        : error.status === 409
-          ? 'conflict'
-          : error.status === 401
-            ? 'invalid_credentials'
-            : error.status
-              ? 'server'
-              : 'network';
+      : error.status === 403 && /verify your email/i.test(error.message)
+        ? 'email_verification_required'
+        : error.status === 403
+          ? 'forbidden'
+          : error.status === 429
+            ? 'rate_limited'
+            : error.status === 400
+              ? 'validation'
+              : error.status === 409
+                ? 'conflict'
+                : error.status === 401
+                  ? 'invalid_credentials'
+                  : error.status
+                    ? 'server'
+                    : 'network';
     throw new AuthApiError(error.message, kind, error.status);
   }
 }

@@ -63,11 +63,12 @@ const SAFE_USER_FIELDS = [
   "businessName", "businessType", "createdAt", "updatedAt",
   "lastLogin", "lastLoginAt", "referralCode", "credits",
   "emailVerified", "phoneVerified", "verificationStatus",
+  "mustChangePassword",
   "dealerPackage", "packageListingMax", "packageFeatures", "packageExpiresAt",
   "packageAutoRenew", "subscriptionStatus", "wholesale", "deactivatedAt",
 ];
 
-const serializeUser = (user) => {
+const serializeUser = (user, authState = null) => {
   const raw = typeof user.toObject === "function" ? user.toObject() : user;
   const role = isOwnerEmail(raw.email) ? "superadmin" : raw.role;
   const safe = {};
@@ -75,6 +76,9 @@ const serializeUser = (user) => {
     if (raw[field] !== undefined) safe[field] = raw[field];
   }
   safe.role = role;
+  if (authState && authState.mustChangePassword !== undefined) {
+    safe.mustChangePassword = Boolean(authState.mustChangePassword);
+  }
   safe.isOwner = isOwnerEmail(raw.email);
   return safe;
 };
@@ -113,10 +117,10 @@ const sendAccessToken = (res, token) => {
 // =============================
 // 🧾 RESPONSE FORMAT
 // =============================
-const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null, tokenVersion = 0) => {
+const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null, tokenVersion = 0, authState = null) => {
   const accessToken = generateAccessToken(user);
   const newRefreshToken = generateRefreshToken(user);
-  const safeUser = serializeUser(user);
+  const safeUser = serializeUser(user, authState);
 
   // Store new refresh token in database with rotation
   const refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
@@ -278,14 +282,14 @@ export const register = async (req, res) => {
       void notifyAdminsOfPendingSeller(user).catch(() => {});
     }
 
-    // IMPORTANT: email delivery must never sit in the registration request.
-    // Brevo/network delivery has its own timeout/retry policy and can otherwise
-    // consume the browser's 30s HTTP budget before the account/session response
-    // is returned. The account remains email-unverified until the link is used,
-    // so this preserves the verification gate without coupling account creation
-    // to an external provider's latency.
+    // Verification delivery has two modes by design:
+    // - When email verification is required, provider acceptance is part of
+    //   registration's commit boundary. A failed Brevo delivery must roll the
+    //   identity back rather than creating an account the user cannot verify.
+    // - When verification is not required, delivery remains asynchronous so
+    //   optional provider latency cannot hold the onboarding request open.
     const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
-    void deliver({
+    const verificationPayload = {
       userId: user.id || user._id,
       channel: "email",
       eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
@@ -295,9 +299,26 @@ export const register = async (req, res) => {
       text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
       html: `<p>Hi ${user.name || "there"},</p><p>Verify your KAYAD email to unlock your account.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
       metadata: { verification: true },
-    }).catch((e) => {
-      console.warn("⚠️ Verification email dispatch failed:", e.message);
-    });
+    };
+
+    if (requiresEmailVerification()) {
+      const verificationDelivery = await deliver(verificationPayload);
+      try {
+        assertEmailDeliverySucceeded(verificationDelivery, "Verification");
+      } catch (deliveryErr) {
+        // Do not leave an account that is immediately blocked by the login
+        // verification gate but has no usable verification path.
+        await Promise.allSettled([
+          UserAuth.deleteOne({ _id: userAuth._id }),
+          User.deleteOne({ _id: user._id }),
+        ]);
+        throw new Error("Registration could not be completed because the verification email service is temporarily unavailable.");
+      }
+    } else {
+      void deliver(verificationPayload).catch((e) => {
+        console.warn("⚠️ Verification email dispatch failed:", e.message);
+      });
+    }
 
     if (referredBy) {
       // Referral credit is a post-registration side effect. Never make the
@@ -341,18 +362,16 @@ export const register = async (req, res) => {
     });
 
 
-    try {
-      return await sendAuthResponse(res.status(201), user, null, req, userAuth.tokenVersion || 0);
-    } catch (authResponseErr) {
-      // A registration is not complete until the auth session can be issued.
-      // If refresh-token persistence fails, remove the identity records so a
-      // retry is not blocked by a phantom account.
-      await Promise.allSettled([
-        UserAuth.deleteOne({ _id: userAuth._id }),
-        User.deleteOne({ _id: user._id }),
-      ]);
-      throw authResponseErr;
-    }
+    // Registration deliberately does not create an authenticated session.
+    // The user must complete email verification (when enabled) and then sign
+    // in explicitly. This keeps account creation separate from authentication
+    // and prevents a freshly-created, unverified account from receiving live
+    // access/refresh cookies.
+    return res.status(201).json({
+      success: true,
+      user: serializeUser(user, userAuth),
+      message: "Account created successfully. Please verify your email before signing in.",
+    });
   } catch (err) {
     logError("REGISTER ERROR", err);
     if (err?.code === 11000) {
@@ -422,7 +441,7 @@ export const login = async (req, res) => {
     }
 
     // ─── Email verification gate ────────────────────────────────
-    // Only enforce when verification can actually be completed. If SMTP
+    // Only enforce when verification can actually be completed. If Brevo
     // isn't configured there is no way to receive the
     // verification link, so blocking login would lock everyone out.
     // Override explicitly with REQUIRE_EMAIL_VERIFICATION=true|false.
@@ -450,7 +469,7 @@ export const login = async (req, res) => {
     await user.save();
     if (userAuth) await userAuth.save();
 
-    return await sendAuthResponse(res, user, null, req, userAuth?.tokenVersion || 0);
+    return await sendAuthResponse(res, user, null, req, userAuth?.tokenVersion || 0, userAuth);
   } catch (err) {
     logError("❌ LOGIN ERROR", err);
     R.error(res, "Login failed", 500);
@@ -509,7 +528,7 @@ export const refreshToken = async (req, res) => {
     await storedToken.save();
 
     // Issue new tokens with rotation (old token is revoked in sendAuthResponse)
-    return await sendAuthResponse(res, user, token, req, userAuth?.tokenVersion || 0);
+    return await sendAuthResponse(res, user, token, req, userAuth?.tokenVersion || 0, userAuth);
   } catch (err) {
     logError("❌ REFRESH ERROR", err);
     R.error(res, "Refresh failed", 500);
@@ -709,7 +728,7 @@ export const changePassword = async (req, res) => {
     // 🔥 Invalidate user cache to prevent stale auth state after password change
     invalidateUserCache(req.user.id);
 
-    return sendAuthResponse(res, user, null, null, userAuth.tokenVersion || 0);
+    return sendAuthResponse(res, user, null, null, userAuth.tokenVersion || 0, userAuth);
   } catch (err) {
     R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
@@ -833,21 +852,23 @@ export const forgotPassword = async (req, res) => {
     userAuth.resetTokenExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await userAuth.save();
 
-    try {
-      const resetUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/reset-password?token=${token}`;
-      await deliver({
-        userId: user.id || user._id,
-        channel: "email",
-        eventType: COMMUNICATION_EVENTS.PASSWORD_RESET,
-        recipient: user.email,
-        subject: "Reset Your KAYAD Password",
-        text: `Reset your KAYAD password: ${resetUrl}. This link expires in 1 hour.`,
-        html: `<p>We received a request to reset your KAYAD password.</p><p><a href="${resetUrl}">Reset my password</a></p><p>This link expires in 1 hour.</p>`,
-        metadata: { passwordReset: true },
-      });
-    } catch (e) { console.warn("⚠️ Reset email failed:", e.message); }
+    // Password-reset email delivery is external I/O and must not hold the HTTP
+    // request open. The reset token is already persisted before dispatch, so a
+    // provider timeout cannot turn a successful reset request into a browser
+    // timeout. Keep the response identical for account-enumeration safety.
+    const resetUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/reset-password?token=${token}`;
+    void deliver({
+      userId: user.id || user._id,
+      channel: "email",
+      eventType: COMMUNICATION_EVENTS.PASSWORD_RESET,
+      recipient: user.email,
+      subject: "Reset Your KAYAD Password",
+      text: `Reset your KAYAD password: ${resetUrl}. This link expires in 1 hour.`,
+      html: `<p>We received a request to reset your KAYAD password.</p><p><a href="${resetUrl}">Reset my password</a></p><p>This link expires in 1 hour.</p>`,
+      metadata: { passwordReset: true },
+    }).catch((e) => console.warn("⚠️ Reset email failed:", e.message));
 
-    res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
+    return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
   } catch (err) {
     R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }

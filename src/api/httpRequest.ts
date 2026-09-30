@@ -23,8 +23,10 @@ export interface HttpRequestOptions {
  * inheriting the canonical credentials, timeout, CSRF and auth-expiry rules. */
 export async function request<T>(path: string, options: HttpRequestOptions = {}): Promise<T> {
   const { method = 'GET', body, headers, params } = options;
-  const configuredApiUrl = String(import.meta.env.VITE_API_URL || '');
-  const requestPath = !configuredApiUrl && /^\/api(?:\/|$)/.test(path)
+  // httpClient always carries the canonical /api prefix in baseURL.
+  // Strip an optional /api prefix from service paths so legacy /api/v1/...
+  // auth callers and newer /v1/... callers both resolve exactly once.
+  const requestPath = /^\/api(?:\/|$)/.test(path)
     ? path.slice(4) || '/'
     : path;
 

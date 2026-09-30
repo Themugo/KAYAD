@@ -33,9 +33,7 @@ test.describe('Auction Bidding Workflow', () => {
     // Login as buyer
     const buyerCredentials = AuthHelper.getTestUser('buyer');
     buyerToken = await ApiHelper.loginApi(request, buyerCredentials.email, buyerCredentials.password);
-    await page.addInitScript((authToken) => {
-      window.localStorage.setItem('token', authToken);
-    }, buyerToken);
+    await AuthHelper.loginWithRole(page, 'buyer');
   });
 
   test.describe('Happy Path', () => {
@@ -61,18 +59,14 @@ test.describe('Auction Bidding Workflow', () => {
     test('should show real-time bid updates', async ({ page, context }) => {
       // Create two buyer contexts
       const buyer1Page = await context.newPage();
-      await buyer1Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyer1Page, 'buyer');
       await buyer1Page.goto(`/auctions/${auctionId}`);
 
       const buyer2Credentials = AuthHelper.getTestUser('buyer');
       const buyer2Token = await ApiHelper.loginApi(context.request, buyer2Credentials.email, buyer2Credentials.password);
 
       const buyer2Page = await context.newPage();
-      await buyer2Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyer2Token);
+      await AuthHelper.loginWithRole(buyer2Page, 'buyer');
       await buyer2Page.goto(`/auctions/${auctionId}`);
 
       // Buyer 1 places bid
@@ -88,18 +82,14 @@ test.describe('Auction Bidding Workflow', () => {
 
     test('should notify outbid bidder', async ({ page, context }) => {
       const buyer1Page = await context.newPage();
-      await buyer1Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyer1Page, 'buyer');
       await buyer1Page.goto(`/auctions/${auctionId}`);
 
       const buyer2Credentials = AuthHelper.getTestUser('buyer');
       const buyer2Token = await ApiHelper.loginApi(context.request, buyer2Credentials.email, buyer2Credentials.password);
 
       const buyer2Page = await context.newPage();
-      await buyer2Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyer2Token);
+      await AuthHelper.loginWithRole(buyer2Page, 'buyer');
       await buyer2Page.goto(`/auctions/${auctionId}`);
 
       // Buyer 1 places bid
@@ -157,18 +147,14 @@ test.describe('Auction Bidding Workflow', () => {
 
     test('should handle concurrent bids', async ({ page, context }) => {
       const buyer1Page = await context.newPage();
-      await buyer1Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyer1Page, 'buyer');
       await buyer1Page.goto(`/auctions/${auctionId}`);
 
       const buyer2Credentials = AuthHelper.getTestUser('buyer');
       const buyer2Token = await ApiHelper.loginApi(context.request, buyer2Credentials.email, buyer2Credentials.password);
 
       const buyer2Page = await context.newPage();
-      await buyer2Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyer2Token);
+      await AuthHelper.loginWithRole(buyer2Page, 'buyer');
       await buyer2Page.goto(`/auctions/${auctionId}`);
 
       // Both place bids simultaneously
@@ -364,18 +350,14 @@ test.describe('Auction Bidding Workflow', () => {
 
     test('should notify all participants when auction ends', async ({ page, context }) => {
       const buyer1Page = await context.newPage();
-      await buyer1Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyer1Page, 'buyer');
       await buyer1Page.goto(`/auctions/${auctionId}`);
 
       const buyer2Credentials = AuthHelper.getTestUser('buyer');
       const buyer2Token = await ApiHelper.loginApi(context.request, buyer2Credentials.email, buyer2Credentials.password);
 
       const buyer2Page = await context.newPage();
-      await buyer2Page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyer2Token);
+      await AuthHelper.loginWithRole(buyer2Page, 'buyer');
       await buyer2Page.goto(`/auctions/${auctionId}`);
 
       // End auction

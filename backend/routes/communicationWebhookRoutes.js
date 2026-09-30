@@ -81,23 +81,6 @@ router.post("/twilio/status", asyncHandler(async (req, res) => {
   res.type("text/plain").send(result ? "OK" : "IGNORED");
 }));
 
-router.post("/sendgrid/events", requireWebhookSecret, asyncHandler(async (req, res) => {
-  const events = Array.isArray(req.body) ? req.body : [];
-  let matched = 0;
-  for (const event of events) {
-    const result = await handleProviderStatus({
-      provider: "sendgrid",
-      providerMessageId: event.sg_message_id || event.sg_event_id,
-      status: event.event === "delivered" ? "delivered" : event.event === "bounce" ? "bounced" : event.event === "open" || event.event === "click" ? "read" : event.event === "dropped" ? "failed" : event.event,
-      error: event.reason || event.response,
-      providerEventId: event.sg_event_id,
-      metadata: { email: event.email, timestamp: event.timestamp, category: event.category },
-    });
-    if (result) matched += 1;
-  }
-  res.json({ success: true, matched });
-}));
-
 router.post("/africastalking/status", requireWebhookSecret, asyncHandler(async (req, res) => {
   const result = await handleProviderStatus({
     provider: "africastalking",

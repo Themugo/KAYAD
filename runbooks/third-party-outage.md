@@ -153,7 +153,7 @@ export MPESA_MAINTENANCE_MODE=false
 ### Symptoms
 - Email delivery failures
 - Email bounce errors
-- SMTP connection errors
+- Brevo API connection errors
 
 ### Immediate Actions
 

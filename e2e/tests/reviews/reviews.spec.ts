@@ -42,9 +42,7 @@ test.describe('Reviews Workflow', () => {
     // Login as buyer
     const buyerCredentials = AuthHelper.getTestUser('buyer');
     buyerToken = await ApiHelper.loginApi(request, buyerCredentials.email, buyerCredentials.password);
-    await page.addInitScript((authToken) => {
-      window.localStorage.setItem('token', authToken);
-    }, buyerToken);
+    await AuthHelper.loginWithRole(page, 'buyer');
   });
 
   test.describe('Happy Path', () => {
@@ -104,15 +102,11 @@ test.describe('Reviews Workflow', () => {
 
     test('should send review notification to dealer', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto(`/buyer/escrow/${escrowId}`);
 
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/notifications');
 
       // Submit review
@@ -323,9 +317,7 @@ test.describe('Reviews Workflow', () => {
       });
 
       // Login as dealer
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto('/dealer/reviews');
 
       // Respond to review
@@ -451,9 +443,7 @@ test.describe('Reviews Workflow', () => {
 
     test('should require authentication to submit review', async ({ page }) => {
       // Clear auth
-      await page.evaluate(() => {
-        window.localStorage.removeItem('token');
-      });
+      await page.context().clearCookies();
 
       await page.goto(`/buyer/escrow/${escrowId}`);
 

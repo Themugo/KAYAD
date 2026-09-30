@@ -14,17 +14,27 @@ const checks = [
   ['frontend verification page exists', fs.existsSync(path.join(root, 'src/pages/VerifyEmailPage.tsx'))],
   ['verification page calls backend token endpoint', /verifyEmail\(token\)/.test(read('src/pages/VerifyEmailPage.tsx')) && /\/verify-email\/\$\{encodeURIComponent\(token\)\}/.test(read('src/services/authApi.ts'))],
   ['login handles email verification gate', /verificationRequired/.test(read('src/pages/LoginPage.jsx')) && /resendVerification/.test(read('src/pages/LoginPage.jsx'))],
-  ['registration response issues httpOnly auth cookies', /sendAccessToken\(res, accessToken\)/.test(read('backend/controllers/authController.js')) && /sendRefreshToken\(res, newRefreshToken\)/.test(read('backend/controllers/authController.js'))],
+  ['registration is account-creation only and does not issue a session', /Registration deliberately does not create an authenticated session/.test(read('backend/controllers/authController.js')) && /return res\.status\(201\)\.json\(\{/.test(read('backend/controllers/authController.js')) && !/register[\s\S]{0,12000}sendAuthResponse\(res\.status\(201\)/.test(read('backend/controllers/authController.js'))],
   ['registration duplicate email returns conflict', /An account with that email already exists/.test(read('backend/controllers/authController.js')) && /409/.test(read('backend/controllers/authController.js'))],
-  ['verification email is non-blocking', (() => {
+  ['verification email uses the required/non-required delivery boundary', (() => {
     const source = read('backend/controllers/authController.js');
     const register = source.slice(source.indexOf('export const register'), source.indexOf('// =============================\n// 🔑 LOGIN'));
-    return /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/.test(register) && !/await deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/.test(register);
+    return /if \(requiresEmailVerification\(\)\)/.test(register) && /const verificationDelivery = await deliver\(verificationPayload\)/.test(register) && /void deliver\(verificationPayload\)/.test(register) && /Registration could not be completed because the verification email service is temporarily unavailable/.test(register);
   })()],
   ['welcome email is non-blocking', /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/.test(read('backend/controllers/authController.js'))],
+  ['password reset email is non-blocking', /const resetUrl = .*reset-password\?token=/.test(read('backend/controllers/authController.js')) && /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.PASSWORD_RESET/.test(read('backend/controllers/authController.js'))],
+  ['forgot-password page exists', fs.existsSync(path.join(root, 'src/pages/ForgotPasswordPage.tsx'))],
+  ['reset-password page exists', fs.existsSync(path.join(root, 'src/pages/ResetPasswordPage.tsx'))],
+  ['public auth routes are wired into the application shell', /path === '\/login'/.test(read('src/App.tsx')) && /path === '\/register'/.test(read('src/App.tsx')) && /path === '\/forgot-password'/.test(read('src/App.tsx')) && /path === '\/reset-password'/.test(read('src/App.tsx'))],
+  ['force-password-change route is wired into the application shell', /path === '\/force-password-change'/.test(read('src/App.tsx')) && fs.existsSync(path.join(root, 'src/pages/ForcePasswordChange.jsx'))],
+  ['inspector onboarding validates required application fields client-side', /if \(!form\.phone\.trim\(\)\)/.test(read('src/components/OnboardingFlow.tsx')) && /if \(!form\.idNumber\.trim\(\)\)/.test(read('src/components/OnboardingFlow.tsx')) && /if \(!form\.location\.trim\(\)\)/.test(read('src/components/OnboardingFlow.tsx'))],
 
-  ['CSRF bootstrap path matches the configured API base contract', /const CSRF_BOOTSTRAP_PATH = configuredApiUrl \? '\/api\/v1\/auth\/csrf' : '\/v1\/auth\/csrf'/.test(read('src/api/httpClient.ts')) && read('src/api/httpRequest.ts').includes("path.slice(4)")],
+  ['API transport keeps one canonical /api base across env forms', /const CSRF_BOOTSTRAP_PATH = '\/v1\/auth\/csrf'/.test(read('src/api/httpClient.ts')) && /const API_URL =/.test(read('src/api/httpClient.ts')) && read('src/api/httpRequest.ts').includes("path.slice(4)")],
+  ['production /api env does not create an empty Axios base URL', /VITE_API_URL=\/api/.test(read('.env.production.example')) && /: '\/api';/.test(read('src/api/httpClient.ts'))],
+  ['inspector application uses canonical shared API transport', /apply: \(body: any\) => api\.post\('\/inspector-applications\/apply'/.test(read('src/api/api.exports.ts')) && /baseURL: API_URL/.test(read('src/api/httpClient.ts'))],
   ['CSRF bootstrap token is retained for cross-subdomain requests', /setCSRFToken\(token\)/.test(read('src/api/httpClient.ts')) && /export function setCSRFToken/.test(read('src/utils/csrf.ts'))],
+  ['session expiry retries once through refresh before clearing auth state', /_kayadRetried/.test(read('src/api/httpClient.ts')) && /refreshSession/.test(read('src/api/httpClient.ts')) && /post\('\/v1\/auth\/refresh'/.test(read('src/api/httpClient.ts')) && !/auth\\\/(login\|register\|refresh\|me\|profile)/.test(read('src/api/httpClient.ts'))],
+  ['force-password-change state is returned safely from auth responses', /mustChangePassword/.test(read('backend/controllers/authController.js')) && /mustChangePassword\?: boolean/.test(read('src/services/authApi.ts'))],
   ['backend mounts the canonical versioned auth router', /app\.use\("\/api\/v1", v1Routes\)/.test(read('backend/server.js')) && /router\.use\("\/auth", authLimiter, authRoutes\)/.test(read('backend/routes/v1.js'))],
   ['backend exposes the CSRF route on the auth router', /router\.get\("\/csrf"/.test(read('backend/routes/authRoutes.js'))],
   ['production verifier probes the canonical CSRF endpoint', /auth\/csrf/.test(read('scripts/verify-production-deployment.mjs'))],
@@ -35,6 +45,8 @@ const checks = [
   ['dealer onboarding uses dealer role and required business fields', /role === 'dealer'/.test(read('src/components/OnboardingFlow.tsx')) && /businessName/.test(read('src/components/OnboardingFlow.tsx')) && /location/.test(read('src/components/OnboardingFlow.tsx'))],
   ['inspector onboarding uses dedicated application endpoint', /inspectorAPI\.apply/.test(read('src/components/OnboardingFlow.tsx')) && /api\.post\('\/inspector-applications\/apply'/.test(read('src/api/api.exports.ts'))],
   ['inspector application validates specialties before submit', /specialties\.length === 0/.test(read('src/components/OnboardingFlow.tsx'))],
+  ['inspector backend validates the canonical application contract', /submitApplicationSchema/.test(read('backend/controllers/inspectorApplicationController.js')) && /validateBody\(submitApplicationSchema\)/.test(read('backend/routes/inspectorApplicationRoutes.js'))],
+  ['inspector admin approve/reject payloads are validated', /validateBody\(approveApplicationSchema\)/.test(read('backend/routes/inspectorApplicationRoutes.js')) && /validateBody\(rejectApplicationSchema\)/.test(read('backend/routes/inspectorApplicationRoutes.js'))],
   ['single canonical registration surface is used by auth modal', /<OnboardingFlow onClose=\{onClose\} \/>/.test(read('src/components/AuthModal.tsx'))],
   ['legacy auth modal re-exports canonical surface', /export \{ default, AuthModal \} from '\.\.\/AuthModal'/.test(read('src/components/auth/AuthModal.tsx'))],
   ['frontend registration uses canonical auth API service', /authRegister\(registration\)/.test(read('src/components/OnboardingFlow.tsx')) && /authFetch\('\/api\/v1\/auth\/register'/.test(read('src/services/authApi.ts'))],

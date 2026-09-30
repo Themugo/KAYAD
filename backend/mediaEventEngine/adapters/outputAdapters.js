@@ -168,7 +168,7 @@ class EmailAdapter extends OutputAdapter {
       throw new Error('Email requires "to" and "subject"');
     }
 
-    // In production, this would use SendGrid/Nodemailer
+    // In production, transactional email uses the canonical Brevo adapter
     // await this.emailService.send({ to, subject, template, variables });
 
     logInfo('Email notification sent', { to, subject });

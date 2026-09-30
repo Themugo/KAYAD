@@ -28,16 +28,12 @@ test.describe('Chat Workflow', () => {
     test('should send and receive real-time messages', async ({ page, context }) => {
       // Create buyer context
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto('/buyer/chats');
 
       // Create dealer context
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/chats');
 
       // Buyer sends message
@@ -66,15 +62,11 @@ test.describe('Chat Workflow', () => {
 
     test('should show message read receipts', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto('/buyer/chats');
 
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/chats');
 
       // Buyer sends message
@@ -94,9 +86,7 @@ test.describe('Chat Workflow', () => {
 
     test('should handle offline recipient with notifications', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto('/buyer/chats');
 
       // Buyer sends message while dealer is offline
@@ -114,9 +104,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should display message history', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       // Open existing chat
@@ -131,9 +119,7 @@ test.describe('Chat Workflow', () => {
 
   test.describe('Edge Cases', () => {
     test('should handle message with emoji', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -146,9 +132,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should handle long message', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       const longMessage = 'This is a very long message that exceeds the normal length. '.repeat(20);
@@ -162,9 +146,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should handle empty message submission', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -176,9 +158,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should handle message with special characters', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -190,9 +170,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should handle rapid message sending', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -211,9 +189,7 @@ test.describe('Chat Workflow', () => {
   test.describe('Failure Scenarios', () => {
     test('should handle WebSocket disconnect', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto('/buyer/chats');
 
       // Simulate WebSocket disconnect
@@ -246,9 +222,7 @@ test.describe('Chat Workflow', () => {
         route.fulfill({ status: 500, body: JSON.stringify({ error: 'Database error' }) });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -265,9 +239,7 @@ test.describe('Chat Workflow', () => {
         route.fulfill({ status: 500 });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -279,9 +251,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should handle rate limit on messages', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -299,9 +269,7 @@ test.describe('Chat Workflow', () => {
 
   test.describe('Chat Features', () => {
     test('should allow file attachment', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -317,9 +285,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should allow image sharing', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -335,15 +301,11 @@ test.describe('Chat Workflow', () => {
 
     test('should allow typing indicator', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto('/buyer/chats');
 
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/chats');
 
       // Buyer starts typing
@@ -358,9 +320,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should allow message deletion', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -377,9 +337,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should allow message editing', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       await page.click('button:has-text("New Chat")');
@@ -399,9 +357,7 @@ test.describe('Chat Workflow', () => {
 
   test.describe('Chat Management', () => {
     test('should allow archiving chats', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       // Archive chat
@@ -413,9 +369,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should allow muting chats', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       // Mute chat
@@ -427,9 +381,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should allow blocking users', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       // Block user
@@ -442,9 +394,7 @@ test.describe('Chat Workflow', () => {
     });
 
     test('should search chat history', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/chats');
 
       // Search for specific message

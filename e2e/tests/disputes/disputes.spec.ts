@@ -40,9 +40,7 @@ test.describe('Disputes Workflow', () => {
 
   test.describe('Happy Path', () => {
     test('should allow buyer to open dispute', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Open dispute
@@ -65,9 +63,7 @@ test.describe('Disputes Workflow', () => {
     });
 
     test('should allow seller to open dispute', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto(`/dealer/escrow/${escrowId}`);
 
       // Open dispute
@@ -90,9 +86,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Verify escrow marked as disputed
@@ -101,21 +95,15 @@ test.describe('Disputes Workflow', () => {
 
     test('should notify all parties of dispute', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto(`/buyer/escrow/${escrowId}`);
 
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/notifications');
 
       const adminPage = await context.newPage();
-      await adminPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(adminPage, 'admin');
       await adminPage.goto('/admin/notifications');
 
       // Open dispute
@@ -137,9 +125,7 @@ test.describe('Disputes Workflow', () => {
 
   test.describe('Edge Cases', () => {
     test('should handle dispute with multiple evidence files', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Open Dispute")');
@@ -161,9 +147,7 @@ test.describe('Disputes Workflow', () => {
     });
 
     test('should handle dispute without evidence', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Open Dispute")');
@@ -184,9 +168,7 @@ test.describe('Disputes Workflow', () => {
         description: 'First dispute',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Try to open second dispute
@@ -197,9 +179,7 @@ test.describe('Disputes Workflow', () => {
     });
 
     test('should handle dispute with custom resolution request', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Open Dispute")');
@@ -224,9 +204,7 @@ test.describe('Disputes Workflow', () => {
         status: 'released',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${releasedEscrow.data._id}`);
 
       // Verify dispute button disabled
@@ -239,9 +217,7 @@ test.describe('Disputes Workflow', () => {
         route.fulfill({ status: 500, body: JSON.stringify({ error: 'Database error' }) });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Open Dispute")');
@@ -259,9 +235,7 @@ test.describe('Disputes Workflow', () => {
         route.fulfill({ status: 500 });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Open Dispute")');
@@ -280,9 +254,7 @@ test.describe('Disputes Workflow', () => {
         setTimeout(() => route.abort(), 30000);
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Open Dispute")');
@@ -304,9 +276,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(page, 'admin');
       await page.goto('/admin/disputes');
 
       // Review dispute
@@ -325,9 +295,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(page, 'admin');
       await page.goto('/admin/disputes');
 
       await page.click('[data-testid="dispute-item"]');
@@ -347,9 +315,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(page, 'admin');
       await page.goto('/admin/disputes');
 
       await page.click('[data-testid="dispute-item"]');
@@ -369,9 +335,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(page, 'admin');
       await page.goto('/admin/disputes');
 
       await page.click('[data-testid="dispute-item"]');
@@ -397,9 +361,7 @@ test.describe('Disputes Workflow', () => {
         notes: 'Full refund to buyer',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Verify funds released to buyer
@@ -416,9 +378,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/disputes/${dispute.data._id}`);
 
       // Add additional evidence
@@ -439,9 +399,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto(`/dealer/disputes/${dispute.data._id}`);
 
       // Respond to dispute
@@ -468,9 +426,7 @@ test.describe('Disputes Workflow', () => {
         reason: 'Split the difference',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/disputes/${dispute.data._id}`);
 
       // Accept compromise
@@ -489,9 +445,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/disputes/${dispute.data._id}`);
 
       // View timeline
@@ -512,9 +466,7 @@ test.describe('Disputes Workflow', () => {
       });
 
       // Try to access as different user
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto(`/buyer/disputes/${dispute.data._id}`);
 
       // Verify access denied
@@ -530,9 +482,7 @@ test.describe('Disputes Workflow', () => {
       });
 
       // Try to resolve as buyer
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/disputes/${dispute.data._id}`);
 
       // Verify resolve button not available
@@ -547,9 +497,7 @@ test.describe('Disputes Workflow', () => {
         description: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(page, 'admin');
       await page.goto('/admin/disputes');
 
       await page.click('[data-testid="dispute-item"]');

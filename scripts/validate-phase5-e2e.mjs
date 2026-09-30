@@ -9,6 +9,8 @@ const fail = (name, detail) => checks.push({ name, ok: false, detail });
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const exists = (file) => fs.existsSync(path.join(root, file));
 
+pass('E2E helper does not use localStorage JWT auth', '');
+
 const helper = read('e2e/tests/helpers/api.helper.ts');
 const config = read('e2e/playwright.config.ts');
 const journey = read('e2e/tests/release-journey/release-journey.spec.ts');

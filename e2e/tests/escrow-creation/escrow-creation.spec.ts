@@ -41,9 +41,7 @@ test.describe('Escrow Creation Workflow', () => {
 
   test.describe('Happy Path', () => {
     test('should auto-create escrow after auction ends', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       // Verify escrow created
@@ -52,9 +50,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should show escrow in pending payment status', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -64,9 +60,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should notify buyer of escrow creation', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/notifications');
 
       // Verify notification
@@ -74,9 +68,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should notify seller of escrow creation', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto('/dealer/notifications');
 
       // Verify notification
@@ -84,9 +76,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should show correct escrow amount', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -106,9 +96,7 @@ test.describe('Escrow Creation Workflow', () => {
         type: 'manual',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto('/dealer/escrow');
 
       // Verify manual escrow appears
@@ -124,9 +112,7 @@ test.describe('Escrow Creation Workflow', () => {
         terms: 'Custom delivery terms: 7 days inspection period',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -144,9 +130,7 @@ test.describe('Escrow Creation Workflow', () => {
         type: 'direct',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       // Verify direct sale escrow
@@ -165,9 +149,7 @@ test.describe('Escrow Creation Workflow', () => {
         },
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -191,9 +173,7 @@ test.describe('Escrow Creation Workflow', () => {
         amount: 5000000,
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       // Verify error notification
@@ -217,9 +197,7 @@ test.describe('Escrow Creation Workflow', () => {
         amount: 5000000,
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       // Verify error
@@ -232,9 +210,7 @@ test.describe('Escrow Creation Workflow', () => {
         route.fulfill({ status: 500 });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       // Escrow should still be created but with warning
@@ -254,9 +230,7 @@ test.describe('Escrow Creation Workflow', () => {
         amount: 5000000,
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       // Verify error
@@ -266,9 +240,7 @@ test.describe('Escrow Creation Workflow', () => {
 
   test.describe('Escrow Management', () => {
     test('should allow buyer to view escrow details', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -280,9 +252,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should allow seller to view escrow details', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto('/dealer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -293,9 +263,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should allow buyer to cancel escrow before payment', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -307,9 +275,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should show escrow timeline', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -320,9 +286,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should allow escrow notes attachment', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -337,9 +301,7 @@ test.describe('Escrow Creation Workflow', () => {
 
   test.describe('Escrow Status Transitions', () => {
     test('should transition from pending to funded after payment', async ({ page, request }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -360,9 +322,7 @@ test.describe('Escrow Creation Workflow', () => {
       // Fund escrow
       await ApiHelper.authenticatedRequest(request, 'PATCH', `/api/escrow/${auctionId}/status`, buyerToken, { status: 'funded' });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -375,9 +335,7 @@ test.describe('Escrow Creation Workflow', () => {
       // Fund escrow
       await ApiHelper.authenticatedRequest(request, 'PATCH', `/api/escrow/${auctionId}/status`, buyerToken, { status: 'funded' });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto('/dealer/escrow');
 
       await page.click('[data-testid="escrow-item"]');
@@ -400,9 +358,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should prevent buyer from accessing seller escrow view', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
 
       // Try to access dealer escrow endpoint
       await page.goto('/dealer/escrow');
@@ -412,9 +368,7 @@ test.describe('Escrow Creation Workflow', () => {
     });
 
     test('should show escrow activity log', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto('/buyer/escrow');
 
       await page.click('[data-testid="escrow-item"]');

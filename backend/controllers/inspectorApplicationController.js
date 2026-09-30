@@ -4,6 +4,7 @@ import UserAuth from "../models/UserAuth.js";
 import bcrypt from "bcryptjs";
 import { sendNotification } from "../services/notification.service.js";
 import { logError } from "../utils/logger.js";
+import { submitApplicationSchema } from "../validation/inspectorApplication.schema.js";
 
 const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"];
 
@@ -12,24 +13,18 @@ const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"
 // =============================
 export const submitApplication = async (req, res) => {
   try {
-    const {
-      fullName,
-      email,
-      phone,
-      idNumber,
-      location,
-      yearsOfExperience,
-      specialties,
-      certifications,
-      toolsAvailable,
-      preferredRegions,
-      cvUrl,
-      certificationDocs,
-    } = req.body;
-
-    if (!fullName || !email || !phone || !idNumber || !location || yearsOfExperience === undefined) {
-      return res.status(400).json({ success: false, message: "Missing required fields" });
+    const parsed = submitApplicationSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const messages = Object.entries(parsed.error.flatten().fieldErrors)
+        .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+        .join("; ");
+      return res.status(400).json({ success: false, message: messages || "Invalid inspector application" });
     }
+
+    const {
+      fullName, email, phone, idNumber, location, yearsOfExperience,
+      specialties, certifications, toolsAvailable, preferredRegions, cvUrl, certificationDocs,
+    } = parsed.data;
 
     const existing = await InspectorApplication.findOne({ email: email.toLowerCase().trim(), status: "pending" });
     if (existing) {

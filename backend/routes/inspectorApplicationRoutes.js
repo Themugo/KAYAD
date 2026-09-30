@@ -3,6 +3,7 @@ import InspectorApplication from "../models/InspectorApplication.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
+import { submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema } from "../validation/inspectorApplication.schema.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
 import {
   submitApplication,
@@ -15,8 +16,21 @@ import {
 
 const router = Router();
 
+const validateBody = (schema) => (req, res, next) => {
+  const result = schema.safeParse(req.body);
+  if (!result.success) {
+    const message = Object.entries(result.error.flatten().fieldErrors)
+      .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+      .join("; ");
+    return res.status(400).json({ success: false, message: message || "Invalid request" });
+  }
+  req.body = result.data;
+  next();
+};
+
+
 router.get("/active", asyncHandler(listActiveInspectors));
-router.post("/apply", createLimiter, asyncHandler(submitApplication));
+router.post("/apply", createLimiter, validateBody(submitApplicationSchema), asyncHandler(submitApplication));
 
 router.get(
   "/my",
@@ -29,7 +43,7 @@ router.get(
 
 router.get("/", protect, adminOnly, asyncHandler(listApplications));
 router.get("/:id", protect, adminOnly, validateObjectId, asyncHandler(getApplication));
-router.post("/:id/approve", protect, adminOnly, validateObjectId, asyncHandler(approveApplication));
-router.post("/:id/reject", protect, adminOnly, validateObjectId, asyncHandler(rejectApplication));
+router.post("/:id/approve", protect, adminOnly, validateObjectId, validateBody(approveApplicationSchema), asyncHandler(approveApplication));
+router.post("/:id/reject", protect, adminOnly, validateObjectId, validateBody(rejectApplicationSchema), asyncHandler(rejectApplication));
 
 export default router;

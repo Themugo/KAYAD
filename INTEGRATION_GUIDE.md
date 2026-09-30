@@ -173,9 +173,9 @@ SMS_PROVIDER=africastalking  # or 'mock' for testing
 
 **Purpose**: Send transactional emails (password reset, notifications).
 
-### 4.1 Create SendGrid Account
+### 4.1 Configure Brevo transactional email
 
-1. Go to: **https://signup.sendgrid.com/**
+1. Create/configure the KAYAD sender in Brevo and obtain `BREVO_API_KEY`. The transactional email integration is implemented through `backend/services/emailProvider.service.js`.
 2. Choose **Free Plan** (100 emails/day)
 3. Complete registration
 
@@ -202,8 +202,8 @@ SMS_PROVIDER=africastalking  # or 'mock' for testing
 
 ```env
 # Backend (backend/.env)
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM=noreply@your-domain.com
+BREVO_API_KEY=your-brevo-api-key
+BREVO_FROM_EMAIL=noreply@your-domain.com
 ```
 
 ---
@@ -492,8 +492,8 @@ AT_SENDER_ID=KAYAD
 SMS_PROVIDER=africastalking
 
 # ─── EMAIL ───────────────────────────────────────────────────────
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxx
-EMAIL_FROM=noreply@kayad.space
+BREVO_API_KEY=your-brevo-api-key
+BREVO_FROM_EMAIL=noreply@kayad.space
 
 # ─── WHATSAPP ────────────────────────────────────────────────────
 TWILIO_ACCOUNT_SID=ACxxxxxxxx
@@ -568,7 +568,7 @@ VITE_DOMAIN=kayad.space
 | Supabase | https://supabase.com | https://supabase.com/docs |
 | M-Pesa | https://developer.safaricom.co.ke | https://developer.safaricom.co.ke/docs |
 | Africa's Talking | https://africastalking.com | https://developers.africastalking.com |
-| SendGrid | https://signup.sendgrid.com | https://docs.sendgrid.com |
+| Brevo | Brevo account/dashboard | Brevo transactional email API |
 | Twilio | https://www.twilio.com | https://www.twilio.com/docs |
 | Cloudinary | https://cloudinary.com | https://cloudinary.com/documentation |
 | PostHog | https://posthog.com | https://posthog.com/docs |

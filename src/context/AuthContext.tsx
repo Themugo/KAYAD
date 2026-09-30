@@ -9,6 +9,7 @@ import {
   updateProfile as authUpdateProfile,
 } from '../services/authApi';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
+import { clearCSRFToken } from '../utils/csrf';
 import { STAFF_ROLES, isSellerRole, type User } from '../utils/authRoutes';
 import {
   getEffectivePermissions,
@@ -88,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // On mount: fetch user via cookie-based auth (HttpOnly token cookie)
   useEffect(() => {
-    const handleAuthExpired = () => { setUser(null); setLoading(false); };
+    const handleAuthExpired = () => { clearCSRFToken(); setUser(null); setLoading(false); };
     window.addEventListener('kayad:auth-expired', handleAuthExpired);
 
     getMe().then(user => ({ user }))
@@ -110,15 +111,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const register = useCallback(async (body: any) => {
+    // Registration is intentionally not authentication. The backend creates
+    // the account without issuing session cookies; the user must verify email
+    // when required and then explicitly sign in. Keep the current auth state
+    // untouched so registration cannot silently replace an existing session.
     const user = await authRegister(body);
-    const data = { success: true, user };
-    setUser(normalizeUser(data.user));
-    setLoading(false);
-    return data;
+    return { success: true, user };
   }, []);
 
   const logout = useCallback(async () => {
     try { await authLogout(); } catch (error) { console.error('Logout failed:', error); }
+    clearCSRFToken();
     setUser(null);
     setLoading(false);
   }, []);

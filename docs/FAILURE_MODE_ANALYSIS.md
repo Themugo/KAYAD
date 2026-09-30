@@ -187,7 +187,7 @@ This document provides a comprehensive analysis of potential failure modes in th
 **Severity**: MEDIUM
 
 **Failure Modes**:
-- SMTP timeout
+- Brevo API timeout
 - Authentication failure
 - Rate limit exceeded
 - Email server down
@@ -218,14 +218,14 @@ This document provides a comprehensive analysis of potential failure modes in th
 1. Check circuit breaker state
 2. Review dead letter queue
 3. Retry failed emails from DLQ
-4. Verify SMTP credentials
+4. Verify Brevo credentials and sender configuration
 5. Check email service status
 6. Reset circuit breaker after service recovery
 
 **Prevention**:
 - Monitor circuit breaker states
 - Set up alerts for circuit breaker openings
-- Implement alternative email provider (SendGrid, Mailgun)
+- Keep transactional email on the canonical Brevo adapter; do not introduce a provider fallback.
 - Add email queue for processing
 - Implement email analytics
 

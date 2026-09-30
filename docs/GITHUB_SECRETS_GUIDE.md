@@ -124,7 +124,7 @@ These secrets should be configured directly in Render, not in GitHub Secrets:
 - `MPESA_PASSKEY`
 - `SENTRY_DSN`
 - `REDIS_URL`
-- `SENDGRID_API_KEY`
+- `BREVO_API_KEY`
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
 - `CLOUDINARY_CLOUD_NAME`

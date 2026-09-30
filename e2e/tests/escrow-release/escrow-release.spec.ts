@@ -35,9 +35,7 @@ test.describe('Escrow Release Workflow', () => {
 
   test.describe('Happy Path', () => {
     test('should allow buyer to confirm delivery and release funds', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Confirm delivery
@@ -52,9 +50,7 @@ test.describe('Escrow Release Workflow', () => {
     });
 
     test('should process seller payout after release', async ({ page, request }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Confirm delivery and release
@@ -83,15 +79,11 @@ test.describe('Escrow Release Workflow', () => {
 
     test('should notify seller of fund release', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto(`/buyer/escrow/${escrowId}`);
 
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/notifications');
 
       // Release funds
@@ -107,9 +99,7 @@ test.describe('Escrow Release Workflow', () => {
     });
 
     test('should show transaction details after release', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Complete release
@@ -128,9 +118,7 @@ test.describe('Escrow Release Workflow', () => {
 
   test.describe('Edge Cases', () => {
     test('should handle partial release', async ({ page, request }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Request partial release
@@ -149,9 +137,7 @@ test.describe('Escrow Release Workflow', () => {
         autoReleaseDate: new Date(Date.now() - 86400000).toISOString(),
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Verify auto-release triggered
@@ -165,9 +151,7 @@ test.describe('Escrow Release Workflow', () => {
         reason: 'Vehicle condition issue',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Verify release blocked due to dispute
@@ -187,9 +171,7 @@ test.describe('Escrow Release Workflow', () => {
         });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -208,9 +190,7 @@ test.describe('Escrow Release Workflow', () => {
         route.fulfill({ status: 500, body: JSON.stringify({ error: 'Payout failed' }) });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -227,9 +207,7 @@ test.describe('Escrow Release Workflow', () => {
         route.fulfill({ status: 500 });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -247,9 +225,7 @@ test.describe('Escrow Release Workflow', () => {
         setTimeout(() => route.abort(), 30000);
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -266,9 +242,7 @@ test.describe('Escrow Release Workflow', () => {
         route.fulfill({ status: 500, body: JSON.stringify({ error: 'Database error' }) });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -282,9 +256,7 @@ test.describe('Escrow Release Workflow', () => {
 
   test.describe('Release Management', () => {
     test('should allow buyer to cancel release before confirmation', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -298,9 +270,7 @@ test.describe('Escrow Release Workflow', () => {
     });
 
     test('should show release timeline', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -320,9 +290,7 @@ test.describe('Escrow Release Workflow', () => {
         route.fulfill({ status: 500 });
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -338,9 +306,7 @@ test.describe('Escrow Release Workflow', () => {
     });
 
     test('should show payout receipt after completion', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -367,9 +333,7 @@ test.describe('Escrow Release Workflow', () => {
       });
 
       // Admin force release
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(page, 'admin');
       await page.goto('/admin/disputes');
 
       await page.click('[data-testid="dispute-item"]');
@@ -389,9 +353,7 @@ test.describe('Escrow Release Workflow', () => {
         reason: 'Seller agreement',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, adminToken);
+      await AuthHelper.loginWithRole(page, 'admin');
       await page.goto('/admin/escrow-requests');
 
       // Approve release
@@ -413,9 +375,7 @@ test.describe('Escrow Release Workflow', () => {
         status: 'pending_payment',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${pendingEscrow.data._id}`);
 
       // Verify release button disabled
@@ -424,9 +384,7 @@ test.describe('Escrow Release Workflow', () => {
 
     test('should prevent unauthorized release', async ({ page }) => {
       // Try to access release endpoint as dealer
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(page, 'dealer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       // Verify access denied
@@ -442,9 +400,7 @@ test.describe('Escrow Release Workflow', () => {
         status: 'funded',
       });
 
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${largeEscrow.data._id}`);
 
       await page.click('button:has-text("Confirm Delivery")');
@@ -455,9 +411,7 @@ test.describe('Escrow Release Workflow', () => {
     });
 
     test('should show release activity log', async ({ page }) => {
-      await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(page, 'buyer');
       await page.goto(`/buyer/escrow/${escrowId}`);
 
       await page.click('button:has-text("Confirm Delivery")');

@@ -1,20 +1,29 @@
 import { z } from "zod";
 
+// Canonical public inspector onboarding contract. This matches the payload
+// produced by src/components/OnboardingFlow.tsx and consumed by the live
+// inspectorApplicationController rather than the retired document-upload form.
 export const submitApplicationSchema = z.object({
-  name: z.string().min(2).max(100),
-  email: z.string().email(),
-  phone: z.string().regex(/^2547\d{8}$/, "Phone must be a valid Kenyan number"),
-  city: z.string().min(1, "City is required"),
-  experience: z.string().min(10, "Experience description must be at least 10 characters").max(2000),
-  specialties: z.array(z.string()).min(1),
-  idDocumentUrl: z.string().url("Must be a valid URL"),
-  certificationUrl: z.string().url().optional(),
+  fullName: z.string().trim().min(2).max(100),
+  email: z.string().trim().email(),
+  phone: z.string().trim().min(7).max(40),
+  idNumber: z.string().trim().min(3).max(100),
+  location: z.string().trim().min(1).max(200),
+  yearsOfExperience: z.coerce.number().finite().min(0).max(80),
+  specialties: z.array(z.string().trim().min(1).max(100)).min(1).max(20),
+  certifications: z.array(z.string().trim().min(1).max(200)).max(20).optional(),
+  toolsAvailable: z.string().trim().max(1000).optional(),
+  preferredRegions: z.array(z.string().trim().min(1).max(100)).max(20).optional(),
+  cvUrl: z.string().url().optional(),
+  certificationDocs: z.array(z.string().url()).max(20).optional(),
 });
 
 export const approveApplicationSchema = z.object({
-  notes: z.string().max(500).optional(),
+  assignedSpecialty: z.string().trim().min(1).max(100).optional(),
+  assignedRegion: z.string().trim().min(1).max(100).optional(),
+  reviewNotes: z.string().trim().max(1000).optional(),
 });
 
 export const rejectApplicationSchema = z.object({
-  reason: z.string().min(1, "Reason is required").max(500),
+  reviewNotes: z.string().trim().max(1000).optional(),
 });

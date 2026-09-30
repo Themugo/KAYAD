@@ -21,13 +21,12 @@ export default defineConfig({
   // The 10 legacy spec suites (dealer-onboarding, vehicle-listing,
   // buyer-inquiry, chat, auction-bidding, escrow-*, mpesa-payment,
   // reviews, disputes) target the router-based pages and require a live
-  // backend with a provisioned Supabase DB — see
-  // PRODUCTION_READINESS_MATRIX.md ("DB-loop not verified"). They
-  // currently fail at setup (no /api backend reachable, plus stale UI
-  // contracts), so by default only the executable workflow-certification
-  // suites run. Set E2E_WITH_BACKEND=1 to run everything once a staging
+  // backend with a provisioned database. The canonical onboarding/auth suite
+  // is executable with mocked provider responses and remains enabled by default;
+  // the older marketplace suites are opt-in until their live fixtures are
+  // provisioned. Set E2E_WITH_BACKEND=1 to run everything once a staging
   // backend exists.
-  grep: process.env.E2E_WITH_BACKEND ? undefined : process.env.E2E_RELEASE ? /Workflow certification|KAYAD marketplace controls|KAYAD Phase 5/ : /Workflow certification|KAYAD marketplace controls/,
+  grep: process.env.E2E_WITH_BACKEND ? undefined : process.env.E2E_RELEASE ? /canonical onboarding|Workflow certification|KAYAD marketplace controls|KAYAD Phase 5/ : /canonical onboarding|Workflow certification|KAYAD marketplace controls/,
 
   // Run tests in files in parallel
   fullyParallel: true,

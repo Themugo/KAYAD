@@ -46,7 +46,7 @@ const required = [
   ['backend/services/auctionReminderCron.js', ['COMMUNICATION_EVENTS.AUCTION_ENDING_SOON', 'emitCommunication']],
   ['backend/services/savedSearchCron.js', ['COMMUNICATION_EVENTS.SAVED_SEARCH_MATCH', 'category: "marketing"']],
   ['backend/services/reminderAutomationService.js', ['COMMUNICATION_EVENTS.REMINDER', 'emitCommunication']],
-  ['backend/routes/communicationWebhookRoutes.js', ['/twilio/status', '/sendgrid/events', '/africastalking/status', '/brevo/events']],
+  ['backend/routes/communicationWebhookRoutes.js', ['/twilio/status', '/africastalking/status', '/brevo/events']],
   ['backend/services/communicationControl.service.js', ['getProviderHealth', 'retryDelivery']],
   ['backend/services/communicationGateway.service.js', ['handleProviderStatus', 'communicationDeliveryUpdated']],
 ];

@@ -31,9 +31,7 @@ test.describe('M-Pesa Payment Workflow', () => {
     // Login as buyer
     const buyerCredentials = AuthHelper.getTestUser('buyer');
     buyerToken = await ApiHelper.loginApi(request, buyerCredentials.email, buyerCredentials.password);
-    await page.addInitScript((authToken) => {
-      window.localStorage.setItem('token', authToken);
-    }, buyerToken);
+    await AuthHelper.loginWithRole(page, 'buyer');
   });
 
   test.describe('Happy Path', () => {
@@ -105,15 +103,11 @@ test.describe('M-Pesa Payment Workflow', () => {
 
     test('should send payment confirmation notifications', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto(`/buyer/escrow/${escrowId}`);
 
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/notifications');
 
       // Initiate and complete payment
@@ -430,15 +424,11 @@ test.describe('M-Pesa Payment Workflow', () => {
 
     test('should notify seller of payment received', async ({ page, context }) => {
       const buyerPage = await context.newPage();
-      await buyerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, buyerToken);
+      await AuthHelper.loginWithRole(buyerPage, 'buyer');
       await buyerPage.goto(`/buyer/escrow/${escrowId}`);
 
       const dealerPage = await context.newPage();
-      await dealerPage.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken);
-      }, dealerToken);
+      await AuthHelper.loginWithRole(dealerPage, 'dealer');
       await dealerPage.goto('/dealer/notifications');
 
       // Complete payment

@@ -90,7 +90,7 @@ Grouped by what they imply is actually intended to run:
 - **Auth**: `jsonwebtoken`, `bcryptjs`, `express-session`
 - **Storage**: `cloudinary`, `multer`, `sharp` (image processing)
 - **Observability**: `@sentry/node`, `@sentry/profiling-node`, full `@opentelemetry/*` suite, `pino`/`pino-pretty`/`pino-roll` (structured logging), `posthog-node`
-- **Comms**: `@sendgrid/mail`, `twilio`, `nodemailer`
+- **Comms**: canonical Brevo email adapter, Africa's Talking SMS, Twilio WhatsApp
 - **API docs**: `swagger-jsdoc`, `swagger-ui-express`, plus a **306,597-byte `openapi.yaml`** at the backend root — a substantial, hand-or-generator-maintained API specification, not a stub
 - **Validation**: `zod`
 - **PDF generation**: `pdfkit`

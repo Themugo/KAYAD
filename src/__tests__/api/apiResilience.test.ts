@@ -11,20 +11,25 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const handlers: { requestErr?: any; responseOk?: any; responseErr?: any } = {};
 let createConfig: any = null;
+let axiosInstance: any = null;
 const createMock = vi.fn((config: any) => {
   createConfig = config;
-  return {
-  interceptors: {
-    request: { use: vi.fn() },
-    response: {
-      use: vi.fn((ok: any, err: any) => {
-        handlers.responseOk = ok;
-        handlers.responseErr = err;
-      }),
+  axiosInstance = {
+    get: vi.fn().mockResolvedValue({ data: { csrfToken: 'c'.repeat(64) } }),
+    post: vi.fn().mockRejectedValue(new Error('refresh unavailable')),
+    request: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn() },
+      response: {
+        use: vi.fn((ok: any, err: any) => {
+          handlers.responseOk = ok;
+          handlers.responseErr = err;
+        }),
+      },
     },
-  },
-  defaults: { timeout: 30000 },
+    defaults: { timeout: 30000 },
   };
+  return axiosInstance;
 });
 
 vi.mock('axios', () => ({ default: { create: createMock } }));
@@ -46,7 +51,7 @@ describe('api client resilience', () => {
     expect(createConfig.timeout).toBeGreaterThan(0);
   });
 
-  it('401 on a data endpoint clears the token and dispatches kayad:auth-expired', async () => {
+  it('401 on a protected data endpoint dispatches kayad:auth-expired after refresh fails', async () => {
     const listener = vi.fn();
     window.addEventListener('kayad:auth-expired', listener);
 
@@ -56,15 +61,45 @@ describe('api client resilience', () => {
     window.removeEventListener('kayad:auth-expired', listener);
   });
 
-  it('401 on auth endpoints does NOT dispatch the expiry event (normal login failure)', async () => {
+  it('login/register/session-probe 401s do NOT dispatch the expiry event', async () => {
     const listener = vi.fn();
     window.addEventListener('kayad:auth-expired', listener);
 
-    for (const url of ['/auth/login', '/auth/me', '/auth/refresh']) {
+    for (const url of ['/auth/login', '/auth/register', '/auth/me']) {
       await expect(handlers.responseErr({ response: { status: 401 }, config: { url } })).rejects.toBeTruthy();
     }
 
     expect(listener).not.toHaveBeenCalled();
+    window.removeEventListener('kayad:auth-expired', listener);
+  });
+
+  it('protected 401 attempts refresh once and retries the original request when refresh succeeds', async () => {
+    // Replace the mocked Axios instance's refresh/retry behavior for this case.
+    axiosInstance.post.mockResolvedValue({ data: { success: true } });
+    const retryResult = { data: { success: true } };
+    axiosInstance.request.mockResolvedValue(retryResult);
+    const result = await handlers.responseErr({ response: { status: 401 }, config: { url: '/cars' } });
+    expect(axiosInstance.post).toHaveBeenCalledWith('/v1/auth/refresh');
+    expect(axiosInstance.request).toHaveBeenCalledTimes(1);
+    expect(result).toBe(retryResult);
+  });
+
+  it('CSRF 403 retries the mutation once after clearing and re-bootstrapping the token', async () => {
+    const retryResult = { data: { success: true } };
+    axiosInstance.request.mockResolvedValue(retryResult);
+    const result = await handlers.responseErr({
+      response: { status: 403, data: { message: 'CSRF token validation failed' } },
+      config: { url: '/v1/auth/register', method: 'post' },
+    });
+    expect(axiosInstance.request).toHaveBeenCalledTimes(1);
+    expect(result).toBe(retryResult);
+  });
+
+  it('refresh 401 dispatches auth-expired exactly at the refresh boundary', async () => {
+    const listener = vi.fn();
+    window.addEventListener('kayad:auth-expired', listener);
+    await expect(handlers.responseErr({ response: { status: 401 }, config: { url: '/auth/refresh' } })).rejects.toBeTruthy();
+    expect(listener).toHaveBeenCalledTimes(1);
     window.removeEventListener('kayad:auth-expired', listener);
   });
 

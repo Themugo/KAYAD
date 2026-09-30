@@ -67,6 +67,31 @@ tags:
 - name: Admin
   description: Administrative operations
 paths:
+  /api/auth/csrf:
+    get:
+      tags:
+      - Authentication
+      summary: GET /api/auth/csrf
+      description: Return a browser CSRF token and set the XSRF-TOKEN cookie.
+      operationId: getApiAuthCsrf
+      security: []
+      responses:
+        '200':
+          description: CSRF bootstrap token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, csrfToken]
+                properties:
+                  success:
+                    type: boolean
+                  csrfToken:
+                    type: string
+        '429':
+          description: Rate limited
+        '500':
+          description: Internal server error
   /api/admin/bulk/cars/delete:
     post:
       tags:
@@ -5244,22 +5269,6 @@ paths:
       summary: POST /api/communications/webhooks/brevo/events
       description: 'Route contract: POST /api/communications/webhooks/brevo/events'
       operationId: postApiCommunicationsWebhooksResendEvents
-      responses:
-        '200':
-          description: Success
-        '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Internal server error
-  /api/communications/webhooks/sendgrid/events:
-    post:
-      tags:
-      - Api
-      summary: POST /api/communications/webhooks/sendgrid/events
-      description: 'Route contract: POST /api/communications/webhooks/sendgrid/events'
-      operationId: postApiCommunicationsWebhooksSendgridEvents
       responses:
         '200':
           description: Success

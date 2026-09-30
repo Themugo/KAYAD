@@ -8,6 +8,11 @@ import AuthModal from './components/AuthModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 import DashboardHub from './components/DashboardHub';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import LoginPage from './pages/LoginPage';
+import OnboardingFlow from './components/OnboardingFlow';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import ForcePasswordChange from './pages/ForcePasswordChange';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
@@ -576,6 +581,16 @@ function AppInner() {
   );
 }
 
+function AuthRouteSurface() {
+  const path = window.location.pathname;
+  if (path === '/login') return <LoginPage />;
+  if (path === '/register') return <OnboardingFlow onClose={() => { window.location.href = '/'; }} />;
+  if (path === '/forgot-password') return <ForgotPasswordPage />;
+  if (path === '/reset-password') return <ResetPasswordPage />;
+  if (path === '/force-password-change') return <ForcePasswordChange />;
+  return <AppInner />;
+}
+
 export function App() {
   if (window.location.pathname === '/verify-email') return <VerifyEmailPage />;
   return (
@@ -583,7 +598,7 @@ export function App() {
       <SocketProvider>
         <NotificationProvider>
           <CompareProvider>
-            <AppInner />
+            <AuthRouteSurface />
           </CompareProvider>
         </NotificationProvider>
       </SocketProvider>

@@ -242,7 +242,7 @@ Internet
 - Redis connection strings
 - JWT secret
 - API keys (M-Pesa, Cloudinary)
-- SMTP credentials
+- Brevo transactional email credentials
 - SMS API credentials
 
 ### RBAC

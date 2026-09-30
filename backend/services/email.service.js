@@ -1,11 +1,16 @@
 import { recordMetric, setGauge, incrementCounter } from "../config/metrics.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
-import { addEmailJob } from "../queues/emailQueue.js";
 
 const APP_NAME = process.env.APP_NAME || "Kayad";
 const APP_URL = process.env.FRONTEND_URL || "https://www.kayad.space";
 const FROM = process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM || `noreply@kayad.space`;
-const QUEUE_MODE = process.env.QUEUE_MODE === "true";
+
+const redactEmail = (value) => {
+  const address = String(value || "");
+  const at = address.indexOf("@");
+  if (at <= 2) return address ? "***" : "";
+  return `${address.slice(0, 2)}***${address.slice(at)}`;
+};
 
 const layout = (content, title = APP_NAME) => `
 <!DOCTYPE html>
@@ -75,7 +80,7 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
   const startTime = Date.now();
   if (!process.env.BREVO_API_KEY) {
     incrementCounter("email_disabled");
-    logWarn("Brevo provider is not configured", { subject, to });
+    logWarn("Brevo provider is not configured", { subject, to: redactEmail(to) });
     return { success: false, disabled: true, error: "Brevo provider is not configured" };
   }
 
@@ -85,21 +90,16 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
     const duration = Date.now() - startTime;
     recordMetric("email_send_duration", duration);
     incrementCounter("email_send_success");
-    logInfo("Email sent successfully", { subject, to, messageId: info.id });
+    logInfo("Email sent successfully", { subject, to: redactEmail(to), messageId: info.id });
     return { success: true, id: info.id, provider: "brevo" };
   } catch (err) {
     recordMetric("email_send_duration", Date.now() - startTime, { status: "error" });
     incrementCounter("email_send_failure", { error_type: err.code || "unknown" });
-    logError("Email failed after retries", err, { to, subject, error: err.message });
-    if (QUEUE_MODE && err.code !== "CIRCUIT_BREAKER_OPEN") {
-      try {
-        await addEmailJob({ to, subject, html, text, from });
-        incrementCounter("email_queued_for_retry");
-        return { success: false, queued: true, error: err.message };
-      } catch (queueErr) {
-        logError("Failed to queue email", queueErr);
-      }
-    }
+    logError("Email failed after retries", err, { to: redactEmail(to), subject, error: err.message });
+    // Queue/retry ownership lives above the provider adapter. Do not enqueue
+    // from this function: registration-critical verification could otherwise
+    // roll back an account while a queued retry later sends an orphaned link.
+    // The communication delivery ledger / worker owns retry scheduling.
     return { success: false, error: err.message };
   }
 };
