@@ -70,7 +70,7 @@ const T = {
 // =============================
 export const uploadImage = async (file, folder = "kayad/cars", options = {}) => {
   try {
-    const { generateVariants = true, preserveOriginal = true, compress = true } = options;
+    const { generateVariants = true, preserveOriginal = true, compress = true, userId = null, visibility = "public" } = options;
 
     // 🔥 SUPPORT BOTH MEMORY + DISK
     const uploadOptions = {
@@ -123,10 +123,12 @@ export const uploadImage = async (file, folder = "kayad/cars", options = {}) => 
       url: result.secure_url,
       thumb: cloudinary.url(publicId, { transformation: T.thumb }),
       content: buffer,
+      userId,
       metadata: {
         source: file.buffer ? "memory" : file.path ? "disk" : "unknown",
         resourceType: result.resource_type,
         format: result.format,
+        visibility,
       },
     });
 
@@ -163,8 +165,8 @@ export const uploadImage = async (file, folder = "kayad/cars", options = {}) => 
 // =============================
 // 📦 MULTIPLE UPLOAD
 // =============================
-export const uploadMultiple = async (files, folder) => {
-  return Promise.all(files.map((file) => uploadImage(file, folder)));
+export const uploadMultiple = async (files, folder, options = {}) => {
+  return Promise.all(files.map((file) => uploadImage(file, folder, options)));
 };
 
 // =============================

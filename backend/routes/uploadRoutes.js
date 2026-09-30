@@ -4,7 +4,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadMemory, handleUploadError } from "../middleware/upload.js";
 import { uploadImage, uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { uploadLimiter } from "../middleware/rateLimiter.js";
-import { getUploadRecord } from "../services/sqlUploadStore.js";
+import { getUploadRecord, getUploadRecordByPublicId } from "../services/sqlUploadStore.js";
 
 const router = express.Router();
 
@@ -28,9 +28,12 @@ router.post(
       return res.status(400).json({ success: false, message: `Invalid folder. Must be one of: ${FOLDERS.join(", ")}` });
     }
 
+    const isPrivate = ["documents", "receipts", "inspection", "escrow"].includes(folder);
     const result = await uploadImage(req.file, `kayad/${folder}`, {
       generateVariants: folder !== "documents" && folder !== "receipts" && folder !== "temp",
       preserveOriginal: true,
+      userId: String(req.user._id || req.user.id),
+      visibility: isPrivate ? "private" : "public",
     });
 
     res.json({
@@ -59,7 +62,11 @@ router.post(
       return res.status(400).json({ success: false, message: `Invalid folder. Must be one of: ${FOLDERS.join(", ")}` });
     }
 
-    const results = await uploadMultiple(req.files, `kayad/${folder}`);
+    const isPrivate = ["documents", "receipts", "inspection", "escrow"].includes(folder);
+    const results = await uploadMultiple(req.files, `kayad/${folder}`, {
+      userId: String(req.user._id || req.user.id),
+      visibility: isPrivate ? "private" : "public",
+    });
 
     res.json({
       success: true,
@@ -82,8 +89,15 @@ router.get(
       return res.status(404).json({ success: false, message: "Upload not found" });
     }
 
+    const isAdmin = ["admin", "superadmin"].includes(req.user.role);
+    const isPrivate = ["documents", "receipts", "inspection", "escrow"].includes(record.folder) || record.metadata?.includes('"visibility":"private"');
+    const requesterId = String(req.user._id || req.user.id);
+    if (isPrivate && !isAdmin && String(record.userId || "") !== requesterId) {
+      return res.status(403).json({ success: false, code: "UPLOAD_FORBIDDEN", message: "You are not authorized to access this upload" });
+    }
+
     if (!record.content) {
-      if (record.url) {
+      if (record.url && !isPrivate) {
         return res.redirect(record.url);
       }
       return res.status(404).json({ success: false, message: "Upload content unavailable" });
@@ -109,15 +123,12 @@ router.delete(
 
     const isAdmin = ["admin", "superadmin"].includes(req.user.role);
     const userId = String(req.user._id || req.user.id);
+    const record = getUploadRecordByPublicId(publicId);
 
-    // Ownership check: publicId should start with "kayad/<folder>/" and the folder
-    // should be user-scoped (profiles, temp) or the user must be admin.
-    const isUserScoped = publicId.startsWith(`kayad/profiles/${userId}/`) ||
-      publicId.startsWith(`kayad/temp/${userId}/`) ||
-      publicId.startsWith(`kayad/documents/${userId}/`) ||
-      publicId.startsWith(`kayad/receipts/${userId}/`);
-
-    if (!isAdmin && !isUserScoped) {
+    if (!record) {
+      return res.status(404).json({ success: false, message: "Upload not found" });
+    }
+    if (!isAdmin && String(record.userId || "") !== userId) {
       return res.status(403).json({ success: false, message: "You can only delete your own files" });
     }
 

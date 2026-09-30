@@ -86,7 +86,9 @@
     "validate:api-availability": "node scripts/validate-api-availability.mjs",
     "validate:response-lifecycle": "node scripts/validate-response-lifecycle.mjs",
     "validate:foundation-integrity": "node scripts/validate-foundation-integrity.mjs",
-    "validate:registration-onboarding": "node scripts/validate-registration-onboarding.mjs"
+    "validate:registration-onboarding": "node scripts/validate-registration-onboarding.mjs",
+    "validate:csrf-route": "node scripts/validate-canonical-csrf-route.mjs",
+    "validate:deployment-runtime-drift": "node scripts/validate-deployment-runtime-drift.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

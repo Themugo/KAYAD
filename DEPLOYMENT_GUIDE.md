@@ -1,380 +1,196 @@
----
-title: DEPLOYMENT_GUIDE
-owner: @devops-lead
-team: devops
-last-reviewed: 2026-06-23
-review-frequency: monthly
-status: active
-tags: [deployment]
----
-# KAYAD Deployment Guide
+# KAYAD Deployment & Runtime Truth
 
-**Date:** May 23, 2026
-**Project:** KAYAD - Kenya's Premium Car Marketplace
-**Version:** 2.0.0
-**Live Site:** www.kayad.space
-**API:** api.kayad.space
+**Reviewed:** 2026-09-30  
+**Status:** Current deployment contract  
+**Source of truth:** repository deployment files, startup code, CI/CD workflow, and runtime validators in this release candidate.
 
----
+> Historical deployment instructions that referenced VPS/PM2, the `master` branch, Node 18, or `kayad.com` are not the current production deployment path. Keep historical certification documents for audit history, but use this guide for the current stack.
 
-## Current Status
+## 1. Current topology
 
-**Project Rating:** 10/10 ✅
-**Local Folder:** C:\Users\Kamaa\Desktop\KAYAD-main ✅
-**GitHub:** https://github.com/Themugo/KAYAD (Latest: 7a692b3) ✅
-**Live Site:** www.kayad.space (Needs Deployment)
-
----
-
-## Deployment Architecture
-
-```
-Frontend (www.kayad.space)
-  └─ Vercel (React SPA)
-      └─ Rewrites /api/* → api.kayad.space
-      └─ Rewrites /socket.io/* → api.kayad.space
-
-Backend (api.kayad.space)
-  └─ VPS/Server (Node.js + PM2)
-      └─ Supabase (Postgres)
-      └─ Socket.io
-      └─ M-Pesa Integration
+```text
+Browser
+  │
+  ├── https://kayad.space (Vercel frontend)
+  │      └── /api/* rewrite ───────────────┐
+  │                                        │
+  └── Socket.IO → https://api.kayad.space  │
+                                           ▼
+                              Render: kayad-backend
+                              Docker / Node 22.22.2
+                              0.0.0.0:$PORT
+                                  │
+                  ┌───────────────┼────────────────┐
+                  ▼               ▼                ▼
+              Supabase         Render KV         Providers
+              PostgreSQL       Redis/Valkey      Brevo / Cloudinary /
+                                                  M-Pesa / AT / Twilio
 ```
 
----
+## 2. Runtime contracts
 
-## Prerequisites
+### Backend
 
-### Frontend Deployment (Vercel)
-- Vercel account connected to GitHub
-- Environment variables configured in Vercel
-- Domain www.kayad.space connected to Vercel project
+- Entrypoint: `node bootstrap.js`
+- Node: **22.22.2**
+- Bind host: `0.0.0.0`
+- Port: `process.env.PORT` supplied by the platform; local development defaults to `5000`.
+- Production health: `/health`
+- Liveness: `/health/live`
+- Readiness: `/health/ready`
+- Canonical CSRF bootstrap: `/api/v1/auth/csrf`
+- Runtime identity: `X-KAYAD-Build-ID` and `X-KAYAD-Environment`
 
-### Backend Deployment (Server)
-- SSH access to production server
-- Node.js 18+ installed on server
-- PM2 installed globally
-- Supabase project URL + service key
-- Environment variables configured
-- Git access on server
+Render web services are expected to bind to `0.0.0.0` and the platform-provided `PORT`; the current Blueprint therefore does not pin a production port. citeturn2search0turn2search2
 
----
+### Frontend
 
-## Deployment Steps
+- Build: `npm ci` → `npm run build`
+- Output: `dist/`
+- Deployment: Vercel
+- Browser API base: same-origin `/api` by default
+- Vercel rewrite: `/api/:path*` → `https://api.kayad.space/api/:path*`
+- SPA fallback occurs after the API rewrite
+- Production release artifact: `/release.json`
 
-### 1. Frontend Deployment (Vercel)
+Vercel supports external-origin rewrites for proxying `/api/*` traffic through the frontend domain. citeturn1search3
 
-#### Option A: Automatic Deployment (Recommended)
-Vercel automatically deploys when you push to GitHub. Since latest changes are already pushed:
+## 3. Production deployment path
 
-1. **Check Vercel Dashboard**
-   - Go to https://vercel.com/dashboard
-   - Find the KAYAD project
-   - Check deployment status
-   - Latest commit 7a692b3 should be deploying or deployed
+Production deployment is defined in `.github/workflows/deploy.yml`.
 
-2. **Verify Deployment**
-   - Visit https://www.kayad.space
-   - Check if latest changes are live
-   - Open browser DevTools Console for errors
+1. Push to `main`.
+2. CI uses Node 22.22.2.
+3. Dependencies are installed with `npm ci`.
+4. Deployment/runtime validators run.
+5. The frontend is built.
+6. The Vercel production deployment is created with the Vercel CLI.
+7. The workflow refuses to deploy if `VERCEL_TOKEN` is missing.
+8. The deployed Vercel artifact is checked for its expected Git commit through `/release.json`.
+9. The public frontend and production API are smoke-tested.
+10. `/api/v1/auth/csrf` is directly probed as part of production verification.
 
-#### Option B: Manual Deployment via Vercel CLI
-```bash
-# Install Vercel CLI (if not installed)
-npm i -g vercel
+## 4. Render backend deployment
 
-# Login to Vercel
-vercel login
+`render.yaml` is the production Blueprint.
 
-# Deploy to production
-vercel --prod
+Important production settings:
 
-# Or deploy specific project
-vercel --prod --yes
-```
+- Service: `kayad-backend`
+- Runtime: Docker
+- Dockerfile: `backend/Dockerfile`
+- Health check: `/health`
+- Redis/Valkey: Render Key Value service `kayad-redis`
+- Redis URL is injected through `fromService` using `connectionString`.
 
-#### Option C: Redeploy Latest Commit
-```bash
-# Via Vercel Dashboard
-# 1. Go to project deployments
-# 2. Find commit 7a692b3
-# 3. Click "Redeploy"
-```
+Render's current Blueprint specification uses `keyvalue` for new Key Value services; `redis` remains a deprecated alias. The production and staging files now use `keyvalue`. citeturn1search0turn1search1
 
-### 2. Backend Deployment (Server)
+## 5. Staging
 
-#### Prerequisites
-- SSH access to server
-- Backend code is on server
-- PM2 is configured
+`render-staging.yaml` is the staging contract.
 
-#### Deployment Steps
+Staging intentionally uses:
 
-```bash
-# 1. SSH into production server
-ssh user@api.kayad.space
+- `NODE_ENV=staging`
+- separate Supabase credentials
+- M-Pesa sandbox
+- staging frontend origin
+- separate Render Key Value instance
+- **Brevo** for transactional email
 
-# 2. Navigate to backend directory
-cd /path/to/kayad/backend
+Legacy SendGrid/SMTP environment variables are not part of the current staging provider contract.
 
-# 3. Pull latest changes
-git pull origin master
+## 6. Docker contracts
 
-# 4. Install dependencies
-npm ci --omit=dev
+### Backend image
 
-# 5. Run pre-deploy backup (optional)
-bash scripts/backup.sh
+`backend/Dockerfile`:
 
-# 6. Zero-downtime restart with PM2
-pm2 reload ecosystem.config.cjs --update-env
+- Node 22.22.2 Alpine
+- production dependencies only
+- non-root `nodeuser`
+- `node bootstrap.js` as the container command
+- advertises port 10000 for the Render deployment model
 
-# 7. Check PM2 status
-pm2 status
-pm2 logs kayad-api
+### Local Compose
 
-# 8. Verify health
-curl https://api.kayad.space/health
-curl https://api.kayad.space/health/deep
-```
+`docker-compose.yml` deliberately retains `5000:5000` for local use and explicitly sets `PORT=5000`.
 
-#### Using Deployment Script
-```bash
-# Run the deployment script
-bash scripts/deploy.sh
-```
+The Compose healthcheck uses Node's built-in `fetch()` rather than `curl`, because the Alpine backend image does not install curl.
 
----
+## 7. Runtime identity / drift detection
 
-## Environment Variables
+The backend exposes:
 
-### Frontend (Vercel)
-Set these in Vercel Dashboard → Settings → Environment Variables:
+- `X-KAYAD-Build-ID`
+- `X-KAYAD-Environment`
+- `buildId` in `/health`
+
+On Render, the build identity comes from the platform-provided `RENDER_GIT_COMMIT` value. This allows a live API response to be compared against the expected Git commit rather than assuming that a successful deploy command means the current code is serving traffic. citeturn2search2
+
+The frontend emits `/release.json` containing the Vercel commit identity. The production verifier checks this artifact against `EXPECTED_COMMIT`.
+
+## 8. Mandatory live smoke checks
+
+Run these from a machine that can reach production:
 
 ```bash
-VITE_API_URL=https://api.kayad.space
-VITE_SOCKET_URL=wss://api.kayad.space
-VITE_ENABLE_MOCK=false
+curl -i https://api.kayad.space/health
+curl -i https://api.kayad.space/health/live
+curl -i https://api.kayad.space/health/ready
+curl -i https://api.kayad.space/api/v1/auth/csrf
+curl -i https://kayad.space/release.json
 ```
 
-### Backend (Server)
-Set these in server environment or `.env` file:
+The CSRF request must not return the old:
 
-```bash
-NODE_ENV=production
-PORT=5000
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-JWT_SECRET=your-secret-key
-FRONTEND_URL=https://www.kayad.space
-SENTRY_DSN=your-sentry-dsn
-REDIS_URL=your-redis-url
-MPESA_CONSUMER_KEY=...
-MPESA_CONSUMER_SECRET=...
-MPESA_PASSKEY=...
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
-WEBHOIST_EMAIL=owner@kayad.space
+```text
+Route not found: /api/v1/auth/csrf
 ```
 
----
+A successful current response should include:
 
-## Verification Checklist
-
-### Frontend Verification
-- [ ] Visit https://www.kayad.space
-- [ ] Check page loads without errors
-- [ ] Verify API calls work (check Network tab)
-- [ ] Test WebSocket connection (check Console)
-- [ ] Verify authentication works
-- [ ] Test auction bidding flow
-- [ ] Test escrow flow
-- [ ] Check mobile responsiveness
-
-### Backend Verification
-- [ ] Check health endpoint: `curl https://api.kayad.space/health`
-- [ ] Check deep health: `curl https://api.kayad.space/health/deep`
-- [ ] Check metrics: `curl https://api.kayad.space/metrics`
-- [ ] Verify PM2 status: `pm2 status`
-- [ ] Check PM2 logs: `pm2 logs kayad-api`
-- [ ] Test API endpoints
-- [ ] Verify WebSocket connection
-- [ ] Check database connectivity
-- [ ] Verify M-Pesa integration
-- [ ] Check Sentry error tracking
-
----
-
-## Rollback Plan
-
-### Frontend Rollback
-```bash
-# Via Vercel Dashboard
-# 1. Go to Deployments
-# 2. Find previous deployment
-# 3. Click "Promote to Production"
+```text
+X-KAYAD-Canonical-Route: /api/v1/auth/csrf
+X-KAYAD-API-Contract: v1
+X-KAYAD-Build-ID: <current commit>
 ```
 
-### Backend Rollback
-```bash
-# SSH into server
-ssh user@api.kayad.space
+and a JSON `csrfToken` with sufficient entropy/length.
 
-# Navigate to backend
-cd /path/to/kayad/backend
+## 9. Current certification boundary
 
-# Rollback to previous commit
-git log --oneline -5
-git checkout <previous-commit-hash>
+This source sweep passes the repository deployment/runtime contract, but **does not certify the live production deployment** from this environment.
 
-# Restart PM2
-pm2 reload ecosystem.config.cjs
-```
+The current execution environment has:
 
----
+- Node `22.16.0`, below the repository's required `22.22.2`.
+- no resolvable network path to `api.kayad.space` or `kayad.space`.
+- no Docker daemon available for an image build.
 
-## Troubleshooting
+Therefore the following remain runtime/live gates rather than source PASS claims:
 
-### Frontend Issues
+- actual Render service boot
+- actual Render health response
+- actual production CSRF route
+- actual Vercel release identity
+- actual browser → Vercel → Render `/api` proxy path
+- actual cookies/CORS in production
+- actual Supabase readiness
+- actual Redis/Valkey connectivity
+- actual Brevo delivery
+- full production dealer registration journey
 
-**Build Fails on Vercel**
-- Check Vercel build logs
-- Verify all dependencies are in package.json
-- Check environment variables
-- Ensure Node version is compatible
+## 10. Required operator evidence for closing the deployment-drift gate
 
-**API Calls Failing**
-- Verify CORS configuration
-- Check API is accessible
-- Verify environment variables
-- Check browser console for errors
+Capture the following from production after deployment:
 
-**WebSocket Connection Fails**
-- Verify Socket.io URL
-- Check backend WebSocket is running
-- Verify CORS for WebSocket
-- Check firewall rules
+1. Render deploy commit SHA.
+2. Render service logs showing `node bootstrap.js` and the bound `0.0.0.0:$PORT` listener.
+3. `GET /health` response including `buildId`.
+4. `GET /api/v1/auth/csrf` response and headers.
+5. Vercel `/release.json` response.
+6. Browser Network evidence for `/api/v1/auth/csrf` and registration.
+7. One successful registration → verification-email acceptance → login trace.
 
-### Backend Issues
-
-**PM2 Won't Start**
-- Check logs: `pm2 logs kayad-api`
-- Verify environment variables
-- Check port availability
-- Verify Supabase connection
-
-**Database Connection Fails**
-- Verify SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
-- Check Supabase project status/quota
-- Verify network connectivity
-
-**M-Pesa Integration Fails**
-- Verify credentials
-- Check IP whitelist
-- Verify callback URL
-- Check Safaricom API status
-
----
-
-## Monitoring
-
-### Frontend Monitoring
-- Vercel Analytics
-- Google Analytics
-- Sentry (if configured)
-
-### Backend Monitoring
-- PM2 monitoring: `pm2 monit`
-- Sentry error tracking
-- Custom metrics: `https://api.kayad.space/metrics`
-- Health checks: `https://api.kayad.space/health`
-
----
-
-## Post-Deployment Tasks
-
-1. **Clear CDN Cache** (if using CDN)
-   - Vercel: Automatic on deployment
-   - CloudFront: Manual invalidation
-
-2. **Verify All Features**
-   - User registration/login
-   - Car browsing
-   - Auction bidding
-   - Escrow flow
-   - Payments
-   - Chat functionality
-   - Admin dashboard
-
-3. **Monitor Logs**
-   - Check PM2 logs for errors
-   - Monitor Sentry for exceptions
-   - Check Vercel logs for frontend errors
-
-4. **Performance Check**
-   - Load test with k6 scripts
-   - Check response times
-   - Monitor resource usage
-
----
-
-## Quick Deploy Commands
-
-### Frontend (Vercel CLI)
-```bash
-vercel --prod
-```
-
-### Backend (SSH)
-```bash
-ssh user@api.kayad.space
-cd /path/to/kayad/backend
-git pull origin master
-npm ci --omit=dev
-pm2 reload ecosystem.config.cjs --update-env
-pm2 status
-```
-
----
-
-## Current Deployment Status
-
-**Frontend:** Needs deployment to Vercel
-**Backend:** Needs deployment to production server
-**Latest Commit:** 7a692b3
-**Changes Include:**
-- CONTRIBUTING.md (comprehensive contribution guidelines)
-- CDN.md (CDN configuration documentation)
-- Load testing scripts (k6.js, k6-auction.js)
-- SECURITY_AUDIT_REPORT.md (comprehensive security audit)
-
----
-
-## Next Steps
-
-1. **Deploy Frontend to Vercel**
-   - Check Vercel dashboard for automatic deployment
-   - Or manually deploy using Vercel CLI
-
-2. **Deploy Backend to Server**
-   - SSH into production server
-   - Pull latest changes
-   - Restart PM2
-
-3. **Verify Deployment**
-   - Test all critical features
-   - Monitor logs
-   - Check health endpoints
-
-4. **Monitor Post-Deployment**
-   - Watch for errors
-   - Monitor performance
-   - Check user feedback
-
----
-
-**Last Updated:** May 23, 2026
-**Deployment Version:** 2.0.0
-**Status:** Ready for Deployment
+Only after those checks pass should the release be called live-runtime certified.

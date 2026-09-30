@@ -66,6 +66,6 @@ RUN mkdir -p uploads && chown -R nodeuser:nodejs /app
 
 USER nodeuser
 
-EXPOSE 5000
+EXPOSE 10000
 
 CMD ["node", "bootstrap.js"]

@@ -4,7 +4,7 @@
 // Generates OpenGraph tags, Twitter cards, canonical URLs, and structured data
 // ─────────────────────────────────────────────────────────────
 
-const BASE_URL = "https://www.kayad.space";
+const BASE_URL = import.meta.env.VITE_PUBLIC_URL || 'https://kayad.space';
 
 // =============================
 // 🚗 VEHICLE METADATA GENERATOR

@@ -1,0 +1,12 @@
+backend/middleware/distributedLock.js
+backend/middleware/idempotency.js
+backend/routes/authRoutes.js
+backend/routes/uploadRoutes.js
+backend/config/cloudinary.js
+backend/server.js
+backend/services/dealerHealthScoreService.js
+scripts/validate-canonical-csrf-route.mjs
+package.json
+e2e/tests/auth/csrf-live-route.spec.ts
+CURRENT_SYSTEM_TRUTH.md
+CLEAN_SWEEP_REMEDIATION_20260930.md

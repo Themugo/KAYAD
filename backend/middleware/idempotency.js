@@ -29,6 +29,32 @@ import {
 const idempotencyStore = new Map();
 const IDEMPOTENCY_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
+const SENSITIVE_KEYS = new Set([
+  "password", "currentPassword", "newPassword", "confirmPassword",
+  "otp", "token", "accessToken", "refreshToken", "csrfToken",
+  "authorization", "apiKey", "api_key", "secret", "clientSecret",
+  "signature", "webhookSecret", "mpesaPassword", "consumerSecret",
+]);
+
+const redactForPersistence = (value, depth = 0) => {
+  if (depth > 8) return "[TRUNCATED]";
+  if (value === null || value === undefined) return value;
+  if (Buffer.isBuffer(value)) return "[BUFFER]";
+  if (typeof value !== "object") return typeof value === "string" && value.length > 2000 ? `${value.slice(0, 2000)}…` : value;
+  if (Array.isArray(value)) return value.slice(0, 100).map((item) => redactForPersistence(item, depth + 1));
+  return Object.fromEntries(Object.entries(value).slice(0, 100).map(([key, val]) => [
+    key, SENSITIVE_KEYS.has(key) || SENSITIVE_KEYS.has(key.toLowerCase()) ? "[REDACTED]" : redactForPersistence(val, depth + 1),
+  ]));
+};
+
+const CRITICAL_LOCK_OPERATIONS = new Set([
+  "payment", "payment_callback", "b2c_timeout", "bid", "auction_end",
+  "escrow", "escrow_release", "escrow_refund", "escrow_confirm_delivery",
+  "escrow_dispute", "escrow_vault_funded", "escrow_vault_init",
+  "escrow_vault_release", "verification_approve", "verification_reject",
+  "verification_suspend", "verification_reinstate",
+]);
+
 /**
  * Extract operation type from request path
  */
@@ -179,8 +205,15 @@ export const idempotencyCheck = async (req, res, next) => {
           releaseLock(lockResource, lock.id).catch(() => {});
         }).catch(() => {});
       });
-    } catch {
-      // Lock failure = fail open
+    } catch (lockError) {
+      if (CRITICAL_LOCK_OPERATIONS.has(operationType)) {
+        logError("Critical distributed lock unavailable", lockError, { operationType, path: req.path });
+        return res.status(503).set("Retry-After", "5").json({
+          success: false,
+          code: "IDEMPOTENCY_COORDINATION_UNAVAILABLE",
+          message: "The operation cannot be safely coordinated right now. Please retry.",
+        });
+      }
     }
 
     // ── Check database for cached response ────────────────────
@@ -220,7 +253,7 @@ export const idempotencyCheck = async (req, res, next) => {
 
     onJsonResponse(res, (data) => {
       IdempotencyKey.record({
-        key: idempotencyKey, operationType, user: req.user?.id, requestParams: req.body,
+        key: idempotencyKey, operationType, user: req.user?.id, requestParams: redactForPersistence(req.body),
         responseData: data, responseStatus: res.statusCode, success: data?.success !== false,
         errorMessage: data?.message || null,
         resourceIds: data?.payment ? { paymentId: data.payment._id } : data?.escrowId ? { escrowId: data.escrowId } : data?.bid ? { bidId: data.bid._id } : {},
@@ -293,7 +326,7 @@ export const withIdempotency = (operationType) => {
 
       onJsonResponse(res, (data) => {
         IdempotencyKey.record({
-          key: idempotencyKey, operationType, user: req.user?.id, requestParams: req.body,
+          key: idempotencyKey, operationType, user: req.user?.id, requestParams: redactForPersistence(req.body),
           responseData: data, responseStatus: res.statusCode, success: data?.success !== false,
           errorMessage: data?.message || null, resourceIds: {},
         }).catch((err) => logError("Failed to cache idempotency response", err, { idempotencyKey }));

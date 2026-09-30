@@ -39,7 +39,10 @@ router.get("/csrf", (req, res) => {
   if (!token) {
     return res.status(503).json({ success: false, message: "CSRF token unavailable" });
   }
-  return res.json({ success: true, csrfToken: token });
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-KAYAD-Canonical-Route", "/api/v1/auth/csrf");
+  res.setHeader("X-KAYAD-API-Contract", "v1");
+  return res.json({ success: true, csrfToken: token, route: "/api/v1/auth/csrf" });
 });
 
 // =============================

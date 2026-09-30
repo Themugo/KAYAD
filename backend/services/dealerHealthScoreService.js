@@ -29,23 +29,28 @@ export const calculateHealthScore = async (dealerId) => {
     const listingQualityScore = await calculateListingQualityScore(dealerId);
     const auctionScore = await calculateAuctionScore(dealerId);
 
-    // Calculate overall score
-    const overallScore =
-      verificationScore * 0.15 +
-      accountAgeScore * 0.1 +
-      transactionScore * 0.2 +
-      escrowScore * 0.15 +
-      reviewScore * 0.15 +
-      fraudScore * 0.15 +
-      responseScore * 0.1 +
-      listingQualityScore * 0.1 +
-      auctionScore * 0.1;
+    // Preserve the historical relative weights while normalizing them to 1.0.
+    // The previous implementation accidentally summed to 1.20, allowing
+    // inflated scores and making the documented weighting mathematically false.
+    const weights = { verification: 0.15, accountAge: 0.10, transaction: 0.20, escrow: 0.15, review: 0.15, fraud: 0.15, response: 0.10, listingQuality: 0.10, auction: 0.10 };
+    const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
+    const overallScore = (
+      verificationScore.score * weights.verification +
+      accountAgeScore.score * weights.accountAge +
+      transactionScore.score * weights.transaction +
+      escrowScore.score * weights.escrow +
+      reviewScore.score * weights.review +
+      fraudScore.score * weights.fraud +
+      responseScore.score * weights.response +
+      listingQualityScore.score * weights.listingQuality +
+      auctionScore.score * weights.auction
+    ) / totalWeight;
 
     // Clamp score to 0-100 range
     const clampedScore = Math.max(0, Math.min(100, overallScore));
 
     // Determine score category
-    const scoreCategory = DealerHealthScore.determineScoreCategory(clampedScore);
+    const scoreCategory = clampedScore >= 90 ? "excellent" : clampedScore >= 75 ? "good" : clampedScore >= 60 ? "fair" : clampedScore >= 40 ? "poor" : "critical";
 
     // Get previous score for trend calculation
     const previousRecord = await findOne("dealer_health_scores", { dealer: dealerId });
@@ -59,15 +64,15 @@ export const calculateHealthScore = async (dealerId) => {
       dealer: dealerId,
       healthScore: clampedScore,
       scoreCategory,
-      verificationScore,
-      accountAgeScore,
-      transactionScore,
-      escrowScore,
-      reviewScore,
-      fraudScore,
-      responseScore,
-      listingQualityScore,
-      auctionScore,
+      verificationScore: verificationScore.score,
+      accountAgeScore: accountAgeScore.score,
+      transactionScore: transactionScore.score,
+      escrowScore: escrowScore.score,
+      reviewScore: reviewScore.score,
+      fraudScore: fraudScore.score,
+      responseScore: responseScore.score,
+      listingQualityScore: listingQualityScore.score,
+      auctionScore: auctionScore.score,
       verificationDetails: verificationScore.details,
       accountAgeDetails: accountAgeScore.details,
       transactionDetails: transactionScore.details,
@@ -96,15 +101,15 @@ export const calculateHealthScore = async (dealerId) => {
     return {
       healthScore: clampedScore,
       scoreCategory,
-      verificationScore,
-      accountAgeScore,
-      transactionScore,
-      escrowScore,
-      reviewScore,
-      fraudScore,
-      responseScore,
-      listingQualityScore,
-      auctionScore,
+      verificationScore: verificationScore.score,
+      accountAgeScore: accountAgeScore.score,
+      transactionScore: transactionScore.score,
+      escrowScore: escrowScore.score,
+      reviewScore: reviewScore.score,
+      fraudScore: fraudScore.score,
+      responseScore: responseScore.score,
+      listingQualityScore: listingQualityScore.score,
+      auctionScore: auctionScore.score,
       trend,
       scoreChange,
     };
@@ -171,7 +176,7 @@ export const calculateVerificationScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate verification score", err, { dealerId });
-    return { score: 0, details: { completeness: 0 } };
+    throw err;
   }
 };
 
@@ -213,7 +218,7 @@ export const calculateAccountAgeScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate account age score", err, { dealerId });
-    return { score: 0, details: { accountAgeDays: 0 } };
+    throw err;
   }
 };
 
@@ -262,7 +267,7 @@ export const calculateTransactionScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate transaction score", err, { dealerId });
-    return { score: 50, details: { totalTransactions: 0, successRate: 100 } };
+    throw err;
   }
 };
 
@@ -304,7 +309,7 @@ export const calculateEscrowScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate escrow score", err, { dealerId });
-    return { score: 75, details: { totalEscrows: 0, completionRate: 100 } };
+    throw err;
   }
 };
 
@@ -348,7 +353,7 @@ export const calculateReviewScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate review score", err, { dealerId });
-    return { score: 70, details: { totalReviews: 0, averageRating: 0 } };
+    throw err;
   }
 };
 
@@ -396,7 +401,7 @@ export const calculateFraudScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate fraud score", err, { dealerId });
-    return { score: 0, details: { totalFlags: 0 } };
+    throw err;
   }
 };
 
@@ -441,7 +446,7 @@ export const calculateResponseScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate response score", err, { dealerId });
-    return { score: 70, details: { averageResponseTime: 0 } };
+    throw err;
   }
 };
 
@@ -507,7 +512,7 @@ export const calculateListingQualityScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate listing quality score", err, { dealerId });
-    return { score: 70, details: { totalListings: 0 } };
+    throw err;
   }
 };
 
@@ -558,7 +563,7 @@ export const calculateAuctionScore = async (dealerId) => {
     return { score, details };
   } catch (err) {
     logError("Failed to calculate auction score", err, { dealerId });
-    return { score: 70, details: { totalAuctions: 0 } };
+    throw err;
   }
 };
 
@@ -599,12 +604,14 @@ export const recalculateAllScores = async () => {
 // =============================
 
 export const getTopDealers = async (category = null, limit = 10) => {
-  try {
-    return await DealerHealthScore.getTopDealers(category, limit);
-  } catch (err) {
-    logError("Failed to get top dealers", err);
-    throw err;
-  }
+  const safeLimit = Math.min(Math.max(Number(limit) || 10, 1), 100);
+  const rows = await findAll("dealer_health_scores", {
+    filters: category ? { scoreCategory: category } : {},
+    orderBy: "healthScore",
+    order: "desc",
+    limit: safeLimit,
+  });
+  return rows;
 };
 
 // =============================
@@ -612,12 +619,10 @@ export const getTopDealers = async (category = null, limit = 10) => {
 // =============================
 
 export const getDealerRank = async (dealerId) => {
-  try {
-    return await DealerHealthScore.getDealerRank(dealerId);
-  } catch (err) {
-    logError("Failed to get dealer rank", err);
-    throw err;
-  }
+  const current = await findOne("dealer_health_scores", { dealer: dealerId });
+  if (!current) return null;
+  const higher = await findAll("dealer_health_scores", { filters: { healthScore: { $gt: current.healthScore } }, select: "id" });
+  return { rank: higher.length + 1, healthScore: current.healthScore, totalDealers: higher.length + 1 };
 };
 
 export default {

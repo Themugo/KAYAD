@@ -199,6 +199,18 @@ initOpenTelemetry();
 // ─── CONFIG ───────────────────────────────────────────────────
 const app = express();
 const server = http.createServer(app);
+
+// Runtime identity is intentionally exposed through non-sensitive response
+// headers so deployment drift can be diagnosed from the live service without
+// exposing secrets. Render provides RENDER_GIT_COMMIT automatically.
+app.locals.kayadBuildId =
+  process.env.KAYAD_BUILD_ID || process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT_SHA || "unknown";
+app.locals.kayadEnvironment = process.env.NODE_ENV || "production";
+app.use((req, res, next) => {
+  res.setHeader("X-KAYAD-Build-ID", app.locals.kayadBuildId);
+  res.setHeader("X-KAYAD-Environment", app.locals.kayadEnvironment);
+  next();
+});
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || "0.0.0.0";
 const NODE_ENV = process.env.NODE_ENV || "production";
@@ -841,6 +853,8 @@ app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* is mounted once, after the compatibility routes below.
+// The build identity is exposed to health/diagnostic middleware so a browser
+// route mismatch can be distinguished from a stale deployment.
 // checkSystemStatus is already global under /api, so the versioned mount
 // does not need a second copy of that middleware.
 app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);

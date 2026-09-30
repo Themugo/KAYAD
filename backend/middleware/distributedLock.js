@@ -4,6 +4,7 @@ import { getSupabase } from "../utils/supabase.js";
 const LOCK_TTL_MS = 30_000;
 const RETRY_INTERVAL_MS = 200;
 const MAX_RETRIES = 15;
+const ALLOW_LOCAL_LOCK_FALLBACK = process.env.NODE_ENV !== "production" && process.env.ALLOW_LOCAL_LOCK_FALLBACK === "true";
 
 const locks = new Map();
 
@@ -23,9 +24,12 @@ export async function acquireLock(resourceId, ttl = LOCK_TTL_MS) {
     });
     if (error) throw error;
     return { acquired: data === true, id };
-  } catch {
-    // Development/test fallback only. Production uses the database function
-    // above, which serializes acquisition inside PostgreSQL.
+  } catch (error) {
+    // Never silently downgrade a distributed production lock to a per-process
+    // Map. That would allow two production instances to enter the same
+    // critical section concurrently. Local fallback is opt-in for development
+    // and tests only.
+    if (!ALLOW_LOCAL_LOCK_FALLBACK) throw error;
     const now = Date.now();
     const expiresAt = now + ttl;
     if (!locks.has(resourceId) || locks.get(resourceId).expiresAt < now) {
@@ -45,8 +49,8 @@ export async function releaseLock(resourceId, holderId) {
       p_holder: holderId,
     });
     if (error) throw error;
-  } catch {
-    /* local fallback below */
+  } catch (error) {
+    if (!ALLOW_LOCAL_LOCK_FALLBACK) throw error;
   }
   if (locks.has(resourceId) && locks.get(resourceId).holder === holderId) {
     locks.delete(resourceId);

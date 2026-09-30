@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const BASE = 'https://www.kayad.space';
+const BASE = import.meta.env.VITE_PUBLIC_URL || 'https://kayad.space';
 
 function inject(json: any): () => void {
   const el = document.createElement('script');

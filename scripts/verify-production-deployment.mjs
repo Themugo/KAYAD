@@ -139,12 +139,19 @@ async function checkApi() {
       failures.push('API health: service reports unhealthy');
       return;
     }
-    if (!['healthy', 'degraded'].includes(status)) {
+    if (!['ok', 'healthy', 'degraded'].includes(status)) {
       failures.push(`API health: unexpected service status ${JSON.stringify(status)}`);
       return;
     }
     if (status === 'degraded') {
       warnings.push('API health: service reports degraded status (HTTP 200)');
+    }
+
+    const buildId = payload?.buildId || response.headers.get('x-kayad-build-id') || '';
+    if (!buildId || buildId === 'unknown') {
+      warnings.push('API health: runtime build identity is unknown; deployment drift cannot be conclusively diagnosed from the API');
+    } else {
+      console.log(`PASS API runtime identity: ${buildId}`);
     }
 
     console.log(`PASS API health: HTTP ${response.status}, status=${status}`);

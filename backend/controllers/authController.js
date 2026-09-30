@@ -301,7 +301,7 @@ export const register = async (req, res) => {
     //   identity back rather than creating an account the user cannot verify.
     // - When verification is not required, delivery remains asynchronous so
     //   optional provider latency cannot hold the onboarding request open.
-    const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
+    const verifyUrl = `${process.env.FRONTEND_URL || "https://kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
     const verificationPayload = {
       userId: user.id || user._id,
       channel: "email",
@@ -783,7 +783,7 @@ export const resendVerification = async (req, res) => {
     // delivery cannot strand the account.
     void (async () => {
       try {
-        const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
+        const verifyUrl = `${process.env.FRONTEND_URL || "https://kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
         const verificationDelivery = await deliver({
           userId: user.id || user._id,
           channel: "email",
@@ -839,7 +839,7 @@ export const forgotPassword = async (req, res) => {
     // request open. The reset token is already persisted before dispatch, so a
     // provider timeout cannot turn a successful reset request into a browser
     // timeout. Keep the response identical for account-enumeration safety.
-    const resetUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/reset-password?token=${token}`;
+    const resetUrl = `${process.env.FRONTEND_URL || "https://kayad.space"}/reset-password?token=${token}`;
     void deliver({
       userId: user.id || user._id,
       channel: "email",
