@@ -26,6 +26,7 @@ import User from "../models/User.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateAuth, validateResponse, authResponseSchema } from "../middleware/validate.js";
 import { accountLockout } from "../middleware/accountLockout.js";
+import { registrationLimiter, recoveryLimiter, verificationLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
@@ -100,8 +101,6 @@ router.get("/csrf", (req, res) => {
  *                       properties:
  *                         user:
  *                           $ref: '#/components/schemas/User'
- *                         token:
- *                           type: string
  *       400:
  *         description: Validation error
  *         content:
@@ -115,7 +114,7 @@ router.get("/csrf", (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/register", validateAuth, validateResponse(authResponseSchema), asyncHandler(register));
+router.post("/register", registrationLimiter, validateAuth, validateResponse(authResponseSchema), asyncHandler(register));
 
 // 🔑 LOGIN
 /**
@@ -159,8 +158,6 @@ router.post("/register", validateAuth, validateResponse(authResponseSchema), asy
  *                       properties:
  *                         user:
  *                           $ref: '#/components/schemas/User'
- *                         token:
- *                           type: string
  *       401:
  *         description: Invalid credentials
  *         content:
@@ -465,7 +462,7 @@ router.put("/change-password", protect, asyncHandler(changePassword));
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/verify-email/:token", authLimiter, asyncHandler(verifyEmail));
-router.post("/resend-verification", authLimiter, asyncHandler(resendVerification));
+router.post("/resend-verification", verificationLimiter, authLimiter, asyncHandler(resendVerification));
 
 // =============================
 // 🔑 PASSWORD RESET (public)
@@ -545,8 +542,8 @@ router.post("/resend-verification", authLimiter, asyncHandler(resendVerification
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/forgot-password", authLimiter, asyncHandler(forgotPassword));
-router.post("/reset-password", authLimiter, asyncHandler(resetPassword));
+router.post("/forgot-password", recoveryLimiter, authLimiter, asyncHandler(forgotPassword));
+router.post("/reset-password", recoveryLimiter, authLimiter, asyncHandler(resetPassword));
 
 // =============================
 // 🔐 SESSION MANAGEMENT (DASHBOARD)

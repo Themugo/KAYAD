@@ -37,8 +37,12 @@ export const csrfProtection = (req, res, next) => {
   // External machine-to-machine callbacks use their own authentication.
   if (isCsrfExemptPath(req.path)) return next();
 
-  // Skip if using Authorization header (JWT)
-  if (req.headers.authorization) return next();
+  // Bearer Authorization is NOT a CSRF bypass. A browser attacker can add an
+  // Authorization header, so authentication scheme alone is insufficient.
+  // Explicit machine-to-machine routes may set req.kayadMachineAuthenticated
+  // after validating their own non-browser credential. Provider callbacks are
+  // already handled by the explicit path allowlist above.
+  if (req.kayadMachineAuthenticated === true) return next();
 
   const token = req.headers["x-csrf-token"] || req.body?._csrf;
   const cookieToken = req.cookies?.["XSRF-TOKEN"];

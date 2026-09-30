@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 // M-14 FIX: Validate JWT_SECRET at module load time. Previously, if JWT_SECRET
 // was missing, the first auth request would fail with a cryptic 500 error.
@@ -35,13 +36,14 @@ const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRE || "7d";
 // =============================
 // 🔐 GENERATE ACCESS TOKEN
 // =============================
-export const generateAccessToken = (user) => {
+export const generateAccessToken = (user, tokenVersion = user.tokenVersion || 0, sessionId = null) => {
   return jwt.sign(
     {
       id: user._id || user.id,
       role: user.role || "user",
       status: user.status || "approved",
-      tokenVersion: user.tokenVersion || 0,
+      tokenVersion,
+      ...(sessionId ? { sessionId } : {}),
     },
     getAccess(),
     { expiresIn: ACCESS_EXPIRES },
@@ -51,14 +53,15 @@ export const generateAccessToken = (user) => {
 // =============================
 // 🔄 GENERATE REFRESH TOKEN
 // =============================
-export const generateRefreshToken = (user) => {
+export const generateRefreshToken = (user, tokenVersion = user.tokenVersion || 0, familyId = null) => {
   return jwt.sign(
     {
       id: user._id || user.id,
-      tokenVersion: user.tokenVersion || 0,
+      tokenVersion,
+      ...(familyId ? { familyId } : {}),
     },
     getRefresh(),
-    { expiresIn: REFRESH_EXPIRES },
+    { expiresIn: REFRESH_EXPIRES, jwtid: crypto.randomUUID() },
   );
 };
 

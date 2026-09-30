@@ -10,10 +10,7 @@ info:
     ## Authentication
 
 
-    Most endpoints require authentication using JWT tokens. Include the token in the Authorization header:
-
-
-    `Authorization: Bearer <token>`
+    Browser authentication uses httpOnly `token` and `refreshToken` cookies. State-changing browser requests also require the `X-CSRF-Token` header matching the `XSRF-TOKEN` cookie. The access token and refresh token are never returned in JSON responses. Explicit machine clients must use a separately authenticated machine contract; an arbitrary Authorization header is not a CSRF bypass.
 
 
     ## Rate Limiting
@@ -67,7 +64,7 @@ tags:
 - name: Admin
   description: Administrative operations
 paths:
-  /api/auth/csrf:
+  /api/v1/auth/csrf:
     get:
       tags:
       - Authentication
@@ -20502,11 +20499,21 @@ paths:
           description: Internal server error
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: JWT token authentication
+    accessCookie:
+      type: apiKey
+      in: cookie
+      name: token
+      description: httpOnly access-token cookie set by the authentication service.
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+      description: httpOnly rotating refresh-token cookie; never accepted in a JSON request body.
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: Required for browser state-changing requests authenticated by cookies.
   schemas:
     Error:
       type: object
@@ -20550,16 +20557,12 @@ components:
     LoginResponse:
       type: object
       required:
-      - token
-      - refreshToken
       - user
       properties:
-        token:
+        success:
+          type: boolean
+        message:
           type: string
-          description: JWT access token
-        refreshToken:
-          type: string
-          description: Refresh token
         user:
           $ref: '#/components/schemas/User'
     RegisterRequest:
@@ -20597,12 +20600,8 @@ components:
           description: Registration message
     RefreshTokenRequest:
       type: object
-      required:
-      - refreshToken
-      properties:
-        refreshToken:
-          type: string
-          description: Refresh token
+      description: Refresh uses the httpOnly refreshToken cookie; no token is accepted in the JSON body.
+      properties: {}
     User:
       type: object
       required:

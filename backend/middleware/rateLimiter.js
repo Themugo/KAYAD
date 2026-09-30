@@ -28,6 +28,27 @@ const rateLimitMessage = (message) => ({
   message,
 });
 
+
+const normalizedBodyEmail = (req) => String(req.body?.email || "").trim().toLowerCase();
+const accountAwareKey = (req) => {
+  const email = normalizedBodyEmail(req);
+  return email ? `${ipKeyGenerator(req)}:${email}` : ipKeyGenerator(req);
+};
+
+const authAbuseLimiter = (max, message) => rateLimit({
+  windowMs: 15 * 60 * 1000, max, keyGenerator: accountAwareKey,
+  standardHeaders: true, legacyHeaders: false,
+  handler: (req, res) => {
+    res.setHeader("Retry-After", "900");
+    logWarn("RATE LIMIT (AUTH ACCOUNT-AWARE)", { ip: req.ip, endpoint: req.path });
+    res.status(429).json({ success: false, code: "AUTH_RATE_LIMITED", message });
+  },
+});
+
+export const registrationLimiter = authAbuseLimiter(Number(process.env.REGISTRATION_RATE_LIMIT_MAX || 8), "Too many registration attempts. Try again later.");
+export const recoveryLimiter = authAbuseLimiter(Number(process.env.RECOVERY_RATE_LIMIT_MAX || 8), "Too many recovery attempts. Try again later.");
+export const verificationLimiter = authAbuseLimiter(Number(process.env.VERIFICATION_RATE_LIMIT_MAX || 8), "Too many verification attempts. Try again later.");
+
 // =============================
 // 🌐 GLOBAL LIMITER
 // =============================

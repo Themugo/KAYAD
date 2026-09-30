@@ -47,14 +47,19 @@ export const notFound = (res, message = "Resource not found") => {
 // =============================
 // 🔐 UNAUTHORIZED
 // =============================
-export const unauthorized = (res, message = "Unauthorized") => {
+export const errorCode = (res, message = "Error", status = 500, code = null, details = null) => {
+  return res.status(status).json({ success: false, message, ...(code && { code }), ...(details && { details }) });
+};
+
+export const unauthorized = (res, message = "Unauthorized", code = null) => {
   return res.status(401).json({
     success: false,
     message,
+    ...(code && { code }),
   });
 };
 
 // Compatibility facade for controllers migrated to the canonical response contract.
 export const created = (res, data = null, message = "Created", meta = {}) => res.status(201).json({ success: true, message, data, ...(Object.keys(meta).length ? { meta } : {}) });
 export const badRequest = (res, message = "Bad request", details = null) => error(res, message, 400, details);
-export const response = { success, error, validationError, notFound, unauthorized, created, badRequest };
+export const response = { success, error, errorCode, validationError, notFound, unauthorized, created, badRequest };

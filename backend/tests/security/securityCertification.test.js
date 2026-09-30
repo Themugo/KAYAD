@@ -34,7 +34,7 @@ const userAuthModelMock = {
   create: jest.fn(),
 };
 const dealerModelMock = { findOneAndUpdate: jest.fn(), findOne: jest.fn() };
-const refreshTokenModelMock = { create: jest.fn(), revokeToken: jest.fn() };
+const refreshTokenModelMock = { create: jest.fn(), createSession: jest.fn(), revokeToken: jest.fn(), revokeAllForUser: jest.fn(), revokeSessionById: jest.fn(), getActiveSessions: jest.fn(), findByTokenHash: jest.fn(), findActiveSessionById: jest.fn() };
 const platformConfigMock = { findOne: jest.fn() };
 
 jest.unstable_mockModule("../../models/User.js", () => ({ default: userModelMock }));
@@ -425,8 +425,15 @@ describe("csrfProtection", () => {
     expect(next).toHaveBeenCalledWith();
   });
 
-  test("Bearer-token requests are exempt (not cookie-authenticated)", () => {
-    const req = { method: "POST", headers: { authorization: "Bearer x.y.z" }, session: {} };
+  test("Bearer header alone does not bypass CSRF", () => {
+    const req = { method: "POST", headers: { authorization: "Bearer x.y.z" }, cookies: {}, session: {} };
+    const next = jest.fn();
+    csrfProtection(req, mockRes(), next);
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 403 }));
+  });
+
+  test("explicit machine authentication may bypass browser CSRF", () => {
+    const req = { method: "POST", headers: {}, cookies: {}, kayadMachineAuthenticated: true };
     const next = jest.fn();
     csrfProtection(req, mockRes(), next);
     expect(next).toHaveBeenCalledWith();

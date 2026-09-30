@@ -41,6 +41,7 @@ const isOwnerEmail = (email) =>
 // Single-use email tokens (verify + password reset) are stored as SHA-256
 // hashes so a database leak does not expose usable tokens.
 const hashToken = (token) => crypto.createHash("sha256").update(String(token)).digest("hex");
+const normalizeEmail = (email) => String(email || "").normalize("NFKC").trim().toLowerCase();
 
 const requiresEmailVerification = () =>
   process.env.REQUIRE_EMAIL_VERIFICATION === "true" ||
@@ -118,38 +119,50 @@ const sendAccessToken = (res, token) => {
 // 🧾 RESPONSE FORMAT
 // =============================
 const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null, tokenVersion = 0, authState = null) => {
-  const accessToken = generateAccessToken(user);
-  const newRefreshToken = generateRefreshToken(user);
   const safeUser = serializeUser(user, authState);
+  const refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  let sessionId = null;
+  let familyId = null;
+  let newRefreshToken;
 
-  // Store new refresh token in database with rotation
-  const refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-
-  await RefreshToken.create({
-    user: user._id,
-    token: newRefreshToken,
-    tokenVersion: tokenVersion || 0,
-    deviceId: req?.body?.deviceId || req?.headers["x-device-id"] || "unknown",
-    userAgent: req?.headers["user-agent"] || "",
-    ipAddress: req?.ip || req?.connection?.remoteAddress || "",
-    expiresAt: refreshTokenExpiresAt,
-  });
-
-  // Revoke old refresh token if provided (rotation)
   if (oldRefreshToken) {
-    await RefreshToken.revokeToken(oldRefreshToken, user._id);
+    // Rotation is atomic in PostgreSQL. The old token is claimed once; a second
+    // concurrent use is treated as refresh-token reuse and the family is revoked.
+    const existing = await RefreshToken.findByTokenHash(oldRefreshToken);
+    if (!existing) throw Object.assign(new Error("Refresh token not found or revoked"), { code: "AUTH_REFRESH_INVALID" });
+    familyId = existing.familyId;
+    newRefreshToken = generateRefreshToken(user, tokenVersion, familyId);
+    const result = await RefreshToken.rotate({
+      oldToken: oldRefreshToken, newToken: newRefreshToken, user: user._id, tokenVersion,
+      deviceId: req?.body?.deviceId || req?.headers["x-device-id"] || existing.deviceId || "unknown",
+      userAgent: req?.headers["user-agent"] || existing.userAgent || "",
+      ipAddress: req?.ip || req?.connection?.remoteAddress || existing.ipAddress || "",
+      expiresAt: refreshTokenExpiresAt, familyId,
+    });
+    if (result?.status === "reuse_detected") {
+      await UserAuth.findOneAndUpdate({ user: user._id }, { $inc: { tokenVersion: 1 } });
+      invalidateUserCache(user._id);
+      throw Object.assign(new Error("Refresh token reuse detected. Please sign in again."), { code: "AUTH_REFRESH_REUSED" });
+    }
+    if (result?.status !== "rotated") throw Object.assign(new Error("Refresh token rotation failed"), { code: "AUTH_REFRESH_INVALID" });
+    sessionId = result.session_id;
+  } else {
+    familyId = crypto.randomUUID();
+    newRefreshToken = generateRefreshToken(user, tokenVersion, familyId);
+    const session = await RefreshToken.createSession({
+      user: user._id, token: newRefreshToken, tokenVersion, familyId,
+      deviceId: req?.body?.deviceId || req?.headers["x-device-id"] || "unknown",
+      userAgent: req?.headers["user-agent"] || "",
+      ipAddress: req?.ip || req?.connection?.remoteAddress || "",
+      expiresAt: refreshTokenExpiresAt,
+    });
+    sessionId = session.sessionId;
   }
 
+  const accessToken = generateAccessToken(user, tokenVersion, sessionId);
   sendRefreshToken(res, newRefreshToken);
   sendAccessToken(res, accessToken);
-
-  // M-1 FIX: Do NOT include the access token in the JSON response body.
-  // The httpOnly cookie is already set above. Returning the token in the body
-  // makes it readable by any JavaScript on the page, defeating httpOnly protection.
-  return res.json({
-    success: true,
-    user: safeUser,
-  });
+  return res.json({ success: true, user: safeUser });
 };
 
 const notifyAdminsOfPendingSeller = async (seller) => {
@@ -202,7 +215,7 @@ export const register = async (req, res) => {
       return R.error(res, "Password must contain at least one special character", 400);
     }
 
-    email = email.toLowerCase().trim();
+    email = normalizeEmail(email);
 
     const exists = await User.findOne({ email });
     if (exists) {
@@ -299,6 +312,7 @@ export const register = async (req, res) => {
       text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
       html: `<p>Hi ${user.name || "there"},</p><p>Verify your KAYAD email to unlock your account.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
       metadata: { verification: true },
+      idempotencyKey: `registration-verification:${user.id}` ,
     };
 
     if (requiresEmailVerification()) {
@@ -357,6 +371,7 @@ export const register = async (req, res) => {
       text: `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
       html: `<p>Welcome to KAYAD, ${user.name || "there"}.</p><p>Your account is ready. Browse vehicles, join auctions and use secure transaction workflows.</p>`,
       metadata: { welcome: true },
+      idempotencyKey: `registration-welcome:${user.id}`,
     }).catch((e) => {
       console.warn("⚠️ Welcome email dispatch failed:", e.message);
     });
@@ -392,7 +407,7 @@ export const login = async (req, res) => {
       return R.error(res, "Email and password required", 400);
     }
 
-    email = email.toLowerCase().trim();
+    email = normalizeEmail(email);
 
     const user = await User.findOne({ email });
 
@@ -481,57 +496,32 @@ export const login = async (req, res) => {
 // =============================
 export const refreshToken = async (req, res) => {
   try {
-    // Try cookie first, then fall back to Authorization header
-    let token = req.cookies.refreshToken;
-
-    if (!token) {
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.split(" ")[1];
-      }
-    }
-
-    if (!token) {
-      return R.unauthorized(res, "No refresh token");
-    }
+    const token = req.cookies.refreshToken;
+    if (!token) return R.errorCode(res, "No refresh token", 401, "AUTH_SESSION_EXPIRED");
 
     let decoded;
-
     try {
       decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET, { algorithms: ["HS256"] });
     } catch (err) {
-      // Expired or invalid refresh tokens are rejected — no fallback
-      const msg =
-        err.name === "TokenExpiredError" ? "Refresh token expired — please login again" : "Invalid refresh token";
-      return R.error(res, msg, 403);
+      return R.errorCode(res, err.name === "TokenExpiredError" ? "Refresh token expired — please login again" : "Invalid refresh token", 403, "AUTH_SESSION_EXPIRED");
     }
 
-    // Check if token exists in database and is not revoked
-    const storedToken = await RefreshToken.findOne({ token, isRevoked: false });
-    if (!storedToken) {
-      return R.error(res, "Refresh token not found or revoked", 403);
-    }
+    const storedToken = await RefreshToken.findByTokenHash(token);
+    if (!storedToken) return R.errorCode(res, "Refresh token not found or revoked", 403, "AUTH_SESSION_EXPIRED");
 
     const user = await User.findById(decoded.id);
     const userAuth = user ? await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion") : null;
-
-    if (!user || !userAuth) {
-      return R.error(res, "Invalid credentials", 403);
-    }
-
+    if (!user || !userAuth) return R.errorCode(res, "Invalid credentials", 403, "AUTH_SESSION_EXPIRED");
     if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
-      return R.error(res, "Session invalidated — please login again", 403);
+      return R.errorCode(res, "Session invalidated — please login again", 403, "AUTH_SESSION_EXPIRED");
     }
 
-    // Update last used timestamp
-    storedToken.lastUsedAt = new Date();
-    await storedToken.save();
-
-    // Issue new tokens with rotation (old token is revoked in sendAuthResponse)
-    return await sendAuthResponse(res, user, token, req, userAuth?.tokenVersion || 0, userAuth);
+    return await sendAuthResponse(res, user, token, req, userAuth.tokenVersion || 0, userAuth);
   } catch (err) {
     logError("❌ REFRESH ERROR", err);
-    R.error(res, "Refresh failed", 500);
+    if (err?.code === "AUTH_REFRESH_REUSED") return R.errorCode(res, err.message, 403, "AUTH_REFRESH_REUSED");
+    if (err?.code === "AUTH_REFRESH_INVALID") return R.errorCode(res, err.message, 403, "AUTH_SESSION_EXPIRED");
+    return R.errorCode(res, "Refresh failed", 500, "AUTH_REFRESH_FAILED");
   }
 };
 
@@ -542,7 +532,7 @@ export const logout = async (req, res) => {
   try {
     if (req.user?.id) {
       // 🔥 Revoke all refresh tokens for this user
-      await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
+      await RefreshToken.revokeAllForUser(req.user.id, "logout");
 
       // 🔥 Also increment tokenVersion to invalidate any existing tokens
       await UserAuth.findOneAndUpdate({ user: req.user.id }, {
@@ -600,13 +590,10 @@ export const getSessions = async (req, res) => {
 export const revokeSession = async (req, res) => {
   try {
     const { tokenId } = req.params;
-    const session = await RefreshToken.findOne({ _id: tokenId, user: req.user.id, isRevoked: false });
-
-    if (!session) {
-      return R.notFound(res, "Session not found");
-    }
-
-    await RefreshToken.revokeToken(session.token, req.user.id);
+    const sessions = await RefreshToken.getActiveSessions(req.user.id);
+    const session = sessions.find((item) => String(item.id) === String(tokenId));
+    if (!session) return R.notFound(res, "Session not found");
+    await RefreshToken.revokeSessionById(tokenId, req.user.id);
     res.json({ success: true, message: "Session revoked" });
   } catch (err) {
     logError("❌ REVOKE SESSION ERROR", err);
@@ -616,7 +603,7 @@ export const revokeSession = async (req, res) => {
 
 export const revokeAllSessions = async (req, res) => {
   try {
-    await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
+    await RefreshToken.revokeAllForUser(req.user.id, "logout");
 
     // Also increment tokenVersion to invalidate any existing tokens
     await UserAuth.findOneAndUpdate({ user: req.user.id }, {
@@ -725,7 +712,9 @@ export const changePassword = async (req, res) => {
     userAuth.tokenVersion = (userAuth.tokenVersion || 0) + 1;
     await userAuth.save();
 
-    // 🔥 Invalidate user cache to prevent stale auth state after password change
+    // Password changes invalidate every previous refresh family; the current browser
+    // receives a fresh session only after the new credential is committed.
+    await RefreshToken.revokeAllForUser(req.user.id, "password_changed");
     invalidateUserCache(req.user.id);
 
     return sendAuthResponse(res, user, null, null, userAuth.tokenVersion || 0, userAuth);
@@ -742,24 +731,17 @@ export const verifyEmail = async (req, res) => {
     const { token } = req.params;
     if (!token) return R.error(res, "Token required", 400);
 
-    const userAuth = await UserAuth.findOne({
-      emailVerifyToken: hashToken(token),
-      emailVerifyExpire: { $gt: Date.now() },
-    }).select("+emailVerifyToken +emailVerifyExpire");
-
-    if (!userAuth) {
-      return R.error(res, "Invalid or expired verification link. Request a new one.", 400);
-    }
+    const userAuth = await UserAuth.findOneAndUpdate(
+      { emailVerifyToken: hashToken(token), emailVerifyExpire: { $gt: Date.now() } },
+      { emailVerifyToken: null, emailVerifyExpire: null },
+      { new: true },
+    );
+    if (!userAuth) return R.error(res, "Invalid or expired verification link. Request a new one.", 400);
 
     const user = await User.findById(userAuth.user);
-    if (user) {
-      user.emailVerified = true;
-      await user.save();
-    }
-
-    userAuth.emailVerifyToken = undefined;
-    userAuth.emailVerifyExpire = undefined;
-    await userAuth.save();
+    if (!user) return R.error(res, "Invalid or expired verification link. Request a new one.", 400);
+    user.emailVerified = true;
+    await user.save();
 
     res.json({ success: true, message: "Email verified successfully. You can now log in." });
   } catch (err) {
@@ -775,7 +757,7 @@ export const resendVerification = async (req, res) => {
     const { email } = req.body;
     if (!email) return R.error(res, "Email required", 400);
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ email: normalizeEmail(email) });
 
     // Always return 200 to avoid user enumeration
     if (!user || user.emailVerified) {
@@ -812,6 +794,7 @@ export const resendVerification = async (req, res) => {
           text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
           html: `<p>Hi ${user.name || "there"},</p><p>Your new KAYAD verification link is ready.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
           metadata: { verification: true, resend: true },
+          idempotencyKey: `verification-resend:${user.id}:${nextVerifyTokenHash.slice(0, 16)}`,
         });
         if (requiresEmailVerification()) assertEmailDeliverySucceeded(verificationDelivery, "Verification");
 
@@ -840,7 +823,7 @@ export const forgotPassword = async (req, res) => {
     const { email } = req.body;
     if (!email) return R.error(res, "Email required", 400);
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ email: normalizeEmail(email) });
     // Always return 200 to prevent user enumeration
     if (!user) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
 
@@ -866,6 +849,7 @@ export const forgotPassword = async (req, res) => {
       text: `Reset your KAYAD password: ${resetUrl}. This link expires in 1 hour.`,
       html: `<p>We received a request to reset your KAYAD password.</p><p><a href="${resetUrl}">Reset my password</a></p><p>This link expires in 1 hour.</p>`,
       metadata: { passwordReset: true },
+      idempotencyKey: `password-reset:${user.id}:${hashToken(token).slice(0, 16)}`,
     }).catch((e) => console.warn("⚠️ Reset email failed:", e.message));
 
     return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
@@ -887,18 +871,17 @@ export const resetPassword = async (req, res) => {
     if (!/\d/.test(password)) return R.error(res, "Password must contain at least one number", 400);
     if (!/[^A-Za-z0-9]/.test(password)) return R.error(res, "Password must contain at least one special character", 400);
 
-    const userAuth = await UserAuth.findOne({
-      resetToken: hashToken(token),
-      resetTokenExpire: { $gt: Date.now() },
-    });
+    const passwordHash = await bcrypt.hash(password, 12);
+    const existingAuth = await UserAuth.findOne({ resetToken: hashToken(token), resetTokenExpire: { $gt: Date.now() } }).select("+tokenVersion");
+    if (!existingAuth) return R.error(res, "Reset link is invalid or has expired.", 400);
 
+    const userAuth = await UserAuth.findOneAndUpdate(
+      { resetToken: hashToken(token), resetTokenExpire: { $gt: Date.now() } },
+      { password: passwordHash, resetToken: null, resetTokenExpire: null, tokenVersion: (existingAuth.tokenVersion || 0) + 1 },
+      { new: true },
+    );
     if (!userAuth) return R.error(res, "Reset link is invalid or has expired.", 400);
-
-    userAuth.password = await bcrypt.hash(password, 12);
-    userAuth.resetToken = undefined;
-    userAuth.resetTokenExpire = undefined;
-    userAuth.tokenVersion = (userAuth.tokenVersion || 0) + 1; // Invalidate all existing sessions
-    await userAuth.save();
+    await RefreshToken.revokeAllForUser(userAuth.user, "password_reset");
 
     res.json({ success: true, message: "Password reset successfully. You can now sign in." });
   } catch (err) {

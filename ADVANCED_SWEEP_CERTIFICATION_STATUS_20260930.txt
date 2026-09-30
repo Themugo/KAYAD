@@ -1,0 +1,35 @@
+KAYAD ADVANCED SWEEP — CERTIFICATION STATUS
+Date: 2026-09-30
+
+AUTHORITATIVE BASELINE:
+KAYAD-MASTER-AUTH-ONBOARDING-FOUNDATION-20260930.zip
+
+ADVANCED SOURCE GATE: PASS — 19/19
+BACKEND/SCRIPTS JS SYNTAX: PASS — 837/837
+REGISTRATION/ONBOARDING SOURCE GATE: PASS — 46/46
+V14 HOLISTIC SOURCE GATE: PASS — 18/18
+V14 LIVE-CERTIFICATION CONTRACT: PASS — 15/15
+V14 RELEASE-CANDIDATE: PASS — 17/17, 0 FAIL
+DEPENDENCY SECURITY SOURCE GATE: PASS
+
+RUNTIME / INTEGRATION / E2E / LIVE PROVIDER / PRODUCTION:
+BLOCKED — this runner is Node v22.16.0; KAYAD requires >=22.22.2.
+The foundation's dependencies are not complete in this runner.
+A diagnostic npm ci attempt with engine enforcement disabled timed out.
+A diagnostic typecheck failed because required type-definition packages are missing.
+
+IMPORTANT:
+This archive is a WORKING CANDIDATE containing the completed advanced source
+corrections and certification artifacts. It is NOT the final certified
+foundation ZIP because the supplied engineering specification requires
+executable certification gates to pass before a foundation may be packaged.
+
+Required next executable environment:
+- Node >=22.22.2
+- npm ci
+- configured Supabase staging
+- Redis/queue/worker runtime
+- Brevo API + webhook credentials
+- Playwright-capable browser runtime
+
+Do not label this candidate production-certified until those gates pass.

@@ -75,6 +75,27 @@ export const verifyOtpChallenge = async ({ userId, purpose, code }) => {
     await update("otp_challenges", challenge.id, { status: "locked", updatedAt: new Date().toISOString() });
     return { valid: false, reason: "locked" };
   }
+  // Consume a valid OTP atomically. Two simultaneous requests can both read the
+  // same pending challenge, but only one UPDATE ... WHERE status=pending AND
+  // code_hash=<candidate> may transition it to verified.
+  const nowIso = new Date().toISOString();
+  const { data: consumed, error: consumeError } = await sb
+    .from("otp_challenges")
+    .update({ status: "verified", verified_at: nowIso, updated_at: nowIso })
+    .eq("id", challenge.id)
+    .eq("user_id", userId)
+    .eq("purpose", purpose)
+    .eq("status", "pending")
+    .eq("code_hash", hash(code))
+    .gt("expires_at", nowIso)
+    .select("id")
+    .maybeSingle();
+  if (consumeError) throw consumeError;
+  if (consumed) return { valid: true, challengeId: challenge.id };
+
+  // The candidate was not consumed. If it was wrong, increment the attempt
+  // counter; a successful concurrent verifier has already moved the row out of
+  // pending, so this path cannot undo that success.
   if (hash(code) !== challenge.codeHash) {
     const attempts = Number(challenge.attempts || 0) + 1;
     await update("otp_challenges", challenge.id, {
@@ -84,8 +105,7 @@ export const verifyOtpChallenge = async ({ userId, purpose, code }) => {
     });
     return { valid: false, reason: "invalid", remainingAttempts: Math.max(0, Number(challenge.maxAttempts || MAX_ATTEMPTS) - attempts) };
   }
-  await update("otp_challenges", challenge.id, { status: "verified", verifiedAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-  return { valid: true, challengeId: challenge.id };
+  return { valid: false, reason: "replayed_or_raced" };
 };
 
 // Compatibility facade for older callers. New flows must use createOtpChallenge/verifyOtpChallenge.

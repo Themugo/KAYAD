@@ -3,6 +3,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
+import RefreshToken from "../models/RefreshToken.js";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { OWNER_EMAILS, isOwnerEmail } from "../config/owners.js";
 import { logError, logWarn } from "../utils/logger.js";
@@ -113,27 +114,31 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // 🔥 CHECK TOKEN VERSION via user_auth table (H1 split)
-    const userAuth = await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion").lean();
-    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth?.tokenVersion ?? 0)) {
-      return res.status(401).json({
-        success: false,
-        message: "Session invalidated, please login again",
-      });
+    // Security state is deliberately read fresh on every protected request. The
+    // lightweight user cache may serve non-security profile fields, but must not
+    // allow a banned/deactivated/role-revoked identity to remain authorized.
+    const securityUser = await User.findById(decoded.id).select("_id,email,role,status,isBanned,deactivatedAt,emailVerified,grantedPermissions,revokedPermissions").lean();
+    const userAuth = await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion +mustChangePassword").lean();
+    if (!securityUser || !userAuth) {
+      return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalid" });
+    }
+    user = securityUser;
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
+      return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalidated, please login again" });
+    }
+    if (decoded.sessionId) {
+      const activeSession = await RefreshToken.findActiveSessionById(decoded.sessionId, decoded.id);
+      if (!activeSession) {
+        return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session revoked, please login again" });
+      }
     }
 
     // 🚫 BLOCK BANNED USERS (OWNER EXEMPT)
     if (user.isBanned && !isOwnerEmail(user.email)) {
-      return res.status(403).json({
-        success: false,
-        message: "Account suspended",
-      });
+      return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account suspended" });
     }
     if (user.deactivatedAt && !isOwnerEmail(user.email)) {
-      return res.status(403).json({
-        success: false,
-        message: "Account deactivated",
-      });
+      return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account deactivated" });
     }
 
     // 📧 EMAIL VERIFICATION (config-gated; OWNER + DEMO EXEMPT)

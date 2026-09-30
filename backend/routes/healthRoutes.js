@@ -60,6 +60,13 @@ router.get("/", async (req, res) => {
     health.status = "degraded";
   }
 
+  // Required/optional external dependencies are reported separately so an
+  // optional provider outage does not masquerade as total application failure.
+  health.checks.brevo = {
+    configured: Boolean(process.env.BREVO_API_KEY && process.env.BREVO_FROM_EMAIL),
+    status: process.env.BREVO_API_KEY && process.env.BREVO_FROM_EMAIL ? "configured" : "not_configured",
+  };
+
   // Memory health
   const memoryUsage = process.memoryUsage();
   health.checks.memory = {

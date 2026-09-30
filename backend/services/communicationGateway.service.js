@@ -8,7 +8,17 @@ import { logError, logInfo } from "../utils/logger.js";
 import { getIO } from "../utils/io.js";
 
 const CHANNELS = new Set(["in_app", "email", "sms", "whatsapp"]);
-const TERMINAL = new Set(["sent", "delivered", "failed", "bounced", "read"]);
+const TERMINAL = new Set(["sent", "delivered", "failed", "bounced", "read", "dead_letter"]);
+const DELIVERY_TRANSITIONS = {
+  queued: new Set(["sending", "queued", "failed"]),
+  sending: new Set(["sent", "failed", "queued"]),
+  sent: new Set(["sent", "delivered", "read", "bounced", "failed"]),
+  delivered: new Set(["delivered", "read"]),
+  read: new Set(["read"]),
+  failed: new Set(["failed", "queued", "sending", "sent", "dead_letter"]),
+  dead_letter: new Set(["dead_letter"]),
+  bounced: new Set(["bounced"]),
+};
 
 const normalizePhone = (phone) => {
   if (!phone) return null;
@@ -57,6 +67,7 @@ export const recordDelivery = async (payload) => {
     metadata: payload.metadata || {},
     category: payload.category || "transactional",
     retryCount: payload.retryCount || 0,
+    idempotencyKey: payload.idempotencyKey || null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
@@ -110,6 +121,7 @@ export const deliver = async ({
   message,
   metadata = {},
   deliveryId = null,
+  idempotencyKey = null,
 }) => {
   if (!CHANNELS.has(channel)) throw new Error(`Unsupported communication channel: ${channel}`);
   if (!recipient && channel !== "in_app") throw new Error(`Missing ${channel} recipient`);
@@ -128,6 +140,10 @@ export const deliver = async ({
         : "socket";
 
   let delivery = deliveryId ? await findById("communication_deliveries", deliveryId) : null;
+  if (!delivery && idempotencyKey) {
+    delivery = await findOne("communication_deliveries", { provider, channel, idempotencyKey });
+    if (delivery) return delivery;
+  }
   if (!delivery) delivery = await recordDelivery({
     userId, channel, eventType, templateCode,
     recipient: recipient || String(userId || ""), provider,
@@ -176,7 +192,7 @@ export const deliver = async ({
     const retryable = retryCount <= 3;
     const delayMs = Math.min(60 * 60 * 1000, Math.pow(2, retryCount) * 60 * 1000);
     return updateDelivery(delivery.id, {
-      status: "failed",
+      status: retryable ? "failed" : "dead_letter",
       lastError: error.message,
       failedAt: new Date().toISOString(),
       retryCount,
@@ -197,10 +213,12 @@ export const sendUserCommunication = async ({
   html,
   metadata = {},
   deliveryId = null,
+  idempotencyKey = null,
 }) => {
   const user = await findById("users", userId, "id,email,phone");
   if (!user) throw new Error("User not found");
   const results = [];
+  const eventIdentity = metadata?.idempotencyKey || metadata?.eventId || metadata?.sourceEventId || metadata?.paymentId || metadata?.escrowId || metadata?.applicationId || metadata?.inspectionId || metadata?.bookingId || metadata?.bidId || metadata?.carId || metadata?.sellerId || metadata?.dealerId;
   for (const channel of channels) {
     // Optional providers must be capability-aware. Missing SMS/WhatsApp
     // credentials should not create failed deliveries for unrelated
@@ -214,11 +232,11 @@ export const sendUserCommunication = async ({
       continue;
     }
     if (channel === "in_app") {
-      results.push(await deliver({ userId, channel, eventType, category, templateCode, subject: title, message, metadata }));
+      results.push(await deliver({ userId, channel, eventType, category, templateCode, subject: title, message, metadata, idempotencyKey: eventIdentity ? `${eventType}:${eventIdentity}:${channel}` : null }));
     } else if (channel === "email" && user.email) {
-      results.push(await deliver({ userId, channel, eventType, category, templateCode, recipient: user.email, subject, html: html || `<p>${message}</p>`, text: message, metadata }));
+      results.push(await deliver({ userId, channel, eventType, category, templateCode, recipient: user.email, subject, html: html || `<p>${message}</p>`, text: message, metadata, idempotencyKey: eventIdentity ? `${eventType}:${eventIdentity}:${channel}` : null }));
     } else if ((channel === "sms" || channel === "whatsapp") && user.phone) {
-      results.push(await deliver({ userId, channel, eventType, category, templateCode, recipient: user.phone, message, text: message, metadata }));
+      results.push(await deliver({ userId, channel, eventType, category, templateCode, recipient: user.phone, message, text: message, metadata, idempotencyKey: eventIdentity ? `${eventType}:${eventIdentity}:${channel}` : null }));
     }
   }
   return results;
@@ -226,14 +244,18 @@ export const sendUserCommunication = async ({
 
 export const handleProviderStatus = async ({ provider, providerMessageId, status, error = null, providerEventId = null, metadata = {} }) => {
   if (!providerMessageId) return null;
-  const delivery = await (await import("../db/index.js")).findOne("communication_deliveries", { providerMessageId });
+  const db = await import("../db/index.js");
+  const delivery = await db.findOne("communication_deliveries", { providerMessageId, provider });
   if (!delivery) return null;
   const normalized = String(status || "").toLowerCase();
   const nextStatus = TERMINAL.has(normalized) ? normalized : normalized === "accepted" || normalized === "queued" ? "queued" : normalized === "sending" ? "sending" : "failed";
+  const hashedEventId = providerEventId ? hashExternalId(provider, providerEventId) : null;
+  if (hashedEventId && delivery.providerEventId === hashedEventId) return delivery;
+  if (!DELIVERY_TRANSITIONS[delivery.status]?.has(nextStatus)) return delivery;
   return updateDelivery(delivery.id, {
     status: nextStatus,
     provider,
-    providerEventId: providerEventId ? hashExternalId(provider, providerEventId) : delivery.providerEventId,
+    providerEventId: hashedEventId || delivery.providerEventId,
     deliveredAt: nextStatus === "delivered" ? new Date().toISOString() : delivery.deliveredAt,
     lastError: error || delivery.lastError,
     metadata: { ...(delivery.metadata || {}), webhook: metadata },
