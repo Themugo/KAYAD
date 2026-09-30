@@ -57,6 +57,11 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
+  // Never intercept or cache authentication/CSRF endpoints. A cached
+  // /api/v1/auth/csrf response would replay a stale token (and a cached 404
+  // would outlive the deploy that fixed it).
+  if (/^\/api\/(v\d+\/)?auth\//.test(url.pathname)) return;
+
   // Skip chrome-extension and other non-http(s) requests
   if (!url.protocol.startsWith('http')) return;
 
