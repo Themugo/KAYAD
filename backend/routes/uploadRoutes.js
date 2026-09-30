@@ -105,7 +105,10 @@ router.get(
 
     res.setHeader("Content-Type", record.mimeType || "application/octet-stream");
     res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(record.originalName || "upload")}"`);
-    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    res.setHeader(
+      "Cache-Control",
+      isPrivate ? "private, no-store, max-age=0" : "public, max-age=31536000, immutable",
+    );
     res.send(record.content);
   }),
 );

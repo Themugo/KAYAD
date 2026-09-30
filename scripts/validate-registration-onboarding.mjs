@@ -16,10 +16,10 @@ const checks = [
   ['login handles email verification gate', /verificationRequired/.test(read('src/pages/LoginPage.jsx')) && /resendVerification/.test(read('src/pages/LoginPage.jsx'))],
   ['registration is account-creation only and does not issue a session', /Registration deliberately does not create an authenticated session/.test(read('backend/controllers/authController.js')) && /return res\.status\(201\)\.json\(\{/.test(read('backend/controllers/authController.js')) && !/register[\s\S]{0,12000}sendAuthResponse\(res\.status\(201\)/.test(read('backend/controllers/authController.js'))],
   ['registration duplicate email returns conflict', /An account with that email already exists/.test(read('backend/controllers/authController.js')) && /409/.test(read('backend/controllers/authController.js'))],
-  ['verification email uses the required/non-required delivery boundary', (() => {
+  ['verification email delivery is non-blocking during registration', (() => {
     const source = read('backend/controllers/authController.js');
     const register = source.slice(source.indexOf('export const register'), source.indexOf('// =============================\n// 🔑 LOGIN'));
-    return /if \(requiresEmailVerification\(\)\)/.test(register) && /const verificationDelivery = await deliver\(verificationPayload\)/.test(register) && /void deliver\(verificationPayload\)/.test(register) && /Registration could not be completed because the verification email service is temporarily unavailable/.test(register);
+    return /void deliver\(verificationPayload\)\.catch/.test(register) && !/const verificationDelivery = await deliver\(verificationPayload\)/.test(register);
   })()],
   ['welcome email is non-blocking', /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/.test(read('backend/controllers/authController.js'))],
   ['password reset email is non-blocking', /const resetUrl = .*reset-password\?token=/.test(read('backend/controllers/authController.js')) && /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.PASSWORD_RESET/.test(read('backend/controllers/authController.js'))],

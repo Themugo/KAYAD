@@ -295,12 +295,12 @@ export const register = async (req, res) => {
       void notifyAdminsOfPendingSeller(user).catch(() => {});
     }
 
-    // Verification delivery has two modes by design:
-    // - When email verification is required, provider acceptance is part of
-    //   registration's commit boundary. A failed Brevo delivery must roll the
-    //   identity back rather than creating an account the user cannot verify.
-    // - When verification is not required, delivery remains asynchronous so
-    //   optional provider latency cannot hold the onboarding request open.
+    // Verification delivery is deliberately best-effort and non-blocking.
+    // The account is the durable registration result; when deployment policy
+    // requires email verification, the login gate prevents access until the
+    // user verifies and the existing resend-verification path remains available.
+    // Provider latency/failure must never turn a valid account write into the
+    // generic registration 500 or recreate the original onboarding timeout.
     const verifyUrl = `${process.env.FRONTEND_URL || "https://kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
     const verificationPayload = {
       userId: user.id || user._id,
@@ -315,24 +315,9 @@ export const register = async (req, res) => {
       idempotencyKey: `registration-verification:${user.id}` ,
     };
 
-    if (requiresEmailVerification()) {
-      const verificationDelivery = await deliver(verificationPayload);
-      try {
-        assertEmailDeliverySucceeded(verificationDelivery, "Verification");
-      } catch (deliveryErr) {
-        // Do not leave an account that is immediately blocked by the login
-        // verification gate but has no usable verification path.
-        await Promise.allSettled([
-          UserAuth.deleteOne({ _id: userAuth._id }),
-          User.deleteOne({ _id: user._id }),
-        ]);
-        throw new Error("Registration could not be completed because the verification email service is temporarily unavailable.");
-      }
-    } else {
-      void deliver(verificationPayload).catch((e) => {
-        console.warn("⚠️ Verification email dispatch failed:", e.message);
-      });
-    }
+    void deliver(verificationPayload).catch((e) => {
+      console.warn("⚠️ Verification email dispatch failed:", e.message);
+    });
 
     if (referredBy) {
       // Referral credit is a post-registration side effect. Never make the
