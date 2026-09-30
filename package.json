@@ -89,7 +89,8 @@
     "validate:registration-onboarding": "node scripts/validate-registration-onboarding.mjs",
     "validate:csrf-route": "node scripts/validate-canonical-csrf-route.mjs",
     "validate:deployment-runtime-drift": "node scripts/validate-deployment-runtime-drift.mjs",
-    "validate:private-upload-cache": "node scripts/validate-private-upload-cache.mjs"
+    "validate:private-upload-cache": "node scripts/validate-private-upload-cache.mjs",
+    "validate:explicit-auth-flows": "node scripts/validate-explicit-auth-flows.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

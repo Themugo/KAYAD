@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { AuthApiError, resendVerification } from '../services/authApi';
+import { getPostAuthPath } from '../utils/authRoutes';
 
 export function LoginPage() {
-  const { login, user } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,6 +18,14 @@ export function LoginPage() {
   const [verificationRequired, setVerificationRequired] = useState(false);
   const [resendingVerification, setResendingVerification] = useState(false);
 
+  useEffect(() => {
+    if (authLoading || !user) return;
+    const destination = getPostAuthPath(user, from);
+    if (destination !== '/login' && !destination.startsWith('/login?')) {
+      navigate(destination, { replace: true });
+    }
+  }, [authLoading, user, from, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -25,11 +34,7 @@ export function LoginPage() {
       const data = await login(form);
       toast('Welcome back! 🚗', 'success');
       const u = data.user || user;
-      const role = u?.role;
-      if (u?.mustChangePassword) {
-        navigate('/force-password-change', { replace: true }); return;
-      }
-      const dest = role === 'dealer' ? '/dealer' : role === 'admin' || role === 'superadmin' ? '/admin' : from;
+      const dest = getPostAuthPath(u, from);
       navigate(dest, { replace: true });
     } catch (err) {
       const message = err instanceof AuthApiError ? err.message : err?.response?.data?.message || 'Unable to sign in. Please try again.';

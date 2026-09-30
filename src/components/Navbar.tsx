@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Car,
   PlusCircle,
@@ -57,6 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   unreadCount = 0
 }) => {
   const { branding } = useBranding();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -76,6 +78,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleAuthNavigation = (path: '/login' | '/register') => {
+    setShowUserDropdown(false);
+    setMobileMenuOpen(false);
+    navigate(path);
+  };
 
   const handleNavSelect = (navId: string) => {
     onNavClick(navId);
@@ -517,14 +525,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </div>
             ) : (
-              <button
-                onClick={onOpenAuth}
-                className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-white hover:bg-[#F0FAF8] text-[#0A3340] border border-[#0A3340] transition-all shadow-2xs"
-                id="btn-sign-in-main"
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Sign In</span>
-              </button>
+              <div className="hidden sm:flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleAuthNavigation('/login')}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-white hover:bg-[#F0FAF8] text-[#0A3340] border border-[#0A3340] transition-all shadow-2xs"
+                  id="btn-sign-in-main"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAuthNavigation('/register')}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-[#0A3340] hover:bg-[#12576D] text-white border border-[#0A3340] transition-all shadow-2xs"
+                  id="btn-sign-up-main"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>Create Account</span>
+                </button>
+              </div>
             )}
 
             {/* Mobile Hamburger Button */}
@@ -571,15 +591,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <p className="font-bold text-xs text-white">Guest Visitor</p>
                 <p className="text-[10px] text-slate-300">Sign in to access Escrow & Saved Vehicles</p>
               </div>
-              <button
-                onClick={() => {
-                  onOpenAuth();
-                  setMobileMenuOpen(false);
-                }}
-                className="px-3 py-1.5 bg-[#176B87] text-white font-bold rounded-xl text-xs"
-              >
-                Sign In
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleAuthNavigation('/login')}
+                  className="px-3 py-1.5 bg-[#176B87] text-white font-bold rounded-xl text-xs"
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAuthNavigation('/register')}
+                  className="px-3 py-1.5 bg-amber-400 text-[#0A3340] font-black rounded-xl text-xs"
+                >
+                  Create Account
+                </button>
+              </div>
             </div>
           )}
 

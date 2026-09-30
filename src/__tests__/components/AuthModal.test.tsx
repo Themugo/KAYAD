@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuthModal } from '../../components/AuthModal';
 import { AuthProvider } from '../../context/AuthContext';
+import { MemoryRouter } from 'react-router-dom';
 
 const authMocks = vi.hoisted(() => ({
   login: vi.fn(),
@@ -32,9 +33,11 @@ vi.mock('../../services/authApi', () => ({
 describe('AuthModal - real backend authentication (Phase 3)', () => {
   const renderModal = () =>
     render(
-      <AuthProvider>
-        <AuthModal isOpen={true} onClose={() => {}} onLogin={() => {}} />
-      </AuthProvider>
+      <MemoryRouter>
+        <AuthProvider>
+          <AuthModal isOpen={true} onClose={() => {}} onLogin={() => {}} />
+        </AuthProvider>
+      </MemoryRouter>
     );
 
   beforeEach(() => {
@@ -105,32 +108,12 @@ describe('AuthModal - real backend authentication (Phase 3)', () => {
     );
   });
 
-  it('switching to Create Account calls the real register endpoint with the selected role', async () => {
+  it('keeps registration as an explicit route instead of embedding a second auth flow', async () => {
     renderModal();
     await waitFor(() => expect(screen.getByText('Sign In to KAYAD')).toBeTruthy());
-
-    fireEvent.click(screen.getByText('Create a KAYAD account', { selector: 'button' }));
-    await waitFor(() => expect(screen.getByText('Create Your KAYAD Account')).toBeTruthy());
-    fireEvent.click(screen.getByRole('button', { name: 'Dealer' }));
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
-    await waitFor(() => expect(screen.getByPlaceholderText('Jane Wanjiru')).toBeTruthy());
-
-    authMocks.register.mockResolvedValue({ id: 'u2', name: 'New Dealer', email: 'dealer@kayad.co.ke', role: 'dealer' });
-
-    fireEvent.change(screen.getByPlaceholderText('Jane Wanjiru'), { target: { value: 'New Dealer' } });
-    fireEvent.change(screen.getByPlaceholderText('name@example.co.ke'), { target: { value: 'dealer@kayad.co.ke' } });
-    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'Securepass1!' } });
-    fireEvent.change(screen.getByLabelText('Business name'), { target: { value: 'New Dealer Motors' } });
-    fireEvent.change(screen.getByLabelText('Location / city'), { target: { value: 'Nairobi' } });
-    // "Create Account" appears twice - the mode tab and the submit
-    // button - disambiguated by picking the actual <button> submit
-    // element (type is not "button" for the tab... both share the same
-    // accessible name, so instead target the one that's currently
-    // disabled=false and is the primary submit control specifically).
-    const createAccountButtons = screen.getAllByRole('button', { name: 'Create Account' });
-    fireEvent.click(createAccountButtons[createAccountButtons.length - 1]);
-
-    await waitFor(() => expect(authMocks.register).toHaveBeenCalledWith({ name: 'New Dealer', email: 'dealer@kayad.co.ke', password: 'Securepass1!', role: 'dealer', businessName: 'New Dealer Motors', location: 'Nairobi' }));
+    expect(screen.getByRole('link', { name: /create an account/i })).toHaveAttribute('href', '/register');
+    expect(screen.getByRole('link', { name: /forgot password/i })).toHaveAttribute('href', '/forgot-password');
+    expect(screen.queryByText('Create Your KAYAD Account')).toBeNull();
   });
 });
 
