@@ -7,6 +7,7 @@ import CompareModal from './components/CompareModal';
 import AuthModal from './components/AuthModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 import DashboardHub from './components/DashboardHub';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
@@ -576,6 +577,7 @@ function AppInner() {
 }
 
 export function App() {
+  if (window.location.pathname === '/verify-email') return <VerifyEmailPage />;
   return (
     <AuthProvider>
       <SocketProvider>

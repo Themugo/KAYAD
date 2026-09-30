@@ -60,16 +60,29 @@ export const csrfProtection = (req, res, next) => {
 export const csrfToken = (req, res, next) => {
   const cookieToken = req.cookies?.["XSRF-TOKEN"];
   const token = cookieToken || generateCsrfToken();
+  const hostname = String(req.hostname || req.headers?.host || "").split(":")[0].toLowerCase();
+  const isKayadSubdomain = hostname.endsWith(".kayad.space");
+  const cookieDomain = isKayadSubdomain ? ".kayad.space" : undefined;
 
-  if (cookieToken !== token) {
-    res.cookie("XSRF-TOKEN", token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+  // The browser UI and API are separate subdomains in production (for example
+  // www.kayad.space -> api.kayad.space). A host-only cookie issued by the API
+  // is invisible to document.cookie on www.kayad.space, so the frontend cannot
+  // echo the double-submit token. Scope the CSRF cookie to the KAYAD site in
+  // production while keeping localhost/dev cookies host-only.
+  if (cookieDomain && typeof res.clearCookie === "function") {
+    // Remove any legacy host-only token first; otherwise browsers can retain
+    // two cookies with the same name and produce ambiguous request headers.
+    res.clearCookie("XSRF-TOKEN", { path: "/" });
   }
+
+  res.cookie("XSRF-TOKEN", token, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    domain: cookieDomain,
+    path: "/",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
 
   res.setHeader("Cache-Control", "no-store");
   res.locals.csrfToken = token;

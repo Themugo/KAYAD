@@ -85,7 +85,8 @@
     "validate:session-availability": "node scripts/validate-session-availability.mjs",
     "validate:api-availability": "node scripts/validate-api-availability.mjs",
     "validate:response-lifecycle": "node scripts/validate-response-lifecycle.mjs",
-    "validate:foundation-integrity": "node scripts/validate-foundation-integrity.mjs"
+    "validate:foundation-integrity": "node scripts/validate-foundation-integrity.mjs",
+    "validate:registration-onboarding": "node scripts/validate-registration-onboarding.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

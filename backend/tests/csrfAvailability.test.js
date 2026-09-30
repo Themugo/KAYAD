@@ -3,6 +3,7 @@ import { csrfProtection, csrfToken, generateCsrfToken } from "../middleware/csrf
 
 const makeResponse = () => ({
   cookie: vi.fn(),
+  clearCookie: vi.fn(),
   setHeader: vi.fn(),
   locals: {},
 });
@@ -16,8 +17,10 @@ describe("CSRF availability contract", () => {
     csrfToken(req, res, next);
 
     expect(res.cookie).toHaveBeenCalledTimes(1);
-    const token = res.cookie.mock.calls[0][1];
+    const [cookieName, token, cookieOptions] = res.cookie.mock.calls[0];
+    expect(cookieName).toBe("XSRF-TOKEN");
     expect(token).toMatch(/^[a-f0-9]{64}$/);
+    expect(cookieOptions.domain).toBeUndefined();
     expect(res.locals.csrfToken).toBe(token);
     expect(next).toHaveBeenCalledOnce();
     expect(generateCsrfToken()).toMatch(/^[a-f0-9]{64}$/);
@@ -31,7 +34,9 @@ describe("CSRF availability contract", () => {
 
     csrfToken(req, res, next);
 
-    expect(res.cookie).not.toHaveBeenCalled();
+    expect(res.cookie).toHaveBeenCalledTimes(1);
+    expect(res.cookie.mock.calls[0][1]).toBe(token);
+    expect(res.cookie.mock.calls[0][2].domain).toBeUndefined();
     expect(res.locals.csrfToken).toBe(token);
     expect(next).toHaveBeenCalledOnce();
   });
@@ -45,6 +50,38 @@ describe("CSRF availability contract", () => {
 
     expect(next).toHaveBeenCalledOnce();
     expect(next).toHaveBeenCalledWith();
+  });
+
+
+  it("scopes production subdomain cookies to the KAYAD site and clears legacy host-only tokens", () => {
+    const token = "e".repeat(64);
+    const req = {
+      method: "GET",
+      hostname: "api.kayad.space",
+      cookies: { "XSRF-TOKEN": token },
+      session: undefined,
+    };
+    const res = makeResponse();
+    const next = vi.fn();
+
+    const previous = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      csrfToken(req, res, next);
+    } finally {
+      process.env.NODE_ENV = previous;
+    }
+
+    expect(res.clearCookie).toHaveBeenCalledWith("XSRF-TOKEN", { path: "/" });
+    expect(res.cookie).toHaveBeenCalledTimes(1);
+    expect(res.cookie.mock.calls[0][2]).toMatchObject({
+      domain: ".kayad.space",
+      secure: true,
+      sameSite: "strict",
+      httpOnly: false,
+      path: "/",
+    });
+    expect(next).toHaveBeenCalledOnce();
   });
 
   it("accepts matching double-submit cookie and request token", () => {

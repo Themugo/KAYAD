@@ -12,6 +12,7 @@ const checks = [
   ["CSRF validation is stateless", !/req\.session\?\.csrfToken/.test(csrf) && !/req\.session\.csrfToken/.test(csrf)],
   ["CSRF uses double-submit cookie", /token !== cookieToken/.test(csrf) && /XSRF-TOKEN/.test(csrf)],
   ["CSRF token generation does not persist a session", /const cookieToken = req\.cookies\?\.\["XSRF-TOKEN"\];/.test(csrf) && !/req\.session\.csrfToken = token/.test(csrf)],
+  ["CSRF cookie is shared across production KAYAD subdomains", /endsWith\("\.kayad\.space"\)/.test(csrf) && /domain: cookieDomain/.test(csrf) && /clearCookie\("XSRF-TOKEN"/.test(csrf)],
   ["API system status remains fail-open on control-plane failure", /catch \(err\)[\s\S]*next\(\);/.test(fs.readFileSync(path.join(root, "backend/middleware/systemCheck.js"), "utf8"))],
 ];
 

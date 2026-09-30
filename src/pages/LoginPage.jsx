@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { AuthApiError, resendVerification } from '../services/authApi';
 
 export function LoginPage() {
   const { login, user } = useAuth();
@@ -13,11 +14,14 @@ export function LoginPage() {
   const [form, setForm]       = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [verificationRequired, setVerificationRequired] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
+      setVerificationRequired(false);
       const data = await login(form);
       toast('Welcome back! 🚗', 'success');
       const u = data.user || user;
@@ -28,7 +32,10 @@ export function LoginPage() {
       const dest = role === 'dealer' ? '/dealer' : role === 'admin' || role === 'superadmin' ? '/admin' : from;
       navigate(dest, { replace: true });
     } catch (err) {
-      toast(err.response?.data?.message || 'Invalid credentials', 'error');
+      const message = err instanceof AuthApiError ? err.message : err?.response?.data?.message || 'Unable to sign in. Please try again.';
+      const requiresVerification = err instanceof AuthApiError && err.status === 403 && /verify your email/i.test(err.message);
+      setVerificationRequired(requiresVerification);
+      toast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -46,6 +53,16 @@ export function LoginPage() {
         </div>
 
         <div className="card" style={{ padding: 'var(--space-8)' }}>
+          {verificationRequired && (
+            <div style={{ marginBottom: 'var(--space-5)', padding: '14px 16px', border: '1px solid #f5d48a', borderRadius: 14, background: '#fffbeb' }}>
+              <div style={{ fontWeight: 800, fontSize: 'var(--text-sm)', marginBottom: 6 }}>Email verification required</div>
+              <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', lineHeight: 1.5, marginBottom: 10 }}>Verify your KAYAD email before signing in. If you did not receive the message, request another verification email.</p>
+              <button type="button" disabled={resendingVerification} onClick={async () => { setResendingVerification(true); try { await resendVerification({ email: form.email.trim() }); toast('If the account exists and is unverified, a new verification link has been sent.', 'success'); } catch { toast('Please try again shortly.', 'error'); } finally { setResendingVerification(false); } }} className="btn btn-full" style={{ border: '1px solid #e6c56b', background: '#fff', color: '#7a5a00' }}>
+                {resendingVerification ? 'Sending…' : 'Resend verification email'}
+              </button>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="stack">
             <div className="input-group">
               <label className="input-label">Email</label>

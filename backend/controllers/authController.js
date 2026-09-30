@@ -217,8 +217,21 @@ export const register = async (req, res) => {
       }
     }
 
+    // The frontend uses `buyer` as its display term, while the backend canonical
+    // role is `user`. Normalize it here as a second line of defense even though
+    // the validation schema already canonicalizes the public contract.
     const requestedRole = req.body.role;
     const role = requestedRole === "dealer" || requestedRole === "individual_seller" ? requestedRole : "user";
+    const businessName = String(req.body.businessName || "").trim();
+    const location = String(req.body.location || "").trim();
+
+    if (role === "dealer" && !businessName) {
+      return R.error(res, "Business name is required for dealer registration", 400);
+    }
+    if (role === "dealer" && !location) {
+      return R.error(res, "Location or city is required for dealer registration", 400);
+    }
+
     const status = role === "user" ? "approved" : "pending";
 
     const user = await User.create({
@@ -228,8 +241,8 @@ export const register = async (req, res) => {
       phone: validPhone,
       status,
       emailVerified: false,
-      businessName: role === 'dealer' || role === 'individual_seller' ? String(req.body.businessName || '').trim() : undefined,
-      location: role === 'dealer' || role === 'individual_seller' ? String(req.body.location || '').trim() : undefined,
+      businessName: role === 'dealer' || role === 'individual_seller' ? businessName || undefined : undefined,
+      location: role === 'dealer' || role === 'individual_seller' ? location || undefined : undefined,
       referredBy,
     });
 
@@ -259,8 +272,14 @@ export const register = async (req, res) => {
       throw authErr;
     }
 
+    if (role === "dealer" || role === "individual_seller") {
+      // Seller approval notification is operational telemetry; never make the
+      // customer's account creation depend on an admin notification provider.
+      void notifyAdminsOfPendingSeller(user).catch(() => {});
+    }
+
     try {
-      const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${verifyToken}`;
+      const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
       const verificationDelivery = await deliver({
         userId: user.id || user._id,
         channel: "email",
@@ -317,10 +336,24 @@ export const register = async (req, res) => {
     } catch { /* welcome delivery must not block registration */ }
 
 
-    return sendAuthResponse(res.status(201), user, null, null, userAuth.tokenVersion || 0);
+    try {
+      return await sendAuthResponse(res.status(201), user, null, req, userAuth.tokenVersion || 0);
+    } catch (authResponseErr) {
+      // A registration is not complete until the auth session can be issued.
+      // If refresh-token persistence fails, remove the identity records so a
+      // retry is not blocked by a phantom account.
+      await Promise.allSettled([
+        UserAuth.deleteOne({ _id: userAuth._id }),
+        User.deleteOne({ _id: user._id }),
+      ]);
+      throw authResponseErr;
+    }
   } catch (err) {
     logError("REGISTER ERROR", err);
-    R.error(res, "Registration failed", 500);
+    if (err?.code === 11000) {
+      return R.error(res, "An account with that email already exists", 409);
+    }
+    R.error(res, process.env.NODE_ENV === "production" ? "Registration could not be completed. Please try again." : err.message, 500);
   }
 };
 
@@ -739,7 +772,7 @@ export const resendVerification = async (req, res) => {
     const nextVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
     try {
-      const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${verifyToken}`;
+      const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
       const verificationDelivery = await deliver({
         userId: user.id || user._id,
         channel: "email",

@@ -14,9 +14,11 @@ export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Invalid email address"),
   password: strongPassword,
-  phone: z.string().optional(),
+  phone: z.string().trim().max(40).optional(),
   role: z.enum(["dealer", "individual_seller", "user"]).optional(),
-  referralCode: z.string().optional(),
+  referralCode: z.string().trim().max(64).optional(),
+  businessName: z.string().trim().max(200).optional(),
+  location: z.string().trim().max(200).optional(),
 });
 
 export const loginSchema = z.object({

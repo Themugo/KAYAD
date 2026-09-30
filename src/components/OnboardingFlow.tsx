@@ -56,11 +56,20 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
-        role,
+        // The backend canonical role is `user`; the UI calls that account type `buyer`.
+        role: role === 'buyer' ? 'user' : role,
         ...(form.phone.trim() ? { phone: form.phone.trim() } : {}),
         ...(isSeller && form.businessName.trim() ? { businessName: form.businessName.trim() } : {}),
         ...(isSeller && form.location.trim() ? { location: form.location.trim() } : {}),
       };
+      if (!form.name.trim() || form.name.trim().length < 2) throw new Error('Enter your full name.');
+      if (!form.email.trim()) throw new Error('Enter your email address.');
+      if (!form.password) throw new Error('Create a password.');
+      if (form.password.length < 8 || !/[A-Z]/.test(form.password) || !/[a-z]/.test(form.password) || !/\d/.test(form.password) || !/[^A-Za-z0-9]/.test(form.password)) {
+        throw new Error('Password must be 8+ characters and include uppercase, lowercase, number and special character.');
+      }
+      if (role === 'dealer' && !form.businessName.trim()) throw new Error('Enter your dealership business name.');
+      if (role === 'dealer' && !form.location.trim()) throw new Error('Enter your dealership location or city.');
       const user = await authRegister(registration);
       setComplete({ kind: 'account', user });
       onComplete?.(user);
@@ -75,13 +84,13 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       <div className="min-h-[560px] flex items-center justify-center p-6">
         <div className="w-full max-w-xl text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200"><CheckCircle2 size={34} /></div>
-          <h2 className="text-2xl font-black text-[#0A3340]">{complete.kind === 'application' ? 'Inspector application received' : pending ? 'Application submitted' : 'Welcome to KAYAD'}</h2>
+          <h2 className="text-2xl font-black text-[#0A3340]">{complete.kind === 'application' ? 'Inspector application received' : pending ? 'Dealer application submitted' : 'Welcome to KAYAD'}</h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
             {complete.kind === 'application'
               ? 'Your inspector credentials are now in the KAYAD review queue. The platform will notify you when your application is reviewed.'
               : pending
-                ? 'Your account is created and your seller application is pending verification. You can sign in and track the onboarding status.'
-                : 'Your buyer account is ready. You can now browse vehicles, save listings, compare cars and continue into secure transaction workflows.'}
+                ? `Your account is created, but your email must be verified before you can sign in. ${complete.user?.role === 'dealer' || complete.user?.role === 'individual_seller' ? 'Your seller application is also pending platform verification.' : ''}`
+                : 'Your account is ready. Check your inbox for the KAYAD email verification link before signing in.'}
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <button onClick={onClose} className="rounded-xl bg-[#0A3340] px-5 py-3 text-sm font-bold text-white">Continue to KAYAD</button>
