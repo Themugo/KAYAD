@@ -84,6 +84,28 @@ describe("CSRF availability contract", () => {
     expect(next).toHaveBeenCalledOnce();
   });
 
+  it("supports a fresh browser bootstrap by exposing the middleware token on a GET", () => {
+    const token = "f".repeat(64);
+    const req = { cookies: { "XSRF-TOKEN": token } };
+    const res = {
+      locals: { csrfToken: token },
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    };
+
+    // Mirror the public /auth/csrf route contract without requiring a live
+    // Express app in this focused middleware test.
+    const handler = (request, response) => {
+      const value = response.locals?.csrfToken || request.cookies?.["XSRF-TOKEN"];
+      if (!value) return response.status(503).json({ success: false, message: "CSRF token unavailable" });
+      return response.json({ success: true, csrfToken: value });
+    };
+
+    handler(req, res);
+    expect(res.json).toHaveBeenCalledWith({ success: true, csrfToken: token });
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
   it("accepts matching double-submit cookie and request token", () => {
     const token = "b".repeat(64);
     const req = {

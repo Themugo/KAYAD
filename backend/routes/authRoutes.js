@@ -29,6 +29,18 @@ import { accountLockout } from "../middleware/accountLockout.js";
 
 const router = express.Router();
 
+// Public CSRF bootstrap endpoint. The global csrfToken middleware has already
+// issued/reused the XSRF-TOKEN cookie before auth routes are reached. Returning
+// the token here lets a fresh browser session obtain the double-submit value
+// before its first POST/PUT/PATCH/DELETE request. No session state is created.
+router.get("/csrf", (req, res) => {
+  const token = res.locals?.csrfToken || req.cookies?.["XSRF-TOKEN"];
+  if (!token) {
+    return res.status(503).json({ success: false, message: "CSRF token unavailable" });
+  }
+  return res.json({ success: true, csrfToken: token });
+});
+
 // =============================
 // 🔓 PUBLIC ROUTES
 // =============================

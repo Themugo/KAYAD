@@ -17,8 +17,32 @@ export const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
+let csrfBootstrapPromise: Promise<void> | null = null;
+
+const ensureCsrfToken = async (): Promise<void> => {
+  if (typeof document === 'undefined') return;
+  if (getCsrfHeaders('POST')['X-CSRF-Token']) return;
+
+  if (!csrfBootstrapPromise) {
+    csrfBootstrapPromise = api
+      .get('/auth/csrf', { withCredentials: true })
+      .then(() => undefined)
+      .finally(() => {
+        csrfBootstrapPromise = null;
+      });
+  }
+
+  await csrfBootstrapPromise;
+};
+
+api.interceptors.request.use(async (config) => {
   const method = String(config.method || 'get').toUpperCase();
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    // A brand-new browser has no XSRF cookie yet. Bootstrap it before the
+    // first state-changing request; otherwise the server correctly rejects
+    // registration/login/etc. with "CSRF token validation failed".
+    await ensureCsrfToken();
+  }
   Object.assign(config.headers, getCsrfHeaders(method));
   return config;
 });
