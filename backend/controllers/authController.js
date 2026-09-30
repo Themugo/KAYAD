@@ -202,7 +202,7 @@ export const register = async (req, res) => {
 
     const exists = await User.findOne({ email });
     if (exists) {
-      return R.error(res, "User already exists", 400);
+      return R.error(res, "An account with that email already exists", 409);
     }
 
     const rawPhone = (phone || "").trim();
@@ -300,21 +300,27 @@ export const register = async (req, res) => {
     });
 
     if (referredBy) {
-      const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
-      try {
-        await User.findByIdAndUpdate(referredBy, {
-          $inc: { credits: REFERRAL_BONUS, referralEarnings: REFERRAL_BONUS, referralCount: 1 },
-        });
-        await (await import("../models/Referral.js")).default.create({
-          referrer: referredBy,
-          referee: user._id,
-          status: "credited",
-          bonusAmount: REFERRAL_BONUS,
-          creditedAt: new Date(),
-        });
-      } catch (refErr) {
-        console.warn("Referral credit failed:", refErr.message);
-      }
+      // Referral credit is a post-registration side effect. Never make the
+      // account/session response wait on a second user update plus a referral
+      // record write; a slow referral dependency must not recreate the original
+      // onboarding timeout failure.
+      void (async () => {
+        const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
+        try {
+          await User.findByIdAndUpdate(referredBy, {
+            $inc: { credits: REFERRAL_BONUS, referralEarnings: REFERRAL_BONUS, referralCount: 1 },
+          });
+          await (await import("../models/Referral.js")).default.create({
+            referrer: referredBy,
+            referee: user._id,
+            status: "credited",
+            bonusAmount: REFERRAL_BONUS,
+            creditedAt: new Date(),
+          });
+        } catch (refErr) {
+          console.warn("Referral credit failed:", refErr.message);
+        }
+      })();
     }
 
     // Welcome email is also best-effort and deliberately outside the
@@ -770,32 +776,38 @@ export const resendVerification = async (req, res) => {
     const nextVerifyTokenHash = hashToken(verifyToken);
     const nextVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
-    try {
-      const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
-      const verificationDelivery = await deliver({
-        userId: user.id || user._id,
-        channel: "email",
-        eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
-        templateCode: "account_verification_email",
-        recipient: user.email,
-        subject: "Verify Your Email — KAYAD",
-        text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
-        html: `<p>Hi ${user.name || "there"},</p><p>Your new KAYAD verification link is ready.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
-        metadata: { verification: true, resend: true },
-      });
-      if (requiresEmailVerification()) assertEmailDeliverySucceeded(verificationDelivery, "Verification");
+    // Resend is also an onboarding-critical path. Do not hold the browser request
+    // open while Brevo performs network delivery. The old persisted token remains
+    // valid until provider acceptance of this replacement, so a failed or killed
+    // delivery cannot strand the account.
+    void (async () => {
+      try {
+        const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
+        const verificationDelivery = await deliver({
+          userId: user.id || user._id,
+          channel: "email",
+          eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
+          templateCode: "account_verification_email",
+          recipient: user.email,
+          subject: "Verify Your Email — KAYAD",
+          text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
+          html: `<p>Hi ${user.name || "there"},</p><p>Your new KAYAD verification link is ready.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
+          metadata: { verification: true, resend: true },
+        });
+        if (requiresEmailVerification()) assertEmailDeliverySucceeded(verificationDelivery, "Verification");
 
-      // Provider acceptance is the commit point for the replacement token.
-      userAuth.emailVerifyToken = nextVerifyTokenHash;
-      userAuth.emailVerifyExpire = nextVerifyExpire;
-      await userAuth.save();
-    } catch (e) {
-      console.warn("⚠️ Verification email failed:", e.message);
-      // The persisted token was never changed, so the previous verification link
-      // remains valid. The response remains generic to prevent account enumeration.
-    }
+        // Provider acceptance is the commit point for the replacement token.
+        userAuth.emailVerifyToken = nextVerifyTokenHash;
+        userAuth.emailVerifyExpire = nextVerifyExpire;
+        await userAuth.save();
+      } catch (e) {
+        console.warn("⚠️ Verification email failed:", e.message);
+        // The persisted token was never changed, so the previous verification link
+        // remains valid. The response remains generic to prevent account enumeration.
+      }
+    })();
 
-    res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
+    return res.status(202).json({ success: true, message: "If that email exists and is unverified, a verification email is being sent." });
   } catch (err) {
     R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }

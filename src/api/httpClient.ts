@@ -1,10 +1,16 @@
 import axios from 'axios';
-import { getCsrfHeaders } from '../utils/csrf';
+import { getCSRFToken, getCsrfHeaders, setCSRFToken } from '../utils/csrf';
 
 const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 // Keep the established `/api` same-origin fallback for service prefixes while
 // accepting either an API origin or an origin that already ends in `/api`.
 const API_URL = configuredApiUrl ? configuredApiUrl.replace(/\/api$/, '') : '/api';
+
+// Auth routes are mounted under /api/v1 on the canonical backend. When the
+// frontend is configured with a direct backend origin (production/staging),
+// include that /api prefix explicitly; when same-origin Vite uses /api as the
+// baseURL, keep the request relative to that base.
+const CSRF_BOOTSTRAP_PATH = '/api/v1/auth/csrf';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -21,12 +27,23 @@ let csrfBootstrapPromise: Promise<void> | null = null;
 
 const ensureCsrfToken = async (): Promise<void> => {
   if (typeof document === 'undefined') return;
-  if (getCsrfHeaders('POST')['X-CSRF-Token']) return;
+  if (getCSRFToken()) return;
 
   if (!csrfBootstrapPromise) {
     csrfBootstrapPromise = api
-      .get('/auth/csrf', { withCredentials: true })
-      .then(() => undefined)
+      .get(CSRF_BOOTSTRAP_PATH, { withCredentials: true })
+      .then((response) => {
+        const token = response?.data?.csrfToken;
+        if (typeof token === 'string' && token.length >= 32) {
+          // Keep a memory copy as well as the readable cookie. This matters
+          // when the API is on api.kayad.space and the UI is on a separate
+          // KAYAD subdomain, or when a browser privacy mode hides a cookie
+          // from document.cookie even though it is still sent to the API.
+          setCSRFToken(token);
+          return;
+        }
+        throw new Error('CSRF bootstrap did not return a valid token');
+      })
       .finally(() => {
         csrfBootstrapPromise = null;
       });

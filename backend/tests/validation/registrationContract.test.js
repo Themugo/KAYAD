@@ -48,6 +48,27 @@ describe("registration contract", () => {
     expect(result.success).toBe(false);
   });
 
+
+  it("normalizes all public self-registration account categories to canonical backend roles", () => {
+    for (const role of ["user", "dealer", "individual_seller"]) {
+      const result = registerSchema.safeParse({ ...base, role });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it("keeps dealer registration fields required at the onboarding surface", () => {
+    const source = fs.readFileSync(new URL("../../../src/components/OnboardingFlow.tsx", import.meta.url), "utf8");
+    expect(source).toMatch(/role === 'dealer' && !form\.businessName\.trim\(\)/);
+    expect(source).toMatch(/role === 'dealer' && !form\.location\.trim\(\)/);
+  });
+
+  it("does not block resend verification on external email delivery", () => {
+    const source = fs.readFileSync(new URL("../../controllers/authController.js", import.meta.url), "utf8");
+    const resend = source.slice(source.indexOf('export const resendVerification'), source.indexOf('// ============================================================\n// POST /api/auth/forgot-password'));
+    expect(resend).toMatch(/void \(async \(\) => \{/);
+    expect(resend).toMatch(/status\(202\)\.json/);
+    expect(resend).not.toMatch(/const verificationDelivery = await deliver/);
+  });
   it("keeps auth route rate limiting at the mount boundary only", () => {
     const routes = fs.readFileSync(new URL("../../routes/authRoutes.js", import.meta.url), "utf8");
     expect(routes).not.toMatch(/router\.post\("\/register",\s*authLimiter/);
