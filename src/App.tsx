@@ -21,7 +21,7 @@ import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Views
 // Heavy authenticated/admin surfaces are loaded on demand. This keeps the
@@ -577,7 +577,8 @@ function AppInner() {
 }
 
 function AuthRouteSurface() {
-  const path = window.location.pathname;
+  const location = useLocation();
+  const path = location.pathname;
   if (path === '/login') return <LoginPage />;
   if (path === '/register') return <OnboardingFlow onClose={() => { window.location.href = '/'; }} />;
   if (path === '/forgot-password') return <ForgotPasswordPage />;
@@ -587,7 +588,8 @@ function AuthRouteSurface() {
 }
 
 export function App() {
-  if (window.location.pathname === '/verify-email') return <VerifyEmailPage />;
+  const location = useLocation();
+  if (location.pathname === '/verify-email') return <VerifyEmailPage />;
   return (
     <AuthProvider>
       <SocketProvider>

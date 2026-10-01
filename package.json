@@ -91,7 +91,9 @@
     "validate:deployment-runtime-drift": "node scripts/validate-deployment-runtime-drift.mjs",
     "validate:private-upload-cache": "node scripts/validate-private-upload-cache.mjs",
     "validate:explicit-auth-flows": "node scripts/validate-explicit-auth-flows.mjs",
-    "validate:premium-auth-surfaces": "node scripts/validate-premium-auth-surfaces.mjs"
+    "validate:premium-auth-surfaces": "node scripts/validate-premium-auth-surfaces.mjs",
+    "validate:registration-role-matrix": "node scripts/validate-registration-role-matrix.mjs",
+    "validate:premium-presentation-pass": "node scripts/validate-premium-presentation-pass.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

@@ -37,8 +37,8 @@ describe('LoginPage', () => {
         </AuthProvider>
       </MemoryRouter>
     );
-    expect(screen.getByText('Welcome Back')).toBeInTheDocument();
-    expect(screen.getByText(/Sign in to your KAYAD account/i)).toBeInTheDocument();
+    expect(screen.getByText('Welcome back.')).toBeInTheDocument();
+    expect(screen.getByText(/Sign in to your KAYAD account and continue/i)).toBeInTheDocument();
   });
 
   it('has email and password fields', () => {
@@ -50,7 +50,7 @@ describe('LoginPage', () => {
       </MemoryRouter>
     );
     expect(screen.getByPlaceholderText('you@example.com')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument();
   });
 
   it('has sign in button', () => {
@@ -61,7 +61,7 @@ describe('LoginPage', () => {
         </AuthProvider>
       </MemoryRouter>
     );
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /continue to KAYAD/i })).toBeInTheDocument();
   });
 
   it('has register link', () => {
@@ -72,6 +72,6 @@ describe('LoginPage', () => {
         </AuthProvider>
       </MemoryRouter>
     );
-    expect(screen.getByText(/join free/i)).toBeInTheDocument();
+    expect(screen.getByText(/Create your KAYAD account/i)).toBeInTheDocument();
   });
 });

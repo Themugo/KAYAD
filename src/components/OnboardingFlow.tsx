@@ -104,13 +104,15 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       <div className="kayad-register-complete">
         <div className="w-full max-w-xl text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200"><CheckCircle2 size={34} /></div>
-          <h2 className="text-2xl font-black text-[#0A3340]">{complete.kind === 'application' ? 'Inspector application received' : pending ? 'Dealer application submitted' : 'Welcome to KAYAD'}</h2>
+          <h2 className="text-2xl font-black text-[#0A3340]">{complete.kind === 'application' ? 'Inspector application received' : role === 'dealer' ? 'Dealer application submitted' : role === 'individual_seller' ? 'Private seller account created' : 'Welcome to KAYAD'}</h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
             {complete.kind === 'application'
               ? 'Your inspector credentials are now in the KAYAD review queue. The platform will notify you when your application is reviewed.'
-              : pending
-                ? `Your account is created, but your email must be verified before you can sign in. ${complete.user?.role === 'dealer' || complete.user?.role === 'individual_seller' ? 'Your seller application is also pending platform verification.' : ''}`
-                : 'Your account is ready. Check your inbox for the KAYAD email verification link before signing in.'}
+              : role === 'dealer'
+                ? 'Your dealer account is created. Verify your email, then sign in; dealer verification remains a platform-controlled approval step.'
+                : role === 'individual_seller'
+                  ? 'Your private seller account is created. Verify your email, then sign in to continue with your vehicle listing journey.'
+                  : 'Your buyer account is ready. Check your inbox for the KAYAD email verification link before signing in.'}
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link to="/login" className="rounded-xl bg-[#0A3340] px-5 py-3 text-sm font-bold text-white">Go to Sign In</Link>

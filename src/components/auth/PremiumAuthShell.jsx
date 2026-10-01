@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, BadgeCheck, CarFront, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BadgeCheck, CarFront, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function PremiumAuthShell({
   mode = 'signin',
@@ -20,7 +20,7 @@ export default function PremiumAuthShell({
       <header className="kayad-auth-header">
         <Link to="/" className="kayad-auth-brand" aria-label="KAYAD home">
           <span className="kayad-auth-brand-mark"><CarFront size={19} strokeWidth={2.4} /></span>
-          <span>KAYAD</span>
+          <span className="kayad-auth-brand-copy"><strong>KAYAD</strong><small>Kenya’s trusted vehicle marketplace</small></span>
         </Link>
         <div className="kayad-auth-header-action">
           <span>{isRegister ? 'Already have an account?' : 'New to KAYAD?'}</span>
@@ -50,8 +50,11 @@ export default function PremiumAuthShell({
           <div className="kayad-auth-ad-art" aria-hidden="true">
             <div className="kayad-auth-ad-glow" />
             <div className="kayad-auth-ad-grid" />
-            <div className="kayad-auth-car-silhouette"><CarFront size={150} strokeWidth={0.75} /></div>
-            <div className="kayad-auth-ad-badge"><BadgeCheck size={15} /> Premium inventory</div>
+            <div className="kayad-auth-ad-road" />
+            <div className="kayad-auth-ad-car">
+              <img src="/hero/kayad-prado.png" alt="" />
+            </div>
+            <div className="kayad-auth-ad-badge"><BadgeCheck size={15} /> KAYAD Select</div>
           </div>
           <div className="kayad-auth-ad-copy">
             <span className="kayad-auth-ad-kicker">Advertise where intent is high</span>
@@ -60,7 +63,7 @@ export default function PremiumAuthShell({
           </div>
           <div className="kayad-auth-ad-footer">
             <div><ShieldCheck size={15} /> Secure, contextual placements</div>
-            <Link to="/" className="kayad-auth-ad-link">Explore KAYAD <ArrowUpRight size={15} /></Link>
+            <Link to="/" className="kayad-auth-ad-link">Explore KAYAD <ArrowRight size={15} /></Link>
           </div>
         </aside>
       </section>

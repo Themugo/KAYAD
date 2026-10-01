@@ -84,11 +84,17 @@ router.get("/csrf", (req, res) => {
  *                 description: User's password (min 8 characters)
  *               role:
  *                 type: string
- *                 enum: [user, dealer]
+ *                 enum: [user, individual_seller, dealer]
  *                 description: User role
  *               phone:
  *                 type: string
  *                 description: User's phone number
+ *               businessName:
+ *                 type: string
+ *                 description: Business or trading name for seller accounts
+ *               location:
+ *                 type: string
+ *                 description: Seller/dealer location or city
  *     responses:
  *       201:
  *         description: User registered successfully

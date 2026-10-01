@@ -5,7 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { AuthApiError, resendVerification } from '../services/authApi';
 import { getPostAuthPath } from '../utils/authRoutes';
 import PremiumAuthShell from '../components/auth/PremiumAuthShell';
-import { BadgeCheck, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BadgeCheck, ShieldCheck } from 'lucide-react';
 
 export function LoginPage() {
   const { login, user, loading: authLoading } = useAuth();
@@ -125,7 +125,7 @@ export function LoginPage() {
         </div>
 
         <button className="kayad-auth-submit" type="submit" disabled={loading}>
-          {loading ? <><span className="kayad-auth-spinner" /> Signing in…</> : 'Sign In to KAYAD'}
+          {loading ? <><span className="kayad-auth-spinner" /> Signing in…</> : <>Continue to KAYAD <ArrowRight size={16} /></>}
         </button>
       </form>
 
