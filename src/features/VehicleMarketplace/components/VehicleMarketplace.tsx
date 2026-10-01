@@ -586,14 +586,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE';
   const heroHeadline = activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today';
   const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';
-  const KICC_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
+  const KENYA_ROAD_HERO_BACKGROUND = 'https://p2.piqsels.com/preview/841/874/518/nairobi-traffic-kenya-cars.jpg';
   const heroBackgroundStyle: React.CSSProperties = activeHeroSlide?.backgroundType === 'image' && activeHeroSlide.backgroundValue
     ? { backgroundImage: `url(\"${activeHeroSlide.backgroundValue}\")`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : activeHeroSlide?.backgroundType === 'color' && activeHeroSlide.backgroundValue
       ? { backgroundColor: activeHeroSlide.backgroundValue }
       : activeHeroSlide?.backgroundType === 'gradient' && activeHeroSlide.backgroundValue
         ? { backgroundImage: activeHeroSlide.backgroundValue }
-        : { backgroundImage: `url(\"${KICC_HERO_BACKGROUND}\")`, backgroundSize: 'cover', backgroundPosition: 'center center' };
+        : { backgroundImage: `url(\"${KENYA_ROAD_HERO_BACKGROUND}\")`, backgroundSize: 'cover', backgroundPosition: 'center center' };
 
   // Vehicle artwork always comes from the vehicle record/configuration.
   // No vehicle-specific asset mapping lives in the hero component.
@@ -748,111 +748,137 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           sort, pagination, saved/compare, admin config) - only the visual
           layer changed, not the data or behavior. */}
 
-      {/* 1. HERO - continuous editorial hero: one Nairobi/KICC canvas with transparent vehicle artwork. */}
+      {/* 1. HERO - premium editorial road scene using the existing real featured vehicles. */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#2B6472] bg-[#123746] text-white">
+        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#2B6472] bg-[#0A3340] text-white">
           <div className="absolute inset-0 bg-cover bg-center" style={heroBackgroundStyle} aria-hidden="true" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,43,57,.46)_0%,rgba(10,43,57,.08)_28%,rgba(255,255,255,.02)_50%,rgba(10,43,57,.08)_72%,rgba(10,43,57,.46)_100%)]" aria-hidden="true" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(7,20,38,.56),transparent_34%)]" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,27,38,.96)_0%,rgba(5,27,38,.82)_27%,rgba(5,27,38,.34)_51%,rgba(5,27,38,.08)_76%,rgba(5,27,38,.24)_100%)]" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_56%,rgba(19,184,166,.16),transparent_28%),linear-gradient(to_top,rgba(4,22,31,.82),transparent_54%)]" aria-hidden="true" />
+          <div className="absolute bottom-0 left-[45%] right-0 h-32 bg-[linear-gradient(to_top,rgba(3,19,27,.48),transparent)]" aria-hidden="true" />
           {activeHeroSlide && (
             <div
               className="absolute inset-0"
-              style={{ backgroundColor: activeHeroSlide.overlayColor || '#0A3340', opacity: Math.max(0, Math.min(100, activeHeroSlide.overlayOpacity ?? 14)) / 100 }}
+              style={{ backgroundColor: activeHeroSlide.overlayColor || '#0A3340', opacity: Math.max(0, Math.min(100, activeHeroSlide.overlayOpacity ?? 8)) / 100 }}
               aria-hidden="true"
             />
           )}
 
           <div className="relative mx-auto h-[390px] w-full max-w-[1680px] px-4 sm:h-[420px] sm:px-8 lg:px-10">
             <div className="relative h-full">
-              {/* Left vehicle artwork */}
-              <div className="absolute inset-y-0 left-0 z-10 hidden w-[31%] min-w-[250px] lg:block">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/4 sm:-translate-x-1/8 lg:translate-x-0">
-                  <button type="button" onClick={() => heroLeftVehicle && handleVehicleSelect(heroLeftVehicle)} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6CC8BE]" aria-label={heroLeftVehicle ? `View ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : 'Featured vehicle'}>
-                    <div className="relative h-[300px] w-[500px] max-w-none sm:h-[330px] sm:w-[560px] lg:h-[360px] lg:w-[600px]" aria-live="polite">
-                      {heroPreviousLeftVehicle && heroImageForVehicle(heroPreviousLeftVehicle) && (
-                        <img
-                          src={heroImageForVehicle(heroPreviousLeftVehicle)}
-                          alt=""
-                          aria-hidden="true"
-                          className={`absolute inset-0 h-full w-full object-contain object-center will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
-                          loading="eager"
-                          decoding="async"
-                        />
-                      )}
-                      {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
-                        <img
-                          src={heroImageForVehicle(heroLeftVehicle)}
-                          alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
-                          className={`absolute inset-0 h-full w-full object-contain object-center will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
-                          loading="eager"
-                          decoding="async"
-                        />
-                      )}
-                    </div>
-                  </button>
+              {/* Existing editorial copy — same messaging/actions, cleaner visual hierarchy. */}
+              <div className="absolute inset-y-0 left-0 z-20 flex w-full max-w-[690px] flex-col justify-center pr-4 text-left sm:pr-8 lg:w-[55%] lg:pr-12">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-[#0A3340]/65 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-[#BDF5EE] shadow-lg backdrop-blur-md sm:text-[10px]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6] shadow-[0_0_10px_#13B8A6]" />
+                  {heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'PREMIUM VEHICLES · REAL OPPORTUNITIES' : heroEyebrow}
+                </span>
+                <div className="mb-1 flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] text-white/55 sm:text-[9px]">
+                  <span className="h-px w-7 bg-[#49D5C6]/80" />
+                  <span>Move with confidence</span>
                 </div>
-                <div className="absolute left-0 top-14 w-[170px] text-left sm:w-[205px]">
-                  <span className="inline-flex rounded-full border border-white/25 bg-[#176B87]/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white shadow-lg">Featured</span>
-                  <h2 className="mt-2 font-display text-lg font-black leading-tight text-white sm:text-xl">{heroLeftVehicle ? `${heroLeftVehicle.make} ${heroLeftVehicle.model}` : 'Featured vehicle'}</h2>
-                  <p className="mt-1 text-[11px] leading-4 text-white/90">{heroVehicleNarration(heroLeftVehicle) || 'Verified marketplace vehicle'}</p>
-                  <div className="mt-2 space-y-1 text-[10px] font-semibold text-white/90">{heroVehicleDetails(heroLeftVehicle).slice(0,3).map((detail) => <div key={detail}>{detail}</div>)}</div>
-                  {heroLeftVehicle && <button onClick={() => handleVehicleSelect(heroLeftVehicle)} className="mt-3 inline-flex rounded-full border border-white/50 bg-[#176B87]/90 px-4 py-2 text-[10px] font-extrabold text-white shadow-lg transition hover:bg-[#12576D]">View Details <ChevronRight className="ml-1 h-3.5 w-3.5" /></button>}
-                </div>
-              </div>
-
-              {/* Center editorial copy */}
-              <div className="absolute inset-x-0 top-0 z-20 flex h-full flex-col items-center justify-center text-center lg:inset-x-[24%]">
-                <span className="text-[9px] font-black uppercase tracking-[0.28em] text-[#E6FFFB] sm:text-[10px]">{heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'PREMIUM VEHICLES. REAL OPPORTUNITIES.' : heroEyebrow}</span>
-                <h1 className="mt-3 max-w-[620px] font-display text-[clamp(2.45rem,5vw,4.1rem)] font-black leading-[.92] tracking-[-0.055em] text-[#0A3340] drop-shadow-[0_2px_12px_rgba(255,255,255,.32)]">
-                  <span className="block">{heroHeadline.includes('Dream Today') ? 'Drive Your' : heroHeadline}</span>
-                  {heroHeadline.includes('Dream Today') && <span className="block text-[#176B87]">Dream Today</span>}
+                <h1 className="mt-3 max-w-[620px] font-display text-[clamp(2.25rem,5vw,4rem)] font-black leading-[.94] tracking-[-0.055em] text-white drop-shadow-[0_7px_24px_rgba(0,0,0,.42)]">
+                  {heroHeadline.includes('Dream Today') ? (
+                    <>
+                      <span className="block">Drive Your</span>
+                      <span className="block text-[#49D5C6]">Dream Today</span>
+                    </>
+                  ) : heroHeadline}
                 </h1>
-                <p className="mt-4 max-w-[520px] text-[13px] font-medium leading-5 text-[#0A3340] sm:text-sm">{heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.' ? <>Explore verified vehicles across East Africa.<br />Buy, sell, auction or get financed — all in one place.</> : heroSubheadline}</p>
-                <div className="mt-5 flex items-center gap-2.5">
-                  <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center rounded-full bg-[#176B87] px-6 py-3 text-xs font-black text-white shadow-[0_12px_28px_rgba(23,107,135,.28)] transition hover:bg-[#12576D]">Browse Inventory <ChevronRight className="ml-1 h-4 w-4" /></button>
-                  <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')} className="inline-flex items-center rounded-full border border-[#0A3340]/45 bg-white/10 px-6 py-3 text-xs font-black text-[#0A3340] backdrop-blur-sm transition hover:bg-white/25">How It Works <span className="ml-2 text-sm">▶</span></button>
-                </div>
-                {heroSourceVehicles.length > 2 && <div className="mt-6 flex items-center gap-2" aria-label="Featured vehicle slides">{Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-2 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#176B87]' : 'w-2 bg-white/80'}`} />)}</div>}
-              </div>
+                <p className="mt-4 max-w-[560px] text-[12px] font-medium leading-5 text-white/80 sm:text-sm">
+                  {heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.'
+                    ? <>Explore verified vehicles across East Africa. Buy, sell, auction or get financed — all in one place.</>
+                    : heroSubheadline}
+                </p>
 
-              {/* Right vehicle artwork */}
-              <div className="absolute inset-y-0 right-0 z-10 hidden w-[31%] min-w-[250px] lg:block">
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 sm:translate-x-1/8 lg:translate-x-0">
-                  <button type="button" onClick={() => heroRightVehicle && handleVehicleSelect(heroRightVehicle)} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6CC8BE]" aria-label={heroRightVehicle ? `View ${heroRightVehicle.make} ${heroRightVehicle.model}` : 'Featured vehicle'}>
-                    <div className="relative h-[300px] w-[500px] max-w-none sm:h-[330px] sm:w-[560px] lg:h-[360px] lg:w-[600px]">
-                      {heroPreviousRightVehicle && heroImageForVehicle(heroPreviousRightVehicle) && (
-                        <img
-                          src={heroImageForVehicle(heroPreviousRightVehicle)}
-                          alt=""
-                          aria-hidden="true"
-                          className={`absolute inset-0 h-full w-full object-contain object-center will-change-[opacity,transform] transition-opacity duration-700 ease-out ${heroTransitioning ? 'opacity-100' : 'opacity-0'}`}
-                          loading="eager"
-                          decoding="async"
-                        />
-                      )}
-                      {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
-                        <img
-                          src={heroImageForVehicle(heroRightVehicle)}
-                          alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`}
-                          className={`absolute inset-0 h-full w-full object-contain object-center will-change-[opacity,transform] transition-[opacity,transform] duration-700 ease-out ${heroIncomingVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[.985]'}`}
-                          loading="eager"
-                          decoding="async"
-                        />
-                      )}
+                <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                  <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center rounded-full bg-[#13B8A6] px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.25)] transition hover:bg-[#49D5C6]">Browse Inventory <ChevronRight className="ml-1 h-4 w-4" /></button>
+                  <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')} className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-6 py-3 text-xs font-black text-white backdrop-blur-md transition hover:bg-white/20">How It Works <span className="ml-2 text-sm">▶</span></button>
+                </div>
+
+                <div className="mt-5 grid max-w-[600px] grid-cols-2 gap-x-5 gap-y-2.5 sm:grid-cols-4">
+                  {[
+                    ['Verified Listings', 'Quality vehicles'],
+                    ['Trusted Dealers', 'Verified & rated'],
+                    ['Live Auctions', 'Transparent bidding'],
+                    ['Professional Inspections', 'Buy with confidence'],
+                  ].map(([title, sub]) => (
+                    <div key={title} className="border-l border-white/20 pl-2.5">
+                      <div className="text-[9px] font-black uppercase tracking-[0.08em] text-white sm:text-[10px]">{title}</div>
+                      <div className="mt-0.5 text-[8px] text-white/55 sm:text-[9px]">{sub}</div>
                     </div>
-                  </button>
-                </div>
-                <div className="absolute right-0 top-14 w-[170px] text-right sm:w-[205px]">
-                  <span className="inline-flex rounded-full border border-white/25 bg-[#176B87]/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white shadow-lg">Featured</span>
-                  <h2 className="mt-2 font-display text-lg font-black leading-tight text-white sm:text-xl">{heroRightVehicle ? `${heroRightVehicle.make} ${heroRightVehicle.model}` : 'Featured vehicle'}</h2>
-                  <p className="mt-1 text-[11px] leading-4 text-white/90">{heroVehicleNarration(heroRightVehicle) || 'Verified marketplace vehicle'}</p>
-                  <div className="mt-2 space-y-1 text-[10px] font-semibold text-white/90">{heroVehicleDetails(heroRightVehicle).slice(0,3).map((detail) => <div key={detail}>{detail}</div>)}</div>
-                  {heroRightVehicle && <button onClick={() => handleVehicleSelect(heroRightVehicle)} className="mt-3 inline-flex rounded-full border border-white/50 bg-[#176B87]/90 px-4 py-2 text-[10px] font-extrabold text-white shadow-lg transition hover:bg-[#12576D]">View Details <ChevronRight className="ml-1 h-3.5 w-3.5" /></button>}
+                  ))}
                 </div>
               </div>
 
-              <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/40 bg-[#0A3340]/65 p-3 text-white backdrop-blur-sm transition hover:bg-[#176B87]" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>
-              <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/40 bg-[#0A3340]/65 p-3 text-white backdrop-blur-sm transition hover:bg-[#176B87]" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>
+              {/* Real featured inventory: presented as premium photography cards rather than floating cutouts. */}
+              <div className="absolute right-0 top-1/2 z-20 hidden w-[53%] -translate-y-1/2 lg:block">
+                <div className="absolute -inset-x-5 -inset-y-7 rounded-[34px] border border-white/10 bg-[#071F2A]/12 shadow-[0_30px_100px_rgba(0,0,0,.18)] backdrop-blur-[2px]" aria-hidden="true" />
+                <div className="absolute bottom-[-10px] left-[9%] right-[3%] h-10 rounded-[50%] bg-[#13B8A6]/10 blur-2xl" aria-hidden="true" />
+                <div className="relative ml-auto flex w-full max-w-[760px] items-end justify-end gap-3 pr-1">
+                  {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
+                    <button
+                      type="button"
+                      onClick={() => handleVehicleSelect(heroRightVehicle)}
+                      className="group relative hidden w-[205px] overflow-hidden rounded-[20px] border border-white/25 bg-[#071F2A]/88 text-left shadow-[0_24px_60px_rgba(0,0,0,.42)] backdrop-blur-md transition duration-500 hover:-translate-y-1 hover:border-white/40 xl:block"
+                      aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
+                    >
+                      <div className="h-[188px] overflow-hidden bg-[#102F39]">
+                        <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="eager" decoding="async" />
+                      </div>
+                      <div className="border-t border-white/10 bg-[#071F2A]/90 p-3.5">
+                        <div className="text-[8px] font-black uppercase tracking-[0.16em] text-[#49D5C6]">Featured vehicle</div>
+                        <div className="mt-1 line-clamp-1 text-xs font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}</div>
+                        <div className="mt-1 text-[9px] text-white/55">{heroVehicleNarration(heroRightVehicle) || 'Verified marketplace vehicle'}</div>
+                      </div>
+                    </button>
+                  )}
+
+                  {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
+                    <button
+                      type="button"
+                      onClick={() => handleVehicleSelect(heroLeftVehicle)}
+                      className="group relative w-[310px] overflow-hidden rounded-[24px] border border-white/30 bg-[#071F2A]/78 text-left shadow-[0_30px_85px_rgba(0,0,0,.48)] backdrop-blur-md transition duration-500 hover:-translate-y-1 hover:border-[#49D5C6]/60 sm:w-[350px] xl:w-[390px]"
+                      aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
+                    >
+                      <div className="absolute left-3 top-3 z-10 rounded-full border border-white/20 bg-[#0A3340]/75 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-[#BDF5EE] backdrop-blur-md">Featured</div>
+                      <div className="h-[238px] overflow-hidden bg-[#102F39] sm:h-[264px] xl:h-[276px]">
+                        <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" loading="eager" decoding="async" />
+                      </div>
+                      <div className="border-t border-white/15 bg-[linear-gradient(180deg,rgba(7,31,42,.96),rgba(4,22,31,.98))] p-3.5 sm:p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-[9px] font-black uppercase tracking-[0.16em] text-[#49D5C6]">KAYAD Featured</div>
+                            <h2 className="mt-1 truncate font-display text-base font-black text-white sm:text-lg">{heroLeftVehicle.make} {heroLeftVehicle.model}</h2>
+                            <p className="mt-1 truncate text-[9px] text-white/60">{heroVehicleNarration(heroLeftVehicle) || 'Verified marketplace vehicle'}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <div className="text-[8px] font-black uppercase tracking-[0.12em] text-white/40">From</div>
+                            <div className="mt-0.5 text-sm font-black text-[#BDF5EE]">{heroLeftVehicle.price > 0 ? formatPriceM(heroLeftVehicle.price) : 'View listing'}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* On smaller screens the same real featured vehicle becomes a compact bottom card. */}
+              {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
+                <button type="button" onClick={() => handleVehicleSelect(heroLeftVehicle)} className="absolute bottom-4 right-3 z-20 flex w-[185px] items-center gap-2 rounded-xl border border-white/20 bg-[#071F2A]/85 p-2 text-left shadow-xl backdrop-blur-md lg:hidden" aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}>
+                  <img src={heroImageForVehicle(heroLeftVehicle)} alt="" className="h-12 w-16 rounded-lg object-cover" loading="eager" decoding="async" />
+                  <span className="min-w-0"><span className="block truncate text-[9px] font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</span><span className="mt-0.5 block text-[8px] text-[#49D5C6]">Featured on KAYAD</span></span>
+                </button>
+              )}
+
+              <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:left-2 sm:p-3" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>
+              <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:right-2 sm:p-3" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>
+
+              {heroSourceVehicles.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/15 bg-[#071F2A]/65 px-3 py-1.5 backdrop-blur-md" aria-label="Featured vehicle slides">
+                  {Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => (
+                    <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#13B8A6]' : 'w-1.5 bg-white/45 hover:bg-white/80'}`} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>

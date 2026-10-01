@@ -72,7 +72,7 @@ npm audit
 npm audit fix
 ```
 
-7. Use `REQUIRE_EMAIL_VERIFICATION=true` once Brevo transactional email is configured
+7. Use `REQUIRE_EMAIL_VERIFICATION=true` once SMTP is configured
 
 ```env
 REQUIRE_EMAIL_VERIFICATION=true

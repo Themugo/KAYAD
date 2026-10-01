@@ -19,6 +19,9 @@ assert('standalone registration route exists', /if \(path === '\/register'\) ret
 assert('navbar Sign In navigates to /login', /handleAuthNavigation\('\/login'\)/.test(navbar));
 assert('navbar Create Account navigates to /register', /handleAuthNavigation\('\/register'\)/.test(navbar));
 assert('navbar Sign In does not directly open auth modal', !/onClick=\{onOpenAuth\}[\s\S]{0,300}Sign In/.test(navbar));
+assert('app shell has no rendered authentication modal', !/<AuthModal[\s\S]*?isOpen=/.test(app));
+assert('app shell routes all auth prompts to standalone login', (app.match(/onOpenAuth=\{handleOpenAuth\}/g) || []).length >= 8);
+assert('app shell preserves current path as login return context', /state: \{ from: \{ pathname: window\.location\.pathname \} \}/.test(app));
 assert('compatibility auth modal is sign-in only', !/mode.*register|setMode\(/.test(modal));
 assert('auth modal links to registration route', /to="\/register"/.test(modal));
 assert('auth modal links to password recovery', /to="\/forgot-password"/.test(modal));

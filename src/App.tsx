@@ -4,7 +4,6 @@ import VehicleMarketplace from './features/VehicleMarketplace';
 import TopNoticeStrip from './components/TopNoticeStrip';
 import VehicleDetailModal from './components/VehicleDetailModal';
 import CompareModal from './components/CompareModal';
-import AuthModal from './components/AuthModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 import DashboardHub from './components/DashboardHub';
 import VerifyEmailPage from './pages/VerifyEmailPage';
@@ -22,6 +21,7 @@ import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
+import { useNavigate } from 'react-router-dom';
 
 // Views
 // Heavy authenticated/admin surfaces are loaded on demand. This keeps the
@@ -72,6 +72,12 @@ function AppInner() {
   // provide, except isVerified (backend has no such field - mapped
   // from the real, existing emailVerified boolean).
   const { user: authUser, logout: authLogout, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const handleOpenAuth = useCallback(() => {
+    navigate('/login', {
+      state: { from: { pathname: window.location.pathname } },
+    });
+  }, [navigate]);
   const user: UserProfile | null = useMemo(() => {
     if (!authUser) return null;
     const id = authUser.id || authUser._id;
@@ -132,7 +138,6 @@ function AppInner() {
   const [invalidVehicleId, setInvalidVehicleId] = useState<string | null>(null);
   const resolvedVehicleIds = React.useRef(new Set<string>());
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
-  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
   const [selectedChatVehicle, setSelectedChatVehicle] = useState<Vehicle | null>(null);
 
@@ -327,7 +332,7 @@ function AppInner() {
         onNavClick={(nav) => setActiveNav(nav)}
         selectedCounty={selectedCounty}
         onCountyChange={(c) => setSelectedCounty(c)}
-        onOpenAuth={() => setShowAuthModal(true)}
+        onOpenAuth={handleOpenAuth}
         onOpenAlerts={() => setShowAlertsModal(true)}
         onLogout={() => { authLogout(); }}
       />
@@ -365,7 +370,7 @@ function AppInner() {
               onSearchChange={(q) => setSearchQuery(q)}
               onOpenCompareModal={() => setShowCompareModal(true)}
               onNavigate={(nav) => setActiveNav(nav)}
-              onOpenAuth={() => setShowAuthModal(true)}
+              onOpenAuth={handleOpenAuth}
               isLoadingReal={vehiclesLoading}
               loadError={vehiclesError}
               onRetryLoad={fetchVehicles}
@@ -376,7 +381,7 @@ function AppInner() {
             <AuctionsView
               vehicles={vehicles}
               user={user}
-              onOpenAuth={() => setShowAuthModal(true)}
+              onOpenAuth={handleOpenAuth}
               onStartEscrow={handleStartEscrow}
               onQuickViewVehicle={handleOpenVehicleDetails}
             />
@@ -387,7 +392,7 @@ function AppInner() {
           {activeNav === 'escrow' && (
             <EscrowView
               user={user}
-              onOpenAuth={() => setShowAuthModal(true)}
+              onOpenAuth={handleOpenAuth}
             />
           )}
 
@@ -395,7 +400,7 @@ function AppInner() {
             <InspectionsView
               vehicles={vehicles}
               user={user}
-              onOpenAuth={() => setShowAuthModal(true)}
+              onOpenAuth={handleOpenAuth}
               onViewVehicleDetails={handleOpenVehicleDetails}
               onOpenInspectionMarketplace={() => setActiveNav('inspection-marketplace')}
             />
@@ -456,7 +461,7 @@ function AppInner() {
           )}
 
           {activeNav === 'support' && (
-            <SupportView user={user} onOpenAuth={() => setShowAuthModal(true)} />
+            <SupportView user={user} onOpenAuth={handleOpenAuth} />
           )}
 
           {/* Fixed: 'broadcast' (LiveAuctionBroadcastPage) removed
@@ -471,7 +476,7 @@ function AppInner() {
               would have duplicated that already-real functionality
               rather than adding anything genuinely new. */}
           {activeNav === 'discovery' && (
-            <AuctionDiscoveryNetwork user={user} onOpenAuth={() => setShowAuthModal(true)} />
+            <AuctionDiscoveryNetwork user={user} onOpenAuth={handleOpenAuth} />
           )}
 
           {activeNav === 'kayadlive' && (
@@ -479,16 +484,16 @@ function AppInner() {
           )}
 
           {activeNav === 'buyer-platform' && (
-            <BuyerPlatform user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={() => setShowAuthModal(true)} />
+            <BuyerPlatform user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={handleOpenAuth} />
           )}
 
 
           {activeNav === 'dealer-dashboard' && (
-            <DealerDashboard user={user} onOpenAuth={() => setShowAuthModal(true)} onNavigate={(nav) => setActiveNav(nav)} />
+            <DealerDashboard user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
           )}
 
           {activeNav === 'finance' && (
-            <FinanceMarketplace user={user} onOpenAuth={() => setShowAuthModal(true)} />
+            <FinanceMarketplace user={user} onOpenAuth={handleOpenAuth} />
           )}
 
           {activeNav === 'saved' && (
@@ -512,7 +517,7 @@ function AppInner() {
           )}
 
           {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard' || activeNav === 'seller-platform') && (
-            <PrivateSellerPlatform user={user} onOpenAuth={() => setShowAuthModal(true)} />
+            <PrivateSellerPlatform user={user} onOpenAuth={handleOpenAuth} />
           )}
         </Suspense>
         </main>
@@ -562,16 +567,6 @@ function AppInner() {
           onQuickViewVehicle={handleOpenVehicleDetails}
         />
       )}
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        // Fixed: the real state update already happens inside
-        // AuthModal's own login()/register()/login() calls
-        // through AuthContext by the time this fires - App no longer
-        // keeps any separate state to set here.
-        onLogin={() => {}}
-      />
 
       <PriceAlertsModal
         isOpen={showAlertsModal}

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Car, CheckCircle2, ChevronLeft, ChevronRight, Clock3, ShieldCheck, UserRound, Wrench } from 'lucide-react';
 import { AuthApiError } from '../services/authApi';
+import PremiumAuthShell from './auth/PremiumAuthShell';
 import { useAuth } from '../context/AuthContext';
 import { inspectorAPI } from '../api/api';
 
@@ -92,7 +93,15 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   if (complete) {
     const pending = complete.kind === 'application' || isSeller;
     return (
-      <div className="min-h-[560px] flex items-center justify-center p-6">
+      <PremiumAuthShell
+        mode="register"
+        eyebrow="KAYAD membership"
+        title={complete.kind === 'application' ? 'Application received.' : 'Your KAYAD account is ready.'}
+        description={complete.kind === 'application' ? 'Your application is safely in the KAYAD review workflow.' : 'Your account has been created. Complete email verification, then use the dedicated Sign In flow.'}
+        adTitle="Feature your automotive business on KAYAD"
+        adDescription="Premium placements for dealers, brands, featured vehicles and future auction campaigns."
+      >
+      <div className="kayad-register-complete">
         <div className="w-full max-w-xl text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200"><CheckCircle2 size={34} /></div>
           <h2 className="text-2xl font-black text-[#0A3340]">{complete.kind === 'application' ? 'Inspector application received' : pending ? 'Dealer application submitted' : 'Welcome to KAYAD'}</h2>
@@ -110,19 +119,28 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
           </div>
         </div>
       </div>
+      </PremiumAuthShell>
     );
   }
 
   return (
-    <div className="p-5 sm:p-7">
+    <PremiumAuthShell
+      mode="register"
+      eyebrow="KAYAD membership"
+      title="Create your KAYAD account."
+      description="Choose how you will use KAYAD, create your account, and continue through the appropriate verification path."
+      adTitle="Put your inventory in the spotlight"
+      adDescription="A future-ready advertising surface for dealer campaigns, featured vehicles, auctions and automotive brands."
+    >
+    <div className="kayad-register-content p-1 sm:p-2">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">KAYAD onboarding</p><h2 className="mt-1 text-2xl font-black text-[#0A3340]">Create Your KAYAD Account</h2><p className="mt-1 text-xs text-slate-500">One onboarding path, with the correct registration and verification route for each platform category.</p><p className="mt-2 text-xs text-slate-500">Already have an account? <Link to="/login" className="font-black text-[#176B87] hover:underline">Sign In</Link></p></div>
         {onClose && <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close">×</button>}
       </div>
-      <div className="mb-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><span className={step >= 1 ? 'text-[#0A3340]' : ''}>1. Account type</span><span className="h-px flex-1 bg-slate-200"/><span className={step >= 2 ? 'text-[#0A3340]' : ''}>2. Details</span><span className="h-px flex-1 bg-slate-200"/><span>3. Complete</span></div>
+      <div className="kayad-register-progress mb-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><span className={step >= 1 ? 'text-[#0A3340]' : ''}>1. Account type</span><span className="h-px flex-1 bg-slate-200"/><span className={step >= 2 ? 'text-[#0A3340]' : ''}>2. Details</span><span className="h-px flex-1 bg-slate-200"/><span>3. Complete</span></div>
 
       {step === 1 && (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="kayad-register-role-grid grid gap-3 sm:grid-cols-2">
           {ROLE_OPTIONS.map((option) => {
             const Icon = option.icon; const active = role === option.id;
             return <button key={option.id} type="button" aria-label={option.title} onClick={() => { setRole(option.id); setError(''); }} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#0A3340] bg-[#0A3340] text-white shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
@@ -174,5 +192,6 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         {step === 1 ? <button onClick={()=>setStep(2)} className="inline-flex items-center gap-1 rounded-xl bg-[#0A3340] px-5 py-2.5 text-xs font-bold text-white">Continue <ChevronRight size={15}/></button> : <button disabled={loading} onClick={submitAccount} className="rounded-xl bg-amber-400 px-5 py-2.5 text-xs font-black text-[#0A3340] disabled:opacity-50">{loading ? 'Submitting…' : role === 'inspector' ? 'Submit Inspector Application' : 'Create Account'}</button>}
       </div>
     </div>
+    </PremiumAuthShell>
   );
 }

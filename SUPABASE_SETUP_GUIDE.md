@@ -319,7 +319,7 @@ After Supabase is configured:
 
 1. **M-Pesa Setup**: Configure Safaricom developer account
 2. **SMS Setup**: Configure Africa's Talking
-3. **Email Setup**: Configure Brevo
+3. **Email Setup**: Configure SendGrid
 4. **Deploy Backend**: Deploy to Render, Railway, or similar
 5. **Deploy Frontend**: Deploy to Vercel or Netlify
 

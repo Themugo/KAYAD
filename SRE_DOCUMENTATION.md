@@ -194,7 +194,7 @@ const mpesaConfig = createServiceConfig("mpesa", {
 
 **SRE Features:**
 
-- **Timeout:** 30s for Brevo email send operations
+- **Timeout:** 30s for email send, 10s for SMTP operations
 - **Retries:** 2 retries with exponential backoff
 - **Circuit Breaker:** Opens after 3 failures, resets after 60s
 - **Fallback:** Queue failed emails for retry
@@ -224,7 +224,7 @@ const emailConfig = createServiceConfig("email", {
 
 **Troubleshooting:**
 
-1. **Circuit Breaker Open:** Check Brevo API status, verify `BREVO_API_KEY` and sender configuration
+1. **Circuit Breaker Open:** Check SMTP server status, verify credentials
 2. **High Failure Rate:** Check email provider limits, verify configuration
 3. **Timeout Issues:** Check network connectivity, increase timeout if needed
 4. **Queue Backlog:** Monitor queue depth, process queue worker
@@ -422,8 +422,10 @@ MPESA_CALLBACK_URL=https://api.kayad.space/api/payments/callback
 
 ```bash
 EMAIL_HOST=smtp.example.com
-BREVO_API_KEY=your-brevo-api-key
-BREVO_FROM_EMAIL=noreply@kayad.space
+EMAIL_PORT=587
+EMAIL_USER=your_email@example.com
+EMAIL_PASS=your_password
+EMAIL_FROM=noreply@kayad.space
 QUEUE_MODE=true  # Enable queue mode for email
 ```
 
@@ -584,8 +586,8 @@ const config = createServiceConfig("mpesa", {
 #### Email
 
 **Email Not Sending:**
-- Verify Brevo credentials and sender configuration
-- Check Brevo API availability
+- Verify SMTP credentials
+- Check SMTP server status
 - Verify email addresses
 - Check email provider limits
 
