@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, Clock, CreditCard, RefreshCw, XCircle } from 'lucide-react';
 import { getMyPayments, getPaymentStatus, BackendPayment } from '../services/paymentApi';
 import { Button, Card, PageHeader } from '../components/ui';
+import { AuctionExperienceRail } from '../components/auction/AuctionExperienceRail';
+import { AuctionFulfilmentTimeline } from '../components/auction/AuctionPremiumSurface';
 
 type PaymentStatus = 'pending' | 'success' | 'failed' | 'cancelled' | 'released' | 'refunded' | 'not_found';
 type VehicleDetails = { title?: string; brand?: string; model?: string; year?: number };
@@ -33,7 +35,24 @@ export default function PaymentHistoryView() {
     await Promise.all(pending.filter((p) => p.checkoutRequestId).map(async (p) => { try { await getPaymentStatus(p.checkoutRequestId as string); } catch {} }));
     void load(page, filter, true);
   };
-  return <div className="space-y-6">
+  return <div className="auction-payment-experience space-y-6">
+    <AuctionExperienceRail current="payment" />
+    <section className="auction-wallet-shell">
+      <div className="auction-wallet-grid">
+        <div><span className="auction-wallet-kicker">BIDDER WALLET & SETTLEMENT</span><h2 className="auction-wallet-title">Every payment, one calm place.</h2><p className="auction-wallet-copy">Track live payment status, receipts and settlement activity from the same journey that brought you into the auction room.</p></div>
+        <div className="auction-wallet-metric"><span>Records loaded</span><strong>{total}</strong></div>
+        <div className="auction-wallet-metric"><span>Pending</span><strong>{pending.length}</strong></div>
+        <div className="auction-wallet-metric"><span>Completed</span><strong>{completed.length}</strong></div>
+      </div>
+      <div className="auction-wallet-links"><button type="button" onClick={() => window.location.href='/?nav=auctions'}>Return to auctions</button><button type="button" onClick={() => window.location.href='/?nav=profile'}>Open bidder profile</button></div>
+    </section>
+    <section className="auction-history-card">
+      <div style={{ padding: '18px 18px 10px' }}><span className="auction-xp-overline">AFTER SETTLEMENT</span><h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: '-.035em', color: '#0a2731', margin: '4px 0 2px' }}>The rest of the journey stays visible.</h3><p style={{ fontSize: 10, color: '#82949a', margin: 0 }}>Collection, ownership transfer and completion appear here as KAYAD records each stage.</p></div>
+      <div className="auction-history-row auction-touch-card"><div className="auction-history-icon"><CheckCircle2 size={16} /></div><div><div className="auction-history-title">Settlement confirmed</div><div className="auction-history-meta">Payment receipt and settlement state</div></div><div className="auction-history-status">{completed.length ? 'Activity available' : 'Awaiting payment'}</div></div>
+      <div className="auction-history-row auction-touch-card"><div className="auction-history-icon"><CreditCard size={16} /></div><div><div className="auction-history-title">Collection & transfer</div><div className="auction-history-meta">Dealer fulfilment milestones</div></div><div className="auction-history-status">Tracked in fulfilment</div></div>
+      <div className="auction-history-row auction-touch-card"><div className="auction-history-icon"><Clock size={16} /></div><div><div className="auction-history-title">Auction history</div><div className="auction-history-meta">Your completed auction trail</div></div><div className="auction-history-status">Always available</div></div>
+    </section>
+    <AuctionFulfilmentTimeline steps={[{ label: 'Auction won', detail: 'Outcome recorded', state: 'complete' }, { label: 'Settlement', detail: completed.length ? 'Payment activity recorded' : 'Awaiting payment', state: completed.length ? 'complete' : 'current' }, { label: 'Collection', detail: 'Dealer fulfilment', state: 'pending' }, { label: 'Transfer', detail: 'Ownership completion', state: 'pending' }]} />
     <PageHeader badgeText="Payments" title="Payment History" description="Your real KAYAD payment records and M-Pesa transaction status." />
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4"><Card className="p-5"><p className="text-xs font-semibold text-slate-500">Successful on this page</p><p className="text-2xl font-black text-[#176B87] mt-1">{money(completedAmount)}</p></Card><Card className="p-5"><p className="text-xs font-semibold text-slate-500">Completed records</p><p className="text-2xl font-black text-[#176B87] mt-1">{completed.length}</p></Card><Card className="p-5"><p className="text-xs font-semibold text-slate-500">Pending records</p><p className="text-2xl font-black text-[#176B87] mt-1">{pending.length}</p></Card></div>
     <Card className="overflow-hidden"><div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-2">{FILTERS.map((item) => <button key={item.value || 'all'} onClick={() => { setPage(1); setFilter(item.value); }} className={`px-3 py-1.5 rounded-lg text-xs font-bold ${filter === item.value ? 'bg-[#176B87] text-white' : 'bg-slate-100 text-slate-600'}`}>{item.label}</button>)}</div><Button variant="outline" onClick={refreshPending} disabled={refreshing || loading}><RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} /> Refresh status</Button></div>

@@ -11,6 +11,17 @@ import Car from "../models/Car.js";
 import Referral from "../models/Referral.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
+// Inside a mounted Express router req.path is relative to the mount point
+// (POST /api/cars arrives as "/"), so comparing it to "/cars" never matched and
+// progressive access was unreachable. Use the full mounted path instead.
+export const isListingCreationRequest = (req) => {
+  if (req.method !== "POST") return false;
+  const full = String(`${req.baseUrl || ""}${req.path || ""}` || req.originalUrl || "")
+    .split("?")[0]
+    .replace(/\/+$/, "");
+  return /\/(cars|add-car|inventory)$/.test(full);
+};
+
 // =============================
 // 🔒 REQUIRE DEALER VERIFICATION
 // =============================
@@ -76,8 +87,7 @@ export const requireDealerVerification = async (req, res, next) => {
       // Progressive verification: allow listing creation if < 3 cars and not rejected
       if (
         ["pending", "under_review"].includes(verification.verificationStatus) &&
-        req.method === "POST" &&
-        (req.path === "/cars" || req.path.startsWith("/cars/") || req.path === "/add-car")
+        isListingCreationRequest(req)
       ) {
         const carCount = await Car.countDocuments({ dealer: userId });
         if (carCount < 3) {

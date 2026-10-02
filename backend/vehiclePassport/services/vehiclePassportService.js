@@ -5,6 +5,7 @@
 import db from '../../db/index.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo } from '../../utils/logger.js';
+import { STAFF_ROLES } from '../../config/roles.js';
 import crypto from 'crypto';
 
 /**
@@ -15,11 +16,54 @@ class VehiclePassportService {
   /**
    * Create or retrieve vehicle passport
    */
-  async getOrCreatePassport(vehicleData) {
+  async getOrCreatePassport(vehicleData, accessContext = {}) {
     const { vin, chassisNumber, registrationNumber, make, model } = vehicleData;
+    const { userId = null, role = null, effectiveRole = null } = accessContext;
+    const isStaff = effectiveRole === "webhoist" || STAFF_ROLES.includes(role);
+
+    // Passport mutation is an ownership-sensitive operation. Staff may
+    // reconcile any vehicle; ordinary callers must already control the
+    // vehicle through the canonical owner_vehicles/listing boundary.
+    const canMutate = async (passport = null) => {
+      if (isStaff) return true;
+      if (!userId) return false;
+
+      if (passport?.id) {
+        const owned = await db.findOne("owner_vehicles", {
+          passport_id: passport.id,
+          owner_id: userId,
+          status: "active",
+        });
+        if (owned) return true;
+      }
+
+      const identifiers = [vin, registrationNumber].filter(Boolean);
+      if (!identifiers.length) return false;
+
+      const ownedByIdentity = await db.findOne("owner_vehicles", {
+        owner_id: userId,
+        status: "active",
+        ...(vin ? { vin } : { registration_number: registrationNumber }),
+      });
+      if (ownedByIdentity) return true;
+
+      // Dealers may create/reconcile a passport for a listing they own.
+      if (vin) {
+        const listing = await db.findOne("cars", { vin });
+        if (listing) {
+          const listingOwner = listing.dealer_id || listing.dealer || listing.seller_id || listing.user_id;
+          if (listingOwner && String(listingOwner) === String(userId)) return true;
+        }
+      }
+      return false;
+    };
 
     // Check if passport exists
     let passport = await this.findPassport(vin, chassisNumber, registrationNumber);
+
+    if (!(await canMutate(passport))) {
+      throw new AppError("Vehicle ownership authorization required", 403);
+    }
 
     if (passport) {
       // Update if new data provided
@@ -112,10 +156,28 @@ class VehiclePassportService {
   /**
    * Get full passport with all history
    */
-  async getFullPassport(passportId) {
+  async getFullPassport(passportId, accessContext = {}) {
     const passport = await db.findById('vehicle_passports', passportId);
     if (!passport) {
       throw new AppError('Passport not found', 404);
+    }
+
+    const { userId, role, effectiveRole } = accessContext;
+    const isStaff = effectiveRole === 'webhoist' || STAFF_ROLES.includes(role);
+    if (!isStaff) {
+      const ownedVehicle = userId
+        ? await db.findOne('owner_vehicles', {
+            passport_id: passportId,
+            owner_id: userId,
+            status: 'active',
+          })
+        : null;
+
+      if (!ownedVehicle) {
+        // Deliberately return 404 rather than confirming that a passport UUID
+        // exists to an unrelated authenticated caller.
+        throw new AppError('Passport not found', 404);
+      }
     }
 
     const [timeline, ownership, inspections, services, accidents, auctions, finances, marketplace, documents] = await Promise.all([

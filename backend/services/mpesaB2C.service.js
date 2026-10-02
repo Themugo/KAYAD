@@ -110,7 +110,7 @@ export const disburseB2C = async ({
       p_payout: payoutId,
       p_status: "processing",
       p_conversation_id: null,
-      p_transaction_id: idempotencyKey || null,
+      p_transaction_id: null,
       p_failure_reason: null,
     });
     if (error) throw error;

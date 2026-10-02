@@ -38,8 +38,9 @@ export const initiatePayment = async (req, res) => {
       });
     }
 
-    // All purchases go through escrow by default — normalize buy-type
-    const normalizedType = type === "buy" || type === "direct" ? "escrow" : type;
+    // Settlement mode is selected by the published auction/dealer configuration.
+    // KAYAD does not silently convert direct settlement into escrow.
+    const normalizedType = type === "buy" || type === "direct" ? "purchase" : type;
 
     // Vehicle escrow is funded into the administrator-configured custody
     // bank account. M-Pesa STK is not a vehicle escrow rail because the
@@ -57,7 +58,7 @@ export const initiatePayment = async (req, res) => {
     // A client-supplied amount must match it exactly; it never
     // determines settlement on its own.
     let settlementAmount = parsedAmount;
-    if (normalizedType === "escrow" && carId) {
+    if ((normalizedType === "escrow" || normalizedType === "auction_win" || normalizedType === "purchase") && carId) {
       const carForAmount = await findById("cars", carId, "price,winner");
       if (!carForAmount) {
         return res.status(404).json({ success: false, message: "Car not found" });
@@ -85,6 +86,14 @@ export const initiatePayment = async (req, res) => {
         });
       }
       settlementAmount = serverAmount;
+    }
+
+    if (normalizedType === "auction_win" && carId) {
+      const setup = await findOne("auction_setups", { car_id: carId });
+      const configuredMode = setup?.config?.settlement?.mode || "direct";
+      if (configuredMode === "escrow") {
+        return res.status(409).json({ success: false, code: "AUCTION_ESCROW_SELECTED", message: "This auction requires its configured escrow settlement flow." });
+      }
     }
 
     const result = await initiate({
@@ -183,6 +192,28 @@ export const b2cCallback = async (req, res) => {
     if (conversationId) {
       const { data: payout } = await sb.from("dealer_payouts").select("id,status").eq("conversation_id", conversationId).maybeSingle();
       if (payout) {
+        const { data: payoutForVerification, error: payoutReadError } = await sb
+          .from("dealer_payouts")
+          .select("id,status,net_amount")
+          .eq("id", payout.id)
+          .maybeSingle();
+        if (payoutReadError) throw payoutReadError;
+
+        if (result.success && payoutForVerification) {
+          const providerAmount = Number(result.amount);
+          const expectedAmount = Number(payoutForVerification.net_amount);
+          if (!Number.isFinite(providerAmount) || Math.round(providerAmount * 100) !== Math.round(expectedAmount * 100)) {
+            await sb.rpc("kayad_mark_dealer_payout_atomic", {
+              p_payout: payout.id,
+              p_status: "failed",
+              p_conversation_id: conversationId,
+              p_transaction_id: result.transactionId || null,
+              p_failure_reason: `Provider amount mismatch: expected ${expectedAmount}, received ${providerAmount}`,
+            });
+            throw new Error("M-Pesa B2C amount mismatch");
+          }
+        }
+
         await sb.rpc("kayad_mark_dealer_payout_atomic", {
           p_payout: payout.id,
           p_status: result.success ? "paid" : "failed",
@@ -190,6 +221,17 @@ export const b2cCallback = async (req, res) => {
           p_transaction_id: result.transactionId || null,
           p_failure_reason: result.success ? null : (result.resultDesc || "M-Pesa B2C payout failed"),
         });
+        if (result.success) {
+          const { recordDealerPayout } = await import("../services/ledgerService.js");
+          const { data: paidPayout } = await sb.from("dealer_payouts").select("id,dealer,net_amount,status").eq("id", payout.id).maybeSingle();
+          if (paidPayout?.status === "paid" && Number(paidPayout.net_amount) > 0) {
+            await recordDealerPayout({
+              payout_id: paidPayout.id,
+              user_id: paidPayout.dealer,
+              amount: Number(paidPayout.net_amount),
+            });
+          }
+        }
       }
     }
     if (result.success) {

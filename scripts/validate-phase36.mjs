@@ -24,8 +24,8 @@ for (const p of [
 ]) assert(csrf.includes(`"${p}"`), `Missing explicit CSRF callback exemption: ${p}`);
 assert(csrf.includes('if (isCsrfExemptPath(req.path)) return next();'),
   "CSRF callback exemption must be explicit and path-based");
-assert(csrf.includes('if (req.headers.authorization) return next();'),
-  "Bearer/JWT authorization must remain compatible with CSRF middleware");
+assert(csrf.includes('if (req.kayadMachineAuthenticated === true) return next();'),
+  "Machine-authenticated requests must be explicitly compatible with CSRF middleware");
 
 const routeFiles = fs.readdirSync(path.join(root, "backend/routes")).filter((f) => f.endsWith(".js"));
 assert(routeFiles.length > 0, "No backend route files discovered");

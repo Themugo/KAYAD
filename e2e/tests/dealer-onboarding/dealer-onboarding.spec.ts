@@ -72,7 +72,7 @@ test.describe('KAYAD canonical onboarding', () => {
     await page.getByLabel('Business name').fill('Auto Motors Ltd');
     await page.getByLabel('Location / city').fill('Nairobi');
     await page.getByRole('button', { name: 'Create Account' }).click();
-    await expect(page.getByText('Dealer application submitted')).toBeVisible();
+    await expect(page.getByText('Private seller account created')).toBeVisible();
   });
 
   test('private seller registration uses individual_seller', async ({ page }) => {

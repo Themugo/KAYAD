@@ -6,6 +6,7 @@ import { sendTwilioWhatsApp } from "./whatsappProvider.service.js";
 import { isCommunicationEnabled } from "./communicationRollout.service.js";
 import { logError, logInfo } from "../utils/logger.js";
 import { getIO } from "../utils/io.js";
+import { withLock } from "../middleware/distributedLock.js";
 
 const CHANNELS = new Set(["in_app", "email", "sms", "whatsapp"]);
 const TERMINAL = new Set(["sent", "delivered", "failed", "bounced", "read", "dead_letter"]);
@@ -144,12 +145,25 @@ export const deliver = async ({
     delivery = await findOne("communication_deliveries", { provider, channel, idempotencyKey });
     if (delivery) return delivery;
   }
-  if (!delivery) delivery = await recordDelivery({
-    userId, channel, eventType, templateCode,
-    recipient: recipient || String(userId || ""), provider,
-    status: channel === "in_app" ? "delivered" : "queued",
-    metadata: { ...metadata, subject, message, text, html }, category,
-  });
+  if (!delivery) {
+    try {
+      delivery = await recordDelivery({
+        userId, channel, eventType, templateCode,
+        recipient: recipient || String(userId || ""), provider,
+        status: channel === "in_app" ? "delivered" : "queued",
+        metadata: { ...metadata, subject, message, text, html }, category,
+        idempotencyKey,
+      });
+    } catch (error) {
+      // Two workers may pass the pre-read simultaneously. The database
+      // unique constraint is the final arbiter; recover the canonical row
+      // instead of sending the provider twice or surfacing a false failure.
+      if (error?.code === "23505" && idempotencyKey) {
+        delivery = await findOne("communication_deliveries", { provider, channel, idempotencyKey });
+      }
+      if (!delivery) throw error;
+    }
+  }
   else await updateDelivery(delivery.id, { status: "sending", lastAttemptAt: new Date().toISOString(), lastError: null });
 
   try {
@@ -244,21 +258,23 @@ export const sendUserCommunication = async ({
 
 export const handleProviderStatus = async ({ provider, providerMessageId, status, error = null, providerEventId = null, metadata = {} }) => {
   if (!providerMessageId) return null;
-  const db = await import("../db/index.js");
-  const delivery = await db.findOne("communication_deliveries", { providerMessageId, provider });
-  if (!delivery) return null;
-  const normalized = String(status || "").toLowerCase();
-  const nextStatus = TERMINAL.has(normalized) ? normalized : normalized === "accepted" || normalized === "queued" ? "queued" : normalized === "sending" ? "sending" : "failed";
-  const hashedEventId = providerEventId ? hashExternalId(provider, providerEventId) : null;
-  if (hashedEventId && delivery.providerEventId === hashedEventId) return delivery;
-  if (!DELIVERY_TRANSITIONS[delivery.status]?.has(nextStatus)) return delivery;
-  return updateDelivery(delivery.id, {
-    status: nextStatus,
-    provider,
-    providerEventId: hashedEventId || delivery.providerEventId,
-    deliveredAt: nextStatus === "delivered" ? new Date().toISOString() : delivery.deliveredAt,
-    lastError: error || delivery.lastError,
-    metadata: { ...(delivery.metadata || {}), webhook: metadata },
+  return withLock(`communication-webhook:${provider}:${providerMessageId}`, async () => {
+    const db = await import("../db/index.js");
+    const delivery = await db.findOne("communication_deliveries", { providerMessageId, provider });
+    if (!delivery) return null;
+    const normalized = String(status || "").toLowerCase();
+    const nextStatus = TERMINAL.has(normalized) ? normalized : normalized === "accepted" || normalized === "queued" ? "queued" : normalized === "sending" ? "sending" : "failed";
+    const hashedEventId = providerEventId ? hashExternalId(provider, providerEventId) : null;
+    if (hashedEventId && delivery.providerEventId === hashedEventId) return delivery;
+    if (!DELIVERY_TRANSITIONS[delivery.status]?.has(nextStatus)) return delivery;
+    return updateDelivery(delivery.id, {
+      status: nextStatus,
+      provider,
+      providerEventId: hashedEventId || delivery.providerEventId,
+      deliveredAt: nextStatus === "delivered" ? new Date().toISOString() : delivery.deliveredAt,
+      lastError: error || delivery.lastError,
+      metadata: { ...(delivery.metadata || {}), webhook: metadata },
+    });
   });
 };
 

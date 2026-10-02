@@ -109,6 +109,10 @@ export async function verifyEscrowFunding(escrowId, actorId, fundingReference) {
   const result = await atomicVerifyEscrowFunding(escrowId, actorId, fundingReference);
 
   const escrow = await findById("escrows", escrowId);
+  if (escrow?.auctionOutcomeId) {
+    const { markAuctionEscrowFunded } = await import("./auctionFulfilment.service.js");
+    await markAuctionEscrowFunded({ outcomeId: escrow.auctionOutcomeId, escrowId, fundingReference, actorId }).catch(() => {});
+  }
   const recipients = [escrow?.buyer, escrow?.seller].filter(Boolean);
   if (recipients.length) {
     await emitToUsers(recipients, {

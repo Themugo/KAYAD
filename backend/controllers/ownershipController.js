@@ -14,8 +14,8 @@ export const addTrip = asyncHandler(async (req, res) => ok(res, await ownershipS
 export const completeReminder = asyncHandler(async (req, res) => ok(res, await ownershipService.completeReminder(req.user.id, req.params.reminderId, req.body?.serviceRecordId || null)));
 export const markSold = asyncHandler(async (req, res) => ok(res, await ownershipService.markVehicleSold(req.user.id, req.params.vehicleId, req.body)));
 
-export const createPassport = asyncHandler(async (req, res) => ok(res, await vehiclePassportService.getOrCreatePassport(req.body), 201));
-export const getPassport = asyncHandler(async (req, res) => ok(res, await vehiclePassportService.getFullPassport(req.params.passportId)));
+export const createPassport = asyncHandler(async (req, res) => ok(res, await vehiclePassportService.getOrCreatePassport(req.body, { userId: req.user.id, role: req.user.role, effectiveRole: req.user.effectiveRole }), 201));
+export const getPassport = asyncHandler(async (req, res) => ok(res, await vehiclePassportService.getFullPassport(req.params.passportId, { userId: req.user.id, role: req.user.role, effectiveRole: req.user.effectiveRole })));
 export const getPublicPassport = asyncHandler(async (req, res) => ok(res, await vehiclePassportService.getPublicPassport(req.params.passportId)));
 export const findPassportByVin = asyncHandler(async (req, res) => {
   const passport = await vehiclePassportService.findPassport(req.params.vin, null, null);

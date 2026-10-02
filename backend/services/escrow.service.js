@@ -8,6 +8,7 @@ import { findById, findOne, create, update } from "../db/index.js";
 import { STATES, validateTransition } from "../services/escrowStateMachine.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { atomicTransitionEscrow } from "../utils/atomicTransactions.js";
+import { recordEscrowDeposit, recordEscrowRelease } from "./ledgerService.js";
 
 const getCommissionRate = async () => {
   try {
@@ -49,6 +50,16 @@ export const fundEscrow = async (escrowId, { idempotencyKey, paymentId } = {}) =
     idempotencyKey,
   });
   const escrow = await findById("escrows", escrowId);
+  if (escrow?.status === STATES.FUNDED && Number(escrow.amount) > 0) {
+    // Ledger posting is deliberately idempotent by external reference. A
+    // retry after a provider/network failure therefore converges on one
+    // financial entry rather than creating a duplicate deposit.
+    await recordEscrowDeposit({
+      payment_id: paymentId || escrowId,
+      user_id: escrow.buyer,
+      amount: Number(escrow.amount),
+    });
+  }
   logInfo("Escrow funded atomically", { escrowId, paymentId, amount: escrow?.amount });
   return escrow || result;
 };
@@ -79,8 +90,17 @@ export const releaseEscrow = async (escrowId, adminId, { idempotencyKey } = {}) 
     escrowId, nextStatus: STATES.RELEASED, actorId: adminId, role,
     idempotencyKey,
   });
+  const released = await findById("escrows", escrowId);
+  if (released?.status === STATES.RELEASED) {
+    await recordEscrowRelease({
+      escrow_id: escrowId,
+      user_id: released.buyer,
+      amount: Number(released.amount),
+      commission: Number(released.commission || 0),
+    });
+  }
   logInfo("Escrow released atomically", { escrowId, sellerAmount: result?.sellerAmount, commission: result?.commission });
-  return findById("escrows", escrowId);
+  return released || result;
 };
 
 export const autoReleaseEscrow = async (escrowId) => {
@@ -111,7 +131,7 @@ export const disputeEscrow = async (escrowId, userId, role, reason) => {
   return findById("escrows", escrowId);
 };
 
-export const closeEscrow = async (escrowId, userId, role, { req } = {}) => {
+export const closeEscrow = async (escrowId, userId, role, { req, reason = null } = {}) => {
   try {
     const escrow = await findById("escrows", escrowId);
     if (!escrow) throw new Error("Escrow not found");
@@ -123,7 +143,7 @@ export const closeEscrow = async (escrowId, userId, role, { req } = {}) => {
     await update("escrows", escrow.id, {
       status: STATES.CLOSED,
       closedAt: now,
-      history: [...(escrow.history || []), { action: "Escrow closed", by: userId, at: now }],
+      history: [...(escrow.history || []), { action: "Escrow closed", by: userId, at: now, reason: reason || "Administrative closure" }],
     });
 
     return { ...escrow, status: STATES.CLOSED, closedAt: now };

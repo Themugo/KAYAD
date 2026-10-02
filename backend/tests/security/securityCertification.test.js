@@ -63,6 +63,16 @@ jest.unstable_mockModule("../../infrastructure/logging/index.js", () => ({
   logError: jest.fn(),
 }));
 
+const rpcMock = jest.fn();
+jest.unstable_mockModule("../../utils/supabase.js", () => ({ getSupabase: () => ({ rpc: rpcMock }) }));
+jest.unstable_mockModule("../../services/communicationGateway.service.js", () => ({
+  deliver: jest.fn().mockResolvedValue({ status: "sent" }),
+}));
+jest.unstable_mockModule("../../services/communicationEvents.service.js", () => ({
+  emitCommunication: jest.fn().mockResolvedValue({}),
+  COMMUNICATION_EVENTS: { EMAIL_VERIFICATION: "email.verification", REGISTRATION: "registration", PASSWORD_RESET: "password.reset" },
+}));
+
 const { protect, adminOnly, allowRoles } = await import("../../middleware/auth.js");
 const { authorize } = await import("../../middleware/role.js");
 const { csrfProtection } = await import("../../middleware/csrf.js");
@@ -283,48 +293,90 @@ describe("registration role assignment", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     userModelMock.findOne.mockResolvedValue(null); // email not taken
-    userModelMock.create.mockImplementation(async (doc) => ({ ...doc, _id: "new-user" }));
-    userAuthModelMock.create.mockResolvedValue({ tokenVersion: 0 });
-    refreshTokenModelMock.create.mockResolvedValue({});
+    // The RPC echoes back what the database would have stored.
+    rpcMock.mockImplementation(async (_fn, a) => ({
+      data: {
+        id: "11111111-1111-4111-8111-111111111111", name: a.p_name, email: a.p_email, role: a.p_role,
+        status: a.p_role === "user" ? "approved" : "pending", email_verified: false,
+        business_name: a.p_business_name, location: a.p_location,
+      },
+      error: null,
+    }));
   });
 
-  const registerReq = (role) => ({
-    body: { name: "A", email: "a@b.c", password: "Str0ng!Pass", role },
+  const registerReq = (role, extra = {}) => ({
+    body: { name: "A", email: "a@b.c", password: "Str0ng!Pass", role, ...extra },
     headers: {},
     query: {},
   });
+  const rpcArgs = () => rpcMock.mock.calls.at(-1)[1];
 
   test("requesting role=admin falls back to plain user", async () => {
-    const res = mockRes();
-    res.status(201);
-    await register(registerReq("admin"), res);
-    expect(userModelMock.create).toHaveBeenCalledWith(expect.objectContaining({ role: "user" }));
+    await register(registerReq("admin"), mockRes());
+    expect(rpcMock).toHaveBeenCalledWith("kayad_register_identity_atomic", expect.objectContaining({ p_role: "user" }));
   });
 
   test("requesting role=superadmin falls back to plain user", async () => {
-    const res = mockRes();
-    res.status(201);
-    await register(registerReq("superadmin"), res);
-    expect(userModelMock.create).toHaveBeenCalledWith(expect.objectContaining({ role: "user" }));
+    await register(registerReq("superadmin"), mockRes());
+    expect(rpcArgs().p_role).toBe("user");
   });
 
-  test("dealer/individual_seller register as pending, not approved", async () => {
-    const res = mockRes();
-    res.status(201);
-    await register(registerReq("dealer"), res);
-    expect(userModelMock.create).toHaveBeenCalledWith(
-      expect.objectContaining({ role: "dealer", status: "pending" }),
-    );
+  test("self-registration can never request a staff or inspector role", async () => {
+    for (const role of ["moderator", "escrow_officer", "ghost_checker", "webhoist", "hr"]) {
+      await register(registerReq(role), mockRes());
+      expect(rpcArgs().p_role).toBe("user");
+    }
   });
 
-  test("new accounts start email-unverified with a hashed verification token", async () => {
+  test("dealer and individual_seller are sent as their own role (DB stores them pending)", async () => {
+    const dealerRes = mockRes();
+    await register(registerReq("dealer", { businessName: "Jane Motors", location: "Nairobi" }), dealerRes);
+    expect(rpcArgs()).toEqual(expect.objectContaining({ p_role: "dealer", p_business_name: "Jane Motors", p_location: "Nairobi" }));
+    expect(dealerRes.status).toHaveBeenCalledWith(201);
+    expect(dealerRes.json.mock.calls.at(-1)[0].user.status).toBe("pending");
+
+    const sellerRes = mockRes();
+    await register(registerReq("individual_seller"), sellerRes);
+    expect(rpcArgs().p_role).toBe("individual_seller");
+    expect(sellerRes.status).toHaveBeenCalledWith(201);
+    expect(sellerRes.json.mock.calls.at(-1)[0].user.status).toBe("pending");
+  });
+
+  test("a buyer registers approved with no business fields", async () => {
     const res = mockRes();
-    res.status(201);
     await register(registerReq("user"), res);
-    expect(userModelMock.create).toHaveBeenCalledWith(expect.objectContaining({ emailVerified: false }));
-    expect(userAuthModelMock.create).toHaveBeenCalledWith(
-      expect.objectContaining({ emailVerifyToken: expect.stringMatching(/^[0-9a-f]{64}$/) }),
-    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json.mock.calls.at(-1)[0].user.status).toBe("approved");
+  });
+
+  test("dealer without business name or location is rejected before any write", async () => {
+    const res = mockRes();
+    await register(registerReq("dealer"), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(rpcMock).not.toHaveBeenCalled();
+  });
+
+  test("new accounts start email-unverified with only a SHA-256 hash of the token stored", async () => {
+    await register(registerReq("user"), mockRes());
+    expect(rpcArgs().p_email_verify_token).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  test("a provider outage never fails or deletes the registration", async () => {
+    const { deliver } = await import("../../services/communicationGateway.service.js");
+    deliver.mockRejectedValue(new Error("brevo down"));
+    const res = mockRes();
+    await register(registerReq("user"), res);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(userModelMock.findByIdAndDelete).toBeUndefined();
+    deliver.mockResolvedValue({ status: "sent" });
+  });
+
+  test("duplicate email returns 409", async () => {
+    userModelMock.findOne.mockResolvedValue({ id: "x" });
+    const res = mockRes();
+    await register(registerReq("user"), res);
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(rpcMock).not.toHaveBeenCalled();
   });
 });
 
@@ -390,14 +442,15 @@ describe("single-use token storage", () => {
     expect(userAuthModelMock.findOne).not.toHaveBeenCalled();
   });
 
-  test("verifyEmail looks up the hashed token", async () => {
+  test("verifyEmail looks up the hashed token and filters expiry with a Date", async () => {
     const rawToken = "raw-verify-token-abc";
-    userAuthModelMock.findOne.mockReturnValue(chainable(null));
+    userAuthModelMock.findOneAndUpdate.mockResolvedValue(null);
     const res = mockRes();
     await verifyEmail({ params: { token: rawToken } }, res);
-    expect(userAuthModelMock.findOne).toHaveBeenCalledWith(
-      expect.objectContaining({ emailVerifyToken: sha256(rawToken) }),
-    );
+    const filter = userAuthModelMock.findOneAndUpdate.mock.calls.at(-1)[0];
+    expect(filter.emailVerifyToken).toBe(sha256(rawToken));
+    // Date.now() (a number) was rejected by Postgres timestamptz comparison.
+    expect(filter.emailVerifyExpire.$gt).toBeInstanceOf(Date);
     expect(res.status).toHaveBeenCalledWith(400);
   });
 });

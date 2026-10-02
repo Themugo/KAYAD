@@ -15,6 +15,8 @@ import { generateAccessToken, generateRefreshToken } from "../utils/generateToke
 import { invalidateUserCache } from "../middleware/auth.js";
 import { recordFailedAttempt, recordSuccessfulAttempt } from "../middleware/accountLockout.js";
 import { logError } from '../infrastructure/logging/index.js';
+import { getSupabase } from '../utils/supabase.js';
+import { mapRowIn } from '../utils/fieldMap.js';
 
 const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
 const OWNER_EMAILS = WEBHOIST_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
@@ -129,7 +131,12 @@ const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null, t
     // Rotation is atomic in PostgreSQL. The old token is claimed once; a second
     // concurrent use is treated as refresh-token reuse and the family is revoked.
     const existing = await RefreshToken.findByTokenHash(oldRefreshToken);
-    if (!existing) throw Object.assign(new Error("Refresh token not found or revoked"), { code: "AUTH_REFRESH_INVALID" });
+    if (!existing) throw Object.assign(new Error("Refresh token not found"), { code: "AUTH_REFRESH_INVALID" });
+    // IMPORTANT: do not reject a revoked/expired stored token here. The
+    // PostgreSQL rotation RPC deliberately receives the historical token so
+    // it can atomically classify replay as refresh-token reuse and revoke the
+    // entire family. Returning early here would make that security control
+    // unreachable for a replayed token.
     familyId = existing.familyId;
     newRefreshToken = generateRefreshToken(user, tokenVersion, familyId);
     const result = await RefreshToken.rotate({
@@ -217,26 +224,6 @@ export const register = async (req, res) => {
 
     email = normalizeEmail(email);
 
-    const exists = await User.findOne({ email });
-    if (exists) {
-      return R.error(res, "An account with that email already exists", 409);
-    }
-
-    const rawPhone = (phone || "").trim();
-    const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
-
-    let referredBy = null;
-    const referralCode = req.body.referralCode || req.query?.ref;
-    if (referralCode) {
-      const referrer = await User.findOne({ referralCode });
-      if (referrer && referrer.email !== email) {
-        referredBy = referrer._id;
-      }
-    }
-
-    // The frontend uses `buyer` as its display term, while the backend canonical
-    // role is `user`. Normalize it here as a second line of defense even though
-    // the validation schema already canonicalizes the public contract.
     const requestedRole = req.body.role;
     const role = requestedRole === "dealer" || requestedRole === "individual_seller" ? requestedRole : "user";
     const businessName = String(req.body.businessName || "").trim();
@@ -249,61 +236,47 @@ export const register = async (req, res) => {
       return R.error(res, "Location or city is required for dealer registration", 400);
     }
 
-    const status = role === "user" ? "approved" : "pending";
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return R.error(res, "An account with that email already exists", 409);
+    }
 
-    const user = await User.create({
-      name,
-      email,
-      role,
-      phone: validPhone,
-      status,
-      emailVerified: false,
-      businessName: role === 'dealer' || role === 'individual_seller' ? businessName || undefined : undefined,
-      location: role === 'dealer' || role === 'individual_seller' ? location || undefined : undefined,
-      referredBy,
-    });
+    let referredBy = null;
+    const referralCode = req.body.referralCode || req.query?.ref;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode });
+      if (referrer && referrer.email !== email) referredBy = referrer._id;
+    }
 
-    // Email verification token — only the SHA-256 hash is stored; the raw
-    // token goes out in the verification email. Login/API access stays open
-    // unless verification is enforced (Brevo configured or
-    // REQUIRE_EMAIL_VERIFICATION=true), matching the login gate.
+    const rawPhone = (phone || "").trim();
+    const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
     const verifyToken = crypto.randomBytes(32).toString("hex");
+    const passwordHash = await bcrypt.hash(password, 12);
 
-    let userAuth;
-    try {
-      userAuth = await UserAuth.create({
-        user: user._id,
-        password: await bcrypt.hash(password, 12),
-        tokenVersion: 0,
-        emailVerifyToken: hashToken(verifyToken),
-        emailVerifyExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      });
-    } catch (authErr) {
-      // Registration is a two-record identity write (users + user_auth).
-      // Never leave a half-created account if the credential row cannot be
-      // persisted.  This is the same fail-closed principle used below when
-      // required Brevo verification cannot be delivered.
-      await User.deleteOne({ _id: user._id }).catch((cleanupErr) =>
-        console.warn("⚠️ Registration user cleanup failed:", cleanupErr.message),
-      );
-      throw authErr;
-    }
+    // Identity creation is one PostgreSQL transaction: users + the automatic
+    // profiles/dealer triggers + user_auth either all commit or all roll back.
+    // This removes the historical half-created-account window between two
+    // independent Supabase inserts.
+    const { data: createdRow, error: identityError } = await getSupabase().rpc("kayad_register_identity_atomic", {
+      p_name: String(name).trim(),
+      p_email: email,
+      p_role: role,
+      p_phone: validPhone,
+      p_business_name: businessName || null,
+      p_location: location || null,
+      p_referred_by: referredBy || null,
+      p_password_hash: passwordHash,
+      p_email_verify_token: hashToken(verifyToken),
+      p_email_verify_expire: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    });
+    if (identityError) throw identityError;
 
-    if (role === "dealer" || role === "individual_seller") {
-      // Seller approval notification is operational telemetry; never make the
-      // customer's account creation depend on an admin notification provider.
-      void notifyAdminsOfPendingSeller(user).catch(() => {});
-    }
+    const user = mapRowIn("users", createdRow);
+    const userAuth = { tokenVersion: 0, mustChangePassword: false };
 
-    // Verification delivery is deliberately best-effort and non-blocking.
-    // The account is the durable registration result; when deployment policy
-    // requires email verification, the login gate prevents access until the
-    // user verifies and the existing resend-verification path remains available.
-    // Provider latency/failure must never turn a valid account write into the
-    // generic registration 500 or recreate the original onboarding timeout.
     const verifyUrl = `${process.env.FRONTEND_URL || "https://kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
     const verificationPayload = {
-      userId: user.id || user._id,
+      userId: user.id,
       channel: "email",
       eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
       templateCode: "account_verification_email",
@@ -312,18 +285,25 @@ export const register = async (req, res) => {
       text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
       html: `<p>Hi ${user.name || "there"},</p><p>Verify your KAYAD email to unlock your account.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
       metadata: { verification: true },
-      idempotencyKey: `registration-verification:${user.id}` ,
+      idempotencyKey: `registration-verification:${user.id}`,
     };
 
+    // Email delivery is external I/O and must never decide whether registration
+    // succeeds. The account, credential row and hashed verification token are
+    // already committed above; awaiting the provider here held the request open
+    // for up to 30s (browser "timeout of 30000ms exceeded") and, on a provider
+    // failure, deleted a valid account (see REGISTRATION_TIMEOUT_FIX_20260930.md).
+    // If delivery fails the user simply uses "resend verification", which is
+    // rate limited and generic by design.
     void deliver(verificationPayload).catch((e) => {
       console.warn("⚠️ Verification email dispatch failed:", e.message);
     });
 
+    if (role === "dealer" || role === "individual_seller") {
+      void notifyAdminsOfPendingSeller(user).catch(() => {});
+    }
+
     if (referredBy) {
-      // Referral credit is a post-registration side effect. Never make the
-      // account/session response wait on a second user update plus a referral
-      // record write; a slow referral dependency must not recreate the original
-      // onboarding timeout failure.
       void (async () => {
         const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
         try {
@@ -332,7 +312,7 @@ export const register = async (req, res) => {
           });
           await (await import("../models/Referral.js")).default.create({
             referrer: referredBy,
-            referee: user._id,
+            referee: user.id,
             status: "credited",
             bonusAmount: REFERRAL_BONUS,
             creditedAt: new Date(),
@@ -343,11 +323,8 @@ export const register = async (req, res) => {
       })();
     }
 
-    // Welcome email is also best-effort and deliberately outside the
-    // registration response path. Verification is the only account-state
-    // requirement; welcome mail must never make onboarding appear frozen.
     void deliver({
-      userId: user.id || user._id,
+      userId: user.id,
       channel: "email",
       eventType: COMMUNICATION_EVENTS.REGISTRATION,
       templateCode: "account_welcome_email",
@@ -361,12 +338,6 @@ export const register = async (req, res) => {
       console.warn("⚠️ Welcome email dispatch failed:", e.message);
     });
 
-
-    // Registration deliberately does not create an authenticated session.
-    // The user must complete email verification (when enabled) and then sign
-    // in explicitly. This keeps account creation separate from authentication
-    // and prevents a freshly-created, unverified account from receiving live
-    // access/refresh cookies.
     return res.status(201).json({
       success: true,
       user: serializeUser(user, userAuth),
@@ -374,7 +345,7 @@ export const register = async (req, res) => {
     });
   } catch (err) {
     logError("REGISTER ERROR", err);
-    if (err?.code === 11000) {
+    if (err?.code === 23505 || err?.code === 11000) {
       return R.error(res, "An account with that email already exists", 409);
     }
     R.error(res, process.env.NODE_ENV === "production" ? "Registration could not be completed. Please try again." : err.message, 500);
@@ -717,7 +688,7 @@ export const verifyEmail = async (req, res) => {
     if (!token) return R.error(res, "Token required", 400);
 
     const userAuth = await UserAuth.findOneAndUpdate(
-      { emailVerifyToken: hashToken(token), emailVerifyExpire: { $gt: Date.now() } },
+      { emailVerifyToken: hashToken(token), emailVerifyExpire: { $gt: new Date() } },
       { emailVerifyToken: null, emailVerifyExpire: null },
       { new: true },
     );
@@ -857,11 +828,11 @@ export const resetPassword = async (req, res) => {
     if (!/[^A-Za-z0-9]/.test(password)) return R.error(res, "Password must contain at least one special character", 400);
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const existingAuth = await UserAuth.findOne({ resetToken: hashToken(token), resetTokenExpire: { $gt: Date.now() } }).select("+tokenVersion");
+    const existingAuth = await UserAuth.findOne({ resetToken: hashToken(token), resetTokenExpire: { $gt: new Date() } }).select("+tokenVersion");
     if (!existingAuth) return R.error(res, "Reset link is invalid or has expired.", 400);
 
     const userAuth = await UserAuth.findOneAndUpdate(
-      { resetToken: hashToken(token), resetTokenExpire: { $gt: Date.now() } },
+      { resetToken: hashToken(token), resetTokenExpire: { $gt: new Date() } },
       { password: passwordHash, resetToken: null, resetTokenExpire: null, tokenVersion: (existingAuth.tokenVersion || 0) + 1 },
       { new: true },
     );

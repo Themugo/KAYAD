@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, dealerOnly, requireApproved } from "../middleware/auth.js";
+import { protect, dealerOnly, requireApproved, allowRoles } from "../middleware/auth.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
@@ -16,8 +16,85 @@ import { initiateDealerUpgrade } from "../services/dealerSubscription.service.js
 import { deliver } from "../services/communicationGateway.service.js";
 import { startAuction, extendAuction, closeAuction } from "../services/auctionLifecycle.service.js";
 import { disburseB2C } from "../services/mpesaB2C.service.js";
+import { dealerOnboardingSchema } from "../validation/dealerOnboarding.schema.js";
+import { submitDealerVerification } from "../services/dealerVerificationService.js";
 
 const router = express.Router();
+
+// =============================
+// 🧭 DEALER ONBOARDING (PENDING DEALERS)
+// =============================
+// This route intentionally sits before the approved-dealer boundary. A newly
+// registered dealer is pending by design, but must still be able to complete
+// the existing onboarding + verification workflow that leads to approval.
+router.get("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req, res) => {
+  let dealer = await findOne("dealers", { user: req.user.id });
+  if (!dealer) {
+    dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
+  }
+  res.json({ success: true, dealer });
+}));
+
+router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req, res) => {
+  const parsed = dealerOnboardingSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const message = Object.entries(parsed.error.flatten().fieldErrors)
+      .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+      .join("; ");
+    return res.status(400).json({ success: false, message: message || "Invalid dealer onboarding data" });
+  }
+
+  const { businessName, location, bio, paymentDetails, documents } = parsed.data;
+  let dealer = await findOne("dealers", { user: req.user.id });
+  if (!dealer) {
+    dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
+  }
+
+  const previousDealer = dealer;
+  dealer = await update("dealers", dealer.id, {
+    businessName,
+    location,
+    bio: bio || null,
+    paymentDetails,
+    onboardingComplete: true,
+    onboardingCompletedAt: new Date().toISOString(),
+  });
+
+  try {
+    const verification = await submitDealerVerification(req.user.id, documents);
+
+    await logActionFromReq(req, "dealer_onboarding_completed", {
+      target: dealer.id,
+      targetModel: "Dealer",
+      details: { verificationStatus: verification.verification.verificationStatus },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Dealer onboarding completed and verification submitted.",
+      dealer,
+      verification: verification.verification,
+      progress: verification.progress,
+    });
+  } catch (error) {
+    // Do not leave a dealer claiming onboarding completion when the required
+    // verification record could not be created. Restore the prior durable state
+    // so the user can safely retry without a misleading half-complete account.
+    try {
+      await update("dealers", dealer.id, {
+        businessName: previousDealer.businessName ?? null,
+        location: previousDealer.location ?? null,
+        bio: previousDealer.bio ?? null,
+        paymentDetails: previousDealer.paymentDetails ?? {},
+        onboardingComplete: previousDealer.onboardingComplete ?? false,
+        onboardingCompletedAt: previousDealer.onboardingCompletedAt ?? null,
+      });
+    } catch (rollbackError) {
+      console.error("Dealer onboarding compensation failed:", rollbackError?.message || rollbackError);
+    }
+    throw error;
+  }
+}));
 
 // =============================
 // 🔒 GLOBAL PROTECTION
@@ -882,18 +959,6 @@ router.post(
   requireDealerVerification,
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const { durationMs, startingBid, reservePrice, reserveMode } = req.body;
-    if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });
-
-    // ⏱ Minimum 24h auction duration
-    const MIN_DURATION = 24 * 60 * 60 * 1000;
-    if (durationMs < MIN_DURATION) {
-      return res.status(400).json({
-        success: false,
-        message: `Minimum auction duration is 24 hours (${(durationMs / 3600000).toFixed(0)}h provided)`,
-      });
-    }
-
     const car = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
@@ -909,24 +974,37 @@ router.post(
       });
     }
 
-    const startingBidVal = Number(startingBid) || 0;
-    if (startingBidVal < 1000) {
-      return res.status(400).json({ success: false, message: "Starting bid must be at least KES 1,000" });
+    const setup = await findOne("auction_setups", { car_id: req.params.id });
+    if (!setup || setup.publication_status !== "published") {
+      return res.status(409).json({ success: false, message: "Auction must be published through the auction setup wizard before it can start." });
     }
 
-    const reserveVal = reservePrice ? Number(reservePrice) : null;
-    if (reserveVal !== null && reserveVal < startingBidVal) {
-      return res.status(400).json({ success: false, message: "Reserve price must be >= starting bid" });
+    const config = setup.config || {};
+    const startAt = config.startsAt ? new Date(config.startsAt) : null;
+    const endAt = config.endsAt ? new Date(config.endsAt) : null;
+    if (!startAt || !endAt || Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) {
+      return res.status(409).json({ success: false, message: "Published auction has no valid schedule." });
+    }
+    if (Date.now() < startAt.getTime()) {
+      return res.status(409).json({ success: false, code: "AUCTION_SCHEDULED", message: `Auction is scheduled to start at ${startAt.toISOString()}.` });
+    }
+    const durationMs = endAt.getTime() - Date.now();
+    if (durationMs < 24 * 60 * 60 * 1000) {
+      return res.status(409).json({ success: false, message: "Auction cannot start with less than 24 hours remaining in its published schedule." });
     }
 
-    // Canonical atomic lifecycle: the database transition, audit and
-    // communication are handled by the shared auction service.
+    // Published configuration is authoritative; callers cannot override
+    // economics by posting different values to the legacy start endpoint.
+    const startingBidVal = Number(config.startingBid) || 0;
+    const reserveVal = config.reservePrice === null || config.reservePrice === undefined ? null : Number(config.reservePrice);
+    const reserveModeVal = config.reserveMode || "none";
+
     const result = await startAuction({
       carId: req.params.id,
       durationMs,
       startingBid: startingBidVal,
       reservePrice: reserveVal,
-      reserveMode: reserveMode || "none",
+      reserveMode: reserveModeVal,
       req,
     });
 

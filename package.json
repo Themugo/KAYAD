@@ -93,7 +93,18 @@
     "validate:explicit-auth-flows": "node scripts/validate-explicit-auth-flows.mjs",
     "validate:premium-auth-surfaces": "node scripts/validate-premium-auth-surfaces.mjs",
     "validate:registration-role-matrix": "node scripts/validate-registration-role-matrix.mjs",
-    "validate:premium-presentation-pass": "node scripts/validate-premium-presentation-pass.mjs"
+    "validate:premium-presentation-pass": "node scripts/validate-premium-presentation-pass.mjs",
+    "validate:database-contract-alignment": "node scripts/validate-database-contract-alignment.mjs",
+    "validate:domain-lifecycle-integrity": "node scripts/validate-domain-lifecycle-integrity.mjs",
+    "validate:refresh-reuse-integrity": "node scripts/validate-refresh-reuse-integrity.mjs",
+    "validate:passport-authorization": "node scripts/validate-passport-authorization.mjs",
+    "validate:financial-audit-rls-hardening": "node scripts/validate-financial-audit-rls-hardening.mjs",
+    "validate:payment-gateway-lifecycle": "node scripts/validate-payment-gateway-lifecycle.mjs",
+    "validate:payment-escrow-domain": "node scripts/validate-payment-escrow-domain.mjs",
+    "validate:transactions-money-initiative": "node scripts/validate-transactions-money-initiative.mjs",
+    "validate:high-risk-boundaries": "node scripts/validate-high-risk-boundaries.mjs",
+    "validate:runtime-convergence": "node scripts/validate-runtime-convergence.mjs",
+    "validate:escrow-live-operations-scenarios": "node scripts/validate-escrow-live-operations-scenarios.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

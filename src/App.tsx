@@ -12,10 +12,16 @@ import OnboardingFlow from './components/OnboardingFlow';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForcePasswordChange from './pages/ForcePasswordChange';
+import DealerOnboarding from './pages/dealer/DealerOnboarding';
+import DealerAuctionSetupWizard from './pages/dealer/DealerAuctionSetupWizard';
+import DealerAuctionOperations from './pages/dealer/DealerAuctionOperations';
+import DealerAuctionOperationCase from './pages/dealer/DealerAuctionOperationCase';
+import Profile from './pages/Profile';
+import { AuctionMobileDock, AuctionSurfaceReveal } from './components/auction/AuctionInteractionLayer';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth, RequireAuth, RequireDealer } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
@@ -36,7 +42,7 @@ const ChatView = React.lazy(() => import('./features/ChatView'));
 const AdminView = React.lazy(() => import('./features/AdminView'));
 const SupportView = React.lazy(() => import('./features/SupportView'));
 const PaymentHistoryView = React.lazy(() => import('./features/PaymentHistoryView'));
-const AuctionDiscoveryNetwork = React.lazy(() => import('./pages/AuctionDiscoveryNetwork'));
+const AuctionLivePage = React.lazy(() => import('./pages/AuctionLivePage'));
 const KAYADLive = React.lazy(() => import('./pages/KAYADLive'));
 const BuyerPlatform = React.lazy(() => import('./features/OwnershipPlatform').then((m) => ({ default: m.BuyerPlatform })));
 const PrivateSellerPlatform = React.lazy(() => import('./features/PrivateSellerPlatform'));
@@ -52,6 +58,11 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // AppInner().
 function AppInner() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
+  const location = useLocation();
+  useEffect(() => {
+    const nav = new URLSearchParams(location.search).get('nav');
+    if (nav) setActiveNav(nav);
+  }, [location.search]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -355,6 +366,7 @@ function AppInner() {
         }>
 
         {/* Module Switcher Rendering */}
+        <AuctionSurfaceReveal surface={activeNav}>
         {activeNav === 'marketplace' && (
             <VehicleMarketplace
               vehicles={vehicles}
@@ -388,6 +400,10 @@ function AppInner() {
           )}
 
           {activeNav === 'payments' && user && <PaymentHistoryView />}
+
+          {activeNav === 'profile' && user && (
+            <Profile setPage={(page) => setActiveNav(page)} authUser={authUser} />
+          )}
 
           {activeNav === 'escrow' && (
             <EscrowView
@@ -476,7 +492,7 @@ function AppInner() {
               would have duplicated that already-real functionality
               rather than adding anything genuinely new. */}
           {activeNav === 'discovery' && (
-            <AuctionDiscoveryNetwork user={user} onOpenAuth={handleOpenAuth} />
+            <AuctionsView user={user} onOpenAuth={handleOpenAuth} />
           )}
 
           {activeNav === 'kayadlive' && (
@@ -519,8 +535,13 @@ function AppInner() {
           {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard' || activeNav === 'seller-platform') && (
             <PrivateSellerPlatform user={user} onOpenAuth={handleOpenAuth} />
           )}
+        </AuctionSurfaceReveal>
         </Suspense>
         </main>
+
+      {user && ['auctions','saved','payments','profile'].includes(activeNav) && (
+        <AuctionMobileDock active={activeNav === 'auctions' ? (new URLSearchParams(location.search).get('auctionTab') === 'saved' ? 'saved' : 'auctions') : activeNav} savedCount={savedVehicles.length} onNavigate={(nav) => setActiveNav(nav)} onSaved={() => { setActiveNav('auctions'); window.history.replaceState({}, '', '/?nav=auctions&auctionTab=saved'); window.dispatchEvent(new PopStateEvent('popstate')); }} />
+      )}
 
       {/* 3. Footer */}
       <footer className="bg-[#0A3340] text-slate-300 text-xs py-8 border-t border-navy-600/40 mt-12">
@@ -583,7 +604,12 @@ function AuthRouteSurface() {
   if (path === '/register') return <OnboardingFlow onClose={() => { window.location.href = '/'; }} />;
   if (path === '/forgot-password') return <ForgotPasswordPage />;
   if (path === '/reset-password') return <ResetPasswordPage />;
+  if (path.startsWith('/auction/')) return <AuctionLivePage />;
   if (path === '/force-password-change') return <ForcePasswordChange />;
+  if (path === '/dealer/onboarding') return <RequireAuth><RequireDealer><DealerOnboarding /></RequireDealer></RequireAuth>;
+  if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerAuctionSetupWizard /></RequireDealer></RequireAuth>;
+  if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperations /></RequireDealer></RequireAuth>;
+  if (path.startsWith('/dealer/auction-operations/') && path !== '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperationCase /></RequireDealer></RequireAuth>;
   return <AppInner />;
 }
 

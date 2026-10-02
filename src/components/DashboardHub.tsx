@@ -4,6 +4,7 @@ import { getOwnershipDashboard } from '../services/ownershipApi';
 import * as dealerApi from '../services/dealerPlatformApi';
 import { getControlPlaneSnapshot } from '../services/commandCenterApi';
 import { inspectionAPI } from '../api/api';
+import { AuctionExperienceRail, BidderIdentityCard } from './auction/AuctionExperienceRail';
 
 type Props = { user: any; vehicles?: any[]; onNavigate: (nav: string) => void };
 
@@ -57,7 +58,9 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
 
   const toggle = (id: string) => setHidden((prev) => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev,id]);
 
-  return <section className="space-y-6 pb-10" data-dashboard-role={role}>
+  return <section className="space-y-6 pb-10 auction-dashboard-experience" data-dashboard-role={role}>
+    <AuctionExperienceRail current="wallet" />
+    <BidderIdentityCard user={user} savedCount={0} onPayments={() => onNavigate('payments')} />
     <div className="rounded-3xl p-6 text-white shadow-lg" style={{background:`linear-gradient(135deg, ${config.accent}, #0A3340)`}}>
       <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">KAYAD workspace</p><h1 className="mt-1 text-2xl font-black">{config.title}</h1><p className="mt-1 max-w-2xl text-sm text-white/70">{config.subtitle}</p></div>

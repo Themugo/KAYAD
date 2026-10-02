@@ -67,7 +67,9 @@ describe("registration contract", () => {
     const resend = source.slice(source.indexOf('export const resendVerification'), source.indexOf('// ============================================================\n// POST /api/auth/forgot-password'));
     expect(resend).toMatch(/void \(async \(\) => \{/);
     expect(resend).toMatch(/status\(202\)\.json/);
-    expect(resend).not.toMatch(/const verificationDelivery = await deliver/);
+    // The provider call may only be awaited inside the detached void IIFE.
+    const beforeDetached = resend.slice(0, resend.indexOf("void (async () => {"));
+    expect(beforeDetached).not.toMatch(/await deliver\(/);
   });
   it("keeps auth route rate limiting at the mount boundary only", () => {
     const routes = fs.readFileSync(new URL("../../routes/authRoutes.js", import.meta.url), "utf8");
@@ -92,11 +94,12 @@ describe("registration onboarding integration contract", () => {
 
   it("does not await external verification email delivery inside registration", () => {
     const source = fs.readFileSync(new URL("../../controllers/authController.js", import.meta.url), "utf8");
-    const register = source.slice(source.indexOf('export const register'), source.indexOf('// =============================\\n// 🔑 LOGIN'));
-    expect(register).toMatch(/void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/);
+    const register = source.slice(source.indexOf('export const register'), source.indexOf('export const login'));
+    expect(register).toMatch(/void deliver\(verificationPayload\)/);
     expect(register).toMatch(/void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/);
-    expect(register).not.toMatch(/await deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.EMAIL_VERIFICATION/);
-    expect(register).not.toMatch(/await deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/);
+    expect(register).not.toMatch(/await deliver\(/);
+    // A failed email must never delete a committed account.
+    expect(register).not.toMatch(/findByIdAndDelete/);
   });
 
   it("frontend has a verification page and the API uses the token path contract", () => {

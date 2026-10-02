@@ -2,14 +2,16 @@ import { stkPush } from "./mpesaService.js";
 import { sendNotification } from "./notification.service.js";
 import { findById, findOne, create, update } from "../db/index.js";
 
-export async function initiateBidSecurity({ auctionId, userId, phone, amount }) {
+export async function initiateBidSecurity({ auctionId, userId, phone, amount, registrationId }) {
   const auction = await findById("cars", auctionId);
-  if (!auction || !["live", "ended"].includes(auction.auctionStatus)) return { success: false, message: "Auction not found" };
+  const setup = await findOne("auction_setups", { car_id: auctionId });
+  if (!auction || !setup || setup.publication_status !== "published") return { success: false, message: "Auction is not published" };
+  const setupConfig = setup.config || {};
+  if (setupConfig.startsAt && Date.parse(setupConfig.startsAt) <= Date.now()) return { success: false, message: "Auction registration commitment window has closed" };
 
   const securityAmount = amount || auction.bidSecurityAmount || 50000;
 
-  const destination =
-    process.env.KAYAD_MASTER_PAYBILL;
+  const destination = setupConfig.commitment?.recipientAccount || process.env.KAYAD_AUCTION_COMMITMENT_PAYBILL;
 
   // Trigger STK Push
   if (!destination) {
@@ -41,6 +43,7 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount }) 
     checkoutRequestId: checkoutID,
     description: `Bid security for auction ${auctionId} — held in KAYAD escrow`,
     reference: `SEC-${auctionId}-${Date.now()}`,
+    metadata: { auctionRegistrationId: registrationId || null, auctionId, recipient: setupConfig.commitment?.recipient || "organizer" },
   });
 
   return { success: true, transaction, checkoutID, mode, destination };
@@ -58,10 +61,24 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
 
   if (resultCode !== 0) {
     await update("transactions", transaction.id, { status: "failed" });
+    try {
+      const { finalizeCommitmentRegistration } = await import("./auctionRegistration.service.js");
+      await finalizeCommitmentRegistration({ checkoutRequestID, success: false, receipt: null });
+    } catch (_) {}
     return { success: false, message: "Payment failed" };
   }
 
   await update("transactions", transaction.id, { status: "success", mpesaReceipt });
+
+  // Auction Phase 5: activate the canonical bidder registration after the
+  // provider-confirmed commitment succeeds. This is idempotent and does not
+  // create a second payment/registration authority.
+  try {
+    const { finalizeCommitmentRegistration } = await import("./auctionRegistration.service.js");
+    await finalizeCommitmentRegistration({ checkoutRequestID, success: true, receipt: mpesaReceipt });
+  } catch (registrationErr) {
+    console.warn("Bid security succeeded but bidder registration activation failed", registrationErr.message);
+  }
 
   try {
     const { generateReceipt } = await import("./pdfService.js");

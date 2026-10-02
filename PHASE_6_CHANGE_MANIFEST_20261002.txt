@@ -1,0 +1,15 @@
+PHASE 6 — AUCTION DISCOVERY & TAB CONVERGENCE
+
+Modified:
+src/features/AuctionsView.tsx
+src/App.tsx
+
+Added certification:
+PHASE_6_AUCTION_DISCOVERY_CONVERGENCE_20261002.md
+PHASE_6_CHANGE_MANIFEST_20261002.txt
+
+Canonical customer route:
+/auction/:id -> AuctionLivePage
+
+Legacy discovery route:
+discovery -> canonical AuctionsView

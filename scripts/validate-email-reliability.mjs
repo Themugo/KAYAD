@@ -19,9 +19,9 @@ const resend = auth.slice(resendStart, resendEnd);
 const saveIndex = resend.indexOf("userAuth.emailVerifyToken = nextVerifyTokenHash");
 const deliveryIndex = resend.indexOf("const verificationDelivery = await deliver");
 
-check("registration creates UserAuth before verification delivery", auth.indexOf("UserAuth.create") < auth.indexOf("const verificationDelivery = await deliver"));
-check("registration rolls back both records when required verification delivery fails", auth.includes("UserAuth.deleteOne({ _id: userAuth._id })") && auth.includes("User.deleteOne({ _id: user._id })"));
-check("required verification treats non-sent delivery as failure", auth.includes("assertEmailDeliverySucceeded(verificationDelivery, \"Verification\")"));
+check("registration commits users/user_auth atomically before non-blocking verification delivery", auth.includes("kayad_register_identity_atomic") && auth.includes("p_password_hash") && auth.includes("void deliver(verificationPayload).catch"));
+check("registration does not delete a committed identity when verification delivery fails", !auth.includes("User.findByIdAndDelete(user.id)") && auth.includes("void deliver(verificationPayload).catch"));
+check("registration leaves verification retryable when delivery is unavailable", auth.includes("void deliver(verificationPayload).catch") && auth.includes("resendVerification"));
 check("resend generates replacement token without persisting it first", resend.includes("const nextVerifyTokenHash = hashToken(verifyToken)") && !resend.includes("await userAuth.save();\n\n    try {"));
 check("resend commits replacement token only after provider acceptance", saveIndex > deliveryIndex && resend.includes("Provider acceptance is the commit point for the replacement token"));
 check("resend leaves persisted token untouched on delivery failure", resend.includes("The persisted token was never changed"));

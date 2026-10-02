@@ -89,6 +89,14 @@ export const carsAPI = {
 };
 
 // ── BIDS ──────────────────────────────────────────────
+export const auctionRegistrationAPI = {
+  room: (auctionId: string) => api.get(`/auctions/${auctionId}/room`).then(unwrap),
+  get: (auctionId: string) => api.get(`/auctions/${auctionId}/registration`).then(unwrap),
+  register: (auctionId: string, body: any) => api.post(`/auctions/${auctionId}/registration`, body).then(unwrap),
+  initiateCommitment: (auctionId: string) => api.post(`/auctions/${auctionId}/registration/commitment`).then(unwrap),
+  authorize: (auctionId: string) => api.get(`/auctions/${auctionId}/registration/authorization`).then(unwrap),
+};
+
 export const bidsAPI = {
   place:           (carId: string, body: any) => api.post(`/bids/${carId}/bid`, body).then(unwrap),
   getForCar:       (carId: string)       => api.get(`/bids/${carId}/bids`).then(unwrap),
@@ -120,7 +128,11 @@ export const escrowAPI = {
   requestRelease: (id: string)          => api.post(`/escrow/${id}/request-release`).then(unwrap),
   confirmVehicle: (id: string)          => api.post(`/escrow/${id}/confirm-vehicle`).then(unwrap),
   confirmDelivery:(id: string)          => api.post(`/escrow/${id}/confirm-delivery`).then(unwrap),
-  close:          (id: string)          => api.post(`/escrow/${id}/close`).then(unwrap),
+  close:          (id: string, body?: any) => api.post(`/escrow/${id}/close`, body).then(unwrap),
+  operationsDashboard: (params?: any) => api.get(`/escrow/operations/dashboard`, { params }).then(unwrap),
+  operationsCase: (id: string) => api.get(`/escrow/operations/case/${id}`).then(unwrap),
+  runOperationsReconciliation: (body: any) => api.post(`/escrow/operations/reconcile`, body).then(unwrap),
+  runOperationsAnomalyScan: (body: any) => api.post(`/escrow/operations/anomaly-scan`, body).then(unwrap),
 };
 
 // ── DEALER ────────────────────────────────────────────
@@ -146,6 +158,8 @@ export const dealerAPI = {
   updateSettlement: (body: any)       => api.put('/dealer/settlement', body).then(unwrap),
   getMyActivityLog: (params: any)     => api.get('/security-logs/my', { params }).then(unwrap),
   getProfile:   ()       => api.get('/dealer/profile').then(unwrap),
+  getOnboarding: ()       => api.get('/dealer/onboarding').then(unwrap),
+  completeOnboarding: (body: any) => api.put('/dealer/onboarding', body).then(unwrap),
   updateProfile: (body: any)  => api.put('/dealer/profile', body).then(unwrap),
   milestones:   ()       => api.get('/dealer/milestones').then(unwrap),
   upgrade:      (body: any) => api.post('/dealer/upgrade', body).then(unwrap),
@@ -378,10 +392,28 @@ export const auctionAdminAPI = {
 };
 
 // ── DEALER AUCTION ────────────────────────────────────
+export const auctionSetupAPI = {
+  get:       (carId: string) => api.get(`/dealer/cars/${carId}/auction/setup`).then(unwrap),
+  save:      (carId: string, body: any) => api.put(`/dealer/cars/${carId}/auction/setup`, body).then(unwrap),
+  publish:   (carId: string) => api.post(`/dealer/cars/${carId}/auction/publish`).then(unwrap),
+  amend:     (carId: string, body: any) => api.post(`/dealer/cars/${carId}/auction/amendments`, body).then(unwrap),
+};
+
 export const dealerAuctionAPI = {
   start:     (carId: string, body: any)  => api.post(`/dealer/cars/${carId}/auction/start`, body).then(unwrap),
   end:       (carId: string)        => api.post(`/dealer/cars/${carId}/auction/end`).then(unwrap),
   extend:    (carId: string, hours: number) => api.post(`/dealer/cars/${carId}/auction/extend`, { hours }).then(unwrap),
+};
+
+export const auctionOperationsAPI = {
+  list:       (params?: any) => api.get('/auctions/operations', { params }).then(unwrap),
+  get:        (id: string) => api.get(`/auctions/${id}/operations`).then(unwrap),
+  collection: (id: string, body: any) => api.post(`/auctions/${id}/collection`, body).then(unwrap),
+  transfer:   (id: string, body: any) => api.post(`/auctions/${id}/transfer`, body).then(unwrap),
+  release:    (id: string) => api.post(`/auctions/${id}/escrow/release`).then(unwrap),
+  cancel:     (id: string, body: any) => api.post(`/auctions/${id}/cancel`, body).then(unwrap),
+  dispute:    (id: string, body: any) => api.post(`/auctions/${id}/dispute`, body).then(unwrap),
+  reaward:    (id: string) => api.post(`/auctions/${id}/reaward`).then(unwrap),
 };
 
 // ── VERIFIED BUYER ────────────────────────────────────

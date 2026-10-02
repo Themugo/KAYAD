@@ -85,7 +85,7 @@ export const uploadImage = async (file, folder = "kayad/cars", options = {}) => 
       invalidate: true,
 
       // Preserve original if requested
-      type: preserveOriginal ? "upload" : "upload",
+      type: visibility === "private" ? "authenticated" : "upload",
 
       // Additional optimizations
       quality: compress ? "auto:good" : "auto",
@@ -136,18 +136,58 @@ export const uploadImage = async (file, folder = "kayad/cars", options = {}) => 
       public_id: publicId,
 
       // 🔥 ALWAYS KEEP THIS
-      url: result.secure_url,
+      // Private resources are uploaded as Cloudinary authenticated assets and
+      // must never expose an unsigned public delivery URL. The signed URL is
+      // intentionally short-lived at the application boundary.
+      url: visibility === "private"
+        ? cloudinary.url(publicId, { secure: true, type: "authenticated", sign_url: true })
+        : result.secure_url,
 
       // 🔥 STRUCTURED IMAGES (NEW UI)
-      card: cloudinary.url(publicId, { transformation: T.card }),
-      thumb: cloudinary.url(publicId, { transformation: T.thumb }),
-      blur: cloudinary.url(publicId, { transformation: T.blur }),
+      card: cloudinary.url(publicId, {
+        secure: true,
+        type: visibility === "private" ? "authenticated" : "upload",
+        sign_url: visibility === "private",
+        transformation: T.card,
+      }),
+      thumb: cloudinary.url(publicId, {
+        secure: true,
+        type: visibility === "private" ? "authenticated" : "upload",
+        sign_url: visibility === "private",
+        transformation: T.thumb,
+      }),
+      blur: cloudinary.url(publicId, {
+        secure: true,
+        type: visibility === "private" ? "authenticated" : "upload",
+        sign_url: visibility === "private",
+        transformation: T.blur,
+      }),
 
       // 🔥 RESPONSIVE VARIANTS (NEW)
-      mobile: cloudinary.url(publicId, { transformation: T.mobile }),
-      tablet: cloudinary.url(publicId, { transformation: T.tablet }),
-      desktop: cloudinary.url(publicId, { transformation: T.desktop }),
-      large: cloudinary.url(publicId, { transformation: T.large }),
+      mobile: cloudinary.url(publicId, {
+        secure: true,
+        type: visibility === "private" ? "authenticated" : "upload",
+        sign_url: visibility === "private",
+        transformation: T.mobile,
+      }),
+      tablet: cloudinary.url(publicId, {
+        secure: true,
+        type: visibility === "private" ? "authenticated" : "upload",
+        sign_url: visibility === "private",
+        transformation: T.tablet,
+      }),
+      desktop: cloudinary.url(publicId, {
+        secure: true,
+        type: visibility === "private" ? "authenticated" : "upload",
+        sign_url: visibility === "private",
+        transformation: T.desktop,
+      }),
+      large: cloudinary.url(publicId, {
+        secure: true,
+        type: visibility === "private" ? "authenticated" : "upload",
+        sign_url: visibility === "private",
+        transformation: T.large,
+      }),
 
       width: result.width,
       height: result.height,

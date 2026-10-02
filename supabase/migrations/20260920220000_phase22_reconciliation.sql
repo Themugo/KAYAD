@@ -1,5 +1,40 @@
 -- Phase 22 canonical reconciliation. Idempotent against the live Phase 22 schema.
 -- Apply after the existing KAYAD inspection/dispute/finance migrations.
+--
+-- Database contract repair: service_jobs previously referenced
+-- vehicle_service_offerings and roadside_service_requests without those
+-- tables existing anywhere in the migration chain. That made a clean
+-- Supabase reset fail at this migration. These two tables are now defined
+-- here as the existing service-job reference domains; no new UI/API feature
+-- is introduced by this repair.
+
+create table if not exists public.vehicle_service_offerings (
+ id uuid primary key default gen_random_uuid(),
+ provider_id uuid references public.inspection_providers(id) on delete cascade,
+ name text not null,
+ description text,
+ service_type text,
+ price numeric not null default 0 check(price >= 0),
+ currency text not null default 'KES',
+ status text not null default 'active' check(status in ('active','inactive','archived')),
+ metadata jsonb not null default '{}',
+ created_at timestamptz not null default now(),
+ updated_at timestamptz not null default now()
+);
+create index if not exists idx_vehicle_service_offerings_provider_status on public.vehicle_service_offerings(provider_id,status);
+
+create table if not exists public.roadside_service_requests (
+ id uuid primary key default gen_random_uuid(),
+ requester_id uuid references public.users(id) on delete set null,
+ car_id uuid references public.cars(id) on delete set null,
+ service_type text not null,
+ status text not null default 'requested' check(status in ('requested','accepted','in_progress','completed','cancelled','disputed')),
+ location text,
+ details jsonb not null default '{}',
+ created_at timestamptz not null default now(),
+ updated_at timestamptz not null default now()
+);
+create index if not exists idx_roadside_service_requests_requester_status on public.roadside_service_requests(requester_id,status);
 
 create table if not exists public.service_jobs (
  id uuid primary key default gen_random_uuid(), provider_id uuid not null references public.inspection_providers(id), requester_id uuid not null references public.users(id),

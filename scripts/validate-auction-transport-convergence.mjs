@@ -11,7 +11,7 @@ const files = {
 const read = (name) => fs.readFileSync(files[name], 'utf8');
 const checks = [
   ['canonical auction service uses shared request transport', /from ['"]\.\.\/api\/httpRequest['"]/.test(read('service'))],
-  ['AuctionsView uses canonical fetchActiveAuctions', /fetchActiveAuctions/.test(read('view')) && !/auctionAPI/.test(read('view'))],
+  ['AuctionsView uses canonical auction service transport', /fetchList|fetchActiveAuctions/.test(read('view')) && !/auctionAPI/.test(read('view'))],
   ['marketplaceCore uses canonical auction service', /fetchActiveAuctions|fetchAuction/.test(read('core')) && !/auctionAPI/.test(read('core'))],
   ['legacy public auction export removed', !/export const auctionAPI/.test(read('exports'))],
   ['auction service supports active/list/my/get contracts', ['fetchList','fetchAuction','fetchActiveAuctions','fetchMyAuctions'].every((n) => new RegExp(`export async function ${n}`).test(read('service')))],

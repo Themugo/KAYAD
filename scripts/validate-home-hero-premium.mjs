@@ -14,7 +14,7 @@ const checks = [
   ['existing carousel controls remain wired', source.includes('Previous featured vehicles') && source.includes('Next featured vehicles')],
   ['existing search bridge remains immediately below hero', source.includes('2. SEARCH BRIDGE') && source.includes('Hero maximum price filter')],
   ['Drive Your Dream headline remains canonical', source.includes('Drive Your Dream Today')],
-  ['premium vehicle stage remains presentation-only', source.includes('Real featured inventory: presented as premium photography cards') && source.includes('backdrop-blur-md') && source.includes('shadow-[0_30px_85px_rgba(0,0,0,.48)]')],
+  ['premium vehicle stage remains presentation-only', source.includes('KAYAD Select') && source.includes('Verified listing') && source.includes('backdrop-blur-md') && source.includes('shadow-[0_32px_90px_rgba(0,0,0,.50)]')],
 ];
 
 let passed = 0;

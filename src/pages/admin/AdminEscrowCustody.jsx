@@ -3,6 +3,7 @@ import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { writeEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { useAuth } from '../../context/AuthContext';
+import { userHasPermission, PERM } from '../../utils/permissions';
 
 const EMPTY_ACCOUNT = { accountName: '', bankName: '', accountNumber: '', branch: '', currency: 'KES', isActive: true, isPrimary: false, notes: '' };
 const DEFAULT_RULES = { enabled: false, privateSellerRequirement: 'mandatory', fundingMethods: ['bank_transfer'], releaseDays: 3, minimumAmount: 0, maximumAmount: '', commissionPct: 0, futureWalletEnabled: false };
@@ -15,6 +16,7 @@ export default function AdminEscrowCustody() {
   const [account, setAccount] = useState(EMPTY_ACCOUNT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const canConfigure = userHasPermission(user, PERM.CONFIGURE_ESCROW) || userHasPermission(user, PERM.MANAGE_ESCROW);
 
   const load = async () => {
     setLoading(true);
@@ -60,6 +62,7 @@ export default function AdminEscrowCustody() {
   if (loading) return <div className="card" style={{ padding: 24 }}>Loading escrow custody configuration…</div>;
 
   return <div style={{ display: 'grid', gap: 20 }}>
+    {!canConfigure && <div className="card" style={{ padding: 16, border: '1px solid var(--border)' }}><strong>Read-only custody view.</strong><div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Your account can inspect escrow configuration only. Custody-account and rule changes require Configure Escrow permission.</div></div>}
     <div className="card" style={{ padding: 24, border: '1px solid var(--border)' }}>
       <h3 style={{ fontSize: 18, marginBottom: 8 }}>🏦 Vehicle Escrow Custody</h3>
       <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 18 }}>
@@ -75,7 +78,7 @@ export default function AdminEscrowCustody() {
           <label>Escrow fee (%)<input className="input" type="number" min="0" max="50" value={rules.commissionPct} onChange={e => setRules(r => ({ ...r, commissionPct: e.target.value }))} /></label>
         </div>
         <div style={{ padding: 12, background: 'var(--surface)', borderRadius: 8, fontSize: 12 }}><strong>Funding rail:</strong> Bank transfer only. <strong>Future:</strong> KAYAD e-wallet remains disabled and is not represented as a live funding method.</div>
-        <button className="btn btn-gold" onClick={saveRules} disabled={saving}>{saving ? 'Saving…' : 'Save Escrow Rules'}</button>
+        <button className="btn btn-gold" onClick={saveRules} disabled={saving || !canConfigure}>{saving ? 'Saving…' : 'Save Escrow Rules'}</button>
       </div>
     </div>
 
@@ -85,10 +88,10 @@ export default function AdminEscrowCustody() {
       <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
         {['accountName','bankName','accountNumber','branch'].map(key => <input key={key} className="input" placeholder={key.replace(/([A-Z])/g, ' $1')} value={account[key]} onChange={e => setAccount(a => ({ ...a, [key]: e.target.value }))} />)}
         <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={account.isPrimary} onChange={e => setAccount(a => ({ ...a, isPrimary: e.target.checked }))} /> Primary custody account</label>
-        <button className="btn btn-gold" onClick={addAccount} disabled={saving}>Add Custody Account</button>
+        <button className="btn btn-gold" onClick={addAccount} disabled={saving || !canConfigure}>Add Custody Account</button>
       </div>
       <div style={{ marginTop: 20, display: 'grid', gap: 10 }}>
-        {accounts.map(a => <div key={a.id} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}><div><strong>{a.accountName}</strong><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.bankName} · {a.accountNumber}{a.branch ? ` · ${a.branch}` : ''}</div></div><div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{a.isPrimary && <span className="badge badge-green">PRIMARY</span>}<button className="btn btn-sm btn-outline" onClick={() => removeAccount(a.id)}>Remove</button></div></div>)}
+        {accounts.map(a => <div key={a.id} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}><div><strong>{a.accountName}</strong><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.bankName} · {a.accountNumber}{a.branch ? ` · ${a.branch}` : ''}</div></div><div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{a.isPrimary && <span className="badge badge-green">PRIMARY</span>}<button className="btn btn-sm btn-outline" disabled={!canConfigure} onClick={() => removeAccount(a.id)}>Remove</button></div></div>)}
         {!accounts.length && <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No active escrow custody account configured. Escrow cannot be enabled until one is added.</div>}
       </div>
     </div>

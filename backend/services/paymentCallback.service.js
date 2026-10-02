@@ -8,6 +8,7 @@ import { recordPaymentEvent, recordWebhookReceipt, markWebhookProcessed, markAtt
 import { assertPaymentTransition } from "./paymentStateMachine.js";
 import { activateDealerSubscriptionFromPayment } from "./dealerSubscription.service.js";
 import { getSupabase } from "../utils/supabase.js";
+import { recordPurchasePayment } from "./ledgerService.js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -182,8 +183,24 @@ export const handleMpesaCallback = async (callbackData) => {
       await retry(() => atomicSettleBidPayment(payment.id, receipt));
     }
 
+    if (payment.type === "auction_win") {
+      const outcomeId = payment.metadata?.auctionOutcomeId || payment.metadata?.auction_outcome_id;
+      if (!outcomeId) {
+        await releaseClaim();
+        throw new Error("Auction winner payment is missing its outcome reference");
+      }
+      const { markAuctionPaymentReceived } = await import("./auctionSettlement.service.js");
+      await markAuctionPaymentReceived({ outcomeId, paymentId: payment.id, receipt });
+    }
+
     if (payment.type === "purchase") {
       const settlement = await atomicSettlePurchasePayment(payment.id, receipt);
+      await recordPurchasePayment({
+        payment_id: payment.id,
+        user_id: payment.user,
+        amount: Number(payment.amount),
+        refundRequired: Boolean(settlement?.refund_required),
+      });
       if (settlement?.refund_required) {
         await sendNotification({
           userId: payment.user,

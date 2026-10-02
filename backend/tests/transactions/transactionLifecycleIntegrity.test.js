@@ -19,7 +19,7 @@ describe("Transaction lifecycle integrity contracts", () => {
   });
 
   test("canonical migration contains atomic auto-bid and close functions", () => {
-    const sql = read("supabase/migrations/20260905050000_transaction_lifecycle_integrity.sql");
+    const sql = read("supabase/migrations/20260905060000_transaction_lifecycle_integrity.sql");
     expect(sql).toContain("kayad_auto_bid_atomic");
     expect(sql).toContain("kayad_close_auction_atomic");
     expect(sql).toContain("FOR UPDATE");

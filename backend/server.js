@@ -43,6 +43,8 @@ import carRoutes from "./routes/carRoutes.js";
 import valuationRoutes from "./routes/valuationRoutes.js";
 import bidRoutes from "./routes/bidRoutes.js";
 import dealerRoutes from "./routes/dealerRoutes.js";
+import auctionSetupRoutes from "./routes/auctionSetupRoutes.js";
+import auctionRegistrationRoutes from "./routes/auctionRegistrationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import escrowRoutes from "./routes/escrowRoutes.js";
@@ -762,6 +764,10 @@ app.use("/api/cars", carRoutes);
 app.use("/api/valuation", valuationRoutes);
 app.use("/api/bids", idempotencyCheck, csrfProtection, bidRoutes); // Idempotency + CSRF for state-changing bid operations
 app.use("/api/dealer", dealerRoutes);
+app.use("/api/dealer", auctionSetupRoutes);
+app.use("/api/auctions", auctionRegistrationRoutes);
+app.use("/api/auctions", auctionSettlementRoutes);
+app.use("/api/auctions", auctionFulfilmentRoutes);
 app.use("/api/admin", adminLimiter, adminRoutes);
 
 app.use("/api/payments", externalTimeout, paymentRoutes);

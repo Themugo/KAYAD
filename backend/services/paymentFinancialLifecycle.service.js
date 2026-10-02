@@ -2,6 +2,7 @@
 // These helpers persist provider attempts/events without inventing business state.
 import crypto from "crypto";
 import { create, findOne, update } from "../db/index.js";
+import { withLock } from "../middleware/distributedLock.js";
 
 const hashPayload = (payload) =>
   crypto.createHash("sha256").update(JSON.stringify(payload ?? {})).digest("hex");
@@ -37,18 +38,35 @@ export const recordPaymentAttempt = async ({ paymentId, checkoutRequestId, statu
 export const recordWebhookReceipt = async (payload) => {
   const provider = await getMpesaProvider();
   const dedupeKey = hashPayload(payload);
-  const existing = await findOne("webhook_events", { dedupeKey });
-  if (existing?.processed) return { duplicate: true, event: existing };
-  if (existing) return { duplicate: false, event: existing, retry: true };
+  return withLock(`webhook:mpesa:${dedupeKey}`, async () => {
+    const existing = await findOne("webhook_events", {
+      eventSource: "mpesa_daraja",
+      dedupeKey,
+    });
+    if (existing?.processed) return { duplicate: true, event: existing };
+    if (existing) return { duplicate: false, event: existing, retry: true };
 
-  const event = await create("webhook_events", {
-    providerId: provider?.id || null,
-    eventSource: "mpesa_daraja",
-    dedupeKey,
-    rawPayload: payload,
-    processed: false,
-  });
-  return { duplicate: false, event };
+    try {
+      const event = await create("webhook_events", {
+        providerId: provider?.id || null,
+        eventSource: "mpesa_daraja",
+        dedupeKey,
+        rawPayload: payload,
+        processed: false,
+      });
+      return { duplicate: false, event };
+    } catch (error) {
+      if (error?.code !== "23505") throw error;
+      const event = await findOne("webhook_events", {
+        eventSource: "mpesa_daraja",
+        dedupeKey,
+      });
+      if (!event) throw error;
+      return event.processed
+        ? { duplicate: true, event }
+        : { duplicate: false, event, retry: true };
+    }
+  }, 120000);
 };
 
 export const markWebhookProcessed = async (eventId, { error = null } = {}) => {

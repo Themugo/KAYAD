@@ -470,7 +470,7 @@ router.put("/change-password", protect, asyncHandler(changePassword));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/verify-email/:token", authLimiter, asyncHandler(verifyEmail));
+router.get("/verify-email/:token", verificationLimiter, authLimiter, asyncHandler(verifyEmail));
 router.post("/resend-verification", verificationLimiter, authLimiter, asyncHandler(resendVerification));
 
 // =============================

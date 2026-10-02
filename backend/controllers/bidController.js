@@ -17,6 +17,7 @@ import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { atomicPlaceBid, atomicConfirmBidPayment, atomicAutoBid } from "../utils/atomicTransactions.js";
 import { findOrCreateLeadFromAuction, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logAuctionBidPlaced } from "../services/auditService.js";
+import { assertBidderAuthorized } from "../services/auctionRegistration.service.js";
 
 // =============================
 // 🆔 PSEUDONYM GENERATOR
@@ -202,6 +203,11 @@ export const placeBid = async (req, res) => {
         message: "A verified phone number is required to place bids. Update your profile.",
       });
     }
+
+    // 🪪 Auction-specific registration is the canonical gate for every bid.
+    // This prevents direct API callers from bypassing registration, eligibility,
+    // terms acceptance, and any configured bidder commitment.
+    await assertBidderAuthorized({ auctionId: carId, userId });
 
     // 🛡 High-value bid verification
     if (amount > 5000000) {

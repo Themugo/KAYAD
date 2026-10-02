@@ -73,8 +73,8 @@ expect(
 
 expect(
   "C2 verification route is rate-limited",
-  authRoutes.includes('router.get("/verify-email/:token", authLimiter') &&
-    authRoutes.includes('router.post("/resend-verification", authLimiter'),
+  authRoutes.includes('router.get("/verify-email/:token", verificationLimiter, authLimiter') &&
+    authRoutes.includes('router.post("/resend-verification", verificationLimiter, authLimiter'),
   "verification endpoints use auth rate limiting",
 );
 

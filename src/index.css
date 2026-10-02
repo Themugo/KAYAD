@@ -1,3 +1,5 @@
+@import "./styles/auction-experience-2.css";
+@import "./styles/auction-premium.css";
 @import "tailwindcss";
 
 :root {

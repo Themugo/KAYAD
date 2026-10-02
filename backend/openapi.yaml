@@ -89,6 +89,31 @@ paths:
           description: Rate limited
         '500':
           description: Internal server error
+  /api/auth/csrf:
+    get:
+      tags:
+      - Authentication
+      summary: Compatibility CSRF bootstrap
+      description: Return the browser CSRF token and set the shared XSRF-TOKEN cookie on the maintained unversioned compatibility route.
+      operationId: getCompatibilityAuthCsrf
+      security: []
+      responses:
+        '200':
+          description: CSRF bootstrap token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, csrfToken]
+                properties:
+                  success:
+                    type: boolean
+                  csrfToken:
+                    type: string
+        '429':
+          description: Rate limited
+        '500':
+          description: Internal server error
   /api/admin/bulk/cars/delete:
     post:
       tags:
@@ -7083,6 +7108,75 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/dealer/onboarding:
+    get:
+      tags:
+      - Dealer
+      summary: Get dealer onboarding state
+      description: Return or initialize the authenticated dealer's pending onboarding profile.
+      operationId: getDealerOnboarding
+      responses:
+        '200':
+          description: Dealer onboarding state
+        '401':
+          description: Unauthorized
+        '403':
+          description: Dealer role required
+    put:
+      tags:
+      - Dealer
+      summary: Complete dealer onboarding
+      description: Persist the dealer profile, payment details and verification documents, then submit the existing dealer verification workflow.
+      operationId: completeDealerOnboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [businessName, location, paymentDetails, documents]
+              properties:
+                businessName:
+                  type: string
+                location:
+                  type: string
+                bio:
+                  type: string
+                paymentDetails:
+                  type: object
+                  required: [bankName, accountName, accountNumber, mpesaPhone]
+                  properties:
+                    bankName:
+                      type: string
+                    accountName:
+                      type: string
+                    accountNumber:
+                      type: string
+                    paybillNumber:
+                      type: string
+                    mpesaPhone:
+                      type: string
+                documents:
+                  type: object
+                  required: [governmentId, kraPin]
+                  properties:
+                    governmentId:
+                      type: object
+                    kraPin:
+                      type: object
+                    businessRegistration:
+                      type: object
+      responses:
+        '200':
+          description: Dealer onboarding completed and verification submitted
+        '400':
+          description: Invalid onboarding data or missing dealer profile
+        '401':
+          description: Unauthorized
+        '403':
+          description: Dealer role required
+        '409':
+          description: Existing verification is not eligible for resubmission
   /api/dealer/analytics:
     get:
       tags:

@@ -17,7 +17,7 @@ const ROLE_OPTIONS: Array<{ id: OnboardingRole; title: string; description: stri
   { id: 'buyer', title: 'Buyer', description: 'Browse, save, compare, bid and purchase securely.', icon: UserRound, tone: 'blue' },
   { id: 'individual_seller', title: 'Private Seller', description: 'Sell your own vehicle with a guided listing and verification path.', icon: Car, tone: 'emerald' },
   { id: 'dealer', title: 'Dealer', description: 'Operate a verified dealership, inventory and commercial dashboard.', icon: Building2, tone: 'amber' },
-  { id: 'inspector', title: 'Inspector', description: 'Apply to join the KAYAD certified inspection network.', icon: Wrench, tone: 'violet' },
+  { id: 'inspector', title: 'Inspector / Mechanic', description: 'Mechanics and vehicle inspectors: apply to join the KAYAD certified inspection network.', icon: Wrench, tone: 'violet' },
 ];
 
 const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10';
@@ -107,7 +107,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
           <h2 className="text-2xl font-black text-[#0A3340]">{complete.kind === 'application' ? 'Inspector application received' : role === 'dealer' ? 'Dealer application submitted' : role === 'individual_seller' ? 'Private seller account created' : 'Welcome to KAYAD'}</h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
             {complete.kind === 'application'
-              ? 'Your inspector credentials are now in the KAYAD review queue. The platform will notify you when your application is reviewed.'
+              ? 'Your application is now in the KAYAD review queue. When it is approved we will email you a link to set your password, then you can sign in.'
               : role === 'dealer'
                 ? 'Your dealer account is created. Verify your email, then sign in; dealer verification remains a platform-controlled approval step.'
                 : role === 'individual_seller'

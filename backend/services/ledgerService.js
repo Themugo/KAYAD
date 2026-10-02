@@ -125,6 +125,36 @@ export async function recordRefund({ escrow_id, user_id, amount }) {
   });
 }
 
+export async function recordDealerPayout({ payout_id, user_id, amount }) {
+  return recordLedgerEntry({
+    external_reference: String(payout_id),
+    user_id,
+    amount,
+    source: "dealer_payout",
+    destination: "seller",
+    description: `Dealer payout of KES ${amount.toLocaleString("en-KE")} from escrow`,
+    metadata: { payout_id, event: "dealer_payout" },
+    debitAccountCode: "5000",
+    creditAccountCode: "1000",
+  });
+}
+
+export async function recordRefundSettlement({ refund_id, user_id, amount, cashAccountCode = "1000" }) {
+  const allowedCashAccounts = new Set(["1000", "1200"]);
+  if (!allowedCashAccounts.has(String(cashAccountCode))) throw new Error("Unsupported refund cash account");
+  return recordLedgerEntry({
+    external_reference: String(refund_id),
+    user_id,
+    amount,
+    source: "refund_settlement",
+    destination: "buyer",
+    description: `Refund settlement of KES ${amount.toLocaleString("en-KE")} to buyer`,
+    metadata: { refund_id, event: "refund_settlement" },
+    debitAccountCode: "2100",
+    creditAccountCode: String(cashAccountCode),
+  });
+}
+
 export async function recordSubscriptionPayment({ subscription_id, user_id, amount }) {
   return recordLedgerEntry({
     external_reference: String(subscription_id),
@@ -150,6 +180,24 @@ export async function recordInspectionFee({ inspection_id, user_id, amount }) {
     metadata: { inspection_id, event: "inspection_fee" },
     debitAccountCode: "1000",
     creditAccountCode: "4200",
+  });
+}
+
+
+
+export async function recordPurchasePayment({ payment_id, user_id, amount, refundRequired = false }) {
+  return recordLedgerEntry({
+    external_reference: String(payment_id),
+    user_id,
+    amount,
+    source: refundRequired ? "purchase_refund_payable" : "purchase_payment",
+    destination: refundRequired ? "buyer_refund" : "escrow",
+    description: refundRequired
+      ? `Purchase payment refund payable of KES ${amount.toLocaleString("en-KE")}`
+      : `Vehicle purchase payment of KES ${amount.toLocaleString("en-KE")}`,
+    metadata: { payment_id, event: refundRequired ? "purchase_refund_payable" : "purchase_payment" },
+    debitAccountCode: refundRequired ? "1000" : "1000",
+    creditAccountCode: refundRequired ? "2100" : "2000",
   });
 }
 

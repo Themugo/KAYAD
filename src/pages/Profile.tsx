@@ -4,6 +4,8 @@ import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Star, Clock, Che
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatKES } from '../utils/helpers';
+import { AuctionExperienceRail, BidderIdentityCard } from '../components/auction/AuctionExperienceRail';
+import { AuctionPremiumHeader, AuctionPremiumStats } from '../components/auction/AuctionPremiumSurface';
 
 interface ProfileProps {
   setPage: (page: string) => void;
@@ -71,7 +73,8 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear();
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-16">
+    <div className="min-h-screen bg-cream-50 pt-16 auction-profile-experience">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6"><AuctionExperienceRail current="profile" /><AuctionPremiumHeader kicker="BIDDER IDENTITY" title="Your auction profile, ready for the next room." description="Keep your identity, preferences and auction activity in one calm place so every return feels immediate." /><AuctionPremiumStats items={[{ label: 'Listings', value: user.listingsCount || 0 }, { label: 'Purchases', value: user.purchasesCount || 0 }, { label: 'Saved auctions', value: user.savedCount || 0 }, { label: 'Member since', value: memberYear }]} /><BidderIdentityCard user={user} auctionCount={user.auctionsCount || 0} savedCount={user.savedCount || 0} onPayments={() => navigate('/?nav=payments')} /></div>
       {/* Header */}
       <div className="bg-charcoal-900 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

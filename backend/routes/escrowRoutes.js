@@ -7,13 +7,15 @@
 // ─────────────────────────────────────────────────────────────
 
 import express from "express";
-import { protect, adminOnly } from "../middleware/auth.js";
+import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId, validateResponse, escrowResponseSchema } from "../middleware/validate.js";
+import { validateObjectId, validateResponse, escrowResponseSchema, escrowStateResponseSchema } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
+import { escrowAdminOnly, escrowViewOnly, escrowOperateOnly, escrowReleaseOnly, escrowRefundOnly, escrowSettlementOnly, escrowReconcileOnly, requireEscrowPermission, canViewEscrow } from "../utils/escrowAccess.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { findById } from "../db/index.js";
 import { getEscrowRules, getPrimaryEscrowAccount, sanitizeEscrowAccount, verifyEscrowFunding } from "../services/escrowConfiguration.service.js";
+import { getEscrowOperationsDashboard, getEscrowOperationsCase, runEscrowReconciliation, runEscrowAnomalyScan } from "../controllers/escrowOperationsController.js";
 
 import {
   getAllEscrows,
@@ -27,9 +29,19 @@ import {
   requestRelease,
   disputeEscrow,
   closeEscrowHandler,
+  completeEscrowRefund,
 } from "../controllers/escrowController.js";
 
 const router = express.Router();
+
+// =============================
+// 🏦 ESCROW OPERATIONS CENTER
+// Projection/control layer over canonical escrow services.
+// =============================
+router.get("/operations/dashboard", protect, escrowViewOnly, asyncHandler(getEscrowOperationsDashboard));
+router.get("/operations/case/:id", protect, escrowViewOnly, validateObjectId, asyncHandler(getEscrowOperationsCase));
+router.post("/operations/reconcile", protect, escrowReconcileOnly, idempotencyCheck, asyncHandler(runEscrowReconciliation));
+router.post("/operations/anomaly-scan", protect, escrowOperateOnly, idempotencyCheck, asyncHandler(runEscrowAnomalyScan));
 
 // =============================
 // 📄 GET: USER ESCROWS
@@ -39,7 +51,7 @@ router.get("/my", protect, asyncHandler(getUserEscrows));
 // =============================
 // 📄 GET: ALL ESCROWS (ADMIN)
 // =============================
-router.get("/", protect, adminOnly, asyncHandler(getAllEscrows));
+router.get("/", protect, escrowViewOnly, asyncHandler(getAllEscrows));
 
 // =============================
 // 🔍 GET: SINGLE ESCROW
@@ -80,16 +92,24 @@ router.get("/:id", protect, validateObjectId, validateResponse(escrowResponseSch
  *                   properties:
  *                     currentState:
  *                       type: string
- *                     availableTransitions:
+ *                     allowedTransitions:
  *                       type: array
  *                       items:
  *                         type: string
+ *                     history:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       400:
+ *         description: Invalid escrow ID
  *       401:
  *         description: Unauthorized
+ *       403:
+ *         description: Not a party to this escrow and not authorized staff
  *       404:
  *         description: Escrow not found
  */
-router.get("/:id/state", protect, validateObjectId, validateResponse(escrowResponseSchema), asyncHandler(getEscrowState));
+router.get("/:id/state", protect, validateObjectId, validateResponse(escrowStateResponseSchema), asyncHandler(getEscrowState));
 
 // =============================
 // ✅ VEHICLE CONFIRMED (BUYER)
@@ -178,7 +198,8 @@ router.post(
 router.post(
   "/:id/release",
   protect,
-  adminOnly,
+  escrowAdminOnly,
+  escrowReleaseOnly,
   createLimiter,
   idempotencyCheck,
   validateObjectId,
@@ -191,11 +212,23 @@ router.post(
 router.post(
   "/:id/refund",
   protect,
-  adminOnly,
+  escrowAdminOnly,
+  escrowRefundOnly,
   createLimiter,
   idempotencyCheck,
   validateObjectId,
   asyncHandler(refundEscrow),
+);
+
+router.post(
+  "/:id/refund/:refundId/complete",
+  protect,
+  escrowAdminOnly,
+  escrowSettlementOnly,
+  createLimiter,
+  idempotencyCheck,
+  validateObjectId,
+  asyncHandler(completeEscrowRefund),
 );
 
 // =============================
@@ -241,7 +274,8 @@ router.post(
 router.post(
   "/:id/close",
   protect,
-  adminOnly,
+  escrowAdminOnly,
+  requireEscrowPermission("emergency_escrow_control"),
   createLimiter,
   idempotencyCheck,
   validateObjectId,
@@ -254,14 +288,13 @@ router.post(
 router.get("/:id/funding-instructions", protect, validateObjectId, asyncHandler(async (req, res) => {
   const escrow = await findById("escrows", req.params.id);
   if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
-  const isParty = String(escrow.buyer) === String(req.user.id) || String(escrow.seller) === String(req.user.id);
-  if (!isParty && !["admin", "superadmin", "moderator", "escrow_officer"].includes(req.user.role)) return res.status(403).json({ success: false, message: "Not authorized" });
+  if (!canViewEscrow(escrow, req.user)) return res.status(403).json({ success: false, message: "Not authorized" });
   const rules = await getEscrowRules();
   const account = await getPrimaryEscrowAccount();
   return res.json({ success: true, data: { fundingMethod: "bank_transfer", rules: { releaseDays: rules.releaseDays, minimumAmount: rules.minimumAmount, maximumAmount: rules.maximumAmount }, account: sanitizeEscrowAccount(account), amount: escrow.amount, reference: escrow.fundingReference || `KAYAD-ESCROW-${escrow.id}` } });
 }));
 
-router.post("/:id/verify-funding", protect, adminOnly, idempotencyCheck, validateObjectId, asyncHandler(async (req, res) => {
+router.post("/:id/verify-funding", protect, escrowReconcileOnly, idempotencyCheck, validateObjectId, asyncHandler(async (req, res) => {
   const reference = String(req.body?.fundingReference || "").trim();
   if (!reference) return res.status(400).json({ success: false, message: "Funding reference is required" });
   const result = await verifyEscrowFunding(req.params.id, req.user.id, reference);

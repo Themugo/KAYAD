@@ -31,6 +31,8 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { getCars, getCarById, BackendCar } from '../services/vehicleApi';
+import { getFavorites } from '../services/favoriteApi';
+import { AuctionRecommendationStrip } from '../components/auction/AuctionWowExperience';
 import { placeBid, BidApiError } from '../services/bidApi';
 import type { UserProfile } from '../types';
 
@@ -63,6 +65,8 @@ interface AuctionVehicle {
   fuel: string;
   transmission: string;
   location: string;
+  brand?: string;
+  model?: string;
 }
 
 interface Auction {
@@ -128,6 +132,8 @@ function mapCarToAuction(car: BackendCar): Auction {
       fuel: car.fuel || '',
       transmission: car.transmission || '',
       location: car.location_city || '',
+      brand: car.brand || '',
+      model: car.model || '',
     },
     status,
     currentBid: car.current_bid || 0,
@@ -540,6 +546,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [watchingId, setWatchingId] = useState<string | null>(null);
+  const [favoritePreferences, setFavoritePreferences] = useState<{ brands: string[]; locations: string[] }>({ brands: [], locations: [] });
 
   useEffect(() => {
     let cancelled = false;
@@ -565,6 +572,27 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) {
+      setFavoritePreferences({ brands: [], locations: [] });
+      return () => { cancelled = true; };
+    }
+    getFavorites({ page: 1, limit: 50 }).then((result) => {
+      if (cancelled) return;
+      const brands = new Set<string>();
+      const locations = new Set<string>();
+      (result.favorites || []).forEach((favorite) => {
+        if (favorite.brand) brands.add(favorite.brand.toLowerCase());
+        if (favorite.location) locations.add(favorite.location.toLowerCase());
+      });
+      setFavoritePreferences({ brands: [...brands], locations: [...locations] });
+    }).catch(() => {
+      if (!cancelled) setFavoritePreferences({ brands: [], locations: [] });
+    });
+    return () => { cancelled = true; };
+  }, [user]);
+
   const searchLower = searchQuery.trim().toLowerCase();
   const filterBySearch = (a: Auction) => !searchLower || a.vehicle.title.toLowerCase().includes(searchLower) || a.vehicle.location.toLowerCase().includes(searchLower);
 
@@ -576,6 +604,17 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
     ? formatTimeRemaining(upcomingAuctions[0].startsAt)
     : 'N/A';
   const totalBids = liveAuctions.reduce((sum, a) => sum + a.bidsCount, 0);
+  const personalizedAuctions = [...liveAuctions, ...upcomingAuctions]
+    .map((auction) => {
+      const brand = auction.vehicle.brand?.toLowerCase() || '';
+      const location = auction.vehicle.location?.toLowerCase() || '';
+      const score = (favoritePreferences.brands.some((value) => brand.includes(value) || value.includes(brand)) ? 3 : 0)
+        + (favoritePreferences.locations.some((value) => location.includes(value) || value.includes(location)) ? 2 : 0)
+        + (auction.status === 'live' ? 1 : 0);
+      return { auction, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .map(({ auction }) => ({ id: auction.id, title: auction.vehicle.title, image: auction.vehicle.image, currentBid: auction.currentBid || auction.startingBid, location: auction.vehicle.location }));
 
   return (
     <div className="min-h-screen bg-[#EEF7F5]">
@@ -661,6 +700,11 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
                 </div>
               )}
             </section>
+
+            <AuctionRecommendationStrip
+              auctions={personalizedAuctions}
+              title={favoritePreferences.brands.length || favoritePreferences.locations.length ? 'Picked from what you save' : 'Your next auction shortlist'}
+            />
 
             {/* Auction Learning Center - static, informational content */}
             <section>

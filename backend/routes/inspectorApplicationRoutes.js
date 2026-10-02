@@ -1,6 +1,6 @@
 import { Router } from "express";
 import InspectorApplication from "../models/InspectorApplication.js";
-import { protect, adminOnly } from "../middleware/auth.js";
+import { protect, adminOnly, optionalAuth } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema } from "../validation/inspectorApplication.schema.js";
@@ -30,7 +30,7 @@ const validateBody = (schema) => (req, res, next) => {
 
 
 router.get("/active", asyncHandler(listActiveInspectors));
-router.post("/apply", createLimiter, validateBody(submitApplicationSchema), asyncHandler(submitApplication));
+router.post("/apply", optionalAuth, createLimiter, validateBody(submitApplicationSchema), asyncHandler(submitApplication));
 
 router.get(
   "/my",

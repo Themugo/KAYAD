@@ -14,12 +14,12 @@ const checks = [
   ['frontend verification page exists', fs.existsSync(path.join(root, 'src/pages/VerifyEmailPage.tsx'))],
   ['verification page calls backend token endpoint', /verifyEmail\(token\)/.test(read('src/pages/VerifyEmailPage.tsx')) && /\/verify-email\/\$\{encodeURIComponent\(token\)\}/.test(read('src/services/authApi.ts'))],
   ['login handles email verification gate', /verificationRequired/.test(read('src/pages/LoginPage.jsx')) && /resendVerification/.test(read('src/pages/LoginPage.jsx'))],
-  ['registration is account-creation only and does not issue a session', /Registration deliberately does not create an authenticated session/.test(read('backend/controllers/authController.js')) && /return res\.status\(201\)\.json\(\{/.test(read('backend/controllers/authController.js')) && !/register[\s\S]{0,12000}sendAuthResponse\(res\.status\(201\)/.test(read('backend/controllers/authController.js'))],
+  ['registration is account-creation only and does not issue a session', (() => { const source = read('backend/controllers/authController.js'); const start = source.indexOf('export const register'); const end = source.indexOf('// =============================\n// 🔑 LOGIN', start); const register = source.slice(start, end); return /return res\.status\(201\)\.json\(\{/.test(register) && !/sendAuthResponse\(\s*res/.test(register); })()],
   ['registration duplicate email returns conflict', /An account with that email already exists/.test(read('backend/controllers/authController.js')) && /409/.test(read('backend/controllers/authController.js'))],
-  ['verification email delivery is non-blocking during registration', (() => {
+  ['verification delivery is non-blocking after atomic registration', (() => {
     const source = read('backend/controllers/authController.js');
     const register = source.slice(source.indexOf('export const register'), source.indexOf('// =============================\n// 🔑 LOGIN'));
-    return /void deliver\(verificationPayload\)\.catch/.test(register) && !/const verificationDelivery = await deliver\(verificationPayload\)/.test(register);
+    return /void deliver\(verificationPayload\)\.catch/.test(register) && !/await deliver\(verificationPayload\)/.test(register) && !/User\.findByIdAndDelete\(user\.id\)/.test(register);
   })()],
   ['welcome email is non-blocking', /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.REGISTRATION/.test(read('backend/controllers/authController.js'))],
   ['password reset email is non-blocking', /const resetUrl = .*reset-password\?token=/.test(read('backend/controllers/authController.js')) && /void deliver\(\{[\s\S]*COMMUNICATION_EVENTS\.PASSWORD_RESET/.test(read('backend/controllers/authController.js'))],

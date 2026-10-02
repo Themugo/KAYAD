@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { authAPI, verificationAPI } from '../../api/api';
+import { dealerAPI } from '../../api/api';
 import { Check, ChevronRight, ChevronLeft, Building2, Banknote, FileText, CheckCircle } from 'lucide-react';
 
 const STEPS = [
@@ -37,20 +37,29 @@ export default function DealerOnboarding() {
 
   useEffect(() => {
     if (!user) return;
-    setForm({
-      businessName: user.businessName || '',
-      location: user.location || '',
-      bio: user.bio || '',
-      bankName: user.bankName || user.paymentDetails?.bankName || '',
-      accountName: user.paymentDetails?.accountName || '',
-      accountNumber: user.bankAccount || user.paymentDetails?.accountNumber || '',
-      paybillNumber: user.paymentDetails?.paybillNumber || '',
-      mpesaPhone: user.mpesaBusiness || user.paymentDetails?.mpesaPhone || '',
-      idType: 'national_id',
-      idNumber: user.idNumber || '',
-      kraPin: user.kraPin || '',
-      businessRegNumber: user.businessRegNumber || '',
+    let cancelled = false;
+    dealerAPI.getOnboarding().then(({ dealer }) => {
+      if (cancelled) return;
+      const payment = dealer?.paymentDetails || {};
+      setForm({
+        businessName: dealer?.businessName || user.businessName || '',
+        location: dealer?.location || user.location || '',
+        bio: dealer?.bio || user.bio || '',
+        bankName: payment.bankName || '',
+        accountName: payment.accountName || '',
+        accountNumber: payment.accountNumber || '',
+        paybillNumber: payment.paybillNumber || '',
+        mpesaPhone: payment.mpesaPhone || user.phone || '',
+        idType: 'national_id',
+        idNumber: '',
+        kraPin: '',
+        businessRegNumber: '',
+      });
+    }).catch(() => {
+      if (cancelled) return;
+      setForm((current) => ({ ...current, businessName: user.businessName || '', location: user.location || '', bio: user.bio || '' }));
     });
+    return () => { cancelled = true; };
   }, [user]);
 
   const update = (key, val) => { setForm(p => ({ ...p, [key]: val })); setErrors(p => { const n = { ...p }; delete n[key]; return n; }); };
@@ -94,46 +103,39 @@ export default function DealerOnboarding() {
   const handleSubmit = async () => {
     setSaving(true);
     try {
-      const { user: updated } = await authAPI.updateProfile({
-        businessName: form.businessName,
-        location: form.location,
-        bio: form.bio,
+      const { dealer } = await dealerAPI.completeOnboarding({
+        businessName: form.businessName.trim(),
+        location: form.location.trim(),
+        bio: form.bio.trim(),
         paymentDetails: {
-          bankName: form.bankName,
-          accountName: form.accountName,
-          accountNumber: form.accountNumber,
-          paybillNumber: form.paybillNumber,
-          mpesaPhone: form.mpesaPhone,
+          bankName: form.bankName.trim(),
+          accountName: form.accountName.trim(),
+          accountNumber: form.accountNumber.trim(),
+          paybillNumber: form.paybillNumber.trim() || undefined,
+          mpesaPhone: form.mpesaPhone.trim(),
         },
-        onboardingComplete: true,
-      });
-      if (updated) setUser(updated);
-
-      // Submit verification documents
-      try {
-        await verificationAPI.submit({
-          documents: {
-            governmentId: {
-              type: form.idType,
-              documentNumber: form.idNumber,
-            },
-            kraPin: {
-              pinNumber: form.kraPin.toUpperCase(),
-            },
-            businessRegistration: form.businessRegNumber ? {
-              registrationNumber: form.businessRegNumber,
-              businessName: form.businessName,
-            } : undefined,
+        documents: {
+          governmentId: {
+            type: form.idType,
+            documentNumber: form.idNumber.trim(),
           },
-        });
-      } catch {
-        // Non-blocking — dealer can submit documents later
-      }
+          kraPin: {
+            pinNumber: form.kraPin.toUpperCase().trim(),
+          },
+          businessRegistration: form.businessRegNumber.trim()
+            ? { registrationNumber: form.businessRegNumber.trim(), businessName: form.businessName.trim() }
+            : undefined,
+        },
+      });
 
-      toast('Onboarding complete! Choose your plan.', 'success');
-      navigate('/dealer/choose-plan');
-    } catch {
-      toast('Failed to save. Please try again.', 'error');
+      if (dealer) {
+        toast('Onboarding complete. Your verification is now with KAYAD.', 'success');
+      } else {
+        toast('Onboarding submitted. Your verification is now with KAYAD.', 'success');
+      }
+      navigate('/dealer/onboarding?complete=1', { replace: true });
+    } catch (error) {
+      toast(error?.message || 'Failed to complete onboarding. Please try again.', 'error');
     } finally {
       setSaving(false);
     }
@@ -141,7 +143,9 @@ export default function DealerOnboarding() {
 
   if (!user) return <div className="page loading-center"><div className="spinner" /></div>;
 
-  if (user.onboardingComplete) {
+  const completed = new URLSearchParams(window.location.search).get('complete') === '1';
+
+  if (completed) {
     return (
       <div className="page">
         <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }}>
@@ -150,8 +154,8 @@ export default function DealerOnboarding() {
           <p style={{ color: 'rgba(15, 23, 42, 0.5)', marginBottom: 24 }}>
             Your seller profile is all set up.
           </p>
-          <button onClick={() => navigate('/dealer')} className="btn btn-gold">
-            Go to Dealer Hub
+          <button onClick={() => navigate('/')} className="btn btn-gold">
+            Return to KAYAD
           </button>
         </div>
       </div>

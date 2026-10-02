@@ -84,16 +84,35 @@ export const paymentResponseSchema = z.object({
 });
 
 // Escrow response schemas
+// Matches what escrowController actually returns. Related records may be
+// populated (object with id) or bare ids, so references accept both.
+const escrowRef = z.union([z.string(), z.object({ id: z.string() }).passthrough(), z.null()]).optional();
+const transitionList = z.array(z.string());
+
+// GET /api/escrow/:id  -> { ...escrowRow, allowedTransitions }
 export const escrowResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
-    _id: z.string(),
-    amount: z.number(),
+    id: z.string(),
+    amount: z.union([z.number(), z.string()]),
     status: z.string(),
-    carId: z.string(),
-    buyerId: z.string(),
-    sellerId: z.string(),
+    car: escrowRef,
+    buyer: escrowRef,
+    seller: escrowRef,
+    allowedTransitions: transitionList,
+  }).passthrough().optional(),
+  message: z.string().optional(),
+});
+
+// GET /api/escrow/:id/state -> { currentState, allowedTransitions, history }
+export const escrowStateResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    currentState: z.string(),
+    allowedTransitions: transitionList,
+    history: z.array(z.any()).nullable().optional(),
   }).optional(),
+  message: z.string().optional(),
 });
 
 // Bid response schemas

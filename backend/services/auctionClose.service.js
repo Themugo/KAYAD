@@ -10,6 +10,7 @@ import { emitAuctionEnd, emitListingUpdate } from "../socket/socket.js";
 import { logAuctionEnded } from "./auditService.js";
 import { logInfo, logError } from "../utils/logger.js";
 import { emitAuctionOutcome, emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
+import { ensureAuctionOutcome } from "./auctionSettlement.service.js";
 
 const SYSTEM_ACTOR = { id: null, role: "system", name: "auction-engine", email: null };
 
@@ -21,11 +22,25 @@ export const closeAuction = async (carId, { req = null, actor = null, reason = "
     const result = await atomicCloseAuction(carId, winnerBidId);
 
     if (result?.already_closed) {
+      try {
+        await ensureAuctionOutcome({
+          carId,
+          closeResult: {
+            ...result,
+            winner: result.winner || null,
+            finalBid: Number(result.final_bid || 0),
+            winnerBidId: result.winner_bid_id || null,
+            reserveMet: result.reserve_met !== false,
+          },
+          req,
+        });
+      } catch (e) { logError("Auction outcome backfill failed", e, { carId }); }
       return {
         success: true,
         alreadyClosed: true,
         winner: result.winner || null,
         finalBid: Number(result.final_bid || 0),
+        reserveMet: result.reserve_met !== false,
       };
     }
 
@@ -64,6 +79,9 @@ export const closeAuction = async (carId, { req = null, actor = null, reason = "
       currentBid: Number(result?.final_bid || 0),
     });
     try {
+      await ensureAuctionOutcome({ carId, closeResult: { ...result, winner, finalBid: Number(result?.final_bid || 0), winnerBidId: result?.winner_bid_id || null, reserveMet: result?.reserve_met !== false }, req });
+    } catch (e) { logError("Auction outcome creation failed", e, { carId }); }
+    try {
       await emitAuctionOutcome({ carId, winnerUserId: winner?.user, winnerAmount: result?.final_bid, carTitle: car?.title });
     } catch (e) { logError("Auction outcome communications failed", e, { carId }); }
 
@@ -73,6 +91,7 @@ export const closeAuction = async (carId, { req = null, actor = null, reason = "
       finalBid: Number(result?.final_bid || 0),
       totalBids: Number(result?.total_bids || car?.bidsCount || 0),
       winnerBidId: result?.winner_bid_id || null,
+      reserveMet: result?.reserve_met !== false,
     };
   } catch (err) {
     logError("CLOSE AUCTION ERROR", err, { carId, reason });

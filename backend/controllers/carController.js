@@ -570,6 +570,12 @@ export const createCar = async (req, res) => {
     logError("CREATE ERROR", { error: err.message });
     cleanupFiles(req.files);
     const isDev = process.env.NODE_ENV === "development";
+    // Entitlement errors (assertDealerCanCreateListing) carry a deliberate
+    // 402/403 status and a user-facing message. Surface them instead of
+    // collapsing them into an opaque 500 so a dealer learns they need a plan.
+    if (!res.headersSent && Number.isInteger(err?.status) && err.status >= 400 && err.status < 500 && err.code) {
+      return res.status(err.status).json({ success: false, message: err.message, code: err.code });
+    }
     if (!res.headersSent) {
       res.status(500).json({
         success: false,

@@ -1,7 +1,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import protectAccount from "../middleware/protectAccount.js";
-import { authorize } from "../middleware/role.js";
+import { authorize, requirePermission, PERMISSIONS } from "../middleware/role.js";
 import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
@@ -95,6 +95,43 @@ router.get(
 // 🔒 APPLY GLOBAL ADMIN GUARD
 // =============================
 router.use(protect, adminOnly);
+
+// Defense-in-depth permission routing for the high-impact admin control
+// plane. Route-local adminOrSuper checks remain canonical for operations
+// that are intentionally superadmin-only; this prevents a departmental
+// staff role from reaching unrelated finance, platform, user, or data
+// mutation surfaces merely because it is a member of STAFF_ROLES.
+router.use((req, res, next) => {
+  const path = String(req.path || "").toLowerCase();
+  let permission = null;
+
+  if (/\bescrow\b/.test(path)) {
+    permission = PERMISSIONS.MANAGE_ESCROWS;
+  } else if (/\b(payments?|transactions?|ledger|reconciliation|refund|payout)/.test(path)) {
+    permission = PERMISSIONS.MANAGE_PAYMENTS;
+  } else if (/\b(cars?|listings?|auctions?|bids?)/.test(path)) {
+    permission = path.includes("auction") || path.includes("bid")
+      ? PERMISSIONS.MANAGE_AUCTIONS
+      : PERMISSIONS.MANAGE_CARS;
+  } else if (/\b(staff|users?|dealer-verifications?)/.test(path)) {
+    permission = path.includes("staff") ? PERMISSIONS.MANAGE_STAFF : PERMISSIONS.MANAGE_USERS;
+  } else if (/\b(ads?|campaigns?)/.test(path)) {
+    permission = PERMISSIONS.MANAGE_ADS;
+  } else if (/\b(inspection|ntsa|inspector)/.test(path)) {
+    permission = PERMISSIONS.MANAGE_INSPECTIONS;
+  } else if (/\b(support|chat)/.test(path)) {
+    permission = PERMISSIONS.MANAGE_SUPPORT;
+  } else if (/\b(security|audit|logs?)/.test(path)) {
+    permission = PERMISSIONS.VIEW_LOGS;
+  } else if (/\b(analytics|reports?|market-data)/.test(path)) {
+    permission = PERMISSIONS.VIEW_ANALYTICS;
+  } else if (/\b(settings?|config|cms|theme|branding|platform)/.test(path)) {
+    permission = PERMISSIONS.MANAGE_SETTINGS;
+  }
+
+  if (!permission) return next();
+  return requirePermission(permission)(req, res, next);
+});
 
 // =============================
 // ⚙️ SAFE PAGINATION HELPER
@@ -2092,26 +2129,47 @@ router.get(
 
 // =============================
 // 🔐 ESCROW CUSTODY ADMINISTRATION
-// Vehicle escrow eligibility is no longer controlled per-dealer.
-// Administrators configure the canonical custody bank account and rules.
+// Business rights are deliberately separated: viewing escrow does not
+// grant custody configuration power. Account numbers are masked in the
+// admin control plane to avoid unnecessary financial-data exposure.
 
-router.get("/escrow/config", adminOrSuper, asyncHandler(async (req, res) => {
+const maskAccountNumber = (value) => {
+  const raw = String(value || "");
+  if (raw.length <= 4) return raw ? `••••${raw}` : "";
+  return `••••••${raw.slice(-4)}`;
+};
+
+const sanitizeAdminEscrowAccount = (account) => account ? ({
+  id: account.id,
+  accountName: account.accountName,
+  accountType: account.accountType || "bank",
+  bankName: account.bankName,
+  accountNumber: maskAccountNumber(account.accountNumber),
+  branch: account.branch || null,
+  currency: account.currency || "KES",
+  isActive: account.isActive !== false,
+  isPrimary: account.isPrimary === true,
+  notes: account.notes || null,
+}) : null;
+
+router.get("/escrow/config", requirePermission(PERMISSIONS.VIEW_ESCROW), asyncHandler(async (req, res) => {
   res.json({ success: true, data: await getEscrowRules() });
 }));
 
-router.get("/escrow/accounts", adminOrSuper, asyncHandler(async (req, res) => {
-  res.json({ success: true, data: await getActiveEscrowAccounts() });
+router.get("/escrow/accounts", requirePermission(PERMISSIONS.CONFIGURE_ESCROW), asyncHandler(async (req, res) => {
+  const accounts = await getActiveEscrowAccounts();
+  res.json({ success: true, data: accounts.map(sanitizeAdminEscrowAccount) });
 }));
 
-router.post("/escrow/accounts", adminOrSuper, asyncHandler(async (req, res) => {
-  res.status(201).json({ success: true, data: await saveEscrowAccount(req.body || {}) });
+router.post("/escrow/accounts", requirePermission(PERMISSIONS.CONFIGURE_ESCROW), asyncHandler(async (req, res) => {
+  res.status(201).json({ success: true, data: sanitizeAdminEscrowAccount(await saveEscrowAccount(req.body || {})) });
 }));
 
-router.patch("/escrow/accounts/:id", adminOrSuper, validateObjectId, asyncHandler(async (req, res) => {
-  res.json({ success: true, data: await saveEscrowAccount(req.body || {}, req.params.id) });
+router.patch("/escrow/accounts/:id", requirePermission(PERMISSIONS.CONFIGURE_ESCROW), validateObjectId, asyncHandler(async (req, res) => {
+  res.json({ success: true, data: sanitizeAdminEscrowAccount(await saveEscrowAccount(req.body || {}, req.params.id)) });
 }));
 
-router.delete("/escrow/accounts/:id", adminOrSuper, validateObjectId, asyncHandler(async (req, res) => {
+router.delete("/escrow/accounts/:id", requirePermission(PERMISSIONS.CONFIGURE_ESCROW), validateObjectId, asyncHandler(async (req, res) => {
   await removeEscrowAccount(req.params.id);
   res.json({ success: true });
 }));

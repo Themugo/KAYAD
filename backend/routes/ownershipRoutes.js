@@ -18,6 +18,7 @@ router.patch('/reminders/:reminderId/complete', protect, completeReminder);
 router.patch('/vehicles/:vehicleId/sold', protect, markSold);
 
 router.post('/passports', protect, allowRoles('admin', 'superadmin', 'dealer', 'individual_seller'), createPassport);
+// Full passport is owner/staff-only; the service enforces ownership and returns 404 for unrelated callers.
 router.get('/passports/:passportId', protect, getPassport);
 router.get('/passports/:passportId/public', getPublicPassport);
 router.get('/passports/vin/:vin', findPassportByVin);

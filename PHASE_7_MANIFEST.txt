@@ -1,0 +1,16 @@
+PHASE 7 — LIVE AUCTION ROOM & BIDDING LOCK
+
+New:
+- backend/services/auctionRoom.service.js
+- supabase/migrations/20261002210000_auction_bidding_room_lock.sql
+- scripts/validate-auction-phase7.mjs
+- PHASE_7_LIVE_AUCTION_ROOM_AND_BIDDING_LOCK_COMPLETE_20261002.md
+
+Modified:
+- backend/services/auctionRegistration.service.js
+- backend/routes/auctionRegistrationRoutes.js
+- src/api/api.exports.ts
+- src/pages/AuctionLivePage.jsx
+
+Business invariant:
+After auction start/live, no new bidder may register or activate commitment. Existing active bidders may bid; all others are spectators.

@@ -29,7 +29,7 @@ const TABLE_MAP = {
   LedgerEntry: "ledger_entries",
   ReconciliationRecord: "reconciliation_records",
   ReconciliationReport: "reconciliation_reports",
-  EscrowAnomaly: "escrow_anomalies", EscrowRiskScore: "escrow_risk_scores",
+  EscrowAnomaly: "escrow_anomalies", EscrowRiskScore: "escrow_risk_scores", Refund: "refunds",
   EscrowAudit: "escrow_audits",
   AuctionIntegrityFlag: "auction_integrity_flags",
   AuctionRiskProfile: "auction_risk_profiles",

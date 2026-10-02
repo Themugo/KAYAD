@@ -9,6 +9,7 @@ import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { validateObjectId } from "../middleware/validate.js";
+import { requirePermission, PERMISSIONS } from "../middleware/role.js";
 
 import {
   getAllAudits,
@@ -35,6 +36,7 @@ const router = express.Router();
 // =============================
 router.use(protect);
 router.use(allowRoles("admin", "superadmin"));
+router.use(requirePermission(PERMISSIONS.VIEW_ESCROW_AUDIT));
 
 // =============================
 // 📋 AUDIT VIEWER ENDPOINTS
