@@ -1,7 +1,7 @@
 import process from 'node:process';
 
 const deploymentUrl = String(process.env.DEPLOYMENT_URL || '').trim().replace(/\/$/, '');
-const publicUrl = String(process.env.PUBLIC_URL || 'https://kayad.space').trim().replace(/\/$/, '');
+const publicUrl = String(process.env.PUBLIC_URL || 'https://www.kayad.space').trim().replace(/\/$/, '');
 const apiUrl = String(process.env.API_URL || 'https://api.kayad.space').trim().replace(/\/$/, '');
 const timeoutMs = Number(process.env.SMOKE_TIMEOUT_MS || 30000);
 

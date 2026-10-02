@@ -2,7 +2,7 @@ import { recordMetric, setGauge, incrementCounter } from "../config/metrics.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 
 const APP_NAME = process.env.APP_NAME || "Kayad";
-const APP_URL = process.env.FRONTEND_URL || "https://kayad.space";
+const APP_URL = process.env.FRONTEND_URL || "https://www.kayad.space";
 const FROM = process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM || `noreply@kayad.space`;
 
 const redactEmail = (value) => {

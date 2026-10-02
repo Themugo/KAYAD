@@ -1,6 +1,6 @@
 import { findAll } from "../db/index.js";
 
-const BASE_URL = "https://kayad.space";
+const BASE_URL = "https://www.kayad.space";
 
 export const generateVehicleSitemap = async () => {
   try {

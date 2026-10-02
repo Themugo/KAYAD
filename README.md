@@ -40,3 +40,17 @@ Backend tests run from `backend` with `npm test`.
 Deployment readiness is never inferred from a stale template, demo environment, or external service that has not actually been checked. Use the deployment validation scripts and the target hosting provider's environment configuration as the source of deployment state.
 
 Secrets must be supplied through the deployment environment. Do not commit `.env` files or real credentials.
+
+### Canonical production deployment
+
+The authoritative frontend deployment path is the pinned Vercel workflow in `.github/workflows/deploy.yml`.
+
+- Vercel project: `kayad-space`
+- Production hostname: `https://www.kayad.space`
+- API hostname: `https://api.kayad.space`
+- Vercel CLI: `60.1.3`
+- Node: `22.22.2` in CI/local certification
+- Production sequence: `npm ci` → validation → `npm run build` → `vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod` → `npm run verify:production`
+
+Do not use legacy `vercel --prod` shortcuts or manually mix preview and production project targets. Custom-domain DNS is a separate gate from the application deployment; verify it with `vercel domains verify`.
+

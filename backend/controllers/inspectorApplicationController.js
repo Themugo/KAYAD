@@ -183,7 +183,7 @@ export const approveApplication = async (req, res) => {
         resetToken: crypto.createHash("sha256").update(setupToken).digest("hex"),
         resetTokenExpire: new Date(Date.now() + 72 * 60 * 60 * 1000),
       });
-      setPasswordLink = `${process.env.FRONTEND_URL || "https://kayad.space"}/reset-password?token=${setupToken}`;
+      setPasswordLink = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/reset-password?token=${setupToken}`;
     } else {
       user.role = "ghost_checker";
       user.status = "approved";

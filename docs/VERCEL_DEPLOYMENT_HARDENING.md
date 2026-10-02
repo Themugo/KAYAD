@@ -24,7 +24,7 @@ Run locally:
 
 ```cmd
 npm ci
-npm run verify:vercel
+npm run validate:vercel-ci
 npm run lint
 npm run typecheck
 npm run build

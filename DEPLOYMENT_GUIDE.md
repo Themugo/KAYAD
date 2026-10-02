@@ -78,26 +78,24 @@ Vercel automatically deploys when you push to GitHub. Since latest changes are a
    - Check if latest changes are live
    - Open browser DevTools Console for errors
 
-#### Option B: Manual Deployment via Vercel CLI
-```bash
-# Install Vercel CLI (if not installed)
-npm i -g vercel
-
-# Login to Vercel
+#### Option B: Manual Deployment via Vercel CLI (Canonical)
+```cmd
+npm install -g vercel@60.1.3
+vercel --version
 vercel login
-
-# Deploy to production
-vercel --prod
-
-# Or deploy specific project
-vercel --prod --yes
+vercel whoami
+vercel link --yes --project prj_O3uu4usKUnRzZM1t6j5ZTqUXBkAG --scope team_XhmiqhpCm1TteJizrxloVEwJ
+vercel pull --yes --environment=production --scope themugos-projects
+vercel build --prod --scope themugos-projects
+vercel deploy --prebuilt --prod --scope themugos-projects
 ```
+Do not use the legacy `vercel --prod` shortcut.
 
 #### Option C: Redeploy Latest Commit
 ```bash
 # Via Vercel Dashboard
 # 1. Go to project deployments
-# 2. Find commit 7a692b3
+# 2. Find the intended commit/deployment in the Vercel dashboard
 # 3. Click "Redeploy"
 ```
 
@@ -323,8 +321,9 @@ pm2 reload ecosystem.config.cjs
 ## Quick Deploy Commands
 
 ### Frontend (Vercel CLI)
-```bash
-vercel --prod
+```cmd
+vercel build --prod --scope themugos-projects
+vercel deploy --prebuilt --prod --scope themugos-projects
 ```
 
 ### Backend (SSH)

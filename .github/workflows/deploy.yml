@@ -129,5 +129,5 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
           EXPECTED_COMMIT: ${{ github.sha }}
-          PUBLIC_URL: https://kayad.space
+          PUBLIC_URL: https://www.kayad.space
           API_URL: https://api.kayad.space

@@ -11,7 +11,6 @@ import { getCars, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } 
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
 import HomePageAdminPanel from './HomePageAdminPanel';
-import { DomainPremiumHeader, DomainPremiumStats, DomainJourneyRail, DomainTrustStrip } from '../../../components/ui/DomainPremiumSurface';
 import AdManagerPanel from '../../AdManager/AdManagerPanel';
 import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
 
@@ -73,7 +72,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   searchQuery,
   onSearchChange,
   onOpenCompareModal,
-  onNavigate = () => {},
+  onNavigate = (_navId: string) => {},
   onOpenAuth,
   user,
   isHomePage = false,
@@ -183,6 +182,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverTotalPages, setServerTotalPages] = useState<number>(1);
   const [serverLoading, setServerLoading] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [serverRetryKey, setServerRetryKey] = useState(0);
   const isLoading = isLoadingReal || serverLoading;
 
   // Keep filter options stable while the paginated backend result changes.
@@ -263,7 +263,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       });
 
     return () => { cancelled = true; };
-  }, [serverQuery]);
+  }, [serverQuery, serverRetryKey]);
 
   // Recently Viewed Vehicles Tracking (stored in localStorage)
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
@@ -727,18 +727,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           sort, pagination, saved/compare, admin config) - only the visual
           layer changed, not the data or behavior. */}
 
-      {/* Unified domain shell: visual-only. Existing marketplace data/actions remain authoritative. */}
-      <DomainPremiumHeader domain="marketplace" kicker="KAYAD MARKETPLACE · VERIFIED INVENTORY" title="Find the right vehicle without losing the thread." description="A calmer discovery surface that carries the same trust language into vehicle detail, auction and protected settlement." meta={<><span>{serverTotal.toLocaleString()} vehicles in the current catalogue</span><span>{savedVehicles.length} saved</span><span>{comparedVehicles.length} in compare</span></>} />
-      <DomainPremiumStats domain="marketplace" items={[
-        { label: 'Inventory', value: serverTotal.toLocaleString(), detail: 'Authoritative catalogue result' },
-        { label: 'Saved', value: savedVehicles.length, detail: 'Your saved vehicles' },
-        { label: 'Compare', value: comparedVehicles.length, detail: 'Vehicles in comparison' },
-        { label: 'View', value: viewMode === 'grid' ? `${gridColumns}-column` : 'List', detail: 'Current presentation' },
-      ]} />
-      <div id="market-journey">
-        <DomainJourneyRail domain="marketplace" steps={[{ label: 'Discover', state: 'current' }, { label: 'Inspect', state: 'pending' }, { label: 'Buy or bid', state: 'pending' }, { label: 'Settle', state: 'pending' }, { label: 'Own', state: 'pending' }]} />
+      {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
+      <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 pb-2 pt-4 sm:px-6 lg:px-8">
+        <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#176B87] sm:text-[10px]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
+        <div className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-slate-500 sm:gap-2 sm:text-[10px]">
+          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverError ? 'Inventory unavailable' : `${serverTotal.toLocaleString()} vehicles`}</span>
+          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>
+          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>
+        </div>
       </div>
-      <DomainTrustStrip domain="marketplace" items={[{ label: 'Real inventory' }, { label: 'Inspection available' }, { label: 'Auction-aware listings' }, { label: 'Protected settlement where selected' }]} />
 
       {/* 1. HERO - premium editorial road scene using the existing real featured vehicles. */}
       {homeConfig.sectionVisibility.searchTrustCard && (
@@ -788,9 +785,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                 <div className="mt-5 grid max-w-[600px] grid-cols-2 gap-x-5 gap-y-2.5 sm:grid-cols-4" aria-label="Live marketplace signals">
                   {[
-                    [serverTotal.toLocaleString(), 'Vehicles in catalogue'],
-                    [homepageLiveAuctionCount.toLocaleString(), 'Auction vehicles on this page'],
-                    [homepageEndingSoonCount.toLocaleString(), 'Ending within 30 min'],
+                    [serverError ? '—' : serverTotal.toLocaleString(), 'Vehicles in catalogue'],
+                    [serverError ? '—' : homepageLiveAuctionCount.toLocaleString(), 'Auction vehicles on this page'],
+                    [serverError ? '—' : homepageEndingSoonCount.toLocaleString(), 'Ending within 30 min'],
                     [savedVehicles.length.toLocaleString(), user ? 'Vehicles you saved' : 'Saved on this device'],
                   ].map(([title, sub]) => (
                     <div key={title} className="border-l border-white/20 pl-2.5">
@@ -885,6 +882,34 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </section>
       )}
 
+      {/* Marketplace categories: the visual bridge from hero to inventory, matching the original discovery concept without adding a second dashboard. */}
+      <section className="border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
+        <div className="mx-auto flex max-w-[1480px] items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
+          {[
+            ['All', () => { setSelectedBodyStyle('All'); setSelectedFuel('All'); }],
+            ['SUV', () => setSelectedBodyStyle('SUV')],
+            ['Sedan', () => setSelectedBodyStyle('Sedan')],
+            ['Pickup', () => setSelectedBodyStyle('Pickup')],
+            ['Hatchback', () => setSelectedBodyStyle('Hatchback')],
+            ['Truck', () => setSelectedBodyStyle('Truck')],
+            ['Electric', () => setSelectedFuel('Electric')],
+            ['Hybrid', () => setSelectedFuel('Hybrid')],
+          ].map(([label, action], index) => (
+            <button
+              key={label as string}
+              type="button"
+              onClick={action as () => void}
+              className={`shrink-0 rounded-full border px-4 py-2 text-[11px] font-extrabold transition ${index === 0 && selectedBodyStyle === 'All' && selectedFuel === 'All' ? 'border-[#176B87] bg-[#176B87] text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-[#176B87] hover:text-[#176B87]'}`}
+            >
+              {label as string}
+            </button>
+          ))}
+          <button type="button" onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="ml-auto hidden shrink-0 items-center gap-1 text-[11px] font-extrabold text-[#176B87] lg:flex">
+            View all vehicles <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </section>
+
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {homeConfig.sectionVisibility.searchTrustCard && (
       <div className="relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
@@ -966,6 +991,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </button>
         </div>
       </div>
+      )}
+
+      {featuredPicks.length > 0 && !serverError && (
+        <section className="mx-auto w-full max-w-[1480px] px-4 pt-7 sm:px-6 lg:px-8" aria-labelledby="featured-vehicles-heading">
+          <div className="mb-3 flex items-end justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#176B87]">KAYAD SELECT</span>
+              <h2 id="featured-vehicles-heading" className="mt-1 font-display text-xl font-black tracking-[-0.025em] text-[#0A3340]">Featured vehicles</h2>
+              <p className="mt-0.5 text-xs text-slate-500">Real listings worth a closer look, selected from the live catalogue.</p>
+            </div>
+            <button type="button" onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="hidden text-[11px] font-extrabold text-[#176B87] sm:block">View all →</button>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredPicks.map(({ vehicle, reason }) => (
+              <div key={vehicle.id} className="relative">
+                <span className="absolute left-3 top-3 z-20 rounded-full border border-white/30 bg-[#0A3340]/85 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#BDF5EE] shadow-md backdrop-blur">{reason}</span>
+                <VehicleCard
+                  vehicle={vehicle}
+                  isSaved={savedVehicles.includes(vehicle.id)}
+                  isCompared={comparedVehicles.includes(vehicle.id)}
+                  onToggleSave={onToggleSave}
+                  onToggleCompare={onToggleCompare}
+                  onQuickView={handleVehicleSelect}
+                  onStartEscrow={onStartEscrow}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       <div className="w-full min-w-0 px-0 pt-5 flex gap-0 lg:gap-4 items-start" id="market-results">
@@ -1248,13 +1302,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             ) : (loadError || serverError) ? (
               <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
-                <h4 className="text-sm font-bold text-[#0A3340] mb-1">Couldn't load vehicles</h4>
-                <p className="text-xs text-slate-500 mb-4">{loadError || serverError}</p>
-                {onRetryLoad && !serverError && (
-                  <button onClick={onRetryLoad} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2">
-                    Try Again
-                  </button>
-                )}
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5F3] text-[#176B87]"><AlertTriangle className="h-5 w-5" /></div>
+                <h4 className="text-sm font-bold text-[#0A3340] mb-1">Marketplace inventory is temporarily unavailable</h4>
+                <p className="mx-auto max-w-md text-xs leading-relaxed text-slate-500 mb-4">{loadError || serverError || 'We could not reach the vehicle catalogue. Your filters and saved state are safe.'}</p>
+                <button onClick={() => { onRetryLoad?.(); setServerRetryKey((key) => key + 1); }} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2.5 hover:bg-[#176B87]">
+                  Retry inventory
+                </button>
               </div>
             ) : filteredVehicles.length === 0 ? (
               <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">

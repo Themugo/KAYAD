@@ -97,7 +97,7 @@ export const startSavedSearchCron = () => {
           category: "marketing",
           title: `New matching vehicles: ${search.name}`,
           subject: `New vehicles matching ${search.name}`,
-          message: `${message}. View: https://kayad.space/saved-searches`,
+          message: `${message}. View: https://www.kayad.space/saved-searches`,
           channels: ["in_app", "email", "sms", "whatsapp"],
           metadata: { savedSearchId: search.id, count: fresh.length, vehicles: fresh.slice(0, 10).map((c) => ({ id: c.id || c._id, title: c.title })) },
         });

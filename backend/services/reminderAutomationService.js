@@ -375,7 +375,7 @@ const generateReminderEmailHtml = (reminder) => {
           ${REMINDER_TYPES[reminder.type]?.name || reminder.type}
         </h2>
         <p style="font-size: 16px; color: #374151;">${reminder.message}</p>
-        <a href="https://kayad.space/dashboard"
+        <a href="https://www.kayad.space/dashboard"
            style="display: inline-block; background: #0A1628; color: #fff; padding: 12px 24px;
                   border-radius: 6px; text-decoration: none; margin-top: 16px;">
           Take Action
@@ -383,7 +383,7 @@ const generateReminderEmailHtml = (reminder) => {
       </div>
       <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">
         You're receiving this because you have reminders enabled on Kayad.
-        <a href="https://kayad.space/settings">Manage preferences</a>
+        <a href="https://www.kayad.space/settings">Manage preferences</a>
       </p>
     </div>
   `;
