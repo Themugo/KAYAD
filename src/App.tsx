@@ -383,6 +383,8 @@ function AppInner() {
               onOpenCompareModal={() => setShowCompareModal(true)}
               onNavigate={(nav) => setActiveNav(nav)}
               onOpenAuth={handleOpenAuth}
+              user={user}
+              isHomePage
               isLoadingReal={vehiclesLoading}
               loadError={vehiclesError}
               onRetryLoad={fetchVehicles}

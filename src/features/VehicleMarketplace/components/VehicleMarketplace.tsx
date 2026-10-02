@@ -451,55 +451,20 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return featuredVehicles;
   }, [featuredVehicles, heroFeaturedIds, heroFeaturedMode]);
 
-  // Prefer authoritative Featured/Promoted listings. Until those exist, use the
-  // admin-configured showcase defaults so the homepage is visually complete without
-  // pretending ordinary inventory is Featured. These fallback cars are presentation
-  // content only and can be changed from Home Page Admin.
-  const heroFallbackVehicles = useMemo<Vehicle[]>(() => homeConfig.heroFallbackVehicles.map((item) => ({
-    id: item.id,
-    title: `${item.year} ${item.make} ${item.model}`,
-    make: item.make,
-    model: item.model,
-    year: item.year,
-    vin: `KAYAD-${item.id}`,
-    price: 0,
-    currency: 'KES',
-    mileage: 0,
-    location: 'Nairobi',
-    county: 'Nairobi',
-    bodyStyle: 'SUV',
-    transmission: item.transmission as Vehicle['transmission'],
-    fuelType: item.fuelType as Vehicle['fuelType'],
-    engine: 'Showcase vehicle',
-    horsepower: 0,
-    exteriorColor: 'Not specified',
-    interiorColor: 'Not specified',
-    condition: 'Excellent',
-    listingType: 'fixed',
-    images: [item.image],
-    image: item.image,
-    description: item.tagline,
-    features: [],
-    sellerId: 'kayad-showcase',
-    sellerName: 'KAYAD Showcase',
-    sellerRating: 5,
-    sellerType: 'Verified Dealer',
-    isFeatured: false,
-    isAuction: false,
-    isDealerCertified: true,
-    inspectionPassed: true,
-    viewsCount: 0,
-    savedCount: 0,
-    status: 'active',
-    createdAt: new Date(0).toISOString(),
-  })), [homeConfig.heroFallbackVehicles]);
+  // Prefer authoritative Featured/Promoted listings. Fallback configuration remains
+  // available for backwards-compatible admin settings, but is never promoted as a
+  // vehicle on the public homepage unless it resolves to a real featured record.
+  // Legacy fallback settings are retained in HomePageConfig for backwards
+  // compatibility, but public hero identity is always sourced from real featured
+  // inventory. This prevents a configured placeholder from ever becoming a
+  // clickable fake vehicle.
   // The hero is data-driven: real Featured/Promoted inventory is authoritative.
   // Admin-configured fallback rows are used only when they contain an explicit
   // image URL; there is no bundled/composite vehicle artwork and no vehicle
   // identity is selected by this component.
   const heroSourceVehicles = useMemo(
-    () => (heroVehicles.length ? heroVehicles : heroFallbackVehicles.filter((vehicle) => Boolean(vehicle.images?.[0] || vehicle.image))),
-    [heroVehicles, heroFallbackVehicles],
+    () => heroVehicles,
+    [heroVehicles],
   );
   const [heroPairIndex, setHeroPairIndex] = useState(0);
   const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
@@ -587,7 +552,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE';
   const heroHeadline = activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today';
   const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';
-  const KENYA_ROAD_HERO_BACKGROUND = 'https://p2.piqsels.com/preview/841/874/518/nairobi-traffic-kenya-cars.jpg';
+  const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
   const heroBackgroundStyle: React.CSSProperties = activeHeroSlide?.backgroundType === 'image' && activeHeroSlide.backgroundValue
     ? { backgroundImage: `url(\"${activeHeroSlide.backgroundValue}\")`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : activeHeroSlide?.backgroundType === 'color' && activeHeroSlide.backgroundValue
@@ -637,22 +602,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const featuredPicks = useMemo(() => {
     const picks: { vehicle: Vehicle; reason: string }[] = [];
 
-    const biggestSaving = [...vehicles]
+    const biggestSaving = [...serverVehicles]
       .filter((v) => v.marketPriceAvg && v.price < v.marketPriceAvg)
       .sort((a, b) => (b.marketPriceAvg! - b.price) - (a.marketPriceAvg! - a.price))[0];
     if (biggestSaving) picks.push({ vehicle: biggestSaving, reason: 'Biggest Saving' });
 
-    const mostViewed = [...vehicles]
+    const mostViewed = [...serverVehicles]
       .filter((v) => v.id !== biggestSaving?.id && (v.viewsCount || 0) > 0)
       .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))[0];
     if (mostViewed) picks.push({ vehicle: mostViewed, reason: 'Most Viewed' });
 
-    const endingSoon = [...vehicles]
+    const endingSoon = [...serverVehicles]
       .filter((v) => v.isAuction && v.auctionEndsAt && !picks.some((p) => p.vehicle.id === v.id))
       .sort((a, b) => new Date(a.auctionEndsAt!).getTime() - new Date(b.auctionEndsAt!).getTime())[0];
     if (endingSoon) picks.push({ vehicle: endingSoon, reason: 'Auction Ending Soon' });
 
     return picks;
+  }, [serverVehicles]);
+
+  const homepageLiveAuctionCount = useMemo(
+    () => serverVehicles.filter((vehicle) => vehicle.isAuction).length,
+    [serverVehicles],
+  );
+  const homepageEndingSoonCount = useMemo(() => {
+    const now = Date.now();
+    return serverVehicles.filter((vehicle) => {
+      if (!vehicle.isAuction || !vehicle.auctionEndsAt) return false;
+      const remaining = new Date(vehicle.auctionEndsAt).getTime() - now;
+      return remaining > 0 && remaining <= 30 * 60 * 1000;
+    }).length;
   }, [serverVehicles]);
 
   // Interleaves sponsor/partner cards into the grid every 4th position -
@@ -757,7 +735,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         { label: 'Compare', value: comparedVehicles.length, detail: 'Vehicles in comparison' },
         { label: 'View', value: viewMode === 'grid' ? `${gridColumns}-column` : 'List', detail: 'Current presentation' },
       ]} />
-      <DomainJourneyRail domain="marketplace" steps={[{ label: 'Discover', state: 'current' }, { label: 'Inspect', state: 'pending' }, { label: 'Buy or bid', state: 'pending' }, { label: 'Settle', state: 'pending' }, { label: 'Own', state: 'pending' }]} />
+      <div id="market-journey">
+        <DomainJourneyRail domain="marketplace" steps={[{ label: 'Discover', state: 'current' }, { label: 'Inspect', state: 'pending' }, { label: 'Buy or bid', state: 'pending' }, { label: 'Settle', state: 'pending' }, { label: 'Own', state: 'pending' }]} />
+      </div>
       <DomainTrustStrip domain="marketplace" items={[{ label: 'Real inventory' }, { label: 'Inspection available' }, { label: 'Auction-aware listings' }, { label: 'Protected settlement where selected' }]} />
 
       {/* 1. HERO - premium editorial road scene using the existing real featured vehicles. */}
@@ -803,15 +783,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                 <div className="mt-5 flex flex-wrap items-center gap-2.5">
                   <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center rounded-full bg-[#13B8A6] px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.25)] transition hover:bg-[#49D5C6]">Browse Inventory <ChevronRight className="ml-1 h-4 w-4" /></button>
-                  <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : onNavigate('seller-platform')} className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-6 py-3 text-xs font-black text-white backdrop-blur-md transition hover:bg-white/20">How It Works <span className="ml-2 text-sm">▶</span></button>
+                  <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-6 py-3 text-xs font-black text-white backdrop-blur-md transition hover:bg-white/20">How It Works <span className="ml-2 text-sm">▶</span></button>
                 </div>
 
-                <div className="mt-5 grid max-w-[600px] grid-cols-2 gap-x-5 gap-y-2.5 sm:grid-cols-4">
+                <div className="mt-5 grid max-w-[600px] grid-cols-2 gap-x-5 gap-y-2.5 sm:grid-cols-4" aria-label="Live marketplace signals">
                   {[
-                    ['Verified Listings', 'Quality vehicles'],
-                    ['Trusted Dealers', 'Verified & rated'],
-                    ['Live Auctions', 'Transparent bidding'],
-                    ['Professional Inspections', 'Buy with confidence'],
+                    [serverTotal.toLocaleString(), 'Vehicles in catalogue'],
+                    [homepageLiveAuctionCount.toLocaleString(), 'Auction vehicles on this page'],
+                    [homepageEndingSoonCount.toLocaleString(), 'Ending within 30 min'],
+                    [savedVehicles.length.toLocaleString(), user ? 'Vehicles you saved' : 'Saved on this device'],
                   ].map(([title, sub]) => (
                     <div key={title} className="border-l border-white/20 pl-2.5">
                       <div className="text-[9px] font-black uppercase tracking-[0.08em] text-white sm:text-[10px]">{title}</div>

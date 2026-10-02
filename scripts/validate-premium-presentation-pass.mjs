@@ -21,7 +21,7 @@ pass('Hero keeps 390/420 footprint', hero.includes('h-[390px]') && hero.includes
 pass('Hero keeps real vehicle source', hero.includes('heroSourceVehicles') && hero.includes('heroImageForVehicle'));
 pass('Hero retains existing actions', hero.includes('Browse Inventory') && hero.includes('How It Works'));
 pass('Hero retains carousel controls', hero.includes('Previous featured vehicles') && hero.includes('Next featured vehicles') && hero.includes('Show featured pair'));
-pass('Hero uses Kenyan-road visual fallback', hero.includes('https://p2.piqsels.com/preview/841/874/518/nairobi-traffic-kenya-cars.jpg'));
+pass('Hero uses Kenyan-road visual fallback', hero.includes("const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg'"));
 pass('Hero premium vehicle stage present', hero.includes('KAYAD Select') && hero.includes('Verified listing') && hero.includes('Featured on KAYAD'));
 pass('Login remains canonical standalone surface', app.includes("if (path === '/login') return <LoginPage />;"));
 pass('Register remains canonical standalone surface', app.includes("if (path === '/register') return <OnboardingFlow"));
