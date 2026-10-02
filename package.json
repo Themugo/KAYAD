@@ -106,13 +106,14 @@
     "validate:runtime-convergence": "node scripts/validate-runtime-convergence.mjs",
     "validate:escrow-live-operations-scenarios": "node scripts/validate-escrow-live-operations-scenarios.mjs",
     "validate:migration-hygiene": "node scripts/validate-migration-hygiene.mjs",
-    "validate:homepage-convergence": "node scripts/validate-homepage-convergence.mjs"
+    "validate:homepage-convergence": "node scripts/validate-homepage-convergence.mjs",
+    "validate:vercel-ci": "node scripts/validate-vercel-ci-contract.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.0.5",
-    "axios": "1.20.0",
+    "axios": "1.19.0",
     "date-fns": "4.4.0",
     "framer-motion": "12.43.0",
     "lucide-react": "1.28.0",
@@ -150,7 +151,7 @@
     "undici": "8.10.2"
   },
   "engines": {
-    "node": "22.22.2"
+    "node": ">=22.22.2"
   },
   "certify:phase5:browser-contract": "node scripts/certify-phase5-browser-contract.mjs"
 }

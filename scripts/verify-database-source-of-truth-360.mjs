@@ -1,0 +1,31 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const dir = path.join(root, 'supabase', 'migrations');
+const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort();
+const fail = (m) => { console.error(`FAIL ${m}`); process.exit(1); };
+if (files.length !== 107) fail(`expected 107 migrations, found ${files.length}`);
+if (new Set(files.map((f) => f.slice(0,14))).size !== files.length) fail('migration timestamps are not unique');
+const required = [
+  '20261002130000_customer_registration_and_reconciliation_360.sql',
+  '20261002140000_communications_comm_01_03_contract_state_matching_360.sql',
+  '20261002150000_communications_comm_04_06_provider_templates_routing_360.sql',
+  '20261002160000_communications_comm_07_09_customer_admin_360.sql',
+  '20261002170000_communications_comm_10_12_conversations_scheduler_activation_360.sql',
+  '20261002180000_communications_comm_13_17_certification_observability_release_360.sql',
+];
+for (const f of required) if (!files.includes(f)) fail(`missing canonical migration ${f}`);
+const combined = files.map(f => fs.readFileSync(path.join(dir,f), 'utf8')).join('\n');
+for (const token of [
+  'communication_event_catalog',
+  'communication_delivery_state_transitions',
+  'communication_provider_contracts',
+  'communication_conversations',
+  'automation_job_runs',
+  'communication_provider_activation',
+  'get_customer_communications_self_service_360',
+  'get_communications_center_360',
+  'prepare_customer_registration',
+]) if (!combined.includes(token)) fail(`canonical migration chain missing ${token}`);
+console.log(`PASS database source-of-truth: ${files.length} migrations, unique timestamps, required customer + COMM-01–17 contracts present`);

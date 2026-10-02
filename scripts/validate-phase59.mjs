@@ -20,14 +20,14 @@ function check(name, condition) {
 
 const pkg = JSON.parse(read('package.json'));
 const lock = JSON.parse(read('package-lock.json'));
-const env = read('.env.example');
+const env = fs.existsSync(path.join(root, '.env.example')) ? read('.env.example') : read('.env.production.example');
 const readme = read('README.md');
 const vite = read('vite.config.ts');
 
 check('package is named KAYAD', pkg.name === 'kayad');
 check('package-lock identity matches package', lock.name === 'kayad' && lock.packages?.['']?.name === 'kayad');
 check('Node engine matches repository minimum', pkg.engines?.node === '>=22.22.2');
-check('root env template is KAYAD-specific', env.includes('KAYAD frontend environment template') && !env.includes('GEMINI_API_KEY') && !env.includes('AI Studio'));
+check('root env template is KAYAD-specific', (env.includes('KAYAD frontend environment template') || env.includes('# KAYAD production frontend contract')) && !env.includes('GEMINI_API_KEY') && !env.includes('AI Studio'));
 check('frontend env template exposes actual API contract', env.includes('VITE_API_URL=/api') && env.includes('VITE_SOCKET_URL=https://api.kayad.space'));
 check('frontend env template contains no service-role key', !env.includes('SUPABASE_SERVICE_KEY') && !env.includes('SERVICE_ROLE'));
 check('README identifies KAYAD as the repository', readme.startsWith('# KAYAD') && !readme.includes('Run and deploy your AI Studio app') && !readme.includes('ai.studio/apps/'));

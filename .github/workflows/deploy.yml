@@ -32,6 +32,8 @@ jobs:
         run: npm run validate:homepage-convergence
       - name: Validate deployment readiness
         run: npm run validate:deployment-readiness
+      - name: Validate Vercel CLI and deployment contract
+        run: npm run validate:vercel-ci
       - name: Validate V14 release candidate
         run: npm run validate:v14:release-candidate
       - name: Validate V14 runtime preflight
@@ -69,29 +71,58 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Require Vercel deployment credentials
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          test -n "${{ secrets.VERCEL_TOKEN }}" || { echo "::error::VERCEL_TOKEN is required for production deployment; refusing to report success while production could remain stale."; exit 1; }
+          test -n "$VERCEL_TOKEN" || { echo "::error::VERCEL_TOKEN is required for production deployment; refusing to report success while production could remain stale."; exit 1; }
+          test -n "$VERCEL_ORG_ID" || { echo "::error::VERCEL_ORG_ID is required so CI can target the intended Vercel scope without interactive linking."; exit 1; }
+          test -n "$VERCEL_PROJECT_ID" || { echo "::error::VERCEL_PROJECT_ID is required so CI can target the intended Vercel project without interactive linking."; exit 1; }
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22.22.2'
           cache: 'npm'
-      - name: Install Vercel CLI
-        run: npm install -g vercel
-      - name: Pull Vercel project
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Install pinned Vercel CLI
+        run: npm install -g vercel@60.1.3
+      - name: Verify Vercel CLI
+        run: vercel --version
+      - name: Link intended Vercel project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel link --yes --project="$VERCEL_PROJECT_ID" --scope="$VERCEL_ORG_ID" --token="$VERCEL_TOKEN"
+      - name: Pull Vercel production project settings
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
       - name: Build with Vercel
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel build --prod --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
       - name: Deploy production artifact
         id: deploy
         shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} | tail -n 1)
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID" | tail -n 1)
           test -n "$DEPLOYMENT_URL" || { echo "::error::Vercel did not return a deployment URL"; exit 1; }
           echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
       - name: Verify deployed production
         run: npm run verify:production
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
           EXPECTED_COMMIT: ${{ github.sha }}
           PUBLIC_URL: https://kayad.space

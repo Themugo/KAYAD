@@ -6,7 +6,7 @@ import { placeBid, BidApiError } from '../services/bidApi';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
-import { CountdownDisplay } from '../hooks/useCountdown';
+import { CountdownDisplay } from '../components/CountdownDisplay';
 import { AuctionExperienceRail } from '../components/auction/AuctionExperienceRail';
 import { AuctionCinematicGallery, AuctionActivityPulse, AuctionBidConfirmation, AuctionWinningCelebration, AuctionMobileActionBar } from '../components/auction/AuctionWowExperience';
 import { DomainPremiumHeader, DomainPremiumStats, DomainJourneyRail, DomainTrustStrip } from '../components/ui/DomainPremiumSurface';

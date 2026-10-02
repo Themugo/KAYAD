@@ -15,9 +15,8 @@ export interface CountdownResult {
   // (separate day/hour/minute/second boxes) that need individual
   // numbers rather than the pre-formatted label string above. expired/
   // urgent are aliases for hasEnded/isEndingSoon under the naming
-  // these specific consumers (src/components/CountdownDisplay.tsx and
-  // src/components/features/auction/CountdownDisplay.tsx) already
-  // expected - kept as real, separate fields rather than requiring
+  // these specific consumers (src/components/CountdownDisplay.tsx) already
+  // expects - kept as real, separate fields rather than requiring
   // those components to rename their destructuring, since both were
   // written independently against this exact shape.
   d: number;
