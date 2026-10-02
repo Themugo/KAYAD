@@ -17,6 +17,9 @@ if (workflow.includes('vercel pull --yes --environment=production')) pass('Produ
 if (workflow.includes('vercel build --prod')) pass('Production Vercel build'); else fail('Production Vercel build');
 if (workflow.includes('vercel deploy --prebuilt --prod')) pass('Prebuilt production deployment'); else fail('Prebuilt production deployment');
 if (workflow.includes('npm run verify:production')) pass('Post-deployment verification'); else fail('Post-deployment verification');
+const deployJob = workflow.slice(workflow.indexOf('  deploy-vercel:'));
+if (deployJob.includes('Install repository dependencies') && deployJob.includes('run: npm ci')) pass('Deployment verification job installs repository dependencies'); else fail('Deployment verification job dependency installation');
+if (deployJob.includes("grep -Eo 'https://[^[:space:]]+'")) pass('Deployment URL extraction requires an HTTPS URL'); else fail('Deployment URL extraction');
 if (/\.auction-wow-gallery-shade\{[^}]*background:linear-gradient\([^;]+\)\}/.test(css)) pass('Auction WOW gallery shade CSS syntax'); else fail('Auction WOW gallery shade CSS syntax');
 
 if (failures.length) {

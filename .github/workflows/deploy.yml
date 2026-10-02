@@ -84,6 +84,8 @@ jobs:
         with:
           node-version: '22.22.2'
           cache: 'npm'
+      - name: Install repository dependencies
+        run: npm ci
       - name: Install pinned Vercel CLI
         run: npm install -g vercel@60.1.3
       - name: Verify Vercel CLI
@@ -114,8 +116,10 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID" | tail -n 1)
-          test -n "$DEPLOYMENT_URL" || { echo "::error::Vercel did not return a deployment URL"; exit 1; }
+          DEPLOY_OUTPUT=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID")
+          printf '%s\n' "$DEPLOY_OUTPUT"
+          DEPLOYMENT_URL=$(printf '%s\n' "$DEPLOY_OUTPUT" | grep -Eo 'https://[^[:space:]]+' | tail -n 1)
+          test -n "$DEPLOYMENT_URL" || { echo "::error::Vercel did not return a usable HTTPS deployment URL"; exit 1; }
           echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
       - name: Verify deployed production
         run: npm run verify:production
