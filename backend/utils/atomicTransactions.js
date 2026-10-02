@@ -85,6 +85,15 @@ export async function atomicSettlePurchasePayment(paymentId, receipt = null) {
   return data;
 }
 
+export async function atomicTransitionPurchaseOutcome({ outcomeId, nextStatus, collectionStatus = null, transferStatus = null, reference = null, reason = null, ownershipVehicleId = null }) {
+  const { data, error } = await getSupabase().rpc("kayad_transition_purchase_outcome_atomic", {
+    p_outcome_id: outcomeId, p_next_status: nextStatus, p_collection_status: collectionStatus,
+    p_transfer_status: transferStatus, p_reference: reference, p_reason: reason, p_ownership_vehicle_id: ownershipVehicleId,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function atomicVerifyEscrowFunding(escrowId, actorId, fundingReference) {
   const { data, error } = await getSupabase().rpc("kayad_verify_escrow_funding_atomic", {
     p_escrow_id: escrowId,

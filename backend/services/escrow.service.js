@@ -9,6 +9,7 @@ import { STATES, validateTransition } from "../services/escrowStateMachine.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { atomicTransitionEscrow } from "../utils/atomicTransactions.js";
 import { recordEscrowDeposit, recordEscrowRelease } from "./ledgerService.js";
+import { syncPurchaseOutcomeFromEscrow } from "./marketplaceFulfilment.service.js";
 
 const getCommissionRate = async () => {
   try {
@@ -99,6 +100,7 @@ export const releaseEscrow = async (escrowId, adminId, { idempotencyKey } = {}) 
       commission: Number(released.commission || 0),
     });
   }
+  await syncPurchaseOutcomeFromEscrow(escrowId, "released", { actorId: adminId }).catch((e) => logWarn("Marketplace purchase outcome release sync failed", { error: e.message, escrowId }));
   logInfo("Escrow released atomically", { escrowId, sellerAmount: result?.sellerAmount, commission: result?.commission });
   return released || result;
 };
@@ -109,6 +111,7 @@ export const autoReleaseEscrow = async (escrowId) => {
     idempotencyKey: `auto-release:${escrowId}`,
   });
   const escrow = await findById("escrows", escrowId);
+  await syncPurchaseOutcomeFromEscrow(escrowId, "released", { actorId: null, auto: true }).catch((e) => logWarn("Marketplace purchase outcome auto-release sync failed", { error: e.message, escrowId }));
   logInfo("Escrow auto-released atomically", { escrowId, sellerAmount: result?.sellerAmount, commission: result?.commission });
   return escrow || result;
 };
@@ -119,6 +122,7 @@ export const refundEscrow = async (escrowId, adminId, reason, { idempotencyKey }
     idempotencyKey, reason,
   });
   const escrow = await findById("escrows", escrowId);
+  await syncPurchaseOutcomeFromEscrow(escrowId, "refunded", { actorId: adminId, reason }).catch((e) => logWarn("Marketplace purchase outcome refund sync failed", { error: e.message, escrowId }));
   logInfo("Escrow refunded atomically", { escrowId, reason });
   return escrow || result;
 };
@@ -128,6 +132,7 @@ export const disputeEscrow = async (escrowId, userId, role, reason) => {
     escrowId, nextStatus: STATES.DISPUTED, actorId: userId, role,
     reason,
   });
+  await syncPurchaseOutcomeFromEscrow(escrowId, "disputed", { actorId: userId, reason }).catch((e) => logWarn("Marketplace purchase outcome dispute sync failed", { error: e.message, escrowId }));
   return findById("escrows", escrowId);
 };
 

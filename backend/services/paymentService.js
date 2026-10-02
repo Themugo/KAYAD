@@ -48,6 +48,10 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     if (error?.code === "23505") {
       const raced = await findOne("payments", { user: userId, car: carId, status: "pending", type });
       if (raced) return { success: false, message: "Payment already in progress", payment: raced };
+      if (type === "purchase" && carId) {
+        const activeBuyer = await findOne("payments", { car: carId, status: "pending", type: "purchase" });
+        if (activeBuyer) return { success: false, code: "PURCHASE_IN_PROGRESS", message: "Another purchase is already being processed for this vehicle" };
+      }
     }
     throw error;
   }

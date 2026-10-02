@@ -1,0 +1,32 @@
+import fs from "fs";
+import path from "path";
+const root=process.cwd();
+const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
+const checks=[];
+function check(name,ok,detail=""){checks.push({name,ok,detail});}
+const migration=read("supabase/migrations/20261002240000_marketplace_purchase_fulfilment_convergence.sql");
+const service=read("backend/services/marketplaceFulfilment.service.js");
+const escrow=read("backend/services/escrow.service.js");
+const atomic=read("backend/utils/atomicTransactions.js");
+const callback=read("backend/services/paymentCallback.service.js");
+const paymentService=read("backend/services/paymentService.js");
+const v1=read("backend/routes/v1.js");
+check("purchase_outcomes canonical table",/CREATE TABLE IF NOT EXISTS public\.purchase_outcomes/.test(migration));
+check("purchase payment settlement is idempotent",/ON CONFLICT \(payment_id\)/.test(migration));
+check("one pending purchase per vehicle",/uq_pending_marketplace_purchase_per_car/.test(migration));
+check("unavailable vehicle cannot become a second sale",/Vehicle became unavailable before purchase settlement/.test(migration));
+check("existing payment RPC remains canonical",/kayad_settle_purchase_payment_atomic/.test(migration));
+check("direct vs escrow follows listing escrow policy",/COALESCE\(v_car\.escrow_enabled,false\)/.test(migration));
+check("direct settlement marks vehicle sold",/sold=true,status='sold'.*isPaid.*payment_status='paid'/s.test(migration));
+check("escrow settlement reuses existing escrows",/INSERT INTO escrows/.test(migration));
+check("atomic purchase outcome transitions",/kayad_transition_purchase_outcome_atomic/.test(migration)&&/atomicTransitionPurchaseOutcome/.test(atomic));
+check("ownership reuses canonical ownership service",/ownershipService\.addVehicleToGarage/.test(service));
+check("escrow release syncs Marketplace outcome",/syncPurchaseOutcomeFromEscrow\(escrowId, "released"/.test(escrow));
+check("escrow refund syncs Marketplace outcome",/syncPurchaseOutcomeFromEscrow\(escrowId, "refunded"/.test(escrow));
+check("purchase fulfilment routes mounted",/\/marketplace\/purchases/.test(v1));
+check("auction_win callback type accepted",/purchase', 'escrow', 'inspection', 'auction_win'/.test(callback));
+check("no second escrow implementation",!/createEscrow\("escrows"/.test(service));
+check("purchase race returns controlled conflict",/PURCHASE_IN_PROGRESS/.test(paymentService));
+check("refund completion re-syncs purchase outcome",/syncPurchaseOutcomeFromEscrow\(req\.params\.id, "refunded"/.test(read("backend/controllers/escrowController.js")));
+let pass=0; for(const c of checks){console.log(`${c.ok?'PASS':'FAIL'} ${c.name}${c.detail?` — ${c.detail}`:''}`); if(c.ok)pass++;}
+console.log(`\nMarketplace convergence: ${pass}/${checks.length} PASS`); if(pass!==checks.length)process.exit(1);

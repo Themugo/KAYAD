@@ -160,7 +160,7 @@ export const handleMpesaCallback = async (callbackData) => {
 
     await markPaymentEventSafe(payment.id, "amount_verified", { expected: Number(payment.amount), reported: Number(amount), receipt });
 
-    if (!['bid', 'purchase', 'escrow', 'inspection'].includes(payment.type)) {
+    if (!['bid', 'purchase', 'escrow', 'inspection', 'auction_win'].includes(payment.type)) {
       assertPaymentTransition(payment.status, "success");
       await update("payments", payment.id, {
         status: "success",

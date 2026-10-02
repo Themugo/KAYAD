@@ -20,6 +20,7 @@ import {
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { Button } from '../ui/Button';
 import type { FC } from 'react';
+import { DomainPremiumHeader, DomainPremiumStats, DomainJourneyRail, DomainTrustStrip } from '../ui/DomainPremiumSurface';
 
 export const EscrowPage: FC = () => {
   const { escrowContracts, updateEscrowStep, navigateTo } = useMarketplace();
@@ -88,64 +89,11 @@ export const EscrowPage: FC = () => {
 
   return (
     <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#F6FAF9] text-[#176B87] font-sans">
-      {/* 1. Top Hero Section */}
-      <div className="p-5 sm:p-6 lg:p-7 rounded-2xl bg-[#176B87] text-white border border-white/10 shadow-lg relative overflow-hidden space-y-6">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#13B8A6]/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 space-y-3 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#13B8A6]/20 text-[#13B8A6] text-xs font-extrabold uppercase tracking-wider border border-[#13B8A6]/30">
-            <ShieldCheck className="w-4 h-4 text-[#13B8A6]" />
-            <span>CBK Regulated Escrow Framework</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-5xl font-black font-serif tracking-tight text-white">
-            KAYAD Escrow Vault
-          </h1>
-
-          <p className="text-sm sm:text-base text-slate-200 font-medium leading-relaxed max-w-2xl">
-            Your transaction capital remains strictly protected in a segregated, licensed escrow account. Funds are released to the seller only after physical vehicle inspection, VIN verification, and digital handover sign-off.
-          </p>
-        </div>
-
-        {/* Hero Stats Row */}
-        <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-white/10">
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-2xl sm:text-3xl font-black text-[#13B8A6] font-mono block">
-              KES 2.4B+
-            </span>
-            <span className="text-[11px] text-slate-300 font-bold uppercase tracking-wider mt-0.5 block">
-              Total Protected Capital
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-2xl sm:text-3xl font-black text-white font-mono block">
-              4,800+
-            </span>
-            <span className="text-[11px] text-slate-300 font-bold uppercase tracking-wider mt-0.5 block">
-              Verified Transactions
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-2xl sm:text-3xl font-black text-[#13B8A6] font-mono block">
-              99.8%
-            </span>
-            <span className="text-[11px] text-slate-300 font-bold uppercase tracking-wider mt-0.5 block">
-              Dispute Settlement Rate
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-2xl sm:text-3xl font-black text-[#13B8A6] font-mono block">
-              18 Hrs
-            </span>
-            <span className="text-[11px] text-slate-300 font-bold uppercase tracking-wider mt-0.5 block">
-              Avg. Disbursal Speed
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* 1. Unified escrow surface — factual UI derived from the selected contract only. */}
+      <DomainPremiumHeader domain="escrow" kicker="KAYAD ESCROW · TRANSACTION PROTECTION" title="Follow every protected transaction from funding to release." description="A transparent settlement surface that keeps the vehicle, inspection, handover and release milestones visible in one place." meta={<><span>{activeContract?.id || 'No active contract'}</span>{activeContract?.vehicleTitle && <span>{activeContract.vehicleTitle}</span>}{activeContract && <span>{isFullyCompleted ? 'Completed' : 'In progress'}</span>}</>} />
+      <DomainPremiumStats domain="escrow" items={[{ label: 'Protected amount', value: activeContract ? formatContractAmount(activeContract.agreedPrice) : '—', detail: 'Selected contract' }, { label: 'Milestones', value: activeContract ? `${completedStepsCount}/6` : '—', detail: 'Completed' }, { label: 'Contract', value: activeContract?.id || '—', detail: 'Authoritative reference' }, { label: 'Status', value: isFullyCompleted ? 'Completed' : activeContract ? 'In progress' : 'No contract', detail: 'Current state' }]} />
+      <DomainJourneyRail domain="escrow" steps={[{ label: 'Funded', state: activeContract && completedStepsCount >= 1 ? 'complete' : 'current' }, { label: 'Inspection', state: activeContract && completedStepsCount >= 2 ? 'complete' : completedStepsCount === 1 ? 'current' : 'pending' }, { label: 'Handover', state: activeContract && completedStepsCount >= 4 ? 'complete' : completedStepsCount >= 2 ? 'current' : 'pending' }, { label: 'Release', state: isFullyCompleted ? 'complete' : completedStepsCount >= 4 ? 'current' : 'pending' }]} />
+      <DomainTrustStrip domain="escrow" items={[{ label: 'Milestone-based release' }, { label: 'Inspection visibility' }, { label: 'Dispute-aware settlement' }, { label: 'Existing escrow ledger' }]} />
 
       {/* 2. Step-by-Step "How Escrow Vault Works" */}
       <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#D7E7E4] shadow-sm space-y-6">
@@ -364,7 +312,7 @@ export const EscrowPage: FC = () => {
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-[#13B8A6]" />
                   <span className="text-sm font-bold text-white">
-                    {activeContract.buyerName || 'Alex Mercer'}
+                    {activeContract.buyerName || 'Buyer account'}
                   </span>
                 </div>
               </div>
@@ -376,7 +324,7 @@ export const EscrowPage: FC = () => {
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-[#13B8A6]" />
                   <span className="text-sm font-bold text-white">
-                    {activeContract.sellerName || 'Vanguard Euro Performance'}
+                    {activeContract.sellerName || 'Seller account'}
                   </span>
                 </div>
               </div>

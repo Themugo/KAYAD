@@ -6,7 +6,7 @@ const inspection=read('backend/inspection/controllers/legacyCompatibilityControl
 const chat=read('backend/controllers/chatController.js');
 const socket=read('backend/server.js');
 const ctx=read('src/context/SocketContext.tsx');
-const migration=read('supabase/migrations/20260909092000_inspection_chat_realtime_bridge.sql');
+const migration=read('supabase/migrations/20260909083431_inspection_chat_realtime_bridge.sql');
 const assert=(name,ok)=>{checks.push([name,ok]); if(!ok) console.error(`FAIL ${name}`); else console.log(`PASS ${name}`)};
 assert('inspection order bridges to canonical execution record', inspection.includes('kayad_bridge_inspection_execution'));
 assert('inspection order establishes persistent inspection chat', inspection.includes('kayad_get_or_create_inspection_chat'));

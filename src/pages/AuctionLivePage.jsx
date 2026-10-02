@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, bidsAPI, auctionRegistrationAPI, formatKES } from '../api/api';
+import { carsAPI, auctionRegistrationAPI, formatKES } from '../api/api';
+import { fetchAuctionBids } from '../services/auctionService';
+import { placeBid, BidApiError } from '../services/bidApi';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../hooks/useCountdown';
 import { AuctionExperienceRail } from '../components/auction/AuctionExperienceRail';
 import { AuctionCinematicGallery, AuctionActivityPulse, AuctionBidConfirmation, AuctionWinningCelebration, AuctionMobileActionBar } from '../components/auction/AuctionWowExperience';
+import { DomainPremiumHeader, DomainPremiumStats, DomainJourneyRail, DomainTrustStrip } from '../components/ui/DomainPremiumSurface';
 
 export default function AuctionLivePage() {
   const { id } = useParams();
@@ -35,7 +38,7 @@ export default function AuctionLivePage() {
   useEffect(() => {
     Promise.all([
       carsAPI.get(id),
-      bidsAPI.getForCar(id).catch(() => ({ bids: [] })),
+      fetchAuctionBids(id).catch(() => ({ bids: [] })),
     ]).then(([carData, bidData]) => {
       const c = carData.car || carData.data || carData;
       setCar(c);
@@ -131,11 +134,11 @@ export default function AuctionLivePage() {
     }
     setPlacing(true);
     try {
-      const data = await bidsAPI.place(id, { amount, phone: phone.replace(/\D/g, '') });
+      const data = await placeBid(id, amount, phone.replace(/\D/g, ''));
       setBidConfirmation(true);
       toast('Bid submitted. Complete the M-Pesa confirmation requested by KAYAD.', 'info');
     } catch (err) {
-      toast(err.response?.data?.message || 'Failed to place bid', 'error');
+      toast(err instanceof BidApiError ? err.message : err?.response?.data?.message || 'Failed to place bid', 'error');
     } finally {
       setPlacing(false);
     }
@@ -163,6 +166,10 @@ export default function AuctionLivePage() {
     <div className="page auction-live-premium" style={{ background: 'var(--bg)' }}>
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
         <AuctionExperienceRail current={ended ? 'win' : auctionLive ? 'live' : 'registration'} />
+        <DomainPremiumHeader domain="auction" kicker="KAYAD AUCTION ROOM · LIVE MARKET" title={ended ? 'The auction room has closed.' : car.title} description={ended ? 'The vehicle is now in its authoritative post-auction journey.' : 'A focused live room for bidding, market pulse and the next settlement step—without leaving the vehicle context.'} meta={<><span>{auctionLive ? 'Live bidding' : ended ? 'Auction concluded' : 'Registration'}</span><span>{bidCount} bids</span>{currentBid > 0 && <span>{formatKES(currentBid)}</span>}</>} />
+        <DomainPremiumStats domain="auction" items={[{ label: 'Current bid', value: currentBid > 0 ? formatKES(currentBid) : '—', detail: 'Authoritative live value' }, { label: 'Bids', value: bidCount, detail: 'Live bid count' }, { label: 'Room', value: auctionLive ? 'Open' : ended ? 'Closed' : 'Registration', detail: 'Canonical auction state' }, { label: 'Connection', value: connected ? 'Live' : 'Reconnecting', detail: 'Auction market stream' }]} />
+        <DomainJourneyRail domain="auction" steps={[{ label: 'Register', state: ended ? 'complete' : registration ? 'complete' : 'current' }, { label: 'Bid', state: ended ? 'complete' : auctionLive ? 'current' : 'pending' }, { label: 'Outcome', state: ended ? 'current' : 'pending' }, { label: 'Settlement', state: 'pending' }, { label: 'Fulfilment', state: 'pending' }]} />
+        <DomainTrustStrip domain="auction" items={[{ label: 'Authoritative bid stream' }, { label: 'Bidding lock enforced' }, { label: 'Dealer settlement policy' }, { label: 'Escrow only when selected' }]} />
         {ended && userWon && <AuctionWinningCelebration title={car.title} amount={Number(topBid?.amount || currentBid || 0)} onSettle={() => navigate('/payments')} onHistory={() => navigate('/')} />}
         {ended && !userWon && <div className="auction-wow-win auction-wow-ended-neutral"><div className="auction-wow-trophy"><span>✓</span></div><div className="auction-wow-win-copy"><span className="auction-wow-overline">AUCTION CONCLUDED</span><h2>The room has closed.</h2><p>{car.title} has moved into its post-auction journey.</p></div></div>}
 

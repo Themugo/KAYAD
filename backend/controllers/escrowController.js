@@ -392,6 +392,8 @@ export const completeEscrowRefund = async (req, res) => {
 
     const refund = data || {};
     if (refund.status === "completed") {
+      const { syncPurchaseOutcomeFromEscrow } = await import("../services/marketplaceFulfilment.service.js");
+      await syncPurchaseOutcomeFromEscrow(req.params.id, "refunded", { actorId: req.user.id, reason: "Escrow refund completed" }).catch((e) => logWarn("Marketplace purchase outcome refund sync failed:", e.message));
       notifyEscrowRefunded(req.params.id).catch((e) => logWarn("Refund completion notification failed:", e.message));
       getIO()?.to(`user_${toIdString((await Escrow.findById(req.params.id)).buyer)}`).emit("escrowRefunded", { escrowId: req.params.id, refundId: req.params.refundId, amount: refund.amount });
     }

@@ -94,6 +94,15 @@ export default function AdminEscrows() {
           </div>
         </div>
 
+        <div className="card" style={{ padding: 14, marginBottom: 18 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div><div className="section-eyebrow">Escrow control plane</div><strong>Authorized control rights</strong></div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 11 }}>
+              {[[canOperate,'Operate'],[canRelease,'Approve release'],[canRefund,'Approve refund'],[canSettle,'Settle payout'],[canReconcile,'Reconcile'],[canEmergency,'Emergency control']].map(([allowed,label]) => <span key={label} className={`badge ${allowed ? 'badge-green' : 'badge-muted'}`}>{allowed ? '✓' : '—'} {label}</span>)}
+            </div>
+          </div>
+        </div>
+
         <div className="grid-4" style={{ marginBottom: 18 }}>
           <Queue title="Funded / Awaiting Action" count={queues.funded?.count || 0} amount={queues.funded?.amount || 0} tone="var(--blue)" onOpen={() => setFilter('funded')} />
           <Queue title="Disputes" count={queues.disputed?.count || 0} tone="var(--red)" onOpen={() => setFilter('disputed')} />

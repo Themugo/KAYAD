@@ -8,7 +8,7 @@ const checks=[
  ['atomic plan grant/revoke','backend/routes/adminRoutes.js','kayad_grant_dealer_subscription_atomic'],
  ['subscription expiry sweep','backend/services/dealerSubscriptionExpiryCron.js','kayad_expire_dealer_subscriptions_atomic'],
  ['listing entitlement gate','backend/services/dealerSubscription.service.js','assertDealerCanCreateListing'],
- ['canonical payout ledger','supabase/migrations/20260909102000_dealer_commercial_payout_lifecycle.sql','CREATE TABLE IF NOT EXISTS public.dealer_payouts'],
+ ['canonical payout ledger','supabase/migrations/20260909091703_dealer_commercial_payout_lifecycle.sql','CREATE TABLE IF NOT EXISTS public.dealer_payouts'],
  ['atomic payout preparation','backend/routes/dealerRoutes.js','kayad_prepare_dealer_payout_atomic'],
  ['payout provider callback reconciliation','backend/controllers/paymentController.js','kayad_mark_dealer_payout_atomic'],
  ['canonical admin verification mutation','backend/routes/adminRoutes.js','kayad_apply_dealer_verification_atomic'],

@@ -37,6 +37,7 @@ import bidLogRoutes from "./bidLogRoutes.js";
 import localizationRoutes from "./localizationRoutes.js";
 import userPreferenceRoutes from "./userPreferenceRoutes.js";
 import regionalConfigurationRoutes from "./regionalConfigurationRoutes.js";
+import marketplaceFulfilmentRoutes from "./marketplaceFulfilmentRoutes.js";
 
 const router = Router();
 
@@ -55,6 +56,7 @@ router.use("/favorites", csrfProtection, favoriteRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/reviews", csrfProtection, reviewRoutes);
 router.use("/transactions", transactionRoutes);
+router.use("/marketplace/purchases", marketplaceFulfilmentRoutes);
 router.use("/auction-admin", auctionAdminRoutes);
 router.use("/auctions", auctionRoutes);
 router.use("/auctions", auctionRegistrationRoutes);

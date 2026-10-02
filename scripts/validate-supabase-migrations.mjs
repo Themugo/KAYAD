@@ -78,8 +78,7 @@ for (const file of files) {
 
 for (const [table, owners] of tableCreates) {
   if (owners.length > 1) {
-    // CREATE IF NOT EXISTS can be intentional, but flag for human review.
-    warnings.push(`Table ${table} is created in multiple migrations: ${owners.join(", ")}`);
+    failures.push(`Table ${table} is created in multiple migrations: ${owners.join(", ")}. Consolidate to one canonical creator; preserve historical versions as no-ops if required.`);
   }
 }
 

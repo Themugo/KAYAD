@@ -11,6 +11,7 @@ import { getCars, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } 
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
 import HomePageAdminPanel from './HomePageAdminPanel';
+import { DomainPremiumHeader, DomainPremiumStats, DomainJourneyRail, DomainTrustStrip } from '../../../components/ui/DomainPremiumSurface';
 import AdManagerPanel from '../../AdManager/AdManagerPanel';
 import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
 
@@ -747,6 +748,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           below reuses this component's own real state/logic (filters,
           sort, pagination, saved/compare, admin config) - only the visual
           layer changed, not the data or behavior. */}
+
+      {/* Unified domain shell: visual-only. Existing marketplace data/actions remain authoritative. */}
+      <DomainPremiumHeader domain="marketplace" kicker="KAYAD MARKETPLACE · VERIFIED INVENTORY" title="Find the right vehicle without losing the thread." description="A calmer discovery surface that carries the same trust language into vehicle detail, auction and protected settlement." meta={<><span>{serverTotal.toLocaleString()} vehicles in the current catalogue</span><span>{savedVehicles.length} saved</span><span>{comparedVehicles.length} in compare</span></>} />
+      <DomainPremiumStats domain="marketplace" items={[
+        { label: 'Inventory', value: serverTotal.toLocaleString(), detail: 'Authoritative catalogue result' },
+        { label: 'Saved', value: savedVehicles.length, detail: 'Your saved vehicles' },
+        { label: 'Compare', value: comparedVehicles.length, detail: 'Vehicles in comparison' },
+        { label: 'View', value: viewMode === 'grid' ? `${gridColumns}-column` : 'List', detail: 'Current presentation' },
+      ]} />
+      <DomainJourneyRail domain="marketplace" steps={[{ label: 'Discover', state: 'current' }, { label: 'Inspect', state: 'pending' }, { label: 'Buy or bid', state: 'pending' }, { label: 'Settle', state: 'pending' }, { label: 'Own', state: 'pending' }]} />
+      <DomainTrustStrip domain="marketplace" items={[{ label: 'Real inventory' }, { label: 'Inspection available' }, { label: 'Auction-aware listings' }, { label: 'Protected settlement where selected' }]} />
 
       {/* 1. HERO - premium editorial road scene using the existing real featured vehicles. */}
       {homeConfig.sectionVisibility.searchTrustCard && (

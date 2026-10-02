@@ -1,4 +1,5 @@
-DO $$ BEGIN
- IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='escrows' AND column_name='disputeinspectionid') THEN ALTER TABLE public.escrows RENAME COLUMN disputeinspectionid TO "disputeInspectionId"; END IF;
- IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='escrows' AND column_name='disputechatid') THEN ALTER TABLE public.escrows RENAME COLUMN disputechatid TO "disputeChatId"; END IF;
-END $$;
+-- KAYAD MIGRATION HISTORY PRESERVED AS NO-OP
+-- Canonical migration: 20260909084842_dispute_link_column_naming.sql
+-- This version was an exact duplicate of the canonical migration.
+-- The version remains present so already-applied remote migration history is preserved.
+-- Fresh databases receive the canonical DDL once; this historical version intentionally performs no work.

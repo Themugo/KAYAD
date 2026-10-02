@@ -14,7 +14,7 @@ pass('canonical common InternalNotes exists', exists('src/components/features/co
 pass('legacy InternalNotes removed', !exists('src/components/InternalNotes.jsx'));
 pass('root SearchBar is compatibility re-export', read('src/components/SearchBar.tsx').includes("./features/common/SearchBar"));
 pass('Showroom still imports compatibility SearchBar', read('src/pages/Showroom.jsx').includes("../components/SearchBar"));
-pass('AuctionLivePage uses canonical escrow PaymentModal', read('src/pages/AuctionLivePage.jsx').includes("../components/features/escrow/PaymentModal"));
+pass('canonical escrow PaymentModal is retained for settlement surfaces', exists('src/components/features/escrow/PaymentModal.tsx'));
 pass('canonical dispute support component is retained', exists('src/components/features/common/InternalNotes.tsx'));
 
 const failed = checks.filter(([, ok]) => !ok);

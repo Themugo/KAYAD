@@ -1,6 +1,5 @@
-insert into public.communication_event_controls(event_type, channel, enabled)
-values
-  ('account.password_reset', 'email', true),
-  ('account.password_reset', 'sms', false),
-  ('account.password_reset', 'whatsapp', false)
-on conflict (event_type, channel) do nothing;
+-- KAYAD MIGRATION HISTORY PRESERVED AS NO-OP
+-- Canonical migration: 20260909124238_communications_password_reset_control.sql
+-- This version was an exact duplicate of the canonical migration.
+-- The version remains present so already-applied remote migration history is preserved.
+-- Fresh databases receive the canonical DDL once; this historical version intentionally performs no work.
