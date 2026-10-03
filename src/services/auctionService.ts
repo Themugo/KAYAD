@@ -25,7 +25,7 @@ export interface Auction {
 export interface AuctionListParams {
   page?: number;
   limit?: number;
-  status?: 'active' | 'live' | 'ended';
+  status?: 'active' | 'live' | 'ended' | 'draft';
   search?: string;
 }
 

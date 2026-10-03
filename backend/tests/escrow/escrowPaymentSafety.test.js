@@ -82,9 +82,38 @@ const dbMock = {
   create: jest.fn(),
   update: jest.fn(),
   updateMany: jest.fn(),
+  // Newer service code imports upsert/count/remove from db/index.js; ESM mocks must
+  // declare every named export the importing modules use.
+  upsert: jest.fn(),
+  upsertMany: jest.fn(),
+  count: jest.fn(),
+  remove: jest.fn(),
 };
 
 jest.unstable_mockModule("../../db/index.js", () => dbMock);
+// The callback service now records webhook receipts / payment events through
+// the financial-lifecycle service (distributed lock + webhook_events table).
+// Those collaborators are covered by their own tests; stub them here so these
+// tests exercise only the callback's idempotency / amount-integrity logic.
+jest.unstable_mockModule("../../services/paymentFinancialLifecycle.service.js", () => ({
+  recordPaymentEvent: jest.fn().mockResolvedValue({}),
+  recordWebhookReceipt: jest.fn().mockResolvedValue({ duplicate: false, event: { id: "evt-1" } }),
+  markWebhookProcessed: jest.fn().mockResolvedValue({}),
+  markAttemptByCheckout: jest.fn().mockResolvedValue({}),
+  markAttempt: jest.fn().mockResolvedValue({}),
+  recordPaymentAttempt: jest.fn().mockResolvedValue({}),
+  getMpesaProvider: jest.fn().mockResolvedValue(null),
+}));
+jest.unstable_mockModule("../../services/dealerSubscription.service.js", () => ({
+  activateDealerSubscriptionFromPayment: jest.fn().mockResolvedValue({}),
+}));
+jest.unstable_mockModule("../../services/ledgerService.js", () => ({
+  recordPurchasePayment: jest.fn().mockResolvedValue({}),
+}));
+jest.unstable_mockModule("../../utils/supabase.js", () => ({
+  getSupabase: jest.fn(() => ({})),
+  initSupabase: jest.fn(),
+}));
 jest.unstable_mockModule("../../services/notification.service.js", () => ({
   sendNotification: jest.fn().mockResolvedValue({}),
 }));

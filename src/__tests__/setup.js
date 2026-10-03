@@ -47,6 +47,9 @@ vi.mock('framer-motion', () => ({
   useInView: () => true,
   useScroll: () => ({ scrollYProgress: { get: () => 0 } }),
   useTransform: () => 0,
+  useReducedMotion: () => false,
+  useMotionValue: (v) => ({ get: () => v, set: () => {} }),
+  useSpring: (v) => v,
 }));
 
 const createStorageMock = () => {

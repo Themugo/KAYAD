@@ -48,7 +48,8 @@ describe('AuctionLivePage', () => {
 
   it('renders auction page with mock car', async () => {
     renderAuctionPage();
-    expect(await screen.findByText('Test Car')).toBeInTheDocument();
+    // The premium layout shows the vehicle title in several places (hero, gallery, rail).
+    expect((await screen.findAllByText('Test Car')).length).toBeGreaterThan(0);
   });
 
   it('shows connection status', async () => {

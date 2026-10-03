@@ -4,7 +4,7 @@
 // Tracks request duration, response times, and performance metrics
 // ─────────────────────────────────────────────────────────────
 
-import { recordHttpRequest, recordHistogram, incrementCounter } from "../config/metrics.js";
+import { recordHistogram, incrementCounter } from "../config/metrics.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 /**
@@ -18,7 +18,9 @@ export const performanceMonitor = (req, res, next) => {
     if (recorded) return;
     recorded = true;
     const duration = Number(process.hrtime.bigint() - started) / 1e6;
-    recordHttpRequest(req.method, req.path, res.statusCode, duration);
+    // http_requests_total / http_request_duration_ms are recorded once, with the
+    // matched route path and aborted-request handling, by sliMiddleware.
+    // Recording them here as well double-counted every request.
     recordHistogram("http_response_time_ms", duration, {
       method: req.method, path: req.path, status: res.statusCode,
     });

@@ -45,7 +45,7 @@ const actors = [
   ["unrelated user", { id: X, role: "user" }, 403],
   ["unrelated dealer", { id: X, role: "dealer" }, 403],
   ["unrelated ghost_checker", { id: X, role: "ghost_checker" }, 403],
-  ["unrelated accounts", { id: X, role: "accounts" }, 403],
+  ["accounts (finance staff, VIEW_ESCROW)", { id: X, role: "accounts" }, 200],
   ["admin", { id: X, role: "admin" }, 200],
   ["superadmin", { id: X, role: "superadmin" }, 200],
   ["escrow_officer", { id: X, role: "escrow_officer" }, 200],

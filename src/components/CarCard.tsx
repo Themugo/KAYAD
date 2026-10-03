@@ -56,7 +56,7 @@ export default function CarCard({
   // Auction status
   const now = Date.now();
   const auctionEnd = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
-  const isOnAuction = car.badges.includes('auction') && auctionEnd > now;
+  const isOnAuction = (car.badges ?? []).includes('auction') && auctionEnd > now;
   const currentPrice = isOnAuction && car.currentBid && car.currentBid > 0 ? car.currentBid : car.price;
 
   if (listView) {
@@ -89,7 +89,7 @@ export default function CarCard({
                 LIVE
               </span>
             )}
-            {car.badges.includes('escrow') && (
+            {(car.badges ?? []).includes('escrow') && (
               <span className="card-badge bg-charcoal-900/90 text-white backdrop-blur-sm">
                 <Shield size={10} />
                 ESCROW
@@ -223,7 +223,7 @@ export default function CarCard({
               LIVE
             </span>
           )}
-          {car.badges.includes('escrow') && (
+          {(car.badges ?? []).includes('escrow') && (
             <span className="card-badge bg-charcoal-900/90 text-white backdrop-blur-sm">
               <Shield size={10} />
               ESCROW

@@ -66,7 +66,8 @@ describe("party detection: populated vs unpopulated", () => {
 
 describe("staff access follows the canonical role contract", () => {
   const e = { buyer: B, seller: S };
-  const allow = ["admin", "superadmin", "escrow_officer", "moderator"];
+  // accounts holds VIEW_ESCROW (finance role; admin UI matrix grants it escrow access).
+  const allow = ["admin", "superadmin", "escrow_officer", "moderator", "accounts"];
   test.each(ROLE_HIERARCHY)("role %s", (role) => {
     expect(canViewAnyEscrow({ id: X, role })).toBe(allow.includes(role));
     expect(canViewEscrow(e, { id: X, role })).toBe(allow.includes(role));

@@ -401,3 +401,120 @@
 .domain-next-step{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #d7e8e5;border-radius:16px;padding:13px 15px;background:#fff;color:#0a2731;cursor:pointer;text-align:left;transition:transform .18s,box-shadow .18s,border-color .18s}.domain-next-step:hover{transform:translateY(-1px);border-color:#9ecdc5;box-shadow:0 12px 28px rgba(7,57,68,.06)}.domain-next-step span{display:grid;gap:3px}.domain-next-step b{font-size:10px}.domain-next-step small{color:#82949a;font-size:8px}.domain-next-step--auction svg{color:#0b716f}.domain-next-step--escrow svg{color:#176b87}.domain-next-step--marketplace svg{color:#0a4c59}
 @media(max-width:900px){.domain-premium-header{padding:23px;border-radius:23px}.domain-premium-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.domain-premium-header{align-items:flex-start;flex-direction:column}.domain-premium-header__action{width:100%}}@media(max-width:560px){.domain-premium-header{padding:19px;border-radius:19px}.domain-premium-stats{gap:8px}.domain-premium-stat{padding:12px}.domain-premium-stat strong{font-size:16px}.domain-journey__step{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.domain-next-step{transition:none}}
+
+
+/* Mobile marketplace dock: one canonical public navigation surface.
+   State-driven actions intentionally match AppInner instead of inventing
+   router destinations for marketplace modules. */
+.kayad-mobile-bottom-nav {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 90;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid rgba(215, 231, 228, 0.96);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 45px rgba(10, 51, 64, 0.16), 0 2px 8px rgba(10, 51, 64, 0.06);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+
+.kayad-mobile-bottom-nav__item {
+  position: relative;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #71858A;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 140ms ease, background 160ms ease, color 160ms ease;
+}
+
+.kayad-mobile-bottom-nav__item:active {
+  transform: scale(0.96);
+}
+
+.kayad-mobile-bottom-nav__item.is-active {
+  background: #E6F7F3;
+  color: #0B716F;
+  box-shadow: inset 0 0 0 1px #C5E8E1;
+}
+
+.kayad-mobile-bottom-nav__icon {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+
+@media (min-width: 1024px) {
+  .kayad-mobile-bottom-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .kayad-mobile-bottom-nav {
+    left: 8px;
+    right: 8px;
+    padding: 6px;
+    border-radius: 18px;
+  }
+
+  .kayad-mobile-bottom-nav__item {
+    min-height: 46px;
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kayad-mobile-bottom-nav__item {
+    transition: none;
+  }
+}
+
+
+/* Marketplace mobile comfort pass. Keep the editorial hero readable without
+   letting the featured card, slide controls and primary actions collide on
+   narrow phones. */
+@media (max-width: 639px) {
+  .kayad-homepage {
+    overflow-x: clip;
+  }
+
+  .kayad-homepage .kayad-market-toolbar .kayad-toolbar-control {
+    min-height: 44px;
+  }
+
+  .kayad-homepage .kayad-market-toolbar select,
+  .kayad-homepage .kayad-market-toolbar button,
+  .kayad-homepage .kayad-market-toolbar input {
+    min-height: 40px;
+  }
+
+  .kayad-homepage .kayad-inventory-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .kayad-homepage .kayad-vehicle-card button {
+    min-height: 44px;
+  }
+
+  .kayad-homepage [id="market-results"] {
+    scroll-margin-top: 78px;
+  }
+}

@@ -31,7 +31,7 @@ const checks = [
   ["public auction catalogue route exists", server.includes('app.use("/api/auctions",') || v1.includes('router.use("/auctions", auctionRoutes)')],
   ["public subscription plans route exists", server.includes('app.use("/api/subscriptions", subscriptionRoutes)') && subscription.includes('router.get("/plans"')],
   ["dealer certification routes exist", server.includes('app.use("/api/dealer-platform", dealerPlatformRoutes)') && dealer.includes('router.get("/dashboard", protect, dealerOnly') && dealer.includes('router.get("/finance", protect, dealerOnly')],
-  ["admin escrow route exists", server.includes('app.use("/api/escrow",') && escrow.includes('router.get("/", protect, adminOnly')],
+  ["admin escrow route exists", server.includes('app.use("/api/escrow",') && (escrow.includes('router.get("/", protect, adminOnly') || escrow.includes('router.get("/", protect, escrowViewOnly'))],
   ["admin disputes route exists", dispute.includes('router.get("/", protect, adminOnly')],
 ];
 

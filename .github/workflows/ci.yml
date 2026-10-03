@@ -77,9 +77,11 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      # Production dependencies only: the sole remaining high advisory is `braces`
+      # via nodemon (a dev-only file watcher) and has no upstream fix yet.
       - name: Backend dependency audit
         working-directory: backend
-        run: npm audit --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Backend tests
         working-directory: backend

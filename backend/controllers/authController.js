@@ -345,10 +345,31 @@ export const register = async (req, res) => {
     });
   } catch (err) {
     logError("REGISTER ERROR", err);
-    if (err?.code === 23505 || err?.code === 11000) {
+    // The public message is intentionally generic, so record the real cause
+    // (Postgres/PostgREST code + message) where operators can see it.
+    console.error("REGISTER ERROR cause:", {
+      code: err?.code,
+      message: err?.message,
+      details: err?.details,
+      hint: err?.hint,
+    });
+    if (String(err?.code) === "23505" || err?.code === 11000) {
       return R.error(res, "An account with that email already exists", 409);
     }
-    R.error(res, process.env.NODE_ENV === "production" ? "Registration could not be completed. Please try again." : err.message, 500);
+    // PGRST202 / 42883: the kayad_register_identity_atomic function is not in
+    // the database, i.e. supabase/migrations were not applied to this project.
+    // Say so with a stable code instead of an opaque 500.
+    if (err?.code === "PGRST202" || err?.code === "42883") {
+      console.error(
+        "❌ DATABASE MIGRATION REQUIRED: public.kayad_register_identity_atomic is missing. " +
+          "Apply supabase/migrations/20261001090000_registration_onboarding_integrity.sql (supabase db push).",
+      );
+      return R.errorCode(res, "Registration is temporarily unavailable. Please try again shortly.", 503, "DATABASE_MIGRATION_REQUIRED");
+    }
+    if (process.env.NODE_ENV === "production") {
+      return R.errorCode(res, "Registration could not be completed. Please try again.", 500, "REGISTRATION_FAILED");
+    }
+    R.error(res, err.message, 500);
   }
 };
 

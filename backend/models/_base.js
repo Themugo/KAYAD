@@ -838,6 +838,17 @@ export function createModel(name) {
       return model.findByIdAndDelete(doc.id);
     },
 
+    // Model-level Mongoose-style deleteOne(filter). Registration rollback and
+    // other controllers call User.deleteOne({ _id }) / UserAuth.deleteOne({ _id });
+    // without this the call threw "deleteOne is not a function", which crashed
+    // the rollback, left half-created accounts and masked the original error.
+    async deleteOne(filters = {}) {
+      const doc = await model.findOne(filters);
+      if (!doc) return { deletedCount: 0 };
+      await model.findByIdAndDelete(doc.id || doc._id);
+      return { deletedCount: 1 };
+    },
+
     async deleteMany(filters = {}) {
       const client = sb();
       let q = client.from(table).delete();

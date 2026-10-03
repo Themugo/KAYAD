@@ -18,6 +18,7 @@ import DealerAuctionOperations from './pages/dealer/DealerAuctionOperations';
 import DealerAuctionOperationCase from './pages/dealer/DealerAuctionOperationCase';
 import Profile from './pages/Profile';
 import { AuctionMobileDock, AuctionSurfaceReveal } from './components/auction/AuctionInteractionLayer';
+import MobileBottomNav from './components/MobileBottomNav';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
@@ -327,6 +328,7 @@ function AppInner() {
   }, []);
 
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
+  const showPublicMobileDock = !user || !['auctions', 'payments', 'profile'].includes(activeNav);
 
   return (
     <div className="min-h-screen bg-[#EEF7F5] text-slate-800 flex flex-col font-sans">
@@ -352,8 +354,8 @@ function AppInner() {
       <main
         className={
           isMarketplaceSurface
-            ? 'flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 space-y-0 overflow-x-clip'
-            : 'flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6'
+            ? `flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : ''} lg:pb-0 space-y-0 overflow-x-clip`
+            : `flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : 'pb-6'} lg:pb-6 space-y-6`
         }
       >
         <Suspense fallback={
@@ -541,8 +543,18 @@ function AppInner() {
         </Suspense>
         </main>
 
-      {user && ['auctions','saved','payments','profile'].includes(activeNav) && (
+      {user && ['auctions', 'payments', 'profile'].includes(activeNav) && (
         <AuctionMobileDock active={activeNav === 'auctions' ? (new URLSearchParams(location.search).get('auctionTab') === 'saved' ? 'saved' : 'auctions') : activeNav} savedCount={savedVehicles.length} onNavigate={(nav) => setActiveNav(nav)} onSaved={() => { setActiveNav('auctions'); window.history.replaceState({}, '', '/?nav=auctions&auctionTab=saved'); window.dispatchEvent(new PopStateEvent('popstate')); }} />
+      )}
+
+      {showPublicMobileDock && (
+        <MobileBottomNav
+          authUser={authUser}
+          activeNav={activeNav}
+          onNavigate={(nav) => setActiveNav(nav)}
+          onOpenCompare={() => setShowCompareModal(true)}
+          onOpenAuth={handleOpenAuth}
+        />
       )}
 
       {/* 3. Footer */}

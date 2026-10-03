@@ -98,7 +98,9 @@ describe("successful STK flow", () => {
     axiosMock.get.mockResolvedValue({ data: { access_token: "tok" } });
     axiosMock.post.mockResolvedValue({ data: { CheckoutRequestID: "ws_real_1", ResponseCode: "0" } });
     dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1", auctionStatus: "live" });
-    dbMock.findOne.mockResolvedValue(null); // no platform config override
+    // bidSecurityService requires a published auction_setups row for the auction.
+    dbMock.findOne.mockImplementation(async (table) =>
+      table === "auction_setups" ? { car_id: "auc-1", publication_status: "published", config: { commitment: { recipientAccount: "174379" } } } : null);
     dbMock.create.mockImplementation(async (_t, data) => ({ id: "tx-1", ...data }));
 
     const result = await initiateBidSecurity({ auctionId: "auc-1", userId: "u1", phone: "0712345678", amount: 5000 });
@@ -185,7 +187,9 @@ describe("bid security failure modes", () => {
     process.env.NODE_ENV = "production";
     axiosMock.get.mockRejectedValue(new Error("Request failed with status code 500"));
     dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1", auctionStatus: "live" });
-    dbMock.findOne.mockResolvedValue(null);
+    // Published setup with a payment recipient, so the test reaches the STK failure path.
+    dbMock.findOne.mockImplementation(async (table) =>
+      table === "auction_setups" ? { car_id: "auc-1", publication_status: "published", config: { commitment: { recipientAccount: "174379" } } } : null);
 
     const result = await initiateBidSecurity({ auctionId: "auc-1", userId: "u1", phone: "0712345678", amount: 5000 });
     expect(result.success).toBe(false);
@@ -196,7 +200,9 @@ describe("bid security failure modes", () => {
     process.env.NODE_ENV = "development";
     axiosMock.get.mockRejectedValue(new Error("down"));
     dbMock.findById.mockResolvedValue({ id: "auc-1", bidSecurityAmount: 5000, carId: "car-1", auctionStatus: "live" });
-    dbMock.findOne.mockResolvedValue(null);
+    // bidSecurityService requires a published auction_setups row for the auction.
+    dbMock.findOne.mockImplementation(async (table) =>
+      table === "auction_setups" ? { car_id: "auc-1", publication_status: "published", config: { commitment: { recipientAccount: "174379" } } } : null);
     dbMock.create.mockImplementation(async (_t, data) => ({ id: "tx-1", ...data }));
 
     const result = await initiateBidSecurity({ auctionId: "auc-1", userId: "u1", phone: "0712345678", amount: 5000 });

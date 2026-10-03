@@ -752,7 +752,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             />
           )}
 
-          <div className="relative mx-auto h-[390px] w-full max-w-[1680px] px-4 sm:h-[420px] sm:px-8 lg:px-10">
+          <div className="relative mx-auto h-[470px] w-full max-w-[1680px] px-4 sm:h-[420px] sm:px-8 lg:px-10">
             <div className="relative h-full">
               {/* Existing editorial copy — same messaging/actions, cleaner visual hierarchy. */}
               <div className="absolute inset-y-0 left-0 z-20 flex w-full max-w-[690px] flex-col justify-center pr-4 text-left sm:pr-8 lg:w-[55%] lg:pr-12">
