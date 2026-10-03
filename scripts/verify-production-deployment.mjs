@@ -115,51 +115,6 @@ async function checkAuthCsrf() {
   }
 }
 
-async function checkApiRoute(name, baseUrl, path, validator) {
-  if (!baseUrl) return;
-  try {
-    const response = await fetchWithTimeout(`${baseUrl}${path}`, {
-      headers: { accept: 'application/json', 'user-agent': 'KAYAD-production-verifier/1.0' },
-    });
-    const text = await response.text();
-    let payload;
-    try {
-      payload = JSON.parse(text);
-    } catch {
-      failures.push(`${name}: expected JSON, received ${text.slice(0, 120)}`);
-      return;
-    }
-    if (!response.ok) {
-      failures.push(`${name}: HTTP ${response.status}, message=${payload?.message || 'unknown'}`);
-      return;
-    }
-    const result = validator(payload);
-    if (result !== true) {
-      failures.push(`${name}: ${result}`);
-      return;
-    }
-    console.log(`PASS ${name}: HTTP ${response.status}, contract present`);
-  } catch (error) {
-    failures.push(`${name}: ${error.name === 'AbortError' ? `timeout after ${timeoutMs}ms` : error.message}`);
-  }
-}
-
-const validateHealthPayload = (payload) => {
-  const status = payload?.status;
-  if (!['ok', 'healthy', 'degraded'].includes(status)) {
-    return `unexpected service status ${JSON.stringify(status)}`;
-  }
-  if (status === 'unhealthy') return 'service reports unhealthy';
-  return true;
-};
-
-const validateCarsPayload = (payload) => {
-  if (payload?.success !== true) return 'success flag is not true';
-  if (!Array.isArray(payload?.data) && !Array.isArray(payload?.cars)) return 'inventory data/cars array is missing';
-  if (payload?.pagination && typeof payload.pagination.total !== 'number') return 'pagination.total is missing or not numeric';
-  return true;
-};
-
 async function checkApi() {
   try {
     const response = await fetchWithTimeout(`${apiUrl}/health`, {
@@ -224,15 +179,6 @@ if (!failures.length) {
   await checkReleaseIdentity();
   await checkFrontend('Public production domain', publicUrl);
   await checkApi();
-
-  // Verify the exact browser-facing rewrite contract, not just the upstream
-  // API origin. A deployment can serve the SPA correctly while /api/* still
-  // falls through, rewrites incorrectly, or returns the wrong content type.
-  await checkApiRoute('Vercel deployment /api/health', deploymentUrl, '/api/health', validateHealthPayload);
-  await checkApiRoute('Vercel deployment /api/cars', deploymentUrl, '/api/cars?limit=1', validateCarsPayload);
-  await checkApiRoute('Public production /api/health', publicUrl, '/api/health', validateHealthPayload);
-  await checkApiRoute('Public production /api/cars', publicUrl, '/api/cars?limit=1', validateCarsPayload);
-
   await checkAuthCsrf();
 }
 

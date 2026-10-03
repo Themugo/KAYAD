@@ -7,7 +7,7 @@ check('obsolete browser Supabase clients removed', !fs.existsSync(path.join(root
 const socket=read('src/context/SocketContext.tsx');
 check('SocketContext uses canonical backend Socket.IO transport', socket.includes('/socket.io/socket.io.js') && socket.includes('withCredentials:true'));
 const http=read('src/api/httpClient.ts');
-check('production API fallback is same-origin', http.includes('configuredApiUrl') && http.includes(": '/api'"));
+check('production API fallback uses canonical backend', http.includes('configuredApiUrl') && http.includes("'https://api.kayad.space/api'") && http.includes(": '/api'"));
 check('user preference stats no longer returns 501', !/status\(501\)/.test(read('backend/controllers/userPreferenceController.js')));
 for(const f of ['src/main.tsx','src/App.tsx','src/api/httpRequest.ts'])check(`${f} exists`,fs.existsSync(path.join(root,f)));
 if(checks.some(x=>!x))process.exit(1); console.log(`Runtime integrity validation passed: ${checks.length}/${checks.length}`);

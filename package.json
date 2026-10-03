@@ -41,7 +41,6 @@
     "validate:frontend-runtime-contracts": "node scripts/validate-frontend-runtime-contracts.mjs",
     "validate:dependency-security": "node scripts/validate-dependency-security.mjs",
     "verify:production": "node scripts/verify-production-deployment.mjs",
-    "validate:production-verifier-contract": "node scripts/validate-production-verifier-contract.mjs",
     "validate:socket-contract": "node scripts/validate-socket-contract.mjs",
     "validate:deployment-readiness": "node scripts/validate-deployment-readiness.mjs",
     "validate:backend-runtime-contracts": "node scripts/validate-backend-runtime-contracts.mjs",
@@ -111,8 +110,7 @@
     "validate:vercel-ci": "node scripts/validate-vercel-ci-contract.mjs",
     "validate:pwa-mobile": "node scripts/validate-pwa-mobile-contract.mjs",
     "validate:polish-regressions": "node scripts/validate-polish-regressions.mjs",
-    "validate:next6-polish": "node scripts/validate-next6-polish.mjs",
-    "validate:next7-polish": "node scripts/validate-next7-polish.mjs"
+    "validate:production-host-contract": "node scripts/validate-production-host-contract.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

@@ -4,8 +4,8 @@ import { clearCSRFToken, getCSRFToken, getCsrfHeaders, setCSRFToken } from '../u
 const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').trim().replace(/\/$/, '');
 
 // One transport contract for every browser API call:
-//   - unset VITE_API_URL -> same-origin /api
-//   - VITE_API_URL=/api -> same-origin /api
+//   - unset VITE_API_URL -> /api locally, canonical api.kayad.space in production
+//   - VITE_API_URL=/api -> same-origin /api when explicitly configured
 //   - VITE_API_URL=https://api.kayad.space -> https://api.kayad.space/api
 //   - VITE_API_URL=https://api.kayad.space/api -> same canonical API origin
 // All service modules therefore keep using their existing /cars, /auth, etc.
@@ -13,7 +13,9 @@ const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').trim().repla
 const apiOrigin = configuredApiUrl.replace(/\/api$/, '');
 const API_URL = configuredApiUrl && apiOrigin && /^https?:\/\//i.test(apiOrigin)
   ? `${apiOrigin}/api`
-  : '/api';
+  : import.meta.env.PROD
+    ? 'https://api.kayad.space/api'
+    : '/api';
 
 // Auth routes are mounted at /api/v1/auth on the backend. Axios already has
 // /api in its baseURL, so the request path is /v1/auth/... in every deployment.

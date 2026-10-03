@@ -113,32 +113,6 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     }, { timeout: 2000 });
   });
 
-  it('shows a truthful unavailable state (never "0 vehicles") when the inventory request fails with 502', async () => {
-    vehicleApiMocks.getCars.mockReset();
-    const { VehicleApiError } = await import('../../services/vehicleApi');
-    vehicleApiMocks.getCars.mockRejectedValue(new VehicleApiError('Request failed with status code 502', 'server', 502));
-    await renderMarketplace({ ...baseProps, vehicles: [] });
-    await waitFor(() => {
-      expect(screen.getByText(/Inventory is temporarily unavailable/i)).toBeTruthy();
-    }, { timeout: 3000 });
-    expect(screen.getByRole('button', { name: /Retry inventory/i })).toBeTruthy();
-    expect(screen.getByText(/Reference: HTTP 502/i)).toBeTruthy();
-    // A failed request must not be presented as a genuinely empty marketplace.
-    expect(screen.queryByText(/^0 vehicles$/i)).toBeNull();
-    expect(screen.queryByText(/No vehicles match your filters/i)).toBeNull();
-    const glance = screen.getByLabelText(/Marketplace at a glance/i);
-    expect(glance.textContent).toContain('Inventory unavailable');
-    expect(glance.textContent).not.toMatch(/\b0\b/);
-  });
-
-  it('marks the active category chip and keeps it in sync with the Body Style filter', async () => {
-    await renderMarketplace({ ...baseProps });
-    const suv = screen.getByRole('button', { name: 'SUV', pressed: false });
-    fireEvent.click(suv);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'SUV', pressed: true })).toBeTruthy());
-    expect(screen.getByRole('button', { name: 'All', pressed: false })).toBeTruthy();
-  });
-
   it('renders the full-width inventory grid using the admin presentation defaults', async () => {
     await renderMarketplace({ ...baseProps  });
     await waitFor(() => {

@@ -17,7 +17,7 @@ check('homepage has real live market signals', home.includes('homepageLiveAuctio
 check('how-it-works action stays inside existing journey', home.includes("getElementById('market-journey')"));
 check('featured picks use current server result source', home.includes('const biggestSaving = [...serverVehicles]') && home.includes('const mostViewed = [...serverVehicles]'));
 check('no known demo identities in active homepage source', !/Alex Mercer|Vanguard Euro Performance/i.test(home));
-check('production env contract exists', env.includes('VITE_API_URL=/api') && env.includes('VITE_SOCKET_URL=https://api.kayad.space'));
+check('production env contract exists', env.includes('VITE_API_URL=https://api.kayad.space/api') && env.includes('VITE_SOCKET_URL=https://api.kayad.space'));
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\nHomepage convergence validation: ${failed.length ? `FAIL (${failed.length})` : 'PASS'}`);
