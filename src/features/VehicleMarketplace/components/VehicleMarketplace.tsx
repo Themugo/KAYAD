@@ -550,7 +550,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const activeHeroSlide = heroSlides[heroSlideIndex % Math.max(heroSlides.length, 1)];
 
   const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE';
-  const heroHeadline = activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today';
+  const heroHeadline = activeHeroSlide?.headline?.trim() || 'Find a vehicle worth driving home.';
   const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';
   const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
   const heroBackgroundStyle: React.CSSProperties = activeHeroSlide?.backgroundType === 'image' && activeHeroSlide.backgroundValue
@@ -730,150 +730,122 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
       <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 pb-2 pt-4 sm:px-6 lg:px-8">
         <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#176B87] sm:text-[10px]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
-        <div className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-slate-500 sm:gap-2 sm:text-[10px]">
-          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverError ? 'Inventory unavailable' : `${serverTotal.toLocaleString()} vehicles`}</span>
-          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>
-          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>
-        </div>
+        {!serverError && (
+          <div className="hidden items-center gap-1.5 text-[9px] font-bold text-slate-500 sm:flex sm:gap-2 sm:text-[10px]">
+            <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverTotal.toLocaleString()} vehicles</span>
+            <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>
+            <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>
+          </div>
+        )}
       </div>
 
-      {/* 1. HERO - premium editorial road scene using the existing real featured vehicles. */}
+      {/* 1. HERO - centered editorial message with a vehicle on each side. */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#2B6472] bg-[#0A3340] text-white">
+        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C9E0DD] bg-[#EAF4F2] text-[#0A3340] kayad-premium-hero">
           <div className="absolute inset-0 bg-cover bg-center" style={heroBackgroundStyle} aria-hidden="true" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,27,38,.96)_0%,rgba(5,27,38,.82)_27%,rgba(5,27,38,.34)_51%,rgba(5,27,38,.08)_76%,rgba(5,27,38,.24)_100%)]" aria-hidden="true" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_56%,rgba(19,184,166,.16),transparent_28%),linear-gradient(to_top,rgba(4,22,31,.82),transparent_54%)]" aria-hidden="true" />
-          <div className="absolute bottom-0 left-[45%] right-0 h-32 bg-[linear-gradient(to_top,rgba(3,19,27,.48),transparent)]" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(244,250,249,.93)_0%,rgba(244,250,249,.72)_22%,rgba(244,250,249,.30)_50%,rgba(244,250,249,.72)_78%,rgba(244,250,249,.93)_100%)]" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,.18),rgba(234,244,242,.18)_55%,rgba(10,51,64,.22))]" aria-hidden="true" />
           {activeHeroSlide && (
             <div
               className="absolute inset-0"
-              style={{ backgroundColor: activeHeroSlide.overlayColor || '#0A3340', opacity: Math.max(0, Math.min(100, activeHeroSlide.overlayOpacity ?? 8)) / 100 }}
+              style={{ backgroundColor: activeHeroSlide.overlayColor || '#0A3340', opacity: Math.max(0, Math.min(100, activeHeroSlide.overlayOpacity ?? 8)) / 100 * 0.35 }}
               aria-hidden="true"
             />
           )}
 
-          <div className="relative mx-auto h-[470px] w-full max-w-[1680px] px-4 sm:h-[420px] sm:px-8 lg:px-10">
-            <div className="relative h-full">
-              {/* Existing editorial copy — same messaging/actions, cleaner visual hierarchy. */}
-              <div className="absolute inset-y-0 left-0 z-20 flex w-full max-w-[690px] flex-col justify-center pr-4 text-left sm:pr-8 lg:w-[55%] lg:pr-12">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-[#0A3340]/65 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-[#BDF5EE] shadow-lg backdrop-blur-md sm:text-[10px]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6] shadow-[0_0_10px_#13B8A6]" />
-                  {heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'PREMIUM VEHICLES · REAL OPPORTUNITIES' : heroEyebrow}
-                </span>
-                <div className="mb-1 flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] text-white/55 sm:text-[9px]">
-                  <span className="h-px w-7 bg-[#49D5C6]/80" />
-                  <span>Move with confidence</span>
-                </div>
-                <h1 className="mt-3 max-w-[620px] font-display text-[clamp(2.25rem,5vw,4rem)] font-black leading-[.94] tracking-[-0.055em] text-white drop-shadow-[0_7px_24px_rgba(0,0,0,.42)]">
-                  {heroHeadline.includes('Dream Today') ? (
-                    <>
-                      <span className="block">Drive Your</span>
-                      <span className="block text-[#49D5C6]">Dream Today</span>
-                    </>
-                  ) : heroHeadline}
-                </h1>
-                <p className="mt-4 max-w-[560px] text-[12px] font-medium leading-5 text-white/80 sm:text-sm">
-                  {heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.'
-                    ? <>Explore verified vehicles across East Africa. Buy, sell, auction or get financed — all in one place.</>
-                    : heroSubheadline}
-                </p>
-
-                <div className="mt-5 flex flex-wrap items-center gap-2.5">
-                  <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center rounded-full bg-[#13B8A6] px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.25)] transition hover:bg-[#49D5C6]">Browse Inventory <ChevronRight className="ml-1 h-4 w-4" /></button>
-                  <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-6 py-3 text-xs font-black text-white backdrop-blur-md transition hover:bg-white/20">How It Works <span className="ml-2 text-sm">▶</span></button>
-                </div>
-
-                <div className="mt-5 grid max-w-[600px] grid-cols-2 gap-x-5 gap-y-2.5 sm:grid-cols-4" aria-label="Live marketplace signals">
-                  {[
-                    [serverError ? '—' : serverTotal.toLocaleString(), 'Vehicles in catalogue'],
-                    [serverError ? '—' : homepageLiveAuctionCount.toLocaleString(), 'Auction vehicles on this page'],
-                    [serverError ? '—' : homepageEndingSoonCount.toLocaleString(), 'Ending within 30 min'],
-                    [savedVehicles.length.toLocaleString(), user ? 'Vehicles you saved' : 'Saved on this device'],
-                  ].map(([title, sub]) => (
-                    <div key={title} className="border-l border-white/20 pl-2.5">
-                      <div className="text-[9px] font-black uppercase tracking-[0.08em] text-white sm:text-[10px]">{title}</div>
-                      <div className="mt-0.5 text-[8px] text-white/55 sm:text-[9px]">{sub}</div>
+          <div className="relative mx-auto min-h-[455px] w-full max-w-[1680px] px-3 py-7 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+            <div className="relative grid min-h-[390px] items-center gap-1 lg:grid-cols-[minmax(250px,1fr)_minmax(380px,520px)_minmax(250px,1fr)] lg:gap-0">
+              {/* Left vehicle stage. Real featured imagery wins; the curated static vehicle is only a visual fallback. */}
+              <div className="relative z-10 flex h-[190px] items-end justify-center lg:h-[350px] lg:justify-end lg:pr-0">
+                <div className="kayad-hero-car kayad-hero-car-left">
+                  <div className="kayad-hero-car-glow" aria-hidden="true" />
+                  <img
+                    src={heroImageForVehicle(heroLeftVehicle) || '/hero/kayad-land-cruiser-stage.png'}
+                    alt={heroLeftVehicle ? `${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : 'KAYAD featured vehicle'}
+                    className="h-full w-full object-cover object-center"
+                    loading="eager"
+                    decoding="async"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0A3340]/55 to-transparent" aria-hidden="true" />
+                  <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
+                    <div className="min-w-0 rounded-xl border border-white/30 bg-[#071F2A]/45 px-3 py-2 backdrop-blur-md">
+                      <div className="text-[8px] font-black uppercase tracking-[.18em] text-[#BDF5EE]">{heroLeftVehicle ? 'Featured vehicle' : 'KAYAD Select'}</div>
+                      {heroLeftVehicle && <div className="mt-0.5 truncate text-[11px] font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</div>}
                     </div>
-                  ))}
+                    {heroLeftVehicle && <button type="button" onClick={() => handleVehicleSelect(heroLeftVehicle)} className="shrink-0 rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[8px] font-black text-white backdrop-blur-md transition hover:bg-white/25">View</button>}
+                  </div>
                 </div>
               </div>
 
-              {/* Existing featured vehicles, refined as a single premium automotive stage. */}
-              <div className="absolute right-0 top-1/2 z-20 hidden w-[54%] -translate-y-1/2 lg:block">
-                <div className="absolute right-[3%] top-[5%] h-[76%] w-[88%] rounded-[42px] bg-[radial-gradient(circle_at_58%_46%,rgba(73,213,198,.18),transparent_44%),linear-gradient(135deg,rgba(5,27,38,.05),rgba(5,27,38,.34))] blur-[1px]" aria-hidden="true" />
-                <div className="absolute bottom-[-8px] left-[8%] right-[1%] h-14 rounded-[50%] bg-[#021923]/60 blur-2xl" aria-hidden="true" />
-                <div className="relative ml-auto flex w-full max-w-[770px] items-end justify-end gap-3 pr-1">
-                  {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
-                    <button
-                      type="button"
-                      onClick={() => handleVehicleSelect(heroRightVehicle)}
-                      className="group relative hidden w-[184px] overflow-hidden rounded-[22px] border border-white/25 bg-[#071F2A]/78 text-left shadow-[0_24px_60px_rgba(0,0,0,.40)] backdrop-blur-md transition duration-500 hover:-translate-y-2 hover:border-[#49D5C6]/50 xl:block"
-                      aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
-                    >
-                      <div className="relative h-[176px] overflow-hidden bg-[#102F39]">
-                        <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="eager" decoding="async" />
-                        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(3,19,27,.88),transparent_58%)]" aria-hidden="true" />
-                        <span className="absolute left-3 top-3 rounded-full border border-white/20 bg-[#0A3340]/70 px-2 py-1 text-[7px] font-black uppercase tracking-[.16em] text-[#BDF5EE] backdrop-blur-md">KAYAD Select</span>
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <div className="text-[8px] font-black uppercase tracking-[.12em] text-[#49D5C6]">Featured vehicle</div>
-                          <div className="mt-1 truncate text-[11px] font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}</div>
-                        </div>
+              {/* Center message card: deliberately restrained typography so the automotive imagery carries the hero. */}
+              <div className="relative z-20 flex justify-center px-2 sm:px-4">
+                <div className="w-full max-w-[470px] rounded-[26px] border border-white/80 bg-white/90 px-5 py-6 text-center shadow-[0_24px_70px_rgba(10,51,64,.18)] backdrop-blur-xl sm:px-8 sm:py-7">
+                  <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#C9E0DD] bg-[#F6FAF9]/90 px-3 py-1.5 text-[8px] font-black uppercase tracking-[.24em] text-[#176B87] sm:text-[9px]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />
+                    {heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD MARKETPLACE · VERIFIED VEHICLES' : heroEyebrow}
+                  </span>
+                  <div className="mt-4 flex items-center justify-center gap-2 text-[8px] font-black uppercase tracking-[.26em] text-[#5A7A82] sm:text-[9px]">
+                    <span className="h-px w-7 bg-[#13B8A6]" />
+                    <span>Move with confidence</span>
+                    <span className="h-px w-7 bg-[#13B8A6]" />
+                  </div>
+                  <h1 className="mx-auto mt-3 max-w-[390px] font-display text-[clamp(1.65rem,2.8vw,2.35rem)] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0A3340]">
+                    {heroHeadline.includes('Dream Today') ? <>Find a vehicle <span className="text-[#176B87]">worth driving home.</span></> : heroHeadline}
+                  </h1>
+                  <p className="mx-auto mt-4 max-w-[430px] text-[11px] font-medium leading-5 text-[#526B73] sm:text-xs">
+                    {heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.'
+                      ? <>Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.</>
+                      : heroSubheadline}
+                  </p>
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center rounded-full bg-[#13B8A6] px-5 py-2.5 text-[10px] font-black text-[#07313D] shadow-[0_10px_24px_rgba(19,184,166,.20)] transition hover:bg-[#49D5C6] sm:px-6 sm:py-3 sm:text-xs">Explore Vehicles <ChevronRight className="ml-1 h-4 w-4" /></button>
+                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="inline-flex items-center rounded-full border border-[#C9DCD9] bg-white px-5 py-2.5 text-[10px] font-black text-[#0A3340] shadow-sm transition hover:border-[#13B8A6] hover:bg-[#F6FAF9] sm:px-6 sm:py-3 sm:text-xs">How It Works <span className="ml-2 text-xs text-[#176B87]">▶</span></button>
+                  </div>
+                  <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#DCE9E7] pt-4 sm:grid-cols-4">
+                    {[
+                      ['Verified', 'Listings'],
+                      ['Inspected', 'Vehicles'],
+                      ['Protected', 'Transactions'],
+                      ['East Africa', 'Marketplace'],
+                    ].map(([title, sub]) => (
+                      <div key={title} className="text-center">
+                        <div className="text-[8px] font-black uppercase tracking-[.1em] text-[#176B87]">{title}</div>
+                        <div className="mt-0.5 text-[8px] text-[#70858B]">{sub}</div>
                       </div>
-                      <div className="flex items-center justify-between gap-2 border-t border-white/10 bg-[#071F2A]/90 px-3 py-2.5">
-                        <span className="truncate text-[8px] text-white/55">{heroVehicleNarration(heroRightVehicle) || 'Verified marketplace vehicle'}</span>
-                        <span className="shrink-0 text-[9px] font-black text-[#BDF5EE]">{heroRightVehicle.price > 0 ? formatPriceM(heroRightVehicle.price) : 'View'}</span>
-                      </div>
-                    </button>
-                  )}
-
-                  {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
-                    <button
-                      type="button"
-                      onClick={() => handleVehicleSelect(heroLeftVehicle)}
-                      className="group relative w-[305px] overflow-hidden rounded-[28px] border border-white/30 bg-[#071F2A]/72 text-left shadow-[0_32px_90px_rgba(0,0,0,.50)] backdrop-blur-md transition duration-500 hover:-translate-y-2 hover:border-[#49D5C6]/65 sm:w-[340px] xl:w-[385px]"
-                      aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
-                    >
-                      <div className="relative h-[236px] overflow-hidden bg-[#102F39] sm:h-[252px] xl:h-[264px]">
-                        <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.035]" loading="eager" decoding="async" />
-                        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(3,19,27,.97)_0%,rgba(3,19,27,.28)_36%,transparent_66%)]" aria-hidden="true" />
-                        <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-2">
-                          <span className="rounded-full border border-white/20 bg-[#0A3340]/70 px-2.5 py-1 text-[7px] font-black uppercase tracking-[.17em] text-[#BDF5EE] backdrop-blur-md">KAYAD Select</span>
-                          <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[7px] font-black uppercase tracking-[.14em] text-white/75 backdrop-blur-md">Verified listing</span>
-                        </div>
-                        <div className="absolute inset-x-4 bottom-4">
-                          <div className="flex items-end justify-between gap-4">
-                            <div className="min-w-0">
-                              <div className="text-[8px] font-black uppercase tracking-[.18em] text-[#49D5C6]">Featured on KAYAD</div>
-                              <h2 className="mt-1 truncate font-display text-lg font-black tracking-[-.03em] text-white sm:text-xl">{heroLeftVehicle.make} {heroLeftVehicle.model}</h2>
-                              <p className="mt-1 truncate text-[8px] text-white/65 sm:text-[9px]">{heroVehicleNarration(heroLeftVehicle) || 'Verified marketplace vehicle'}</p>
-                            </div>
-                            <div className="shrink-0 rounded-xl border border-white/15 bg-[#071F2A]/65 px-2.5 py-2 text-right backdrop-blur-md">
-                              <div className="text-[7px] font-black uppercase tracking-[.13em] text-white/45">From</div>
-                              <div className="mt-0.5 text-xs font-black text-[#BDF5EE] sm:text-sm">{heroLeftVehicle.price > 0 ? formatPriceM(heroLeftVehicle.price) : 'View listing'}</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  )}
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* On smaller screens the same real featured vehicle becomes a compact bottom card. */}
-              {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
-                <button type="button" onClick={() => handleVehicleSelect(heroLeftVehicle)} className="absolute bottom-4 right-3 z-20 flex w-[185px] items-center gap-2 rounded-xl border border-white/20 bg-[#071F2A]/85 p-2 text-left shadow-xl backdrop-blur-md lg:hidden" aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}>
-                  <img src={heroImageForVehicle(heroLeftVehicle)} alt="" className="h-12 w-16 rounded-lg object-cover" loading="eager" decoding="async" />
-                  <span className="min-w-0"><span className="block truncate text-[9px] font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</span><span className="mt-0.5 block text-[8px] text-[#49D5C6]">Featured on KAYAD</span></span>
-                </button>
-              )}
+              {/* Right vehicle stage. */}
+              <div className="relative z-10 flex h-[190px] items-end justify-center lg:h-[350px] lg:justify-start lg:pl-0">
+                <div className="kayad-hero-car kayad-hero-car-right">
+                  <div className="kayad-hero-car-glow" aria-hidden="true" />
+                  <img
+                    src={heroImageForVehicle(heroRightVehicle) || '/hero/kayad-mercedes-gle-stage.png'}
+                    alt={heroRightVehicle ? `${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}` : 'KAYAD featured vehicle'}
+                    className="h-full w-full object-cover object-center"
+                    loading="eager"
+                    decoding="async"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0A3340]/55 to-transparent" aria-hidden="true" />
+                  <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
+                    <div className="min-w-0 rounded-xl border border-white/30 bg-[#071F2A]/45 px-3 py-2 backdrop-blur-md">
+                      <div className="text-[8px] font-black uppercase tracking-[.18em] text-[#BDF5EE]">{heroRightVehicle ? 'Featured vehicle' : 'KAYAD Select'}</div>
+                      {heroRightVehicle && <div className="mt-0.5 truncate text-[11px] font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}</div>}
+                    </div>
+                    {heroRightVehicle && <button type="button" onClick={() => handleVehicleSelect(heroRightVehicle)} className="shrink-0 rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[8px] font-black text-white backdrop-blur-md transition hover:bg-white/25">View</button>}
+                  </div>
+                </div>
+              </div>
 
-              <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:left-2 sm:p-3" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>
-              <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:right-2 sm:p-3" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>
+              <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/70 bg-white/85 p-2.5 text-[#0A3340] shadow-lg backdrop-blur-md transition hover:bg-white sm:left-2 sm:p-3" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>
+              <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/70 bg-white/85 p-2.5 text-[#0A3340] shadow-lg backdrop-blur-md transition hover:bg-white sm:right-2 sm:p-3" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>
 
               {heroSourceVehicles.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/15 bg-[#071F2A]/65 px-3 py-1.5 backdrop-blur-md" aria-label="Featured vehicle slides">
+                <div className="absolute bottom-0 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/70 bg-white/75 px-3 py-1.5 shadow-sm backdrop-blur-md" aria-label="Featured vehicle slides">
                   {Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => (
-                    <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#13B8A6]' : 'w-1.5 bg-white/45 hover:bg-white/80'}`} />
+                    <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#13B8A6]' : 'w-1.5 bg-[#176B87]/35 hover:bg-[#176B87]/70'}`} />
                   ))}
                 </div>
               )}

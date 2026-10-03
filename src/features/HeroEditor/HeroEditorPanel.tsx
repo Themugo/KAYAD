@@ -8,7 +8,7 @@ interface HeroEditorPanelProps {
 
 const EMPTY_DRAFT: HeroSlideInput = {
   eyebrowText: '',
-  headline: 'Drive Your Dream Today',
+  headline: 'Find a vehicle worth driving home.',
   subheadline: 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.',
   ctaPrimaryText: '',
   ctaPrimaryLink: '',
