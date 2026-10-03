@@ -647,3 +647,12 @@ export const BRANDS = [
   'Honda', 'Volkswagen', 'Lexus', 'Audi', 'Mitsubishi', 'Hyundai', 'Kia', 'Ford',
   'Jeep', 'Peugeot', 'Isuzu', 'Porsche', 'Jaguar', 'Volvo', 'Suzuki', 'Daihatsu',
 ].map(name => ({ name }));
+
+export const heroPlacementsAPI = {
+  publicConfig: () => api.get('/hero-placements/public-config').then(unwrap),
+  publicActive: () => api.get('/hero-placements/public-active').then(unwrap),
+  mine: () => api.get('/hero-placements/mine').then(unwrap),
+  purchase: (body: any) => api.post('/hero-placements', body, { timeout: 45000 }).then(unwrap),
+  adminAll: () => api.get('/hero-placements/admin/all').then(unwrap),
+  adminSchedule: (id: string, body: any) => api.put(`/hero-placements/admin/${id}/schedule`, body).then(unwrap),
+};

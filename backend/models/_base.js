@@ -15,7 +15,7 @@ const TABLE_MAP = {
   RefreshToken: "refresh_tokens",
 
   SupportTicket: "support_tickets", FeatureFlag: "feature_flags", AdSlot: "ad_slots", HeroSlide: "hero_slides", LoanApplication: "loan_applications", MarketingCampaign: "marketing_campaigns",
-  PlatformConfig: "platform_config", Announcement: "announcements",
+  PlatformConfig: "platform_config", HeroPlacement: "hero_placements", Announcement: "announcements",
   SavedSearch: "saved_searches", Report: "reports",
   Transaction: "transactions", Subscription: "subscriptions", DealerSubscription: "dealer_subscriptions",
   MarketData: "market_data", MarketPricing: "market_pricing",

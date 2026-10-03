@@ -13,7 +13,7 @@ import { findAll, count } from "../db/index.js";
 // =============================
 export const initiatePayment = async (req, res) => {
   try {
-    const { phone, amount, carId, type } = req.body;
+    const { phone, amount, carId, type, metadata } = req.body;
 
     if (!phone || !amount || !type) {
       return res.status(400).json({
@@ -102,6 +102,7 @@ export const initiatePayment = async (req, res) => {
       type: normalizedType,
       amount: settlementAmount,
       phone,
+      metadata: metadata || {},
     });
 
     // Create Escrow record for private sellers (individual_seller) - MANDATORY

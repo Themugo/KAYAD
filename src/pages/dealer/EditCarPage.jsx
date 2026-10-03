@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
+import { heroPlacementsAPI } from '../../api/api.exports';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -19,8 +20,16 @@ export default function EditCarPage() {
   const [ownershipError, setOwnershipError] = useState(false);
   const [newImages, setNewImages] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [heroCommercial, setHeroCommercial] = useState(null);
+  const [heroPackageId, setHeroPackageId] = useState('');
+  const [heroBuying, setHeroBuying] = useState(false);
 
   useEffect(() => {
+    heroPlacementsAPI.publicConfig().then(r => {
+      const cfg = r?.config || {};
+      setHeroCommercial(cfg);
+      if (cfg.packages?.[0]) setHeroPackageId(cfg.packages[0].id);
+    }).catch(() => {});
     carsAPI.get(id).then(d => {
       const c = d.car || d.data || d;
       // Ownership check — only the listing owner can edit
@@ -67,6 +76,25 @@ export default function EditCarPage() {
       navigate('/dealer');
     } catch { toast('Failed to update', 'error'); }
     finally { setSaving(false); }
+  };
+
+  const handleHeroPurchase = async () => {
+    if (!heroPackageId) { toast.error('Choose a Hero Spotlight package first'); return; }
+    const phone = user?.phone || car?.dealerPhone || '';
+    if (!phone) { toast.error('Add your M-Pesa phone number before purchasing Hero Spotlight'); return; }
+    setHeroBuying(true);
+    try {
+      const result = await heroPlacementsAPI.purchase({ vehicleId: car._id || car.id, packageId: heroPackageId, phone: String(phone).replace(/^\+/, '') });
+      if (result?.payment?.checkoutID || result?.payment?.checkoutRequestID) {
+        toast.success('Hero Spotlight payment started. Complete the M-Pesa prompt; KAYAD will schedule the paid placement.');
+      } else if (result?.paymentRequired === false) {
+        toast.success('Hero Spotlight placement reserved.');
+      } else {
+        toast.success('Hero Spotlight request submitted.');
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || err?.message || 'Could not purchase Hero Spotlight');
+    } finally { setHeroBuying(false); }
   };
 
   const handleAuctionStart = async () => {
@@ -273,6 +301,32 @@ export default function EditCarPage() {
               </div>
             )}
           </div>
+
+          {/* Premium commercial placement - keeps the existing edit page footprint but exposes paid hero inventory. */}
+          {heroCommercial?.enabled !== false && heroCommercial?.packages?.length > 0 && (
+            <div className="card" style={{ padding: 28, border: '1px solid rgba(19,184,166,.22)', background: 'linear-gradient(135deg,#f7fcfb,#ffffff)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.16em', color: '#176B87', marginBottom: 6 }}>KAYAD Hero Spotlight</div>
+                  <h3 style={{ margin: 0, color: '#0A3340' }}>Put this vehicle in the premium homepage rotation</h3>
+                  <p style={{ margin: '7px 0 0', fontSize: 12, lineHeight: 1.6, color: 'rgba(15,23,42,.55)', maxWidth: 620 }}>Purchase a timed hero placement. KAYAD schedules the paid slot so your vehicle appears in the same premium two-car hero without changing the marketplace layout.</p>
+                </div>
+                <span style={{ padding: '6px 9px', borderRadius: 999, background: '#E6F7F3', color: '#0B756D', fontSize: 9, fontWeight: 900 }}>PAID PROMOTION</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginTop: 18 }}>
+                {heroCommercial.packages.map(pkg => (
+                  <button key={pkg.id} type="button" onClick={() => setHeroPackageId(pkg.id)} style={{ textAlign: 'left', padding: 13, borderRadius: 12, border: heroPackageId === pkg.id ? '1.5px solid #13B8A6' : '1px solid rgba(15,23,42,.09)', background: heroPackageId === pkg.id ? '#F0FBF9' : '#fff', cursor: 'pointer' }}>
+                    <div style={{ fontSize: 11, fontWeight: 900, color: '#0A3340' }}>{pkg.label}</div>
+                    <div style={{ marginTop: 5, fontSize: 16, fontWeight: 900, color: '#176B87' }}>KES {Number(pkg.price || 0).toLocaleString()}</div>
+                    <div style={{ marginTop: 2, fontSize: 9, color: 'rgba(15,23,42,.45)' }}>{pkg.seconds}s rotation time · admin scheduled</div>
+                  </button>
+                ))}
+              </div>
+              <button className="btn btn-gold" onClick={handleHeroPurchase} disabled={heroBuying || !heroPackageId} style={{ marginTop: 16 }}>
+                {heroBuying ? 'Starting M-Pesa…' : 'Buy Hero Spotlight'}
+              </button>
+            </div>
+          )}
 
           {/* Live stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>

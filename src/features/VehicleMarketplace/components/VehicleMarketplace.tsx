@@ -7,6 +7,7 @@ import MarketingCard, { MarketingCardData } from '../../../components/MarketingC
 import FloatingAdRail from '../../../components/FloatingAdRail';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { adminAPI } from '../../../api/api';
+import { heroPlacementsAPI } from '../../../api/api.exports';
 import { getCars, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
@@ -96,6 +97,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [heroFeaturedMode, setHeroFeaturedMode] = useState<'all' | 'selected'>('all');
   const [heroFeaturedIds, setHeroFeaturedIds] = useState<string[]>([]);
   const [featuredVehicles, setFeaturedVehicles] = useState<Vehicle[]>([]);
+  const [heroCommercialConfig, setHeroCommercialConfig] = useState<any>({ enabled: true, rotationMode: 'equal', defaultSlotSeconds: 15, packages: [] });
+  const [activeHeroPlacements, setActiveHeroPlacements] = useState<any[]>([]);
 
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
 
@@ -440,6 +443,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([heroPlacementsAPI.publicConfig().catch(() => null), heroPlacementsAPI.publicActive().catch(() => ({ data: [] }))])
+      .then(([commercial, active]) => {
+        if (cancelled) return;
+        if (commercial?.config) setHeroCommercialConfig(commercial.config);
+        setActiveHeroPlacements(Array.isArray(active?.data) ? active.data : []);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   const heroVehicles = useMemo(() => {
     if (!featuredVehicles.length) return [];
     if (heroFeaturedMode === 'selected') {
@@ -450,6 +464,30 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     }
     return featuredVehicles;
   }, [featuredVehicles, heroFeaturedIds, heroFeaturedMode]);
+
+  const commercialHeroEntries = useMemo(() => {
+    if (heroCommercialConfig.enabled === false || !activeHeroPlacements.length) return [];
+    return activeHeroPlacements
+      .map((placement) => ({
+        vehicle: placement.vehicle ? mapBackendCarToVehicle(placement.vehicle) : featuredVehicles.find((vehicle) => vehicle.id === placement.vehicleId),
+        seconds: Math.max(5, Math.min(300, Number(placement.slotSeconds) || Number(heroCommercialConfig.defaultSlotSeconds) || 15)),
+        placement,
+      }))
+      .filter((entry): entry is { vehicle: Vehicle; seconds: number; placement: any } => Boolean(entry.vehicle));
+  }, [activeHeroPlacements, featuredVehicles, heroCommercialConfig.defaultSlotSeconds]);
+
+  const heroRotationEntries = useMemo(() => {
+    if (commercialHeroEntries.length) return commercialHeroEntries;
+    return heroVehicles.map((vehicle) => ({
+      vehicle,
+      seconds: heroCommercialConfig.rotationMode === 'custom'
+        ? Math.max(5, Math.min(300, Number(heroCommercialConfig.vehicleDurations?.[vehicle.id]) || Number(heroCommercialConfig.defaultSlotSeconds) || 15))
+        : Math.max(5, Number(heroCommercialConfig.defaultSlotSeconds) || 15),
+      placement: null,
+    }));
+  }, [commercialHeroEntries, heroVehicles, heroCommercialConfig]);
+
+  const heroSourceVehicles = useMemo(() => heroRotationEntries.map((entry) => entry.vehicle), [heroRotationEntries]);
 
   // Prefer authoritative Featured/Promoted listings. Fallback configuration remains
   // available for backwards-compatible admin settings, but is never promoted as a
@@ -462,14 +500,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Admin-configured fallback rows are used only when they contain an explicit
   // image URL; there is no bundled/composite vehicle artwork and no vehicle
   // identity is selected by this component.
-  const heroSourceVehicles = useMemo(
-    () => heroVehicles,
-    [heroVehicles],
-  );
   const [heroPairIndex, setHeroPairIndex] = useState(0);
   const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
   const [heroTransitioning, setHeroTransitioning] = useState(false);
   const [heroIncomingVisible, setHeroIncomingVisible] = useState(true);
+  const [heroTransitionDirection, setHeroTransitionDirection] = useState<'next' | 'previous'>('next');
 
   useEffect(() => {
     setHeroPairIndex(0);
@@ -485,6 +520,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
     const normalized = ((nextIndex % pairCount) + pairCount) % pairCount;
     if (normalized === heroPairIndex || pairCount < 2) return;
+    const direction = normalized > heroPairIndex || (heroPairIndex === pairCount - 1 && normalized === 0) ? 'next' : 'previous';
+    setHeroTransitionDirection(direction);
     setHeroPreviousPairIndex(heroPairIndex);
     setHeroPairIndex(normalized);
     setHeroIncomingVisible(false);
@@ -502,13 +539,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [heroTransitioning]);
 
   useEffect(() => {
-    if (heroSourceVehicles.length < 2) return;
-    const timer = window.setInterval(() => {
-      const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
+    if (heroRotationEntries.length < 2) return;
+    const leftSeconds = Number(heroRotationEntries[(heroPairIndex * 2) % heroRotationEntries.length]?.seconds || 15);
+    const rightSeconds = Number(heroRotationEntries[(heroPairIndex * 2 + 1) % heroRotationEntries.length]?.seconds || leftSeconds);
+    const durationMs = Math.max(leftSeconds, rightSeconds) * 1000;
+    const timer = window.setTimeout(() => {
+      const pairCount = Math.max(1, Math.ceil(heroRotationEntries.length / 2));
       changeHeroPair((heroPairIndex + 1) % pairCount);
-    }, 6500);
-    return () => window.clearInterval(timer);
-  }, [heroSourceVehicles.length, heroPairIndex]);
+    }, durationMs);
+    return () => window.clearTimeout(timer);
+  }, [heroRotationEntries, heroPairIndex]);
 
   const heroLeftVehicle = heroSourceVehicles.length ? heroSourceVehicles[(heroPairIndex * 2) % heroSourceVehicles.length] : undefined;
   const heroRightVehicle = heroSourceVehicles.length > 1
@@ -582,15 +622,61 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   const heroVehicleDetails = (vehicle?: Vehicle) => {
     if (!vehicle) return [];
+    const auctionEnd = vehicle.auctionEndsAt || vehicle.auctionEnds;
+    const auctionStamp = auctionEnd ? new Date(auctionEnd).toLocaleString('en-KE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    const auctionFacts = vehicle.isAuction ? [
+      vehicle.currentBid > 0 ? `Bid ${formatPriceM(vehicle.currentBid)}` : 'Bidding open',
+      vehicle.reservePrice > 0 ? `Reserve ${formatPriceM(vehicle.reservePrice)}` : 'No reserve',
+      auctionStamp ? `Ends ${auctionStamp}` : '',
+    ] : [];
+    if (vehicle.isAuction) {
+      return [
+        vehicle.year ? String(vehicle.year) : '',
+        vehicle.currentBid > 0 ? `Bid ${formatPriceM(vehicle.currentBid)}` : 'Bidding open',
+        vehicle.reservePrice > 0 ? `Reserve ${formatPriceM(vehicle.reservePrice)}` : 'No reserve',
+        auctionStamp ? `Ends ${auctionStamp}` : '',
+      ].filter(Boolean);
+    }
     return [
       vehicle.year ? String(vehicle.year) : '',
       vehicle.price > 0 ? formatPriceM(vehicle.price) : '',
       vehicle.mileage > 0 ? `${vehicle.mileage.toLocaleString()} km` : '',
-      vehicle.fuelType || '',
-      vehicle.transmission || '',
-      vehicle.bodyStyle || '',
-      vehicle.location || '',
+      vehicle.fuelType || vehicle.transmission || '',
     ].filter(Boolean).slice(0, 4);
+  };
+
+  const renderHeroVehicle = (vehicle: Vehicle | undefined, side: 'left' | 'right') => {
+    const details = heroVehicleDetails(vehicle);
+    const placement = commercialHeroEntries.find((entry) => entry.vehicle.id === vehicle?.id)?.placement || null;
+    const isAuction = Boolean(vehicle?.isAuction);
+    const trustLabel = vehicle?.inspectionPassed ? 'Inspected' : vehicle?.isDealerCertified || vehicle?.verified ? 'Verified' : vehicle?.isFeatured ? 'Featured' : 'KAYAD Select';
+    return (
+      <div className={`kayad-hero-car kayad-hero-car-${side}`}>
+        <div className="kayad-hero-car-glow" aria-hidden="true" />
+        <img
+          src={heroImageForVehicle(vehicle) || (side === 'left' ? '/hero/kayad-land-cruiser-cutout.png' : '/hero/kayad-mercedes-gle-cutout.png')}
+          alt={vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : 'KAYAD featured vehicle'}
+          className="h-full w-full object-contain object-center"
+          loading="eager"
+          decoding="async"
+        />
+        {vehicle && (
+          <div className={`absolute bottom-2 z-20 w-[min(230px,72%)] rounded-2xl border border-white/70 bg-[#071F2A]/70 px-3 py-2.5 text-white shadow-[0_14px_35px_rgba(7,31,42,.22)] backdrop-blur-xl ${side === 'left' ? 'right-2 text-right' : 'left-2 text-left'}`}>
+            <div className={`flex items-center gap-2 ${side === 'left' ? 'justify-end' : 'justify-start'}`}>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#42D7C7]" />
+              <span className="text-[8px] font-black uppercase tracking-[.16em] text-[#BDF5EE]">{trustLabel}</span>
+              {placement && <span className="rounded-full bg-[#13B8A6]/90 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider text-[#07313D]">Hero Spotlight</span>}
+              {isAuction && <span className="rounded-full bg-[#FF8A3D]/90 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider text-white">Auction</span>}
+            </div>
+            <div className="mt-1 truncate text-[12px] font-black tracking-[-0.01em]">{vehicle.year} {vehicle.make} {vehicle.model}</div>
+            <div className={`mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[8px] font-semibold text-white/75 ${side === 'left' ? 'justify-end' : 'justify-start'}`}>
+              {details.map((detail) => <span key={`${vehicle.id}-${detail}`}>{detail}</span>)}
+            </div>
+            <button type="button" onClick={() => handleVehicleSelect(vehicle)} className="mt-2 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[8px] font-black text-white transition hover:bg-white/20">View vehicle <ChevronRight className={`ml-1 h-3 w-3 ${side === 'left' ? 'rotate-180' : ''}`} /></button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   // FEATURED PICKS — a small, curated strip shown above the full
@@ -757,32 +843,26 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           )}
 
           <div className="relative mx-auto min-h-[455px] w-full max-w-[1680px] px-3 py-7 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-            <div className="relative grid min-h-[390px] items-center gap-1 lg:grid-cols-[minmax(250px,1fr)_minmax(380px,520px)_minmax(250px,1fr)] lg:gap-0">
-              {/* Left vehicle stage. Real featured imagery wins; the curated static vehicle is only a visual fallback. */}
-              <div className="relative z-10 flex h-[190px] items-end justify-center lg:h-[350px] lg:justify-end lg:pr-0">
-                <div className="kayad-hero-car kayad-hero-car-left">
-                  <div className="kayad-hero-car-glow" aria-hidden="true" />
-                  <img
-                    src={heroImageForVehicle(heroLeftVehicle) || '/hero/kayad-land-cruiser-cutout.png'}
-                    alt={heroLeftVehicle ? `${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : 'KAYAD featured vehicle'}
-                    className="h-full w-full object-cover object-center"
-                    loading="eager"
-                    decoding="async"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0A3340]/55 to-transparent" aria-hidden="true" />
-                  <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
-                    <div className="min-w-0 rounded-xl border border-white/30 bg-[#071F2A]/45 px-3 py-2 backdrop-blur-md">
-                      <div className="text-[8px] font-black uppercase tracking-[.18em] text-[#BDF5EE]">{heroLeftVehicle ? 'Featured vehicle' : 'KAYAD Select'}</div>
-                      {heroLeftVehicle && <div className="mt-0.5 truncate text-[11px] font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</div>}
-                    </div>
-                    {heroLeftVehicle && <button type="button" onClick={() => handleVehicleSelect(heroLeftVehicle)} className="shrink-0 rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[8px] font-black text-white backdrop-blur-md transition hover:bg-white/25">View</button>}
-                  </div>
+            <div className="relative grid min-h-[390px] items-center gap-4 lg:grid-cols-[minmax(300px,1fr)_minmax(320px,360px)_minmax(300px,1fr)]">
+              {/* Featured vehicle presentation. The existing featured/promoted feed is the source of truth; the admin-selected IDs control the rotation pool. */}
+              <div className="relative z-10 flex h-[205px] items-center justify-center lg:h-[370px] lg:justify-end lg:pr-1">
+                <div className="relative h-full w-full max-w-[500px]">
+                  {heroTransitioning ? (
+                    <>
+                      <div className="absolute inset-0 transition-all duration-700 ease-out" style={{ transform: heroIncomingVisible ? `translateX(${heroTransitionDirection === 'next' ? '-8%' : '8%'})` : 'translateX(0)', opacity: heroIncomingVisible ? 0 : 1 }}>
+                        {renderHeroVehicle(heroPreviousLeftVehicle, 'left')}
+                      </div>
+                      <div className="absolute inset-0 transition-all duration-700 ease-out" style={{ transform: heroIncomingVisible ? 'translateX(0)' : `translateX(${heroTransitionDirection === 'next' ? '8%' : '-8%'})`, opacity: heroIncomingVisible ? 1 : 0 }}>
+                        {renderHeroVehicle(heroLeftVehicle, 'left')}
+                      </div>
+                    </>
+                  ) : renderHeroVehicle(heroLeftVehicle, 'left')}
                 </div>
               </div>
 
-              {/* Center message card: deliberately restrained typography so the automotive imagery carries the hero. */}
-              <div className="relative z-20 flex justify-center px-2 sm:px-4">
-                <div className="w-full max-w-[470px] rounded-[26px] border border-white/80 bg-white/90 px-5 py-6 text-center shadow-[0_24px_70px_rgba(10,51,64,.18)] backdrop-blur-xl sm:px-8 sm:py-7">
+              {/* Center message card: intentionally narrower so the featured vehicles remain visible and commercially legible on both sides. */}
+              <div className="relative z-20 flex justify-center px-1 sm:px-2">
+                <div className="w-full max-w-[410px] rounded-[24px] border border-white/85 bg-white/92 px-5 py-6 text-center shadow-[0_24px_70px_rgba(10,51,64,.18)] backdrop-blur-xl sm:px-7 sm:py-7">
                   <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#C9E0DD] bg-[#F6FAF9]/90 px-3 py-1.5 text-[8px] font-black uppercase tracking-[.24em] text-[#176B87] sm:text-[9px]">
                     <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />
                     {heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD MARKETPLACE · VERIFIED VEHICLES' : heroEyebrow}
@@ -792,10 +872,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     <span>Move with confidence</span>
                     <span className="h-px w-7 bg-[#13B8A6]" />
                   </div>
-                  <h1 className="mx-auto mt-3 max-w-[390px] font-display text-[clamp(1.65rem,2.8vw,2.35rem)] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0A3340]">
+                  <h1 className="mx-auto mt-3 max-w-[360px] font-display text-[clamp(1.65rem,2.55vw,2.25rem)] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0A3340]">
                     {heroHeadline}
                   </h1>
-                  <p className="mx-auto mt-4 max-w-[430px] text-[11px] font-medium leading-5 text-[#526B73] sm:text-xs">
+                  <p className="mx-auto mt-4 max-w-[380px] text-[11px] font-medium leading-5 text-[#526B73] sm:text-xs">
                     {heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.'
                       ? <>Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.</>
                       : heroSubheadline}
@@ -805,12 +885,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="inline-flex items-center rounded-full border border-[#C9DCD9] bg-white px-5 py-2.5 text-[10px] font-black text-[#0A3340] shadow-sm transition hover:border-[#13B8A6] hover:bg-[#F6FAF9] sm:px-6 sm:py-3 sm:text-xs">How It Works <span className="ml-2 text-xs text-[#176B87]">▶</span></button>
                   </div>
                   <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#DCE9E7] pt-4 sm:grid-cols-4">
-                    {[
-                      ['Verified', 'Listings'],
-                      ['Inspected', 'Vehicles'],
-                      ['Protected', 'Transactions'],
-                      ['East Africa', 'Marketplace'],
-                    ].map(([title, sub]) => (
+                    {[['Verified', 'Listings'], ['Inspected', 'Vehicles'], ['Protected', 'Transactions'], ['East Africa', 'Marketplace']].map(([title, sub]) => (
                       <div key={title} className="text-center">
                         <div className="text-[8px] font-black uppercase tracking-[.1em] text-[#176B87]">{title}</div>
                         <div className="mt-0.5 text-[8px] text-[#70858B]">{sub}</div>
@@ -820,25 +895,18 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               </div>
 
-              {/* Right vehicle stage. */}
-              <div className="relative z-10 flex h-[190px] items-end justify-center lg:h-[350px] lg:justify-start lg:pl-0">
-                <div className="kayad-hero-car kayad-hero-car-right">
-                  <div className="kayad-hero-car-glow" aria-hidden="true" />
-                  <img
-                    src={heroImageForVehicle(heroRightVehicle) || '/hero/kayad-mercedes-gle-cutout.png'}
-                    alt={heroRightVehicle ? `${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}` : 'KAYAD featured vehicle'}
-                    className="h-full w-full object-cover object-center"
-                    loading="eager"
-                    decoding="async"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0A3340]/55 to-transparent" aria-hidden="true" />
-                  <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
-                    <div className="min-w-0 rounded-xl border border-white/30 bg-[#071F2A]/45 px-3 py-2 backdrop-blur-md">
-                      <div className="text-[8px] font-black uppercase tracking-[.18em] text-[#BDF5EE]">{heroRightVehicle ? 'Featured vehicle' : 'KAYAD Select'}</div>
-                      {heroRightVehicle && <div className="mt-0.5 truncate text-[11px] font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}</div>}
-                    </div>
-                    {heroRightVehicle && <button type="button" onClick={() => handleVehicleSelect(heroRightVehicle)} className="shrink-0 rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[8px] font-black text-white backdrop-blur-md transition hover:bg-white/25">View</button>}
-                  </div>
+              <div className="relative z-10 flex h-[205px] items-center justify-center lg:h-[370px] lg:justify-start lg:pl-1">
+                <div className="relative h-full w-full max-w-[500px]">
+                  {heroTransitioning ? (
+                    <>
+                      <div className="absolute inset-0 transition-all duration-700 ease-out" style={{ transform: heroIncomingVisible ? `translateX(${heroTransitionDirection === 'next' ? '8%' : '-8%'})` : 'translateX(0)', opacity: heroIncomingVisible ? 0 : 1 }}>
+                        {renderHeroVehicle(heroPreviousRightVehicle, 'right')}
+                      </div>
+                      <div className="absolute inset-0 transition-all duration-700 ease-out" style={{ transform: heroIncomingVisible ? 'translateX(0)' : `translateX(${heroTransitionDirection === 'next' ? '-8%' : '8%'})`, opacity: heroIncomingVisible ? 1 : 0 }}>
+                        {renderHeroVehicle(heroRightVehicle, 'right')}
+                      </div>
+                    </>
+                  ) : renderHeroVehicle(heroRightVehicle, 'right')}
                 </div>
               </div>
 
