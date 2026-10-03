@@ -7,15 +7,9 @@ const CACHE_NAME = 'kayad-mobile-v2';
 const STATIC_CACHE = 'kayad-static-v2';
 const IMAGE_CACHE = 'kayad-images-v2';
 
-// Static assets to cache on install (only content-hashed assets, NOT index.html)
+// Static assets to cache on install (small, stable shell assets only)
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
-];
-
-// API routes to cache
-const API_ROUTES = [
-  '/api/cars',
-  '/api/brands',
 ];
 
 // Install event - cache static assets
@@ -23,7 +17,6 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log('[SW] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => self.skipWaiting())
@@ -39,7 +32,6 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter((name) => name !== CACHE_NAME && name !== STATIC_CACHE && name !== IMAGE_CACHE)
             .map((name) => {
-              console.log('[SW] Deleting old cache:', name);
               return caches.delete(name);
             })
         );
@@ -255,7 +247,6 @@ self.addEventListener('sync', (event) => {
 
 async function syncFavorites() {
   // Sync favorites when back online
-  console.log('[SW] Syncing favorites...');
   // Implementation would sync local favorites with server
 }
 
@@ -267,13 +258,11 @@ self.addEventListener('message', (event) => {
 
   if (event.data === 'clearImageCache') {
     caches.delete(IMAGE_CACHE);
-    console.log('[SW] Image cache cleared');
   }
 
   if (event.data === 'clearAllCaches') {
     caches.keys().then((names) => {
       return Promise.all(names.map((name) => caches.delete(name)));
     });
-    console.log('[SW] All caches cleared');
   }
 });

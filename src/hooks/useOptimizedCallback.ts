@@ -218,7 +218,9 @@ export function useRenderCount(name: string = 'Component') {
   countRef.current++;
 
   useEffect(() => {
-    console.log(`${name} rendered ${countRef.current} times`);
+    if (import.meta.env.DEV) {
+      console.log(`${name} rendered ${countRef.current} times`);
+    }
   });
 
   return countRef.current;

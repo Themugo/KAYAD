@@ -116,7 +116,10 @@ export const SecurityEvents = {
 };
 
 export function logSecurityEvent(event, metadata = {}) {
-  if (import.meta.env.PROD) console.warn('[SECURITY]', event, metadata);
+  // Keep production telemetry intentionally minimal: arbitrary metadata may
+  // contain identifiers or request context that should not be written to the
+  // browser console. Development retains metadata for local diagnostics.
+  if (import.meta.env.PROD) console.warn('[SECURITY]', event);
   else console.log('[SECURITY DEV]', event, metadata);
 }
 

@@ -55,7 +55,7 @@ export default function LazyImage({ src, alt, fallback, width, height, style, cl
   const imgResult = currentSrc ? getCloudinarySrcSet(currentSrc) : null;
 
   return (
-    <div ref={imgRef} className={className} style={{ position: 'relative', overflow: 'hidden', background: '#111', width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined, ...style }}>
+    <div ref={imgRef} className={className} style={{ position: 'relative', overflow: 'hidden', background: '#edf6f4', width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined, ...style }}>
       {!loaded && (
         <div style={{
           position: 'absolute', inset: 0,

@@ -3,7 +3,6 @@ import { adminAPI } from '../api/api';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CompareDrawer from './CompareDrawer';
-import MobileBottomNav from './MobileBottomNav';
 
 interface SiteConfig {
   fontDisplay?: string;
@@ -62,7 +61,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {children}
       </main>
       <Footer />
-      <MobileBottomNav />
       <CompareDrawer />
     </div>
   );
