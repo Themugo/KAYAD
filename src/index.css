@@ -450,7 +450,7 @@ button, a, input, select, textarea {
   }
   .kayad-premium-hero > .relative.mx-auto {
     min-height: 0 !important;
-    padding: 8px 10px 14px !important;
+    padding: 12px 10px 20px !important;
   }
   .kayad-premium-hero > .relative.mx-auto > .relative.grid {
     min-height: 0 !important;
@@ -490,7 +490,7 @@ button, a, input, select, textarea {
     padding-top: 11px;
   }
   .kayad-premium-hero .kayad-hero-car-slot {
-    height: 118px !important;
+    height: 168px !important;
     align-items: end;
   }
   .kayad-premium-hero .kayad-hero-car-slot-left {
@@ -594,7 +594,7 @@ button, a, input, select, textarea {
 }
 
 @media (max-width: 380px) {
-  .kayad-premium-hero .kayad-hero-car-slot { height: 104px !important; }
+  .kayad-premium-hero .kayad-hero-car-slot { height: 148px !important; }
   .kayad-premium-hero .kayad-hero-center-card > div { padding-left: 12px; padding-right: 12px; }
   .kayad-premium-hero .kayad-hero-center-card h1 { font-size: 1.65rem; }
   .kayad-premium-hero .kayad-hero-center-card .grid-cols-2 { gap: 8px; }
@@ -723,7 +723,7 @@ button, a, input, select, textarea {
 .kayad-premium-hero .kayad-hero-car {
   position: relative;
   width: min(100%, clamp(300px, 30vw, 480px));
-  height: clamp(158px, 17vw, 252px);
+  height: clamp(225px, 24vw, 360px);
   overflow: visible;
   border: 0;
   border-radius: 0;
@@ -761,12 +761,12 @@ button, a, input, select, textarea {
   transform: translateX(clamp(-150px, -10vw, -64px));
 }
 @media (min-width: 1280px) {
-  .kayad-premium-hero .kayad-hero-car { height: clamp(175px, 17vw, 259px); }
+  .kayad-premium-hero .kayad-hero-car { height: clamp(250px, 24vw, 370px); }
 }
 @media (max-width: 1023px) {
   .kayad-premium-hero .kayad-hero-car {
     width: min(44vw, 330px);
-    height: clamp(119px, 20vw, 165px);
+    height: clamp(170px, 28vw, 235px);
   }
   .kayad-premium-hero .kayad-hero-car-left { transform: translateX(clamp(36px, 7vw, 90px)); }
   .kayad-premium-hero .kayad-hero-car-right { transform: translateX(clamp(-90px, -7vw, -36px)); }
@@ -774,7 +774,7 @@ button, a, input, select, textarea {
 @media (max-width: 767px) {
   .kayad-premium-hero .kayad-hero-car {
     width: min(46vw, 215px);
-    height: clamp(98px, 25vw, 130px);
+    height: clamp(140px, 35vw, 185px);
   }
   .kayad-premium-hero .kayad-hero-car-left { transform: translateX(4px); }
   .kayad-premium-hero .kayad-hero-car-right { transform: translateX(-4px); }
@@ -782,4 +782,32 @@ button, a, input, select, textarea {
 }
 @media (prefers-reduced-motion: reduce) {
   .kayad-premium-hero .kayad-hero-car img { transition: none; }
+}
+
+/* KAYAD hero stage balance: reduce only the visual stage/background height and
+   move full-size featured vehicles outward. The center card is intentionally
+   untouched. */
+@media (min-width: 768px) {
+  .kayad-premium-hero > .absolute.inset-0 {
+    height: 70%;
+    bottom: auto;
+  }
+
+  .kayad-premium-hero .kayad-hero-car-left {
+    transform: translateX(clamp(110px, 13vw, 200px));
+  }
+
+  .kayad-premium-hero .kayad-hero-car-right {
+    transform: translateX(clamp(-200px, -13vw, -110px));
+  }
+}
+
+@media (min-width: 1024px) {
+  .kayad-premium-hero .kayad-hero-car-left {
+    transform: translateX(clamp(140px, 14vw, 225px));
+  }
+
+  .kayad-premium-hero .kayad-hero-car-right {
+    transform: translateX(clamp(-225px, -14vw, -140px));
+  }
 }

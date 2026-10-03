@@ -842,10 +842,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             />
           )}
 
-          <div className="relative mx-auto min-h-[280px] w-full max-w-[1680px] px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
-            <div className="relative grid min-h-[238px] items-center gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)_minmax(0,1fr)]">
+          <div className="relative mx-auto min-h-[400px] w-full max-w-[1680px] px-3 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+            <div className="relative grid min-h-[340px] items-center gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)_minmax(0,1fr)]">
               {/* Featured vehicle presentation. The existing featured/promoted feed is the source of truth; the admin-selected IDs control the rotation pool. */}
-              <div className="kayad-hero-car-slot kayad-hero-car-slot-left relative z-10 flex h-[123px] items-center justify-center lg:h-[214px] lg:justify-end lg:pr-1">
+              <div className="kayad-hero-car-slot kayad-hero-car-slot-left relative z-10 flex h-[175px] items-center justify-center lg:h-[305px] lg:justify-end lg:pr-1">
                 <div className="relative h-full w-full max-w-[500px]">
                   {heroTransitioning ? (
                     <>
@@ -895,7 +895,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               </div>
 
-              <div className="kayad-hero-car-slot kayad-hero-car-slot-right relative z-10 flex h-[123px] items-center justify-center lg:h-[214px] lg:justify-start lg:pl-1">
+              <div className="kayad-hero-car-slot kayad-hero-car-slot-right relative z-10 flex h-[175px] items-center justify-center lg:h-[305px] lg:justify-start lg:pl-1">
                 <div className="relative h-full w-full max-w-[500px]">
                   {heroTransitioning ? (
                     <>
