@@ -78,7 +78,7 @@ router.get(
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne()
       .select(
-        "platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing heroCarIds heroFeaturedMode heroCommercial",
+        "platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing heroCarIds heroFeaturedMode heroPresentation heroCardContent",
       )
       .lean();
 
@@ -646,7 +646,8 @@ router.put(
       "branding",
       "heroCarIds",
       "heroFeaturedMode",
-      "heroCommercial",
+      "heroPresentation",
+      "heroCardContent",
     ];
 
     for (const key of allowed) {

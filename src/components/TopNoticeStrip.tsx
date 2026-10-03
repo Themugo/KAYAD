@@ -44,25 +44,22 @@ export const TopNoticeStrip: React.FC = () => {
     if (fadeIndex >= slots.length) setFadeIndex(0);
   }, [fadeIndex, slots.length]);
 
-  if (!loaded) {
-    return <div className="w-full h-9 bg-[#0A3340] border-b border-white/10" role="region" aria-label="KAYAD notices" />;
-  }
-
-  if (slots.length === 0) {
+  if (!loaded || slots.length === 0) {
     const fallback = [
-      'Verified Vehicles',
-      'Transparent Pricing',
-      'Secure Escrow',
-      'Pre-Purchase Inspection',
-      'Sell Your Vehicle with Confidence',
-      'KAYAD Automotive Marketplace · East Africa',
+      'KAYAD · Verified vehicles across East Africa',
+      'Live auctions · transparent bidding · protected transactions',
+      'Pre-purchase inspection available on eligible vehicles',
+      'Sell your vehicle · reach verified KAYAD buyers',
     ];
+    const items = [...fallback, ...fallback];
     return (
       <div className="w-full h-9 overflow-hidden bg-[#0A3340] border-b border-white/10" role="region" aria-label="KAYAD notices">
-        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: '28s' }}>
-          {[...fallback, ...fallback].map((item, index) => (
-            <span key={`${item}-${index}`} className="flex items-center gap-4 px-6 text-[10px] sm:text-[11px] font-semibold tracking-[.02em] text-white/90">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#42D7C7]" />{item}<span className="text-white/25">|</span>
+        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: '34s' }}>
+          {items.map((item, index) => (
+            <span key={`${item}-${index}`} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em] text-white/90">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" aria-hidden="true" />
+              {item}
+              <span className="text-white/25" aria-hidden="true">|</span>
             </span>
           ))}
         </div>

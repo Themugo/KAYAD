@@ -24,7 +24,11 @@ export default function MobileBottomNav({
       action: () => {
         onNavigate('marketplace');
         window.requestAnimationFrame(() => {
-          document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          document.getElementById('market-results')?.scrollIntoView({
+            behavior: prefersReducedMotion ? 'auto' : 'smooth',
+            block: 'start',
+          });
         });
       },
     },

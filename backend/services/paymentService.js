@@ -6,7 +6,6 @@ import { logWarn } from "../utils/logger.js";
 import { recordPaymentEvent, recordPaymentAttempt } from "./paymentFinancialLifecycle.service.js";
 import { findById, findOne, create, update } from "../db/index.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
-import { heroPlacementService } from "./heroPlacement.service.js";
 
 const formatPhone = (phone) => {
   if (!phone) return null;
@@ -119,10 +118,6 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     mpesaReceipt: receipt,
     paidAt: new Date().toISOString(),
   });
-
-  if (payment.type === "hero_placement" && payment.metadata?.heroPlacementId) {
-    await heroPlacementService.markPaid(payment.id, payment.metadata.heroPlacementId).catch(() => null);
-  }
 
   const mpesaTxn = await findOne("mpesa_transactions", { checkoutRequestId: checkoutRequestID });
   if (mpesaTxn) {

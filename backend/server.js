@@ -117,7 +117,6 @@ import supportTicketAdminRoutes from "./routes/supportTicketAdminRoutes.js";
 import bulkAdminRoutes from "./routes/bulkAdminRoutes.js";
 import cmsRoutes from "./routes/cmsRoutes.js";
 import adSlotRoutes from "./routes/adSlotRoutes.js";
-import heroPlacementRoutes from "./routes/heroPlacementRoutes.js";
 import heroSlideRoutes from "./routes/heroSlideRoutes.js";
 import loanApplicationRoutes from "./routes/loanApplicationRoutes.js";
 import automationRoutes from "./routes/automationRoutes.js";
@@ -366,10 +365,9 @@ const allowedOrigins = [
     .split(",")
     .map((v) => v.trim())
     .filter(Boolean),
-  // Add the current stable Vercel aliases (not wildcard). Preview deployments
-  // remain intentionally outside the production CORS allow-list.
+  // Add specific Vercel deployment URLs (not wildcard)
   ...(!IS_DEVELOPMENT && !IS_TEST
-    ? ["https://kayad-space.vercel.app", "https://kayad-space-themugos-projects.vercel.app"]
+    ? ["https://kayad-motors.vercel.app", "https://kayad-motors-themugos-projects.vercel.app"]
     : []),
   // Add custom domain if configured
   ...(process.env.CUSTOM_DOMAIN
@@ -378,7 +376,7 @@ const allowedOrigins = [
 ];
 
 // Stricter Vercel regex - only allow specific known deployment patterns
-const vercelPattern = /^https:\/\/kayad-space(-themugos-projects)?\.vercel\.app$/;
+const vercelPattern = /^https:\/\/kayad-motors(-themugos-projects)?\.vercel\.app$/;
 
 app.use(
   cors({
@@ -842,7 +840,6 @@ app.use("/api/admin/support-tickets", supportTicketAdminRoutes);
 app.use("/api/admin/bulk", bulkAdminRoutes);
 app.use("/api/cms", cmsRoutes);
 app.use("/api/ads", adSlotRoutes);
-app.use("/api/hero-placements", heroPlacementRoutes);
 app.use("/api/hero", heroSlideRoutes);
 app.use("/api/loans", loanApplicationRoutes);
 app.use("/api/automation", automationRoutes);

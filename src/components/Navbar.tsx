@@ -95,7 +95,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasNotifications = (user?.unreadNotificationsCount ?? 0) > 0 || effectiveUnread > 0;
 
   return (
-    <header className="kayad-app-header sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#D7E7E4] shadow-[0_4px_20px_rgba(11,29,58,.06)] text-slate-800">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#D7E7E4] shadow-[0_4px_20px_rgba(11,29,58,.06)] text-slate-800">
       {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
 
       {/* Main Navigation Container */}

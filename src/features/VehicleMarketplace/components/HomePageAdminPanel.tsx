@@ -9,8 +9,6 @@ import {
 } from '../../Admin/hooks/escrowRulesConfig';
 import { readLogEntries } from '../../Admin/hooks/adminAuditLog';
 import type { Vehicle } from '../../../types';
-import { adminAPI } from '../../../api/api';
-import { heroPlacementsAPI } from '../../../api/api.exports';
 
 interface HomePageAdminPanelProps {
   config: HomePageConfig;
@@ -24,7 +22,10 @@ interface HomePageAdminPanelProps {
   featuredVehicles: Vehicle[];
   heroFeaturedMode: 'all' | 'selected';
   heroFeaturedIds: string[];
+  heroPresentation: { stageHeightPct: number; cardScalePct: number; leftOffsetPct: number; rightOffsetPct: number; tickerEnabled: boolean };
+  heroCardContent: Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string }>;
   onSaveHeroVehicleSelection: (mode: 'all' | 'selected', ids: string[]) => Promise<void>;
+  onSaveHeroPresentation: (presentation: { stageHeightPct: number; cardScalePct: number; leftOffsetPct: number; rightOffsetPct: number; tickerEnabled: boolean }, cardContent: Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string }>) => Promise<void>;
 }
 
 const SECTION_LABELS: Record<keyof HomePageConfig['sectionVisibility'], string> = {
@@ -54,7 +55,7 @@ function formatAdminPrice(value: number) {
 }
 
 export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
-  config, onUpdate, onReset, onClose, adminUser, featuredVehicles, heroFeaturedMode, heroFeaturedIds, onSaveHeroVehicleSelection
+  config, onUpdate, onReset, onClose, adminUser, featuredVehicles, heroFeaturedMode, heroFeaturedIds, heroPresentation, heroCardContent, onSaveHeroVehicleSelection, onSaveHeroPresentation
 }) => {
   // Escrow rules have their own separate config/storage/audit-log
   // mechanism from HomePageConfig (readEscrowRulesConfig/
@@ -70,21 +71,10 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
   const [heroMode, setHeroMode] = useState<'all' | 'selected'>(heroFeaturedMode);
   const [heroIds, setHeroIds] = useState<string[]>(heroFeaturedIds);
   const [savingHeroSelection, setSavingHeroSelection] = useState(false);
-  const [heroCommercial, setHeroCommercial] = useState<any>({ enabled: true, rotationMode: 'equal', defaultSlotSeconds: 15, packages: [] });
-  const [heroPlacements, setHeroPlacements] = useState<any[]>([]);
-  const [savingHeroCommercial, setSavingHeroCommercial] = useState(false);
-  const [placementDrafts, setPlacementDrafts] = useState<Record<string, { start: string; end: string }>>({});
-
-  React.useEffect(() => {
-    Promise.all([
-      adminAPI.getConfig().catch(() => ({})),
-      heroPlacementsAPI.adminAll?.().catch(() => ({ data: [] })) || Promise.resolve({ data: [] }),
-    ]).then(([cfg, placements]) => {
-      const raw = cfg?.config || cfg || {};
-      if (raw.heroCommercial) setHeroCommercial(raw.heroCommercial);
-      setHeroPlacements(Array.isArray(placements?.data) ? placements.data : []);
-    });
-  }, []);
+  const [heroLayout, setHeroLayout] = useState(heroPresentation);
+  const [heroCopy, setHeroCopy] = useState(heroCardContent);
+  const [heroCopyVehicleId, setHeroCopyVehicleId] = useState<string>(heroFeaturedIds[0] || featuredVehicles[0]?.id || '');
+  const [savingHeroPresentation, setSavingHeroPresentation] = useState(false);
 
   const toggleHeroVehicle = (id: string) => {
     setHeroIds((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
@@ -99,36 +89,27 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
     }
   };
 
-  const saveHeroCommercial = async () => {
-    setSavingHeroCommercial(true);
+  const saveHeroPresentation = async () => {
+    setSavingHeroPresentation(true);
     try {
-      const current = await adminAPI.getConfig();
-      await adminAPI.updateConfig({ ...(current?.config || current || {}), heroCommercial });
+      const clamped = {
+        stageHeightPct: Math.max(70, Math.min(120, Number(heroLayout.stageHeightPct) || 100)),
+        cardScalePct: Math.max(70, Math.min(100, Number(heroLayout.cardScalePct) || 80)),
+        leftOffsetPct: Math.max(0, Math.min(30, Number(heroLayout.leftOffsetPct) || 14)),
+        rightOffsetPct: Math.max(0, Math.min(30, Number(heroLayout.rightOffsetPct) || 14)),
+        tickerEnabled: heroLayout.tickerEnabled !== false,
+      };
+      await onSaveHeroPresentation(clamped, heroCopy);
+      setHeroLayout(clamped);
     } finally {
-      setSavingHeroCommercial(false);
+      setSavingHeroPresentation(false);
     }
   };
 
-  const updateHeroPackage = (index: number, field: 'seconds' | 'price' | 'label', value: string) => {
-    setHeroCommercial((prev: any) => ({ ...prev, packages: (prev.packages || []).map((pkg: any, i: number) => i === index ? { ...pkg, [field]: field === 'label' ? value : Number(value) } : pkg) }));
-  };
-
-  const schedulePlacement = async (placement: any) => {
-    const draft = placementDrafts[placement.id];
-    if (!draft?.start || !draft?.end) return;
-    try {
-      await heroPlacementsAPI.adminSchedule(placement.id, { assignedStartAt: new Date(draft.start).toISOString(), assignedEndAt: new Date(draft.end).toISOString(), status: 'scheduled' });
-      const refreshed = await heroPlacementsAPI.adminAll();
-      setHeroPlacements(refreshed?.data || []);
-    } catch { /* surface remains stable; admin can retry */ }
-  };
-
-  const toLocalDateTime = (value: string | null | undefined) => {
-    if (!value) return '';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return '';
-    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-    return local.toISOString().slice(0, 16);
+  const activeCopy = heroCopyVehicleId ? (heroCopy[heroCopyVehicleId] || {}) : {};
+  const updateActiveCopy = (field: 'eyebrow' | 'message' | 'detail' | 'ctaLabel' | 'ctaLink', value: string) => {
+    if (!heroCopyVehicleId) return;
+    setHeroCopy((prev) => ({ ...prev, [heroCopyVehicleId]: { ...(prev[heroCopyVehicleId] || {}), [field]: value } }));
   };
 
   const updateEscrowConfig = (next: EscrowRulesConfig) => {
@@ -234,51 +215,19 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
             </div>
 
             {heroMode === 'selected' && (
-              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3">
+              <div className="max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
                 {featuredVehicles.length === 0 ? (
-                  <p className="p-2 text-[11px] text-slate-500">No promoted vehicles are currently available.</p>
-                ) : (
-                  <>
-                    <p className="text-[10px] leading-relaxed text-slate-500">Choose the two lead vehicles first. Additional selected vehicles become the rotation pool after those two positions.</p>
-                    {[
-                      { label: 'Left hero vehicle', index: 0 },
-                      { label: 'Right hero vehicle', index: 1 },
-                    ].map(({ label, index }) => (
-                      <label key={label} className="block">
-                        <span className="mb-1 block text-[9px] font-black uppercase tracking-wide text-[#176B87]">{label}</span>
-                        <select
-                          value={heroIds[index] || ''}
-                          onChange={(e) => {
-                            const id = e.target.value;
-                            setHeroIds((prev) => {
-                              const next = [...prev];
-                              if (id) next[index] = id;
-                              else next.splice(index, 1);
-                              return next.filter((item, i) => item && next.indexOf(item) === i);
-                            });
-                          }}
-                          className="w-full rounded-lg border border-slate-200 bg-[#FBFDFC] px-2.5 py-2 text-[11px] font-semibold text-slate-700 outline-none focus:border-[#176B87]"
-                        >
-                          <option value="">Auto / none</option>
-                          {featuredVehicles.map((vehicle) => (
-                            <option key={vehicle.id} value={vehicle.id}>
-                              {vehicle.year} {vehicle.make} {vehicle.model} · {formatAdminPrice(vehicle.price)}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ))}
-                    <div className="max-h-36 space-y-1 overflow-y-auto rounded-lg bg-[#F8FBFF] p-2">
-                      {featuredVehicles.map((vehicle) => (
-                        <button key={vehicle.id} type="button" onClick={() => toggleHeroVehicle(vehicle.id)} className={`flex w-full items-center gap-2 rounded-lg p-1.5 text-left transition ${heroIds.includes(vehicle.id) ? 'bg-white ring-1 ring-[#176B87]/20' : 'hover:bg-white'}`}>
-                          <span className={`h-2 w-2 shrink-0 rounded-full ${heroIds.includes(vehicle.id) ? 'bg-[#13B8A6]' : 'bg-slate-300'}`} />
-                          <span className="min-w-0 flex-1 truncate text-[10px] font-bold text-[#0A3340]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
-                          <span className="shrink-0 text-[9px] text-slate-400">{formatAdminPrice(vehicle.price)}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                  <p className="p-3 text-[11px] text-slate-500">No promoted vehicles are currently available.</p>
+                ) : featuredVehicles.map((vehicle) => (
+                  <label key={vehicle.id} className="flex cursor-pointer items-center gap-2 rounded-lg p-2 hover:bg-[#F8FBFF]">
+                    <input type="checkbox" checked={heroIds.includes(vehicle.id)} onChange={() => toggleHeroVehicle(vehicle.id)} className="accent-[#176B87]" />
+                    <img src={vehicle.images?.[0]} alt="" className="h-9 w-12 rounded-md object-cover bg-slate-100" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[11px] font-bold text-[#0A3340]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
+                      <span className="block truncate text-[10px] text-slate-400">{vehicle.location || 'Location not specified'} · {formatAdminPrice(vehicle.price)}</span>
+                    </span>
+                  </label>
+                ))}
               </div>
             )}
 
@@ -287,79 +236,49 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
             </button>
           </div>
 
-          {/* Paid hero inventory: commercial scheduling stays inside the existing admin hero controls. */}
-          <div className="space-y-3 rounded-2xl border border-[#D7E7E4] bg-[#F9FCFB] p-3.5">
-            <div className="flex items-start gap-2">
-              <Settings className="mt-0.5 h-4 w-4 text-[#176B87] shrink-0" />
-              <div>
-                <h3 className="font-bold text-[#0A3340] uppercase text-[10px] tracking-wide">Hero Commercialisation</h3>
-                <p className="text-[11px] leading-relaxed text-slate-500 mt-1">Sell timed homepage hero exposure without changing the hero footprint. Paid placements enter the same rotation only for their assigned window.</p>
-              </div>
+          {/* Unified hero composition controls: backend-persisted through platform_config. */}
+          <div className="space-y-3 rounded-2xl border border-[#B8D9D6] bg-[#F8FBFF] p-3.5">
+            <div>
+              <h3 className="font-bold text-[#0A3340] uppercase text-[10px] tracking-wide">Hero Composition & Commercial Card</h3>
+              <p className="text-[11px] leading-relaxed text-slate-500 mt-1">Position the existing hero without changing its architecture. The center card, vehicle subjects and broadcast strip remain the same canonical surfaces.</p>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setHeroCommercial((p: any) => ({ ...p, enabled: true }))} className={`rounded-xl border p-2.5 text-left ${heroCommercial.enabled !== false ? 'border-[#176B87] bg-white' : 'border-slate-200 bg-white'}`}>
-                <span className="block text-xs font-black text-[#0A3340]">Hero sales ON</span><span className="block text-[10px] mt-0.5 text-slate-400">Paid placements enabled</span>
-              </button>
-              <button type="button" onClick={() => setHeroCommercial((p: any) => ({ ...p, enabled: false }))} className={`rounded-xl border p-2.5 text-left ${heroCommercial.enabled === false ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'}`}>
-                <span className="block text-xs font-black text-[#0A3340]">Hero sales OFF</span><span className="block text-[10px] mt-0.5 text-slate-400">Featured-only rotation</span>
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {(['equal','custom'] as const).map(mode => (
-                <button key={mode} type="button" onClick={() => setHeroCommercial((p: any) => ({ ...p, rotationMode: mode }))} className={`rounded-xl border p-2.5 text-left ${heroCommercial.rotationMode === mode ? 'border-[#176B87] bg-white' : 'border-slate-200 bg-white'}`}>
-                  <span className="block text-xs font-black text-[#0A3340]">{mode === 'equal' ? 'Equal time' : 'Custom time'}</span>
-                  <span className="block text-[10px] mt-0.5 text-slate-400">{mode === 'equal' ? 'Every vehicle uses the default duration' : 'Set exposure per selected vehicle'}</span>
-                </button>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                ['stageHeightPct','Hero stage height','70–120%'],
+                ['cardScalePct','Center card scale','70–100%'],
+                ['leftOffsetPct','Left vehicle outward','0–30%'],
+                ['rightOffsetPct','Right vehicle outward','0–30%'],
+              ].map(([key,label,hint]) => (
+                <label key={key} className="rounded-xl border border-slate-200 bg-white p-2.5">
+                  <span className="block text-[9px] font-black uppercase tracking-wide text-slate-500">{label}</span>
+                  <input type="number" min={key === 'stageHeightPct' ? 70 : key === 'cardScalePct' ? 70 : 0} max={key === 'stageHeightPct' ? 120 : key === 'cardScalePct' ? 100 : 30} value={(heroLayout as any)[key]} onChange={(e) => setHeroLayout((prev) => ({ ...prev, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold text-[#0A3340]" />
+                  <span className="mt-1 block text-[9px] text-slate-400">{hint}</span>
+                </label>
               ))}
             </div>
-            <label className="block"><span className="mb-1 block text-[9px] font-black uppercase tracking-wide text-[#176B87]">Default rotation seconds</span><input type="number" min="5" max="300" value={heroCommercial.defaultSlotSeconds || 15} onChange={e => setHeroCommercial((p: any) => ({ ...p, defaultSlotSeconds: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[11px] font-semibold" /></label>
-            {heroCommercial.rotationMode === 'custom' && (
-              <div className="space-y-1.5 rounded-xl border border-slate-200 bg-white p-3">
-                <div className="text-[9px] font-black uppercase tracking-wide text-slate-500">Custom exposure per featured vehicle</div>
-                <div className="max-h-36 space-y-1 overflow-y-auto">
-                  {featuredVehicles.map((vehicle) => (
-                    <label key={vehicle.id} className="flex items-center gap-2 rounded-lg px-1.5 py-1.5 hover:bg-[#F8FBFF]">
-                      <span className="min-w-0 flex-1 truncate text-[10px] font-bold text-[#0A3340]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
-                      <input type="number" min="5" max="300" value={heroCommercial.vehicleDurations?.[vehicle.id] || heroCommercial.defaultSlotSeconds || 15} onChange={e => setHeroCommercial((p: any) => ({ ...p, vehicleDurations: { ...(p.vehicleDurations || {}), [vehicle.id]: Number(e.target.value) } }))} className="w-16 rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-bold text-right" aria-label={`${vehicle.make} ${vehicle.model} seconds`} />
-                      <span className="text-[9px] text-slate-400">sec</span>
-                    </label>
-                  ))}
+            <label className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3">
+              <span><span className="block text-xs font-bold text-[#0A3340]">Broadcast ticker</span><span className="block text-[10px] text-slate-400">Keep the dark TV-style notice strip above navigation.</span></span>
+              <input type="checkbox" checked={heroLayout.tickerEnabled} onChange={(e) => setHeroLayout((prev) => ({ ...prev, tickerEnabled: e.target.checked }))} className="accent-[#176B87] h-4 w-4" />
+            </label>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+              <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">Per-vehicle hero card message</div>
+              <select value={heroCopyVehicleId} onChange={(e) => setHeroCopyVehicleId(e.target.value)} className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs">
+                <option value="">Select featured vehicle</option>
+                {featuredVehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.year} {vehicle.make} {vehicle.model}{vehicle.isAuction ? ' · Auction' : ''}</option>)}
+              </select>
+              {heroCopyVehicleId && <div className="space-y-2">
+                <input value={activeCopy.eyebrow || ''} onChange={(e) => updateActiveCopy('eyebrow', e.target.value)} placeholder="Eyebrow / campaign label" className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
+                <textarea value={activeCopy.message || ''} onChange={(e) => updateActiveCopy('message', e.target.value)} placeholder="Hero message shown with this vehicle" rows={3} className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs resize-none" />
+                <input value={activeCopy.detail || ''} onChange={(e) => updateActiveCopy('detail', e.target.value)} placeholder="Supporting detail / promotion" className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
+                <div className="grid grid-cols-2 gap-2">
+                  <input value={activeCopy.ctaLabel || ''} onChange={(e) => updateActiveCopy('ctaLabel', e.target.value)} placeholder="CTA label" className="rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
+                  <input value={activeCopy.ctaLink || ''} onChange={(e) => updateActiveCopy('ctaLink', e.target.value)} placeholder="CTA link / route" className="rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
                 </div>
-              </div>
-            )}
-            <div className="space-y-2 rounded-xl border border-[#D7E7E4] bg-white p-3">
-              <div className="text-[9px] font-black uppercase tracking-wide text-[#176B87]">Hero positioning & scale</div>
-              <p className="text-[10px] leading-relaxed text-slate-500">Tune the existing composition without redesigning it. The center card remains the anchor; these controls only set the stage footprint and vehicle spacing.</p>
-              <div className="grid grid-cols-2 gap-2">
-                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Stage height %</span><input type="number" min=70 max=120 value={heroCommercial.layout?.stageHeightPct || 100} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), stageHeightPct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
-                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Card scale %</span><input type="number" min=70 max=100 value={heroCommercial.layout?.centerCardScalePct || 80} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), centerCardScalePct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
-                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Left car outward %</span><input type="number" min=0 max=30 value={heroCommercial.layout?.leftOffsetPct || 12} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), leftOffsetPct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
-                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Right car outward %</span><input type="number" min=0 max=30 value={heroCommercial.layout?.rightOffsetPct || 12} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), rightOffsetPct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
-              </div>
-              <div className="flex items-center justify-between rounded-lg bg-[#F5FAF9] px-2.5 py-2 text-[9px] text-slate-500"><span>Recommended starting balance</span><b className="text-[#0A3340]">Stage 100% · Card 80% · Cars 12% outward</b></div>
+              </div>}
             </div>
 
-            <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
-              <div className="text-[9px] font-black uppercase tracking-wide text-slate-500">Hero packages sold to sellers</div>
-              {(heroCommercial.packages || []).map((pkg: any, index: number) => (
-                <div key={pkg.id || index} className="grid grid-cols-[1fr_80px_90px] gap-2 items-center">
-                  <input value={pkg.label || ''} onChange={e => updateHeroPackage(index, 'label', e.target.value)} className="rounded-lg border border-slate-200 px-2 py-2 text-[10px]" />
-                  <input type="number" min="5" max="300" value={pkg.seconds || 15} onChange={e => updateHeroPackage(index, 'seconds', e.target.value)} className="rounded-lg border border-slate-200 px-2 py-2 text-[10px]" aria-label="seconds" />
-                  <input type="number" min="0" value={pkg.price || 0} onChange={e => updateHeroPackage(index, 'price', e.target.value)} className="rounded-lg border border-slate-200 px-2 py-2 text-[10px]" aria-label="price" />
-                </div>
-              ))}
-              <button type="button" disabled={savingHeroCommercial} onClick={() => void saveHeroCommercial()} className="w-full rounded-xl bg-[#176B87] px-3 py-2.5 text-xs font-black text-white">{savingHeroCommercial ? 'Saving commercial settings…' : 'Save hero commercial settings'}</button>
-            </div>
-            {heroPlacements.length > 0 && (
-              <div className="space-y-2 rounded-xl border border-[#E7D7C9] bg-[#FFFBF7] p-3">
-                <div className="text-[9px] font-black uppercase tracking-wide text-[#A65F28]">Paid placements awaiting / assigned</div>
-                {heroPlacements.slice(0, 8).map((placement: any) => {
-                  const vehicle = featuredVehicles.find(v => v.id === placement.vehicleId);
-                  const draft = placementDrafts[placement.id] || { start: toLocalDateTime(placement.assignedStartAt), end: toLocalDateTime(placement.assignedEndAt) };
-                  return <div key={placement.id} className="space-y-2 rounded-lg bg-white p-2.5"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><div className="truncate text-[10px] font-black text-[#0A3340]">{vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : placement.vehicleId}</div><div className="text-[9px] text-slate-400">KES {Number(placement.price || 0).toLocaleString()} · {placement.status} · {placement.slotSeconds}s</div></div></div><div className="grid grid-cols-2 gap-2"><input type="datetime-local" value={draft.start} onChange={e => setPlacementDrafts(p => ({ ...p, [placement.id]: { ...draft, start: e.target.value } }))} className="rounded-lg border border-slate-200 px-2 py-1.5 text-[9px]" aria-label="Assigned start" /><input type="datetime-local" value={draft.end} onChange={e => setPlacementDrafts(p => ({ ...p, [placement.id]: { ...draft, end: e.target.value } }))} className="rounded-lg border border-slate-200 px-2 py-1.5 text-[9px]" aria-label="Assigned end" /></div><button type="button" disabled={placement.status === 'pending_payment' || !draft.start || !draft.end} onClick={() => void schedulePlacement(placement)} className="w-full rounded-lg bg-[#0A3340] px-2.5 py-1.5 text-[9px] font-black text-white disabled:opacity-40">Assign scheduled hero time</button></div>;
-                })}
-              </div>
-            )}
+            <button type="button" disabled={savingHeroPresentation} onClick={() => void saveHeroPresentation()} className="w-full rounded-xl bg-[#0A3340] px-3 py-2.5 text-xs font-black text-white disabled:opacity-50">{savingHeroPresentation ? 'Saving hero presentation…' : 'Save hero composition & messages'}</button>
           </div>
 
           {/* Fallback hero showcase: used only while no real Featured/Promoted vehicles exist. */}

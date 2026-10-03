@@ -3,9 +3,9 @@
  * Provides offline support and caching for the mobile automotive marketplace
  */
 
-const CACHE_NAME = 'kayad-mobile-v3';
-const STATIC_CACHE = 'kayad-static-v3';
-const IMAGE_CACHE = 'kayad-images-v3';
+const CACHE_NAME = 'kayad-mobile-v2';
+const STATIC_CACHE = 'kayad-static-v2';
+const IMAGE_CACHE = 'kayad-images-v2';
 
 // Static assets to cache on install (small, stable shell assets only)
 const STATIC_ASSETS = [
