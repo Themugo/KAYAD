@@ -13,6 +13,7 @@ import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageCon
 import HomePageAdminPanel from './HomePageAdminPanel';
 import AdManagerPanel from '../../AdManager/AdManagerPanel';
 import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
+import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroPresentation';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -96,7 +97,23 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [heroFeaturedMode, setHeroFeaturedMode] = useState<'all' | 'selected'>('all');
   const [heroFeaturedIds, setHeroFeaturedIds] = useState<string[]>([]);
   const [featuredVehicles, setFeaturedVehicles] = useState<Vehicle[]>([]);
-  const [heroPresentation, setHeroPresentation] = useState({ stageHeightPct: 100, cardScalePct: 80, leftOffsetPct: 14, rightOffsetPct: 14, tickerEnabled: true });
+  const DEFAULT_HERO_PRESENTATION: HeroPresentationConfig = {
+    stageHeightPct: 100, stageMaxWidthPct: 100, cardScalePct: 80, cardWidthPct: 42, cardOffsetXPct: 0, cardOffsetYPct: 0,
+    cardBgOpacityPct: 95, cardBlurPx: 18, cardBorderColor: '#FFFFFF', cardTextColor: '#0A3340',
+    backgroundUrl: '/hero/kayad-nairobi-kicc.jpg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
+    overlayColor: '#EAF5F7', overlayOpacityPct: 18, secondaryOverlayColor: '#FFFFFF', secondaryOverlayOpacityPct: 10,
+    leftOffsetPct: 16, rightOffsetPct: 16, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
+    showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: '#13B8A6', secondaryButtonBorderColor: '#C7DAD8',
+    arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
+    tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', tickerBackgroundColor: '#0A3340', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34,
+    vehicleSource: 'showcase',
+    showcaseVehicles: [
+      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser.png', eyebrow: 'KAYAD SELECT', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
+      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/hero/kayad-mercedes-gle.png', eyebrow: 'KAYAD SELECT', tagline: 'Luxury SUV · Automatic', enabled: true },
+    ],
+    floatingCards: [],
+  };
+  const [heroPresentation, setHeroPresentation] = useState<HeroPresentationConfig>(DEFAULT_HERO_PRESENTATION);
   const [heroCardContent, setHeroCardContent] = useState<Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string }>>({});
 
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
@@ -433,14 +450,25 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         const mode = cfg?.heroFeaturedMode === 'selected' ? 'selected' : 'all';
         const ids = Array.isArray(cfg?.heroCarIds) ? cfg.heroCarIds.filter(Boolean) : [];
         const presentation = cfg?.heroPresentation || {};
+        const showcase = Array.isArray(presentation.showcaseVehicles) && presentation.showcaseVehicles.length ? presentation.showcaseVehicles : DEFAULT_HERO_PRESENTATION.showcaseVehicles;
         setHeroFeaturedMode(mode);
         setHeroFeaturedIds(ids);
         setHeroPresentation({
-          stageHeightPct: Math.max(70, Math.min(120, Number(presentation.stageHeightPct) || 100)),
-          cardScalePct: Math.max(70, Math.min(100, Number(presentation.cardScalePct) || 80)),
-          leftOffsetPct: Math.max(0, Math.min(30, Number(presentation.leftOffsetPct) || 14)),
-          rightOffsetPct: Math.max(0, Math.min(30, Number(presentation.rightOffsetPct) || 14)),
+          ...DEFAULT_HERO_PRESENTATION,
+          ...presentation,
+          stageHeightPct: Math.max(70, Math.min(120, Number(presentation.stageHeightPct) || DEFAULT_HERO_PRESENTATION.stageHeightPct)),
+          stageMaxWidthPct: Math.max(90, Math.min(100, Number(presentation.stageMaxWidthPct) || DEFAULT_HERO_PRESENTATION.stageMaxWidthPct)),
+          cardScalePct: Math.max(70, Math.min(100, Number(presentation.cardScalePct) || DEFAULT_HERO_PRESENTATION.cardScalePct)),
+          cardWidthPct: Math.max(28, Math.min(50, Number(presentation.cardWidthPct) || DEFAULT_HERO_PRESENTATION.cardWidthPct)),
+          leftOffsetPct: Math.max(0, Math.min(30, Number(presentation.leftOffsetPct) || DEFAULT_HERO_PRESENTATION.leftOffsetPct)),
+          rightOffsetPct: Math.max(0, Math.min(30, Number(presentation.rightOffsetPct) || DEFAULT_HERO_PRESENTATION.rightOffsetPct)),
+          vehicleScalePct: Math.max(75, Math.min(125, Number(presentation.vehicleScalePct) || DEFAULT_HERO_PRESENTATION.vehicleScalePct)),
+          vehicleTopPct: Math.max(35, Math.min(65, Number(presentation.vehicleTopPct) || DEFAULT_HERO_PRESENTATION.vehicleTopPct)),
+          vehicleWidthPct: Math.max(32, Math.min(48, Number(presentation.vehicleWidthPct) || DEFAULT_HERO_PRESENTATION.vehicleWidthPct)),
+          showcaseVehicles: showcase,
+          floatingCards: Array.isArray(presentation.floatingCards) ? presentation.floatingCards : [],
           tickerEnabled: presentation.tickerEnabled !== false,
+          vehicleSource: ['showcase','featured','selected'].includes(presentation.vehicleSource) ? presentation.vehicleSource : DEFAULT_HERO_PRESENTATION.vehicleSource,
         });
         setHeroCardContent(presentation && typeof cfg?.heroCardContent === 'object' && cfg.heroCardContent ? cfg.heroCardContent : {});
       })
@@ -473,10 +501,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Admin-configured fallback rows are used only when they contain an explicit
   // image URL; there is no bundled/composite vehicle artwork and no vehicle
   // identity is selected by this component.
-  const heroSourceVehicles = useMemo(
-    () => heroVehicles,
-    [heroVehicles],
-  );
+  const heroShowcaseVehicles = useMemo(() => {
+    const rows = heroPresentation.showcaseVehicles?.filter((item) => item.enabled !== false && item.image) || [];
+    return rows.map((item): Vehicle => ({
+      id: item.id, title: `${item.make} ${item.model}`, make: item.make, model: item.model, year: item.year, vin: `SHOWCASE-${item.id}`,
+      price: 0, mileage: 0, location: 'Nairobi, Kenya', bodyStyle: 'SUV', transmission: 'Automatic', fuelType: 'Petrol', engine: '', horsepower: 0,
+      exteriorColor: '', interiorColor: '', condition: 'New', listingType: 'fixed', images: [item.image], image: item.image, description: item.tagline || '', features: [], sellerId: 'kayad-showcase', sellerName: 'KAYAD', sellerRating: 5, sellerType: 'Verified Dealer',
+      isDealerCertified: true, verified: true, savedCount: 0, escrowEligible: true, status: 'active', createdAt: new Date(0).toISOString(), badge: item.eyebrow || 'KAYAD SELECT', isFeatured: true,
+    }));
+  }, [heroPresentation.showcaseVehicles]);
+
+  const heroSourceVehicles = useMemo(() => {
+    if (heroPresentation.vehicleSource === 'showcase') return heroShowcaseVehicles;
+    if (heroPresentation.vehicleSource === 'selected') return heroVehicles.filter((vehicle) => heroFeaturedIds.includes(vehicle.id));
+    return heroVehicles;
+  }, [heroPresentation.vehicleSource, heroShowcaseVehicles, heroVehicles, heroFeaturedIds]);
   const [heroPairIndex, setHeroPairIndex] = useState(0);
   const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
   const [heroTransitioning, setHeroTransitioning] = useState(false);
@@ -564,25 +603,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const heroHeadline = activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today';
   const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';
   const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
-  const heroBackgroundStyle: React.CSSProperties = activeHeroSlide?.backgroundType === 'image' && activeHeroSlide.backgroundValue
-    ? { backgroundImage: `url(\"${activeHeroSlide.backgroundValue}\")`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : activeHeroSlide?.backgroundType === 'color' && activeHeroSlide.backgroundValue
-      ? { backgroundColor: activeHeroSlide.backgroundValue }
-      : activeHeroSlide?.backgroundType === 'gradient' && activeHeroSlide.backgroundValue
-        ? { backgroundImage: activeHeroSlide.backgroundValue }
-        : { backgroundImage: 'linear-gradient(120deg,#082A36 0%,#0B4455 52%,#0A3340 100%)' };
-  // The skyline asset is only clean in its upper band (the lower part is soft/blurred),
-  // so it is shown as a masked horizon strip: environment, never the subject.
-  const heroHasCustomBackground = Boolean(
-    activeHeroSlide?.backgroundValue && ['image', 'color', 'gradient'].includes(activeHeroSlide.backgroundType),
-  );
-  const heroSkylineStyle: React.CSSProperties = {
-    backgroundImage: `url(\"${KENYA_ROAD_HERO_BACKGROUND}\")`,
-    backgroundSize: '100% auto',
-    backgroundPosition: 'center top',
+  const heroAdminBackgroundUrl = heroPresentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND;
+  const heroBackgroundStyle: React.CSSProperties = {
+    backgroundImage: `url(\"${heroAdminBackgroundUrl}\")`,
+    backgroundSize: 'cover',
+    backgroundPosition: `${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionX) || 50))}% ${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionY) || 50))}%`,
     backgroundRepeat: 'no-repeat',
-    WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
-    maskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
+    backgroundColor: '#EAF5F7',
   };
 
   // Vehicle artwork always comes from the vehicle record/configuration.
@@ -775,92 +802,163 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       </div>
 
-      {/* 1. HERO - premium editorial road scene using the existing real featured vehicles. */}
+      {/* 1. HERO - one continuous commercial composition. */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#2B6472] bg-[#0A3340] text-white">
-          <div className="absolute inset-0 bg-cover bg-center" style={heroBackgroundStyle} aria-hidden="true" />
-          {!heroHasCustomBackground && (
-            <div className="absolute inset-x-0 bottom-[20%] h-[30%] opacity-40 sm:bottom-[18%]" style={heroSkylineStyle} aria-hidden="true" />
-          )}
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,27,38,.92)_0%,rgba(5,27,38,.74)_27%,rgba(5,27,38,.26)_52%,rgba(5,27,38,.04)_78%,rgba(5,27,38,.14)_100%)]" aria-hidden="true" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_56%,rgba(19,184,166,.16),transparent_28%),linear-gradient(to_top,rgba(4,22,31,.82),transparent_54%)]" aria-hidden="true" />
-          <div className="absolute bottom-0 left-[45%] right-0 h-32 bg-[linear-gradient(to_top,rgba(3,19,27,.48),transparent)]" aria-hidden="true" />
-          {activeHeroSlide && (
+        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] bg-[#EAF5F7] text-white">
+          <div
+            className="absolute inset-0 transition-transform duration-500"
+            style={{
+              ...heroBackgroundStyle,
+              transform: `scale(${Math.max(1, Math.min(1.3, Number(heroPresentation.backgroundScalePct) / 100 || 1))})`,
+              transformOrigin: 'center center',
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(90deg, ${heroPresentation.overlayColor} 0%, transparent 50%, ${heroPresentation.overlayColor} 100%)`,
+              opacity: Math.max(0, Math.min(100, heroPresentation.overlayOpacityPct)) / 100,
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to top, ${heroPresentation.secondaryOverlayColor}, transparent 60%)`,
+              opacity: Math.max(0, Math.min(100, heroPresentation.secondaryOverlayOpacityPct)) / 100,
+            }}
+            aria-hidden="true"
+          />
+          {activeHeroSlide && activeHeroSlide.overlayOpacity > 0 && (
             <div
               className="absolute inset-0"
-              style={{ backgroundColor: activeHeroSlide.overlayColor || '#0A3340', opacity: Math.max(0, Math.min(100, activeHeroSlide.overlayOpacity ?? 8)) / 100 }}
+              style={{ backgroundColor: activeHeroSlide.overlayColor || '#0A3340', opacity: Math.max(0, Math.min(100, activeHeroSlide.overlayOpacity)) / 100 }}
               aria-hidden="true"
             />
           )}
 
-          <div className="relative mx-auto w-full max-w-[1680px] px-4 sm:px-8 lg:px-10" style={{ height: `${Math.round(430 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100))}px` }}>
+          <div
+            className="relative mx-auto w-full px-4 sm:px-8 lg:px-10"
+            style={{
+              maxWidth: `${Math.max(90, Math.min(100, heroPresentation.stageMaxWidthPct))}%`,
+              height: `${Math.round(430 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100))}px`,
+            }}
+          >
             <div className="relative h-full">
-              {/* Unified commercial vehicle stage: one continuous background, protected center card,
-                  and two large featured vehicles positioned outward so the subjects never crowd the card. */}
+              {/* Large vehicle subjects stay at full commercial scale; only their position is configurable. */}
               <div className="absolute inset-0 hidden lg:block" aria-label="Featured vehicles">
                 {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
-                  <button type="button" onClick={() => handleVehicleSelect(heroLeftVehicle)} className="group absolute top-1/2 z-10 w-[43%] -translate-y-1/2 text-left" style={{ left: `${Math.max(0, Math.min(30, heroPresentation.leftOffsetPct))}%` }} aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}>
-                    <div className="relative flex h-[330px] items-end justify-center overflow-visible">
+                  <button
+                    type="button"
+                    onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroLeftVehicle)}
+                    className="group absolute z-10 -translate-y-1/2 text-left"
+                    style={{
+                      top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
+                      left: `${Math.max(0, Math.min(30, heroPresentation.leftOffsetPct))}%`,
+                      width: `${Math.max(32, Math.min(48, heroPresentation.vehicleWidthPct))}%`,
+                    }}
+                    aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
+                  >
+                    <div className="relative flex h-[330px] items-end justify-center overflow-visible" style={{ transform: `scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }}>
                       <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" loading="eager" decoding="async" />
-                      <div className="absolute bottom-5 left-5 max-w-[250px] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 backdrop-blur-md">
-                        <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.isAuction ? 'Live auction' : 'Featured vehicle')}</div>
-                        <div className="mt-1 truncate text-sm font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</div>
-                        <div className="mt-0.5 text-[9px] text-white/65">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : heroLeftVehicle.price > 0 ? `From ${formatPriceM(heroLeftVehicle.price)}` : 'View vehicle'}</div>
-                      </div>
+                      {heroPresentation.showVehicleInfoCards && (
+                        <div className="absolute bottom-5 left-5 max-w-[250px] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 backdrop-blur-md">
+                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
+                          <div className="mt-1 truncate text-sm font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</div>
+                          <div className="mt-0.5 text-[9px] text-white/65">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : heroCardContent[heroLeftVehicle.id]?.detail || heroLeftVehicle.description || 'Premium vehicle showcase'}</div>
+                        </div>
+                      )}
                     </div>
                   </button>
                 )}
 
                 {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
-                  <button type="button" onClick={() => handleVehicleSelect(heroRightVehicle)} className="group absolute top-1/2 z-10 w-[43%] -translate-y-1/2 text-right" style={{ right: `${Math.max(0, Math.min(30, heroPresentation.rightOffsetPct))}%` }} aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}>
-                    <div className="relative flex h-[330px] items-end justify-center overflow-visible">
+                  <button
+                    type="button"
+                    onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroRightVehicle)}
+                    className="group absolute z-10 -translate-y-1/2 text-right"
+                    style={{
+                      top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
+                      right: `${Math.max(0, Math.min(30, heroPresentation.rightOffsetPct))}%`,
+                      width: `${Math.max(32, Math.min(48, heroPresentation.vehicleWidthPct))}%`,
+                    }}
+                    aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
+                  >
+                    <div className="relative flex h-[330px] items-end justify-center overflow-visible" style={{ transform: `scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }}>
                       <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" loading="eager" decoding="async" />
-                      <div className="absolute bottom-5 right-5 max-w-[250px] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 text-left backdrop-blur-md">
-                        <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.isAuction ? 'Live auction' : 'Featured vehicle')}</div>
-                        <div className="mt-1 truncate text-sm font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}</div>
-                        <div className="mt-0.5 text-[9px] text-white/65">{heroRightVehicle.isAuction ? heroAuctionMeta(heroRightVehicle) : heroRightVehicle.price > 0 ? `From ${formatPriceM(heroRightVehicle.price)}` : 'View vehicle'}</div>
-                      </div>
+                      {heroPresentation.showVehicleInfoCards && (
+                        <div className="absolute bottom-5 right-5 max-w-[250px] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 text-left backdrop-blur-md">
+                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
+                          <div className="mt-1 truncate text-sm font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}</div>
+                          <div className="mt-0.5 text-[9px] text-white/65">{heroRightVehicle.isAuction ? heroAuctionMeta(heroRightVehicle) : heroCardContent[heroRightVehicle.id]?.detail || heroRightVehicle.description || 'Premium vehicle showcase'}</div>
+                        </div>
+                      )}
                     </div>
                   </button>
                 )}
 
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-                  <div className="pointer-events-auto w-[min(520px,42vw)] origin-center transition-transform duration-300" style={{ transform: `scale(${Math.max(0.7, Math.min(1, heroPresentation.cardScalePct / 100))})` }}>
-                    <div className="rounded-[30px] border border-white/70 bg-white/95 p-7 text-center text-[#0A3340] shadow-[0_30px_80px_rgba(3,19,27,.24)] backdrop-blur-xl">
+                  <div
+                    className="pointer-events-auto origin-center transition-transform duration-300"
+                    style={{
+                      width: `${Math.max(28, Math.min(50, heroPresentation.cardWidthPct))}%`,
+                      transform: `translate(${heroPresentation.cardOffsetXPct}%, ${heroPresentation.cardOffsetYPct}%) scale(${Math.max(0.7, Math.min(1, heroPresentation.cardScalePct / 100))})`,
+                    }}
+                  >
+                    <div
+                      className="rounded-[30px] p-7 text-center shadow-[0_30px_80px_rgba(3,19,27,.24)]"
+                      style={{
+                        backgroundColor: `rgba(255,255,255,${Math.max(0, Math.min(100, heroPresentation.cardBgOpacityPct)) / 100})`,
+                        border: `1px solid ${heroPresentation.cardBorderColor}`,
+                        color: heroPresentation.cardTextColor,
+                        backdropFilter: `blur(${Math.max(0, Math.min(40, heroPresentation.cardBlurPx))}px)`,
+                      }}
+                    >
                       <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-[#176B87]"><span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />{heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD MARKETPLACE · VERIFIED VEHICLES' : heroEyebrow}</span>
                       <div className="mt-5 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[.2em] text-[#5F7B86]"><span className="h-px w-9 bg-[#13B8A6]" /> MOVE WITH CONFIDENCE <span className="h-px w-9 bg-[#13B8A6]" /></div>
                       <h1 className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] font-black leading-[1.02] tracking-[-.045em]">{heroHeadline.includes('Dream Today') ? <>Drive Your Dream<br />Today</> : heroHeadline}</h1>
                       <p className="mx-auto mt-4 max-w-[430px] text-sm font-medium leading-6 text-[#58717B]">{activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.' : heroSubheadline)}</p>
                       <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center rounded-full bg-[#13B8A6] px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]">{activeHeroCard?.ctaLabel || 'Explore Vehicles'} <ChevronRight className="ml-1 h-4 w-4" /></button>
-                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="inline-flex items-center rounded-full border border-[#C7DAD8] bg-white px-6 py-3 text-xs font-black text-[#0A3340] shadow-sm">How It Works <span className="ml-2 text-sm">▶</span></button>
+                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex items-center rounded-full px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]">{activeHeroCard?.ctaLabel || 'Explore Vehicles'} <ChevronRight className="ml-1 h-4 w-4" /></button>
+                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex items-center rounded-full border bg-white px-6 py-3 text-xs font-black text-[#0A3340] shadow-sm">How It Works <span className="ml-2 text-sm">▶</span></button>
                       </div>
                       <dl className="mt-6 grid grid-cols-4 border-t border-[#D7E7E4] pt-5">
-                        {[[ 'VERIFIED','Listings' ],[ 'INSPECTED','Vehicles' ],[ 'PROTECTED','Transactions' ],[ 'EAST AFRICA','Marketplace' ]].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-[#176B87]">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
+                        {[['VERIFIED','Listings'],['INSPECTED','Vehicles'],['PROTECTED','Transactions'],['EAST AFRICA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-[#176B87]">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
                       </dl>
                     </div>
                   </div>
                 </div>
 
-                <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-[#0A3340] shadow-xl backdrop-blur-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>
-                <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-[#0A3340] shadow-xl backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>
+                {heroPresentation.floatingCards.filter((card) => card.enabled !== false).map((card) => {
+                  const cardBody = (
+                    <div className="rounded-2xl border px-3.5 py-3 shadow-xl backdrop-blur-xl" style={{ width: `${Math.max(12, Math.min(35, card.widthPct || 18))}%`, backgroundColor: card.backgroundColor || 'rgba(7,31,42,.78)', color: card.textColor || '#FFFFFF', borderColor: card.borderColor || 'rgba(255,255,255,.18)', opacity: Math.max(0.5, Math.min(1, (card.opacityPct ?? 100) / 100)), backdropFilter: `blur(${Math.max(0, Math.min(24, card.blurPx ?? 12))}px)` }}>
+                      {card.eyebrow && <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{card.eyebrow}</div>}
+                      <div className="mt-1 text-xs font-black">{card.title}</div>
+                      {card.body && <div className="mt-1 text-[10px] opacity-75">{card.body}</div>}
+                      {card.ctaLabel && <div className="mt-2 text-[9px] font-black uppercase tracking-wide text-[#49D5C6]">{card.ctaLabel} →</div>}
+                    </div>
+                  );
+                  return card.ctaLink ? <a key={card.id} href={card.ctaLink} className="absolute z-25" style={{ left: `${card.leftPct ?? 5}%`, top: `${card.topPct ?? 10}%` }}>{cardBody}</a> : <div key={card.id} className="absolute z-25" style={{ left: `${card.leftPct ?? 5}%`, top: `${card.topPct ?? 10}%` }}>{cardBody}</div>;
+                })}
+
+                {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-[#0A3340] shadow-xl backdrop-blur-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>}
+                {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-[#0A3340] shadow-xl backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>}
               </div>
-              {/* On smaller screens the same real featured vehicle becomes a compact bottom card. */}
+
               {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
-                <button type="button" onClick={() => handleVehicleSelect(heroLeftVehicle)} className="absolute bottom-4 right-3 z-20 flex w-[185px] items-center gap-2 rounded-xl border border-white/20 bg-[#071F2A]/85 p-2 text-left shadow-xl backdrop-blur-md lg:hidden" aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}>
+                <button type="button" onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroLeftVehicle)} className="absolute bottom-4 right-3 z-20 flex w-[185px] items-center gap-2 rounded-xl border border-white/20 bg-[#071F2A]/85 p-2 text-left shadow-xl backdrop-blur-md lg:hidden" aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}>
                   <img src={heroImageForVehicle(heroLeftVehicle)} alt="" className="h-12 w-16 rounded-lg object-cover" loading="eager" decoding="async" />
-                  <span className="min-w-0"><span className="block truncate text-[9px] font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</span><span className="mt-0.5 block text-[8px] text-[#49D5C6]">Featured on KAYAD</span></span>
+                  <span className="min-w-0"><span className="block truncate text-[9px] font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</span><span className="mt-0.5 block text-[8px] text-[#49D5C6]">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : 'KAYAD Select'}</span></span>
                 </button>
               )}
 
-              <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:left-2 sm:p-3" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>
-              <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:right-2 sm:p-3" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>
+              {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:left-2 sm:p-3 lg:hidden" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>}
+              {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:right-2 sm:p-3 lg:hidden" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>}
 
-              {heroSourceVehicles.length > 1 && (
+              {heroPresentation.dotsEnabled && heroSourceVehicles.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/15 bg-[#071F2A]/65 px-3 py-1.5 backdrop-blur-md" aria-label="Featured vehicle slides">
-                  {Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => (
-                    <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#13B8A6]' : 'w-1.5 bg-white/45 hover:bg-white/80'}`} />
-                  ))}
+                  {Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#13B8A6]' : 'w-1.5 bg-white/45 hover:bg-white/80'}`} />)}
                 </div>
               )}
             </div>

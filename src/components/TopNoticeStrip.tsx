@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getVisibleAdSlots, AdDisplayMode, AdSlot } from '../services/adApi';
+import { adminAPI } from '../api/api';
 
 /**
  * KAYAD's broadcast notice board. Content, ordering, colors, visibility and
@@ -10,11 +11,28 @@ export const TopNoticeStrip: React.FC = () => {
   const [loaded, setLoaded] = useState(false);
   const [fadeIndex, setFadeIndex] = useState(0);
   const [fadeVisible, setFadeVisible] = useState(true);
+  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34 });
 
   useEffect(() => {
     let cancelled = false;
-    getVisibleAdSlots('top_ticker')
-      .then((data) => { if (!cancelled) setSlots(data); })
+    Promise.allSettled([getVisibleAdSlots('top_ticker'), adminAPI.getPublicConfig()])
+      .then(([adsResult, configResult]) => {
+        if (cancelled) return;
+        if (adsResult.status === 'fulfilled') setSlots(adsResult.value);
+        if (configResult.status === 'fulfilled') {
+          const cfg = (configResult.value as any)?.config || configResult.value || {};
+          const hp = cfg?.heroPresentation || {};
+          setHeroTickerConfig((prev) => ({
+            ...prev,
+            enabled: hp.tickerEnabled !== false,
+            fallbackText: hp.tickerFallbackText || prev.fallbackText,
+            backgroundColor: hp.tickerBackgroundColor || prev.backgroundColor,
+            textColor: hp.tickerTextColor || prev.textColor,
+            heightPx: Math.max(28, Math.min(60, Number(hp.tickerHeightPx) || prev.heightPx)),
+            scrollSeconds: Math.max(10, Math.min(90, Number(hp.tickerScrollSeconds) || prev.scrollSeconds)),
+          }));
+        }
+      })
       .catch(() => { /* notice board must never block the main site */ })
       .finally(() => { if (!cancelled) setLoaded(true); });
     return () => { cancelled = true; };
@@ -44,19 +62,16 @@ export const TopNoticeStrip: React.FC = () => {
     if (fadeIndex >= slots.length) setFadeIndex(0);
   }, [fadeIndex, slots.length]);
 
+  if (!heroTickerConfig.enabled) return null;
+
   if (!loaded || slots.length === 0) {
-    const fallback = [
-      'KAYAD · Verified vehicles across East Africa',
-      'Live auctions · transparent bidding · protected transactions',
-      'Pre-purchase inspection available on eligible vehicles',
-      'Sell your vehicle · reach verified KAYAD buyers',
-    ];
+    const fallback = heroTickerConfig.fallbackText.split(' · ').filter(Boolean);
     const items = [...fallback, ...fallback];
     return (
-      <div className="w-full h-9 overflow-hidden bg-[#0A3340] border-b border-white/10" role="region" aria-label="KAYAD notices">
-        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: '34s' }}>
+      <div className="w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor }} role="region" aria-label="KAYAD notices">
+        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s` }}>
           {items.map((item, index) => (
-            <span key={`${item}-${index}`} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em] text-white/90">
+            <span key={`${item}-${index}`} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em]" style={{ color: heroTickerConfig.textColor }}>
               <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" aria-hidden="true" />
               {item}
               <span className="text-white/25" aria-hidden="true">|</span>
@@ -86,7 +101,7 @@ export const TopNoticeStrip: React.FC = () => {
     const slot = slots[fadeIndex];
     return (
       <div
-        className="w-full h-9 overflow-hidden bg-[#0A3340] border-b border-white/10"
+        className="w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor }}
         role="region"
         aria-label="KAYAD notices"
         aria-live="polite"
@@ -109,7 +124,7 @@ export const TopNoticeStrip: React.FC = () => {
   const loopItems = [...slots, ...slots];
   return (
     <div
-      className="w-full h-9 overflow-hidden bg-[#0A3340] border-b border-white/10"
+      className="w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor }}
       role="region"
       aria-label="KAYAD notices"
     >
