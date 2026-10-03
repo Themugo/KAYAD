@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+
+const verifier = fs.readFileSync('scripts/verify-production-deployment.mjs', 'utf8');
+const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+const failures = [];
+const pass = (name) => console.log(`PASS ${name}`);
+const fail = (name) => failures.push(name);
+
+if (verifier.includes("'/api/health'")) pass('Production verifier checks browser-facing /api/health');
+else fail('Production verifier browser-facing /api/health check');
+
+if (verifier.includes("'/api/cars?limit=1'")) pass('Production verifier checks canonical /api/cars inventory');
+else fail('Production verifier /api/cars inventory check');
+
+if (verifier.includes("validateCarsPayload")) pass('Production verifier validates inventory response contract');
+else fail('Production verifier inventory response validation');
+
+if (verifier.includes("Vercel deployment /api/cars") && verifier.includes("Public production /api/cars")) pass('Production verifier checks both Vercel rewrite and public-domain inventory paths');
+else fail('Production verifier rewrite/public inventory coverage');
+
+if (vercel.rewrites?.[0]?.source === '/api/:path*' && vercel.rewrites?.[0]?.destination === 'https://api.kayad.space/api/:path*') pass('Vercel canonical API rewrite remains explicit');
+else fail('Vercel canonical API rewrite');
+
+if (vercel.rewrites?.[1]?.source === '/(.*)' && vercel.rewrites?.[1]?.destination === '/index.html') pass('SPA fallback remains after API rewrite');
+else fail('SPA fallback ordering');
+
+if (failures.length) {
+  for (const failure of failures) console.error(`FAIL ${failure}`);
+  process.exit(1);
+}
+
+console.log('Production verifier contract validation: PASS');
