@@ -102,7 +102,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     cardBgOpacityPct: 95, cardBlurPx: 18, cardBorderColor: '#FFFFFF', cardTextColor: '#0A3340',
     backgroundUrl: '/hero/kayad-nairobi-kicc.jpg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
     overlayColor: '#EAF5F7', overlayOpacityPct: 18, secondaryOverlayColor: '#FFFFFF', secondaryOverlayOpacityPct: 10,
-    leftOffsetPct: 16, rightOffsetPct: 16, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
+    leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 22, rightVehicleNudgePct: 22, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: '#13B8A6', secondaryButtonBorderColor: '#C7DAD8',
     arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
     tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', tickerBackgroundColor: '#0A3340', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34,
@@ -462,6 +462,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           cardWidthPct: Math.max(28, Math.min(50, Number(presentation.cardWidthPct) || DEFAULT_HERO_PRESENTATION.cardWidthPct)),
           leftOffsetPct: Math.max(0, Math.min(30, Number(presentation.leftOffsetPct) || DEFAULT_HERO_PRESENTATION.leftOffsetPct)),
           rightOffsetPct: Math.max(0, Math.min(30, Number(presentation.rightOffsetPct) || DEFAULT_HERO_PRESENTATION.rightOffsetPct)),
+          leftVehicleNudgePct: Math.max(0, Math.min(25, Number(presentation.leftVehicleNudgePct) || DEFAULT_HERO_PRESENTATION.leftVehicleNudgePct)),
+          rightVehicleNudgePct: Math.max(0, Math.min(25, Number(presentation.rightVehicleNudgePct) || DEFAULT_HERO_PRESENTATION.rightVehicleNudgePct)),
           vehicleScalePct: Math.max(75, Math.min(125, Number(presentation.vehicleScalePct) || DEFAULT_HERO_PRESENTATION.vehicleScalePct)),
           vehicleTopPct: Math.max(35, Math.min(65, Number(presentation.vehicleTopPct) || DEFAULT_HERO_PRESENTATION.vehicleTopPct)),
           vehicleWidthPct: Math.max(32, Math.min(48, Number(presentation.vehicleWidthPct) || DEFAULT_HERO_PRESENTATION.vehicleWidthPct)),
@@ -860,7 +862,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     }}
                     aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
                   >
-                    <div className="relative flex h-[330px] items-end justify-center overflow-visible" style={{ transform: `scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }}>
+                    <div className="relative flex h-[330px] items-end justify-center overflow-visible" style={{ transform: `translateX(-${Math.max(0, Math.min(25, heroPresentation.leftVehicleNudgePct || 0))}%) scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }}>
                       <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 left-5 max-w-[250px] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 backdrop-blur-md">
@@ -885,7 +887,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     }}
                     aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
                   >
-                    <div className="relative flex h-[330px] items-end justify-center overflow-visible" style={{ transform: `scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }}>
+                    <div className="relative flex h-[330px] items-end justify-center overflow-visible" style={{ transform: `translateX(${Math.max(0, Math.min(25, heroPresentation.rightVehicleNudgePct || 0))}%) scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }}>
                       <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 right-5 max-w-[250px] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 text-left backdrop-blur-md">

@@ -48,6 +48,8 @@ export interface HeroPresentationConfig {
   secondaryOverlayOpacityPct: number;
   leftOffsetPct: number;
   rightOffsetPct: number;
+  leftVehicleNudgePct: number;
+  rightVehicleNudgePct: number;
   vehicleScalePct: number;
   vehicleTopPct: number;
   vehicleWidthPct: number;
