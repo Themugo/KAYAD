@@ -842,10 +842,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             />
           )}
 
-          <div className="relative mx-auto min-h-[455px] w-full max-w-[1680px] px-3 py-7 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-            <div className="relative grid min-h-[390px] items-center gap-4 lg:grid-cols-[minmax(300px,1fr)_minmax(320px,360px)_minmax(300px,1fr)]">
+          <div className="relative mx-auto min-h-[400px] w-full max-w-[1680px] px-3 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+            <div className="relative grid min-h-[340px] items-center gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)_minmax(0,1fr)]">
               {/* Featured vehicle presentation. The existing featured/promoted feed is the source of truth; the admin-selected IDs control the rotation pool. */}
-              <div className="relative z-10 flex h-[205px] items-center justify-center lg:h-[370px] lg:justify-end lg:pr-1">
+              <div className="kayad-hero-car-slot kayad-hero-car-slot-left relative z-10 flex h-[175px] items-center justify-center lg:h-[305px] lg:justify-end lg:pr-1">
                 <div className="relative h-full w-full max-w-[500px]">
                   {heroTransitioning ? (
                     <>
@@ -861,8 +861,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
 
               {/* Center message card: intentionally narrower so the featured vehicles remain visible and commercially legible on both sides. */}
-              <div className="relative z-20 flex justify-center px-1 sm:px-2">
-                <div className="w-full max-w-[410px] rounded-[24px] border border-white/85 bg-white/92 px-5 py-6 text-center shadow-[0_24px_70px_rgba(10,51,64,.18)] backdrop-blur-xl sm:px-7 sm:py-7">
+              <div className="kayad-hero-center-card relative z-20 flex justify-center px-1 sm:px-2">
+                <div className="w-full max-w-[380px] rounded-[24px] border border-white/85 bg-white/92 px-5 py-6 text-center shadow-[0_24px_70px_rgba(10,51,64,.18)] backdrop-blur-xl sm:px-7 sm:py-7">
                   <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#C9E0DD] bg-[#F6FAF9]/90 px-3 py-1.5 text-[8px] font-black uppercase tracking-[.24em] text-[#176B87] sm:text-[9px]">
                     <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />
                     {heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD MARKETPLACE · VERIFIED VEHICLES' : heroEyebrow}
@@ -895,7 +895,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               </div>
 
-              <div className="relative z-10 flex h-[205px] items-center justify-center lg:h-[370px] lg:justify-start lg:pl-1">
+              <div className="kayad-hero-car-slot kayad-hero-car-slot-right relative z-10 flex h-[175px] items-center justify-center lg:h-[305px] lg:justify-start lg:pl-1">
                 <div className="relative h-full w-full max-w-[500px]">
                   {heroTransitioning ? (
                     <>
