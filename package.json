@@ -107,7 +107,8 @@
     "validate:escrow-live-operations-scenarios": "node scripts/validate-escrow-live-operations-scenarios.mjs",
     "validate:migration-hygiene": "node scripts/validate-migration-hygiene.mjs",
     "validate:homepage-convergence": "node scripts/validate-homepage-convergence.mjs",
-    "validate:vercel-ci": "node scripts/validate-vercel-ci-contract.mjs"
+    "validate:vercel-ci": "node scripts/validate-vercel-ci-contract.mjs",
+    "validate:pwa-mobile": "node scripts/validate-pwa-mobile-contract.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

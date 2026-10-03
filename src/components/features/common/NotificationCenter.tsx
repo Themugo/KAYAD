@@ -39,7 +39,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
   };
 
   return (
-    <div className="absolute top-full right-0 mt-3 w-[370px] bg-charcoal-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[200]">
+    <div className="absolute top-full right-0 mt-3 w-[min(370px,calc(100vw-1.5rem))] bg-charcoal-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[200]">
       {/* Header */}
       <div className="px-5 py-4 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-2">

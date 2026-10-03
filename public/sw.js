@@ -6,7 +6,6 @@
 const CACHE_NAME = 'kayad-mobile-v2';
 const STATIC_CACHE = 'kayad-static-v2';
 const IMAGE_CACHE = 'kayad-images-v2';
-const API_CACHE = 'kayad-api-v2';
 
 // Static assets to cache on install (only content-hashed assets, NOT index.html)
 const STATIC_ASSETS = [
@@ -38,7 +37,7 @@ self.addEventListener('activate', (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((name) => name !== CACHE_NAME && name !== STATIC_CACHE && name !== IMAGE_CACHE && name !== API_CACHE)
+            .filter((name) => name !== CACHE_NAME && name !== STATIC_CACHE && name !== IMAGE_CACHE)
             .map((name) => {
               console.log('[SW] Deleting old cache:', name);
               return caches.delete(name);
@@ -69,7 +68,9 @@ self.addEventListener('fetch', (event) => {
   if (isImageRequest(request)) {
     event.respondWith(handleImageRequest(request));
   } else if (isApiRequest(request)) {
-    event.respondWith(handleApiRequest(request));
+    // API responses are deliberately never cached: cookie-authenticated and
+    // rapidly changing marketplace data must not become a shared stale cache.
+    event.respondWith(fetch(request));
   } else if (isStaticAsset(request)) {
     event.respondWith(handleStaticRequest(request));
   } else {
@@ -118,33 +119,6 @@ async function handleImageRequest(request) {
   } catch (error) {
     // Return a placeholder image if offline
     return caches.match('/placeholder-car.svg');
-  }
-}
-
-// Handle API requests with network-first strategy
-async function handleApiRequest(request) {
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(API_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    // Return offline API response
-    return new Response(JSON.stringify({
-      error: 'offline',
-      message: 'You are currently offline. Showing cached data.',
-      cars: [],
-      total: 0,
-      hasMore: false
-    }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
   }
 }
 
