@@ -559,7 +559,20 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       ? { backgroundColor: activeHeroSlide.backgroundValue }
       : activeHeroSlide?.backgroundType === 'gradient' && activeHeroSlide.backgroundValue
         ? { backgroundImage: activeHeroSlide.backgroundValue }
-        : { backgroundImage: `url(\"${KENYA_ROAD_HERO_BACKGROUND}\")`, backgroundSize: 'cover', backgroundPosition: 'center center' };
+        : { backgroundImage: 'linear-gradient(120deg,#082A36 0%,#0B4455 52%,#0A3340 100%)' };
+  // The skyline asset is only clean in its upper band (the lower part is soft/blurred),
+  // so it is shown as a masked horizon strip: environment, never the subject.
+  const heroHasCustomBackground = Boolean(
+    activeHeroSlide?.backgroundValue && ['image', 'color', 'gradient'].includes(activeHeroSlide.backgroundType),
+  );
+  const heroSkylineStyle: React.CSSProperties = {
+    backgroundImage: `url(\"${KENYA_ROAD_HERO_BACKGROUND}\")`,
+    backgroundSize: '100% auto',
+    backgroundPosition: 'center top',
+    backgroundRepeat: 'no-repeat',
+    WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
+    maskImage: 'linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%)',
+  };
 
   // Vehicle artwork always comes from the vehicle record/configuration.
   // No vehicle-specific asset mapping lives in the hero component.
@@ -741,7 +754,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {homeConfig.sectionVisibility.searchTrustCard && (
         <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#2B6472] bg-[#0A3340] text-white">
           <div className="absolute inset-0 bg-cover bg-center" style={heroBackgroundStyle} aria-hidden="true" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,27,38,.96)_0%,rgba(5,27,38,.82)_27%,rgba(5,27,38,.34)_51%,rgba(5,27,38,.08)_76%,rgba(5,27,38,.24)_100%)]" aria-hidden="true" />
+          {!heroHasCustomBackground && (
+            <div className="absolute inset-x-0 bottom-[20%] h-[30%] opacity-40 sm:bottom-[18%]" style={heroSkylineStyle} aria-hidden="true" />
+          )}
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,27,38,.92)_0%,rgba(5,27,38,.74)_27%,rgba(5,27,38,.26)_52%,rgba(5,27,38,.04)_78%,rgba(5,27,38,.14)_100%)]" aria-hidden="true" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_56%,rgba(19,184,166,.16),transparent_28%),linear-gradient(to_top,rgba(4,22,31,.82),transparent_54%)]" aria-hidden="true" />
           <div className="absolute bottom-0 left-[45%] right-0 h-32 bg-[linear-gradient(to_top,rgba(3,19,27,.48),transparent)]" aria-hidden="true" />
           {activeHeroSlide && (
@@ -756,15 +772,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <div className="relative h-full">
               {/* Existing editorial copy — same messaging/actions, cleaner visual hierarchy. */}
               <div className="absolute inset-y-0 left-0 z-20 flex w-full max-w-[690px] flex-col justify-center pr-4 text-left sm:pr-8 lg:w-[55%] lg:pr-12">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-[#0A3340]/65 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-[#BDF5EE] shadow-lg backdrop-blur-md sm:text-[10px]">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-[#0A3340]/55 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#BDF5EE] backdrop-blur-md sm:text-[11px]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6] shadow-[0_0_10px_#13B8A6]" />
                   {heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'PREMIUM VEHICLES · REAL OPPORTUNITIES' : heroEyebrow}
                 </span>
-                <div className="mb-1 flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] text-white/55 sm:text-[9px]">
-                  <span className="h-px w-7 bg-[#49D5C6]/80" />
-                  <span>Move with confidence</span>
-                </div>
-                <h1 className="mt-3 max-w-[620px] font-display text-[clamp(2.25rem,5vw,4rem)] font-black leading-[.94] tracking-[-0.055em] text-white drop-shadow-[0_7px_24px_rgba(0,0,0,.42)]">
+                <h1 className="mt-4 max-w-[620px] font-display text-[clamp(2.25rem,5vw,4rem)] font-black leading-[1] tracking-[-0.04em] text-white drop-shadow-[0_6px_20px_rgba(0,0,0,.35)]">
                   {heroHeadline.includes('Dream Today') ? (
                     <>
                       <span className="block">Drive Your</span>
@@ -772,7 +784,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     </>
                   ) : heroHeadline}
                 </h1>
-                <p className="mt-4 max-w-[560px] text-[12px] font-medium leading-5 text-white/80 sm:text-sm">
+                <p className="mt-4 max-w-[540px] text-sm font-medium leading-6 text-white/85 sm:text-base">
                   {heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.'
                     ? <>Explore verified vehicles across East Africa. Buy, sell, auction or get financed — all in one place.</>
                     : heroSubheadline}
@@ -783,19 +795,26 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-6 py-3 text-xs font-black text-white backdrop-blur-md transition hover:bg-white/20">How It Works <span className="ml-2 text-sm">▶</span></button>
                 </div>
 
-                <div className="mt-5 grid max-w-[600px] grid-cols-2 gap-x-5 gap-y-2.5 sm:grid-cols-4" aria-label="Live marketplace signals">
-                  {[
-                    [serverError ? '—' : serverTotal.toLocaleString(), 'Vehicles in catalogue'],
-                    [serverError ? '—' : homepageLiveAuctionCount.toLocaleString(), 'Auction vehicles on this page'],
-                    [serverError ? '—' : homepageEndingSoonCount.toLocaleString(), 'Ending within 30 min'],
-                    [savedVehicles.length.toLocaleString(), user ? 'Vehicles you saved' : 'Saved on this device'],
-                  ].map(([title, sub]) => (
-                    <div key={title} className="border-l border-white/20 pl-2.5">
-                      <div className="text-[9px] font-black uppercase tracking-[0.08em] text-white sm:text-[10px]">{title}</div>
-                      <div className="mt-0.5 text-[8px] text-white/55 sm:text-[9px]">{sub}</div>
-                    </div>
-                  ))}
-                </div>
+                {/* Public marketplace context from the existing catalogue state only.
+                    A failed or in-flight request is shown as such, never as "0". */}
+                <dl className="mt-6 grid max-w-[620px] grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4" aria-label="Marketplace at a glance">
+                  {(() => {
+                    const inventoryState: 'error' | 'loading' | 'ready' = serverError ? 'error' : isLoading ? 'loading' : 'ready';
+                    const metric = (n: number) => (inventoryState === 'ready' ? n.toLocaleString() : inventoryState === 'loading' ? '…' : '—');
+                    const entries: { label: string; value: string }[] = [
+                      { label: inventoryState === 'error' ? 'Inventory unavailable' : 'Vehicles available', value: metric(serverTotal) },
+                      { label: 'Live auctions', value: metric(homepageLiveAuctionCount) },
+                      { label: 'Ending within 30 min', value: metric(homepageEndingSoonCount) },
+                      { label: user ? 'Your saved vehicles' : 'Saved vehicles', value: savedVehicles.length.toLocaleString() },
+                    ];
+                    return entries.map(({ label, value }) => (
+                      <div key={label} className="border-l border-white/25 pl-3">
+                        <dd className="order-1 font-display text-lg font-black leading-none tracking-[-0.02em] text-white sm:text-xl">{value}</dd>
+                        <dt className="mt-1 text-[11px] font-medium leading-tight text-white/70">{label}</dt>
+                      </div>
+                    ));
+                  })()}
+                </dl>
               </div>
 
               {/* Existing featured vehicles, refined as a single premium automotive stage. */}
@@ -894,12 +913,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             ['Truck', () => setSelectedBodyStyle('Truck')],
             ['Electric', () => setSelectedFuel('Electric')],
             ['Hybrid', () => setSelectedFuel('Hybrid')],
-          ].map(([label, action], index) => (
+          ].map(([label, action]) => (
             <button
               key={label as string}
+              aria-pressed={
+                label === 'All' ? selectedBodyStyle === 'All' && selectedFuel === 'All'
+                : label === 'Electric' || label === 'Hybrid' ? selectedFuel === label
+                : selectedBodyStyle === label
+              }
               type="button"
               onClick={action as () => void}
-              className={`shrink-0 rounded-full border px-4 py-2 text-[11px] font-extrabold transition ${index === 0 && selectedBodyStyle === 'All' && selectedFuel === 'All' ? 'border-[#176B87] bg-[#176B87] text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-[#176B87] hover:text-[#176B87]'}`}
+              className={`shrink-0 rounded-full border px-4 py-2 text-[11px] font-extrabold transition ${(label === 'All' ? selectedBodyStyle === 'All' && selectedFuel === 'All' : label === 'Electric' || label === 'Hybrid' ? selectedFuel === label : selectedBodyStyle === label) ? 'border-[#176B87] bg-[#176B87] text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-[#176B87] hover:text-[#176B87]'}`}
             >
               {label as string}
             </button>
@@ -1060,9 +1084,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
               <h2 className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-[#0A3340]">
                 Vehicle Inventory
-                <span className="inline-flex items-center rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#12576D]">
-                  {serverTotal.toLocaleString()} vehicle{serverTotal === 1 ? '' : 's'}
-                </span>
+                {!isLoading && (
+                  <span className="inline-flex items-center rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[11px] font-bold tracking-[0.02em] text-[#12576D]">
+                    {serverError || loadError ? 'Inventory unavailable' : `${serverTotal.toLocaleString()} vehicle${serverTotal === 1 ? '' : 's'}`}
+                  </span>
+                )}
               </h2>
               <p className="mt-1 max-w-2xl text-xs sm:text-[13px] leading-relaxed text-slate-500">
                 Compare verified marketplace listings, inspection status, pricing and auction availability in one clear view.
@@ -1070,21 +1096,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="kayad-toolbar-control flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Results per page">
+              <div className="kayad-toolbar-control flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Results per page">
                 <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Show</span>
                 {[12, 24, 48].map((n) => (
                   <button
                     key={n}
                     onClick={() => setPageSize(n)}
                     aria-pressed={pageSize === n}
-                    className={`min-w-9 rounded-lg px-2.5 py-2 text-[11px] font-extrabold transition-colors ${pageSize === n ? 'bg-[#0A3340] text-white shadow-sm' : 'text-slate-500 hover:bg-white hover:text-[#0A3340]'}`}
+                    className={`h-8 min-w-9 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${pageSize === n ? 'bg-[#0A3340] text-white shadow-sm' : 'text-slate-500 hover:bg-white hover:text-[#0A3340]'}`}
                   >
                     {n}
                   </button>
                 ))}
               </div>
 
-              <label className="kayad-toolbar-control flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <label className="kayad-toolbar-control flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 focus-within:border-[#176B87]">
                 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Sort</span>
                 <select
                   value={sortBy}
@@ -1103,13 +1129,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </label>
 
               {viewMode === 'grid' && (
-                <div className="kayad-toolbar-control flex items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
+                <div className="kayad-toolbar-control flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
                   {[3, 4, 5].map((n) => (
                     <button
                       key={n}
                       onClick={() => setGridColumns(n as 3 | 4 | 5)}
                       aria-pressed={gridColumns === n}
-                      className={`min-w-9 rounded-lg px-2 py-2 text-[10px] font-black transition-colors ${gridColumns === n ? 'bg-[#176B87] text-white' : 'text-slate-500 hover:bg-white hover:text-[#0A3340]'}`}
+                      className={`h-8 min-w-9 rounded-lg px-2 text-[11px] font-bold transition-colors ${gridColumns === n ? 'bg-[#176B87] text-white' : 'text-slate-500 hover:bg-white hover:text-[#0A3340]'}`}
                       title={`${n} columns`}
                     >
                       {n}×
@@ -1118,12 +1144,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               )}
 
-              <div className="kayad-toolbar-control flex items-center rounded-xl border border-slate-200 bg-white p-1" aria-label="Inventory view">
+              <div className="kayad-toolbar-control flex h-10 items-center rounded-xl border border-slate-200 bg-white p-1" aria-label="Inventory view">
                 <button
                   onClick={() => setViewMode('grid')}
                   aria-pressed={viewMode === 'grid'}
                   title="Grid view"
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-slate-400 hover:text-slate-700'}`}
                 >
                   <Grid className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Grid</span>
                 </button>
@@ -1131,7 +1157,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   onClick={() => setViewMode('list')}
                   aria-pressed={viewMode === 'list'}
                   title="List view"
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-slate-400 hover:text-slate-700'}`}
                 >
                   <ListIcon className="w-3.5 h-3.5" /> <span className="hidden xl:inline">List</span>
                 </button>
@@ -1141,7 +1167,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
               <button
                 onClick={() => setShowMobileFilterDrawer(true)}
-                className="lg:hidden flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600"
+                className="lg:hidden flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600"
               >
                 <Filter className="w-3.5 h-3.5" /> Filters
               </button>
@@ -1300,12 +1326,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             {isLoading ? (
               <SkeletonGrid count={pageSize} />
             ) : (loadError || serverError) ? (
-              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
-                <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5F3] text-[#176B87]"><AlertTriangle className="h-5 w-5" /></div>
-                <h4 className="text-sm font-bold text-[#0A3340] mb-1">Marketplace inventory is temporarily unavailable</h4>
-                <p className="mx-auto max-w-md text-xs leading-relaxed text-slate-500 mb-4">{loadError || serverError || 'We could not reach the vehicle catalogue. Your filters and saved state are safe.'}</p>
-                <button onClick={() => { onRetryLoad?.(); setServerRetryKey((key) => key + 1); }} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2.5 hover:bg-[#176B87]">
+              <div role="status" className="rounded-2xl border border-[#D7E7E4] bg-white px-6 py-14 text-center shadow-sm">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5F3] text-[#176B87]"><AlertTriangle className="h-5 w-5" aria-hidden="true" /></div>
+                <h3 className="font-display text-base font-bold text-[#0A3340]">Inventory is temporarily unavailable</h3>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
+                  We couldn&apos;t load vehicles just now. This is usually brief. Your filters and saved vehicles are kept, so you can pick up right where you left off.
+                </p>
+                {(() => {
+                  const code = /\b(4\d\d|5\d\d)\b/.exec(String(loadError || serverError || ''))?.[1];
+                  return code ? <p className="mt-2 text-xs text-slate-400">Reference: HTTP {code}</p> : null;
+                })()}
+                <button onClick={() => { onRetryLoad?.(); setServerRetryKey((key) => key + 1); }} className="mt-5 inline-flex h-10 items-center rounded-xl bg-[#0A3340] px-5 text-sm font-bold text-white transition hover:bg-[#176B87] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]">
                   Retry inventory
                 </button>
               </div>

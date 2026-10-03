@@ -17,7 +17,7 @@ const loginTest = read('src/__tests__/pages/LoginPage.test.jsx');
 pass('Router location drives auth surface', app.includes("const location = useLocation();") && app.includes("const path = location.pathname;"));
 pass('Navbar uses canonical /login navigation', nav.includes("handleAuthNavigation('/login')") && nav.includes("navigate(path)"));
 pass('Navbar uses canonical /register navigation', nav.includes("handleAuthNavigation('/register')") && nav.includes("navigate(path)"));
-pass('Hero keeps 390/420 footprint', hero.includes('h-[390px]') && hero.includes('sm:h-[420px]'));
+pass('Hero keeps stable mobile/desktop footprint', hero.includes('h-[470px]') && hero.includes('sm:h-[420px]'));
 pass('Hero keeps real vehicle source', hero.includes('heroSourceVehicles') && hero.includes('heroImageForVehicle'));
 pass('Hero retains existing actions', hero.includes('Browse Inventory') && hero.includes('How It Works'));
 pass('Hero retains carousel controls', hero.includes('Previous featured vehicles') && hero.includes('Next featured vehicles') && hero.includes('Show featured pair'));
