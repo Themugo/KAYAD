@@ -6,6 +6,7 @@ const DEFAULT_COMMERCIAL = {
   enabled: true,
   rotationMode: 'equal',
   defaultSlotSeconds: 15,
+  layout: { stageHeightPct: 100, leftOffsetPct: 12, rightOffsetPct: 12, centerCardScalePct: 80 },
   packages: [
     { id: 'hero-15', label: '15-second Hero Spotlight', seconds: 15, price: 2500 },
     { id: 'hero-30', label: '30-second Hero Spotlight', seconds: 30, price: 4500 },
@@ -21,6 +22,12 @@ function mergeCommercial(value) {
     ...source,
     rotationMode: source.rotationMode === 'custom' ? 'custom' : 'equal',
     defaultSlotSeconds: Math.max(5, Math.min(300, Number(source.defaultSlotSeconds) || 15)),
+    layout: {
+      stageHeightPct: Math.max(70, Math.min(120, Number(source.layout?.stageHeightPct) || 100)),
+      leftOffsetPct: Math.max(0, Math.min(30, Number(source.layout?.leftOffsetPct) || 12)),
+      rightOffsetPct: Math.max(0, Math.min(30, Number(source.layout?.rightOffsetPct) || 12)),
+      centerCardScalePct: Math.max(70, Math.min(100, Number(source.layout?.centerCardScalePct) || 80)),
+    },
     packages: packages.map((p, i) => ({
       id: String(p?.id || `hero-${i + 1}`),
       label: String(p?.label || `Hero Spotlight ${i + 1}`),

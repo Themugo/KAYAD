@@ -327,6 +327,18 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                 </div>
               </div>
             )}
+            <div className="space-y-2 rounded-xl border border-[#D7E7E4] bg-white p-3">
+              <div className="text-[9px] font-black uppercase tracking-wide text-[#176B87]">Hero positioning & scale</div>
+              <p className="text-[10px] leading-relaxed text-slate-500">Tune the existing composition without redesigning it. The center card remains the anchor; these controls only set the stage footprint and vehicle spacing.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Stage height %</span><input type="number" min=70 max=120 value={heroCommercial.layout?.stageHeightPct || 100} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), stageHeightPct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
+                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Card scale %</span><input type="number" min=70 max=100 value={heroCommercial.layout?.centerCardScalePct || 80} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), centerCardScalePct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
+                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Left car outward %</span><input type="number" min=0 max=30 value={heroCommercial.layout?.leftOffsetPct || 12} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), leftOffsetPct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
+                <label className="rounded-lg border border-slate-200 p-2"><span className="block text-[9px] font-black uppercase text-slate-400">Right car outward %</span><input type="number" min=0 max=30 value={heroCommercial.layout?.rightOffsetPct || 12} onChange={e => setHeroCommercial((p: any) => ({ ...p, layout: { ...(p.layout || {}), rightOffsetPct: Number(e.target.value) } }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-bold" /></label>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[#F5FAF9] px-2.5 py-2 text-[9px] text-slate-500"><span>Recommended starting balance</span><b className="text-[#0A3340]">Stage 100% · Card 80% · Cars 12% outward</b></div>
+            </div>
+
             <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
               <div className="text-[9px] font-black uppercase tracking-wide text-slate-500">Hero packages sold to sellers</div>
               {(heroCommercial.packages || []).map((pkg: any, index: number) => (

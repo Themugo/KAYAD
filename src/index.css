@@ -784,30 +784,26 @@ button, a, input, select, textarea {
   .kayad-premium-hero .kayad-hero-car img { transition: none; }
 }
 
-/* KAYAD hero stage balance: reduce only the visual stage/background height and
-   move full-size featured vehicles outward. The center card is intentionally
-   untouched. */
+/* KAYAD hero composition: one continuous stage. Admin controls tune stage height,
+   vehicle offsets and center-card scale without changing the underlying hero system. */
 @media (min-width: 768px) {
-  .kayad-premium-hero > .absolute.inset-0 {
-    height: 70%;
-    bottom: auto;
-  }
-
   .kayad-premium-hero .kayad-hero-car-left {
-    transform: translateX(clamp(110px, 13vw, 200px));
+    transform: translateX(clamp(0px, calc(var(--kayad-hero-left-offset, 12) * 1vw), 18vw));
   }
-
   .kayad-premium-hero .kayad-hero-car-right {
-    transform: translateX(clamp(-200px, -13vw, -110px));
+    transform: translateX(clamp(-18vw, calc(var(--kayad-hero-right-offset, 12) * -1vw), 0px));
+  }
+  .kayad-premium-hero .kayad-hero-center-card {
+    transform: scale(var(--kayad-hero-card-scale, .8));
+    transform-origin: center center;
   }
 }
-
-@media (min-width: 1024px) {
-  .kayad-premium-hero .kayad-hero-car-left {
-    transform: translateX(clamp(140px, 14vw, 225px));
-  }
-
-  .kayad-premium-hero .kayad-hero-car-right {
-    transform: translateX(clamp(-225px, -14vw, -140px));
-  }
+@media (max-width: 767px) {
+  .kayad-premium-hero .kayad-hero-center-card { transform: scale(min(var(--kayad-hero-card-scale, .8), .92)); transform-origin: center center; }
+  .kayad-premium-hero .kayad-hero-car-left { transform: translateX(3vw); }
+  .kayad-premium-hero .kayad-hero-car-right { transform: translateX(-3vw); }
 }
+
+@keyframes kayadMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.animate-marquee { animation-name: kayadMarquee; animation-timing-function: linear; animation-iteration-count: infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-marquee { animation: none !important; } }

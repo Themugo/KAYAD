@@ -97,7 +97,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [heroFeaturedMode, setHeroFeaturedMode] = useState<'all' | 'selected'>('all');
   const [heroFeaturedIds, setHeroFeaturedIds] = useState<string[]>([]);
   const [featuredVehicles, setFeaturedVehicles] = useState<Vehicle[]>([]);
-  const [heroCommercialConfig, setHeroCommercialConfig] = useState<any>({ enabled: true, rotationMode: 'equal', defaultSlotSeconds: 15, packages: [] });
+  const [heroCommercialConfig, setHeroCommercialConfig] = useState<any>({ enabled: true, rotationMode: 'equal', defaultSlotSeconds: 15, packages: [], layout: { stageHeightPct: 100, leftOffsetPct: 12, rightOffsetPct: 12, centerCardScalePct: 80 } });
   const [activeHeroPlacements, setActiveHeroPlacements] = useState<any[]>([]);
 
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
@@ -830,7 +830,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 1. HERO - centered editorial message with a vehicle on each side. */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C9E0DD] bg-[#EAF4F2] text-[#0A3340] kayad-premium-hero">
+        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C9E0DD] bg-[#EAF4F2] text-[#0A3340] kayad-premium-hero" style={{ ['--kayad-hero-left-offset' as any]: `${Number(heroCommercialConfig.layout?.leftOffsetPct || 12)}`, ['--kayad-hero-right-offset' as any]: `${Number(heroCommercialConfig.layout?.rightOffsetPct || 12)}`, ['--kayad-hero-card-scale' as any]: `${Math.max(0.7, Math.min(1, Number(heroCommercialConfig.layout?.centerCardScalePct || 80) / 100))}` }}>
           <div className="absolute inset-0 bg-cover bg-center" style={heroBackgroundStyle} aria-hidden="true" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(244,250,249,.93)_0%,rgba(244,250,249,.72)_22%,rgba(244,250,249,.30)_50%,rgba(244,250,249,.72)_78%,rgba(244,250,249,.93)_100%)]" aria-hidden="true" />
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,.18),rgba(234,244,242,.18)_55%,rgba(10,51,64,.22))]" aria-hidden="true" />
@@ -842,8 +842,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             />
           )}
 
-          <div className="relative mx-auto min-h-[400px] w-full max-w-[1680px] px-3 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-            <div className="relative grid min-h-[340px] items-center gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)_minmax(0,1fr)]">
+          <div className="relative mx-auto w-full max-w-[1680px] px-3 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7" style={{ minHeight: `clamp(300px, ${Number(heroCommercialConfig.layout?.stageHeightPct || 100) * 4}px, 460px)` }}>
+            <div className="relative grid h-full min-h-[300px] items-center gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)_minmax(0,1fr)]" style={{ minHeight: `clamp(260px, ${Math.max(70, Number(heroCommercialConfig.layout?.stageHeightPct || 100)) * 3.2}px, 400px)` }}>
               {/* Featured vehicle presentation. The existing featured/promoted feed is the source of truth; the admin-selected IDs control the rotation pool. */}
               <div className="kayad-hero-car-slot kayad-hero-car-slot-left relative z-10 flex h-[175px] items-center justify-center lg:h-[305px] lg:justify-end lg:pr-1">
                 <div className="relative h-full w-full max-w-[500px]">
