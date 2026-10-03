@@ -597,3 +597,52 @@
 @media (prefers-reduced-motion: reduce) {
   .kayad-premium-hero .kayad-hero-car img { transition: none; }
 }
+
+/* Hero vehicle framing: use the full available stage without embedding a
+   secondary rectangular scene inside the hero. Clean cutouts remain fully
+   visible and scale against the viewport; real listing imagery remains
+   contain-fit so its complete vehicle is preserved. */
+.kayad-premium-hero .kayad-hero-car {
+  width: min(100%, clamp(300px, 34vw, 540px));
+  height: clamp(230px, 28vw, 390px);
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.kayad-premium-hero .kayad-hero-car img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  transform: scale(1);
+  transform-origin: center bottom;
+  filter: drop-shadow(0 24px 24px rgba(7,31,42,.20));
+}
+.kayad-premium-hero .kayad-hero-car:hover img {
+  transform: scale(1.025) translateY(-2px);
+}
+.kayad-premium-hero .kayad-hero-car-glow {
+  inset: 58% 12% 2%;
+  background: rgba(19,184,166,.10);
+  filter: blur(30px);
+}
+@media (min-width: 1280px) {
+  .kayad-premium-hero .kayad-hero-car { height: clamp(290px, 27vw, 420px); }
+  .kayad-premium-hero .kayad-hero-car-left { transform: translateX(2vw); }
+  .kayad-premium-hero .kayad-hero-car-right { transform: translateX(-2vw); }
+}
+@media (max-width: 1023px) {
+  .kayad-premium-hero .kayad-hero-car {
+    width: min(48vw, 360px);
+    height: clamp(170px, 30vw, 250px);
+  }
+}
+@media (max-width: 767px) {
+  .kayad-premium-hero .kayad-hero-car {
+    width: min(46vw, 210px);
+    height: clamp(135px, 34vw, 180px);
+  }
+  .kayad-premium-hero .kayad-hero-car-left { transform: translateX(8px); }
+  .kayad-premium-hero .kayad-hero-car-right { transform: translateX(-8px); }
+}

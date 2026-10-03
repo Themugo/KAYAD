@@ -550,7 +550,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const activeHeroSlide = heroSlides[heroSlideIndex % Math.max(heroSlides.length, 1)];
 
   const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE';
-  const heroHeadline = activeHeroSlide?.headline?.trim() || 'Find a vehicle worth driving home.';
+  const configuredHeroHeadline = activeHeroSlide?.headline?.trim() || '';
+  const heroHeadline = configuredHeroHeadline && !/find a vehicle worth driving home\.?$/i.test(configuredHeroHeadline)
+    ? configuredHeroHeadline
+    : 'Drive Your Dream Today';
   const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';
   const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
   const heroBackgroundStyle: React.CSSProperties = activeHeroSlide?.backgroundType === 'image' && activeHeroSlide.backgroundValue
@@ -730,7 +733,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
       <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 pb-2 pt-4 sm:px-6 lg:px-8">
         <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#176B87] sm:text-[10px]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
-        {!serverError && (
+        {!serverError && serverTotal > 0 && (
           <div className="hidden items-center gap-1.5 text-[9px] font-bold text-slate-500 sm:flex sm:gap-2 sm:text-[10px]">
             <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverTotal.toLocaleString()} vehicles</span>
             <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>
@@ -760,7 +763,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <div className="kayad-hero-car kayad-hero-car-left">
                   <div className="kayad-hero-car-glow" aria-hidden="true" />
                   <img
-                    src={heroImageForVehicle(heroLeftVehicle) || '/hero/kayad-land-cruiser-stage.png'}
+                    src={heroImageForVehicle(heroLeftVehicle) || '/hero/kayad-land-cruiser-cutout.png'}
                     alt={heroLeftVehicle ? `${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : 'KAYAD featured vehicle'}
                     className="h-full w-full object-cover object-center"
                     loading="eager"
@@ -790,7 +793,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     <span className="h-px w-7 bg-[#13B8A6]" />
                   </div>
                   <h1 className="mx-auto mt-3 max-w-[390px] font-display text-[clamp(1.65rem,2.8vw,2.35rem)] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0A3340]">
-                    {heroHeadline.includes('Dream Today') ? <>Find a vehicle <span className="text-[#176B87]">worth driving home.</span></> : heroHeadline}
+                    {heroHeadline}
                   </h1>
                   <p className="mx-auto mt-4 max-w-[430px] text-[11px] font-medium leading-5 text-[#526B73] sm:text-xs">
                     {heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.'
@@ -822,7 +825,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <div className="kayad-hero-car kayad-hero-car-right">
                   <div className="kayad-hero-car-glow" aria-hidden="true" />
                   <img
-                    src={heroImageForVehicle(heroRightVehicle) || '/hero/kayad-mercedes-gle-stage.png'}
+                    src={heroImageForVehicle(heroRightVehicle) || '/hero/kayad-mercedes-gle-cutout.png'}
                     alt={heroRightVehicle ? `${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}` : 'KAYAD featured vehicle'}
                     className="h-full w-full object-cover object-center"
                     loading="eager"
