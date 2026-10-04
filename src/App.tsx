@@ -347,6 +347,7 @@ function AppInner() {
         onCountyChange={(c) => setSelectedCounty(c)}
         onOpenAuth={handleOpenAuth}
         onOpenAlerts={() => setShowAlertsModal(true)}
+        onOpenCompare={() => setShowCompareModal(true)}
         onLogout={() => { authLogout(); }}
       />
 

@@ -13,7 +13,7 @@ const checks = [
   ['center card remains configurable', source.includes('cardScalePct') && source.includes('cardWidthPct')],
   ['admin-controlled vehicle positioning remains wired', source.includes('leftVehicleNudgePct') && source.includes('rightVehicleNudgePct')],
   ['existing carousel controls remain wired', source.includes('Previous featured vehicles') && source.includes('Next featured vehicles')],
-  ['mobile hero has its own responsive composition', source.includes('KAYAD mobile hero') && source.includes('min-h-[620px] lg:hidden')],
+  ['mobile hero has its own responsive composition', source.includes('KAYAD mobile hero') && source.includes('relative pb-4 pt-4 lg:hidden') && !source.includes('min-h-[620px]')],
   ['mobile hero preserves the canonical headline and CTAs', source.includes('Explore Vehicles') && source.includes('How It Works')],
   ['existing search bridge remains below hero', source.includes('2. SEARCH BRIDGE') && source.includes('Hero maximum price filter')],
 ];

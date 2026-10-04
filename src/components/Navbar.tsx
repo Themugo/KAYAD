@@ -41,6 +41,7 @@ interface NavbarProps {
   onCountyChange: (county: string) => void;
   onOpenAuth: () => void;
   onOpenAlerts: () => void;
+  onOpenCompare?: () => void;
   onLogout?: () => void;
   unreadCount?: number;
 }
@@ -54,6 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onCountyChange,
   onOpenAuth,
   onOpenAlerts,
+  onOpenCompare,
   onLogout,
   unreadCount = 0
 }) => {
@@ -64,6 +66,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const countyRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+
+  // The mobile dock's Menu tab opens this same drawer (no second menu implementation).
+  useEffect(() => {
+    const openMenu = () => {
+      setMobileMenuOpen(true);
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    };
+    window.addEventListener('kayad:open-mobile-menu', openMenu);
+    return () => window.removeEventListener('kayad:open-mobile-menu', openMenu);
+  }, []);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -659,6 +672,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Lock className="w-4 h-4 text-blue-400" />
                 <span>Escrow</span>
               </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => handleNavSelect('financing')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'financing' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <span>Financing</span>
+              </button>
+              <button
+                onClick={() => handleNavSelect('saved')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between gap-2 ${
+                  activeNav === 'saved' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <span>Saved</span>
+                {savedCount > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[10px] font-black text-[#07313D]">{savedCount}</span>}
+              </button>
+              {onOpenCompare && (
+                <button
+                  onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }}
+                  className="p-3 rounded-xl font-bold text-xs text-left bg-slate-800/80 text-slate-200"
+                >
+                  Compare
+                </button>
+              )}
             </div>
 
             <button

@@ -11,7 +11,7 @@ const check = (name, condition) => { results.push({ name, ok: Boolean(condition)
 
 check('homepage uses canonical VehicleMarketplace surface', app.includes("activeNav === 'marketplace'") && app.includes('<VehicleMarketplace'));
 check('homepage passes real user/admin context', app.includes('user={user}') && app.includes('isHomePage'));
-check('hero source is real featured inventory', home.includes('getCars({ page: 1, limit: 100, featured: true') && home.includes('const heroSourceVehicles = useMemo(\n    () => heroVehicles'));
+check('hero source is real featured inventory', home.includes('getCars({ page: 1, limit: 100, featured: true') && home.includes('const heroSourceVehicles = useMemo(') && home.includes('    return heroVehicles;'));
 check('hero has no remote background dependency', home.includes("const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg'"));
 check('homepage has real live market signals', home.includes('homepageLiveAuctionCount') && home.includes('homepageEndingSoonCount'));
 check('how-it-works action stays inside existing journey', home.includes("getElementById('market-journey')"));

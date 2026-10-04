@@ -507,7 +507,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     const rows = heroPresentation.showcaseVehicles?.filter((item) => item.enabled !== false && item.image) || [];
     return rows.map((item): Vehicle => ({
       id: item.id, title: `${item.make} ${item.model}`, make: item.make, model: item.model, year: item.year, vin: `SHOWCASE-${item.id}`,
-      price: 0, mileage: 0, location: 'Nairobi, Kenya', bodyStyle: 'SUV', transmission: 'Automatic', fuelType: 'Petrol', engine: '', horsepower: 0,
+      price: 0, mileage: 0, location: 'Nairobi, Kenya', bodyStyle: 'SUV', transmission: 'Automatic', fuelType: 'Gasoline', engine: '', horsepower: 0,
       exteriorColor: '', interiorColor: '', condition: 'New', listingType: 'fixed', images: [item.image], image: item.image, description: item.tagline || '', features: [], sellerId: 'kayad-showcase', sellerName: 'KAYAD', sellerRating: 5, sellerType: 'Verified Dealer',
       isDealerCertified: true, verified: true, savedCount: 0, escrowEligible: true, status: 'active', createdAt: new Date(0).toISOString(), badge: item.eyebrow || 'KAYAD SELECT', isFeatured: true,
     }));
@@ -657,6 +657,50 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     ].filter(Boolean).join(' · ');
   };
 
+  const heroCaption = (vehicle?: Vehicle) => {
+    if (!vehicle) return '';
+    return vehicle.isAuction
+      ? heroAuctionMeta(vehicle)
+      : heroCardContent[vehicle.id]?.detail || vehicle.description || 'Premium vehicle showcase';
+  };
+
+  // Mobile presents ONE featured vehicle at a time (desktop keeps the pair).
+  // Same canonical source list; only the presentation differs.
+  const [heroMobileIndex, setHeroMobileIndex] = useState(0);
+  useEffect(() => { setHeroMobileIndex(0); }, [heroSourceVehicles.map((vehicle) => vehicle.id).join('|')]);
+  const changeHeroMobile = (nextIndex: number) => {
+    const count = heroSourceVehicles.length;
+    if (count < 2) return;
+    setHeroMobileIndex(((nextIndex % count) + count) % count);
+  };
+  const heroMobileVehicle = heroSourceVehicles.length
+    ? heroSourceVehicles[heroMobileIndex % heroSourceVehicles.length]
+    : undefined;
+
+  // Desktop lane geometry. Each vehicle owns a lane on its own side of the
+  // centre card; admin values are clamped so a lane can never intersect the
+  // card, whatever the stored configuration says. This replaces the previous
+  // fixed 43% vehicle width + outward nudge, which overlapped the 42%-wide
+  // card and was then clipped by the stage overflow boundary.
+  const heroLane = (() => {
+    const clampNum = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+    const cardVisualPct = clampNum(Number(heroPresentation.cardWidthPct) || 42, 28, 50)
+      * clampNum((Number(heroPresentation.cardScalePct) || 80) / 100, 0.7, 1);
+    const gutterPct = 2.5;
+    const lanePct = Math.max(18, 50 - cardVisualPct / 2 - gutterPct);
+    const widthPct = Math.min(clampNum(Number(heroPresentation.vehicleWidthPct) || 43, 32, 48), lanePct);
+    const slackPct = Math.max(0, lanePct - widthPct);
+    return {
+      widthPct,
+      leftPct: Math.min(clampNum(Number(heroPresentation.leftOffsetPct) || 0, 0, 30), slackPct),
+      rightPct: Math.min(clampNum(Number(heroPresentation.rightOffsetPct) || 0, 0, 30), slackPct),
+      // Scale never exceeds 1 so artwork stays inside its lane.
+      scale: clampNum((Number(heroPresentation.vehicleScalePct) || 100) / 100, 0.75, 1),
+      cardOffsetX: clampNum(Number(heroPresentation.cardOffsetXPct) || 0, -5, 5),
+      cardOffsetY: clampNum(Number(heroPresentation.cardOffsetYPct) || 0, -10, 10),
+    };
+  })();
+
   // FEATURED PICKS — a small, curated strip shown above the full
   // filterable inventory grid. Home-page redesign pass: the page
   // previously went straight from the trust strip into "browse
@@ -797,10 +841,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
       <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 pb-2 pt-4 sm:px-6 lg:px-8">
         <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#176B87] sm:text-[10px]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
-        <div className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-slate-500 sm:gap-2 sm:text-[10px]">
+        <div role="group" aria-label="Marketplace at a glance" className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-slate-500 sm:gap-2 sm:text-[10px]">
           <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverError ? 'Inventory unavailable' : `${serverTotal.toLocaleString()} vehicles`}</span>
-          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>
-          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>
+          {savedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>}
+          {comparedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>}
         </div>
       </div>
 
@@ -841,13 +885,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           )}
 
           <div
-            className="relative mx-auto w-full px-4 sm:px-8 lg:px-10"
+            className="relative mx-auto w-full px-4 sm:px-8 lg:h-[var(--hero-stage-h)] lg:px-10"
             style={{
               maxWidth: `${Math.max(90, Math.min(100, heroPresentation.stageMaxWidthPct))}%`,
-              height: `${Math.round(430 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100))}px`,
-            }}
+              ['--hero-stage-h' as string]: `${Math.round(430 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100))}px`,
+            } as React.CSSProperties}
           >
-            <div className="relative h-full overflow-hidden">
+            <div className="relative overflow-hidden lg:h-full">
               {/* Large vehicle subjects stay at full commercial scale; only their position is configurable. */}
               <div className="absolute inset-0 hidden lg:block" aria-label="Featured vehicles">
                 {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
@@ -857,13 +901,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     className="group absolute z-10 -translate-y-1/2 text-left"
                     style={{
                       top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
-                      left: `${Math.max(0, Math.min(30, heroPresentation.leftOffsetPct))}%`,
-                      width: `${Math.max(32, Math.min(48, heroPresentation.vehicleWidthPct))}%`,
+                      left: `${heroLane.leftPct}%`,
+                      width: `${heroLane.widthPct}%`,
                     }}
                     aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
                   >
                     <div className="relative flex h-[330px] items-end justify-center overflow-hidden">
-                      <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `translateX(-${Math.max(0, Math.min(40, heroPresentation.leftVehicleNudgePct || 0))}%) scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }} loading="eager" decoding="async" />
+                      <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 left-4 max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
@@ -882,13 +926,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     className="group absolute z-10 -translate-y-1/2 text-right"
                     style={{
                       top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
-                      right: `${Math.max(0, Math.min(30, heroPresentation.rightOffsetPct))}%`,
-                      width: `${Math.max(32, Math.min(48, heroPresentation.vehicleWidthPct))}%`,
+                      right: `${heroLane.rightPct}%`,
+                      width: `${heroLane.widthPct}%`,
                     }}
                     aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
                   >
                     <div className="relative flex h-[330px] items-end justify-center overflow-hidden">
-                      <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `translateX(${Math.max(0, Math.min(40, heroPresentation.rightVehicleNudgePct || 0))}%) scale(${Math.max(0.75, Math.min(1.25, heroPresentation.vehicleScalePct / 100))})` }} loading="eager" decoding="async" />
+                      <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 right-4 max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 text-left backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
@@ -905,7 +949,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     className="pointer-events-auto origin-center transition-transform duration-300"
                     style={{
                       width: `${Math.max(28, Math.min(50, heroPresentation.cardWidthPct))}%`,
-                      transform: `translate(${heroPresentation.cardOffsetXPct}%, ${heroPresentation.cardOffsetYPct}%) scale(${Math.max(0.7, Math.min(1, heroPresentation.cardScalePct / 100))})`,
+                      transform: `translate(${heroLane.cardOffsetX}%, ${heroLane.cardOffsetY}%) scale(${Math.max(0.7, Math.min(1, heroPresentation.cardScalePct / 100))})`,
                     }}
                   >
                     <div
@@ -948,45 +992,48 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-[#0A3340] shadow-xl backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>}
               </div>
 
-              <div className="relative min-h-[620px] lg:hidden" aria-label="KAYAD mobile hero">
-                <div className="absolute inset-x-4 top-5 z-20 mx-auto max-w-[calc(100%-2rem)]">
-                  <div className="origin-top rounded-[26px] border border-white/70 bg-white/95 p-5 text-center shadow-[0_24px_55px_rgba(3,19,27,.20)] backdrop-blur-xl" style={{ transform: `scale(${Math.max(0.72, Math.min(1, heroPresentation.cardScalePct / 100))})` }}>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[9px] font-black uppercase tracking-[.16em] text-[#176B87]"><span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />KAYAD MARKETPLACE · VERIFIED VEHICLES</span>
-                    <div className="mt-4 flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-[.18em] text-[#5F7B86]"><span className="h-px w-7 bg-[#13B8A6]" /> MOVE WITH CONFIDENCE <span className="h-px w-7 bg-[#13B8A6]" /></div>
-                    <h1 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.45rem)] font-black leading-[1.02] tracking-[-.045em] text-[#0A3340]">Drive Your Dream<br />Today</h1>
-                    <p className="mx-auto mt-3 max-w-[320px] text-[12px] font-medium leading-5 text-[#58717B]">Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.</p>
-                    <div className="mt-4 flex items-center justify-center gap-2">
-                      <button onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex items-center rounded-full px-4 py-2.5 text-[11px] font-black text-[#07313D] shadow-[0_10px_22px_rgba(19,184,166,.22)]">Explore Vehicles <ChevronRight className="ml-1 h-3.5 w-3.5" /></button>
-                      <button onClick={() => document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="inline-flex items-center rounded-full border border-[#C7DAD8] bg-white px-4 py-2.5 text-[11px] font-black text-[#0A3340] shadow-sm">How It Works <span className="ml-1 text-xs">▶</span></button>
-                    </div>
+              <div className="relative pb-4 pt-4 lg:hidden" aria-label="KAYAD mobile hero">
+                <div className="rounded-[26px] border border-white/70 bg-white/95 px-5 py-5 text-center shadow-[0_24px_55px_rgba(3,19,27,.20)] backdrop-blur-xl">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[9px] font-black uppercase tracking-[.16em] text-[#176B87]"><span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />KAYAD MARKETPLACE · VERIFIED VEHICLES</span>
+                  <h1 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.45rem)] font-black leading-[1.02] tracking-[-.045em] text-[#0A3340]">Drive Your Dream<br />Today</h1>
+                  <p className="mx-auto mt-2.5 max-w-[320px] text-[12px] font-medium leading-5 text-[#58717B]">{activeHeroCard?.message || 'Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.'}</p>
+                  <div className="mt-4 flex items-center justify-center gap-2">
+                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex min-h-[44px] items-center rounded-full px-5 text-[12px] font-black text-[#07313D] shadow-[0_10px_22px_rgba(19,184,166,.22)]">{activeHeroCard?.ctaLabel || 'Explore Vehicles'} <ChevronRight className="ml-1 h-3.5 w-3.5" /></button>
+                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex min-h-[44px] items-center rounded-full border bg-white px-5 text-[12px] font-black text-[#0A3340] shadow-sm">How It Works <span className="ml-1.5 text-xs">▶</span></button>
                   </div>
                 </div>
 
-                <div className="absolute inset-x-2 bottom-20 z-10 flex items-end justify-between gap-1">
-                  {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && <button type="button" onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroLeftVehicle)} className="w-[52%] text-left" aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}>
-                    <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="mx-auto h-[170px] w-full object-contain drop-shadow-[0_20px_28px_rgba(3,19,27,.35)]" loading="eager" decoding="async" />
-                  </button>}
-                  {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && <button type="button" onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroRightVehicle)} className="w-[52%] text-right" aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}>
-                    <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.make} ${heroRightVehicle.model}`} className="mx-auto h-[170px] w-full object-contain drop-shadow-[0_20px_28px_rgba(3,19,27,.35)]" loading="eager" decoding="async" />
-                  </button>}
-                </div>
-
-                {heroLeftVehicle && <div className="absolute bottom-8 left-3 z-20 max-w-[72%] rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3 py-2.5 text-left shadow-xl backdrop-blur-md">
-                  <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroLeftVehicle.isAuction ? 'LIVE AUCTION' : 'KAYAD SELECT'}</div>
-                  <div className="mt-0.5 truncate text-xs font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</div>
-                  <div className="mt-0.5 truncate text-[8px] text-white/65">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : heroCardContent[heroLeftVehicle.id]?.detail || heroLeftVehicle.description || 'Premium vehicle showcase'}</div>
-                </div>}
-
-                {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-2 top-[56%] z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/75 p-2.5 text-white shadow-lg backdrop-blur-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4" /></button>}
-                {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-2 top-[56%] z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/75 p-2.5 text-white shadow-lg backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4" /></button>}
-                {heroPresentation.dotsEnabled && heroSourceVehicles.length > 1 && <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/15 bg-[#071F2A]/70 px-3 py-1.5 backdrop-blur-md">{Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full ${index === heroPairIndex ? 'w-6 bg-[#13B8A6]' : 'w-1.5 bg-white/45'}`} />)}</div>}
+                {heroMobileVehicle && heroImageForVehicle(heroMobileVehicle) && (
+                  <div className="mt-3" role="group" aria-roledescription="carousel" aria-label="Featured vehicles">
+                    <div className="relative flex h-[132px] items-end justify-center">
+                      <button type="button" onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroMobileVehicle)} className="flex h-full w-[66%] items-end justify-center" aria-label={`View ${heroMobileVehicle.make} ${heroMobileVehicle.model}`}>
+                        <img key={heroMobileVehicle.id} src={heroImageForVehicle(heroMobileVehicle)} alt={`${heroMobileVehicle.year} ${heroMobileVehicle.make} ${heroMobileVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_18px_24px_rgba(3,19,27,.35)]" loading="eager" decoding="async" />
+                      </button>
+                      {heroPresentation.arrowEnabled && heroSourceVehicles.length > 1 && <button type="button" onClick={() => changeHeroMobile(heroMobileIndex - 1)} className="absolute left-0 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-[#0A3340]/75 text-white shadow-lg backdrop-blur-md" aria-label="Previous featured vehicle"><ChevronLeft className="h-4 w-4" /></button>}
+                      {heroPresentation.arrowEnabled && heroSourceVehicles.length > 1 && <button type="button" onClick={() => changeHeroMobile(heroMobileIndex + 1)} className="absolute right-0 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-[#0A3340]/75 text-white shadow-lg backdrop-blur-md" aria-label="Next featured vehicle"><ChevronRight className="h-4 w-4" /></button>}
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 shadow-xl backdrop-blur-md">
+                      <div className="min-w-0 text-left" aria-live="polite">
+                        <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroMobileVehicle.id]?.eyebrow || (heroMobileVehicle.isAuction ? 'LIVE AUCTION' : 'KAYAD SELECT')}</div>
+                        <div className="mt-0.5 truncate text-xs font-black text-white">{heroMobileVehicle.make} {heroMobileVehicle.model}</div>
+                        <div className="mt-0.5 truncate text-[9px] text-white/65">{heroCaption(heroMobileVehicle)}</div>
+                      </div>
+                      {heroPresentation.dotsEnabled && heroSourceVehicles.length > 1 && (
+                        <div className="flex shrink-0 items-center" aria-label="Featured vehicle slides">
+                          {heroSourceVehicles.map((vehicle, index) => (
+                            <button key={vehicle.id} type="button" onClick={() => changeHeroMobile(index)} aria-label={`Show featured vehicle ${index + 1}`} aria-current={index === heroMobileIndex % heroSourceVehicles.length ? 'true' : undefined} className="grid h-11 w-6 place-items-center">
+                              <span className={`h-1.5 rounded-full transition-all ${index === heroMobileIndex % heroSourceVehicles.length ? 'w-5 bg-[#13B8A6]' : 'w-1.5 bg-white/45'}`} />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:left-2 sm:p-3 lg:hidden" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>}
-              {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-1 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/25 bg-[#0A3340]/70 p-2.5 text-white shadow-lg backdrop-blur-md transition hover:bg-[#176B87] sm:right-2 sm:p-3 lg:hidden" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>}
-
               {heroPresentation.dotsEnabled && heroSourceVehicles.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/15 bg-[#071F2A]/65 px-3 py-1.5 backdrop-blur-md" aria-label="Featured vehicle slides">
+                <div className="absolute bottom-4 left-1/2 z-30 hidden -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/15 bg-[#071F2A]/65 lg:flex px-3 py-1.5 backdrop-blur-md" aria-label="Featured vehicle slides">
                   {Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[#13B8A6]' : 'w-1.5 bg-white/45 hover:bg-white/80'}`} />)}
                 </div>
               )}
