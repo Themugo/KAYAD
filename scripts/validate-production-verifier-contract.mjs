@@ -21,7 +21,16 @@ else fail('Production verifier rewrite/public inventory coverage');
 if (vercel.rewrites?.[0]?.source === '/api/:path*' && vercel.rewrites?.[0]?.destination === 'https://api.kayad.space/api/:path*') pass('Vercel canonical API rewrite remains explicit');
 else fail('Vercel canonical API rewrite');
 
-if (vercel.rewrites?.[1]?.source === '/(.*)' && vercel.rewrites?.[1]?.destination === '/index.html') pass('SPA fallback remains after API rewrite');
+// The SPA fallback must stay second (after the API rewrite) and must serve application routes
+// only: /api/* and missing /assets/* must never be answered with index.html.
+const spaRule = vercel.rewrites?.[1];
+const spaRe = spaRule?.source ? new RegExp(`^${spaRule.source}$`) : null;
+if (
+  spaRule?.destination === '/index.html' &&
+  spaRe &&
+  ['/', '/marketplace', '/auctions/123'].every((p) => spaRe.test(p)) &&
+  !['/api/cars', '/api/v1/auth/csrf', '/assets/index-abc123.js'].some((p) => spaRe.test(p))
+) pass('SPA fallback remains after API rewrite and excludes /api and /assets');
 else fail('SPA fallback ordering');
 
 if (failures.length) {

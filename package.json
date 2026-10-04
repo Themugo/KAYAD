@@ -41,7 +41,6 @@
     "validate:frontend-runtime-contracts": "node scripts/validate-frontend-runtime-contracts.mjs",
     "validate:dependency-security": "node scripts/validate-dependency-security.mjs",
     "verify:production": "node scripts/verify-production-deployment.mjs",
-    "validate:production-verifier-contract": "node scripts/validate-production-verifier-contract.mjs",
     "validate:socket-contract": "node scripts/validate-socket-contract.mjs",
     "validate:deployment-readiness": "node scripts/validate-deployment-readiness.mjs",
     "validate:backend-runtime-contracts": "node scripts/validate-backend-runtime-contracts.mjs",
