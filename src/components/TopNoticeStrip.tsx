@@ -68,7 +68,7 @@ export const TopNoticeStrip: React.FC = () => {
     const fallback = heroTickerConfig.fallbackText.split(' · ').filter(Boolean);
     const items = [...fallback, ...fallback];
     return (
-      <div className="w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor }} role="region" aria-label="KAYAD notices">
+      <div className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }} role="region" aria-label="KAYAD notices">
         <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s` }}>
           {items.map((item, index) => (
             <span key={`${item}-${index}`} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em]" style={{ color: heroTickerConfig.textColor }}>
@@ -101,7 +101,7 @@ export const TopNoticeStrip: React.FC = () => {
     const slot = slots[fadeIndex];
     return (
       <div
-        className="w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor }}
+        className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
         role="region"
         aria-label="KAYAD notices"
         aria-live="polite"
@@ -124,7 +124,7 @@ export const TopNoticeStrip: React.FC = () => {
   const loopItems = [...slots, ...slots];
   return (
     <div
-      className="w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor }}
+      className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
       role="region"
       aria-label="KAYAD notices"
     >

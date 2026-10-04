@@ -99,8 +99,8 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
   // Default marketing showcase: these are presentation-only assets. Admin can
   // switch the hero to real Featured/Promoted inventory at any time without code.
   heroFallbackVehicles: [
-    { id: 'hero-fallback-1', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'KAYAD Select', image: '/hero/kayad-land-cruiser.png' },
-    { id: 'hero-fallback-2', make: 'Mercedes-Benz', model: 'GLE', year: 2026, fuelType: 'Petrol', transmission: 'Automatic', tagline: 'KAYAD Select', image: '/hero/kayad-mercedes-gle.png' },
+    { id: 'hero-fallback-1', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, fuelType: 'Diesel', transmission: 'Automatic', tagline: 'KAYAD Select', image: '/hero/kayad-land-cruiser-clean.png' },
+    { id: 'hero-fallback-2', make: 'Mercedes-Benz', model: 'GLE', year: 2026, fuelType: 'Petrol', transmission: 'Automatic', tagline: 'KAYAD Select', image: '/hero/kayad-mercedes-gle-clean.png' },
   ],
   inventoryLayout: {
     viewMode: 'grid',

@@ -4,17 +4,18 @@ const file = 'src/features/VehicleMarketplace/components/VehicleMarketplace.tsx'
 const source = fs.readFileSync(file, 'utf8');
 
 const checks = [
-  ['hero preserves existing 390/420px footprint', source.includes('h-[390px]') && source.includes('sm:h-[420px]')],
-  ['Kenyan road background is configured', source.includes('KENYA_ROAD_HERO_BACKGROUND') && source.includes('nairobi-traffic-kenya-cars.jpg')],
-  ['real featured vehicle imagery remains data-driven', source.includes('heroImageForVehicle(heroLeftVehicle)') && source.includes('heroImageForVehicle(heroRightVehicle)')],
-  ['primary vehicle card remains wired to vehicle details', source.includes('handleVehicleSelect(heroLeftVehicle)')],
-  ['secondary vehicle card remains wired to vehicle details', source.includes('handleVehicleSelect(heroRightVehicle)')],
-  ['existing browse CTA remains wired', source.includes('Browse Inventory') && source.includes('market-results')],
-  ['existing how-it-works CTA remains wired', source.includes('How It Works') && source.includes('seller-platform')],
+  ['continuous hero stage remains canonical', source.includes('w-screen overflow-hidden') && source.includes('heroBackgroundStyle')],
+  ['full Nairobi background remains configurable', source.includes('backgroundUrl') && source.includes('backgroundScalePct')],
+  ['Drive Your Dream headline remains canonical', source.includes('Drive Your Dream') && source.includes('Today')],
+  ['desktop featured vehicle subjects remain data-driven', source.includes('heroImageForVehicle(heroLeftVehicle)') && source.includes('heroImageForVehicle(heroRightVehicle)')],
+  ['clean showcase assets are configured', source.includes('kayad-land-cruiser-clean.png') && source.includes('kayad-mercedes-gle-clean.png')],
+  ['vehicle info cards are contained within vehicle stages', source.includes('overflow-hidden') && source.includes('max-w-[calc(100%-2rem)]')],
+  ['center card remains configurable', source.includes('cardScalePct') && source.includes('cardWidthPct')],
+  ['admin-controlled vehicle positioning remains wired', source.includes('leftVehicleNudgePct') && source.includes('rightVehicleNudgePct')],
   ['existing carousel controls remain wired', source.includes('Previous featured vehicles') && source.includes('Next featured vehicles')],
-  ['existing search bridge remains immediately below hero', source.includes('2. SEARCH BRIDGE') && source.includes('Hero maximum price filter')],
-  ['Drive Your Dream headline remains canonical', source.includes('Drive Your Dream Today')],
-  ['premium vehicle stage remains presentation-only', source.includes('KAYAD Select') && source.includes('Verified listing') && source.includes('backdrop-blur-md') && source.includes('shadow-[0_32px_90px_rgba(0,0,0,.50)]')],
+  ['mobile hero has its own responsive composition', source.includes('KAYAD mobile hero') && source.includes('min-h-[620px] lg:hidden')],
+  ['mobile hero preserves the canonical headline and CTAs', source.includes('Explore Vehicles') && source.includes('How It Works')],
+  ['existing search bridge remains below hero', source.includes('2. SEARCH BRIDGE') && source.includes('Hero maximum price filter')],
 ];
 
 let passed = 0;

@@ -545,3 +545,9 @@
     scroll-margin-top: 78px;
   }
 }
+
+/* KAYAD broadcast ticker: preserve admin height on desktop, compact the same canonical strip on phones. */
+@media (max-width: 639px) {
+  .kayad-top-ticker { height: min(var(--kayad-ticker-height, 36px), 30px) !important; }
+  .kayad-top-ticker .animate-marquee span { padding-top: 4px; padding-bottom: 4px; font-size: 9px; }
+}

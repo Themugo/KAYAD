@@ -43,8 +43,8 @@ SET hero_presentation = jsonb_build_object(
   'tickerScrollSeconds', 34,
   'vehicleSource', 'showcase',
   'showcaseVehicles', jsonb_build_array(
-    jsonb_build_object('id','showcase-land-cruiser','make','Toyota','model','Land Cruiser 300','year',2026,'image','/hero/kayad-land-cruiser.png','eyebrow','KAYAD SELECT','tagline','Premium SUV · 4WD · Automatic','enabled',true),
-    jsonb_build_object('id','showcase-mercedes-gle','make','Mercedes-Benz','model','GLE','year',2026,'image','/hero/kayad-mercedes-gle.png','eyebrow','KAYAD SELECT','tagline','Luxury SUV · Automatic','enabled',true)
+    jsonb_build_object('id','showcase-land-cruiser','make','Toyota','model','Land Cruiser 300','year',2026,'image','/hero/kayad-land-cruiser-clean.png','eyebrow','KAYAD SELECT','tagline','Premium SUV · 4WD · Automatic','enabled',true),
+    jsonb_build_object('id','showcase-mercedes-gle','make','Mercedes-Benz','model','GLE','year',2026,'image','/hero/kayad-mercedes-gle-clean.png','eyebrow','KAYAD SELECT','tagline','Luxury SUV · Automatic','enabled',true)
   ),
   'floatingCards', '[]'::jsonb
 ) || COALESCE(hero_presentation, '{}'::jsonb)
