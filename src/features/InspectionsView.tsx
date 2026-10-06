@@ -318,7 +318,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F6FAF9] text-slate-800 pb-16 space-y-6">
+    <div className="kayad-inspection-page min-h-screen bg-[#F6FAF9] text-slate-800 pb-16 space-y-6">
       {/* Toast Notification */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#176B87] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-white/20 animate-fade-in">
@@ -447,7 +447,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           informational service-tier content, not user-specific data.
           "Digital Reports" and "Bookings Tracker" now show this
           user's own real inspection history. */}
-      <div className="sticky top-14 z-40 bg-white border-b border-slate-200 shadow-xs">
+      <div className="sticky top-[72px] z-40 bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center space-x-1 sm:space-x-4 overflow-x-auto py-2 scrollbar-none text-xs font-bold">
             <button

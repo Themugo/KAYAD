@@ -563,3 +563,162 @@
   .kayad-hero-mobile-slide,
   .kayad-hero-mobile-slide[data-direction="prev"] { animation: none; }
 }
+
+/* ============================================================
+   KAYAD 2026-10-06 — CROSS-SURFACE PRODUCT POLISH
+   One visual language across desktop + phone. Presentation only.
+   ============================================================ */
+
+.kayad-global-header{isolation:isolate}
+.kayad-global-header .min-h-16{letter-spacing:-.01em}
+.kayad-global-header button,.kayad-global-header a{touch-action:manipulation}
+
+/* Marketplace bridge: category navigation must remain in normal flow.
+   The search card may overlap the hero, but never the category rail. */
+.kayad-market-categories{position:relative;z-index:20}
+.kayad-market-categories > div{scrollbar-width:none;overscroll-behavior-x:contain}
+.kayad-market-categories > div::-webkit-scrollbar{display:none}
+.kayad-market-categories button{min-height:42px}
+.kayad-search-bridge{z-index:10}
+.kayad-search-bridge > div{position:relative}
+
+/* Mobile density is not a user-facing 3×/4×/5× control: the responsive
+   mobile grid has its own intentional column rules. */
+@media(max-width:1023px){
+  .kayad-grid-density-control{display:none!important}
+  .kayad-market-categories{margin-top:0!important}
+  .kayad-search-bridge{margin-top:12px!important}
+  .kayad-search-bridge > div{box-shadow:0 14px 36px rgba(10,51,64,.09)}
+}
+
+/* Shared page rhythm on desktop and phone. */
+.kayad-homepage,.kayad-auction-page,.kayad-inspection-page{scroll-padding-bottom:110px}
+
+/* Menu: turn the drawer into grouped product navigation rather than a feature dump. */
+.kayad-mobile-menu{background:linear-gradient(180deg,#073944 0%,#082f3b 58%,#062a34 100%)!important;border-color:rgba(157,229,217,.12)!important;box-shadow:0 24px 60px rgba(3,31,39,.28)}
+.kayad-mobile-menu .kayad-menu-section-title{color:#8fb2b7!important;letter-spacing:.16em}
+.kayad-mobile-menu .grid.grid-cols-2>button,
+.kayad-mobile-menu .kayad-menu-secondary-grid>button,
+.kayad-mobile-menu .w-full.p-2\.5,
+.kayad-mobile-menu .w-full.p-3{border:1px solid rgba(180,226,220,.09);background:rgba(255,255,255,.055)!important;border-radius:16px;min-height:52px;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.kayad-mobile-menu .grid.grid-cols-2>button:hover,
+.kayad-mobile-menu .kayad-menu-secondary-grid>button:hover,
+.kayad-mobile-menu .w-full.p-2\.5:hover,
+.kayad-mobile-menu .w-full.p-3:hover{background:rgba(142,231,218,.10)!important;border-color:rgba(142,231,218,.22);transform:translateY(-1px)}
+.kayad-mobile-menu .grid.grid-cols-2>button svg{color:#9cebdd}
+.kayad-mobile-menu .w-full.bg-\[\#176B87\]{background:linear-gradient(135deg,#147d92,#176b87)!important;border-color:rgba(156,235,221,.28)!important;box-shadow:0 10px 28px rgba(0,0,0,.12)}
+.kayad-mobile-menu .bg-amber-400{background:#f6c443!important}
+.kayad-mobile-menu .bg-slate-800\/80{background:rgba(255,255,255,.055)!important}
+
+/* Bottom dock: consistent KAYAD icon system and a little more breathing room. */
+.kayad-mobile-bottom-nav{min-height:64px;padding-bottom:max(7px,env(safe-area-inset-bottom));bottom:max(8px,env(safe-area-inset-bottom));}
+.kayad-mobile-bottom-nav__item{min-height:50px;font-size:9px;letter-spacing:.015em}
+.kayad-mobile-bottom-nav__icon{width:34px;height:28px;border-radius:11px;color:#7c9095}
+.kayad-mobile-bottom-nav__item.is-active .kayad-mobile-bottom-nav__icon{background:#dff5f1;color:#0b716f;box-shadow:inset 0 0 0 1px #c5e8e1}
+.kayad-mobile-bottom-nav__item.is-active{background:transparent;box-shadow:none}
+.kayad-mobile-bottom-nav__item:focus-visible{outline:2px solid #13b8a6;outline-offset:2px}
+
+/* Auction surface: stronger live-room hierarchy on desktop and phone. */
+.kayad-auction-page{max-width:1480px;margin-inline:auto;padding:18px clamp(14px,2.5vw,32px) 100px}
+.kayad-auction-page .auction-hero-shell{min-height:330px}
+.kayad-auction-page .auction-segment-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.kayad-auction-page .auction-segment{min-height:84px}
+.kayad-auction-page .auction-segment.is-active{position:relative;overflow:hidden}
+.kayad-auction-page .auction-segment.is-active:after{content:"";position:absolute;inset:auto -15% -65% 35%;height:100%;background:rgba(142,231,218,.12);filter:blur(25px);border-radius:50%;pointer-events:none}
+.kayad-auction-page .auction-searchbar{margin-top:2px}
+.kayad-auction-page .auction-searchbar input{font-size:13px!important;min-height:42px}
+.kayad-auction-page .auction-card-grid{margin-top:4px}
+.kayad-auction-page .auction-card-media{background:linear-gradient(135deg,#edf6f5,#e5f0f2)!important}
+.kayad-auction-page .auction-card-body{min-height:190px}
+.kayad-auction-page .auction-card-title{line-height:1.2}
+.kayad-auction-page .auction-card button{min-height:42px}
+
+/* Inspection surface: eliminate the old newspaper/document feel and use the
+   same KAYAD service language as Auction and Marketplace. */
+.kayad-inspection-page{background:linear-gradient(180deg,#f3faf8 0%,#f7fbfb 45%,#eef7f7 100%)!important;color:#0a3340}
+.kayad-inspection-page > .bg-\[\#0A3340\]{border-radius:0 0 22px 22px;background:linear-gradient(135deg,#063b46,#0a5963)!important;border-color:rgba(142,231,218,.22)!important}
+.kayad-inspection-page > .bg-\[\#176B87\]{background:linear-gradient(135deg,#0a5667 0%,#147c8b 58%,#176b87 100%)!important;box-shadow:0 24px 55px rgba(7,57,68,.14)}
+.kayad-inspection-page > .bg-\[\#176B87\] h1{letter-spacing:-.045em;line-height:.98}
+.kayad-inspection-page > .bg-\[\#176B87\] .text-slate-300{color:rgba(255,255,255,.72)!important}
+.kayad-inspection-page > .bg-\[\#176B87\] .bg-white\/10{background:rgba(255,255,255,.075)!important;border-color:rgba(255,255,255,.14)!important}
+.kayad-inspection-page > .bg-\[\#176B87\] .bg-amber-400\/20{background:rgba(246,196,67,.15)!important}
+.kayad-inspection-page > .bg-\[\#176B87\] .bg-emerald-400\/20{background:rgba(142,231,218,.13)!important}
+.kayad-inspection-page > .bg-\[\#176B87\] .bg-blue-400\/20{background:rgba(98,182,231,.13)!important}
+.kayad-inspection-page > .bg-\[\#176B87\] .bg-rose-400\/20{background:rgba(210,133,153,.13)!important}
+.kayad-inspection-page > .bg-\[\#176B87\] button{min-height:44px}
+.kayad-inspection-page > .sticky{background:rgba(255,255,255,.94)!important;backdrop-filter:blur(16px);border-color:#d8e9e6!important;box-shadow:0 8px 22px rgba(7,57,68,.06)!important}
+.kayad-inspection-page > .sticky nav button{min-height:42px;color:#607980}
+.kayad-inspection-page > .sticky nav button.bg-\[\#176B87\]{color:#fff!important;background:#0b716f!important;box-shadow:0 7px 18px rgba(11,113,111,.16)}
+.kayad-inspection-page main{padding-bottom:100px}
+.kayad-inspection-page main .rounded-xl,.kayad-inspection-page main .rounded-2xl{border-color:#dbeae7}
+.kayad-inspection-page main .bg-slate-50{background:#f4faf8!important}
+
+/* Shared page/card polish at larger screens. */
+@media(min-width:1024px){
+  .kayad-global-header{box-shadow:0 6px 24px rgba(10,51,64,.07)!important}
+  .kayad-market-categories > div{min-height:62px}
+  .kayad-search-bridge{margin-top:14px!important}
+  .kayad-inspection-page{padding-bottom:48px}
+}
+
+@media(max-width:900px){
+  .kayad-auction-page{padding-inline:14px;padding-top:12px}
+  .kayad-auction-page .auction-segment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kayad-auction-page .auction-hero-shell{min-height:0}
+}
+
+@media(max-width:640px){
+  .kayad-market-categories > div{padding-top:10px;padding-bottom:10px}
+  .kayad-market-categories button{padding-inline:14px;font-size:10px}
+  .kayad-search-bridge > div{padding:14px!important;border-radius:18px!important}
+  .kayad-auction-page{padding:8px 12px 110px;gap:20px}
+  .kayad-auction-page.auction-premium-page{gap:20px}
+  .kayad-auction-page .auction-hero-content{padding:24px 18px 22px}
+  .kayad-auction-page .auction-hero-title{font-size:2.35rem;line-height:.96}
+  .kayad-auction-page .auction-hero-copy{margin-top:15px;font-size:12.5px;line-height:1.6}
+  .kayad-auction-page .auction-trust-row span{min-height:44px;border-radius:14px;padding:10px 12px}
+  .kayad-auction-page .auction-segment-grid{gap:8px}
+  .kayad-auction-page .auction-segment{min-height:72px;padding:12px;border-radius:16px}
+  .kayad-auction-page .auction-segment-value{font-size:22px}
+  .kayad-auction-page .auction-searchbar{padding:7px;border-radius:15px}
+  .kayad-auction-page .auction-refresh-btn{min-width:44px;font-size:0!important;padding-inline:11px!important}
+  .kayad-auction-page .auction-refresh-btn svg{margin:0!important}
+  .kayad-auction-page .auction-card-grid{gap:12px}
+  .kayad-auction-page .auction-card-media{height:205px!important}
+  .kayad-auction-page .auction-card-body{min-height:0;padding:15px!important}
+
+  .kayad-inspection-page{padding-bottom:108px!important;gap:18px!important}
+  .kayad-inspection-page > .bg-\[\#0A3340\]{margin-inline:10px;border-radius:16px}
+  .kayad-inspection-page > .bg-\[\#176B87\]{padding:24px 16px 28px!important;border-radius:0 0 24px 24px}
+  .kayad-inspection-page > .bg-\[\#176B87\] h1{font-size:2.15rem!important}
+  .kayad-inspection-page > .bg-\[\#176B87\] .grid{gap:10px!important}
+  .kayad-inspection-page > .bg-\[\#176B87\] .grid>div{padding:12px;border-radius:15px}
+  .kayad-inspection-page > .sticky{top:64px;z-index:35}
+  .kayad-inspection-page > .sticky nav{padding-top:7px!important;padding-bottom:7px!important}
+  .kayad-inspection-page > .sticky nav button{min-height:44px;padding-inline:13px!important}
+  .kayad-inspection-page main{padding-inline:14px!important;padding-bottom:100px}
+
+  .kayad-mobile-menu{max-height:calc(100dvh - 72px)!important;padding-bottom:calc(96px + env(safe-area-inset-bottom))!important}
+  .kayad-mobile-menu .grid.grid-cols-2{gap:8px}
+  .kayad-mobile-menu .grid.grid-cols-2>button,.kayad-mobile-menu .kayad-menu-secondary-grid>button{min-height:54px;padding:11px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .kayad-mobile-menu .grid.grid-cols-2>button,
+  .kayad-mobile-menu .kayad-menu-secondary-grid>button{transition:none}
+  .kayad-auction-page .auction-live-pulse{animation:none!important}
+}
+
+/* Semantic active icon accents: same family, different product meaning. */
+.kayad-mobile-bottom-nav__item:nth-child(1).is-active .kayad-mobile-bottom-nav__icon{color:#0b716f}
+.kayad-mobile-bottom-nav__item:nth-child(2).is-active .kayad-mobile-bottom-nav__icon{color:#176b87}
+.kayad-mobile-bottom-nav__item:nth-child(3).is-active .kayad-mobile-bottom-nav__icon{color:#0b716f}
+.kayad-mobile-bottom-nav__item:nth-child(4).is-active .kayad-mobile-bottom-nav__icon{color:#237b86}
+.kayad-mobile-bottom-nav__item:nth-child(5).is-active .kayad-mobile-bottom-nav__icon{color:#365b64}
+
+/* Desktop navigation icon language: keep the same optical weight while
+   allowing each primary product area a restrained semantic accent. */
+@media(min-width:1024px){
+  .kayad-global-header svg{stroke-width:2.1}
+  .kayad-global-header a:hover svg,.kayad-global-header button:hover svg{color:#0b716f}
+}

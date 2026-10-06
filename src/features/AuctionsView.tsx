@@ -118,7 +118,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   };
 
   return (
-    <div className="auction-premium-page space-y-8">
+    <div className="auction-premium-page kayad-auction-page space-y-8">
       <AuctionExperienceRail current={tab === 'ended' ? 'history' : 'detail'} />
       {user && <AuctionSwipeHint>Swipe the room • save anything you want to return to</AuctionSwipeHint>}
       {user && <BidderIdentityCard user={user} savedCount={favorites.size} onPayments={() => navigate('/?nav=payments')} onProfile={() => navigate('/?nav=profile')} />}

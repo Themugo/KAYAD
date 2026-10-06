@@ -115,7 +115,9 @@
     "validate:next7-polish": "node scripts/validate-next7-polish.mjs",
     "validate:backend-boot": "node scripts/validate-backend-boot.mjs",
     "validate:hero-mobile-assets": "node scripts/validate-hero-mobile-assets.mjs",
-    "validate:hero-admin-control": "node scripts/validate-hero-admin-control.mjs"
+    "validate:hero-desktop-assets": "node scripts/validate-hero-desktop-assets.mjs",
+    "validate:hero-admin-control": "node scripts/validate-hero-admin-control.mjs",
+    "validate:mobile-desktop-polish": "node scripts/validate-mobile-desktop-polish.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

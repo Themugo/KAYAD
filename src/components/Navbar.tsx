@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasNotifications = (user?.unreadNotificationsCount ?? 0) > 0 || effectiveUnread > 0;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#D7E7E4] shadow-[0_4px_20px_rgba(11,29,58,.06)] text-slate-800">
+    <header className="kayad-global-header sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#D7E7E4] shadow-[0_4px_20px_rgba(11,29,58,.06)] text-slate-800">
       {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
 
       {/* Main Navigation Container */}
@@ -575,7 +575,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* MOBILE DRAWER NAVIGATION */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#0A3340] text-white border-t border-slate-800 px-4 pt-4 pb-8 space-y-4 animate-fade-in max-h-[calc(100vh-80px)] overflow-y-auto">
+        <div className="kayad-mobile-menu lg:hidden bg-[#0A3340] text-white border-t border-slate-800 px-4 pt-4 pb-8 space-y-4 animate-fade-in max-h-[calc(100vh-80px)] overflow-y-auto">
 
           {/* User Account Banner or Login Prompt */}
           {user ? (
@@ -627,8 +627,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Fixed: matches the same simplified, flat list as desktop
               now - removed KAYAD LIVE/Watch Live/Financing (not in
               scope), added the missing Escrow link. */}
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
+          <div className="kayad-menu-section space-y-1">
+            <span className="kayad-menu-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
               Public Marketplace
             </span>
 
@@ -674,7 +674,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="kayad-menu-secondary-grid grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleNavSelect('financing')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${

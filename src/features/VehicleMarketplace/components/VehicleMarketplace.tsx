@@ -16,6 +16,28 @@ import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
 import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroPresentation';
 import { HERO_EXTRAS_DEFAULTS, normalizeHeroExtras } from '../types/heroPresentation';
 
+const CANONICAL_HERO_DESKTOP_ASSETS: Record<string, string> = {
+  'showcase-land-cruiser': '/hero/kayad-land-cruiser-cutout.png',
+  'showcase-mercedes-gle': '/hero/kayad-mercedes-gle-cutout.png',
+};
+
+const LEGACY_CANONICAL_HERO_DESKTOP_ASSETS: Record<string, string> = {
+  '/hero/kayad-land-cruiser-clean.png': CANONICAL_HERO_DESKTOP_ASSETS['showcase-land-cruiser'],
+  '/hero/kayad-mercedes-gle-clean.png': CANONICAL_HERO_DESKTOP_ASSETS['showcase-mercedes-gle'],
+};
+
+/**
+ * Normalizes only the two known legacy canonical showcase URLs.
+ * Custom admin-provided artwork is deliberately left untouched.
+ */
+const normalizeCanonicalHeroDesktopImage = (vehicle: HeroShowcaseVehicle): HeroShowcaseVehicle => {
+  const legacyReplacement = LEGACY_CANONICAL_HERO_DESKTOP_ASSETS[vehicle.image];
+  if (!legacyReplacement) return vehicle;
+  const canonicalDesktop = CANONICAL_HERO_DESKTOP_ASSETS[vehicle.id];
+  if (!canonicalDesktop || canonicalDesktop !== legacyReplacement) return vehicle;
+  return { ...vehicle, image: canonicalDesktop };
+};
+
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
   savedVehicles: string[];
@@ -109,8 +131,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', tickerBackgroundColor: '#0A3340', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34,
     vehicleSource: 'showcase',
     showcaseVehicles: [
-      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-clean.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
-      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/hero/kayad-mercedes-gle-clean.png', mobileImage: '/hero/kayad-mercedes-gle-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Luxury SUV · Automatic', enabled: true },
+      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-cutout.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
+      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/hero/kayad-mercedes-gle-cutout.png', mobileImage: '/hero/kayad-mercedes-gle-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Luxury SUV · Automatic', enabled: true },
     ],
     floatingCards: [],
     ...HERO_EXTRAS_DEFAULTS,
@@ -453,7 +475,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         const mode = cfg?.heroFeaturedMode === 'selected' ? 'selected' : 'all';
         const ids = Array.isArray(cfg?.heroCarIds) ? cfg.heroCarIds.filter(Boolean) : [];
         const presentation = cfg?.heroPresentation || {};
-        const showcase = Array.isArray(presentation.showcaseVehicles) && presentation.showcaseVehicles.length ? presentation.showcaseVehicles : DEFAULT_HERO_PRESENTATION.showcaseVehicles;
+        const showcase = (Array.isArray(presentation.showcaseVehicles) && presentation.showcaseVehicles.length ? presentation.showcaseVehicles : DEFAULT_HERO_PRESENTATION.showcaseVehicles).map(normalizeCanonicalHeroDesktopImage);
         setHeroFeaturedMode(mode);
         setHeroFeaturedIds(ids);
         setHeroPresentation({
@@ -1120,7 +1142,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       )}
 
       {/* Marketplace categories: the visual bridge from hero to inventory, matching the original discovery concept without adding a second dashboard. */}
-      <section className="border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
+      <section className="kayad-market-categories border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
         <div className="mx-auto flex max-w-[1480px] items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
           {[
             ['All', () => { setSelectedBodyStyle('All'); setSelectedFuel('All'); }],
@@ -1154,7 +1176,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {homeConfig.sectionVisibility.searchTrustCard && (
-      <div className="relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
+      <div className="kayad-search-bridge relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
         <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
           <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
             <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Search</label>
@@ -1347,7 +1369,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </label>
 
               {viewMode === 'grid' && (
-                <div className="kayad-toolbar-control flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
+                <div className="kayad-toolbar-control kayad-grid-density-control flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Grid columns">
                   {[3, 4, 5].map((n) => (
                     <button
                       key={n}
