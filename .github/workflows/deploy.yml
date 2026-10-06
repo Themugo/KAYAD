@@ -44,6 +44,8 @@ jobs:
         run: npm run validate:v14:release-candidate
       - name: Validate V14 runtime preflight
         run: npm run validate:v14:runtime-preflight
+      - name: Validate Vercel build contract
+        run: npm run validate:vercel-build
       - name: Build production frontend
         run: npm run build
       - name: Validate dist output

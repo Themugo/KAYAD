@@ -126,7 +126,7 @@ export const copyToClipboard = async (text) => {
 // Supabase Storage/CDN URLs are already responsive-safe at the application
 // boundary. Keep the helper generic so image components never depend on a
 // storage vendor.
-export const getMediaSrcSet = (src: string | undefined | null): { src: string; srcSet?: string } | null => {
+export const getMediaSrcSet = (src) => {
   if (!src) return null;
   return { src };
 };

@@ -120,7 +120,8 @@
     "validate:media-storage": "node scripts/validate-media-storage-contract.mjs",
     "validate:media-delivery-lifecycle": "node scripts/validate-media-delivery-lifecycle.mjs",
     "certify:inspection:runtime": "node scripts/certify-inspection-runtime.mjs",
-    "validate:inspection:payout-runtime": "node scripts/validate-inspection-payout-runtime.mjs"
+    "validate:inspection:payout-runtime": "node scripts/validate-inspection-payout-runtime.mjs",
+    "validate:vercel-build": "node scripts/validate-vercel-build-contract.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

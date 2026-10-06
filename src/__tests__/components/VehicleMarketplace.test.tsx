@@ -331,7 +331,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await renderMarketplace({ ...baseProps  });
     const grid = await screen.findByTestId('inventory-grid');
     for (const columns of [3, 4, 5]) {
-      fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
+      fireEvent.click(screen.getByRole('button', { name: `${columns} columns` }));
       await waitFor(() => {
         expect(grid.getAttribute('data-columns')).toBe(String(columns));
         expect(grid.className).toContain('kayad-inventory-grid');
