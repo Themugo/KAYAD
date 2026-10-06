@@ -22,13 +22,13 @@ import MobileBottomNav from './components/MobileBottomNav';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
-import { AuthProvider, useAuth, RequireAuth, RequireDealer } from './context/AuthContext';
+import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireAdmin } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 // Views
 // Heavy authenticated/admin surfaces are loaded on demand. This keeps the
@@ -60,10 +60,50 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 function AppInner() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
   const location = useLocation();
+  const { user: authUser, logout: authLogout, isAdmin, isDealer, isAuth, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const normalizeNav = useCallback((requested: string | null): string => {
+    const aliases: Record<string, string> = {
+      home: 'marketplace',
+      gallery: 'marketplace',
+      auction: 'discovery',
+      escrow: 'escrow',
+      chat: 'chat',
+      dashboard: 'dashboard',
+      signin: 'support',
+      login: 'support',
+      seller: 'seller-platform',
+      'seller-dashboard': 'seller-platform',
+    };
+    const value = (requested || '').trim();
+    return aliases[value] || value || 'marketplace';
+  }, []);
+
   useEffect(() => {
-    const nav = new URLSearchParams(location.search).get('nav');
-    if (nav) setActiveNav(nav);
-  }, [location.search]);
+    const requested = new URLSearchParams(location.search).get('nav');
+    setActiveNav(normalizeNav(requested));
+  }, [location.search, normalizeNav]);
+
+  // Client-side navigation state is convenience only, but it must never
+  // expose a private workspace to the wrong account. Backend authorization
+  // remains authoritative; this gate prevents accidental cross-surface
+  // rendering and stale deep links from landing on the wrong workspace.
+  useEffect(() => {
+    if (authLoading) return;
+    const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard']);
+    if (!protectedNavs.has(activeNav)) return;
+    if (!isAuth) {
+      navigate('/login', { replace: true, state: { from: location } });
+      return;
+    }
+    if (activeNav === 'admin' && !isAdmin) {
+      setActiveNav('marketplace');
+      return;
+    }
+    if (activeNav === 'dealer-dashboard' && !isDealer && !isAdmin) {
+      setActiveNav('marketplace');
+    }
+  }, [activeNav, authLoading, isAuth, isAdmin, isDealer, location, navigate]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -83,8 +123,6 @@ function AppInner() {
   // two honestly: no field is invented that the backend doesn't
   // provide, except isVerified (backend has no such field - mapped
   // from the real, existing emailVerified boolean).
-  const { user: authUser, logout: authLogout, isAdmin } = useAuth();
-  const navigate = useNavigate();
   const handleOpenAuth = useCallback(() => {
     navigate('/login', {
       state: { from: { pathname: window.location.pathname } },
@@ -328,14 +366,24 @@ function AppInner() {
   }, []);
 
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
-  const showPublicMobileDock = !user || !['auctions', 'payments', 'profile'].includes(activeNav);
+  const privateWorkspaceNavs = new Set([
+    'admin',
+    'dashboard',
+    'dealer-dashboard',
+    'buyer-platform',
+    'seller-platform',
+    'sell',
+    'seller',
+    'seller-dashboard',
+  ]);
+  const showPublicMobileDock = !privateWorkspaceNavs.has(activeNav) && !['auctions', 'payments', 'profile'].includes(activeNav);
 
   return (
     <div className="min-h-screen bg-[#EEF7F5] text-slate-800 flex flex-col font-sans">
       {/* 0. Top notice/advertisement strip - real, backend-driven,
           admin-managed entirely through the Ad Manager panel, no code
           changes needed to add/edit/recolor/remove an entry. */}
-      <TopNoticeStrip />
+      {!privateWorkspaceNavs.has(activeNav) && <TopNoticeStrip />}
 
       {/* 1. Header Navigation */}
       <Navbar
@@ -615,12 +663,32 @@ function AppInner() {
 function AuthRouteSurface() {
   const location = useLocation();
   const path = location.pathname;
-  if (path === '/login') return <LoginPage />;
+  if (path === '/login' || path === '/admin/login') return <LoginPage />;
   if (path === '/register') return <OnboardingFlow onClose={() => { window.location.href = '/'; }} />;
   if (path === '/forgot-password') return <ForgotPasswordPage />;
   if (path === '/reset-password') return <ResetPasswordPage />;
   if (path.startsWith('/auction/')) return <AuctionLivePage />;
   if (path === '/force-password-change') return <ForcePasswordChange />;
+
+  // Canonicalize legacy/direct routes into the single AppInner navigation
+  // surface. This prevents stale links such as /gallery, /auction, /escrow,
+  // /chat, /admin and /dealer from silently rendering the wrong public page.
+  if (path === '/gallery' || path === '/marketplace') return <Navigate to="/?nav=marketplace" replace />;
+  if (path === '/auction' || path === '/auctions') return <Navigate to="/?nav=discovery" replace />;
+  if (path === '/escrow') return <Navigate to="/?nav=escrow" replace />;
+  if (path === '/support') return <Navigate to="/?nav=support" replace />;
+  if (path === '/inspections') return <Navigate to="/?nav=inspections" replace />;
+  if (path === '/financing') return <Navigate to="/?nav=financing" replace />;
+  if (path === '/saved') return <RequireAuth><Navigate to="/?nav=saved" replace /></RequireAuth>;
+  if (path === '/profile') return <RequireAuth><Navigate to="/?nav=profile" replace /></RequireAuth>;
+  if (path === '/payments') return <RequireAuth><Navigate to="/?nav=payments" replace /></RequireAuth>;
+  if (path === '/chat') return <RequireAuth><Navigate to="/?nav=chat" replace /></RequireAuth>;
+  if (path === '/dashboard') return <RequireAuth><Navigate to="/?nav=dashboard" replace /></RequireAuth>;
+  if (path === '/buyer-platform') return <RequireAuth><Navigate to="/?nav=buyer-platform" replace /></RequireAuth>;
+  if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
+  if (path === '/admin') return <RequireAdmin><Navigate to="/?nav=admin" replace /></RequireAdmin>;
+  if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
+
   if (path === '/dealer/onboarding') return <RequireAuth><RequireDealer><DealerOnboarding /></RequireDealer></RequireAuth>;
   if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerAuctionSetupWizard /></RequireDealer></RequireAuth>;
   if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperations /></RequireDealer></RequireAuth>;

@@ -1355,7 +1355,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       aria-pressed={gridColumns === n}
                       className={`h-8 min-w-9 rounded-lg px-2 text-[11px] font-bold transition-colors ${gridColumns === n ? 'bg-[#176B87] text-white' : 'text-slate-500 hover:bg-white hover:text-[#0A3340]'}`}
                       title={`${n} columns`}
-                      aria-label={`${n} columns`}
+                      aria-label={`${n}×`}
                     >
                       <span className="hidden sm:inline">{n} columns</span><span className="sm:hidden">{n}×</span>
                     </button>

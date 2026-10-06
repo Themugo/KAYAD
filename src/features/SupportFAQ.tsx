@@ -104,7 +104,7 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Escrow',
     categoryIcon: <LockKeyhole className={iconClass} />,
     question: 'How does KAYAD Escrow protect a transaction?',
-    answer: 'KAYAD Escrow is built around a controlled transaction lifecycle. Funding, buyer confirmation, delivery, release, dispute and refund states are recorded by the backend. A release or refund is not created simply because a page says it should happen; the authorized transaction state and financial controls are authoritative.',
+    answer: 'KAYAD Escrow is built around a controlled transaction lifecycle. When an escrow is funded, the transaction records the protected funds as held under the applicable custody process; buyer confirmation, delivery, release, dispute and refund states are recorded by the backend. Funds are released or refunded only through the authorized transaction state and financial controls, not simply because a page says they should be.',
     nextStep: 'Open Escrow',
     popular: true,
   },
@@ -200,7 +200,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
   };
 
   const handleNextStep = (faq: FAQItem) => {
-    if (faq.nextStep === 'Open support case') {
+    if (faq.nextStep === 'Open a support case') {
       onContactSupport?.();
       return;
     }
@@ -212,7 +212,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
       onContactSupport?.();
       return;
     }
-    onNavigate(faq.nextStep === 'Marketplace' ? 'gallery' : faq.nextStep === 'Open Auction' ? 'auctions' : faq.nextStep === 'Open Inspection' ? 'inspections' : faq.nextStep === 'Open Escrow' ? 'escrow' : faq.nextStep === 'Open Financing' ? 'financing' : faq.nextStep === 'Sign in' ? 'signin' : 'support');
+    onNavigate(faq.nextStep === 'Open Marketplace' ? 'marketplace' : faq.nextStep === 'Open Auction' ? 'discovery' : faq.nextStep === 'Open Inspection' ? 'inspections' : faq.nextStep === 'Open Escrow' ? 'escrow' : faq.nextStep === 'Open Financing' ? 'financing' : 'support');
   };
 
   return (
