@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
@@ -30,6 +30,10 @@ vi.mock('../../api/api', async () => {
   };
 });
 
+vi.mock('../../services/heroApi', async () => {
+  const actual = await vi.importActual<typeof import('../../services/heroApi')>('../../services/heroApi');
+  return { ...actual, getVisibleHeroSlides: vi.fn().mockResolvedValue([]) };
+});
 vi.mock('../../components/FloatingAdRail', () => ({ default: () => null }));
 
 vi.mock('../../services/adApi', async () => {
@@ -129,6 +133,157 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     const glance = screen.getByLabelText(/Marketplace at a glance/i);
     expect(glance.textContent).toContain('Inventory unavailable');
     expect(glance.textContent).not.toMatch(/\b0\b/);
+  });
+
+  describe('mobile hero carousel (single active vehicle, canonical hero collection)', () => {
+    const mobileHero = () => screen.getByLabelText('KAYAD mobile hero');
+
+    it('shows ONE vehicle with the canonical tagline and switches with the arrows, wrapping both ways', async () => {
+      await renderMarketplace({ ...baseProps });
+      const hero = mobileHero();
+      const view = within(hero);
+      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
+      expect(view.getByText('Premium SUV · 4WD · Automatic')).toBeTruthy();
+      // Only the active vehicle is rendered (no second large vehicle on mobile).
+      expect(view.queryByText('Mercedes-Benz GLE')).toBeNull();
+      expect(view.getAllByRole('img').length).toBe(1);
+
+      fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
+      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
+      expect(view.getByText('Luxury SUV · Automatic')).toBeTruthy();
+      expect(view.queryByText('Toyota Land Cruiser 300')).toBeNull();
+
+      // Wraps forward to the first vehicle, and backward again to the last.
+      fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
+      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
+      fireEvent.click(view.getByRole('button', { name: 'Previous featured vehicle' }));
+      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
+    });
+
+    it('keeps dots in sync with the active vehicle and lets a dot jump to a vehicle', async () => {
+      await renderMarketplace({ ...baseProps });
+      const view = within(mobileHero());
+      const dot = (n: number) => view.getByRole('button', { name: `Show featured vehicle ${n}` });
+      expect(dot(1).getAttribute('aria-current')).toBe('true');
+      expect(dot(2).getAttribute('aria-current')).toBeNull();
+      fireEvent.click(dot(2));
+      expect(dot(2).getAttribute('aria-current')).toBe('true');
+      expect(dot(1).getAttribute('aria-current')).toBeNull();
+      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
+    });
+
+    it('changes vehicle on a deliberate horizontal swipe but not on a vertical scroll', async () => {
+      await renderMarketplace({ ...baseProps });
+      const view = within(mobileHero());
+      const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ }).parentElement as HTMLElement;
+      const touch = (x: number, y: number) => ({ touches: [{ clientX: x, clientY: y }], changedTouches: [{ clientX: x, clientY: y }] });
+
+      fireEvent.touchStart(stage, touch(200, 100));
+      fireEvent.touchEnd(stage, touch(205, 190)); // mostly vertical: ignored
+      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
+
+      fireEvent.touchStart(stage, touch(240, 100));
+      fireEvent.touchEnd(stage, touch(120, 104)); // swipe left -> next
+      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
+
+      fireEvent.touchStart(stage, touch(100, 100));
+      fireEvent.touchEnd(stage, touch(230, 98)); // swipe right -> previous
+      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
+    });
+
+    it('serves the high-resolution WebP only to mobile via <picture>, keeping the approved desktop image as the fallback', async () => {
+      await renderMarketplace({ ...baseProps });
+      const view = within(mobileHero());
+      const img = view.getByRole('img') as HTMLImageElement;
+      const picture = img.closest('picture') as HTMLElement;
+      const source = picture.querySelector('source') as HTMLSourceElement;
+      // Desktop / fallback image is the approved clean PNG (desktop composition unchanged).
+      expect(img.getAttribute('src')).toBe('/hero/kayad-land-cruiser-clean.png');
+      // Mobile-only high-resolution asset, limited to widths below the lg breakpoint.
+      expect(source.getAttribute('srcset')).toBe('/hero/kayad-land-cruiser-mobile.webp');
+      expect(source.getAttribute('media')).toBe('(max-width: 1023.98px)');
+      expect(source.getAttribute('type')).toBe('image/webp');
+      // Intrinsic size prevents layout shift while the larger asset loads.
+      expect(img.getAttribute('width')).toBe('1021');
+      expect(img.getAttribute('height')).toBe('634');
+
+      fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
+      const next = within(mobileHero()).getByRole('img') as HTMLImageElement;
+      expect(next.getAttribute('src')).toBe('/hero/kayad-mercedes-gle-clean.png');
+      expect((next.closest('picture') as HTMLElement).querySelector('source')?.getAttribute('srcset')).toBe('/hero/kayad-mercedes-gle-mobile.webp');
+    });
+
+    it('does not pair a custom admin vehicle with a canonical mobile photo', async () => {
+      const custom = { ...INITIAL_VEHICLES[0], id: 'custom-1', make: 'Range', model: 'Rover', images: ['/uploads/range-rover.jpg'], image: '/uploads/range-rover.jpg', isFeatured: true };
+      const { adminAPI } = await import('../../api/api');
+      vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { vehicleSource: 'showcase', showcaseVehicles: [
+        { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/uploads/custom-lc.png', enabled: true },
+      ] } } } as never);
+      await renderMarketplace({ ...baseProps, vehicles: [custom] });
+      const view = within(mobileHero());
+      await waitFor(() => expect((view.getByRole('img') as HTMLImageElement).getAttribute('src')).toBe('/uploads/custom-lc.png'));
+      // Same id but a different desktop image: no canonical mobile WebP is injected.
+      expect((view.getByRole('img') as HTMLImageElement).closest('picture')?.querySelector('source')).toBeNull();
+    });
+
+    describe('admin-controlled hero configuration', () => {
+      const slide = (over: Record<string, unknown> = {}) => ({
+        id: 'slide-1', eyebrowText: 'ADMIN EYEBROW', headline: 'Find Your Dream Today', subheadline: 'Admin supporting copy.',
+        ctaPrimaryText: 'Browse Inventory', ctaPrimaryLink: '/inventory', ctaSecondaryText: 'See How', ctaSecondaryLink: '/how',
+        backgroundType: 'color', overlayColor: '#000000', overlayOpacity: 0, displayMode: 'boxed', isVisible: true, sortOrder: 1, ...over,
+      });
+
+      it('shows the admin hero slide copy, CTA labels and exact headline on MOBILE (and does not rewrite it)', async () => {
+        const { getVisibleHeroSlides } = await import('../../services/heroApi');
+        vi.mocked(getVisibleHeroSlides).mockResolvedValueOnce([slide()] as never);
+        await renderMarketplace({ ...baseProps });
+        const view = within(mobileHero());
+        await waitFor(() => expect(view.getByText('ADMIN EYEBROW')).toBeTruthy());
+        // Exact admin headline: not turned into "Drive Your Dream Today" just because it contains "Dream Today".
+        expect(view.getByRole('heading', { level: 1 }).textContent).toBe('Find Your Dream Today');
+        expect(view.getByText('Admin supporting copy.')).toBeTruthy();
+        expect(view.getByRole('button', { name: /Browse Inventory/ })).toBeTruthy();
+        expect(view.getByRole('button', { name: /See How/ })).toBeTruthy();
+        expect(view.queryByText('How It Works')).toBeNull();
+      });
+
+      it('falls back to the canonical copy when no admin slide exists', async () => {
+        await renderMarketplace({ ...baseProps });
+        const view = within(mobileHero());
+        expect(view.getByRole('heading', { level: 1 }).textContent).toBe('Drive Your DreamToday');
+        expect(view.getByRole('button', { name: /Explore Vehicles/ })).toBeTruthy();
+        expect(view.getByRole('button', { name: /How It Works/ })).toBeTruthy();
+      });
+
+      it('applies admin mobile stage height, slide speed and honours an explicit 0 (instant)', async () => {
+        const { adminAPI } = await import('../../api/api');
+        vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 200, mobileStageMaxPx: 300, mobileTransitionMs: 0, rotationSeconds: 0 } } } as never);
+        await renderMarketplace({ ...baseProps });
+        const view = within(mobileHero());
+        const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ });
+        await waitFor(() => expect((stage.parentElement as HTMLElement).style.height).toBe('clamp(200px, 52vw, 300px)'));
+        expect(stage.style.getPropertyValue('--kayad-hero-slide-ms')).toBe('0ms');
+      });
+
+      it('clamps unsafe stored values so the stage can never break the layout', async () => {
+        const { adminAPI } = await import('../../api/api');
+        vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 5, mobileStageMaxPx: 9000, mobileTransitionMs: -50, rotationSeconds: 1 } } } as never);
+        await renderMarketplace({ ...baseProps });
+        const view = within(mobileHero());
+        const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ });
+        await waitFor(() => expect((stage.parentElement as HTMLElement).style.height).toBe('clamp(120px, 52vw, 420px)'));
+        expect(stage.style.getPropertyValue('--kayad-hero-slide-ms')).toBe('0ms');
+      });
+    });
+
+    it('never overlays arrows on the vehicle stage and contains the image', async () => {
+      await renderMarketplace({ ...baseProps });
+      const view = within(mobileHero());
+      const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ }).parentElement as HTMLElement;
+      // Arrow buttons live in a separate controls row, not inside the vehicle stage.
+      expect(within(stage).queryByRole('button', { name: /featured vehicle/i })).toBeNull();
+      expect(view.getByRole('img').className).toContain('object-contain');
+    });
   });
 
   it('marks the active category chip and keeps it in sync with the Body Style filter', async () => {

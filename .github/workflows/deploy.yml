@@ -34,6 +34,12 @@ jobs:
         run: npm run validate:deployment-readiness
       - name: Validate Vercel CLI and deployment contract
         run: npm run validate:vercel-ci
+      - name: Backend boot guard (undefined identifiers)
+        run: npm run validate:backend-boot
+      - name: Hero mobile asset contract
+        run: npm run validate:hero-mobile-assets
+      - name: Hero admin-control contract
+        run: npm run validate:hero-admin-control
       - name: Validate V14 release candidate
         run: npm run validate:v14:release-candidate
       - name: Validate V14 runtime preflight

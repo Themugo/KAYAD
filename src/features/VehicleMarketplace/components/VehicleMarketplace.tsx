@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
 import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin } from 'lucide-react';
@@ -14,6 +14,7 @@ import HomePageAdminPanel from './HomePageAdminPanel';
 import AdManagerPanel from '../../AdManager/AdManagerPanel';
 import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
 import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroPresentation';
+import { HERO_EXTRAS_DEFAULTS, normalizeHeroExtras } from '../types/heroPresentation';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -108,12 +109,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', tickerBackgroundColor: '#0A3340', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34,
     vehicleSource: 'showcase',
     showcaseVehicles: [
-      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-clean.png', eyebrow: 'KAYAD SELECT', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
-      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/hero/kayad-mercedes-gle-clean.png', eyebrow: 'KAYAD SELECT', tagline: 'Luxury SUV · Automatic', enabled: true },
+      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-clean.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
+      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/hero/kayad-mercedes-gle-clean.png', mobileImage: '/hero/kayad-mercedes-gle-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Luxury SUV · Automatic', enabled: true },
     ],
     floatingCards: [],
+    ...HERO_EXTRAS_DEFAULTS,
   };
   const [heroPresentation, setHeroPresentation] = useState<HeroPresentationConfig>(DEFAULT_HERO_PRESENTATION);
+  const heroRotationMs = heroPresentation.rotationSeconds > 0 ? Math.round(heroPresentation.rotationSeconds * 1000) : 0;
   const [heroCardContent, setHeroCardContent] = useState<Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string }>>({});
 
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
@@ -470,6 +473,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           showcaseVehicles: showcase,
           floatingCards: Array.isArray(presentation.floatingCards) ? presentation.floatingCards : [],
           tickerEnabled: presentation.tickerEnabled !== false,
+          ...normalizeHeroExtras(presentation),
           vehicleSource: ['showcase','featured','selected'].includes(presentation.vehicleSource) ? presentation.vehicleSource : DEFAULT_HERO_PRESENTATION.vehicleSource,
         });
         setHeroCardContent(presentation && typeof cfg?.heroCardContent === 'object' && cfg.heroCardContent ? cfg.heroCardContent : {});
@@ -505,12 +509,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // identity is selected by this component.
   const heroShowcaseVehicles = useMemo(() => {
     const rows = heroPresentation.showcaseVehicles?.filter((item) => item.enabled !== false && item.image) || [];
-    return rows.map((item): Vehicle => ({
+    return rows.map((item): Vehicle => {
+      // Stored admin configs saved before `mobileImage` existed still get the canonical mobile asset,
+      // but only while their desktop image is still the canonical one (never pair a custom car with the wrong photo).
+      const canonical = DEFAULT_HERO_PRESENTATION.showcaseVehicles.find((d) => d.id === item.id && d.image === item.image);
+      const heroMobileImage = item.mobileImage || canonical?.mobileImage || undefined;
+      return {
+      heroMobileImage,
       id: item.id, title: `${item.make} ${item.model}`, make: item.make, model: item.model, year: item.year, vin: `SHOWCASE-${item.id}`,
       price: 0, mileage: 0, location: 'Nairobi, Kenya', bodyStyle: 'SUV', transmission: 'Automatic', fuelType: 'Gasoline', engine: '', horsepower: 0,
       exteriorColor: '', interiorColor: '', condition: 'New', listingType: 'fixed', images: [item.image], image: item.image, description: item.tagline || '', features: [], sellerId: 'kayad-showcase', sellerName: 'KAYAD', sellerRating: 5, sellerType: 'Verified Dealer',
       isDealerCertified: true, verified: true, savedCount: 0, escrowEligible: true, status: 'active', createdAt: new Date(0).toISOString(), badge: item.eyebrow || 'KAYAD SELECT', isFeatured: true,
-    }));
+      };
+    });
   }, [heroPresentation.showcaseVehicles]);
 
   const heroSourceVehicles = useMemo(() => {
@@ -554,13 +565,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [heroTransitioning]);
 
   useEffect(() => {
-    if (heroSourceVehicles.length < 2) return;
+    // Rotation timing is admin-controlled (0 = no automatic rotation).
+    if (heroSourceVehicles.length < 2 || !heroRotationMs) return;
     const timer = window.setInterval(() => {
       const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
       changeHeroPair((heroPairIndex + 1) % pairCount);
-    }, 6500);
+    }, heroRotationMs);
     return () => window.clearInterval(timer);
-  }, [heroSourceVehicles.length, heroPairIndex]);
+  }, [heroSourceVehicles.length, heroPairIndex, heroRotationMs]);
 
   const heroLeftVehicle = heroSourceVehicles.length ? heroSourceVehicles[(heroPairIndex * 2) % heroSourceVehicles.length] : undefined;
   const heroRightVehicle = heroSourceVehicles.length > 1
@@ -595,14 +607,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => { cancelled = true; };
   }, []);
   useEffect(() => {
-    if (heroSlides.length < 2) return;
-    const timer = setInterval(() => setHeroSlideIndex((index) => (index + 1) % heroSlides.length), 6500);
+    if (heroSlides.length < 2 || !heroRotationMs) return;
+    const timer = setInterval(() => setHeroSlideIndex((index) => (index + 1) % heroSlides.length), heroRotationMs);
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
+  }, [heroSlides.length, heroRotationMs]);
   const activeHeroSlide = heroSlides[heroSlideIndex % Math.max(heroSlides.length, 1)];
 
   const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE';
   const heroHeadline = activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today';
+  // Single source of truth for hero copy: desktop AND mobile render these, so every admin edit
+  // (hero slide eyebrow / headline / subheadline / CTA text, vehicle card content) shows on both.
+  const heroEyebrowDisplay = heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD MARKETPLACE · VERIFIED VEHICLES' : heroEyebrow;
+  // Only the canonical default headline gets the designed line break; any admin-authored headline renders exactly as written.
+  const heroHeadlineNode: React.ReactNode = heroHeadline === 'Drive Your Dream Today' ? <>Drive Your Dream<br />Today</> : heroHeadline;
   const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';
   const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
   const heroAdminBackgroundUrl = heroPresentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND;
@@ -617,12 +634,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Vehicle artwork always comes from the vehicle record/configuration.
   // No vehicle-specific asset mapping lives in the hero component.
   const heroImageForVehicle = (vehicle?: Vehicle) => vehicle?.images?.[0] || vehicle?.image || '';
+  // Mobile carousel image: the optional high-resolution mobile asset, else the same image desktop uses.
+  const heroMobileImageForVehicle = (vehicle?: Vehicle) => vehicle?.heroMobileImage || heroImageForVehicle(vehicle);
 
   // Warm the complete hero artwork before it is ever displayed. This is
   // intentionally limited to hero assets so the rest of the marketplace is
   // untouched.
   useEffect(() => {
-    const urls = heroSourceVehicles.map(heroImageForVehicle).filter(Boolean);
+    // Phones warm only the mobile hero assets; larger screens warm only the desktop ones.
+    const isMobileViewport = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 1023.98px)').matches;
+    const urls = heroSourceVehicles.map(isMobileViewport ? heroMobileImageForVehicle : heroImageForVehicle).filter(Boolean);
     urls.forEach((src) => {
       const image = new Image();
       image.decoding = 'async';
@@ -644,6 +665,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   };
 
   const activeHeroCard = heroLeftVehicle ? heroCardContent[heroLeftVehicle.id] : undefined;
+  const heroSupportCopy = activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.' : heroSubheadline);
+  // CTA labels: vehicle card content first (existing behaviour), then the admin hero slide's own button text, then the default.
+  const heroPrimaryLabel = activeHeroCard?.ctaLabel || activeHeroSlide?.ctaPrimaryText?.trim() || 'Explore Vehicles';
+  const heroSecondaryLabel = activeHeroSlide?.ctaSecondaryText?.trim() || 'How It Works';
   const heroAuctionMeta = (vehicle?: Vehicle) => {
     if (!vehicle?.isAuction) return '';
     const bid = vehicle.currentBid || vehicle.price || 0;
@@ -668,10 +693,32 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Same canonical source list; only the presentation differs.
   const [heroMobileIndex, setHeroMobileIndex] = useState(0);
   useEffect(() => { setHeroMobileIndex(0); }, [heroSourceVehicles.map((vehicle) => vehicle.id).join('|')]);
+  // Direction of the last change (animation metadata only; the active slide is still heroMobileIndex).
+  const heroMobileDirection = useRef<'next' | 'prev'>('next');
+  const heroSwipeStart = useRef<{ x: number; y: number } | null>(null);
   const changeHeroMobile = (nextIndex: number) => {
     const count = heroSourceVehicles.length;
     if (count < 2) return;
-    setHeroMobileIndex(((nextIndex % count) + count) % count);
+    const normalized = ((nextIndex % count) + count) % count;
+    if (normalized === heroMobileIndex % count) return;
+    const forward = (normalized - (heroMobileIndex % count) + count) % count <= count / 2;
+    heroMobileDirection.current = forward ? 'next' : 'prev';
+    setHeroMobileIndex(normalized);
+  };
+  const onHeroSwipeStart = (event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    heroSwipeStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+  };
+  const onHeroSwipeEnd = (event: React.TouchEvent) => {
+    const start = heroSwipeStart.current;
+    heroSwipeStart.current = null;
+    const touch = event.changedTouches[0];
+    if (!start || !touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    // Horizontal, deliberate swipes only; vertical gestures keep scrolling the page.
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    changeHeroMobile(heroMobileIndex + (dx < 0 ? 1 : -1));
   };
   const heroMobileVehicle = heroSourceVehicles.length
     ? heroSourceVehicles[heroMobileIndex % heroSourceVehicles.length]
@@ -961,13 +1008,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         backdropFilter: `blur(${Math.max(0, Math.min(40, heroPresentation.cardBlurPx))}px)`,
                       }}
                     >
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-[#176B87]"><span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />{heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD MARKETPLACE · VERIFIED VEHICLES' : heroEyebrow}</span>
+                      <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-[#176B87]"><span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />{heroEyebrowDisplay}</span>
                       <div className="mt-5 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[.2em] text-[#5F7B86]"><span className="h-px w-9 bg-[#13B8A6]" /> MOVE WITH CONFIDENCE <span className="h-px w-9 bg-[#13B8A6]" /></div>
-                      <h1 className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] font-black leading-[1.02] tracking-[-.045em]">{heroHeadline.includes('Dream Today') ? <>Drive Your Dream<br />Today</> : heroHeadline}</h1>
-                      <p className="mx-auto mt-4 max-w-[430px] text-sm font-medium leading-6 text-[#58717B]">{activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.' : heroSubheadline)}</p>
+                      <h1 className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] font-black leading-[1.02] tracking-[-.045em]">{heroHeadlineNode}</h1>
+                      <p className="mx-auto mt-4 max-w-[430px] text-sm font-medium leading-6 text-[#58717B]">{heroSupportCopy}</p>
                       <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex items-center rounded-full px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]">{activeHeroCard?.ctaLabel || 'Explore Vehicles'} <ChevronRight className="ml-1 h-4 w-4" /></button>
-                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex items-center rounded-full border bg-white px-6 py-3 text-xs font-black text-[#0A3340] shadow-sm">How It Works <span className="ml-2 text-sm">▶</span></button>
+                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex items-center rounded-full px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-4 w-4" /></button>
+                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex items-center rounded-full border bg-white px-6 py-3 text-xs font-black text-[#0A3340] shadow-sm">{heroSecondaryLabel} <span className="ml-2 text-sm">▶</span></button>
                       </div>
                       <dl className="mt-6 grid grid-cols-4 border-t border-[#D7E7E4] pt-5">
                         {[['VERIFIED','Listings'],['INSPECTED','Vehicles'],['PROTECTED','Transactions'],['EAST AFRICA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-[#176B87]">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
@@ -994,39 +1041,69 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
               <div className="relative pb-4 pt-4 lg:hidden" aria-label="KAYAD mobile hero">
                 <div className="rounded-[26px] border border-white/70 bg-white/95 px-5 py-5 text-center shadow-[0_24px_55px_rgba(3,19,27,.20)] backdrop-blur-xl">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[9px] font-black uppercase tracking-[.16em] text-[#176B87]"><span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />KAYAD MARKETPLACE · VERIFIED VEHICLES</span>
-                  <h1 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.45rem)] font-black leading-[1.02] tracking-[-.045em] text-[#0A3340]">Drive Your Dream<br />Today</h1>
-                  <p className="mx-auto mt-2.5 max-w-[320px] text-[12px] font-medium leading-5 text-[#58717B]">{activeHeroCard?.message || 'Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.'}</p>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-[#176B87]"><span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" />{heroEyebrowDisplay}</span>
+                  <h1 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.45rem)] font-black leading-[1.02] tracking-[-.045em] text-[#0A3340]">{heroHeadlineNode}</h1>
+                  <p className="mx-auto mt-2.5 max-w-[320px] text-[13px] font-medium leading-5 text-[#58717B]">{heroSupportCopy}</p>
                   <div className="mt-4 flex items-center justify-center gap-2">
-                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex min-h-[44px] items-center rounded-full px-5 text-[12px] font-black text-[#07313D] shadow-[0_10px_22px_rgba(19,184,166,.22)]">{activeHeroCard?.ctaLabel || 'Explore Vehicles'} <ChevronRight className="ml-1 h-3.5 w-3.5" /></button>
-                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex min-h-[44px] items-center rounded-full border bg-white px-5 text-[12px] font-black text-[#0A3340] shadow-sm">How It Works <span className="ml-1.5 text-xs">▶</span></button>
+                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex min-h-[44px] items-center rounded-full px-5 text-[12px] font-black text-[#07313D] shadow-[0_10px_22px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-3.5 w-3.5" /></button>
+                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex min-h-[44px] items-center rounded-full border bg-white px-5 text-[12px] font-black text-[#0A3340] shadow-sm">{heroSecondaryLabel} <span className="ml-1.5 text-xs">▶</span></button>
                   </div>
                 </div>
 
                 {heroMobileVehicle && heroImageForVehicle(heroMobileVehicle) && (
                   <div className="mt-3" role="group" aria-roledescription="carousel" aria-label="Featured vehicles">
-                    <div className="relative flex h-[132px] items-end justify-center">
-                      <button type="button" onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroMobileVehicle)} className="flex h-full w-[66%] items-end justify-center" aria-label={`View ${heroMobileVehicle.make} ${heroMobileVehicle.model}`}>
-                        <img key={heroMobileVehicle.id} src={heroImageForVehicle(heroMobileVehicle)} alt={`${heroMobileVehicle.year} ${heroMobileVehicle.make} ${heroMobileVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_18px_24px_rgba(3,19,27,.35)]" loading="eager" decoding="async" />
+                    {/* ONE complete vehicle at a time, full width, never cropped (object-contain). */}
+                    <div
+                      className="relative flex w-full items-center justify-center overflow-x-clip"
+                      style={{ touchAction: 'pan-y', height: `clamp(${heroPresentation.mobileStageMinPx}px, 52vw, ${heroPresentation.mobileStageMaxPx}px)` }}
+                      onTouchStart={onHeroSwipeStart}
+                      onTouchEnd={onHeroSwipeEnd}
+                    >
+                      <button
+                        key={heroMobileVehicle.id}
+                        type="button"
+                        onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroMobileVehicle)}
+                        className="kayad-hero-mobile-slide flex h-full w-full items-center justify-center"
+                        data-direction={heroMobileDirection.current}
+                        style={{ ['--kayad-hero-slide-ms' as string]: `${heroPresentation.mobileTransitionMs}ms` }}
+                        aria-label={`View ${heroMobileVehicle.make} ${heroMobileVehicle.model}`}
+                      >
+                        <picture className="contents">
+                          {/* Phones/tablets (<1024px) get the high-resolution mobile asset; desktop never downloads it. */}
+                          {heroMobileVehicle.heroMobileImage && <source media="(max-width: 1023.98px)" srcSet={heroMobileVehicle.heroMobileImage} type={heroMobileVehicle.heroMobileImage.toLowerCase().endsWith('.webp') ? 'image/webp' : undefined} />}
+                          <img src={heroImageForVehicle(heroMobileVehicle)} alt={`${heroMobileVehicle.year} ${heroMobileVehicle.make} ${heroMobileVehicle.model}`} width={1021} height={634} className="h-full w-full object-contain drop-shadow-[0_18px_24px_rgba(3,19,27,.35)]" loading="eager" decoding="async" />
+                        </picture>
                       </button>
-                      {heroPresentation.arrowEnabled && heroSourceVehicles.length > 1 && <button type="button" onClick={() => changeHeroMobile(heroMobileIndex - 1)} className="absolute left-0 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-[#0A3340]/75 text-white shadow-lg backdrop-blur-md" aria-label="Previous featured vehicle"><ChevronLeft className="h-4 w-4" /></button>}
-                      {heroPresentation.arrowEnabled && heroSourceVehicles.length > 1 && <button type="button" onClick={() => changeHeroMobile(heroMobileIndex + 1)} className="absolute right-0 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-[#0A3340]/75 text-white shadow-lg backdrop-blur-md" aria-label="Next featured vehicle"><ChevronRight className="h-4 w-4" /></button>}
                     </div>
-                    <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 shadow-xl backdrop-blur-md">
-                      <div className="min-w-0 text-left" aria-live="polite">
-                        <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroMobileVehicle.id]?.eyebrow || (heroMobileVehicle.isAuction ? 'LIVE AUCTION' : 'KAYAD SELECT')}</div>
-                        <div className="mt-0.5 truncate text-xs font-black text-white">{heroMobileVehicle.make} {heroMobileVehicle.model}</div>
-                        <div className="mt-0.5 truncate text-[9px] text-white/65">{heroCaption(heroMobileVehicle)}</div>
+
+                    {/* Controls sit BELOW the vehicle so they can never cover the car at any width. */}
+                    {heroSourceVehicles.length > 1 && (heroPresentation.arrowEnabled || heroPresentation.dotsEnabled) && (
+                      <div className="mt-1 flex items-center justify-center gap-4" aria-label="Featured vehicle controls">
+                        {heroPresentation.arrowEnabled && (
+                          <button type="button" onClick={() => changeHeroMobile(heroMobileIndex - 1)} className="grid h-11 w-11 place-items-center rounded-full border border-white/25 bg-[#0A3340]/80 text-white shadow-lg backdrop-blur-md min-[360px]:h-11 max-[359px]:h-10 max-[359px]:w-10" aria-label="Previous featured vehicle"><ChevronLeft className="h-5 w-5" aria-hidden="true" /></button>
+                        )}
+                        {heroPresentation.dotsEnabled && (
+                          <div className="flex items-center" aria-label="Featured vehicle slides">
+                            {heroSourceVehicles.map((vehicle, index) => (
+                              <button key={vehicle.id} type="button" onClick={() => changeHeroMobile(index)} aria-label={`Show featured vehicle ${index + 1}`} aria-current={index === heroMobileIndex % heroSourceVehicles.length ? 'true' : undefined} className="grid h-11 w-7 place-items-center">
+                                <span className={`h-2 rounded-full transition-all ${index === heroMobileIndex % heroSourceVehicles.length ? 'w-6 bg-[#13B8A6]' : 'w-2 bg-[#0A3340]/35'}`} />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {heroPresentation.arrowEnabled && (
+                          <button type="button" onClick={() => changeHeroMobile(heroMobileIndex + 1)} className="grid h-11 w-11 place-items-center rounded-full border border-white/25 bg-[#0A3340]/80 text-white shadow-lg backdrop-blur-md max-[359px]:h-10 max-[359px]:w-10" aria-label="Next featured vehicle"><ChevronRight className="h-5 w-5" aria-hidden="true" /></button>
+                        )}
                       </div>
-                      {heroPresentation.dotsEnabled && heroSourceVehicles.length > 1 && (
-                        <div className="flex shrink-0 items-center" aria-label="Featured vehicle slides">
-                          {heroSourceVehicles.map((vehicle, index) => (
-                            <button key={vehicle.id} type="button" onClick={() => changeHeroMobile(index)} aria-label={`Show featured vehicle ${index + 1}`} aria-current={index === heroMobileIndex % heroSourceVehicles.length ? 'true' : undefined} className="grid h-11 w-6 place-items-center">
-                              <span className={`h-1.5 rounded-full transition-all ${index === heroMobileIndex % heroSourceVehicles.length ? 'w-5 bg-[#13B8A6]' : 'w-1.5 bg-white/45'}`} />
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                    )}
+
+                    <div className="mt-2 rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-3 shadow-xl backdrop-blur-md">
+                      <div className="min-w-0 text-left" aria-live="polite">
+                        <div className="text-[10px] font-bold uppercase tracking-[.14em] text-[#49D5C6]">{heroCardContent[heroMobileVehicle.id]?.eyebrow || (heroMobileVehicle.isAuction ? 'LIVE AUCTION' : heroMobileVehicle.badge || 'KAYAD SELECT')}</div>
+                        <div className="mt-0.5 truncate text-sm font-bold text-white">{heroMobileVehicle.make} {heroMobileVehicle.model}</div>
+                        {/* Canonical caption: admin tagline for showcase vehicles, real auction meta for auctions. */}
+                        <div className="mt-0.5 truncate text-[11px] text-white/70">{heroCaption(heroMobileVehicle)}</div>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -10,6 +10,7 @@ import {
 import { readLogEntries } from '../../Admin/hooks/adminAuditLog';
 import type { Vehicle } from '../../../types';
 import type { HeroPresentationConfig, HeroFloatingCard, HeroShowcaseVehicle } from '../types/heroPresentation';
+import { normalizeHeroExtras } from '../types/heroPresentation';
 
 interface HomePageAdminPanelProps {
   config: HomePageConfig;
@@ -116,6 +117,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
         vehicleTopPct: Math.max(35, Math.min(65, Number(heroLayout.vehicleTopPct) || 50)),
         vehicleWidthPct: Math.max(32, Math.min(48, Number(heroLayout.vehicleWidthPct) || 43)),
         tickerEnabled: heroLayout.tickerEnabled !== false,
+        ...normalizeHeroExtras(heroLayout),
         tickerBackgroundColor: heroLayout.tickerBackgroundColor || '#0A3340', tickerTextColor: heroLayout.tickerTextColor || '#FFFFFF', tickerHeightPx: Math.max(28, Math.min(60, Number(heroLayout.tickerHeightPx) || 36)), tickerScrollSeconds: Math.max(10, Math.min(90, Number(heroLayout.tickerScrollSeconds) || 34)),
         vehicleSource: ['showcase', 'featured', 'selected'].includes(heroLayout.vehicleSource) ? heroLayout.vehicleSource : 'showcase',
         showcaseVehicles: Array.isArray(heroLayout.showcaseVehicles) ? heroLayout.showcaseVehicles.slice(0, 6) : [],
@@ -312,6 +314,9 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                 <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker text</span><input type="color" value={heroLayout.tickerTextColor} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerTextColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-slate-200" /></label>
               </div>
               <div className="grid grid-cols-2 gap-2">
+                {([['primaryButtonColor','Primary button'],['secondaryButtonBorderColor','Secondary button border'],['cardTextColor','Hero card text'],['secondaryOverlayColor','Secondary overlay']] as const).map(([key,label]) => <label key={key} className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">{label}</span><input type="color" value={/^#[0-9a-fA-F]{6}$/.test(String(heroLayout[key])) ? String(heroLayout[key]) : '#000000'} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-slate-200" /></label>)}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
                 <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker height</span><input type="number" min={28} max={60} value={heroLayout.tickerHeightPx} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerHeightPx: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /></label>
                 <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker speed (sec)</span><input type="number" min={10} max={90} value={heroLayout.tickerScrollSeconds} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerScrollSeconds: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /></label>
               </div>
@@ -322,6 +327,9 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 {([['showVehicleInfoCards','Vehicle info cards'],['showVehicleLabels','Vehicle labels'],['arrowEnabled','Navigation arrows'],['dotsEnabled','Rotation dots']] as const).map(([key,label]) => <label key={key} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-2.5"><span className="text-[10px] font-bold text-slate-600">{label}</span><input type="checkbox" checked={Boolean((heroLayout as any)[key])} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.checked }))} className="accent-[#176B87]" /></label>)}
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                {([['mobileStageMinPx','Mobile vehicle min height (px)',120,320],['mobileStageMaxPx','Mobile vehicle max height (px)',168,420],['mobileTransitionMs','Mobile slide speed (ms, 0 = instant)',0,1000],['rotationSeconds','Hero auto-rotate (sec, 0 = off; mobile carousel stays manual)',0,60]] as const).map(([key,label,min,max]) => <label key={key} className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">{label}</span><input type="number" min={min} max={max} step={key === 'rotationSeconds' ? 0.5 : 1} value={heroLayout[key]} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.value === '' ? 0 : Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /></label>)}
+              </div>
             </div>
 
             <div className="rounded-xl border border-[#B8D9D6] bg-white p-3 space-y-3">
@@ -331,6 +339,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   <input value={vehicle.make} onChange={(e) => updateShowcaseVehicle(index, { make: e.target.value })} placeholder="Make" className="rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" />
                   <input value={vehicle.model} onChange={(e) => updateShowcaseVehicle(index, { model: e.target.value })} placeholder="Model" className="rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" />
                   <input value={vehicle.image} onChange={(e) => updateShowcaseVehicle(index, { image: e.target.value })} placeholder="Image URL" className="col-span-2 rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
+                  <input value={vehicle.mobileImage || ''} onChange={(e) => updateShowcaseVehicle(index, { mobileImage: e.target.value })} placeholder="Mobile image URL (optional, high-resolution WebP)" className="col-span-2 rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
                   <input value={vehicle.eyebrow || ''} onChange={(e) => updateShowcaseVehicle(index, { eyebrow: e.target.value })} placeholder="Eyebrow" className="rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
                   <input value={vehicle.tagline || ''} onChange={(e) => updateShowcaseVehicle(index, { tagline: e.target.value })} placeholder="Tagline" className="rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
                 </div>

@@ -79,7 +79,7 @@ export const verifyOtpChallenge = async ({ userId, purpose, code }) => {
   // same pending challenge, but only one UPDATE ... WHERE status=pending AND
   // code_hash=<candidate> may transition it to verified.
   const nowIso = new Date().toISOString();
-  const { data: consumed, error: consumeError } = await sb
+  const { data: consumed, error: consumeError } = await getSupabase()
     .from("otp_challenges")
     .update({ status: "verified", verified_at: nowIso, updated_at: nowIso })
     .eq("id", challenge.id)

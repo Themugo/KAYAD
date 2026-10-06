@@ -10,7 +10,7 @@
 
 import { sendNotification } from "./notification.service.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
-import { findAll, findById, findOne, create, aggregate } from "../db/index.js";
+import { findAll, findById, findOne, create, update, aggregate } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 
 const generateReportId = () => `RECON-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;

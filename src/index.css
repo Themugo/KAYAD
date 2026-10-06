@@ -551,3 +551,15 @@
   .kayad-top-ticker { height: min(var(--kayad-ticker-height, 36px), 30px) !important; }
   .kayad-top-ticker .animate-marquee span { padding-top: 4px; padding-bottom: 4px; font-size: 9px; }
 }
+
+/* Mobile hero carousel: restrained fade + slight horizontal slide for the active vehicle.
+   Direction comes from data-direction (set from the existing mobile carousel index).
+   Reduced motion: immediate swap, no animation. */
+@keyframes kayad-hero-slide-in-next { from { opacity: 0; transform: translate3d(18px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes kayad-hero-slide-in-prev { from { opacity: 0; transform: translate3d(-18px, 0, 0); } to { opacity: 1; transform: none; } }
+.kayad-hero-mobile-slide { animation: kayad-hero-slide-in-next var(--kayad-hero-slide-ms, 320ms) cubic-bezier(.22, .61, .36, 1) both; }
+.kayad-hero-mobile-slide[data-direction="prev"] { animation-name: kayad-hero-slide-in-prev; }
+@media (prefers-reduced-motion: reduce) {
+  .kayad-hero-mobile-slide,
+  .kayad-hero-mobile-slide[data-direction="prev"] { animation: none; }
+}

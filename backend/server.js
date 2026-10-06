@@ -46,6 +46,8 @@ import dealerRoutes from "./routes/dealerRoutes.js";
 import auctionSetupRoutes from "./routes/auctionSetupRoutes.js";
 import auctionRegistrationRoutes from "./routes/auctionRegistrationRoutes.js";
 import auctionRoutes from "./routes/auctionRoutes.js";
+import auctionSettlementRoutes from "./routes/auctionSettlementRoutes.js";
+import auctionFulfilmentRoutes from "./routes/auctionFulfilmentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import escrowRoutes from "./routes/escrowRoutes.js";

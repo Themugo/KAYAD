@@ -22,6 +22,24 @@ if (deployJob.includes('Install repository dependencies') && deployJob.includes(
 if (deployJob.includes("grep -Eo 'https://[^[:space:]]+'")) pass('Deployment URL extraction requires an HTTPS URL'); else fail('Deployment URL extraction');
 if (/\.auction-wow-gallery-shade\{[^}]*background:linear-gradient\([^;]+\)\}/.test(css)) pass('Auction WOW gallery shade CSS syntax'); else fail('Auction WOW gallery shade CSS syntax');
 
+// API-before-SPA routing contract: /api/* must be proxied before the SPA fallback,
+// and the fallback must not capture /api/* or /assets/* (a missing hashed chunk must
+// be a real 404, not index.html served as JavaScript).
+{
+  const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+  const rewrites = vercel.rewrites || [];
+  const apiIdx = rewrites.findIndex((r) => r.source === '/api/:path*' && /^https:\/\/api\.kayad\.space\/api\/:path\*$/.test(r.destination));
+  const spaIdx = rewrites.findIndex((r) => r.destination === '/index.html');
+  if (apiIdx !== -1 && spaIdx !== -1 && apiIdx < spaIdx) pass('API rewrite precedes SPA fallback');
+  else fail('API rewrite must precede SPA fallback');
+  const spaRe = new RegExp('^' + String(rewrites[spaIdx]?.source || '').replace(/^\//, '/') + '$');
+  const captured = ['/api/cars', '/api/v1/auth/csrf', '/assets/index-abc123.js'].filter((p) => spaRe.test(p));
+  if (captured.length === 0) pass('SPA fallback does not capture /api/* or /assets/*');
+  else fail(`SPA fallback captures: ${captured.join(', ')}`);
+  if (['/', '/marketplace', '/auctions/123'].every((p) => spaRe.test(p))) pass('SPA fallback still handles application routes');
+  else fail('SPA fallback no longer handles application routes');
+}
+
 if (failures.length) {
   for (const failure of failures) console.error(`FAIL ${failure}`);
   process.exit(1);

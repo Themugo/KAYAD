@@ -307,6 +307,8 @@ export interface Vehicle {
   listingType: ListingType;
   images: string[];
   image?: string;
+  /** Mobile hero carousel only (optional high-resolution WebP). */
+  heroMobileImage?: string;
   additionalImages?: string[];
   description: string;
   features: string[];
