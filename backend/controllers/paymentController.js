@@ -1,5 +1,6 @@
 // backend/controllers/paymentController.js
 
+import crypto from "node:crypto";
 import { findOne, findById } from "../db/index.js";
 import { isValidId } from "../utils/validateId.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
@@ -190,51 +191,6 @@ export const b2cCallback = async (req, res) => {
     const sb = getSupabase();
     const conversationId = result.conversationID;
     if (conversationId) {
-      const { data: inspectionSettlement } = await sb
-        .from("inspection_settlements")
-        .select("id,status,net_amount,provider_id")
-        .eq("provider_conversation_id", conversationId)
-        .maybeSingle();
-
-      if (inspectionSettlement) {
-        if (result.success) {
-          const providerAmount = Number(result.amount);
-          const expectedAmount = Number(inspectionSettlement.net_amount);
-          if (!Number.isFinite(providerAmount) || Math.round(providerAmount * 100) !== Math.round(expectedAmount * 100)) {
-            await sb.from("inspection_settlements").update({
-              status: "failed",
-              provider_transaction_id: result.transactionId || null,
-              payout_failure_reason: `Provider amount mismatch: expected ${expectedAmount}, received ${providerAmount}`,
-              updated_at: new Date().toISOString(),
-            }).eq("id", inspectionSettlement.id).eq("status", "processing");
-            throw new Error("M-Pesa inspection settlement amount mismatch");
-          }
-        }
-
-        if (result.success) {
-          await sb.from("inspection_settlements").update({
-            provider_transaction_id: result.transactionId || null,
-            updated_at: new Date().toISOString(),
-          }).eq("id", inspectionSettlement.id);
-
-          await sb.rpc("kayad_mark_inspection_settlement_paid_atomic", {
-            p_settlement_id: inspectionSettlement.id,
-            p_payment_method: "mpesa_b2c",
-            p_payment_reference: result.transactionId || conversationId,
-            p_user_id: null,
-          });
-        } else {
-          await sb.from("inspection_settlements").update({
-            status: "failed",
-            provider_transaction_id: result.transactionId || null,
-            payout_failure_reason: result.resultDesc || "M-Pesa B2C payout failed",
-            updated_at: new Date().toISOString(),
-          }).eq("id", inspectionSettlement.id).eq("status", "processing");
-        }
-
-        return res.json({ ResultCode: 0, ResultDesc: "Success" });
-      }
-
       const { data: payout } = await sb.from("dealer_payouts").select("id,status").eq("conversation_id", conversationId).maybeSingle();
       if (payout) {
         const { data: payoutForVerification, error: payoutReadError } = await sb
@@ -268,15 +224,43 @@ export const b2cCallback = async (req, res) => {
         });
         if (result.success) {
           const { recordDealerPayout } = await import("../services/ledgerService.js");
-          const { data: paidPayout } = await sb.from("dealer_payouts").select("id,dealer,net_amount,status").eq("id", payout.id).maybeSingle();
+          const { emitCommunication, COMMUNICATION_EVENTS } = await import("../services/communicationEvents.service.js");
+          const { data: paidPayout } = await sb.from("dealer_payouts").select("id,dealer,net_amount,status,escrow").eq("id", payout.id).maybeSingle();
           if (paidPayout?.status === "paid" && Number(paidPayout.net_amount) > 0) {
             await recordDealerPayout({
               payout_id: paidPayout.id,
               user_id: paidPayout.dealer,
               amount: Number(paidPayout.net_amount),
             });
+            await emitCommunication({
+              userId: paidPayout.dealer,
+              eventType: COMMUNICATION_EVENTS.ESCROW_PAYOUT_COMPLETED,
+              title: "Seller payout completed",
+              message: `Your KAYAD escrow payout of KES ${Number(paidPayout.net_amount).toLocaleString("en-KE")} has been confirmed by the payment provider.`,
+              channels: ["in_app", "email", "sms"],
+              metadata: { payoutId: paidPayout.id, escrowId: paidPayout.escrow || null },
+            }).catch((e) => logError("Payout completion notification failed", e));
           }
         }
+      } else {
+        // Unknown provider callbacks are not silently discarded. Persist the
+        // raw provider event for reconciliation/manual investigation. This
+        // table is service-role controlled and is already the canonical raw
+        // webhook boundary used elsewhere in KAYAD.
+        const rawPayload = req.body || {};
+        const dedupeKey = `mpesa_b2c:${conversationId}:${result.transactionId || "none"}:${crypto
+          .createHash("sha256")
+          .update(JSON.stringify(rawPayload))
+          .digest("hex")}`;
+        await sb.from("webhook_events").upsert({
+          event_source: "mpesa_daraja_b2c",
+          dedupe_key: dedupeKey,
+          raw_payload: rawPayload,
+          processed: false,
+          processing_error: "No canonical dealer payout matched provider ConversationID",
+          received_at: new Date().toISOString(),
+        }, { onConflict: "dedupe_key", ignoreDuplicates: true });
+        logError("Unknown M-Pesa B2C payout callback", { conversationId, transactionId: result.transactionId || null });
       }
     }
     if (result.success) {
@@ -297,7 +281,34 @@ export const b2cCallback = async (req, res) => {
 // ⏱️ B2C TIMEOUT
 // =============================
 export const b2cTimeout = async (req, res) => {
-  console.warn("B2C timeout received", { body: req.body });
+  try {
+    const result = req.body?.Result || {};
+    const conversationId = String(result.ConversationID || "").trim();
+    if (conversationId) {
+      const { getSupabase } = await import("../utils/supabase.js");
+      const sb = getSupabase();
+      const { data: payout } = await sb
+        .from("dealer_payouts")
+        .select("id,status,metadata")
+        .eq("conversation_id", conversationId)
+        .maybeSingle();
+      if (payout) {
+        await sb.from("dealer_payouts").update({
+          metadata: {
+            ...(payout.metadata || {}),
+            providerTimeoutObservedAt: new Date().toISOString(),
+            providerTimeoutPayload: result,
+          },
+          updated_at: new Date().toISOString(),
+        }).eq("id", payout.id);
+      }
+    }
+    console.warn("B2C timeout received", { conversationId: conversationId || null });
+  } catch (err) {
+    logError("B2C TIMEOUT persistence failed", err);
+  }
+  // A provider timeout is ambiguous: do not mark the payout failed because
+  // the provider may still complete it. Leave it processing for reconciliation.
   return res.json({ ResultCode: 0, ResultDesc: "Timeout acknowledged" });
 };
 

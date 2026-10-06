@@ -10,8 +10,8 @@ const KAYAD_COLORS = {
   lightNavy: '#12576D',
   warmBeige: '#EEF7F5',
   white: '#ffffff',
-  emerald: '#10b981',
-  mutedTerracotta: '#5AAFA4',
+  emerald: '#13B8A6',
+  mutedTerracotta: '#91CEC5',
   softBlue: '#64748b',
 };
 
@@ -125,7 +125,7 @@ export default function ProviderCard({ provider, onSelect }: ProviderCardProps) 
             className="flex items-center gap-1 text-sm"
             style={{ color: KAYAD_COLORS.softBlue }}
           >
-            <CheckCircle size={14} className="text-emerald-500" />
+            <CheckCircle size={14} className="text-[#13B8A6]" />
             <span>{stats.completedInspections} inspections</span>
           </div>
         </div>

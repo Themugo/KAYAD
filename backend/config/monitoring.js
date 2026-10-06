@@ -64,7 +64,7 @@ export const monitoringConfig = {
         checkInterval: 300000,
         timeout: 5000
       },
-      supabaseStorage: {
+      cloudinary: {
         checkInterval: 300000,
         timeout: 5000
       }

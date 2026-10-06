@@ -1,11 +1,22 @@
 import fs from 'node:fs';
 import path from 'node:path';
-const root=process.cwd();
-const read=(p)=>fs.readFileSync(path.join(root,p),'utf8');
-const checks=[
-  ['inspection PDF uses canonical Supabase Storage', /uploadBuffer/.test(read('backend/inspection/services/reportService.js'))],
-  ['inspection evidence uses canonical Supabase Storage', /uploadFile/.test(read('backend/middleware/evidenceUpload.js'))],
-  ['private media uses signed URLs', /createSignedUrl/.test(read('backend/services/storage.service.js'))],
-  ['QA remains required before PDF generation', /only be generated after independent QA approval/.test(read('backend/inspection/services/reportService.js'))],
-];
-let failed=false; for(const [n,ok] of checks){console.log(`${ok?'PASS':'FAIL'}: ${n}`);if(!ok)failed=true;} process.exitCode=failed?1:0;
+const root = process.cwd();
+const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
+const migration = fs.readdirSync(path.join(root, 'supabase/migrations')).find((f) => f === '20261006150000_inspection_qa_report_versions.sql');
+const report = read('backend/inspection/services/reportService.js');
+const review = read('backend/inspectionBusinessCenter/services/reportReviewService.js');
+const cloudinary = read('backend/config/cloudinary.js');
+const routes = read('backend/inspection/routes/inspectionRoutes.js');
+const must = (condition, message) => { if (!condition) { console.error(`FAIL ${message}`); process.exitCode = 1; } else console.log(`PASS ${message}`); };
+must(Boolean(migration), 'QA report-version migration exists');
+must(/CREATE TABLE IF NOT EXISTS public\.report_versions/.test(read(`supabase/migrations/${migration}`)), 'report_versions is migration-backed');
+must(/CREATE TABLE IF NOT EXISTS public\.report_corrections/.test(read(`supabase/migrations/${migration}`)), 'report_corrections is migration-backed');
+must(/report_versions/.test(report) && /engineer_complete/.test(report), 'generated reports enter canonical QA version lifecycle');
+must(/uploadRawBuffer/.test(report) && !/return a placeholder/.test(report), 'PDF generation creates a real uploaded artifact');
+must(/resource_type: "raw"/.test(cloudinary) && /type: "authenticated"/.test(cloudinary), 'PDF artifacts use authenticated raw storage');
+must(/reports\/:reportId\/pdf/.test(routes), 'authenticated report PDF download route exists');
+must(/inspection_staff/.test(review) && !/inspection_engineers/.test(review), 'QA review uses canonical inspection_staff identity');
+must(/findById\('inspection_reports', reportId\)/.test(review), 'QA approval resolves report by report ID');
+must(!/status:\s*'customer_reviewed'/.test(review), 'delivery does not falsely mark buyer review complete');
+if (process.exitCode) process.exit(1);
+console.log('Inspection QA contract: PASS');

@@ -1,6 +1,6 @@
 # docker-compose.yml — KAYAD Automotive Marketplace
 # Usage: docker compose up -d
-# Requires: .env file with SUPABASE_*, MPESA_*, JWT_SECRET
+# Requires: .env file with SUPABASE_*, MPESA_*, CLOUDINARY_*, JWT_SECRET
 
 version: "3.9"
 

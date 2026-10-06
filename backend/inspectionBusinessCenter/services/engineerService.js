@@ -23,18 +23,28 @@ class EngineerService {
       phone: engineerData.phone,
       photo_url: engineerData.photoUrl,
       role: engineerData.role,
-      specializations: engineerData.skills || engineerData.specializations || [],
+      skills: engineerData.skills || [],
+      vehicle_types: engineerData.vehicleTypes || ['cars', 'suvs'],
       certifications: engineerData.certifications || [],
       years_experience: engineerData.yearsExperience || 0,
+      home_county: engineerData.homeCounty,
+      home_town: engineerData.homeTown,
+      home_latitude: engineerData.homeLatitude,
+      home_longitude: engineerData.homeLongitude,
+      working_hours: engineerData.workingHours,
       is_active: true,
       is_available: true,
-      total_inspections: 0,
+      inspection_count: 0,
       average_rating: 0,
+      total_reviews: 0,
+      avg_inspection_time_minutes: 60,
+      on_time_rate: 100,
+      quality_score: 100,
       created_at: new Date(),
       updated_at: new Date(),
     };
 
-    const result = await db.create('inspection_staff', engineer);
+    const result = await db.create('inspection_engineers', engineer);
     logInfo('Engineer created', { engineerId: result.id, providerId });
     return result;
   }
@@ -43,7 +53,7 @@ class EngineerService {
    * Get engineer by ID
    */
   async getEngineerById(engineerId) {
-    const engineer = await db.findById('inspection_staff', engineerId);
+    const engineer = await db.findById('inspection_engineers', engineerId);
     if (!engineer) {
       throw new AppError('Engineer not found', 404);
     }
@@ -63,7 +73,7 @@ class EngineerService {
       query.is_available = filters.isAvailable;
     }
 
-    const engineers = await db.find('inspection_staff', query, {
+    const engineers = await db.find('inspection_engineers', query, {
       sort: { first_name: 1 },
     });
 
@@ -76,7 +86,9 @@ class EngineerService {
   async updateEngineer(engineerId, updates) {
     const allowedUpdates = [
       'first_name', 'last_name', 'email', 'phone', 'photo_url',
-      'role', 'specializations', 'certifications', 'years_experience',
+      'role', 'skills', 'vehicle_types', 'certifications',
+      'years_experience', 'home_county', 'home_town',
+      'home_latitude', 'home_longitude', 'working_hours',
       'is_available', 'is_active'
     ];
 
@@ -88,7 +100,7 @@ class EngineerService {
     }
     sanitizedUpdates.updated_at = new Date();
 
-    const result = await db.update('inspection_staff', engineerId, sanitizedUpdates);
+    const result = await db.update('inspection_engineers', engineerId, sanitizedUpdates);
     logInfo('Engineer updated', { engineerId });
     return result;
   }
@@ -153,9 +165,9 @@ class EngineerService {
         totalInspections,
         totalRevenue,
         averageRating: engineer.average_rating,
-        onTimeRate: 100,
-        qualityScore: 100,
-        avgInspectionTime: 60,
+        onTimeRate: engineer.on_time_rate,
+        qualityScore: engineer.quality_score,
+        avgInspectionTime: engineer.avg_inspection_time_minutes,
         yearsExperience: engineer.years_experience,
       },
       scheduledJobs: scheduledJobs.length,
@@ -187,24 +199,29 @@ class EngineerService {
    * Get engineer schedule
    */
   async getEngineerSchedule(engineerId, startDate, endDate) {
+    const schedules = await db.find('engineer_schedules', {
+      engineer_id: engineerId,
+      date: { $gte: startDate, $lte: endDate }
+    }, { sort: { date: 1, start_time: 1 } });
+
     const bookings = await db.find('inspection_bookings', {
       assigned_staff_id: engineerId,
       scheduled_date: { $gte: startDate, $lte: endDate }
-    }, { sort: { scheduled_date: 1, scheduled_time: 1 } });
+    });
 
     return {
       engineerId,
       startDate,
       endDate,
-      schedules: bookings.map(b => ({
-        id: b.id,
-        date: b.scheduled_date,
-        startTime: b.scheduled_time,
-        endTime: b.estimated_end_time || null,
-        status: b.status,
-        bookingId: b.id,
-        locationName: b.inspection_address || `${b.inspection_town || ''}, ${b.inspection_county || ''}`.replace(/^, |, $/g, ''),
-        notes: b.customer_notes || b.internal_notes || null,
+      schedules: schedules.map(s => ({
+        id: s.id,
+        date: s.date,
+        startTime: s.start_time,
+        endTime: s.end_time,
+        status: s.status,
+        bookingId: s.booking_id,
+        locationName: s.location_name,
+        notes: s.notes,
       })),
       bookings: bookings.map(b => ({
         id: b.id,
@@ -212,8 +229,8 @@ class EngineerService {
         date: b.scheduled_date,
         time: b.scheduled_time,
         status: b.status,
-        vehicle: `${b.vehicle_year || ''} ${b.vehicle_make || ''} ${b.vehicle_model || ''}`.trim(),
-        location: `${b.inspection_town || ''}, ${b.inspection_county || ''}`.replace(/^, |, $/g, ''),
+        vehicle: `${b.vehicle_year} ${b.vehicle_make} ${b.vehicle_model}`,
+        location: `${b.inspection_town}, ${b.inspection_county}`,
       })),
     };
   }
@@ -227,7 +244,7 @@ class EngineerService {
       throw new AppError('Booking not found', 404);
     }
 
-    const engineers = await db.find('inspection_staff', {
+    const engineers = await db.find('inspection_engineers', {
       provider_id: providerId,
       is_active: true,
       is_available: true,
@@ -235,8 +252,8 @@ class EngineerService {
 
     // Filter by skills and vehicle types
     const qualified = engineers.filter(e => {
-      const vehicleTypes = e.specializations || [];
-      return vehicleTypes.length === 0 || vehicleTypes.includes(booking.vehicle_type) || vehicleTypes.includes('cars');
+      const vehicleTypes = e.vehicle_types || [];
+      return vehicleTypes.includes(booking.vehicle_type) || vehicleTypes.includes('cars');
     });
 
     // Score and rank by suitability
@@ -257,8 +274,11 @@ class EngineerService {
     let score = 100;
 
     // Distance (lower is better)
-    if (false && booking.inspection_latitude) {
-      const distance = 0;
+    if (engineer.home_latitude && booking.inspection_latitude) {
+      const distance = this.calculateDistance(
+        engineer.home_latitude, engineer.home_longitude,
+        booking.inspection_latitude, booking.inspection_longitude
+      );
       if (distance > 50) score -= 20;
       if (distance > 100) score -= 20;
     }
@@ -310,23 +330,23 @@ class EngineerService {
       phone: engineer.phone,
       photoUrl: engineer.photo_url,
       role: engineer.role,
-      skills: engineer.specializations || [],
-      vehicleTypes: [],
+      skills: engineer.skills,
+      vehicleTypes: engineer.vehicle_types,
       certifications: engineer.certifications,
       yearsExperience: engineer.years_experience,
       inspectionCount: engineer.inspection_count,
       averageRating: engineer.average_rating,
       isAvailable: engineer.is_available,
       location: {
-        county: null,
-        town: null,
-        latitude: null,
-        longitude: null,
+        county: engineer.home_county,
+        town: engineer.home_town,
+        latitude: engineer.home_latitude,
+        longitude: engineer.home_longitude,
       },
       performance: {
-        onTimeRate: 100,
-        qualityScore: 100,
-        avgInspectionTime: 60,
+        onTimeRate: engineer.on_time_rate,
+        qualityScore: engineer.quality_score,
+        avgInspectionTime: engineer.avg_inspection_time_minutes,
       },
     };
   }
@@ -349,7 +369,7 @@ class EngineerService {
    * Get team overview
    */
   async getTeamOverview(providerId) {
-    const engineers = await db.find('inspection_staff', {
+    const engineers = await db.find('inspection_engineers', {
       provider_id: providerId,
       is_active: true
     });

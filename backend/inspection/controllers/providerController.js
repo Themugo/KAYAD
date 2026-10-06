@@ -289,14 +289,6 @@ export const generateSettlement = asyncHandler(async (req, res) => {
 });
 
 
-export const initiateSettlementPayout = asyncHandler(async (req, res) => {
-  const result = await settlementService.initiateSettlementPayout(
-    req.params.settlementId,
-    req.user.id
-  );
-  response.success(res, result);
-});
-
 export const markSettlementPaid = asyncHandler(async (req, res) => {
   const result = await settlementService.markSettlementPaid(
     req.params.settlementId,
@@ -391,7 +383,6 @@ export default {
   processPayment,
   processRefund,
   generateSettlement,
-  initiateSettlementPayout,
   markSettlementPaid,
   getTransactions,
   getSettlements,

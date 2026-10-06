@@ -74,7 +74,7 @@ tags: [general]
 - [ ] M-Pesa integration tested
 - [ ] Email service tested
 - [ ] SMS service tested
-- [ ] Supabase Storage tested
+- [ ] Cloudinary tested
 - [ ] Redis connection verified
 - [ ] Sentry DSN configured
 - [ ] PostHog configured

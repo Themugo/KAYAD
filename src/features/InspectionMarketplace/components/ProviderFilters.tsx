@@ -9,7 +9,7 @@ const KAYAD_COLORS = {
   lightNavy: '#12576D',
   warmBeige: '#EEF7F5',
   white: '#ffffff',
-  emerald: '#10b981',
+  emerald: '#13B8A6',
   mutedTerracotta: '#5AAFA4',
   softBlue: '#64748b',
 };
@@ -34,7 +34,7 @@ export default function ProviderFilters({ filters, onChange }: ProviderFiltersPr
               placeholder="County"
               value={filters.county || ''}
               onChange={(e) => onChange({ county: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 rounded-lg border outline-none focus:border-[#13B8A6]"
               style={{ borderColor: KAYAD_COLORS.softBlue }}
             />
             <input
@@ -42,7 +42,7 @@ export default function ProviderFilters({ filters, onChange }: ProviderFiltersPr
               placeholder="Town"
               value={filters.town || ''}
               onChange={(e) => onChange({ town: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 rounded-lg border outline-none focus:border-[#13B8A6]"
               style={{ borderColor: KAYAD_COLORS.softBlue }}
             />
           </div>
@@ -208,7 +208,7 @@ function Checkbox({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="w-4 h-4 rounded accent-emerald-500"
+        className="w-4 h-4 rounded accent-[#13B8A6]"
       />
       {label}
     </label>

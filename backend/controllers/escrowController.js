@@ -382,7 +382,18 @@ export const completeEscrowRefund = async (req, res) => {
     if (!["1000", "1200"].includes(cashAccountCode)) return res.status(400).json({ success: false, message: "Unsupported refund cash account" });
 
     const { getSupabase } = await import("../utils/supabase.js");
-    const { data, error } = await getSupabase().rpc("kayad_complete_escrow_refund_atomic", {
+    const sb = getSupabase();
+    const { data: refundRow, error: refundLookupError } = await sb
+      .from("refunds")
+      .select("id,escrow_id,status,amount")
+      .eq("id", req.params.refundId)
+      .maybeSingle();
+    if (refundLookupError) throw refundLookupError;
+    if (!refundRow) return res.status(404).json({ success: false, message: "Refund not found" });
+    if (String(refundRow.escrow_id || "") !== String(req.params.id)) {
+      return res.status(409).json({ success: false, message: "Refund does not belong to this escrow" });
+    }
+    const { data, error } = await sb.rpc("kayad_complete_escrow_refund_atomic", {
       p_refund_id: req.params.refundId,
       p_actor_id: req.user.id,
       p_provider_reference: providerReference,

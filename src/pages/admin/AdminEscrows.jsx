@@ -5,8 +5,14 @@ import { useAuth } from '../../context/AuthContext';
 import { userHasPermission, PERM } from '../../utils/permissions';
 
 const STATUS = {
-  pending: ['Pending', 'badge-orange'], funded: ['Funded', 'badge-blue'], released: ['Released', 'badge-green'],
-  refunded: ['Refunded', 'badge-red'], disputed: ['Disputed', 'badge-red'],
+  pending: ['Pending funding', 'badge-orange'],
+  funded: ['Funds held', 'badge-blue'],
+  vehicle_confirmed: ['Buyer confirmed', 'badge-blue'],
+  delivered: ['Delivered', 'badge-orange'],
+  disputed: ['Disputed', 'badge-red'],
+  released: ['Released', 'badge-green'],
+  refunded: ['Refunded', 'badge-red'],
+  closed: ['Closed', 'badge-muted'],
 };
 
 const Queue = ({ title, count, amount, tone, children, onOpen }) => (
@@ -64,10 +70,31 @@ export default function AdminEscrows() {
   };
 
   const release = id => act(`release:${id}`, () => escrowAPI.release(id), 'Funds released through the canonical escrow workflow.');
-  const refund = id => act(`refund:${id}`, () => escrowAPI.refund(id), 'Refund initiated; settlement remains separately controlled.');
+  const refund = async (id) => {
+    const reason = window.prompt('Refund reason (minimum 10 characters):');
+    if (!reason || reason.trim().length < 10) return;
+    await act(`refund:${id}`, () => escrowAPI.refund(id, { reason: reason.trim() }), 'Refund initiated; external settlement remains separately controlled.');
+  };
   const reconcile = () => act('reconcile', () => escrowAPI.runOperationsReconciliation({ reportType: 'full', timeRange: '24h' }), 'Reconciliation run completed.');
   const scan = () => act('scan', () => escrowAPI.runOperationsAnomalyScan({ scanWindowHours: 24 }), 'Anomaly scan completed.');
-  const emergencyClose = async (id) => { const reason = window.prompt('Emergency closure reason (minimum 10 characters):'); if (!reason || reason.trim().length < 10) return; await act(`close:${id}`, () => escrowAPI.close(id, { reason }), 'Escrow emergency closure completed and audited.'); };
+  const emergencyClose = async (id) => { const reason = window.prompt('Emergency closure reason (minimum 10 characters):'); if (!reason || reason.trim().length < 10) return; await act(`close:${id}`, () => escrowAPI.close(id, { reason: reason.trim() }), 'Escrow emergency closure completed and audited.'); };
+  const verifyFunding = async (id) => {
+    const reference = window.prompt('Enter the verified bank funding reference:');
+    if (!reference?.trim()) return;
+    await act(`verify:${id}`, () => escrowAPI.verifyFunding(id, { fundingReference: reference.trim() }), 'Funding verified through the canonical custody workflow.');
+  };
+  const initiatePayout = async (id) => {
+    if (!window.confirm('Initiate the seller payout through the canonical M-Pesa B2C settlement workflow?')) return;
+    await act(`payout:${id}`, () => escrowAPI.initiateEscrowPayout(id), 'Seller payout initiated; provider callback will determine final settlement.');
+  };
+
+  const completeRefund = async (id, refundId) => {
+    const providerReference = window.prompt('Enter the external refund provider reference:');
+    if (!providerReference?.trim()) return;
+    const cashAccountCode = window.prompt('Cash account code (1000 = M-Pesa, 1200 = Bank):', '1000');
+    if (!['1000', '1200'].includes(String(cashAccountCode || ''))) return;
+    await act(`refund-complete:${id}`, () => escrowAPI.completeRefund(id, refundId, { providerReference: providerReference.trim(), cashAccountCode }), 'External refund settlement recorded and reconciled.');
+  };
 
   const queues = dashboard?.queues || {};
   const selectedEscrow = caseData?.escrow;
@@ -98,21 +125,23 @@ export default function AdminEscrows() {
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
             <div><div className="section-eyebrow">Escrow control plane</div><strong>Authorized control rights</strong></div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 11 }}>
-              {[[canOperate,'Operate'],[canRelease,'Approve release'],[canRefund,'Approve refund'],[canSettle,'Settle payout'],[canReconcile,'Reconcile'],[canEmergency,'Emergency control']].map(([allowed,label]) => <span key={label} className={`badge ${allowed ? 'badge-green' : 'badge-muted'}`}>{allowed ? '✓' : '—'} {label}</span>)}
+              {[[canOperate,'Operate'],[canRelease,'Approve release'],[canRefund,'Approve refund'],[canSettle,'Settle external obligations'],[canReconcile,'Reconcile'],[canEmergency,'Emergency control']].map(([allowed,label]) => <span key={label} className={`badge ${allowed ? 'badge-green' : 'badge-muted'}`}>{allowed ? '✓' : '—'} {label}</span>)}
             </div>
           </div>
         </div>
 
-        <div className="grid-4" style={{ marginBottom: 18 }}>
-          <Queue title="Funded / Awaiting Action" count={queues.funded?.count || 0} amount={queues.funded?.amount || 0} tone="var(--blue)" onOpen={() => setFilter('funded')} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 12, marginBottom: 18 }}>
+          <Queue title="Funds held" count={queues.funded?.count || 0} amount={queues.funded?.amount || 0} tone="var(--blue)" onOpen={() => setFilter('funded')} />
+          <Queue title="Buyer confirmation" count={queues.vehicleConfirmed?.count || 0} tone="var(--blue)" onOpen={() => setFilter('vehicle_confirmed')} />
+          <Queue title="Delivered / settlement" count={queues.delivered?.count || 0} tone="var(--gold)" onOpen={() => setFilter('delivered')} />
           <Queue title="Disputes" count={queues.disputed?.count || 0} tone="var(--red)" onOpen={() => setFilter('disputed')} />
-          <Queue title="Refund / Payout Work" count={queues.refunds?.count || 0} tone="var(--gold)" />
-          <Queue title="Control Exceptions" count={(queues.reconciliation?.count || 0) + (queues.anomalies?.count || 0)} tone="var(--orange)"><div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{queues.reconciliation?.count || 0} reconciliation · {queues.anomalies?.count || 0} anomalies</div></Queue>
+          <Queue title="Refund work" count={queues.refunds?.count || 0} tone="var(--gold)" />
+          <Queue title="Control exceptions" count={(queues.reconciliation?.count || 0) + (queues.anomalies?.count || 0)} tone="var(--orange)"><div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{queues.reconciliation?.count || 0} reconciliation · {queues.anomalies?.count || 0} anomalies</div></Queue>
         </div>
 
         <div className="card" style={{ padding: 12, marginBottom: 18 }}>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-            {['funded', 'disputed', 'pending', 'released', 'refunded', 'all'].map(f => <button key={f} className={`tab-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{STATUS[f]?.[0] || 'All'}</button>)}
+            {['funded', 'vehicle_confirmed', 'delivered', 'disputed', 'pending', 'released', 'refunded', 'closed', 'all'].map(f => <button key={f} className={`tab-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{STATUS[f]?.[0] || 'All'}</button>)}
           </div>
         </div>
 
@@ -127,11 +156,13 @@ export default function AdminEscrows() {
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><div><div className="section-eyebrow">Case #{String(selected).slice(-10)}</div><h3>{selectedEscrow?.car?.title || 'Escrow case'}</h3></div><button className="btn btn-outline btn-sm" onClick={() => { setSelected(null); setCaseData(null); }}>Close</button></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '18px 0' }}>{[['Status', selectedEscrow?.status],['Amount', formatKES(selectedEscrow?.amount)],['Buyer', selectedEscrow?.buyer?.name],['Seller', selectedEscrow?.seller?.name]].map(([k,v]) => <div key={k}><div className="stat-label">{k}</div><div style={{ fontWeight: 600, marginTop: 3 }}>{v || '—'}</div></div>)}</div>
               <div style={{ padding: 12, borderRadius: 8, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{actionHint}</div>
-              {selectedEscrow?.status === 'funded' && <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>{canRelease && <button className="btn btn-gold btn-full" disabled={!!busy} onClick={() => window.confirm('Release funds through the canonical escrow workflow?') && release(selected)}>{busy === `release:${selected}` ? 'Releasing…' : 'Release Funds'}</button>}{canRefund && <button className="btn btn-danger btn-full" disabled={!!busy} onClick={() => window.confirm('Initiate buyer refund? Settlement is a separate controlled step.') && refund(selected)}>{busy === `refund:${selected}` ? 'Initiating…' : 'Initiate Refund'}</button>}</div>}
+              {selectedEscrow?.status === 'pending' && canReconcile && <div style={{ marginBottom: 18, padding: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}><strong style={{ fontSize: 12 }}>Funding verification</strong><div style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 10px' }}>Verify the custody deposit against the provider/bank reference. This is the canonical transition from pending to funded.</div><button className="btn btn-outline btn-full" disabled={!!busy} onClick={() => verifyFunding(selected)}>{busy === `verify:${selected}` ? 'Verifying…' : 'Verify Funding Reference'}</button></div>}
+              {['funded','vehicle_confirmed','delivered','disputed'].includes(selectedEscrow?.status) && <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>{canRelease && selectedEscrow?.status !== 'disputed' && <button className="btn btn-gold btn-full" disabled={!!busy} onClick={() => window.confirm('Release funds through the canonical escrow workflow?') && release(selected)}>{busy === `release:${selected}` ? 'Releasing…' : 'Release Funds'}</button>}{canRefund && <button className="btn btn-danger btn-full" disabled={!!busy} onClick={() => refund(selected)}>{busy === `refund:${selected}` ? 'Initiating…' : 'Initiate Refund'}</button>}</div>}
               <div className="section-eyebrow">Operational Timeline</div><div style={{ marginTop: 8, maxHeight: 280, overflow: 'auto' }}>{timeline.length ? timeline.map((t,i) => <div key={t.id || i} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><strong style={{ fontSize: 12 }}>{t.action}</strong><span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t.timestamp ? new Date(t.timestamp).toLocaleString('en-KE') : ''}</span></div><div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t.actor} · {t.role || 'operator'}{t.reason ? ` · ${t.reason}` : ''}</div></div>) : <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '14px 0' }}>No audit events recorded.</div>}</div>
               {(anomalies.length || reconciliation.length) > 0 && <><div className="section-eyebrow" style={{ marginTop: 18 }}>Control Exceptions</div>{anomalies.map(a => <div key={a.id || a._id} style={{ padding: 10, marginTop: 7, border: '1px solid var(--border)', borderRadius: 8 }}><strong style={{ fontSize: 12 }}>{a.severity?.toUpperCase()} · {a.category}</strong><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.summary || 'Anomaly detected'} · {a.status}</div></div>)}{reconciliation.map(r => <div key={r.id || r._id} style={{ padding: 10, marginTop: 7, border: '1px solid var(--border)', borderRadius: 8 }}><strong style={{ fontSize: 12 }}>Reconciliation exception</strong><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.status || 'unresolved'} · {r.createdAt ? new Date(r.createdAt).toLocaleString('en-KE') : ''}</div></div>)}</>}
               {canEmergency && selectedEscrow?.status === 'released' && <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}><button className="btn btn-outline btn-full" disabled={!!busy} onClick={() => emergencyClose(selected)}>Emergency Close — audited reason required</button></div>}
-              {canSettle && selectedEscrow?.refund?.status === 'pending' && <div style={{ marginTop: 18, padding: 12, border: '1px solid var(--border)', borderRadius: 8 }}><strong style={{ fontSize: 12 }}>Settlement authority</strong><div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>This role can settle payout/refund obligations after the external provider confirms the transaction. The control is intentionally not conflated with refund approval.</div></div>}
+              {selectedEscrow?.payout && <div style={{ marginTop: 18, padding: 12, border: '1px solid var(--border)', borderRadius: 8 }}><strong style={{ fontSize: 12 }}>Seller payout</strong><div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{selectedEscrow.payout.status} · {formatKES(selectedEscrow.payout.netAmount)} net{selectedEscrow.payout.transactionId ? ` · ${selectedEscrow.payout.transactionId}` : ''}</div>{canSettle && ['pending','failed','cancelled'].includes(selectedEscrow.payout.status) && <button className="btn btn-outline btn-full" disabled={!!busy} onClick={() => initiatePayout(selected)} style={{ marginTop: 8 }}>{busy === `payout:${selected}` ? 'Initiating…' : selectedEscrow.payout.status === 'pending' ? 'Initiate Seller Payout' : 'Retry Seller Payout'}</button>}{selectedEscrow.payout.status === 'processing' && <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>Provider processing. Do not retry while outcome is unknown; reconcile against the provider callback.</div>}{selectedEscrow.payout.status === 'failed' && selectedEscrow.payout.failureReason && <div style={{ marginTop: 6, fontSize: 11, color: 'var(--danger, #b42318)' }}>{selectedEscrow.payout.failureReason}</div>}</div>}
+              {canSettle && selectedEscrow?.refund?.status && ['pending','processing','approved'].includes(selectedEscrow.refund.status) && <div style={{ marginTop: 18, padding: 12, border: '1px solid var(--border)', borderRadius: 8 }}><strong style={{ fontSize: 12 }}>Refund settlement authority</strong><div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Record the external provider reference only after the refund has actually settled. This closes the payable and posts the cash-side ledger entry.</div><button className="btn btn-outline btn-full" disabled={!!busy} onClick={() => completeRefund(selected, selectedEscrow.refund.id)}>{busy === `refund-complete:${selected}` ? 'Recording…' : 'Record External Refund Settlement'}</button></div>}
             </>}
           </div>}
         </div>

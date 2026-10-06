@@ -88,7 +88,7 @@ export const getUserTickets = async (req, res) => {
       .populate("assignedTo", "name email")
       .populate("relatedEscrow", "amount status")
       .populate("relatedCar", "title price brand model year images")
-      .select("status priority category subject createdAt sla assignedTo relatedEscrow relatedCar")
+      .select("ticketNumber status priority category subject createdAt updatedAt sla assignedTo relatedEscrow relatedCar")
       .sort({ createdAt: -1 });
 
     res.json({ success: true, tickets });
@@ -114,7 +114,7 @@ export const getTicket = async (req, res) => {
       .populate("relatedEscrow", "amount status buyer seller")
       .populate("relatedCar", "title price brand model year images")
       .populate("relatedPayment", "amount status type")
-      .select("user status priority category subject description createdAt sla assignedTo escalatedTo messages relatedEscrow relatedCar relatedPayment satisfactionRating resolutionNotes closedAt closedBy");
+      .select("user ticketNumber status priority category subject description createdAt updatedAt sla assignedTo escalatedTo messages relatedEscrow relatedCar relatedPayment satisfactionRating resolutionNotes closedAt closedBy");
 
     if (!ticket) {
       return res.status(404).json({ success: false, message: "Ticket not found" });
@@ -195,8 +195,8 @@ export const updateTicketStatus = async (req, res) => {
     const { ticketId } = req.params;
     const { status, assignedTo, escalatedTo, priority } = req.body;
     const userId = req.user.id || req.user._id;
-    const allowedStatuses = new Set(["open", "in_progress", "pending_customer", "escalated", "resolved", "closed"]);
-    const allowedPriorities = new Set(["low", "normal", "high", "urgent"]);
+    const allowedStatuses = new Set(["open", "in_progress", "waiting_on_user", "waiting_on_internal", "escalated", "resolved", "closed"]);
+    const allowedPriorities = new Set(["low", "medium", "high", "urgent"]);
     if (status !== undefined && !allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid support ticket status" });
     if (priority !== undefined && !allowedPriorities.has(priority)) return res.status(400).json({ success: false, message: "Invalid support ticket priority" });
 

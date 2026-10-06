@@ -23,7 +23,7 @@ class DashboardService {
     const allBookings = await db.find('inspection_bookings', { provider_id: providerId });
 
     // Get all engineers
-    const engineers = await db.find('inspection_staff', { provider_id: providerId, is_active: true });
+    const engineers = await db.find('inspection_engineers', { provider_id: providerId, is_active: true });
 
     // Today's jobs
     const todayBookings = allBookings.filter(b => b.scheduled_date === today);
@@ -306,7 +306,7 @@ class DashboardService {
       status: { $nin: ['cancelled'] }
     });
 
-    const engineers = await db.find('inspection_staff', {
+    const engineers = await db.find('inspection_engineers', {
       provider_id: providerId,
       is_active: true
     });

@@ -205,6 +205,38 @@ export const uploadImage = async (file, folder = "kayad/cars", options = {}) => 
 // =============================
 // 📦 MULTIPLE UPLOAD
 // =============================
+
+// Upload non-image inspection artifacts such as generated PDF reports.
+// Raw assets are kept in authenticated delivery mode so report URLs are never
+// exposed as unsigned public objects.
+export const uploadRawBuffer = async (buffer, { folder = "kayad/inspection-reports", publicId, format = "pdf" } = {}) => {
+  if (!buffer || !Buffer.isBuffer(buffer)) throw new Error("Raw upload requires a Buffer");
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream({
+      folder,
+      public_id: publicId,
+      resource_type: "raw",
+      type: "authenticated",
+      format,
+      invalidate: true,
+    }, (err, result) => {
+      if (err) return reject(err);
+      resolve({
+        public_id: result.public_id,
+        url: cloudinary.url(result.public_id, {
+          secure: true,
+          resource_type: "raw",
+          type: "authenticated",
+          sign_url: true,
+          format,
+        }),
+        bytes: result.bytes,
+        format: result.format || format,
+      });
+    }).end(buffer);
+  });
+};
+
 export const uploadMultiple = async (files, folder, options = {}) => {
   return Promise.all(files.map((file) => uploadImage(file, folder, options)));
 };

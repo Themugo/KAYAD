@@ -15,7 +15,7 @@ import { escrowAdminOnly, escrowViewOnly, escrowOperateOnly, escrowReleaseOnly, 
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { findById } from "../db/index.js";
 import { getEscrowRules, getPrimaryEscrowAccount, sanitizeEscrowAccount, verifyEscrowFunding } from "../services/escrowConfiguration.service.js";
-import { getEscrowOperationsDashboard, getEscrowOperationsCase, runEscrowReconciliation, runEscrowAnomalyScan } from "../controllers/escrowOperationsController.js";
+import { getEscrowOperationsDashboard, getEscrowOperationsCase, runEscrowReconciliation, runEscrowAnomalyScan, initiateEscrowPayout } from "../controllers/escrowOperationsController.js";
 
 import {
   getAllEscrows,
@@ -42,6 +42,7 @@ router.get("/operations/dashboard", protect, escrowViewOnly, asyncHandler(getEsc
 router.get("/operations/case/:id", protect, escrowViewOnly, validateObjectId, asyncHandler(getEscrowOperationsCase));
 router.post("/operations/reconcile", protect, escrowReconcileOnly, idempotencyCheck, asyncHandler(runEscrowReconciliation));
 router.post("/operations/anomaly-scan", protect, escrowOperateOnly, idempotencyCheck, asyncHandler(runEscrowAnomalyScan));
+router.post("/operations/case/:id/payout", protect, escrowSettlementOnly, idempotencyCheck, validateObjectId, asyncHandler(initiateEscrowPayout));
 
 // =============================
 // 📄 GET: USER ESCROWS

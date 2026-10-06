@@ -6,7 +6,6 @@ import db from './dbAdapter.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 import { incrementCounter } from '../../config/metrics.js';
-import { getPrivateStorageUrl } from '../../services/storage.service.js';
 
 /**
  * Generate booking reference
@@ -61,16 +60,6 @@ class BookingService {
       }
     }
 
-    // Bind the booking to a real KAYAD vehicle when supplied. Never fabricate
-    // vehicle identity from free text when a canonical vehicle id is available.
-    let canonicalVehicle = null;
-    if (bookingData.vehicleId) {
-      canonicalVehicle = await db.findById('cars', bookingData.vehicleId);
-      if (!canonicalVehicle || canonicalVehicle.deleted_at || canonicalVehicle.deletedAt) {
-        throw new AppError('Vehicle not found or unavailable', 404);
-      }
-    }
-
     // Calculate price
     let mobileFee = 0;
     if (bookingData.isMobile && provider.mobile_inspection_fee) {
@@ -89,12 +78,11 @@ class BookingService {
       customer_name: bookingData.customerName,
       customer_email: bookingData.customerEmail,
       customer_phone: bookingData.customerPhone,
-      vehicle_id: bookingData.vehicleId || null,
-      vehicle_make: canonicalVehicle?.make || bookingData.vehicleMake,
-      vehicle_model: canonicalVehicle?.model || bookingData.vehicleModel,
-      vehicle_year: canonicalVehicle?.year || bookingData.vehicleYear,
-      vehicle_registration: canonicalVehicle?.registration || bookingData.vehicleRegistration,
-      vehicle_vin: canonicalVehicle?.vin || bookingData.vehicleVin,
+      vehicle_make: bookingData.vehicleMake,
+      vehicle_model: bookingData.vehicleModel,
+      vehicle_year: bookingData.vehicleYear,
+      vehicle_registration: bookingData.vehicleRegistration,
+      vehicle_vin: bookingData.vehicleVin,
       vehicle_type: bookingData.vehicleType,
       inspection_country: bookingData.country || provider.country,
       inspection_county: bookingData.county,
@@ -250,9 +238,7 @@ class BookingService {
           number: report.report_number,
           overallScore: report.overall_score,
           overallCondition: report.overall_condition,
-          pdfUrl: report.pdf_storage_path
-            ? await getPrivateStorageUrl(report.pdf_storage_path, 900)
-            : report.pdf_url,
+          pdfUrl: report.pdf_url,
           shareToken: report.share_token,
         } : null,
       };

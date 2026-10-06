@@ -252,6 +252,12 @@ export interface EscrowTransaction {
   sellerPhone?: string;
   sellerEmail?: string;
   sellerType?: 'Private Seller' | 'Verified Dealer';
+  backendStatus?: 'pending' | 'funded' | 'vehicle_confirmed' | 'delivered' | 'disputed' | 'refunded' | 'released' | 'closed';
+  fundedAt?: string;
+  vehicleConfirmedAt?: string;
+  deliveredAt?: string;
+  releasedAt?: string;
+  closedAt?: string;
   status: string; // e.g. 'Vehicle Reserved' | 'Awaiting Buyer Deposit' | 'Deposit Deposited' | 'Inspection Scheduled' | 'Inspection Completed' | 'Inspection Approved' | 'Awaiting Buyer Approval' | 'Title Transfer' | 'Ownership Transfer In Progress' | 'Funds Ready for Release' | 'Completed' | 'Dispute Under Review';
   step: number; // 1: Reserved, 2: Deposit, 3: Inspection, 4: Buyer Approval, 5: Title Transfer, 6: Seller Paid
   updatedAt: string;

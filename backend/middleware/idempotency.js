@@ -48,27 +48,31 @@ const redactForPersistence = (value, depth = 0) => {
 };
 
 const CRITICAL_LOCK_OPERATIONS = new Set([
-  "payment", "payment_callback", "b2c_timeout", "bid", "auction_end",
+  "payment", "payment_callback", "b2c_callback", "b2c_timeout", "bid", "auction_end",
   "escrow", "escrow_release", "escrow_refund", "escrow_confirm_delivery",
   "escrow_dispute", "escrow_vault_funded", "escrow_vault_init",
   "escrow_vault_release", "verification_approve", "verification_reject",
-  "verification_suspend", "verification_reinstate", "inspection_complete",
+  "verification_suspend", "verification_reinstate",
 ]);
 
 /**
  * Extract operation type from request path
  */
 const extractOperationType = (path) => {
-  if (path.includes("/payment")) return "payment";
-  if (path.includes("/callback") || path.includes("/b2c/callback")) return "payment_callback";
+  // Match the most specific provider callback paths before the generic
+  // `/payment` branch. `/api/payments/b2c/callback` contains `/payment`,
+  // so ordering the generic branch first silently disabled deterministic
+  // B2C replay protection.
+  if (path.includes("/b2c/callback")) return "b2c_callback";
   if (path.includes("/b2c/timeout")) return "b2c_timeout";
+  if (path.includes("/callback")) return "payment_callback";
+  if (path.includes("/payment")) return "payment";
   if (path.includes("/escrow") && path.includes("/release")) return "escrow_release";
   if (path.includes("/escrow") && path.includes("/refund")) return "escrow_refund";
   if (path.includes("/escrow") && path.includes("/confirm")) return "escrow_confirm_delivery";
   if (path.includes("/escrow") && path.includes("/dispute")) return "escrow_dispute";
   if (path.includes("/bid")) return "bid";
   if (path.includes("/auction")) return "auction_end";
-  if (path.includes("/execution/") && path.endsWith("/complete")) return "inspection_complete";
   if (path.includes("/verification")) {
     if (path.includes("/approve")) return "verification_approve";
     if (path.includes("/reject")) return "verification_reject";
@@ -133,6 +137,20 @@ export const idempotencyCheck = async (req, res, next) => {
       if (checkoutId) {
         idempotencyKey = generateCallbackKey(checkoutId);
       }
+    } else if (operationType === "b2c_callback") {
+      const result = req.body?.Result || {};
+      const conversationId = String(result.ConversationID || "").trim();
+      const resultCode = String(result.ResultCode ?? "").trim();
+      const transactionId = String(result.TransactionID || "").trim();
+      if (conversationId) {
+        idempotencyKey = `b2c_callback_${conversationId}_${resultCode}_${transactionId}`;
+      }
+    } else if (operationType === "b2c_timeout") {
+      const result = req.body?.Result || {};
+      const conversationId = String(result.ConversationID || "").trim();
+      if (conversationId) {
+        idempotencyKey = `b2c_timeout_${conversationId}`;
+      }
     } else if (operationType === "escrow_vault_funded") {
       const bankRef = req.body?.bankRef;
       if (bankRef) {
@@ -165,11 +183,6 @@ export const idempotencyCheck = async (req, res, next) => {
         idempotencyKey = `vault_release_${vaultId}_${crypto.createHash("sha256").update(otp).digest("hex").slice(0, 12)}`;
       }
     }
-    else if (operationType === "inspection_complete") {
-      const bookingId = req.params?.bookingId || "";
-      const userId = req.user?.id || "";
-      if (bookingId && userId) idempotencyKey = `inspection_complete_${bookingId}_${userId}`;
-    }
   }
 
   if (!idempotencyKey) {
@@ -185,7 +198,10 @@ export const idempotencyCheck = async (req, res, next) => {
     // ── Distributed lock to prevent concurrent processing ─────
     const checkoutId = req.body?.Body?.stkCallback?.CheckoutRequestID
       || req.body?.stkCallback?.CheckoutRequestID;
-    const lockResource = checkoutId ? `payment:${checkoutId}` : `idempotency:${idempotencyKey}`;
+    const providerConversationId = req.body?.Result?.ConversationID;
+    const lockResource = checkoutId
+      ? `payment:${checkoutId}`
+      : (providerConversationId ? `b2c:${providerConversationId}` : `idempotency:${idempotencyKey}`);
 
     try {
       const { acquireLock } = await import("./distributedLock.js");
@@ -278,6 +294,18 @@ export const idempotencyCheck = async (req, res, next) => {
     logError("Idempotency check error", error, { idempotencyKey, path: req.path });
     recordIdempotencyCheck(operationType, false, duration);
     recordIdempotencyError(operationType, error.name);
+
+    // Money-moving and provider callback operations must fail closed when
+    // their idempotency store/coordination layer is unavailable. Proceeding
+    // without durable replay protection can create duplicate payouts,
+    // refunds, or provider-side side effects.
+    if (CRITICAL_LOCK_OPERATIONS.has(operationType)) {
+      return res.status(503).set("Retry-After", "5").json({
+        success: false,
+        code: "IDEMPOTENCY_COORDINATION_UNAVAILABLE",
+        message: "The operation cannot be safely coordinated right now. Please retry.",
+      });
+    }
 
     req.idempotencyKey = idempotencyKey;
     req.idempotencyOperationType = operationType;

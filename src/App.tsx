@@ -482,7 +482,7 @@ function AppInner() {
           )}
 
           {activeNav === 'support' && (
-            <SupportView user={user} onOpenAuth={handleOpenAuth} />
+            <SupportView user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
           )}
 
           {/* Fixed: 'broadcast' (LiveAuctionBroadcastPage) removed

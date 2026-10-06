@@ -127,9 +127,9 @@ These secrets should be configured directly in Render, not in GitHub Secrets:
 - `BREVO_API_KEY`
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
-- `SUPABASE_PUBLIC_BUCKET`
-- `SUPABASE_PRIVATE_BUCKET`
-- `SUPABASE_STORAGE_MIGRATION_UNUSED`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
 
 See `backend/.env.example` for the complete list.
 

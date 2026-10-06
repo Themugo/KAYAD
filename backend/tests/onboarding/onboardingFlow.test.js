@@ -29,7 +29,7 @@ jest.unstable_mockModule("../../services/notification.service.js", () => ({ send
 jest.unstable_mockModule("../../utils/logger.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn() }));
 jest.unstable_mockModule("../../utils/supabase.js", () => ({ getSupabase: () => ({ from: () => sbChain() }), isSupabaseConnected: () => true }));
 jest.unstable_mockModule("../../services/dealerSubscription.service.js", () => ({ getDealerEntitlement: jest.fn(), assertDealerCanCreateListing: entitlement }));
-jest.unstable_mockModule("../../services/storage.service.js", () => ({ uploadMultiple: jest.fn(), deleteMedia: jest.fn(), uploadFile: jest.fn() }));
+jest.unstable_mockModule("../../config/cloudinary.js", () => ({ uploadMultiple: jest.fn(), deleteImage: jest.fn() }));
 jest.unstable_mockModule("../../middleware/upload.js", () => ({ cleanupFiles: jest.fn() }));
 jest.unstable_mockModule("../../utils/cache.js", () => ({ cacheDelPattern: jest.fn() }));
 jest.unstable_mockModule("../../utils/securityLogger.js", () => ({ logActionFromReq: jest.fn() }));

@@ -30,7 +30,7 @@ const KAYAD_COLORS = {
   lightNavy: '#12576D',
   warmBeige: '#EEF7F5',
   white: '#ffffff',
-  emerald: '#10b981',
+  emerald: '#13B8A6',
   mutedTerracotta: '#5AAFA4',
   softBlue: '#64748b',
 };
@@ -441,7 +441,7 @@ function PackageStep({ provider, formData, onChange }: any) {
             onClick={() => onChange({ ...formData, selectedPackage: pkg })}
             className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
               formData.selectedPackage?.id === pkg.id
-                ? 'border-emerald-500'
+                ? 'border-[#13B8A6]'
                 : 'border-transparent'
             }`}
             style={{ backgroundColor: KAYAD_COLORS.warmBeige }}
@@ -578,7 +578,7 @@ function LocationStep({ provider, formData, onChange }: any) {
             type="checkbox"
             checked={formData.isMobile}
             onChange={(e) => onChange({ ...formData, isMobile: e.target.checked })}
-            className="w-5 h-5 rounded accent-emerald-500"
+            className="w-5 h-5 rounded accent-[#13B8A6]"
           />
           <span style={{ color: KAYAD_COLORS.lightNavy }}>
             Mobile inspection (inspector comes to you)
@@ -633,7 +633,7 @@ function LocationStep({ provider, formData, onChange }: any) {
               type="checkbox"
               checked={formData.sellerIsDealer}
               onChange={(e) => onChange({ ...formData, sellerIsDealer: e.target.checked })}
-              className="w-4 h-4 rounded accent-emerald-500"
+              className="w-4 h-4 rounded accent-[#13B8A6]"
             />
             <span style={{ color: KAYAD_COLORS.softBlue }}>
               Seller is a dealer
@@ -698,7 +698,7 @@ function ConfirmStep({ provider, formData, totalPrice, onChange }: any) {
           <textarea
             value={formData.notes}
             onChange={(e) => onChange({ ...formData, notes: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border outline-none focus:border-emerald-500"
+            className="w-full px-3 py-2 rounded-lg border outline-none focus:border-[#13B8A6]"
             style={{ borderColor: KAYAD_COLORS.softBlue }}
             rows={3}
           />
@@ -787,7 +787,7 @@ function FormInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 rounded-lg border outline-none focus:border-emerald-500"
+        className="w-full px-3 py-2 rounded-lg border outline-none focus:border-[#13B8A6]"
         style={{ borderColor: KAYAD_COLORS.softBlue }}
       />
     </div>

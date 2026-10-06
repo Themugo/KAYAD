@@ -1,64 +1,102 @@
-# KAYAD Inspection Deep E2E Runtime Foundation — 2026-10-06
+# KAYAD — Pre-Purchase Inspection Control Center Refinement
 
-## Progression result
+Date: 2026-10-06
 
-This sweep advances the inspection domain from source/static readiness toward the real staging runtime boundary.
+## Starting foundation
 
-### Implemented
+Source foundation: `KAYAD-INSPECTION-NEXT-SWEEP-FOUNDATION-20261006.zip`
 
-- Independent QA access now permits designated QA/auditor staff and administrators while preventing the executing inspector from approving their own report.
-- Public report-share retrieval now requires an approved canonical report version and `quality_reviewed=true`.
-- PDF generation rollback deletes a private PDF object if persistence fails.
-- Inspection settlement payout now has a real M-Pesa B2C initiation path.
-- Settlement transitions to `processing` before the Daraja call.
-- Provider conversation ID and transaction receipt are persisted.
-- B2C callback resolves inspection settlements separately from dealer payouts.
-- Callback verifies the provider-reported amount against settlement net amount.
-- Only a successful verified provider receipt invokes the atomic inspection settlement-paid RPC.
-- Failed B2C results leave the settlement non-paid and record the failure reason.
-- Settlement-paid RPC is idempotent and accepts the processing state.
-- Added staging runtime certification runbook.
-- Added inspection payout runtime static validator.
-- Restored `.env.production.example` production environment contract.
+This sweep preserves the existing KAYAD inspection architecture and backend contracts. No production deployment was performed.
 
-## Automated results
+## Audit scope
 
-- Inspection runtime integrity: 15/15 PASS
-- Inspection payout runtime: 10/10 PASS
-- Media delivery lifecycle: 9/9 PASS
-- Database contract alignment: 8/8 PASS
-- Payment gateway lifecycle: 13/13 PASS
-- Payment/escrow domain: 9/9 PASS
-- Transaction integrity: 14/14 PASS
-- Migration hygiene: 157 migrations, no exact duplicate bodies, no duplicate table creators
-- Runtime convergence: 7/7 PASS
-- Backend runtime contracts: 14/14 PASS
-- Frontend runtime contracts: PASS
-- Deployment readiness: PASS
-- Canonical architecture: PASS
-- Changed JavaScript syntax checks: PASS
+- Buyer inspection control surface (`src/features/InspectionsView.tsx`)
+- Inspection provider marketplace
+- Provider cards and filters
+- Provider booking flow
+- Provider Business Center
+- Inspection API/runtime contracts
+- Inspection payment/settlement/ledger contracts
+- Inspection chat/realtime bridge
+- QA/report-version lifecycle
+- Deployment/runtime convergence checks
 
-## Environment-gated result
+## Findings and corrections
 
-REAL staging certification was not falsely claimed in this environment.
+### Buyer Inspection Control Center
 
-Current runner is Node 22.16.0 while the project requires Node >=22.22.2. A clean `npm ci` could not complete because external npm transport timed out. No staging Supabase, M-Pesa, Brevo or Twilio credentials are present.
+- Reframed the large marketing-style hero into a compact operational control-center header.
+- Replaced the mixed amber/blue/rose/green process accents with the KAYAD navy/teal visual language and restrained semantic status use.
+- Removed misleading package claims such as hard-coded "Top Buyer Choice", undefined duration/checkpoint output, and unsupported standardized-mechanic language.
+- Made the truthful backend-authoritative model explicit for assignment, pricing, scheduling, payment state and reports.
+- Changed the bookings surface from an escrow-marketing presentation to an order/status control surface.
+- Added intentional empty states for no orders and no reports.
+- Removed UI actions that only displayed success toasts without actually downloading a report or initiating an escrow purchase.
+- Added backend-truthful fallbacks for missing assignment, scheduling, fee, payment and report fields.
+- Reworked the request modal from a misleading seven-step pseudo-workflow into a compact request flow containing only fields supported by the current buyer inspection-order endpoint: vehicle, phone, review/submit, confirmation.
 
-Therefore the following remain unexecuted against real infrastructure:
+### Inspection Marketplace
 
-- real Supabase migration apply/reset
-- real storage bucket verification
-- real evidence upload/signed retrieval/deletion
-- real authenticated inspection execution
-- real QA identities and report approval
-- real PDF object generation/retrieval
-- real Brevo delivery
-- real Twilio WhatsApp delivery
-- real buyer review
-- real settlement against staging PostgreSQL
-- real Daraja B2C payout and callback
-- real payout reconciliation
+- Unified visual accents around the existing KAYAD navy/teal palette.
+- Removed unsupported scheduling marketing copy.
+- Removed the dead `/inspection/become-provider` CTA route and replaced it with a truthful provider-access note.
+- Preserved provider discovery, filtering, sorting and backend data contracts.
 
-## Next exact boundary
+### Provider Business Center
 
-Do not add more inspection features before the staging runner is available. Run the sequence in `STAGING_RUNTIME_CERTIFICATION_RUNBOOK_20261006.md` on Node 22.22.2+ with real staging credentials.
+- Reduced non-KAYAD purple/yellow/blue status styling.
+- Kept semantic status color only where useful and aligned the rest with KAYAD brand colors.
+- Removed dead `href="#"` quick actions and non-functional View/Download buttons.
+- Preserved provider dashboard, bookings, reports, earnings and settings surfaces.
+
+### Booking flow / filters
+
+- Unified accent/focus controls with KAYAD teal.
+- Preserved the existing provider booking/payment workflow and its authoritative M-Pesa completion polling.
+
+## Automated inspection/domain validation
+
+- Inspection marketplace: **21/21 PASS**
+- Inspection marketplace activation: **14/14 PASS**
+- Inspection → Chat/Realtime E2E contract: **10/10 PASS**
+- Inspection QA contract: **PASS**
+- Inspection settlement/ledger: **10/10 PASS**
+- Frontend runtime contracts: **PASS**
+- Code splitting: **PASS**
+- UI surface convergence: **9/9 PASS**
+- Deployment readiness: **PASS**
+- Canonical architecture: **PASS**
+- Backend inspection JavaScript syntax: **PASS**
+- Changed TSX transpilation/syntax check: **6/6 PASS**
+- Changed-file trailing-whitespace check: **PASS**
+
+## Known pre-existing / environment limitations
+
+The full dependency installation/build gate was not completed in this execution environment because the project requires Node `>=22.22.2` while this environment provides Node `22.16.0`, and the package installation could not be completed within the available execution window.
+
+Therefore this report does **not** claim a fresh `npm ci`, `npm test`, `npm run typecheck`, or `npm run build` PASS from this environment.
+
+The production environment example file was restored because the deployment-readiness validator requires it; no secret values were added.
+
+The broader Wave 3 API governance check still reports 5 undocumented escrow operations routes (1107/1112 documented). This is unrelated to the inspection UI sweep and was not modified.
+
+## Changed source scope
+
+1. `src/features/InspectionsView.tsx`
+2. `src/features/InspectionMarketplace/components/ProviderCard.tsx`
+3. `src/features/InspectionMarketplace/components/ProviderFilters.tsx`
+4. `src/features/InspectionMarketplace/pages/BookingFlow.tsx`
+5. `src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx`
+6. `src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx`
+7. `.env.production.example` — restored packaging/validation contract only; no secrets
+
+## Production safety
+
+- Backend business logic was not changed.
+- Database architecture/migrations were not changed.
+- Authentication/CSRF was not changed.
+- Payment/escrow/RLS logic was not changed.
+- Vercel routing/deployment architecture was not changed.
+- Existing inspection API contracts were preserved.
+- No mock inventory, fabricated inspection data, fabricated payment state or fabricated provider activity was introduced.
+- **PRODUCTION WAS NOT DEPLOYED DURING THIS SWEEP.**

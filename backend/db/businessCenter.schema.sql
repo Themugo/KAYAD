@@ -162,10 +162,6 @@ CREATE TABLE IF NOT EXISTS report_versions (
   reviewed_at TIMESTAMP,
   review_notes TEXT,
 
-  -- QA submission provenance
-  submitted_by UUID REFERENCES users(id),
-  submitted_at TIMESTAMP,
-
   -- Approval
   approved_by UUID REFERENCES users(id),
   approved_at TIMESTAMP,

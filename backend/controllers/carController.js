@@ -2,7 +2,7 @@ import Car from "../models/Car.js";
 import User from "../models/User.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { cacheDelPattern } from "../utils/cache.js";
-import { uploadMultiple as uploadStorageMultiple, deleteMedia } from "../services/storage.service.js";
+import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 import { logWarn, logError } from "../utils/logger.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
@@ -14,6 +14,7 @@ import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../servi
 import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/dealerSubscription.service.js";
 import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
 import { randomUUID } from "node:crypto";
+import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
 
@@ -404,19 +405,32 @@ export const createCar = async (req, res) => {
     }
     delete body.address;
 
-    // ── PROCESS UPLOADED IMAGES — canonical Supabase Storage ─────
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ success: false, message: "At least one image is required." });
+    // ── PROCESS UPLOADED IMAGES ───────────────────────────────
+    const cloudinaryConfigured =
+      process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudinaryConfigured && req.files && req.files.length > 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Cloud storage not configured. Please set CLOUDINARY credentials.",
+      });
     }
-    const uploadedImages = await uploadStorageMultiple(req.files, "kayad/vehicles", { visibility: "public" });
-    body.images = uploadedImages.map((item) => ({
-      url: item.url,
-      thumb: item.thumb || item.url,
-      public_id: item.public_id,
-      storage_provider: "supabase",
-      storage_bucket: item.bucket,
-      storage_path: item.path,
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one image is required.",
+      });
+    }
+
+    let pendingFiles = null;
+    body.images = req.files.map((f, i) => ({
+      url: `/uploads/${path.basename(f.path)}`,
+      thumb: `/uploads/${path.basename(f.path)}`,
+      public_id: null,
+      _pending: true,
     }));
+    pendingFiles = req.files;
 
     // Set coverImage: use user selection if valid, otherwise default to 0
     const totalImages = (body.images || []).length;
@@ -511,9 +525,56 @@ export const createCar = async (req, res) => {
     });
 
     res.status(201).json({ success: true, data: car });
+
+    // ── BACKGROUND: Upload images to Cloudinary after response ──
+    if (pendingFiles && cloudinaryConfigured) {
+      setImmediate(async () => {
+        const recoveryJobs = [];
+        for (const file of pendingFiles) {
+          try {
+            const job = await registerMediaUploadJob({
+              listingId: car._id,
+              ownerId: req.user.id,
+              sourcePath: file.path,
+              metadata: { originalName: file.originalname, mimeType: file.mimetype },
+            });
+            recoveryJobs.push({ file, job });
+          } catch (e) {
+            logWarn("Media recovery job registration failed", { error: e.message, listingId: car._id });
+          }
+        }
+
+        for (const { file, job } of recoveryJobs) {
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              const uploaded = await uploadMultiple([file], "kayad/cars");
+              const item = uploaded?.[0];
+              if (!item?.url || !item?.public_id) throw new Error("Cloudinary returned incomplete media metadata");
+              const current = await Car.findById(car._id);
+              const images = Array.isArray(current?.images) ? current.images : [];
+              const nextImages = images.map((img) => img?._pending && img?.url?.endsWith(`/uploads/${path.basename(file.path)}`) ? item : img);
+              await Car.findByIdAndUpdate(car._id, { $set: { images: nextImages } });
+              await completeMediaUpload({ jobId: job?.id, publicId: item.public_id, remoteUrl: item.url, metadata: { width: item.width, height: item.height, bytes: item.bytes } });
+              cleanupFiles([file]);
+              break;
+            } catch (e) {
+              logWarn(`Cloudinary upload attempt ${attempt}/3 failed:`, { error: e.message, listingId: car._id });
+              if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 2000));
+              else await registerMediaUploadFailure({ listingId: car._id, ownerId: req.user.id, sourcePath: file.path, error: e, metadata: { originalName: file.originalname, mimeType: file.mimetype } }).catch((recoveryError) => logWarn("Media failure persistence failed", { error: recoveryError.message, listingId: car._id }));
+            }
+          }
+        }
+      });
+    }
   } catch (err) {
-    if (err?.code === "LISTING_LIMIT_REACHED" || err?.status) {
-      return res.status(err.status || 400).json({ success: false, message: err.message, code: err.code });
+    logError("CREATE ERROR", { error: err.message });
+    cleanupFiles(req.files);
+    const isDev = process.env.NODE_ENV === "development";
+    // Entitlement errors (assertDealerCanCreateListing) carry a deliberate
+    // 402/403 status and a user-facing message. Surface them instead of
+    // collapsing them into an opaque 500 so a dealer learns they need a plan.
+    if (!res.headersSent && Number.isInteger(err?.status) && err.status >= 400 && err.status < 500 && err.code) {
+      return res.status(err.status).json({ success: false, message: err.message, code: err.code });
     }
     if (!res.headersSent) {
       res.status(500).json({
@@ -731,9 +792,9 @@ export const deleteCarImage = async (req, res) => {
 
     const removedImage = car.images[imageIndex];
 
-    // Delete the Supabase Storage object for this listing image
+    // Delete from Cloudinary if it has a public_id
     if (removedImage?.public_id) {
-      await deleteMedia({ bucket: removedImage.storage_bucket || process.env.SUPABASE_PUBLIC_BUCKET || "kayad-images", path: removedImage.storage_path || removedImage.public_id });
+      await deleteImage(removedImage.public_id);
     }
 
     // Remove from array
@@ -793,9 +854,19 @@ export const addCarImages = async (req, res) => {
       });
     }
 
-    const newImages = await uploadStorageMultiple(req.files, "kayad/vehicles", { visibility: "public" });
-    cleanupFiles(req.files);
+    const cloudinaryConfigured =
+      process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
+    if (!cloudinaryConfigured) {
+      cleanupFiles(req.files);
+      return res.status(500).json({
+        success: false,
+        message: "Cloud storage not configured. Please set CLOUDINARY credentials.",
+      });
+    }
+
+    const newImages = await uploadMultiple(req.files, "kayad/cars");
+    cleanupFiles(req.files);
 
     car.images = [...(car.images || []), ...newImages];
     await car.save();

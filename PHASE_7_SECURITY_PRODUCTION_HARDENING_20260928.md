@@ -8,7 +8,7 @@ Phase 7 hardens the existing production architecture without introducing a paral
 
 ## Changes
 
-1. Production environment validation now requires launch-critical M-Pesa, Supabase Storage, Brevo, Africa's Talking, Twilio, managed Redis, and platform-owner configuration.
+1. Production environment validation now requires launch-critical M-Pesa, Cloudinary, Brevo, Africa's Talking, Twilio, managed Redis, and platform-owner configuration.
 2. `DISABLE_REDIS=true` is forbidden in production.
 3. Redis production startup fails closed when the managed `REDIS_URL` contract is missing.
 4. Public health and readiness responses no longer expose raw infrastructure error messages.

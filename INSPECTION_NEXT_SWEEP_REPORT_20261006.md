@@ -14,7 +14,7 @@ The inspection report service previously returned a route-looking placeholder UR
 Correction:
 - Added a dependency-free PDF document generator for inspection reports.
 - Generates a valid PDF containing report identity, vehicle identity, score/condition, executive summary, findings, recommendations, QA state and generation timestamp.
-- Uploads the generated artifact as an authenticated private Supabase Storage object.
+- Uploads the generated artifact as an authenticated Cloudinary raw asset.
 - Persists the signed PDF URL on `inspection_reports`.
 - Added authenticated `GET /api/inspection/reports/:reportId/pdf` download/redirect behavior.
 
@@ -81,7 +81,7 @@ This environment has Node 22.16.0. The KAYAD production contract requires Node >
 
 ## Exact next engineering phase
 1. Converge the inspector workspace onto the canonical inspection booking/staff/report lifecycle.
-2. Add authenticated evidence upload tied to inspection reports using existing private Supabase Storage signed delivery controls.
+2. Add authenticated evidence upload tied to inspection reports using existing private Cloudinary delivery controls.
 3. Wire provider QA queue actions to the active application route surface.
 4. Wire approved-report email/WhatsApp delivery through the existing communications control plane.
 5. Add buyer report/review surface to the canonical inspection journey.

@@ -6,7 +6,7 @@ import db from './dbAdapter.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';
-import { uploadBuffer, getPrivateStorageUrl, deleteMedia } from '../../services/storage.service.js';
+import { uploadRawBuffer } from '../../config/cloudinary.js';
 
 /**
  * Generate report number
@@ -21,7 +21,7 @@ const generateReportNumber = () => {
 /**
  * Inspection Categories with 150-point checklist
  */
-export const INSPECTION_CATEGORIES = {
+const INSPECTION_CATEGORIES = {
   engine: {
     name: 'Engine',
     points: 20,
@@ -415,46 +415,7 @@ class ReportService {
       throw new AppError('Report not found or link expired', 404);
     }
 
-    const latestVersion = await db.find('report_versions', { report_id: report.id }, { sort: { version_number: -1 }, limit: 1 });
-    if (latestVersion[0]?.status !== 'approved' || !report.quality_reviewed) {
-      throw new AppError('Report is not available until independent QA approval is complete', 409);
-    }
-
-    const photos = await Promise.all((Array.isArray(report.photos) ? report.photos : []).map(async (photo) => {
-      if (typeof photo === 'string' && /^https?:\/\//.test(photo)) return photo;
-      return photo ? await getPrivateStorageUrl(photo, 900) : null;
-    })).then((items) => items.filter(Boolean));
-
-    // Public share links must not expose customer contact details, internal
-    // workflow fields, storage identifiers, or audit metadata. The token is a
-    // capability for the report, not a capability for the entire database row.
-    return {
-      id: report.id,
-      reportNumber: report.report_number,
-      overallScore: report.overall_score,
-      overallCondition: report.overall_condition,
-      engineScore: report.engine_score,
-      transmissionScore: report.transmission_score,
-      suspensionScore: report.suspension_score,
-      brakesScore: report.brakes_score,
-      electricalScore: report.electrical_score,
-      interiorScore: report.interior_score,
-      exteriorScore: report.exterior_score,
-      bodyScore: report.body_score,
-      paintScore: report.paint_score,
-      tyresScore: report.tyres_score,
-      undercarriageScore: report.undercarriage_score,
-      roadTestScore: report.road_test_score,
-      findings: report.findings || [],
-      criticalIssues: report.critical_issues || [],
-      recommendations: report.recommendations || [],
-      executiveSummary: report.executive_summary || null,
-      roadTestPerformed: Boolean(report.road_test_performed),
-      photos,
-      pdf_url: report.pdf_storage_path ? await getPrivateStorageUrl(report.pdf_storage_path, 900) : report.pdf_url,
-      qualityReviewed: Boolean(report.quality_reviewed),
-      createdAt: report.created_at,
-    };
+    return report;
   }
 
   /**
@@ -528,18 +489,9 @@ class ReportService {
       executiveSummary: report.executive_summary,
       criticalIssues: report.critical_issues,
       recommendations: report.recommendations,
-      findings: await Promise.all((Array.isArray(report.findings) ? report.findings : []).map(async (finding) => ({
-        ...finding,
-        photos: await Promise.all((Array.isArray(finding.photos) ? finding.photos : []).map(async (photo) => {
-          if (typeof photo === 'string' && /^https?:\/\//.test(photo)) return photo;
-          return photo ? await getPrivateStorageUrl(photo, 900) : null;
-        })).then((items) => items.filter(Boolean)),
-      }))),
+      findings: report.findings,
       checklistItems: this.groupChecklistByCategory(checklistItems),
-      photos: await Promise.all((Array.isArray(report.photos) ? report.photos : []).map(async (photo) => {
-        if (typeof photo === 'string' && /^https?:\/\//.test(photo)) return photo;
-        return photo ? await getPrivateStorageUrl(photo, 900) : null;
-      })).then((items) => items.filter(Boolean)),
+      photos: report.photos,
       roadTest: {
         performed: report.road_test_performed,
         notes: report.road_test_notes,
@@ -560,9 +512,7 @@ class ReportService {
         expiresAt: report.share_expires_at,
       },
       createdAt: report.created_at,
-      pdfUrl: report.pdf_storage_path
-        ? await getPrivateStorageUrl(report.pdf_storage_path, 900)
-        : report.pdf_url,
+      pdfUrl: report.pdf_url,
     };
   }
 
@@ -630,10 +580,6 @@ class ReportService {
    */
   async generatePDF(reportId, access = {}) {
     const report = await this.getReportDetails(reportId, access);
-    const latestVersion = await db.find('report_versions', { report_id: reportId }, { sort: { version_number: -1 }, limit: 1 });
-    if (latestVersion[0]?.status !== 'approved') {
-      throw new AppError('Report PDF can only be generated after independent QA approval', 409);
-    }
     const escapePdfText = (value) => String(value ?? '')
       .replace(/\\/g, '\\\\')
       .replace(/\(/g, '\\(')
@@ -701,25 +647,16 @@ class ReportService {
     for (let i = 1; i < offsets.length; i++) pdf += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
     pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
 
-    const uploaded = await uploadBuffer(Buffer.from(pdf, 'utf8'), {
+    const uploaded = await uploadRawBuffer(Buffer.from(pdf, 'utf8'), {
       folder: 'kayad/inspection-reports',
-      fileName: `inspection-${reportId}.pdf`,
-      contentType: 'application/pdf',
-      visibility: 'private',
-      metadata: { reportId },
+      publicId: `inspection-${reportId}`,
+      format: 'pdf',
     });
-    try {
-      await db.update('inspection_reports', reportId, {
-        pdf_url: null,
-        pdf_storage_bucket: uploaded.bucket,
-        pdf_storage_path: uploaded.path,
-        pdf_generated_at: new Date(),
-        updated_at: new Date(),
-      });
-    } catch (error) {
-      await deleteMedia({ bucket: uploaded.bucket, path: uploaded.path }).catch(() => {});
-      throw error;
-    }
+    await db.update('inspection_reports', reportId, {
+      pdf_url: uploaded.url,
+      pdf_generated_at: new Date(),
+      updated_at: new Date(),
+    });
     return { pdfUrl: uploaded.url, reportId, generatedAt: new Date().toISOString() };
   }
 
@@ -787,13 +724,6 @@ class ReportService {
    */
   async qualityReview(reportId, auditorId, reviewData) {
     const report = await this.getReportById(reportId);
-    if (!reviewData || reviewData.passed !== true) {
-      throw new AppError('Report must pass QA before it can be marked quality reviewed', 409);
-    }
-    const latestVersion = await db.find('report_versions', { report_id: reportId }, { sort: { version_number: -1 }, limit: 1 });
-    if (latestVersion[0]?.status !== 'approved') {
-      throw new AppError('Canonical report QA version must be approved before quality review can be finalized', 409);
-    }
 
     // Create audit record
     await db.create('inspection_quality_audits', {

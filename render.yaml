@@ -21,10 +21,6 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: SUPABASE_PUBLIC_BUCKET
-        value: kayad-images
-      - key: SUPABASE_PRIVATE_BUCKET
-        value: kayad-private
       - key: SESSION_SECRET
         sync: false
       - key: JWT_SECRET
@@ -44,6 +40,12 @@ services:
       - key: MPESA_PASSKEY
         sync: false
       - key: MPESA_CALLBACK_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
         sync: false
       - key: BREVO_API_KEY
         sync: false

@@ -144,7 +144,7 @@ This document represents the official Gold Master certification for KAYAD Versio
 | Backend Hosting | ✅ Ready | Render/Railway |
 | Database | ✅ Ready | Supabase |
 | Cache | ✅ Ready | Redis |
-| Storage | ✅ Ready | Supabase Storage |
+| Storage | ✅ Ready | Cloudinary |
 | CDN | ✅ Ready | Vercel Edge |
 | Monitoring | ✅ Ready | Sentry + Grafana |
 

@@ -27,6 +27,16 @@ pass('release/refund/settlement routes retain distinct permissions', /escrowRele
 pass('role boundary fails closed for money-moving escrow admin actions', /ESCROW_ADMIN_ROLES = Object\.freeze\(\["admin", "superadmin"\]\)/.test(access));
 pass('emergency operations remain explicitly permissioned', /emergency_close|emergency closure|EMERGENCY/.test(routes + read('backend/controllers/escrowOperationsController.js') + read('backend/controllers/escrowController.js')));
 
+
+pass('release ledger is single-authority inside the atomic escrow transition', !/recordEscrowRelease\s*\(/.test(read('backend/services/escrow.service.js')) && /escrow-release:'\|\|v_escrow.id/.test(transition));
+pass('payment-less refunds create an explicit refund payable record', /legacy_paymentless/.test(transition) || /kayad_ensure_escrow_refund_payable/.test(read('supabase/migrations/20261006230000_escrow_live_settlement_completion_hardening.sql')));
+pass('refund completion binds the refund to the escrow case', /Refund does not belong to this escrow/.test(read('backend/controllers/escrowController.js')) && /refundRow\.escrow_id/.test(read('backend/controllers/escrowController.js')));
+pass('payment-less refunded escrows receive a settlement record', /kayad_ensure_escrow_refund_payable/.test(read('supabase/migrations/20261006230000_escrow_live_settlement_completion_hardening.sql')));
+pass('seller payout control is exposed through the escrow settlement permission', /operations\/case\/:id\/payout/.test(routes) && /escrowSettlementOnly/.test(routes) && /kayad_prepare_dealer_payout_atomic/.test(read('backend/controllers/escrowOperationsController.js')));
+pass('B2C conversation identity is persisted before provider callback', /data\?\.ConversationID/.test(read('backend/services/mpesaB2C.service.js')) && /p_conversation_id: data\.ConversationID/.test(read('backend/services/mpesaB2C.service.js')));
+pass('B2C timeout is observed without falsely failing an ambiguous payout', /B2C TIMEOUT persistence failed/.test(read('backend/controllers/paymentController.js')) && /leave it processing/i.test(read('backend/controllers/paymentController.js')));
+pass('seller receives idempotent payout completion notification', /ESCROW_PAYOUT_COMPLETED/.test(read('backend/controllers/paymentController.js')) && /payoutId/.test(read('backend/controllers/paymentController.js')));
+
 const liveConfigured = !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 console.log(`${liveConfigured?'PASS':'BLOCKED'} staging Supabase credentials ${liveConfigured?'available for live execution':'not available in this environment'}`);
 checks.push({name:'staging credentials',ok:liveConfigured,environmentOnly:true});

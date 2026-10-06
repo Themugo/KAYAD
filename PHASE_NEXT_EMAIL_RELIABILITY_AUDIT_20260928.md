@@ -23,7 +23,7 @@ The previous flow could receive a `failed` delivery result from the communicatio
 - Africa's Talking = optional SMS/OTP.
 - Twilio = optional WhatsApp.
 - M-Pesa = optional payments.
-- Supabase Storage = current active media provider.
+- Cloudinary = current active media provider.
 - Redis = required managed production infrastructure.
 
 No provider was removed and no fake credentials or bypasses were introduced.
@@ -63,10 +63,10 @@ A full npm/Vitest/build certification was not claimed from this isolated runner 
 ## Next live gate
 1. Deploy this foundation to Render.
 2. Confirm `/health` and `/health/ready`.
-3. Confirm Redis/Supabase Storage/Brevo startup configuration.
+3. Confirm Redis/Supabase/Cloudinary/Brevo startup configuration.
 4. Register the first dealer.
 5. Confirm Brevo verification email is received.
 6. Verify the account.
 7. Complete dealer onboarding.
-8. Create the first vehicle listing with real Supabase Storage media.
+8. Create the first vehicle listing with real Cloudinary media.
 9. Only after that activate M-Pesa/SMS/WhatsApp when their real production credentials and business workflows are ready.

@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import crypto from "crypto";
 import { logWarn, logError } from "../utils/logger.js";
-import { uploadFile, uploadMultiple as uploadStorageMultiple } from "../services/storage.service.js";
+import { uploadImage } from "../config/cloudinary.js";
 
 const MAGIC_BYTES = {
   "image/jpeg": [0xFF, 0xD8, 0xFF],
@@ -54,28 +54,10 @@ const fileFilter = (req, file, cb) => {
   if (!ALLOWED_MIMES.includes(file.mimetype)) {
     return cb(new Error(`File type ${file.mimetype} is not supported for evidence upload`), false);
   }
-  // Multer's memoryStorage does not populate file.buffer until AFTER fileFilter.
-  // Content-signature validation therefore happens in validateEvidenceUploadContent.
+  if (!validateMagicBytes(file.buffer, file.mimetype)) {
+    return cb(new Error(`File content does not match declared type ${file.mimetype}`), false);
+  }
   cb(null, true);
-};
-
-export const validateEvidenceUploadContent = (req, res, next) => {
-  const files = [];
-  if (req.file) files.push(req.file);
-  if (Array.isArray(req.files)) files.push(...req.files);
-  if (req.files && !Array.isArray(req.files)) {
-    Object.values(req.files).forEach((group) => files.push(...(group || [])));
-  }
-  for (const file of files) {
-    if (!validateMagicBytes(file.buffer, file.mimetype)) {
-      return res.status(400).json({
-        success: false,
-        code: 'INVALID_FILE_SIGNATURE',
-        message: `File content does not match its declared type ${file.mimetype}`,
-      });
-    }
-  }
-  next();
 };
 
 const storage = multer.memoryStorage();
@@ -96,25 +78,24 @@ export const uploadEvidenceFields = uploadEvidence.fields([
 
 export const uploadEvidenceSingle = uploadEvidence.single("file");
 
-export const uploadEvidenceToStorage = async (file, type = "document") => {
+export const uploadEvidenceToCloudinary = async (file, type = "document") => {
   if (!file) throw new Error("No file provided");
   const folder = `kayad/evidence/${type}`;
   const isVideo = file.mimetype.startsWith("video/");
-  const result = await uploadFile(file, folder, {
-    visibility: "private",
+  const result = await uploadImage(file, folder, {
+    generateVariants: !isVideo,
+    preserveOriginal: true,
   });
   return {
     url: result.url,
     public_id: result.public_id,
-    storage_provider: result.storageProvider,
-    bucket: result.bucket,
     thumb: result.thumb || result.url,
   };
 };
 
-export const uploadEvidenceMultipleToStorage = async (files, type = "document") => {
+export const uploadEvidenceMultipleToCloudinary = async (files, type = "document") => {
   if (!files || files.length === 0) return [];
-  return Promise.all(files.map((f) => uploadEvidenceToStorage(f, type)));
+  return Promise.all(files.map((f) => uploadEvidenceToCloudinary(f, type)));
 };
 
 export const handleEvidenceUploadError = (err, req, res, next) => {

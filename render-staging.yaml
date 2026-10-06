@@ -26,10 +26,6 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: SUPABASE_PUBLIC_BUCKET
-        value: kayad-images
-      - key: SUPABASE_PRIVATE_BUCKET
-        value: kayad-private
       - key: JWT_SECRET
         sync: false
       - key: REFRESH_TOKEN_SECRET
@@ -56,6 +52,12 @@ services:
         sync: false
       - key: MPESA_CALLBACK_URL
         value: https://kayad-backend-staging.onrender.com/api/payments/callback
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
       - key: POSTHOG_API_KEY
         sync: false
       - key: POSTHOG_HOST

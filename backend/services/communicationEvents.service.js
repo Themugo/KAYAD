@@ -21,6 +21,7 @@ export const COMMUNICATION_EVENTS = Object.freeze({
   ESCROW_FUNDED: "escrow.funded",
   ESCROW_RELEASED: "escrow.released",
   ESCROW_REFUNDED: "escrow.refunded",
+  ESCROW_PAYOUT_COMPLETED: "escrow.payout_completed",
   INSPECTION_BOOKED: "inspection.booked",
   INSPECTION_ASSIGNED: "inspection.assigned",
   INSPECTION_STARTED: "inspection.started",

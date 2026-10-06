@@ -57,8 +57,8 @@ const FEATURE_GROUPS = [
     vars: ["MPESA_CONSUMER_KEY", "MPESA_CONSUMER_SECRET", "MPESA_SHORTCODE", "MPESA_PASSKEY"],
   },
   {
-    label: "Supabase Storage (media)",
-    vars: ["SUPABASE_PUBLIC_BUCKET", "SUPABASE_PRIVATE_BUCKET"],
+    label: "Cloudinary (image hosting)",
+    vars: ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"],
   },
   {
     label: "Africa's Talking (SMS/OTP)",
@@ -161,6 +161,9 @@ export const validateEnv = (opts = { silent: false }) => {
     // durable data, media uploads, transactional email and managed queue/rate-limit
     // infrastructure.
     const coreRequired = [
+      ["CLOUDINARY_CLOUD_NAME", "Cloudinary cloud name"],
+      ["CLOUDINARY_API_KEY", "Cloudinary API key"],
+      ["CLOUDINARY_API_SECRET", "Cloudinary API secret"],
       ["BREVO_API_KEY", "Brevo API key"],
       ["BREVO_FROM_EMAIL", "Brevo sender email"],
       ["REDIS_URL", "Managed Redis connection"],

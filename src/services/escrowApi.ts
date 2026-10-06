@@ -116,6 +116,18 @@ export async function requestRelease(escrowId: string): Promise<{ message: strin
   return { message: body.message };
 }
 
+/** GET /api/escrow/:id/state - canonical state-machine history and next-state contract. */
+export async function getEscrowState(escrowId: string): Promise<{ currentState: BackendEscrow['status']; allowedTransitions: BackendEscrow['status'][]; history: Array<{ action?: string; by?: string; at?: string; reason?: string }> }> {
+  const body = await escrowFetch<{ data: { currentState: BackendEscrow['status']; allowedTransitions: BackendEscrow['status'][]; history: Array<{ action?: string; by?: string; at?: string; reason?: string }> } }>(`/api/escrow/${escrowId}/state`);
+  return body.data;
+}
+
+/** GET /api/escrow/:id/funding-instructions - real custody funding instructions. */
+export async function getFundingInstructions(escrowId: string): Promise<{ fundingMethod: string; rules: { releaseDays: number; minimumAmount: number; maximumAmount?: number | null }; account: { accountName?: string; bankName?: string; accountNumber?: string; branch?: string; currency?: string } | null; amount: number; reference: string }> {
+  const body = await escrowFetch<{ data: { fundingMethod: string; rules: { releaseDays: number; minimumAmount: number; maximumAmount?: number | null }; account: { accountName?: string; bankName?: string; accountNumber?: string; branch?: string; currency?: string } | null; amount: number; reference: string } }>(`/api/escrow/${escrowId}/funding-instructions`);
+  return body.data;
+}
+
 /** POST /api/escrow/:id/dispute - buyer, seller, or staff raises a
  * real dispute, freezing the deal. */
 export async function disputeEscrow(escrowId: string, reason: string): Promise<BackendEscrow> {
@@ -186,6 +198,12 @@ export function mapBackendEscrowToTransaction(e: BackendEscrow): EscrowTransacti
     sellerEmail: e.seller?.email,
     sellerType: e.seller?.role === 'dealer' ? 'Verified Dealer' : 'Private Seller',
     status: STATUS_LABELS[e.status] || e.status,
+    backendStatus: e.status,
+    fundedAt: e.fundedAt || undefined,
+    vehicleConfirmedAt: e.vehicleConfirmedAt || undefined,
+    deliveredAt: e.deliveredAt || undefined,
+    releasedAt: e.releasedAt || undefined,
+    closedAt: e.closedAt || undefined,
     step: STATUS_STEP[e.status] ?? 0,
     updatedAt: e.updatedAt,
     depositDate: e.fundedAt || undefined,

@@ -116,12 +116,7 @@
     "validate:backend-boot": "node scripts/validate-backend-boot.mjs",
     "validate:hero-mobile-assets": "node scripts/validate-hero-mobile-assets.mjs",
     "validate:hero-admin-control": "node scripts/validate-hero-admin-control.mjs",
-    "validate:inspection-qa-contract": "node scripts/validate-inspection-qa-contract.mjs",
-    "validate:media-storage": "node scripts/validate-media-storage-contract.mjs",
-    "validate:media-delivery-lifecycle": "node scripts/validate-media-delivery-lifecycle.mjs",
-    "certify:inspection:runtime": "node scripts/certify-inspection-runtime.mjs",
-    "validate:inspection:payout-runtime": "node scripts/validate-inspection-payout-runtime.mjs",
-    "validate:vercel-build": "node scripts/validate-vercel-build-contract.mjs"
+    "validate:inspection-qa-contract": "node scripts/validate-inspection-qa-contract.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

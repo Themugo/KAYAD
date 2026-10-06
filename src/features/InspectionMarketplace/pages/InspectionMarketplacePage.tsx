@@ -16,8 +16,8 @@ const KAYAD_COLORS = {
   lightNavy: '#12576D',
   warmBeige: '#EEF7F5',
   white: '#ffffff',
-  emerald: '#10b981',
-  mutedTerracotta: '#5AAFA4',
+  emerald: '#13B8A6',
+  mutedTerracotta: '#91CEC5',
   softBlue: '#64748b',
 };
 
@@ -143,7 +143,7 @@ export default function InspectionMarketplacePage() {
               <input
                 type="text"
                 placeholder="Search by county, town, or provider name..."
-                className="w-full pl-12 pr-4 py-4 rounded-lg border-2 border-transparent focus:border-emerald-500 outline-none shadow-lg"
+                className="w-full pl-12 pr-4 py-4 rounded-lg border-2 border-transparent focus:border-[#13B8A6] outline-none shadow-lg"
                 style={{ backgroundColor: KAYAD_COLORS.white }}
                 onChange={(e) => handleSearch(e.target.value)}
               />
@@ -181,24 +181,24 @@ export default function InspectionMarketplacePage() {
       <section className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <QuickStatCard
-            icon={<Shield className="text-emerald-500" size={24} />}
+            icon={<Shield className="text-[#13B8A6]" size={24} />}
             label="Active Providers"
             value={String(total)}
           />
           <QuickStatCard
-            icon={<Car className="text-blue-500" size={24} />}
+            icon={<Car className="text-[#176B87]" size={24} />}
             label="Inspection Types"
             value={String(INSPECTION_TYPES.length)}
           />
           <QuickStatCard
-            icon={<Star className="text-yellow-500" size={24} />}
+            icon={<Star className="text-[#2F8F87]" size={24} />}
             label="Verified Filter"
             value="Available"
           />
           <QuickStatCard
-            icon={<Clock className="text-purple-500" size={24} />}
-            label="Flexible Scheduling"
-            value="Same-day / Weekend"
+            icon={<Clock className="text-[#5AAFA4]" size={24} />}
+            label="Scheduling filters"
+            value="Available in filters"
           />
         </div>
       </section>
@@ -252,7 +252,7 @@ export default function InspectionMarketplacePage() {
             className="px-4 py-2 rounded-lg border outline-none"
             style={{
               backgroundColor: KAYAD_COLORS.white,
-              borderColor: KAYAD_COLORS.softBlue,
+              borderColor: '#D7E7E4',
               color: KAYAD_COLORS.lightNavy
             }}
           >
@@ -328,31 +328,9 @@ export default function InspectionMarketplacePage() {
         )}
       </section>
 
-      {/* CTA Section */}
-      <section
-        className="py-16 px-4"
-        style={{ backgroundColor: KAYAD_COLORS.lightNavy }}
-      >
-        <div className="max-w-3xl mx-auto text-center">
-          <h2
-            className="text-3xl font-bold mb-4"
-            style={{ color: KAYAD_COLORS.white }}
-          >
-            Become an Inspection Provider
-          </h2>
-          <p
-            className="text-lg mb-8"
-            style={{ color: KAYAD_COLORS.mutedTerracotta }}
-          >
-            Join KAYAD's inspection marketplace and grow your business
-          </p>
-          <a
-            href="/inspection/become-provider"
-            className="inline-block px-8 py-4 rounded-lg font-semibold text-lg transition-transform hover:scale-105"
-            style={{ backgroundColor: KAYAD_COLORS.emerald, color: KAYAD_COLORS.white }}
-          >
-            Apply Now
-          </a>
+      <section className="max-w-7xl mx-auto px-4 pb-12">
+        <div className="rounded-xl border border-[#D7E7E4] bg-white px-5 py-4 text-sm text-slate-600">
+          <span className="font-semibold text-[#0F5D73]">Provider access:</span> provider onboarding and business controls are exposed only through the authenticated provider workflow. This public discovery surface does not invent an application route.
         </div>
       </section>
     </div>

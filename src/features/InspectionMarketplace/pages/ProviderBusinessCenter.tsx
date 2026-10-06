@@ -17,8 +17,6 @@ import {
   MessageSquare,
   Settings,
   Plus,
-  Eye,
-  Download,
 } from 'lucide-react';
 import { inspectionApi } from '../services/api';
 import type { ProviderDashboard, Booking, EarningsSummary, BookingStatus } from '../types/inspection';
@@ -27,8 +25,8 @@ const KAYAD_COLORS = {
   lightNavy: '#12576D',
   warmBeige: '#EEF7F5',
   white: '#ffffff',
-  emerald: '#10b981',
-  mutedTerracotta: '#5AAFA4',
+  emerald: '#13B8A6',
+  mutedTerracotta: '#91CEC5',
   softBlue: '#64748b',
 };
 
@@ -169,25 +167,25 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          icon={<Calendar className="text-blue-500" />}
+          icon={<Calendar className="text-[#176B87]" />}
           label="Today's Bookings"
           value={dashboard.overview.todayBookings}
           trend={null}
         />
         <StatCard
-          icon={<TrendingUp className="text-emerald-500" />}
+          icon={<TrendingUp className="text-[#13B8A6]" />}
           label="Monthly Revenue"
           value={`KES ${dashboard.overview.monthlyRevenue.toLocaleString()}`}
           trend={null}
         />
         <StatCard
-          icon={<Star className="text-yellow-500" />}
+          icon={<Star className="text-[#2F8F87]" />}
           label="Average Rating"
           value={dashboard.overview.averageRating.toFixed(1)}
           trend={null}
         />
         <StatCard
-          icon={<FileText className="text-purple-500" />}
+          icon={<FileText className="text-[#5AAFA4]" />}
           label="Pending Reports"
           value={dashboard.overview.pendingReports}
           trend={null}
@@ -202,7 +200,7 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
             <h2 className="text-lg font-bold" style={{ color: KAYAD_COLORS.lightNavy }}>
               Upcoming Bookings
             </h2>
-            <a href="#" style={{ color: KAYAD_COLORS.emerald }}>View All</a>
+            <span className="text-xs font-semibold text-slate-400">Latest 5</span>
           </div>
 
           {dashboard.upcomingBookings.length === 0 ? (
@@ -246,9 +244,9 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
               Quick Actions
             </h2>
             <div className="space-y-2">
-              <QuickAction icon={<Plus size={16} />} label="Add Package" href="#" />
-              <QuickAction icon={<Users size={16} />} label="Manage Staff" href="#" />
-              <QuickAction icon={<MessageSquare size={16} />} label="Messages" href="#" badge={dashboard.unreadMessages} />
+              <QuickAction icon={<Plus size={16} />} label="Add Package" />
+              <QuickAction icon={<Users size={16} />} label="Manage Staff" />
+              <QuickAction icon={<MessageSquare size={16} />} label="Messages" badge={dashboard.unreadMessages} />
             </div>
           </div>
         </div>
@@ -442,15 +440,15 @@ function StatCard({ icon, label, value, trend }: { icon: React.ReactNode; label:
 
 function BookingCard({ booking, showActions = false }: { booking: Booking; showActions?: boolean }) {
   const statusColors: Record<string, string> = {
-    booked: '#3b82f6',
-    confirmed: '#8b5cf6',
-    inspector_assigned: '#8b5cf6',
-    travelling: '#f59e0b',
-    inspection_started: '#10b981',
-    inspection_complete: '#10b981',
-    report_generated: '#10b981',
-    closed: '#6b7280',
-    cancelled: '#ef4444',
+    booked: '#176B87',
+    confirmed: '#2F8F87',
+    inspector_assigned: '#2F8F87',
+    travelling: '#5AAFA4',
+    inspection_started: '#13B8A6',
+    inspection_complete: '#13B8A6',
+    report_generated: '#13B8A6',
+    closed: '#64748b',
+    cancelled: '#C65D5D',
   };
 
   return (
@@ -488,14 +486,7 @@ function BookingCard({ booking, showActions = false }: { booking: Booking; showA
         </span>
 
         {showActions && (
-          <div className="flex gap-2 mt-2 justify-end">
-            <button className="p-2 rounded" style={{ backgroundColor: KAYAD_COLORS.white }}>
-              <Eye size={16} style={{ color: KAYAD_COLORS.lightNavy }} />
-            </button>
-            <button className="p-2 rounded" style={{ backgroundColor: KAYAD_COLORS.white }}>
-              <Download size={16} style={{ color: KAYAD_COLORS.lightNavy }} />
-            </button>
-          </div>
+          <span className="text-[10px] font-medium text-slate-400 mt-2 block">Actions are available in the provider workflow when returned by the backend.</span>
         )}
       </div>
     </div>
@@ -522,11 +513,10 @@ function EarningsRow({ label, value, isBold = false, isNegative = false, highlig
   );
 }
 
-function QuickAction({ icon, label, href, badge }: { icon: React.ReactNode; label: string; href: string; badge?: number }) {
+function QuickAction({ icon, label, badge }: { icon: React.ReactNode; label: string; badge?: number }) {
   return (
-    <a
-      href={href}
-      className="flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-gray-50"
+    <div
+      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50"
       style={{ color: KAYAD_COLORS.lightNavy }}
     >
       <span className="flex items-center gap-2">
@@ -541,6 +531,6 @@ function QuickAction({ icon, label, href, badge }: { icon: React.ReactNode; labe
           {badge}
         </span>
       )}
-    </a>
+    </div>
   );
 }

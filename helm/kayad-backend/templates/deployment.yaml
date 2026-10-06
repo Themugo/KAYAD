@@ -95,16 +95,27 @@ spec:
               name: {{ include "kayad-backend.fullname" . }}-secrets
               key: mpesa-passkey
         {{- end }}
-        - name: SUPABASE_PUBLIC_BUCKET
+        {{- if .Values.secrets.cloudinaryCloudName }}
+        - name: CLOUDINARY_CLOUD_NAME
           valueFrom:
             secretKeyRef:
               name: {{ include "kayad-backend.fullname" . }}-secrets
-              key: supabase-public-bucket
-        - name: SUPABASE_PRIVATE_BUCKET
+              key: cloudinary-cloud-name
+        {{- end }}
+        {{- if .Values.secrets.cloudinaryApiKey }}
+        - name: CLOUDINARY_API_KEY
           valueFrom:
             secretKeyRef:
               name: {{ include "kayad-backend.fullname" . }}-secrets
-              key: supabase-private-bucket
+              key: cloudinary-api-key
+        {{- end }}
+        {{- if .Values.secrets.cloudinaryApiSecret }}
+        - name: CLOUDINARY_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: cloudinary-api-secret
+        {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         livenessProbe:

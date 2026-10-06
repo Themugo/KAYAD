@@ -122,11 +122,14 @@ export const copyToClipboard = async (text) => {
   }
 };
 
-// ─── Canonical media helpers ─────────────────────────────
-// Supabase Storage/CDN URLs are already responsive-safe at the application
-// boundary. Keep the helper generic so image components never depend on a
-// storage vendor.
-export const getMediaSrcSet = (src) => {
+// ─── Cloudinary Image Helpers ───────────────────────────
+export const getCloudinarySrcSet = (src) => {
   if (!src) return null;
+  if (src.includes('res.cloudinary.com')) {
+    return {
+      src,
+      srcSet: `${src.replace('/image/upload/', '/image/upload/w_400/')} 400w, ${src.replace('/image/upload/', '/image/upload/w_800/')} 800w, ${src.replace('/image/upload/', '/image/upload/w_1200/')} 1280w`,
+    };
+  }
   return { src };
 };

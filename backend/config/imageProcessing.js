@@ -80,7 +80,7 @@ export const FORMAT_CONVERSION = {
 // =============================
 
 export const STORAGE_STRATEGY = {
-  primary: "supabase",
+  primary: "cloudinary",
   preserveOriginal: true,
   generateVariants: true,
   eagerTransformations: true,

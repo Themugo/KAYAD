@@ -127,7 +127,7 @@ const CarCard = memo(CarCardComponent, (prevProps, nextProps) => {
 | Lazy Loading | ✅ IntersectionObserver |
 | Placeholder | ✅ Shimmer animation |
 | Fallback Chain | ✅ 3 image fallback |
-| WebP Support | ✅ via Supabase Storage |
+| WebP Support | ✅ via Cloudinary |
 | Responsive Images | ✅ srcSet with sizes |
 | Async Decoding | ✅ `decoding="async"` |
 
@@ -163,7 +163,7 @@ blurDataURL={generateBlurPlaceholder(image)}
 { urlPattern: /\/api\/cars.*/i, handler: 'NetworkFirst' }
 
 // Images: CacheFirst, 30 days TTL
-{ urlPattern: /^https:\/\/res\.Supabase Storage\.com\/.*/i, handler: 'CacheFirst' }
+{ urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i, handler: 'CacheFirst' }
 ```
 
 ---

@@ -115,7 +115,7 @@
         ▼                     ▼                     ▼
 ┌───────────────┐    ┌───────────────┐    ┌───────────────┐
 │   Database    │    │    Cache     │    │   Storage     │
-│  (Supabase)   │    │   (Redis)    │    │ (Supabase Storage)  │
+│  (Supabase)   │    │   (Redis)    │    │ (Cloudinary)  │
 │  PostgreSQL   │    │              │    │               │
 └───────────────┘    └───────────────┘    └───────────────┘
         │                     │                     │
@@ -155,7 +155,7 @@
 |------------|---------|
 | Vercel | Frontend Hosting |
 | Render/Railway | Backend Hosting |
-| Supabase Storage | Media Storage |
+| Cloudinary | Media Storage |
 | Sentry | Error Tracking |
 | Grafana | Monitoring |
 
@@ -626,8 +626,8 @@ MPESA_CONSUMER_KEY=xxx
 MPESA_CONSUMER_SECRET=xxx
 STRIPE_SECRET_KEY=xxx
 SENDGRID_API_KEY=xxx
-SUPABASE_PUBLIC_BUCKET=xxx
-SUPABASE_PRIVATE_BUCKET=xxx
+CLOUDINARY_CLOUD_NAME=xxx
+CLOUDINARY_API_KEY=xxx
 ```
 
 ## 6.2 Deployment Procedures

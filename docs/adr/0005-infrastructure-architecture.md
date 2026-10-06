@@ -1,5 +1,3 @@
-> **SUPERSEDED (2026-10-06):** The historical Cloudinary media decision in this ADR is no longer the active architecture. KAYAD now uses Supabase Storage as its sole media provider. This ADR is retained for historical traceability.
-
 ---
 title: 0005 Infrastructure Architecture
 owner: @tech-lead

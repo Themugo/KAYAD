@@ -76,7 +76,7 @@ Surface mapping of all route files (~80), controllers (~50), and middleware, fol
 
 - `/api/metadata/schema`, `/api/metadata/entities` list table/entity names publicly (admin config has `metadataSchemaPublic` if ops chooses to lock it). Consider protecting by default.
 - `NodeCache.getStats()` used for the cache-health endpoint has a long-standing no-op stub — harmless, cleanup opportunity.
-- Upload pipeline: Supabase Storage is canonical. Public marketplace media uses public bucket URLs; private evidence/documents use short-lived signed URLs. Expiring signed URLs are not persisted as the canonical private media identity.
+- Upload pipeline: Cloudinary delivery uses public URLs; signed URLs are only needed for KYC/verification evidence (already handled via `kyc` flag). Intentional.
 - Lockout/lockout-redis: falls back to in-process Map when Redis is absent — fine for single instance, document Redis as prod requirement.
 - Email verification gate remains opt-in (`REQUIRE_EMAIL_VERIFICATION` / `EMAIL_HOST`); set one of them in production config to enforce.
 - Long `maxFileSize` (50 MB) on evidence upload combines with magic-byte validation; consider lowering for non-evidence routes.

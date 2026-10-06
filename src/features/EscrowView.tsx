@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { EscrowTransaction, EscrowLogEntry, EscrowDispute, UserProfile } from '../types';
-import { getMyEscrows, confirmVehicle, confirmDelivery, requestRelease, disputeEscrow, releaseEscrow, mapBackendEscrowToTransaction, EscrowApiError } from '../services/escrowApi';
+import { getMyEscrows, getEscrowState, getFundingInstructions, confirmVehicle, confirmDelivery, requestRelease, disputeEscrow, releaseEscrow, mapBackendEscrowToTransaction, EscrowApiError } from '../services/escrowApi';
 import EvidenceUpload from '../components/EvidenceUpload';
 import {
   Shield,
@@ -62,6 +62,8 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
   const [dealSearch, setDealSearch] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create' | 'rules'>('journey');
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const [stateDetails, setStateDetails] = useState<{ currentState?: string; allowedTransitions?: string[]; history?: Array<{ action?: string; by?: string; at?: string; reason?: string }> } | null>(null);
+  const [fundingInstructions, setFundingInstructions] = useState<{ fundingMethod: string; rules: { releaseDays: number; minimumAmount: number; maximumAmount?: number | null }; account: { accountName?: string; bankName?: string; accountNumber?: string; branch?: string; currency?: string } | null; amount: number; reference: string } | null>(null);
   const selectedDeal = dealsList.find((d) => d.id === selectedDealId);
 
   useEffect(() => {
@@ -96,6 +98,31 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
       });
     return () => { cancelled = true; };
   }, [user]);
+
+  useEffect(() => {
+    if (!selectedDealId || !user) {
+      setStateDetails(null);
+      setFundingInstructions(null);
+      return;
+    }
+    let cancelled = false;
+    setStateDetails(null);
+    getEscrowState(selectedDealId).then((details) => {
+      if (!cancelled) setStateDetails(details);
+    }).catch(() => {
+      if (!cancelled) setStateDetails(null);
+    });
+    if (selectedDeal?.backendStatus === 'pending') {
+      getFundingInstructions(selectedDealId).then((details) => {
+        if (!cancelled) setFundingInstructions(details);
+      }).catch(() => {
+        if (!cancelled) setFundingInstructions(null);
+      });
+    } else {
+      setFundingInstructions(null);
+    }
+    return () => { cancelled = true; };
+  }, [selectedDealId, selectedDeal?.backendStatus, user]);
 
   // Fixed: derives the real, honest perspective from who the deal's
   // real parties actually are, rather than a free toggle anyone could
@@ -137,51 +164,17 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // 6-Step Visual Escrow Purchase Timeline Protocol Definition
+  // Canonical buyer/seller journey derived from the real backend state machine.
+  // No inspection, title-transfer, or payout milestone is shown as complete
+  // unless the backend exposes that state.
   const escrowTimelineSteps = [
-    {
-      step: 1,
-      id: 'reserved',
-      title: 'Vehicle Reserved',
-      desc: 'Price agreed & offer locked by both parties.',
-      controller: 'Seller & Buyer Agreement'
-    },
-    {
-      step: 2,
-      id: 'deposit',
-      title: 'Buyer Deposits Funds',
-      desc: 'Funds locked in neutral KAYAD Escrow Vault.',
-      controller: 'Awaiting Vault Confirmation'
-    },
-    {
-      step: 3,
-      id: 'inspection',
-      title: 'Inspection Completed',
-      desc: '150-Point technical audit & VIN verification.',
-      controller: 'Certified Inspector & Kayad'
-    },
-    {
-      step: 4,
-      id: 'approval',
-      title: 'Buyer Approves Vehicle',
-      desc: 'Buyer signs off on physical condition.',
-      controller: 'Buyer Release Sign-off'
-    },
-    {
-      step: 5,
-      id: 'transfer',
-      title: 'Logbook Transfer',
-      desc: 'External title-transfer step; KAYAD does not currently have a live NTSA TIMS integration.',
-      controller: 'External title-transfer process (not connected)'
-    },
-    {
-      step: 6,
-      id: 'released',
-      title: 'Seller Paid',
-      desc: 'Bank vault releases payout to seller.',
-      controller: 'Bank Custodian Disbursed'
-    }
+    { step: 1, id: 'pending', title: 'Escrow Created', desc: 'Transaction exists and is awaiting custody funding.', controller: 'Purchase & Payment Workflow' },
+    { step: 2, id: 'funded', title: 'Funds Held', desc: 'Custody funding has been verified and funds are held.', controller: 'KAYAD Escrow State Machine' },
+    { step: 3, id: 'vehicle_confirmed', title: 'Buyer Confirmed', desc: 'Buyer has confirmed the vehicle against the transaction.', controller: 'Buyer Confirmation' },
+    { step: 4, id: 'delivered', title: 'Delivery Confirmed', desc: 'Seller has confirmed vehicle delivery.', controller: 'Seller Delivery Confirmation' },
+    { step: 5, id: 'released', title: 'Settlement', desc: 'Funds have been released or the escrow has reached a terminal outcome.', controller: 'Authorized Settlement / System' },
   ];
+
 
   const filteredDeals = useMemo(() => {
     if (!dealSearch) return dealsList;
@@ -195,70 +188,35 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
     );
   }, [dealsList, dealSearch]);
 
-  const totalVaultValue = dealsList.reduce((sum, d) => sum + d.amount, 0);
+  const heldStatuses = new Set(['funded', 'vehicle_confirmed', 'delivered', 'disputed']);
+  const totalHeldValue = dealsList.filter((d) => heldStatuses.has(d.backendStatus || '')).reduce((sum, d) => sum + d.amount, 0);
+  const activeDealCount = dealsList.filter((d) => !['released', 'refunded', 'closed'].includes(d.backendStatus || '')).length;
+  const pendingFundingCount = dealsList.filter((d) => d.backendStatus === 'pending').length;
+  const settledDealCount = dealsList.filter((d) => ['released', 'refunded', 'closed'].includes(d.backendStatus || '')).length;
+  const selectedHeldAmount = selectedDeal && heldStatuses.has(selectedDeal.backendStatus || '') ? selectedDeal.amount : 0;
 
-  // Helper function to derive expected next action and current fund controller
+  // Derive the next operational action from the canonical backend state.
   const getWorkflowContext = (deal: EscrowTransaction) => {
-    if (deal.status === 'Dispute Under Review' || deal.dispute) {
-      return {
-        singleStatusText: 'Dispute Opened — Custodian Funds Frozen in Vault',
-        badgeVariant: 'warning' as const,
-        fundController: 'KAYAD Escrow Custody (Frozen)',
-        nextActionRole: 'Administrator / Legal Compliance',
-        nextActionText: 'Reviewing evidence & mechanic logs to resolve dispute.'
-      };
+    if (deal.backendStatus === 'disputed' || deal.dispute) {
+      return { singleStatusText: 'Dispute under review', badgeVariant: 'warning' as const, fundController: 'KAYAD Escrow State Machine (Disputed)', nextActionRole: 'Authorized escrow operator', nextActionText: 'Review the dispute evidence and audit trail. Release or refund only through an authorized backend transition.' };
     }
-
-    switch (deal.step) {
-      case 1:
-        return {
-          singleStatusText: 'Awaiting Buyer Vault Deposit',
-          badgeVariant: 'escrow' as const,
-          fundController: 'Buyer (Awaiting Vault Transfer)',
-          nextActionRole: 'Buyer',
-          nextActionText: 'Deposit purchase funds into KAYAD Escrow Vault.'
-        };
-      case 2:
-        return {
-          singleStatusText: 'Vault Deposit Received — Awaiting Inspection',
-          badgeVariant: 'escrow' as const,
-          fundController: 'KAYAD Escrow (Neutral Hold)',
-          nextActionRole: 'Certified Inspector',
-          nextActionText: 'Dispatch mechanic to conduct 150-point technical audit.'
-        };
-      case 3:
-        return {
-          singleStatusText: '150-Point Technical Inspection Completed',
-          badgeVariant: 'verified' as const,
-          fundController: 'KAYAD Escrow Vault (Neutral Hold)',
-          nextActionRole: 'Buyer',
-          nextActionText: 'Review 150-Point Audit Report and approve vehicle.'
-        };
-      case 4:
-        return {
-          singleStatusText: 'Awaiting Buyer Approval',
-          badgeVariant: 'escrow' as const,
-          fundController: 'KAYAD Escrow Vault (Neutral Hold)',
-          nextActionRole: 'Buyer',
-          nextActionText: 'Sign electronic approval certificate to initiate title transfer.'
-        };
-      case 5:
-        return {
-          singleStatusText: 'Ownership Transfer In Progress',
-          badgeVariant: 'verified' as const,
-          fundController: 'KAYAD Escrow Vault (Neutral Hold)',
-          nextActionRole: 'Authorized transaction parties',
-          nextActionText: 'Complete the external title-transfer process; KAYAD does not claim a live NTSA TIMS connection.'
-        };
-      case 6:
+    switch (deal.backendStatus) {
+      case 'pending':
+        return { singleStatusText: 'Awaiting verified custody funding', badgeVariant: 'escrow' as const, fundController: 'Buyer / funding rail', nextActionRole: 'Buyer or funding operator', nextActionText: 'Use the backend-issued custody instructions and verify the deposit reference.' };
+      case 'funded':
+        return { singleStatusText: 'Funds held in escrow', badgeVariant: 'escrow' as const, fundController: 'KAYAD Escrow Custody', nextActionRole: 'Buyer', nextActionText: 'Review the vehicle and confirm it through the escrow workflow when ready.' };
+      case 'vehicle_confirmed':
+        return { singleStatusText: 'Buyer confirmed the vehicle', badgeVariant: 'verified' as const, fundController: 'KAYAD Escrow Custody', nextActionRole: 'Seller', nextActionText: 'Confirm vehicle delivery through the seller workflow.' };
+      case 'delivered':
+        return { singleStatusText: 'Delivery confirmed — awaiting settlement', badgeVariant: 'verified' as const, fundController: 'KAYAD Escrow Custody', nextActionRole: 'Buyer / authorized settlement operator', nextActionText: 'Buyer may request release; authorized settlement can release funds when the backend transition is eligible.' };
+      case 'released':
+        return { singleStatusText: 'Funds released to seller', badgeVariant: 'success' as const, fundController: 'Seller / settlement rail', nextActionRole: 'Operations', nextActionText: 'Confirm the settlement record and close the escrow when the terminal workflow permits.' };
+      case 'refunded':
+        return { singleStatusText: 'Refunded to buyer', badgeVariant: 'warning' as const, fundController: 'Buyer / refund settlement', nextActionRole: 'Operations', nextActionText: 'Confirm the external refund settlement record and preserve the audit trail.' };
+      case 'closed':
+        return { singleStatusText: 'Escrow closed', badgeVariant: 'success' as const, fundController: 'Terminal', nextActionRole: 'None', nextActionText: 'This escrow is in a terminal state. No further transaction action is available.' };
       default:
-        return {
-          singleStatusText: 'Transaction Completed & Seller Disbursed',
-          badgeVariant: 'success' as const,
-          fundController: 'Seller Account (Funds Released)',
-          nextActionRole: 'None',
-          nextActionText: 'Transaction settled successfully. Logbook transferred.'
-        };
+        return { singleStatusText: deal.status, badgeVariant: 'neutral' as const, fundController: 'Backend controlled', nextActionRole: 'Operations', nextActionText: 'Review the canonical state endpoint for the current transition contract.' };
     }
   };
 
@@ -267,25 +225,6 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
   const handleCreateEscrow = (e: React.FormEvent) => {
     e.preventDefault();
     triggerToast('Standalone escrow creation is not available. Start from a real purchase/payment flow.');
-  };
-
-  // Advance deal workflow step
-  // Fixed: this previously advanced through all 6 fake steps purely
-  // in local state, including fake "Inspection Completed"/"NTSA
-  // Processing" stages with no real backend action behind them at
-  // all. The real backend's own matching action is confirmVehicle -
-  // the buyer confirming the vehicle, moving the deal forward for
-  // real (confirmed directly: backend/controllers/escrowController.js's
-  // confirmVehicleHandler, gated to the real buyer or an admin).
-  const handleAdvanceStep = async (dealId: string) => {
-    try {
-      const updatedEscrow = await confirmVehicle(dealId);
-      const updated = mapBackendEscrowToTransaction(updatedEscrow);
-      setDealsList(prev => prev.map(d => d.id === dealId ? updated : d));
-      triggerToast(`Deal moved forward: ${updated.status}`);
-    } catch (err) {
-      triggerToast(err instanceof EscrowApiError ? err.message : 'Could not confirm this deal. Please try again.');
-    }
   };
 
   // Open Dispute Handler
@@ -326,9 +265,9 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
       {/* Standalone Header Banner */}
       <PageHeader
         badgeIcon={<Lock className="w-4 h-4 text-amber-400" />}
-        badgeText="Bank-Backed Custodian Portal"
-        title="KAYAD Escrow Purchase Journey & Financial Settlement"
-        description="Eliminating buyer & seller risk through visual package-tracking escrow clarity, 150-point technical mechanic audits, and direct NTSA TIMS logbook title clearance."
+        badgeText="Escrow Control Center"
+        title="KAYAD Escrow Control Center"
+        description="A backend-controlled transaction surface for custody funding, vehicle confirmation, delivery, dispute handling and settlement. KAYAD shows only states and actions supported by the live escrow workflow."
         rightElement={
           <div className="flex items-center gap-2 flex-wrap">
             <Button
@@ -338,7 +277,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               className="bg-[#176B87] text-white font-bold"
             >
               <Lock className="w-4 h-4 text-amber-400" />
-              <span>Escrow Purchase Journey</span>
+              <span>Transaction Journey</span>
             </Button>
             <Button
               variant={activeTab === 'deals' ? 'primary' : 'outline'}
@@ -347,7 +286,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               className="font-bold text-slate-700"
             >
               <FileText className="w-4 h-4 text-emerald-600" />
-              <span>All Protected Deals ({dealsList.length})</span>
+              <span>Protected Deals ({dealsList.length})</span>
             </Button>
             <Button
               variant={activeTab === 'create' ? 'primary' : 'outline'}
@@ -356,7 +295,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               className="font-bold text-slate-700"
             >
               <PlusCircle className="w-4 h-4 text-[#176B87]" />
-              <span>Escrow Flow</span>
+              <span>How Escrow Starts</span>
             </Button>
           </div>
         }
@@ -366,44 +305,46 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatWidget
           label="Total Locked Vault Volume"
-          value={`Ksh ${totalVaultValue.toLocaleString()}`}
-          trend="Sum of your loaded escrow records"
+          value={`Ksh ${totalHeldValue.toLocaleString()}`}
+          trend="Funds in held / disputed escrow states"
           trendType="positive"
           icon={<Landmark className="w-4 h-4 text-emerald-600" />}
         />
 
         <StatWidget
           label="Active Protected Transactions"
-          value={dealsList.length}
-          trend="Live records only"
+          value={activeDealCount}
+          trend={`${pendingFundingCount} awaiting funding`}
           trendType="positive"
           icon={<Lock className="w-4 h-4 text-amber-500" />}
         />
 
         <StatWidget
-          label="Escrow Settlement Time"
-          value="Not calculated"
-          trend="Backend does not expose this metric"
+          label="Pending Funding"
+          value={pendingFundingCount}
+          trend="Awaiting verified custody funding"
           trendType="neutral"
-          icon={<Clock className="w-4 h-4 text-blue-500" />}
+          icon={<Clock className="w-4 h-4 text-[#176B87]" />}
         />
 
         <StatWidget
-          label="Title Clearance"
-          value="Not verified here"
-          trend="No direct NTSA integration in this view"
+          label="Settled / Closed"
+          value={settledDealCount}
+          trend="Released, refunded or closed records"
           trendType="positive"
           icon={<FileCheck className="w-4 h-4 text-emerald-600" />}
         />
       </div>
 
-      <Card className="p-4 border border-slate-200 bg-white">
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-          <UserCheck className="w-4 h-4 text-[#176B87]" />
-          <span>Current perspective: {userRole}</span>
-          <span className="font-normal text-slate-500">(derived from the signed-in user and selected real escrow)</span>
-        </div>
-      </Card>
+      {realUserRole && selectedDeal && (
+        <Card className="p-4 border border-slate-200 bg-white">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+            <UserCheck className="w-4 h-4 text-[#176B87]" />
+            <span>Current perspective: {userRole}</span>
+            <span className="font-normal text-slate-500">derived from the signed-in user and selected real escrow</span>
+          </div>
+        </Card>
+      )}
 
       {/* TAB 1: ESCROW PURCHASE JOURNEY DASHBOARD */}
       {activeTab === 'journey' && selectedDeal && (
@@ -505,23 +446,47 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
             </div>
           </Card>
 
-          {/* 2. VISUAL ESCROW TIMELINE STEPPER */}
+          {selectedDeal.backendStatus === 'pending' && fundingInstructions && (
+            <Card className="p-5 bg-white border border-slate-200 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold text-[#176B87]">Custody funding instructions</p>
+                  <h3 className="text-base font-black text-[#0A3340] font-display mt-1">Fund this escrow through the configured custody rail</h3>
+                </div>
+                <Badge variant="neutral" size="sm">{fundingInstructions.fundingMethod.replace('_', ' ')}</Badge>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200"><p className="text-[10px] uppercase font-bold text-slate-400">Amount</p><p className="font-black text-[#176B87] mt-1">Ksh {Number(fundingInstructions.amount || selectedDeal.amount).toLocaleString()}</p></div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200"><p className="text-[10px] uppercase font-bold text-slate-400">Reference</p><p className="font-mono font-bold text-slate-800 mt-1 break-all">{fundingInstructions.reference}</p></div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200"><p className="text-[10px] uppercase font-bold text-slate-400">Custody account</p><p className="font-bold text-slate-800 mt-1">{fundingInstructions.account?.accountName || 'Configured custody account'}</p><p className="text-[10px] text-slate-500">{fundingInstructions.account?.bankName || 'Bank details available from custody configuration'}</p><p className="text-[10px] text-slate-500 font-mono">{fundingInstructions.account?.accountNumber || 'Account number unavailable'}</p></div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200"><p className="text-[10px] uppercase font-bold text-slate-400">Release window</p><p className="font-bold text-slate-800 mt-1">{fundingInstructions.rules.releaseDays} day{fundingInstructions.rules.releaseDays === 1 ? '' : 's'}</p><p className="text-[10px] text-slate-500">Backend-controlled rule</p></div>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-3">Only use the current backend-issued reference. This screen does not mark an escrow funded; funding is recognized only after the authorized custody verification succeeds.</p>
+            </Card>
+          )}
+
+          {/* 2. CANONICAL STATE TIMELINE */}
           <Card className="p-6 bg-white border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-extrabold text-[#176B87] font-display flex items-center gap-2">
                 <ShieldCheck className="w-4.5 h-4.5 text-emerald-600" />
-                Package-Tracking Visual Escrow Progress Timeline
+                Canonical Escrow Lifecycle
               </h3>
               <span className="text-xs text-slate-500 font-bold">
-                Progress: Step {selectedDeal.step} of 6 Completed
+                Backend state: {selectedDeal.backendStatus || 'unknown'}
               </span>
             </div>
 
             {/* Stepper Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2">
               {escrowTimelineSteps.map((st) => {
-                const isDone = selectedDeal.step > st.step || selectedDeal.step === 6;
-                const isCurrent = selectedDeal.step === st.step && selectedDeal.step < 6;
+                const currentIndex = ['pending', 'funded', 'vehicle_confirmed', 'delivered', 'released'].includes(selectedDeal.backendStatus || '')
+                  ? escrowTimelineSteps.findIndex((item) => item.id === (selectedDeal.backendStatus === 'closed' ? 'released' : selectedDeal.backendStatus))
+                  : -1;
+                const stepIndex = escrowTimelineSteps.findIndex((item) => item.id === st.id);
+                const isNormalPath = currentIndex >= 0;
+                const isDone = isNormalPath && stepIndex < currentIndex;
+                const isCurrent = isNormalPath && currentIndex === stepIndex;
                 return (
                   <div
                     key={st.step}
@@ -568,6 +533,35 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
               })}
             </div>
           </Card>
+
+          {stateDetails && (
+            <Card className="p-5 bg-white border border-slate-200 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-extrabold text-[#176B87] font-display flex items-center gap-2"><History className="w-4 h-4 text-[#176B87]" /> Canonical state audit</h3>
+                <Badge variant="neutral" size="sm">{stateDetails.currentState || selectedDeal.backendStatus}</Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Recorded state history</p>
+                  <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                    {(stateDetails.history || []).length ? (stateDetails.history || []).map((entry, index) => (
+                      <div key={`${entry.at || 'event'}-${index}`} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px]">
+                        <div className="flex justify-between gap-2 font-bold text-slate-700"><span>{entry.action || 'State update'}</span><span className="text-[10px] text-slate-400">{entry.at ? new Date(entry.at).toLocaleString() : '—'}</span></div>
+                        {entry.reason && <p className="text-slate-500 mt-1">{entry.reason}</p>}
+                      </div>
+                    )) : <p className="text-[11px] text-slate-500">No state-history entries were returned by the backend.</p>}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Backend transition contract</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {(stateDetails.allowedTransitions || []).length ? (stateDetails.allowedTransitions || []).map((next) => <span key={next} className="px-2.5 py-1.5 rounded-lg bg-[#EAF4F5] border border-[#CFE4E7] text-[10px] font-bold text-[#176B87]">{next}</span>) : <span className="text-[11px] text-slate-500">No next states returned. This may be a terminal state.</span>}
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-3">The list above describes the backend contract; role and guard conditions still determine whether the current user can execute a transition.</p>
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* 3. DUAL COLUMN DASHBOARD GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -616,7 +610,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                       </div>
 
                       <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase">Seller Verification</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">Seller</p>
                         <p className="font-extrabold text-emerald-950 flex items-center gap-1">
                           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                           {selectedDeal.sellerName}
@@ -653,7 +647,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
 
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Payment Channel</p>
-                    <p className="font-extrabold text-[#176B87]">{selectedDeal.paymentMethod || 'Payment method not provided'}</p>
+                    <p className="font-extrabold text-[#176B87]">{selectedDeal.paymentMethod || (selectedDeal.backendStatus === 'pending' && fundingInstructions ? fundingInstructions.fundingMethod.replace('_', ' ') : 'Funding method not exposed')}</p>
                     {/* Only display a payment reference when the backend actually returns one. */}
                     {selectedDeal.bankReference && (
                       <p className="text-[10px] text-slate-500">Ref: {selectedDeal.bankReference}</p>
@@ -662,7 +656,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
 
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Locked Vault Balance</p>
-                    <p className="font-black text-emerald-700 text-sm">Ksh {selectedDeal.amount.toLocaleString()}</p>
+                    <p className="font-black text-emerald-700 text-sm">Ksh {selectedHeldAmount.toLocaleString()}</p>
                     <p className="text-[10px] text-slate-500 font-bold">Status: {selectedDeal.status}</p>
                   </div>
                 </div>
@@ -795,7 +789,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                       </div>
 
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600 font-medium">
-                        <strong>Seller Payout Status:</strong> Ksh {selectedDeal.amount.toLocaleString()} remains under the backend-controlled release workflow until an authorized release transition is recorded.
+                        <strong>Settlement Status:</strong> {selectedDeal.status}. Seller payout is recorded only after the canonical release transition and provider settlement workflow.
                       </div>
                     </>
                   )}
@@ -820,34 +814,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                           className="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold shadow-xs"
                         >
                           <Landmark className="w-4 h-4" />
-                          <span>Release Vault Funds to Seller</span>
-                        </Button>
-                      )}
-
-                      {/* Fixed: this action calls the real backend's
-                          admin-only release endpoint (confirmed
-                          directly) - only ever shown to a genuinely
-                          real admin now, not to the buyer this whole
-                          block is otherwise scoped to. */}
-                      {selectedDeal.dispute && isRealAdmin && (
-                        <Button
-                          variant="secondary"
-                          size="md"
-                          fullWidth
-                          onClick={async () => {
-                            try {
-                              await releaseEscrow(selectedDeal.id);
-                              const refreshed = await getMyEscrows();
-                              setDealsList(refreshed.map(mapBackendEscrowToTransaction));
-                              triggerToast('Dispute resolved. Vault funds released to seller.');
-                            } catch (err) {
-                              triggerToast(err instanceof EscrowApiError ? err.message : 'Could not release funds. Please try again.');
-                            }
-                          }}
-                          className="bg-amber-100 text-[#0A3340] border border-amber-300 font-bold"
-                        >
-                          <ShieldCheck className="w-4 h-4 text-[#176B87]" />
-                          <span>Resolve Dispute & Release Funds</span>
+                          <span>{selectedDeal.dispute ? 'Resolve Dispute & Release Funds' : 'Release Vault Funds to Seller'}</span>
                         </Button>
                       )}
 
@@ -925,14 +892,14 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-extrabold text-[#176B87] font-display flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                      Dispute Guarantee Shield Active
+                      Dispute protection
                     </h4>
                     <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">
-                      Zero Open Disputes
+                      No dispute on this deal
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    If the vehicle fails physical 150-point inspection or title transfer encounters encumbrances, the buyer can open a 1-click dispute to freeze vault funds immediately.
+                    A dispute can be opened by an authorized party when a transaction issue needs review. The backend moves the escrow into its disputed state and controls subsequent money-moving transitions.
                   </p>
                 </Card>
               )}
@@ -993,6 +960,23 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
         </div>
       )}
 
+      {activeTab === 'journey' && !selectedDeal && (
+        <Card className="p-6 sm:p-8 bg-white border border-slate-200 shadow-xs">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#EAF4F5] border border-[#CFE4E7] flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-6 h-6 text-[#176B87]" />
+            </div>
+            <p className="text-[11px] uppercase tracking-[0.16em] font-extrabold text-[#176B87]">Escrow Control Surface</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0A3340] font-display mt-2">No protected deal selected</h2>
+            <p className="text-sm text-slate-600 leading-relaxed mt-3 max-w-2xl mx-auto">{user ? 'No escrow record is currently associated with this account. Start from a real KAYAD purchase/payment workflow; this page will show the persisted transaction here once the backend creates it.' : 'Sign in to view escrow records associated with your KAYAD transactions.'}</p>
+            <div className="flex justify-center gap-2 mt-5 flex-wrap">
+              {user ? <Button variant="secondary" onClick={() => setActiveTab('create')}>View How Escrow Starts</Button> : <Button variant="primary" onClick={onOpenAuth}>Sign In</Button>}
+              {user && dealsList.length > 0 && <Button variant="outline" onClick={() => setActiveTab('deals')}>Open Protected Deals</Button>}
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* TAB 2: ALL PROTECTED DEALS TABLE */}
       {activeTab === 'deals' && (
         <div className="space-y-4">
@@ -1009,7 +993,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
             <div className="text-xs text-slate-500 font-bold flex items-center gap-2">
               <span>Protected Queue Balance:</span>
               <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-lg font-black text-sm">
-                Ksh {totalVaultValue.toLocaleString()}
+                Ksh {totalHeldValue.toLocaleString()}
               </span>
             </div>
           </div>
@@ -1052,10 +1036,10 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={d.status === 'Completed' ? 'success' : d.dispute ? 'warning' : 'escrow'}
+                        variant={['Released', 'Completed'].includes(d.status) ? 'success' : d.dispute ? 'warning' : 'escrow'}
                         size="sm"
                       >
-                        <CheckCircle2 className="w-3 h-3" /> {d.status} (Step {d.step}/6)
+                        <CheckCircle2 className="w-3 h-3" /> {d.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -1070,17 +1054,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                         >
                           <span>Open Journey</span>
                         </Button>
-                        {d.step < 6 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAdvanceStep(d.id)}
-                            title="Simulate Next Workflow Step"
-                          >
-                            <span>Advance Step</span>
-                            <ChevronRight className="w-3 h-3" />
-                          </Button>
-                        )}
+
                       </div>
                     </TableCell>
                   </TableRow>
@@ -1122,7 +1096,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                 <span>Immediate Custodian Vault Freeze Guarantee</span>
               </div>
               <p className="text-[11px] text-slate-600 leading-normal">
-                Submitting this dispute will immediately freeze all funds (Ksh {selectedDeal.amount.toLocaleString()}) inside the KAYAD Escrow Vault. No funds can be released to the seller until KAYAD legal mediation completes.
+                Submitting this dispute moves the escrow into the backend disputed state. Money-moving transitions remain controlled by the canonical escrow state machine while the case is reviewed.
               </p>
             </div>
 
@@ -1138,9 +1112,8 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
             </div>
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 space-y-1">
-              <p className="font-bold text-[#176B87]">Automatic Evidence Attached:</p>
-              <p>✓ 150-Point Mechanic Inspection Audit Log</p>
-              <p>✓ KAYAD Escrow Vault Bank Deposit Statement</p>
+              <p className="font-bold text-[#176B87]">Evidence handling</p>
+              <p>Use the dispute evidence workflow to attach files that are actually available to the case.</p>
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
@@ -1157,7 +1130,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
                 variant="primary"
                 size="md"
                 onClick={handleOpenDisputeSubmit}
-                className="bg-[#E5484D] hover:bg-rose-700 text-white font-extrabold shadow-sm"
+                className="bg-[#9F2F35] hover:bg-[#84272D] text-white font-extrabold shadow-sm"
               >
                 <AlertTriangle className="w-4 h-4" />
                 <span>Submit Dispute & Freeze Vault Funds</span>

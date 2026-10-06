@@ -250,7 +250,7 @@ app.use(
         // For inline scripts/styles, implement nonce-based CSP in future
         scriptSrc: ["'self'"],
         styleSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https://*.supabase.co", "blob:"],
+        imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
         connectSrc: [
           "'self'",
           FRONTEND,

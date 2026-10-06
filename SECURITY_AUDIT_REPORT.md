@@ -440,7 +440,7 @@ node_modules/
 | File size | Configurable limit | ✅ |
 | Magic bytes | MIME validation | ✅ |
 | Storage | Safe file names | ✅ |
-| Secure URLs | Signed URLs (Supabase Storage) | ✅ |
+| Secure URLs | Signed URLs (Cloudinary) | ✅ |
 | Virus scanning | Ready for ClamAV | ⚠️ |
 
 ### Phase 5: API Security ✅
