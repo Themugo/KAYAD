@@ -190,6 +190,51 @@ export const b2cCallback = async (req, res) => {
     const sb = getSupabase();
     const conversationId = result.conversationID;
     if (conversationId) {
+      const { data: inspectionSettlement } = await sb
+        .from("inspection_settlements")
+        .select("id,status,net_amount,provider_id")
+        .eq("provider_conversation_id", conversationId)
+        .maybeSingle();
+
+      if (inspectionSettlement) {
+        if (result.success) {
+          const providerAmount = Number(result.amount);
+          const expectedAmount = Number(inspectionSettlement.net_amount);
+          if (!Number.isFinite(providerAmount) || Math.round(providerAmount * 100) !== Math.round(expectedAmount * 100)) {
+            await sb.from("inspection_settlements").update({
+              status: "failed",
+              provider_transaction_id: result.transactionId || null,
+              payout_failure_reason: `Provider amount mismatch: expected ${expectedAmount}, received ${providerAmount}`,
+              updated_at: new Date().toISOString(),
+            }).eq("id", inspectionSettlement.id).eq("status", "processing");
+            throw new Error("M-Pesa inspection settlement amount mismatch");
+          }
+        }
+
+        if (result.success) {
+          await sb.from("inspection_settlements").update({
+            provider_transaction_id: result.transactionId || null,
+            updated_at: new Date().toISOString(),
+          }).eq("id", inspectionSettlement.id);
+
+          await sb.rpc("kayad_mark_inspection_settlement_paid_atomic", {
+            p_settlement_id: inspectionSettlement.id,
+            p_payment_method: "mpesa_b2c",
+            p_payment_reference: result.transactionId || conversationId,
+            p_user_id: null,
+          });
+        } else {
+          await sb.from("inspection_settlements").update({
+            status: "failed",
+            provider_transaction_id: result.transactionId || null,
+            payout_failure_reason: result.resultDesc || "M-Pesa B2C payout failed",
+            updated_at: new Date().toISOString(),
+          }).eq("id", inspectionSettlement.id).eq("status", "processing");
+        }
+
+        return res.json({ ResultCode: 0, ResultDesc: "Success" });
+      }
+
       const { data: payout } = await sb.from("dealer_payouts").select("id,status").eq("conversation_id", conversationId).maybeSingle();
       if (payout) {
         const { data: payoutForVerification, error: payoutReadError } = await sb

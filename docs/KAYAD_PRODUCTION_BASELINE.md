@@ -35,7 +35,7 @@ Status key: REAL (built, connected, working as designed) / PARTIAL (built but in
 | 22 | Analytics | BACKEND MIXED | Several route files exist; table backing is mixed (part of the 69/116 split); no frontend consumer |
 | 23 | Background jobs | PARTIAL/UNKNOWN | BullMQ + node-cron real dependencies confirmed; live queue behavior unverified - sandbox server-start test showed 30+ Redis connection failures from queue initialization |
 | 24 | Redis | PARTIAL | Real dependency (ioredis), designed in-memory fallback when REDIS_URL is empty (confirmed in .env.example's own comment); not provisioned in render.yaml at all - a real gap, newly confirmed this phase (section 4) |
-| 25 | Storage | REAL (code) | Cloudinary integration confirmed real (image upload flow, images JSONB shape verified in Phase 5); live credential validity unknown |
+| 25 | Storage | REAL (code) | Supabase Storage integration is the canonical media path; live bucket/policy validation remains an environment certification step |
 | 26 | Deployment | REAL (config exists) / UNKNOWN (live state) | render.yaml (Docker/Render) + vercel.json (frontend) both real and substantial; no live deployment reachable from this environment to verify |
 | 27 | Vercel | REAL (config) | Confirmed no API proxy rewrite exists - only SPA fallback (PHASE2_AUTH_AUTHORIZATION.md); genuinely cross-origin topology |
 | 28 | Render | REAL (config) | Docker-based web service, health check path, persistent disk for uploads, full env var list confirmed this phase (section 4) - no Redis add-on referenced |
@@ -100,7 +100,7 @@ Already established, cited rather than re-derived:
 Node/npm: Node >=20.x (backend package.json engines field), .nvmrc specifies 22. Frontend package.json has no engines field - inherits the same Node version by convention, not enforced. This sandbox runs Node v22.22.2/npm 10.9.7, consistent with .nvmrc.
 
 Required production environment variables (from render.yaml, the authoritative deployment config):
-NODE_ENV, PORT, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET, JWT_SECRET, REFRESH_TOKEN_SECRET, FRONTEND_URL, BACKEND_URL, MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE, MPESA_PASSKEY, MPESA_CALLBACK_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, WEBHOIST_EMAIL, ADMIN_EMAIL.
+NODE_ENV, PORT, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET, JWT_SECRET, REFRESH_TOKEN_SECRET, FRONTEND_URL, BACKEND_URL, MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE, MPESA_PASSKEY, MPESA_CALLBACK_URL, SUPABASE_PUBLIC_BUCKET, SUPABASE_PRIVATE_BUCKET, WEBHOIST_EMAIL, ADMIN_EMAIL.
 
 Notably absent from render.yaml: any REDIS_URL/REDIS_HOST variable. .env.example documents Redis as optional with an in-memory fallback when unset - but this sandbox's own server-start test (Phase 0 of this session) showed the live process hanging on basic requests alongside repeated Redis connection failures, which is not obviously consistent with a clean, complete in-memory fallback for every Redis-dependent code path (queues in particular). This inconsistency is not resolved in this document - flagged as a P0 item (section 3) requiring live investigation, not assumed safe either way.
 

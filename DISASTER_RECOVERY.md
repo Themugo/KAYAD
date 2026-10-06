@@ -144,7 +144,7 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 
 **Third-Party Services:**
 - M-Pesa (payments)
-- Cloudinary (images)
+- Supabase Storage (media)
 - Brevo (transactional email)
 - Africa's Talking (SMS) and Twilio (WhatsApp)
 - Sentry (error tracking)
@@ -156,11 +156,11 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 4. Monitor M-Pesa status
 5. Process queued payments when service restored
 
-**Cloudinary Outage (Medium):**
-1. Serve images from CDN cache
-2. Display placeholder images if cache miss
-3. Monitor Cloudinary status
-4. Re-upload images if needed after restoration
+**Supabase Storage Outage (Medium):**
+1. Preserve cached public media where available
+2. Display placeholder images if a public object cannot be retrieved
+3. Verify `kayad-images` and `kayad-private` bucket health
+4. Reconcile failed media jobs after restoration
 
 **Brevo/Africa's Talking/Twilio Outage (Low):**
 1. Queue notifications

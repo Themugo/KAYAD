@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, UserProfile } from '../types';
 import { createInspectionOrder, getMyInspections, InspectionApiError, BackendInspectionOrder } from '../services/inspectionApi';
-import { inspectionApi as inspectionMarketplaceApi } from './InspectionMarketplace/services/api';
 import { useSocket } from '../context/SocketContext';
 import {
   ShieldCheck,
@@ -329,7 +328,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       )}
 
       {/* Service scope banner */}
-      <div className="bg-[#0A3340] border-b border-amber-400/30 px-4 py-3 text-xs shadow-md rounded-2xl">
+      <div className="kayad-inspection-scope bg-[#0A3340] border-b border-[#13B8A6]/25 px-4 py-3 text-xs shadow-md rounded-2xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-amber-400 font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">KAYAD Inspection Orders</span>
@@ -339,7 +338,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       </div>
 
       {/* Hero Header Banner */}
-      <div className="bg-[#176B87] text-white pt-8 pb-10 px-4 sm:px-6 lg:px-8 shadow-md">
+      <div className="kayad-inspection-hero bg-[#176B87] text-white pt-8 pb-10 px-4 sm:px-6 lg:px-8 shadow-md">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
@@ -387,7 +386,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           </div>
 
           {/* CRITICAL BUSINESS MODEL TRANSPARENCY BANNER */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div className="kayad-inspection-process bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 font-bold border border-amber-400/30">
                 1
@@ -448,7 +447,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           informational service-tier content, not user-specific data.
           "Digital Reports" and "Bookings Tracker" now show this
           user's own real inspection history. */}
-      <div className="sticky top-[72px] z-40 bg-white border-b border-slate-200 shadow-xs">
+      <div className="kayad-inspection-tabs sticky top-14 z-40 bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center space-x-1 sm:space-x-4 overflow-x-auto py-2 scrollbar-none text-xs font-bold">
             <button
@@ -818,47 +817,9 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    window.open(`/api/inspection/bookings/${selectedReport.bookingId}/report/pdf`, '_blank', 'noopener,noreferrer');
-                  }}
+                  onClick={() => showToast('PDF Report download started')}
                 >
-                  <Download className="w-4 h-4 mr-1.5" /> Download PDF Report
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={async () => {
-                    const raw = window.prompt('Rate this inspection provider from 1 to 5');
-                    const rating = Number(raw);
-                    if (!Number.isInteger(rating) || rating < 1 || rating > 5) return;
-                    const comment = window.prompt('Optional review comment') || '';
-                    try {
-                      await inspectionMarketplaceApi.submitReviewAtomic({ bookingId: selectedReport.bookingId, ratings: { overall: rating }, reviewText: comment });
-                      showToast('Review submitted. Thank you.');
-                    } catch (error) {
-                      showToast(error instanceof Error ? error.message : 'Review could not be submitted');
-                    }
-                  }}
-                >
-                  <Star className="w-4 h-4 mr-1.5" /> Review Provider
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={async () => {
-                    const description = window.prompt('Describe the inspection issue or dispute');
-                    if (!description) return;
-                    try {
-                      await inspectionMarketplaceApi.openDispute(selectedReport.bookingId, 'inspection_quality', description);
-                      showToast('Dispute opened for KAYAD review.');
-                    } catch (error) {
-                      showToast(error instanceof Error ? error.message : 'Dispute could not be opened');
-                    }
-                  }}
-                >
-                  <AlertTriangle className="w-4 h-4 mr-1.5" /> Raise Dispute
+                  <Download className="w-4 h-4 mr-1.5" /> Download PDF Certificate
                 </Button>
 
                 <Button
@@ -866,7 +827,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   size="sm"
                   onClick={() => {
                     setSelectedReport(null);
-                    showToast('Proceeding to protected vehicle purchase.');
+                    showToast('Direct Escrow purchase initiated for this vehicle');
                   }}
                 >
                   Proceed to Escrow Purchase

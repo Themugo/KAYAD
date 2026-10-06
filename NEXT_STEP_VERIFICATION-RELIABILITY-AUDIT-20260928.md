@@ -40,8 +40,8 @@ The six failures are not source regressions:
 - M-Pesa remains optional until explicitly activated.
 - Africa's Talking remains optional until explicitly activated.
 - Twilio WhatsApp remains optional until explicitly activated.
-- Cloudinary remains part of the current active media architecture.
+- Supabase Storage remains part of the current active media architecture.
 - No production credentials were embedded or fabricated.
 
 ## Release readiness
-Source-level release gates remain green. The next certification step requires the actual Windows/Render environment with Node 22.22.2+, production environment variables, managed Redis, Supabase, Brevo and Cloudinary available.
+Source-level release gates remain green. The next certification step requires the actual Windows/Render environment with Node 22.22.2+, production environment variables, managed Redis, Supabase, Brevo and Supabase Storage available.

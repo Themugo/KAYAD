@@ -6,6 +6,7 @@ import db from './dbAdapter.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 import { incrementCounter } from '../../config/metrics.js';
+import { getPrivateStorageUrl } from '../../services/storage.service.js';
 
 /**
  * Generate booking reference
@@ -60,6 +61,16 @@ class BookingService {
       }
     }
 
+    // Bind the booking to a real KAYAD vehicle when supplied. Never fabricate
+    // vehicle identity from free text when a canonical vehicle id is available.
+    let canonicalVehicle = null;
+    if (bookingData.vehicleId) {
+      canonicalVehicle = await db.findById('cars', bookingData.vehicleId);
+      if (!canonicalVehicle || canonicalVehicle.deleted_at || canonicalVehicle.deletedAt) {
+        throw new AppError('Vehicle not found or unavailable', 404);
+      }
+    }
+
     // Calculate price
     let mobileFee = 0;
     if (bookingData.isMobile && provider.mobile_inspection_fee) {
@@ -78,11 +89,12 @@ class BookingService {
       customer_name: bookingData.customerName,
       customer_email: bookingData.customerEmail,
       customer_phone: bookingData.customerPhone,
-      vehicle_make: bookingData.vehicleMake,
-      vehicle_model: bookingData.vehicleModel,
-      vehicle_year: bookingData.vehicleYear,
-      vehicle_registration: bookingData.vehicleRegistration,
-      vehicle_vin: bookingData.vehicleVin,
+      vehicle_id: bookingData.vehicleId || null,
+      vehicle_make: canonicalVehicle?.make || bookingData.vehicleMake,
+      vehicle_model: canonicalVehicle?.model || bookingData.vehicleModel,
+      vehicle_year: canonicalVehicle?.year || bookingData.vehicleYear,
+      vehicle_registration: canonicalVehicle?.registration || bookingData.vehicleRegistration,
+      vehicle_vin: canonicalVehicle?.vin || bookingData.vehicleVin,
       vehicle_type: bookingData.vehicleType,
       inspection_country: bookingData.country || provider.country,
       inspection_county: bookingData.county,
@@ -238,7 +250,9 @@ class BookingService {
           number: report.report_number,
           overallScore: report.overall_score,
           overallCondition: report.overall_condition,
-          pdfUrl: report.pdf_url,
+          pdfUrl: report.pdf_storage_path
+            ? await getPrivateStorageUrl(report.pdf_storage_path, 900)
+            : report.pdf_url,
           shareToken: report.share_token,
         } : null,
       };
@@ -463,6 +477,29 @@ class BookingService {
   /**
    * Get provider bookings
    */
+  async getInspectorBookings(userId, filters = {}) {
+    const staff = await db.findOne('inspection_staff', { user_id: userId, is_active: true });
+    if (!staff) return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+
+    const query = { assigned_staff_id: staff.id };
+    if (filters.status) query.status = filters.status;
+    if (filters.date) query.scheduled_date = filters.date;
+
+    const page = Math.max(1, parseInt(filters.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(filters.limit, 10) || 20));
+    const skip = (page - 1) * limit;
+    const bookings = await db.find('inspection_bookings', query, {
+      sort: { scheduled_date: 1, scheduled_time: 1 }, skip, limit,
+    });
+    const total = await db.count('inspection_bookings', query);
+
+    return {
+      items: await Promise.all(bookings.map((booking) => this.getBookingDetails(booking.id, 'provider'))),
+      total, page, limit, totalPages: Math.ceil(total / limit),
+      staff: { id: staff.id, role: staff.role, firstName: staff.first_name, lastName: staff.last_name },
+    };
+  }
+
   async getProviderBookings(providerId, filters = {}) {
     const query = { provider_id: providerId };
 

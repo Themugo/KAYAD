@@ -3,19 +3,74 @@
 -- ============================================================
 
 -- ============================================================
--- ENGINEERS/STAFF
+-- ENGINEERS/STAFF (Extended from inspection.schema)
 -- ============================================================
--- Canonical workforce lives in inspection_staff (inspection.schema.sql).
--- The Business Center extends that canonical table through the
--- 20261006100000_inspection_business_center_convergence migration.
--- No second inspection_engineers entity is created here.
+CREATE TABLE IF NOT EXISTS inspection_engineers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID REFERENCES inspection_providers(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id),
+
+  -- Personal Info
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  photo_url VARCHAR(500),
+
+  -- Role
+  role VARCHAR(50) NOT NULL, -- 'lead_engineer', 'senior_inspector', 'junior_inspector', 'electrical_specialist', 'body_specialist', 'commercial_specialist', 'motorcycle_specialist', 'qa_reviewer'
+
+  -- Skills
+  skills JSONB DEFAULT '[]', -- Array of skill codes
+  vehicle_types JSONB DEFAULT '["cars", "suvs"]', -- Authorized vehicle types
+  certifications JSONB DEFAULT '[]',
+
+  -- Experience
+  years_experience INTEGER DEFAULT 0,
+  inspection_count INTEGER DEFAULT 0,
+
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+  is_available BOOLEAN DEFAULT true,
+
+  -- Location
+  home_latitude DECIMAL(10, 8),
+  home_longitude DECIMAL(11, 8),
+  home_county VARCHAR(100),
+  home_town VARCHAR(100),
+
+  -- Performance
+  average_rating DECIMAL(3, 2) DEFAULT 0,
+  total_reviews INTEGER DEFAULT 0,
+  avg_inspection_time_minutes INTEGER DEFAULT 60,
+  on_time_rate DECIMAL(5, 2) DEFAULT 100,
+  quality_score DECIMAL(3, 2) DEFAULT 100,
+
+  -- Working Hours
+  working_hours JSONB DEFAULT '{
+    "monday": {"enabled": true, "start": "08:00", "end": "18:00"},
+    "tuesday": {"enabled": true, "start": "08:00", "end": "18:00"},
+    "wednesday": {"enabled": true, "start": "08:00", "end": "18:00"},
+    "thursday": {"enabled": true, "start": "08:00", "end": "18:00"},
+    "friday": {"enabled": true, "start": "08:00", "end": "18:00},
+    "saturday": {"enabled": true, "start": "09:00", "end": "14:00"},
+    "sunday": {"enabled": false, "start": "09:00", "end": "14:00}
+  }',
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_engineers_provider ON inspection_engineers(provider_id);
+CREATE INDEX idx_engineers_role ON inspection_engineers(role);
+CREATE INDEX idx_engineers_available ON inspection_engineers(is_available);
 
 -- ============================================================
 -- ENGINEER SCHEDULES
 -- ============================================================
 CREATE TABLE IF NOT EXISTS engineer_schedules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  engineer_id UUID REFERENCES inspection_staff(id) ON DELETE CASCADE,
+  engineer_id UUID REFERENCES inspection_engineers(id) ON DELETE CASCADE,
 
   date DATE NOT NULL,
   start_time TIME NOT NULL,
@@ -106,6 +161,10 @@ CREATE TABLE IF NOT EXISTS report_versions (
   reviewed_by UUID REFERENCES users(id),
   reviewed_at TIMESTAMP,
   review_notes TEXT,
+
+  -- QA submission provenance
+  submitted_by UUID REFERENCES users(id),
+  submitted_at TIMESTAMP,
 
   -- Approval
   approved_by UUID REFERENCES users(id),
@@ -245,7 +304,7 @@ CREATE TABLE IF NOT EXISTS business_documents (
   verified_at TIMESTAMP,
 
   -- Associated Entity
-  engineer_id UUID REFERENCES inspection_staff(id),
+  engineer_id UUID REFERENCES inspection_engineers(id),
 
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -260,7 +319,7 @@ CREATE INDEX idx_documents_expiry ON business_documents(expiry_date);
 -- ============================================================
 CREATE TABLE IF NOT EXISTS engineer_locations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  engineer_id UUID REFERENCES inspection_staff(id) ON DELETE CASCADE,
+  engineer_id UUID REFERENCES inspection_engineers(id) ON DELETE CASCADE,
 
   latitude DECIMAL(10, 8) NOT NULL,
   longitude DECIMAL(11, 8) NOT NULL,

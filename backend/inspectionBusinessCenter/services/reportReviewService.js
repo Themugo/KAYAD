@@ -5,34 +5,62 @@
 import db from '../../db/index.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo } from '../../utils/logger.js';
+import { sendUserCommunication } from '../../services/communicationGateway.service.js';
+import { getPrivateStorageUrl } from '../../services/storage.service.js';
+import { COMMUNICATION_EVENTS } from '../../services/communicationEvents.service.js';
 
 /**
  * Report Review Service - Quality assurance workflow
  */
+const ADMIN_ROLES = new Set(['admin', 'superadmin']);
+const QA_STAFF_ROLES = new Set(['qa', 'quality_assurance', 'quality-assurance', 'auditor', 'quality_auditor']);
+
 class ReportReviewService {
+  async assertIndependentReviewer(reportId, reviewerId) {
+    const report = await db.findById('inspection_reports', reportId);
+    if (!report) throw new AppError('Report not found', 404);
+    const booking = await db.findById('inspection_bookings', report.booking_id);
+    if (!booking) throw new AppError('Report booking not found', 404);
+
+    // The person who executed the inspection cannot approve their own report.
+    if (booking.assigned_staff_id) {
+      const inspector = await db.findById('inspection_staff', booking.assigned_staff_id);
+      if (inspector && String(inspector.user_id) === String(reviewerId)) {
+        throw new AppError('Independent QA review is required; the inspecting staff member cannot approve this report', 403);
+      }
+    }
+
+    const reviewer = await db.findOne('users', { id: reviewerId });
+    if (!reviewer) throw new AppError('QA reviewer not found', 404);
+    const staff = await db.findOne('inspection_staff', { provider_id: booking.provider_id, user_id: reviewerId, is_active: true });
+    const isAuthorized = ADMIN_ROLES.has(reviewer.role) || QA_STAFF_ROLES.has(String(staff?.role || '').toLowerCase());
+    if (!isAuthorized) throw new AppError('Only an administrator or designated QA/auditor may perform independent report review', 403);
+
+    return { report, booking, reviewer, staff };
+  }
+
+  async assertReportBelongsToProvider(reportId, providerId) {
+    const report = await db.findById('inspection_reports', reportId);
+    if (!report) throw new AppError('Report not found', 404);
+    const booking = await db.findById('inspection_bookings', report.booking_id);
+    if (!booking || String(booking.provider_id) !== String(providerId)) throw new AppError('Report does not belong to this provider', 403);
+    return { report, booking };
+  }
   /**
    * Get reports in review queue
    */
   async getReviewQueue(providerId, status = null) {
-    const query = { provider_id: providerId };
-    if (status) {
-      // Status is applied to the latest version below because inspection_reports
-      // itself has no workflow status column.
-    }
-
     const bookings = await db.find('inspection_bookings', { provider_id: providerId }, { sort: { created_at: -1 } });
-    const reports = [];
-    for (const booking of bookings) {
-      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
-      if (report) reports.push(report);
-    }
-
+    const bookingIds = bookings.map((b) => b.id);
+    const reports = bookingIds.length
+      ? await db.find('inspection_reports', { booking_id: { $in: bookingIds } }, { sort: { created_at: -1 } })
+      : [];
+    const bookingById = new Map(bookings.map((b) => [String(b.id), b]));
     const queue = [];
     for (const report of reports) {
-      const booking = await db.findById('inspection_bookings', report.booking_id);
+      const booking = bookingById.get(String(report.booking_id));
       const currentVersion = await this.getLatestVersion(report.id);
-      if (status && currentVersion?.status !== status) continue;
-
+      if (status && (currentVersion?.status || 'draft') !== status) continue;
       queue.push({
         reportId: report.id,
         reportNumber: report.report_number,
@@ -49,7 +77,6 @@ class ReportReviewService {
         assignedReviewer: currentVersion?.reviewed_by,
       });
     }
-
     return queue;
   }
 
@@ -89,6 +116,8 @@ class ReportReviewService {
    * Submit report for QA review
    */
   async submitForReview(reportId, submittedBy) {
+    const report = await db.findById('inspection_reports', reportId);
+    if (!report) throw new AppError('Report not found', 404);
     const version = await this.getLatestVersion(reportId);
     if (!version) {
       throw new AppError('No report version found', 404);
@@ -100,6 +129,8 @@ class ReportReviewService {
 
     await db.update('report_versions', version.id, {
       status: 'qa_review',
+      submitted_by: submittedBy,
+      submitted_at: new Date(),
       updated_at: new Date(),
     });
 
@@ -111,6 +142,7 @@ class ReportReviewService {
    * Approve report
    */
   async approveReport(reportId, reviewerId, notes = null) {
+    await this.assertIndependentReviewer(reportId, reviewerId);
     const version = await this.getLatestVersion(reportId);
     if (!version) {
       throw new AppError('No report version found', 404);
@@ -119,9 +151,6 @@ class ReportReviewService {
     if (version.status !== 'qa_review') {
       throw new AppError('Report must be in QA review status', 400);
     }
-
-    const reviewerStaff = await db.findOne('inspection_staff', { user_id: reviewerId });
-    const reviewerStaffId = reviewerStaff?.id || null;
 
     await db.update('report_versions', version.id, {
       status: 'approved',
@@ -138,7 +167,7 @@ class ReportReviewService {
     if (report) {
       await db.update('inspection_reports', report.id, {
         quality_reviewed: true,
-        quality_reviewer_id: reviewerStaffId,
+        quality_reviewer_id: reviewerId,
         quality_reviewed_at: new Date(),
       });
     }
@@ -151,6 +180,10 @@ class ReportReviewService {
    * Request corrections
    */
   async requestCorrections(reportId, reviewerId, corrections) {
+    await this.assertIndependentReviewer(reportId, reviewerId);
+    if (!Array.isArray(corrections) || corrections.length === 0) {
+      throw new AppError('At least one correction is required', 400);
+    }
     const version = await this.getLatestVersion(reportId);
     if (!version) {
       throw new AppError('No report version found', 404);
@@ -211,35 +244,37 @@ class ReportReviewService {
    */
   async sendToCustomer(reportId, method = 'email') {
     const version = await this.getLatestVersion(reportId);
-    if (!version) {
-      throw new AppError('No report version found', 404);
-    }
+    if (!version) throw new AppError('No report version found', 404);
+    if (version.status !== 'approved') throw new AppError('Report must be approved before sending', 400);
 
-    if (version.status !== 'approved') {
-      throw new AppError('Report must be approved before sending', 400);
-    }
-
-    await db.update('report_versions', version.id, {
-      status: 'sent',
-      sent_at: new Date(),
-      sent_via: method,
-      updated_at: new Date(),
-    });
-
-    // Update booking status
     const report = await db.findById('inspection_reports', reportId);
-    if (report) {
-      const booking = await db.findById('inspection_bookings', report.booking_id);
-      if (booking) {
-        await db.update('inspection_bookings', booking.id, {
-          status: 'customer_reviewed',
-          status_changed_at: new Date(),
-        });
-      }
-    }
+    const booking = report ? await db.findById('inspection_bookings', report.booking_id) : null;
+    if (!report || !booking) throw new AppError('Report booking not found', 404);
+    if (!report.pdf_storage_path && !report.pdf_url) throw new AppError('Approved report has no PDF; generate the PDF before delivery', 409);
+    // Never persist an expiring signed storage URL as the customer-facing link.
+    // The share route resolves the current private PDF URL at read time.
+    const frontendUrl = process.env.FRONTEND_URL || process.env.VITE_PUBLIC_URL || '';
+    const pdfUrl = report.share_token
+      ? `${frontendUrl.replace(/\/$/, '')}/inspection-reports/${report.share_token}`
+      : (report.pdf_storage_path ? await getPrivateStorageUrl(report.pdf_storage_path, 900) : report.pdf_url);
 
-    logInfo('Report sent to customer', { reportId, method });
-    return this.getLatestVersion(reportId);
+    const channels = method === 'whatsapp' ? ['in_app', 'whatsapp']
+      : method === 'email' ? ['in_app', 'email']
+      : ['in_app', 'email', 'whatsapp'];
+    const deliveries = await sendUserCommunication({
+      userId: booking.customer_id,
+      channels,
+      eventType: COMMUNICATION_EVENTS.INSPECTION_COMPLETED,
+      title: 'Your KAYAD inspection report is ready',
+      subject: `KAYAD inspection report ${report.report_number}`,
+      message: `Your pre-purchase inspection for ${booking.vehicle_year || ''} ${booking.vehicle_make || ''} ${booking.vehicle_model || ''} has passed KAYAD quality review. Report: ${pdfUrl}`.replace(/\s+/g, ' ').trim(),
+      html: `<p>Your KAYAD pre-purchase inspection report has passed quality review.</p><p><strong>${report.report_number}</strong></p><p><a href="${pdfUrl}">Open your inspection report</a></p>`,
+      metadata: { inspectionId: booking.vehicle_inspection_id || null, bookingId: booking.id, reportId: report.id, reportNumber: report.report_number, pdfStorageBucket: report.pdf_storage_bucket || null, pdfStoragePath: report.pdf_storage_path || null, reportShareToken: report.share_token || null },
+    });
+    await db.update('report_versions', version.id, { status: 'sent', sent_at: new Date(), sent_via: method, updated_at: new Date() });
+    await db.update('inspection_reports', report.id, { updated_at: new Date() });
+    logInfo('Report sent to customer', { reportId, method, deliveries: deliveries.length });
+    return { version: await this.getLatestVersion(reportId), deliveries };
   }
 
   /**
@@ -279,7 +314,7 @@ class ReportReviewService {
     }
 
     const provider = await db.findById('inspection_providers', booking?.provider_id);
-    const engineer = await db.findById('inspection_staff', booking?.assigned_staff_id);
+    const inspector = await db.findById('inspection_staff', booking?.assigned_staff_id);
 
     return {
       id: report.id,
@@ -320,10 +355,10 @@ class ReportReviewService {
         id: provider.id,
         name: provider.company_name,
       } : null,
-      engineer: engineer ? {
-        id: engineer.id,
-        name: `${engineer.first_name} ${engineer.last_name}`,
-        role: engineer.role,
+      inspector: inspector ? {
+        id: inspector.id,
+        name: `${inspector.first_name} ${inspector.last_name}`,
+        role: inspector.role,
       } : null,
       versions,
       currentStatus: versions[0]?.status || 'draft',
@@ -345,15 +380,18 @@ class ReportReviewService {
       startDate.setFullYear(startDate.getFullYear() - 1);
     }
 
-    const reports = await db.find('inspection_reports', {
+    const bookings = await db.find('inspection_bookings', {
       provider_id: providerId,
       created_at: { $gte: startDate }
     });
+    const bookingIds = bookings.map((b) => b.id);
+    const reports = bookingIds.length
+      ? await db.find('inspection_reports', { booking_id: { $in: bookingIds }, created_at: { $gte: startDate } })
+      : [];
 
-    const versions = await db.find('report_versions', {
-      provider_id: providerId,
-      created_at: { $gte: startDate }
-    });
+    const versions = bookingIds.length
+      ? await db.find('report_versions', { report_id: { $in: reports.map((r) => r.id) }, created_at: { $gte: startDate } })
+      : [];
 
     const approved = versions.filter(v => v.status === 'approved');
     const rejected = versions.filter(v => v.status === 'corrections_requested');

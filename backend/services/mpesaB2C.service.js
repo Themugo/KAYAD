@@ -67,6 +67,7 @@ export const disburseB2C = async ({
   amount,
   escrowId,
   payoutId = null,
+  settlementId = null,
   sellerName,
   idempotencyKey,
 }) => {
@@ -105,7 +106,14 @@ export const disburseB2C = async ({
   };
 
   // ── Mark canonical payout processing BEFORE provider call ──
-  if (payoutId) {
+  if (settlementId) {
+    const { error } = await getSupabase().rpc("kayad_mark_inspection_settlement_processing_atomic", {
+      p_settlement_id: settlementId,
+      p_payout_phone: phone,
+      p_user_id: null,
+    });
+    if (error) throw error;
+  } else if (payoutId) {
     const { error } = await getSupabase().rpc("kayad_mark_dealer_payout_atomic", {
       p_payout: payoutId,
       p_status: "processing",
@@ -128,7 +136,13 @@ export const disburseB2C = async ({
   const data = res.data;
 
   if (data.ErrorCode) {
-    if (payoutId) {
+    if (settlementId) {
+      await getSupabase().from("inspection_settlements").update({
+        status: "failed",
+        payout_failure_reason: `${data.ErrorMessage || "M-Pesa B2C error"} (${data.ErrorCode})`,
+        updated_at: new Date().toISOString(),
+      }).eq("id", settlementId).eq("status", "processing");
+    } else if (payoutId) {
       await getSupabase().rpc("kayad_mark_dealer_payout_atomic", {
         p_payout: payoutId,
         p_status: "failed",

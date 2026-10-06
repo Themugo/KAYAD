@@ -103,7 +103,7 @@ GitHub (Themugo/KAYAD, main)
             │    → Render (render.yaml, Docker)     ❌ 502 on all endpoints
             ├─ Supabase Postgres                      ⚠️ connectivity NOT VERIFIED
             ├─ Redis                                  ⚠️ NOT VERIFIED
-            ├─ Cloudinary (uploads)                   ⚠️ NOT VERIFIED
+            ├─ Supabase Storage (uploads)                   ⚠️ NOT VERIFIED
             └─ M-Pesa Daraja / Africa's Talking / email  ⚠️ NOT VERIFIED
 
 TESTING: backend 16 suites/335 tests (Jest) · frontend 50 files/359 (Vitest)

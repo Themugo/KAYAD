@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-function OptimizedImg({ src, alt, width, height, className, style, loading = 'lazy', cloudinaryTransform }) {
+function OptimizedImg({ src, alt, width, height, className, style, loading = 'lazy', imageTransform }) {
   const [loaded, setLoaded] = useState(false);
   const [inView, setInView] = useState(false);
   const imgRef = useRef(null);
@@ -15,15 +15,10 @@ function OptimizedImg({ src, alt, width, height, className, style, loading = 'la
     return () => obs.disconnect();
   }, [loading]);
 
-  const imgSrc = cloudinaryTransform && src?.includes('res.cloudinary.com')
-    ? src.replace('/image/upload/', `/image/upload/${cloudinaryTransform}/`)
-    : src;
-
-  const srcSet = imgSrc?.includes('res.cloudinary.com')
-    ? `${imgSrc.replace('/image/upload/', '/image/upload/w_400/')} 400w,
-       ${imgSrc.replace('/image/upload/', '/image/upload/w_800/')} 800w,
-       ${imgSrc.replace('/image/upload/', '/image/upload/w_1200/')} 1200w`
-    : null;
+  // Supabase Storage owns media delivery. The backend may return a fully
+  // qualified transformed URL; the component does not rewrite vendor URLs.
+  const imgSrc = src;
+  const srcSet = null;
 
   return (
     <div ref={imgRef} className={`opt-img-wrap${className ? ' ' + className : ''}`} style={{ position: 'relative', overflow: 'hidden', ...style }}>

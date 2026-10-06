@@ -24,7 +24,7 @@ Foundation: KAYAD Wave 1 production-hardened tree
 - Added `media_upload_jobs` with persistent retry state and dead-letter state.
 - Added atomic job registration, failure recording and completion RPCs.
 - Listing media upload failures are persisted rather than leaving only an in-memory retry loop.
-- Successful Cloudinary uploads reconcile the listing image and recovery job together.
+- Successful Supabase Storage uploads reconcile the listing image and recovery job together.
 
 ### 10. Auction → payment → escrow → ledger
 - Bid-payment confirmation now records a canonical ledger posting in the same database transaction as payment/bid confirmation.

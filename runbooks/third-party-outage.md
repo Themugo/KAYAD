@@ -2,7 +2,7 @@
 title: Third Party Outage
 owner: @tech-lead
 team: all
-last-reviewed: 2026-06-23
+last-reviewed: 2026-10-06
 review-frequency: quarterly
 status: active
 tags: [general]
@@ -17,9 +17,9 @@ tags: [general]
 
 ### Critical Services
 - **M-Pesa** (payments) - Critical
-- **Cloudinary** (images) - Medium
+- **Supabase Storage** (media) - Medium
 - **Brevo** (emails) - Low
-- **Twilio** (SMS) - Low
+- **Twilio** (WhatsApp) - Low
 - **Sentry** (error tracking) - Low
 
 ## M-Pesa Outage (Critical)
@@ -97,52 +97,35 @@ export MPESA_MAINTENANCE_MODE=false
 - Notify stakeholders
 - Post incident summary
 
-## Cloudinary Outage (Medium)
+## Supabase Storage Outage (Medium)
 
 ### Severity: Medium
 ### RTO: 1 hour
 ### RPO: N/A
 
 ### Symptoms
-- Image upload failures
-- Image display failures
-- CDN errors
+- Media upload failures
+- Private evidence/report retrieval failures
+- Marketplace image delivery failures
 
 ### Immediate Actions
 
-#### 1. Check Cloudinary Status
-- Visit Cloudinary status page
-- Check Cloudinary Twitter for announcements
-
-#### 2. Serve from CDN Cache
-- Images should be served from CDN cache
-- Monitor cache hit rates
-- Monitor cache misses
-
-#### 3. Display Placeholder Images
-- For cache misses, show placeholder images
-- Graceful degradation
-- Maintain user experience
+1. Check Supabase project status and Storage health.
+2. Confirm the `kayad-images` and `kayad-private` buckets exist.
+3. Verify application errors are not exposing service-role credentials.
+4. Keep existing public media cached where available; do not introduce a second provider.
 
 ### Recovery Steps
 
-#### 1. Monitor Cloudinary Status
-- Continuously check Cloudinary status
-- Monitor for service restoration
-
-#### 2. Re-upload Images if Needed
-- If images were lost during outage
-- Re-upload from local storage
-- Update database with new URLs
-
-#### 3. Verify Image Display
-- Test image uploads
-- Test image display
-- Verify CDN functionality
+1. Restore Supabase Storage availability.
+2. Verify public image reads.
+3. Verify private signed-URL creation.
+4. Verify upload/delete operations with a controlled test object.
+5. Reconcile any failed `media_upload_jobs` records through the canonical recovery process.
 
 ### Communication
-- Update status page if extended outage
-- Notify stakeholders if critical
+- Update status page if the incident persists.
+- Notify stakeholders if inspection evidence or reports are affected.
 
 ## Brevo Outage (Low)
 

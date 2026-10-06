@@ -30,7 +30,7 @@ This sweep does not use the previously generated post-sweep ZIP as its source.
 - Existing atomic dealer listing RPC remains canonical.
 
 ### Uploads / documents
-- Private Cloudinary resources are now uploaded as `authenticated`, not public `upload` assets.
+- Private Supabase Storage resources are now uploaded as `authenticated`, not public `upload` assets.
 - Private delivery URLs are signed.
 - Existing API-level ownership checks and `private, no-store` response headers are preserved.
 - Existing upload/delete authorization remains intact.
@@ -99,7 +99,7 @@ Therefore this artifact does **not** claim:
 
 ## Changed-file inventory
 
-- `backend/config/cloudinary.js`
+- `backend/config/Supabase Storage.js`
 - `backend/services/communicationGateway.service.js`
 - `backend/services/escrow.service.js`
 - `backend/services/ledgerService.js`

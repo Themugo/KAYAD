@@ -8,7 +8,7 @@ const checks = [
   ['full Nairobi background remains configurable', source.includes('backgroundUrl') && source.includes('backgroundScalePct')],
   ['Drive Your Dream headline remains canonical', source.includes('Drive Your Dream') && source.includes('Today')],
   ['desktop featured vehicle subjects remain data-driven', source.includes('heroImageForVehicle(heroLeftVehicle)') && source.includes('heroImageForVehicle(heroRightVehicle)')],
-  ['high-resolution canonical showcase assets are configured', source.includes('kayad-land-cruiser-cutout.png') && source.includes('kayad-mercedes-gle-cutout.png')],
+  ['clean showcase assets are configured', source.includes('kayad-land-cruiser-clean.png') && source.includes('kayad-mercedes-gle-clean.png')],
   ['vehicle info cards are contained within vehicle stages', source.includes('overflow-hidden') && source.includes('max-w-[calc(100%-2rem)]')],
   ['center card remains configurable', source.includes('cardScalePct') && source.includes('cardWidthPct')],
   ['admin-controlled vehicle positioning remains wired', source.includes('leftVehicleNudgePct') && source.includes('rightVehicleNudgePct')],

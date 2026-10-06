@@ -52,7 +52,7 @@ const CRITICAL_LOCK_OPERATIONS = new Set([
   "escrow", "escrow_release", "escrow_refund", "escrow_confirm_delivery",
   "escrow_dispute", "escrow_vault_funded", "escrow_vault_init",
   "escrow_vault_release", "verification_approve", "verification_reject",
-  "verification_suspend", "verification_reinstate",
+  "verification_suspend", "verification_reinstate", "inspection_complete",
 ]);
 
 /**
@@ -68,6 +68,7 @@ const extractOperationType = (path) => {
   if (path.includes("/escrow") && path.includes("/dispute")) return "escrow_dispute";
   if (path.includes("/bid")) return "bid";
   if (path.includes("/auction")) return "auction_end";
+  if (path.includes("/execution/") && path.endsWith("/complete")) return "inspection_complete";
   if (path.includes("/verification")) {
     if (path.includes("/approve")) return "verification_approve";
     if (path.includes("/reject")) return "verification_reject";
@@ -163,6 +164,11 @@ export const idempotencyCheck = async (req, res, next) => {
       if (vaultId && otp) {
         idempotencyKey = `vault_release_${vaultId}_${crypto.createHash("sha256").update(otp).digest("hex").slice(0, 12)}`;
       }
+    }
+    else if (operationType === "inspection_complete") {
+      const bookingId = req.params?.bookingId || "";
+      const userId = req.user?.id || "";
+      if (bookingId && userId) idempotencyKey = `inspection_complete_${bookingId}_${userId}`;
     }
   }
 

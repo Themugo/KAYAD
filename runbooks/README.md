@@ -51,7 +51,7 @@ This directory contains operational runbooks for managing the KAYAD platform. Th
 | Grafana | https://grafana.kayad.space | Metrics & alerting |
 | Sentry | https://sentry.io/kayad | Error tracking |
 | Supabase | https://supabase.com/dashboard | Database monitoring |
-| Cloudinary | https://cloudinary.com/console | Media storage |
+| Supabase Storage | https://supabase.com/dashboard/project/_/storage/buckets | Media storage |
 
 ## Alert Severity Levels
 

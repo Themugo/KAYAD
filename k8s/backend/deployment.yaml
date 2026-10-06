@@ -76,21 +76,10 @@ spec:
             secretKeyRef:
               name: kayad-secrets
               key: mpesa-passkey
-        - name: CLOUDINARY_CLOUD_NAME
-          valueFrom:
-            secretKeyRef:
-              name: kayad-secrets
-              key: cloudinary-cloud-name
-        - name: CLOUDINARY_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: kayad-secrets
-              key: cloudinary-api-key
-        - name: CLOUDINARY_API_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: kayad-secrets
-              key: cloudinary-api-secret
+        - name: SUPABASE_PUBLIC_BUCKET
+          value: "kayad-images"
+        - name: SUPABASE_PRIVATE_BUCKET
+          value: "kayad-private"
         resources:
           requests:
             memory: "512Mi"

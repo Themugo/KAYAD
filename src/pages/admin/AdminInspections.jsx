@@ -171,16 +171,6 @@ export default function AdminInspections() {
           </div>
         )}
       </div>
-
-      <div className="container" style={{ paddingBottom: 40, maxWidth: 960 }}>
-        <div className="card" style={{ padding: 20, marginTop: 24 }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12, marginBottom:16 }}>
-            <div><h3 style={{ margin:0 }}>Inspection Provider Applications</h3><p style={{ color:'var(--text-muted)', fontSize:12, marginTop:4 }}>Approve verified inspection businesses before they enter the public marketplace.</p></div>
-            <select className="input" style={{ width:150, fontSize:12 }} value={providerStatus} onChange={e=>setProviderStatus(e.target.value)}><option value="pending">Pending</option><option value="active">Active</option><option value="suspended">Suspended</option></select>
-          </div>
-          {providerApps.length===0 ? <div style={{ color:'var(--text-muted)', fontSize:13 }}>No provider applications in this state.</div> : <div style={{display:'flex',flexDirection:'column',gap:10}}>{providerApps.map(p=><div key={p.id} style={{padding:14,border:'1px solid var(--border)',borderRadius:10}}><div style={{display:'flex',justifyContent:'space-between',gap:12}}><div><strong>{p.company_name || p.trading_name || 'Inspection business'}</strong><div style={{fontSize:12,color:'var(--text-muted)',marginTop:4}}>{p.email} · {p.phone} · {p.town || p.county || 'Location pending'}</div><div style={{fontSize:11,color:'var(--text-muted)',marginTop:4}}>Verification: {p.verification_status || 'unverified'} · Lifecycle: {p.lifecycle_stage || 'pending'}</div></div>{providerStatus==='pending'&&<div style={{display:'flex',gap:6}}><button className="btn btn-sm btn-green" disabled={actionLoading===p.id} onClick={()=>reviewProvider(p.id,'verify')}>{actionLoading===p.id?'…':'Verify'}</button><button className="btn btn-sm btn-outline" disabled={actionLoading===p.id} onClick={()=>reviewProvider(p.id,'suspend')}>Reject</button></div>}</div></div>)}</div>}
-        </div>
-      </div>
     </div>
   );
 }

@@ -23,7 +23,7 @@ Built from `KAYAD-NEXT-FULLY-UPDATED-TESTED-FOUNDATION-20260929.zip` without reb
 
 - Brevo remains canonical email.
 - Africa's Talking and Twilio remain optional and fail-closed when credentials are absent.
-- Cloudinary remains the media provider.
+- Supabase Storage remains the media provider.
 - Backend custom authentication remains authoritative.
 - Health readiness continues to use a real `cars` database probe; it is not weakened.
 - No production secrets are embedded.

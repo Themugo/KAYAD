@@ -1,197 +1,136 @@
-// backend/services/storage.service.js - Unified Storage Interface v1.0
-// ─────────────────────────────────────────────────────────────
-// Provides unified interface for image storage (Supabase + Cloudinary)
-// Falls back gracefully when services are not configured
-// ─────────────────────────────────────────────────────────────
+// KAYAD canonical media storage — Supabase Storage only.
+// Supabase Storage is the sole active media provider.
 
 import { createClient } from "@supabase/supabase-js";
+import { createHash, randomUUID } from "node:crypto";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
-
-// =============================
-// 🔐 SUPABASE CONFIG
-// =============================
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || "";
-const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET || "kayad-images";
+const PUBLIC_BUCKET = process.env.SUPABASE_PUBLIC_BUCKET || "kayad-images";
+const PRIVATE_BUCKET = process.env.SUPABASE_PRIVATE_BUCKET || "kayad-private";
 
-// Placeholder values that should be replaced
-const PLACEHOLDER_PATTERNS = [
-  "placeholder",
-  "your-project",
-  "your_supabase",
-];
+const PLACEHOLDERS = new Set(["", "<project-ref>", "https://<project-ref>.supabase.co", "<supabase-service-role-key>"]);
+const configured = (value) => !PLACEHOLDERS.has(String(value || "").trim());
 
-const isPlaceholder = (value) => {
-  if (!value) return true;
-  const lower = value.toLowerCase();
-  return PLACEHOLDER_PATTERNS.some(p => lower.includes(p));
-};
+let client = null;
+let connected = false;
 
-let supabaseClient = null;
-let supabaseConnected = false;
-
-const initSupabaseStorage = () => {
-  // Check if placeholder values are used
-  if (isPlaceholder(SUPABASE_URL) || isPlaceholder(SUPABASE_SERVICE_KEY)) {
-    logWarn("Supabase storage not configured — using Cloudinary fallback");
-    return false;
-  }
-
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    logWarn("Supabase storage not configured — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
-    return false;
-  }
-
+if (configured(SUPABASE_URL) && configured(SUPABASE_SERVICE_KEY)) {
   try {
-    supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-      auth: { persistSession: false },
-      storage: { abortSignal: undefined },
+    client = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
     });
-    supabaseConnected = true;
-    logInfo("✅ Supabase storage initialized");
-    return true;
-  } catch (err) {
-    logError("Supabase storage init failed:", err);
-    return false;
+    connected = true;
+    logInfo("Supabase Storage initialized as canonical media provider");
+  } catch (error) {
+    logError("Supabase Storage initialization failed", error);
   }
+} else {
+  logWarn("Supabase Storage not configured — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
+}
+
+const requireStorage = () => {
+  if (!connected || !client) throw new Error("Supabase Storage is not configured");
+  return client;
 };
 
-// Initialize on module load
-initSupabaseStorage();
+const safeName = (name = "upload") => String(name).replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 160) || "upload";
+const normalizeFolder = (folder = "uploads") => String(folder).replace(/^\/+|\/+$/g, "").replace(/\.\./g, "_");
+const bucketFor = (visibility) => visibility === "private" ? PRIVATE_BUCKET : PUBLIC_BUCKET;
 
-// =============================
-// 🏗️ IMAGE VARIANTS CONFIG
-// =============================
-
-const IMAGE_VARIANTS = {
-  original: { width: 0, height: 0 },
-  full: { width: 1400, height: 900 },
-  card: { width: 600, height: 400 },
-  thumb: { width: 300, height: 200 },
-  mobile: { width: 320, height: 0 },
-  tablet: { width: 768, height: 0 },
-  desktop: { width: 1200, height: 0 },
-  blur: { width: 20, height: 20 },
-};
-
-// =============================
-// 📤 UPLOAD TO SUPABASE
-// =============================
-
-export const uploadToSupabase = async (file, folder = "cars") => {
-  if (!supabaseConnected || !supabaseClient) {
-    throw new Error("Supabase storage not available");
-  }
-
-  try {
-    const timestamp = Date.now();
-    const sanitizedName = file.originalname
-      ?.replace(/[^a-zA-Z0-9.-]/g, "_")
-      .replace(/_{2,}/g, "_");
-    const fileName = `${timestamp}-${sanitizedName || "upload"}`;
-    const filePath = `${folder}/${fileName}`;
-
-    // Convert buffer to base64 for upload
-    const buffer = file.buffer ? Buffer.from(file.buffer) : null;
-    if (!buffer) {
-      throw new Error("No file data available");
-    }
-
-    const { data, error } = await supabaseClient.storage
-      .from(SUPABASE_BUCKET)
-      .upload(filePath, buffer, {
-        contentType: file.mimetype || "image/jpeg",
-        upsert: false,
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    // Get public URL
-    const { data: urlData } = supabaseClient.storage
-      .from(SUPABASE_BUCKET)
-      .getPublicUrl(data.path);
-
-    const baseUrl = urlData.publicUrl;
-
-    // Generate variant URLs (Supabase uses transform params)
-    const variants = {};
-    for (const [name, dims] of Object.entries(IMAGE_VARIANTS)) {
-      const params = new URLSearchParams();
-      if (dims.width) params.set("width", dims.width.toString());
-      if (dims.height) params.set("height", dims.height.toString());
-      if (name === "blur") params.set("quality", "10");
-
-      const queryString = params.toString();
-      variants[name] = queryString ? `${baseUrl}?${queryString}` : baseUrl;
-    }
-
-    return {
-      public_id: data.path,
-      url: baseUrl,
-      ...variants,
-      format: file.mimetype?.split("/")[1] || "jpg",
-      bytes: buffer.length,
-      storageId: `supabase:${data.path}`,
-      storageProvider: "supabase",
-    };
-  } catch (err) {
-    logError("Supabase upload failed:", err);
-    throw err;
-  }
-};
-
-// =============================
-// ❌ DELETE FROM SUPABASE
-// =============================
-
-export const deleteFromSupabase = async (publicId) => {
-  if (!supabaseConnected || !supabaseClient || !publicId) {
-    return;
-  }
-
-  try {
-    const { error } = await supabaseClient.storage
-      .from(SUPABASE_BUCKET)
-      .remove([publicId]);
-
-    if (error) {
-      logWarn("Supabase delete warning:", error.message);
-    }
-  } catch (err) {
-    logError("Supabase delete failed:", err);
-  }
-};
-
-// =============================
-// 🔍 GET PUBLIC URL
-// =============================
-
-export const getSupabasePublicUrl = (path) => {
-  if (!supabaseClient) return null;
-
-  const { data } = supabaseClient.storage
-    .from(SUPABASE_BUCKET)
-    .getPublicUrl(path);
-
+const publicUrl = (bucket, path) => {
+  const { data } = requireStorage().storage.from(bucket).getPublicUrl(path);
   return data?.publicUrl || null;
 };
 
-// =============================
-// 📊 STORAGE STATUS
-// =============================
+export const createSignedStorageUrl = async (bucket, path, expiresIn = 900) => {
+  const { data, error } = await requireStorage().storage.from(bucket).createSignedUrl(path, expiresIn);
+  if (error) throw error;
+  return data?.signedUrl || null;
+};
 
-export const isStorageConnected = () => supabaseConnected;
+export const uploadBuffer = async (buffer, {
+  folder = "uploads",
+  fileName = "upload",
+  contentType = "application/octet-stream",
+  visibility = "public",
+  upsert = false,
+  expiresIn = 900,
+  metadata = {},
+} = {}) => {
+  if (!Buffer.isBuffer(buffer) || buffer.length === 0) throw new Error("Upload buffer is empty");
+  const bucket = bucketFor(visibility);
+  const path = `${normalizeFolder(folder)}/${randomUUID()}-${safeName(fileName)}`;
+  const { error } = await requireStorage().storage.from(bucket).upload(path, buffer, {
+    contentType,
+    upsert,
+    cacheControl: visibility === "public" ? "31536000" : "0",
+  });
+  if (error) throw error;
 
-export const getStorageProvider = () =>
-  supabaseConnected ? "supabase" : "cloudinary-fallback";
+  const url = visibility === "private"
+    ? await createSignedStorageUrl(bucket, path, expiresIn)
+    : publicUrl(bucket, path);
+
+  const checksum = createHash("sha256").update(buffer).digest("hex");
+  return {
+    provider: "supabase",
+    storageProvider: "supabase",
+    bucket,
+    path,
+    public_id: path,
+    storageId: `supabase:${bucket}/${path}`,
+    url,
+    thumb: visibility === "public" ? publicUrl(bucket, path) : url,
+    contentType,
+    bytes: buffer.length,
+    checksum,
+    visibility,
+    metadata,
+  };
+};
+
+export const uploadFile = async (file, folder = "uploads", options = {}) => {
+  const buffer = file?.buffer || (file?.path ? (await import("node:fs/promises")).readFile(file.path) : null);
+  if (!buffer) throw new Error("No file data available");
+  return uploadBuffer(buffer, {
+    folder,
+    fileName: file.originalname || file.filename || file.name || "upload",
+    contentType: file.mimetype || "application/octet-stream",
+    ...options,
+  });
+};
+
+export const uploadMultiple = async (files, folder, options = {}) =>
+  Promise.all((files || []).map((file) => uploadFile(file, folder, options)));
+
+export const deleteMedia = async ({ bucket = PUBLIC_BUCKET, path }) => {
+  if (!path) return;
+  const { error } = await requireStorage().storage.from(bucket).remove([path]);
+  if (error) throw error;
+};
+
+export const getStorageProvider = () => "supabase";
+export const isStorageConnected = () => connected && Boolean(client);
+export const getPublicStorageUrl = (bucket, path) => publicUrl(bucket, path);
+export const getPrivateStorageUrl = (path, expiresIn = 900) => createSignedStorageUrl(PRIVATE_BUCKET, path, expiresIn);
+
+export const uploadToSupabase = uploadFile;
+export const deleteFromSupabase = async (path) => deleteMedia({ path });
+export const getSupabasePublicUrl = (path) => publicUrl(PUBLIC_BUCKET, path);
 
 export default {
+  uploadBuffer,
+  uploadFile,
+  uploadMultiple,
+  deleteMedia,
+  createSignedStorageUrl,
+  getStorageProvider,
+  isStorageConnected,
+  getPublicStorageUrl,
+  getPrivateStorageUrl,
   uploadToSupabase,
   deleteFromSupabase,
   getSupabasePublicUrl,
-  isStorageConnected,
-  getStorageProvider,
 };

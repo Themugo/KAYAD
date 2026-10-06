@@ -98,16 +98,6 @@ class ProviderService {
       query.verification_status = 'verified';
     }
 
-    // Provider discovery text search
-    if (filters.search) {
-      query.$or = [
-        { company_name: { $regex: filters.search, $options: 'i' } },
-        { trading_name: { $regex: filters.search, $options: 'i' } },
-        { county: { $regex: filters.search, $options: 'i' } },
-        { town: { $regex: filters.search, $options: 'i' } },
-      ];
-    }
-
     // Location filters
     if (filters.country) query.country = filters.country;
     if (filters.county) query.county = filters.county;
@@ -569,110 +559,6 @@ class ProviderService {
 
     const result = await db.create('provider_credentials', credential);
     return result;
-  }
-
-  /** Get active packages for a provider. */
-  async getPackages(providerId, includeInactive = false) {
-    const query = { provider_id: providerId };
-    if (!includeInactive) query.is_active = true;
-    return db.find('inspection_packages', query, { sort: { sort_order: 1, price: 1 } });
-  }
-
-  /** Create a provider-owned inspection package. */
-  async createPackage(providerId, data) {
-    const pkg = {
-      provider_id: providerId,
-      name: data.name,
-      description: data.description || null,
-      inspection_type: data.inspectionType,
-      price: Number(data.price),
-      currency: data.currency || 'KES',
-      mobile_surcharge: Number(data.mobileSurcharge || 0),
-      estimated_duration_minutes: Number(data.estimatedDurationMinutes || 60),
-      inspection_points: Number(data.inspectionPoints || 150),
-      includes_diagnostics: Boolean(data.includesDiagnostics),
-      includes_road_test: Boolean(data.includesRoadTest),
-      includes_electrical_check: Boolean(data.includesElectrical),
-      includes_suspension_check: Boolean(data.includesSuspension),
-      included_items: Array.isArray(data.includedItems) ? data.includedItems : [],
-      excluded_items: Array.isArray(data.excludedItems) ? data.excludedItems : [],
-      report_template: data.reportTemplate || 'standard',
-      report_language: data.reportLanguage || 'en',
-      digital_report: data.digitalReport !== false,
-      pdf_report: data.pdfReport !== false,
-      is_active: data.isActive !== false,
-      is_featured: Boolean(data.isFeatured),
-      sort_order: Number(data.sortOrder || 0),
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    if (!pkg.name || !pkg.inspection_type || !Number.isFinite(pkg.price) || pkg.price < 0) {
-      throw new AppError('Package name, inspection type and a valid price are required', 400);
-    }
-    return db.create('inspection_packages', pkg);
-  }
-
-  /** Update only provider-owned package fields. */
-  async updatePackage(providerId, packageId, data) {
-    const existing = await db.findById('inspection_packages', packageId);
-    if (!existing || String(existing.provider_id) !== String(providerId)) {
-      throw new AppError('Inspection package not found', 404);
-    }
-    const allowed = {
-      name: data.name,
-      description: data.description,
-      inspection_type: data.inspectionType,
-      price: data.price !== undefined ? Number(data.price) : undefined,
-      currency: data.currency,
-      mobile_surcharge: data.mobileSurcharge !== undefined ? Number(data.mobileSurcharge) : undefined,
-      estimated_duration_minutes: data.estimatedDurationMinutes !== undefined ? Number(data.estimatedDurationMinutes) : undefined,
-      inspection_points: data.inspectionPoints !== undefined ? Number(data.inspectionPoints) : undefined,
-      includes_diagnostics: data.includesDiagnostics,
-      includes_road_test: data.includesRoadTest,
-      includes_electrical_check: data.includesElectrical,
-      includes_suspension_check: data.includesSuspension,
-      included_items: data.includedItems,
-      excluded_items: data.excludedItems,
-      report_template: data.reportTemplate,
-      report_language: data.reportLanguage,
-      digital_report: data.digitalReport,
-      pdf_report: data.pdfReport,
-      is_active: data.isActive,
-      is_featured: data.isFeatured,
-      sort_order: data.sortOrder !== undefined ? Number(data.sortOrder) : undefined,
-      updated_at: new Date(),
-    };
-    const updates = Object.fromEntries(Object.entries(allowed).filter(([, v]) => v !== undefined));
-    if (updates.price !== undefined && (!Number.isFinite(updates.price) || updates.price < 0)) {
-      throw new AppError('Package price must be a valid non-negative number', 400);
-    }
-    return db.update('inspection_packages', packageId, updates);
-  }
-
-  /** Get branches belonging to a provider. */
-  async getBranches(providerId) {
-    return db.find('inspection_branches', { provider_id: providerId, is_active: true }, { sort: { name: 1 } });
-  }
-
-  /** Create a provider branch. */
-  async createBranch(providerId, data) {
-    if (!data.name) throw new AppError('Branch name is required', 400);
-    return db.create('inspection_branches', {
-      provider_id: providerId,
-      name: data.name,
-      address: data.address || null,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      phone: data.phone || null,
-      is_active: true,
-      created_at: new Date(),
-      updated_at: new Date(),
-    });
-  }
-
-  /** Provider-owned credential list. */
-  async getCredentials(providerId) {
-    return db.find('provider_credentials', { provider_id: providerId }, { sort: { expiry_date: 1, created_at: -1 } });
   }
 
   /**

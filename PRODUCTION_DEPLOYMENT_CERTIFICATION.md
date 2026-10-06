@@ -14,7 +14,7 @@ Scope: Verify the actual deployment chain end-to-end. **No optimistic certificat
 | Backend deployment (Render) | ❌ **FAIL** | `https://api.kayad.space/*` → **HTTP 502 on every endpoint** (`/health`, `/health/live`, `/health/ready`, `/api/health`, `/`, `/api/cars`), including after a 45s cold-start allowance. The Render service exists (`x-render-origin-server: Render`, Cloudflare in front, valid TLS cert CN=api.kayad.space exp. 2026-10-29) but the application behind it is down/crash-looping |
 | Database (Supabase) | ⚠️ NOT VERIFIED | Backend down → no live DB connectivity observable. No Supabase credentials exist in this environment |
 | Redis | ⚠️ NOT VERIFIED | Backend down → Redis connectivity unobservable. No Redis URL available here |
-| Storage (Cloudinary/uploads) | ⚠️ NOT VERIFIED | Backend down → unobservable |
+| Storage (Supabase Storage/uploads) | ⚠️ NOT VERIFIED | Backend down → unobservable |
 | External integrations (M-Pesa, SMS, email) | ⚠️ NOT VERIFIED | Backend down → unobservable. Credentials cannot be checked from this environment |
 | DNS / TLS | ⚠️ MIXED | `kayad.space` cert valid (Let's Encrypt, exp. 2026-10-10) but serves DEPLOYMENT_NOT_FOUND. **`www.kayad.space` cert EXPIRED 2026-08-16** (`.kayad.space` wildcard, Let's Encrypt) — www subdomain is unreachable over HTTPS. `api.kayad.space` cert valid (Google Trust Services, exp. 2026-10-29) |
 
@@ -23,7 +23,7 @@ Scope: Verify the actual deployment chain end-to-end. **No optimistic certificat
 | Variable | Status |
 | --- | --- |
 | Vercel `VITE_*` env vars (dashboard) | NOT VERIFIED — no Vercel access; `deploy.yml` fails pulling project info |
-| Render env vars (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL`, M-Pesa, Cloudinary, Redis…) | NOT VERIFIED — no Render access. `render.yaml` declares them `sync: false` (dashboard-set); the 502s are consistent with missing/invalid required env but that is a hypothesis, not a verification |
+| Render env vars (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL`, M-Pesa, Supabase Storage, Redis…) | NOT VERIFIED — no Render access. `render.yaml` declares them `sync: false` (dashboard-set); the 502s are consistent with missing/invalid required env but that is a hypothesis, not a verification |
 | GitHub Actions secrets (`VERCEL_TOKEN`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) | ❌ PARTIALLY VERIFIED BROKEN — deploy workflow fails at Vercel credentials step |
 | Backend `validateEnv()` on boot | VERIFIED in code (PORT required; warns on missing secrets) — runtime behavior NOT VERIFIED (service down) |
 

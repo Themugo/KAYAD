@@ -9,8 +9,8 @@
 // =============================
 
 export const CDN_CONFIG = {
-  // Cloudinary CDN (built-in)
-  provider: "cloudinary",
+  // Supabase Storage CDN
+  provider: "supabase",
 
   // Cache headers
   cacheHeaders: {

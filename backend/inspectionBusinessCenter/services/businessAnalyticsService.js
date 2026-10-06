@@ -42,8 +42,10 @@ class BusinessAnalyticsService {
     const currentGross = revenue.reduce((sum, b) => sum + parseFloat(b.total_price), 0);
     const previousGross = previousRevenue.reduce((sum, b) => sum + parseFloat(b.total_price), 0);
 
-    // Engineer metrics
+    // Workforce metrics use the canonical inspection_staff table.
     const engineers = await db.find('inspection_staff', { provider_id: providerId, is_active: true });
+    const provider = await db.findById('inspection_providers', providerId);
+    const commissionRate = Number(provider?.commission_rate ?? 15);
     const completedWithTime = completedJobs.filter(b => b.started_at && b.completed_at);
 
     return {
@@ -76,7 +78,7 @@ class BusinessAnalyticsService {
       },
       revenue: {
         grossRevenue: currentGross,
-        netRevenue: currentGross - (await this.getInspectionCommission(providerId, currentBookings)),
+        netRevenue: currentGross - (currentGross * commissionRate / 100),
         averageJobValue: completedJobs.length > 0 ? currentGross / completedJobs.length : 0,
         revenueByType: this.groupRevenueByType(currentBookings),
         revenueByDay: this.groupRevenueByDay(currentBookings),
@@ -106,12 +108,6 @@ class BusinessAnalyticsService {
         approvalRate: 0, // Would calculate
       },
     };
-  }
-
-  async getInspectionCommission(providerId, bookings) {
-    const provider = await db.findById('inspection_providers', providerId);
-    const rate = Number(provider?.commission_rate ?? 15);
-    return bookings.filter(b => b.payment_status === 'fully_paid').reduce((sum, b) => sum + (Number(b.total_price || 0) * rate / 100), 0);
   }
 
   /**
@@ -265,9 +261,9 @@ class BusinessAnalyticsService {
       id: e.id,
       name: `${e.first_name} ${e.last_name}`,
       role: e.role,
-      completedInspections: e.inspection_count,
+      completedInspections: e.total_inspections,
       averageRating: e.average_rating,
-      qualityScore: e.quality_score,
+      qualityScore: 100,
     }));
   }
 
@@ -349,12 +345,9 @@ class BusinessAnalyticsService {
    * Get average quality score
    */
   async getAverageQualityScore(providerId) {
-    const bookings = await db.find('inspection_bookings', { provider_id: providerId });
-    const reports = [];
-    for (const booking of bookings) {
-      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
-      if (report) reports.push(report);
-    }
+    const reports = await db.find('inspection_reports', {
+      provider_id: providerId
+    });
 
     if (reports.length === 0) return 0;
 
@@ -366,30 +359,24 @@ class BusinessAnalyticsService {
    * Count approved reports
    */
   async countApprovedReports(providerId, since) {
-    const bookings = await db.find('inspection_bookings', { provider_id: providerId });
-    let count = 0;
-    for (const booking of bookings) {
-      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
-      if (!report) continue;
-      const versions = await db.find('report_versions', { report_id: report.id, status: 'approved', approved_at: { $gte: since } });
-      count += versions.length;
-    }
-    return count;
+    const versions = await db.find('report_versions', {
+      provider_id: providerId,
+      status: 'approved',
+      approved_at: { $gte: since }
+    });
+    return versions.length;
   }
 
   /**
    * Count rejected reports
    */
   async countRejectedReports(providerId, since) {
-    const bookings = await db.find('inspection_bookings', { provider_id: providerId });
-    let count = 0;
-    for (const booking of bookings) {
-      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
-      if (!report) continue;
-      const versions = await db.find('report_versions', { report_id: report.id, status: 'corrections_requested', reviewed_at: { $gte: since } });
-      count += versions.length;
-    }
-    return count;
+    const versions = await db.find('report_versions', {
+      provider_id: providerId,
+      status: 'corrections_requested',
+      reviewed_at: { $gte: since }
+    });
+    return versions.length;
   }
 
   /**

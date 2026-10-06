@@ -18,7 +18,6 @@ import type {
 } from '../types/inspection';
 
 export interface SearchProvidersParams {
-  search?: string;
   country?: string;
   county?: string;
   town?: string;
@@ -75,13 +74,13 @@ export interface InspectionPaymentInitiation {
 
 export interface SubmitReviewParams {
   bookingId: string;
-  providerId?: string;
+  providerId: string;
   ratings: {
     overall: number;
-    professionalism?: number;
-    thoroughness?: number;
-    timeliness?: number;
-    communication?: number;
+    professionalism: number;
+    thoroughness: number;
+    timeliness: number;
+    communication: number;
   };
   reviewText?: string;
 }
@@ -466,84 +465,6 @@ export const inspectionApi = {
     );
     return unwrapInspectionResponse(response);
   },
-};
-
-
-
-export interface InspectionBusinessCenterApi {
-  getMe: () => Promise<{ provider: any }>;
-  getDashboard: (providerId: string) => Promise<any>;
-  getAttention: (providerId: string) => Promise<any>;
-  getBookings: (providerId: string, params?: Record<string, unknown>) => Promise<any>;
-  getBookingBoard: (providerId: string) => Promise<any>;
-  updateBookingStatus: (providerId: string, bookingId: string, status: string, staffId?: string, notes?: string) => Promise<any>;
-  getEngineers: (providerId: string, params?: Record<string, unknown>) => Promise<any>;
-  createEngineer: (providerId: string, body: Record<string, unknown>) => Promise<any>;
-  updateEngineer: (providerId: string, engineerId: string, body: Record<string, unknown>) => Promise<any>;
-  setEngineerAvailability: (providerId: string, engineerId: string, isAvailable: boolean) => Promise<any>;
-  getEngineerPerformance: (providerId: string, engineerId: string, period?: string) => Promise<any>;
-  getReportQueue: (providerId: string, status?: string) => Promise<any>;
-  submitReport: (providerId: string, reportId: string) => Promise<any>;
-  approveReport: (providerId: string, reportId: string, notes?: string) => Promise<any>;
-  requestCorrections: (providerId: string, reportId: string, corrections: any[]) => Promise<any>;
-  sendReport: (providerId: string, reportId: string, method?: string) => Promise<any>;
-  getAnalytics: (providerId: string, period?: string) => Promise<any>;
-  getFinance: (providerId: string, period?: string) => Promise<any>;
-  getTransactions: (providerId: string, params?: Record<string, unknown>) => Promise<any>;
-  getSettlements: (providerId: string, status?: string) => Promise<any>;
-  generateSettlement: (providerId: string, periodStart: string, periodEnd: string) => Promise<any>;
-  getCustomers: (providerId: string, params?: Record<string, unknown>) => Promise<any>;
-  getProfile: (providerId: string) => Promise<any>;
-  updateProfile: (providerId: string, body: Record<string, unknown>) => Promise<any>;
-  getPackages: (providerId: string, includeInactive?: boolean) => Promise<any>;
-  createPackage: (providerId: string, body: Record<string, unknown>) => Promise<any>;
-  updatePackage: (providerId: string, packageId: string, body: Record<string, unknown>) => Promise<any>;
-  getBranches: (providerId: string) => Promise<any>;
-  createBranch: (providerId: string, body: Record<string, unknown>) => Promise<any>;
-  getCredentials: (providerId: string) => Promise<any>;
-  createCredential: (providerId: string, body: Record<string, unknown>) => Promise<any>;
-  getPromos: (providerId: string) => Promise<any>;
-  createPromo: (providerId: string, body: Record<string, unknown>) => Promise<any>;
-  getDocuments: (providerId: string) => Promise<any>;
-  createDocument: (providerId: string, body: Record<string, unknown>) => Promise<any>;
-}
-
-export const inspectionBusinessCenterApi: InspectionBusinessCenterApi = {
-  getMe: async () => unwrapInspectionResponse(await apiClient.get('/api/business-center/me')),
-  getDashboard: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/dashboard`)),
-  getAttention: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/attention`)),
-  getBookings: async (id, params) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/bookings`, { params })),
-  getBookingBoard: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/bookings/status`)),
-  updateBookingStatus: async (id, bookingId, status, staffId, notes) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/bookings/${bookingId}/status`, { status, staffId, notes })),
-  getEngineers: async (id, params) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/engineers`, { params })),
-  createEngineer: async (id, body) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/engineers`, body)),
-  updateEngineer: async (id, engineerId, body) => unwrapInspectionResponse(await apiClient.patch(`/api/business-center/${id}/engineers/${engineerId}`, body)),
-  setEngineerAvailability: async (id, engineerId, isAvailable) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/engineers/${engineerId}/availability`, { isAvailable })),
-  getEngineerPerformance: async (id, engineerId, period = 'monthly') => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/engineers/${engineerId}/performance`, { params: { period } })),
-  getReportQueue: async (id, status) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/reports/queue`, { params: { status } })),
-  submitReport: async (id, reportId) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/reports/${reportId}/submit`, {})),
-  approveReport: async (id, reportId, notes) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/reports/${reportId}/approve`, { notes })),
-  requestCorrections: async (id, reportId, corrections) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/reports/${reportId}/corrections`, { corrections })),
-  sendReport: async (id, reportId, method = 'portal') => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/reports/${reportId}/send`, { method })),
-  getAnalytics: async (id, period = 'monthly') => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/analytics`, { params: { period } })),
-  getFinance: async (id, period = 'monthly') => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/finance/overview`, { params: { period } })),
-  getTransactions: async (id, params) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/finance/transactions`, { params })),
-  getSettlements: async (id, status) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/finance/settlements`, { params: { status } })),
-  generateSettlement: async (id, periodStart, periodEnd) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/finance/settlements`, { periodStart, periodEnd })),
-  getCustomers: async (id, params) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/customers`, { params })),
-  getProfile: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/profile`)),
-  updateProfile: async (id, body) => unwrapInspectionResponse(await apiClient.patch(`/api/business-center/${id}/profile`, body)),
-  getPackages: async (id, includeInactive = true) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/packages`, { params: { includeInactive } })),
-  createPackage: async (id, body) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/packages`, body)),
-  updatePackage: async (id, packageId, body) => unwrapInspectionResponse(await apiClient.patch(`/api/business-center/${id}/packages/${packageId}`, body)),
-  getBranches: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/branches`)),
-  createBranch: async (id, body) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/branches`, body)),
-  getCredentials: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/credentials`)),
-  createCredential: async (id, body) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/credentials`, body)),
-  getPromos: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/promos`)),
-  createPromo: async (id, body) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/promos`, body)),
-  getDocuments: async (id) => unwrapInspectionResponse(await apiClient.get(`/api/business-center/${id}/documents`)),
-  createDocument: async (id, body) => unwrapInspectionResponse(await apiClient.post(`/api/business-center/${id}/documents`, body)),
 };
 
 export default inspectionApi;

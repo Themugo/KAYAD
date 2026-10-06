@@ -1496,7 +1496,7 @@ router.post(
 // 🖼 LOGO UPLOAD
 // =============================
 import { uploadMemory, handleUploadError } from "../middleware/upload.js";
-import { uploadImage } from "../config/cloudinary.js";
+import { uploadFile } from "../services/storage.service.js";
 router.post(
   "/upload-logo",
   protect,
@@ -1505,10 +1505,7 @@ router.post(
   handleUploadError,
   asyncHandler(async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-    const result = await uploadImage(req.file, "kayad/branding", {
-      generateVariants: true,
-      preserveOriginal: true,
-    });
+    const result = await uploadFile(req.file, "kayad/branding", { visibility: "public" });
     let config = await PlatformConfig.findOne();
     if (!config) config = new PlatformConfig();
     config.branding.logoType = "image";

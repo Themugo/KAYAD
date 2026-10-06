@@ -40,17 +40,10 @@ class DashboardService {
 
     // Reports
     const reportsPending = allBookings.filter(b => b.status === 'inspection_complete').length;
-    const providerBookingsForReports = await db.find('inspection_bookings', { provider_id: providerId });
-    const providerReportIds = [];
-    for (const b of providerBookingsForReports) {
-      const r = await db.findOne('inspection_reports', { booking_id: b.id });
-      if (r) providerReportIds.push(r.id);
-    }
-    const reportVersions = [];
-    for (const reportId of providerReportIds) {
-      reportVersions.push(...await db.find('report_versions', { report_id: reportId }));
-    }
-    const reportsInQA = reportVersions.filter(v => v.status === 'qa_review').length;
+    const reportsInQA = await db.count('report_versions', {
+      provider_id: providerId,
+      status: 'qa_review'
+    });
 
     // Completed today
     const completedToday = todayBookings.filter(b => b.status === 'closed').length;
@@ -97,7 +90,11 @@ class DashboardService {
     // Quality alerts (reports pending QA for > 24 hours)
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const qualityAlerts = reportVersions.filter(v => v.status === 'qa_review' && new Date(v.created_at) < yesterday).length;
+    const qualityAlerts = await db.count('report_versions', {
+      provider_id: providerId,
+      status: 'qa_review',
+      created_at: { $lt: yesterday }
+    });
 
     return {
       summary: {

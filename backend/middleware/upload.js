@@ -49,7 +49,7 @@ const diskStorage = multer.diskStorage({
 });
 
 // =============================
-// ⚡ MEMORY STORAGE (FOR CLOUDINARY DIRECT)
+// ⚡ MEMORY STORAGE (FOR SUPABASE STORAGE DIRECT)
 // =============================
 export const memoryStorage = multer.memoryStorage();
 
@@ -124,7 +124,7 @@ const upload = multer({
 });
 
 // =============================
-// 🚀 CLOUDINARY-READY UPLOAD
+// 🚀 SUPABASE-STORAGE-READY UPLOAD
 // =============================
 export const uploadMemory = multer({
   storage: memoryStorage,

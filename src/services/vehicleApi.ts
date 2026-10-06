@@ -59,7 +59,7 @@ export interface BackendCar {
   features?: string[] | null;
   /** JSONB array of {url, thumb, public_id, ...} objects - NOT a plain
    * TEXT[] of URL strings, confirmed via createCar()/updateCar() and
-   * the Cloudinary-upload follow-up flow in carController.js. */
+   * the canonical Supabase Storage upload flow in carController.js. */
   images?: Array<{ url: string; thumb?: string; public_id?: string }> | null;
   location_city?: string | null; // NOT a nested "location.city" path
   vin?: string | null;

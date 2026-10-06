@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Home, Search, Gavel, ShieldCheck, Menu } from 'lucide-react';
 
 /** Event the Navbar listens for to open its existing mobile menu (single menu implementation). */
@@ -16,6 +17,22 @@ export default function MobileBottomNav({
   activeNav,
   onNavigate,
 }: MobileBottomNavProps) {
+  useEffect(() => {
+    const previousPadding = document.body.style.paddingBottom;
+    const syncSafeSpace = () => {
+      const isMobile = window.innerWidth < 1024;
+      document.body.style.paddingBottom = isMobile
+        ? 'calc(84px + env(safe-area-inset-bottom))'
+        : previousPadding;
+    };
+    syncSafeSpace();
+    window.addEventListener('resize', syncSafeSpace);
+    return () => {
+      window.removeEventListener('resize', syncSafeSpace);
+      document.body.style.paddingBottom = previousPadding;
+    };
+  }, []);
+
   const items = [
     { key: 'home', label: 'Home', icon: Home, action: () => onNavigate('marketplace') },
     {

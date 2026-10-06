@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasNotifications = (user?.unreadNotificationsCount ?? 0) > 0 || effectiveUnread > 0;
 
   return (
-    <header className="kayad-global-header sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#D7E7E4] shadow-[0_4px_20px_rgba(11,29,58,.06)] text-slate-800">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#D7E7E4] shadow-[0_4px_20px_rgba(11,29,58,.06)] text-slate-800">
       {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
 
       {/* Main Navigation Container */}
@@ -575,7 +575,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* MOBILE DRAWER NAVIGATION */}
       {mobileMenuOpen && (
-        <div className="kayad-mobile-menu lg:hidden bg-[#0A3340] text-white border-t border-slate-800 px-4 pt-4 pb-8 space-y-4 animate-fade-in max-h-[calc(100vh-80px)] overflow-y-auto">
+        <div className="kayad-mobile-menu lg:hidden bg-[#0A3340] text-white border-t border-[#1C5663] px-4 pt-4 pb-8 space-y-4 animate-fade-in max-h-[calc(100vh-80px)] overflow-y-auto">
 
           {/* User Account Banner or Login Prompt */}
           {user ? (
@@ -627,8 +627,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Fixed: matches the same simplified, flat list as desktop
               now - removed KAYAD LIVE/Watch Live/Financing (not in
               scope), added the missing Escrow link. */}
-          <div className="kayad-menu-section space-y-1">
-            <span className="kayad-menu-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
+          <div className="kayad-mobile-menu__group space-y-2 rounded-2xl border border-white/8 bg-[#0B3A48]/70 p-3">
+            <span className="text-[10px] font-black text-[#8DB8B9] uppercase tracking-[0.16em] block px-1">
               Public Marketplace
             </span>
 
@@ -674,7 +674,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            <div className="kayad-menu-secondary-grid grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleNavSelect('financing')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
@@ -722,7 +722,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Group 2: Authenticated Account & Role Links */}
           {user && (
-            <div className="space-y-1 pt-2 border-t border-slate-800">
+            <div className="kayad-mobile-menu__group space-y-2 rounded-2xl border border-white/8 bg-[#0B3A48]/60 p-3 pt-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
                 Account & Dashboards
               </span>
@@ -793,7 +793,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Region Selector Mobile */}
-          <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
+          <div className="kayad-mobile-menu__footer pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
             <span className="flex items-center gap-1 text-slate-400 font-medium">
               <MapPin className="w-4 h-4 text-slate-400" /> Region: <strong className="text-white">{selectedCounty}</strong>
             </span>

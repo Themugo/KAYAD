@@ -38,7 +38,7 @@ spec:
     ports:
     - protocol: TCP
       port: 6379
-  # Allow egress to external APIs (M-Pesa, Cloudinary, etc.)
+  # Allow egress to external APIs (M-Pesa, Supabase Storage, etc.)
   - to:
     - namespaceSelector: {}
     ports:

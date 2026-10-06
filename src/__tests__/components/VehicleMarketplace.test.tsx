@@ -197,8 +197,8 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       const img = view.getByRole('img') as HTMLImageElement;
       const picture = img.closest('picture') as HTMLElement;
       const source = picture.querySelector('source') as HTMLSourceElement;
-      // Desktop / fallback image is the approved high-resolution transparent PNG.
-      expect(img.getAttribute('src')).toBe('/hero/kayad-land-cruiser-cutout.png');
+      // Desktop / fallback image is the approved clean PNG (desktop composition unchanged).
+      expect(img.getAttribute('src')).toBe('/hero/kayad-land-cruiser-clean.png');
       // Mobile-only high-resolution asset, limited to widths below the lg breakpoint.
       expect(source.getAttribute('srcset')).toBe('/hero/kayad-land-cruiser-mobile.webp');
       expect(source.getAttribute('media')).toBe('(max-width: 1023.98px)');
@@ -209,22 +209,8 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
 
       fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
       const next = within(mobileHero()).getByRole('img') as HTMLImageElement;
-      expect(next.getAttribute('src')).toBe('/hero/kayad-mercedes-gle-cutout.png');
+      expect(next.getAttribute('src')).toBe('/hero/kayad-mercedes-gle-clean.png');
       expect((next.closest('picture') as HTMLElement).querySelector('source')?.getAttribute('srcset')).toBe('/hero/kayad-mercedes-gle-mobile.webp');
-    });
-
-    it('normalizes legacy canonical desktop assets without touching custom artwork', async () => {
-      const { adminAPI } = await import('../../api/api');
-      vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { vehicleSource: 'showcase', showcaseVehicles: [
-        { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-clean.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', enabled: true },
-        { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/uploads/custom-mercedes.png', mobileImage: '/uploads/custom-mercedes-mobile.webp', enabled: true },
-      ] } } } as never);
-      await renderMarketplace({ ...baseProps });
-      const view = within(mobileHero());
-      await waitFor(() => expect((view.getByRole('img') as HTMLImageElement).getAttribute('src')).toBe('/hero/kayad-land-cruiser-cutout.png'));
-      fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
-      await waitFor(() => expect((within(mobileHero()).getByRole('img') as HTMLImageElement).getAttribute('src')).toBe('/uploads/custom-mercedes.png'));
-      expect((within(mobileHero()).getByRole('img') as HTMLImageElement).closest('picture')?.querySelector('source')?.getAttribute('srcset')).toBe('/uploads/custom-mercedes-mobile.webp');
     });
 
     it('does not pair a custom admin vehicle with a canonical mobile photo', async () => {

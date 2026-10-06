@@ -54,8 +54,6 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [completedBookingId, setCompletedBookingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     // Vehicle
@@ -128,7 +126,6 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
 
   const handleSubmit = async () => {
     setLoading(true);
-    setPaymentError(null);
     try {
       const booking = await inspectionApi.createBooking({
         packageId: formData.selectedPackage!.id,
@@ -157,7 +154,6 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
       });
       const payment = await inspectionApi.initiatePayment(booking.id, formData.customerPhone);
       if (payment?.paymentStatus === 'fully_paid') {
-        setCompletedBookingId(booking.id);
         onComplete?.(booking.id);
         return;
       }
@@ -173,7 +169,6 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
         await new Promise((resolve) => setTimeout(resolve, 2000));
         const status = await getPaymentStatus(checkoutRequestId);
         if (status.status === 'success') {
-          setCompletedBookingId(booking.id);
           onComplete?.(booking.id);
           return;
         }
@@ -184,7 +179,6 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
       throw new Error('Payment is still pending. Please wait for the M-Pesa confirmation before leaving this screen.');
     } catch (error) {
       console.error('Booking failed:', error);
-      setPaymentError(error instanceof Error ? error.message : 'The inspection booking could not be completed. Your booking state remains protected on the backend.');
     } finally {
       setLoading(false);
     }
@@ -213,10 +207,6 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
   const totalPrice = formData.selectedPackage
     ? formData.selectedPackage.price + (formData.isMobile ? (provider.operatingModel.mobileFee || 0) : 0)
     : 0;
-
-  if (completedBookingId) {
-    return <div className="min-h-screen grid place-items-center p-5" style={{ backgroundColor: KAYAD_COLORS.warmBeige }}><div className="max-w-xl w-full rounded-3xl bg-white p-7 md:p-9 text-center border" style={{ borderColor: '#D9E8E7' }}><div className="w-16 h-16 rounded-full mx-auto grid place-items-center" style={{ background: '#DFF8F3', color: KAYAD_COLORS.emerald }}><Check size={30}/></div><div className="text-[11px] font-black uppercase tracking-[.18em] mt-5" style={{ color: KAYAD_COLORS.teal }}>Inspection booking secured</div><h2 className="text-3xl font-black mt-2" style={{ color: KAYAD_COLORS.lightNavy }}>Your inspection request is in the KAYAD workflow.</h2><p className="mt-3 text-sm leading-6" style={{ color: KAYAD_COLORS.softBlue }}>Payment is only considered complete after the verified backend callback. The provider/inspector workflow now controls assignment, execution and report delivery.</p><div className="mt-5 rounded-2xl p-4 text-left" style={{ background: KAYAD_COLORS.warmBeige }}><div className="text-xs uppercase font-black" style={{ color: KAYAD_COLORS.softBlue }}>Booking ID</div><div className="font-black mt-1 break-all" style={{ color: KAYAD_COLORS.lightNavy }}>{completedBookingId}</div></div><button onClick={onCancel} className="mt-5 px-6 py-3 rounded-xl text-white font-black" style={{ background: KAYAD_COLORS.lightNavy }}>Return to inspection marketplace</button></div></div>;
-  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: KAYAD_COLORS.warmBeige }}>
@@ -287,8 +277,6 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
           </div>
         </div>
       </header>
-
-      {paymentError && <div className="max-w-4xl mx-auto px-4 pt-4"><div className="rounded-2xl p-4 text-sm font-semibold" role="alert" style={{background:'#FFF4E4',color:'#8A5B00'}}>{paymentError}</div></div>}
 
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">

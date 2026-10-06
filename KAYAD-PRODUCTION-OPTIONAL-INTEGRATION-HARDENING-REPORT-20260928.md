@@ -25,7 +25,7 @@ The following remain hard production requirements:
 - Supabase production URL/service-role key
 - JWT, refresh-token and session secrets
 - Frontend/backend public URLs
-- Cloudinary credentials — current vehicle media path still uses Cloudinary
+- Supabase Storage credentials — current vehicle media path still uses Supabase Storage
 - Brevo API key and sender — required for the current email-verification flow
 - Managed Redis — required by the production queue/rate-limit contract
 
@@ -219,7 +219,7 @@ This is an environment limitation, not evidence of a KAYAD source failure.
 
 ### Canonical media architecture
 
-The active source still contains real Cloudinary integration for vehicle/dispute media. Supabase remains the authoritative database/backend layer, but Cloudinary has not actually been removed from the media path. This foundation therefore intentionally keeps Cloudinary production requirements intact.
+The active source still contains real Supabase Storage integration for vehicle/dispute media. Supabase remains the authoritative database/backend layer, but Supabase Storage has not actually been removed from the media path. This foundation therefore intentionally keeps Supabase Storage production requirements intact.
 
 ### Legacy provider references remain
 
@@ -242,7 +242,7 @@ The intended production profile after this foundation is:
 
 **Required now**
 
-Supabase + Redis + Cloudinary + Brevo + core auth/security
+Supabase + Redis + Supabase Storage + Brevo + core auth/security
 
 **Optional until activated**
 
@@ -257,6 +257,6 @@ This allows the next live test to concentrate on:
 5. Login
 6. Dealer onboarding
 7. First vehicle listing
-8. Cloudinary media upload
+8. Supabase Storage media upload
 
 Payment, SMS and WhatsApp can be activated later without redesigning the architecture.

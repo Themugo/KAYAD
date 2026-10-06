@@ -6,6 +6,7 @@ import db from './dbAdapter.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 import { getSupabase } from '../../utils/supabase.js';
+import { disburseB2C } from '../../services/mpesaB2C.service.js';
 
 /**
  * Generate settlement reference
@@ -70,6 +71,24 @@ class SettlementService {
    * Generate settlement for provider
    */
   async generateSettlement(providerId, periodStart, periodEnd, userId = null) {
+    // Settlement is downstream of buyer acceptance. Only inspections with a
+    // generated/QA-approved report and an actual buyer review are eligible.
+    const bookings = await db.find('inspection_bookings', {
+      provider_id: providerId,
+      status: 'closed',
+      payment_status: 'fully_paid',
+      paid_at: { $gte: new Date(periodStart), $lte: new Date(`${periodEnd}T23:59:59.999Z`) },
+    });
+    const eligible = [];
+    for (const booking of bookings) {
+      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
+      const review = await db.findOne('inspection_reviews', { booking_id: booking.id });
+      const versions = report ? await db.find('report_versions', { report_id: report.id }, { sort: { version_number: -1 }, limit: 1 }) : [];
+      const latestVersion = versions[0];
+      if (report?.quality_reviewed && report?.pdf_storage_path && latestVersion?.status === 'approved' && review) eligible.push(booking);
+    }
+    if (!eligible.length) throw new AppError('No reviewed, QA-approved paid inspections are eligible for settlement', 409);
+
     const { data, error } = await getSupabase().rpc('kayad_generate_inspection_settlement_atomic', {
       p_provider_id: providerId,
       p_period_start: periodStart,
@@ -169,9 +188,55 @@ class SettlementService {
   }
 
   /**
+   * Initiate the real provider payout through M-Pesa B2C.
+   * The settlement remains processing until Daraja sends a callback receipt.
+   */
+  async initiateSettlementPayout(settlementId, userId = null) {
+    const settlement = await db.findById('inspection_settlements', settlementId);
+    if (!settlement) throw new AppError('Settlement not found', 404);
+    if (!['pending', 'processing', 'failed'].includes(settlement.status)) {
+      throw new AppError(`Settlement cannot be paid from ${settlement.status}`, 409);
+    }
+
+    const provider = await db.findById('inspection_providers', settlement.provider_id);
+    if (!provider) throw new AppError('Inspection provider not found', 404);
+    const phone = provider.phone || provider.whatsapp;
+    if (!phone) throw new AppError('Provider payout phone is required before initiating settlement', 409);
+
+    const result = await disburseB2C({
+      phone,
+      amount: settlement.net_amount,
+      escrowId: `inspection-settlement:${settlement.id}`,
+      settlementId: settlement.id,
+      sellerName: provider.company_name,
+      idempotencyKey: settlement.id,
+    });
+
+    if (result?.conversationID) {
+      await getSupabase().from('inspection_settlements').update({
+        provider_conversation_id: result.conversationID,
+        updated_at: new Date().toISOString(),
+      }).eq('id', settlement.id);
+    }
+
+    return { settlementId: settlement.id, status: 'processing', provider: result };
+  }
+
+  /**
    * Mark settlement as paid
    */
   async markSettlementPaid(settlementId, paymentData, userId = null) {
+    const settlement = await db.findById('inspection_settlements', settlementId);
+    if (!settlement) throw new AppError('Settlement not found', 404);
+    const transactions = await db.find('inspection_transactions', { settlement_id: settlementId, transaction_type: 'inspection_payment' });
+    for (const transaction of transactions) {
+      const review = transaction.booking_id ? await db.findOne('inspection_reviews', { booking_id: transaction.booking_id }) : null;
+      const report = transaction.booking_id ? await db.findOne('inspection_reports', { booking_id: transaction.booking_id }) : null;
+      const versions = report ? await db.find('report_versions', { report_id: report.id }, { sort: { version_number: -1 }, limit: 1 }) : [];
+      if (!review || !report?.quality_reviewed || !report?.pdf_storage_path || versions[0]?.status !== 'approved') {
+        throw new AppError('Settlement contains an inspection without approved QA, generated PDF, and buyer review', 409);
+      }
+    }
     const { data, error } = await getSupabase().rpc('kayad_mark_inspection_settlement_paid_atomic', {
       p_settlement_id: settlementId,
       p_payment_method: paymentData.method || null,

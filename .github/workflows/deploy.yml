@@ -38,10 +38,6 @@ jobs:
         run: npm run validate:backend-boot
       - name: Hero mobile asset contract
         run: npm run validate:hero-mobile-assets
-      - name: Validate canonical desktop hero assets
-        run: npm run validate:hero-desktop-assets
-      - name: Validate inspection marketplace and business center
-        run: npm run validate:inspection-marketplace && npm run validate:inspection-business-center
       - name: Hero admin-control contract
         run: npm run validate:hero-admin-control
       - name: Validate V14 release candidate

@@ -48,7 +48,7 @@ The foundation remains intended for:
 4. Dealer registration
 5. Email verification
 6. Dealer onboarding
-7. Cloudinary vehicle media upload
+7. Supabase Storage vehicle media upload
 8. First vehicle listing
 
 No M-Pesa, Africa's Talking, or Twilio credentials are required for this path unless their explicit `REQUIRE_*` flags are enabled.

@@ -1,6 +1,6 @@
 import { useState, useEffect, type CSSProperties } from 'react';
 import useIntersectionObserver from '../../../hooks/useIntersectionObserver';
-import { getCloudinarySrcSet } from '../../../utils/helpers';
+import { getMediaSrcSet } from '../../../utils/helpers';
 
 const FALLBACK_CHAIN = [
   'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop',
@@ -52,7 +52,7 @@ export default function LazyImage({ src, alt, fallback, width, height, style, cl
     onError?.();
   };
 
-  const imgResult = currentSrc ? getCloudinarySrcSet(currentSrc) : null;
+  const imgResult = currentSrc ? getMediaSrcSet(currentSrc) : null;
 
   return (
     <div ref={imgRef} className={className} style={{ position: 'relative', overflow: 'hidden', background: '#edf6f4', width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined, ...style }}>

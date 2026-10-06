@@ -249,48 +249,31 @@ TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886  # Sandbox or your approved number
 
 ---
 
-## STEP 6: CLOUDINARY (Image Storage)
+## STEP 6: SUPABASE STORAGE (CANONICAL MEDIA STORAGE)
 
-**Purpose**: Store and optimize car images and videos.
+**Purpose**: Store vehicle media, inspection evidence, documents and generated inspection reports.
 
-### 6.1 Create Cloudinary Account
+KAYAD no longer uses Cloudinary. Supabase Storage is the sole active media provider.
 
-1. Go to: **https://cloudinary.com/users/register/free**
-2. Sign up with email or Google
-3. Choose **Free Plan** (25 credits/month)
+### 6.1 Create the canonical buckets
 
-### 6.2 Get Cloud Name and API Key
+Create these buckets in the Supabase project:
 
-1. Go to **Dashboard**
-2. Copy:
-   - **Cloud Name**
+- `kayad-images` — public vehicle/branding media
+- `kayad-private` — private inspection evidence, reports, receipts and documents
 
-### 6.3 Get API Secret
-
-1. Go to **Settings** → **API Keys**
-2. Copy:
-   - **API Key**
-   - **API Secret**
-
-### 6.4 Create Upload Preset (Optional)
-
-1. Go to **Settings** → **Upload**
-2. Scroll to **Upload presets**
-3. Click **Add upload preset**
-4. Name it: `kayad-images`
-5. Signing Mode: **Unsigned** (for easier uploads)
-6. Save
+The migration `20261006180000_supabase_storage_canonical_media.sql` creates/converges both buckets.
 
 ### 📋 Values for .env
 
 ```env
-# Backend (backend/.env)
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_PUBLIC_BUCKET=kayad-images
+SUPABASE_PRIVATE_BUCKET=kayad-private
 ```
 
----
+Private objects are never exposed as permanent public URLs. KAYAD generates short-lived signed URLs only after application-level authorization.
 
 ## STEP 7: POSTHOG (Analytics)
 
@@ -492,18 +475,18 @@ AT_SENDER_ID=KAYAD
 SMS_PROVIDER=africastalking
 
 # ─── EMAIL ───────────────────────────────────────────────────────
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxx
-EMAIL_FROM=noreply@kayad.space
+BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxx
+BREVO_FROM_EMAIL=noreply@kayad.space
+BREVO_FROM_NAME=KAYAD
 
 # ─── WHATSAPP ────────────────────────────────────────────────────
 TWILIO_ACCOUNT_SID=ACxxxxxxxx
 TWILIO_AUTH_TOKEN=your_token
 TWILIO_WHATSAPP_NUMBER=whatsapp:+2547xxxxxxx
 
-# ─── CLOUDINARY ──────────────────────────────────────────────────
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_key
-CLOUDINARY_API_SECRET=your_secret
+# ─── MEDIA STORAGE ───────────────────────────────────────────────
+SUPABASE_PUBLIC_BUCKET=kayad-images
+SUPABASE_PRIVATE_BUCKET=kayad-private
 
 # ─── ANALYTICS ───────────────────────────────────────────────────
 POSTHOG_API_KEY=phc_xxxxxxxx
@@ -570,7 +553,7 @@ VITE_DOMAIN=kayad.space
 | Africa's Talking | https://africastalking.com | https://developers.africastalking.com |
 | SendGrid | https://signup.sendgrid.com | https://docs.sendgrid.com |
 | Twilio | https://www.twilio.com | https://www.twilio.com/docs |
-| Cloudinary | https://cloudinary.com | https://cloudinary.com/documentation |
+| Supabase Storage | https://supabase.com/docs/guides/storage | Supabase project Storage buckets and signed URLs |
 | PostHog | https://posthog.com | https://posthog.com/docs |
 | Sentry | https://sentry.io | https://docs.sentry.io |
 | Redis Cloud | https://redis.com | https://redis.io/docs |
