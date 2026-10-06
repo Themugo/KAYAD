@@ -23,7 +23,7 @@ class DashboardService {
     const allBookings = await db.find('inspection_bookings', { provider_id: providerId });
 
     // Get all engineers
-    const engineers = await db.find('inspection_engineers', { provider_id: providerId, is_active: true });
+    const engineers = await db.find('inspection_staff', { provider_id: providerId, is_active: true });
 
     // Today's jobs
     const todayBookings = allBookings.filter(b => b.scheduled_date === today);
@@ -40,10 +40,17 @@ class DashboardService {
 
     // Reports
     const reportsPending = allBookings.filter(b => b.status === 'inspection_complete').length;
-    const reportsInQA = await db.count('report_versions', {
-      provider_id: providerId,
-      status: 'qa_review'
-    });
+    const providerBookingsForReports = await db.find('inspection_bookings', { provider_id: providerId });
+    const providerReportIds = [];
+    for (const b of providerBookingsForReports) {
+      const r = await db.findOne('inspection_reports', { booking_id: b.id });
+      if (r) providerReportIds.push(r.id);
+    }
+    const reportVersions = [];
+    for (const reportId of providerReportIds) {
+      reportVersions.push(...await db.find('report_versions', { report_id: reportId }));
+    }
+    const reportsInQA = reportVersions.filter(v => v.status === 'qa_review').length;
 
     // Completed today
     const completedToday = todayBookings.filter(b => b.status === 'closed').length;
@@ -90,11 +97,7 @@ class DashboardService {
     // Quality alerts (reports pending QA for > 24 hours)
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const qualityAlerts = await db.count('report_versions', {
-      provider_id: providerId,
-      status: 'qa_review',
-      created_at: { $lt: yesterday }
-    });
+    const qualityAlerts = reportVersions.filter(v => v.status === 'qa_review' && new Date(v.created_at) < yesterday).length;
 
     return {
       summary: {
@@ -306,7 +309,7 @@ class DashboardService {
       status: { $nin: ['cancelled'] }
     });
 
-    const engineers = await db.find('inspection_engineers', {
+    const engineers = await db.find('inspection_staff', {
       provider_id: providerId,
       is_active: true
     });

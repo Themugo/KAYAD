@@ -2,7 +2,7 @@
 // KAYAD INSPECTION BUSINESS CENTER - ENGINEER SERVICE
 // ============================================================
 
-import db from '../../db/index.js';
+import db from '../../inspection/services/dbAdapter.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 
@@ -23,10 +23,11 @@ class EngineerService {
       phone: engineerData.phone,
       photo_url: engineerData.photoUrl,
       role: engineerData.role,
-      skills: engineerData.skills || [],
+      skills: engineerData.skills || engineerData.specializations || [],
       vehicle_types: engineerData.vehicleTypes || ['cars', 'suvs'],
       certifications: engineerData.certifications || [],
       years_experience: engineerData.yearsExperience || 0,
+      specializations: engineerData.skills || engineerData.specializations || [],
       home_county: engineerData.homeCounty,
       home_town: engineerData.homeTown,
       home_latitude: engineerData.homeLatitude,
@@ -44,7 +45,7 @@ class EngineerService {
       updated_at: new Date(),
     };
 
-    const result = await db.create('inspection_engineers', engineer);
+    const result = await db.create('inspection_staff', engineer);
     logInfo('Engineer created', { engineerId: result.id, providerId });
     return result;
   }
@@ -53,7 +54,7 @@ class EngineerService {
    * Get engineer by ID
    */
   async getEngineerById(engineerId) {
-    const engineer = await db.findById('inspection_engineers', engineerId);
+    const engineer = await db.findById('inspection_staff', engineerId);
     if (!engineer) {
       throw new AppError('Engineer not found', 404);
     }
@@ -73,7 +74,7 @@ class EngineerService {
       query.is_available = filters.isAvailable;
     }
 
-    const engineers = await db.find('inspection_engineers', query, {
+    const engineers = await db.find('inspection_staff', query, {
       sort: { first_name: 1 },
     });
 
@@ -100,7 +101,7 @@ class EngineerService {
     }
     sanitizedUpdates.updated_at = new Date();
 
-    const result = await db.update('inspection_engineers', engineerId, sanitizedUpdates);
+    const result = await db.update('inspection_staff', engineerId, sanitizedUpdates);
     logInfo('Engineer updated', { engineerId });
     return result;
   }
@@ -244,7 +245,7 @@ class EngineerService {
       throw new AppError('Booking not found', 404);
     }
 
-    const engineers = await db.find('inspection_engineers', {
+    const engineers = await db.find('inspection_staff', {
       provider_id: providerId,
       is_active: true,
       is_available: true,
@@ -257,10 +258,10 @@ class EngineerService {
     });
 
     // Score and rank by suitability
-    const scored = qualified.map(e => ({
+    const scored = await Promise.all(qualified.map(async (e) => ({
       ...this.formatEngineerBrief(e),
-      score: this.calculateSuitabilityScore(e, booking),
-    }));
+      score: await this.calculateSuitabilityScore(e, booking),
+    })));
 
     scored.sort((a, b) => b.score - a.score);
 
@@ -270,7 +271,7 @@ class EngineerService {
   /**
    * Calculate suitability score for assignment
    */
-  calculateSuitabilityScore(engineer, booking) {
+  async calculateSuitabilityScore(engineer, booking) {
     let score = 100;
 
     // Distance (lower is better)
@@ -285,7 +286,7 @@ class EngineerService {
 
     // Current workload
     const today = new Date().toISOString().split('T')[0];
-    const todayJobs = 0; // Would query database
+    const todayJobs = await db.count('inspection_bookings', { assigned_staff_id: engineer.id, scheduled_date: today, status: { $nin: ['cancelled', 'no_show'] } });
     if (todayJobs >= 4) score -= 30;
     else if (todayJobs >= 2) score -= 15;
 
@@ -330,7 +331,7 @@ class EngineerService {
       phone: engineer.phone,
       photoUrl: engineer.photo_url,
       role: engineer.role,
-      skills: engineer.skills,
+      skills: engineer.skills || engineer.specializations || [],
       vehicleTypes: engineer.vehicle_types,
       certifications: engineer.certifications,
       yearsExperience: engineer.years_experience,
@@ -369,7 +370,7 @@ class EngineerService {
    * Get team overview
    */
   async getTeamOverview(providerId) {
-    const engineers = await db.find('inspection_engineers', {
+    const engineers = await db.find('inspection_staff', {
       provider_id: providerId,
       is_active: true
     });

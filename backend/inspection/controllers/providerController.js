@@ -20,6 +20,7 @@ import { initiatePayment } from '../../services/paymentService.js';
 export const searchProviders = asyncHandler(async (req, res) => {
   const filters = {
     status: req.query.status,
+    search: req.query.search,
     verified: req.query.verified === 'true',
     country: req.query.country,
     county: req.query.county,
@@ -200,6 +201,30 @@ export const getReportByShareToken = asyncHandler(async (req, res) => {
 });
 
 // Generate PDF
+
+
+export const downloadCustomerReportPDF = asyncHandler(async (req, res) => {
+  const booking = await bookingService.getBookingById(req.params.bookingId);
+  if (String(booking.customer_id) !== String(req.user.id) && !['admin','superadmin'].includes(req.user.role)) {
+    throw new AppError('You do not have access to this inspection report', 403);
+  }
+  const report = await db.findOne('inspection_reports', { booking_id: booking.id });
+  if (!report) throw new AppError('Inspection report not found', 404);
+  const buffer = await reportService.generatePDFBuffer(report.id, { userId: req.user.id, role: req.user.role });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename=KAYAD-inspection-${report.report_number}.pdf`);
+  res.setHeader('Content-Length', buffer.length);
+  res.end(buffer);
+});
+
+export const downloadPDF = asyncHandler(async (req, res) => {
+  const buffer = await reportService.generatePDFBuffer(req.params.reportId, { providerId: req.params.providerId, userId: req.user.id, role: req.user.role });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename=KAYAD-inspection-${req.params.reportId}.pdf`);
+  res.setHeader('Content-Length', buffer.length);
+  res.end(buffer);
+});
+
 export const generatePDF = asyncHandler(async (req, res) => {
   const result = await reportService.generatePDF(req.params.reportId, { providerId: req.params.providerId, userId: req.user.id, role: req.user.role });
   response.success(res, result);
@@ -324,6 +349,27 @@ export const getEarningsSummary = asyncHandler(async (req, res) => {
  */
 
 // Submit review
+
+export const listProviderApplications = asyncHandler(async (req, res) => {
+  const status = req.query.status || 'pending';
+  const providers = await db.find('inspection_providers', { status }, { sort: { created_at: -1 } });
+  response.success(res, { providers });
+});
+
+export const verifyProviderApplication = asyncHandler(async (req, res) => {
+  const provider = await providerService.getProviderById(req.params.providerId);
+  if (provider.status === 'active' && provider.verification_status === 'verified') return response.success(res, { provider, idempotent: true });
+  await providerService.verifyProvider(req.params.providerId, req.user.id);
+  const updated = await providerService.getProviderById(req.params.providerId);
+  response.success(res, { provider: updated });
+});
+
+export const suspendProviderApplication = asyncHandler(async (req, res) => {
+  await providerService.suspendProvider(req.params.providerId, req.body.reason || 'Provider suspended by KAYAD administrator');
+  const updated = await providerService.getProviderById(req.params.providerId);
+  response.success(res, { provider: updated });
+});
+
 export const submitReview = asyncHandler(async (req, res) => {
   const { bookingId, ratings, reviewText } = req.body;
 
@@ -351,6 +397,9 @@ export default {
   createProvider,
   updateProvider,
   getProviderEarnings,
+  listProviderApplications,
+  verifyProviderApplication,
+  suspendProviderApplication,
   addCredential,
   // Booking
   createBooking,
@@ -366,6 +415,8 @@ export default {
   getReport,
   getReportByShareToken,
   generatePDF,
+  downloadPDF,
+  downloadCustomerReportPDF,
   shareReport,
   revokeReportShare,
   getInspectionCategories,

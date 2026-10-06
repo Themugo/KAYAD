@@ -50,6 +50,9 @@ const PrivateSellerPlatform = React.lazy(() => import('./features/PrivateSellerP
 const DealerDashboard = React.lazy(() => import('./pages/dealer/dashboard/DealerDashboard'));
 const FinanceMarketplace = React.lazy(() => import('./features/FinancePlatform').then((m) => ({ default: m.FinanceMarketplace })));
 const InspectionMarketplacePage = React.lazy(() => import('./features/InspectionMarketplace/pages/InspectionMarketplacePage'));
+const ProviderBusinessCenter = React.lazy(() => import('./features/InspectionMarketplace/pages/ProviderBusinessCenter'));
+const ProviderOnboardingPage = React.lazy(() => import('./features/InspectionMarketplace/pages/ProviderOnboardingPage'));
+const InspectorDashboard = React.lazy(() => import('./pages/inspector/InspectorDashboard'));
 
 // Fixed (Final Integration - real data integration): App() previously
 // held its own, disconnected local user state directly - re-applying
@@ -62,8 +65,10 @@ function AppInner() {
   const location = useLocation();
   useEffect(() => {
     const nav = new URLSearchParams(location.search).get('nav');
-    if (nav) setActiveNav(nav);
-  }, [location.search]);
+    if (location.pathname.startsWith('/inspector/dashboard')) {
+      setActiveNav('inspector-dashboard');
+    } else if (nav) setActiveNav(nav);
+  }, [location.search, location.pathname]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -428,7 +433,19 @@ function AppInner() {
           )}
 
           {activeNav === 'inspection-marketplace' && (
-            <InspectionMarketplacePage />
+            <InspectionMarketplacePage onOpenBusinessCenter={() => setActiveNav('inspection-business')} onOpenProviderOnboarding={() => setActiveNav('inspection-provider-onboarding')} />
+          )}
+
+          {activeNav === 'inspection-business' && (
+            <ProviderBusinessCenter onExit={() => setActiveNav('inspection-marketplace')} />
+          )}
+
+          {activeNav === 'inspection-provider-onboarding' && (
+            <ProviderOnboardingPage onBack={() => setActiveNav('inspection-marketplace')} onSuccess={() => setActiveNav('inspection-marketplace')} />
+          )}
+
+          {activeNav === 'inspector-dashboard' && (
+            <InspectorDashboard />
           )}
 
           {activeNav === 'financing' && (

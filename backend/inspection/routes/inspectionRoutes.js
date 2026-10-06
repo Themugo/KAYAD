@@ -57,10 +57,15 @@ router.get('/bookings/:reference', requireAuth, controller.getBooking);
 
 // Cancel booking
 router.post('/bookings/:bookingId/cancel', requireAuth, controller.cancelBooking);
+router.get('/bookings/:bookingId/report/pdf', requireAuth, controller.downloadCustomerReportPDF);
 
 // Submit review
 router.post('/reviews', requireAuth, controller.submitReview);
 
+
+router.get('/admin/providers', requireAuth, requireRole(['admin','superadmin']), controller.listProviderApplications);
+router.post('/admin/providers/:providerId/verify', requireAuth, requireRole(['admin','superadmin']), controller.verifyProviderApplication);
+router.post('/admin/providers/:providerId/suspend', requireAuth, requireRole(['admin','superadmin']), controller.suspendProviderApplication);
 
 /**
  * ============================================================
@@ -91,6 +96,7 @@ router.post('/provider/:providerId/bookings/:bookingId/report', requireAuth, req
 
 // Generate PDF
 router.post('/provider/:providerId/reports/:reportId/pdf', requireAuth, requireProviderOwnership, controller.generatePDF);
+router.get('/provider/:providerId/reports/:reportId/pdf', requireAuth, requireProviderOwnership, controller.downloadPDF);
 
 // Share report
 router.post('/provider/:providerId/reports/:reportId/share', requireAuth, requireProviderOwnership, controller.shareReport);

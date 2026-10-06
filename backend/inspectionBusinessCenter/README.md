@@ -43,7 +43,7 @@ KAYAD provides technology while inspection companies remain independent business
 
 | Table | Description |
 |-------|-------------|
-| `inspection_engineers` | Team members with roles, skills, and performance |
+| `inspection_staff` (canonical workforce) | Team members with roles, skills, and performance |
 | `engineer_schedules` | Engineer availability and job assignments |
 | `inspection_customers` | Customer relationships and history |
 | `report_versions` | QA workflow for reports |

@@ -43,7 +43,7 @@ class BusinessAnalyticsService {
     const previousGross = previousRevenue.reduce((sum, b) => sum + parseFloat(b.total_price), 0);
 
     // Engineer metrics
-    const engineers = await db.find('inspection_engineers', { provider_id: providerId, is_active: true });
+    const engineers = await db.find('inspection_staff', { provider_id: providerId, is_active: true });
     const completedWithTime = completedJobs.filter(b => b.started_at && b.completed_at);
 
     return {
@@ -76,7 +76,7 @@ class BusinessAnalyticsService {
       },
       revenue: {
         grossRevenue: currentGross,
-        netRevenue: currentGross * 0.85, // After commission (would calculate properly)
+        netRevenue: currentGross - (await this.getInspectionCommission(providerId, currentBookings)),
         averageJobValue: completedJobs.length > 0 ? currentGross / completedJobs.length : 0,
         revenueByType: this.groupRevenueByType(currentBookings),
         revenueByDay: this.groupRevenueByDay(currentBookings),
@@ -106,6 +106,12 @@ class BusinessAnalyticsService {
         approvalRate: 0, // Would calculate
       },
     };
+  }
+
+  async getInspectionCommission(providerId, bookings) {
+    const provider = await db.findById('inspection_providers', providerId);
+    const rate = Number(provider?.commission_rate ?? 15);
+    return bookings.filter(b => b.payment_status === 'fully_paid').reduce((sum, b) => sum + (Number(b.total_price || 0) * rate / 100), 0);
   }
 
   /**
@@ -247,7 +253,7 @@ class BusinessAnalyticsService {
    * Get top performing engineers
    */
   async getTopEngineers(providerId, limit = 5) {
-    const engineers = await db.find('inspection_engineers', {
+    const engineers = await db.find('inspection_staff', {
       provider_id: providerId,
       is_active: true
     }, {
@@ -343,9 +349,12 @@ class BusinessAnalyticsService {
    * Get average quality score
    */
   async getAverageQualityScore(providerId) {
-    const reports = await db.find('inspection_reports', {
-      provider_id: providerId
-    });
+    const bookings = await db.find('inspection_bookings', { provider_id: providerId });
+    const reports = [];
+    for (const booking of bookings) {
+      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
+      if (report) reports.push(report);
+    }
 
     if (reports.length === 0) return 0;
 
@@ -357,24 +366,30 @@ class BusinessAnalyticsService {
    * Count approved reports
    */
   async countApprovedReports(providerId, since) {
-    const versions = await db.find('report_versions', {
-      provider_id: providerId,
-      status: 'approved',
-      approved_at: { $gte: since }
-    });
-    return versions.length;
+    const bookings = await db.find('inspection_bookings', { provider_id: providerId });
+    let count = 0;
+    for (const booking of bookings) {
+      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
+      if (!report) continue;
+      const versions = await db.find('report_versions', { report_id: report.id, status: 'approved', approved_at: { $gte: since } });
+      count += versions.length;
+    }
+    return count;
   }
 
   /**
    * Count rejected reports
    */
   async countRejectedReports(providerId, since) {
-    const versions = await db.find('report_versions', {
-      provider_id: providerId,
-      status: 'corrections_requested',
-      reviewed_at: { $gte: since }
-    });
-    return versions.length;
+    const bookings = await db.find('inspection_bookings', { provider_id: providerId });
+    let count = 0;
+    for (const booking of bookings) {
+      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
+      if (!report) continue;
+      const versions = await db.find('report_versions', { report_id: report.id, status: 'corrections_requested', reviewed_at: { $gte: since } });
+      count += versions.length;
+    }
+    return count;
   }
 
   /**

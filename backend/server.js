@@ -63,6 +63,7 @@ import userRoutes from "./routes/userRoutes.js";
 import savedSearchRoutes from "./routes/savedSearchRoutes.js";
 import ntsaVerificationRoutes from "./routes/ntsaVerificationRoutes.js";
 import inspectionRoutes from "./inspection/routes/inspectionRoutes.js";
+import inspectionBusinessCenterRoutes from "./inspectionBusinessCenter/routes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 import securityLogRoutes from "./routes/securityLogRoutes.js";
 import smsBiddingRoutes from "./routes/smsBiddingRoutes.js";
@@ -792,6 +793,7 @@ app.use("/api/saved-searches", csrfProtection, savedSearchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/ntsa-verification", ntsaVerificationRoutes);
 app.use("/api/inspection", inspectionRoutes);
+app.use("/api/business-center", inspectionBusinessCenterRoutes);
 // Backward-compatible alias for clients using the earlier plural path.
 app.use("/api/inspections", inspectionRoutes);
 app.use("/api/security-logs", securityLogRoutes);

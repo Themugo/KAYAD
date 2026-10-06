@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Vehicle, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, UserProfile } from '../types';
 import { createInspectionOrder, getMyInspections, InspectionApiError, BackendInspectionOrder } from '../services/inspectionApi';
+import { inspectionApi as inspectionMarketplaceApi } from './InspectionMarketplace/services/api';
 import { useSocket } from '../context/SocketContext';
 import {
   ShieldCheck,
@@ -817,9 +818,47 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => showToast('PDF Report download started')}
+                  onClick={() => {
+                    window.open(`/api/inspection/bookings/${selectedReport.bookingId}/report/pdf`, '_blank', 'noopener,noreferrer');
+                  }}
                 >
-                  <Download className="w-4 h-4 mr-1.5" /> Download PDF Certificate
+                  <Download className="w-4 h-4 mr-1.5" /> Download PDF Report
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={async () => {
+                    const raw = window.prompt('Rate this inspection provider from 1 to 5');
+                    const rating = Number(raw);
+                    if (!Number.isInteger(rating) || rating < 1 || rating > 5) return;
+                    const comment = window.prompt('Optional review comment') || '';
+                    try {
+                      await inspectionMarketplaceApi.submitReviewAtomic({ bookingId: selectedReport.bookingId, ratings: { overall: rating }, reviewText: comment });
+                      showToast('Review submitted. Thank you.');
+                    } catch (error) {
+                      showToast(error instanceof Error ? error.message : 'Review could not be submitted');
+                    }
+                  }}
+                >
+                  <Star className="w-4 h-4 mr-1.5" /> Review Provider
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={async () => {
+                    const description = window.prompt('Describe the inspection issue or dispute');
+                    if (!description) return;
+                    try {
+                      await inspectionMarketplaceApi.openDispute(selectedReport.bookingId, 'inspection_quality', description);
+                      showToast('Dispute opened for KAYAD review.');
+                    } catch (error) {
+                      showToast(error instanceof Error ? error.message : 'Dispute could not be opened');
+                    }
+                  }}
+                >
+                  <AlertTriangle className="w-4 h-4 mr-1.5" /> Raise Dispute
                 </Button>
 
                 <Button
@@ -827,7 +866,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   size="sm"
                   onClick={() => {
                     setSelectedReport(null);
-                    showToast('Direct Escrow purchase initiated for this vehicle');
+                    showToast('Proceeding to protected vehicle purchase.');
                   }}
                 >
                   Proceed to Escrow Purchase

@@ -117,7 +117,8 @@
     "validate:hero-mobile-assets": "node scripts/validate-hero-mobile-assets.mjs",
     "validate:hero-desktop-assets": "node scripts/validate-hero-desktop-assets.mjs",
     "validate:hero-admin-control": "node scripts/validate-hero-admin-control.mjs",
-    "validate:mobile-desktop-polish": "node scripts/validate-mobile-desktop-polish.mjs"
+    "validate:mobile-desktop-polish": "node scripts/validate-mobile-desktop-polish.mjs",
+    "validate:inspection-business-center": "node scripts/validate-inspection-business-center.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

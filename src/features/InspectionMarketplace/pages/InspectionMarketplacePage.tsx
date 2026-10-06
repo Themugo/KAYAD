@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, MapPin, Star, Clock, Shield, Wrench, Car, Zap } from 'lucide-react';
 import { inspectionApi, SearchProvidersParams } from '../services/api';
@@ -21,7 +22,7 @@ const KAYAD_COLORS = {
   softBlue: '#64748b',
 };
 
-export default function InspectionMarketplacePage() {
+export default function InspectionMarketplacePage({ onOpenBusinessCenter, onOpenProviderOnboarding }: { onOpenBusinessCenter?: () => void; onOpenProviderOnboarding?: () => void }) {
   const [providers, setProviders] = useState<InspectionProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -30,6 +31,7 @@ export default function InspectionMarketplacePage() {
   const [selectedProvider, setSelectedProvider] = useState<InspectionProvider | null>(null);
   const [selectedProviderLoading, setSelectedProviderLoading] = useState(false);
   const [selectedProviderError, setSelectedProviderError] = useState<string | null>(null);
+  const [showBooking, setShowBooking] = useState(false);
   const [filters, setFilters] = useState<SearchProvidersParams>({
     page: 1,
     limit: 12,
@@ -67,7 +69,7 @@ export default function InspectionMarketplacePage() {
     }
   };
 
-  if (selectedProvider) {
+  if (selectedProvider && showBooking) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: KAYAD_COLORS.warmBeige }}>
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -85,8 +87,28 @@ export default function InspectionMarketplacePage() {
     );
   }
 
+  if (selectedProvider && !showBooking) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: KAYAD_COLORS.warmBeige }}>
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <button type="button" onClick={() => setSelectedProvider(null)} className="mb-5 font-bold" style={{ color: KAYAD_COLORS.lightNavy }}>← Back to inspection providers</button>
+          <div className="rounded-3xl overflow-hidden bg-white border" style={{ borderColor: '#D9E8E7' }}>
+            <div className="h-44 md:h-56 relative" style={{ background: `linear-gradient(135deg, ${KAYAD_COLORS.lightNavy}, #0A3340)` }}>
+              {selectedProvider.coverImage && <img src={selectedProvider.coverImage} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35" />}
+              <div className="absolute inset-0 p-6 flex items-end"><div><div className="text-[11px] uppercase tracking-[.18em] font-black text-cyan-100">KAYAD Verified Inspection Provider</div><h1 className="text-3xl md:text-4xl font-black text-white mt-1">{selectedProvider.companyName}</h1></div></div>
+            </div>
+            <div className="p-5 md:p-7 grid lg:grid-cols-[1.5fr_1fr] gap-6">
+              <div><p className="text-sm leading-7" style={{ color: KAYAD_COLORS.softBlue }}>{selectedProvider.description || 'Independent vehicle inspection services delivered through KAYAD with backend-controlled booking, assignment, payment and reporting.'}</p><div className="grid sm:grid-cols-3 gap-3 mt-5"><MetricBox label="Rating" value={`${Number(selectedProvider.stats.averageRating||0).toFixed(1)} / 5`} /><MetricBox label="Completed" value={String(selectedProvider.stats.completedInspections||0)} /><MetricBox label="Starting from" value={selectedProvider.startingPrice != null ? `KES ${Number(selectedProvider.startingPrice).toLocaleString()}` : 'View packages'} /></div><div className="flex flex-wrap gap-2 mt-5">{selectedProvider.verification.status==='verified'&&<Tag text="Verified provider"/>}{selectedProvider.operatingModel.offersMobile&&<Tag text="Mobile inspection"/>}{selectedProvider.operatingModel.hasWorkshop&&<Tag text="Workshop"/>}{selectedProvider.operatingModel.sameDayAvailable&&<Tag text="Same day"/>}{selectedProvider.operatingModel.weekendAvailable&&<Tag text="Weekend"/>}</div></div>
+              <div className="rounded-2xl p-5" style={{ background: KAYAD_COLORS.warmBeige }}><div className="font-black text-lg" style={{ color: KAYAD_COLORS.lightNavy }}>Book with this provider</div><p className="text-sm mt-2" style={{ color: KAYAD_COLORS.softBlue }}>Choose the vehicle, package, location, schedule and complete protected payment.</p><button onClick={()=>setShowBooking(true)} className="mt-5 w-full py-3 rounded-xl font-black text-white" style={{ background: KAYAD_COLORS.emerald }}>Start inspection booking →</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleSearch = (query: string) => {
-    setFilters(prev => ({ ...prev, county: query, page: 1 }));
+    setFilters(prev => ({ ...prev, search: query || undefined, page: 1 }));
   };
 
   const handleFilterChange = (newFilters: Partial<SearchProvidersParams>) => {
@@ -159,6 +181,8 @@ export default function InspectionMarketplacePage() {
               </button>
             </div>
           </motion.div>
+          {onOpenBusinessCenter && <div className="text-center mt-4"><button type="button" onClick={onOpenBusinessCenter} className="text-sm font-bold text-white/80 hover:text-white">Are you an inspection business? Open Business Center →</button></div>}
+          {onOpenProviderOnboarding && <div className="text-center mt-2"><button type="button" onClick={onOpenProviderOnboarding} className="text-xs font-bold text-cyan-100/80 hover:text-white">Join the KAYAD Inspection Network →</button></div>}
         </div>
       </header>
 
@@ -294,7 +318,7 @@ export default function InspectionMarketplacePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {providers.map((provider) => (
-              <ProviderCard key={provider.id} provider={provider} onSelect={handleSelectProvider} />
+              <ProviderCard key={provider.id} provider={provider} onSelect={(provider) => { void handleSelectProvider(provider); }} />
             ))}
           </div>
         )}
@@ -364,7 +388,7 @@ function QuickStatCard({
   label,
   value
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {
@@ -388,4 +412,11 @@ function QuickStatCard({
       </p>
     </motion.div>
   );
+}
+
+function MetricBox({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-2xl p-4" style={{ background: '#EEF7F5' }}><div className="text-[10px] font-black uppercase tracking-wide" style={{ color: '#64748b' }}>{label}</div><div className="font-black mt-1" style={{ color: '#12576D' }}>{value}</div></div>;
+}
+function Tag({ text }: { text: string }) {
+  return <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: '#E4F6F2', color: '#176B87' }}>{text}</span>;
 }

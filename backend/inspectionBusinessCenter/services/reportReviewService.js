@@ -16,17 +16,22 @@ class ReportReviewService {
   async getReviewQueue(providerId, status = null) {
     const query = { provider_id: providerId };
     if (status) {
-      query.status = status;
+      // Status is applied to the latest version below because inspection_reports
+      // itself has no workflow status column.
     }
 
-    const reports = await db.find('inspection_reports', query, {
-      sort: { created_at: -1 }
-    });
+    const bookings = await db.find('inspection_bookings', { provider_id: providerId }, { sort: { created_at: -1 } });
+    const reports = [];
+    for (const booking of bookings) {
+      const report = await db.findOne('inspection_reports', { booking_id: booking.id });
+      if (report) reports.push(report);
+    }
 
     const queue = [];
     for (const report of reports) {
       const booking = await db.findById('inspection_bookings', report.booking_id);
       const currentVersion = await this.getLatestVersion(report.id);
+      if (status && currentVersion?.status !== status) continue;
 
       queue.push({
         reportId: report.id,
@@ -115,6 +120,9 @@ class ReportReviewService {
       throw new AppError('Report must be in QA review status', 400);
     }
 
+    const reviewerStaff = await db.findOne('inspection_staff', { user_id: reviewerId });
+    const reviewerStaffId = reviewerStaff?.id || null;
+
     await db.update('report_versions', version.id, {
       status: 'approved',
       reviewed_by: reviewerId,
@@ -126,11 +134,11 @@ class ReportReviewService {
     });
 
     // Update report status
-    const report = await db.findOne('inspection_reports', { booking_id: reportId });
+    const report = await db.findById('inspection_reports', reportId);
     if (report) {
       await db.update('inspection_reports', report.id, {
         quality_reviewed: true,
-        quality_reviewer_id: reviewerId,
+        quality_reviewer_id: reviewerStaffId,
         quality_reviewed_at: new Date(),
       });
     }
@@ -219,7 +227,7 @@ class ReportReviewService {
     });
 
     // Update booking status
-    const report = await db.findOne('inspection_reports', { booking_id: reportId });
+    const report = await db.findById('inspection_reports', reportId);
     if (report) {
       const booking = await db.findById('inspection_bookings', report.booking_id);
       if (booking) {
@@ -271,7 +279,7 @@ class ReportReviewService {
     }
 
     const provider = await db.findById('inspection_providers', booking?.provider_id);
-    const engineer = await db.findById('inspection_engineers', booking?.assigned_staff_id);
+    const engineer = await db.findById('inspection_staff', booking?.assigned_staff_id);
 
     return {
       id: report.id,
