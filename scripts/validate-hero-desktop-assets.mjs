@@ -24,10 +24,14 @@ for (const [id, asset, expectedWidth, expectedHeight] of assets) {
   else fail(`${id}: canonical desktop asset is not wired in showcase configuration`);
 }
 
-if (component.includes('kayad-land-cruiser-clean.png') && !component.includes("'/hero/kayad-land-cruiser-clean.png': CANONICAL_HERO_DESKTOP_ASSETS")) fail('legacy Land Cruiser asset is still used as a desktop showcase source');
-else pass('legacy Land Cruiser clean asset is only retained for exact legacy normalization');
-if (component.includes('kayad-mercedes-gle-clean.png') && !component.includes("'/hero/kayad-mercedes-gle-clean.png': CANONICAL_HERO_DESKTOP_ASSETS")) fail('legacy Mercedes asset is still used as a desktop showcase source');
-else pass('legacy Mercedes clean asset is only retained for exact legacy normalization');
+if (component.includes("'/hero/kayad-land-cruiser-clean.png': '/hero/kayad-land-cruiser-cutout.png'"))
+  pass('legacy Land Cruiser clean asset is only retained for exact legacy normalization');
+else
+  fail('legacy Land Cruiser normalization mapping is missing');
+if (component.includes("'/hero/kayad-mercedes-gle-clean.png': '/hero/kayad-mercedes-gle-cutout.png'"))
+  pass('legacy Mercedes clean asset is only retained for exact legacy normalization');
+else
+  fail('legacy Mercedes normalization mapping is missing');
 if (component.includes('normalizeCanonicalHeroDesktopImage')) pass('legacy canonical desktop configuration normalization is wired');
 else fail('legacy canonical desktop configuration normalization is missing');
 

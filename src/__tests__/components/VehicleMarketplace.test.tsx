@@ -198,7 +198,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       const picture = img.closest('picture') as HTMLElement;
       const source = picture.querySelector('source') as HTMLSourceElement;
       // Desktop / fallback image is the approved clean PNG (desktop composition unchanged).
-      expect(img.getAttribute('src')).toBe('/hero/kayad-land-cruiser-clean.png');
+      expect(img.getAttribute('src')).toBe('/hero/kayad-land-cruiser-cutout.png');
       // Mobile-only high-resolution asset, limited to widths below the lg breakpoint.
       expect(source.getAttribute('srcset')).toBe('/hero/kayad-land-cruiser-mobile.webp');
       expect(source.getAttribute('media')).toBe('(max-width: 1023.98px)');
@@ -209,7 +209,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
 
       fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
       const next = within(mobileHero()).getByRole('img') as HTMLImageElement;
-      expect(next.getAttribute('src')).toBe('/hero/kayad-mercedes-gle-clean.png');
+      expect(next.getAttribute('src')).toBe('/hero/kayad-mercedes-gle-cutout.png');
       expect((next.closest('picture') as HTMLElement).querySelector('source')?.getAttribute('srcset')).toBe('/hero/kayad-mercedes-gle-mobile.webp');
     });
 

@@ -1,7 +1,7 @@
 // Mobile hero asset contract (frozen visual foundation).
 // - Every canonical showcase vehicle has a mobileImage that exists on disk.
 // - Mobile assets are WebP with an alpha channel, inside the 100-320 KB budget.
-// - The desktop `image` is untouched by this contract (still the approved clean PNG).
+// - The desktop `image` uses the approved high-resolution transparent PNG.
 // - The carousel's reduced-motion rule and the picture/mobile-only source wiring are present.
 import fs from 'node:fs';
 
@@ -18,8 +18,8 @@ if (entries.length >= 2) pass(`canonical showcase config declares mobileImage fo
 else fail('canonical showcase vehicles must each declare mobileImage');
 
 for (const { id, image, mobileImage } of entries) {
-  if (/-clean\.png$/.test(image)) pass(`${id}: desktop image unchanged (${image})`);
-  else fail(`${id}: desktop image must remain the approved clean PNG, found ${image}`);
+  if (/-cutout\.png$/.test(image)) pass(`${id}: desktop image uses approved high-resolution cutout (${image})`);
+  else fail(`${id}: desktop image must use the approved high-resolution cutout PNG, found ${image}`);
   const file = `public${mobileImage}`;
   if (!fs.existsSync(file)) { fail(`${id}: ${file} is missing`); continue; }
   const buf = fs.readFileSync(file);
