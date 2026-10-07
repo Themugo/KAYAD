@@ -132,8 +132,50 @@ export async function atomicStartAuction({ carId, durationMs, startingBid, reser
   return data;
 }
 
+export async function atomicStartScheduledAuction({ carId, scheduledEndAt, startingBid, reservePrice = null, reserveMode = "none" }) {
+  const { data, error } = await getSupabase().rpc("kayad_start_scheduled_auction_atomic", {
+    p_car_id: carId,
+    p_scheduled_end_at: scheduledEndAt,
+    p_starting_bid: startingBid,
+    p_reserve_price: reservePrice,
+    p_reserve_mode: reserveMode,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function atomicExtendAuction({ carId, extraMs }) {
   const { data, error } = await getSupabase().rpc("kayad_extend_auction_atomic", { p_car_id: carId, p_extra_ms: extraMs });
+  if (error) throw error;
+  return data;
+}
+
+// P0/P1 SOURCE-LEVEL TRUST BOUNDARY SWEEP — Item 8 ("winner payment +
+// deadline"). markAuctionPaymentReceived and defaultAuctionWinner previously
+// raced each other via a plain findById()/update() pair with no row lock, so
+// a payment confirmed at nearly the same moment the deadline swept could
+// both credit the seller payable AND forfeit the winner's security deposit
+// for the same sale. These two RPCs lock the same auction_outcomes row
+// first, so only one of the two transitions can ever apply.
+export async function atomicSettleAuctionWinnerPayment({ outcomeId, paymentId, winnerUserId, expectedAmount, actualAmount, receipt = null }) {
+  const { data, error } = await getSupabase().rpc("kayad_settle_auction_winner_payment_atomic", {
+    p_outcome_id: outcomeId,
+    p_payment_id: paymentId,
+    p_winner_user_id: winnerUserId,
+    p_expected_amount: expectedAmount,
+    p_actual_amount: actualAmount,
+    p_receipt: receipt,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function atomicDefaultAuctionWinner({ outcomeId, actorId, reawardAllowed }) {
+  const { data, error } = await getSupabase().rpc("kayad_default_auction_winner_atomic", {
+    p_outcome_id: outcomeId,
+    p_actor_id: actorId,
+    p_reaward_allowed: reawardAllowed,
+  });
   if (error) throw error;
   return data;
 }

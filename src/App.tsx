@@ -37,7 +37,6 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 const AuctionsView = React.lazy(() => import('./features/AuctionsView'));
 const EscrowView = React.lazy(() => import('./features/EscrowView'));
 const InspectionsView = React.lazy(() => import('./features/InspectionsView'));
-const FinancingView = React.lazy(() => import('./features/FinancingView'));
 const DealersView = React.lazy(() => import('./features/DealersView'));
 const ChatView = React.lazy(() => import('./features/ChatView'));
 const AdminView = React.lazy(() => import('./features/AdminView'));
@@ -46,7 +45,7 @@ const PaymentHistoryView = React.lazy(() => import('./features/PaymentHistoryVie
 const AuctionLivePage = React.lazy(() => import('./pages/AuctionLivePage'));
 const KAYADLive = React.lazy(() => import('./pages/KAYADLive'));
 const BuyerPlatform = React.lazy(() => import('./features/OwnershipPlatform').then((m) => ({ default: m.BuyerPlatform })));
-const PrivateSellerPlatform = React.lazy(() => import('./features/PrivateSellerPlatform'));
+const PrivateSellerPlatform = React.lazy(() => import('./features/PrivateSellerPlatform').then((module) => ({ default: module.PrivateSellerPlatform })));
 const DealerDashboard = React.lazy(() => import('./pages/dealer/dashboard/DealerDashboard'));
 const FinanceMarketplace = React.lazy(() => import('./features/FinancePlatform').then((m) => ({ default: m.FinanceMarketplace })));
 const InspectionMarketplacePage = React.lazy(() => import('./features/InspectionMarketplace/pages/InspectionMarketplacePage'));
@@ -105,6 +104,7 @@ function AppInner() {
     }
   }, [activeNav, authLoading, isAuth, isAdmin, isDealer, location, navigate]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
+  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'create'>('journey');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fixed (Final Integration - real data integration): this was
@@ -349,6 +349,7 @@ function AppInner() {
   const handleStartEscrow = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
+    setEscrowLaunchTab('create');
     setActiveNav('escrow');
   }, []);
 
@@ -363,6 +364,11 @@ function AppInner() {
   const handleSelectDealerVehicles = useCallback((dealerName: string) => {
     setSearchQuery(dealerName);
     setActiveNav('marketplace');
+  }, []);
+
+  const handleNavClick = useCallback((nav: string) => {
+    if (nav === 'escrow') setEscrowLaunchTab('journey');
+    setActiveNav(nav);
   }, []);
 
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
@@ -390,7 +396,7 @@ function AppInner() {
         user={user}
         savedCount={savedVehicles.length}
         activeNav={activeNav}
-        onNavClick={(nav) => setActiveNav(nav)}
+        onNavClick={handleNavClick}
         selectedCounty={selectedCounty}
         onCountyChange={(c) => setSelectedCounty(c)}
         onOpenAuth={handleOpenAuth}
@@ -462,6 +468,7 @@ function AppInner() {
             <EscrowView
               user={user}
               onOpenAuth={handleOpenAuth}
+              initialTab={escrowLaunchTab}
             />
           )}
 
@@ -479,11 +486,8 @@ function AppInner() {
             <InspectionMarketplacePage />
           )}
 
-          {activeNav === 'financing' && (
-            <FinancingView
-              vehicles={vehicles}
-              onQuickViewVehicle={handleOpenVehicleDetails}
-            />
+          {(activeNav === 'financing' || activeNav === 'finance') && (
+            <FinanceMarketplace user={user} onOpenAuth={handleOpenAuth} />
           )}
 
           {activeNav === 'dealers' && (
@@ -561,9 +565,6 @@ function AppInner() {
             <DealerDashboard user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
           )}
 
-          {activeNav === 'finance' && (
-            <FinanceMarketplace user={user} onOpenAuth={handleOpenAuth} />
-          )}
 
           {activeNav === 'saved' && (
             <VehicleMarketplace
@@ -579,9 +580,10 @@ function AppInner() {
               searchQuery=""
               onSearchChange={() => {}}
               onOpenCompareModal={() => setShowCompareModal(true)}
-              isLoadingReal={vehiclesLoading}
-              loadError={vehiclesError}
-              onRetryLoad={fetchVehicles}
+              isLoadingReal={false}
+              loadError={null}
+              onRetryLoad={() => undefined}
+              savedOnly
             />
           )}
 
@@ -667,6 +669,17 @@ function AuthRouteSurface() {
   if (path === '/register') return <OnboardingFlow onClose={() => { window.location.href = '/'; }} />;
   if (path === '/forgot-password') return <ForgotPasswordPage />;
   if (path === '/reset-password') return <ResetPasswordPage />;
+
+  // Canonical vehicle deep-link boundary. Marketplace cards, shared links,
+  // dealer previews and auction completion historically used /cars/:id,
+  // while the current marketplace detail state is URL-query based. Resolve
+  // the legacy/public path into the existing single detail mechanism instead
+  // of letting it fall through to the homepage without opening the vehicle.
+  const vehiclePathMatch = path.match(/^\/cars\/([^/]+)\/?$/);
+  if (vehiclePathMatch) {
+    return <Navigate replace to={`/?nav=marketplace&vehicleId=${encodeURIComponent(vehiclePathMatch[1])}`} />;
+  }
+
   if (path.startsWith('/auction/')) return <AuctionLivePage />;
   if (path === '/force-password-change') return <ForcePasswordChange />;
 

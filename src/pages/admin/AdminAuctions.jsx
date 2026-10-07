@@ -12,7 +12,6 @@ export default function AdminAuctions() {
   const [actionId, setActionId] = useState(null);
   const [selected, setSelected] = useState(null); // car for start-auction modal
   const [bids, setBids]       = useState({}); // carId -> bids[]
-  const [startForm, setStartForm] = useState({ hours: 24 });
   const [extendForm, setExtendForm] = useState({ hours: 2 });
   const [winnerModal, setWinnerModal] = useState(null); // { car, bids }
 
@@ -42,7 +41,7 @@ export default function AdminAuctions() {
     if (bids[carId]) return bids[carId];
     try {
       const data = await auctionAdminAPI.bidHistory(carId);
-      const b = data.bids || data.data || [];
+      const b = (data.bids || data.data || []).filter((bid) => ['paid', 'won', 'lost'].includes(String(bid.status || '').toLowerCase()) || bid.mpesaPaid === true);
       setBids(prev => ({ ...prev, [carId]: b }));
       return b;
     } catch { return []; }
@@ -52,9 +51,7 @@ export default function AdminAuctions() {
     if (!selected) return;
     setActionId(selected._id);
     try {
-      const endAt = new Date(Date.now() + Number(startForm.hours) * 3600000).toISOString();
-      const durationMs = Number(startForm.hours) * 3600000;
-      await auctionAdminAPI.start(selected._id, { durationMs, startingBid: 0 });
+      await auctionAdminAPI.start(selected._id, {});
       toast('🔴 Auction is now LIVE!', 'success');
       setSelected(null);
       load();
@@ -97,7 +94,7 @@ export default function AdminAuctions() {
     setActionId(bidId);
     try {
       await auctionAdminAPI.setWinner(winnerModal.car._id, bidId);
-      toast('🏆 Winner set! Escrow initiated.', 'success');
+      toast('🏆 Winner recorded. Settlement follows the published auction mode.', 'success');
       setWinnerModal(null);
       load();
     } catch (err) {
@@ -211,9 +208,13 @@ export default function AdminAuctions() {
                   {/* Actions */}
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flexShrink: 0 }}>
                     {car._tab === 'draft' && (
-                      <button className="btn btn-gold btn-sm" onClick={() => setSelected(car)}>
-                        ▶ Start Auction
-                      </button>
+                      new Date(car.auctionStartTime || car.auction_start_time || 0).getTime() > Date.now() ? (
+                        <span className="badge badge-muted">Scheduled · {new Date(car.auctionStartTime || car.auction_start_time).toLocaleString('en-KE')}</span>
+                      ) : (
+                        <button className="btn btn-gold btn-sm" onClick={() => setSelected(car)}>
+                          ▶ Start Auction
+                        </button>
+                      )
                     )}
 
                     {car._tab === 'live' && (
@@ -271,24 +272,16 @@ export default function AdminAuctions() {
             </div>
 
             <div className="input-group" style={{ marginBottom: 20 }}>
-              <label className="input-label">Auction Duration</label>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {[6, 12, 24, 48, 72].map(h => (
-                  <button key={h}
-                    className={`btn btn-sm ${startForm.hours === h ? 'btn-gold' : 'btn-outline'}`}
-                    onClick={() => setStartForm({ hours: h })}
-                  >
-                    {h}h
-                  </button>
-                ))}
-              </div>
-              <div style={{ marginTop: 8 }}>
-                <input className="input" type="number" placeholder="Custom hours" min={1} max={168}
-                  value={startForm.hours}
-                  onChange={e => setStartForm({ hours: Number(e.target.value) })} />
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                Ends: {new Date(Date.now() + startForm.hours * 3600000).toLocaleString('en-KE')}
+              <label className="input-label">Published auction schedule</label>
+              <input
+                className="input"
+                value={selected.auctionStartTime && selected.auctionEnd
+                  ? `${new Date(selected.auctionStartTime).toLocaleString('en-KE')} → ${new Date(selected.auctionEnd).toLocaleString('en-KE')}`
+                  : 'Published schedule'}
+                readOnly
+              />
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                Admin can start only within the published schedule. Economics, timing and bidder rules remain bound to the published auction contract.
               </div>
             </div>
 
@@ -312,7 +305,7 @@ export default function AdminAuctions() {
             </div>
 
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
-              Select the winning bid. The winner will be notified and an escrow will be initiated automatically.
+              Select the winning bid. The winner will be notified and settlement will follow the auction's published settlement mode.
             </p>
 
             {winnerModal.bids.length === 0 ? (
@@ -322,35 +315,38 @@ export default function AdminAuctions() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 360, overflowY: 'auto' }}>
-                {winnerModal.bids.sort((a, b) => b.amount - a.amount).map((bid, i) => (
-                  <div key={bid._id} style={{
-                    background: i === 0 ? 'var(--gold-glow)' : 'var(--surface)',
-                    border: `1px solid ${i === 0 ? 'rgba(37, 99, 235,0.3)' : 'var(--border)'}`,
-                    borderRadius: 'var(--radius)', padding: '14px 16px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {i === 0 && <span>👑</span>}
-                        <span style={{ fontWeight: 600, fontSize: 14 }}>{bid.user?.name || 'Bidder'}</span>
-                        {bid.mpesaPaid && <span className="badge badge-green" style={{ fontSize: 9 }}>✓ M-Pesa Paid</span>}
+                {winnerModal.bids.sort((a, b) => b.amount - a.amount).map((bid, i) => {
+                  const confirmed = ['paid', 'won', 'lost'].includes(String(bid.status || '').toLowerCase()) || bid.mpesaPaid === true;
+                  return (
+                    <div key={bid._id} style={{
+                      background: i === 0 ? 'var(--gold-glow)' : 'var(--surface)',
+                      border: `1px solid ${i === 0 ? 'rgba(37, 99, 235,0.3)' : 'var(--border)'}`,
+                      borderRadius: 'var(--radius)', padding: '14px 16px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {i === 0 && <span>👑</span>}
+                          <span style={{ fontWeight: 600, fontSize: 14 }}>{bid.user?.name || 'Bidder'}</span>
+                          {confirmed ? <span className="badge badge-green" style={{ fontSize: 9 }}>✓ Confirmed</span> : <span className="badge badge-muted" style={{ fontSize: 9 }}>Pending payment</span>}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                          {bid.phone} · {new Date(bid.createdAt).toLocaleString('en-KE')}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                        {bid.phone} · {new Date(bid.createdAt).toLocaleString('en-KE')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className="price-tag">{formatKES(bid.amount)}</div>
+                        <button
+                          className={`btn btn-sm ${i === 0 ? 'btn-gold' : 'btn-outline'}`}
+                          onClick={() => handleSetWinner(bid._id)}
+                          disabled={actionId === bid._id || !confirmed}
+                        >
+                          {actionId === bid._id ? '...' : confirmed ? '🏆 Select' : 'Awaiting payment'}
+                        </button>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div className="price-tag">{formatKES(bid.amount)}</div>
-                      <button
-                        className={`btn btn-sm ${i === 0 ? 'btn-gold' : 'btn-outline'}`}
-                        onClick={() => handleSetWinner(bid._id)}
-                        disabled={actionId === bid._id}
-                      >
-                        {actionId === bid._id ? '...' : '🏆 Select'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

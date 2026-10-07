@@ -43,7 +43,7 @@ export async function fetchList(params: AuctionListParams = {}) {
 
 export async function fetchAuction(id: string) {
   if (!id) throw new HttpRequestError('Auction ID is required.');
-  return auctionRequest<Auction>(`/api/auctions/${encodeURIComponent(id)}`);
+  return auctionRequest<{ success?: boolean; auction: Auction; bids?: Array<Record<string, unknown>> }>(`/api/auctions/${encodeURIComponent(id)}`);
 }
 
 export async function fetchActiveAuctions(params: { page?: number; limit?: number } = {}) {
@@ -52,6 +52,20 @@ export async function fetchActiveAuctions(params: { page?: number; limit?: numbe
     if (value !== undefined) query.set(key, String(value));
   });
   return auctionRequest<{ auctions: Auction[]; pagination?: Record<string, unknown> }>(`/api/auctions/active${query.toString() ? `?${query}` : ''}`);
+}
+
+export async function fetchAuctionOutcome(id: string) {
+  if (!id) throw new HttpRequestError('Auction ID is required.');
+  return auctionRequest<{ success?: boolean; outcome: Record<string, unknown> }>(`/api/auctions/${encodeURIComponent(id)}/outcome`);
+}
+
+export async function initiateAuctionWinnerPayment(id: string, phone: string) {
+  if (!id) throw new HttpRequestError('Auction ID is required.');
+  if (!phone) throw new HttpRequestError('Verified phone number is required.');
+  return auctionRequest<Record<string, unknown>>(`/api/auctions/${encodeURIComponent(id)}/outcome/payment`, {
+    method: 'POST',
+    body: JSON.stringify({ phone }),
+  });
 }
 
 export async function fetchMyAuctions(params: { page?: number; limit?: number } = {}) {
@@ -64,7 +78,7 @@ export async function fetchMyAuctions(params: { page?: number; limit?: number } 
 
 export async function fetchAuctionBids(carId: string) {
   if (!carId) throw new HttpRequestError('Vehicle ID is required.');
-  return auctionRequest<{ success?: boolean; bids: Array<Record<string, unknown>> }>(`/api/bids/${encodeURIComponent(carId)}/bids`);
+  return auctionRequest<{ success?: boolean; bids: Array<Record<string, unknown>> }>(`/api/auctions/${encodeURIComponent(carId)}/bids`);
 }
 
 export async function startDealerAuction(carId: string, body: { durationMs: number; startingBid: number; reservePrice?: number | null; reserveMode?: string }) {
@@ -83,4 +97,4 @@ export async function setAuctionWinner(bidId: string) {
   });
 }
 
-export default { fetchList, fetchAuction, fetchActiveAuctions, fetchMyAuctions, fetchAuctionBids, startDealerAuction, setAuctionWinner };
+export default { fetchList, fetchAuction, fetchActiveAuctions, fetchAuctionOutcome, initiateAuctionWinnerPayment, fetchMyAuctions, fetchAuctionBids, startDealerAuction, setAuctionWinner };

@@ -2,22 +2,23 @@ import crypto from "crypto";
 import User from "../models/User.js";
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
-import Escrow from "../models/Escrow.js";
 import { initiatePayment } from "../services/paymentService.js";
 import { emitListingUpdate } from "../socket/socket.js";
 import { sendSMS } from "../utils/sms.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
-import { applySnipingProtection } from "../utils/snipeGuard.js";
 import { getMinIncrement } from "../utils/bidRules.js";
 import { acquireLock, releaseLock } from "../middleware/distributedLock.js";
 import { closeAuction } from "../services/auctionClose.service.js";
 import { getIO } from "../utils/io.js";
+import { emitBidUpdate, emitAuctionExtended } from "../socket/socket.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
-import { atomicPlaceBid, atomicConfirmBidPayment, atomicAutoBid } from "../utils/atomicTransactions.js";
+import { atomicPlaceBid, atomicAutoBid } from "../utils/atomicTransactions.js";
 import { findOrCreateLeadFromAuction, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logAuctionBidPlaced } from "../services/auditService.js";
 import { assertBidderAuthorized } from "../services/auctionRegistration.service.js";
+import { findOne } from "../db/index.js";
+import { getAuctionFinancialPolicy, getAuctionSecurityHold } from "../services/auctionFinancialIntegrity.service.js";
 
 // =============================
 // 🆔 PSEUDONYM GENERATOR
@@ -53,15 +54,24 @@ const runAutoBidding = async (carId) => {
     // database-level locking discipline as manual bids. The RPC locks the
     // car row, derives the two highest max-bid participants, inserts at most
     // one auto-bid, and advances the market in one PostgreSQL transaction.
+    const beforeCar = await Car.findById(carId).select("auctionEnd").lean();
+    const previousAuctionEnd = beforeCar?.auctionEnd ? new Date(beforeCar.auctionEnd).getTime() : null;
     const result = await atomicAutoBid(carId);
     if (!result?.created) return result;
 
     const car = await Car.findById(carId);
     if (!car) return result;
 
-    await applySnipingProtection(car);
-
     const carIdStr = String(carId);
+    if (previousAuctionEnd !== null && result.auction_end && new Date(result.auction_end).getTime() !== previousAuctionEnd) {
+      await emitAuctionExtended(carIdStr, result.auction_end);
+    }
+    await emitBidUpdate(carIdStr, {
+      amount: Number(result.amount || result.current_bid || 0),
+      bidderTag: "Bidder",
+      time: new Date().toISOString(),
+      auto: true,
+    });
     if (getIO()) {
       getIO().to(`car_${carIdStr}`).emit("auctionUpdate", {
         carId: carIdStr,
@@ -146,6 +156,9 @@ export const placeBid = async (req, res) => {
         message: "Invalid bid amount",
       });
     }
+    if (maxBid !== undefined && maxBid !== null && (!Number.isFinite(Number(maxBid)) || Number(maxBid) < Number(amount))) {
+      return res.status(400).json({ success: false, message: "Maximum proxy bid must be at least the submitted bid amount" });
+    }
 
     bidLockResource = `auction:bid:${carId}`;
     bidLock = await acquireLock(bidLockResource, 15000);
@@ -209,20 +222,17 @@ export const placeBid = async (req, res) => {
     // terms acceptance, and any configured bidder commitment.
     await assertBidderAuthorized({ auctionId: carId, userId });
 
-    // 🛡 High-value bid verification
-    if (amount > 5000000) {
-      const escrowDeposit = await Escrow.findOne({
-        buyer: userId,
-        amount: { $gte: 50000 },
-        status: "held",
-      });
-      if (!escrowDeposit) {
+    // 🛡 High-value bid verification — server policy + canonical auction security hold.
+    const financialPolicy = await getAuctionFinancialPolicy();
+    if (Number(amount) > financialPolicy.highValueBidThresholdKes) {
+      const deposit = await getAuctionSecurityHold({ auctionId: carId, userId, holdType: "high_value_deposit" });
+      if (!deposit || !["held", "applied"].includes(deposit.status) || Number(deposit.amount) < financialPolicy.highValueDepositKes) {
         return res.status(403).json({
           success: false,
-            message:
-            "Bids over KES 5,000,000 require a KES 50,000 pre-authorized deposit held in escrow. Please deposit via your profile.",
+          message: `Bids over KES ${financialPolicy.highValueBidThresholdKes.toLocaleString("en-KE")} require a KES ${financialPolicy.highValueDepositKes.toLocaleString("en-KE")} pre-authorized auction security deposit before bidding.`,
           code: "WALLET_LOCK_REQUIRED",
-          minDeposit: 50000,
+          minDeposit: financialPolicy.highValueDepositKes,
+          threshold: financialPolicy.highValueBidThresholdKes,
         });
       }
     }
@@ -231,7 +241,9 @@ export const placeBid = async (req, res) => {
     const currentBid = Math.max(highest?.amount || 0, car.currentBid || 0) || car.price || 0;
 
     // 📏 Enforce minimum bid increment (canonical tiers — utils/bidRules.js)
-    const minIncrement = getMinIncrement(currentBid);
+    const auctionSetup = await findOne("auction_setups", { car_id: carId, publication_status: "published" });
+    const configuredIncrement = Number(auctionSetup?.config?.bidIncrement || 0);
+    const minIncrement = getMinIncrement(currentBid, configuredIncrement);
     if (amount < currentBid + minIncrement) {
       return res.status(400).json({
         success: false,
@@ -247,9 +259,11 @@ export const placeBid = async (req, res) => {
       userId,
       carId,
       type: "bid",
-      amount: 1,
+      // The published platform policy owns the nominal confirmation fee.
+      // The vehicle bid amount itself is not collected at bid-placement time.
+      amount: financialPolicy.bidConfirmationFeeKes,
       phone: bidder.phone,
-      metadata: { bidAmount: amount },
+      metadata: { bidAmount: amount, auctionId: carId, confirmationFeeKes: financialPolicy.bidConfirmationFeeKes },
     });
 
     // =============================
@@ -305,92 +319,16 @@ export const placeBid = async (req, res) => {
 // =============================
 export const confirmBidPayment = async (req, res) => {
   try {
-    const callback = req.body?.Body?.stkCallback || req.body?.stkCallback;
-
-    if (!callback) throw new Error("Invalid callback");
-
-    const checkoutRequestID = callback.CheckoutRequestID;
-    const resultCode = callback.ResultCode;
-
-    const metadata = callback.CallbackMetadata?.Item || [];
-
-    const receipt = metadata.find((i) => i.Name === "MpesaReceiptNumber")?.Value;
-
-    if (resultCode !== 0) {
-      await Bid.updateOne({ checkoutRequestID }, { status: "failed" });
-      return res.json({ success: false, message: "Payment failed" });
-    }
-
-    const atomicConfirmation = await atomicConfirmBidPayment(checkoutRequestID, receipt);
-    const bid = await Bid.findById(atomicConfirmation.bid_id);
-    if (!bid) throw new Error("Atomic bid confirmation succeeded but bid could not be reloaded");
-
-    // ── PDF RECEIPT (fire-and-forget) ───────────────────────
-    try {
-      const { generateReceipt } = await import("../services/pdfService.js");
-      generateReceipt({
-        title: "Bid Payment Confirmed",
-        amount: bid.amount,
-        transactionId: receipt || bid._id.toString(),
-        carDetails: bid.carId?.toString() || "—",
-        date: new Date(),
-      }).catch((e) => logWarn("SMS send failed", { error: e.message }));
-    } catch (_) {
-      /* PDF generation non-critical */
-    }
-
-    const car = await Car.findById(bid.carId);
-    const previousHighestBidder = atomicConfirmation.previous_highest_bidder;
-    const raisesMarket = atomicConfirmation.applied_to_market === true;
-
-    logActionFromReq(req, "bid.payment_confirmed", {
-      target: bid.carId,
-      targetModel: "Car",
-      resourceId: String(bid.carId),
-      details: { bidId: bid.id || bid._id, amount: bid.amount, receipt, appliedToMarket: raisesMarket },
-      severity: "info",
-    });
-
-    // 🔥 AUTO-BID + REALTIME — only when the confirmed bid moved the market
-    if (raisesMarket) {
-      await runAutoBidding(bid.carId);
-
-      if (getIO()) {
-        const carIdStr = bid.carId.toString();
-        getIO().to(`car_${carIdStr}`).emit("auctionUpdate", {
-          carId: carIdStr,
-          currentBid: car.currentBid,
-        });
-      }
-      emitListingUpdate(bid.carId.toString(), { currentBid: car.currentBid, bidsCount: car?.bidsCount || 1 });
-    }
-
-    // Canonical communication event: confirmed bidder + previous highest bidder.
-    try {
-      const User = (await import("../models/User.js")).default;
-      const bidder = await User.findById(bid.user).select("email name phone").lean();
-      if (bidder) await emitCommunication({
-        userId: bid.user, eventType: COMMUNICATION_EVENTS.BID_CONFIRMED, category: "transactional",
-        title: "Bid confirmed",
-        message: `Your bid of KES ${Number(bid.amount).toLocaleString("en-KE")} on ${car?.title || "vehicle"} is confirmed.`,
-        channels: ["in_app", "email", "sms", "whatsapp"],
-        metadata: { bidId: bid.id || bid._id, carId: bid.carId, amount: bid.amount },
-      });
-      if (previousHighestBidder && String(previousHighestBidder) !== String(bid.user)) {
-        await emitCommunication({
-          userId: previousHighestBidder, eventType: COMMUNICATION_EVENTS.OUTBID, category: "transactional",
-          title: "You have been outbid",
-          message: `You have been outbid on ${car?.title || "vehicle"} at KES ${Number(bid.amount).toLocaleString("en-KE")}.`,
-          channels: ["in_app", "email", "sms", "whatsapp"],
-          metadata: { bidId: bid.id || bid._id, carId: bid.carId, amount: bid.amount },
-        });
-      }
-    } catch (e) { logWarn("Bid communication event failed", { error: e.message }); }
-
-    res.json({ success: true });
+    // Legacy /api/bids/mpesa/callback remains mounted for compatibility, but
+    // it now delegates to the same canonical payment callback processor used
+    // by production /api/payments/callback. There is one M-Pesa settlement
+    // authority for bid payments.
+    const { handleMpesaCallback } = await import("../services/paymentCallback.service.js");
+    await handleMpesaCallback(req.body);
+    return res.json({ success: true });
   } catch (err) {
-    logError("CALLBACK ERROR", err);
-    res.status(500).json({ success: false, message: "Bid callback failed" });
+    logError("BID PAYMENT CALLBACK ERROR", err);
+    return res.status(500).json({ success: false, message: "Bid callback failed" });
   }
 };
 

@@ -14,11 +14,11 @@ const login = read('src/pages/LoginPage.jsx');
 const authApi = read('src/services/authApi.ts');
 const authController = read('backend/controllers/authController.js');
 
-assert('standalone login route exists', /if \(path === '\/login'\) return <LoginPage/.test(app));
+assert('standalone login route exists', /if \(path === '\/login' \|\| path === '\/admin\/login'\) return <LoginPage/.test(app));
 assert('standalone registration route exists', /if \(path === '\/register'\) return <OnboardingFlow/.test(app));
-assert('navbar Sign In navigates to /login', /handleAuthNavigation\('\/login'\)/.test(navbar));
-assert('navbar Create Account navigates to /register', /handleAuthNavigation\('\/register'\)/.test(navbar));
-assert('navbar Sign In does not directly open auth modal', !/onClick=\{onOpenAuth\}[\s\S]{0,300}Sign In/.test(navbar));
+assert('navbar guest auth action navigates to canonical /login', /handleAuthNavigation\('\/login'\)/.test(navbar));
+assert('navbar guest auth surface explicitly offers sign-in/sign-up entry', /Sign In \/ Sign Up/.test(navbar));
+assert('navbar guest auth action does not directly open a legacy auth modal', !/onClick=\{onOpenAuth\}[\s\S]{0,300}Sign In \/ Sign Up/.test(navbar));
 assert('app shell has no rendered authentication modal', !/<AuthModal[\s\S]*?isOpen=/.test(app));
 assert('app shell routes all auth prompts to standalone login', (app.match(/onOpenAuth=\{handleOpenAuth\}/g) || []).length >= 8);
 assert('app shell preserves current path as login return context', /state: \{ from: \{ pathname: window\.location\.pathname \} \}/.test(app));

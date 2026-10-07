@@ -20,7 +20,6 @@ import {
   Building2,
   Lock,
   Settings,
-  Bookmark,
   BarChart3,
   Layers,
   Calendar,
@@ -77,6 +76,11 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener('kayad:open-mobile-menu', openMenu);
     return () => window.removeEventListener('kayad:open-mobile-menu', openMenu);
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('kayad-mobile-menu-is-open', mobileMenuOpen);
+    return () => document.body.classList.remove('kayad-mobile-menu-is-open');
+  }, [mobileMenuOpen]);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -378,14 +382,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
 
                       <button
-                        onClick={() => handleNavSelect('saved')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
-                      >
-                        <Bookmark className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                        <span>Saved Searches</span>
-                      </button>
-
-                      <button
                         onClick={() => handleNavSelect('kayadlive')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
                       >
@@ -410,7 +406,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
 
                       <button
-                        onClick={() => handleNavSelect('dashboard')}
+                        onClick={() => handleNavSelect('profile')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
                       >
                         <Settings className="w-4 h-4 text-slate-500 stroke-[1.75]" />
@@ -432,14 +428,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                           <span>Dealer Dashboard</span>
                         </button>
                         <button
-                          onClick={() => handleNavSelect('dealers')}
+                          onClick={() => handleNavSelect('dealer-dashboard')}
                           className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
                         >
                           <Layers className="w-4 h-4 text-[#0A3340]" />
                           <span>Dealer Inventory</span>
                         </button>
                         <button
-                          onClick={() => handleNavSelect('dashboard')}
+                          onClick={() => handleNavSelect('dealer-dashboard')}
                           className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
                         >
                           <BarChart3 className="w-4 h-4 text-[#0A3340]" />
@@ -473,28 +469,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                         >
                           <FileText className="w-4 h-4 text-emerald-600" />
                           <span>150-Point Reports</span>
-                        </button>
-                      </div>
-                    )}
-
-                    {user.role === 'bank_officer' && (
-                      <div className="border-t border-slate-100 pt-1.5 mt-1.5 bg-blue-50/50 pb-1">
-                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-900">
-                          Bank & Finance Underwriting Portal
-                        </div>
-                        <button
-                          onClick={() => handleNavSelect('financing')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-blue-100/70 flex items-center gap-2.5 font-bold text-blue-950"
-                        >
-                          <Landmark className="w-4 h-4 text-blue-600" />
-                          <span>Underwriting Desk</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('financing')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-blue-100/70 flex items-center gap-2.5 font-bold text-blue-950"
-                        >
-                          <CreditCard className="w-4 h-4 text-blue-600" />
-                          <span>Applications Intake</span>
                         </button>
                       </div>
                     )}
@@ -542,20 +516,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAuthNavigation('/login')}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-white hover:bg-[#F0FAF8] text-[#0A3340] border border-[#0A3340] transition-all shadow-2xs"
-                  id="btn-sign-in-main"
+                  className="flex items-center gap-2 rounded-xl border border-[#0A3340] bg-[#0A3340] px-4 py-2.5 text-xs font-black text-white shadow-[0_8px_20px_rgba(10,51,64,.12)] transition-all hover:bg-[#12576D]"
+                  id="btn-auth-main"
                 >
-                  <User className="w-3.5 h-3.5" />
-                  <span>Sign In</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAuthNavigation('/register')}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-[#0A3340] hover:bg-[#12576D] text-white border border-[#0A3340] transition-all shadow-2xs"
-                  id="btn-sign-up-main"
-                >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  <span>Create Account</span>
+                  <User className="h-3.5 w-3.5" />
+                  <span>Sign In / Sign Up</span>
                 </button>
               </div>
             )}
@@ -573,241 +538,73 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* MOBILE DRAWER NAVIGATION */}
+      {/* MOBILE DRAWER NAVIGATION — one premium, scroll-safe surface. */}
       {mobileMenuOpen && (
-        <div className="kayad-mobile-menu lg:hidden bg-[#0A3340] text-white border-t border-[#1C5663] px-4 pt-4 pb-8 space-y-4 animate-fade-in max-h-[calc(100vh-80px)] overflow-y-auto">
+        <>
+          <button type="button" aria-label="Close navigation menu" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-[55] bg-[#031E27]/55 backdrop-blur-[2px] lg:hidden" />
+          <aside className="kayad-mobile-menu absolute left-0 right-0 top-full z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
+            <div className="mx-auto flex max-h-[calc(100svh-78px)] w-full max-w-[760px] flex-col overflow-hidden rounded-b-[28px] border-x border-b border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
+              <div className="flex min-h-1.5 items-center justify-center bg-[#0A3340]"><span className="h-1 w-10 rounded-full bg-white/20" /></div>
+              <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {user ? (
+                  <section className="mb-4 rounded-[22px] border border-white/10 bg-white/[0.07] p-3.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        {user.avatar ? <img src={user.avatar} alt="" className="h-11 w-11 shrink-0 rounded-2xl object-cover ring-1 ring-white/15" /> : <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#0D7187]"><User className="h-5 w-5" /></div>}
+                        <div className="min-w-0"><p className="truncate text-sm font-black">{user.name}</p><p className="truncate text-[10px] text-white/55">{user.email}</p><p className="mt-1 text-[9px] font-black uppercase tracking-[.14em] text-[#61D7CA]">{user.role}</p></div>
+                      </div>
+                      <button type="button" onClick={() => { if (onLogout) onLogout(); setMobileMenuOpen(false); }} className="shrink-0 rounded-xl border border-rose-300/20 bg-rose-400/10 px-3 py-2 text-[10px] font-black text-rose-200">Log out</button>
+                    </div>
+                  </section>
+                ) : (
+                  <section className="mb-4 rounded-[22px] border border-[#3B7E88] bg-gradient-to-br from-[#0B3E4B] to-[#07313D] p-4">
+                    <div className="flex items-start gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#DDF4F0] text-[#0A3340]"><User className="h-5 w-5" /></div><div className="min-w-0 flex-1"><p className="text-sm font-black">Welcome to KAYAD</p><p className="mt-0.5 text-[11px] leading-5 text-white/60">Sign in to access saved vehicles, escrow and your account.</p></div></div>
+                    <button type="button" onClick={() => handleAuthNavigation('/login')} className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#13B8A6] px-4 text-sm font-black text-[#062E3A] shadow-[0_10px_25px_rgba(19,184,166,.18)]">Sign In / Sign Up <ChevronDown className="h-4 w-4 -rotate-90" /></button>
+                  </section>
+                )}
 
-          {/* User Account Banner or Login Prompt */}
-          {user ? (
-            <div className="p-3 bg-slate-800/90 rounded-2xl border border-slate-700 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-[#0A3340]" />
-                <div>
-                  <p className="font-bold text-xs text-white">{user.name}</p>
-                  <p className="text-[10px] text-slate-400">{user.email}</p>
-                  <span className="text-[9px] font-bold text-slate-300 uppercase">{user.role}</span>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (onLogout) onLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="p-2 bg-rose-500/20 text-rose-300 rounded-xl font-bold text-xs hover:bg-rose-500 hover:text-white transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="p-3 bg-[#0A3340] rounded-2xl border border-slate-700 flex items-center justify-between">
-              <div>
-                <p className="font-bold text-xs text-white">Guest Visitor</p>
-                <p className="text-[10px] text-slate-300">Sign in to access Escrow & Saved Vehicles</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleAuthNavigation('/login')}
-                  className="px-3 py-1.5 bg-[#176B87] text-white font-bold rounded-xl text-xs"
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAuthNavigation('/register')}
-                  className="px-3 py-1.5 bg-amber-400 text-[#0A3340] font-black rounded-xl text-xs"
-                >
-                  Create Account
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Group 1: Public Services */}
-          {/* Fixed: matches the same simplified, flat list as desktop
-              now - removed KAYAD LIVE/Watch Live/Financing (not in
-              scope), added the missing Escrow link. */}
-          <div className="kayad-mobile-menu__group space-y-2 rounded-2xl border border-white/8 bg-[#0B3A48]/70 p-3">
-            <span className="text-[10px] font-black text-[#8DB8B9] uppercase tracking-[0.16em] block px-1">
-              Public Marketplace
-            </span>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => handleNavSelect('marketplace')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'marketplace' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <Car className="w-4 h-4" />
-                <span>Marketplace</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('discovery')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'discovery' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <Gavel className="w-4 h-4" />
-                <span>Auction</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('inspections')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'inspections' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Pre-Purchase Inspection</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('escrow')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'escrow' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <Lock className="w-4 h-4 text-blue-400" />
-                <span>Escrow</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => handleNavSelect('financing')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'financing' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <span>Financing</span>
-              </button>
-              <button
-                onClick={() => handleNavSelect('saved')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between gap-2 ${
-                  activeNav === 'saved' ? 'bg-[#0A3340] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <span>Saved</span>
-                {savedCount > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[10px] font-black text-[#07313D]">{savedCount}</span>}
-              </button>
-              {onOpenCompare && (
-                <button
-                  onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }}
-                  className="p-3 rounded-xl font-bold text-xs text-left bg-slate-800/80 text-slate-200"
-                >
-                  Compare
-                </button>
-              )}
-            </div>
-
-            <button
-              onClick={() => handleNavSelect('support')}
-              className="w-full p-2.5 bg-slate-800/80 rounded-xl font-bold text-xs text-left flex items-center gap-2 text-slate-300"
-            >
-              <HelpCircle className="w-4 h-4 text-slate-400" />
-              <span>Support & Disputes</span>
-            </button>
-
-            <button
-              onClick={() => handleNavSelect('seller-platform')}
-              className="w-full p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 bg-[#176B87] text-white"
-              id="mobile-cta-sell-car"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>Sell Vehicle</span>
-            </button>
-          </div>
-
-          {/* Group 2: Authenticated Account & Role Links */}
-          {user && (
-            <div className="kayad-mobile-menu__group space-y-2 rounded-2xl border border-white/8 bg-[#0B3A48]/60 p-3 pt-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
-                Account & Dashboards
-              </span>
-
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleNavSelect('dashboard')}
-                  className="p-2.5 bg-slate-800/80 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2"
-                >
-                  <LayoutDashboard className="w-4 h-4 text-slate-400" />
-                  <span>Dashboard</span>
-                </button>
-
-                <button
-                  onClick={() => handleNavSelect('chat')}
-                  className="p-2.5 bg-slate-800/80 rounded-xl text-xs font-bold text-slate-200 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-slate-400" />
-                    <span>Messages</span>
-                  </div>
-                  {effectiveUnread > 0 && (
-                    <span className="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[9px] font-bold">
-                      {effectiveUnread}
-                    </span>
-                  )}
-                </button>
-              </div>
-
-              <button onClick={() => handleNavSelect('payments')} className="w-full mt-2 p-2.5 bg-slate-800/80 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-slate-400" />
-                <span>Payment History</span>
-              </button>
-
-              {/* Role Specific Mobile Links */}
-              {user.role === 'dealer' && (
-                <div className="p-2.5 bg-slate-800/90 border border-slate-700 rounded-xl space-y-1 mt-2">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase block">Dealer Tools</span>
+                <section className="mb-4">
+                  <div className="mb-2 flex items-center justify-between px-1"><span className="text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Marketplace</span><span className="text-[9px] font-semibold text-white/35">Explore KAYAD</span></div>
                   <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => handleNavSelect('dealer-dashboard')} className="text-xs font-bold text-slate-200 flex items-center gap-1.5 py-1">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400" /> Dashboard
-                    </button>
-                    <button onClick={() => handleNavSelect('dealers')} className="text-xs font-bold text-slate-200 flex items-center gap-1.5 py-1">
-                      <Layers className="w-3.5 h-3.5 text-slate-400" /> Inventory
-                    </button>
+                    {[
+                      { id: 'marketplace', label: 'Marketplace', icon: Car },
+                      { id: 'discovery', label: 'Auction', icon: Gavel },
+                      { id: 'inspections', label: 'Pre-Purchase Inspection', icon: ShieldCheck },
+                      { id: 'escrow', label: 'Escrow', icon: Lock },
+                      { id: 'financing', label: 'Financing', icon: Landmark },
+                      { id: 'support', label: 'Support & Disputes', icon: HelpCircle },
+                    ].map(({ id, label, icon: Icon }) => (
+                      <button key={id} type="button" onClick={() => handleNavSelect(id)} className={`group flex min-h-[58px] items-center gap-3 rounded-[18px] border px-3.5 text-left transition-all active:scale-[.985] ${activeNav === id ? 'border-[#39C9BB]/45 bg-[#0F5968] text-white shadow-[0_10px_24px_rgba(0,0,0,.12)]' : 'border-white/[0.07] bg-white/[0.055] text-white/82 hover:bg-white/[0.09]'}`}>
+                        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${activeNav === id ? 'bg-[#DDF4F0] text-[#0A3340]' : 'bg-[#0A4150] text-[#7BD9CF]'}`}><Icon className="h-[18px] w-[18px]" /></span><span className="text-[11px] font-black leading-4">{label}</span>
+                      </button>
+                    ))}
                   </div>
-                </div>
-              )}
+                </section>
 
-              {user.role === 'mechanic' && (
-                <div className="p-2.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl space-y-1 mt-2">
-                  <span className="text-[9px] font-bold text-emerald-400 uppercase block">Mechanic Tools</span>
-                  <button onClick={() => handleNavSelect('inspections')} className="text-xs font-bold text-emerald-200 flex items-center gap-1.5 py-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Inspections Portal
-                  </button>
-                </div>
-              )}
+                <section className="mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2">
+                  <span className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Your KAYAD</span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {user && <>
+                      <button type="button" onClick={() => handleNavSelect('dashboard')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><LayoutDashboard className="h-4 w-4 text-[#79D8CF]" />Dashboard</button>
+                      <button type="button" onClick={() => handleNavSelect('chat')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-[#79D8CF]" />Messages</span>{effectiveUnread > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[9px] font-black text-[#062E3A]">{effectiveUnread}</span>}</button>
+                      <button type="button" onClick={() => handleNavSelect('payments')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><CreditCard className="h-4 w-4 text-[#79D8CF]" />Payment History</button>
+                      <button type="button" onClick={() => handleNavSelect('saved')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Heart className="h-4 w-4 text-[#79D8CF]" />Saved Vehicles</span>{savedCount > 0 && <span className="rounded-full bg-[#176B87] px-1.5 text-[9px] font-black text-white">{savedCount}</span>}</button>
+                      {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><Sliders className="h-4 w-4 text-[#79D8CF]" />Compare</button>}
+                    </>}
+                    <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><Bell className="h-4 w-4 text-[#79D8CF]" />Price Alerts</button>
+                  </div>
+                </section>
 
-              {user.role === 'admin' && (
-                <div className="p-2.5 bg-slate-800 border border-slate-700 rounded-xl space-y-1 mt-2">
-                  <span className="text-[9px] font-bold text-slate-300 uppercase block">Administrator</span>
-                  <button onClick={() => handleNavSelect('admin')} className="text-xs font-bold text-slate-200 flex items-center gap-1.5 py-1">
-                    <Lock className="w-3.5 h-3.5 text-slate-400" /> Admin Console
-                  </button>
-                </div>
-              )}
+                {user?.role === 'dealer' && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Dealer Tools</span><div className="grid grid-cols-2 gap-1.5"><button type="button" onClick={() => handleNavSelect('dealer-dashboard')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Building2 className="mb-1 h-4 w-4 text-[#79D8CF]" />Dashboard</button><button type="button" onClick={() => handleNavSelect('dealer-dashboard')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Layers className="mb-1 h-4 w-4 text-[#79D8CF]" />Inventory</button></div></section>}
+                {user?.role === 'mechanic' && <section className="mb-4 rounded-[20px] border border-emerald-300/10 bg-emerald-400/[0.05] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-emerald-300">Inspection Tools</span><button type="button" onClick={() => handleNavSelect('inspections')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-emerald-100"><ShieldCheck className="h-4 w-4" />Inspection Portal</button></section>}
+                {user?.role === 'admin' && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#A8B8BC]">Administration</span><button type="button" onClick={() => handleNavSelect('admin')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="h-4 w-4" />Admin Console</button></section>}
+
+                <button type="button" onClick={() => handleNavSelect('seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">Sell Vehicle</strong><small className="text-[10px] text-white/60">List your vehicle with KAYAD</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
+                <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span><button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="font-black text-white/65">Price alerts</button></div>
+              </div>
             </div>
-          )}
-
-          {/* Region Selector Mobile */}
-          <div className="kayad-mobile-menu__footer pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-            <span className="flex items-center gap-1 text-slate-400 font-medium">
-              <MapPin className="w-4 h-4 text-slate-400" /> Region: <strong className="text-white">{selectedCounty}</strong>
-            </span>
-            <button
-              onClick={() => {
-                onOpenAlerts();
-                setMobileMenuOpen(false);
-              }}
-              className="text-slate-300 font-bold flex items-center gap-1"
-            >
-              <Bell className="w-3.5 h-3.5" /> Price Alerts
-            </button>
-          </div>
-        </div>
+          </aside>
+        </>
       )}
     </header>
   );

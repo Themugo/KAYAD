@@ -19,12 +19,17 @@ const interfaceKeys = (name) => {
   return [...body.matchAll(/^ {2}(\w+)\??: /gm)].map((m) => m[1]);
 };
 
-// 1. Every config key has an admin control.
-for (const name of ['HeroPresentationConfig', 'HeroShowcaseVehicle', 'HeroFloatingCard']) {
+// 1. Every active public/admin config key has an admin control.
+// HeroShowcaseVehicle remains in the persisted schema only for backward compatibility;
+// its identity/image fields are deliberately no longer an active public hero control.
+for (const name of ['HeroPresentationConfig', 'HeroFloatingCard']) {
   const missing = interfaceKeys(name).filter((k) => !new RegExp(`\\b${k}\\b`).test(panel));
   if (missing.length === 0) pass(`${name}: every field has an admin control`);
   else fail(`${name}: no admin control for ${missing.join(', ')}`);
 }
+
+if (!/Marketing Showcase Cars/.test(panel) && !/updateShowcaseVehicle\(/.test(panel)) pass('legacy showcase vehicle identity controls are removed from the active admin surface');
+else fail('legacy showcase vehicle identity controls must not remain an active admin surface');
 
 // 2. Persistence: the existing platform-config endpoint accepts every hero config object.
 for (const key of ['heroPresentation', 'heroCardContent', 'heroFeaturedMode', 'heroCarIds']) {

@@ -11,31 +11,34 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 
 const router = express.Router();
 
-router.get("/:id/outcome", asyncHandler(async (req, res) => {
+router.get("/:id/outcome", protect, validateObjectId, asyncHandler(async (req, res) => {
   const outcome = await getAuctionOutcome(req.params.id);
   if (!outcome) return res.status(404).json({ success: false, message: "Auction outcome not available" });
+  const isAdmin = ["admin", "super_admin", "superadmin", "staff"].includes(req.user?.role);
+  const isParticipant = String(outcome.winnerUserId) === String(req.user.id) || String(outcome.organizerId) === String(req.user.id);
+  if (!isAdmin && !isParticipant) return res.status(403).json({ success: false, message: "Not authorized to view this auction outcome" });
   res.json({ success: true, outcome });
 }));
 
 router.get("/:id/settlement-capabilities", protect, requireDealerVerification, asyncHandler(async (req, res) => {
   const setup = await findOne("auction_setups", { car_id: req.params.id });
-  if (!setup || String(setup.organizer_id) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized for this auction" });
+  if (!setup || String(setup.organizerId) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized for this auction" });
   res.json({ success: true, capabilities: await getDealerAuctionCapabilities() });
 }));
 
 router.post("/:id/outcome/payment", protect, validateObjectId, asyncHandler(async (req, res) => {
   const outcome = await getAuctionOutcome(req.params.id);
   if (!outcome) return res.status(404).json({ success: false, message: "Auction outcome not found" });
-  if (String(outcome.winner_user_id) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Only the auction winner may initiate winner payment" });
-  if (outcome.settlement_mode !== "direct") return res.status(409).json({ success: false, code: "AUCTION_ESCROW_SELECTED", message: "This auction uses escrow settlement. Use the configured custody funding flow." });
+  if (String(outcome.winnerUserId) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Only the auction winner may initiate winner payment" });
+  if (outcome.settlementMode !== "direct") return res.status(409).json({ success: false, code: "AUCTION_ESCROW_SELECTED", message: "This auction uses escrow settlement. Use the configured custody funding flow." });
   if (outcome.status !== "payment_due") return res.status(409).json({ success: false, message: "Auction is not awaiting direct winner payment" });
   const phone = String(req.body?.phone || "").trim();
   if (!phone) return res.status(400).json({ success: false, message: "Phone is required" });
   const result = await initiatePayment({
     userId: req.user.id,
-    carId: outcome.car_id,
+    carId: outcome.carId,
     type: "auction_win",
-    amount: Number(outcome.winning_amount),
+    amount: Number(outcome.paymentDueAmount ?? outcome.winningAmount),
     phone,
     metadata: { auctionOutcomeId: outcome.id },
   });
@@ -44,7 +47,7 @@ router.post("/:id/outcome/payment", protect, validateObjectId, asyncHandler(asyn
 
 router.post("/:id/outcome/escrow", protect, requireDealerVerification, validateObjectId, asyncHandler(async (req, res) => {
   const setup = await findOne("auction_setups", { car_id: req.params.id });
-  if (!setup || String(setup.organizer_id) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized for this auction" });
+  if (!setup || String(setup.organizerId) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized for this auction" });
   const outcome = await getAuctionOutcome(req.params.id);
   if (!outcome) return res.status(404).json({ success: false, message: "Auction outcome not found" });
   const updated = await createOptionalEscrowForOutcome({ outcomeId: outcome.id, actorId: req.user.id, req });
@@ -53,7 +56,7 @@ router.post("/:id/outcome/escrow", protect, requireDealerVerification, validateO
 
 router.post("/:id/outcome/default", protect, requireDealerVerification, validateObjectId, asyncHandler(async (req, res) => {
   const setup = await findOne("auction_setups", { car_id: req.params.id });
-  if (!setup || String(setup.organizer_id) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized for this auction" });
+  if (!setup || String(setup.organizerId) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized for this auction" });
   const outcome = await getAuctionOutcome(req.params.id);
   if (!outcome) return res.status(404).json({ success: false, message: "Auction outcome not found" });
   const updated = await defaultAuctionWinner({ outcomeId: outcome.id, actorId: req.user.id, req });

@@ -15,7 +15,7 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
 }) => {
   const baseText = `This auction is conducted independently by the verified organizer shown above.`;
 
-  const fullText = `This auction is conducted independently by the verified organizer shown above. KAYAD provides the digital marketplace and auction technology but does not receive auction bid security deposits or vehicle purchase payments. All financial transactions are handled directly between the buyer and the auction organizer.`;
+  const fullText = `This auction is conducted independently by the verified organizer shown above. KAYAD provides the digital marketplace and auction technology. Bid-confirmation payments may be processed through KAYAD's payment rail, while bid security and final vehicle settlement follow the auction's published organizer payment and settlement rules.`;
 
   // Compact variant - for use in headers
   if (variant === 'compact') {
@@ -83,7 +83,7 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
         <div className="flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-amber-800 font-medium">
-            All auction payments must be made directly to <strong>{organizerName}</strong>. KAYAD never requests or receives auction-related payments from buyers.
+            Bid security and final vehicle settlement follow the published payment instructions for <strong>{organizerName}</strong>. A separate nominal bid-confirmation M-Pesa payment may be required when submitting a bid.
           </p>
         </div>
       </div>
@@ -96,7 +96,7 @@ export const CompactProtectionNotice: React.FC = () => (
   <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
     <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
     <span className="text-xs text-amber-800">
-      Payments go directly to the auction organizer, not KAYAD
+      Final settlement follows the published auction payment rule
     </span>
   </div>
 );

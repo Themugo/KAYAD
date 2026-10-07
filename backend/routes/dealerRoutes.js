@@ -989,9 +989,6 @@ router.post(
       return res.status(409).json({ success: false, code: "AUCTION_SCHEDULED", message: `Auction is scheduled to start at ${startAt.toISOString()}.` });
     }
     const durationMs = endAt.getTime() - Date.now();
-    if (durationMs < 24 * 60 * 60 * 1000) {
-      return res.status(409).json({ success: false, message: "Auction cannot start with less than 24 hours remaining in its published schedule." });
-    }
 
     // Published configuration is authoritative; callers cannot override
     // economics by posting different values to the legacy start endpoint.
@@ -1002,6 +999,7 @@ router.post(
     const result = await startAuction({
       carId: req.params.id,
       durationMs,
+      scheduledEndAt: endAt.toISOString(),
       startingBid: startingBidVal,
       reservePrice: reserveVal,
       reserveMode: reserveModeVal,
@@ -1057,12 +1055,14 @@ router.post(
     const car = await findOne("cars", { id: req.params.id, dealer: req.user.id, auctionStatus: "live" });
     if (!car) return res.status(404).json({ success: false, message: "Car not found or auction not live" });
 
-    const MAX_EXTENSIONS = 3;
-    const extensionCount = car.extensionCount || 0;
-    if (extensionCount >= MAX_EXTENSIONS) {
-      return res
-        .status(400)
-        .json({ success: false, message: `Maximum ${MAX_EXTENSIONS} extensions per auction reached` });
+    // Published auction configuration is the source of truth for the
+    // maximum extension count. The DB-atomic function re-checks it while
+    // holding the auction row lock, so this is only a fast UX guard.
+    const setup = await findOne("auction_setups", { car_id: req.params.id, publication_status: "published" });
+    const maxExtensions = Math.max(0, Math.min(10, Number(setup?.config?.maxExtensions ?? 3)));
+    const extensionCount = Number(car.extensionCount || 0);
+    if (extensionCount >= maxExtensions) {
+      return res.status(400).json({ success: false, message: `Maximum ${maxExtensions} extensions per auction reached` });
     }
 
     // Canonical atomic extension. The RPC owns extensionCount and

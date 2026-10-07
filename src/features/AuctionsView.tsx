@@ -134,7 +134,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
               <div className="auction-trust-row">
                 <span><ShieldCheck size={15} /> Verified listings</span>
                 <span><Radio size={15} /> Live bidding</span>
-                <span><Shield size={15} /> Protected settlement</span>
+                <span><Shield size={15} /> Published settlement rules</span>
               </div>
             </div>
             <div className="auction-hero-stat-card">
@@ -180,13 +180,15 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
         {filtered.map((auction) => {
           const id = String(auction.carId || auction.id);
           const image = imageUrl(auction.car?.images);
-          const isLive = tab === 'live';
+          const isLive = auction.status === 'active';
+          const isScheduled = auction.status === 'draft';
+          const isEnded = auction.status === 'ended';
           return (
             <Card key={auction.id} className="auction-card overflow-hidden group auction-touch-card auction-interaction-glow">
               <button onClick={() => openAuction(auction)} className="block w-full text-left">
                 <div className="auction-card-media relative h-52 bg-slate-100 overflow-hidden">
                   {image ? <LazyImage src={image} alt={title(auction)} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform" /> : <div className="h-full flex items-center justify-center text-slate-400">No image supplied</div>}
-                  <div className="auction-card-badge absolute top-3 left-3"><Badge variant={isLive ? 'accent' : 'neutral'}>{isLive ? 'LIVE NOW' : tab === 'scheduled' ? 'STARTING SOON' : 'COMPLETED'}</Badge></div>
+                  <div className="auction-card-badge absolute top-3 left-3"><Badge variant={isLive ? 'accent' : 'neutral'}>{isLive ? 'LIVE NOW' : isScheduled ? 'STARTING SOON' : 'COMPLETED'}</Badge></div>
                   <div className="auction-card-overlay" aria-hidden="true" />
                 </div>
               </button>
@@ -196,12 +198,12 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
                   <AuctionSavedPulse active={favorites.has(id)} onToggle={() => void watch(auction)} label="Watch" />
                 </div>
                 <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span className="flex items-center gap-1"><Clock3 className="w-3 h-3" /> {isLive ? `${remaining(auction.endTime)} remaining` : tab === 'scheduled' ? `Starts in ${remaining(auction.startTime)}` : 'Auction ended'}</span>
+                  <span className="flex items-center gap-1"><Clock3 className="w-3 h-3" /> {isLive ? `${remaining(auction.endTime)} remaining` : isScheduled ? `Starts in ${remaining(auction.startTime)}` : 'Auction ended'}</span>
                   <span>{auction.bidCount || 0} bids</span>
                 </div>
                 <div className="flex items-end justify-between">
-                  <div><p className="text-xs text-slate-500">{isLive ? 'Current bid' : 'Starting bid'}</p><p className="auction-card-price text-xl font-black text-slate-900">{money(isLive ? auction.highestBid : auction.startingBid)}</p></div>
-                  <div className="text-right">{auction.car?.is_verified_dealer && <span className="text-xs text-emerald-700 flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Verified organizer</span>}<Button onClick={() => openAuction(auction)} className="mt-2">{isLive ? 'Open auction' : 'View auction'}</Button></div>
+                  <div><p className="text-xs text-slate-500">{isLive ? 'Current bid' : isEnded ? 'Final bid' : 'Starting bid'}</p><p className="auction-card-price text-xl font-black text-slate-900">{money(isLive || isEnded ? auction.highestBid : auction.startingBid)}</p></div>
+                  <div className="text-right">{(auction.car?.is_verified_dealer || auction.car?.isVerifiedDealer || auction.car?.dealer?.verified) && <span className="text-xs text-emerald-700 flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Verified organizer</span>}<Button onClick={() => openAuction(auction)} className="mt-2">{isLive ? 'Open auction' : 'View auction'}</Button></div>
                 </div>
               </div>
             </Card>

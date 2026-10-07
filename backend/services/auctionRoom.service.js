@@ -35,7 +35,7 @@ export async function getAuctionRoomState(auctionId) {
     biddingRoomClosed: biddingOpen,
     viewerOnlyBeforeRegistration: biddingOpen,
     startsAt: config.startsAt || null,
-    endsAt: config.endsAt || car.auctionEnd || car.auction_end || null,
+    endsAt: liveByStatus ? (car.auctionEnd || car.auction_end || config.endsAt || null) : (config.endsAt || car.auctionEnd || car.auction_end || null),
     registrationDeadline: config.registrationDeadline || null,
     bidIncrement: Number(config.bidIncrement) || 0,
   };

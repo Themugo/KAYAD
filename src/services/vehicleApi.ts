@@ -40,28 +40,32 @@ import type { Vehicle } from '../types';
  * version this file originally used). */
 export interface BackendCar {
   id: string;
+  /** Canonical public /api/cars responses use camelCase after the backend field mapper.
+   * Legacy snake_case aliases remain accepted because older fixtures and some
+   * direct database-backed paths still expose them. */
+  _id?: string;
   dealer_id?: string | null;
   title: string;
   slug?: string | null;
-  brand: string; // NOT "make" - confirmed the real column name is "brand"
+  brand: string;
   model: string;
   year: number;
   price: number;
   mileage?: number | null;
-  fuel?: string | null; // NOT "fuel_type"
+  fuel?: string | null;
   transmission?: string | null;
   body_type?: string | null;
+  bodyType?: string | null;
   color?: string | null;
-  engine?: string | null; // NOT "engine_capacity"
+  engine?: string | null;
   drive_type?: string | null;
+  driveType?: string | null;
   condition?: string | null;
   description?: string | null;
   features?: string[] | null;
-  /** JSONB array of {url, thumb, public_id, ...} objects - NOT a plain
-   * TEXT[] of URL strings, confirmed via createCar()/updateCar() and
-   * the Cloudinary-upload follow-up flow in carController.js. */
   images?: Array<{ url: string; thumb?: string; public_id?: string }> | null;
-  location_city?: string | null; // NOT a nested "location.city" path
+  location_city?: string | null;
+  city?: string | null;
   vin?: string | null;
   chassis_number?: string | null;
   registration_number?: string | null;
@@ -69,30 +73,40 @@ export interface BackendCar {
   status?: string | null;
   views?: number | null;
   approved?: boolean | null;
-  inspection_status?: string | null; // basic status only - not the full inspection record
+  inspection_status?: string | null;
+  inspectionStatus?: string | null;
   is_verified_dealer?: boolean | null;
-  /** Real, already-populated by the backend (carController.js:
-   * .populate("dealer", "name businessName phone role avatar
-   * dealerApprovedAt")). Not consumed directly by this type's own
-   * dealer field below - callers derive verification from the
-   * separate, direct is_verified_dealer flag on the car itself
-   * instead (more reliable than depending on this join succeeding -
-   * see pages/AuctionDiscoveryNetwork.tsx's own mapper for why). */
-  dealer?: { name?: string; businessName?: string; avatar?: string; phone?: string; email?: string; role?: string; dealerApprovedAt?: string | null } | null;
+  isVerifiedDealer?: boolean | null;
+  dealer?: string | { _id?: string; id?: string; name?: string; businessName?: string; business_name?: string; avatar?: string; phone?: string; email?: string; role?: string; dealerApprovedAt?: string | null } | null;
   is_promoted?: boolean | null;
+  isPromoted?: boolean | null;
   deal_rating?: string | null;
-  // --- Auction fields, denormalized directly onto the car row ---
-  auction_status?: string | null; // 'none' | 'draft' | 'live' | 'ended' - confirmed via backend/config/swagger.js's own documented enum
+  dealRating?: string | null;
+  // Auction fields are returned in camelCase by the canonical /api/cars route.
+  auctionStatus?: string | null;
+  auction_status?: string | null;
+  auctionEnd?: string | null;
   auction_end?: string | null;
+  auctionStartTime?: string | null;
   auction_start_time?: string | null;
+  startingBid?: number | null;
   starting_bid?: number | null;
+  currentBid?: number | null;
   current_bid?: number | null;
+  bidsCount?: number | null;
   bids_count?: number | null;
+  highestBidderId?: string | null;
   highest_bidder_id?: string | null;
+  allowBid?: boolean | null;
   allow_bid?: boolean | null;
+  allowBuy?: boolean | null;
   allow_buy?: boolean | null;
-  has_auction?: boolean | null; // GENERATED column: auction_status IS DISTINCT FROM 'none'
+  isAuction?: boolean | null;
+  hasAuction?: boolean | null;
+  has_auction?: boolean | null;
+  createdAt?: string | null;
   created_at?: string | null;
+  updatedAt?: string | null;
   updated_at?: string | null;
 }
 
@@ -235,84 +249,78 @@ export async function getMyListings(): Promise<BackendCar[]> {
  * Other fields with no authoritative source retain honest defaults.
  */
 export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
-  const imageUrls = (car.images || []).map((img) => img.url).filter(Boolean);
-  const conditionValue = (car.condition || '') as Vehicle['condition'];
-  const bodyStyleValue = (car.body_type || '') as Vehicle['bodyStyle'];
+  const imageUrls = (car.images || []).map((img) => img?.url).filter((url): url is string => Boolean(url));
+  const auctionStatus = String(car.auctionStatus ?? car.auction_status ?? '').toLowerCase();
+  const isAuction = Boolean(
+    car.isAuction ??
+    car.hasAuction ??
+    car.has_auction ??
+    ((auctionStatus && auctionStatus !== 'none') || car.allowBid || car.allow_bid),
+  );
+  const currentBid = car.currentBid ?? car.current_bid;
+  const bidsCount = car.bidsCount ?? car.bids_count;
+  const auctionEnd = car.auctionEnd ?? car.auction_end;
+  const location = car.city ?? car.location_city ?? '';
+  const bodyStyleValue = (car.bodyType ?? car.body_type ?? '') as Vehicle['bodyStyle'];
   const transmissionValue = (car.transmission || '') as Vehicle['transmission'];
   const fuelTypeValue = (car.fuel || '') as Vehicle['fuelType'];
-  // These 4 casts assume the backend's free-text column values line up
-  // with this frontend's stricter union types - true for the historical seed
-  // data these columns were designed around, but not enforced by any
-  // schema constraint on the backend side (confirmed: these are plain
-  // TEXT columns, no CHECK constraint restricting their values the way
-  // e.g. cars.status has one). A backend value outside the expected
-  // union renders with an unrecognized value at runtime rather than
-  // crashing - flagged here as a real, known risk rather than silently
-  // assumed safe.
+  const conditionValue = (car.condition || '') as Vehicle['condition'];
+  const dealer = typeof car.dealer === 'object' && car.dealer ? car.dealer : null;
+  const sellerId = car.dealer_id || dealer?._id || dealer?.id || (typeof car.dealer === 'string' ? car.dealer : '') || '';
+  const dealerRole = dealer?.role;
+  const sellerType = dealerRole === 'dealer'
+    ? 'Verified Dealer'
+    : dealerRole === 'individual_seller'
+      ? 'Private Seller'
+      : sellerId
+        ? undefined
+        : 'Private Seller';
+  const isVerifiedDealer = Boolean(car.isVerifiedDealer ?? car.is_verified_dealer ?? dealer?.dealerApprovedAt);
+  const inspectionStatus = String(car.inspectionStatus ?? car.inspection_status ?? '').trim();
 
   return {
-    id: car.id,
+    id: car.id || car._id || '',
     title: car.title,
-    make: car.brand, // real column is "brand", not "make"
+    make: car.brand,
     model: car.model,
     year: car.year,
     vin: car.vin || '',
     price: Number(car.price),
     mileage: car.mileage ?? 0,
-    location: car.location_city || '',
+    location,
     bodyStyle: bodyStyleValue,
     transmission: transmissionValue,
     fuelType: fuelTypeValue,
-    // engine: real column exists (car.engine) but was never mapped by
-    // the pre-Phase-7 version of this function - genuine oversight,
-    // fixed here now that a real Vehicle return type surfaced it.
     engine: car.engine || '',
-    // horsepower: no equivalent column exists anywhere on the real
-    // cars row - honest default, not fabricated.
     horsepower: 0,
-    // exteriorColor/interiorColor: the backend has a single `color`
-    // column, not separate exterior/interior fields - real value used
-    // for exterior (the far more common real-world distinction to
-    // actually have), interior left as an honest default.
     exteriorColor: car.color || '',
     interiorColor: '',
     condition: conditionValue,
-    // listingType: inferred from the real has_auction field rather
-    // than fabricated from nothing - 'auction' when has_auction is
-    // true, 'fixed' otherwise. This IS a real, if imperfect, signal
-    // (unlike horsepower/interiorColor above, which have no backend
-    // signal at all) - not the same category of default.
-    listingType: car.has_auction ? 'auction' : 'fixed',
+    listingType: isAuction ? 'auction' : 'fixed',
     images: imageUrls,
     image: imageUrls[0] || undefined,
     description: car.description || '',
     features: car.features || [],
-    // --- still-genuine gaps: not present on the cars row at all ---
-    sellerId: car.dealer_id || '',
-    sellerName: car.dealer?.businessName || car.dealer?.name || 'Unknown Seller',
-    sellerAvatar: car.dealer?.avatar || undefined,
-    sellerPhone: car.dealer?.phone || undefined,
-    sellerEmail: car.dealer?.email || undefined,
-    sellerRating: 0, // no authoritative rating aggregate is returned by this endpoint
-    sellerType: car.dealer_id ? (car.dealer?.role === 'dealer' ? 'Verified Dealer' : car.dealer?.role === 'individual_seller' ? 'Private Seller' : undefined) : 'Private Seller',
-    isDealerCertified: Boolean(car.is_verified_dealer || car.dealer?.dealerApprovedAt),
-    verified: Boolean(car.is_verified_dealer),
-    isAuction: Boolean(car.has_auction),
-    currentBid: car.current_bid != null ? Number(car.current_bid) : undefined,
-    bidsCount: car.bids_count ?? undefined,
-    auctionEndsAt: car.auction_end || undefined,
-    savedCount: 0, // no favorites-count aggregation performed by getCars - would require a separate query against the favorites table
-    // status: backend has a real `status` column (confirmed: CHECK
-    // constraint restricts it to 'available'/'sold'/'pending'/
-    // 'reserved'/'hidden'/'draft' - see supabase/migrations/
-    // ..._foundational_tables.sql.sql) but its value set doesn't
-    // exactly match this frontend's Vehicle.status union
-    // ('active'/'sold'/'pending'/'draft') - 'available' maps to
-    // 'active' as the closest equivalent; anything else not in the
-    // frontend union falls back to 'active' rather than crashing.
+    sellerId,
+    sellerName: dealer?.businessName || dealer?.business_name || dealer?.name || 'Unknown Seller',
+    sellerAvatar: dealer?.avatar || undefined,
+    sellerPhone: dealer?.phone || undefined,
+    sellerEmail: dealer?.email || undefined,
+    sellerRating: 0,
+    sellerType,
+    isDealerCertified: isVerifiedDealer,
+    dealerId: sellerId || undefined,
+    verified: isVerifiedDealer,
+    isAuction,
+    currentBid: currentBid != null ? Number(currentBid) : undefined,
+    bidsCount: bidsCount != null ? Number(bidsCount) : undefined,
+    auctionEndsAt: auctionEnd || undefined,
+    savedCount: 0,
+    inspectionStatus: inspectionStatus || undefined,
+    inspectionPassed: inspectionStatus.toLowerCase() === 'passed',
     status: car.status === 'sold' ? 'sold' : car.status === 'pending' ? 'pending' : car.status === 'draft' ? 'draft' : 'active',
-    isFeatured: Boolean(car.is_promoted),
-    createdAt: car.created_at || '',
+    isFeatured: Boolean(car.isPromoted ?? car.is_promoted),
+    createdAt: car.createdAt || car.created_at || '',
   };
 }
 

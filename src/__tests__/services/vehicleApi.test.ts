@@ -96,6 +96,46 @@ describe('mapBackendCarToVehicle - matches the real, corrected schema (Phase 5)'
     is_verified_dealer: true,
   };
 
+
+  it('maps the canonical /api/cars camelCase response shape used by the live backend', () => {
+    const canonicalCar: BackendCar = {
+      id: 'car-live-1',
+      title: '2025 Toyota Land Cruiser',
+      brand: 'Toyota',
+      model: 'Land Cruiser',
+      year: 2025,
+      price: 9500000,
+      mileage: 18000,
+      fuel: 'Diesel',
+      transmission: 'Automatic',
+      bodyType: 'SUV',
+      city: 'Nairobi',
+      images: [{ url: 'https://example.com/live.jpg' }],
+      dealer: { id: 'dealer-live-1', name: 'KAYAD Motors', role: 'dealer', dealerApprovedAt: '2026-01-01T00:00:00Z' },
+      auctionStatus: 'live',
+      currentBid: 9100000,
+      bidsCount: 8,
+      auctionEnd: '2026-10-08T12:00:00Z',
+      isVerifiedDealer: true,
+      isPromoted: true,
+      inspectionStatus: 'passed',
+      createdAt: '2026-10-01T00:00:00Z',
+    };
+
+    const mapped = mapBackendCarToVehicle(canonicalCar);
+    expect(mapped.sellerId).toBe('dealer-live-1');
+    expect(mapped.sellerName).toBe('KAYAD Motors');
+    expect(mapped.sellerType).toBe('Verified Dealer');
+    expect(mapped.location).toBe('Nairobi');
+    expect(mapped.isAuction).toBe(true);
+    expect(mapped.currentBid).toBe(9100000);
+    expect(mapped.bidsCount).toBe(8);
+    expect(mapped.auctionEndsAt).toBe('2026-10-08T12:00:00Z');
+    expect(mapped.verified).toBe(true);
+    expect(mapped.isFeatured).toBe(true);
+    expect(mapped.inspectionStatus).toBe('passed');
+    expect(mapped.inspectionPassed).toBe(true);
+  });
   it('correctly maps every field that genuinely exists on the backend car row, using the real column names', () => {
     const mapped = mapBackendCarToVehicle(realCar);
     expect(mapped.id).toBe('car-42');

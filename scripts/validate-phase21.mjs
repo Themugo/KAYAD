@@ -55,7 +55,11 @@ if (!/publishedCarId/.test(seller) || !/publishError/.test(seller)) fail('privat
 if (/MOCK_|SAMPLE_/i.test(seller)) fail('active private seller platform contains fabricated data language');
 
 const activeAuction = read('src/features/AuctionsView.tsx');
-if (!activeAuction.includes('fetchActiveAuctions')) fail('active auction page is not backend-driven');
+// Canonical tabbed browsing (live/draft/ended) uses fetchList({status}); the
+// homepage rail separately uses fetchActiveAuctions via marketplaceCore.ts.
+// Either call is real, backend-driven auction transport (GET /api/auctions or
+// GET /api/auctions/active, both served from live auction_setups/Car records).
+if (!activeAuction.includes('fetchActiveAuctions') && !activeAuction.includes('fetchList(')) fail('active auction page is not backend-driven');
 if (activeAuction.includes('SAMPLE_') || activeAuction.includes('MOCK_')) fail('active auction page contains local sample data');
 
 const buyerIndex = read('src/features/OwnershipPlatform/index.ts');

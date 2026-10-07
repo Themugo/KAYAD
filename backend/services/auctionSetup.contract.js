@@ -61,6 +61,17 @@ export function validateConfig(config) {
     if (!(config.antiSnipeExtensionSeconds >= 10 && config.antiSnipeExtensionSeconds <= 3600)) errors.push('Anti-snipe extension must be 10–3600 seconds');
     if (!(config.maxExtensions >= 0 && config.maxExtensions <= 10)) errors.push('Maximum extensions must be 0–10');
   }
+  // Payment rails are intentionally constrained to the rails that are
+  // actually implemented today. Direct winner settlement is M-Pesa;
+  // escrow custody is bank-transfer based. Do not publish a configuration
+  // that the winner UI cannot actually execute.
+  if (config.settlement?.mode === 'direct' && config.settlement?.paymentMethod !== 'mpesa') {
+    errors.push('Direct auction settlement currently supports M-Pesa only.');
+  }
+  if (config.settlement?.mode === 'escrow' && config.settlement?.paymentMethod !== 'bank') {
+    errors.push('Escrow auction settlement currently uses bank/custody transfer only.');
+  }
+
   if (config.commitment.required) {
     if (config.commitment.type === 'fixed' && !(config.commitment.amount > 0)) errors.push('Commitment amount is required');
     if (config.commitment.type === 'percent' && !(config.commitment.percent > 0 && config.commitment.percent <= 100)) errors.push('Commitment percentage must be between 0 and 100');

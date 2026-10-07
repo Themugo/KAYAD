@@ -7,6 +7,7 @@ import {
   getAuction,
   getMyAuctions,
   getActiveAuctions,
+  getPublicAuctionBids,
 } from "../controllers/auctionController.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 router.get("/", asyncHandler(listAuctions));
 router.get("/active", asyncHandler(getActiveAuctions));
 router.get("/my", protect, asyncHandler(getMyAuctions));
+router.get("/:id/bids", validateObjectId, asyncHandler(getPublicAuctionBids));
 router.get("/:id", validateObjectId, asyncHandler(getAuction));
 
 export default router;

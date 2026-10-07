@@ -67,7 +67,8 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         mileage: v.mileage, fuel: v.fuelType, transmission: v.transmission, body_type: v.bodyStyle,
         location_city: v.location, has_auction: v.isAuction, current_bid: v.currentBid ?? null,
         bids_count: v.bidsCount ?? null, auction_end: v.auctionEndsAt ?? null,
-        is_verified_dealer: v.verified ?? false, dealer_id: v.sellerId || null,
+        is_verified_dealer: v.verified ?? false, is_promoted: true, dealer_id: v.sellerId || null,
+        images: v.image ? [{ url: v.image }] : [],
       })),
       pagination: { page: 1, limit: 24, total: INITIAL_VEHICLES.length, pages: 1 },
     });
@@ -109,6 +110,14 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     expect(heading.textContent).toContain(String(INITIAL_VEHICLES.length));
   });
 
+  it('saved-only mode reuses the canonical marketplace grid without re-querying the full inventory', async () => {
+    const result = render(<VehicleMarketplace {...baseProps} savedOnly />);
+    await waitFor(() => expect(screen.getByText('Saved Vehicles')).toBeInTheDocument());
+    expect(screen.getByText(/2021 Toyota Land Cruiser Prado TX-L 2.8L/)).toBeInTheDocument();
+    expect(vehicleApiMocks.getCars).not.toHaveBeenCalled();
+    result.unmount();
+  });
+
   it('renders empty vehicles list without crashing, showing a real empty state', async () => {
     vehicleApiMocks.getCars.mockResolvedValueOnce({ success: true, data: [], pagination: { page: 1, limit: 24, total: 0, pages: 1 } });
     await renderMarketplace({ ...baseProps, vehicles: [] });
@@ -142,22 +151,22 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       await renderMarketplace({ ...baseProps });
       const hero = mobileHero();
       const view = within(hero);
-      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
-      expect(view.getByText('Premium SUV · 4WD · Automatic')).toBeTruthy();
+      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
+      expect(view.getByText('Pristine 7-seater SUV with full 150-point inspection certificate. Features leather seats, sunroof, 360 camera, adaptive cruise control.')).toBeTruthy();
       // Only the active vehicle is rendered (no second large vehicle on mobile).
-      expect(view.queryByText('Mercedes-Benz GLE')).toBeNull();
+      expect(view.queryByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeNull();
       expect(view.getAllByRole('img').length).toBe(1);
 
       fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
-      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
-      expect(view.getByText('Luxury SUV · Automatic')).toBeTruthy();
-      expect(view.queryByText('Toyota Land Cruiser 300')).toBeNull();
+      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
+      expect(view.getByText('Immaculate Subaru Outback with EyeSight Ver 3 driver assist, X-Mode 4WD, power tailgate and Harmon Kardon premium audio.')).toBeTruthy();
+      expect(view.queryByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeNull();
 
       // Wraps forward to the first vehicle, and backward again to the last.
       fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
-      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
+      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
       fireEvent.click(view.getByRole('button', { name: 'Previous featured vehicle' }));
-      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
+      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
     });
 
     it('keeps dots in sync with the active vehicle and lets a dot jump to a vehicle', async () => {
@@ -169,61 +178,48 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       fireEvent.click(dot(2));
       expect(dot(2).getAttribute('aria-current')).toBe('true');
       expect(dot(1).getAttribute('aria-current')).toBeNull();
-      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
+      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
     });
 
     it('changes vehicle on a deliberate horizontal swipe but not on a vertical scroll', async () => {
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ }).parentElement as HTMLElement;
+      const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ }).parentElement as HTMLElement;
       const touch = (x: number, y: number) => ({ touches: [{ clientX: x, clientY: y }], changedTouches: [{ clientX: x, clientY: y }] });
 
       fireEvent.touchStart(stage, touch(200, 100));
       fireEvent.touchEnd(stage, touch(205, 190)); // mostly vertical: ignored
-      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
+      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
 
       fireEvent.touchStart(stage, touch(240, 100));
       fireEvent.touchEnd(stage, touch(120, 104)); // swipe left -> next
-      expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
+      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
 
       fireEvent.touchStart(stage, touch(100, 100));
       fireEvent.touchEnd(stage, touch(230, 98)); // swipe right -> previous
-      expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy();
+      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
     });
 
-    it('serves the high-resolution WebP only to mobile via <picture>, keeping the approved desktop image as the fallback', async () => {
+    it('uses real featured inventory as the hero source and keeps the selected vehicle consistent across desktop/mobile', async () => {
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
       const img = view.getByRole('img') as HTMLImageElement;
-      const picture = img.closest('picture') as HTMLElement;
-      const source = picture.querySelector('source') as HTMLSourceElement;
-      // Desktop / fallback image is the approved clean PNG (desktop composition unchanged).
-      expect(img.getAttribute('src')).toBe('/hero/kayad-land-cruiser-clean.png');
-      // Mobile-only high-resolution asset, limited to widths below the lg breakpoint.
-      expect(source.getAttribute('srcset')).toBe('/hero/kayad-land-cruiser-mobile.webp');
-      expect(source.getAttribute('media')).toBe('(max-width: 1023.98px)');
-      expect(source.getAttribute('type')).toBe('image/webp');
-      // Intrinsic size prevents layout shift while the larger asset loads.
-      expect(img.getAttribute('width')).toBe('1021');
-      expect(img.getAttribute('height')).toBe('634');
+      expect(img.getAttribute('src')).toBe(INITIAL_VEHICLES[0].image);
+      expect(img.closest('picture')?.querySelector('source')).toBeNull();
 
       fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
       const next = within(mobileHero()).getByRole('img') as HTMLImageElement;
-      expect(next.getAttribute('src')).toBe('/hero/kayad-mercedes-gle-clean.png');
-      expect((next.closest('picture') as HTMLElement).querySelector('source')?.getAttribute('srcset')).toBe('/hero/kayad-mercedes-gle-mobile.webp');
+      expect(next.getAttribute('src')).toBe(INITIAL_VEHICLES[1].image);
     });
 
-    it('does not pair a custom admin vehicle with a canonical mobile photo', async () => {
-      const custom = { ...INITIAL_VEHICLES[0], id: 'custom-1', make: 'Range', model: 'Rover', images: ['/uploads/range-rover.jpg'], image: '/uploads/range-rover.jpg', isFeatured: true };
+    it('ignores legacy showcase hero configuration and keeps public hero identity on real featured inventory', async () => {
       const { adminAPI } = await import('../../api/api');
       vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { vehicleSource: 'showcase', showcaseVehicles: [
-        { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/uploads/custom-lc.png', enabled: true },
+        { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-cutout.png', enabled: true },
       ] } } } as never);
-      await renderMarketplace({ ...baseProps, vehicles: [custom] });
+      await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      await waitFor(() => expect((view.getByRole('img') as HTMLImageElement).getAttribute('src')).toBe('/uploads/custom-lc.png'));
-      // Same id but a different desktop image: no canonical mobile WebP is injected.
-      expect((view.getByRole('img') as HTMLImageElement).closest('picture')?.querySelector('source')).toBeNull();
+      await waitFor(() => expect((view.getByRole('img') as HTMLImageElement).getAttribute('src')).toBe(INITIAL_VEHICLES[0].image));
     });
 
     describe('admin-controlled hero configuration', () => {
@@ -260,7 +256,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 200, mobileStageMaxPx: 300, mobileTransitionMs: 0, rotationSeconds: 0 } } } as never);
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
-        const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ });
+        const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ });
         await waitFor(() => expect((stage.parentElement as HTMLElement).style.height).toBe('clamp(200px, 52vw, 300px)'));
         expect(stage.style.getPropertyValue('--kayad-hero-slide-ms')).toBe('0ms');
       });
@@ -270,7 +266,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 5, mobileStageMaxPx: 9000, mobileTransitionMs: -50, rotationSeconds: 1 } } } as never);
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
-        const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ });
+        const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ });
         await waitFor(() => expect((stage.parentElement as HTMLElement).style.height).toBe('clamp(120px, 52vw, 420px)'));
         expect(stage.style.getPropertyValue('--kayad-hero-slide-ms')).toBe('0ms');
       });
@@ -279,7 +275,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     it('never overlays arrows on the vehicle stage and contains the image', async () => {
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      const stage = view.getByRole('button', { name: /^View Toyota Land Cruiser 300$/ }).parentElement as HTMLElement;
+      const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ }).parentElement as HTMLElement;
       // Arrow buttons live in a separate controls row, not inside the vehicle stage.
       expect(within(stage).queryByRole('button', { name: /featured vehicle/i })).toBeNull();
       expect(view.getByRole('img').className).toContain('object-contain');
@@ -351,7 +347,8 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
         mileage: v.mileage, fuel: v.fuelType, transmission: v.transmission, body_type: v.bodyStyle,
         location_city: v.location, has_auction: v.isAuction, current_bid: v.currentBid ?? null,
         bids_count: v.bidsCount ?? null, auction_end: v.auctionEndsAt ?? null,
-        is_verified_dealer: v.verified ?? false, dealer_id: v.sellerId || null,
+        is_verified_dealer: v.verified ?? false, is_promoted: true, dealer_id: v.sellerId || null,
+        images: v.image ? [{ url: v.image }] : [],
       })),
       pagination: { page: 1, limit: 24, total: INITIAL_VEHICLES.length, pages: 1 },
     });
@@ -424,7 +421,8 @@ describe('VehicleMarketplace - toolbar controls (redesigned layout)', () => {
         mileage: v.mileage, fuel: v.fuelType, transmission: v.transmission, body_type: v.bodyStyle,
         location_city: v.location, has_auction: v.isAuction, current_bid: v.currentBid ?? null,
         bids_count: v.bidsCount ?? null, auction_end: v.auctionEndsAt ?? null,
-        is_verified_dealer: v.verified ?? false, dealer_id: v.sellerId || null,
+        is_verified_dealer: v.verified ?? false, is_promoted: true, dealer_id: v.sellerId || null,
+        images: v.image ? [{ url: v.image }] : [],
       })),
       pagination: { page: 1, limit: 24, total: INITIAL_VEHICLES.length, pages: 1 },
     });
@@ -464,7 +462,8 @@ describe('VehicleMarketplace - admin home page customization', () => {
         mileage: v.mileage, fuel: v.fuelType, transmission: v.transmission, body_type: v.bodyStyle,
         location_city: v.location, has_auction: v.isAuction, current_bid: v.currentBid ?? null,
         bids_count: v.bidsCount ?? null, auction_end: v.auctionEndsAt ?? null,
-        is_verified_dealer: v.verified ?? false, dealer_id: v.sellerId || null,
+        is_verified_dealer: v.verified ?? false, is_promoted: true, dealer_id: v.sellerId || null,
+        images: v.image ? [{ url: v.image }] : [],
       })),
       pagination: { page: 1, limit: 24, total: INITIAL_VEHICLES.length, pages: 1 },
     });
@@ -602,7 +601,8 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
         mileage: v.mileage, fuel: v.fuelType, transmission: v.transmission, body_type: v.bodyStyle,
         location_city: v.location, has_auction: v.isAuction, current_bid: v.currentBid ?? null,
         bids_count: v.bidsCount ?? null, auction_end: v.auctionEndsAt ?? null,
-        is_verified_dealer: v.verified ?? false, dealer_id: v.sellerId || null,
+        is_verified_dealer: v.verified ?? false, is_promoted: true, dealer_id: v.sellerId || null,
+        images: v.image ? [{ url: v.image }] : [],
       })),
       pagination: { page: 1, limit: 24, total: INITIAL_VEHICLES.length, pages: 1 },
     });

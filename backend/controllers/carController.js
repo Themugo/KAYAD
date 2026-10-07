@@ -232,13 +232,14 @@ export const getCars = async (req, res) => {
         createdAt: 1,
         dealer: 1,
         isVerifiedDealer: 1,
+        inspectionStatus: 1,
         ntsaVerified: 1,
         dutyStatus: 1,
         isPromoted: 1,
       });
     } else {
       findQuery = findQuery.select(
-        "title price images coverImage brand year model city fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted",
+        "title price images coverImage brand year model city fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer inspectionStatus ntsaVerified dutyStatus isPromoted",
       );
     }
 
@@ -614,6 +615,52 @@ export const updateCar = async (req, res) => {
     if (req.user.role === "dealer") car.escrowEnabled = false;
     if (req.user.role === "individual_seller") car.escrowEnabled = true;
 
+    // ── AUCTION PARAMETER LOCK ───────────────────────────
+    // The canonical path for changing auction terms is auctionSetup.service.js
+    // (saveAuctionSetup / publishAuctionSetup / requestAuctionAmendment), which
+    // already enforces that a *published* setup is immutable (409) and that any
+    // change afterward goes through a reviewed amendment with a reason. That
+    // boundary mirrors its config onto these same `cars` columns
+    // (auctionStartTime, auctionEnd, auctionStatus, allowBid), but this generic
+    // listing-edit endpoint was mutating the identical columns directly via the
+    // allowedFields loop below with no reference to auctionStatus at all — so a
+    // dealer could silently change reservePrice/startingBid/auctionEnd/allowBid
+    // on a live, closing, ended, or sold auction, bypassing the amendment
+    // workflow entirely. Lock those fields once the auction has left `draft`.
+    const AUCTION_LOCKED_FIELDS = [
+      "auctionStartTime",
+      "auctionEnd",
+      "startingBid",
+      "reservePrice",
+      "reserveMode",
+      "allowBid",
+    ];
+    const auctionStatus = String(car.auctionStatus || "draft").toLowerCase();
+    const auctionIsLocked = auctionStatus !== "draft" && auctionStatus !== "";
+    if (auctionIsLocked && !isStaff) {
+      const attemptedLockedField = AUCTION_LOCKED_FIELDS.find((field) => {
+        if (!(field in req.body)) return false;
+        const incoming = req.body[field];
+        const current = car[field];
+        // Allow no-op resubmission of the current value (idempotent retries,
+        // forms that round-trip the full record) without allowing a real change.
+        if (incoming === undefined) return false;
+        if (field === "auctionStartTime" || field === "auctionEnd") {
+          const incomingTime = incoming ? new Date(incoming).getTime() : null;
+          const currentTime = current ? new Date(current).getTime() : null;
+          return incomingTime !== currentTime;
+        }
+        return String(incoming) !== String(current ?? "");
+      });
+      if (attemptedLockedField) {
+        return res.status(409).json({
+          success: false,
+          code: "AUCTION_TERMS_LOCKED",
+          message: `Auction terms are locked once the auction leaves draft (current status: "${auctionStatus}"). Submit a controlled amendment instead of editing "${attemptedLockedField}" directly.`,
+        });
+      }
+    }
+
     // Preserve existing coverImage if caller didn't explicitly send one
     const incomingCover = req.body.coverImage;
     const hadExplicitCover = incomingCover !== undefined && incomingCover !== null && incomingCover !== "";
@@ -671,7 +718,18 @@ export const updateCar = async (req, res) => {
     for (const key of Object.keys(req.body)) {
       if (key === "city" || key === "address") continue; // folded into location above
       if (allowedFields.includes(key) || key === "location") {
-        car.set(key, req.body[key]);
+        // The Car model (backend/models/_base.js wrapDoc) returns a plain
+        // object with a handful of explicitly defined methods (save,
+        // toObject, deleteOne, addTimelineEntry) — it is not a Mongoose
+        // document and has no .set() method. `car.set(key, value)` threw
+        // "car.set is not a function" on every single field, for every
+        // listing edit, unconditionally — caught by this function's own
+        // outer try/catch and surfaced only as a generic 500 "Failed to
+        // update car", with no real-database end-to-end test exercising
+        // this path to catch it. Plain property assignment is the correct
+        // equivalent here: save() persists via `Object.entries(this)`, so
+        // any enumerable own property is picked up identically.
+        car[key] = req.body[key];
       }
     }
 

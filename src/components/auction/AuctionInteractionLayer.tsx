@@ -22,7 +22,7 @@ type DockItem = { id: string; label: string; icon: React.ElementType };
 const dockItems: DockItem[] = [
   { id: 'auctions', label: 'Auctions', icon: Gavel },
   { id: 'saved', label: 'Saved', icon: Bookmark },
-  { id: 'payments', label: 'Wallet', icon: WalletCards },
+  { id: 'payments', label: 'Payments', icon: WalletCards },
   { id: 'profile', label: 'Profile', icon: UserRound },
 ];
 

@@ -9034,6 +9034,98 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/escrow/operations/dashboard:
+    get:
+      tags:
+      - Api
+      summary: GET /api/escrow/operations/dashboard
+      description: 'Route contract: GET /api/escrow/operations/dashboard'
+      operationId: getApiEscrowOperationsDashboard
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/escrow/operations/case/{id}:
+    get:
+      tags:
+      - Api
+      summary: GET /api/escrow/operations/case/{id}
+      description: 'Route contract: GET /api/escrow/operations/case/{id}'
+      operationId: getApiEscrowOperationsCaseId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/escrow/operations/reconcile:
+    post:
+      tags:
+      - Api
+      summary: POST /api/escrow/operations/reconcile
+      description: 'Route contract: POST /api/escrow/operations/reconcile'
+      operationId: postApiEscrowOperationsReconcile
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/escrow/operations/anomaly-scan:
+    post:
+      tags:
+      - Api
+      summary: POST /api/escrow/operations/anomaly-scan
+      description: 'Route contract: POST /api/escrow/operations/anomaly-scan'
+      operationId: postApiEscrowOperationsAnomalyScan
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/escrow/operations/case/{id}/payout:
+    post:
+      tags:
+      - Api
+      summary: POST /api/escrow/operations/case/{id}/payout
+      description: 'Route contract: POST /api/escrow/operations/case/{id}/payout'
+      operationId: postApiEscrowOperationsCaseIdPayout
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
   /api/escrow/my:
     get:
       tags:
@@ -9169,6 +9261,33 @@ paths:
       operationId: postApiEscrowIdRefund
       parameters:
       - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/escrow/{id}/refund/{refundId}/complete:
+    post:
+      tags:
+      - Api
+      summary: POST /api/escrow/{id}/refund/{refundId}/complete
+      description: 'Route contract: POST /api/escrow/{id}/refund/{refundId}/complete'
+      operationId: postApiEscrowIdRefundRefundIdComplete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: refundId
         in: path
         required: true
         schema:
@@ -17989,6 +18108,28 @@ paths:
       summary: GET /api/v1/auctions/{id}
       description: 'Route contract: GET /api/v1/auctions/{id}'
       operationId: getApiV1AuctionsId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/v1/auctions/{id}/bids:
+    get:
+      tags:
+      - Api
+      summary: GET /api/v1/auctions/{id}/bids
+      description: 'Route contract: GET /api/v1/auctions/{id}/bids'
+      operationId: getApiV1AuctionsIdBids
       parameters:
       - name: id
         in: path

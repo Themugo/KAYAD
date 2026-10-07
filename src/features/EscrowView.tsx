@@ -39,6 +39,7 @@ import { PageHeader, StatWidget, Card, CardHeader, CardTitle, Table, TableHeader
 interface EscrowViewProps {
   user?: UserProfile | null;
   onOpenAuth?: () => void;
+  initialTab?: 'journey' | 'deals' | 'create' | 'rules';
 }
 
 // Fixed: this entire page previously ran on MOCK_ESCROW_DEALS - fake
@@ -55,12 +56,16 @@ interface EscrowViewProps {
 // moderator (matching the real backend's own authorization checks on
 // every action route, confirmed directly in
 // backend/controllers/escrowController.js).
-export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth }) => {
+export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth, initialTab = 'journey' }) => {
   const [dealsList, setDealsList] = useState<EscrowTransaction[]>([]);
   const [dealsLoading, setDealsLoading] = useState<boolean>(true);
   const [dealsError, setDealsError] = useState<string | null>(null);
   const [dealSearch, setDealSearch] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create' | 'rules'>('journey');
+  const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create' | 'rules'>(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [stateDetails, setStateDetails] = useState<{ currentState?: string; allowedTransitions?: string[]; history?: Array<{ action?: string; by?: string; at?: string; reason?: string }> } | null>(null);
   const [fundingInstructions, setFundingInstructions] = useState<{ fundingMethod: string; rules: { releaseDays: number; minimumAmount: number; maximumAmount?: number | null }; account: { accountName?: string; bankName?: string; accountNumber?: string; branch?: string; currency?: string } | null; amount: number; reference: string } | null>(null);

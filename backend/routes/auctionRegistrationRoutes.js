@@ -3,6 +3,7 @@ import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { getRegistration, registerForAuction, initiateRegistrationCommitment, assertBidderAuthorized } from "../services/auctionRegistration.service.js";
+import { initiateHighValueDeposit, getAuctionFinancialPolicy, getAuctionSecurityHold } from "../services/auctionFinancialIntegrity.service.js";
 import { getAuctionRoomState } from "../services/auctionRoom.service.js";
 
 const router = express.Router();
@@ -28,6 +29,17 @@ router.post("/:id/registration", protect, validateObjectId, asyncHandler(async (
 
 router.post("/:id/registration/commitment", protect, validateObjectId, asyncHandler(async (req, res) => {
   const result = await initiateRegistrationCommitment({ auctionId: req.params.id, userId: req.user.id, req });
+  res.json({ success: true, ...result });
+}));
+
+router.get("/:id/registration/security-policy", protect, validateObjectId, asyncHandler(async (req, res) => {
+  const policy = await getAuctionFinancialPolicy();
+  const hold = await getAuctionSecurityHold({ auctionId: req.params.id, userId: req.user.id, holdType: "high_value_deposit" });
+  res.json({ success: true, policy: { highValueBidThresholdKes: policy.highValueBidThresholdKes, highValueDepositKes: policy.highValueDepositKes, bidConfirmationFeeKes: policy.bidConfirmationFeeKes }, hold });
+}));
+
+router.post("/:id/registration/high-value-deposit", protect, validateObjectId, asyncHandler(async (req, res) => {
+  const result = await initiateHighValueDeposit({ auctionId: req.params.id, userId: req.user.id, req });
   res.json({ success: true, ...result });
 }));
 

@@ -1,0 +1,15 @@
+backend/controllers/bidController.js
+backend/routes/auctionRegistrationRoutes.js
+backend/routes/auctionSettlementRoutes.js
+backend/services/auctionFinancialIntegrity.service.js
+backend/services/auctionPlatformPolicy.service.js
+backend/services/auctionRegistration.service.js
+backend/services/auctionSettlement.service.js
+backend/services/bidSecurityService.js
+backend/services/paymentCallback.service.js
+scripts/validate-auction-phase-a-financial-integrity.mjs
+scripts/validate-auction-phase10.mjs
+supabase/migrations/20261007180000_auction_financial_integrity_phase_a.sql
+package.json
+AUCTION_PHASE_A_FINANCIAL_INTEGRITY_20261007.md
+AUCTION_PHASE_A_CHANGED_FILES_20261007.txt

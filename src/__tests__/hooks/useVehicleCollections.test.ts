@@ -12,6 +12,11 @@ import { Vehicle } from '../../types';
 
 
 const favoriteMocks = vi.hoisted(() => ({ getFavorites: vi.fn(), toggleFavorite: vi.fn() }));
+const vehicleMocks = vi.hoisted(() => ({ getCarById: vi.fn(), mapBackendCarToVehicle: vi.fn() }));
+vi.mock('../../services/vehicleApi', () => ({
+  getCarById: vehicleMocks.getCarById,
+  mapBackendCarToVehicle: vehicleMocks.mapBackendCarToVehicle,
+}));
 vi.mock('../../services/favoriteApi', () => ({
   getFavorites: favoriteMocks.getFavorites,
   toggleFavorite: favoriteMocks.toggleFavorite,
@@ -90,6 +95,17 @@ describe('useVehicleCollections - authenticated path (real favorites service)', 
     const { result } = renderHook(() => useVehicleCollections([], 'user-123'));
     await waitFor(() => expect(result.current.savedVehicles).toEqual(['real-1', 'real-2']));
     expect(favoriteMocks.getFavorites).toHaveBeenCalledWith({ limit: 50 });
+  });
+
+  it('resolves saved vehicles outside the current inventory page through the canonical vehicle endpoint', async () => {
+    const resolved = makeVehicle('saved-outside-page');
+    favoriteMocks.getFavorites.mockResolvedValue({ favorites: [{ id: resolved.id }] });
+    vehicleMocks.getCarById.mockResolvedValue({ id: resolved.id, title: resolved.title });
+    vehicleMocks.mapBackendCarToVehicle.mockReturnValue(resolved);
+
+    const { result } = renderHook(() => useVehicleCollections([], 'user-123'));
+    await waitFor(() => expect(result.current.savedVehiclesList.map((v) => v.id)).toEqual([resolved.id]));
+    expect(vehicleMocks.getCarById).toHaveBeenCalledWith(resolved.id);
   });
 
   it('does not fetch when no userId is provided', () => {

@@ -1,0 +1,52 @@
+KAYAD AUCTION 360 HARDENING — 7 OCTOBER 2026
+
+Canonical foundation preserved. No second marketplace, no mock inventory, no information-architecture redesign.
+
+Primary audit:
+  AUCTION_360_AUDIT_20261007.md
+
+New hardening validator:
+  scripts/validate-auction-360-hardening-20261007.mjs
+
+Key code hardening:
+  backend/controllers/auctionController.js
+  backend/controllers/bidController.js
+  backend/routes/auctionRoutes.js
+  backend/routes/auctionAdminRoutes.js
+  backend/routes/auctionSettlementRoutes.js
+  backend/routes/dealerRoutes.js
+  backend/services/auctionLifecycle.service.js
+  backend/services/auctionRoom.service.js
+  backend/services/auctionSetup.service.js
+  backend/services/bidSecurityService.js
+  backend/utils/auctionTimer.js
+  backend/utils/atomicTransactions.js
+  backend/utils/bidRules.js
+  backend/migrations / Supabase:
+    supabase/migrations/20261007120000_auction_rule_authority_convergence.sql
+
+Frontend hardening:
+  src/pages/AuctionLivePage.jsx
+  src/features/AuctionsView.tsx
+  src/services/auctionService.ts
+  src/context/SocketContext.tsx
+  src/components/auction/AuctionDisclaimer.tsx
+  src/components/auction/AuctionInteractionLayer.tsx
+  src/components/organizer/BuyerProtectionNotice.tsx
+  src/components/organizer/PaymentTransparency.tsx
+  src/pages/admin/AdminAuctions.jsx
+  src/styles/auction-premium.css
+
+Validation results:
+  Auction 360 hardening: 28/28 PASS
+  Auction bid surface: 6/6 PASS
+  Auction domain integrity: 24/24 PASS
+  Auction transport convergence: 5/5 PASS
+  Phase 4: PASS
+  Phase 5: PASS
+  Phase 7: 8/8 PASS
+  Phase 8: 14/14 PASS
+  Phase 9: 21/21 PASS
+  Phase 10: 32/32 PASS
+
+Important: final production certification still requires Node 22.22.2, npm install/build/test, Playwright/browser checks, real Supabase/RLS staging and real M-Pesa provider certification.

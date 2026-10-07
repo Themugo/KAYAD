@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle } from '../types';
-import { isEscrowApplicable, getEscrowBadgeLabel } from '../utils/escrow';
+import { isEscrowApplicable, getEscrowBadgeLabel, isEscrowLive } from '../utils/escrow';
 import {
   CheckCircle2,
   MapPin,
@@ -536,7 +536,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     className="shadow-md font-black text-sm"
                   >
                     <Lock className="w-5 h-5 text-amber-400" />
-                    <span>Start Secure Escrow Purchase</span>
+                    <span>{isEscrowLive() ? 'Start Secure Escrow Purchase' : 'Review Escrow Workflow'}</span>
                   </Button>
                 ) : (
                   <Button
@@ -583,12 +583,12 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           </div>
 
           {/* ==========================================
-              5. BUYER ASSURANCE (KAYAD Purchase Protection)
+              5. BUYER ASSURANCE (KAYAD Transaction Safeguards)
               ========================================== */}
           <div className="p-6 bg-gradient-to-r from-slate-900 via-[#176B87] to-slate-900 text-white rounded-3xl shadow-md space-y-4 border border-amber-400/20">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-sm font-black text-amber-400 uppercase tracking-wider font-display flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-amber-400" /> KAYAD Purchase Protection
+                <ShieldCheck className="w-5 h-5 text-amber-400" /> KAYAD Transaction Safeguards
               </span>
               <span className="text-xs text-slate-300 font-semibold">Max 6 Verified Safeguards</span>
             </div>
@@ -600,7 +600,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 { enabled: Boolean(vehicle.isDealerCertified), title: '✓ Dealer Certified', desc: 'Seller has a dealer certification record' },
                 { enabled: Boolean(vehicle.inspectionPassed || vehicle.inspection), title: '✓ Inspection Report', desc: 'Inspection data is available' },
                 { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
-                { enabled: Boolean(vehicle.escrowEligible || isEscrowActive), title: '✓ Escrow Eligible', desc: 'Secure transaction workflow is available' },
+                { enabled: Boolean(vehicle.escrowEligible || isEscrowActive), title: `✓ ${getEscrowBadgeLabel(vehicle)}`, desc: 'Escrow workflow is available for this listing' },
                 { enabled: Boolean(vehicle.vin), title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }
               ].map((item, idx) => (
                 <div key={idx} className={`p-3 rounded-2xl backdrop-blur-md border space-y-0.5 ${item.enabled ? 'bg-white/10 border-white/15' : 'bg-white/5 border-white/10 opacity-60'}`}>
@@ -1003,7 +1003,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               onClick={() => onStartEscrow(vehicle)}
             >
               <Lock className="w-3.5 h-3.5 text-amber-400" />
-              <span>Start Escrow</span>
+              <span>{isEscrowLive() ? 'Start Escrow' : 'Review Escrow'}</span>
             </Button>
           ) : (
             <Button

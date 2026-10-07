@@ -61,6 +61,16 @@ export async function publishAuctionSetup({ carId, userId, req }) {
     locked_at: publishedAt,
     readiness_snapshot: { ...readiness, validationErrors: [], capturedAt: publishedAt },
   });
+
+  // Mirror the immutable published schedule onto the canonical car lifecycle
+  // row so the server can start the auction automatically at the configured
+  // time without creating a second scheduler/data source.
+  await update("cars", carId, {
+    auctionStartTime: config.startsAt,
+    auctionEnd: config.endsAt,
+    auctionStatus: "draft",
+    allowBid: false,
+  });
   await logActionFromReq(req, "auction_setup_published", { target: carId, targetModel: "Car", details: { setupId: setup.id, version: setup.version } });
   return { setup: updated, readiness };
 }

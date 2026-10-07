@@ -3,6 +3,7 @@ import { findById, findOne, create, update } from "../db/index.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { normalizeAuctionSetup, validateConfig } from "./auctionSetup.contract.js";
 import { initiateBidSecurity } from "./bidSecurityService.js";
+import { createAuctionSecurityHold } from "./auctionFinancialIntegrity.service.js";
 
 const ACTIVE = "active";
 const REGISTRATION_STATES = ["not_registered","registration_started","pending_verification","pending_eligibility","pending_commitment","active","suspended","withdrawn","disqualified","expired"];
@@ -86,7 +87,11 @@ export async function initiateRegistrationCommitment({ auctionId, userId, req })
   const config = normalizeAuctionSetup(setup?.config || {});
   const amount = commitmentAmount(config);
   if (!amount || amount <= 0) throw Object.assign(new Error("A fixed commitment amount is required for payment initiation"), { status: 422 });
-  const result = await initiateBidSecurity({ auctionId, userId, phone: user.phone, amount, registrationId: registration.id });
+  const hold = await createAuctionSecurityHold({
+    auctionId, bidderId: userId, registrationId: registration.id, holdType: "commitment", amount,
+    policySnapshot: { commitmentAmount: amount, creditTowardWinningPayment: true },
+  });
+  const result = await initiateBidSecurity({ auctionId, userId, phone: user.phone, amount, registrationId: registration.id, holdId: hold.id, holdType: "commitment" });
   if (!result.success) throw Object.assign(new Error(result.message || "Unable to initiate commitment"), { status: 502 });
   await update("auction_registrations", registration.id, { commitment_status: "payment_pending" });
   await create("auction_registration_events", { registration_id: registration.id, event_type: "commitment_initiated", actor_id: userId, metadata: { amount, checkoutID: result.checkoutID } });

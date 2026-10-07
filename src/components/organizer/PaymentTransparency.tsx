@@ -72,7 +72,7 @@ export const PaymentTransparency: React.FC<PaymentTransparencyProps> = ({
             </div>
             <div>
               <h3 className="font-black text-sm text-white">Organizer Payment Information</h3>
-              <p className="text-xs text-slate-400">All payments go directly to the auction organizer</p>
+              <p className="text-xs text-slate-400">Final auction settlement follows the published organizer payment and settlement rule</p>
             </div>
           </div>
           <Badge variant="success" size="sm" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
@@ -138,7 +138,7 @@ export const PaymentTransparency: React.FC<PaymentTransparencyProps> = ({
                   <p>• <strong>Payment Deadline:</strong> {paymentDeadline}</p>
                   <p>• <strong>Bid Security:</strong> Paid to organizer (refundable per policy)</p>
                   <p>• <strong>Final Payment:</strong> Complete balance to organizer</p>
-                  <p>• <strong>KAYAD:</strong> Does not receive auction payments</p>
+                  <p>• <strong>KAYAD:</strong> A separate nominal bid-confirmation payment may apply</p>
                 </div>
               </div>
             </div>
@@ -210,7 +210,7 @@ export const PaymentTransparency: React.FC<PaymentTransparencyProps> = ({
       {/* Notice */}
       <div className="mt-4 pt-3 border-t border-white/10">
         <p className="text-[10px] text-slate-400 leading-relaxed">
-          KAYAD does not receive bid security deposits or vehicle purchase payments. All payments go directly to the auction organizer.
+          Bid security and final vehicle settlement follow the auction's published organizer payment instructions. A separate nominal bid-confirmation M-Pesa payment may apply when a bid is submitted.
         </p>
       </div>
     </Card>

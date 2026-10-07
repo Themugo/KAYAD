@@ -88,7 +88,7 @@ export const DealerProfilePage: FC = () => {
               Certified Dealership Inventory ({dealerVehicles.length})
             </h2>
             <p className="text-xs text-[#66808A] font-medium mt-0.5">
-              Verified luxury stock, guaranteed titles, and concierge pre-inspections.
+              Verified listings, documented vehicle details, and concierge pre-purchase inspection support.
             </p>
           </div>
         </div>

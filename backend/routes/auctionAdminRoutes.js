@@ -61,14 +61,16 @@ router.post(
       return res.status(409).json({ success: false, code: "AUCTION_SCHEDULED", message: `Auction is scheduled to start at ${startAt.toISOString()}.` });
     }
     const durationMs = endAt.getTime() - Date.now();
-    if (durationMs < 24 * 60 * 60 * 1000) {
-      return res.status(409).json({ success: false, message: "Auction cannot start with less than 24 hours remaining in its published schedule." });
-    }
+
+    // Starting manually after the published start time must preserve the
+    // published end timestamp. The server-side scheduled-start atomic path
+    // handles this without shortening or extending the business contract.
 
     // Admin start is still bound to the same published business contract.
     const result = await startAuction({
       carId: req.params.carId,
       durationMs,
+      scheduledEndAt: endAt.toISOString(),
       startingBid: Number(config.startingBid) || 0,
       reservePrice: config.reservePrice === null || config.reservePrice === undefined ? null : Number(config.reservePrice),
       reserveMode: config.reserveMode || "none",

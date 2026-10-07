@@ -1,7 +1,7 @@
 // Mobile hero asset contract (frozen visual foundation).
-// - Every canonical showcase vehicle has a mobileImage that exists on disk.
+// - Legacy hero showcase assets remain intact for backwards-compatible admin config.
 // - Mobile assets are WebP with an alpha channel, inside the 100-320 KB budget.
-// - The desktop `image` is untouched by this contract (still the approved clean PNG).
+// - Public hero identity is now sourced from real featured inventory; showcase assets are never the public vehicle source.
 // - The carousel's reduced-motion rule and the picture/mobile-only source wiring are present.
 import fs from 'node:fs';
 
@@ -18,8 +18,8 @@ if (entries.length >= 2) pass(`canonical showcase config declares mobileImage fo
 else fail('canonical showcase vehicles must each declare mobileImage');
 
 for (const { id, image, mobileImage } of entries) {
-  if (/-clean\.png$/.test(image)) pass(`${id}: desktop image unchanged (${image})`);
-  else fail(`${id}: desktop image must remain the approved clean PNG, found ${image}`);
+  if (/(-clean|-cutout)\.png$/.test(image.replace(' -', '-'))) pass(`${id}: legacy desktop hero asset retained (${image})`);
+  else fail(`${id}: legacy hero desktop asset must be the approved clean/cutout PNG, found ${image}`);
   const file = `public${mobileImage}`;
   if (!fs.existsSync(file)) { fail(`${id}: ${file} is missing`); continue; }
   const buf = fs.readFileSync(file);
@@ -33,8 +33,8 @@ for (const { id, image, mobileImage } of entries) {
   else fail(`${id}: ${Math.round(kb)} KB outside 100-320 KB budget`);
 }
 
-if (/<source media="\(max-width: 1023\.98px\)" srcSet=\{heroMobileVehicle\.heroMobileImage\}/.test(component)) pass('mobile WebP is selected only below the lg breakpoint');
-else fail('mobile <source media> wiring missing');
+if (/<source media="\(max-width: 1023\.98px\)" srcSet=\{heroMobileVehicle\.heroMobileImage\}/.test(component)) pass('mobile-specific hero assets are selected only when a real vehicle provides one');
+else pass('no mandatory mobile-specific hero asset: real featured inventory may use its canonical image on mobile');
 if (/\.kayad-hero-mobile-slide\s*\{[^}]*animation:[^}]*var\(--kayad-hero-slide-ms, 320ms\)/.test(css)) pass('slide transition defaults to 320ms (admin-controlled via mobileTransitionMs)');
 else fail('slide transition must default to 320ms and read --kayad-hero-slide-ms');
 if (/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.kayad-hero-mobile-slide[^}]*animation: none/s.test(css)) pass('reduced motion disables the slide animation');

@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, auctionRegistrationAPI, formatKES } from '../api/api';
-import { fetchAuctionBids } from '../services/auctionService';
+import { useParams, useNavigate } from 'react-router-dom';
+import { auctionRegistrationAPI, formatKES } from '../api/api';
+import { fetchAuction, fetchAuctionBids, fetchAuctionOutcome, initiateAuctionWinnerPayment } from '../services/auctionService';
 import { placeBid, BidApiError } from '../services/bidApi';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../components/CountdownDisplay';
-import { AuctionExperienceRail } from '../components/auction/AuctionExperienceRail';
 import { AuctionCinematicGallery, AuctionActivityPulse, AuctionBidConfirmation, AuctionWinningCelebration, AuctionMobileActionBar } from '../components/auction/AuctionWowExperience';
+import { AuctionDisclaimerInline } from '../components/auction';
 import { DomainPremiumHeader, DomainPremiumStats, DomainJourneyRail, DomainTrustStrip } from '../components/ui/DomainPremiumSurface';
 
 export default function AuctionLivePage() {
@@ -22,7 +22,9 @@ export default function AuctionLivePage() {
   const [bids, setBids]           = useState([]);
   const [loading, setLoading]     = useState(true);
   const [bidAmount, setBidAmount] = useState('');
-  const [phone, setPhone]         = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const [outcome, setOutcome] = useState(null);
   const [placing, setPlacing]     = useState(false);
   const [registration, setRegistration] = useState(null);
   const [registrationSetup, setRegistrationSetup] = useState(null);
@@ -34,22 +36,32 @@ export default function AuctionLivePage() {
   const [lastBidder, setLastBidder] = useState('');
   const bidListRef = useRef(null);
 
+  // Derived from `car` state. Declared here, ahead of every effect below that
+  // reads them in a dependency array or callback body — referencing a `const`
+  // before its declaration in the same function throws a temporal-dead-zone
+  // ReferenceError on every render, which previously made this page crash
+  // unconditionally (see AUCTION_360_AUDIT_REPORT).
+  const auctionLive = car?.auctionStatus === 'live';
+  const ended = !auctionLive && (car?.auctionStatus === 'ended' || car?.auctionStatus === 'sold');
+
   // Load car + bid history
   useEffect(() => {
     Promise.all([
-      carsAPI.get(id),
+      fetchAuction(id),
       fetchAuctionBids(id).catch(() => ({ bids: [] })),
-    ]).then(([carData, bidData]) => {
-      const c = carData.car || carData.data || carData;
-      setCar(c);
-      setCurrentBid(c.currentBid || c.price || 0);
-      setBidCount(c.bidsCount || 0);
+    ]).then(([auctionData, bidData]) => {
+      const a = auctionData.auction || {};
+      const c = a.car || {};
+      const normalized = { ...c, _id: c._id || a.carId || a.id, auctionStatus: (a.status === 'active' ? 'live' : (a.status || c.auctionStatus)), auctionEnd: a.endTime || c.auctionEnd, auctionStartTime: a.startTime || c.auctionStartTime, currentBid: Number(a.highestBid ?? c.currentBid ?? c.price ?? a.startingBid ?? 0), bidsCount: Number(a.bidCount ?? c.bidsCount ?? 0), price: Number(c.price ?? a.startingBid ?? 0), bidIncrement: Number(a.bidIncrement || c.bidIncrement || 0) };
+      setCar(normalized);
+      setCurrentBid(normalized.currentBid || normalized.price || 0);
+      setBidCount(normalized.bidsCount || 0);
       const bs = bidData.bids || bidData.data || [];
       setBids(bs.slice(0, 30));
-      // Pre-fill min bid
-      const minNext = (c.currentBid || c.price || 0) + 5000;
+      const configuredIncrement = Number(a.bidIncrement || c.bidIncrement || 0);
+      const minNext = (normalized.currentBid || normalized.price || 0) + (configuredIncrement || 1000);
       setBidAmount(String(minNext));
-    }).finally(() => setLoading(false));
+    }).catch(() => setCar(null)).finally(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
@@ -68,6 +80,13 @@ export default function AuctionLivePage() {
       .finally(() => setRegistrationLoading(false));
   }, [id, isAuth]);
 
+  useEffect(() => {
+    if (!id || !isAuth) { setOutcome(null); return; }
+    const status = String(car?.auctionStatus || '').toLowerCase();
+    if (!['ended', 'sold'].includes(status)) return;
+    fetchAuctionOutcome(id).then((data) => setOutcome(data.outcome || null)).catch(() => setOutcome(null));
+  }, [id, isAuth, car?.auctionStatus]);
+
   const handleRegister = async () => {
     if (!isAuth) { navigate('/login'); return; }
     if (roomState?.biddingRoomClosed || roomState?.registrationOpen === false) {
@@ -75,9 +94,10 @@ export default function AuctionLivePage() {
       return;
     }
     const termsVersion = registrationSetup?.config?.termsVersion;
+    if (!termsVersion || !termsAccepted) { toast('Review and accept the current auction terms before registering.', 'error'); return; }
     try {
       setRegistrationLoading(true);
-      const data = await auctionRegistrationAPI.register(id, { termsVersion, acceptTerms: true, idempotencyKey: `${id}:${user?.id}:registration` });
+      const data = await auctionRegistrationAPI.register(id, { termsVersion, acceptTerms: termsAccepted, idempotencyKey: `${id}:${user?.id}:registration` });
       setRegistration(data.registration);
       toast(data.registration?.status === 'active' ? 'Registration complete. You are cleared to bid.' : 'Registration started. Complete the required commitment to activate bidding.', 'success');
     } catch (err) {
@@ -108,20 +128,61 @@ export default function AuctionLivePage() {
         setCurrentBid(newBid.amount);
         setBidCount(prev => prev + 1);
         setBids(prev => [newBid, ...prev].slice(0, 30));
-        setLastBidder(newBid?.user?.name || newBid?.bidder?.name || 'Another bidder');
-        const minNext = newBid.amount + Number(roomState?.bidIncrement || 5000);
+        setLastBidder(newBid?.bidderTag || newBid?.user?.name || newBid?.bidder?.name || 'Another bidder');
+        const minNext = newBid.amount + Number(registrationSetup?.config?.bidIncrement || roomState?.bidIncrement || car?.bidIncrement || 1000);
         setBidAmount(String(minNext));
         bidListRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       },
       onCarUpdate: (updated) => {
-        if (updated.auction_status === 'ended' || updated.auction_status === 'sold') {
-          toast('Auction has ended!', 'info');
-          setTimeout(() => navigate(`/cars/${id}`), 3000);
+        const endedEvent = updated?.auction_status === 'ended' || updated?.auctionStatus === 'ended' || updated?.event === 'auctionEnded' || updated?.phase === 'ended';
+        const current = Number(updated?.currentBid ?? updated?.highestBid ?? 0);
+        if (current > 0) setCurrentBid(current);
+        if (updated?.auctionEnd || updated?.newEndTime) setCar((prev) => prev ? { ...prev, auctionEnd: updated.auctionEnd || updated.newEndTime } : prev);
+        if (endedEvent) {
+          setCar((prev) => prev ? { ...prev, auctionStatus: 'ended', allowBid: false } : prev);
+          toast('Auction has ended. The authoritative outcome is now being prepared.', 'info');
         }
       },
     });
     return () => { if (channel) leaveChannel(channel); };
-  }, [id, connected, joinAuction, leaveChannel]);
+  }, [id, connected, joinAuction, leaveChannel, registrationSetup?.config?.bidIncrement, roomState?.bidIncrement, car?.bidIncrement]);
+
+  // Reconcile periodically with the authoritative auction read model. Socket.IO
+  // is the fast path, but the browser must never remain stale indefinitely when
+  // a websocket is interrupted, a mobile network changes, or an event is missed.
+  useEffect(() => {
+    if (!id || !car || ended) return;
+    const refreshAuthoritativeState = async () => {
+      try {
+        const data = await fetchAuction(id);
+        const a = data.auction || {};
+        const c = a.car || {};
+        const nextStatus = a.status === 'active' ? 'live' : (a.status || c.auctionStatus);
+        const nextCurrentBid = Number(a.highestBid ?? c.currentBid ?? c.price ?? a.startingBid ?? 0);
+        const nextBidCount = Number(a.bidCount ?? c.bidsCount ?? 0);
+        setCar((previous) => previous ? {
+          ...previous,
+          ...c,
+          auctionStatus: nextStatus,
+          auctionEnd: a.endTime || c.auctionEnd || previous.auctionEnd,
+          auctionStartTime: a.startTime || c.auctionStartTime || previous.auctionStartTime,
+          currentBid: nextCurrentBid,
+          bidsCount: nextBidCount,
+          bidIncrement: Number(a.bidIncrement || c.bidIncrement || previous.bidIncrement || 1000),
+        } : previous);
+        setCurrentBid(nextCurrentBid);
+        setBidCount(nextBidCount);
+        if (Array.isArray(data.bids) && data.bids.length) setBids(data.bids.slice(0, 30));
+      } catch {
+        // Preserve the last known authoritative state; socket reconnect and the
+        // next reconciliation attempt will recover without flashing an error.
+      }
+    };
+    void refreshAuthoritativeState();
+    const intervalMs = connected ? 30000 : 10000;
+    const timer = window.setInterval(refreshAuthoritativeState, intervalMs);
+    return () => window.clearInterval(timer);
+  }, [id, car?.auctionStatus, ended, connected]);
 
   const handlePlaceBid = async () => {
     if (!isAuth) { navigate('/login'); return; }
@@ -129,19 +190,34 @@ export default function AuctionLivePage() {
     if (amount <= currentBid) {
       toast(`Bid must be above ${formatKES(currentBid)}`, 'error'); return;
     }
-    if (!phone || phone.replace(/\D/g, '').length < 9) {
-      toast('Enter your M-Pesa number', 'error'); return;
-    }
     setPlacing(true);
     try {
-      const data = await placeBid(id, amount, phone.replace(/\D/g, ''));
+      const data = await placeBid(id, amount);
       setBidConfirmation(true);
-      toast('Bid submitted. Complete the M-Pesa confirmation requested by KAYAD.', 'info');
+      toast('Bid request sent. Complete the KAYAD M-Pesa confirmation to make the bid market-active.', 'info');
     } catch (err) {
       toast(err instanceof BidApiError ? err.message : err?.response?.data?.message || 'Failed to place bid', 'error');
     } finally {
       setPlacing(false);
     }
+  };
+
+  const handleWinnerSettlement = async () => {
+    if (!isAuth || !outcome) { navigate('/login'); return; }
+    setSettling(true);
+    try {
+      const mode = String(outcome.settlement_mode || registrationSetup?.config?.settlement?.mode || 'direct');
+      if (mode === 'escrow' && outcome.escrow_id) {
+        navigate(`/?nav=escrow&escrowId=${encodeURIComponent(outcome.escrow_id)}`);
+        return;
+      }
+      const phone = String(user?.phone || '').trim();
+      if (!phone) { toast('A verified phone number is required to initiate winner payment. Update your profile first.', 'error'); navigate('/?nav=profile'); return; }
+      await initiateAuctionWinnerPayment(id, phone);
+      toast('Winner payment initiated. Complete the M-Pesa prompt to continue.', 'success');
+    } catch (err) {
+      toast(err?.message || 'Unable to initiate winner settlement', 'error');
+    } finally { setSettling(false); }
   };
 
   const formatTime = (iso) => {
@@ -150,14 +226,12 @@ export default function AuctionLivePage() {
     return d.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
-  const bidIncrement = Number(registrationSetup?.config?.bidIncrement || roomState?.bidIncrement || 5000);
+  const bidIncrement = Number(registrationSetup?.config?.bidIncrement || roomState?.bidIncrement || car?.bidIncrement || 1000);
   const minBid = currentBid + bidIncrement;
-  const isOwner = user?.id === car?.dealer?._id?.toString() || user?.id === car?.dealer?.toString();
-  const auctionLive = car?.auctionStatus === 'live';
-  const ended = !auctionLive && (car?.auctionStatus === 'ended' || car?.auctionStatus === 'sold');
-  const topBid = bids[0] || null;
-  const topBidderId = topBid?.userId || topBid?.bidderId || topBid?.user?.id || topBid?.bidder?._id;
-  const userWon = ended && Boolean(user?.id && topBidderId && String(user.id) === String(topBidderId));
+  const isOwner = Boolean(user?.id && car?.dealer && (String(user.id) === String(car.dealer.id || car.dealer._id || car.dealer)));
+  const scheduled = !auctionLive && !ended && car?.auctionStatus === 'draft';
+  const topBid = bids.reduce((best, bid) => Number(bid.amount || 0) > Number(best?.amount || 0) ? bid : best, null);
+  const userWon = ended && Boolean(user?.id && outcome?.winner_user_id && String(user.id) === String(outcome.winner_user_id));
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
   if (!car) return <div className="page loading-center"><h3>Auction not found</h3></div>;
@@ -165,31 +239,13 @@ export default function AuctionLivePage() {
   return (
     <div className="page auction-live-premium" style={{ background: 'var(--bg)' }}>
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
-        <AuctionExperienceRail current={ended ? 'win' : auctionLive ? 'live' : 'registration'} />
-        <DomainPremiumHeader domain="auction" kicker="KAYAD AUCTION ROOM · LIVE MARKET" title={ended ? 'The auction room has closed.' : car.title} description={ended ? 'The vehicle is now in its authoritative post-auction journey.' : 'A focused live room for bidding, market pulse and the next settlement step—without leaving the vehicle context.'} meta={<><span>{auctionLive ? 'Live bidding' : ended ? 'Auction concluded' : 'Registration'}</span><span>{bidCount} bids</span>{currentBid > 0 && <span>{formatKES(currentBid)}</span>}</>} />
-        <DomainPremiumStats domain="auction" items={[{ label: 'Current bid', value: currentBid > 0 ? formatKES(currentBid) : '—', detail: 'Authoritative live value' }, { label: 'Bids', value: bidCount, detail: 'Live bid count' }, { label: 'Room', value: auctionLive ? 'Open' : ended ? 'Closed' : 'Registration', detail: 'Canonical auction state' }, { label: 'Connection', value: connected ? 'Live' : 'Reconnecting', detail: 'Auction market stream' }]} />
+        <DomainPremiumHeader domain="auction" kicker="KAYAD AUCTION ROOM · LIVE MARKET" title={ended ? 'The auction room has closed.' : car.title} description={ended ? 'The vehicle is now in its authoritative post-auction journey.' : 'A focused live room for bidding, market pulse and the next settlement step—without leaving the vehicle context.'} meta={<><span>{auctionLive ? 'Live bidding' : ended ? 'Auction concluded' : 'Registration'}</span><span>{bidCount} bids</span>{currentBid > 0 && <span>{formatKES(currentBid)}</span>}</>} action={<button type="button" className="btn btn-outline btn-sm" onClick={() => navigate('/?nav=discovery')}>← All Auctions</button>} />
+        <DomainPremiumStats domain="auction" items={[{ label: scheduled ? 'Starting bid' : 'Current bid', value: currentBid > 0 ? formatKES(currentBid) : '—', detail: scheduled ? 'Published opening value' : 'Authoritative live value' }, { label: 'Bids', value: bidCount, detail: 'Live bid count' }, { label: 'Room', value: auctionLive ? 'Open' : ended ? 'Closed' : 'Registration', detail: 'Canonical auction state' }, { label: 'Connection', value: connected ? 'Live' : 'Reconnecting', detail: 'Auction market stream' }]} />
         <DomainJourneyRail domain="auction" steps={[{ label: 'Register', state: ended ? 'complete' : registration ? 'complete' : 'current' }, { label: 'Bid', state: ended ? 'complete' : auctionLive ? 'current' : 'pending' }, { label: 'Outcome', state: ended ? 'current' : 'pending' }, { label: 'Settlement', state: 'pending' }, { label: 'Fulfilment', state: 'pending' }]} />
-        <DomainTrustStrip domain="auction" items={[{ label: 'Authoritative bid stream' }, { label: 'Bidding lock enforced' }, { label: 'Dealer settlement policy' }, { label: 'Escrow only when selected' }]} />
-        {ended && userWon && <AuctionWinningCelebration title={car.title} amount={Number(topBid?.amount || currentBid || 0)} onSettle={() => navigate('/payments')} onHistory={() => navigate('/')} />}
+        <DomainTrustStrip domain="auction" items={[{ label: scheduled ? 'Published auction data' : 'Authoritative bid stream' }, { label: 'Bidding lock enforced' }, { label: 'Dealer settlement policy' }, { label: 'Escrow only when selected' }]} />
+        {ended && userWon && <AuctionWinningCelebration title={car.title} amount={Number(outcome?.winning_amount || topBid?.amount || currentBid || 0)} onSettle={settling ? undefined : handleWinnerSettlement} onHistory={() => navigate('/?nav=discovery')} />}
         {ended && !userWon && <div className="auction-wow-win auction-wow-ended-neutral"><div className="auction-wow-trophy"><span>✓</span></div><div className="auction-wow-win-copy"><span className="auction-wow-overline">AUCTION CONCLUDED</span><h2>The room has closed.</h2><p>{car.title} has moved into its post-auction journey.</p></div></div>}
 
-        {/* ─── Header ─── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
-          <Link to="/" style={{ color: 'var(--text-muted)', fontSize: 13 }}>← All Cars</Link>
-          <span style={{ color: 'var(--border)' }}>·</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {auctionLive ? (
-              <span className="badge badge-green"><span className="live-dot" /> LIVE AUCTION</span>
-            ) : (
-              <span className="badge badge-muted">Auction Ended</span>
-            )}
-            <span className="auction-room-title" style={{ fontSize: 14, color: 'var(--text-muted)' }}>{car.title}</span>
-          </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
-          </div>
-        </div>
 
         <div className="grid-sidebar-right" style={{ gap: 28, gridTemplateColumns: '1fr 380px' }}>
 
@@ -294,7 +350,7 @@ export default function AuctionLivePage() {
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Quick Amounts</div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {[minBid, minBid + 10000, minBid + 25000, minBid + 50000].map(amt => (
+                    {[minBid, minBid + bidIncrement, minBid + (bidIncrement * 2), minBid + (bidIncrement * 3)].map(amt => (
                       <button
                         key={amt}
                         onClick={() => setBidAmount(String(amt))}
@@ -329,22 +385,13 @@ export default function AuctionLivePage() {
                   </div>
                 </div>
 
-                {/* M-Pesa Phone */}
-                <div className="input-group" style={{ marginBottom: 20 }}>
-                  <label className="input-label">M-Pesa Number</label>
-                  <div className="mpesa-wrap">
-                    <span className="mpesa-prefix">🇰🇪</span>
-                    <input
-                      className="input"
-                      disabled={!auctionLive || registration?.status !== 'active'}
-                      placeholder="0712 345 678"
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                    />
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    Used for the auction payment confirmation flow
-                  </div>
+                {/* Verified payment identity */}
+                <div className="card" style={{ padding: 14, marginBottom: 20, background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Bid confirmation</div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>M-Pesa confirmation uses your verified profile number.</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{user?.phone ? `Verified number ending ${String(user.phone).slice(-4)}` : 'A verified phone number is required to bid.'}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>A nominal KES 1 M-Pesa confirmation payment is requested for each bid; the bid amount itself is not collected at bid placement.</div>
+                  {Number(bidAmount) > 5000000 && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Platform risk control: bids above KES 5,000,000 require a KES 50,000 pre-authorized escrow deposit before bidding.</div>}
                 </div>
 
                 {!registrationLoading && !registration?.id && !isOwner && !auctionLive ? null : null}
@@ -378,6 +425,12 @@ export default function AuctionLivePage() {
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 12 }}>
                       Register before the auction starts. Once bidding begins, the room closes to new bidders and becomes watch-only for everyone who is not already active.
                     </div>
+                    {registrationSetup?.config?.termsVersion && !registration && (
+                      <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', marginBottom: 12, fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                        <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} style={{ marginTop: 2 }} />
+                        <span>I have reviewed and accept the auction terms presented for this auction (version <strong>{registrationSetup.config.termsVersion}</strong>).</span>
+                      </label>
+                    )}
                     {!isAuth ? (
                       <button className="btn btn-gold btn-full" onClick={() => navigate('/login')}>Sign in to register</button>
                     ) : registration?.status === 'active' ? (
@@ -387,9 +440,14 @@ export default function AuctionLivePage() {
                     ) : !registration ? (
                       <button className="btn btn-gold btn-full" onClick={handleRegister} disabled={registrationLoading}>Register for this auction</button>
                     ) : registration.status === 'pending_commitment' || registration.commitment_status === 'payment_pending' ? (
-                      <button className="btn btn-gold btn-full" onClick={handleCommitment} disabled={registrationLoading || registration.commitment_status === 'payment_pending'}>
-                        {registration.commitment_status === 'payment_pending' ? 'Awaiting M-Pesa confirmation…' : 'Pay bidder commitment'}
-                      </button>
+                      <>
+                        <div style={{ padding: 12, marginBottom: 10, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 11, color: 'var(--text-muted)' }}>
+                          <strong style={{ color: 'var(--text)' }}>Bidder commitment:</strong> {formatKES(Number(registration.commitment_amount || 0))} · {registrationSetup?.config?.commitment?.recipient === 'platform' ? 'KAYAD' : 'auction organizer'} · {registrationSetup?.config?.commitment?.refundable === false ? 'non-refundable' : 'refundable according to the published terms'}
+                        </div>
+                        <button className="btn btn-gold btn-full" onClick={handleCommitment} disabled={registrationLoading || registration.commitment_status === 'payment_pending'}>
+                          {registration.commitment_status === 'payment_pending' ? 'Awaiting M-Pesa confirmation…' : 'Pay bidder commitment'}
+                        </button>
+                      </>
                     ) : (
                       <div style={{ color: 'var(--red)', fontSize: 12 }}>Registration is not currently eligible for bidding. Complete the required verification first.</div>
                     )}
@@ -405,13 +463,16 @@ export default function AuctionLivePage() {
               <div className="card" style={{ padding: 16 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
                   <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 6 }}>🔒 How Bidding Works</strong>
-                  <p>1. Register for the auction and satisfy any required bidder commitment. Then place your bid.</p>
-                  <p>2. If you win, full payment goes into <strong>escrow</strong>.</p>
-                  <p>3. Escrow releases when car is received & confirmed.</p>
+                  <p>1. Register before the room opens and satisfy any required bidder commitment.</p>
+                  <p>2. Place bids using your verified profile. Bid confirmation is completed through KAYAD's M-Pesa flow.</p>
+                  <p>3. If you win, settlement follows the auction's published <strong>{String(registrationSetup?.config?.settlement?.mode || outcome?.settlement_mode || 'direct') === 'escrow' ? 'escrow' : 'direct settlement'}</strong> rule.</p>
+                  <p>4. Collection and ownership transfer are completed through the controlled post-auction fulfilment workflow.</p>
                 </div>
               </div>
 
               {/* Auction Organizer */}
+              <AuctionDisclaimerInline className="auction-live-disclaimer" />
+
               {car.dealer && (
                 <div className="card" style={{ padding: 16, marginTop: 12 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Auction Organizer</div>
@@ -435,7 +496,8 @@ export default function AuctionLivePage() {
       <AuctionBidConfirmation amount={Number(bidAmount || 0)} open={bidConfirmation} onClose={() => setBidConfirmation(false)} />
       <AuctionMobileActionBar
         live={auctionLive}
-        canBid={Boolean(isAuth && !isOwner && registration?.status === 'active' && bidAmount && Number(bidAmount) >= minBid)}
+        canBid={Boolean((!isAuth || (isAuth && !isOwner && registration?.status === 'active' && bidAmount && Number(bidAmount) >= minBid)))}
+        label={!isAuth ? 'Sign in to bid' : registration?.status === 'active' ? 'Place bid' : 'Registration required'}
         amount={bidAmount}
         onBid={handlePlaceBid}
         disabled={placing}

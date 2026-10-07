@@ -5,17 +5,49 @@ import { HelmetProvider } from 'react-helmet-async';
 import AuctionLivePage from '../../pages/AuctionLivePage';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
+// AuctionLivePage reads auction/bid state through the canonical services
+// (services/auctionService, services/bidApi), not the legacy carsAPI/bidsAPI
+// surface. These mocks previously targeted the wrong module entirely, so the
+// component's real network calls always rejected in jsdom and "Auction not
+// found" rendered regardless of what was being tested.
 vi.mock('../../api/api', () => ({
-  carsAPI: { get: vi.fn().mockResolvedValue({ car: { _id: 'mock1', title: 'Test Car', brand: 'Toyota', model: 'Hilux', year: 2021, fuel: 'Diesel', transmission: 'Manual', price: 2000000, images: [], auctionEnd: null, dealer: { _id: 'd1', name: 'Test Dealer' } } }) },
-  bidsAPI: { getForCar: vi.fn().mockResolvedValue({ bids: [] }) },
-  smsBiddingAPI: { my: vi.fn().mockResolvedValue({}) },
+  auctionRegistrationAPI: {
+    room: vi.fn().mockResolvedValue({ room: null }),
+    get: vi.fn().mockResolvedValue({ registration: null, setup: null }),
+    register: vi.fn().mockResolvedValue({ registration: { status: 'active' } }),
+    initiateCommitment: vi.fn().mockResolvedValue({ registration: { status: 'pending' } }),
+  },
   formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
+}));
+vi.mock('../../services/auctionService', () => ({
+  fetchAuction: vi.fn().mockResolvedValue({
+    auction: {
+      id: 'mock1',
+      carId: 'mock1',
+      status: 'active',
+      startingBid: 2000000,
+      highestBid: 0,
+      bidIncrement: 1000,
+      bidCount: 0,
+      startTime: null,
+      endTime: null,
+      car: { _id: 'mock1', title: 'Test Car', brand: 'Toyota', model: 'Hilux', year: 2021, fuel: 'Diesel', transmission: 'Manual', price: 2000000, images: [], auctionEnd: null, dealer: { _id: 'd1', name: 'Test Dealer' } },
+    },
+    bids: [],
+  }),
+  fetchAuctionBids: vi.fn().mockResolvedValue({ bids: [] }),
+  fetchAuctionOutcome: vi.fn().mockResolvedValue({ outcome: null }),
+  initiateAuctionWinnerPayment: vi.fn().mockResolvedValue({}),
+}));
+vi.mock('../../services/bidApi', () => ({
+  placeBid: vi.fn().mockResolvedValue({}),
+  BidApiError: class BidApiError extends Error {},
 }));
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ user: null, isAuth: false }),
 }));
 vi.mock('../../context/SocketContext', () => ({
-  useSocket: () => ({ joinAuction: vi.fn(), on: vi.fn(() => vi.fn()), connected: false }),
+  useSocket: () => ({ joinAuction: vi.fn(), leaveChannel: vi.fn(), connected: false }),
 }));
 vi.mock('../../context/ToastContext', () => ({
   useToast: () => ({ toast: vi.fn() }),
@@ -54,7 +86,11 @@ describe('AuctionLivePage', () => {
 
   it('shows connection status', async () => {
     renderAuctionPage();
-    expect(await screen.findByText('Reconnecting...')).toBeInTheDocument();
+    // DomainPremiumStats renders the live value verbatim (no ellipsis) for the
+    // "Connection" stat; see AuctionLivePage.jsx's connected ? 'Live' : 'Reconnecting'.
+    // The premium layout renders this stat strip in more than one place
+    // (desktop + mobile), same as the "Test Car" title assertion above.
+    expect((await screen.findAllByText('Reconnecting')).length).toBeGreaterThan(0);
   });
 
   it('shows starting price label', async () => {

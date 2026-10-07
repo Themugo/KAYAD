@@ -114,7 +114,7 @@ export function AuctionBidConfirmation({ amount, open, onClose }: { amount: numb
     <AnimatePresence>
       {open && <motion.div className="auction-wow-bid-confirm" initial={{ opacity: 0, y: 20, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }}>
         <div className="auction-wow-confirm-icon"><Zap size={19} fill="currentColor" /></div>
-        <div><span className="auction-wow-overline">BID SUBMITTED</span><strong>KES {Number(amount).toLocaleString('en-KE')}</strong><p>Watch the room. Your bid is in motion.</p></div>
+        <div><span className="auction-wow-overline">BID REQUEST SENT</span><strong>KES {Number(amount).toLocaleString('en-KE')}</strong><p>Complete the M-Pesa confirmation to make this bid market-active.</p></div>
         <button type="button" onClick={onClose} aria-label="Dismiss confirmation">×</button>
       </motion.div>}
     </AnimatePresence>

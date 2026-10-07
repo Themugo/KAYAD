@@ -16,7 +16,7 @@ const checks = [
   ['late registration remains blocked', /AUCTION_BIDDING_ROOM_CLOSED/.test(read('backend/services/auctionRegistration.service.js'))],
   ['canonical auction close remains authoritative', /closeAuction|ensureAuctionOutcome/.test(read('backend/services/auctionClose.service.js'))],
   ['direct winner payment remains direct', /type: "auction_win"/.test(read('backend/routes/auctionSettlementRoutes.js'))],
-  ['direct settlement does not create escrow', /settlement_mode !== "direct"/.test(read('backend/routes/auctionSettlementRoutes.js'))],
+  ['direct settlement does not create escrow', /settlementMode !== "direct"/.test(read('backend/routes/auctionSettlementRoutes.js'))],
   ['escrow creation remains canonical', /createEscrow/.test(read('backend/services/auctionSettlement.service.js'))],
   ['escrow funding syncs outcome', /markAuctionEscrowFunded/.test(read('backend/services/escrowConfiguration.service.js'))],
   ['collection requires settlement', /Winner payment must be settled before collection/.test(read('backend/services/auctionFulfilment.service.js'))],

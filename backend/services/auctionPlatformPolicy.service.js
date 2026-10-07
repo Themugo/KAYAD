@@ -8,6 +8,11 @@ export const DEFAULT_AUCTION_PLATFORM_POLICY = {
   allowDealerCustomCancellationRules: true,
   minPaymentDeadlineHours: 1,
   maxPaymentDeadlineHours: 168,
+  bidConfirmationFeeKes: 1,
+  highValueBidThresholdKes: 5000000,
+  highValueDepositKes: 50000,
+  commitmentCreditTowardWinningPayment: true,
+  nonWinnerCommitmentRefundRequired: true,
 };
 
 export async function getAuctionPlatformPolicy() {

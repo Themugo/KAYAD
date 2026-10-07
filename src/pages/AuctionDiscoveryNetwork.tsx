@@ -143,7 +143,7 @@ function mapCarToAuction(car: BackendCar): Auction {
     startsAt: car.auction_start_time || null,
     allowBid: Boolean(car.allow_bid),
     inspected: car.inspection_status === 'passed' || car.inspection_status === 'completed',
-    organizerName: car.dealer?.businessName || car.dealer?.name,
+    organizerName: typeof car.dealer === 'object' ? (car.dealer?.businessName || car.dealer?.name) : undefined,
     // Fixed: car.dealer?.verified relied on a dealer-population
     // query that was silently failing on every request (a real,
     // separate backend defect - a non-existent column name -

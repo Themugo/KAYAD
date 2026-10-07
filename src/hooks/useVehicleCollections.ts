@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Vehicle } from '../types';
 import { getFavorites, toggleFavorite, FavoriteApiError } from '../services/favoriteApi';
+import { getCarById, mapBackendCarToVehicle } from '../services/vehicleApi';
 
 /**
  * Phase 1 architecture hardening: extracted from App.tsx (savedVehicles/
@@ -35,6 +36,7 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
   const [savedVehicles, setSavedVehicles] = useState<string[]>([]);
   const [isFetchingFavorites, setIsFetchingFavorites] = useState<boolean>(false);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
+  const [resolvedSavedVehicles, setResolvedSavedVehicles] = useState<Record<string, Vehicle>>({});
   // Tracks in-flight optimistic toggles by car ID, so a rapid
   // double-click can't race itself into an inconsistent state - a
   // second toggle on the same ID while one is already in flight is
@@ -54,6 +56,7 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
       // A logout is a hard session boundary. Never leak the previous
       // authenticated user's saved vehicles into another session.
       setSavedVehicles([]);
+      setResolvedSavedVehicles({});
       setFavoritesError(null);
       setIsFetchingFavorites(false);
       return;
@@ -69,6 +72,31 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
             .map((f) => f.id || f._id)
             .filter((id): id is string => Boolean(id));
           setSavedVehicles(ids);
+
+          // The saved-vehicle tab must not depend on the current marketplace
+          // page containing the user's saved IDs. Resolve any saved listing
+          // that is outside the current inventory slice through the canonical
+          // single-vehicle API. This mirrors the compare/deep-link boundary and
+          // prevents pagination from making real saved vehicles disappear.
+          const visibleIds = new Set(vehicles.map((vehicle) => vehicle.id));
+          const missingIds = ids.filter((id) => !visibleIds.has(id));
+          if (missingIds.length > 0) {
+            const resolved = await Promise.all(missingIds.map(async (id) => {
+              try {
+                const car = await getCarById(id);
+                return car ? [id, mapBackendCarToVehicle(car)] as const : [id, null] as const;
+              } catch {
+                return [id, null] as const;
+              }
+            }));
+            if (!cancelled) {
+              setResolvedSavedVehicles((prev) => {
+                const next = { ...prev };
+                for (const [id, vehicle] of resolved) if (vehicle) next[id] = vehicle;
+                return next;
+              });
+            }
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -113,6 +141,7 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
     const wasSaved = savedVehicles.includes(id);
     // Optimistic update
     setSavedVehicles((prev) => (wasSaved ? prev.filter((item) => item !== id) : [...prev, id]));
+    if (wasSaved) setResolvedSavedVehicles((prev) => { const next = { ...prev }; delete next[id]; return next; });
     setFavoritesError(null);
 
     toggleFavorite(id)
@@ -141,8 +170,11 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
   }, [userId, savedVehicles]);
 
   const savedVehiclesList = useMemo(() => {
-    return vehicles.filter((v) => savedVehicles.includes(v.id));
-  }, [vehicles, savedVehicles]);
+    const currentById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+    return savedVehicles
+      .map((id) => currentById.get(id) || resolvedSavedVehicles[id])
+      .filter((vehicle): vehicle is Vehicle => Boolean(vehicle));
+  }, [vehicles, savedVehicles, resolvedSavedVehicles]);
 
   return {
     savedVehicles,

@@ -1,5 +1,6 @@
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
+import { findAll } from "../db/index.js";
 
 // KAYAD canonical auction model: auction lifecycle state is stored on the
 // cars row (auctionStatus, auctionStartTime, auctionEnd, currentBid, etc.).
@@ -26,8 +27,6 @@ const toAuctionResponse = (car) => ({
   startTime: car.auctionStartTime ?? null,
   endTime: car.auctionEnd ?? null,
   bidIncrement: Number(car.bidIncrement ?? 0),
-  reservePrice: car.reservePrice ?? null,
-  highestBidderId: car.highestBidderId ?? null,
   bidCount: Number(car.bidsCount ?? 0),
   allowBid: Boolean(car.allowBid),
   allowBuy: Boolean(car.allowBuy),
@@ -43,14 +42,20 @@ const toAuctionResponse = (car) => ({
     transmission: car.transmission,
     mileage: car.mileage,
     location: car.location,
-    dealer: car.dealer,
+    dealer: car.dealer ? {
+      id: car.dealer.id || car.dealer._id || car.dealer,
+      name: car.dealer.name || car.dealer.businessName || 'Verified organizer',
+      businessName: car.dealer.businessName || null,
+      avatar: car.dealer.avatar || null,
+      dealerRating: car.dealer.dealerRating ?? null,
+      verified: Boolean(car.dealer.dealerApprovedAt),
+    } : null,
     currentBid: car.currentBid,
     bidsCount: car.bidsCount,
     auctionStatus: car.auctionStatus,
     allowBid: car.allowBid,
     description: car.description,
     features: car.features,
-    reservePrice: car.reservePrice,
     reserveMode: car.reserveMode,
   },
 });
@@ -72,6 +77,42 @@ export const listAuctions = async (req, res) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const skip = (page - 1) * limit;
+  // Scheduled auctions live in the published auction setup contract until their
+  // start time; they do not have to be copied into the cars lifecycle row early.
+  if (req.query.status === "draft" || req.query.status === "scheduled") {
+    const setups = await findAll("auction_setups", {
+      filters: { publication_status: "published" },
+      limit: 1000,
+    });
+    const now = Date.now();
+    const scheduled = setups
+      .filter((setup) => {
+        const start = setup?.config?.startsAt ? Date.parse(setup.config.startsAt) : NaN;
+        return Number.isFinite(start) && start > now;
+      })
+      .sort((a, b) => Date.parse(a.config.startsAt) - Date.parse(b.config.startsAt));
+    const pageRows = scheduled.slice(skip, skip + limit);
+    const ids = pageRows.map((setup) => setup.car_id).filter(Boolean);
+    const cars = ids.length ? await Car.find({ deletedAt: null, id: { $in: ids } }).lean() : [];
+    const byId = new Map(cars.map((car) => [String(car.id), car]));
+    const auctions = pageRows.map((setup) => {
+      const car = byId.get(String(setup.car_id));
+      if (!car) return null;
+      const config = setup.config || {};
+      return toAuctionResponse({
+        ...car,
+        auctionStatus: "draft",
+        auctionStartTime: config.startsAt,
+        auctionEnd: config.endsAt,
+        startingBid: config.startingBid,
+        bidIncrement: config.bidIncrement,
+        reservePrice: config.reservePrice,
+        reserveMode: config.reserveMode,
+      });
+    }).filter(Boolean);
+    return res.json({ success: true, auctions, pagination: { page, limit, total: scheduled.length, pages: Math.ceil(scheduled.length / limit) } });
+  }
+
   const filter = buildAuctionFilter(req.query);
 
   let sort = { auctionEnd: -1 };
@@ -94,21 +135,87 @@ export const listAuctions = async (req, res) => {
 };
 
 export const getAuction = async (req, res) => {
-  const car = await Car.findById(req.params.id).lean();
-  if (!car || !["live", "ended"].includes(car.auctionStatus)) {
+  const car = await Car.findById(req.params.id).populate("dealer", "name businessName avatar dealerApprovedAt dealerRating").lean();
+  if (!car || !["draft", "live", "ended"].includes(car.auctionStatus)) {
     return res.status(404).json({ success: false, message: "Auction not found" });
   }
 
-  const bids = await Bid.find({ carId: car.id })
-    .sort({ amount: -1 })
+  const setup = await findAll("auction_setups", {
+    filters: { car_id: car.id, publication_status: "published" },
+    limit: 1,
+  }).then((rows) => rows[0] || null);
+
+  if (!setup) {
+    return res.status(404).json({ success: false, message: "Auction not published" });
+  }
+
+  const config = setup.config || {};
+  const startsAt = car.auctionStartTime || config.startsAt || null;
+  const endsAt = car.auctionStatus === "live" || car.auctionStatus === "ended" ? (car.auctionEnd || config.endsAt || null) : (config.endsAt || car.auctionEnd || null);
+  const scheduled = car.auctionStatus === "draft" && startsAt && new Date(startsAt).getTime() > Date.now();
+
+  // Public auction activity must never expose bidder PII. Only confirmed
+  // market-moving bids are returned, using the auction's pseudonymous bidder tag.
+  const bids = await Bid.find({
+    carId: car.id,
+    status: { $in: ["paid", "won", "lost"] },
+  })
+    .sort({ createdAt: -1 })
     .limit(50)
-    .populate("user", "name email phone")
     .lean();
 
   res.json({
     success: true,
-    auction: toAuctionResponse(car),
-    bids,
+    auction: toAuctionResponse({
+      ...car,
+      auctionStartTime: startsAt,
+      auctionEnd: endsAt,
+      bidIncrement: config.bidIncrement ?? car.bidIncrement,
+      startingBid: config.startingBid ?? car.startingBid,
+      reservePrice: config.reservePrice ?? car.reservePrice,
+      reserveMode: config.reserveMode ?? car.reserveMode,
+      auctionStatus: scheduled ? "draft" : car.auctionStatus,
+    }),
+    bids: bids.map((b) => ({
+      id: b.id || b._id,
+      amount: Number(b.amount || 0),
+      bidderTag: b.bidderTag || "Bidder",
+      status: b.status,
+      isAuto: Boolean(b.isAuto),
+      createdAt: b.createdAt,
+    })),
+  });
+};
+
+export const getPublicAuctionBids = async (req, res) => {
+  const car = await Car.findById(req.params.id).populate("dealer", "name businessName avatar dealerApprovedAt dealerRating").lean();
+  if (!car || !["draft", "live", "ended"].includes(car.auctionStatus)) {
+    return res.status(404).json({ success: false, message: "Auction not found" });
+  }
+  const setup = await findAll("auction_setups", {
+    filters: { car_id: car.id, publication_status: "published" },
+    limit: 1,
+  }).then((rows) => rows[0] || null);
+  if (!setup) return res.status(404).json({ success: false, message: "Auction not published" });
+
+  const bids = await Bid.find({
+    carId: car.id,
+    status: { $in: ["paid", "won", "lost"] },
+  })
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .lean();
+
+  res.json({
+    success: true,
+    bids: bids.map((b) => ({
+      id: b.id || b._id,
+      amount: Number(b.amount || 0),
+      bidderTag: b.bidderTag || "Bidder",
+      status: b.status,
+      isAuto: Boolean(b.isAuto),
+      createdAt: b.createdAt,
+    })),
   });
 };
 

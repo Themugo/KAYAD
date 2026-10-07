@@ -48,6 +48,26 @@ export const handleMpesaCallback = async (callbackData) => {
 
     const checkoutId = stk.CheckoutRequestID;
     const success = stk.ResultCode === 0;
+    const callbackMetadata = stk.CallbackMetadata?.Item || [];
+    const callbackAmount = callbackMetadata.find((i) => i.Name === "Amount")?.Value;
+    const callbackReceipt = callbackMetadata.find((i) => i.Name === "MpesaReceiptNumber")?.Value;
+
+    // Auction bidder commitments/high-value security use the existing
+    // transaction + bid-security rail rather than creating a second payment
+    // engine. Route those provider callbacks through their canonical atomic
+    // hold settlement before the generic payments claim path.
+    const securityTransaction = await findOne("transactions", { checkoutRequestId: checkoutId });
+    if (securityTransaction && ["bid_commitment", "bid_security"].includes(securityTransaction.type)) {
+      const { handleBidSecurityCallback } = await import("./bidSecurityService.js");
+      const securityResult = await handleBidSecurityCallback({
+        checkoutRequestID: checkoutId,
+        resultCode: stk.ResultCode,
+        mpesaReceipt: callbackReceipt,
+        providerAmount: callbackAmount,
+      });
+      await markWebhookProcessed(webhookEventId, securityResult.success ? null : { error: securityResult.message || "Auction security payment failed" });
+      return securityResult;
+    }
 
     // ── Claim payment atomically ──
     // Single conditional UPDATE: only the first callback to flip
@@ -120,11 +140,11 @@ export const handleMpesaCallback = async (callbackData) => {
       return;
     }
 
-    const metadata = stk.CallbackMetadata?.Item || [];
+    const metadata = callbackMetadata;
 
-    const receipt = metadata.find((i) => i.Name === "MpesaReceiptNumber")?.Value;
+    const receipt = callbackReceipt;
 
-    const amount = metadata.find((i) => i.Name === "Amount")?.Value;
+    const amount = callbackAmount;
 
     if (!receipt || amount === undefined || amount === null) {
       await releaseClaim();

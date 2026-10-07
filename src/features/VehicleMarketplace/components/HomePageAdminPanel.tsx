@@ -119,7 +119,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
         tickerEnabled: heroLayout.tickerEnabled !== false,
         ...normalizeHeroExtras(heroLayout),
         tickerBackgroundColor: heroLayout.tickerBackgroundColor || '#0A3340', tickerTextColor: heroLayout.tickerTextColor || '#FFFFFF', tickerHeightPx: Math.max(28, Math.min(60, Number(heroLayout.tickerHeightPx) || 36)), tickerScrollSeconds: Math.max(10, Math.min(90, Number(heroLayout.tickerScrollSeconds) || 34)),
-        vehicleSource: ['showcase', 'featured', 'selected'].includes(heroLayout.vehicleSource) ? heroLayout.vehicleSource : 'showcase',
+        vehicleSource: heroLayout.vehicleSource === 'selected' ? 'selected' : 'featured',
         showcaseVehicles: Array.isArray(heroLayout.showcaseVehicles) ? heroLayout.showcaseVehicles.slice(0, 6) : [],
         floatingCards: Array.isArray(heroLayout.floatingCards) ? heroLayout.floatingCards.slice(0, 8) : [],
       };
@@ -301,7 +301,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
 
             <div className="rounded-xl border border-[#B8D9D6] bg-[#F8FBFF] p-3 space-y-3">
               <div><div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Hero Marketing System</div><div className="text-[10px] text-slate-500 mt-1">Control the visual system here. No code changes are required for future campaigns.</div></div>
-              <label className="block"><span className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Vehicle source</span><select value={heroLayout.vehicleSource} onChange={(e) => setHeroLayout((p) => ({ ...p, vehicleSource: e.target.value as HeroPresentationConfig['vehicleSource'] }))} className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold"><option value="showcase">Marketing showcase</option><option value="featured">All featured vehicles</option><option value="selected">Selected featured vehicles</option></select></label>
+              <label className="block"><span className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Vehicle source</span><select value={heroLayout.vehicleSource} onChange={(e) => setHeroLayout((p) => ({ ...p, vehicleSource: e.target.value as HeroPresentationConfig['vehicleSource'] }))} className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold"><option value="featured">All featured vehicles</option><option value="selected">Selected featured vehicles</option></select></label>
               <div className="grid grid-cols-2 gap-2">
                 {([['stageMaxWidthPct','Hero width','90–100'],['cardWidthPct','Card width','28–50'],['vehicleScalePct','Vehicle scale','75–125'],['leftVehicleNudgePct','Left car outward','0–40'],['rightVehicleNudgePct','Right car outward','0–40'],['vehicleTopPct','Vehicle vertical','35–65'],['vehicleWidthPct','Vehicle stage width','32–48'],['backgroundScalePct','Background scale','100–130'],['backgroundPositionX','Background X','0–100'],['backgroundPositionY','Background Y','0–100'],['cardOffsetXPct','Card X offset','-10–10'],['cardOffsetYPct','Card Y offset','-10–10'],['cardBgOpacityPct','Card opacity','70–100'],['cardBlurPx','Card blur','0–40']] as const).map(([key,label,hint]) => <label key={key} className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">{label}</span><input type="number" value={Number((heroLayout as any)[key])} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /><span className="block text-[8px] text-slate-400 mt-0.5">{hint}</span></label>)}
               </div>
@@ -332,19 +332,9 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#B8D9D6] bg-white p-3 space-y-3">
-              <div className="flex items-center justify-between"><div><div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Marketing Showcase Cars</div><div className="text-[10px] text-slate-500">Default visual pair. Replace these later without code.</div></div></div>
-              {heroLayout.showcaseVehicles.map((vehicle, index) => <div key={vehicle.id} className="rounded-lg border border-slate-200 p-2.5 space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <input value={vehicle.make} onChange={(e) => updateShowcaseVehicle(index, { make: e.target.value })} placeholder="Make" className="rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" />
-                  <input value={vehicle.model} onChange={(e) => updateShowcaseVehicle(index, { model: e.target.value })} placeholder="Model" className="rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" />
-                  <input value={vehicle.image} onChange={(e) => updateShowcaseVehicle(index, { image: e.target.value })} placeholder="Image URL" className="col-span-2 rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
-                  <input value={vehicle.mobileImage || ''} onChange={(e) => updateShowcaseVehicle(index, { mobileImage: e.target.value })} placeholder="Mobile image URL (optional, high-resolution WebP)" className="col-span-2 rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
-                  <input value={vehicle.eyebrow || ''} onChange={(e) => updateShowcaseVehicle(index, { eyebrow: e.target.value })} placeholder="Eyebrow" className="rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
-                  <input value={vehicle.tagline || ''} onChange={(e) => updateShowcaseVehicle(index, { tagline: e.target.value })} placeholder="Tagline" className="rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" />
-                </div>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600"><input type="checkbox" checked={vehicle.enabled !== false} onChange={(e) => updateShowcaseVehicle(index, { enabled: e.target.checked })} className="accent-[#176B87]" /> Show this vehicle</label>
-              </div>)}
+            <div className="rounded-xl border border-[#B8D9D6] bg-[#F8FBFF] p-3 space-y-1.5">
+              <div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Featured Vehicle Source</div>
+              <p className="text-[10px] leading-relaxed text-slate-500">The public hero uses real promoted marketplace inventory. Choose all featured vehicles or the selected featured vehicles below; legacy marketing-only showcase cars are no longer a public inventory source.</p>
             </div>
 
             <div className="rounded-xl border border-[#B8D9D6] bg-white p-3 space-y-3">

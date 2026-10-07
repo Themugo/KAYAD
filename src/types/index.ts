@@ -329,6 +329,7 @@ export interface Vehicle {
   viewsCount?: number;
   savedCount: number;
   inspection?: VehicleInspection;
+  inspectionStatus?: string;
   inspectionPassed?: boolean;
   inspectionReportId?: string;
   escrowEligible?: boolean;

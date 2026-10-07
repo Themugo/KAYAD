@@ -58,6 +58,8 @@ interface VehicleMarketplaceProps {
   isLoadingReal?: boolean;
   loadError?: string | null;
   onRetryLoad?: () => void;
+  /** Render the same canonical marketplace grid against the user's saved-vehicle collection only. */
+  savedOnly?: boolean;
 }
 
 
@@ -80,7 +82,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   isHomePage = false,
   isLoadingReal,
   loadError,
-  onRetryLoad
+  onRetryLoad,
+  savedOnly = false
 }) => {
   // Home page admin customization - scoped to the real home page only
   // (isHomePage), and its UI only rendered/reachable for admins
@@ -106,11 +109,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: '#13B8A6', secondaryButtonBorderColor: '#C7DAD8',
     arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
-    tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', tickerBackgroundColor: '#0A3340', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34,
-    vehicleSource: 'showcase',
+    tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Clear transaction workflows', tickerBackgroundColor: '#0A3340', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34,
+    // Real promoted/featured inventory is the canonical public hero source.
+    // Legacy 'showcase' configs are normalized to this source below.
+    vehicleSource: 'featured',
     showcaseVehicles: [
-      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-clean.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
-      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/hero/kayad-mercedes-gle-clean.png', mobileImage: '/hero/kayad-mercedes-gle-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Luxury SUV · Automatic', enabled: true },
+      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 2026, image: '/hero/kayad-land-cruiser-cutout.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
+      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 2026, image: '/hero/kayad-mercedes-gle-cutout.png', mobileImage: '/hero/kayad-mercedes-gle-mobile.webp', eyebrow: 'KAYAD SELECT', tagline: 'Luxury SUV · Automatic', enabled: true },
     ],
     floatingCards: [],
     ...HERO_EXTRAS_DEFAULTS,
@@ -261,6 +266,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   ]);
 
   useEffect(() => {
+    if (savedOnly) return;
     let cancelled = false;
     setServerLoading(true);
     setServerError(null);
@@ -285,7 +291,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       });
 
     return () => { cancelled = true; };
-  }, [serverQuery, serverRetryKey]);
+  }, [serverQuery, serverRetryKey, savedOnly]);
+
+  // Saved surface: use the resolved collection supplied by App rather than
+  // re-querying the full marketplace. This keeps pagination and authorization
+  // boundaries honest while reusing the canonical card/grid implementation.
+  useEffect(() => {
+    if (!savedOnly) return;
+    setServerLoading(false);
+    setServerError(null);
+    setServerVehicles(vehicles);
+    setServerTotal(vehicles.length);
+    setServerTotalPages(1);
+  }, [savedOnly, vehicles, loadError]);
 
   // Recently Viewed Vehicles Tracking (stored in localStorage)
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
@@ -431,6 +449,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // /api/cars contract as inventory, with featured=true, rather than hardcoded
   // vehicle imagery.
   useEffect(() => {
+    if (savedOnly) {
+      setFeaturedVehicles([]);
+      return;
+    }
     let cancelled = false;
     getCars({ page: 1, limit: 100, featured: true, sort: 'newest' })
       .then((res) => {
@@ -440,7 +462,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         if (!cancelled) setFeaturedVehicles([]);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [savedOnly]);
 
   // Public config is safe to read and keeps hero selection consistent across
   // visitors/browsers. Admin writes go through the protected config endpoint.
@@ -474,7 +496,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           floatingCards: Array.isArray(presentation.floatingCards) ? presentation.floatingCards : [],
           tickerEnabled: presentation.tickerEnabled !== false,
           ...normalizeHeroExtras(presentation),
-          vehicleSource: ['showcase','featured','selected'].includes(presentation.vehicleSource) ? presentation.vehicleSource : DEFAULT_HERO_PRESENTATION.vehicleSource,
+          vehicleSource: presentation.vehicleSource === 'selected' ? 'selected' : 'featured',
         });
         setHeroCardContent(presentation && typeof cfg?.heroCardContent === 'object' && cfg.heroCardContent ? cfg.heroCardContent : {});
       })
@@ -496,39 +518,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return featuredVehicles;
   }, [featuredVehicles, heroFeaturedIds, heroFeaturedMode]);
 
-  // Prefer authoritative Featured/Promoted listings. Fallback configuration remains
-  // available for backwards-compatible admin settings, but is never promoted as a
-  // vehicle on the public homepage unless it resolves to a real featured record.
-  // Legacy fallback settings are retained in HomePageConfig for backwards
-  // compatibility, but public hero identity is always sourced from real featured
-  // inventory. This prevents a configured placeholder from ever becoming a
-  // clickable fake vehicle.
-  // The hero is data-driven: real Featured/Promoted inventory is authoritative.
-  // Admin-configured fallback rows are used only when they contain an explicit
-  // image URL; there is no bundled/composite vehicle artwork and no vehicle
-  // identity is selected by this component.
-  const heroShowcaseVehicles = useMemo(() => {
-    const rows = heroPresentation.showcaseVehicles?.filter((item) => item.enabled !== false && item.image) || [];
-    return rows.map((item): Vehicle => {
-      // Stored admin configs saved before `mobileImage` existed still get the canonical mobile asset,
-      // but only while their desktop image is still the canonical one (never pair a custom car with the wrong photo).
-      const canonical = DEFAULT_HERO_PRESENTATION.showcaseVehicles.find((d) => d.id === item.id && d.image === item.image);
-      const heroMobileImage = item.mobileImage || canonical?.mobileImage || undefined;
-      return {
-      heroMobileImage,
-      id: item.id, title: `${item.make} ${item.model}`, make: item.make, model: item.model, year: item.year, vin: `SHOWCASE-${item.id}`,
-      price: 0, mileage: 0, location: 'Nairobi, Kenya', bodyStyle: 'SUV', transmission: 'Automatic', fuelType: 'Gasoline', engine: '', horsepower: 0,
-      exteriorColor: '', interiorColor: '', condition: 'New', listingType: 'fixed', images: [item.image], image: item.image, description: item.tagline || '', features: [], sellerId: 'kayad-showcase', sellerName: 'KAYAD', sellerRating: 5, sellerType: 'Verified Dealer',
-      isDealerCertified: true, verified: true, savedCount: 0, escrowEligible: true, status: 'active', createdAt: new Date(0).toISOString(), badge: item.eyebrow || 'KAYAD SELECT', isFeatured: true,
-      };
-    });
-  }, [heroPresentation.showcaseVehicles]);
-
+  // Real Featured/Promoted inventory is the only public hero identity source.
+  // Admin selection controls which real featured records are shown; legacy
+  // showcase rows remain stored only for backward-compatible config reads.
   const heroSourceVehicles = useMemo(() => {
-    if (heroPresentation.vehicleSource === 'showcase') return heroShowcaseVehicles;
     if (heroPresentation.vehicleSource === 'selected') return heroVehicles.filter((vehicle) => heroFeaturedIds.includes(vehicle.id));
     return heroVehicles;
-  }, [heroPresentation.vehicleSource, heroShowcaseVehicles, heroVehicles, heroFeaturedIds]);
+  }, [heroPresentation.vehicleSource, heroVehicles, heroFeaturedIds]);
   const [heroPairIndex, setHeroPairIndex] = useState(0);
   const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
   const [heroTransitioning, setHeroTransitioning] = useState(false);
@@ -665,7 +661,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   };
 
   const activeHeroCard = heroLeftVehicle ? heroCardContent[heroLeftVehicle.id] : undefined;
-  const heroSupportCopy = activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and protected transactions — from discovery to ownership.' : heroSubheadline);
+  const heroSupportCopy = activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and clear transaction workflows — from discovery to ownership.' : heroSubheadline);
   // CTA labels: vehicle card content first (existing behaviour), then the admin hero slide's own button text, then the default.
   const heroPrimaryLabel = activeHeroCard?.ctaLabel || activeHeroSlide?.ctaPrimaryText?.trim() || 'Explore Vehicles';
   const heroSecondaryLabel = activeHeroSlide?.ctaSecondaryText?.trim() || 'How It Works';
@@ -889,14 +885,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 pb-2 pt-4 sm:px-6 lg:px-8">
         <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#176B87] sm:text-[10px]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
         <div role="group" aria-label="Marketplace at a glance" className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-slate-500 sm:gap-2 sm:text-[10px]">
-          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverError ? 'Inventory unavailable' : `${serverTotal.toLocaleString()} vehicles`}</span>
+          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverError ? (savedOnly ? 'Saved vehicles unavailable' : 'Inventory unavailable') : savedOnly ? `${serverTotal.toLocaleString()} saved` : `${serverTotal.toLocaleString()} vehicles`}</span>
           {savedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>}
           {comparedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>}
         </div>
       </div>
 
       {/* 1. HERO - one continuous commercial composition. */}
-      {homeConfig.sectionVisibility.searchTrustCard && (
+      {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
         <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] bg-[#EAF5F7] text-white">
           <div
             className="absolute inset-0 transition-transform duration-500"
@@ -944,7 +940,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
                   <button
                     type="button"
-                    onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroLeftVehicle)}
+                    onClick={() => handleVehicleSelect(heroLeftVehicle)}
                     className="group absolute z-10 -translate-y-1/2 text-left"
                     style={{
                       top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
@@ -953,8 +949,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     }}
                     aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
                   >
-                    <div className="relative flex h-[330px] items-end justify-center overflow-hidden">
-                      <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
+                    <div className="relative flex h-[360px] items-end justify-center overflow-visible px-1">
+                      <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-[98%] max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 left-4 max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
@@ -969,7 +965,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
                   <button
                     type="button"
-                    onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroRightVehicle)}
+                    onClick={() => handleVehicleSelect(heroRightVehicle)}
                     className="group absolute z-10 -translate-y-1/2 text-right"
                     style={{
                       top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
@@ -978,8 +974,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     }}
                     aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
                   >
-                    <div className="relative flex h-[330px] items-end justify-center overflow-hidden">
-                      <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
+                    <div className="relative flex h-[360px] items-end justify-center overflow-visible px-1">
+                      <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-[98%] max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 right-4 max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 text-left backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
@@ -1062,7 +1058,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <button
                         key={heroMobileVehicle.id}
                         type="button"
-                        onClick={() => heroPresentation.vehicleSource === 'showcase' ? undefined : handleVehicleSelect(heroMobileVehicle)}
+                        onClick={() => handleVehicleSelect(heroMobileVehicle)}
                         className="kayad-hero-mobile-slide flex h-full w-full items-center justify-center"
                         data-direction={heroMobileDirection.current}
                         style={{ ['--kayad-hero-slide-ms' as string]: `${heroPresentation.mobileTransitionMs}ms` }}
@@ -1120,7 +1116,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       )}
 
       {/* Marketplace categories: the visual bridge from hero to inventory, matching the original discovery concept without adding a second dashboard. */}
-      <section className="border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
+      {!savedOnly && <section className="border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
         <div className="mx-auto flex max-w-[1480px] items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
           {[
             ['All', () => { setSelectedBodyStyle('All'); setSelectedFuel('All'); }],
@@ -1150,10 +1146,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             View all vehicles <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
-      </section>
+      </section>}
 
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
-      {homeConfig.sectionVisibility.searchTrustCard && (
+      {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
       <div className="kayad-search-bridge relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
         <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
           <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
@@ -1235,7 +1231,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       </div>
       )}
 
-      {featuredPicks.length > 0 && !serverError && (
+      {!savedOnly && featuredPicks.length > 0 && !serverError && (
         <section className="mx-auto w-full max-w-[1480px] px-4 pt-7 sm:px-6 lg:px-8" aria-labelledby="featured-vehicles-heading">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
@@ -1719,7 +1715,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         <div className="hidden 2xl:block shrink-0 w-16"><FloatingAdRail placement="right_rail" /></div>
       </div>
 
-      <div className="w-full px-3 sm:px-5 lg:px-7 2xl:px-10">
+      {!savedOnly && <div className="w-full px-3 sm:px-5 lg:px-7 2xl:px-10">
         {/* 7. CTA BANDS */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 mt-12 rounded-2xl overflow-hidden">
           <div className="bg-gradient-to-br from-[#12576D] to-[#0A3340] text-white p-8 sm:p-10 flex flex-col justify-center gap-4">
@@ -1743,7 +1739,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </button>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* 8. FLOATING COMPARISON TRAY */}
       {comparedVehicles.length > 0 && (

@@ -2,20 +2,16 @@
 // All auction state transitions (start, extend, close) converge here so
 // admin and dealer controls cannot drift into separate implementations.
 
-import { atomicStartAuction, atomicExtendAuction } from "../utils/atomicTransactions.js";
+import { atomicStartAuction, atomicStartScheduledAuction, atomicExtendAuction } from "../utils/atomicTransactions.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { closeAuction } from "./auctionClose.service.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 import Car from "../models/Car.js";
 
-export const startAuction = async ({ carId, durationMs, startingBid, reservePrice = null, reserveMode = "none", req }) => {
-  const result = await atomicStartAuction({
-    carId,
-    durationMs,
-    startingBid,
-    reservePrice,
-    reserveMode,
-  });
+export const startAuction = async ({ carId, durationMs, scheduledEndAt = null, startingBid, reservePrice = null, reserveMode = "none", req }) => {
+  const result = scheduledEndAt
+    ? await atomicStartScheduledAuction({ carId, scheduledEndAt, startingBid, reservePrice, reserveMode })
+    : await atomicStartAuction({ carId, durationMs, startingBid, reservePrice, reserveMode });
 
   await logActionFromReq(req, "auction_start", {
     target: carId,

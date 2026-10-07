@@ -103,6 +103,7 @@
     "validate:payment-gateway-lifecycle": "node scripts/validate-payment-gateway-lifecycle.mjs",
     "validate:payment-escrow-domain": "node scripts/validate-payment-escrow-domain.mjs",
     "validate:transactions-money-initiative": "node scripts/validate-transactions-money-initiative.mjs",
+    "validate:financial-ledger-reconciliation-domain": "node scripts/validate-financial-ledger-reconciliation-domain.mjs",
     "validate:high-risk-boundaries": "node scripts/validate-high-risk-boundaries.mjs",
     "validate:runtime-convergence": "node scripts/validate-runtime-convergence.mjs",
     "validate:escrow-live-operations-scenarios": "node scripts/validate-escrow-live-operations-scenarios.mjs",
@@ -116,7 +117,15 @@
     "validate:backend-boot": "node scripts/validate-backend-boot.mjs",
     "validate:hero-mobile-assets": "node scripts/validate-hero-mobile-assets.mjs",
     "validate:hero-admin-control": "node scripts/validate-hero-admin-control.mjs",
-    "validate:inspection-qa-contract": "node scripts/validate-inspection-qa-contract.mjs"
+    "validate:inspection-qa-contract": "node scripts/validate-inspection-qa-contract.mjs",
+    "validate:auction-phase-a-financial-integrity": "node scripts/validate-auction-phase-a-financial-integrity.mjs",
+    "validate:auction-360-hardening-20261007": "node scripts/validate-auction-360-hardening-20261007.mjs",
+    "validate:auction-domain-integrity": "node scripts/validate-auction-domain-integrity.mjs",
+    "validate:auction-bid-surface": "node scripts/validate-auction-bid-surface.mjs",
+    "validate:auction-phase7": "node scripts/validate-auction-phase7.mjs",
+    "validate:auction-phase8": "node scripts/validate-auction-phase8.mjs",
+    "validate:auction-phase9": "node scripts/validate-auction-phase9.mjs",
+    "validate:auction-phase10": "node scripts/validate-auction-phase10.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

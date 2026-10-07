@@ -31,7 +31,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
       <div className={`flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg ${className}`}>
         {showIcon && <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />}
         <span className="text-xs text-blue-800 font-medium">
-          Auctions conducted by verified organizers • Payments go directly to organizers
+          Auctions conducted by verified organizers • Final settlement follows the published auction rule
         </span>
       </div>
     );
@@ -80,7 +80,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
                 <div>
                   <p className="text-xs font-bold text-slate-700 mb-1">Payment Recipient</p>
                   <p className="text-xs text-slate-500">
-                    Bid security deposits and vehicle payments go directly to the Auction Organizer.
+                    Bid security deposits and final vehicle settlement follow the published organizer payment instructions and settlement mode.
                   </p>
                 </div>
               </div>
@@ -119,10 +119,9 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
                     Important Payment Information
                   </p>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    All financial transactions related to auction participation—including bid security deposits
-                    and final vehicle payments—must be made directly to the Auction Organizer using their
-                    verified payment channels. KAYAD's Escrow Vault facilitates secure title transfer
-                    only, not payment collection.
+                    Final vehicle payments and bid security follow the payment recipient and settlement mode published
+                    for this auction. KAYAD's bid-confirmation payment is a separate platform transaction; where escrow
+                    is selected, custody funding follows the controlled escrow workflow.
                   </p>
                 </div>
               </div>
@@ -152,13 +151,14 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
               shown on each listing.
             </p>
             <p>
-              <strong>Bid Security deposits and vehicle purchase payments are made directly to the
-              Auction Organizer</strong> using their verified payment channels—not to KAYAD.
+              <strong>Bid Security deposits and final vehicle settlement follow the Auction Organizer's
+              published payment and settlement instructions.</strong> A separate nominal bid-confirmation M-Pesa
+              payment may be required when you submit a bid.
             </p>
             <p className="text-xs text-slate-500">
               KAYAD provides the digital marketplace, bidder registration, live auction technology,
-              digital certificates and auction management tools. KAYAD does not receive Bid Security
-              deposits or vehicle purchase payments.
+              digital certificates and auction management tools. Final vehicle settlement follows the
+              published direct or escrow mode.
             </p>
           </div>
         </div>
@@ -172,7 +172,7 @@ export const AuctionDisclaimerInline: React.FC<{ className?: string }> = ({ clas
   <div className={`flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg ${className}`}>
     <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />
     <span className="text-xs text-blue-800">
-      Payments go directly to the Auction Organizer, not KAYAD
+      Final settlement follows the published auction payment rule
     </span>
   </div>
 );

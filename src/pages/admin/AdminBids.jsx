@@ -48,7 +48,7 @@ export default function AdminBids() {
     setActionId(bid._id);
     try {
       await setBidWinner(bid._id);
-      toast('🏆 Winner set! Escrow initiated.', 'success');
+      toast('🏆 Winner recorded. Settlement follows the published auction mode.', 'success');
       setSelected(null);
       load();
     } catch (err) {
