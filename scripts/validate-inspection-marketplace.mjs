@@ -50,6 +50,23 @@ pass('provider card uses an in-app selection callback instead of a dead href',
   card.includes('onSelect?:') && card.includes('onClick={() => onSelect?.(provider)}'));
 pass('fake marketplace headline stats were removed',
   !page.includes('5,000+') && !page.includes("East Africa's largest vehicle inspection marketplace"));
+pass('public provider search defaults to verified profiles', provider.includes("if (filters.verified !== false)") && page.includes('verified: true'));
+pass('public provider profile rejects inactive or unverified providers', provider.includes("provider.status !== 'active'") && provider.includes("provider.verification_status !== 'verified'"));
+pass('marketplace selection opens provider profile before booking', page.includes('ProviderProfilePage') && page.includes('onBook={() => setBookingProvider(selectedProvider)}'));
+pass('booking request has no client discount authority', !api.includes('discount?: number'));
+pass('booking total is derived only from canonical package price plus server mobile fee', booking.includes('const basePrice = Number(pkg.price);') && booking.includes('const totalPrice = basePrice + mobileFee;'));
+pass('stored booking discount is server-controlled', booking.includes('discount: 0'));
+pass('payment initiation derives amount from stored booking', controller.includes('amount: Number(booking.total_price)'));
+pass('booking route validates customer input before service execution', routes.includes("validate(inspectionBookingSchema), controller.createBooking"));
+pass('booking schema excludes client-controlled monetary fields', !read('backend/validation/phase22.schema.js').includes('discount:') && !read('backend/validation/phase22.schema.js').includes('totalPrice:'));
+pass('booking requires active verified provider', booking.includes("provider.status !== 'active' || provider.verification_status !== 'verified'"));
+pass('mobile booking respects provider mobile capability', booking.includes("bookingData.isMobile && !provider.offers_mobile"));
+pass('workshop booking respects provider workshop capability', booking.includes("bookingData.isMobile === false && !provider.has_workshop"));
+pass('booking rejects invalid canonical package price', booking.includes('Number.isFinite(basePrice) || basePrice < 0'));
+pass('booking UI surfaces payment or booking errors', page.includes('errorMessage') || read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('errorMessage'));
+pass('booking UI treats displayed total as a pre-booking estimate', read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('pre-booking estimate only'));
+pass('booking date generation avoids UTC rollover', read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('date.getFullYear()'));
+
 
 let failed = 0;
 for (const c of checks) {

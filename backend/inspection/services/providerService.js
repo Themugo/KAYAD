@@ -94,7 +94,7 @@ class ProviderService {
     }
 
     // Verification filter
-    if (filters.verified) {
+    if (filters.verified !== false) {
       query.verification_status = 'verified';
     }
 
@@ -251,8 +251,8 @@ class ProviderService {
    */
   async getProviderProfile(providerId) {
     const provider = await db.findById(providersCollection, providerId);
-    if (!provider) {
-      throw new AppError('Provider not found', 404);
+    if (!provider || provider.status !== 'active' || provider.verification_status !== 'verified') {
+      throw new AppError('Provider not available', 404);
     }
 
     // Get packages

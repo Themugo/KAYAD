@@ -54,6 +54,7 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     // Vehicle
@@ -125,6 +126,8 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
   };
 
   const handleSubmit = async () => {
+    if (loading) return;
+    setErrorMessage(null);
     setLoading(true);
     try {
       const booking = await inspectionApi.createBooking({
@@ -179,6 +182,7 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
       throw new Error('Payment is still pending. Please wait for the M-Pesa confirmation before leaving this screen.');
     } catch (error) {
       console.error('Booking failed:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'We could not complete the booking. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -203,7 +207,8 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
     }
   };
 
-  // Calculate total price
+  // This is a pre-booking estimate only. The server recomputes the canonical
+  // package price + mobile fee when the booking is created.
   const totalPrice = formData.selectedPackage
     ? formData.selectedPackage.price + (formData.isMobile ? (provider.operatingModel.mobileFee || 0) : 0)
     : 0;
@@ -327,14 +332,18 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
             )}
             {currentStep === 5 && (
               <PaymentStep
-                formData={formData}
                 totalPrice={totalPrice}
-                onSubmit={handleSubmit}
                 loading={loading}
               />
             )}
           </motion.div>
         </AnimatePresence>
+
+        {errorMessage && (
+          <div role="alert" className="mt-6 rounded-xl border px-4 py-3 text-sm" style={{ borderColor: '#FECACA', backgroundColor: '#FEF2F2', color: '#991B1B' }}>
+            {errorMessage}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="flex justify-between mt-8 pt-6 border-t" style={{ borderColor: KAYAD_COLORS.warmBeige }}>
@@ -481,8 +490,9 @@ function ScheduleStep({ availableSlots, loading, formData, onChange }: any) {
   const dates = Array.from({ length: 14 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() + i);
+    const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return {
-      value: date.toISOString().split('T')[0],
+      value,
       label: date.toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' }),
     };
   });
@@ -723,7 +733,7 @@ function ConfirmStep({ provider, formData, totalPrice, onChange }: any) {
   );
 }
 
-function PaymentStep({ formData, totalPrice, onSubmit, loading }: any) {
+function PaymentStep({ totalPrice, loading }: { totalPrice: number; loading: boolean }) {
   return (
     <div className="rounded-xl p-6" style={{ backgroundColor: KAYAD_COLORS.white }}>
       <h2 className="text-xl font-bold mb-6" style={{ color: KAYAD_COLORS.lightNavy }}>
@@ -748,17 +758,6 @@ function PaymentStep({ formData, totalPrice, onSubmit, loading }: any) {
         </p>
       </div>
 
-      <button
-        onClick={onSubmit}
-        disabled={loading}
-        className="w-full py-4 rounded-lg font-semibold text-lg"
-        style={{
-          backgroundColor: KAYAD_COLORS.emerald,
-          color: KAYAD_COLORS.white
-        }}
-      >
-        {loading ? 'Starting payment...' : 'Send M-PESA Prompt'}
-      </button>
     </div>
   );
 }

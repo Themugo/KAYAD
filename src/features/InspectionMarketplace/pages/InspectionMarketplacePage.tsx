@@ -11,13 +11,14 @@ import { INSPECTION_TYPES } from '../types/inspection';
 import ProviderCard from '../components/ProviderCard';
 import ProviderFilters from '../components/ProviderFilters';
 import BookingFlow from './BookingFlow';
+import ProviderProfilePage from './ProviderProfilePage';
 
 const KAYAD_COLORS = {
   lightNavy: '#12576D',
-  warmBeige: '#EEF7F5',
+  warmBeige: '#F5F8F8',
   white: '#ffffff',
   emerald: '#13B8A6',
-  mutedTerracotta: '#91CEC5',
+  mutedTerracotta: '#B8EEE7',
   softBlue: '#64748b',
 };
 
@@ -30,10 +31,12 @@ export default function InspectionMarketplacePage() {
   const [selectedProvider, setSelectedProvider] = useState<InspectionProvider | null>(null);
   const [selectedProviderLoading, setSelectedProviderLoading] = useState(false);
   const [selectedProviderError, setSelectedProviderError] = useState<string | null>(null);
+  const [bookingProvider, setBookingProvider] = useState<InspectionProvider | null>(null);
   const [filters, setFilters] = useState<SearchProvidersParams>({
     page: 1,
     limit: 12,
     sortBy: 'rating',
+    verified: true,
   });
 
   useEffect(() => {
@@ -67,26 +70,27 @@ export default function InspectionMarketplacePage() {
     }
   };
 
+  if (bookingProvider) {
+    return <BookingFlow provider={bookingProvider} onCancel={() => setBookingProvider(null)} onComplete={() => setBookingProvider(null)} />;
+  }
+
   if (selectedProvider) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: KAYAD_COLORS.warmBeige }}>
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <button
-            type="button"
-            onClick={() => setSelectedProvider(null)}
-            className="mb-4 font-medium"
-            style={{ color: KAYAD_COLORS.lightNavy }}
-          >
-            ← Back to providers
-          </button>
-          <BookingFlow provider={selectedProvider} onCancel={() => setSelectedProvider(null)} />
-        </div>
-      </div>
+      <ProviderProfilePage
+        provider={selectedProvider}
+        loading={selectedProviderLoading}
+        error={selectedProviderError}
+        onBack={() => setSelectedProvider(null)}
+        onBook={() => setBookingProvider(selectedProvider)}
+      />
     );
   }
 
   const handleSearch = (query: string) => {
-    setFilters(prev => ({ ...prev, county: query, page: 1 }));
+    // The public provider search contract supports county/town, not free-text
+    // provider-name search. Keep the input honest instead of sending a
+    // provider name as a county filter.
+    setFilters(prev => ({ ...prev, county: query.trim() || undefined, page: 1 }));
   };
 
   const handleFilterChange = (newFilters: Partial<SearchProvidersParams>) => {
@@ -117,15 +121,20 @@ export default function InspectionMarketplacePage() {
               className="text-4xl md:text-5xl font-bold mb-4"
               style={{ color: KAYAD_COLORS.white }}
             >
-              Inspection Marketplace
+              Find an Inspection Provider
             </h1>
             <p
               className="text-xl mb-8 max-w-2xl mx-auto"
               style={{ color: KAYAD_COLORS.mutedTerracotta }}
             >
-              Find active vehicle inspection providers and compare services, locations, ratings, and availability
+              Compare available inspection providers by location, service, verification status and published availability.
             </p>
           </motion.div>
+
+          <div className="max-w-2xl mx-auto mt-5 flex flex-col sm:flex-row items-center justify-center gap-2 text-[11px] text-slate-300">
+            <span>Looking to provide inspection services?</span>
+            <button type="button" className="font-bold text-[#B8EEE7] hover:text-white underline underline-offset-2" onClick={() => window.dispatchEvent(new CustomEvent('kayad:open-inspection-provider-application'))}>Apply to join KAYAD</button>
+          </div>
 
           {/* Search Bar */}
           <motion.div
@@ -142,7 +151,7 @@ export default function InspectionMarketplacePage() {
               />
               <input
                 type="text"
-                placeholder="Search by county, town, or provider name..."
+                placeholder="Search by county or town..."
                 className="w-full pl-12 pr-4 py-4 rounded-lg border-2 border-transparent focus:border-[#13B8A6] outline-none shadow-lg"
                 style={{ backgroundColor: KAYAD_COLORS.white }}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -182,34 +191,34 @@ export default function InspectionMarketplacePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <QuickStatCard
             icon={<Shield className="text-[#13B8A6]" size={24} />}
-            label="Active Providers"
+            label="Providers found"
             value={String(total)}
           />
           <QuickStatCard
             icon={<Car className="text-[#176B87]" size={24} />}
-            label="Inspection Types"
+            label="Service types"
             value={String(INSPECTION_TYPES.length)}
           />
           <QuickStatCard
             icon={<Star className="text-[#2F8F87]" size={24} />}
-            label="Verified Filter"
-            value="Available"
+            label="Provider standard"
+            value="Verified profiles"
           />
           <QuickStatCard
             icon={<Clock className="text-[#5AAFA4]" size={24} />}
-            label="Scheduling filters"
-            value="Available in filters"
+            label="Scheduling"
+            value="Filter available"
           />
         </div>
       </section>
 
-      {/* Inspection Types */}
+      {/* Service types */}
       <section className="max-w-7xl mx-auto px-4 pb-8">
         <h2
           className="text-2xl font-bold mb-6"
           style={{ color: KAYAD_COLORS.lightNavy }}
         >
-          Inspection Types
+          Service types
         </h2>
         <div className="flex flex-wrap gap-3">
           {INSPECTION_TYPES.map((type) => (

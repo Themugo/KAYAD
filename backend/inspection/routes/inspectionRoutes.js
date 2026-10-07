@@ -9,7 +9,7 @@ import { requireAuth, optionalAuth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/auth.js';
 import requireProviderOwnership from '../middleware/requireProviderOwnership.js';
 import { validate } from '../../middleware/validate.js';
-import { inspectionPaymentSchema, inspectionPaymentInitiateSchema } from '../../validation/phase22.schema.js';
+import { inspectionPaymentSchema, inspectionPaymentInitiateSchema, inspectionBookingSchema } from '../../validation/phase22.schema.js';
 import { csrfProtection } from '../../middleware/csrf.js';
 import { idempotencyCheck } from '../../middleware/idempotency.js';
 import { paymentLimiter } from '../../middleware/rateLimiter.js';
@@ -47,7 +47,7 @@ router.get('/categories', controller.getInspectionCategories);
  */
 
 // Create booking
-router.post('/bookings', requireAuth, controller.createBooking);
+router.post('/bookings', requireAuth, validate(inspectionBookingSchema), controller.createBooking);
 
 // Get customer bookings
 router.get('/bookings', requireAuth, controller.getCustomerBookings);

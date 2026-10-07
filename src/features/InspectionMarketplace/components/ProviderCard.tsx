@@ -8,10 +8,10 @@ import type { InspectionProvider } from '../types/inspection';
 
 const KAYAD_COLORS = {
   lightNavy: '#12576D',
-  warmBeige: '#EEF7F5',
+  warmBeige: '#F5F8F8',
   white: '#ffffff',
   emerald: '#13B8A6',
-  mutedTerracotta: '#91CEC5',
+  mutedTerracotta: '#B8EEE7',
   softBlue: '#64748b',
 };
 
@@ -79,7 +79,7 @@ export default function ProviderCard({ provider, onSelect }: ProviderCardProps) 
             style={{ backgroundColor: KAYAD_COLORS.emerald, color: KAYAD_COLORS.white }}
           >
             <Shield size={12} />
-            Verified
+            Verified profile
           </div>
         )}
       </div>
@@ -152,7 +152,7 @@ export default function ProviderCard({ provider, onSelect }: ProviderCardProps) 
         {/* Experience */}
         <div className="text-sm mb-4" style={{ color: KAYAD_COLORS.softBlue }}>
           {experience.yearsInBusiness > 0 && (
-            <span>{experience.yearsInBusiness} years in business</span>
+            <span>{experience.yearsInBusiness} years operating</span>
           )}
         </div>
 
@@ -161,14 +161,14 @@ export default function ProviderCard({ provider, onSelect }: ProviderCardProps) 
           <div>
             {lowestPrice && (
               <p className="text-sm" style={{ color: KAYAD_COLORS.softBlue }}>
-                From
+                Starting from
               </p>
             )}
             <p
               className="text-xl font-bold"
               style={{ color: KAYAD_COLORS.lightNavy }}
             >
-              {lowestPrice ? `KES ${lowestPrice.toLocaleString()}` : 'View packages'}
+              {lowestPrice ? `KES ${lowestPrice.toLocaleString()}` : 'View provider'}
             </p>
           </div>
           <button

@@ -34,6 +34,7 @@ export interface SearchProvidersParams {
   sortBy?: 'rating' | 'reviews' | 'price_low' | 'price_high' | 'completions';
   page?: number;
   limit?: number;
+  verified?: boolean;
 }
 
 export interface CreateBookingParams {
@@ -60,7 +61,6 @@ export interface CreateBookingParams {
   scheduledTime: string;
   staffId?: string;
   notes?: string;
-  discount?: number;
 }
 
 export interface InspectionPaymentInitiation {

@@ -4,6 +4,7 @@
 
 export { default as InspectionMarketplacePage } from './pages/InspectionMarketplacePage';
 export { default as BookingFlow } from './pages/BookingFlow';
+export { default as ProviderProfilePage } from './pages/ProviderProfilePage';
 export { default as ProviderBusinessCenter } from './pages/ProviderBusinessCenter';
 export { default as ProviderCard } from './components/ProviderCard';
 export { default as ProviderFilters } from './components/ProviderFilters';

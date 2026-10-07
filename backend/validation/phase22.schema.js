@@ -68,3 +68,34 @@ export const inspectionPaymentSchema = z.object({
 export const inspectionPaymentInitiateSchema = z.object({
   phone: text(30),
 });
+
+// Customer booking input is deliberately limited to scheduling, customer,
+// vehicle and location data. Monetary fields (price, mobile fee, discount and
+// total) are never accepted from the browser. Zod's object schema strips any
+// unknown fields before the controller receives the body.
+export const inspectionBookingSchema = z.object({
+  packageId: uuid,
+  customerName: text(160),
+  customerEmail: z.string().trim().email().max(240),
+  customerPhone: text(40),
+  vehicleMake: nullableText(80),
+  vehicleModel: nullableText(120),
+  vehicleYear: z.coerce.number().int().min(1886).max(new Date().getFullYear() + 1).optional(),
+  vehicleRegistration: nullableText(40),
+  vehicleVin: nullableText(80),
+  vehicleType: nullableText(80),
+  country: nullableText(80),
+  county: nullableText(120),
+  town: nullableText(120),
+  inspectionAddress: nullableText(400),
+  latitude: z.coerce.number().finite().min(-90).max(90).optional(),
+  longitude: z.coerce.number().finite().min(-180).max(180).optional(),
+  isMobile: z.boolean().default(true),
+  sellerName: nullableText(160),
+  sellerPhone: nullableText(40),
+  sellerIsDealer: z.boolean().default(false),
+  scheduledDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  scheduledTime: z.string().regex(/^\d{2}:\d{2}(?::\d{2})?$/),
+  staffId: uuid.optional(),
+  notes: z.string().trim().max(4000).optional(),
+});

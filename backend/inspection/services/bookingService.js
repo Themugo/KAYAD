@@ -33,8 +33,22 @@ class BookingService {
 
     // Get provider
     const provider = await db.findById('inspection_providers', pkg.provider_id);
-    if (!provider || provider.status !== 'active') {
+    if (!provider || provider.status !== 'active' || provider.verification_status !== 'verified') {
       throw new AppError('Provider not available', 400);
+    }
+
+    // Public bookings are only allowed against a currently active, verified
+    // provider. The package/provider relationship above is authoritative; the
+    // browser cannot redirect a booking to another provider.
+
+    // Enforce the provider's published service model. Do not silently accept a
+    // mobile booking when mobile inspection is disabled, or a workshop booking
+    // when no workshop service is published.
+    if (bookingData.isMobile && !provider.offers_mobile) {
+      throw new AppError('Mobile inspection is not available from this provider', 400);
+    }
+    if (bookingData.isMobile === false && !provider.has_workshop) {
+      throw new AppError('Workshop inspection is not available from this provider', 400);
     }
 
     // Check availability
@@ -66,7 +80,17 @@ class BookingService {
       mobileFee = provider.mobile_inspection_fee;
     }
 
-    const totalPrice = parseFloat(pkg.price) + mobileFee - (bookingData.discount || 0);
+    // Monetary authority stays server-side: package price and mobile fee are
+    // resolved from the canonical provider/package records. Client input
+    // cannot reduce the payable amount.
+    const basePrice = Number(pkg.price);
+    if (!Number.isFinite(basePrice) || basePrice < 0) {
+      throw new AppError('Inspection package price is invalid', 500);
+    }
+    if (!Number.isFinite(mobileFee) || mobileFee < 0) {
+      throw new AppError('Provider mobile inspection fee is invalid', 500);
+    }
+    const totalPrice = basePrice + mobileFee;
 
     // Create booking
     const booking = {
@@ -99,9 +123,9 @@ class BookingService {
       assigned_staff_id: bookingData.staffId,
       status: 'booked',
       customer_notes: bookingData.notes,
-      base_price: parseFloat(pkg.price),
+      base_price: basePrice,
       mobile_fee: mobileFee,
-      discount: bookingData.discount || 0,
+      discount: 0,
       total_price: totalPrice,
       currency: pkg.currency || 'KES',
       payment_status: 'pending',
