@@ -49,16 +49,16 @@ const redactForPersistence = (value, depth = 0) => {
 
 const CRITICAL_LOCK_OPERATIONS = new Set([
   "payment", "payment_callback", "b2c_callback", "b2c_timeout", "bid", "auction_end",
-  "escrow", "escrow_release", "escrow_refund", "escrow_confirm_delivery",
-  "escrow_dispute", "escrow_vault_funded", "escrow_vault_init",
-  "escrow_vault_release", "verification_approve", "verification_reject",
+  "escrow", "escrow_release", "escrow_refund", "escrow_refund_complete",
+  "escrow_confirm_vehicle", "escrow_confirm_delivery", "escrow_request_release",
+  "escrow_dispute", "verification_approve", "verification_reject",
   "verification_suspend", "verification_reinstate",
 ]);
 
 /**
  * Extract operation type from request path
  */
-const extractOperationType = (path) => {
+export const extractOperationType = (path) => {
   // Match the most specific provider callback paths before the generic
   // `/payment` branch. `/api/payments/b2c/callback` contains `/payment`,
   // so ordering the generic branch first silently disabled deterministic
@@ -67,9 +67,22 @@ const extractOperationType = (path) => {
   if (path.includes("/b2c/timeout")) return "b2c_timeout";
   if (path.includes("/callback")) return "payment_callback";
   if (path.includes("/payment")) return "payment";
-  if (path.includes("/escrow") && path.includes("/release")) return "escrow_release";
+  // Most-specific escrow paths first. "/request-release" contains "/release"
+  // as a substring, and the refund-completion route contains "/refund" — each
+  // was previously swallowed by the generic branch below it and labeled with
+  // the SAME operationType as a structurally different action (a buyer's
+  // non-financial "request release" nudge vs. an admin's actual financial
+  // release; a refund-completion vs. a refund-initiation). That matters once
+  // a deterministic idempotency key is generated per operationType (below):
+  // two different actions sharing one label would collide on one key, so
+  // whichever committed first would make the DB short-circuit the other as
+  // "already done" and silently skip it.
+  if (path.includes("/escrow") && path.includes("/request-release")) return "escrow_request_release";
+  if (path.includes("/escrow") && path.includes("/refund") && path.includes("/complete")) return "escrow_refund_complete";
   if (path.includes("/escrow") && path.includes("/refund")) return "escrow_refund";
-  if (path.includes("/escrow") && path.includes("/confirm")) return "escrow_confirm_delivery";
+  if (path.includes("/escrow") && path.includes("/release")) return "escrow_release";
+  if (path.includes("/escrow") && path.includes("/confirm-vehicle")) return "escrow_confirm_vehicle";
+  if (path.includes("/escrow") && path.includes("/confirm-delivery")) return "escrow_confirm_delivery";
   if (path.includes("/escrow") && path.includes("/dispute")) return "escrow_dispute";
   if (path.includes("/bid")) return "bid";
   if (path.includes("/auction")) return "auction_end";
@@ -151,11 +164,32 @@ export const idempotencyCheck = async (req, res, next) => {
       if (conversationId) {
         idempotencyKey = `b2c_timeout_${conversationId}`;
       }
-    } else if (operationType === "escrow_vault_funded") {
-      const bankRef = req.body?.bankRef;
-      if (bankRef) {
-        idempotencyKey = `vault_funded_${bankRef}`;
-      }
+    } else if (operationType === "escrow_release") {
+      // Admin-triggered, financially authoritative — one key per escrow.
+      // A real retry of the same release (network timeout, double-click)
+      // resolves against the same key; a request for a *different* escrow
+      // gets its own.
+      const escrowId = req.params?.id || "";
+      if (escrowId) idempotencyKey = `escrow_release_${escrowId}`;
+    } else if (operationType === "escrow_refund") {
+      const escrowId = req.params?.id || "";
+      if (escrowId) idempotencyKey = `escrow_refund_${escrowId}`;
+    } else if (operationType === "escrow_refund_complete") {
+      const escrowId = req.params?.id || "";
+      const refundId = req.params?.refundId || "";
+      if (escrowId && refundId) idempotencyKey = `escrow_refund_complete_${escrowId}_${refundId}`;
+    } else if (operationType === "escrow_confirm_vehicle") {
+      const escrowId = req.params?.id || "";
+      const userId = req.user?.id || "";
+      if (escrowId && userId) idempotencyKey = `escrow_confirm_vehicle_${escrowId}_${userId}`;
+    } else if (operationType === "escrow_confirm_delivery") {
+      const escrowId = req.params?.id || "";
+      const userId = req.user?.id || "";
+      if (escrowId && userId) idempotencyKey = `escrow_confirm_delivery_${escrowId}_${userId}`;
+    } else if (operationType === "escrow_request_release") {
+      const escrowId = req.params?.id || "";
+      const userId = req.user?.id || "";
+      if (escrowId && userId) idempotencyKey = `escrow_request_release_${escrowId}_${userId}`;
     } else if (operationType === "bid") {
       const userId = req.user?.id || "";
       const carId = req.params?.id || "";
@@ -164,24 +198,12 @@ export const idempotencyCheck = async (req, res, next) => {
       const windowMs = 5000;
       const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
       idempotencyKey = `bid_${userId}_${carId}_${amount}_${windowStart}`;
-    } else if (operationType === "escrow_vault_init") {
-      const carId = req.params?.id || "";
-      const buyerId = req.user?.id || "";
-      if (carId && buyerId) {
-        idempotencyKey = `vault_init_${buyerId}_${carId}`;
-      }
     } else if (operationType === "escrow_dispute") {
       const escrowId = req.params?.id || "";
       const userId = req.user?.id || "";
       const reason = req.body?.reason || "";
       const reasonHash = crypto.createHash("sha256").update(reason).digest("hex").slice(0, 8);
       idempotencyKey = `escrow_dispute_${escrowId}_${userId}_${reasonHash}`;
-    } else if (operationType === "escrow_vault_release") {
-      const vaultId = req.params?.id || "";
-      const otp = req.body?.otp || "";
-      if (vaultId && otp) {
-        idempotencyKey = `vault_release_${vaultId}_${crypto.createHash("sha256").update(otp).digest("hex").slice(0, 12)}`;
-      }
     }
   }
 

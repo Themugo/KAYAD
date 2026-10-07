@@ -100,6 +100,7 @@
     "validate:refresh-reuse-integrity": "node scripts/validate-refresh-reuse-integrity.mjs",
     "validate:passport-authorization": "node scripts/validate-passport-authorization.mjs",
     "validate:financial-audit-rls-hardening": "node scripts/validate-financial-audit-rls-hardening.mjs",
+    "validate:inspection-domain-rls-enablement": "node scripts/validate-inspection-domain-rls-enablement.mjs",
     "validate:payment-gateway-lifecycle": "node scripts/validate-payment-gateway-lifecycle.mjs",
     "validate:payment-escrow-domain": "node scripts/validate-payment-escrow-domain.mjs",
     "validate:transactions-money-initiative": "node scripts/validate-transactions-money-initiative.mjs",
