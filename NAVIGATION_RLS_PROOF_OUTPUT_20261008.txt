@@ -1,0 +1,94 @@
+apply 20260710044800_20260710100000_platform_config.sql
+apply 20260710045300_20260710150000_platform_config_admin_fields.sql
+apply 20260926123000_platform_config_hero_vehicle_selection.sql
+psql:kayad_audit/extracted/supabase/migrations/20260926123000_platform_config_hero_vehicle_selection.sql:8: NOTICE:  constraint "platform_config_hero_featured_mode_check" of relation "platform_config" does not exist, skipping
+apply 20261003100000_platform_config_hero_presentation_and_card_content.sql
+-- pre-migration row
+ rows 
+------
+    1
+(1 row)
+
+apply navigation migration (x2 for idempotency)
+psql:kayad_audit/extracted/supabase/migrations/20261008150000_platform_config_navigation.sql:7: NOTICE:  column "navigation" of relation "platform_config" already exists, skipping
+ column_name | data_type | is_nullable | column_default 
+-------------+-----------+-------------+----------------
+ navigation  | jsonb     | NO          | '{}'::jsonb
+(1 row)
+
+ navigation 
+------------
+ {}
+(1 row)
+
+     relname     | rls_enabled 
+-----------------+-------------
+ platform_config | t
+(1 row)
+
+ policies_on_platform_config 
+-----------------------------
+                           0
+(1 row)
+
+== anon
+ visible_rows 
+--------------
+            0
+(1 row)
+
+ navigation 
+------------
+(0 rows)
+
+ rows_updated 
+--------------
+            0
+(1 row)
+
+ERROR:  new row violates row-level security policy for table "platform_config"
+insert blocked (expected)
+ rows_deleted 
+--------------
+            0
+(1 row)
+
+== authenticated
+ visible_rows 
+--------------
+            0
+(1 row)
+
+ navigation 
+------------
+(0 rows)
+
+ rows_updated 
+--------------
+            0
+(1 row)
+
+ERROR:  new row violates row-level security policy for table "platform_config"
+insert blocked (expected)
+ rows_deleted 
+--------------
+            0
+(1 row)
+
+== service_role
+ visible_rows 
+--------------
+            1
+(1 row)
+
+                     navigation                      
+-----------------------------------------------------
+ {"items": [{"id": "marketplace", "visible": true}]}
+(1 row)
+
+== post: row intact
+                     navigation                      
+-----------------------------------------------------
+ {"items": [{"id": "marketplace", "visible": true}]}
+(1 row)
+

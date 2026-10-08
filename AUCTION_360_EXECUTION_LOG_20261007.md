@@ -1451,3 +1451,41 @@ new `validate-navigation-convergence` 27/27. Zero backend changes.
 
 **STAGE 15 — NAVIGATION CONVERGENCE: COMPLETE.** Reference image was not
 attached to the upload; design followed the written principles.
+
+---
+
+## STAGE 14A — NAVIGATION AUTHORITY CONTROL — 2026-10-08
+
+**Question.** Can the frozen Stage 15 navigation become admin-controlled via
+the existing control plane? **Answer: yes, by extension.** The existing
+architecture could not already do it (no navigation field anywhere), so the
+smallest backend extension was made: `platform_config.navigation` JSONB
+column (migration `20261008150000_platform_config_navigation.sql`), strict
+validator `backend/utils/navigationConfig.js`, validate/replace/audit inside
+the existing `PUT /api/admin/config`, and `navigation` added to the existing
+`/admin/public/config` whitelist (normalised on read). Frontend:
+`applyNavigationConfig` (total, canonical fallback), carried by the existing
+`BrandingContext` fetch; `Navbar` wiring only (CSS/markup untouched); editor in
+the live admin console (`AdminNavigationControl` in `AdminView`).
+
+**Controls.** Item show/hide, order, dropdown on/off, child show/hide/order.
+Not configurable: labels, destinations, hrefs, icons, roles, CSS, markup.
+Marketplace and Support can never be hidden.
+
+**Validation.** Authorization matrix over HTTP on the real `adminRoutes.js`
+(admin/superadmin 200; user, seller, dealer, ghost_checker and all
+departmental staff 403; anonymous 401; 15 hostile payloads 400). Real
+PostgreSQL 16 RLS proof (anon/authenticated blocked, service_role OK).
+Browser: 180/180 (Stage 15 suite) + 94/94 (fallback/controlled/visual-freeze
+at 10 viewports) + 11/11 (admin UI round trip). Eight REVERT→FAIL→RESTORE→PASS
+cycles. tsc/build clean; frontend 377/11/1 (baseline-identical failures);
+backend Jest 694/694 + Vitest 16 + node:test 1; navigation validator 40/40;
+other validators identical to baseline.
+
+**Findings.** `pages/admin/AdminSettings*.jsx` is unreachable; the editor lives
+in `AdminView`. Whole-config echo saves from other screens required `{}` to be
+a valid "no override" value.
+
+**STAGE 14A — ADMIN-CONTROLLED NAVIGATION: COMPLETE** (apply the migration
+before deploying; staging smoke of PUT→GET recommended).
+

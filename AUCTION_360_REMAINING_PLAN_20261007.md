@@ -725,3 +725,22 @@ No new blocking items were introduced by Stage 14.
 7. Items from Stage 13/14 carry-forward (Supabase / M-Pesa / deployment
    credentials, `/api/cars/:id` winner exposure, `idempotencyCheck`
    ordering review, sandbox `EBADENGINE`) are unchanged.
+
+---
+
+## STAGE 14A carry-forward — 2026-10-08
+
+1. **Closed:** "Navigation structure has no admin authority" (Stage 15 item 1).
+   See `NAVIGATION_AUTHORITY_MODEL_20261008.md`.
+2. Deploy order: apply `20261008150000_platform_config_navigation.sql`, then
+   the backend. Staging smoke: admin `PUT /api/admin/config {navigation}` →
+   `GET /api/admin/public/config` → confirm the header and the
+   `"Navigation configuration updated"` audit row.
+3. Navigation changes take effect on next page load (no live push); the
+   four-fold `/admin/public/config` fetch would be removed by a shared cache.
+4. Labels and role-based visibility are deliberately not admin-configurable;
+   revisit only with a controlled-label model.
+5. `pages/admin/AdminSettings*.jsx` (and sibling legacy admin pages) are not
+   reachable from the app; schedule a dedicated sweep.
+6. Stage 15 items 2–7 and the Stage 13/14 carry-forward are unchanged.
+

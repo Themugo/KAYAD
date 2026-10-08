@@ -38,6 +38,35 @@ add('deleted MobileCarCard architecture not resurrected', !fs.existsSync(path.jo
 add('reduced-motion rules cover the new header', read('src/styles/kayad-navigation.css').includes('prefers-reduced-motion:reduce'));
 add('sign-in/sign-up routes keep canonical /login entry', navbar.includes("handleAuthNavigation('/login')") && /Sign In \/ Sign Up/.test(navbar));
 
+// ── Stage 14A: admin navigation authority ─────────────────────────────────
+const { NAVIGATION_REGISTRY, NAVIGATION_LOCKED_VISIBLE } = await import(new URL('../backend/utils/navigationConfig.js', import.meta.url));
+const routes = read('backend/routes/adminRoutes.js');
+const branding = read('src/context/BrandingContext.tsx');
+const feReg = {};
+{
+  let cur = null;
+  const body = cfg.split('export const NAV_PRIMARY')[1].split('export const visibleChildren')[0];
+  for (const line of body.split('\n')) {
+    const p = line.match(/^    id: '([^']+)'/);
+    if (p) { cur = p[1]; feReg[cur] = []; continue; }
+    const c = line.match(/^      \{ id: '([^']+)', label:/);
+    if (c && cur) feReg[cur].push(c[1]);
+  }
+}
+add('14A backend registry mirrors frontend navConfig ids exactly (no drift)', JSON.stringify(feReg) === JSON.stringify(NAVIGATION_REGISTRY));
+add('14A locked-visible set matches frontend and covers marketplace + support', JSON.stringify([...NAVIGATION_LOCKED_VISIBLE]) === JSON.stringify(['marketplace', 'support']) && /NAV_LOCKED_VISIBLE: readonly string\[\] = \['marketplace', 'support'\]/.test(cfg));
+add('14A authority lives in the existing platform_config via the existing PUT /config (no second config system / route)', /router\.put\(\s*"\/config",\s*adminOrSuper,/.test(routes) && routes.includes('validateNavigationInput(req.body.navigation)') && !fs.existsSync(path.join(root, 'backend/routes/navigationRoutes.js')) && !fs.existsSync(path.join(root, 'backend/models/Navigation.js')));
+add('14A navigation mutation is validated before persistence and audited through the existing AuditLog', routes.indexOf('validateNavigationInput(req.body.navigation)') < routes.indexOf('await config.save()') && routes.includes('"Navigation configuration updated"'));
+add('14A public projection exposes navigation only through the existing whitelist, normalised', /heroCardContent navigation"/.test(routes) && routes.includes('normalizeNavigation(config.navigation)'));
+add('14A public projection does not whitelist secrets/admin fields', !/\.select\(\s*"[^"]*\b(daraja|bank|reconciliation|supportEmail|dealerCommission)\b/.test(routes.split('"/public/config"')[1].split('router.use(protect')[0]));
+add('14A the public-config GET is defined before the global admin guard; mutation is after it', routes.indexOf('"/public/config"') < routes.indexOf('router.use(protect, adminOnly)') && routes.indexOf('router.put(\n  "/config",') > routes.indexOf('router.use(protect, adminOnly)'));
+add('14A frontend consumes navigation via the existing BrandingContext fetch (no new request)', branding.includes('setNavigation(') && (branding.match(/getPublicConfig\(/g) || []).length === 1 && !/adminAPI|getPublicConfig|fetch\(/.test(navbar));
+add('14A Navbar renders from applyNavigationConfig, never directly from raw config', navbar.includes('applyNavigationConfig(navigation)') && !/NAV_PRIMARY/.test(navbar));
+add('14A resolver is total and falls back to canonical NAV_PRIMARY', /export function applyNavigationConfig[\s\S]*catch \{\s*return base;/.test(cfg));
+add('14A admin editor is mounted in the reachable admin console (AdminView), not the orphaned legacy settings page', read('src/features/AdminView.tsx').includes("<AdminNavigationControl />") && !/avigation/.test(read('src/pages/admin/AdminSettings.jsx')));
+add('14A admin editor lives in the reachable admin console (AdminView) and saves through the existing adminAPI.updateConfig only', read('src/features/AdminNavigationControl.tsx').includes('adminAPI.updateConfig({ navigation') && !/api\.(put|post)\(/.test(read('src/features/AdminNavigationControl.tsx')));
+add('14A migration is the smallest possible: one JSONB column with a default, no policy changes', (() => { const m = fs.readdirSync(path.join(root, 'supabase/migrations')).filter((f) => /platform_config_navigation/.test(f)); if (m.length !== 1) return false; const sql = read('supabase/migrations/' + m[0]).replace(/^--.*$/gm, ''); return /ADD COLUMN IF NOT EXISTS navigation JSONB NOT NULL DEFAULT '\{\}'::jsonb/.test(sql) && !/POLICY|DISABLE ROW LEVEL SECURITY|GRANT /i.test(sql); })());
+
 let failed = 0;
 for (const [label, ok] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'}: ${label}`); if (!ok) failed++; }
 console.log(`Navigation convergence: ${checks.length - failed}/${checks.length} PASS`);
