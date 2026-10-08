@@ -68,7 +68,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         location_city: v.location, has_auction: v.isAuction, current_bid: v.currentBid ?? null,
         bids_count: v.bidsCount ?? null, auction_end: v.auctionEndsAt ?? null,
         is_verified_dealer: v.verified ?? false, is_promoted: true, dealer_id: v.sellerId || null,
-        images: v.image ? [{ url: v.image }] : [],
+        images: v.image ? [{ url: v.image }] : [], description: v.description,
       })),
       pagination: { page: 1, limit: 24, total: INITIAL_VEHICLES.length, pages: 1 },
     });
@@ -113,7 +113,9 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   it('saved-only mode reuses the canonical marketplace grid without re-querying the full inventory', async () => {
     const result = render(<VehicleMarketplace {...baseProps} savedOnly />);
     await waitFor(() => expect(screen.getByText('Saved Vehicles')).toBeInTheDocument());
-    expect(screen.getByText(/2021 Toyota Land Cruiser Prado TX-L 2.8L/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '2021 Toyota Prado' })).toBeInTheDocument();
+    // The Saved destination identifies itself and never presents itself as the full inventory.
+    expect(screen.queryByText('Vehicle Inventory')).toBeNull();
     expect(vehicleApiMocks.getCars).not.toHaveBeenCalled();
     result.unmount();
   });
@@ -148,25 +150,31 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     const mobileHero = () => screen.getByLabelText('KAYAD mobile hero');
 
     it('shows ONE vehicle with the canonical tagline and switches with the arrows, wrapping both ways', async () => {
+      // The hero collection is the real featured inventory (all INITIAL_VEHICLES in this fixture); the
+      // identity line is "make model" - the same convention the desktop hero card and the image alt use.
+      const name = (n: number) => `${INITIAL_VEHICLES[n].make} ${INITIAL_VEHICLES[n].model}`;
+      const last = INITIAL_VEHICLES.length - 1;
       await renderMarketplace({ ...baseProps });
       const hero = mobileHero();
       const view = within(hero);
-      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
-      expect(view.getByText('Pristine 7-seater SUV with full 150-point inspection certificate. Features leather seats, sunroof, 360 camera, adaptive cruise control.')).toBeTruthy();
+      expect(view.getByText(name(0))).toBeTruthy();
+      expect(view.getByText(INITIAL_VEHICLES[0].description)).toBeTruthy();
       // Only the active vehicle is rendered (no second large vehicle on mobile).
-      expect(view.queryByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeNull();
+      expect(view.queryByText(name(1))).toBeNull();
       expect(view.getAllByRole('img').length).toBe(1);
 
       fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
-      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
-      expect(view.getByText('Immaculate Subaru Outback with EyeSight Ver 3 driver assist, X-Mode 4WD, power tailgate and Harmon Kardon premium audio.')).toBeTruthy();
-      expect(view.queryByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeNull();
+      expect(view.getByText(name(1))).toBeTruthy();
+      expect(view.getByText(INITIAL_VEHICLES[1].description)).toBeTruthy();
+      expect(view.queryByText(name(0))).toBeNull();
 
-      // Wraps forward to the first vehicle, and backward again to the last.
-      fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
-      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
+      // Back to the first, then backward past the first wraps to the last, and forward from the last wraps to the first.
       fireEvent.click(view.getByRole('button', { name: 'Previous featured vehicle' }));
-      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
+      expect(view.getByText(name(0))).toBeTruthy();
+      fireEvent.click(view.getByRole('button', { name: 'Previous featured vehicle' }));
+      expect(view.getByText(name(last))).toBeTruthy();
+      fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
+      expect(view.getByText(name(0))).toBeTruthy();
     });
 
     it('keeps dots in sync with the active vehicle and lets a dot jump to a vehicle', async () => {
@@ -178,26 +186,26 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       fireEvent.click(dot(2));
       expect(dot(2).getAttribute('aria-current')).toBe('true');
       expect(dot(1).getAttribute('aria-current')).toBeNull();
-      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
+      expect(view.getByText('Subaru Outback')).toBeTruthy();
     });
 
     it('changes vehicle on a deliberate horizontal swipe but not on a vertical scroll', async () => {
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ }).parentElement as HTMLElement;
+      const stage = view.getByRole('button', { name: /^View Toyota Prado$/ }).parentElement as HTMLElement;
       const touch = (x: number, y: number) => ({ touches: [{ clientX: x, clientY: y }], changedTouches: [{ clientX: x, clientY: y }] });
 
       fireEvent.touchStart(stage, touch(200, 100));
       fireEvent.touchEnd(stage, touch(205, 190)); // mostly vertical: ignored
-      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
+      expect(view.getByText('Toyota Prado')).toBeTruthy();
 
       fireEvent.touchStart(stage, touch(240, 100));
       fireEvent.touchEnd(stage, touch(120, 104)); // swipe left -> next
-      expect(view.getByText('2019 Subaru Outback 2.5i EyeSight Limited')).toBeTruthy();
+      expect(view.getByText('Subaru Outback')).toBeTruthy();
 
       fireEvent.touchStart(stage, touch(100, 100));
       fireEvent.touchEnd(stage, touch(230, 98)); // swipe right -> previous
-      expect(view.getByText('2021 Toyota Land Cruiser Prado TX-L 2.8L')).toBeTruthy();
+      expect(view.getByText('Toyota Prado')).toBeTruthy();
     });
 
     it('uses real featured inventory as the hero source and keeps the selected vehicle consistent across desktop/mobile', async () => {
@@ -256,7 +264,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 200, mobileStageMaxPx: 300, mobileTransitionMs: 0, rotationSeconds: 0 } } } as never);
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
-        const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ });
+        const stage = view.getByRole('button', { name: /^View Toyota Prado$/ });
         await waitFor(() => expect((stage.parentElement as HTMLElement).style.height).toBe('clamp(200px, 52vw, 300px)'));
         expect(stage.style.getPropertyValue('--kayad-hero-slide-ms')).toBe('0ms');
       });
@@ -266,7 +274,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 5, mobileStageMaxPx: 9000, mobileTransitionMs: -50, rotationSeconds: 1 } } } as never);
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
-        const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ });
+        const stage = view.getByRole('button', { name: /^View Toyota Prado$/ });
         await waitFor(() => expect((stage.parentElement as HTMLElement).style.height).toBe('clamp(120px, 52vw, 420px)'));
         expect(stage.style.getPropertyValue('--kayad-hero-slide-ms')).toBe('0ms');
       });
@@ -275,7 +283,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     it('never overlays arrows on the vehicle stage and contains the image', async () => {
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      const stage = view.getByRole('button', { name: /^View 2021 Toyota Land Cruiser Prado TX-L 2.8L$/ }).parentElement as HTMLElement;
+      const stage = view.getByRole('button', { name: /^View Toyota Prado$/ }).parentElement as HTMLElement;
       // Arrow buttons live in a separate controls row, not inside the vehicle stage.
       expect(within(stage).queryByRole('button', { name: /featured vehicle/i })).toBeNull();
       expect(view.getByRole('img').className).toContain('object-contain');

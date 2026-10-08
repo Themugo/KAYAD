@@ -26,11 +26,10 @@ check('Notification icon typing accepts backend notification strings', /getNotif
 check('Orphan AuctionCalendar test retired', !exists('src/__tests__/pages/AuctionCalendar.test.jsx'));
 check('Stale relative imports repaired', (() => {
   const files = [
-    'src/components/VehicleCard/index.js',
     'src/components/mobile/index.js',
     'src/pages/admin/cms/components/MediaLibrary.jsx',
   ];
-  return /from ['"]\.\/VehicleCard['"]/.test(read(files[0])) && /from ['"]\.\.\/MobileBottomNav['"]/.test(read(files[1])) && /from ['"]\.\.\/\.\.\/\.\.\/\.\.\/services\/cmsApi['"]/.test(read(files[2]));
+  return exists('src/components/VehicleCard.tsx') && !exists('src/components/VehicleCard/index.js') && /from ['"]\.\.\/MobileBottomNav['"]/.test(read(files[0])) && /from ['"]\.\.\/\.\.\/\.\.\/\.\.\/services\/cmsApi['"]/.test(read(files[1]));
 })());
 check('Backend operational test uses Jest, not Vitest', /from ['"]@jest\/globals['"]/.test(read('backend/tests/phase10/operationalDataContract.test.js')) && !/from ['"]vitest['"]/.test(read('backend/tests/phase10/operationalDataContract.test.js')));
 check('M-Pesa failure tests match fail-closed bid-security contract', /fails closed and creates no transaction/.test(read('backend/tests/resilience/failureModes.test.js')) && /KAYAD_MASTER_PAYBILL/.test(read('backend/tests/resilience/failureModes.test.js')));

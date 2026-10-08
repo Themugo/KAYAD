@@ -1489,3 +1489,6 @@ a valid "no override" value.
 **STAGE 14A — ADMIN-CONTROLLED NAVIGATION: COMPLETE** (apply the migration
 before deploying; staging smoke of PUT→GET recommended).
 
+
+## Frontend Test Recovery — 2026-10-09
+Resolved all 11 failing frontend tests (9 VehicleMarketplace mobile hero/saved, 2 Navbar). 3 app defects fixed (featured feed `data`/`cars`, hero index race, Saved page identity); remaining were stale expectations proven against the documented contract. Frontend 388 pass / 0 fail / 1 skip (baseline skip); tsc and build clean; 5 stale validators corrected; 2 validators environment-blocked (provider credentials, Node 22.22.2). No backend/migration/RLS change. See `FRONTEND_FAILURE_ROOT_CAUSE_AUDIT.md` and `FRONTEND_FAILURE_REPAIR_REPORT.md`.

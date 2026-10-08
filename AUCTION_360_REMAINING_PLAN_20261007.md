@@ -744,3 +744,6 @@ No new blocking items were introduced by Stage 14.
    reachable from the app; schedule a dedicated sweep.
 6. Stage 15 items 2–7 and the Stage 13/14 carry-forward are unchanged.
 
+
+## Update — Frontend Test Recovery complete (2026-10-09)
+Frontend suite is fully green; no design stage was started. Carry-forward: desktop hero pair-index effect-reset race; reduced-motion handling for the Featured vehicles smooth scroll; run the two environment-blocked validators on Node ≥ 22.22.2 with real provider credentials; deploy order for Stage 14A migration `20261008150000_platform_config_navigation.sql` unchanged.

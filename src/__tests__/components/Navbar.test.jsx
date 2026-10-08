@@ -50,10 +50,16 @@ describe('Navbar', () => {
     expect(screen.getAllByText('KAYAD').length).toBeGreaterThan(0);
   });
 
-  it('renders explicit sign-in and account creation routes for guests', () => {
+  // Approved product contract (Stage 4 -> present): the signed-out header exposes ONE combined
+  // "Sign In / Sign Up" entry that routes to the standalone /login surface, and /login itself carries
+  // the "Create your KAYAD account" link to /register (asserted in pages/LoginPage.test.jsx and
+  // validate-explicit-auth-flows). There is deliberately no second header control for registration.
+  it('renders a single combined Sign In / Sign Up entry for guests (registration is reached through /login)', () => {
     render(<MemoryRouter><Navbar {...guestProps} /></MemoryRouter>);
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /create account/i })).toBeTruthy();
+    const entry = screen.getByRole('button', { name: /sign in \/ sign up/i });
+    expect(entry).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /sign (in|up)/i })).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: /^create account$/i })).toBeNull();
   });
 
   it('navbar Sign In navigates to the standalone login flow', () => {
@@ -74,7 +80,7 @@ describe('Navbar', () => {
     expect(guestProps.onOpenAuth).not.toHaveBeenCalled();
   });
 
-  it('navbar Create Account navigates to the standalone registration flow', () => {
+  it('the mobile drawer offers the same single Sign In / Sign Up entry and it opens the standalone login flow', () => {
     function LocationProbe() {
       const location = useLocation();
       return <span data-testid="location">{location.pathname}</span>;
@@ -87,8 +93,13 @@ describe('Navbar', () => {
         </Routes>
       </MemoryRouter>
     );
-    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
-    expect(screen.getByTestId('location')).toHaveTextContent('/register');
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const entries = Array.from(drawer.querySelectorAll('button')).filter((b) => /sign in \/ sign up/i.test(b.textContent || ''));
+    expect(entries).toHaveLength(1);
+    expect(Array.from(drawer.querySelectorAll('button')).some((b) => /^create account$/i.test((b.textContent || '').trim()))).toBe(false);
+    fireEvent.click(entries[0]);
+    expect(screen.getByTestId('location')).toHaveTextContent('/login');
   });
 
   // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE REGRESSION TEST: while the
