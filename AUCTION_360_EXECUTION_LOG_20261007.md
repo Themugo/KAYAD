@@ -383,3 +383,95 @@ own explicit instruction ("Do not begin Stage 3 until Stage 2 has been
 explicitly classified"), this classification is recorded here and in the
 contract matrix document; Stage 3 (Marketplace/Vehicle/Auction journey-level
 convergence) may now begin in a future pass.
+
+---
+
+# Stage 3 — Marketplace/Vehicle/Auction Convergence (this round)
+Scope: the "KAYAD AUCTION 360 — STAGE 3 EXECUTION / MARKETPLACE → VEHICLE →
+AUCTION CONVERGENCE" master prompt. Full detail, journey matrix, and the
+exit-criteria answers live in
+`AUCTION_MARKETPLACE_VEHICLE_CONVERGENCE_20261007.md` — this section is the
+execution-log summary.
+
+## Environment correction
+
+`npm install --engine-strict=false` installs successfully in this sandbox
+despite the Node `v22.22.0` vs. `>=22.22.2` engine mismatch, after which
+`tsc --noEmit`, the full frontend `vitest` suite, and `npm run build` all
+run for real. Stages 1-2's `ENVIRONMENT BLOCKED` calls for these specific
+commands should be read as "needed this flag," not as a genuine hard block.
+All three were actually run and are reported as PASS below.
+
+## Findings and fixes (5 fixed, 1 deferred with reasoning)
+
+1. `useParams()` always returned `{}` (no `<Routes>`/`<Route>` tree exists
+   anywhere in this app) — `AuctionLivePage.jsx` and
+   `DealerAuctionOperationCase.jsx` both always read `id === undefined`, so
+   the live auction page rendered "Auction not found" for every car, on
+   every real navigation, in production. **Most severe finding across this
+   entire engagement.** **FIXED**: both now read the id via a new
+   `getIdFromPathPrefix()` helper in `navigation.ts`, through
+   `useLocation()`, matching `AuthRouteSurface`'s own established
+   `vehiclePathMatch` convention. Also added `key={path}` to
+   `<AuctionLivePage />`'s render site to fix a related transient
+   cross-auction state-staleness issue on in-app navigation.
+2. Manual (human) bid confirmation never emitted a realtime socket update —
+   only auto-bids did. **FIXED**: `paymentCallback.service.js` now emits
+   `emitBidUpdate`/`emitListingUpdate` after `atomicSettleBidPayment`
+   succeeds, mirroring the auto-bid payload shape exactly.
+3. Dealer's own auction-setup dashboard misclassified a published-but-not-
+   started auction (status `draft`, future `auctionEnd`) as "Live".
+   **FIXED**: `isLive` now checks `auctionStatus === 'live'` only.
+4. Dead `auctionStatus:"active"` filter value (never written to the DB) in
+   3 admin dashboards + 1 executive dashboard, permanently showing "0 active
+   auctions". **FIXED**: all 4 occurrences changed to `"live"`.
+5. Duplicate, hazardous `useCountdown.jsx` shadow file (different/
+   incomplete shape than the canonical `.ts`, inert only by bundler
+   resolution-order accident). **FIXED (converged)**: deleted.
+6. Dealer-dashboard stats endpoint (`dealerRoutes.js`, ~lines 325-440) uses
+   the raw Supabase client directly with camelCase field names
+   (`dealer`, `auctionStatus`) that don't match the real snake_case columns
+   — bypassing the `fieldMap.js` translation layer the rest of the
+   codebase correctly uses. Confirmed real and far broader than its
+   originally-flagged form (affects nearly every stat on that endpoint, not
+   just auction counts). **DEFERRED** — out of this pass's scope (sized for
+   its own dedicated pass; the queries are chained, so a partial fix leaves
+   the query still erroring).
+
+## Tests added
+
+`backend/tests/payments/bidPaymentRealtimeEmit.test.js` (2 cases),
+`src/__tests__/pages/DealerAuctionSetup.test.jsx` (1 case). Both verified to
+actually catch their regression (reverted, re-ran, confirmed the exact
+expected failure, then restored). No existing test modified or weakened.
+
+## Validation
+
+- Backend jest: **37/37 suites, 586/586 tests** (up from Stage 2's 36/36,
+  584/584).
+- Backend validators re-run: `validate-auction-transport-convergence` (5/5),
+  `validate-auction-bid-surface` (6/6), `validate-socket-contract` (PASS),
+  `validate-command-center-domain` (8/8), `validate-runtime-hotspots` (8/8),
+  `validate-dealer-platform-domain` (10/10),
+  `validate-dealer-operations-initiative` (15/15),
+  `validate-backend-runtime-contracts` (14/14),
+  `validate-database-contract-alignment` (8/8), `validate-ecp-domain`
+  (12/12) — all green.
+- Frontend `tsc --noEmit`: **PASS** (exit 0, genuinely run this time).
+- Frontend `vitest run`: **330 passed, 11 failed** (pre-existing/unrelated —
+  2 files, zero import overlap with anything touched this pass), 1 skipped.
+- Frontend `npm run build`: **PASS**.
+
+## Remaining risks
+
+See `AUCTION_MARKETPLACE_VEHICLE_CONVERGENCE_20261007.md` §11 — the dealer-
+dashboard raw-query bug (Finding 6), the registration/eligibility realtime-
+staleness gap (needs new socket infrastructure, not a wiring fix), the four
+Stage-2 carried-forward items (untouched, per explicit scope), a missing
+regression test for `DealerAuctionOperationCase.jsx`, several confirmed-dead
+component files not yet converged/deleted, and the unrelated
+`verifyMFACode()` always-true placeholder.
+
+**STAGE 3 — MARKETPLACE/VEHICLE/AUCTION CONVERGENCE: COMPLETE.** Per the
+master prompt's own ordering, Stage 4 (account/session/identity UX) may now
+begin in a future pass.

@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getIdFromPathPrefix } from '../utils/navigation';
 import { auctionRegistrationAPI, formatKES } from '../api/api';
 import { fetchAuction, fetchAuctionBids, fetchAuctionOutcome, initiateAuctionWinnerPayment } from '../services/auctionService';
 import { placeBid, BidApiError } from '../services/bidApi';
@@ -12,7 +13,18 @@ import { AuctionDisclaimerInline } from '../components/auction';
 import { DomainPremiumHeader, DomainPremiumStats, DomainJourneyRail, DomainTrustStrip } from '../components/ui/DomainPremiumSurface';
 
 export default function AuctionLivePage() {
-  const { id } = useParams();
+  // STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: this app has no
+  // react-router <Routes>/<Route> tree (confirmed: src/main.tsx only wraps
+  // the app in <BrowserRouter>; src/App.tsx::AuthRouteSurface renders this
+  // page directly from a manual `path.startsWith('/auction/')` check, not a
+  // <Route path="/auction/:id">). useParams() therefore always returned {},
+  // so `id` was undefined on every real navigation and this page always
+  // rendered "Auction not found" regardless of which auction was clicked.
+  // Read the id the same way the rest of AuthRouteSurface's manual routing
+  // already does (see its `vehiclePathMatch` convention) instead of relying
+  // on router-provided params that this app's routing never populates.
+  const location = useLocation();
+  const id = useMemo(() => getIdFromPathPrefix(location.pathname, '/auction/'), [location.pathname]);
   const { user, isAuth } = useAuth();
   const { joinAuction, leaveChannel, connected } = useSocket();
   const { toast } = useToast();

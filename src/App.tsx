@@ -680,7 +680,17 @@ function AuthRouteSurface() {
     return <Navigate replace to={`/?nav=marketplace&vehicleId=${encodeURIComponent(vehiclePathMatch[1])}`} />;
   }
 
-  if (path.startsWith('/auction/')) return <AuctionLivePage />;
+  // STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: AuctionLivePage is
+  // rendered directly from this path switch, not from a <Route>, so React
+  // has no identity-driven unmount/remount signal of its own when `path`
+  // changes between two different auctions (e.g. navigating from
+  // /auction/A to /auction/B via AuctionsView's in-app navigate() call).
+  // Without a `key`, the existing component instance is reused and its
+  // `registration`/`car` state can transiently show the previous auction's
+  // data for the brief window before the new auction's fetches resolve.
+  // Keying on `path` forces a clean remount per auction, matching how a
+  // real <Route path="/auction/:id"> would behave.
+  if (path.startsWith('/auction/')) return <AuctionLivePage key={path} />;
   if (path === '/force-password-change') return <ForcePasswordChange />;
 
   // Canonicalize legacy/direct routes into the single AppInner navigation

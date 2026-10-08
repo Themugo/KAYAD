@@ -1,32 +1,79 @@
 # KAYAD Auction 360 — Remaining Plan
-Date: 2026-10-07
+Date: 2026-10-07/08
 
 Stage 1 of the 16-stage continuation prompt is source-level complete (see
 `P0_P1_SOURCE_CERTIFICATION_20261007.md` and
 `AUCTION_360_EXECUTION_LOG_20261007.md`). Stage 2 (API contract convergence)
-is now also complete (see `AUCTION_API_CONTRACT_MATRIX_20261007.md` and the
-Stage 2 section appended to the execution log) — explicitly classified
-**STAGE 2 — API CONTRACT CONVERGENCE: COMPLETE** per the master prompt's own
-requirement before Stage 3 may begin. This document plans Stages 3–16, in the
-order the master prompt specifies — "CONTINUE FROM WHERE YOU ARE", not a
-restart.
+and Stage 3 (marketplace/vehicle/auction convergence) are now also complete
+(see `AUCTION_API_CONTRACT_MATRIX_20261007.md`,
+`AUCTION_MARKETPLACE_VEHICLE_CONVERGENCE_20261007.md`, and the Stage 2/3
+sections appended to the execution log) — both explicitly classified
+**COMPLETE** per the master prompt's own requirement before the next stage
+may begin. This document plans Stages 4–16, in the order the master prompt
+specifies — "CONTINUE FROM WHERE YOU ARE", not a restart.
 
-## Before Stage 8 (frontend) can begin cleanly — unchanged, still open
+## Environment correction (supersedes the Stage-2 note below)
+
+Stage 3 discovered that `npm install --engine-strict=false` installs
+successfully in this sandbox despite the Node `v22.22.0` vs. `>=22.22.2`
+mismatch, after which `tsc --noEmit`, the full frontend `vitest` suite, and
+`npm run build` all genuinely run and were run clean. The item below
+("Run a full root npm install...") is no longer blocked in the sense Stage
+2 recorded it — use the flag. The one thing still genuinely needing a
+matching-engine environment is live-database migration certification
+(item 1 below), which is a Postgres/Supabase constraint, not a Node one.
+
+## Before Stage 8 (frontend) can begin cleanly
 
 1. Apply both Stage-1 migrations
    (`20261007190000_auction_winner_payment_deadline_lock.sql`,
    `20261007200000_inspection_domain_rls_enable.sql`) to a real
    Postgres/Supabase instance and re-run the full validator suite against it,
-   to move their status from SOURCE-LEVEL PASS to live-certified.
-2. Run a full root `npm install` + `tsc --noEmit` + `npm run build` in an
-   environment matching the repo's declared Node engine (`>=22.22.2`) — this
-   sandbox still cannot do it (`v22.22.0`), re-confirmed during Stage 2. This
-   is also now the explicit blocker for closing the one Stage-2 deferred
-   finding below (the vehicle `rejected`-status mapping).
+   to move their status from SOURCE-LEVEL PASS to live-certified. Still
+   blocked — no live Postgres/Supabase instance is reachable from this
+   sandbox, unrelated to the Node-version item above.
+2. ~~Run a full root npm install + tsc --noEmit + npm run build~~ — DONE
+   this pass, with `--engine-strict=false`. No longer a blocker.
 
-Neither blocks Stage 3 itself (a pure code/journey trace, not a live-
-infrastructure task), but both must close out before Stage 8, where a real
-build and a real browser matter.
+Does not block Stage 4 itself (a pure code/journey trace, not a live-
+infrastructure task), but item 1 must close out before Stage 8, where a
+real build and a real browser matter.
+
+## Carried forward from Stage 3 — not yet fixed, with reasoning recorded
+
+1. **Dealer-dashboard stats endpoint raw-query column-name bug**
+   (`backend/routes/dealerRoutes.js`, ~lines 325-440) — every `.eq("dealer",
+   ...)`/`.eq("auctionStatus", ...)` filter in this block uses the raw
+   Supabase client directly with camelCase field names that don't match the
+   real snake_case columns (`dealer_id`, `auction_status`), bypassing the
+   `fieldMap.js` translation layer the rest of the codebase correctly uses.
+   Confirmed real; affects nearly every stat on this endpoint (total cars,
+   sold cars, views, revenue, live/draft auction counts), not just the
+   auction-status value originally flagged. Sized for its own dedicated
+   pass — the filters are chained, so a partial fix leaves the query still
+   erroring on whichever `.eq()` is fixed last.
+2. **Registration/eligibility realtime-staleness after async commitment
+   confirmation** — `AuctionLivePage.jsx` fetches `registration` once and
+   never refetches; there is no backend socket event for registration/
+   commitment state changes at all (unlike bids, which now have one per
+   Stage 3's Finding 2). Closing this needs new realtime infrastructure,
+   not a wiring fix to something already there. Candidate for Stage 4
+   (account/session/identity UX) or its own follow-up.
+3. **Confirmed-dead component/page files not converged**: `Showroom.jsx`/
+   `.tsx`, the `VehicleCard` duplicate cluster
+   (`components/gallery/VehicleCard.tsx`, `components/VehicleCard/VehicleCard.jsx`),
+   `components/features/auction/CountdownDisplay.tsx`,
+   `components/home/LiveAuctionsSection.tsx`,
+   `pages/home/components/HomeLiveAuctions.jsx`. All confirmed zero live
+   importers; not deleted this pass (unlike `useCountdown.jsx`, which was
+   both dead AND a live footgun) pending an explicit decision on removing
+   whole unreachable pages/components.
+4. **`verifyMFACode()` always returns `true`** (`backend/identity/services/
+   identityService.js:294`, `const isValid = true; // Placeholder`) — MFA
+   verification currently always succeeds regardless of the submitted code.
+   Unrelated to auction/vehicle contracts; worth its own security ticket if
+   MFA is relied on in production auth flows. Surfaced incidentally during
+   the mock/fallback sweep.
 
 ## Carried forward from Stage 2 — not yet fixed, with reasoning recorded
 
@@ -53,16 +100,20 @@ counts"). They should be picked up explicitly, not silently forgotten:
    as out of scope for any convergence pass; needs its own dedicated
    architecture stage, not a slot in Stages 3–16 as currently numbered.
 
-## Stage 3 — Marketplace/vehicle/auction convergence (next)
+## Stage 3 — Marketplace/vehicle/auction convergence — COMPLETE
 
-Plan: walk the real journey marketplace → vehicle detail → auction detail →
-registration → live bidding → close → winner → payment with one real car
-record traced through every layer, confirming `auction.id === car.id` (already
-established as a hard invariant and re-confirmed this pass and the prior one)
-holds through every intermediate read, and that no page falls back to mock or
-placeholder inventory on a slow/failed fetch.
+Done this pass — see `AUCTION_MARKETPLACE_VEHICLE_CONVERGENCE_20261007.md`.
+The journey marketplace → vehicle detail → auction detail → registration →
+live bidding → close → winner → payment was traced end to end;
+`auction.id === car.id === carId` re-confirmed as a hard invariant; the
+single most severe defect of the whole engagement to date (the live auction
+page never actually reading its own URL's id) was found and fixed, along
+with 4 other real defects. No mock/placeholder-inventory fallback risk
+found. One real defect (the dealer-dashboard stats endpoint's raw-query
+column bug) deferred as out of scope/size for this pass — see "Carried
+forward from Stage 3" above.
 
-## Stage 4 — Account/session/identity UX
+## Stage 4 — Account/session/identity UX (next)
 
 Plan: trace create-account → verify → sign-in → session-restore → profile →
 registration → bidding → payment → history, specifically checking: CSRF token
@@ -121,10 +172,12 @@ will continue to apply at every future stage.
 
 ## Summary of what's genuinely left
 
-Source-level backend/contract work (Stages 1–7) is either done (Stage 1:
-source-level trust-boundary sweep; Stage 2: API contract convergence) or
-scoped and ready to start in order (Stages 3–7). The 4 items carried forward
-from Stage 2 above are explicit, recorded exceptions, not silent gaps. All
-frontend/UX work (Stages 8–14) is entirely unstarted and gated behind Stages
-3–7 landing, per the master prompt's own explicit ordering. No part of this
-plan proposes restarting, redesigning, or duplicating anything already built.
+Source-level backend/contract/journey work (Stages 1–7) is either done
+(Stage 1: source-level trust-boundary sweep; Stage 2: API contract
+convergence; Stage 3: marketplace/vehicle/auction convergence) or scoped
+and ready to start in order (Stages 4–7). The 4 items carried forward from
+Stage 2 and the 4 carried forward from Stage 3 above are explicit, recorded
+exceptions, not silent gaps. All frontend/UX work (Stages 8–14) is entirely
+unstarted and gated behind Stages 4–7 landing, per the master prompt's own
+explicit ordering. No part of this plan proposes restarting, redesigning,
+or duplicating anything already built.

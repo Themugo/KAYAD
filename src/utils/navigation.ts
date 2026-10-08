@@ -1,5 +1,40 @@
 import { Vehicle } from '../types';
 
+/**
+ * STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: this app has no
+ * react-router `<Routes>`/`<Route>` tree anywhere (confirmed: `src/main.tsx`
+ * only wraps the app in `<BrowserRouter>`; routing is a manual path switch
+ * in `src/App.tsx::AuthRouteSurface`). `useParams()` only ever returns
+ * values populated by an ancestor `<Route>` match — with none in the render
+ * tree, it always returns `{}`. Two live pages rendered directly from that
+ * path switch (`AuctionLivePage`, matched on `/auction/:id`, and
+ * `DealerAuctionOperationCase`, matched on `/dealer/auction-operations/:id`)
+ * destructured `useParams().id` as their sole source of identity, so `id`
+ * was `undefined` on every real navigation — the live auction page always
+ * rendered "Auction not found" and the dealer case page always rendered
+ * "Auction case not found", for every car, regardless of which one was
+ * clicked. `AuthRouteSurface` already has an established, working
+ * convention for exactly this (`vehiclePathMatch` on `/cars/:id`): extract
+ * the trailing path segment directly from the URL instead of relying on
+ * router-provided params. This helper generalizes that convention so both
+ * affected pages can read their own canonical identity the same way,
+ * without introducing a second routing mechanism.
+ *
+ * Takes the pathname explicitly (from react-router's own `useLocation()`,
+ * the same source `AuthRouteSurface` already reads) rather than reading
+ * `window.location` directly — `AuthRouteSurface` itself is rendered under
+ * `<BrowserRouter>` in production, where the two stay in sync, but tests
+ * mount pages under `<MemoryRouter>`, which deliberately does NOT update
+ * `window.location`. Reading through `useLocation()` keeps this helper
+ * correct in both.
+ */
+export function getIdFromPathPrefix(pathname: string, prefix: string): string | null {
+  if (!pathname || !pathname.startsWith(prefix)) return null;
+  const rest = pathname.slice(prefix.length);
+  const segment = rest.split('/')[0];
+  return segment ? decodeURIComponent(segment) : null;
+}
+
 export const VEHICLE_PARAM = 'vehicleId';
 
 /**

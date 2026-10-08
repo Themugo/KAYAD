@@ -124,9 +124,14 @@ export async function executeSelfHealing(action, actorId, req) {
   return { success: true, data: row };
 }
 
+// STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: `liveAuctions` below
+// filtered on `auctionStatus: "active"`, a value `cars.auction_status` never
+// actually stores (it's only 'none' | 'draft' | 'live' | 'ended' - 'active'
+// is the serialized public status toAuctionResponse() derives, not a raw DB
+// value), so this executive dashboard stat was permanently 0.
 export async function getBusinessHealth() {
   const [activeUsers, activeDealers, vehiclesListed, liveAuctions, revenueRows, incidents] = await Promise.all([
-    count("users", { isBanned: false, deactivatedAt: null }), count("users", { role: "dealer", isBanned: false, deactivatedAt: null }), count("cars", { status: "available", deletedAt: null }), count("cars", { hasAuction: true, auctionStatus: "active", deletedAt: null }), findAll("payments", { filters: { status: "success", createdAt: { $gte: since(1) } }, limit: 500 }), count("incidents", { status: { $in: ["open", "investigating", "mitigated"] } })
+    count("users", { isBanned: false, deactivatedAt: null }), count("users", { role: "dealer", isBanned: false, deactivatedAt: null }), count("cars", { status: "available", deletedAt: null }), count("cars", { hasAuction: true, auctionStatus: "live", deletedAt: null }), findAll("payments", { filters: { status: "success", createdAt: { $gte: since(1) } }, limit: 500 }), count("incidents", { status: { $in: ["open", "investigating", "mitigated"] } })
   ]);
   return { success: true, data: { activeUsers, activeDealers, vehiclesListed, liveAuctions, revenueToday: revenueRows.reduce((s,p) => s + Number(p.amount || 0), 0), openIncidents: incidents } };
 }

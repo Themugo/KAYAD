@@ -3,6 +3,7 @@ import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { emitBidUpdate, emitListingUpdate } from "../socket/socket.js";
 import { atomicSettleBidPayment, atomicSettlePurchasePayment } from "../utils/atomicTransactions.js";
 import { recordPaymentEvent, recordWebhookReceipt, markWebhookProcessed, markAttemptByCheckout } from "./paymentFinancialLifecycle.service.js";
 import { assertPaymentTransition } from "./paymentStateMachine.js";
@@ -200,7 +201,43 @@ export const handleMpesaCallback = async (callbackData) => {
     }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
 
     if (payment.type === "bid") {
-      await retry(() => atomicSettleBidPayment(payment.id, receipt));
+      // STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: this is the
+      // ONLY place a human-placed bid becomes market-authoritative (the bid
+      // is written "pending" at placement time, per the KES-1-confirmation
+      // design - see bidController.js::placeBid) - but until now nothing
+      // here ever told the live auction page about it. emitBidUpdate/
+      // emitListingUpdate are only ever called from the auto-bid paths
+      // (bidController.js::runAutoBidding, autoBid.service.js); a confirmed
+      // MANUAL bid never emitted either, so AuctionLivePage's own
+      // joinAuction/onBid socket handler - which IS correctly wired on the
+      // frontend - never fired for the normal human-bidding path. The only
+      // thing that kept this from being user-visible was the page's own
+      // 10-30s polling fallback. Mirror the exact payload shape
+      // runAutoBidding already emits so the frontend's existing handler
+      // needs no changes.
+      const settled = await retry(() => atomicSettleBidPayment(payment.id, receipt));
+      if (settled?.car_id) {
+        try {
+          const [settledBid, settledCar] = await Promise.all([
+            findById("bids", settled.bid_id).catch(() => null),
+            findById("cars", settled.car_id).catch(() => null),
+          ]);
+          await emitBidUpdate(String(settled.car_id), {
+            amount: Number(settled.amount || 0),
+            bidderTag: settledBid?.bidderTag || settledBid?.bidder_tag || "Bidder",
+            time: new Date().toISOString(),
+            auto: false,
+          });
+          emitListingUpdate(String(settled.car_id), {
+            currentBid: Number(settled.amount || 0),
+            bidsCount: Number(settledCar?.bidsCount || settledCar?.bids_count || 0),
+          });
+        } catch (emitErr) {
+          // A missed realtime emit must never fail payment confirmation -
+          // the page's own authoritative-state poll is the backstop.
+          logWarn("Bid settlement realtime emit failed", { error: emitErr.message, paymentId: payment.id });
+        }
+      }
     }
 
     if (payment.type === "auction_win") {

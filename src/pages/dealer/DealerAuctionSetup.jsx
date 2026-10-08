@@ -43,7 +43,18 @@ export default function DealerAuctionSetup() {
     return cars.reduce((groups, car) => {
       const end = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
       const isEnded = car.auctionStatus === 'ended' || (end > 0 && end <= now);
-      const isLive = !isEnded && (car.auctionStatus === 'live' || end > now);
+      // STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: `|| end > now`
+      // previously let a published-but-not-yet-started auction count as
+      // "live" the moment it was published, because auctionSetup.service.js
+      // writes the real future auctionEnd at publish time while the car's
+      // own auctionStatus is still 'draft' until the auction engine's timer
+      // actually starts it. The only authoritative value for auction phase
+      // is auctionStatus itself (confirmed: it's only ever 'none' | 'draft'
+      // | 'live' | 'ended') - a future end time on its own says nothing
+      // about whether bidding has actually opened, and this dashboard
+      // showed a ticking countdown and a working-looking "End Auction"
+      // button for an auction the backend would still reject every bid on.
+      const isLive = !isEnded && car.auctionStatus === 'live';
       if (isLive) groups.live.push(car);
       else if (isEnded) groups.ended.push(car);
       else groups.draft.push(car);

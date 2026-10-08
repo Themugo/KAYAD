@@ -1,14 +1,27 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Clock3, FileText, Gavel, Truck, Wallet } from 'lucide-react';
 import { auctionOperationsAPI } from '../../api/api';
 import { AuctionFulfilmentTimeline } from '../../components/auction/AuctionPremiumSurface';
 import { useToast } from '../../context/ToastContext';
+import { getIdFromPathPrefix } from '../../utils/navigation';
 
 const money = (n) => `KES ${Number(n || 0).toLocaleString('en-KE')}`;
 
 export default function DealerAuctionOperationCase() {
-  const { id } = useParams();
+  // STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: same root cause as
+  // AuctionLivePage.jsx — this app has no react-router <Routes>/<Route>
+  // tree (src/App.tsx::AuthRouteSurface renders this page directly from a
+  // manual `path.startsWith('/dealer/auction-operations/')` check), so
+  // useParams() always returned {} and `id` was always undefined, making
+  // this page render "Auction case not found." for every case regardless
+  // of which row was clicked. Read the id from the URL the same way
+  // AuthRouteSurface's own `vehiclePathMatch` convention already does.
+  const location = useLocation();
+  const id = useMemo(
+    () => getIdFromPathPrefix(location.pathname, '/dealer/auction-operations/'),
+    [location.pathname],
+  );
   const { toast } = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
