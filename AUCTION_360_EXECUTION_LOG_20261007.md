@@ -941,3 +941,66 @@ every prior stage.
 
 **STAGE 9 — ESCROW CAPABILITY ADMINISTRATION + CONFIGURATION + FINANCIAL
 ACCOUNT BOUNDARY: COMPLETE.**
+
+## STAGE 10 — PREMIUM CUSTOMER AUCTION EXPERIENCE + MARKETPLACE UX CONVERGENCE
+
+**Scope:** Visual/UX convergence pass across the full customer auction/
+marketplace surface (Steps 10A–10Z of the master prompt) — no new backend
+architecture, no change to canonical business logic, no reintroduction of
+`escrowOverride`/`escrow_approved`/`escrow_forced` as competing authority.
+
+**Real defects found and fixed (3):**
+1. The main paginated inventory grid — the actual card customers scroll
+   through — turned out to be a fourth, previously-undocumented, hand-
+   rolled card distinct from the Stage 8 `VehicleCard.tsx` component.
+   Its badge logic was a single mutually-exclusive ribbon keyed off the
+   `isAuction` capability flag rather than `auctionLifecycle`, so a
+   scheduled or ended auction could show "🔴 Live Auction" on the real
+   marketplace grid — reintroducing, on this undiscovered fourth card,
+   exactly the lifecycle/capability confusion Stage 8 believed it had
+   fixed everywhere. Fixed across 5 call sites in
+   `VehicleMarketplace.tsx` by switching to the same canonical
+   `auctionLifecycle`/`isEscrowApplicable()`/`inspectionPassed` fields
+   already used by `VehicleCard.tsx` — no new badge logic invented.
+2. `VehicleDetailPage.tsx`'s unconditional "Clean Title" badge was a
+   fabricated trust claim with no backing field anywhere — removed.
+3. `VehicleDetailPage.tsx`'s unconditional "Duty Paid" chip was wired to
+   a real, already-existing, authoritative backend field
+   (`cars.duty_status`, NTSA-verification-only) that the backend already
+   selected but the frontend never consumed — connected rather than
+   removed, since a real authoritative source existed.
+
+**What changed:** 4 frontend source files
+(`VehicleMarketplace.tsx`, `VehicleDetailPage.tsx`, `vehicleApi.ts`,
+`types/index.ts`) + 1 updated test file
+(`VehicleMarketplace.test.tsx`, +1 new regression test). **Zero backend
+files changed** — every fix reads a field the backend already
+authoritatively provides; the Stage 9 escrow capability authority chain
+was not reopened.
+
+**Validation:** Backend jest **48/48 suites, 644/644 tests**
+(unchanged — zero backend changes this stage); `tsc --noEmit` clean;
+frontend `vitest run` **341 passed / 11 pre-existing-unrelated failed /
+1 skipped / 353 total** (up from Stage 8/9's 340/352 by exactly the one
+new passing test, 0 regressions); `npm run build` clean. 11 relevant
+validators re-run, all green (see
+`AUCTION_UX_EXECUTION_REPORT_20261008.md` for the full list). The new
+test was verified via revert/confirm-fail/restore/confirm-pass: reverting
+the fix reproduced the exact "Live Auction" mislabeling it was written to
+catch.
+
+**Carry-forward (6, all visual-consistency or product-decision items, none
+functional regressions):** three parallel design-token/typography
+systems unreconciled; icon-to-concept mapping inconsistent sitewide
+beyond the surfaces directly touched; 4 components re-implement
+`prefers-reduced-motion` inline instead of reusing the shared hook, and
+the richest decorative motion isn't gated by it; the already-deprecated,
+orphaned `MobileCarCard.jsx` not yet removed; `VehicleDetailPage.tsx`'s
+second, parallel bid-submission path still lacks a loading/disabled
+guard (closing it requires first deciding whether that path should
+remain, a product question outside this stage's scope); mobile
+breakpoint re-verification and a dedicated accessibility pass still
+require a reachable browser/device runtime.
+
+**STAGE 10 — PREMIUM CUSTOMER AUCTION EXPERIENCE + MARKETPLACE UX
+CONVERGENCE: COMPLETE.**

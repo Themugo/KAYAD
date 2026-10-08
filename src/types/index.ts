@@ -338,6 +338,7 @@ export interface Vehicle {
   inspectionPassed?: boolean;
   inspectionReportId?: string;
   escrowEligible?: boolean;
+  dutyPaid?: boolean;
   escrowOverride?: 'enforce' | 'revoke' | null;
   financeAvailable?: boolean;
   inspectionBookingAvailable?: boolean;

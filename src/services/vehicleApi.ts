@@ -75,6 +75,8 @@ export interface BackendCar {
   approved?: boolean | null;
   inspection_status?: string | null;
   inspectionStatus?: string | null;
+  duty_status?: string | null;
+  dutyStatus?: string | null;
   is_verified_dealer?: boolean | null;
   isVerifiedDealer?: boolean | null;
   dealer?: string | { _id?: string; id?: string; name?: string; businessName?: string; business_name?: string; avatar?: string; phone?: string; email?: string; role?: string; dealerApprovedAt?: string | null } | null;
@@ -293,6 +295,17 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
   // escrowEligible) silently always evaluated as false/undefined —
   // not because the backend said so, but because nothing ever told it.
   const escrowEligible = Boolean(car.escrowEnabled ?? car.escrow_enabled);
+  // STAGE 10M FIX: cars.duty_status is a real, authoritative backend field
+  // (written only by the NTSA verification workflow, AdminNtsaQueue.jsx,
+  // to the literal value 'duty_paid' once actually confirmed — never a
+  // client-settable free text on the public listing form), but it was
+  // never threaded through to the frontend at all. The vehicle detail
+  // page's "Duty Paid" chip rendered unconditionally regardless of this
+  // field — a fabricated trust claim per this stage's explicit audit.
+  // Fixed by wiring the real field through, rather than removing the
+  // signal outright, since (unlike "Clean Title") an authoritative source
+  // for it already exists.
+  const dutyStatus = String(car.dutyStatus ?? car.duty_status ?? '').trim();
   const auctionLifecycle = (['none', 'draft', 'live', 'ended'] as const).includes(auctionStatus as 'none' | 'draft' | 'live' | 'ended')
     ? (auctionStatus as 'none' | 'draft' | 'live' | 'ended')
     : 'none';
@@ -339,6 +352,7 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
     inspectionStatus: inspectionStatus || undefined,
     inspectionPassed: inspectionStatus.toLowerCase() === 'passed',
     escrowEligible,
+    dutyPaid: dutyStatus.toLowerCase() === 'duty_paid',
     status: car.status === 'sold' ? 'sold' : car.status === 'pending' ? 'pending' : car.status === 'draft' ? 'draft' : 'active',
     isFeatured: Boolean(car.isPromoted ?? car.is_promoted),
     createdAt: car.createdAt || car.created_at || '',

@@ -335,6 +335,76 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       });
     }
   });
+
+  // STAGE 10 MARKETPLACE VISUAL CONVERGENCE FIX: this inventory grid card
+  // previously had its own, independent, mutually-exclusive badge
+  // calculation (a single "ribbon" keyed off v.isAuction, the capability
+  // flag) instead of the canonical auctionLifecycle/escrowEligible/
+  // inspectionPassed fields already used by VehicleCard.tsx since Stage 8.
+  // Two real defects this proves are fixed: (1) a scheduled/ended auction
+  // must never render "Live Auction" on this grid, and (2) ESCROW and
+  // INSPECTED signals must be able to show independently and in
+  // combination, not as a single mutually-exclusive label.
+  it('renders lifecycle-aware auction labels and independent escrow/inspection signals on the inventory grid card (not a single mutually-exclusive ribbon)', async () => {
+    const scheduledId = 'lifecycle-draft-1';
+    const liveId = 'lifecycle-live-1';
+    const endedId = 'lifecycle-ended-1';
+    vehicleApiMocks.getCars.mockReset();
+    vehicleApiMocks.getCars.mockResolvedValue({
+      success: true,
+      data: [
+        {
+          id: scheduledId, title: 'Scheduled Auction Car', brand: 'Toyota', model: 'Prado', year: 2021,
+          price: 3000000, mileage: 40000, fuel: 'Petrol', transmission: 'Automatic', body_type: 'SUV',
+          location_city: 'Nairobi', has_auction: true, auction_status: 'draft', current_bid: null,
+          bids_count: 0, auction_end: null, escrow_enabled: false, inspection_status: 'pending',
+          is_verified_dealer: false, is_promoted: false, dealer_id: null, images: [],
+        },
+        {
+          id: liveId, title: 'Live Auction Car', brand: 'Toyota', model: 'Hilux', year: 2020,
+          price: 2500000, mileage: 60000, fuel: 'Diesel', transmission: 'Manual', body_type: 'Pickup',
+          location_city: 'Mombasa', has_auction: true, auction_status: 'live', current_bid: 2600000,
+          bids_count: 4, auction_end: new Date(Date.now() + 3600_000).toISOString(),
+          escrow_enabled: true, inspection_status: 'passed',
+          is_verified_dealer: true, is_promoted: false, dealer_id: null, images: [],
+        },
+        {
+          id: endedId, title: 'Ended Auction Car', brand: 'Nissan', model: 'X-Trail', year: 2019,
+          price: 1800000, mileage: 80000, fuel: 'Petrol', transmission: 'Automatic', body_type: 'SUV',
+          location_city: 'Kisumu', has_auction: true, auction_status: 'ended', current_bid: 1900000,
+          bids_count: 6, auction_end: new Date(Date.now() - 3600_000).toISOString(),
+          escrow_enabled: false, inspection_status: 'pending',
+          is_verified_dealer: false, is_promoted: false, dealer_id: null, images: [],
+        },
+      ],
+      pagination: { page: 1, limit: 24, total: 3, pages: 1 },
+    });
+
+    await renderMarketplace({ ...baseProps, vehicles: [] });
+    const grid = await screen.findByTestId('inventory-grid');
+
+    // The scheduled auction must never show as live or bid-ready.
+    // Titles render as "{year} {make} {model}" split across text nodes, so
+    // match on the unique model name rather than the fixture's own `title`.
+    const scheduledCard = within(grid).getByText(/Prado/).closest('article')!;
+    expect(within(scheduledCard).getAllByText(/Upcoming Auction/i).length).toBeGreaterThan(0);
+    expect(within(scheduledCard).queryByText(/Live Auction/i)).toBeNull();
+    expect(within(scheduledCard).queryByText(/Current bid/i)).toBeNull();
+
+    // The ended auction must never look bid-ready either.
+    const endedCard = within(grid).getByText(/X-Trail/).closest('article')!;
+    expect(within(endedCard).getAllByText(/Auction Ended/i).length).toBeGreaterThan(0);
+    expect(within(endedCard).queryByText(/Live Auction/i)).toBeNull();
+    expect(within(endedCard).queryByText(/Current bid/i)).toBeNull();
+
+    // The live auction, which is also escrow-eligible AND inspected, shows
+    // all three signals at once rather than only one mutually-exclusive label.
+    const liveCard = within(grid).getByText(/Hilux/).closest('article')!;
+    expect(within(liveCard).getAllByText(/Live Auction/i).length).toBeGreaterThan(0);
+    expect(within(liveCard).getByText(/Escrow/i)).toBeTruthy();
+    expect(within(liveCard).getByText(/Inspected/i)).toBeTruthy();
+    expect(within(liveCard).getByText(/Current bid/i)).toBeTruthy();
+  });
 });
 
 describe('VehicleMarketplace - consolidated Make selector (space audit)', () => {

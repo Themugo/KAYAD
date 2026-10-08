@@ -3,6 +3,7 @@ import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
 import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
+import { isEscrowApplicable } from '../../../utils/escrow';
 import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
 import FloatingAdRail from '../../../components/FloatingAdRail';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
@@ -585,7 +586,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       vehicle.badge || (vehicle.isFeatured ? 'Featured vehicle' : ''),
       vehicle.inspectionPassed ? 'Inspection passed' : '',
       vehicle.isDealerCertified ? 'Verified dealer' : '',
-      vehicle.isAuction ? 'Live auction' : '',
+      // STAGE 10 FIX: lifecycle-aware, not the bare capability flag — see the
+      // identical fix applied to the main inventory grid card below.
+      vehicle.auctionLifecycle === 'live' ? 'Live auction'
+        : vehicle.auctionLifecycle === 'draft' ? 'Upcoming auction'
+        : vehicle.auctionLifecycle === 'ended' ? 'Auction ended' : '',
       vehicle.location ? vehicle.location : '',
     ].filter(Boolean);
     return facts.slice(0, 3).join(' · ');
@@ -953,7 +958,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <img src={heroImageForVehicle(heroLeftVehicle)} alt={`${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-[98%] max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 left-4 max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 backdrop-blur-md">
-                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
+                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroLeftVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroLeftVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
                           <div className="mt-1 truncate text-sm font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}</div>
                           <div className="mt-0.5 text-[9px] text-white/65">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : heroCardContent[heroLeftVehicle.id]?.detail || heroLeftVehicle.description || 'Premium vehicle showcase'}</div>
                         </div>
@@ -978,7 +983,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <img src={heroImageForVehicle(heroRightVehicle)} alt={`${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-[98%] max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" />
                       {heroPresentation.showVehicleInfoCards && (
                         <div className="absolute bottom-5 right-4 max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/72 px-3.5 py-2.5 text-left backdrop-blur-md">
-                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.isAuction ? 'Live auction' : 'KAYAD SELECT')}</div>
+                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroRightVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroRightVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
                           <div className="mt-1 truncate text-sm font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}</div>
                           <div className="mt-0.5 text-[9px] text-white/65">{heroRightVehicle.isAuction ? heroAuctionMeta(heroRightVehicle) : heroCardContent[heroRightVehicle.id]?.detail || heroRightVehicle.description || 'Premium vehicle showcase'}</div>
                         </div>
@@ -1591,13 +1596,28 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   }
                   const v = item.vehicle;
                   const isSaved = savedVehicles.includes(v.id);
-                  const ribbon = v.inspectionPassed
-                    ? { label: 'Report Available', cls: 'bg-emerald-600' }
-                    : v.isAuction
-                    ? { label: '🔴 Live Auction', cls: 'bg-[#12576D]' }
-                    : v.badge
-                    ? { label: `★ ${v.badge}`, cls: 'bg-[#0A3340]' }
-                    : null;
+                  // STAGE 10 MARKETPLACE VISUAL CONVERGENCE FIX: this hand-rolled
+                  // grid card had its own, third, independent badge calculation
+                  // (a single mutually-exclusive "ribbon"), separate from both
+                  // VehicleCard.tsx's canonical AUCTION/ESCROW/INSPECTION badge
+                  // logic (Stage 8) and utils/escrow.ts's isEscrowApplicable().
+                  // Two real defects: (1) it keyed the auction label off
+                  // v.isAuction (the capability flag) rather than
+                  // v.auctionLifecycle, so a scheduled (draft) or already-ended
+                  // auction rendered as "🔴 Live Auction" on this, the actual
+                  // paginated marketplace grid users scroll through — exactly
+                  // the Stage 8 defect that was fixed in VehicleCard.tsx but
+                  // never in this separate card; (2) it never showed an ESCROW
+                  // signal at all, and could only ever show one of
+                  // auction/escrow/inspection at a time instead of all that
+                  // apply. Fixed by reusing the identical canonical fields and
+                  // the same isEscrowApplicable() helper as VehicleCard.tsx —
+                  // no new badge logic invented, no duplicated authority.
+                  const showLiveAuction = v.auctionLifecycle === 'live';
+                  const showUpcomingAuction = v.auctionLifecycle === 'draft';
+                  const showEndedAuction = v.auctionLifecycle === 'ended';
+                  const showEscrow = isEscrowApplicable(v);
+                  const showInspected = Boolean(v.inspectionPassed);
                   return (
                     <article
                       key={v.id}
@@ -1617,11 +1637,33 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                           </div>
                         )}
                         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
-                          {ribbon ? (
-                            <span className={`text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm ${ribbon.cls}`}>
-                              {ribbon.label}
-                            </span>
-                          ) : <span />}
+                          <div className="flex flex-wrap gap-1 max-w-[78%]">
+                            {showLiveAuction && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-rose-600">
+                                <Gavel className="w-2.5 h-2.5" />Live Auction
+                              </span>
+                            )}
+                            {showUpcomingAuction && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-[#176B87]">
+                                <Gavel className="w-2.5 h-2.5" />Upcoming Auction
+                              </span>
+                            )}
+                            {showEndedAuction && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-slate-500">
+                                <Gavel className="w-2.5 h-2.5" />Auction Ended
+                              </span>
+                            )}
+                            {showEscrow && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-[#0A3340]">
+                                <Lock className="w-2.5 h-2.5" />Escrow
+                              </span>
+                            )}
+                            {showInspected && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-emerald-600">
+                                <ShieldCheck className="w-2.5 h-2.5" />Inspected
+                              </span>
+                            )}
+                          </div>
                           <button
                             onClick={() => onToggleSave(v.id)}
                             className="w-8 h-8 rounded-full bg-[#0A3340]/75 hover:bg-[#0A3340] text-white flex items-center justify-center backdrop-blur-sm transition-colors"
@@ -1631,7 +1673,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                             <span className="text-base leading-none">{isSaved ? '♥' : '♡'}</span>
                           </button>
                         </div>
-                        {v.isAuction && v.currentBid && (
+                        {/* STAGE 10 FIX: gated on auctionLifecycle === 'live', not
+                            the isAuction capability flag — a scheduled or ended
+                            auction must never show a "current bid, live now"
+                            banner implying it is bid-ready. */}
+                        {showLiveAuction && v.currentBid && (
                           <div className="absolute bottom-0 left-0 right-0 bg-[#0A3340]/90 backdrop-blur-sm text-white text-[10px] px-3 py-2 flex items-center justify-between gap-2">
                             <span className="font-semibold text-slate-200">Current bid</span>
                             <span className="font-black">{formatPriceM(v.currentBid)}</span>
@@ -1642,7 +1688,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <div className={`${inventoryDensity.body} flex-1 flex flex-col min-w-0`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#176B87] mb-1">{v.isAuction ? 'Live auction' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#176B87] mb-1">{showLiveAuction ? 'Live auction' : showUpcomingAuction ? 'Upcoming auction' : showEndedAuction ? 'Auction ended' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
                             <h4 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-[#0A3340] line-clamp-2`}>
                               {v.year} {v.make} {v.model}
                             </h4>

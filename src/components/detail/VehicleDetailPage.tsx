@@ -525,10 +525,20 @@ export const VehicleDetailPage: FC = () => {
               )}
 
               {/* Badges Overlay */}
+              {/* STAGE 10M FIX: this previously showed an unconditional "Clean
+                  Title" badge with a ShieldCheck "verified" icon, backed by no
+                  real vehicle field anywhere in this app (confirmed by grep —
+                  no titleStatus/cleanTitle field exists on the Vehicle type or
+                  anywhere in vehicleApi.ts's mapper). Flagged but left
+                  unfixed in Stage 8/9's carry-forward notes; Stage 10's
+                  explicit instruction is to either make its source
+                  authoritative or stop presenting it as a verified trust
+                  signal. No backend title-status field or verification
+                  workflow exists to make authoritative without inventing new
+                  business logic/architecture (out of this stage's scope), so
+                  the fabricated claim is removed outright rather than kept as
+                  a misleading "verified" badge. */}
               <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10 pointer-events-none">
-                <Badge variant="emerald" icon={<ShieldCheck className="w-3.5 h-3.5" />}>
-                  Clean Title
-                </Badge>
                 {vehicle.inspection && (
                   <Badge variant="amber">
                     150-Pt Score: {vehicle.inspection.score}/100
@@ -840,9 +850,15 @@ export const VehicleDetailPage: FC = () => {
                 <span className="text-3xl font-black text-[#176B87] font-serif">
                   KSh {vehicle.price.toLocaleString()}
                 </span>
-                <span className="text-xs text-emerald-700 font-extrabold bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 shrink-0">
-                  Duty Paid
-                </span>
+                {/* STAGE 10M FIX: gated on the real, authoritative
+                    vehicle.dutyPaid field (cars.duty_status === 'duty_paid',
+                    written only by the NTSA verification workflow) instead
+                    of rendering unconditionally for every vehicle. */}
+                {vehicle.dutyPaid && (
+                  <span className="text-xs text-emerald-700 font-extrabold bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 shrink-0">
+                    Duty Paid
+                  </span>
+                )}
               </div>
 
               {/* Buy Now Direct Protection CTA Button (Primary Action) */}

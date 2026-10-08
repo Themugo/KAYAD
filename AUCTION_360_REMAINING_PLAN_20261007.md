@@ -434,12 +434,61 @@ matrix, and the execution report in
   unnecessary authority path (see
   `ESCROW_CAPABILITY_ADMINISTRATION_AUDIT_20261008.md`'s "Scope boundary").
 
-## Stages 10–15 — Desktop UX, mobile UX, typography, iconography,
-## accessibility, performance
+## Stage 10 — Premium customer auction experience + marketplace UX
+## convergence
 
-Not started. Stage 8's customer-facing baseline (including the trust
-badges, now backed by the Stage 9 capability authority) exists for these
-to apply viewport/typography/a11y/performance passes to, once scheduled.
+**COMPLETE.** Full visual/UX convergence pass across discovery, detail,
+live auction room, bidding, countdown, winning moment, payment, optional
+escrow, inspection, mobile, reduced motion, desktop, typography,
+iconography, accessibility, error experience, and performance. 3 real
+defects found and fixed (the main inventory grid's lifecycle/capability
+badge confusion across 5 call sites, the fabricated "Clean Title" badge,
+the unwired "Duty Paid" field) — all frontend-only, zero backend files
+touched, Stage 9's escrow capability authority untouched. Full detail in
+`PREMIUM_AUCTION_UX_AUDIT_20261008.md`,
+`AUCTION_CUSTOMER_EXPERIENCE_MATRIX_20261008.md`,
+`MARKETPLACE_VISUAL_HIERARCHY_AUDIT_20261008.md`, and
+`AUCTION_UX_EXECUTION_REPORT_20261008.md`.
+
+## Carried forward from Stage 10 — not yet fixed
+
+- Three parallel, unreconciled design-token/typography systems (Tailwind
+  config tokens, `index.css` CSS-variable tokens, and hardcoded hex
+  literals) — a cross-cutting migration disproportionate to a single
+  visual-convergence pass; needs its own dedicated stage.
+- Icon-to-concept mapping remains inconsistent sitewide beyond the
+  surfaces directly touched this stage (live/inspected concepts use
+  different icons in different components).
+- 4 components re-implement the `prefers-reduced-motion` matchMedia
+  check inline instead of reusing the shared `usePrefersReducedMotion`
+  hook; the live auction room's framer-motion transitions and the
+  vehicle detail page's image-zoom are not gated by reduced motion at
+  all (functional state is unaffected either way — this is a
+  consistency gap, not a functional defect).
+- `src/components/mobile/MobileCarCard.jsx` remains in the tree,
+  already self-marked deprecated and already unused by the real mobile
+  rendering path (which uses CSS container queries) — not deleted this
+  stage.
+- `VehicleDetailPage.tsx::handlePlaceBid` (a second, parallel bid-
+  submission path via `MarketplaceContext`, distinct from the live
+  auction room's `services/bidApi.ts` path) has no loading/disabled/
+  duplicate-click-prevention state — closing this safely first requires
+  deciding whether this second path should remain a live bidding entry
+  point or be retired in favor of the live-room's already-correct form;
+  a product/architecture question, not a one-line fix.
+- Mobile breakpoint re-verification (320/360/375/390/412/430) and a
+  dedicated accessibility (axe/screen-reader) pass — both reasoned about
+  statically this stage in the absence of a reachable browser/device
+  runtime; need a real pass once one is available.
+
+## Stages 11–15 — Remaining UX/performance passes beyond Stage 10's scope
+
+Not started; nothing currently blocks scheduling them. Stage 10 already
+covers desktop/mobile/typography/iconography/accessibility/performance at
+a convergence-pass level — any further stage here would be a deeper,
+dedicated pass on one of the carry-forward items above (e.g., a
+dedicated design-token migration stage, a dedicated icon-unification
+stage), not new ground.
 
 ## Stages 16–17 — Test/regression gate, environment-dependent certification
 
