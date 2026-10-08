@@ -37,10 +37,38 @@ matching-engine environment is live-database migration certification
 2. ~~Run a full root npm install + tsc --noEmit + npm run build~~ — DONE
    this pass, with `--engine-strict=false`. No longer a blocker.
 
-Did not block Stage 4 (a pure code/journey trace, not a live-infrastructure
-task, now complete), and does not block Stage 5 either for the same
-reason; item 1 must close out before Stage 8, where a real build and a
-real browser matter.
+Did not block Stage 4 or Stage 5 (both pure code/journey traces, not
+live-infrastructure tasks, now complete), and does not block Stage 6
+either for the same reason; item 1 must close out before Stage 8, where a
+real build and a real browser matter.
+
+## Carried forward from Stage 5 — not yet fixed, with reasoning recorded
+
+1. **`createOrder()`'s read-then-insert duplicate-active-inspection race**
+   (`backend/inspection/controllers/legacyCompatibilityController.js`) — two
+   concurrent requests from the same buyer for the same car could both pass
+   the existing-inspection check before either insert lands. Real, but
+   low-likelihood and low-blast-radius (a refundable duplicate fee charge,
+   not a security or data-integrity break); carried forward rather than
+   fixed, consistent with this engagement's established bar for narrow
+   double-submit windows.
+2. **Three dead inspection models** (`backend/models/Inspection.js`,
+   `InspectionPackage.js`, `Inspector.js`) pointing at
+   `inspections`/`inspection_packages`/`inspectors` table names with no
+   live controller reference anywhere in the codebase. Zero-risk cleanup
+   item, not a defect — safe to delete whenever a dead-code pass is
+   scheduled.
+3. **`getByCar()`'s no-ownership-check completed-report lookup** — confirmed
+   intentional (a vehicle-history-style public signal for any authenticated
+   user), not a gap; recorded so a future pass doesn't "fix" it unnecessarily.
+4. **A harmless dead `protect`/`adminOnly` re-export** on
+   `legacyCompatibilityController.js`'s default export — not a defect.
+5. **Recommendation (not a defect): split `backend/inspection/routes/inspectionRoutes.js`
+   into two files** (one per product, re-exported from the current file) for
+   engineer clarity — a pure refactor with no behavior change, not forced by
+   any master-prompt requirement, so not executed this stage.
+
+Full reasoning for each: `INSPECTION_PROVIDER_OPERATIONS_AUDIT_20261008.md` §3.
 
 ## Carried forward from Stage 4 — not yet fixed, with reasoning recorded
 
@@ -154,10 +182,14 @@ counts"). They should be picked up explicitly, not silently forgotten:
    prompt.
 3. **`completeEscrowRefund`'s untyped RPC passthrough** — no frontend
    consumer exists yet; revisit once one is built.
-4. **Legacy-vs-canonical inspection system split** — architectural technical
-   debt (two non-interoperable backend implementations), explicitly flagged
-   as out of scope for any convergence pass; needs its own dedicated
-   architecture stage, not a slot in Stages 3–16 as currently numbered.
+4. ~~**Legacy-vs-canonical inspection system split**~~ — **RESOLVED in Stage
+   5.** Investigated directly rather than assumed: this is not two
+   non-interoperable implementations of the same feature, but two
+   intentionally distinct products (the "Ghost Check" pre-purchase
+   inspection and the third-party Inspection Marketplace) sharing the word
+   "inspection" and one router file, already correctly isolated at the
+   table/model/RLS/router-mount level. No architecture migration was
+   needed. Full evidence: `INSPECTION_ARCHITECTURE_CONVERGENCE_20261008.md`.
 
 ## Stage 3 — Marketplace/vehicle/auction convergence — COMPLETE
 
@@ -196,13 +228,26 @@ payment-initiation idempotency-key fix — are the natural starting point
 for a future dedicated follow-up pass, whenever one is scheduled; they are
 not part of Stage 5's own scope below.
 
-## Stage 5 — Inspection/provider operations
+## Stage 5 — Inspection/provider operations — COMPLETE
 
-Plan: much of the access-control half of this is already certified (Item 1 of
-Stage 1, now backed by a working RLS layer per this pass's fix). Remaining:
-trace the operational workflow itself — assignment, completion, evidence
-capture, notification-on-completion, and failure/retry handling — which
-Stage 1 didn't cover (Stage 1 was authorization/access-control only).
+Done this pass — see `INSPECTION_ARCHITECTURE_CONVERGENCE_20261008.md`,
+`INSPECTION_STATUS_MATRIX_20261008.md`, and
+`INSPECTION_PROVIDER_OPERATIONS_AUDIT_20261008.md`. The long-standing
+"legacy-vs-canonical inspection system split" item (carried forward since
+Stage 2, below) is now resolved with direct evidence: it is not a dangerous
+divergent-implementation split, but two intentionally distinct products
+(the "Ghost Check" pre-purchase inspection on `vehicle_inspections`, and the
+third-party Inspection Marketplace on `inspection_bookings`) that are
+already correctly isolated at the table/model/RLS/router level — no
+`ARCHITECTURE MIGRATION REQUIRED` declaration was warranted. The
+operational workflow itself (assignment, start, completion, evidence
+capture, payment confirmation, notification-on-completion) was traced
+end to end; 2 real defects were found and fixed (`start()`'s missing
+status-transition precondition, allowing a completed report to silently
+revert to "in progress"; `confirmPayment()`'s missing ownership scoping, an
+IDOR/wildcard-match data leak letting any authenticated user read another
+buyer's full inspection record). 5 further findings are documented and
+intentionally not fixed — see "Carried forward from Stage 5" below.
 
 ## Stage 6 — Escrow/purchase/fulfilment
 
@@ -249,11 +294,12 @@ will continue to apply at every future stage.
 Source-level backend/contract/journey work (Stages 1–7) is either done
 (Stage 1: source-level trust-boundary sweep; Stage 2: API contract
 convergence; Stage 3: marketplace/vehicle/auction convergence; Stage 4:
-account/session/identity/customer-trust) or scoped and ready to start in
-order (Stages 5–7). The 4 items carried forward from Stage 2, the 4
-carried forward from Stage 3, and the 15 carried forward from Stage 4
-above are explicit, recorded exceptions, not silent gaps. All frontend/UX
-work (Stages 8–14) is entirely unstarted and gated behind Stages 5–7
-landing, per the master prompt's own explicit ordering. No part of this
-plan proposes restarting, redesigning, or duplicating anything already
-built.
+account/session/identity/customer-trust; Stage 5: inspection/provider
+operations/evidence/workflow convergence) or scoped and ready to start in
+order (Stages 6–7). The 4 items carried forward from Stage 2, the 4
+carried forward from Stage 3, the 15 carried forward from Stage 4, and the
+5 carried forward from Stage 5 above are explicit, recorded exceptions,
+not silent gaps — 28 total. All frontend/UX work (Stages 8–14) is entirely
+unstarted and gated behind Stages 6–7 landing, per the master prompt's own
+explicit ordering. No part of this plan proposes restarting, redesigning,
+or duplicating anything already built.

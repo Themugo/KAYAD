@@ -158,6 +158,17 @@ export const start = asyncHandler(async (req, res) => {
   const inspection = await getInspection(req.params.id);
   await assertAccess(inspection, req.user);
   if (String(inspection.inspector_id) !== String(req.user.id) && !['admin', 'superadmin'].includes(req.user.role)) return res.status(403).json({ success: false, message: 'Not your assignment' });
+  // STAGE 5 INSPECTION/PROVIDER-OPERATIONS CONVERGENCE FIX: this had no
+  // status-precondition guard at all (unlike assign(), which requires
+  // 'requested', and submit(), which requires 'in_progress'). Without one,
+  // the assigned inspector (or an admin) could call start() again on an
+  // already-'completed' inspection, silently reverting a finished,
+  // buyer-visible report back to 'in_progress' -- a backward status
+  // transition with no real-world meaning, confusing both the buyer-facing
+  // statusMap (legacyOrder() above) and the admin dashboards that count
+  // inspections by status (commandCenterController.js,
+  // operationsDashboardController.js).
+  if (inspection.status !== 'assigned') return res.status(400).json({ success: false, message: 'Inspection must be assigned before it can be started' });
   const { data, error } = await getSupabase().from('vehicle_inspections').update({ status: 'in_progress', current_stage: 'job_verification', scheduled_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', inspection.id).select('*').single();
   if (error) throw new AppError(error.message, 500);
   res.json({ success: true, order: legacyOrder(data) });
@@ -189,7 +200,26 @@ export const availableInspectors = asyncHandler(async (req, res) => {
 export const confirmPayment = asyncHandler(async (req, res) => {
   const { checkoutRequestID } = req.body;
   if (!checkoutRequestID) return res.status(400).json({ success: false, message: 'checkoutRequestID required' });
-  const { data: rows, error } = await getSupabase().from('vehicle_inspections').select('*').like('notes', `%${checkoutRequestID}%`).limit(1);
+  // STAGE 5 INSPECTION/PROVIDER-OPERATIONS CONVERGENCE FIX: this had no
+  // ownership scoping at all -- it looked up ANY inspection whose stringified
+  // `notes` JSON contained the client-supplied checkoutRequestID substring,
+  // then returned that row's full order (buyer id, car id, checklist,
+  // inspector notes, evidence) to whichever authenticated user happened to
+  // call this endpoint, admin or not. Two compounding problems: (1) no
+  // isAdmin/isOwner check at all -- any signed-in user who learned or
+  // guessed another buyer's checkoutRequestID (Safaricom's own ID, not a
+  // KAYAD secret) could read that buyer's complete inspection record; (2)
+  // `.like()` treats '%' and '_' in the client-supplied value as SQL LIKE
+  // wildcards, so a value of just '%' matches every row in the table,
+  // handing back an arbitrary stranger's inspection with no checkoutRequestID
+  // knowledge needed at all. Scoping to the caller's own requester_id (admins
+  // excepted, consistent with assertAccess() above) closes both: a non-admin
+  // can now only ever match their own rows, so a wildcard value finds nothing
+  // more than that same person's own active/completed orders.
+  const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
+  let query = getSupabase().from('vehicle_inspections').select('*').like('notes', `%${checkoutRequestID}%`);
+  if (!isAdmin) query = query.eq('requester_id', req.user.id);
+  const { data: rows, error } = await query.limit(1);
   if (error) throw new AppError(error.message, 500);
   if (!rows?.length) return res.status(404).json({ success: false, message: 'Inspection order not found' });
   res.json({ success: true, order: legacyOrder(rows[0]) });

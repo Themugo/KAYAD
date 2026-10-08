@@ -599,3 +599,64 @@ blocker (genuinely infrastructure-dependent, unrelated to Node version).
 **STAGE 4 — ACCOUNT/SESSION/IDENTITY/CUSTOMER TRUST: COMPLETE.** Per the
 master prompt's own ordering, Stage 5 (inspection/provider operations) may
 now begin in a future pass.
+
+# Stage 5 — Inspection/Provider Operations/Evidence/Workflow Convergence (this round)
+
+**Method:** read the current tracking docs and the Stage 1 RLS/architecture
+notes first; mapped the full inspection surface directly (routes,
+controllers, services, models, schema) before writing anything, with
+particular attention to the master prompt's own "legacy vs canonical
+inspection system" warning. Confirmed — rather than assumed — that this is
+**not** the dangerous split the warning feared: two genuinely distinct
+products ("Ghost Check" pre-purchase inspection on `vehicle_inspections`,
+and the third-party Inspection Marketplace on `inspection_bookings` + its
+satellite tables) share the word "inspection" and one router file, but are
+already correctly isolated at the table/model/RLS/router-mount level (the
+project's own `validate:canonical-architecture` script already asserts
+and passes this). Full evidence in
+`INSPECTION_ARCHITECTURE_CONVERGENCE_20261008.md`.
+
+**Findings fixed (2, both in the Ghost Check system's**
+`legacyCompatibilityController.js`**):**
+1. `start()` had no status-transition precondition at all, permitting a
+   backward transition from `completed` back to `in_progress` and
+   silently un-completing a buyer-visible report. Fixed: now requires
+   `status === 'assigned'`.
+2. `confirmPayment()` had no ownership scoping at all — any authenticated
+   user could read any other buyer's complete inspection record by
+   guessing/learning their `checkoutRequestID`, and the underlying
+   `.like()` call's wildcard characters (`%`/`_`) meant a value of just
+   `"%"` matched an arbitrary stranger's row with no real knowledge
+   needed. Fixed: scoped to the caller's own `requester_id` for non-admins.
+
+Both fixes tested via the established revert → confirm-fail → restore →
+confirm-pass discipline in the new
+`backend/tests/inspection/legacyInspectionStartConfirmPayment.test.js`
+(4 new test cases).
+
+**Findings documented, not fixed (5):** `createOrder()`'s narrow
+read-then-insert duplicate-active-inspection race; three dead
+`Inspection`/`InspectionPackage`/`Inspector` models with no live controller
+reference; `getByCar()`'s intentionally-public-to-any-authenticated-user
+completed-report lookup (confirmed by design, not a gap); a harmless dead
+`protect`/`adminOnly` re-export. Full reasoning per item in
+`INSPECTION_PROVIDER_OPERATIONS_AUDIT_20261008.md` §3.
+
+**Validation:** Backend jest **42/42 suites, 606/606 tests** (up from Stage
+4's 41/602); `tsc --noEmit` clean (no frontend changes this stage);
+frontend `vitest run` **336 passed / 11 pre-existing-unrelated failed / 1
+skipped / 348 total** (identical to Stage 3/4's documented baseline);
+`npm run build` clean. Relevant validators re-run and all green:
+`validate:inspection-marketplace` (37/37), `validate:inspection-domain-rls-enablement`
+(8/8 tables), `validate:inspection-qa-contract` (10/10),
+`validate:canonical-architecture` (10/10), `validate:high-risk-boundaries`
+(10/10), `scripts/validate-inspection-chat-realtime-e2e.mjs` (10/10).
+
+**Remaining risks:** see `INSPECTION_PROVIDER_OPERATIONS_AUDIT_20261008.md`
+§3 for the 5 documented-not-fixed items above; all pre-existing Stage 2/3/4
+carried-forward items remain untouched and tracked (none had any discovered
+dependency on anything touched this stage).
+
+**STAGE 5 — INSPECTION/PROVIDER OPERATIONS/EVIDENCE/WORKFLOW CONVERGENCE:
+COMPLETE.** Per the master prompt's own ordering, Stage 6 (escrow/purchase/
+fulfilment) may now begin in a future pass.
