@@ -306,7 +306,19 @@ export const placeBid = async (req, res) => {
     });
   } catch (err) {
     logError("PLACE BID ERROR", err);
-    res.status(500).json({ success: false, message: "Bid failed" });
+    // STAGE 2 API CONTRACT CONVERGENCE FIX: this previously hardcoded a generic
+    // 500 "Bid failed" for every failure, discarding the specific status/code/
+    // message that assertBidderAuthorized() (and other callees above) already
+    // attach — e.g. a real 403 BIDDER_REGISTRATION_REQUIRED/BIDDER_COMMITMENT_
+    // REQUIRED or a 409 AUCTION_NOT_PUBLISHED arrived at the client as an
+    // indistinguishable generic 500. A genuinely unexpected error (no status
+    // attached) still falls back to 500 with the same generic message as before.
+    const statusCode = err.statusCode || err.status || 500;
+    res.status(statusCode).json({
+      success: false,
+      message: statusCode === 500 ? "Bid failed" : err.message,
+      ...(err.code && { code: err.code }),
+    });
   } finally {
     if (bidLock?.acquired && bidLockResource) {
       releaseLock(bidLockResource, bidLock.id).catch(() => {});

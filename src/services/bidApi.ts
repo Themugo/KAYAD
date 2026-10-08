@@ -48,11 +48,21 @@ export class BidApiError extends Error {
 export interface PlaceBidResponse {
   success: boolean;
   message?: string;
+  code?: string;
   minBid?: number;
+  /** STAGE 2 API CONTRACT CONVERGENCE FIX: placeBid's real response (the raw
+   * Bid document, via backend/utils/fieldMap.js's bids alias table) carries
+   * `carId` here, not `car` — `car` only appears on the different
+   * getMyBids endpoint, which populates it into a nested object. This type
+   * previously declared `car`/`user` as plain strings, a shape that
+   * doesn't exist on this response at all; no current caller reads
+   * result.bid.car/.user from placeBid (confirmed), so this was a latent
+   * type inaccuracy rather than a live break, but is fixed here to reflect
+   * what the backend actually sends. */
   bid?: {
     id: string;
     amount: number;
-    car: string;
+    carId: string;
     user: string;
     status: string;
   };

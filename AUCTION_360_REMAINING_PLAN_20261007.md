@@ -1,55 +1,59 @@
 # KAYAD Auction 360 — Remaining Plan
 Date: 2026-10-07
 
-Stage 1 of the 16-stage continuation prompt is now source-level complete (see
+Stage 1 of the 16-stage continuation prompt is source-level complete (see
 `P0_P1_SOURCE_CERTIFICATION_20261007.md` and
-`AUCTION_360_EXECUTION_LOG_20261007.md`). This document plans Stages 2–16,
-which have not been started, in the order the master prompt specifies —
-"CONTINUE FROM WHERE YOU ARE", not a restart.
+`AUCTION_360_EXECUTION_LOG_20261007.md`). Stage 2 (API contract convergence)
+is now also complete (see `AUCTION_API_CONTRACT_MATRIX_20261007.md` and the
+Stage 2 section appended to the execution log) — explicitly classified
+**STAGE 2 — API CONTRACT CONVERGENCE: COMPLETE** per the master prompt's own
+requirement before Stage 3 may begin. This document plans Stages 3–16, in the
+order the master prompt specifies — "CONTINUE FROM WHERE YOU ARE", not a
+restart.
 
-## Before Stage 2 can begin cleanly
+## Before Stage 8 (frontend) can begin cleanly — unchanged, still open
 
-1. Apply both new migrations
+1. Apply both Stage-1 migrations
    (`20261007190000_auction_winner_payment_deadline_lock.sql`,
    `20261007200000_inspection_domain_rls_enable.sql`) to a real
    Postgres/Supabase instance and re-run the full validator suite against it,
    to move their status from SOURCE-LEVEL PASS to live-certified.
 2. Run a full root `npm install` + `tsc --noEmit` + `npm run build` in an
    environment matching the repo's declared Node engine (`>=22.22.2`) — this
-   sandbox cannot do it (`v22.22.0`).
+   sandbox still cannot do it (`v22.22.0`), re-confirmed during Stage 2. This
+   is also now the explicit blocker for closing the one Stage-2 deferred
+   finding below (the vehicle `rejected`-status mapping).
 
-Neither blocks starting Stage 2 itself (which is a pure code/contract trace,
-not a live-infrastructure task), but both should close out before Stage 8
-(frontend), where a real build and a real browser matter.
+Neither blocks Stage 3 itself (a pure code/journey trace, not a live-
+infrastructure task), but both must close out before Stage 8, where a real
+build and a real browser matter.
 
-## Stage 2 — API contract convergence (next)
+## Carried forward from Stage 2 — not yet fixed, with reasoning recorded
 
-Plan: trace every auction-adjacent contract pair front-to-back —
-Marketplace, Vehicle, Auction, Registration, Bid, Payment, Escrow, Refund,
-Winner, Ownership, Inspection, Provider, Notifications — starting from the
-backend response shape (`toXResponse()`-style serializers, where they exist)
-against every frontend type/interface and fetch call that consumes it.
-Specific things already known to need checking, carried over as open
-questions from this pass's tracing (not yet confirmed as defects):
-- Confirm `auction_outcomes`/`auctionSettlement.service.js` response shapes
-  (just modified this pass, under Item 8) are unchanged for the fields the
-  frontend reads — the fix only changed *how* the status transition happens,
-  not the outcome object's shape, but this should be explicitly diffed rather
-  than assumed.
-- `communication_deliveries` status enum (`queued/sending/sent/delivered/
-  read/bounced/failed/dead_letter`) vs. whatever the frontend notification
-  center expects — not checked this pass.
-- Error envelope consistency for the newly-added 409 paths this pass
-  introduced (`AUCTION_TERMS_LOCKED` in `carController.js`, and the two new
-  409s in `auctionSettlement.service.js`'s race-loser paths) — confirm the
-  frontend has (or needs) specific handling for these new codes rather than
-  falling through to a generic error toast.
+These are real, confirmed findings from Stage 2's trace that were
+intentionally not fixed this pass (full reasoning in
+`AUCTION_API_CONTRACT_MATRIX_20261007.md`'s matrix rows and "Summary
+counts"). They should be picked up explicitly, not silently forgotten:
 
-Converge to the existing canonical contracts; do not introduce a new
-adapter/abstraction layer to paper over a mismatch — fix whichever side (or
-both) is actually wrong.
+1. **Vehicle `rejected`-status mapping** (`vehicleApi.ts::mapBackendCarToVehicle`
+   collapses backend `rejected` to frontend `'active'`, 33 consumption
+   sites) — blocked on a matching-Node-version environment for `tsc
+   --noEmit` verification before touching it.
+2. **`paymentController.js::mpesaCallback`'s hardcoded-500 catch block** — a
+   real defect (a 409 "already received" conflict reaches Safaricom's
+   callback log as a generic 500), deliberately left out of Stage 2's scope
+   because it is a server-to-server webhook contract, not a frontend
+   contract, and warrants its own dedicated, carefully-scoped payment-webhook
+   hardening pass rather than a drive-by fix under a contract-convergence
+   prompt.
+3. **`completeEscrowRefund`'s untyped RPC passthrough** — no frontend
+   consumer exists yet; revisit once one is built.
+4. **Legacy-vs-canonical inspection system split** — architectural technical
+   debt (two non-interoperable backend implementations), explicitly flagged
+   as out of scope for any convergence pass; needs its own dedicated
+   architecture stage, not a slot in Stages 3–16 as currently numbered.
 
-## Stage 3 — Marketplace/vehicle/auction convergence
+## Stage 3 — Marketplace/vehicle/auction convergence (next)
 
 Plan: walk the real journey marketplace → vehicle detail → auction detail →
 registration → live bidding → close → winner → payment with one real car
@@ -117,8 +121,10 @@ will continue to apply at every future stage.
 
 ## Summary of what's genuinely left
 
-Source-level backend work (Stages 1–7) is either done (Stage 1) or scoped and
-ready to start in order (Stages 2–7). All frontend/UX work (Stages 8–14) is
-entirely unstarted and gated behind Stages 2–7 landing, per the master
-prompt's own explicit ordering. No part of this plan proposes restarting,
-redesigning, or duplicating anything already built.
+Source-level backend/contract work (Stages 1–7) is either done (Stage 1:
+source-level trust-boundary sweep; Stage 2: API contract convergence) or
+scoped and ready to start in order (Stages 3–7). The 4 items carried forward
+from Stage 2 above are explicit, recorded exceptions, not silent gaps. All
+frontend/UX work (Stages 8–14) is entirely unstarted and gated behind Stages
+3–7 landing, per the master prompt's own explicit ordering. No part of this
+plan proposes restarting, redesigning, or duplicating anything already built.

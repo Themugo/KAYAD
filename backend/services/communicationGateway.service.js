@@ -72,7 +72,17 @@ export const recordDelivery = async (payload) => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
-  return delivery;
+  // STAGE 2 API CONTRACT CONVERGENCE FIX: this returned the undefined
+  // identifier `delivery` (the created row was assigned to `row`), so every
+  // call that actually inserted a new row (i.e. every delivery that wasn't an
+  // idempotency-key cache hit) threw a ReferenceError here. deliver() below
+  // only recovers from a Postgres unique-violation (code 23505); a
+  // ReferenceError has no .code, so it re-threw out to every caller, which in
+  // turn all swallow it with .catch(() => {}) / .catch(e => console.warn(...)).
+  // Net effect: no communication_deliveries row was ever durably recorded for
+  // a fresh delivery, and no email/SMS/WhatsApp was actually sent through this
+  // path, while callers observed no error at all.
+  return row;
 };
 
 export const updateDelivery = async (id, patch) => {

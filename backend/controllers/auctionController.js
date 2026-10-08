@@ -41,7 +41,19 @@ const toAuctionResponse = (car) => ({
     fuel: car.fuel,
     transmission: car.transmission,
     mileage: car.mileage,
-    location: car.location,
+    // STAGE 2 API CONTRACT CONVERGENCE FIX: car.location is not a real field
+    // or alias at all (the real DB column is location_city, app-level alias
+    // "city" — see utils/fieldMap.js's cars.city -> location_city entry and
+    // carController.js's own documented fix of the identical defect at
+    // listing-creation time). car.location was always undefined here, so
+    // every public auction response's nested car.location silently carried
+    // no city text whatsoever, with no error raised anywhere.
+    location: car.city,
+    // The frontend's AuctionsView.tsx already defensively reads
+    // `auction.car?.location || auction.car?.location_city` (a leftover
+    // guard from when this was broken) — sending the snake_case key too
+    // costs nothing and means that fallback isn't dead weight.
+    location_city: car.city,
     dealer: car.dealer ? {
       id: car.dealer.id || car.dealer._id || car.dealer,
       name: car.dealer.name || car.dealer.businessName || 'Verified organizer',

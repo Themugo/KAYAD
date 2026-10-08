@@ -65,7 +65,16 @@ export default function EditCarPage() {
       }
       toast('Listing updated!', 'success');
       navigate('/dealer');
-    } catch { toast('Failed to update', 'error'); }
+    } catch (err) {
+      // STAGE 2 API CONTRACT CONVERGENCE FIX: this previously discarded the
+      // error entirely (a bare `catch {}`), so a precise, actionable 409
+      // from the backend — e.g. AUCTION_TERMS_LOCKED, which explains exactly
+      // why the save was rejected and that a controlled amendment is needed
+      // instead — surfaced as the same flat "Failed to update" as any other
+      // failure. handleAuctionStart right below already forwards the real
+      // backend message; this now does the same.
+      toast(err.response?.data?.message || 'Failed to update', 'error');
+    }
     finally { setSaving(false); }
   };
 

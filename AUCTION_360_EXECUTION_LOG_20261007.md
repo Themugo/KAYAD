@@ -245,3 +245,141 @@ backend/source integrity is clean, which it now is as of this log.
   Postgres/Supabase instance is available (see "Infrastructure blockers").
 - A full root-level `npm install` + `tsc --noEmit` + build in an environment
   matching the repo's declared Node engine, before Stage 8 begins.
+
+---
+
+# Stage 2 — API Contract Convergence (this round)
+Scope: the "CONTINUE KAYAD AUCTION 360 — STAGE 2 / API CONTRACT CONVERGENCE"
+master prompt. Stage 1 was not restarted or re-litigated; its certified
+findings are the authoritative starting context (per the prompt's own
+explicit instruction). Full detail, per-domain trace, and the required
+Section 12 matrix live in `AUCTION_API_CONTRACT_MATRIX_20261007.md` — this
+section is the execution-log summary the master prompt separately requires.
+
+## What this pass covered
+
+Traced the full backend → frontend contract for all 13 required domains
+(Marketplace, Vehicle, Auction, Registration, Bid, Payment, Auction outcome/
+Winner, Escrow, Refund, Ownership, Inspection, Provider, Notifications/
+Communications) plus the 7 required cross-cutting sections (new 409
+contracts, error-handling architecture, financial contracts, status machine
+contracts, pagination/collection contracts, date/time contracts,
+authorization-as-UX-only contracts). Used 5 parallel read-only research
+agents to trace domain groups, then triaged and verified every candidate
+finding myself by direct re-reading before any fix.
+
+## Findings and fixes (10 total, see the matrix for full detail)
+
+1. `communicationGateway.service.js::recordDelivery` — `return delivery;`
+   referenced an undeclared identifier (`ReferenceError`), silently breaking
+   the entire communications-delivery pipeline on every fresh insert. Most
+   severe finding this pass. **FIXED** → `return row;`.
+2. `.status` vs `.statusCode` systemic mismatch in `asyncHandler.js`/
+   `errorHandler.js` — 76 call sites across 9+ service files set `.status`,
+   which neither shared middleware file read, silently coercing real 409/403
+   errors to 500. **FIXED** with a minimal 2-file fallback (`err.status` when
+   `err.statusCode` is absent) rather than rewriting 76+ call sites.
+3. `bidController.js::placeBid` catch block hardcoded 500/"Bid failed" for
+   every failure, discarding `assertBidderAuthorized`'s specific 403/409
+   codes. **FIXED** to forward the real status/code/message.
+4. `toAuctionResponse()`'s nested `car.location` always undefined (`location`
+   is not a real field/alias; real column is `city`/`location_city`).
+   **FIXED** to send `car.city` under both keys.
+5. `createCar` response envelope mismatch — frontend type declared `car`,
+   backend always sends `data`, so every successful listing publish fell
+   through to the error branch. **FIXED** (type + one call site converged on
+   `data`, the established canonical convention).
+6. `EditCarPage.jsx::handleSave`'s bare `catch {}` discarded the new
+   `AUCTION_TERMS_LOCKED` 409's specific, actionable message. **FIXED** to
+   match the existing `handleAuctionStart` pattern in the same file.
+7. `ProviderBusinessCenter.tsx`'s `statusColors` map missing
+   `customer_reviewed`/`no_show` (produced the literal invalid CSS string
+   `"undefined20"`). **FIXED** — both entries added.
+8. `communicationControl.service.js::getProviderHealth` never counted
+   `dead_letter` deliveries in any bucket, understating real failure rates.
+   **FIXED** — added a dedicated `deadLetter` bucket.
+9. `legacyCompatibilityController.js::assign()` never actually advanced
+   status to `'assigned'` (re-set it to a no-op `'requested'`), so two
+   already-shipped admin dashboards always counted zero assigned inspections
+   and buyers saw no visible progress after assignment. **FIXED** across
+   three coordinated edits (`activeStatuses`, `legacyOrder()` mapping,
+   `assign()`'s update call).
+10. `bidApi.ts::PlaceBidResponse.bid` declared a non-existent `car: string`
+    field (real field is `carId`). **FIXED** (type-only; confirmed zero live
+    callers read the old field name).
+
+## Findings explicitly deferred (with reasoning — not silently dropped)
+
+- Vehicle `rejected`-status collapsing to frontend `'active'` in
+  `mapBackendCarToVehicle` (33 consumption sites) — deferred because
+  `tsc --noEmit` is environment-blocked in this sandbox, and a frontend
+  type-union change of this breadth cannot be safely verified without it.
+- `paymentController.js::mpesaCallback`'s hardcoded-500 catch block — a real
+  defect (a 409 "already received" conflict reaches Safaricom's callback log
+  as a generic 500), but this endpoint is server-to-server (Safaricom-facing,
+  no frontend parser/component), outside Section 5's stated frontend-contract
+  scope, and changing a live payment webhook's ack/retry semantics without
+  explicit instruction carries real production risk. Recorded for a
+  dedicated future payment-webhook hardening pass.
+- `completeEscrowRefund`'s untyped RPC passthrough — no frontend consumer
+  exists in `src/` at all (carried forward from Stage 1's own "Remaining"
+  list, item #1); unverified but not actively broken.
+- The parallel legacy-vs-canonical inspection system split — architectural
+  technical debt, explicitly out of scope for a contract-convergence pass
+  (fixing it would be a redesign, which the master prompt explicitly
+  disallows).
+
+## Tests added
+
+6 new files, 13 new test cases: `recordDelivery.test.js` (3),
+`errorStatusCodeConvergence.test.js` (4), `placeBidErrorContract.test.js` (3),
+`auctionResponseLocation.test.js` (1), `providerHealthDeadLetter.test.js` (1),
+`legacyInspectionAssign.test.js` (1). Every test that could be revert-tested
+was: the fix was temporarily reverted, the test re-run to confirm it fails
+with the exact expected defect, then the fix restored and the test re-run to
+confirm it passes. No existing test was modified or weakened.
+
+## Validators run and passed this pass
+
+`validate-communication-event-convergence` (1 pre-existing/unrelated
+failure, confirmed via revert-test), `validate-c1-c5-convergence` (7/9, 2
+pre-existing/unrelated failures in untouched `authController.js`),
+`validate-auction-transport-convergence` (5/5), `validate-auction-bid-surface`
+(6/6), `validate-inspection-marketplace-activation` (14/14),
+`validate-inspection-qa-contract` (PASS), `validate-inspection-settlement-
+ledger` (10/10), `validate-backend-runtime-contracts` (14/14),
+`validate-frontend-runtime-contracts` (PASS), `validate-database-contract-
+alignment` (8/8), `validate-socket-contract` (PASS),
+`validate-marketplace-ui-convergence` (7/7), `validate-communications-
+cleanup-provider-certification` (PASS), `validate-communications-provider-
+certification` (environment-blocked — no provider secrets in this sandbox,
+not a code defect).
+
+Full backend jest suite: 36/36 suites, 584/584 tests (up from Stage 1's
+571/571; +13 new tests, 0 regressions).
+
+## Remaining source-level/contract risks
+
+See `AUCTION_API_CONTRACT_MATRIX_20261007.md`'s "Summary counts" section and
+the 3 deferred findings above — none block Stage 3, all are explicitly
+scoped and recorded rather than silently left open.
+
+## Infrastructure blockers (unchanged from Stage 1)
+
+- Root `npm install`/`tsc --noEmit`/`npm run build` at the repo root remain
+  **ENVIRONMENT BLOCKED**: sandbox Node `v22.22.0` < repo's declared
+  `engines.node >=22.22.2`. Re-confirmed this pass (missing-module/ambient-
+  type errors consistent with an incomplete install under the mismatched
+  engine, not code defects). This blocks verifying the one deferred frontend
+  finding (vehicle `rejected`-status) but did not block verifying any of the
+  10 fixes actually shipped this pass (all backend-testable via jest, or
+  type-only frontend fixes confirmed zero-risk via grep).
+- Both new migrations from Stage 1 remain unexecuted against a real Postgres/
+  Supabase instance (carried forward, unchanged this pass — Stage 2 touched
+  no schema).
+
+**STAGE 2 — API CONTRACT CONVERGENCE: COMPLETE.** Per the master prompt's
+own explicit instruction ("Do not begin Stage 3 until Stage 2 has been
+explicitly classified"), this classification is recorded here and in the
+contract matrix document; Stage 3 (Marketplace/Vehicle/Auction journey-level
+convergence) may now begin in a future pass.

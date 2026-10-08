@@ -594,8 +594,8 @@ function ListingWizardSection({ draft, setDraft, onNavigate }: {
         price: pricing?.askingPrice,
       });
 
-      if (result.success && result.car) {
-        setPublishedCarId(result.car.id);
+      if (result.success && result.data) {
+        setPublishedCarId(result.data.id);
         setDraft(null);
       } else {
         setPublishError(result.message || 'Failed to publish listing.');

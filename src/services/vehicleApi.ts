@@ -371,7 +371,16 @@ export interface CreateCarPayload {
 export interface CreateCarResponse {
   success: boolean;
   message?: string;
-  car?: BackendCar;
+  /** STAGE 2 API CONTRACT CONVERGENCE FIX: the real, canonical backend
+   * envelope for every car-returning response in carController.js (list,
+   * create, update, get) is `{ success, data }` — confirmed directly
+   * (backend/controllers/carController.js:528 for this specific create
+   * response, and every other car response in that file). This type
+   * previously declared `car`, a field the backend has never sent, so
+   * `result.success && result.car` was always false on every real,
+   * successful listing creation — the caller fell through to its error
+   * branch and showed "Failed to publish listing." on every success. */
+  data?: BackendCar;
 }
 
 /** POST /api/cars - the one, real, canonical listing-creation

@@ -93,12 +93,18 @@ export const getProviderHealth = async () => {
   const providers = {};
   for (const row of rows) {
     const key = row.provider || "unknown";
-    const p = providers[key] ||= { provider: key, total: 0, sent: 0, delivered: 0, failed: 0, bounced: 0 };
+    const p = providers[key] ||= { provider: key, total: 0, sent: 0, delivered: 0, failed: 0, bounced: 0, deadLetter: 0 };
     p.total++;
     if (row.status === "sent") p.sent++;
     if (row.status === "delivered" || row.status === "read") p.delivered++;
     if (row.status === "failed") p.failed++;
     if (row.status === "bounced") p.bounced++;
+    // STAGE 2 API CONTRACT CONVERGENCE FIX: dead_letter (a delivery that
+    // exhausted its retries — see DELIVERY_TRANSITIONS/TERMINAL in
+    // communicationGateway.service.js) was counted in `total` but in none of
+    // the per-status buckets, so it was invisible as a failure here and
+    // understated each provider's real failure rate.
+    if (row.status === "dead_letter") p.deadLetter++;
   }
   return Object.values(providers).map(p => ({ ...p, configured: configured[p.provider] ?? null, successRate: p.total ? Math.round(((p.delivered + p.sent) / p.total) * 10000) / 100 : 0 }));
 };

@@ -447,6 +447,17 @@ function BookingCard({ booking, showActions = false }: { booking: Booking; showA
     inspection_started: '#13B8A6',
     inspection_complete: '#13B8A6',
     report_generated: '#13B8A6',
+    // STAGE 2 API CONTRACT CONVERGENCE FIX: the backend's real booking-status
+    // enum (backend/inspection/services/bookingService.js's validTransitions
+    // keys) includes customer_reviewed and no_show, which this lookup table
+    // omitted. The dot indicator already falls back safely
+    // (statusColors[...] || KAYAD_COLORS.softBlue below), but the badge two
+    // lines down used statusColors[booking.status] + '20' unconditionally,
+    // producing the literal invalid CSS string "undefined20" (silently
+    // ignored by the browser) and leaving the badge text color unset for
+    // these two statuses.
+    customer_reviewed: '#2F8F87',
+    no_show: '#C65D5D',
     closed: '#64748b',
     cancelled: '#C65D5D',
   };

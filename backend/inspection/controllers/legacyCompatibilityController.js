@@ -8,7 +8,13 @@ import Car from '../../models/Car.js';
 import User from '../../models/User.js';
 import { emitCommunication, COMMUNICATION_EVENTS } from '../../services/communicationEvents.service.js';
 
-const activeStatuses = ['requested', 'in_progress'];
+// STAGE 2 API CONTRACT CONVERGENCE FIX: 'assigned' added alongside the fix to
+// assign() below (which previously never actually set this status). Without
+// it, a customer whose inspection has already been assigned to an inspector
+// (but not yet started) could book a second, duplicate inspection for the
+// same vehicle, since the active-inspection duplicate check below would no
+// longer see it as "active".
+const activeStatuses = ['requested', 'assigned', 'in_progress'];
 const gradeFor = (score) => {
   const n = Number(score) || 0;
   if (n >= 90) return 'A';
@@ -41,7 +47,17 @@ function legacyOrder(inspection, car, buyer = null, inspector = null) {
     inspector: inspector || inspection.inspector_id,
     fee: Number(notes.fee || 0),
     payment: notes.payment || null,
-    status: inspection.status === 'completed' ? 'completed' : inspection.status === 'in_progress' ? 'in_progress' : 'pending_payment',
+    // STAGE 2 API CONTRACT CONVERGENCE FIX: 'assigned' is now a real status
+    // this table can carry (see assign() below) and the frontend's own
+    // statusMap (src/features/InspectionsView.tsx) already has a case for it
+    // ('Scheduled') — it was dead code until now because the backend never
+    // actually emitted it, so an assigned-but-not-started inspection always
+    // collapsed to 'pending_payment' ("Pending Mechanic Confirmation") even
+    // though an inspector had already been assigned.
+    status: inspection.status === 'completed' ? 'completed'
+      : inspection.status === 'in_progress' ? 'in_progress'
+      : inspection.status === 'assigned' ? 'assigned'
+      : 'pending_payment',
     location: notes.location || null,
     checkoutRequestID: notes.checkoutRequestID || null,
     checklist: inspection.checklist || [],
@@ -120,7 +136,17 @@ export const assign = asyncHandler(async (req, res) => {
   if (inspection.status !== 'requested') return res.status(400).json({ success: false, message: 'Inspection must be requested before assignment' });
   const { inspectorId } = req.body;
   if (!inspectorId) return res.status(400).json({ success: false, message: 'inspectorId required' });
-  const { data, error } = await getSupabase().from('vehicle_inspections').update({ inspector_id: inspectorId, status: 'requested', updated_at: new Date().toISOString() }).eq('id', inspection.id).select('*').single();
+  // STAGE 2 API CONTRACT CONVERGENCE FIX: this re-set status to 'requested'
+  // (a no-op, since the precondition above already requires it to be
+  // 'requested') instead of ever advancing it. Two existing, already-shipped
+  // admin surfaces — commandCenterController.js::getInspectionOperations and
+  // operationsDashboardController.js's overview counts — already query
+  // vehicle_inspections for status:'assigned' expecting this exact
+  // transition to exist; because it never did, "assigned" always counted as
+  // zero on those dashboards, and a buyer whose inspection had just been
+  // assigned to an inspector still saw "Pending Mechanic Confirmation" with
+  // no visible progress (see legacyOrder()'s status mapping above).
+  const { data, error } = await getSupabase().from('vehicle_inspections').update({ inspector_id: inspectorId, status: 'assigned', updated_at: new Date().toISOString() }).eq('id', inspection.id).select('*').single();
   if (error) throw new AppError(error.message, 500);
   const { data: car } = await getSupabase().from('cars').select('dealer_id').eq('id', inspection.car_id).maybeSingle();
   const { data: chatId, error: chatError } = await getSupabase().rpc('kayad_get_or_create_inspection_chat', { p_vehicle_inspection_id: inspection.id, p_car_id: inspection.car_id, p_buyer_id: inspection.requester_id, p_seller_id: car?.dealer_id || null, p_inspector_id: inspectorId });

@@ -4,7 +4,10 @@ import { AppError } from "../utils/AppError.js";
 const errorHandler = (err, req, res, next) => {
   // Once headers are committed, delegate to Express instead of sending again.
   if (res.headersSent || res.writableEnded) return next(err);
-  let statusCode = err.statusCode || res.statusCode || 500;
+  // Same .status fallback as asyncHandler.js, for any error that reaches this
+  // handler without passing through asyncHandler first (e.g. next(err) called
+  // directly). See the comment there for why this fallback exists.
+  let statusCode = err.statusCode || err.status || res.statusCode || 500;
   if (statusCode === 200) statusCode = 500;
 
   const requestId = req.requestId || req.headers["x-request-id"] || undefined;
