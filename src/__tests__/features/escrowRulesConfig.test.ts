@@ -34,13 +34,33 @@ describe('Escrow rules config actually drives real business logic (not decorativ
     expect(isEscrowApplicable(privateSeller)).toBe(false);
   });
 
-  it('admin setting dealerRequirement to "mandatory" actually makes it apply to a dealer vehicle that is NOT individually escrowEligible', () => {
+  // STAGE 8 FIX: this test previously asserted the real defect this
+  // stage fixed. Setting the global "Dealer requirement" policy to
+  // "mandatory" is an admin business-rule choice about which dealer
+  // vehicles MUST use escrow once they ARE capable of it — it must never
+  // fabricate escrow capability for a vehicle the backend has not
+  // actually marked escrow_enabled. Before the fix, "mandatory" was
+  // unconditional and ignored escrowEligible entirely, so this exact
+  // admin action (reachable from the real in-app admin panel, not just
+  // devtools) would show "Escrow Mandatory" on every dealer vehicle even
+  // though vehicle escrow is hard-enforced server-side as a
+  // private-seller-only product (backend/controllers/carController.js).
+  // See src/utils/escrow.ts and
+  // ESCROW_CAPABILITY_CONFIGURATION_AUDIT_20261008.md.
+  it('admin setting dealerRequirement to "mandatory" does NOT apply to a dealer vehicle that is NOT individually escrowEligible', () => {
     const dealerNotEligible = INITIAL_VEHICLES.find((v) => v.sellerType === 'Verified Dealer' && !v.escrowEligible);
     if (!dealerNotEligible) return; // no such vehicle in current mock data - nothing to verify against
     expect(isEscrowApplicable(dealerNotEligible)).toBe(false); // sanity check before
 
     writeEscrowRulesConfig({ ...DEFAULT_ESCROW_RULES_CONFIG, dealerRequirement: 'mandatory' }, admin);
-    expect(isEscrowApplicable(dealerNotEligible)).toBe(true);
+    expect(isEscrowApplicable(dealerNotEligible)).toBe(false);
+  });
+
+  it('admin setting dealerRequirement to "mandatory" DOES apply to a dealer vehicle that the backend has marked escrowEligible', () => {
+    const dealerEligible = INITIAL_VEHICLES.find((v) => v.sellerType === 'Verified Dealer' && v.escrowEligible);
+    if (!dealerEligible) return;
+    writeEscrowRulesConfig({ ...DEFAULT_ESCROW_RULES_CONFIG, dealerRequirement: 'mandatory' }, admin);
+    expect(isEscrowApplicable(dealerEligible)).toBe(true);
   });
 
   it('isEscrowLive() reflects liveMode and defaults to false (not yet CBK-certified)', () => {

@@ -36,6 +36,7 @@ import { getDealerPlans } from "../services/dealerSubscription.service.js";
 import { getSupabase } from "../utils/supabase.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
 import { getEscrowRules, getActiveEscrowAccounts, saveEscrowAccount, removeEscrowAccount } from "../services/escrowConfiguration.service.js";
+import { moderationBlockedReason } from "../utils/carModerationGuard.js";
 
 
 // Routes that only admin/superadmin can access
@@ -548,6 +549,14 @@ router.post(
 
     const car = await Car.findById(req.params.id).populate("dealer", "email phone name");
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    // STAGE 7 ADMIN/OPERATIONS PRIVILEGE-BOUNDARY FIX: see
+    // backend/utils/carModerationGuard.js for the full rationale. A sold car
+    // is no longer eligible for listing moderation.
+    const blockedReason = moderationBlockedReason(car);
+    if (blockedReason) {
+      return res.status(409).json({ success: false, message: blockedReason });
+    }
 
     if (action === "approve") {
       car.status = "available";

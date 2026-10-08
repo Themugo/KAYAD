@@ -323,6 +323,11 @@ export interface Vehicle {
   dealerId?: string;
   verified?: boolean;
   isAuction?: boolean;
+  /** Raw backend auction lifecycle state ('none'|'draft'|'live'|'ended'),
+   * distinct from isAuction (capability). Used only for optional trust-
+   * badge status text (e.g. "Live Auction" vs "Upcoming Auction"); never
+   * use this in place of server-authoritative bid/eligibility checks. */
+  auctionLifecycle?: 'none' | 'draft' | 'live' | 'ended';
   auctionEndsAt?: string;
   auctionEnds?: string;
   bidsCount?: number;

@@ -1,18 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, ChevronLeft, ChevronRight, CircleCheck, Gauge, Image as ImageIcon, MapPin, Sparkles, Timer, Trophy, Zap } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, CircleCheck, Gauge, Image as ImageIcon, Lock, MapPin, Sparkles, Timer, Trophy, Zap } from 'lucide-react';
 
 type GalleryProps = {
   title: string;
   images?: Array<{ url?: string } | string>;
   status?: string;
   inspected?: boolean;
+  /** STAGE 8 MARKETPLACE TRUST SIGNAL FIX: authoritative escrow
+   * capability for this vehicle (car.escrowEnabled from the backend),
+   * so the auction detail page agrees with the marketplace card. */
+  escrow?: boolean;
 };
 
 const imageUrl = (image: { url?: string } | string | undefined) => typeof image === 'string' ? image : image?.url || '';
 
-export function AuctionCinematicGallery({ title, images = [], status, inspected }: GalleryProps) {
+export function AuctionCinematicGallery({ title, images = [], status, inspected, escrow }: GalleryProps) {
   const usable = images.map(imageUrl).filter(Boolean);
   const [active, setActive] = useState(0);
   const touchStartX = useRef<number | null>(null);
@@ -46,6 +50,7 @@ export function AuctionCinematicGallery({ title, images = [], status, inspected 
             {status === 'live' && <i />}{status === 'live' ? 'LIVE ROOM' : 'AUCTION'}
           </span>
           {inspected && <span className="auction-wow-soft-chip"><CircleCheck size={12} /> Inspected</span>}
+          {escrow && <span className="auction-wow-soft-chip"><Lock size={12} /> Escrow</span>}
         </div>
         <div className="auction-wow-gallery-caption">
           <span className="auction-wow-overline">VEHICLE STORY</span>

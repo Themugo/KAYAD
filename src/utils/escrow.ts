@@ -35,23 +35,50 @@ function globalRequirement(vehicle: Vehicle): 'mandatory' | 'optional' | 'disabl
 
 /**
  * Evaluates whether Escrow Vault protection is applicable for a given vehicle.
- * 1. A per-sale admin override (escrowOverride) wins over everything.
- * 2. Otherwise the admin-configured global rule for the seller type applies:
- *    - mandatory: always applicable
- *    - disabled: never applicable
- *    - optional: applicable only when the vehicle is escrowEligible
+ *
+ * STAGE 8 FIX: vehicle.escrowEligible (sourced from the backend's
+ * server-enforced cars.escrow_enabled field — see vehicleApi.ts) is now an
+ * absolute precondition for every branch below. Previously, the
+ * "mandatory" global-policy tier returned true unconditionally, without
+ * even checking escrowEligible. Since the admin-configurable rules
+ * (features/Admin/hooks/escrowRulesConfig.ts) are a client-side
+ * presentation/policy layer, not a backend grant, that meant an admin
+ * setting "Dealer requirement: Mandatory" in the in-app admin panel would
+ * display an "Escrow Mandatory" trust badge on every dealer vehicle even
+ * though the backend hard-enforces escrow_enabled=false for every
+ * dealer-owned car (vehicle escrow is a private-seller-only product —
+ * see backend/controllers/carController.js). That is exactly the
+ * fabricated trust signal the master prompt prohibits ("Never show the
+ * escrow badge merely because... the admin has globally configured
+ * escrow... The badge must belong to the actual vehicle/listing").
+ *
+ * Corrected precedence:
+ * 1. Not escrowEligible (backend-authoritative capability) -> never
+ *    applicable, regardless of policy tier or override. This is the one
+ *    rule nothing below may bypass.
+ * 2. A per-sale admin "revoke" override still wins -> never applicable.
+ *    (escrowOverride has no backend write path yet; see
+ *    ESCROW_CAPABILITY_CONFIGURATION_AUDIT_20261008.md — this remains
+ *    inert scaffolding today, kept for forward compatibility.)
+ * 3. A per-sale "enforce" override requires eligibility too (it can no
+ *    longer manufacture capability for an ineligible vehicle) — but once
+ *    eligible, it still forces the badge on even under a "disabled"
+ *    global policy tier, same as before.
+ * 4. Otherwise the admin-configured global rule applies: "disabled" turns
+ *    it off even for an eligible vehicle; "mandatory"/"optional" both
+ *    resolve to true once eligibility is already confirmed.
  */
 export function isEscrowApplicable(vehicle: Vehicle | null | undefined): boolean {
   if (!vehicle) return false;
+  if (!vehicle.escrowEligible) return false;
 
   const override = getOverride(vehicle);
-  if (override === 'enforce') return true;
   if (override === 'revoke') return false;
+  if (override === 'enforce') return true;
 
   const requirement = globalRequirement(vehicle);
-  if (requirement === 'mandatory') return true;
   if (requirement === 'disabled') return false;
-  return Boolean(vehicle.escrowEligible);
+  return true;
 }
 
 /**

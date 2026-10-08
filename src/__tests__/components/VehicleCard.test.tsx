@@ -53,17 +53,18 @@ describe('VehicleCard - trust badges (professional/compact pass)', () => {
     onStartEscrow: vi.fn(),
   };
 
-  // Rule (explicit direction): only the auction indicator belongs on the
-  // image - Dealer, Certified, Escrow, Finance are static trust facts,
-  // not urgent, and moved to the card body. Replaces the old "max 2
-  // badges on the image" test, which stopped meaningfully testing
-  // anything once the image badge system became auction-only (it still
-  // technically passed - at most 1 auction badge is always <= 2 - but
-  // wasn't verifying the actual current rule anymore).
-  it('the image overlay never shows Dealer/Certified/Escrow/Finance - only ever the auction badge, if any', () => {
-    // Picks whichever real mock vehicle would trigger the most trust-
-    // badge conditions at once (verified + inspected + escrow/finance)
-    // to actually stress this, not just check an already-empty overlay.
+  // STAGE 8 MARKETPLACE TRUST SIGNAL FIX: these two tests previously
+  // asserted that the image overlay (and the card as a whole) never
+  // visibly shows an escrow or inspection trust signal — "Escrow" and
+  // "Certified" were deliberately kept out of the visible UI, folded
+  // only into the aria-label. The master prompt explicitly requires the
+  // opposite: "Any vehicle/listing that is actually associated with
+  // an auction/escrow/inspection must carry a visible badge". The
+  // overlay is now Max 3 small badges (AUCTION / ESCROW / INSPECTED),
+  // each gated on real backend-authoritative state. "Dealer"/"Finance"
+  // remain aria-label-only — those were never one of the three
+  // required trust signals.
+  it('the image overlay shows ONLY the AUCTION/ESCROW/INSPECTED trust badges (never Dealer/Finance, and never a badge the vehicle data does not support)', () => {
     const busiest = [...INITIAL_VEHICLES].sort((a, b) => {
       const score = (v: typeof a) =>
         Number(!!v.verified) + Number(!!v.inspectionPassed) + Number(!!v.financeAvailable);
@@ -72,20 +73,38 @@ describe('VehicleCard - trust badges (professional/compact pass)', () => {
     const { container } = render(<VehicleCard {...baseProps} vehicle={busiest} />);
     const imageOverlay = container.querySelector('.absolute.top-2.left-2');
     const overlayText = imageOverlay?.textContent || '';
-    expect(overlayText).not.toMatch(/Dealer|Certified|Escrow|Finance/);
+    expect(overlayText).not.toMatch(/Dealer|Finance/);
+    // Escrow/Inspected are only expected to appear when the fixture
+    // itself says the capability applies — assert each independently.
+    if (busiest.inspectionPassed) expect(overlayText).toMatch(/Inspected/);
+    else expect(overlayText).not.toMatch(/Inspected/);
   });
 
-  it('no longer shows Dealer/Certified/Escrow/Finance as visible badges anywhere on the card - removed per explicit direction to free up further per-card space; the underlying trust info is preserved via aria-label instead of discarded, verified separately below', () => {
+  it('shows a visible ESCROW badge for a vehicle the backend has marked escrow-eligible, and none for one that is not', () => {
+    const eligible = INITIAL_VEHICLES.find((v) => v.escrowEligible);
+    const notEligible = INITIAL_VEHICLES.find((v) => v.escrowEligible === false);
+    expect(eligible).toBeTruthy();
+    expect(notEligible).toBeTruthy();
+
+    const { unmount } = render(<VehicleCard {...baseProps} vehicle={eligible!} />);
+    expect(screen.getByText('Escrow')).toBeTruthy();
+    unmount();
+
+    render(<VehicleCard {...baseProps} vehicle={notEligible!} />);
+    expect(screen.queryByText('Escrow')).toBeNull();
+  });
+
+  it('still never shows Dealer/Finance as visible badges - that trust info is preserved via aria-label only', () => {
     const busiest = [...INITIAL_VEHICLES].sort((a, b) => {
       const score = (v: typeof a) =>
         Number(!!v.verified) + Number(!!v.inspectionPassed) + Number(!!v.financeAvailable);
       return score(b) - score(a);
     })[0];
     render(<VehicleCard {...baseProps} vehicle={busiest} />);
-    const hasAnyVisibleTrustBadge = ['Dealer', 'Verified', 'Certified', 'Escrow', 'Finance'].some(
+    const hasAnyVisibleOutOfScopeBadge = ['Dealer', 'Finance'].some(
       (label) => screen.queryByText(label) !== null
     );
-    expect(hasAnyVisibleTrustBadge).toBe(false);
+    expect(hasAnyVisibleOutOfScopeBadge).toBe(false);
   });
 
   it('preserves trust info for screen readers via aria-label even though it is no longer shown visually', () => {

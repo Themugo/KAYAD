@@ -188,6 +188,20 @@ export const placeBid = async (req, res) => {
       });
     }
 
+    // STAGE 8 CUSTOMER AUCTION JOURNEY FIX: admin listing moderation
+    // (POST /admin/cars/:id/moderate, action: "reject") sets car.status
+    // = "rejected" without touching auctionStatus/allowBid, so a
+    // rejected listing's auction kept accepting real bids here — this is
+    // the canonical bid endpoint, the one place the master prompt
+    // requires this check to live (see
+    // CUSTOMER_AUCTION_EXPERIENCE_AUDIT_20261008.md).
+    if (car.status === "rejected") {
+      return res.status(409).json({
+        success: false,
+        message: "This listing has been removed from sale and can no longer accept bids",
+      });
+    }
+
     // =============================
     // 🔐 WALLET-LOCK: Bids > KES 5M require KES 50K pre-authorized escrow
     // =============================

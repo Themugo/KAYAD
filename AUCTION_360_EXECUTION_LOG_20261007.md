@@ -724,3 +724,114 @@ tracked.
 **STAGE 6 — ESCROW/PURCHASE/FULFILMENT/SETTLEMENT/OWNERSHIP CONVERGENCE:
 COMPLETE.** Per the master prompt's own ordering, Stage 7 (admin/
 operations) may now begin in a future pass.
+
+# Stage 7 — Admin/Operations Privilege Boundary (this round)
+
+**Method:** read the current tracking docs and all Stage 1–6 certification
+documents first; mapped the full privileged surface directly from source —
+the auth→role→authorization chain (`middleware/auth.js`, `config/owners.js`),
+the admin control plane (`routes/adminRoutes.js`), escrow admin operations
+(`routes/escrowRoutes.js`/`controllers/escrowController.js`), staff role
+assignment, user/dealer administration, and the service-role/RLS boundary.
+Full map and narrative findings in
+`ADMIN_OPERATIONS_PRIVILEGE_AUDIT_20261008.md`; full route-by-route table
+in `ADMIN_PRIVILEGE_MATRIX_20261008.md`.
+
+**Finding fixed (1):** `POST /api/admin/cars/:id/moderate` had no
+precondition on the target car's current status, letting an admin (or any
+staff role with `MANAGE_CARS` permission) call `approve` on a car already
+marked `sold` by Stage 6's escrow-release fulfilment fix, silently
+re-listing a financially-completed sale as purchasable while the payment/
+escrow/ownership records still showed it sold — exactly the invariant this
+stage's own master prompt named explicitly. Fixed via a new, independently
+unit-tested guard, `backend/utils/carModerationGuard.js::moderationBlockedReason()`,
+wired into the route as a `409` rejection before any mutation. Tested in
+`backend/tests/admin/carModerationGuard.test.js` (5 new cases), verified via
+the established revert → confirm-fail → restore → confirm-pass discipline.
+
+**Findings re-verified, no fix needed (confirmed PASS, left unmodified):**
+admin authentication/role trust (owner status is env-derived, never
+database-editable or client-supplied; stale sessions/bans are re-checked
+fresh every request, not cached); auction administration (no winner-
+override or admin auction-engine surface exists anywhere in the codebase —
+the safest possible state, not a gap); escrow release/refund (authorization
+checked twice, amounts/beneficiaries always server-derived, idempotency key
+threaded through, doubled audit trail); staff role assignment (superadmin
+elevation is impossible through any API — env-config-only); user/dealer
+administration (self-delete and owner-account protections intact);
+service-role/RLS boundary (already certified by passing validators,
+re-confirmed not re-litigated).
+
+**Validation:** Backend jest **45/45 suites, 616/616 tests** (up from
+Stage 6's 44/611); `tsc --noEmit` clean (no frontend changes this stage);
+frontend `vitest run` **336 passed / 11 pre-existing-unrelated failed / 1
+skipped / 348 total** (unchanged baseline); `npm run build` clean.
+Relevant validators re-run and all green: `validate:registration-role-matrix`
+(32/32), `validate:domain-lifecycle-integrity` (PASS),
+`validate:passport-authorization` (7/7), `validate:high-risk-boundaries`
+(PASS), `validate:hero-admin-control` (PASS),
+`validate:database-contract-alignment` (8/8).
+
+**Remaining risks:** see `ADMIN_OPERATIONS_PRIVILEGE_AUDIT_20261008.md` §13;
+live Postgres/Supabase/Redis/M-Pesa concurrency execution and staging
+certification remain environment-blocked, unchanged from every prior stage.
+
+**STAGE 7 — ADMIN/OPERATIONS PRIVILEGE BOUNDARY: COMPLETE.** Per the
+master prompt's own ordering, Stage 8 (frontend auction experience) remains
+gated behind the live-infrastructure item on record since Stage 1.
+
+---
+
+# Stage 8 — Customer Auction Experience + Marketplace Trust Signals + Optional Escrow Capability (this round)
+
+**Scope:** customer auction journey end-to-end + public AUCTION/ESCROW/
+INSPECTION trust-signal badges + escrow-capability architecture audit.
+Escrow remains fully optional and launch-disabled-capable throughout; no
+new auction/escrow/inspection/payment engine introduced; no mock
+inventory introduced.
+
+**Real defects found and fixed (4):**
+1. A listing rejected mid-auction (admin moderation) kept appearing in
+   the active-auctions feed and kept accepting real bids — fixed by
+   excluding `status: "rejected"` from `getActiveAuctions()`'s filter and
+   adding the same check to `bidController.js::placeBid` (409).
+2. The ESCROW trust badge could be fabricated for every dealer vehicle by
+   a legitimate in-app admin policy setting ("Dealer requirement:
+   Mandatory"), independent of the vehicle's real backend
+   `escrow_enabled` state — fixed by wiring `cars.escrow_enabled` through
+   to the frontend (`vehicle.escrowEligible`) and hard-gating
+   `isEscrowApplicable()` on it in every branch.
+3. `VehicleDetailPage.tsx`'s Escrow/Auction/Inspection/Availability
+   status badges rendered unconditionally for every vehicle — fixed by
+   gating each on its real backing field.
+4. `VehicleCard.tsx`'s auction badge showed "LIVE" (or a countdown) for
+   any auction-capable vehicle regardless of real lifecycle state — fixed
+   by keying it off the real `draft`/`live`/`ended` lifecycle instead of
+   the capability flag.
+
+**Findings re-verified, no fix needed:** Stage 3 routing fix (manual
+`path.startsWith`/`getIdFromPathPrefix`, no `useParams()` regression);
+Stage 4 bid-identity hardening (`bidApi.ts::placeBid` sends no
+client-controlled identity field); realtime auction-scoped
+join/leave/cleanup/reconciliation; Stage 6 canonical escrow state
+machine and fulfilment engine; Stage 6/7 `closeAuction()` as the sole
+auction-close path; `vehicleApi.ts`'s `rejected → active` status mapping
+— investigated per the master prompt's explicit instruction, proven to
+have no remaining customer-exposure path once defect #1's two gates are
+in place, left unchanged.
+
+**Validation:** Backend jest **47/47 suites, 620/620 tests** (up from
+Stage 7's 45/45, 616/616); `tsc --noEmit` clean; frontend `vitest run`
+**340 passed / 11 pre-existing-unrelated failed / 1 skipped / 352 total**
+(same 11 pre-existing failures as every prior stage's baseline); `npm run
+build` clean. 16 relevant validators re-run, all green (see
+`CUSTOMER_AUCTION_EXECUTION_REPORT_20261008.md` for the full list).
+
+**Remaining risks:** see `ESCROW_CAPABILITY_CONFIGURATION_AUDIT_20261008.md`
+for the admin-grantable escrow eligibility gap (intentionally deferred,
+not a regression); live Postgres/Supabase/Redis/M-Pesa concurrency
+execution, staging certification, and real browser/device execution
+remain environment-blocked, unchanged from every prior stage.
+
+**STAGE 8 — CUSTOMER AUCTION EXPERIENCE + MARKETPLACE TRUST SIGNALS:
+COMPLETE.**

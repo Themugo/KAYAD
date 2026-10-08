@@ -108,6 +108,14 @@ export interface BackendCar {
   created_at?: string | null;
   updatedAt?: string | null;
   updated_at?: string | null;
+  // STAGE 8 MARKETPLACE TRUST SIGNAL FIX: escrowEnabled is a real,
+  // server-enforced field on the canonical Car record (see
+  // backend/controllers/carController.js's role-based enforcement) but
+  // was never declared or read here, so the frontend's existing
+  // escrow-capability system (src/utils/escrow.ts::isEscrowApplicable)
+  // had no authoritative backend signal to key off at all.
+  escrowEnabled?: boolean | null;
+  escrow_enabled?: boolean | null;
 }
 
 export interface PaginatedCarsResponse {
@@ -277,6 +285,17 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
         : 'Private Seller';
   const isVerifiedDealer = Boolean(car.isVerifiedDealer ?? car.is_verified_dealer ?? dealer?.dealerApprovedAt);
   const inspectionStatus = String(car.inspectionStatus ?? car.inspection_status ?? '').trim();
+  // STAGE 8 MARKETPLACE TRUST SIGNAL FIX: wire the already-built escrow
+  // capability system (src/utils/escrow.ts::isEscrowApplicable) to the
+  // real, server-enforced cars.escrow_enabled field. Before this fix,
+  // escrowEligible was never populated here, so isEscrowApplicable() for
+  // a dealer vehicle (the "optional" policy tier, which reads
+  // escrowEligible) silently always evaluated as false/undefined —
+  // not because the backend said so, but because nothing ever told it.
+  const escrowEligible = Boolean(car.escrowEnabled ?? car.escrow_enabled);
+  const auctionLifecycle = (['none', 'draft', 'live', 'ended'] as const).includes(auctionStatus as 'none' | 'draft' | 'live' | 'ended')
+    ? (auctionStatus as 'none' | 'draft' | 'live' | 'ended')
+    : 'none';
 
   return {
     id: car.id || car._id || '',
@@ -312,12 +331,14 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
     dealerId: sellerId || undefined,
     verified: isVerifiedDealer,
     isAuction,
+    auctionLifecycle,
     currentBid: currentBid != null ? Number(currentBid) : undefined,
     bidsCount: bidsCount != null ? Number(bidsCount) : undefined,
     auctionEndsAt: auctionEnd || undefined,
     savedCount: 0,
     inspectionStatus: inspectionStatus || undefined,
     inspectionPassed: inspectionStatus.toLowerCase() === 'passed',
+    escrowEligible,
     status: car.status === 'sold' ? 'sold' : car.status === 'pending' ? 'pending' : car.status === 'draft' ? 'draft' : 'active',
     isFeatured: Boolean(car.isPromoted ?? car.is_promoted),
     createdAt: car.createdAt || car.created_at || '',

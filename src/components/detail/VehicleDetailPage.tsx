@@ -34,6 +34,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
+import { isEscrowApplicable } from '../../utils/escrow';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -295,50 +296,85 @@ export const VehicleDetailPage: FC = () => {
             {vehicle.title.startsWith(String(vehicle.year)) ? vehicle.title : `${vehicle.year} ${vehicle.title}`}
           </h1>
 
-          {/* Interactive Market Status Badges */}
+          {/* STAGE 8 MARKETPLACE TRUST SIGNAL FIX: Interactive Market
+              Status Badges. These were previously rendered
+              unconditionally for every vehicle regardless of its real
+              backend state — a non-escrow-eligible car still offered an
+              "M-Pesa Escrow Protected" CTA, a non-inspected car still
+              claimed "150-Point Inspected", and a sold/pending car still
+              claimed "Ready for Delivery". Each is now gated on the same
+              authoritative fields the marketplace card uses
+              (mapBackendCarToVehicle / isEscrowApplicable), so the
+              detail page agrees with the listing card per the master
+              prompt's "the detail page must agree with the listing
+              card" requirement. */}
           <div className="flex flex-wrap items-center gap-2 pt-0.5">
-            {/* Escrow Protected Badge */}
-            <button
-              onClick={() => navigateTo('escrow')}
-              className="px-3 py-1.5 rounded-xl bg-[#13B8A6]/15 hover:bg-[#13B8A6]/25 text-[#176B87] border border-[#13B8A6]/40 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
-              title="Click to view M-Pesa Escrow Guarantee"
-            >
-              <Lock className="w-3.5 h-3.5 text-[#13B8A6] group-hover:scale-110 transition-transform" />
-              <span>M-Pesa Escrow Protected</span>
-              <ChevronRight className="w-3 h-3 text-[#176B87]/60" />
-            </button>
+            {/* Escrow Protected Badge — only for vehicles the backend has
+                actually marked escrow-eligible. */}
+            {isEscrowApplicable(vehicle) && (
+              <button
+                onClick={() => navigateTo('escrow')}
+                className="px-3 py-1.5 rounded-xl bg-[#13B8A6]/15 hover:bg-[#13B8A6]/25 text-[#176B87] border border-[#13B8A6]/40 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
+                title="Click to view M-Pesa Escrow Guarantee"
+              >
+                <Lock className="w-3.5 h-3.5 text-[#13B8A6] group-hover:scale-110 transition-transform" />
+                <span>M-Pesa Escrow Protected</span>
+                <ChevronRight className="w-3 h-3 text-[#176B87]/60" />
+              </button>
+            )}
 
-            {/* Auction or Fixed Price Status Badge */}
+            {/* Auction or Fixed Price Status Badge — label reflects the
+                real auction lifecycle (capability vs. live/upcoming/
+                ended), not just whether the vehicle has auction capability. */}
             <button
               onClick={() => navigateTo('auctions')}
               className={`px-3 py-1.5 rounded-xl border text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs ${
-                vehicle.listingType === 'auction' || vehicle.listingType === 'both'
+                vehicle.auctionLifecycle === 'live'
                   ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 border-amber-400'
-                  : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-900 border-emerald-400'
+                  : vehicle.auctionLifecycle === 'draft'
+                    ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-900 border-blue-400'
+                    : vehicle.auctionLifecycle === 'ended'
+                      ? 'bg-slate-200/60 hover:bg-slate-200 text-slate-700 border-slate-400'
+                      : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-900 border-emerald-400'
               }`}
-              title="Click to view Live Auction Floor"
+              title="Click to view the auction floor"
             >
               <Gavel className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform" />
-              <span>{vehicle.listingType === 'auction' ? 'Live Auction Floor' : 'Verified Fixed Price'}</span>
+              <span>
+                {vehicle.auctionLifecycle === 'live'
+                  ? 'Live Auction Floor'
+                  : vehicle.auctionLifecycle === 'draft'
+                    ? 'Upcoming Auction'
+                    : vehicle.auctionLifecycle === 'ended'
+                      ? 'Auction Ended'
+                      : 'Verified Fixed Price'}
+              </span>
               <ChevronRight className="w-3 h-3 text-slate-500" />
             </button>
 
-            {/* Pre-Inspection Badge */}
+            {/* Inspection Badge — claims "Inspected" only once the
+                vehicle actually carries a qualifying passed inspection;
+                otherwise offers to book one instead of misrepresenting
+                its state. */}
             <button
               onClick={() => navigateTo('ghost_check', vehicle.id)}
               className="px-3 py-1.5 rounded-xl bg-[#176B87] hover:bg-[#0A3340] text-white border border-[#176B87] text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
-              title="Click to book 150-Point Pre-Purchase Inspection"
+              title={vehicle.inspectionPassed ? 'Click to view the 150-Point Inspection report' : 'Click to book a 150-Point Pre-Purchase Inspection'}
             >
               <Wrench className="w-3.5 h-3.5 text-[#13B8A6] group-hover:scale-110 transition-transform" />
-              <span>150-Point Inspected</span>
+              <span>{vehicle.inspectionPassed ? '150-Point Inspected' : 'Book Inspection'}</span>
               <ChevronRight className="w-3 h-3 text-[#13B8A6]" />
             </button>
 
-            {/* Availability Status */}
-            <span className="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Ready for Delivery</span>
-            </span>
+            {/* Availability Status — never claims delivery-readiness for
+                a vehicle that is not actually an active, purchasable
+                listing. */}
+            {vehicle.status === 'active' && (
+              <span className="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Ready for Delivery</span>
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-[#365563]">

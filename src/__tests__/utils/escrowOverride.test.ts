@@ -44,17 +44,33 @@ describe('isEscrowApplicable - per-vehicle admin override (escrowOverride)', () 
     expect(isEscrowApplicable(vehicle)).toBe(false);
   });
 
-  it('escrowOverride "enforce" returns true even for a Verified Dealer vehicle with escrowEligible: false', () => {
+  // STAGE 8 FIX: escrowOverride "enforce" can no longer manufacture
+  // escrow capability for a vehicle the backend has not marked eligible
+  // (vehicle.escrowEligible, sourced from cars.escrow_enabled). An
+  // override has no backend write path today (see
+  // ESCROW_CAPABILITY_CONFIGURATION_AUDIT_20261008.md), so this is
+  // presentation-layer scaffolding only — it must never be able to
+  // fabricate a trust signal the backend would reject at purchase time.
+  it('escrowOverride "enforce" does NOT fabricate escrow for a Verified Dealer vehicle with escrowEligible: false', () => {
     const vehicle = makeVehicle({
       sellerType: 'Verified Dealer',
       escrowEligible: false,
       escrowOverride: 'enforce',
     });
+    expect(isEscrowApplicable(vehicle)).toBe(false);
+  });
+
+  it('escrowOverride "enforce" DOES apply once the vehicle is backend-eligible, even under a global "disabled" tier', () => {
+    const vehicle = makeVehicle({
+      sellerType: 'Verified Dealer',
+      escrowEligible: true,
+      escrowOverride: 'enforce',
+    });
     expect(isEscrowApplicable(vehicle)).toBe(true);
   });
 
-  it('with no override (undefined), falls through to the existing global-rule behavior unchanged', () => {
-    const privateSeller = makeVehicle({ sellerType: 'Private Seller' });
+  it('with no override (undefined), falls through to the existing global-rule behavior, still gated on real backend eligibility', () => {
+    const privateSeller = makeVehicle({ sellerType: 'Private Seller', escrowEligible: true });
     const dealerNotEligible = makeVehicle({ sellerType: 'Verified Dealer', escrowEligible: false });
     const dealerEligible = makeVehicle({ sellerType: 'Verified Dealer', escrowEligible: true });
     expect(isEscrowApplicable(privateSeller)).toBe(true);
@@ -62,9 +78,14 @@ describe('isEscrowApplicable - per-vehicle admin override (escrowOverride)', () 
     expect(isEscrowApplicable(dealerEligible)).toBe(true);
   });
 
-  it('explicit escrowOverride: null behaves identically to undefined (falls through to the global rule)', () => {
-    const vehicle = makeVehicle({ sellerType: 'Private Seller', escrowOverride: null });
+  it('explicit escrowOverride: null behaves identically to undefined (falls through to the global rule), still gated on real backend eligibility', () => {
+    const vehicle = makeVehicle({ sellerType: 'Private Seller', escrowOverride: null, escrowEligible: true });
     expect(isEscrowApplicable(vehicle)).toBe(true);
+  });
+
+  it('a private seller vehicle the backend has NOT marked escrow-eligible never shows the badge, regardless of the mandatory default policy', () => {
+    const vehicle = makeVehicle({ sellerType: 'Private Seller', escrowEligible: false });
+    expect(isEscrowApplicable(vehicle)).toBe(false);
   });
 });
 

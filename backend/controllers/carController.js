@@ -236,10 +236,17 @@ export const getCars = async (req, res) => {
         ntsaVerified: 1,
         dutyStatus: 1,
         isPromoted: 1,
+        // STAGE 8 MARKETPLACE TRUST SIGNAL FIX: escrowEnabled already
+        // exists on the Car model (server-enforced by seller role — see
+        // carController.js create/update handlers) but was never
+        // selected into the public listing projection, so the public
+        // marketplace could not show an authoritative ESCROW badge at
+        // all. See MARKETPLACE_TRUST_SIGNAL_MATRIX_20261008.md.
+        escrowEnabled: 1,
       });
     } else {
       findQuery = findQuery.select(
-        "title price images coverImage brand year model city fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer inspectionStatus ntsaVerified dutyStatus isPromoted",
+        "title price images coverImage brand year model city fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer inspectionStatus ntsaVerified dutyStatus isPromoted escrowEnabled",
       );
     }
 

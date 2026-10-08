@@ -8,7 +8,9 @@ import {
   ArrowRightLeft,
   Gavel,
   Building2,
-  UserCheck
+  UserCheck,
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 import { Badge, Button, LazyImage } from './ui';
 
@@ -68,10 +70,10 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
   const URGENCY_WINDOW_MS = 30 * 60 * 1000;
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (!vehicle.isAuction) return;
+    if (vehicle.auctionLifecycle !== 'live') return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [vehicle.isAuction]);
+  }, [vehicle.auctionLifecycle]);
 
   const endsAtMs = vehicle.auctionEndsAt ? new Date(vehicle.auctionEndsAt).getTime() : null;
   const msRemaining = endsAtMs !== null ? endsAtMs - now : null;
@@ -122,12 +124,50 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
           </div>
         )}
 
-        {/* Dynamic Top Overlay Badges (Max 3) */}
+        {/* STAGE 8 MARKETPLACE TRUST SIGNAL FIX: Dynamic Top Overlay
+            Badges (Max 3) — AUCTION / ESCROW / INSPECTION. Each is
+            derived strictly from authoritative backend state carried on
+            `vehicle` by mapBackendCarToVehicle; none are calculated
+            independently here. Previously the lone auction badge here
+            showed "LIVE" (or a countdown) for ANY vehicle.isAuction
+            vehicle regardless of real lifecycle state — a scheduled
+            (draft) or already-ended auction on the general marketplace
+            list (which, unlike the dedicated active-auctions endpoint,
+            is not filtered to auctionStatus:'live') would still render
+            as "LIVE", contradicting the master prompt's explicit "scheduled
+            auctions are not falsely labelled live... closed auctions are
+            not active" requirement. Fixed by keying off the raw
+            auctionLifecycle state instead of the isAuction capability
+            flag, and separating capability from lifecycle presentation. */}
         <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 max-w-[78%] pointer-events-none z-10">
-          {vehicle.isAuction && (
+          {vehicle.auctionLifecycle === 'live' && (
             <Badge variant="live" size="sm">
               <Gavel className="w-3 h-3 shrink-0" />
               <span>{isEndingSoon && countdownLabel ? countdownLabel : 'LIVE'}</span>
+            </Badge>
+          )}
+          {vehicle.auctionLifecycle === 'draft' && (
+            <Badge variant="info" size="sm">
+              <Gavel className="w-3 h-3 shrink-0" />
+              <span>Upcoming Auction</span>
+            </Badge>
+          )}
+          {vehicle.auctionLifecycle === 'ended' && (
+            <Badge variant="neutral" size="sm">
+              <Gavel className="w-3 h-3 shrink-0" />
+              <span>Auction Ended</span>
+            </Badge>
+          )}
+          {isEscrowApplicable(vehicle) && (
+            <Badge variant="escrow" size="sm">
+              <Lock className="w-3 h-3 shrink-0" />
+              <span>Escrow</span>
+            </Badge>
+          )}
+          {vehicle.inspectionPassed && (
+            <Badge variant="inspected" size="sm">
+              <ShieldCheck className="w-3 h-3 shrink-0" />
+              <span>Inspected</span>
             </Badge>
           )}
         </div>

@@ -279,7 +279,7 @@ export default function AuctionLivePage() {
 
           {/* ─── LEFT: Car + Bid History ─── */}
           <div>
-            <AuctionCinematicGallery title={car.title} images={car.images} status={auctionLive ? 'live' : car.auctionStatus} inspected={car.inspectionStatus === 'passed' || car.inspectionStatus === 'completed'} />
+            <AuctionCinematicGallery title={car.title} images={car.images} status={auctionLive ? 'live' : car.auctionStatus} inspected={car.inspectionStatus === 'passed' || car.inspectionStatus === 'completed'} escrow={Boolean(car.escrowEnabled)} />
             {auctionLive && <AuctionActivityPulse currentBid={currentBid} bidCount={bidCount} endsAt={car.auctionEnd} connected={connected} recentBidder={lastBidder} />}
 
             {/* Car specs strip */}

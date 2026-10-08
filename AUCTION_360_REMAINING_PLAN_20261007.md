@@ -57,6 +57,16 @@ real build and a real browser matter.
 
 Full reasoning: `ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md` §4.
 
+## Carried forward from Stage 7 — not yet fixed
+
+None. Stage 7 found exactly one real defect and fixed it; every other
+privileged surface inspected was confirmed correctly authorized with no
+open item. The pre-existing Stage 6 item above (payment-initiation
+already-sold-car defense-in-depth guard) remains open, re-reviewed this
+stage and confirmed to have no Stage 7 dependency — it is a payment-
+initiation concern, not an admin-privilege one. Full reasoning:
+`ADMIN_OPERATIONS_PRIVILEGE_AUDIT_20261008.md` §11.
+
 ## Carried forward from Stage 5 — not yet fixed, with reasoning recorded
 
 1. **`createOrder()`'s read-then-insert duplicate-active-inspection race**
@@ -299,28 +309,91 @@ client-writable escrow live-mode flag) were re-investigated directly and
 confirmed to need no fix — see "Carried forward from Stage 6" below for
 why each is now closed rather than still open.
 
-## Stage 7 — Admin/operations
+## Stage 7 — Admin/operations privilege boundary — COMPLETE
 
-Plan: audit every privileged admin workflow (auction creation/publishing,
-reserve config, closing, winner handling, payment monitoring, escrow ops,
-refunds, forfeiture, reconciliation, ownership ops, inspection ops) for
-server-side authorization — no hidden-frontend-control reliance. The
-`isStaff`/admin-bypass pattern already established and used in this pass's
-`carController.js` fix is the template to check every other admin surface
-against.
+Done this pass — see `ADMIN_OPERATIONS_PRIVILEGE_AUDIT_20261008.md`,
+`ADMIN_PRIVILEGE_MATRIX_20261008.md`, and
+`ADMIN_OPERATIONS_EXECUTION_REPORT_20261008.md`. Audited every privileged
+admin workflow (admin authentication/role trust, auction administration,
+escrow admin operations, staff role assignment, user/dealer administration,
+vehicle/listing moderation, service-role/RLS boundary, audit trail) for
+server-side authorization. Found and fixed 1 real defect: `POST
+/admin/cars/:id/moderate` had no precondition against mutating an
+already-sold car, letting an admin silently re-list a financially-completed
+sale as purchasable — exactly the "sold vehicles cannot casually be
+returned to purchasable state" invariant this stage was required to verify.
+Every other privileged surface inspected (auction administration — no
+winner-override surface exists at all; escrow release/refund — doubly
+authorized, idempotent, doubly audited; staff role assignment — superadmin
+elevation impossible through any API) was confirmed correctly authorized
+and left unmodified.
 
-## Stage 8 — Frontend auction experience (gated)
+## Stage 8 — Customer auction experience + marketplace trust signals + optional escrow capability — COMPLETE
 
-Explicitly gated per the master prompt until backend/source P0/P1/P2
-integrity is clean — which, at the source level, it now is. Still blocked on
-the infrastructure items above (real build/typecheck) before starting.
+Full customer auction journey traced and re-confirmed intact end-to-end
+(discovery → detail → registration → bid → realtime → countdown →
+winner/loser → payment → optional escrow → fulfilment → history). Public
+AUCTION/ESCROW/INSPECTION marketplace trust-signal badges built on the
+marketplace card, vehicle detail, and auction detail, each derived
+strictly from authoritative backend state (`auctionStatus`,
+`escrow_enabled`, `inspection_status === 'passed'`) — no new schema, no
+mock inventory, no second engine of any kind.
+
+4 real defects found and fixed:
+1. A listing rejected mid-auction kept appearing in the active-auctions
+   feed and kept accepting real bids — fixed at `getActiveAuctions()`'s
+   filter and `bidController.js::placeBid`.
+2. The ESCROW badge could be fabricated for every dealer vehicle by a
+   legitimate in-app admin policy setting, independent of the vehicle's
+   real backend escrow capability — fixed by wiring `cars.escrow_enabled`
+   through to the frontend and hard-gating the badge logic on it.
+3. `VehicleDetailPage.tsx`'s status badges (Escrow/Auction/Inspection/
+   Availability) rendered unconditionally — fixed by gating each on its
+   real field.
+4. `VehicleCard.tsx`'s auction badge showed "LIVE" regardless of real
+   auction lifecycle state — fixed by keying off the real lifecycle
+   value instead of the capability flag.
+
+`vehicleApi.ts`'s long-carried-forward Stage 2 `rejected → active`
+mapping was investigated per this stage's explicit instruction and found
+to have no remaining customer-exposure path once the above fixes are in
+place — left unchanged, documented as resolved-at-the-source rather than
+modified speculatively.
+
+Full detail, matrices, and the escrow-capability architecture audit (what
+exists, what's intentionally deferred, and why) in
+`CUSTOMER_AUCTION_EXPERIENCE_AUDIT_20261008.md`,
+`CUSTOMER_AUCTION_JOURNEY_MATRIX_20261008.md`,
+`MARKETPLACE_TRUST_SIGNAL_MATRIX_20261008.md`,
+`ESCROW_CAPABILITY_CONFIGURATION_AUDIT_20261008.md`, and
+`CUSTOMER_AUCTION_EXECUTION_REPORT_20261008.md`.
+
+Every other journey step inspected (registration/eligibility, realtime
+scoping, payment idempotency, fulfilment/ownership convergence, history
+scoping) was confirmed correctly authorized and left unmodified.
+
+## Carried forward from Stage 8 — not yet fixed
+
+- No admin-grantable per-seller/per-vehicle escrow eligibility mechanism
+  exists (eligibility is hard-coded to seller role) — intentionally
+  deferred; building one would be new business-rule/architecture
+  invention outside this stage's explicit scope boundary.
+- `escrowOverride` / `users.escrow_approved` / `escrow_forced` remain
+  inert scaffolding with no write path anywhere.
+- `vehicle.inspection` (rich per-system-score object) is declared but
+  never populated by the mapper.
+- `VehicleDetailPage.tsx`'s unconditional "Clean Title" image badge is
+  not backed by any title-status field — not one of the three required
+  trust signals, flagged rather than fixed to avoid scope creep.
+- `authController.js`'s `bankAccount` profile field has no backing
+  migration column on `users` — appears dead/unsupported.
 
 ## Stages 9–14 — Desktop UX, mobile UX, typography, iconography,
 ## accessibility, performance
 
-Not started. Each depends on Stage 8 landing first (there's no frontend
-auction-experience baseline yet to apply viewport/typography/a11y/performance
-passes to).
+Not started. Stage 8's customer-facing baseline (including the new trust
+badges) now exists for these to apply viewport/typography/a11y/performance
+passes to, once scheduled.
 
 ## Stages 15–16 — Test/regression gate, environment-dependent certification
 
@@ -331,15 +404,24 @@ will continue to apply at every future stage.
 
 ## Summary of what's genuinely left
 
-Source-level backend/contract/journey work (Stages 1–7) is either done
-(Stage 1: source-level trust-boundary sweep; Stage 2: API contract
-convergence; Stage 3: marketplace/vehicle/auction convergence; Stage 4:
-account/session/identity/customer-trust; Stage 5: inspection/provider
-operations/evidence/workflow convergence) or scoped and ready to start in
-order (Stages 6–7). The 4 items carried forward from Stage 2, the 4
-carried forward from Stage 3, the 15 carried forward from Stage 4, and the
-5 carried forward from Stage 5 above are explicit, recorded exceptions,
-not silent gaps — 28 total. All frontend/UX work (Stages 8–14) is entirely
-unstarted and gated behind Stages 6–7 landing, per the master prompt's own
-explicit ordering. No part of this plan proposes restarting, redesigning,
-or duplicating anything already built.
+Source-level backend/contract/journey/customer-experience work
+(Stages 1–8) is entirely done (Stage 1: source-level trust-boundary
+sweep; Stage 2: API contract convergence; Stage 3: marketplace/vehicle/
+auction convergence; Stage 4: account/session/identity/customer-trust;
+Stage 5: inspection/provider operations/evidence/workflow convergence;
+Stage 6: escrow/purchase/fulfilment/settlement/ownership convergence;
+Stage 7: admin/operations privilege boundary; Stage 8: customer auction
+experience + marketplace trust signals + optional escrow capability).
+The 4 items carried forward from Stage 2, the 4 carried forward from
+Stage 3, the 15 carried forward from Stage 4, the 5 carried forward from
+Stage 5, the 1 carried forward from Stage 6, and the 5 carried forward
+from Stage 8 above are explicit, recorded exceptions, not silent gaps —
+34 total (Stage 7 added none). Stages 9–14 (desktop/mobile UX,
+typography, iconography, accessibility, performance) remain unstarted,
+no longer gated on anything but scheduling — Stage 8 now supplies the
+customer-facing baseline (including the new trust badges) for those
+passes to apply to. The one remaining live-infrastructure blocker (live
+Postgres/Supabase migration certification, on record since Stage 1)
+still gates only genuine live/staging execution, never the source-level
+work itself. No part of this plan proposes restarting, redesigning, or
+duplicating anything already built.

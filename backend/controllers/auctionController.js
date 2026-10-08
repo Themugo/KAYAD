@@ -69,6 +69,13 @@ const toAuctionResponse = (car) => ({
     description: car.description,
     features: car.features,
     reserveMode: car.reserveMode,
+    // STAGE 8 MARKETPLACE TRUST SIGNAL FIX: the auction detail response
+    // must agree with the marketplace card for the same vehicle (master
+    // prompt: "The detail page must agree with the listing card"). Both
+    // fields already exist on the canonical Car record; they were simply
+    // never threaded through this serializer.
+    escrowEnabled: Boolean(car.escrowEnabled),
+    inspectionStatus: car.inspectionStatus ?? null,
   },
 });
 
@@ -269,6 +276,18 @@ export const getActiveAuctions = async (req, res) => {
     allowBid: true,
     auctionStartTime: { $lte: now },
     auctionEnd: { $gt: now },
+    // STAGE 8 CUSTOMER AUCTION JOURNEY FIX: a listing an admin has
+    // rejected mid-auction (POST /admin/cars/:id/moderate, action:
+    // "reject") only ever sets car.status = "rejected" — it does not
+    // touch auctionStatus/allowBid (closing the auction is a separate,
+    // deliberately-not-automatic decision; see
+    // CUSTOMER_AUCTION_EXPERIENCE_AUDIT_20261008.md). Without this
+    // exclusion, a rejected listing's auction stayed fully live and
+    // biddable and was displayed to customers as a perfectly normal
+    // active auction (vehicleApi.ts maps any non-sold/pending/draft
+    // status, including "rejected", to frontend "active") — directly
+    // contradicting the admin's rejection decision.
+    status: { $ne: "rejected" },
   };
 
   const [cars, total] = await Promise.all([
