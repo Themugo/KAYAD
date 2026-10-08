@@ -1,5 +1,5 @@
 // src/context/AuthContext.tsx
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import {
   getMe,
@@ -81,6 +81,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUserState] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: every auth action that
+  // can set `user` (the mount-time getMe() bootstrap, login(), logout(), the
+  // kayad:auth-expired handler) now bumps this ref first and stamps the
+  // request it starts with the value at that moment. Before this fix, the
+  // mount effect's getMe() call had no such guard: if it resolved AFTER a
+  // newer action already ran - e.g. a user lands on /login already
+  // authenticated as account A (mount's getMe() for A in flight), submits
+  // credentials for account B before that promise resolves, login() sets
+  // user=B, and the stale getMe() for A then resolves and calls
+  // setUser(normalizeUser(A)) - the UI would silently revert to the older
+  // identity. Symmetrically, logout() setting user=null could be silently
+  // undone by an in-flight getMe() resolving afterward with the pre-logout
+  // user payload. Each async identity-setting path now only applies its
+  // result if no newer one has started since.
+  const authActionSeq = useRef(0);
+
   const setUser = (u: User | null) => {
     setUserState(u);
     if (u) setPostHogUser(u);
@@ -89,13 +105,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // On mount: fetch user via cookie-based auth (HttpOnly token cookie)
   useEffect(() => {
-    const handleAuthExpired = () => { clearCSRFToken(); setUser(null); setLoading(false); };
+    const handleAuthExpired = () => {
+      authActionSeq.current += 1;
+      clearCSRFToken(); setUser(null); setLoading(false);
+    };
     window.addEventListener('kayad:auth-expired', handleAuthExpired);
 
+    const mySeq = ++authActionSeq.current;
     getMe().then(user => ({ user }))
-      .then(data => setUser(normalizeUser(data.user)))
+      .then(data => {
+        // A newer auth action (login/logout/another bootstrap) has already
+        // run since this request started - its result is stale, discard it.
+        if (authActionSeq.current !== mySeq) return;
+        setUser(normalizeUser(data.user));
+      })
       .catch(() => { /* not authenticated — user stays null */ })
-      .finally(() => setLoading(false));
+      .finally(() => { if (authActionSeq.current === mySeq) setLoading(false); });
 
     return () => window.removeEventListener('kayad:auth-expired', handleAuthExpired);
   }, []);
@@ -103,10 +128,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(async (credentialsOrEmail: { email: string; password: string } | string, passwordArg?: string) => {
     const email = typeof credentialsOrEmail === 'string' ? credentialsOrEmail : credentialsOrEmail.email;
     const password = typeof credentialsOrEmail === 'string' ? (passwordArg || '') : credentialsOrEmail.password;
+    const mySeq = ++authActionSeq.current;
     const user = await authLogin(email, password);
     const data = { success: true, user };
-    setUser(normalizeUser(data.user));
-    setLoading(false);
+    if (authActionSeq.current === mySeq) {
+      setUser(normalizeUser(data.user));
+      setLoading(false);
+    }
     return data;
   }, []);
 
@@ -120,10 +148,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = useCallback(async () => {
+    const mySeq = ++authActionSeq.current;
     try { await authLogout(); } catch (error) { console.error('Logout failed:', error); }
     clearCSRFToken();
-    setUser(null);
-    setLoading(false);
+    if (authActionSeq.current === mySeq) {
+      setUser(null);
+      setLoading(false);
+    }
   }, []);
 
   const updateProfile = useCallback(async (body: any) => {

@@ -1,12 +1,27 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { getIdFromPathPrefix } from '../../utils/navigation';
 
 
 export default function EditCarPage() {
-  const { id }     = useParams();
+  // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: this page reproduced
+  // the exact Stage-3 routing defect (useParams() always returns {} - this
+  // app has no react-router <Routes>/<Route> tree anywhere, confirmed in
+  // src/main.tsx). Unlike the two pages Stage 3 fixed, this one is
+  // currently unreachable (not imported/routed from anywhere in
+  // AuthRouteSurface or AppInner), so the bug has zero production impact
+  // today - but it is a landmine: the moment someone adds a nav link to
+  // it (DealerLayout.tsx already carries a `'edit-car': 'Edit Listing'`
+  // label for exactly this page), `id` would silently be undefined and
+  // the ownership check below would run against a car fetched with
+  // `id === undefined`. Fixed now, using this codebase's established
+  // manual-routing convention (the same helper the two already-fixed
+  // Stage-3 pages use) rather than waiting for it to go live broken.
+  const location = useLocation();
+  const id = useMemo(() => getIdFromPathPrefix(location.pathname, '/dealer/edit-car/'), [location.pathname]);
   const { toast }  = useToast();
   const { user, isAdmin } = useAuth();
   const navigate   = useNavigate();

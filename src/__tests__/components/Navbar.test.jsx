@@ -90,4 +90,23 @@ describe('Navbar', () => {
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     expect(screen.getByTestId('location')).toHaveTextContent('/register');
   });
+
+  // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE REGRESSION TEST: while the
+  // authoritative session check is in flight, `user` is always null
+  // regardless of whether the visitor is actually signed in. Before this
+  // fix, Navbar rendered straight off `user`, so an already-authenticated
+  // customer saw the signed-out "Sign In / Sign Up" button flash on every
+  // reload. With `authLoading` true, neither the signed-in nor the
+  // signed-out control should render.
+  it('renders neither the signed-in menu nor the sign-in button while the session check is still in flight', () => {
+    render(<MemoryRouter><Navbar {...guestProps} authLoading={true} /></MemoryRouter>);
+    expect(screen.queryByRole('button', { name: /sign in/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /create account/i })).toBeNull();
+    expect(screen.queryByText(/sign in \/ sign up/i)).toBeNull();
+  });
+
+  it('renders the signed-out sign-in control once the session check resolves to unauthenticated', () => {
+    render(<MemoryRouter><Navbar {...guestProps} authLoading={false} /></MemoryRouter>);
+    expect(screen.getByText(/sign in \/ sign up/i)).toBeTruthy();
+  });
 });

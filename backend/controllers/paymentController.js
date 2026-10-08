@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { findOne, findById } from "../db/index.js";
 import { isValidId } from "../utils/validateId.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
+import { getAuctionFinancialPolicy } from "../services/auctionFinancialIntegrity.service.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 import { logInfo } from "../utils/logger.js";
 import { logError } from "../infrastructure/logging/index.js";
@@ -87,6 +88,70 @@ export const initiatePayment = async (req, res) => {
         });
       }
       settlementAmount = serverAmount;
+    }
+
+    // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: this endpoint
+    // (POST /api/payments/initiate) is a generic, directly-callable,
+    // customer-authenticated route. The amount-integrity guard above only
+    // ever covered type ∈ {escrow, auction_win, purchase}. For every other
+    // accepted `type` value - "bid", "listing", "subscription", "deposit" -
+    // `settlementAmount` fell through unchanged as `parsedAmount`, the raw
+    // client-supplied number, which was then passed straight to `initiate()`
+    // and becomes the real M-Pesa STK amount charged. Concretely, any
+    // authenticated user could POST {type:"bid", carId, amount: 1, phone}
+    // directly to this endpoint and create a real "bid" payment for
+    // whatever amount they chose, completely bypassing
+    // bidController.js::placeBid's own, separate call path (which never
+    // goes through this HTTP controller at all - it calls the
+    // `initiatePayment` *service* function directly) along with every one
+    // of its gates: the configured `bidConfirmationFeeKes` policy, the
+    // auction-live check, and the registration/eligibility check.
+    //
+    // "bid" has a real, already-canonical, server-side authoritative
+    // amount - the same `getAuctionFinancialPolicy().bidConfirmationFeeKes`
+    // constant bidController.js already enforces - so it's folded into the
+    // same amount-integrity pattern used above for escrow/purchase/
+    // auction_win: the client amount must match the server value exactly.
+    //
+    // "listing", "subscription" and "deposit" have no authoritative
+    // server-side amount anywhere in this codebase at all (confirmed: no
+    // listing-fee/subscription-plan-price/deposit-amount lookup exists), and
+    // no current frontend caller ever sends these types to this endpoint
+    // (confirmed via grep across src/) - they are an unimplemented, dead
+    // customer-facing surface, not a real feature regressing here. Per this
+    // stage's change discipline ("do not rewrite the payment system", "do
+    // not introduce a new abstraction merely to conceal an existing
+    // mismatch"), inventing a fee computation for them now would be
+    // designing new business logic, not fixing an existing one. The correct,
+    // minimal, fail-closed fix is to refuse a client-trusted amount for
+    // these types here until a dedicated, server-computed flow for them is
+    // built - exactly as "escrow" is already refused above with a
+    // dedicated-flow message, not silently allowed through.
+    if (normalizedType === "bid" && carId) {
+      const policy = await getAuctionFinancialPolicy();
+      const serverAmount = Number(policy.bidConfirmationFeeKes);
+      if (!Number.isFinite(serverAmount) || serverAmount <= 0) {
+        return res.status(400).json({ success: false, message: "Cannot determine the server-configured bid confirmation fee" });
+      }
+      if (parsedAmount !== serverAmount) {
+        logError("Payment amount mismatch — client amount rejected", null, {
+          userId: req.user.id,
+          carId,
+          type: normalizedType,
+          clientAmount: parsedAmount,
+          serverAmount,
+        });
+        return res.status(400).json({
+          success: false,
+          message: "Amount does not match the server-determined bid confirmation fee",
+        });
+      }
+      settlementAmount = serverAmount;
+    } else if (["listing", "subscription", "deposit"].includes(normalizedType)) {
+      return res.status(400).json({
+        success: false,
+        message: "This payment type is not available through this endpoint yet",
+      });
     }
 
     if (normalizedType === "auction_win" && carId) {
@@ -329,7 +394,23 @@ export const checkPaymentStatus = async (req, res) => {
     }
 
     // 🔒 SECURITY CHECK
-    if (req.user && payment.user && payment.user.toString() !== req.user.id && req.user.role !== "admin") {
+    // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: this previously
+    // read `payment.user && payment.user.toString() !== req.user.id && ...`
+    // — when `payment.user` was itself falsy (a legacy/edge-case payment
+    // record with no user attached), the whole `&&` chain short-circuited
+    // to `false` and the entire ownership check was SKIPPED, returning the
+    // full payment object (amount, phone, mpesaReceipt, metadata) to
+    // *any* authenticated user who supplied/guessed that checkoutRequestId
+    // — fail-open rather than fail-closed. `getPaymentById` (this
+    // controller, below) and `getEscrowById` already do fetch-then-
+    // authorize correctly with an explicit deny; this endpoint is brought
+    // into line with that same pattern: ownership is now a positive
+    // assertion (`isOwner`), and anyone who isn't the recorded owner *and*
+    // isn't staff is denied, including when the payment record has no
+    // owner on file at all.
+    const isOwner = !!(payment.user && req.user && payment.user.toString() === req.user.id);
+    const isStaff = req.user?.role === "admin" || req.user?.effectiveRole === "webhoist";
+    if (!isOwner && !isStaff) {
       return res.status(403).json({
         success: false,
         message: "Not authorized",

@@ -6,6 +6,13 @@ jest.unstable_mockModule('../../infrastructure/logging/index.js', () => ({ logEr
 jest.unstable_mockModule('../../db/index.js', () => ({ findOne: jest.fn(), findById: jest.fn(), findAll, count }));
 jest.unstable_mockModule('../../services/paymentService.js', () => ({ initiatePayment: jest.fn() }));
 jest.unstable_mockModule('../../services/paymentCallback.service.js', () => ({ handleMpesaCallback: jest.fn() }));
+// STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE: paymentController.js now
+// also imports getAuctionFinancialPolicy (used only by initiatePayment's
+// "bid" amount-integrity check, not by getUserPayments under test here),
+// which itself imports db/index.js's `create`/`update` - exports this
+// file's own db/index.js mock above doesn't provide. Without mocking it
+// too, importing the controller module at all fails at ESM link time.
+jest.unstable_mockModule('../../services/auctionFinancialIntegrity.service.js', () => ({ getAuctionFinancialPolicy: jest.fn() }));
 const { getUserPayments } = await import('../../controllers/paymentController.js');
 
 const call = async (query) => {

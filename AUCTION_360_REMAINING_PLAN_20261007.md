@@ -3,14 +3,16 @@ Date: 2026-10-07/08
 
 Stage 1 of the 16-stage continuation prompt is source-level complete (see
 `P0_P1_SOURCE_CERTIFICATION_20261007.md` and
-`AUCTION_360_EXECUTION_LOG_20261007.md`). Stage 2 (API contract convergence)
-and Stage 3 (marketplace/vehicle/auction convergence) are now also complete
-(see `AUCTION_API_CONTRACT_MATRIX_20261007.md`,
-`AUCTION_MARKETPLACE_VEHICLE_CONVERGENCE_20261007.md`, and the Stage 2/3
-sections appended to the execution log) — both explicitly classified
-**COMPLETE** per the master prompt's own requirement before the next stage
-may begin. This document plans Stages 4–16, in the order the master prompt
-specifies — "CONTINUE FROM WHERE YOU ARE", not a restart.
+`AUCTION_360_EXECUTION_LOG_20261007.md`). Stage 2 (API contract convergence),
+Stage 3 (marketplace/vehicle/auction convergence) and Stage 4 (account/
+session/identity/customer-trust) are now also complete (see
+`AUCTION_API_CONTRACT_MATRIX_20261007.md`,
+`AUCTION_MARKETPLACE_VEHICLE_CONVERGENCE_20261007.md`,
+`ACCOUNT_SESSION_IDENTITY_AUDIT_20261008.md`, and the Stage 2/3/4 sections
+appended to the execution log) — all explicitly classified **COMPLETE** per
+the master prompt's own requirement before the next stage may begin. This
+document plans Stages 5–16, in the order the master prompt specifies —
+"CONTINUE FROM WHERE YOU ARE", not a restart.
 
 ## Environment correction (supersedes the Stage-2 note below)
 
@@ -35,9 +37,66 @@ matching-engine environment is live-database migration certification
 2. ~~Run a full root npm install + tsc --noEmit + npm run build~~ — DONE
    this pass, with `--engine-strict=false`. No longer a blocker.
 
-Does not block Stage 4 itself (a pure code/journey trace, not a live-
-infrastructure task), but item 1 must close out before Stage 8, where a
-real build and a real browser matter.
+Did not block Stage 4 (a pure code/journey trace, not a live-infrastructure
+task, now complete), and does not block Stage 5 either for the same
+reason; item 1 must close out before Stage 8, where a real build and a
+real browser matter.
+
+## Carried forward from Stage 4 — not yet fixed, with reasoning recorded
+
+Full reasoning for each in `ACCOUNT_SESSION_IDENTITY_AUDIT_20261008.md` §3.
+
+1. **`kayad_escrow_rules_config_v1` localStorage flag is unauthenticated
+   and client-writable**, driving the regulated "live escrow"
+   (CBK-certification) claim across `VehicleCard`/`VehicleDetailModal`/
+   `CompareModal`/`TrustBadgeMatrix`. No backend persistence exists for
+   this config at all (by explicit, pre-existing design, consistent with
+   every other admin config built so far), so a real fix means adding a
+   backend-sourced, admin-write-only store — new infrastructure, sized
+   for its own pass.
+2. **No deterministic idempotency key on `POST /api/payments/initiate`
+   retries** — the HTTP client's 401/CSRF-403 auto-retry replays the exact
+   POST body, but `backend/middleware/idempotency.js` has no deterministic
+   case for the generic `"payment"` operation type, so a retried
+   payment-initiation request risks a duplicate M-Pesa STK push. Needs a
+   scoped change to shared idempotency infrastructure plus a frontend
+   stable-key change.
+3. **Duplicate phone numbers unenforced at registration** — only email has
+   a uniqueness constraint. Needs a DB migration (unique index) plus a
+   controller-side duplicate check.
+4. **Auto-firing, single-use-token email-verification GET** — vulnerable
+   to corporate link-scanners consuming the real link before the user
+   opens it. Fixing this is a deliberate UX/flow change (add a confirm
+   step), not a drive-by fix.
+5. **Two independent, inconsistent brute-force lockout mechanisms**
+   (in-memory per-IP vs. DB-persisted per-account) — neither is broken,
+   they just don't share state/scope.
+6. **Logout is always "all devices"** — a single-session-revoke endpoint
+   exists server-side but isn't wired to the frontend's `logout()`. Fails
+   toward more revocation, not less — a product decision.
+7. **No cross-tab logout propagation** — mitigated by the shared cookie jar
+   and server-side `tokenVersion` revocation (a stale tab's next mutation
+   correctly 401s); the gap is purely display staleness in that tab until
+   its next request.
+8. **Dead refresh-token DB-row expiry value** (30d vs. the JWT's own 7d,
+   which always rejects first) — misleading, fails safe.
+9. **Dead granular-RBAC frontend mechanism** (`RequireAdminPage`/
+   `ADMIN_PAGE_ROLES`/`RequirePermission`) never wired into `AdminView` —
+   misleading UI only; backend authorization is unaffected and correct.
+10. **`getMe()` fetched once at mount only** — a mid-session role
+    change isn't reflected in the frontend until next login; backend
+    stays authoritative per-request regardless.
+11. **No live countdown on 429 responses** (most rate limiters don't embed
+    a number; the frontend never reads response headers).
+12. **`authLimiter`'s 429 message hardcodes "too many login attempts"**
+    even for register/forgot-password/verify-email — cosmetic
+    mislabeling.
+13. **Stale "Place Bid" button after a silent session expiry** — cosmetic
+    only; the click handler itself correctly re-checks `isAuth` first.
+14. **`PaymentHistoryView` discards its own classified `PaymentApiError.kind`**
+    — shows one generic error regardless of 401/403/5xx.
+15. **Silent, unexplained logout on session expiry** — no toast/message
+    distinguishing "you were logged out" from "never signed in".
 
 ## Carried forward from Stage 3 — not yet fixed, with reasoning recorded
 
@@ -113,14 +172,29 @@ found. One real defect (the dealer-dashboard stats endpoint's raw-query
 column bug) deferred as out of scope/size for this pass — see "Carried
 forward from Stage 3" above.
 
-## Stage 4 — Account/session/identity UX (next)
+## Stage 4 — Account/session/identity/customer-trust — COMPLETE
 
-Plan: trace create-account → verify → sign-in → session-restore → profile →
-registration → bidding → payment → history, specifically checking: CSRF token
-handling, session-expiry/refresh behavior, logout (does it clear everything
-it should), duplicate-account prevention, and — the specific thing the prompt
-calls out — that the UI never shows "signed in" state before the backend has
-actually confirmed it.
+Done this pass — see `ACCOUNT_SESSION_IDENTITY_AUDIT_20261008.md`. Traced
+create-account → verify → sign-in → session → profile → protected routes →
+auction registration → commitment → KES 1 → bidding → payment → purchase
+history → logout end to end. The single most severe defect of this stage
+(the mandatory `phone` field in `bidSchema` silently blocking every real
+bid before it reached the bid-authorization boundary) was found and fixed,
+along with 7 other real defects (a client-trusted payment amount on
+bid/listing/subscription/deposit types, a fail-open payment-status
+ownership check, an auth-state mount/login/logout race condition, a
+flash-of-signed-out-navbar bootstrap bug, a swallowed 403 on the
+registration-status read, a login timing-based enumeration side-channel,
+and a dead-code `useParams()` reintroduction). 15 further findings are
+documented and intentionally not fixed (see "Carried forward from Stage 4"
+above) — none silently dropped. No second auth/session/CSRF/routing
+mechanism was introduced; the already-certified bid-authorization
+architecture was not altered, only reached correctly. The two
+sized-for-their-own-pass items among the 15 carried-forward findings — the
+`kayad_escrow_rules_config_v1` backend-persistence redesign and the
+payment-initiation idempotency-key fix — are the natural starting point
+for a future dedicated follow-up pass, whenever one is scheduled; they are
+not part of Stage 5's own scope below.
 
 ## Stage 5 — Inspection/provider operations
 
@@ -174,10 +248,12 @@ will continue to apply at every future stage.
 
 Source-level backend/contract/journey work (Stages 1–7) is either done
 (Stage 1: source-level trust-boundary sweep; Stage 2: API contract
-convergence; Stage 3: marketplace/vehicle/auction convergence) or scoped
-and ready to start in order (Stages 4–7). The 4 items carried forward from
-Stage 2 and the 4 carried forward from Stage 3 above are explicit, recorded
-exceptions, not silent gaps. All frontend/UX work (Stages 8–14) is entirely
-unstarted and gated behind Stages 4–7 landing, per the master prompt's own
-explicit ordering. No part of this plan proposes restarting, redesigning,
-or duplicating anything already built.
+convergence; Stage 3: marketplace/vehicle/auction convergence; Stage 4:
+account/session/identity/customer-trust) or scoped and ready to start in
+order (Stages 5–7). The 4 items carried forward from Stage 2, the 4
+carried forward from Stage 3, and the 15 carried forward from Stage 4
+above are explicit, recorded exceptions, not silent gaps. All frontend/UX
+work (Stages 8–14) is entirely unstarted and gated behind Stages 5–7
+landing, per the master prompt's own explicit ordering. No part of this
+plan proposes restarting, redesigning, or duplicating anything already
+built.

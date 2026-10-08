@@ -88,7 +88,23 @@ export default function AuctionLivePage() {
     setRegistrationLoading(true);
     auctionRegistrationAPI.get(id)
       .then((data) => { setRegistration(data.registration || null); setRegistrationSetup(data.setup || null); })
-      .catch(() => { setRegistration(null); setRegistrationSetup(null); })
+      .catch((err) => {
+        setRegistration(null); setRegistrationSetup(null);
+        // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: this previously
+        // discarded the error entirely, treating a 403 "Account suspended"/
+        // "Account deactivated" response (backend/middleware/auth.js's
+        // protect() middleware) identically to "not yet registered" - a
+        // banned/deactivated user saw a normal "Register to bid" CTA with
+        // no indication why. The sibling write path just below (register/
+        // commitment handlers) already surfaces the backend's specific
+        // message via the same err.response?.data?.message shape; this
+        // read path is brought into line with it for the one case that
+        // actually needs surfacing - an auth-boundary rejection, not an
+        // ordinary "no registration yet" 404/empty response.
+        const status = err?.response?.status;
+        const message = err?.response?.data?.message;
+        if (status === 403 && message) toast(message, 'error');
+      })
       .finally(() => setRegistrationLoading(false));
   }, [id, isAuth]);
 

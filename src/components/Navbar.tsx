@@ -43,6 +43,16 @@ interface NavbarProps {
   onOpenCompare?: () => void;
   onLogout?: () => void;
   unreadCount?: number;
+  /** STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: whether the
+   * authoritative session check (AuthContext's mount-time getMe()) is
+   * still in flight. `user` is always null during this window regardless
+   * of whether the visitor is actually signed in - rendering off `user`
+   * alone, as this component previously did unconditionally, means an
+   * already-authenticated customer sees the "Sign In / Sign Up" button
+   * flash on every reload until that request resolves. Optional and
+   * defaulted to false so any caller that doesn't track loading state
+   * keeps today's exact behavior. */
+  authLoading?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -56,7 +66,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAlerts,
   onOpenCompare,
   onLogout,
-  unreadCount = 0
+  unreadCount = 0,
+  authLoading = false,
 }) => {
   const { branding } = useBranding();
   const navigate = useNavigate();
@@ -288,7 +299,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* AUTHENTICATED USER DROPDOWN OR LOGIN BUTTON (Secondary CTA: White bg, Navy border) */}
-            {user ? (
+            {/* STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: while the
+                authoritative session check is still in flight, `user` is
+                always null, so rendering straight off `user` here showed
+                the signed-out "Sign In / Sign Up" button to an
+                already-authenticated customer on every reload until
+                getMe() resolved. Render a neutral, same-sized placeholder
+                instead during that window - it never claims either auth
+                state, unlike both branches it replaces. */}
+            {authLoading ? (
+              <div className="hidden sm:flex items-center gap-2" aria-hidden="true">
+                <div className="w-24 h-9 rounded-xl bg-slate-100 animate-pulse" />
+              </div>
+            ) : user ? (
               <div className="relative" ref={userRef}>
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}

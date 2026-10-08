@@ -394,6 +394,7 @@ function AppInner() {
       {/* 1. Header Navigation */}
       <Navbar
         user={user}
+        authLoading={authLoading}
         savedCount={savedVehicles.length}
         activeNav={activeNav}
         onNavClick={handleNavClick}

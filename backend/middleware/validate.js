@@ -114,9 +114,29 @@ import {
   disputeResponseSchema,
 } from "../validation/response.schema.js";
 
+// STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: `phone` was required
+// here, but the real bidder's phone is never collected from the client at
+// all - the one, canonical frontend bid call (src/pages/AuctionLivePage.jsx
+// -> src/services/bidApi.ts::placeBid(carId, amount)) never passes a third
+// `phone` argument, so the request body this middleware actually receives
+// in production is always `{ amount }`. The backend bid-authorization
+// boundary itself (backend/controllers/bidController.js::placeBid, lines
+// ~211-216) never reads req.body.phone either - it independently loads the
+// bidder's own verified phone from their User record
+// (`User.findById(userId).select("phone phoneVerified emailVerified")`) and
+// rejects the bid server-side if that profile phone is missing/unverified,
+// which is the correct, already-authoritative identity check. With `phone`
+// required here, every real signed-in customer's bid failed this
+// middleware's 400 validation before ever reaching that boundary - bidding
+// was completely non-functional end-to-end via the production UI. Making it
+// optional lets a legitimate request without a body `phone` field through;
+// it is accepted-but-unused by the controller exactly as before for any
+// caller that does still send one (kept for backward compatibility with any
+// other caller), and the controller's own server-side phone check is
+// untouched.
 const bidSchema = z.object({
   amount: z.number().positive("Bid must be positive").max(100_000_000),
-  phone: z.string().regex(/^2547\d{8}$/, "Phone must be a valid Safaricom number starting with 2547"),
+  phone: z.string().regex(/^2547\d{8}$/, "Phone must be a valid Safaricom number starting with 2547").optional(),
   maxBid: z.number().positive("Max bid must be positive").optional(),
 });
 

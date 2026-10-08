@@ -475,3 +475,127 @@ component files not yet converged/deleted, and the unrelated
 **STAGE 3 — MARKETPLACE/VEHICLE/AUCTION CONVERGENCE: COMPLETE.** Per the
 master prompt's own ordering, Stage 4 (account/session/identity UX) may now
 begin in a future pass.
+
+# Stage 4 — Account/Session/Identity/Customer-Trust Sweep (this round)
+
+Full report: `ACCOUNT_SESSION_IDENTITY_AUDIT_20261008.md`. Six parallel
+research passes traced registration/login/CSRF/verification/recovery;
+session creation/restoration/race-conditions/logout/expiration/bootstrap
+UX/multi-tab; protected manual routes/`useParams()` reintroduction risk/
+profile/role convergence/localStorage audit; auction-registration and
+bidding identity binding (including a full `req.body.userId/bidderId/
+buyerId/sellerId/ownerId` override sweep); payment-initiation and purchase/
+history identity boundaries; and authentication-adjacent HTTP error → UX
+mapping. Every candidate finding was independently re-verified against the
+actual current source before any fix was made.
+
+## Findings fixed (8)
+
+1. **`bidSchema`'s mandatory `phone` field blocked every real bid before it
+   reached the bid-authorization boundary** (`backend/middleware/
+   validate.js`) — the single most severe defect this stage, structurally
+   identical in impact to Stage 3's `useParams()` finding: bidding was
+   completely non-functional for every real customer. Made `phone`
+   optional; the controller's own server-side phone check (reads from the
+   bidder's `User` record, never from the request body) is untouched.
+2. **Client-supplied payment `amount` trusted for `bid`/`listing`/
+   `subscription`/`deposit` on `POST /api/payments/initiate`**
+   (`backend/controllers/paymentController.js`) — a real financial
+   bypass of `bidController.js`'s own confirmation-fee/eligibility/
+   auction-live gates. `"bid"` now verified against the same server-side
+   `bidConfirmationFeeKes` constant; the other three types (no
+   authoritative server amount exists anywhere for them) are now refused
+   outright rather than trusting the client.
+3. **`checkPaymentStatus` failed open (skipped its ownership check
+   entirely) when a payment record had no `user` on file** — fixed to a
+   positive `isOwner` assertion; denies by default now, including the
+   no-owner edge case.
+4. **`AuthContext`'s mount-time `getMe()` had no guard against resolving
+   after a newer `login()`/`logout()`** — a stale bootstrap response could
+   silently overwrite a fresher login, or silently re-authenticate the UI
+   after a logout. Fixed with a monotonic sequence counter so only the
+   most recent identity-setting action's result is ever applied.
+5. **Navbar flashed signed-out "Sign In / Sign Up" on every reload for an
+   already-authenticated customer** (master prompt's own item 22,
+   explicitly named) — fixed by threading `authLoading` through to a new,
+   backward-compatible `Navbar` prop that renders a neutral placeholder
+   during the bootstrap window instead.
+6. **`AuctionLivePage`'s registration-status fetch silently discarded a
+   403 "Account suspended"/"deactivated" rejection**, treating it
+   identically to "not yet registered" — brought into line with the
+   sibling register/commitment handlers in the same file, which already
+   surface the backend's specific message.
+7. **Login timing side-channel**: an unknown-email login short-circuited
+   before paying any bcrypt cost, while a known-email/wrong-password login
+   paid the full cost — a measurable account-enumeration timing oracle.
+   Fixed with an equal-cost dummy `bcrypt.compare`; no response content
+   changed.
+8. **Dead-code reintroduction of the Stage-3 `useParams()` defect** in
+   `src/pages/dealer/EditCarPage.jsx` (currently unreachable — zero
+   production impact today, but a landmine given `DealerLayout.tsx`
+   already carries a nav label for it) — fixed using the same
+   `getIdFromPathPrefix` convention as the two already-fixed Stage-3 pages.
+
+## Findings documented, not fixed (15) — carried forward with reasoning
+
+See `ACCOUNT_SESSION_IDENTITY_AUDIT_20261008.md` §3 for the full list and
+reasoning on each: the unauthenticated, client-writable
+`kayad_escrow_rules_config_v1` localStorage flag driving a regulated "live
+escrow" claim (needs real backend persistence — its own pass); no
+deterministic idempotency key on payment-initiation retries (needs
+`idempotency.js` + frontend changes — its own pass); unenforced duplicate
+phone numbers at registration (needs a DB migration); the auto-firing,
+single-use-token email-verification GET (a deliberate UX/flow decision);
+two inconsistent brute-force lockout mechanisms; logout-is-always-
+all-devices; no cross-tab logout sync; a dead refresh-token-expiry value;
+a dead granular-RBAC frontend mechanism; `getMe()` fetched once at mount
+only; no 429 retry-after countdown; `authLimiter`'s 429 mislabeling; a
+cosmetically-stale "Place Bid" button after session expiry;
+`PaymentHistoryView` discarding its own classified error kind; and a
+silent, unexplained logout on session expiry.
+
+## Tests added
+
+`backend/tests/validation/bidSchema.test.js` (5 cases),
+`backend/tests/transactions/paymentInitiateAmountIntegrity.test.js`
+(5 cases), `backend/tests/transactions/paymentStatusOwnership.test.js`
+(4 cases), `backend/tests/auth/loginTimingEnumeration.test.js` (2 cases),
+2 new cases in `src/__tests__/context/AuthContext.test.jsx`, 2 new cases in
+`src/__tests__/components/Navbar.test.jsx`, 2 new cases in
+`src/__tests__/pages/AuctionLivePage.test.jsx`. Every one was verified to
+actually catch its regression (reverted the fix, re-ran, confirmed the
+exact expected failure, then restored). One pre-existing test file's mock
+(`backend/tests/transactions/paymentHistory.test.js`) was updated to add a
+mock for the one new service import `paymentController.js` now pulls in —
+no existing assertion was weakened or removed.
+
+## Validation
+
+- Backend jest: **41/41 suites, 602/602 tests** (up from Stage 3's 37/37,
+  586/586).
+- Frontend `tsc --noEmit`: **PASS** (exit 0).
+- Frontend `vitest run`: **336 passed, 11 failed** (pre-existing/unrelated,
+  identical failing test names to Stage 3's documented baseline — zero
+  overlap with this stage's changes), 1 skipped, 348 total (up from Stage
+  3's 330/11/1/342).
+- Frontend `npm run build`: **PASS** (same pre-existing chunk-size warning).
+- Validators: 8 relevant auth/session/CSRF/passport/registration/role
+  validators re-run, all green (19/19, 16/16, 7/7, 9/9, 32/32, 7/7 + 2
+  simple PASS scripts). 4 unrelated validators fail with `ENOENT` against
+  files confirmed to not exist anywhere in this checkout — pre-existing,
+  not caused by this pass.
+
+## Remaining risks
+
+See `ACCOUNT_SESSION_IDENTITY_AUDIT_20261008.md` §3 — the 15 documented-
+not-fixed findings above, plus the five Stage-4 "do not touch" carried-
+forward items (vehicle `rejected`→`active` mapping, `mpesaCallback`'s
+hardcoded-500, `completeEscrowRefund`'s untyped RPC, legacy/canonical
+inspection split, dealer-dashboard raw-Supabase column bug — all untouched
+per explicit master-prompt instruction, confirmed no direct dependency
+discovered this pass) and the Stage-1 live-database-migration-certification
+blocker (genuinely infrastructure-dependent, unrelated to Node version).
+
+**STAGE 4 — ACCOUNT/SESSION/IDENTITY/CUSTOMER TRUST: COMPLETE.** Per the
+master prompt's own ordering, Stage 5 (inspection/provider operations) may
+now begin in a future pass.

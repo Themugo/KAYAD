@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import AuctionLivePage from '../../pages/AuctionLivePage';
+import { auctionRegistrationAPI } from '../../api/api';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 // AuctionLivePage reads auction/bid state through the canonical services
@@ -43,14 +44,23 @@ vi.mock('../../services/bidApi', () => ({
   placeBid: vi.fn().mockResolvedValue({}),
   BidApiError: class BidApiError extends Error {},
 }));
+// STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE: isAuth and the toast spy are
+// made mutable/hoisted (rather than fixed inline return values, as every
+// other mock in this file still is) specifically so the new
+// "registration-fetch error surfacing" tests below can render with
+// isAuth: true and assert on a shared toast() spy, without disturbing any
+// of this file's existing isAuth:false tests, which continue to get
+// exactly their original fixed behavior by default.
+const authState = vi.hoisted(() => ({ isAuth: false }));
+const toastSpy = vi.hoisted(() => vi.fn());
 vi.mock('../../context/AuthContext', () => ({
-  useAuth: () => ({ user: null, isAuth: false }),
+  useAuth: () => ({ user: null, isAuth: authState.isAuth }),
 }));
 vi.mock('../../context/SocketContext', () => ({
   useSocket: () => ({ joinAuction: vi.fn(), leaveChannel: vi.fn(), connected: false }),
 }));
 vi.mock('../../context/ToastContext', () => ({
-  useToast: () => ({ toast: vi.fn() }),
+  useToast: () => ({ toast: toastSpy }),
 }));
 vi.mock('../../components/CountdownDisplay', () => ({ CountdownDisplay: () => null }));
 vi.mock('../../components/BackButton', () => ({ default: () => null }));
@@ -96,5 +106,41 @@ describe('AuctionLivePage', () => {
   it('shows starting price label', async () => {
     renderAuctionPage();
     expect(await screen.findByText('Starting Price')).toBeInTheDocument();
+  });
+});
+
+// STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE REGRESSION TESTS: the
+// registration-status fetch previously discarded any error from
+// auctionRegistrationAPI.get() silently, treating a 403 "Account
+// suspended"/"Account deactivated" rejection identically to "not yet
+// registered" - the signed-in-but-banned user saw a normal "Register to
+// bid" CTA with no indication why. This proves the specific backend
+// message is now surfaced via toast for a 403, and that an ordinary
+// "no registration yet" rejection (no response/any other status) still
+// does NOT spam a toast.
+describe('AuctionLivePage registration-status error surfacing', () => {
+  afterEach(() => { cleanup(); authState.isAuth = false; toastSpy.mockClear(); auctionRegistrationAPI.get.mockReset(); });
+
+  it('surfaces the backend message via toast when the registration-status fetch is rejected with 403', async () => {
+    authState.isAuth = true;
+    auctionRegistrationAPI.get.mockRejectedValueOnce({
+      response: { status: 403, data: { message: 'Account suspended' } },
+    });
+
+    renderAuctionPage();
+
+    await waitFor(() => {
+      expect(toastSpy).toHaveBeenCalledWith('Account suspended', 'error');
+    });
+  });
+
+  it('does not toast for an ordinary "not yet registered" rejection with no response', async () => {
+    authState.isAuth = true;
+    auctionRegistrationAPI.get.mockRejectedValueOnce(new Error('network error'));
+
+    renderAuctionPage();
+    await screen.findAllByText('Test Car');
+
+    expect(toastSpy).not.toHaveBeenCalled();
   });
 });

@@ -373,6 +373,23 @@ export const register = async (req, res) => {
   }
 };
 
+// STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: a dummy, lazily-computed
+// bcrypt hash used only to equalize login timing for an unknown email (see
+// below) — never a real credential, never compared against anything a
+// client supplies as a hash, only used as the second argument to
+// bcrypt.compare() so an unknown-email request pays the same bcrypt cost a
+// known-email request already pays.
+let _dummyPasswordHash = null;
+async function getDummyPasswordHash() {
+  if (!_dummyPasswordHash) {
+    // Matches models/_base.js's BCRYPT_ROUNDS (12), kept as a literal here
+    // rather than imported, since this is only ever used for its bcrypt
+    // cost, never compared against a real credential.
+    _dummyPasswordHash = await bcrypt.hash(crypto.randomUUID(), 12);
+  }
+  return _dummyPasswordHash;
+}
+
 // =============================
 // 🔑 LOGIN
 // =============================
@@ -390,6 +407,24 @@ export const login = async (req, res) => {
 
     // Auth fields live in user_auth table (H1 split)
     const userAuth = user ? await UserAuth.findOne({ user: user._id }).select("+password +tokenVersion") : null;
+
+    // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: when `userAuth` is
+    // null (unknown email), the credential check below previously read
+    // `!userAuth || !(await userAuth.matchPassword(password))` — the `||`
+    // short-circuits before ever calling matchPassword/bcrypt.compare, so
+    // an unknown-email request returned "Invalid credentials" immediately,
+    // while a known-email/wrong-password request paid the full bcrypt
+    // cost (BCRYPT_ROUNDS=12) first. Both paths already return the
+    // identical response body/message (confirmed below, no enumeration
+    // via content), but this created a measurable response-time oracle for
+    // account enumeration via timing — inconsistent with this same
+    // controller's own explicitly constant-time-shaped forgotPassword/
+    // resendVerification flows. Running the same-cost dummy compare here
+    // for an unknown email closes that timing gap without changing any
+    // response content.
+    if (!userAuth) {
+      await bcrypt.compare(password, await getDummyPasswordHash());
+    }
 
     // ─── Check lockout BEFORE password verification ──────
     if (userAuth?.lockUntil && userAuth.lockUntil > new Date()) {
