@@ -1,9 +1,10 @@
-import { findById, findOne, findAll, create, updateMany } from "../db/index.js";
+import { findById, findOne, findAll, create, update, updateMany } from "../db/index.js";
 import { atomicTransitionPurchaseOutcome } from "../utils/atomicTransactions.js";
 import { ownershipService } from "../ownership/services/ownershipService.js";
 import { openDispute as openEscrowDispute } from "./dispute.service.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
+import { logWarn } from "../utils/logger.js";
 
 const nowIso = () => new Date().toISOString();
 const err = (message, status=409) => Object.assign(new Error(message), { status });
@@ -33,6 +34,25 @@ export async function syncPurchaseOutcomeFromEscrow(escrowId, escrowStatus, meta
   }
   if(escrowStatus === "released") {
     if(outcome.status === "completed") return outcome;
+    // STAGE 6 ESCROW/PURCHASE/FULFILMENT CONVERGENCE FIX: escrow release
+    // is the point of financial completion for a private-seller sale, but
+    // nothing on this path ever updated the underlying `cars` row -- only
+    // `purchase_outcomes`. The two OTHER purchase paths that exist in this
+    // codebase (a direct, non-escrow purchase in paymentService.js, and an
+    // auction-win settlement in auctionSettlement.service.js) both flip
+    // `cars.status` to "sold" the moment payment succeeds; this escrow
+    // path alone left it at "available" forever. Confirmed consequence:
+    // GET /cars's own default marketplace query filters on
+    // `status: "available"` (carController.js::getCars), so an
+    // escrow-settled, ownership-transferred vehicle kept appearing in
+    // public marketplace search/browse results indefinitely, and nothing
+    // at payment-initiation time checks for an existing completed
+    // purchase_outcomes row for the car -- so a second buyer could
+    // initiate and pay for a vehicle someone else already owns. Mirrors
+    // the exact field set the other two paths already use, so this
+    // reuses the established "sold" convention rather than inventing a
+    // new one.
+    await update("cars", outcome.car_id, { sold: true, status: "sold", isPaid: true, paymentStatus: "paid" }).catch((e) => logWarn("Failed to mark car sold after escrow release", { error: e.message, carId: outcome.car_id }));
     return atomicTransitionPurchaseOutcome({outcomeId:outcome.id,nextStatus:outcome.collection_status==='collected'?(outcome.transfer_status==='completed'?'completed':'transfer_pending'):'ready_for_collection',collectionStatus:outcome.collection_status==='collected'?'collected':'ready',transferStatus:outcome.transfer_status});
   }
   if(["funded","vehicle_confirmed","delivered"].includes(String(escrowStatus)) && outcome.status === "payment_received") {

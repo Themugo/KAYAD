@@ -198,6 +198,34 @@ export const idempotencyCheck = async (req, res, next) => {
       const windowMs = 5000;
       const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
       idempotencyKey = `bid_${userId}_${carId}_${amount}_${windowStart}`;
+    } else if (operationType === "payment") {
+      // STAGE 6 ESCROW/PURCHASE/FULFILMENT CONVERGENCE FIX: POST
+      // /payments/initiate (the generic M-Pesa STK-push initiation
+      // endpoint) had no deterministic-key branch here at all, so every
+      // request — including a genuine retry of the exact same payment
+      // after a network timeout, or a buyer double-clicking "Pay" — fell
+      // through to the final fallback below (`generateIdempotencyKey`,
+      // which mixes in `Date.now()` and `Math.random()`), producing a
+      // fresh, never-repeating key every single time. The middleware's
+      // own cached-response dedup therefore never engaged for this
+      // endpoint — confirmed no frontend caller sends its own
+      // x-idempotency-key header either — so a retry always re-ran
+      // initiatePayment() and issued a second real Safaricom STK push,
+      // which can prompt the buyer's phone for the SAME payment twice.
+      // Keyed the same way "bid" above already is: user + car + type +
+      // amount, within a short time window. The window (not an unbounded
+      // per-identity key) is deliberate — a genuinely new, later payment
+      // attempt for the same car (e.g. after a prior STK push expired
+      // unactioned, which Safaricom does in roughly 60-120s) must still
+      // be allowed to go through, not be silently swallowed as "already
+      // done" forever.
+      const userId = req.user?.id || "";
+      const carId = req.body?.carId || "";
+      const payType = req.body?.type || "";
+      const amount = req.body?.amount || 0;
+      const windowMs = 30000;
+      const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
+      if (userId) idempotencyKey = `payment_${userId}_${carId}_${payType}_${amount}_${windowStart}`;
     } else if (operationType === "escrow_dispute") {
       const escrowId = req.params?.id || "";
       const userId = req.user?.id || "";

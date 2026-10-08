@@ -42,6 +42,21 @@ live-infrastructure tasks, now complete), and does not block Stage 6
 either for the same reason; item 1 must close out before Stage 8, where a
 real build and a real browser matter.
 
+## Carried forward from Stage 6 — not yet fixed, with reasoning recorded
+
+1. **No explicit guard at payment-initiation time against an
+   already-sold car via a direct/stale link** — Stage 6's Finding 2 (car
+   marked `sold` on escrow release) closes the realistic exposure (a sold
+   car no longer appears in the default marketplace browse/search), but a
+   buyer who already has the car's direct ID (a stale bookmark/deep link)
+   could still, in principle, reach the payment-initiation endpoint for an
+   already-sold car. Recorded as a defense-in-depth hardening item for a
+   future dedicated pass, not fixed now — the correct error shape/UX
+   across every existing payment-type branch needs a deliberate design
+   decision, not a drive-by fix.
+
+Full reasoning: `ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md` §4.
+
 ## Carried forward from Stage 5 — not yet fixed, with reasoning recorded
 
 1. **`createOrder()`'s read-then-insert duplicate-active-inspection race**
@@ -81,14 +96,19 @@ Full reasoning for each in `ACCOUNT_SESSION_IDENTITY_AUDIT_20261008.md` §3.
    this config at all (by explicit, pre-existing design, consistent with
    every other admin config built so far), so a real fix means adding a
    backend-sourced, admin-write-only store — new infrastructure, sized
-   for its own pass.
-2. **No deterministic idempotency key on `POST /api/payments/initiate`
-   retries** — the HTTP client's 401/CSRF-403 auto-retry replays the exact
-   POST body, but `backend/middleware/idempotency.js` has no deterministic
-   case for the generic `"payment"` operation type, so a retried
-   payment-initiation request risks a duplicate M-Pesa STK push. Needs a
-   scoped change to shared idempotency infrastructure plus a frontend
-   stable-key change.
+   for its own pass. **Narrowed in Stage 6:** traced every consumer of
+   the flag directly — it changes only a button's label text
+   (`VehicleDetailModal.tsx`); the `onClick` handler and the backend's
+   escrow-creation path are both unaffected by its value, so this is
+   confirmed an operational-durability/admin-UX gap, not a financial-
+   authority risk. The backend-persistence redesign itself remains open
+   and sized for its own pass.
+2. ~~**No deterministic idempotency key on `POST /api/payments/initiate`
+   retries**~~ — **FIXED in Stage 6.** `backend/middleware/idempotency.js`
+   now generates a 30-second time-windowed deterministic key
+   (user+car+type+amount) for the generic `"payment"` operation type,
+   mirroring the existing `bid` pattern. See
+   `ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md` §2, Finding 1.
 3. **Duplicate phone numbers unenforced at registration** — only email has
    a uniqueness constraint. Needs a DB migration (unique index) plus a
    controller-side duplicate check.
@@ -173,15 +193,25 @@ counts"). They should be picked up explicitly, not silently forgotten:
    collapses backend `rejected` to frontend `'active'`, 33 consumption
    sites) — blocked on a matching-Node-version environment for `tsc
    --noEmit` verification before touching it.
-2. **`paymentController.js::mpesaCallback`'s hardcoded-500 catch block** — a
-   real defect (a 409 "already received" conflict reaches Safaricom's
-   callback log as a generic 500), deliberately left out of Stage 2's scope
-   because it is a server-to-server webhook contract, not a frontend
-   contract, and warrants its own dedicated, carefully-scoped payment-webhook
-   hardening pass rather than a drive-by fix under a contract-convergence
-   prompt.
-3. **`completeEscrowRefund`'s untyped RPC passthrough** — no frontend
-   consumer exists yet; revisit once one is built.
+2. ~~**`paymentController.js::mpesaCallback`'s hardcoded-500 catch
+   block**~~ — **RESOLVED (no fix needed) in Stage 6.** Directly traced
+   the feared scenario (a duplicate/"already received" callback reaching
+   this catch block as a generic 500): it does not happen.
+   `paymentCallback.service.js::handleMpesaCallback`'s webhook-dedup
+   (`recordWebhookReceipt`) and atomic payment-claim
+   (`processed: false → true`) both already resolve a duplicate callback
+   without throwing, so the catch-all 500 only ever fires for genuinely
+   malformed input, where it is the correct response. See
+   `ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md` §3, item 1.
+3. ~~**`completeEscrowRefund`'s untyped RPC passthrough**~~ —
+   **RESOLVED (no fix needed) in Stage 6.** Re-confirmed no frontend
+   consumer exists, and read the backing
+   `kayad_complete_escrow_refund_atomic` RPC's SQL directly: row-locked,
+   idempotent, rejects a reused provider reference, validates its cash-
+   account code. Internally safe; building typed JS validation around an
+   admin-only controller's only caller would be new architecture for an
+   already-enforced contract. See
+   `ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md` §3, item 2.
 4. ~~**Legacy-vs-canonical inspection system split**~~ — **RESOLVED in Stage
    5.** Investigated directly rather than assumed: this is not two
    non-interoperable implementations of the same feature, but two
@@ -249,15 +279,25 @@ IDOR/wildcard-match data leak letting any authenticated user read another
 buyer's full inspection record). 5 further findings are documented and
 intentionally not fixed — see "Carried forward from Stage 5" below.
 
-## Stage 6 — Escrow/purchase/fulfilment
+## Stage 6 — Escrow/purchase/fulfilment/settlement/ownership — COMPLETE
 
-Plan: this pass hardened the two specific races found in auction settlement
-and RLS; Stage 6 asks for a full no-double-transition audit end-to-end
-(auction close → payment due → payment → escrow → fulfilment → buyer
-confirmation → release → seller payout → ownership completion). Much of this
-chain's individual links are already certified PASS (Items 3, 5, 6, 8 of
-Stage 1). Stage 6's job is to confirm the full chain holds together with no
-gap at the seams between links, not to re-prove each link alone.
+Done this pass — see `ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md`,
+`ESCROW_STATE_MACHINE_MATRIX_20261008.md`, and
+`ESCROW_EXECUTION_REPORT_20261008.md`. The full chain (auction close →
+payment due → payment → escrow → fulfilment → buyer confirmation →
+release → seller payout → ownership completion → purchase history →
+reconciliation) was traced end to end and confirmed to hold together with
+no gap at the seams. 2 real defects were found and fixed: payment-
+initiation had no idempotency protection against a genuine retry (a
+network timeout or double-click could trigger a second real M-Pesa STK
+push); escrow release never marked the underlying vehicle `sold`, leaving
+a completed private-seller sale visible and purchasable in the public
+marketplace indefinitely (a real double-sale risk — the most severe
+finding of this stage). Three previously carried-forward items (the
+`mpesaCallback` hardcoded-500, `completeEscrowRefund`'s untyped RPC, the
+client-writable escrow live-mode flag) were re-investigated directly and
+confirmed to need no fix — see "Carried forward from Stage 6" below for
+why each is now closed rather than still open.
 
 ## Stage 7 — Admin/operations
 

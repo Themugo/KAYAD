@@ -660,3 +660,67 @@ dependency on anything touched this stage).
 **STAGE 5 — INSPECTION/PROVIDER OPERATIONS/EVIDENCE/WORKFLOW CONVERGENCE:
 COMPLETE.** Per the master prompt's own ordering, Stage 6 (escrow/purchase/
 fulfilment) may now begin in a future pass.
+
+# Stage 6 — Escrow/Purchase/Fulfilment/Settlement/Ownership Convergence (this round)
+
+**Method:** read the current tracking docs and all Stage 1–5 certification
+documents first; mapped the full auction-close → ownership-completion
+transaction directly from source (not inferred) — one payment engine, one
+escrow engine, one ledger, one ownership system, confirmed, none
+duplicated. Full map, state machine, and findings in
+`ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md` and
+`ESCROW_STATE_MACHINE_MATRIX_20261008.md`.
+
+**Findings fixed (2):**
+1. `POST /payments/initiate` had no deterministic idempotency key — every
+   retry got a random key, so a network-timeout retry or a buyer
+   double-click could issue a second real M-Pesa STK push for the same
+   payment. Fixed with a 30-second time-windowed deterministic key
+   (user+car+type+amount), mirroring the existing `bid` pattern.
+2. Escrow release never marked the underlying vehicle `sold` — the only
+   one of three purchase paths in this codebase that didn't, leaving a
+   completed private-seller sale visible and purchasable in the public
+   marketplace indefinitely (a real double-sale risk). Fixed by reusing
+   the exact `sold`-marking convention the other two paths already use.
+
+Both tested via the established revert → confirm-fail → restore →
+confirm-pass discipline in two new test files
+(`backend/tests/security/paymentInitiateIdempotencyKey.test.js`,
+`backend/tests/transactions/marketplaceFulfilmentCarSoldOnRelease.test.js`,
+5 new test cases total).
+
+**Findings re-verified, no fix needed (3, all explicitly named by the
+master prompt as directly relevant):** `mpesaCallback`'s hardcoded-500
+(confirmed the feared conflict-as-500 scenario no longer reaches that code
+path — already closed by a prior stage's webhook-dedup/atomic-claim
+hardening); `completeEscrowRefund`'s untyped RPC passthrough (confirmed
+the backing RPC is internally safe, no frontend consumer exists);
+client-writable escrow "live mode" localStorage flag (confirmed
+presentation-only — changes a button's label text, never its behavior,
+never read by the backend). Also confirmed refund/forfeiture cannot
+consume the same security-hold liability, by direct SQL read.
+
+**Findings documented, not fixed (1 new):** no explicit guard at
+payment-initiation time against an already-sold car via a direct/stale
+link — its realistic exposure is already closed by Finding 2's
+listing-visibility fix; recorded for a future defense-in-depth pass.
+
+**Validation:** Backend jest **44/44 suites, 611/611 tests** (up from
+Stage 5's 42/606); `tsc --noEmit` clean (no frontend changes this stage);
+frontend `vitest run` **336 passed / 11 pre-existing-unrelated failed / 1
+skipped / 348 total** (unchanged baseline); `npm run build` clean.
+Relevant validators re-run and all green:
+`validate:domain-lifecycle-integrity`, `validate:financial-audit-rls-hardening`,
+`validate:payment-gateway-lifecycle` (13/13), `validate:payment-escrow-domain`
+(9/9), `validate:financial-ledger-reconciliation-domain` (13/13),
+`validate:high-risk-boundaries`, `validate:escrow-live-operations-scenarios`
+(21/21 source-level; staging execution correctly reported BLOCKED, not
+fabricated), `validate:auction-phase-a-financial-integrity` (24/24).
+
+**Remaining risks:** see `ESCROW_PURCHASE_FULFILMENT_AUDIT_20261008.md` §4;
+all pre-existing Stage 2/3/4/5 carried-forward items remain untouched and
+tracked.
+
+**STAGE 6 — ESCROW/PURCHASE/FULFILMENT/SETTLEMENT/OWNERSHIP CONVERGENCE:
+COMPLETE.** Per the master prompt's own ordering, Stage 7 (admin/
+operations) may now begin in a future pass.
