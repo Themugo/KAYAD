@@ -4,7 +4,7 @@ import protectAccount from "../middleware/protectAccount.js";
 import { authorize, requirePermission, PERMISSIONS } from "../middleware/role.js";
 import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
+import { validate, validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
 import { auditLog } from "../middleware/auditLog.js";
 import bcrypt from "bcryptjs";
 import { escapeRegex } from "../utils/escapeRegex.js";
@@ -36,6 +36,8 @@ import { getDealerPlans } from "../services/dealerSubscription.service.js";
 import { getSupabase } from "../utils/supabase.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
 import { getEscrowRules, getActiveEscrowAccounts, saveEscrowAccount, removeEscrowAccount } from "../services/escrowConfiguration.service.js";
+import { setSellerEscrowCapability, getSellerEscrowCapabilityStatus } from "../services/escrowCapability.service.js";
+import { setEscrowCapabilitySchema } from "../validation/escrow.schema.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
 
 
@@ -2184,5 +2186,45 @@ router.delete("/escrow/accounts/:id", requirePermission(PERMISSIONS.CONFIGURE_ES
   await removeEscrowAccount(req.params.id);
   res.json({ success: true });
 }));
+
+// =============================
+// 🔐 ESCROW SELLER CAPABILITY ADMINISTRATION (Stage 9)
+// Closes the gap Stage 8 documented: "No per-seller / per-vehicle admin
+// grant mechanism exists." This is the single admin-facing surface that
+// grants/revokes/suspends/restores a seller's (individual_seller or
+// dealer) escrow eligibility. It does not touch the platform custody
+// account configuration above, and it is not a second escrow engine — it
+// only ever sets users.escrow_capability_status, which
+// escrowCapability.service.js's computeEffectiveEscrowEnabled() then
+// consumes identically for both the public ESCROW badge and the real
+// purchase-time escrow decision (paymentController.js).
+//
+// Path intentionally contains "escrow" so the global admin permission
+// gate above (the `/\bescrow\b/` regex) requires PERMISSIONS.MANAGE_ESCROWS
+// in addition to the route-local CONFIGURE_ESCROW check below — the same
+// defense-in-depth pattern already used for /escrow/accounts.
+// =============================
+
+router.get("/escrow/sellers/:userId/capability", requirePermission(PERMISSIONS.VIEW_ESCROW), validateObjectId, asyncHandler(async (req, res) => {
+  const status = await getSellerEscrowCapabilityStatus(req.params.userId);
+  res.json({ success: true, data: { userId: req.params.userId, status } });
+}));
+
+router.patch(
+  "/escrow/sellers/:userId/capability",
+  requirePermission(PERMISSIONS.CONFIGURE_ESCROW),
+  validateObjectId,
+  validate(setEscrowCapabilitySchema),
+  asyncHandler(async (req, res) => {
+    const result = await setSellerEscrowCapability({
+      targetUserId: req.params.userId,
+      status: req.body.status,
+      reason: req.body.reason,
+      adminUser: req.user,
+      req,
+    });
+    res.json({ success: true, data: result });
+  }),
+);
 
 export default router;

@@ -9,6 +9,7 @@ import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 import { logInfo } from "../utils/logger.js";
 import { logError } from "../infrastructure/logging/index.js";
 import { findAll, count } from "../db/index.js";
+import { getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 
 // =============================
 // 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
@@ -170,14 +171,31 @@ export const initiatePayment = async (req, res) => {
       phone,
     });
 
-    // Create Escrow record for private sellers (individual_seller) - MANDATORY
-    // Private sellers cannot disable escrow; it's enforced for all their transactions
+    // Create Escrow record when the canonical escrow capability authority
+    // says this transaction qualifies.
+    //
+    // STAGE 9: this used to be inline role-based logic
+    // (`isPrivateSeller || dealerCanEscrow`, reading the dead-write-path
+    // `users.escrowApproved`/`escrowForced` fields that no admin endpoint
+    // has ever set). It is now the SAME computeEffectiveEscrowEnabled()
+    // authority the public ESCROW badge uses
+    // (carController.js::getCar, auctionController.js::getAuction) —
+    // the master prompt's hard requirement is that the badge and the
+    // real purchase decision can never disagree.
+    //
+    // Behavior note: previously a private (`individual_seller`) seller's
+    // transaction always got an escrow record regardless of
+    // `cars.escrow_enabled`, which could create escrow for a vehicle the
+    // public badge was NOT showing as escrow-protected (the inverse of
+    // the forbidden case, but still a real badge/purchase disagreement).
+    // The unified authority now requires `cars.escrow_enabled` to be true
+    // for every seller type, closing that inconsistency.
     if (normalizedType === "escrow" && result.payment?.id) {
       const car = await findById("cars", carId, "escrowEnabled,dealer");
-      const sellerUser = car ? await findById("users", car.dealer, "role,escrowApproved,escrowForced") : null;
-      const isPrivateSeller = sellerUser && sellerUser.role === "individual_seller";
-      const dealerCanEscrow = sellerUser && sellerUser.role === "dealer" && car.escrowEnabled && (sellerUser.escrowApproved || sellerUser.escrowForced);
-      const useEscrow = isPrivateSeller || dealerCanEscrow;
+      const useEscrow = car ? await getEffectiveEscrowForCar({
+        carEscrowEnabled: car.escrowEnabled,
+        sellerId: car.dealer,
+      }) : false;
 
       if (car && useEscrow) {
         const { create: createEscrow } = await import("../db/index.js");

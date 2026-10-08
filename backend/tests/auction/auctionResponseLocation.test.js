@@ -30,6 +30,12 @@ jest.unstable_mockModule("../../models/Bid.js", () => ({
 jest.unstable_mockModule("../../db/index.js", () => ({
   findAll: findAllMock,
 }));
+// STAGE 9: getAuction now also live-rechecks the escrow badge via
+// escrowCapability.service.js — mocked here since this test only exercises
+// the unrelated location/location_city fix.
+jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
+  getEffectiveEscrowForCar: jest.fn().mockResolvedValue(false),
+}));
 
 const { getAuction } = await import("../../controllers/auctionController.js");
 

@@ -30,6 +30,12 @@ jest.unstable_mockModule("../../models/Bid.js", () => ({
 jest.unstable_mockModule("../../db/index.js", () => ({
   findAll: jest.fn().mockResolvedValue([]),
 }));
+// STAGE 9: auctionController.js now also imports escrowCapability.service.js
+// (used only by getAuction's live badge recheck, not by getActiveAuctions
+// under test here) — mocked so importing the controller module succeeds.
+jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
+  getEffectiveEscrowForCar: jest.fn().mockResolvedValue(false),
+}));
 
 const { getActiveAuctions } = await import("../../controllers/auctionController.js");
 

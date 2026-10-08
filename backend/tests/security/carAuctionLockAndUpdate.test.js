@@ -32,7 +32,8 @@ import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 
 const findByIdMock = jest.fn();
 jest.unstable_mockModule("../../models/Car.js", () => ({ default: { findById: findByIdMock } }));
-jest.unstable_mockModule("../../models/User.js", () => ({ default: {} }));
+const userFindByIdMock = jest.fn();
+jest.unstable_mockModule("../../models/User.js", () => ({ default: { findById: userFindByIdMock } }));
 jest.unstable_mockModule("../../models/PlatformConfig.js", () => ({ default: {} }));
 jest.unstable_mockModule("../../utils/cache.js", () => ({ cacheDelPattern: jest.fn().mockResolvedValue(undefined) }));
 jest.unstable_mockModule("../../config/cloudinary.js", () => ({
@@ -61,6 +62,14 @@ jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({
   registerMediaUploadJob: jest.fn(),
   registerMediaUploadFailure: jest.fn(),
   completeMediaUpload: jest.fn(),
+}));
+// STAGE 9: updateCar's escrow-enforcement block now derives
+// car.escrowEnabled from escrowCapability.service.js instead of a
+// req.user.role hard-code — mocked to a deterministic, uninteresting
+// value here since none of these tests are about escrow.
+jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
+  getEscrowEnabledForNewOrEditedCar: jest.fn().mockResolvedValue(false),
+  getEffectiveEscrowForCar: jest.fn().mockResolvedValue(false),
 }));
 
 const { updateCar } = await import("../../controllers/carController.js");
@@ -100,7 +109,14 @@ const mockRes = () => {
 };
 
 describe("updateCar — field assignment no longer crashes", () => {
-  beforeEach(() => { findByIdMock.mockReset(); });
+  beforeEach(() => {
+    findByIdMock.mockReset();
+    userFindByIdMock.mockReset();
+    // Default: the car's own listed owner (dealer1), used whenever a
+    // non-owner (e.g. staff/admin) edit needs to look up the *listing
+    // owner's* role for the escrow-enforcement block.
+    userFindByIdMock.mockReturnValue({ select: jest.fn().mockResolvedValue({ role: "individual_seller" }) });
+  });
 
   test("applies an allowed field edit and saves (car.set was never a real method)", async () => {
     const car = makeCarDoc();

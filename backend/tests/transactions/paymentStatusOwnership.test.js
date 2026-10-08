@@ -20,6 +20,7 @@ jest.unstable_mockModule('../../db/index.js', () => ({ findOne, findById: jest.f
 jest.unstable_mockModule('../../services/paymentService.js', () => ({ initiatePayment: jest.fn() }));
 jest.unstable_mockModule('../../services/paymentCallback.service.js', () => ({ handleMpesaCallback: jest.fn() }));
 jest.unstable_mockModule('../../services/auctionFinancialIntegrity.service.js', () => ({ getAuctionFinancialPolicy: jest.fn() }));
+jest.unstable_mockModule('../../services/escrowCapability.service.js', () => ({ getEffectiveEscrowForCar: jest.fn().mockResolvedValue(false), getSellerEscrowCapabilityStatus: jest.fn().mockResolvedValue('none'), getEscrowEnabledForNewOrEditedCar: jest.fn().mockResolvedValue(false), computeEffectiveEscrowEnabled: jest.fn().mockReturnValue(false), setSellerEscrowCapability: jest.fn() }));
 
 const { checkPaymentStatus } = await import('../../controllers/paymentController.js');
 

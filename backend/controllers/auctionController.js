@@ -1,6 +1,7 @@
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
 import { findAll } from "../db/index.js";
+import { getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 
 // KAYAD canonical auction model: auction lifecycle state is stored on the
 // cars row (auctionStatus, auctionStartTime, auctionEnd, currentBid, etc.).
@@ -173,6 +174,16 @@ export const getAuction = async (req, res) => {
   const endsAt = car.auctionStatus === "live" || car.auctionStatus === "ended" ? (car.auctionEnd || config.endsAt || null) : (config.endsAt || car.auctionEnd || null);
   const scheduled = car.auctionStatus === "draft" && startsAt && new Date(startsAt).getTime() > Date.now();
 
+  // STAGE 9: same live re-check as carController.js::getCar — the auction
+  // detail view is the single-vehicle authoritative read for an auction
+  // listing, so its ESCROW badge must be re-derived from the seller's
+  // current escrow_capability_status, not the possibly-stale stored
+  // cars.escrow_enabled column.
+  const effectiveEscrowEnabled = await getEffectiveEscrowForCar({
+    carEscrowEnabled: car.escrowEnabled,
+    sellerId: car.dealer?._id || car.dealer,
+  });
+
   // Public auction activity must never expose bidder PII. Only confirmed
   // market-moving bids are returned, using the auction's pseudonymous bidder tag.
   const bids = await Bid.find({
@@ -194,6 +205,7 @@ export const getAuction = async (req, res) => {
       reservePrice: config.reservePrice ?? car.reservePrice,
       reserveMode: config.reserveMode ?? car.reserveMode,
       auctionStatus: scheduled ? "draft" : car.auctionStatus,
+      escrowEnabled: effectiveEscrowEnabled,
     }),
     bids: bids.map((b) => ({
       id: b.id || b._id,

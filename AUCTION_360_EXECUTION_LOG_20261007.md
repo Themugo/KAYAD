@@ -835,3 +835,109 @@ remain environment-blocked, unchanged from every prior stage.
 
 **STAGE 8 — CUSTOMER AUCTION EXPERIENCE + MARKETPLACE TRUST SIGNALS:
 COMPLETE.**
+
+---
+
+## STAGE 9 — ESCROW CAPABILITY ADMINISTRATION + CONFIGURATION + FINANCIAL ACCOUNT BOUNDARY
+
+**Mission:** close the one gap Stage 8 reported as unresolved — "No
+per-seller / per-vehicle admin grant mechanism exists" — with the smallest
+correct canonical administrative capability layer, without a second escrow
+engine, a second admin system, a second bank-account system, or live
+escrow activation.
+
+**Traced before any code changed (Step 9A):** the vehicle-level flag
+(`cars.escrow_enabled`, real but purely role-hardcoded); the seller-level
+"capability" nearest to working (`users.escrow_approved`/`escrow_forced`
+— live read path in `paymentController.js`, but zero write path anywhere);
+the dedicated-looking but actually dead/unwired purchase-time gate
+(`escrowConfiguration.service.js::validatePrivateSellerEscrow`, never
+called); the REAL purchase-time gate (inline logic in
+`paymentController.js`); `backend/models/_base.js`'s `.save()` mechanics
+and `backend/db/index.js`'s `update()` (needed to know how to persist new
+admin-write fields); the existing admin authorization layer
+(`adminRoutes.js`'s path-based permission regex gate +
+`requirePermission(PERMISSIONS.CONFIGURE_ESCROW)`, already used for
+`/admin/escrow/accounts` — reused as-is, no new permission); the
+`logActionFromReq(req, action, {target, targetModel, resourceId, details,
+severity})` audit signature (reused as-is); and RLS on `users`/`cars`
+(enabled, but bypassed by the backend's service-role Supabase connection
+for every query — confirmed Express middleware, not RLS, is the real
+enforcement boundary for this and every other admin surface in this
+codebase).
+
+**Design decision (Step 9B)**, written into
+`ESCROW_CAPABILITY_CONFIGURATION_AUDIT_20261008.md` before any code
+changed: the smallest canonical addition is four new `users` columns
+(`escrow_capability_status` enum + 3 metadata columns), one shared service
+(`escrowCapability.service.js`), and one admin route — all answered in
+full against the master prompt's 9 required questions.
+
+**Built:**
+- `supabase/migrations/20261008120000_escrow_seller_capability_authority.sql`
+  — `users.escrow_capability_status` (none/granted/suspended/revoked) +
+  metadata, with a behavior-preserving backfill (every existing
+  `individual_seller` → `granted`; every `dealer` stays `none`).
+- `backend/services/escrowCapability.service.js` — the single shared
+  authority: `computeEffectiveEscrowEnabled()` (pure formula consumed
+  identically by the badge and the purchase decision),
+  `getEffectiveEscrowForCar()`, `getEscrowEnabledForNewOrEditedCar()`,
+  `getSellerEscrowCapabilityStatus()`, `setSellerEscrowCapability()` (the
+  admin grant/revoke/suspend/restore operation, with self-grant
+  prevention, target-role/existence validation, audit logging via the
+  existing `logActionFromReq`, and an immediate vehicle-flag cascade on
+  revoke/suspend so a weaker child-level flag can never outlive a revoked
+  parent capability).
+- `backend/controllers/carController.js` — createCar/updateCar's escrow
+  enforcement now derives from the new authority instead of the role
+  hard-code; `getCar()` live-rechecks the ESCROW badge.
+- `backend/controllers/auctionController.js::getAuction()` — identical
+  live re-check for the auction-detail badge.
+- `backend/controllers/paymentController.js` — the real escrow-creation
+  decision now consumes the identical authority as the badge.
+- `backend/routes/adminRoutes.js` — new
+  `GET`/`PATCH /admin/escrow/sellers/:userId/capability`, reusing the
+  existing `CONFIGURE_ESCROW` permission.
+- `backend/validation/escrow.schema.js` — new `setEscrowCapabilitySchema`.
+
+**1 real defect found and fixed while implementing:** `updateCar`'s
+escrow-enforcement block, once converted from the role-hardcode to the
+capability check, would have read the *editor's* role rather than the
+*listing owner's* — silently resetting a seller's own granted escrow
+capability to false the instant staff edited any field on their listing
+for an unrelated reason. Fixed to resolve the listing owner's own
+role/capability before deriving `escrowEnabled`.
+
+**Also fixed as a side effect of unifying the authority (not a
+separately-introduced defect):** a latent badge/purchase inconsistency
+where a private seller's transaction previously always received a real
+escrow record regardless of `cars.escrow_enabled`, while the public badge
+(since Stage 8) already required that same flag — closed by the unified
+formula requiring the vehicle flag for every seller type.
+
+**Validation:** Backend jest **48/48 suites, 644/644 tests** (up from
+Stage 8's 47/47, 620/620 — +1 suite, +24 tests, 0 regressions); `tsc
+--noEmit` clean; frontend `vitest run` **340 passed / 11
+pre-existing-unrelated failed / 1 skipped / 352 total** (unchanged — no
+frontend files touched this stage); `npm run build` clean. 17 relevant
+validators re-run, all green (see
+`ESCROW_CONFIGURATION_EXECUTION_REPORT_20261008.md` for the full list).
+Authorization proven at the service layer (this codebase's established
+testing convention): unauthorized FAILS (self-grant 403, nonexistent
+target 404, ineligible role 400, invalid status 400), authorized
+SUCCEEDS (grant/revoke/suspend/restore all proven, including the primary
+Stage 9 requirement — granting a dealer escrow capability for the first
+time ever). Idempotency proven for repeated grant/revoke/suspend/restore
+calls.
+
+**Remaining risks:** `users.escrow_approved`/`escrow_forced` and
+`vehicle.escrowOverride` remain in place, unused/unconnected (explicit,
+documented, not a regression); no independent per-vehicle escrow override
+distinct from the seller's own capability was built (intentionally
+deferred — would be a second, unnecessary authority path); live
+Postgres/Supabase/Redis concurrency execution, staging certification, and
+real browser/device execution remain environment-blocked, unchanged from
+every prior stage.
+
+**STAGE 9 — ESCROW CAPABILITY ADMINISTRATION + CONFIGURATION + FINANCIAL
+ACCOUNT BOUNDARY: COMPLETE.**

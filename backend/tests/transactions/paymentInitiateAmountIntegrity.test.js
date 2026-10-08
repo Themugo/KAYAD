@@ -18,6 +18,7 @@ const findOne = jest.fn();
 const findById = jest.fn();
 const initiate = jest.fn();
 const getAuctionFinancialPolicy = jest.fn();
+jest.unstable_mockModule('../../services/escrowCapability.service.js', () => ({ getEffectiveEscrowForCar: jest.fn().mockResolvedValue(false), getSellerEscrowCapabilityStatus: jest.fn().mockResolvedValue('none'), getEscrowEnabledForNewOrEditedCar: jest.fn().mockResolvedValue(false), computeEffectiveEscrowEnabled: jest.fn().mockReturnValue(false), setSellerEscrowCapability: jest.fn() }));
 
 jest.unstable_mockModule('../../utils/logger.js', () => ({ logInfo: jest.fn() }));
 jest.unstable_mockModule('../../infrastructure/logging/index.js', () => ({ logError: jest.fn() }));

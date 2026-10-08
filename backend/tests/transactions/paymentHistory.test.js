@@ -13,6 +13,16 @@ jest.unstable_mockModule('../../services/paymentCallback.service.js', () => ({ h
 // file's own db/index.js mock above doesn't provide. Without mocking it
 // too, importing the controller module at all fails at ESM link time.
 jest.unstable_mockModule('../../services/auctionFinancialIntegrity.service.js', () => ({ getAuctionFinancialPolicy: jest.fn() }));
+// STAGE 9: paymentController.js also now imports escrowCapability.service.js
+// (the new shared escrow-capability authority) for its escrow-creation
+// decision — mocked here too so importing the controller at all succeeds.
+jest.unstable_mockModule('../../services/escrowCapability.service.js', () => ({
+  getEffectiveEscrowForCar: jest.fn().mockResolvedValue(false),
+  getSellerEscrowCapabilityStatus: jest.fn().mockResolvedValue('none'),
+  getEscrowEnabledForNewOrEditedCar: jest.fn().mockResolvedValue(false),
+  computeEffectiveEscrowEnabled: jest.fn().mockReturnValue(false),
+  setSellerEscrowCapability: jest.fn(),
+}));
 const { getUserPayments } = await import('../../controllers/paymentController.js');
 
 const call = async (query) => {

@@ -15,6 +15,7 @@ import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/
 import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
 import { randomUUID } from "node:crypto";
 import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
+import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
 
@@ -381,11 +382,18 @@ export const createCar = async (req, res) => {
     }
 
     // ── ESCROW ENFORCEMENT ─────────────────────────────────
-    // Vehicle escrow is a private-seller custody product only. Dealer
-    // approval/force flags are legacy compatibility fields and never grant
-    // vehicle escrow eligibility.
-    if (isDealer) req.body.escrowEnabled = false;
-    if (isSeller) req.body.escrowEnabled = true;
+    // STAGE 9: vehicle escrow eligibility is no longer hard-coded to
+    // seller.role. It is now derived from the admin-grantable
+    // users.escrow_capability_status authority (see
+    // escrowCapability.service.js) — the client cannot submit
+    // escrowEnabled=true and have it honored either way; this value is
+    // always server-computed and overwrites anything in req.body.
+    // The backfill migration (20261008120000) set every existing
+    // individual_seller's capability to 'granted', so this preserves
+    // today's exact behavior for every seller an admin has not yet
+    // touched, while making dealer escrow a real, grantable possibility
+    // instead of a permanent hard-coded false.
+    req.body.escrowEnabled = await getEscrowEnabledForNewOrEditedCar(seller.id, seller.role);
 
     const body = {
       ...req.body,
@@ -617,10 +625,19 @@ export const updateCar = async (req, res) => {
     }
 
     // ── ESCROW ENFORCEMENT ON UPDATE ─────────────────────
-    // Vehicle escrow is a private-seller custody product only. Legacy
-    // dealer approval/force flags cannot enable it.
-    if (req.user.role === "dealer") car.escrowEnabled = false;
-    if (req.user.role === "individual_seller") car.escrowEnabled = true;
+    // STAGE 9: see createCar's identical comment — this is now derived
+    // from the admin-grantable escrow_capability_status authority instead
+    // of a seller-role hard-code. Editing a listing re-applies the
+    // *listing owner's* current capability (so a later admin grant/revoke
+    // is picked up the next time the listing is touched, not only on
+    // create) — deliberately the owner's role/capability, not the
+    // editor's: a staff member editing someone else's listing must not
+    // accidentally wipe that seller's own escrow eligibility just because
+    // staff isn't an "individual_seller"/"dealer".
+    const ownerForEscrow = isOwner ? req.user : await User.findById(car.dealer).select("role");
+    car.escrowEnabled = ownerForEscrow
+      ? await getEscrowEnabledForNewOrEditedCar(car.dealer, ownerForEscrow.role)
+      : false;
 
     // ── AUCTION PARAMETER LOCK ───────────────────────────
     // The canonical path for changing auction terms is auctionSetup.service.js
@@ -994,6 +1011,22 @@ export const getCar = async (req, res) => {
       }
       delete car.dealer?.visibility;
     }
+
+    // STAGE 9: the single-vehicle detail read is where a customer
+    // actually decides to buy — this is the one authoritative place (along
+    // with the auction-detail equivalent in auctionController.js::getAuction)
+    // where the ESCROW badge is re-derived live from the seller's current
+    // escrow_capability_status, rather than trusting the stored
+    // cars.escrow_enabled column, which is only guaranteed in sync
+    // immediately after an admin revoke/suspend (see
+    // escrowCapability.service.js's cascade) and at each create/edit of
+    // this specific car. This guarantees the badge the buyer sees here can
+    // never disagree with the real purchase-time decision
+    // (paymentController.js uses the identical computeEffectiveEscrowEnabled()).
+    car.escrowEnabled = await getEffectiveEscrowForCar({
+      carEscrowEnabled: car.escrowEnabled,
+      sellerId: car.dealer?._id || car.dealer,
+    });
 
     // ── VIEW COUNT (Issue #5) ─────────────────────────────────
     // Use Redis atomic counter to prevent lost updates under concurrency.

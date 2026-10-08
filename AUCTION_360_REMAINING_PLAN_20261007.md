@@ -372,30 +372,76 @@ Every other journey step inspected (registration/eligibility, realtime
 scoping, payment idempotency, fulfilment/ownership convergence, history
 scoping) was confirmed correctly authorized and left unmodified.
 
-## Carried forward from Stage 8 — not yet fixed
+## Carried forward from Stage 8 — status after Stage 9
 
-- No admin-grantable per-seller/per-vehicle escrow eligibility mechanism
-  exists (eligibility is hard-coded to seller role) — intentionally
-  deferred; building one would be new business-rule/architecture
-  invention outside this stage's explicit scope boundary.
-- `escrowOverride` / `users.escrow_approved` / `escrow_forced` remain
-  inert scaffolding with no write path anywhere.
+- ~~No admin-grantable per-seller/per-vehicle escrow eligibility mechanism
+  exists~~ — **CLOSED in Stage 9.** See Stage 9's own section below.
+- `escrowOverride` / `users.escrow_approved` / `escrow_forced` —
+  **disposition decided in Stage 9**: the two legacy `users` columns are
+  superseded (no longer read by any live code path, migrated to the new
+  `escrow_capability_status`) but kept, unused, rather than dropped;
+  `escrowOverride` (frontend-only) remains intentionally unconnected
+  scaffolding, to avoid a second per-sale authority path. Not removed.
 - `vehicle.inspection` (rich per-system-score object) is declared but
-  never populated by the mapper.
+  never populated by the mapper. Unrelated to escrow; not touched.
 - `VehicleDetailPage.tsx`'s unconditional "Clean Title" image badge is
   not backed by any title-status field — not one of the three required
   trust signals, flagged rather than fixed to avoid scope creep.
 - `authController.js`'s `bankAccount` profile field has no backing
-  migration column on `users` — appears dead/unsupported.
+  migration column on `users` — appears dead/unsupported. Re-confirmed
+  unchanged in Stage 9.
 
-## Stages 9–14 — Desktop UX, mobile UX, typography, iconography,
+## Stage 9 — Escrow capability administration + configuration + financial account boundary — COMPLETE
+
+Closed the one gap Stage 8 reported as unresolved: built the smallest
+correct canonical admin-grantable escrow capability layer
+(`users.escrow_capability_status`: none/granted/suspended/revoked), a
+single shared authority function
+(`backend/services/escrowCapability.service.js::computeEffectiveEscrowEnabled()`)
+consumed identically by the public ESCROW badge (single-vehicle detail
+reads) and the real purchase-time escrow decision
+(`paymentController.js`), and one new admin route
+(`GET`/`PATCH /admin/escrow/sellers/:userId/capability`, reusing the
+existing `CONFIGURE_ESCROW` permission — no new permission, no second
+escrow engine, no second admin system, no live banking added, `liveMode`
+unchanged).
+
+1 real defect found and fixed: `updateCar`'s escrow-enforcement block
+would have read the *editor's* role (not the listing owner's) once the
+role-hardcode was replaced with a capability check — would have reset a
+seller's own granted escrow capability to false on every staff edit of
+their listing. Fixed to resolve the listing owner's own role/capability
+instead of the editor's.
+
+Full detail, the 9-question Step 9B design decision, the capability
+matrix, and the execution report in
+`ESCROW_CAPABILITY_ADMINISTRATION_AUDIT_20261008.md`,
+`ESCROW_CAPABILITY_MATRIX_20261008.md`,
+`ESCROW_CAPABILITY_CONFIGURATION_AUDIT_20261008.md` (updated), and
+`ESCROW_CONFIGURATION_EXECUTION_REPORT_20261008.md`.
+
+## Carried forward from Stage 9 — not yet fixed
+
+- `users.escrow_approved`/`escrow_forced` and `vehicle.escrowOverride`
+  remain in place, unused/unconnected (see above) — a future stage could
+  drop the two legacy columns once confirmed nothing reads them
+  defensively, but that is a separate, riskier migration-safety decision
+  out of this stage's scope.
+- `authController.js`'s `bankAccount` dead field — still flagged, not
+  escrow-blocking.
+- No independent per-vehicle escrow override distinct from the seller's
+  own capability was built — intentionally deferred as a second,
+  unnecessary authority path (see
+  `ESCROW_CAPABILITY_ADMINISTRATION_AUDIT_20261008.md`'s "Scope boundary").
+
+## Stages 10–15 — Desktop UX, mobile UX, typography, iconography,
 ## accessibility, performance
 
-Not started. Stage 8's customer-facing baseline (including the new trust
-badges) now exists for these to apply viewport/typography/a11y/performance
-passes to, once scheduled.
+Not started. Stage 8's customer-facing baseline (including the trust
+badges, now backed by the Stage 9 capability authority) exists for these
+to apply viewport/typography/a11y/performance passes to, once scheduled.
 
-## Stages 15–16 — Test/regression gate, environment-dependent certification
+## Stages 16–17 — Test/regression gate, environment-dependent certification
 
 Ongoing discipline already being followed throughout (every fix this pass and
 the prior one ran its narrow test, the full suite, and relevant validators
@@ -404,24 +450,29 @@ will continue to apply at every future stage.
 
 ## Summary of what's genuinely left
 
-Source-level backend/contract/journey/customer-experience work
-(Stages 1–8) is entirely done (Stage 1: source-level trust-boundary
-sweep; Stage 2: API contract convergence; Stage 3: marketplace/vehicle/
-auction convergence; Stage 4: account/session/identity/customer-trust;
-Stage 5: inspection/provider operations/evidence/workflow convergence;
-Stage 6: escrow/purchase/fulfilment/settlement/ownership convergence;
-Stage 7: admin/operations privilege boundary; Stage 8: customer auction
-experience + marketplace trust signals + optional escrow capability).
-The 4 items carried forward from Stage 2, the 4 carried forward from
-Stage 3, the 15 carried forward from Stage 4, the 5 carried forward from
-Stage 5, the 1 carried forward from Stage 6, and the 5 carried forward
-from Stage 8 above are explicit, recorded exceptions, not silent gaps —
-34 total (Stage 7 added none). Stages 9–14 (desktop/mobile UX,
-typography, iconography, accessibility, performance) remain unstarted,
-no longer gated on anything but scheduling — Stage 8 now supplies the
-customer-facing baseline (including the new trust badges) for those
-passes to apply to. The one remaining live-infrastructure blocker (live
-Postgres/Supabase migration certification, on record since Stage 1)
+Source-level backend/contract/journey/customer-experience/escrow-
+administration work (Stages 1–9) is entirely done (Stage 1: source-level
+trust-boundary sweep; Stage 2: API contract convergence; Stage 3:
+marketplace/vehicle/auction convergence; Stage 4: account/session/
+identity/customer-trust; Stage 5: inspection/provider operations/
+evidence/workflow convergence; Stage 6: escrow/purchase/fulfilment/
+settlement/ownership convergence; Stage 7: admin/operations privilege
+boundary; Stage 8: customer auction experience + marketplace trust
+signals + optional escrow capability; Stage 9: escrow capability
+administration + configuration + financial account boundary). The 4 items
+carried forward from Stage 2, the 4 carried forward from Stage 3, the 15
+carried forward from Stage 4, the 5 carried forward from Stage 5, the 1
+carried forward from Stage 6, and the 3 carried forward from Stage 9
+above are explicit, recorded exceptions, not silent gaps — 32 total
+(Stage 7 added none; Stage 8's 5 carried-forward items are now
+superseded/closed by Stage 9's 3, as detailed above — the primary Stage 8
+gap, admin-grantable escrow eligibility, is closed, not merely
+re-deferred). Stages 10–15 (desktop/mobile UX, typography, iconography,
+accessibility, performance) remain unstarted, no longer gated on anything
+but scheduling — Stage 8/9 now supply the customer-facing baseline
+(including the trust badges and their backing capability authority) for
+those passes to apply to. The one remaining live-infrastructure blocker
+(live Postgres/Supabase migration certification, on record since Stage 1)
 still gates only genuine live/staging execution, never the source-level
 work itself. No part of this plan proposes restarting, redesigning, or
 duplicating anything already built.
