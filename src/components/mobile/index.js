@@ -12,9 +12,14 @@ export { default as MobileFilterDrawer } from './MobileFilterDrawer';
 export { default as MobileForm, Input, Textarea, Select, Checkbox, RadioGroup, Toggle, Section as FormSection, PriceInput, PhoneInput } from './MobileForm';
 
 // Display components
-export { default as MobileCarCard, MobileCarCardSkeleton } from './MobileCarCard';
-export { default as VehicleCard } from '../VehicleCard/VehicleCard';
-export { VehicleCardSkeleton } from '../VehicleCard/VehicleCard';
+// STAGE 11 PHASE E: MobileCarCard.jsx (and its sole dependency,
+// components/VehicleCard/VehicleCard.jsx, plus that directory's own now-
+// orphaned index.js barrel) were removed as proven-dead code — this barrel
+// was their only remaining import site, and this barrel itself has zero
+// consumers anywhere in the app (every real card surface imports the
+// canonical components/VehicleCard.tsx directly, which the bundler
+// resolves in preference to this directory). See
+// STAGE11_UX_HARDENING_AUDIT_20261008.md for the full trace proving this.
 export { default as MobileEmptyState } from './MobileEmptyState';
 export { default as MobileSkeleton, Card, List, Detail, Page as PageSkeleton, Text, Stat, StaggeredList, Block, MobileCardSkeleton } from './MobileSkeleton';
 

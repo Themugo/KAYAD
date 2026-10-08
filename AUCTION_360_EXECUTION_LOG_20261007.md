@@ -1004,3 +1004,123 @@ require a reachable browser/device runtime.
 
 **STAGE 10 — PREMIUM CUSTOMER AUCTION EXPERIENCE + MARKETPLACE UX
 CONVERGENCE: COMPLETE.**
+
+## STAGE 11 — FINAL UX HARDENING + MOBILE/ACCESSIBILITY + SURFACE CONVERGENCE
+
+Objective: close the 6 Stage 10 carry-forward items without introducing
+new product architecture, under TRACE → PROVE → FIX → TEST → CERTIFY
+discipline. Zero backend/migration files touched this stage (confirmed
+via timestamp comparison).
+
+**Phase B — design-token convergence.** Traced the "three competing
+systems" flag and found it was actually one already-reconciled canonical
+palette ("KAYAD Slate Teal") expressed three ways: CSS custom
+properties, a Tailwind v4 `@theme` block generating real utility classes
+from those same values, and hardcoded hex-literal Tailwind
+arbitrary-value classes scattered across the codebase with no value
+drift from the token. A separate, unrelated `brand`/`charcoal`/`gold`
+palette in `tailwind.config.js` has zero usages in the 5 primary
+customer-facing files — confirmed by grep, left untouched. Converged the
+4 primary customer-facing files (`VehicleMarketplace.tsx`,
+`VehicleCard.tsx`, `VehicleDetailPage.tsx`, `AuctionLivePage.jsx`;
+~275 call sites total) from hex-literal classes to the canonical named
+token classes. No 4th system invented; no broad sitewide redesign
+attempted without a browser to verify it. ~133 other files' equivalent
+conversion carried forward.
+
+**Phase C — iconography convergence.** Converged 2 genuine
+same-concept/different-icon duplicates ("Inspected": CircleCheck→
+ShieldCheck; promotional "LIVE" teaser: emoji→Gavel icon). Explicitly
+preserved 2 superficially-similar-but-semantically-distinct pairs
+(Wrench-as-action vs. ShieldCheck-as-status; checklist CheckCircle2 vs.
+badge-chip ShieldCheck) rather than forcing unification. Added
+`aria-label`s to 3 previously-unlabeled icon-only controls (pagination
+prev/next, mobile filter-drawer close).
+
+**Phase D — reduced-motion convergence.** Found and converged 2 real
+local `matchMedia('(prefers-reduced-motion: reduce)')` duplicates
+(`Navbar.tsx`, `MobileBottomNav.tsx`) to the shared
+`usePrefersReducedMotion()` hook; removed 1 fully dead duplicate hook
+(`useReducedMotion()`/`getAnimationClass()` in `useAccessibility.tsx`);
+wrapped 3 previously-ungated Framer Motion surfaces in
+`AuctionWowExperience.tsx` (cinematic gallery, bid confirmation, winning
+celebration) in `<MotionConfig reducedMotion="user">`; made
+`VehicleDetailPage.tsx`'s image-zoom transition reduced-motion-aware.
+Left `runAuctionTransition()`'s direct `matchMedia` call untouched — it
+is a plain utility function, not a component, so it cannot call a React
+hook without introducing an out-of-scope architecture change. Caught and
+fixed a real test regression this work introduced (the global
+`framer-motion` mock lacked a `MotionConfig` export), which doubled as
+the Phase K revert/fail/restore/pass proof for this phase.
+
+**Phase E — `MobileCarCard.jsx`.** Exhaustively traced every possible
+reference (imports, dynamic imports, routes, lazy, string refs, tests,
+CSS, build config) and proved it, its sole dependency
+(`VehicleCard/VehicleCard.jsx`), and that directory's own
+now-orphaned `index.js` barrel were all genuinely dead — module
+resolution means every real import of `VehicleCard` resolves to the
+sibling file `components/VehicleCard.tsx`, confirmed empirically (not
+just reasoned) via a passing test assertion that only the surviving
+file's content could satisfy. All 3 files deleted; full suite re-run
+confirmed 0 regressions.
+
+**Phase F — `VehicleDetailPage.tsx`'s second bid path.** Traced fully:
+this is a legitimate second UI entry point to the one canonical,
+backend-authoritative `placeBid()` — not a second bid authority. Found
+and fixed 2 real defects: (1) `handlePlaceBid` called the async
+`placeBid()` without `await`, making the result always truthy regardless
+of the real backend outcome — a "fake success" UX defect, fixed with
+proper awaiting, a pending/disabled state, and real error surfacing; (2)
+the form was gated on auction capability, not `auctionLifecycle`, the
+same defect class Stage 10 fixed elsewhere — fixed by gating the live
+bid form strictly on `auctionLifecycle === 'live'`. Built a new,
+from-scratch regression test file (4 tests) and performed a literal
+file-backup revert/fail/restore/pass cycle proving both fixes are
+independently necessary. Found and fixed, as a related accessibility
+defect, a missing `id`/`htmlFor` label association in the shared
+`Input.tsx` component (sitewide fix, 0 regressions).
+
+**Phase G/H — mobile responsive + accessibility certification.**
+Performed as honest static-source analysis only; no browser, device
+emulator, or axe-core runtime was available. Every finding in
+`STAGE11_RESPONSIVE_ACCESSIBILITY_MATRIX_20261008.md` is labeled PASS /
+PARTIAL / GAP / ENVIRONMENT-BLOCKED; nothing requiring a runtime is
+claimed as certified.
+
+**Phase I — customer journey re-trace.** Re-walked
+MARKETPLACE→DETAIL→AUCTION→BID→LIVE→COUNTDOWN→WIN/LOSE→PAYMENT→
+ESCROW→INSPECTION→FULFILMENT; confirmed the Phase F fix closes a
+marketplace-grid-vs-detail-page consistency gap (both surfaces now
+gate correctly on lifecycle); no new architecture introduced.
+
+**Phase J/K — regression testing.** Backend 48/48 suites, 644/644 tests
+(unchanged). Frontend 345 passed / 11 pre-existing unrelated failures
+(unchanged) / 1 skipped / 357 total (up from 341/353 — the 4 new Phase F
+tests). `tsc --noEmit` clean. `npm run build` clean. All 11 relevant
+validators re-run with results identical to the Stage 10 baseline.
+Explicit revert/fail/restore/pass cycles performed for Phase D and
+Phase F; before/after full-suite parity used as the equivalent
+evidentiary bar for the non-toggleable Phase B/E changes.
+
+**Phase L — architecture integrity.** Confirmed via `find <dir> -newer
+<reference>` timestamp comparison: zero backend/migration files touched;
+no duplicate auction/payment/escrow/ledger/ownership engine; no mock
+inventory; no fabricated trust state; no browser-owned financial
+authority; no RLS change; no second bid authority; no new unnecessary
+abstraction layer.
+
+**Carry-forward (documented, not fixed — see
+`STAGE11_RESPONSIVE_ACCESSIBILITY_MATRIX_20261008.md` and
+`STAGE11_EXECUTION_REPORT_20261008.md` for full detail):** ~133 files'
+remaining hex-literal token-class conversion; sitewide icon unification
+beyond the 2 concepts converged this stage; `VehicleDetailPage.tsx`
+heading-hierarchy skip (h1→h3); no `aria-live` region on bid-result or
+live countdown/price updates; `AuctionBidConfirmation` overlay lacks
+explicit dialog semantics/focus trap; pagination icon-button
+touch-target *size* (naming was fixed, hit-area size was not); full
+breakpoint-by-breakpoint visual certification, keyboard walkthrough,
+screen-reader walkthrough, and contrast-ratio measurement all remain
+ENVIRONMENT-BLOCKED pending a reachable browser/device/axe runtime.
+
+**STAGE 11 — FINAL UX HARDENING + MOBILE/ACCESSIBILITY + SURFACE
+CONVERGENCE: COMPLETE.**

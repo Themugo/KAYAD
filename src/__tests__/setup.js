@@ -43,6 +43,12 @@ vi.mock('framer-motion', () => ({
     svg: ({ children, ...p }) => React.createElement('svg', p, children),
   },
   AnimatePresence: ({ children }) => children,
+  // STAGE 11 REDUCED-MOTION CONVERGENCE: MotionConfig (used to gate the
+  // live auction room's transitions and the vehicle detail page's image
+  // zoom under prefers-reduced-motion) was missing from this mock; it is a
+  // pure pass-through wrapper in the real library when no inline style is
+  // needed, so the test double does the same.
+  MotionConfig: ({ children }) => children,
   useAnimation: () => ({ start: () => {} }),
   useInView: () => true,
   useScroll: () => ({ scrollYProgress: { get: () => 0 } }),

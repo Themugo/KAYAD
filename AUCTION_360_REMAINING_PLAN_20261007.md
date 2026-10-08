@@ -481,14 +481,63 @@ touched, Stage 9's escrow capability authority untouched. Full detail in
   statically this stage in the absence of a reachable browser/device
   runtime; need a real pass once one is available.
 
-## Stages 11–15 — Remaining UX/performance passes beyond Stage 10's scope
+## Stage 11 — Final UX hardening + mobile/accessibility + surface convergence
 
-Not started; nothing currently blocks scheduling them. Stage 10 already
-covers desktop/mobile/typography/iconography/accessibility/performance at
-a convergence-pass level — any further stage here would be a deeper,
-dedicated pass on one of the carry-forward items above (e.g., a
-dedicated design-token migration stage, a dedicated icon-unification
-stage), not new ground.
+**COMPLETE.** Closed all 6 Stage 10 carry-forward items under TRACE →
+PROVE → FIX → TEST → CERTIFY discipline, without introducing new product
+architecture. Scoped design-token convergence (4 primary customer-facing
+files, ~275 call sites, one already-reconciled canonical palette — not a
+3-way conflict as originally flagged); 2 genuine icon-concept
+convergences plus 3 icon-only accessibility fixes; reduced-motion
+convergence (2 duplicates routed to the shared hook, 1 dead duplicate
+hook removed, 3 previously-ungated Framer Motion surfaces wrapped in
+`MotionConfig`); `MobileCarCard.jsx` and its 2 dead dependents proven
+dead and removed; `VehicleDetailPage.tsx`'s second bid path hardened (not
+removed) — fixed a real "fake success" un-awaited-promise defect and a
+lifecycle-vs-capability gating defect, the same class Stage 10 fixed
+elsewhere; a sitewide `Input.tsx` label-association accessibility defect
+fixed; mobile/accessibility certification performed as honest, clearly
+labeled static analysis (no browser/device/axe runtime available). Zero
+backend/migration files touched. Full detail in
+`STAGE11_UX_HARDENING_AUDIT_20261008.md`,
+`STAGE11_RESPONSIVE_ACCESSIBILITY_MATRIX_20261008.md`,
+`STAGE11_SURFACE_CONVERGENCE_MATRIX_20261008.md`, and
+`STAGE11_EXECUTION_REPORT_20261008.md`.
+
+## Carried forward from Stage 11 — not yet fixed
+
+- ~133 remaining files' hex-literal token-class conversion (scoped out
+  this stage to the 4 primary customer-facing files, to avoid an
+  unverifiable broad visual redesign with no browser available).
+- Sitewide icon unification beyond the 2 concepts converged this stage
+  (Inspected, promotional LIVE) — other icon pairs were evaluated and
+  deliberately kept distinct (Wrench vs. ShieldCheck; checklist
+  CheckCircle2 vs. badge ShieldCheck), not left unexamined.
+- `VehicleDetailPage.tsx` heading-hierarchy skip (h1→h3) — a pure
+  presentation fix outside this stage's traced scope.
+- No `aria-live` region on bid-result messages or live
+  countdown/price updates — both are the same class of fix (live-region
+  wiring) and are better addressed together in a dedicated pass.
+- `AuctionBidConfirmation` overlay lacks explicit `role="dialog"`/
+  `aria-modal`/focus-trap semantics — pre-existing, not introduced or
+  worsened by this stage's reduced-motion `MotionConfig` wrap.
+- Pagination icon-button touch-target *size* (accessible *naming* was
+  fixed this stage via `aria-label`; hit-area sizing needs a rendered
+  viewport to change safely).
+- Full breakpoint-by-breakpoint (320–430px) visual certification, full
+  keyboard walkthrough, screen-reader walkthrough, and contrast-ratio
+  measurement all remain ENVIRONMENT-BLOCKED pending a reachable
+  browser/device/axe runtime.
+
+## Stages 12–15 — Remaining UX/performance passes beyond Stage 11's scope
+
+Not started; nothing currently blocks scheduling them. Stage 11 already
+closed every named Stage 10 carry-forward item — any further stage here
+would be a deeper, dedicated pass on one of the Stage 11 carry-forward
+items above (e.g., a dedicated repo-wide token migration stage, a
+dedicated `aria-live`/dialog-semantics accessibility stage, or a
+dedicated browser/device-runtime certification stage once one is
+reachable), not new ground.
 
 ## Stages 16–17 — Test/regression gate, environment-dependent certification
 

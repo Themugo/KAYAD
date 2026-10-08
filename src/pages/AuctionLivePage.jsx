@@ -321,7 +321,7 @@ export default function AuctionLivePage() {
                         border: `1px solid ${i === 0 ? 'var(--gold)' : 'var(--border)'}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 12, fontWeight: 700,
-                        color: i === 0 ? '#0A3340' : 'var(--text-muted)',
+                        color: i === 0 ? 'var(--color-navy-900)' : 'var(--text-muted)',
                       }}>
                         {i === 0 ? '👑' : `#${bidCount - i}`}
                       </div>
@@ -384,7 +384,7 @@ export default function AuctionLivePage() {
                         onClick={() => setBidAmount(String(amt))}
                         style={{
                           background: bidAmount === String(amt) ? 'var(--gold)' : 'var(--surface)',
-                          color: bidAmount === String(amt) ? '#0A3340' : 'var(--text-muted)',
+                          color: bidAmount === String(amt) ? 'var(--color-navy-900)' : 'var(--text-muted)',
                           border: `1px solid ${bidAmount === String(amt) ? 'var(--gold)' : 'var(--border)'}`,
                           borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer',
                           fontWeight: bidAmount === String(amt) ? 700 : 400,
@@ -505,7 +505,7 @@ export default function AuctionLivePage() {
                 <div className="card" style={{ padding: 16, marginTop: 12 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Auction Organizer</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A3340', fontWeight: 700 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-navy-900)', fontWeight: 700 }}>
                       {(car.dealer?.name || 'A')[0].toUpperCase()}
                     </div>
                     <div>

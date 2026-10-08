@@ -107,7 +107,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
       tabIndex={0}
       role="button"
       aria-label={ariaLabel}
-      className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#176B87]/30 transition-all duration-200 flex flex-col group relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2"
+      className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md hover:border-navy-600/30 transition-all duration-200 flex flex-col group relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy-600 focus:ring-offset-2"
     >
       {/* 1. VEHICLE IMAGE CONTAINER */}
       <div className="relative h-32 overflow-hidden bg-slate-100">
@@ -194,7 +194,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
               onToggleCompare(vehicle.id);
             }}
             className={`w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-sm flex items-center justify-center ${
-              isCompared ? 'bg-amber-400 text-[#0A3340]' : 'bg-white/90 text-slate-700 hover:bg-white hover:text-amber-600'
+              isCompared ? 'bg-amber-400 text-navy-900' : 'bg-white/90 text-slate-700 hover:bg-white hover:text-amber-600'
             }`}
             title={isCompared ? 'Remove comparison' : 'Compare vehicle'}
             aria-label={isCompared ? 'Remove from comparison' : 'Compare vehicle'}
@@ -222,13 +222,13 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
           )}
 
           {/* Title: Year Make Model Variant */}
-          <h3 className="text-base font-black text-[#176B87] font-display line-clamp-1 group-hover:text-amber-600 transition-colors pt-0.5">
+          <h3 className="text-base font-black text-navy-600 font-display line-clamp-1 group-hover:text-amber-600 transition-colors pt-0.5">
             {vehicle.title}
           </h3>
 
           {/* Primary Price Focal Point */}
           <div className="flex items-baseline gap-2 pt-0.5">
-            <span className="text-xl sm:text-2xl font-black text-[#176B87] font-display tracking-tight">
+            <span className="text-xl sm:text-2xl font-black text-navy-600 font-display tracking-tight">
               Ksh {displayPrice.toLocaleString()}
             </span>
             {vehicle.marketPriceAvg && (
@@ -260,7 +260,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
             {vehicle.sellerType === 'Private Seller' ? (
               <UserCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
             ) : vehicle.sellerType === 'Verified Dealer' ? (
-              <Building2 className="w-3.5 h-3.5 text-[#176B87] shrink-0" />
+              <Building2 className="w-3.5 h-3.5 text-navy-600 shrink-0" />
             ) : null}
             <span className="text-xs font-bold text-slate-700 truncate">
               {sellerDisplayName}
@@ -278,7 +278,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
               e.stopPropagation();
               onQuickView(vehicle);
             }}
-            className="bg-[#176B87] hover:bg-[#0A3340] text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shrink-0"
+            className="bg-navy-600 hover:bg-navy-900 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shrink-0"
           >
             View Details
           </Button>

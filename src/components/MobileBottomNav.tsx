@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Home, Search, Gavel, ShieldCheck, Menu } from 'lucide-react';
+import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 
 /** Event the Navbar listens for to open its existing mobile menu (single menu implementation). */
 export const OPEN_MOBILE_MENU_EVENT = 'kayad:open-mobile-menu';
@@ -17,6 +18,11 @@ export default function MobileBottomNav({
   activeNav,
   onNavigate,
 }: MobileBottomNavProps) {
+  // STAGE 11 REDUCED-MOTION CONVERGENCE: reuse the shared hook instead of a
+  // local matchMedia implementation (decorative scroll-behavior only — does
+  // not affect any auction/bid/payment/escrow state).
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   useEffect(() => {
     const previousPadding = document.body.style.paddingBottom;
     const syncSafeSpace = () => {
@@ -42,7 +48,6 @@ export default function MobileBottomNav({
       action: () => {
         onNavigate('marketplace');
         window.requestAnimationFrame(() => {
-          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
           document.getElementById('market-results')?.scrollIntoView({
             behavior: prefersReducedMotion ? 'auto' : 'smooth',
             block: 'start',

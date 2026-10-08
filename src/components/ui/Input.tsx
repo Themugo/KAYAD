@@ -2,7 +2,7 @@
 // Stitch Design System Input
 // Aligns with Heritage Tech design language
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useId } from 'react';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
@@ -29,10 +29,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       fullWidth = true,
       className = '',
       style,
+      id,
       ...props
     },
     ref
   ) => {
+    // STAGE 11 ACCESSIBILITY (Phase H): this shared Input had no id/htmlFor
+    // association between its <label> and <input>, so a screen reader
+    // could not announce the label for any field using this component
+    // (found while writing the Stage 11 Phase F bid-form regression test,
+    // where getByLabelText failed for exactly this reason). useId()
+    // generates a stable id when the caller doesn't already pass one,
+    // preserving any explicit id a call site already relies on.
+    const generatedId = useId();
+    const inputId = id ?? (label ? generatedId : undefined);
     // Stitch: Height based on size (48px mobile)
     const effectiveIcon = icon ?? leftIcon;
     const effectiveIconPosition = icon ? iconPosition : 'left';
@@ -134,11 +144,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div style={containerStyle} className={className}>
-        {label && <label style={labelStyle}>{label}</label>}
+        {label && <label htmlFor={inputId} style={labelStyle}>{label}</label>}
         <div style={iconWrapperStyle}>
           {effectiveIcon && <span style={iconWrapperInternalStyle}>{effectiveIcon}</span>}
           <input
             ref={ref}
+            id={inputId}
             style={effectiveIcon ? inputWithIconStyle : inputBaseStyle}
             onFocus={handleFocus}
             onBlur={handleBlur}

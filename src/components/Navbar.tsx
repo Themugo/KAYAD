@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { useBranding } from '../context/BrandingContext';
+import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -76,17 +77,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const countyRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+  // STAGE 11 REDUCED-MOTION CONVERGENCE: reuse the shared hook instead of a
+  // local matchMedia implementation (decorative/presentational only — does
+  // not affect any auction/bid/payment/escrow state).
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   // The mobile dock's Menu tab opens this same drawer (no second menu implementation).
   useEffect(() => {
     const openMenu = () => {
       setMobileMenuOpen(true);
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+      window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
     };
     window.addEventListener('kayad:open-mobile-menu', openMenu);
     return () => window.removeEventListener('kayad:open-mobile-menu', openMenu);
-  }, []);
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     document.body.classList.toggle('kayad-mobile-menu-is-open', mobileMenuOpen);

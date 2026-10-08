@@ -181,33 +181,12 @@ export function useSkipLink(targetId: string, label: string = 'Skip to content')
   return { targetId, label, handleClick };
 }
 
-// Reduced motion preference
-export function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handler = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches);
-    };
-
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
-  return prefersReducedMotion;
-}
-
-// Animation helper with reduced motion support
-export function getAnimationClass(
-  prefersReducedMotion: boolean,
-  normalClass: string,
-  reducedMotionClass: string = 'transition-none'
-): string {
-  return prefersReducedMotion ? reducedMotionClass : normalClass;
-}
+// STAGE 11 REDUCED-MOTION CONVERGENCE: this file previously duplicated a
+// second useReducedMotion()/getAnimationClass() pair here. Proven (by grep)
+// to have zero callers anywhere outside this file's own barrel re-export,
+// so it was removed; usePrefersReducedMotion() in hooks/useMediaQuery.ts
+// is now the single canonical reduced-motion hook. Animation/motion-class
+// gating callers should use that hook's boolean directly.
 
 // Escape key handler
 export function useEscapeKey(callback: () => void, isActive: boolean = true) {
@@ -276,8 +255,6 @@ export default {
   useKeyboardNavigation,
   useAnnounce,
   useSkipLink,
-  useReducedMotion,
-  getAnimationClass,
   useEscapeKey,
   useScrollLock,
   generateId,
