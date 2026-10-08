@@ -1341,3 +1341,113 @@ plan updated; ZIP packaged (7 source files changed this stage).
 **STAGE 13 — PRODUCTION RUNTIME CERTIFICATION + FINAL RELEASE GATE:
 COMPLETE** (to the full extent possible without external infrastructure
 credentials; remaining scope is ENVIRONMENT-BLOCKED, not fabricated).
+
+---
+
+## STAGE 14 — PREMIUM PUBLIC AUCTION EXPERIENCE — AUCTION SURFACE CONVERGENCE + CREATIVE DESIGN MASTERY — 2026-10-08
+
+**Phase A.** Traced the real auction domain end to end: confirmed no
+separate `auctions` table (denormalized onto `cars`); mapped the
+three-layer lifecycle vocabulary (raw `auction_status` enum vs.
+`allow_bid`/`allow_buy` capability flags vs. the server-derived public
+`status`); confirmed the bid-to-payment-confirmation gate; found and
+documented (not fixed) a winner-field exposure inconsistency between
+`/api/auctions*` and `/api/cars/:id`; classified which trust-signal flags
+are real vs. not reliably authoritative.
+
+**Phase B.** `AUCTION_PUBLIC_TRUTH_MAP_20261008.md` written — every public
+auction datum traced to source/authority/safe-to-display.
+
+**Phase C.** `AUCTION_SURFACE_RESPONSIBILITY_MAP_20261008.md` written —
+every auction-adjacent surface classified by job; confirmed zero
+duplication among Marketplace/Auction/Live Auction/Vehicle Detail/Payment.
+
+**Phases D-F.** Defined the Auction page as a discovery-and-direction
+surface distinct from `AuctionLivePage`'s participation role.
+`AUCTION_HOMEPAGE_MARKETPLACE_BOUNDARY_20261008.md` written — found no
+separate Homepage component exists (`src/components/home/*` is dead
+code); confirmed `VehicleMarketplace`'s existing catalogue-wide role
+already correctly bounds against the Auction page's auction-scoped role,
+so no cross-surface change was needed.
+
+**Phase G.** Full creative redesign of the public Auction page
+(`src/features/AuctionsView.tsx` + `src/styles/auction-premium.css`):
+replaced the oversized marketing hero with a compact, data-led market
+header (headline generated from real live/scheduled counts, never static
+marketing copy); added a time-urgency spotlight feature (soonest-ending
+real live auction, sorted by real `endTime`, never hand-picked); added
+per-tab truthful empty-state copy; preserved the exact existing lifecycle
+derivation and data-fetching logic unchanged. Full rationale in
+`PREMIUM_AUCTION_DESIGN_AUDIT_20261008.md`.
+
+**Accessibility pass.** Confirmed single `<h1>`, `aria-live` on the
+data-driven headline, `role="tablist"`/`role="tab"`/`aria-selected` on
+segment controls, real `<button>` semantics throughout. Found and fixed
+one gap: the new live-pulse animation and card-hover transitions were not
+covered by Stage 12's `prefers-reduced-motion` discipline — added the
+missing media-query block.
+
+**Regression protection.** Performed an explicit REVERT→FAIL→RESTORE→PASS
+cycle on the spotlight-selection logic (the stage's one new piece of
+functional logic): reverted the urgency-sort to a naive first-item pick,
+proved it wrongly selects a non-urgent auction against deliberately
+mis-ordered TEST-ONLY mock data (FAIL), restored the real sort, proved it
+correctly selects the truly urgent auction regardless of array order
+(PASS), re-confirmed `tsc --noEmit` clean after restoring.
+
+**Final regression re-run.** Backend: Jest 644/644, Vitest 16/16, node:test
+1/1 — unchanged, as expected (zero backend files touched). Frontend:
+357/369 (11 pre-existing named failures, 1 skipped) — exact baseline
+parity. `tsc --noEmit` clean. `npm run build` clean. 6 relevant validators
+(auction-transport-convergence, ui-surface-convergence,
+auction-bid-surface, auction-domain-integrity, homepage-convergence,
+polish-regressions) all PASS.
+
+**Documentation.** All 5 required documents written (truth map, surface
+responsibility map, homepage/marketplace boundary, design audit,
+execution report). This log and the remaining plan updated. ZIP packaged
+since source changed (2 files):
+`KAYAD-AUCTION-PREMIUM-PUBLIC-EXPERIENCE-20261008.zip` — see the final
+report for the SHA-256.
+
+**STAGE 14 — PREMIUM PUBLIC AUCTION EXPERIENCE: COMPLETE.** Zero backend
+changes. Zero regressions. The public Auction page is now a genuinely
+auction-first, data-led discovery surface rather than a marketing banner
+with disconnected stats beneath it, built entirely from real backend data
+already available to the frontend.
+
+---
+
+## STAGE 15 — NAVIGATION + GLOBAL HEADER CONVERGENCE — 2026-10-08
+
+**Trace.** Navigation is a manual `activeNav` switch (no router tree). The
+ticker (`/api/ads?placement=top_ticker` + `heroPresentation.ticker*`) and
+brand (`PlatformConfig.branding`) are already admin-controlled; navigation
+structure has no backend authority and is hardcoded. A feature-flag service
+exists with no frontend consumer. Findings in
+`NAVIGATION_BACKEND_TRUTH_MAP_20261008.md`.
+
+**IA.** Dropdowns only where existing destinations justify them:
+Marketplace (Browse / Saved / Financing), Auction (the four existing
+AuctionsView tabs), Pre-Purchase Inspection (Request / Find a provider),
+Escrow (the existing EscrowView tabs). Support stays a direct link. Payment
+History moved into the account menu. `DealersView` not exposed (empty
+`dealers` prop).
+
+**Build.** New three-field header (brand | deep-teal navigation capsule |
+utilities), canonical `navigation/navConfig.ts`, split link+chevron
+disclosure dropdowns, Escape/outside-click/focus return, hover pin logic,
+modal-dialog mobile drawer with focus containment, config-driven drawer
+groups, accessible names, reduced-motion rules, ticker hairline. App
+`handleNavClick` accepts `auctions:<tab>` / `escrow:<tab>`; AuctionsView
+syncs all four tabs with `?auctionTab=`.
+
+**Validation.** Real-browser suite 180/180 (desktop 1440/1280/1100/1024;
+mobile 320/360/375/390/412/430; keyboard; Escape; outside click; hover;
+guest/user/dealer/admin; reduced motion). Three REVERT→FAIL→RESTORE→PASS
+cycles. tsc clean, build clean, frontend 357/369 (baseline-identical),
+backend 644/644 + 16 + 1, 15 existing validators identical to baseline,
+new `validate-navigation-convergence` 27/27. Zero backend changes.
+
+**STAGE 15 — NAVIGATION CONVERGENCE: COMPLETE.** Reference image was not
+attached to the upload; design followed the written principles.

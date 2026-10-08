@@ -1,0 +1,95 @@
+/* KAYAD global header — brand field | navigation field | utility field.
+   Colours reuse the established KAYAD teal/navy tokens already used by the
+   existing Navbar (#0A3340 deep navy, #12576D, #13B8A6 teal accent,
+   #D7E7E4 line). Presentation only. */
+
+.kayad-header{--kn-ink:#0A3340;--kn-deep:#062E3A;--kn-mid:#0E4B5A;--kn-teal:#13B8A6;--kn-line:#D7E7E4;--kn-soft:#E7F5F2;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--kn-line);box-shadow:0 6px 22px rgba(10,51,64,.06);color:#1e293b}
+.kayad-header__bar{display:flex;align-items:center;gap:12px;width:100%;max-width:1440px;margin:0 auto;min-height:60px;padding:0 12px}
+@media(min-width:640px){.kayad-header__bar{padding:0 20px;gap:14px}}
+@media(min-width:1024px){.kayad-header__bar{min-height:72px;padding:0 28px;gap:18px}}
+
+/* Brand field — its own visual authority, never a menu item. */
+.kayad-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:0;border-radius:14px;padding:4px 6px 4px 0;text-decoration:none}
+.kayad-brand:focus-visible,.kayad-nav__link:focus-visible,.kayad-nav__toggle:focus-visible,.kayad-menu__item:focus-visible,.kayad-util:focus-visible{outline:2px solid var(--kn-teal);outline-offset:2px}
+.kayad-brand__mark{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:13px;background:linear-gradient(135deg,var(--kn-ink),var(--kn-mid));color:#fff;box-shadow:0 6px 16px rgba(10,51,64,.22),inset 0 1px 0 rgba(255,255,255,.14);transition:transform .2s ease}
+.kayad-brand:hover .kayad-brand__mark{transform:translateY(-1px)}
+.kayad-brand__text{display:flex;flex-direction:column;min-width:0;text-align:left;line-height:1}
+.kayad-brand__word{display:flex;align-items:center;gap:6px;font-family:var(--font-display);font-weight:900;font-size:clamp(1.25rem,2vw,1.6rem);letter-spacing:-.035em;color:var(--kn-ink)}
+.kayad-brand__ea{font-family:var(--font-sans);font-size:9px;font-weight:800;letter-spacing:.04em;padding:2px 6px;border-radius:6px;background:#DDF4F0;color:#12576D;border:1px solid #BDE5DE}
+.kayad-brand__tag{margin-top:5px;font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+@media(max-width:1279px){.kayad-brand__tag{display:none}}
+@media(min-width:640px) and (max-width:1023px){.kayad-brand__tag{display:block;max-width:170px}}
+@media(max-width:379px){.kayad-brand__mark{width:36px;height:36px;border-radius:11px}}
+
+/* Navigation field — a distinct deep-teal capsule. */
+.kayad-navfield{display:none;flex:1 1 auto;min-width:0;align-items:center;height:50px;padding:0 6px;border-radius:16px;background:linear-gradient(135deg,var(--kn-deep) 0%,var(--kn-ink) 55%,var(--kn-mid) 100%);box-shadow:0 10px 26px rgba(6,46,58,.18),inset 0 1px 0 rgba(255,255,255,.08)}
+@media(min-width:1024px){.kayad-navfield{display:flex}}
+.kayad-navfield>ul{display:flex;align-items:center;gap:2px;margin:0;padding:0;list-style:none;min-width:0}
+.kayad-nav__group{position:relative;display:flex;align-items:center}
+.kayad-nav__link{position:relative;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 11px;border-radius:11px;color:rgba(255,255,255,.82);font-size:12.5px;font-weight:650;letter-spacing:.005em;white-space:nowrap;text-decoration:none;transition:background .18s ease,color .18s ease}
+.kayad-nav__link:hover{background:rgba(255,255,255,.09);color:#fff}
+.kayad-nav__link svg{opacity:.8;flex-shrink:0}
+.kayad-nav__group.has-children .kayad-nav__link{padding-right:4px;border-top-right-radius:0;border-bottom-right-radius:0}
+.kayad-nav__toggle{display:inline-grid;place-items:center;width:24px;height:38px;margin-left:-1px;border:0;background:transparent;color:rgba(255,255,255,.7);border-radius:0 11px 11px 0;cursor:pointer;transition:background .18s ease,color .18s ease}
+.kayad-nav__toggle:hover,.kayad-nav__group.is-open .kayad-nav__toggle{background:rgba(255,255,255,.09);color:#fff}
+.kayad-nav__toggle svg{transition:transform .2s ease}
+.kayad-nav__group.is-open .kayad-nav__toggle svg{transform:rotate(180deg)}
+.kayad-nav__group.is-active .kayad-nav__link,.kayad-nav__group.is-active .kayad-nav__toggle{color:#fff;background:rgba(255,255,255,.12)}
+.kayad-nav__group.is-active::after{content:"";position:absolute;left:12px;right:12px;bottom:3px;height:2px;border-radius:2px;background:var(--kn-teal)}
+.kayad-nav__label-compact{display:inline}.kayad-nav__label-full{display:none}
+@media(min-width:1280px){.kayad-nav__label-compact{display:none}.kayad-nav__label-full{display:inline}.kayad-nav__link{padding:0 13px;font-size:13px}.kayad-navfield>ul{gap:4px}}
+@media(max-width:1279px){.kayad-nav__link{padding:0 9px;font-size:12px;gap:6px}.kayad-nav__link .kayad-nav__icon{display:none}}
+
+/* Dropdown panel — white, compact, link rows with a one-line description. */
+.kayad-menu{position:absolute;left:0;top:calc(100% + 12px);z-index:70;width:320px;max-width:calc(100vw - 24px);padding:8px;border:1px solid var(--kn-line);border-radius:18px;background:#fff;box-shadow:0 24px 60px rgba(6,46,58,.2),0 4px 14px rgba(6,46,58,.08);animation:kaMenuIn .16s ease both}
+.kayad-menu::before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px}
+.kayad-menu__title{margin:2px 8px 6px;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#64808a}
+.kayad-menu ul{display:flex;flex-direction:column;align-items:stretch;gap:2px;margin:0;padding:0;list-style:none}
+.kayad-menu__item{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:12px;color:var(--kn-ink);text-decoration:none;transition:background .15s ease}
+.kayad-menu__item:hover{background:#F0FAF8}
+.kayad-menu__item[aria-current="page"]{background:var(--kn-soft)}
+.kayad-menu__icon{display:grid;place-items:center;width:34px;height:34px;flex-shrink:0;border-radius:11px;background:var(--kn-soft);color:#12576D}
+.kayad-menu__item:hover .kayad-menu__icon,.kayad-menu__item[aria-current="page"] .kayad-menu__icon{background:var(--kn-ink);color:#fff}
+.kayad-menu__label{display:block;font-size:13px;font-weight:750;line-height:1.2}
+.kayad-menu__desc{display:block;margin-top:2px;font-size:11.5px;line-height:1.35;color:#64748b}
+@keyframes kaMenuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* Utility field — separated from primary navigation. */
+.kayad-utilities{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+@media(min-width:1024px){.kayad-utilities{margin-left:0;gap:8px}}
+.kayad-util{position:relative;display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;color:#475569;background:transparent;border:0;cursor:pointer;transition:background .18s ease,color .18s ease}
+.kayad-util:hover{background:#F0FAF8;color:var(--kn-ink)}
+.kayad-util.is-active{background:var(--kn-ink);color:#fff}
+.kayad-hamburger{width:44px;height:44px}
+@media(max-width:639px){.kayad-util.kayad-hide-sm{display:none}}
+@media(min-width:1024px){.kayad-hamburger{display:none}}
+.kayad-util__divider{display:none;width:1px;height:26px;background:var(--kn-line);margin:0 2px}
+@media(min-width:1024px){.kayad-hamburger{width:44px;height:44px}
+@media(max-width:639px){.kayad-util.kayad-hide-sm{display:none}}
+@media(min-width:1024px){.kayad-hamburger{display:none}}
+.kayad-util__divider{display:block}}
+.kayad-cta{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;border:0;border-radius:12px;background:#176B87;color:#fff;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 8px 18px rgba(23,107,135,.22);transition:background .18s ease,transform .18s ease}
+.kayad-cta:hover{background:#12576D}.kayad-cta:active{transform:scale(.98)}
+.kayad-cta:focus-visible{outline:2px solid var(--kn-teal);outline-offset:2px}
+.kayad-signin{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;border:1px solid var(--kn-ink);border-radius:12px;background:#fff;color:var(--kn-ink);font-size:11.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:background .18s ease,color .18s ease}
+.kayad-signin:hover{background:var(--kn-ink);color:#fff}
+.kayad-signin:focus-visible{outline:2px solid var(--kn-teal);outline-offset:2px}
+@media(min-width:1280px){.kayad-signin{font-size:12px;padding:0 15px}.kayad-cta{padding:0 16px}}
+
+/* Mobile drawer — grouped destinations from the same canonical config. */
+.kayad-drawer-group{margin-bottom:8px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.05);overflow:hidden}
+.kayad-drawer-group__head{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 14px;color:rgba(255,255,255,.9);text-decoration:none;font-size:13px;font-weight:800}
+.kayad-drawer-group__head.is-active{background:#0F5968;color:#fff}
+.kayad-drawer-group__icon{display:grid;place-items:center;width:34px;height:34px;flex-shrink:0;border-radius:11px;background:#0A4150;color:#7BD9CF}
+.kayad-drawer-group__head.is-active .kayad-drawer-group__icon{background:#DDF4F0;color:var(--kn-ink)}
+.kayad-drawer-group__links{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
+.kayad-drawer-chip{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);font-size:11px;font-weight:700;text-decoration:none}
+.kayad-drawer-chip:hover{background:rgba(255,255,255,.12)}
+.kayad-drawer-chip[aria-current="page"]{background:#8ee7da;border-color:#8ee7da;color:#063b46}
+.kayad-drawer-group__head:focus-visible,.kayad-drawer-chip:focus-visible{outline:2px solid #8ee7da;outline-offset:-2px}
+
+/* Ticker relationship: a thin teal rule ties the notice strip to the header
+   without altering its admin-controlled content, colours or height. */
+.kayad-top-ticker{border-bottom:1px solid rgba(19,184,166,.4)!important}
+
+@media(prefers-reduced-motion:reduce){.kayad-menu{animation:none}.kayad-brand__mark,.kayad-nav__toggle svg,.kayad-nav__link,.kayad-menu__item,.kayad-cta,.kayad-util,.kayad-signin{transition:none}.kayad-brand:hover .kayad-brand__mark{transform:none}}

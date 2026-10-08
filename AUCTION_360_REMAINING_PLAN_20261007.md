@@ -674,3 +674,54 @@ infrastructure.
 With a real Supabase project, real M-Pesa sandbox credentials, and real
 deployment access, Phases G through U could be executed for real in a
 follow-up stage and this gate re-run to a genuine RELEASE READY verdict.
+
+---
+
+## STAGE 14 carry-forward — 2026-10-08
+
+Stage 14 delivered a complete frontend redesign of the public Auction
+page with zero backend changes and zero regressions. What remains open:
+
+1. The `/api/cars/:id` winner-field exposure gap (found in Stage 14's
+   truth-map research, pre-existing, not introduced this stage): the
+   endpoint returns `winner`/`highestBidder` with no field-stripping or
+   auth check, unlike `/api/auctions*` which correctly omits them. The
+   redesigned public Auction page never calls `/api/cars/:id`, so this
+   does not affect it, but it is worth a dedicated backend review/fix in
+   a future stage.
+2. Full live-data visual verification across all 7 required viewports
+   against *genuine* backend auction data remains blocked by the same
+   missing Supabase credentials carried forward since Stage 13 — Stage 14
+   verified 2 of 7 widths (desktop 1440px, mobile 390px) directly against
+   TEST-ONLY mocked data, and the remaining 5 mobile widths under the true
+   empty-state condition plus the shared CSS breakpoint logic. A future
+   stage with real Supabase access could re-confirm all 7 against real
+   live auctions end-to-end.
+3. Items 1-5 from the Stage 13 carry-forward section above (Supabase,
+   M-Pesa, deployment credentials; the `idempotencyCheck`-ordering design
+   review; the sandbox `EBADENGINE` fresh-install issue) remain exactly as
+   recorded — Stage 14 is a frontend-design stage and did not attempt to
+   resolve any of them, consistent with its scope.
+
+No new blocking items were introduced by Stage 14.
+
+---
+
+## STAGE 15 carry-forward — 2026-10-08
+
+1. Navigation structure has no admin authority. Documented, zero-endpoint
+   extension: add a hide-only `navigation` field to `PlatformConfig`, add it
+   to the `/admin/public/config` select list, expose via `BrandingContext`,
+   filter `NAV_PRIMARY` (see `NAVIGATION_ADMIN_CONTROL_AUDIT_20261008.md`).
+2. `GET /admin/public/config` is requested four times by independent
+   components; a shared cache would remove three.
+3. Nested `<main>` landmarks across page views (App + page level).
+4. `DealersView` is passed `dealers={[]}`; fix the data before linking it.
+5. Remove proven-dead legacy header/nav components in a dedicated sweep:
+   `layout/Header.tsx`, `layout/MobileBottomNav.tsx`, `AppLayout.tsx`.
+6. Two Navbar unit tests and one validator check still expect a separate
+   "Create Account" control; decide product intent (single "Sign In / Sign
+   Up" vs two controls) and align the tests or the UI.
+7. Items from Stage 13/14 carry-forward (Supabase / M-Pesa / deployment
+   credentials, `/api/cars/:id` winner exposure, `idempotencyCheck`
+   ordering review, sandbox `EBADENGINE`) are unchanged.

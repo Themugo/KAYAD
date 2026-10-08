@@ -114,7 +114,8 @@ function AppInner() {
     }
   }, [activeNav, authLoading, isAuth, isAdmin, isDealer, location, navigate]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
-  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'create'>('journey');
+  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create'>('journey');
+  const [escrowLaunchNonce, setEscrowLaunchNonce] = useState(0);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fixed (Final Integration - real data integration): this was
@@ -377,6 +378,24 @@ function AppInner() {
   }, []);
 
   const handleNavClick = useCallback((nav: string) => {
+    // `scope:value` ids from the global navigation select an EXISTING tab of an
+    // existing destination (Auction tabs, Escrow tabs). They create no route.
+    if (nav.startsWith('auctions:')) {
+      const tab = nav.slice('auctions:'.length);
+      const params = new URLSearchParams({ nav: 'auctions' });
+      if (tab && tab !== 'live') params.set('auctionTab', tab);
+      window.history.replaceState({}, '', `/?${params.toString()}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      setActiveNav('auctions');
+      return;
+    }
+    if (nav.startsWith('escrow:')) {
+      const tab = nav.slice('escrow:'.length);
+      setEscrowLaunchTab(tab === 'create' || tab === 'deals' ? tab : 'journey');
+      setEscrowLaunchNonce((n) => n + 1);
+      setActiveNav('escrow');
+      return;
+    }
     if (nav === 'escrow') setEscrowLaunchTab('journey');
     setActiveNav(nav);
   }, []);
@@ -481,6 +500,7 @@ function AppInner() {
 
           {activeNav === 'escrow' && (
             <EscrowView
+              key={escrowLaunchNonce}
               user={user}
               onOpenAuth={handleOpenAuth}
               initialTab={escrowLaunchTab}
