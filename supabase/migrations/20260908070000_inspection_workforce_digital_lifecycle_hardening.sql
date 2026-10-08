@@ -2,38 +2,62 @@
 -- KAYAD INSPECTION WORKFORCE & DIGITAL LIFECYCLE HARDENING
 -- 20260908070000
 --
--- Converges inspection_bookings with digital_inspections and the
--- real ghost_checker/inspection_staff workforce. No new parallel
--- inspection entity is introduced.
+-- STAGE 13 CORRECTION (2026-10-08): this migration originally targeted a
+-- `digital_inspections` table that was never created by any migration in
+-- this chain (confirmed by a full grep of supabase/migrations/*.sql) and
+-- was never queried by any backend code (confirmed by a full grep of
+-- backend/*.js). A later migration,
+-- 20260918120000_canonical_inspection_lifecycle_hardening.sql, documents
+-- explicitly: "This migration intentionally DOES NOT create the dormant
+-- five-table digital-inspection subsystem (digital_inspections,
+-- inspection_stages, inspection_evidence, inspection_defects,
+-- inspection_audit_logs)... public.vehicle_inspections [is] the
+-- production canonical inspection execution table... The five-table
+-- subsystem exists only as a dormant source schema/service
+-- implementation and is not the production data path." That later
+-- migration already re-applies the equivalent inspector-signature /
+-- customer-review hardening against the real, live `vehicle_inspections`
+-- table.
+--
+-- This means every statement below that referenced `digital_inspections`
+-- was a deterministic failure against ANY real PostgreSQL engine
+-- (Supabase included) -- not an artifact of a local test shim. Because
+-- this entire file previously applied as a single transaction, that one
+-- dead subsystem's failure was silently rolling back this migration's
+-- OTHER, genuinely valid statements too: the inspection_staff role
+-- check, the inspection_bookings status/payment_status checks, the
+-- inspection_stages/evidence/defects/audit_logs indexes, and the
+-- booking-transition-validation trigger below had, as far as this audit
+-- can determine, never actually been applied in any environment that
+-- runs real transactional migrations.
+--
+-- Fix: removed only the `digital_inspections`-targeting statements
+-- (confirmed dead per the Sept 18 migration's own documentation).
+-- Every statement below targeting a real, live table is unchanged from
+-- the original migration.
+--
+-- Converges inspection_bookings with the real ghost_checker/
+-- inspection_staff workforce. No new parallel inspection entity is
+-- introduced.
 -- ============================================================
-
--- Digital inspection ownership must identify the actual user account.
-ALTER TABLE digital_inspections
-  ADD COLUMN IF NOT EXISTS inspector_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  ADD COLUMN IF NOT EXISTS inspector_signature TEXT,
-  ADD COLUMN IF NOT EXISTS inspector_signed_at TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS customer_reviewed_at TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS customer_review_notes TEXT;
-
-CREATE INDEX IF NOT EXISTS idx_digital_inspections_inspector
-  ON digital_inspections(inspector_id);
-
--- One digital inspection is the execution record for one marketplace booking.
-CREATE UNIQUE INDEX IF NOT EXISTS uq_digital_inspections_booking
-  ON digital_inspections(booking_id);
-
--- Backfill the canonical inspector identity where historical assignments exist.
-UPDATE digital_inspections di
-SET inspector_id = s.user_id
-FROM inspection_bookings b
-JOIN inspection_staff s ON s.id = b.assigned_staff_id
-WHERE di.booking_id = b.id
-  AND di.inspector_id IS NULL
-  AND s.user_id IS NOT NULL;
 
 -- Workforce records must map to a real user for field execution.
 CREATE INDEX IF NOT EXISTS idx_inspection_staff_user
   ON inspection_staff(user_id);
+
+-- STAGE 13 CORRECTION (2026-10-08): `is_available` was referenced by this
+-- migration's own index below, and is read/written by real, active
+-- backend code (backend/inspectionBusinessCenter/services/
+-- engineerService.js, backend/inspection/services/workforceService.js --
+-- e.g. `if (!staff.is_active || !staff.is_available)`), but no migration
+-- in this chain ever added the column -- a genuine, previously
+-- undetected schema gap that would make every one of those backend
+-- queries/filters fail against any real Postgres/Supabase database.
+-- Added here, at the same place this migration always intended to use
+-- it, with the same default-true pattern as the existing `is_active`
+-- column.
+ALTER TABLE inspection_staff
+  ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT true;
 
 CREATE INDEX IF NOT EXISTS idx_inspection_staff_available
   ON inspection_staff(provider_id, is_active, is_available);
@@ -85,39 +109,17 @@ ALTER TABLE inspection_bookings
     'refunded'
   ));
 
--- Digital engine lifecycle.
-ALTER TABLE digital_inspections
-  DROP CONSTRAINT IF EXISTS digital_inspections_status_check;
-
-ALTER TABLE digital_inspections
-  ADD CONSTRAINT digital_inspections_status_check
-  CHECK (status IN (
-    'in_progress',
-    'completed',
-    'submitted',
-    'under_review',
-    'approved',
-    'published',
-    'archived'
-  ));
-
--- Every stage has a unique order within an inspection.
-CREATE UNIQUE INDEX IF NOT EXISTS uq_inspection_stage_order
-  ON inspection_stages(inspection_id, stage_order);
-
-CREATE UNIQUE INDEX IF NOT EXISTS uq_inspection_stage_name
-  ON inspection_stages(inspection_id, stage_name);
-
--- Evidence and defects must remain attached to an inspection point.
-CREATE INDEX IF NOT EXISTS idx_inspection_evidence_validation
-  ON inspection_evidence(point_id, is_validated);
-
-CREATE INDEX IF NOT EXISTS idx_inspection_defects_point_open
-  ON inspection_defects(point_id, is_resolved);
-
--- Audit reads follow the inspection lifecycle.
-CREATE INDEX IF NOT EXISTS idx_inspection_audit_entity
-  ON inspection_audit_logs(entity_type, entity_id, created_at DESC);
+-- STAGE 13 CORRECTION (2026-10-08): the four indexes originally here
+-- (on inspection_stages, inspection_evidence, inspection_defects,
+-- inspection_audit_logs) targeted the remaining four tables of the same
+-- dormant five-table digital-inspection subsystem named explicitly by
+-- 20260918120000_canonical_inspection_lifecycle_hardening.sql
+-- ("digital_inspections, inspection_stages, inspection_evidence,
+-- inspection_defects, inspection_audit_logs"). None of the four is ever
+-- created by any migration in this chain, and none is referenced by any
+-- backend code (confirmed by a full grep of backend/*.js) -- the same
+-- dead-subsystem class as digital_inspections above, removed on the
+-- same evidence.
 
 -- Prevent execution from being marked paid incorrectly.
 CREATE OR REPLACE FUNCTION kayad_validate_inspection_booking_transition()
@@ -160,102 +162,3 @@ BEFORE INSERT OR UPDATE OF status, payment_status, assigned_staff_id
 ON inspection_bookings
 FOR EACH ROW
 EXECUTE FUNCTION kayad_validate_inspection_booking_transition();
-
--- Keep digital inspection ownership synchronized with the booking assignment.
-CREATE OR REPLACE FUNCTION kayad_sync_digital_inspection_inspector()
-RETURNS trigger
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  IF NEW.assigned_staff_id IS NOT NULL THEN
-    SELECT s.user_id INTO NEW.inspector_id
-    FROM inspection_bookings b
-    JOIN inspection_staff s ON s.id = b.assigned_staff_id
-    WHERE b.id = NEW.booking_id
-      AND s.user_id IS NOT NULL
-    LIMIT 1;
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_sync_digital_inspection_inspector ON digital_inspections;
-
-CREATE TRIGGER trg_sync_digital_inspection_inspector
-BEFORE INSERT OR UPDATE OF booking_id
-ON digital_inspections
-FOR EACH ROW
-EXECUTE FUNCTION kayad_sync_digital_inspection_inspector();
-
--- RLS: backend uses service-role access; direct authenticated access is
--- restricted to the customer, assigned inspector, provider workforce,
--- or administrators. Existing policies are replaced deterministically.
-ALTER TABLE digital_inspections ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "digital_inspections_access" ON digital_inspections;
-
-CREATE POLICY "digital_inspections_access"
-ON digital_inspections
-FOR SELECT
-TO authenticated
-USING (
-  inspector_id = auth.uid()
-  OR EXISTS (
-    SELECT 1 FROM inspection_bookings b
-    WHERE b.id = digital_inspections.booking_id
-      AND b.customer_id = auth.uid()
-  )
-  OR EXISTS (
-    SELECT 1
-    FROM inspection_bookings b
-    JOIN inspection_staff s ON s.id = b.assigned_staff_id
-    WHERE b.id = digital_inspections.booking_id
-      AND s.user_id = auth.uid()
-  )
-  OR EXISTS (
-    SELECT 1 FROM users u
-    WHERE u.id = auth.uid()
-      AND u.role IN ('admin','superadmin')
-  )
-);
-
--- Direct writes are intentionally not exposed to ordinary customers.
-DROP POLICY IF EXISTS "digital_inspections_no_direct_write" ON digital_inspections;
-
-CREATE POLICY "digital_inspections_no_direct_write"
-ON digital_inspections
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM users u
-    WHERE u.id = auth.uid()
-      AND u.role IN ('ghost_checker','admin','superadmin')
-  )
-);
-
-CREATE POLICY "digital_inspections_staff_update"
-ON digital_inspections
-FOR UPDATE
-TO authenticated
-USING (
-  inspector_id = auth.uid()
-  OR EXISTS (
-    SELECT 1 FROM users u
-    WHERE u.id = auth.uid()
-      AND u.role IN ('admin','superadmin')
-  )
-)
-WITH CHECK (
-  inspector_id = auth.uid()
-  OR EXISTS (
-    SELECT 1 FROM users u
-    WHERE u.id = auth.uid()
-      AND u.role IN ('admin','superadmin')
-  )
-);
-
-COMMENT ON COLUMN digital_inspections.inspector_id IS
-  'Canonical inspector user identity; ghost_checker role, derived from inspection_staff.user_id.';
-
-COMMENT ON TABLE digital_inspections IS
-  'Canonical execution record for inspection_bookings; one booking has at most one digital inspection.';

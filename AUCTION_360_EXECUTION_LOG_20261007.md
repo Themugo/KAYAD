@@ -1268,3 +1268,76 @@ ENVIRONMENT-BLOCKED pending live Supabase/Redis/M-Pesa credentials.
 
 **STAGE 12 — ACCESSIBILITY SEMANTICS + BROWSER/DEVICE RUNTIME
 CERTIFICATION: COMPLETE.**
+
+---
+
+## STAGE 13 — PRODUCTION RUNTIME CERTIFICATION + FINAL RELEASE GATE
+(2026-10-08)
+
+**Phase A.** No git repo, no live credentials present (as in every prior
+stage). New discovery: real PostgreSQL 16 and real Redis server binaries
+are installed in this sandbox — started both for the first time in this
+project's audit history.
+
+**Phase B.** Backend `npm ci`/`tsc`/tests/build clean (644/644 + 1
+node:test). Frontend tests at exact Stage 12 parity (357/369); build
+clean; a fresh `npm ci`/`npm install` fails in this sandbox on
+`EBADENGINE` (sandbox Node v22.22.0 vs project's own
+`engine-strict`-enforced `>=22.22.2` requirement) — confirmed
+infrastructure-only, not a Stage 13 regression.
+
+**Phase C.** Ran the full 161-migration chain against a real, fresh local
+Postgres 16 database for what appears to be the first time in this
+project's history. Found and fixed 5 genuine migration bugs (jsonb/array
+mismatch, two dangling FK references to a never-created `transactions`
+table, a dead-subsystem reference masking valid hardening in the same
+transaction, one genuinely missing column). Final: 161/161 from empty.
+
+**Phase D.** Exercised the real RLS role×table matrix. Confirmed 8 tables
+are safe deny-all (enforced at the backend layer only). Found, traced,
+and fixed a 3-part `is_admin()` EXECUTE-privilege regression that had
+silently broken RLS for every authenticated user on several tables,
+including anonymous public ad-slot visibility — fully reverified with a
+fresh 161/161 run and 17 role×table scenarios.
+
+**Phase E.** Proved real Redis connectivity and failure-mode behavior;
+proved the financial distributed lock (`kayad_try_acquire_lock`/
+`kayad_release_lock`, Postgres RPC) is entirely independent of Redis —
+Postgres remains sole financial-concurrency authority. Found and fixed
+one dead-code Redis bug (zero production impact).
+
+**Phase F.** Live-tested CSRF double-submit enforcement and auth
+middleware against the real running backend. Confirmed the server never
+trusts a JWT's self-asserted role claim — always re-verifies against the
+live user record.
+
+**Phases G-R.** ENVIRONMENT-BLOCKED: confirmed architecturally (backend
+data layer is exclusively Supabase-JS-client-based) and by a fresh,
+genuine attempt this stage to stand up a local Docker-based Supabase
+stack (Docker CLI present, daemon unavailable). No M-Pesa or deployment
+credentials exist either.
+
+**Phase S.** Real Chromium browser E2E smoke test: 28/28 page-load
+combinations across desktop + 6 mobile widths, zero crashes; a real wrong
+-password login attempt produced no fake success.
+
+**Phases T-U.** Deployment certification ENVIRONMENT-BLOCKED (no
+platform credentials). Failure/recovery for DB/Redis unavailability
+proven (graceful, fail-closed). One design observation logged
+(idempotency-before-CSRF/auth ordering on bid/payment/escrow/dispute
+routes) — reported, not changed, pending team review.
+
+**Phase V.** Final release matrix compiled. **Overall verdict: NOT
+RELEASE READY**, blocked entirely by missing external credentials
+(Supabase, M-Pesa, deployment platform) — zero outstanding source
+defects; every defect found this stage was fixed and reverified.
+
+**Phase W.** Full regression re-run: backend 644/644, frontend 357/369
+(baseline parity), 6/6 relevant validators PASS.
+
+**Phase X.** 8 required documents written; this log and the remaining
+plan updated; ZIP packaged (7 source files changed this stage).
+
+**STAGE 13 — PRODUCTION RUNTIME CERTIFICATION + FINAL RELEASE GATE:
+COMPLETE** (to the full extent possible without external infrastructure
+credentials; remaining scope is ENVIRONMENT-BLOCKED, not fabricated).

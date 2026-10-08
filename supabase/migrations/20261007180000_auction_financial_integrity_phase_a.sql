@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS auction_security_holds (
   currency TEXT NOT NULL DEFAULT 'KES' CHECK (currency = 'KES'),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','held','applied','refund_pending','refunded','forfeited','failed','cancelled')),
   checkout_request_id TEXT,
-  payment_transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL,
+  payment_transaction_id UUID REFERENCES payments(id) ON DELETE SET NULL,
   mpesa_receipt TEXT,
   ledger_reference TEXT,
   applied_outcome_id UUID REFERENCES auction_outcomes(id) ON DELETE SET NULL,

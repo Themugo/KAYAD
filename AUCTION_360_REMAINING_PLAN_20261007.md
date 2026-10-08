@@ -621,3 +621,56 @@ those passes to apply to. The one remaining live-infrastructure blocker
 still gates only genuine live/staging execution, never the source-level
 work itself. No part of this plan proposes restarting, redesigning, or
 duplicating anything already built.
+
+---
+
+## STAGE 13 UPDATE (2026-10-08) — Production Runtime Certification + Final Release Gate
+
+Stage 13 closed the "live Postgres/Supabase migration certification" item
+that had been on record as a blocker since Stage 1 — to the full extent
+this sandbox allows. A real local PostgreSQL 16 engine (discovered this
+stage, not previously known to be installed) was used to run the full
+161-migration chain from empty, find and fix 5 genuine migration bugs,
+and certify the complete RLS role×table matrix, including finding and
+fixing a 3-part `is_admin()` privilege regression. A real local Redis
+server was used to certify caching/lock-adjacent behavior and prove the
+financial distributed lock is Postgres-backed, not Redis-backed. The real
+backend server and a real Chromium browser were used to certify
+auth/CSRF/session behavior and page-level browser E2E.
+
+**What remains genuinely blocked, carried forward as explicit,
+recorded exceptions (not silent gaps):**
+
+1. Real Supabase (cloud or local-Docker) credentials/access — blocks
+   Phases G-R of the Stage 13 master prompt: auction lifecycle via API,
+   the real KES 1 bid path, concurrent bidding via API, auction
+   close/winner, winner payment, refund/forfeit, escrow business logic,
+   ownership/fulfilment, inspection/documents via API, admin/escrow
+   capability grant/revoke, and full authenticated browser E2E. A fresh
+   attempt this stage to stand up a local Docker-based Supabase stack
+   (via `npx supabase start`) confirmed the Docker daemon itself is
+   unavailable in this sandbox, closing that alternative too.
+2. Real M-Pesa (Safaricom Daraja) sandbox credentials — blocks the real
+   STK push path, callback attack testing, and B2C payout/refund
+   execution.
+3. Real deployment platform (Render/Vercel) API credentials — blocks
+   deployment certification (tested-commit-vs-deployed-commit, live env
+   var/health checks).
+4. One design observation (not a fix): `idempotencyCheck` middleware
+   runs before CSRF/auth for bid/payment/escrow/dispute routes — fails
+   closed, may be deliberate, flagged for team review rather than
+   changed without certainty of intent.
+5. The frontend's fresh `npm ci`/`npm install` fails in this exact
+   sandbox (`EBADENGINE`: sandbox Node v22.22.0 vs the project's own
+   `engine-strict`-enforced `>=22.22.2`) — an infrastructure/CI concern
+   worth the team's attention, not a source defect (already-installed
+   dependencies build and test cleanly).
+
+**Overall Stage 13 verdict: NOT RELEASE READY**, blocked entirely by (1)-(3)
+above — zero outstanding source defects from this stage's own work; every
+defect actually found was fixed and re-verified against real
+infrastructure.
+
+With a real Supabase project, real M-Pesa sandbox credentials, and real
+deployment access, Phases G through U could be executed for real in a
+follow-up stage and this gate re-run to a genuine RELEASE READY verdict.

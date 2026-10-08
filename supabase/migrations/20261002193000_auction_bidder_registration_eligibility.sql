@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS auction_registrations (
   commitment_required BOOLEAN NOT NULL DEFAULT false,
   commitment_amount NUMERIC,
   commitment_status TEXT NOT NULL DEFAULT 'not_required' CHECK (commitment_status IN ('not_required','pending','payment_pending','satisfied','failed','refunded','forfeited')),
-  commitment_transaction_id UUID REFERENCES transactions(id),
+  commitment_transaction_id UUID REFERENCES payments(id),
   commitment_receipt TEXT,
   bidder_number TEXT NOT NULL,
   registration_source TEXT NOT NULL DEFAULT 'web',

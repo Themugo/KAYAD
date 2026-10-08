@@ -240,8 +240,18 @@ export const redisGet = async (key) => {
 };
 
 export const redisSet = async (key, value, options) => {
+  // STAGE 13 CORRECTION (2026-10-08): calling `client.set(key, value, options)`
+  // with `options` left `undefined` (the common call shape, `redisSet(key,
+  // value)`) sent a literal extra argument to the Redis SET command and was
+  // proven, against a real Redis 7 server, to fail every time with `ERR
+  // syntax error` -- not a local-shim artifact. This exported wrapper has no
+  // callers anywhere in backend/ today (the live cache path calls
+  // `client.setex(...)` directly instead), so the bug had zero production
+  // impact, but it is fixed here since it was found during this stage's
+  // Redis certification and the file already changed this stage. Only pass
+  // the options argument through when one was actually supplied.
   return await executeWithSRE(async (client) => {
-    return await client.set(key, value, options);
+    return options === undefined ? await client.set(key, value) : await client.set(key, value, options);
   });
 };
 

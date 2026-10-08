@@ -8,7 +8,7 @@
 --              create/update the corresponding report/history.
 --   Provider: read operational/financial records belonging to that provider;
 --             no direct financial mutation.
---   Admin/superadmin: full inspection-domain access through existing is_admin().
+--   Admin/superadmin: full inspection-domain access through the admin role model.
 --
 -- IMPORTANT:
 --   1. This file is NOT applied by this reconciliation.
@@ -16,12 +16,41 @@
 --   3. Existing RLS is preserved. No DROP POLICY is used.
 --   4. SECURITY DEFINER is not introduced by this migration.
 --   5. Financial mutation remains behind existing canonical atomic functions/service role.
+--
+-- STAGE 13 CORRECTION (2026-10-08): every policy below calls
+-- `public.is_admin()`. An EARLIER migration,
+-- 20260909073141_production_advisor_hardening.sql, revoked EXECUTE on
+-- that function from `authenticated` as well as `anon`/`public` --
+-- overshooting the function's own defining migration
+-- (20260907240500_canonical_authorization_helpers.sql), which explicitly
+-- grants EXECUTE to `authenticated` and revokes only from bare `public`.
+-- That overshoot made every policy below fail with `permission denied
+-- for function is_admin` for every real request -- proven against a real
+-- local PostgreSQL engine, not a test artifact; not just for
+-- non-admins, for every authenticated role, including the legitimate
+-- owner of their own record.
+--
+-- The fix is at the SOURCE: 20260909073141 now revokes only from
+-- `public, anon`, restoring exactly the EXECUTE grant to `authenticated`
+-- that this function's own defining migration already intended. An
+-- earlier attempt to fix this HERE instead, by inlining
+-- `EXISTS (SELECT 1 FROM public.profiles ...)` in place of
+-- `is_admin()` (mirroring the Sept 9 migration's own `ad_slots_admin_all`
+-- replacement), was tried and found to be the WRONG fix: `profiles` has
+-- row-level security enabled with zero policies on it, so a plain
+-- inline EXISTS against `profiles` -- evaluated with the INVOKING
+-- role's own privileges -- can never see any row for anon/authenticated,
+-- permanently and silently defeating the admin-bypass branch (proven:
+-- an admin fixture resolved `public.is_admin()` to `true` but the
+-- inlined EXISTS form of the identical check to `false`, in the same
+-- session). `is_admin()` is SECURITY DEFINER specifically so it can see
+-- `profiles` rows regardless of that lockout, which is exactly why it
+-- exists as a function instead of being inlined everywhere. Calling
+-- `is_admin()` directly, now that its EXECUTE grant is corrected at the
+-- source, is therefore the right fix -- not a reversion for its own
+-- sake.
 
 BEGIN;
-
--- Helper predicates are expressed inline to avoid introducing new SECURITY DEFINER
--- functions. Existing public.is_admin() is used only for the already-established
--- admin role model (profiles.role in admin/superadmin).
 
 -- ------------------------------------------------------------
 -- vehicle_inspections: canonical execution record
