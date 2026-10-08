@@ -1124,3 +1124,147 @@ ENVIRONMENT-BLOCKED pending a reachable browser/device/axe runtime.
 
 **STAGE 11 — FINAL UX HARDENING + MOBILE/ACCESSIBILITY + SURFACE
 CONVERGENCE: COMPLETE.**
+
+---
+
+## STAGE 12 — ACCESSIBILITY SEMANTICS + BROWSER/DEVICE RUNTIME CERTIFICATION
+
+**Foundation:** Stage 11 zip (SHA-256
+`b00b6cf217ed0da839fb8da7058600194afc5015a49861293b417b77567b08de`) —
+frozen, no redesign, no new architecture.
+
+**Phase A.** Read Stage 10/11 reports; confirmed the exact 4 named
+carry-forward gaps verbatim via direct grep, rather than inferring
+undocumented findings.
+
+**Phase B — aria-live audit.** Closed all 4 named aria-live gaps: bid
+success (`role="status" aria-live="polite"`) and bid error
+(`role="alert" aria-live="assertive"`) on `VehicleDetailPage.tsx`;
+countdown expiry on `CountdownDisplay.tsx` (deliberately NOT on the
+ticking digits, to avoid per-second announcement noise); winning
+celebration and ended-for-non-winner panel, both `role="status"`.
+Confirmed the existing toast system was already correctly accessible
+(a PASS, not a gap).
+
+**Phase C — bid confirmation semantics.** TRACE before FIX: found that
+`AuctionBidConfirmation` auto-dismisses via `setTimeout` with no
+confirm/cancel decision, so it is a transient status panel, not a
+decision dialog — applying `role="dialog"`/focus-trap there would have
+been an accessibility anti-pattern (trapping focus on a vanishing
+panel). Gave it `role="status" aria-live="polite" aria-atomic="true"`
+instead. Found the REAL dialog-semantics gap elsewhere:
+`MobileFilterDrawer` had correct ARIA roles but no actual focus
+management — fixed with 3 refs (panel/close-button/previously-focused)
+backing a combined keydown handler doing focus-move-in, Tab-trap with
+wrap-around, and focus-restore-on-close. Incidentally discovered and
+fixed a pre-existing `ReferenceError` crash (`CONDITION` vs the real
+`CONDITIONS` constant) that had made the component non-functional in
+any real render — unrelated to this stage's named scope, fixed as a
+one-line correction.
+
+**Phase D — heading hierarchy + skip-link.** Distinguished a legitimate
+responsive-variant pattern (two `<h1>`s, desktop/mobile hero, mutually
+exclusive via Tailwind display toggling) from the genuine h1→h4 skip
+bug on `VehicleDetailPage.tsx` — fixed via tag-only promotions (6
+sections h3/h4→h2, 2 subsections h4→h3), zero visual change. Found
+`SkipLink.tsx` fully built but never rendered anywhere in the real
+route tree (a separate, also-unused `CustomerLayout.tsx` had its own
+dead inline skip link) — wired the real component into `App.tsx`.
+
+**Phase E — pagination touch targets.** Fixed the documented sizing gap
+(`p-2` → `min-h-11 min-w-11`, 44×44px) with a layout-preserving
+Tailwind class change, later genuinely verified via real Playwright
+`boundingBox()` measurement.
+
+**Phase F — static re-check.** Continuous Vitest re-run after each
+phase confirmed zero regressions against the Stage 11 baseline
+throughout (345/357→352/364→357/369, every increase accounted for by
+new tests added, same 11 pre-existing unrelated failures throughout,
+`tsc` clean throughout).
+
+**Phase G — runtime availability.** Determined a genuine, real browser
+automation runtime IS available in this cloud sandbox: Playwright +
+the pre-installed Chromium at `/opt/pw-browsers` (distinct from the
+device-bridge tools, which only reach the user's own separate desktop).
+This elevated Phases H/I/J from what would otherwise be
+ENVIRONMENT-BLOCKED to genuine, real-browser-verified results.
+
+**Phase H/I/J — real-browser certification.** Built a throwaway Vite +
+Playwright harness (never shipped, deleted before packaging) mounting
+the real, unmodified production components with only their two
+context-hook dependencies swapped for fixture stubs mirroring the
+existing checked-in Vitest mocks. Captured real results: 36/36
+zero-horizontal-overflow checks across 6 widths × 6 scenes; real
+44×44px pagination touch-target measurement; real Tab-trap/
+focus-restore/Escape keyboard behavior via actual keyboard events; real
+`prefers-reduced-motion` media-query-driven className differences via
+actual browser media emulation. Solved three harness-engineering
+problems along the way (Vite alias not catching relative imports;
+config needing to live inside the project for `node_modules`
+resolution; a network-dependent fixture image silently invalidating
+the reduced-motion check, fixed with an inline data-URI image) — all
+honestly scoped, including the caveat that the harness's own minimal
+Tailwind build does not compile every utility class used only in the
+aliased real `src/` tree (a harness limitation, not a product defect;
+the real production build was independently re-confirmed clean).
+
+**Phase K — customer auction journey.** Honestly scoped: DETAIL→BID→
+CONFIRMATION→COUNTDOWN→WIN/LOSE segments real-browser-verified; full
+MARKETPLACE grid and full LIVE AUCTION ROOM page shell not attempted
+via real browser this stage (jsdom coverage only, stated explicitly
+rather than implied); PAYMENT/ESCROW/INSPECTION/FULFILMENT remain
+genuinely ENVIRONMENT-BLOCKED (no live Supabase/Redis/M-Pesa
+credentials in this sandbox, unchanged since Stage 9/10/11).
+
+**Phase L — architecture integrity.** Initial `find -newer package.json`
+check produced a misleading result (`package.json`'s mtime predates
+even Stage 9/10's work), falsely flagging ~35 backend files and several
+unrelated frontend files. Re-run against the correct Stage 11→12
+boundary file (`STAGE11_EXECUTION_REPORT_20261008.md`) confirmed: zero
+backend files touched, and exactly the 10 frontend source/test files
+named throughout this stage's docs — nothing else. No second bid/
+auction/payment/escrow/ledger authority introduced; no mock inventory
+shipped (the harness is a deleted-before-packaging test scaffold); no
+browser-owned financial state; no RLS change; no IA change.
+
+**Phase M — full regression.** Backend: 644 Jest + 16 Vitest + 1
+node:test, all passing, unchanged. Frontend: 357/369 passed, same 11
+pre-existing unrelated failures (2 suites, by name, not just count).
+`tsc --noEmit` clean. `npm run build` clean. All 11 relevant validators
+(`validate-auction-360-hardening-20261007` 28/28,
+`validate-auction-domain-integrity` 24/24,
+`validate-marketplace-convergence` 17/17,
+`validate-payment-escrow-domain` 9/9, `validate-pwa-mobile-contract`
+13/13, `validate-frontend-runtime-contracts` PASS,
+`validate-backend-runtime-contracts` 14/14, `validate-auction-bid-surface`
+6/6, `validate-escrow-business-integrity` 20/20,
+`validate-listing-lifecycle-integrity` 5/5,
+`validate-marketplace-ui-convergence` 7/7) identical to the Stage 11
+baseline, zero regressions, zero relabeled failures.
+
+**Phase N — revert/fail/restore/pass.** Four explicit cycles performed:
+(1) aria-live removed → 2/7 bid-path tests failed → restored → 7/7
+passed; (2) heading promotion reverted → heading-skip test failed
+(`expected 4 to be ≤ 2`) → restored → 7/7 passed; (3)
+`MobileFilterDrawer` focus management reduced to pre-Stage-12
+escape-only → 3/4 focus tests failed (Escape-still-closes correctly
+still passed) → restored → 4/4 passed; (4) pagination className
+reverted → real Playwright measurement showed 32×32px (genuine fail) →
+restored → measured 44×44px exactly. Full suite re-run after all four
+cycles confirmed the codebase ended in its correct, fully-restored
+state (357/369, `tsc` clean).
+
+**Carry-forward (documented, not fixed — see
+`STAGE12_ACCESSIBILITY_AUDIT_20261008.md`,
+`STAGE12_BROWSER_DEVICE_CERTIFICATION_20261008.md`, and
+`STAGE12_AUCTION_RUNTIME_JOURNEY_20261008.md` for full detail):**
+fullscreen image lightbox modal has no dialog role/semantics at all
+(bigger gap than its heading level, which was an out-of-scope orphan);
+full `VehicleMarketplace` grid and full `AuctionLivePage` page shell
+not mounted in the real-browser harness this stage (fixture
+dependencies beyond what was built out; jsdom coverage unaffected);
+PAYMENT/ESCROW/INSPECTION/FULFILMENT real-runtime certification remains
+ENVIRONMENT-BLOCKED pending live Supabase/Redis/M-Pesa credentials.
+
+**STAGE 12 — ACCESSIBILITY SEMANTICS + BROWSER/DEVICE RUNTIME
+CERTIFICATION: COMPLETE.**

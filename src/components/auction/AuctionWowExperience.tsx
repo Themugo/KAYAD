@@ -127,14 +127,31 @@ export function AuctionBidConfirmation({ amount, open, onClose }: { amount: numb
     const timer = window.setTimeout(onClose, 2800);
     return () => window.clearTimeout(timer);
   }, [open, onClose]);
+  // STAGE 12 PHASE C: traced before changing anything. Despite the
+  // "confirmation" name, this is NOT a decision-blocking dialog — it has
+  // no confirm/cancel choice, auto-dismisses itself after 2.8s regardless
+  // of user action (see the timer above), and its only button is a
+  // supplementary early-dismiss, not a required interaction. Giving it
+  // role="dialog"/aria-modal="true" and a focus trap (the Stage 11 gap
+  // note's literal wording) would be the wrong fix here: it would trap
+  // keyboard focus on a panel that vanishes on its own a moment later,
+  // which is worse than not trapping it at all. The correct semantics for
+  // a transient, self-dismissing status message is a polite live region,
+  // the same pattern already used for the toast system elsewhere in the
+  // app -- so that's what this adds, with no change to timing, bid
+  // authority, or when the panel appears/disappears. A live region is
+  // announced by assistive tech without moving keyboard focus to it,
+  // which is the correct behavior for a non-blocking transient message
+  // (unlike a real dialog, nothing here should steal focus from the page
+  // the bidder is still interacting with).
   return (
     // STAGE 11 REDUCED-MOTION CONVERGENCE: see AuctionCinematicGallery above —
     // same MotionConfig gating, no change to when the confirmation appears or
     // disappears (that remains driven by `open` and the existing 2.8s timer).
     <MotionConfig reducedMotion="user">
       <AnimatePresence>
-        {open && <motion.div className="auction-wow-bid-confirm" initial={{ opacity: 0, y: 20, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }}>
-          <div className="auction-wow-confirm-icon"><Zap size={19} fill="currentColor" /></div>
+        {open && <motion.div className="auction-wow-bid-confirm" role="status" aria-live="polite" aria-atomic="true" initial={{ opacity: 0, y: 20, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }}>
+          <div className="auction-wow-confirm-icon" aria-hidden="true"><Zap size={19} fill="currentColor" /></div>
           <div><span className="auction-wow-overline">BID REQUEST SENT</span><strong>KES {Number(amount).toLocaleString('en-KE')}</strong><p>Complete the M-Pesa confirmation to make this bid market-active.</p></div>
           <button type="button" onClick={onClose} aria-label="Dismiss confirmation">×</button>
         </motion.div>}
@@ -148,10 +165,18 @@ export function AuctionWinningCelebration({ title, amount, onSettle, onHistory }
     // STAGE 11 REDUCED-MOTION CONVERGENCE: see AuctionCinematicGallery above —
     // same MotionConfig gating; the winning-moment content, amount and
     // settlement/history actions are unchanged either way.
+    //
+    // STAGE 12 PHASE B: this component only ever mounts conditionally, once,
+    // the moment a user's win is confirmed (see AuctionLivePage.jsx:
+    // `{ended && userWon && <AuctionWinningCelebration ... />}`) -- a single,
+    // genuinely meaningful lifecycle transition, not a repeating or
+    // decorative change, so role="status"/aria-live="polite" here announces
+    // it exactly once without any risk of the "every timer tick" noise the
+    // master prompt warns against.
     <MotionConfig reducedMotion="user">
-      <motion.section className="auction-wow-win" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="auction-wow-win-glow" />
-        <div className="auction-wow-trophy"><Trophy size={27} /></div>
+      <motion.section className="auction-wow-win" role="status" aria-live="polite" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="auction-wow-win-glow" aria-hidden="true" />
+        <div className="auction-wow-trophy" aria-hidden="true"><Trophy size={27} /></div>
         <div className="auction-wow-win-copy"><span className="auction-wow-overline">WINNING MOMENT</span><h2>You won {title}.</h2><p>Your winning bid is <strong>KES {Number(amount).toLocaleString('en-KE')}</strong>. The next step is settlement.</p></div>
         <div className="auction-wow-win-actions">
           {onSettle && <button type="button" onClick={onSettle}>Continue to settlement <ArrowUpRight size={15} /></button>}

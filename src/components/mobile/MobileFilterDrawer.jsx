@@ -29,6 +29,15 @@ function MobileFilterDrawer({
   const [priceMax, setPriceMax] = useState(filters.priceMax || 20000000);
   const [mileageMax, setMileageMax] = useState(filters.mileageMax || 200000);
   const contentRef = useRef(null);
+  // STAGE 12 PHASE C: this dialog already had role="dialog"/aria-modal="true"
+  // and an Escape handler, but never actually moved keyboard focus into
+  // itself on open, never trapped Tab/Shift+Tab inside the panel while
+  // open (focus could silently leave into the page behind the overlay),
+  // and never returned focus to whatever triggered it once closed. These
+  // three refs close that gap without changing what the drawer does.
+  const panelRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
   // Sync local filters with props
   useEffect(() => {
@@ -37,20 +46,65 @@ function MobileFilterDrawer({
     setMileageMax(filters.mileageMax || 200000);
   }, [filters, open]);
 
-  // Handle escape key
+  // Handle escape key, Tab-trap the dialog, and move focus in/out of it.
+  // STAGE 12 PHASE C: focus management for this already-semantic dialog
+  // (see the three refs above) -- behavior-only addition, no visual change.
   useEffect(() => {
     if (!open) return;
 
-    const handleEsc = (e) => {
-      if (e.key === 'Escape') onClose();
+    previouslyFocusedRef.current = document.activeElement;
+    // Move focus into the dialog once it has rendered (the close button
+    // is always present and is a safe, stable first focus target).
+    const focusTimer = window.setTimeout(() => {
+      closeButtonRef.current?.focus();
+    }, 0);
+
+    const getFocusable = () => {
+      const panel = panelRef.current;
+      if (!panel) return [];
+      // Note: deliberately not filtering by `offsetParent` here -- this
+      // panel has no collapsed/off-screen-but-focusable elements inside
+      // it, and `offsetParent` is always null under jsdom (no real
+      // layout), which would silently make this trap a no-op under test
+      // while still working by accident in a real browser. Excluding
+      // `hidden` elements is enough for this panel's actual markup.
+      return Array.from(
+        panel.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hidden);
     };
 
-    document.addEventListener('keydown', handleEsc);
+    const handleKeydown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeydown);
     document.body.style.overflow = 'hidden';
 
     return () => {
-      document.removeEventListener('keydown', handleEsc);
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleKeydown);
       document.body.style.overflow = '';
+      // Return focus to whatever opened the drawer (e.g. the "Filters"
+      // button in VehicleMarketplace.tsx), rather than leaving it on a
+      // now-unmounted/hidden close button.
+      previouslyFocusedRef.current?.focus?.();
     };
   }, [open, onClose]);
 
@@ -116,7 +170,7 @@ function MobileFilterDrawer({
         aria-hidden="true"
       />
 
-      <div className="mobile-filter-panel">
+      <div className="mobile-filter-panel" ref={panelRef}>
         <div className="mobile-filter-handle" aria-hidden="true" />
 
         <div className="mobile-filter-header">
@@ -127,6 +181,7 @@ function MobileFilterDrawer({
             )}
           </h2>
           <button
+            ref={closeButtonRef}
             className="mobile-filter-close"
             onClick={onClose}
             aria-label="Close filters"
@@ -212,10 +267,20 @@ function MobileFilterDrawer({
           </div>
 
           {/* Condition */}
+          {/* STAGE 12 PHASE C: this referenced the undefined global
+              `CONDITION` instead of the actual `CONDITIONS` constant
+              declared at the top of this file -- a pre-existing bug,
+              unrelated to anything Stage 12 set out to change, that threw
+              a ReferenceError the moment this drawer rendered at all.
+              Found only because Phase C's focus-management tests were the
+              first real render of this component (confirmed by grep: no
+              prior test file ever rendered MobileFilterDrawer). Fixed as a
+              one-line correction, not a redesign -- the drawer was simply
+              never reachable in a working state before this. */}
           <div className="mobile-filter-section">
             <h3 className="mobile-filter-section__title">Condition</h3>
             <div className="mobile-filter-chips">
-              {CONDITION.map(cond => (
+              {CONDITIONS.map(cond => (
                 <button
                   key={cond}
                   className={`mobile-filter-chip ${localFilters.condition === cond ? 'mobile-filter-chip--active' : ''}`}

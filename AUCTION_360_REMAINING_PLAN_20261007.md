@@ -529,14 +529,61 @@ backend/migration files touched. Full detail in
   measurement all remain ENVIRONMENT-BLOCKED pending a reachable
   browser/device/axe runtime.
 
-## Stages 12–15 — Remaining UX/performance passes beyond Stage 11's scope
+## Stage 12 — Accessibility semantics + browser/device runtime certification
 
-Not started; nothing currently blocks scheduling them. Stage 11 already
-closed every named Stage 10 carry-forward item — any further stage here
-would be a deeper, dedicated pass on one of the Stage 11 carry-forward
-items above (e.g., a dedicated repo-wide token migration stage, a
-dedicated `aria-live`/dialog-semantics accessibility stage, or a
-dedicated browser/device-runtime certification stage once one is
+**COMPLETE.** Closed all 4 named Stage 11 carry-forward accessibility
+items (aria-live wiring, bid-confirmation semantics, heading-hierarchy
+skip, pagination touch-target size) under TRACE → PROVE → FIX → TEST →
+CERTIFY discipline. Discovered that a genuine, real browser-automation
+runtime (Playwright + a pre-installed Chromium, independent of the
+device-bridge tools) is reachable from this sandbox, and used it —
+through a throwaway, deleted-before-packaging test harness mounting the
+real production components — to turn what would otherwise be
+ENVIRONMENT-BLOCKED device/keyboard/reduced-motion certification into
+genuine real-browser-verified PASS results: 36/36 no-overflow checks
+across 6 widths × 6 scenes, real 44×44px pagination touch-target
+measurement, real keyboard focus-trap/wrap/escape behavior, and real
+`prefers-reduced-motion` media-query-driven rendering differences.
+Customer auction journey honestly scoped: DETAIL→BID→CONFIRMATION→
+COUNTDOWN→WIN/LOSE segments real-browser-verified; the full MARKETPLACE
+grid and full LIVE AUCTION ROOM page mounts not attempted via real
+browser this stage (jsdom coverage only); PAYMENT/ESCROW/INSPECTION/
+FULFILMENT remain genuinely ENVIRONMENT-BLOCKED (no live Supabase/Redis/
+M-Pesa credentials in this sandbox, unchanged since Stage 9/10).
+Incidentally found and fixed a pre-existing `CONDITION`/`CONDITIONS`
+crash bug in `MobileFilterDrawer`, unrelated to this stage's named
+scope. Zero backend files touched. Full detail in
+`STAGE12_ACCESSIBILITY_AUDIT_20261008.md`,
+`STAGE12_BROWSER_DEVICE_CERTIFICATION_20261008.md`,
+`STAGE12_AUCTION_RUNTIME_JOURNEY_20261008.md`, and
+`STAGE12_EXECUTION_REPORT_20261008.md`.
+
+## Carried forward from Stage 12 — not yet fixed
+
+- Fullscreen image lightbox modal (`VehicleDetailPage.tsx`, ~line 1196)
+  has no dialog role/semantics at all — a bigger gap than the heading
+  level inside it (which was itself an out-of-scope orphan, left
+  untouched). Not fixed this stage: it was outside the 4 named gaps and
+  fixing it would have meant adding net-new dialog semantics to a
+  surface not named in this stage's scope.
+- Full `VehicleMarketplace` grid and full `AuctionLivePage` page shell
+  were not mounted in the real-browser harness this stage (fixture
+  dependencies beyond what the harness built out) — real-browser
+  coverage of those two full-page surfaces remains open for a future
+  stage; jsdom/Vitest coverage of both is unchanged and unaffected.
+- PAYMENT/ESCROW/INSPECTION/FULFILMENT real-runtime certification
+  remains ENVIRONMENT-BLOCKED pending live Supabase/Redis/M-Pesa
+  credentials — unchanged blocker, on record since Stage 1/9/10/11.
+
+## Stages 13–15 — Remaining UX/performance passes beyond Stage 12's scope
+
+Not started; nothing currently blocks scheduling them. Stage 12 already
+closed every named Stage 11 carry-forward accessibility item — any
+further stage here would be a deeper, dedicated pass on one of the
+Stage 12 carry-forward items above (e.g., a dedicated lightbox-dialog
+hardening stage, a dedicated full-page real-browser certification stage
+extending the harness to the marketplace grid and live auction room, or
+a live-backend-credentialed certification stage once one becomes
 reachable), not new ground.
 
 ## Stages 16–17 — Test/regression gate, environment-dependent certification

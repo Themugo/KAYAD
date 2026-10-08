@@ -1741,11 +1741,22 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
             {/* PAGINATION */}
             {serverTotalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-8">
+              // STAGE 12 PHASE E: the two buttons below were sized to their
+              // icon plus p-2 (~30px hit area), short of a ~44px minimum
+              // practical touch target -- a documented Stage 11 carry-
+              // forward. min-h-11/min-w-11 (44px, Tailwind's scale already
+              // matches the common touch-target guideline) brings each
+              // button's hit area up without changing the icon size or the
+              // card/grid layout around it; gap-3 (was gap-2) gives a
+              // little more breathing room between the two buttons and the
+              // page-count text now that the buttons are slightly larger,
+              // so they stay comfortably separated rather than crowding
+              // each other.
+              <div className="flex items-center justify-center gap-3 mt-8">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-2 border border-slate-200 rounded-lg disabled:opacity-40"
+                  className="min-h-11 min-w-11 flex items-center justify-center border border-slate-200 rounded-lg disabled:opacity-40"
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
@@ -1754,7 +1765,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-2 border border-slate-200 rounded-lg disabled:opacity-40"
+                  className="min-h-11 min-w-11 flex items-center justify-center border border-slate-200 rounded-lg disabled:opacity-40"
                   aria-label="Next page"
                 >
                   <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />

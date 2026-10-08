@@ -19,6 +19,16 @@ import DealerAuctionOperationCase from './pages/dealer/DealerAuctionOperationCas
 import Profile from './pages/Profile';
 import { AuctionMobileDock, AuctionSurfaceReveal } from './components/auction/AuctionInteractionLayer';
 import MobileBottomNav from './components/MobileBottomNav';
+// STAGE 12 PHASE D: SkipLink already existed in src/components/ui/SkipLink.tsx
+// (default targetId="main-content", default label="Skip to main content")
+// but was never imported or rendered anywhere in the app -- confirmed by
+// grep before touching anything. The <main> this top-level route tree
+// renders below had no id for it to target either. This is the one real,
+// well-scoped "skip-to-content" gap for the primary auction/marketplace
+// surfaces audited across this engagement (a different, unrelated
+// CustomerLayout used elsewhere in the app already has its own inline
+// skip link to its own <main id="main-content">, which was not touched).
+import SkipLink from './components/ui/SkipLink';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
@@ -392,6 +402,8 @@ function AppInner() {
       {!privateWorkspaceNavs.has(activeNav) && <TopNoticeStrip />}
 
       {/* 1. Header Navigation */}
+      <SkipLink />
+
       <Navbar
         user={user}
         authLoading={authLoading}
@@ -408,6 +420,8 @@ function AppInner() {
 
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
       <main
+        id="main-content"
+        tabIndex={-1}
         className={
           isMarketplaceSurface
             ? `flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : ''} lg:pb-0 space-y-0 overflow-x-clip`

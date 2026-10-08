@@ -133,6 +133,39 @@ describe('VehicleDetailPage bid form (Stage 11 Phase F)', () => {
     expect(screen.queryByText(/Bid placed successfully/i)).not.toBeInTheDocument();
   });
 
+  // STAGE 12 PHASE B REGRESSION TEST: before this stage, bidSuccess/
+  // bidError rendered as plain <p> text with no live-region semantics, so
+  // a screen-reader user had no way to know the result of a bid they just
+  // submitted short of re-reading the page. These two tests assert the
+  // actual ARIA roles exist on the right message, not just that the text
+  // appears (getByText alone would pass even without role="status"/
+  // role="alert", so it would not have caught the original gap).
+  it('announces a successful bid via a polite status live region', async () => {
+    placeBidMock.mockResolvedValue(true);
+
+    render(<VehicleDetailPage />);
+
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\. \d/i), { target: { value: '3100000' } });
+    fireEvent.click(screen.getByRole('button', { name: /Place Binding Bid/i }));
+
+    const status = await screen.findByRole('status');
+    await waitFor(() => {
+      expect(status).toHaveTextContent(/Bid placed successfully/i);
+    });
+  });
+
+  it('announces a failed bid via an assertive alert live region', async () => {
+    placeBidMock.mockResolvedValue(false);
+
+    render(<VehicleDetailPage />);
+
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\. \d/i), { target: { value: '3100000' } });
+    fireEvent.click(screen.getByRole('button', { name: /Place Binding Bid/i }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(/Failed to record bid/i);
+  });
+
   it('does not render a live bid form for a scheduled (draft) auction, even though the vehicle is auction-capable', () => {
     currentVehicle = { ...baseVehicle, auctionLifecycle: 'draft' };
 
@@ -149,5 +182,26 @@ describe('VehicleDetailPage bid form (Stage 11 Phase F)', () => {
 
     expect(screen.queryByRole('button', { name: /Place Binding Bid/i })).not.toBeInTheDocument();
     expect(screen.getAllByText(/Auction Ended/i).length).toBeGreaterThan(0);
+  });
+
+  // STAGE 12 PHASE D REGRESSION TEST: the page previously had a single
+  // <h1> followed directly by <h4> subsection headings (no h2 or h3 in
+  // between) -- a real skip, not a styling choice, since nothing about
+  // visual size required it. This asserts the actual heading *levels*
+  // rendered, not just that the page has an h1, so a future regression
+  // back to h4-first-subsection would fail this test.
+  it('has no heading-level skip between the page h1 and its first subsection heading', () => {
+    render(<VehicleDetailPage />);
+
+    const headings = screen.getAllByRole('heading');
+    const levels = headings.map((h) => Number(h.tagName.replace('H', '')));
+
+    expect(levels[0]).toBe(1);
+    // Every subsequent heading level must be reachable by descending one
+    // level at a time from whatever came before it -- i.e. never jump
+    // straight from h1 to h3/h4, or from h2 to h4, etc.
+    for (let i = 1; i < levels.length; i++) {
+      expect(levels[i]).toBeLessThanOrEqual(levels[i - 1] + 1);
+    }
   });
 });

@@ -272,7 +272,12 @@ export default function AuctionLivePage() {
         <DomainJourneyRail domain="auction" steps={[{ label: 'Register', state: ended ? 'complete' : registration ? 'complete' : 'current' }, { label: 'Bid', state: ended ? 'complete' : auctionLive ? 'current' : 'pending' }, { label: 'Outcome', state: ended ? 'current' : 'pending' }, { label: 'Settlement', state: 'pending' }, { label: 'Fulfilment', state: 'pending' }]} />
         <DomainTrustStrip domain="auction" items={[{ label: scheduled ? 'Published auction data' : 'Authoritative bid stream' }, { label: 'Bidding lock enforced' }, { label: 'Dealer settlement policy' }, { label: 'Escrow only when selected' }]} />
         {ended && userWon && <AuctionWinningCelebration title={car.title} amount={Number(outcome?.winning_amount || topBid?.amount || currentBid || 0)} onSettle={settling ? undefined : handleWinnerSettlement} onHistory={() => navigate('/?nav=discovery')} />}
-        {ended && !userWon && <div className="auction-wow-win auction-wow-ended-neutral"><div className="auction-wow-trophy"><span>✓</span></div><div className="auction-wow-win-copy"><span className="auction-wow-overline">AUCTION CONCLUDED</span><h2>The room has closed.</h2><p>{car.title} has moved into its post-auction journey.</p></div></div>}
+        {/* STAGE 12 PHASE B: symmetric with AuctionWinningCelebration above --
+            this is the one-time, genuinely meaningful "auction just ended"
+            transition for everyone who isn't the winner (including a losing
+            bidder or a spectator), not a repeating/decorative update, so it
+            gets the same role="status"/aria-live="polite" treatment. */}
+        {ended && !userWon && <div className="auction-wow-win auction-wow-ended-neutral" role="status" aria-live="polite"><div className="auction-wow-trophy" aria-hidden="true"><span>✓</span></div><div className="auction-wow-win-copy"><span className="auction-wow-overline">AUCTION CONCLUDED</span><h2>The room has closed.</h2><p>{car.title} has moved into its post-auction journey.</p></div></div>}
 
 
         <div className="grid-sidebar-right" style={{ gap: 28, gridTemplateColumns: '1fr 380px' }}>

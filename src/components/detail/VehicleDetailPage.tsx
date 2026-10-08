@@ -513,7 +513,7 @@ export const VehicleDetailPage: FC = () => {
                   <div className="w-16 h-16 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center">
                     <Info className="w-8 h-8 text-[var(--kayad-cyan)]" />
                   </div>
-                  <h4 className="text-lg font-serif font-black">Vehicle photos unavailable</h4>
+                  <h2 className="text-lg font-serif font-black">Vehicle photos unavailable</h2>
                   <p className="text-xs text-slate-300 max-w-sm">No vehicle images were supplied by the authoritative listing record.</p>
                 </div>
               ) : !imageFailed ? (
@@ -546,7 +546,7 @@ export const VehicleDetailPage: FC = () => {
                   <div className="w-16 h-16 rounded-3xl bg-[var(--kayad-cyan)]/20 border border-[var(--kayad-cyan)]/40 flex items-center justify-center text-[var(--kayad-cyan)]">
                     <ShieldCheck className="w-8 h-8" />
                   </div>
-                  <h4 className="text-lg font-serif font-black">{formattedFullTitle}</h4>
+                  <h2 className="text-lg font-serif font-black">{formattedFullTitle}</h2>
                   <p className="text-xs text-slate-300 max-w-sm">Verified Showroom Vehicle • High Resolution Photography Loading</p>
                 </div>
               )}
@@ -650,10 +650,10 @@ export const VehicleDetailPage: FC = () => {
 
           {/* Technical Specifications Matrix */}
           <div className="p-6 rounded-3xl bg-white border border-[#D7E7E4] space-y-4 shadow-xs">
-            <h3 className="text-lg font-bold text-navy-600 font-serif flex items-center justify-between">
+            <h2 className="text-lg font-bold text-navy-600 font-serif flex items-center justify-between">
               <span>Technical Specifications</span>
               <span className="text-xs font-mono font-bold text-[var(--kayad-cyan)]">KAYAD Verified</span>
-            </h3>
+            </h2>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
@@ -693,7 +693,13 @@ export const VehicleDetailPage: FC = () => {
 
             {/* Description */}
             <div className="pt-2 border-t border-[#D7E7E4] space-y-1.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#66808A]">Seller Description</h4>
+              {/* STAGE 12 PHASE D: demoted from h4 to h3 (tag only, same
+                  className/text) -- its parent section heading just above
+                  ("Technical Specifications") was itself promoted from h3
+                  to h2 in this pass, so this subsection needs to drop one
+                  level too to keep h2 -> h3 -> ... unbroken instead of
+                  skipping straight to h4. */}
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#66808A]">Seller Description</h3>
               <p className="text-xs text-[#365563] leading-relaxed font-medium">
                 {vehicle.description || 'The seller has not provided a description for this listing.'}
               </p>
@@ -701,9 +707,11 @@ export const VehicleDetailPage: FC = () => {
 
             {/* Installed Features */}
             <div className="pt-2 border-t border-[#D7E7E4]">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#66808A] mb-2">
+              {/* STAGE 12 PHASE D: same demotion as "Seller Description"
+                  just above, for the same reason. */}
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#66808A] mb-2">
                 Installed Features & Options
-              </h4>
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {vehicle.features.map((feat, i) => (
                   <span
@@ -727,9 +735,9 @@ export const VehicleDetailPage: FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-base sm:text-lg font-bold text-white font-serif">
+                      <h2 className="text-base sm:text-lg font-bold text-white font-serif">
                         150-Point Ghost Check Certification
-                      </h3>
+                      </h2>
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[var(--kayad-cyan)] text-navy-600">
                         Verified
                       </span>
@@ -771,10 +779,10 @@ export const VehicleDetailPage: FC = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--kayad-cyan)]/15 rounded-full blur-2xl pointer-events-none" />
 
             <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3.5 relative z-10">
-              <h3 className="text-base font-bold text-white font-serif flex items-center gap-2.5">
+              <h2 className="text-base font-bold text-white font-serif flex items-center gap-2.5">
                 <ShieldCheck className="w-5 h-5 text-[var(--kayad-cyan)]" />
                 <span>Buyer Protection & Trust Guarantees</span>
-              </h3>
+              </h2>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--kayad-cyan)]/20 text-[var(--kayad-cyan)] border border-[var(--kayad-cyan)]/40">
                 100% KAYAD Verified
               </span>
@@ -826,9 +834,9 @@ export const VehicleDetailPage: FC = () => {
                   <div className="text-[10px] font-mono font-extrabold uppercase text-[var(--kayad-cyan)] tracking-wider">
                     GHOST CHECK VERIFICATION
                   </div>
-                  <h3 className="text-lg font-black text-white font-serif">
+                  <h2 className="text-lg font-black text-white font-serif">
                     Request On-Demand Physical Inspection
-                  </h3>
+                  </h2>
                 </div>
               </div>
 
@@ -949,13 +957,27 @@ export const VehicleDetailPage: FC = () => {
                     KSh {currentPrice.toLocaleString()}
                   </p>
 
+                  {/* STAGE 12 PHASE B: a screen-reader user placing a bid
+                      here previously had no way to know the bid succeeded
+                      or failed short of re-reading this part of the page --
+                      this was the documented Stage 11 carry-forward gap.
+                      bidSuccess gets a polite status announcement (an
+                      expected, non-urgent confirmation of what the user
+                      just asked for); bidError gets an assertive alert
+                      (the user needs to know the submit did not go through
+                      so they can retry), matching how errors are already
+                      announced elsewhere in the app (e.g. the toast
+                      system's role="alert" items). No change to when/why
+                      either message appears -- that's still entirely
+                      driven by the awaited placeBid() result from Stage 11
+                      Phase F. */}
                   {bidSuccess && (
-                    <p className="text-xs font-bold text-navy-600 bg-[var(--kayad-cyan)]/20 p-2.5 rounded-xl border border-[var(--kayad-cyan)]/40">
+                    <p role="status" aria-live="polite" className="text-xs font-bold text-navy-600 bg-[var(--kayad-cyan)]/20 p-2.5 rounded-xl border border-[var(--kayad-cyan)]/40">
                       {bidSuccess}
                     </p>
                   )}
                   {bidError && (
-                    <p className="text-xs font-bold text-[#DC3545] bg-[#DC3545]/10 p-2.5 rounded-xl border border-[#DC3545]/20">
+                    <p role="alert" aria-live="assertive" className="text-xs font-bold text-[#DC3545] bg-[#DC3545]/10 p-2.5 rounded-xl border border-[#DC3545]/20">
                       {bidError}
                     </p>
                   )}
@@ -1037,7 +1059,7 @@ export const VehicleDetailPage: FC = () => {
               </div>
               <div>
                 <p className="text-xs text-slate-300 font-semibold">Listed by {vehicle.sellerType || 'Seller'}</p>
-                <h4 className="text-base font-bold text-white font-serif">{vehicle.sellerName}</h4>
+                <h2 className="text-base font-bold text-white font-serif">{vehicle.sellerName}</h2>
                 {vehicle.sellerRating > 0 ? (
                   <p className="text-xs text-[var(--kayad-cyan)] font-bold">★ {vehicle.sellerRating}</p>
                 ) : (

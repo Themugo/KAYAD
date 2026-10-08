@@ -57,8 +57,14 @@ export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: Co
   const { d, h, m, s, expired, urgent } = useCountdown(endTime);
 
   if (expired) {
+    // STAGE 12 PHASE B: the ticking digits above are intentionally NOT a
+    // live region -- announcing every second would be exactly the noisy,
+    // meaningless-tick behavior the master prompt warns against. This
+    // "expired" branch only renders once, the single moment the countdown
+    // crosses zero and the auction's lifecycle genuinely changes, so it is
+    // the one transition in this component worth announcing.
     return (
-      <span style={{
+      <span role="status" aria-live="polite" style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         padding: '5px 12px', borderRadius: 8,
         background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
