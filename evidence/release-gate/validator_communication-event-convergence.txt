@@ -1,0 +1,17 @@
+PASS backend/services/communicationEvents.service.js
+PASS backend/services/communicationGateway.service.js
+PASS backend/services/communicationRetryCron.js
+PASS backend/services/paymentService.js
+PASS backend/services/auctionLifecycle.service.js
+PASS backend/services/auctionClose.service.js
+file:///tmp/g3/found/scripts/validate-communication-event-convergence.mjs:23
+    if (!text.includes(needle)) throw new Error(`FAIL ${file}: missing ${needle}`);
+                                      ^
+
+Error: FAIL backend/controllers/bidController.js: missing COMMUNICATION_EVENTS.BID_CONFIRMED
+    at file:///tmp/g3/found/scripts/validate-communication-event-convergence.mjs:23:39
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.0

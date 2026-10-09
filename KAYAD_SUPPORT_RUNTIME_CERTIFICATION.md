@@ -24,3 +24,6 @@ Deployment note: apply the migration **before** the new backend (the backend cal
 | Jest / Vitest / tsc / build / validators | **yes** | n/a | n/a |
 | Browser journeys | **yes, mocked HTTP** | not run | not run |
 | RLS on hosted Supabase, e-mail delivery, live round-trip, load | no | **not run** | **not run** |
+
+## Final release gate addendum (2026-10-09)
+Authorization audit, deletedAt proofs, ticket-number collision guard and data review: see KAYAD_FINAL_RELEASE_GATE_REPORT.md. Staging RLS / provider delivery: NOT RUN.

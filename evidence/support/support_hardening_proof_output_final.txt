@@ -1,0 +1,94 @@
+Output format is unaligned.
+INSERT 0 2
+GRANT
+P1 create without ticket_number -> generated
+t
+P2 same idempotency key -> deduplicated, one row
+true|1
+P3 customer cannot be staff-first-response: customer reply keeps first_response_at null
+open|t
+P4 staff internal note is not a first response
+open|t
+P5 staff public reply sets first response and moves open->in_progress
+in_progress|f
+P6 customer B cannot append to A ticket
+ERROR:  SUPPORT_TICKET_NOT_FOUND
+CONTEXT:  PL/pgSQL function kayad_support_append_message(uuid,uuid,text,text,boolean,integer) line 12 at RAISE
+P7 customer cannot post internal
+ERROR:  SUPPORT_INTERNAL_FORBIDDEN
+CONTEXT:  PL/pgSQL function kayad_support_append_message(uuid,uuid,text,text,boolean,integer) line 13 at RAISE
+P8 invalid transition open->closed rejected (set to open first)
+UPDATE 1
+ERROR:  SUPPORT_TRANSITION_INVALID
+CONTEXT:  PL/pgSQL function kayad_support_update_case(uuid,uuid,integer,text,text,uuid,uuid,text,boolean) line 20 at RAISE
+P9 resolve without note rejected
+ERROR:  SUPPORT_RESOLUTION_NOTE_REQUIRED
+CONTEXT:  PL/pgSQL function kayad_support_update_case(uuid,uuid,integer,text,text,uuid,uuid,text,boolean) line 22 at RAISE
+P10 assignee must be active support staff (marketing user rejected)
+ERROR:  SUPPORT_ASSIGNEE_INVALID
+CONTEXT:  PL/pgSQL function kayad_support_update_case(uuid,uuid,integer,text,text,uuid,uuid,text,boolean) line 10 at RAISE
+P11 stale row_version rejected
+ERROR:  SUPPORT_VERSION_CONFLICT
+CONTEXT:  PL/pgSQL function kayad_support_update_case(uuid,uuid,integer,text,text,uuid,uuid,text,boolean) line 7 at RAISE
+P12 valid assign + resolve with note, audit row written
+resolved
+1
+P13 rating: owner only, 1..5, once
+ERROR:  SUPPORT_TICKET_NOT_FOUND
+CONTEXT:  PL/pgSQL function kayad_support_rate_case(uuid,uuid,integer,text) line 6 at RAISE
+ERROR:  SUPPORT_RATING_INVALID
+CONTEXT:  PL/pgSQL function kayad_support_rate_case(uuid,uuid,integer,text) line 4 at RAISE
+4
+ERROR:  SUPPORT_ALREADY_RATED
+CONTEXT:  PL/pgSQL function kayad_support_rate_case(uuid,uuid,integer,text) line 8 at RAISE
+P13b rating text did not touch staff resolution_notes
+Refund guidance given|good
+P14 customer reply inside window reopens; outside window rejected
+true
+UPDATE 1
+ERROR:  SUPPORT_REOPEN_WINDOW_EXPIRED
+CONTEXT:  PL/pgSQL function kayad_support_append_message(uuid,uuid,text,text,boolean,integer) line 21 at RAISE
+P15 closed rejects replies
+UPDATE 1
+ERROR:  SUPPORT_TICKET_CLOSED
+CONTEXT:  PL/pgSQL function kayad_support_append_message(uuid,uuid,text,text,boolean,integer) line 15 at RAISE
+P16 legacy RPC is inert
+ERROR:  SUPPORT_RPC_DEPRECATED: use kayad_support_append_message
+CONTEXT:  PL/pgSQL function kayad_append_support_message(uuid,uuid,text,text,boolean,jsonb) line 3 at RAISE
+P17 authenticated cannot EXECUTE support RPCs (direct PostgREST call)
+BEGIN
+SET
+ERROR:  permission denied for function kayad_support_append_message
+ROLLBACK
+BEGIN
+SET
+ERROR:  permission denied for function kayad_support_create_case
+ROLLBACK
+P18 authenticated cannot SELECT messages column directly
+BEGIN
+SET
+t
+ERROR:  permission denied for table support_tickets
+ROLLBACK
+P19 authenticated owner can SELECT safe columns, other customer sees nothing
+BEGIN
+SET
+t
+1
+ROLLBACK
+BEGIN
+SET
+t
+0
+ROLLBACK
+P20 authenticated direct INSERT/UPDATE denied
+BEGIN
+SET
+ERROR:  permission denied for table support_tickets
+ROLLBACK
+BEGIN
+SET
+ERROR:  permission denied for table support_tickets
+ROLLBACK
+P21 metrics
+2|2|null

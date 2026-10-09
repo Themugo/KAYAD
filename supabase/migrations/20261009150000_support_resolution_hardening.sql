@@ -7,9 +7,16 @@ CREATE SEQUENCE IF NOT EXISTS support_ticket_number_seq;
 
 CREATE OR REPLACE FUNCTION kayad_support_assign_ticket_number() RETURNS trigger
 LANGUAGE plpgsql SET search_path = public AS $$
+DECLARE v_candidate text;
 BEGIN
   IF NEW.ticket_number IS NULL OR btrim(NEW.ticket_number) = '' THEN
-    NEW.ticket_number := 'SUP-' || to_char(now(), 'YYYYMMDD') || '-' || lpad(nextval('support_ticket_number_seq')::text, 6, '0');
+    -- Legacy rows were back-filled as SUP-YYYYMMDD-<6 hex>; a hex tail can be all digits, so never assume the
+    -- sequence value is free: draw until the number is unused (unique index remains the final guard).
+    LOOP
+      v_candidate := 'SUP-' || to_char(now(), 'YYYYMMDD') || '-' || lpad(nextval('support_ticket_number_seq')::text, 6, '0');
+      EXIT WHEN NOT EXISTS (SELECT 1 FROM support_tickets WHERE ticket_number = v_candidate);
+    END LOOP;
+    NEW.ticket_number := v_candidate;
   END IF;
   RETURN NEW;
 END $$;

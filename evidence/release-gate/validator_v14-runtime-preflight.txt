@@ -1,0 +1,12 @@
+FAIL Node runtime meets production contract — running 22.22.0, required >=22.22.2
+PASS package engine preserves production contract — configured >=22.22.2
+PASS live API harness exists
+PASS live API harness is read-only after authentication
+PASS live API harness uses canonical profile endpoint
+PASS live API harness has no duplicate profile check
+PASS production API default is canonical
+PASS production backend has no HTTP 501 placeholders
+PASS holistic source gate exists
+PASS live certification contract gate exists
+
+V14 runtime preflight: 9/10 PASS

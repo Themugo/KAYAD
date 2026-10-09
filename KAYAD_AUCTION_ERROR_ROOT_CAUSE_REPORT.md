@@ -39,3 +39,6 @@ Fix (additive, no behaviour change for other callers): adapter operator `{ $exis
 * `e2e/auction-journey/auction_load_failure_journey.cjs` — mocked-HTTP browser journey, desktop + mobile, incl. Refresh recovery: 14/14.
 
 Authority unchanged: no bidding, settlement, escrow or financial code touched.
+
+## Final release gate addendum (2026-10-09)
+deletedAt semantics proven with real-adapter tests; deployed cause remains UNCONFIRMED (blockers in KAYAD_FINAL_RELEASE_GATE_REPORT.md section 3).

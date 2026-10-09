@@ -28,5 +28,10 @@ test('GET, HEAD, JSON, errors and SLI complete without double sending', async ()
     const late=await fetch(base+'/late'); assert.equal(late.status,200); assert.equal((await late.json()).value,2);
     assert.equal(getCounter('http_requests_total',{method:'GET',path:'/json',status:200}),1);
     assert.equal(getCounter('http_requests_total',{method:'HEAD',path:'/',status:404}),1);
-  } finally {await new Promise(resolve=>server.close(resolve))}
+  } finally {
+    // Drop keep-alive sockets held by fetch(); otherwise server.close() can wait indefinitely (observed as an intermittent hang on Node 22.22.2).
+    const closed = new Promise(resolve=>server.close(resolve));
+    server.closeAllConnections?.();
+    await closed;
+  }
 });

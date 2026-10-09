@@ -1,0 +1,15 @@
+Active migration count: 164
+file:///tmp/g3/found/scripts/validate-local-supabase.mjs:21
+    throw new Error(`${label}: failed\n${detail}`);
+          ^
+
+Error: Supabase local start: failed
+{"_tag":"Error","error":{"code":"DockerLifecycleInspectError","message":"failed to inspect container health: failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker.sock: connect: no such file or directory"}}
+WARN: config section [inbucket] is deprecated. Please use [local_smtp] instead.
+    at run (file:///tmp/g3/found/scripts/validate-local-supabase.mjs:21:11)
+    at file:///tmp/g3/found/scripts/validate-local-supabase.mjs:26:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.0

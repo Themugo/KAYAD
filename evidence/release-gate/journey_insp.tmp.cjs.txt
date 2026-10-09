@@ -1,0 +1,68 @@
+PASS  guest: one h1 and both service lanes are explained
+PASS  guest: no false claims (no payment/verdict/ratings text)
+PASS  guest: three tabs, first selected
+PASS  guest: ArrowRight moves focus + selection to My inspections
+PASS  guest: records tab asks to sign in and calls no inspection API
+PASS  guest: no horizontal scroll (desktop)
+PASS  guest: no page errors
+PASS  empty: honest empty state
+PASS  request: dialog opens with accessible name
+PASS  request: focus moved inside the dialog
+PASS  request: no vehicle is preselected by default
+PASS  request: submit disabled until valid
+PASS  request: invalid phone exposes aria-invalid + described error
+PASS  request: states no payment is taken
+PASS  request: ONE POST despite double click  [{"carId":"e2e-car-2","phone":"0712345678","location":"Nairobi"}]
+PASS  request: POST carries the chosen vehicle and phone
+PASS  request: confirmation is the server order + truthful status
+PASS  tracked: record appears in My inspections after reload from the API
+PASS  tracked: stage progress is exposed as a list with current step
+PASS  tracked: no payment/pay button for a KAYAD request
+PASS  no page errors
+PASS  failure: error shown, NOT an empty state
+PASS  failure: retry recovers and shows the real booking
+PASS  partial failure: the working source is shown and the failure is announced
+PASS  pay: waiting state is announced and Escape is blocked mid-payment
+PASS  pay: dialog stays open while waiting
+PASS  pay: confirmed only after the status endpoint reported success
+PASS  pay: list reloaded from the API shows Paid and no Pay button
+PASS  cancel: unpaid booking cancelled via API and list shows Cancelled
+PASS  reports: both completed records listed
+PASS  report: shows stored score + notes, invents no verdict
+PASS  report: Escape closes and focus returns to the trigger
+PASS  report: provider report is fetched from the API and rendered
+PASS  vehicle->inspection: lands on inspections with the vehicle preselected
+PASS  vehicle->inspection: URL no longer holds the vehicle detail
+PASS  no page errors
+PASS  apply: phone required inline (aria-invalid) and nothing sent
+PASS  apply: server message shown and says access is not granted
+PASS  mobile 360: service tab has no horizontal scroll
+PASS  mobile 360: records tab has no horizontal scroll
+PASS  mobile 360: interactive controls are at least 32px tall  small=0
+PASS  mobile 360: dialog fits the viewport
+PASS  mobile 360: Tab never leaves the dialog (focus trap)
+PASS  mobile 360: reduced-motion honoured (no running animation on dialog)
+PASS  mobile 360: no page errors
+PASS  mobile 375: service tab has no horizontal scroll
+PASS  mobile 375: records tab has no horizontal scroll
+PASS  mobile 375: interactive controls are at least 32px tall  small=0
+PASS  mobile 375: dialog fits the viewport
+PASS  mobile 375: Tab never leaves the dialog (focus trap)
+PASS  mobile 375: reduced-motion honoured (no running animation on dialog)
+PASS  mobile 375: no page errors
+PASS  mobile 390: service tab has no horizontal scroll
+PASS  mobile 390: records tab has no horizontal scroll
+PASS  mobile 390: interactive controls are at least 32px tall  small=0
+PASS  mobile 390: dialog fits the viewport
+PASS  mobile 390: Tab never leaves the dialog (focus trap)
+PASS  mobile 390: reduced-motion honoured (no running animation on dialog)
+PASS  mobile 390: no page errors
+PASS  mobile 768: service tab has no horizontal scroll
+PASS  mobile 768: records tab has no horizontal scroll
+PASS  mobile 768: interactive controls are at least 32px tall  small=0
+PASS  mobile 768: dialog fits the viewport
+PASS  mobile 768: Tab never leaves the dialog (focus trap)
+PASS  mobile 768: reduced-motion honoured (no running animation on dialog)
+PASS  mobile 768: no page errors
+
+TOTAL=66 FAIL=0

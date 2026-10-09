@@ -1,0 +1,24 @@
+KAYAD canonical provider certification: email, sms
+email: NOT CONFIGURED
+sms: NOT CONFIGURED
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: email certification requires its provider credential set in the execution environment.
+
+false !== true
+
+    at file:///tmp/g3/found/scripts/validate-communications-provider-certification.mjs:14:41
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.22.0
