@@ -1492,3 +1492,11 @@ before deploying; staging smoke of PUT→GET recommended).
 
 ## Frontend Test Recovery — 2026-10-09
 Resolved all 11 failing frontend tests (9 VehicleMarketplace mobile hero/saved, 2 Navbar). 3 app defects fixed (featured feed `data`/`cars`, hero index race, Saved page identity); remaining were stale expectations proven against the documented contract. Frontend 388 pass / 0 fail / 1 skip (baseline skip); tsc and build clean; 5 stale validators corrected; 2 validators environment-blocked (provider credentials, Node 22.22.2). No backend/migration/RLS change. See `FRONTEND_FAILURE_ROOT_CAUSE_AUDIT.md` and `FRONTEND_FAILURE_REPAIR_REPORT.md`.
+
+
+## Pre-Purchase Inspection — Product Discovery & Public Experience Convergence — 2026-10-09
+Discovery written first (`INSPECTION_PRODUCT_DISCOVERY.md`), then implemented without a second system or new API. Backend: one controller corrected (`listMine` projection, no unsettleable M-Pesa charge) with tests. Frontend: new InspectionsView (two truthful routes, tracked My inspections/Reports, pay/cancel for unpaid provider bookings, provider application), vehicle-preserving launch from every vehicle type, booking retry reuses the booking, marketplace error/confirmation/Apply. Frontend 419/0/1 (baseline 388/0/1); backend Jest 698 (+4), Vitest 16, node 1; tsc/build clean; validators identical to baseline (1 updated, stricter); browser 66/66; revert-proofs recorded. See `INSPECTION_EXPERIENCE_CONVERGENCE_REPORT.md`. Owner decision pending: whether KAYAD vehicle inspections are charged (needs a `vehicle_inspections` settlement path).
+
+
+## Automotive Services Marketplace — Master Convergence — 2026-10-09
+Discovery first (`AUTOMOTIVE_SERVICES_PRODUCT_DISCOVERY.md`), then one additive migration (`20261009120000_automotive_services_governance.sql`: capabilities table, staff affiliation), a backend taxonomy, discovery + governance services, admin governance sub-router, A-system eligibility enforcement, and the marketplace/application/admin/report UI wired to them. Found and fixed the `/api/api` transport bug. FE 455/0/1; BE Jest 770 (baseline 698), Vitest 16, node 1; validators identical to baseline (1 updated); tsc/build clean; browser 50/50 + 66/66; revert-proofs 16/15/6. No escrow or other stage started. See `AUTOMOTIVE_SERVICES_MARKETPLACE_CONVERGENCE_REPORT.md`.

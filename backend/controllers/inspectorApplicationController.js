@@ -88,9 +88,10 @@ export const listActiveInspectors = async (req, res) => {
   try {
     const { data, error } = await getSupabase()
       .from("inspection_providers")
-      .select("id,user_id,company_name,trading_name,email,phone,county,town,description,inspection_types,status,verification_status,average_rating,reviews_count")
+      .select("id,user_id,company_name,trading_name,county,town,description,inspection_types,status,verification_status,lifecycle_stage,average_rating,reviews_count")
       .eq("status", "active")
       .eq("verification_status", "verified")
+      .eq("lifecycle_stage", "ACTIVE")
       .order("average_rating", { ascending: false })
       .order("reviews_count", { ascending: false });
 
@@ -101,12 +102,10 @@ export const listActiveInspectors = async (req, res) => {
       userId: provider.user_id,
       name: provider.trading_name || provider.company_name,
       companyName: provider.company_name,
-      email: provider.email,
-      phone: provider.phone,
       location: provider.town || provider.county,
       bio: provider.description,
       inspectionSpecialty: provider.inspection_types || [],
-      rating: Number(provider.average_rating || 0),
+      rating: Number(provider.reviews_count || 0) > 0 ? Number(provider.average_rating) : null,
       inspectionsCompleted: Number(provider.reviews_count || 0),
     }));
 
@@ -214,12 +213,32 @@ export const approveApplication = async (req, res) => {
       lifecycle_stage: "ACTIVE",
       reviewed_by: req.user.id,
       reviewed_at: new Date().toISOString(),
+      verified_at: new Date().toISOString(),
+      verification_notes: reviewNotes || "Approved from an individual inspector application",
     };
     const providerQuery = existingProvider
       ? sb.from("inspection_providers").update(providerPayload).eq("id", existingProvider.id).select().single()
       : sb.from("inspection_providers").insert(providerPayload).select().single();
     const { data: provider, error: providerWriteError } = await providerQuery;
     if (providerWriteError) throw providerWriteError;
+
+    // The admin approved this person specifically to perform pre-purchase inspections,
+    // so record exactly that (and nothing broader) as a verified capability.
+    const { data: capRow } = await sb
+      .from("provider_service_capabilities")
+      .select("id")
+      .eq("provider_id", provider.id)
+      .eq("category_code", "pre_purchase_inspection")
+      .is("subcategory_code", null)
+      .is("staff_id", null)
+      .maybeSingle();
+    if (!capRow) {
+      await sb.from("provider_service_capabilities").insert({
+        provider_id: provider.id, category_code: "pre_purchase_inspection", status: "verified", all_makes: true,
+        reviewed_by: req.user.id, reviewed_at: new Date().toISOString(), declared_by: req.user.id,
+        review_notes: "Verified through administrator approval of the inspector application",
+      });
+    }
 
     Object.assign(application, approvalPatch);
     await application.save();

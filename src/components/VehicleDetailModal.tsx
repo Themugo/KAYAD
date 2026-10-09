@@ -547,7 +547,21 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     className="shadow-md font-black text-sm"
                   >
                     <MessageSquare className="w-5 h-5 text-white" />
-                    <span>Book Inspection & Reserve</span>
+                    <span>Request an Inspection</span>
+                  </Button>
+                )}
+                {/* The primary action above is the inspection itself only in the fallback case. Every other
+                    vehicle still needs a way to reach the pre-purchase inspection. */}
+                {onRequestInspection && (isAuction || isPrivateSeller || isEscrowActive) && (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    fullWidth
+                    onClick={() => onRequestInspection(vehicle)}
+                    className="font-bold text-sm"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-[#176B87]" />
+                    <span>Request an Inspection</span>
                   </Button>
                 )}
               </div>

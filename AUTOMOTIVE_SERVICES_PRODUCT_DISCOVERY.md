@@ -1,0 +1,56 @@
+# KAYAD Automotive Services — Product Discovery (2026-10-09)
+Basis: tree delivered as `KAYAD-PRE-PURCHASE-INSPECTION-CONVERGENCE-20261009.zip` (working tree, no `.git` in the sandbox; the repo is `Themugo/KAYAD`). Companion: `INSPECTION_PRODUCT_DISCOVERY.md`, `INSPECTION_EXPERIENCE_CONVERGENCE_REPORT.md`.
+Labels: `PASS` verified working · `PARTIAL` · `GAP` · `DUPLICATE` · `ENVIRONMENT-BLOCKED`. "Verified" below means I executed it: against a **PostgreSQL 16 built from all 162 repository migrations** (158 applied cleanly; 4 failed only on Supabase-platform objects `auth.users` / `rls_auto_enable()`), or by running the repo's tests. The live KAYAD database is **ENVIRONMENT-BLOCKED** (the two Supabase projects reachable from this session are unrelated to KAYAD and were not touched).
+
+## 1. Baseline (captured before any edit)
+| Item | Result |
+|---|---|
+| Frontend vitest | 419 passed / 0 failed / 1 skipped, 59 files |
+| tsc / build | clean / OK |
+| Backend Jest / Vitest / node:test | 698 / 16 / 1 |
+| Validators | 174 `validate-*.mjs`: 164 pass, 10 fail (4 env/package-gated, 6 legacy stand-alone) — recorded per-script in `scratchpad/insp/val_final.txt` |
+| Browser | `e2e/inspection-journey` 66/66 (mocked backend) |
+
+## 2. Provider / organization architecture (one canonical identity: `inspection_providers`)
+| Concern | Evidence | Status |
+|---|---|---|
+| Provider identity | `inspection_providers` (user_id owner, company/trading name, registration/tax id, business_type, coordinates, `service_radius_km`, `has_workshop`, `offers_mobile`, declared flags `electric_vehicles/luxury/commercial`, `status`, `verification_status`, `lifecycle_stage`) — `20260816180000_*`, `20260817050000_provider_lifecycle_state_machine.sql` | PASS |
+| Single eligibility source | `lifecycle_stage` (REGISTERED…UNDER_REVIEW, VERIFIED, ACTIVE, SUSPENDED, INACTIVE) is authoritative; trigger `trg_sync_provider_status` derives `status`/`verification_status`. Booking creation requires `status='active' AND verification_status='verified'` (`bookingService.createBooking`) | PASS |
+| Business registration | `POST /api/v1/phase22/providers/register` → RPC `kayad_create_inspection_provider_application` → `UNDER_REVIEW` | **GAP (P0)**: the RPC inserts `service_terms`, a column that does not exist in the migration-built schema — verified: `ERROR: column "service_terms" of relation "inspection_providers" does not exist`. Registration fails on a migrations-built database |
+| Admin decision on a **business** | `providerService.verifyProvider/suspendProvider` exist but are **never called**; no admin route or UI touches `inspection_providers` except inspector-application approval | **GAP (P0)**: a business application can never leave `UNDER_REVIEW` through the product |
+| Individual inspectors | `POST /api/v1/inspector-applications/apply` → admin `approve` (`inspectorApplicationController.approveApplication`, `adminOnly`, no self-approval, refuses to re-role dealers/sellers) creates a `ghost_checker` user + an `inspection_providers` row set straight to `ACTIVE`/`verified` | PARTIAL: individual is a "provider" with no business affiliation, no recorded evidence review beyond `reviewed_by`; UI page `AdminInspectorApplications.jsx` is **not wired into `AdminView`** (unreachable; sidebar lists only) |
+| Staff / mechanic affiliation | `inspection_staff(provider_id,user_id,role,is_active,is_available)`; read paths only (`workforceService`, `bookingService`). **No code path creates or confirms staff.** `assertStaffAssignable` is defined but never called, so `assignInspector` accepts an inactive/unavailable/unlinked staff row | **GAP** |
+| Credentials | `provider_credentials` migration columns: `credential_type,title,issued_by,issued_at,expires_at,verification_status,certificate_number`. Service code (`addCredential`, `getProviderProfile`) uses the *legacy* `backend/db/inspection.schema.sql` shape (`type,name,issuing_body,is_verified,expiry_date`) | **GAP (P0)**: `getProviderProfile` queries `is_verified` → fails on the migration schema; `addCredential` inserts nonexistent columns. **DUPLICATE** schema definitions (`backend/db/inspection.schema.sql` vs migrations) |
+| Schema drift in discovery | `searchProviders` projection selects `total_reviews, total_completed_inspections, response_time_minutes`; profile reads `cover_image_url, verified_at`; none exist in the migration schema (verified by script + SQL) | **GAP (P0)**: public provider search/profile break on a migrations-built DB |
+| Public search eligibility | `providerController.searchProviders` forwards client `status`; `verified: req.query.verified === 'true'` is `false` by default, and the service applies the verification filter only `if (filters.verified !== false)` ⇒ **verification is not enforced by default and `?status=pending|suspended` is honoured** | **GAP (P0, security)**: unverified/pending/suspended businesses can be listed publicly |
+| Public PII | `GET /api/v1/inspector-applications/active` (unauthenticated) returns every active inspector's **email and phone** | **GAP (P0, privacy)** |
+| Ownership isolation | `requireProviderOwnership` (owner or admin) on every `:providerId` route; `updateProvider` uses an allow-list (no status/verification fields) | PASS (material profile edits are not audited: PARTIAL) |
+| Suspended provider | New bookings blocked (PASS). Existing-booking operations (`status`, `assign`, `report`) are only ownership-gated | PARTIAL (deliberate: customers with open bookings are not stranded; documented) |
+| Audit | Admin mutations are auto-audited (`adminRoutes` `auditLog`); generic domain audit table `inspection_status_history(entity_type, entity_id, changed_by, notes)` exists and is unused for providers | PASS (mechanism exists; reused) |
+
+## 3. Inspection architecture (see `INSPECTION_PRODUCT_DISCOVERY.md`)
+Two systems, both reused. **A**: `vehicle_inspections` (`/api/inspections/order|my`), inspector chosen by an admin from `ghost_checker` users, who are themselves `inspection_providers` rows (approved individuals). So A is *performed by independent inspectors from KAYAD's approved network*; the earlier customer copy "KAYAD vehicle inspection / KAYAD assigns the inspector" understates that. **B**: `inspection_bookings` (provider marketplace). A **does not** record which provider row performed the work except through `inspector_id` (a user); the report attribution shows the inspector's name only — **PARTIAL**. Payment: A takes none (re-verified: callback requires `metadata.bookingId` and RPC `kayad_process_inspection_payment_atomic` only handles `inspection_bookings` — **PASS**, no charge reintroduced). B: M-Pesa via canonical payment service; `commission_rate` (default 15) exists on providers and `settlementService` computes provider settlements — existing behaviour, not changed, **business decision unresolved** (whether/what KAYAD charges).
+
+## 4. Vehicle-owner services, roadside, taxonomy
+| Concern | Evidence | Status |
+|---|---|---|
+| Service taxonomy | none. Only free-form `inspection_types jsonb`, 3 declared boolean flags, `vehicle_types`; `GET /api/inspection/categories` returns *inspection report* categories | **GAP** |
+| Service requests / jobs | tables `service_jobs`, `service_job_events`, `service_job_disputes`, `vehicle_service_offerings`, `roadside_service_requests` exist (`20260920220000_phase22_reconciliation.sql`) but **no code creates a service request**, and all of RPCs `kayad_transition_service_job_atomic`, `kayad_open/ add evidence/admin_resolve … dispute_atomic`, `kayad_find_nearby_inspection_providers`, `kayad_get_inspection_report_access`, `kayad_purchase_inspection_report_download` are **referenced by `phase22Service` but defined in no migration** (verified `pg_proc` = 0 on the chain-built DB) | **GAP (P0)** for those Phase-22 endpoints; they 500 on a migrations-built DB. Repair/roadside request journeys are therefore **not supported** and will not be presented as such |
+| Vehicle catalog | no make/model catalog table; `cars.make/model` strings; `vehicle_identities` is a VIN-registry; marketplace filters derive brands from listings | PARTIAL: reuse live listing values; no duplicate catalog |
+| Location | providers have lat/lon, county/town, `service_radius_km`, `offers_mobile`, `has_workshop`; nearby search RPC missing (above); no geocoder | PARTIAL: straight-line distance can be computed server-side from real coordinates |
+| Availability | `GET /providers/:id/slots` real, per provider/date | PASS |
+| Reviews/ratings | `average_rating`, `reviews_count` default 0 (0 = "no data", not a rating) | PARTIAL: UI must not show 0 as a rating |
+
+## 5. Frontend
+`InspectionMarketplacePage` + `ProviderFilters/Card/ProfilePage` (provider search by county/town, flags, inspection type); card shows the **provider's self-declared** "electric vehicles" next to the "verified" badge (conflates declared and verified — GAP). `AdminView` live console has no provider module. Admin permission routing is path-regex based (`/inspection|inspector/` → `MANAGE_INSPECTIONS`).
+
+## 6. Design consequence (decisions made)
+1. Fix the P0 data-contract drift with **one additive migration** and correct the service code to the migration schema (no new system).
+2. Enforce eligibility server-side (ignore client `status`/`verified`); remove public PII.
+3. Add the smallest governance layer on the existing identity: admin business decisions (via `inspection_providers.lifecycle_stage` + audit rows), a **capability** table (declared → verified → revoked, optionally tied to a staff member) with a single backend-served taxonomy, and two-sided staff affiliation. Alternative (no-premises) verification is a recorded `verification_route` with evidence credentials and the same admin decision.
+4. Matching consults capabilities; high-risk (hybrid/EV HV) matches **verified** only; location uses real coordinates; vehicle make uses provider-declared makes, labelled declared.
+5. Repair and roadside **requests are not built** (their RPCs are missing and no provider-side workflow exists): the UI offers verified-provider discovery and states plainly that KAYAD does not yet take those requests.
+6. Payments untouched.
+
+## 7. Implementation results (appended after build; sections 1–6 above are the pre-implementation discovery and are unchanged)
+All six design decisions were implemented on the existing system: one additive migration (`20261009120000_automotive_services_governance.sql`), a taxonomy served by the backend, discovery/governance services on `inspection_providers`, an admin sub-router behind the existing guard, and the existing marketplace UI rewired (no new marketplace). Result: frontend 455 pass / 0 fail / 1 skip (baseline 419/0/1); backend Jest 770 pass (baseline 698), Vitest 16, node 1; validators 164 pass / 10 fail = baseline set exactly; tsc and build clean; browser 50/50 (desktop 1440 + mobile 375) plus the earlier 66/66. Two findings beyond the discovery: (a) every marketplace call from the shipped UI went to `/api/api/...` (404) because of a double prefix, masked by glob-based test routes, now fixed and test-guarded; (b) the legacy admin "assign inspector" path did not check provider eligibility, now enforced server-side. Full detail: `AUTOMOTIVE_SERVICES_MARKETPLACE_CONVERGENCE_REPORT.md`.

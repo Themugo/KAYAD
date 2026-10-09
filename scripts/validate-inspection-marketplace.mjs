@@ -11,6 +11,7 @@ const routes = read('backend/inspection/routes/inspectionRoutes.js');
 const controller = read('backend/inspection/controllers/providerController.js');
 const booking = read('backend/inspection/services/bookingService.js');
 const provider = read('backend/inspection/services/providerService.js');
+const discovery = read('backend/inspection/services/providerDiscoveryService.js');
 const report = read('backend/inspection/services/reportService.js');
 const settlement = read('backend/inspection/services/settlementService.js');
 const adapter = read('backend/inspection/services/dbAdapter.js');
@@ -40,8 +41,10 @@ pass('booking race is backed by a DB unique active-slot index', migration.includ
 pass('payment double-processing is backed by a DB unique index', migration.includes('idx_inspection_one_completed_payment'));
 pass('settlement writes have matching payment columns', migration.includes('ADD COLUMN IF NOT EXISTS payment_method'));
 pass('inspection API unwraps the shared response envelope', api.includes('response?.data?.data ?? response?.data'));
-pass('provider search returns the shape consumed by the marketplace UI', provider.includes('return {\n      items,'));
-pass('provider price sorting uses a real provider-level starting price', provider.includes('sort = { starting_price: 1 }') && migration.includes('starting_price NUMERIC'));
+pass('provider search returns the shape consumed by the marketplace UI', discovery.includes('return { items, total, page: f.page') && provider.includes('searchEligibleProviders(filters)'));
+// Automotive-services convergence: the price/rating sort controls were removed (ordering is distance -> verified capability -> name).
+// What must still hold is that a price is only ever shown when a real provider-level starting price is stored.
+pass('provider starting price is real and null-safe (never invented)', discovery.includes('p.starting_price == null ? null') && migration.includes('starting_price NUMERIC'));
 pass('provider starting price stays synchronized with active packages', migration.includes('trg_inspection_package_starting_price'));
 pass('provider search does not query a nonexistent deleted_at column', !provider.includes('deleted_at: null'));
 pass('marketplace is reachable from the main inspection view',
@@ -50,7 +53,7 @@ pass('provider card uses an in-app selection callback instead of a dead href',
   card.includes('onSelect?:') && card.includes('onClick={() => onSelect?.(provider)}'));
 pass('fake marketplace headline stats were removed',
   !page.includes('5,000+') && !page.includes("East Africa's largest vehicle inspection marketplace"));
-pass('public provider search defaults to verified profiles', provider.includes("if (filters.verified !== false)") && page.includes('verified: true'));
+pass('public provider search defaults to verified profiles', discovery.includes(".eq('verification_status', 'verified')") && discovery.includes(".eq('lifecycle_stage', 'ACTIVE')") && discovery.includes(".eq('status', 'active')"));
 pass('public provider profile rejects inactive or unverified providers', provider.includes("provider.status !== 'active'") && provider.includes("provider.verification_status !== 'verified'"));
 pass('marketplace selection opens provider profile before booking', page.includes('ProviderProfilePage') && page.includes('onBook={() => setBookingProvider(selectedProvider)}'));
 pass('booking request has no client discount authority', !api.includes('discount?: number'));

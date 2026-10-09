@@ -15,7 +15,7 @@ const appModel = { findById: jest.fn(), findOne: jest.fn(), create: jest.fn() };
 const sendNotification = jest.fn(async () => ({}));
 const entitlement = jest.fn();
 
-const sbChain = () => { const c = { select: () => c, eq: () => c, maybeSingle: async () => ({ data: null, error: null }), single: async () => ({ data: { id: "prov" }, error: null }), insert: () => c, update: () => c }; return c; };
+const sbChain = () => { const c = { select: () => c, eq: () => c, is: () => c, maybeSingle: async () => ({ data: null, error: null }), single: async () => ({ data: { id: "prov" }, error: null }), insert: () => c, update: () => c }; return c; };
 
 jest.unstable_mockModule("../../models/Dealer.js", () => ({ default: dealerModel }));
 jest.unstable_mockModule("../../models/DealerVerification.js", () => ({ default: verificationModel }));

@@ -210,13 +210,13 @@ describe('VehicleDetailModal', () => {
 
   // Found while verifying the Place Bid fix above: the exact same
   // wrong-action bug existed on 2 more buttons in this file -
-  // "Book Inspection & Reserve" and "Compare Bank Rates for this
+  // "Request an Inspection" and "Compare Bank Rates for this
   // Vehicle" both called onContactSeller (opening chat) despite their
   // labels promising something else entirely. "Book Inspection &
   // Reserve" only renders for the non-auction/non-private-seller/
   // non-escrow-active fallback case, so picks a real vehicle matching
   // that specifically rather than assuming any vehicle works.
-  it('clicking "Book Inspection & Reserve" calls onRequestInspection, not onContactSeller', () => {
+  it('clicking "Request an Inspection" calls onRequestInspection, not onContactSeller', () => {
     const dealerVehicleNoEscrow = INITIAL_VEHICLES.find(
       (v) => !v.isAuction && v.sellerType !== 'Private Seller' && !v.escrowEligible
     );
@@ -236,7 +236,7 @@ describe('VehicleDetailModal', () => {
         notFoundId={null}
       />
     );
-    fireEvent.click(screen.getByText('Book Inspection & Reserve'));
+    fireEvent.click(screen.getByText('Request an Inspection'));
     expect(onRequestInspection).toHaveBeenCalledWith(dealerVehicleNoEscrow);
     expect(onContactSeller).not.toHaveBeenCalled();
   });
@@ -330,5 +330,34 @@ describe('VehicleDetailModal - price consistency with the real, live auction ses
     render(<VehicleDetailModal vehicle={nonAuction} {...baseProps} />);
     expect(screen.getAllByText('Listed Price').length).toBeGreaterThan(0);
     expect(screen.getAllByText(`Ksh ${nonAuction.price.toLocaleString()}`).length).toBeGreaterThan(0);
+  });
+});
+
+describe('VehicleDetailModal inspection entry point on every vehicle type', () => {
+  it('auction and private-seller vehicles also offer "Request an Inspection" with the vehicle', () => {
+    const vehicles = [
+      INITIAL_VEHICLES.find((v) => v.isAuction),
+      INITIAL_VEHICLES.find((v) => !v.isAuction && v.sellerType === 'Private Seller'),
+    ];
+    for (const v of vehicles) {
+      expect(v).toBeTruthy();
+      const onRequestInspection = vi.fn();
+      const { unmount } = render(
+        <VehicleDetailModal
+          vehicle={v!}
+          allVehicles={INITIAL_VEHICLES}
+          onClose={() => {}}
+          onStartEscrow={() => {}}
+          onContactSeller={() => {}}
+          onRequestInspection={onRequestInspection}
+          isSaved={false}
+          onToggleSave={() => {}}
+          notFoundId={null}
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: /Request an Inspection/ }));
+      expect(onRequestInspection).toHaveBeenCalledWith(v);
+      unmount();
+    }
   });
 });

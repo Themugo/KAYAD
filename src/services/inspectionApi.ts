@@ -52,25 +52,41 @@ export interface BackendInspector {
   id?: string;
   _id?: string;
   name?: string;
-  email?: string;
+  /** The independent business this inspector works as (from the verified provider record). */
+  businessName?: string | null;
 }
 
+/**
+ * The legacyOrder() projection returned by EVERY buyer endpoint
+ * (GET /my, POST /order, GET /:id ...) - see
+ * backend/inspection/controllers/legacyCompatibilityController.js.
+ * Fields with no real backend source stay optional and are never invented
+ * by callers.
+ */
 export interface BackendInspectionOrder {
   id?: string;
   _id?: string;
+  /** Backend status: pending_payment (= requested) | assigned | in_progress | completed. */
   status: string;
   car?: BackendInspectionCar;
-  inspector?: BackendInspector;
+  /** An inspector summary, or just the inspector's id when it could not be resolved. */
+  inspector?: BackendInspector | string | null;
+  /** Quoted fee recorded on the order. A KAYAD vehicle inspection request does not charge it. */
   fee?: number;
-  location?: string;
+  location?: string | null;
   scheduledAt?: string;
-  completedAt?: string;
+  completedAt?: string | null;
   checklist?: unknown[];
-  overallScore?: number;
+  /** null until an inspector has recorded a score. */
+  overallScore?: number | null;
   conditionRating?: string;
-  images?: Array<{ url: string }>;
-  notes?: string;
+  inspectorNotes?: string;
+  images?: Array<{ url: string } | string>;
+  evidence?: Array<{ url: string } | string>;
   createdAt?: string;
+  updatedAt?: string;
+  digitalInspectionId?: string;
+  chatId?: string | null;
 }
 
 export interface GetMyInspectionsResponse {

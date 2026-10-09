@@ -14,10 +14,12 @@ import {
   Search,
   ShieldCheck,
   Users,
+  Wrench as ProvidersIcon,
 } from 'lucide-react';
 import { Badge, Button, Card, Input, PageHeader, StatWidget, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui';
 import AdminCommunications from '../pages/admin/AdminCommunications';
 import AdminNavigationControl from './AdminNavigationControl';
+import AdminProviderGovernance from './AdminProviderGovernance';
 
 interface AdminViewProps {
   vehicles: Vehicle[];
@@ -65,7 +67,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [cars, setCars] = useState<AdminCar[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
-  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation'>('overview');
+  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers'>('overview');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,7 +164,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       )}
 
       <div className="flex flex-wrap gap-2">
-        {(['overview', 'users', 'cars', 'audit', 'communications', 'navigation'] as const).map((item) => (
+        {(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers'] as const).map((item) => (
           <Button key={item} variant={module === item ? 'primary' : 'outline'} size="sm" onClick={() => setModule(item)}>
             {item === 'overview' && <ShieldCheck className="w-4 h-4" />}
             {item === 'users' && <Users className="w-4 h-4" />}
@@ -170,10 +172,11 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             {item === 'audit' && <History className="w-4 h-4" />}
             {item === 'communications' && <Send className="w-4 h-4" />}
             {item === 'navigation' && <Compass className="w-4 h-4" />}
+            {item === 'providers' && <ProvidersIcon className="w-4 h-4" />}
             {item[0].toUpperCase() + item.slice(1)}
           </Button>
         ))}
-        {module !== 'overview' && module !== 'navigation' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
+        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
       </div>
 
       {module === 'overview' && (
@@ -241,6 +244,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       {module === 'communications' && <AdminCommunications />}
 
       {module === 'navigation' && <AdminNavigationControl />}
+      {module === 'providers' && <AdminProviderGovernance />}
 
       {module === 'audit' && (
         <Card className="overflow-hidden">

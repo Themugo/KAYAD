@@ -18,28 +18,9 @@ import { initiatePayment } from '../../services/paymentService.js';
 
 // Search providers
 export const searchProviders = asyncHandler(async (req, res) => {
-  const filters = {
-    status: req.query.status,
-    verified: req.query.verified === 'true',
-    country: req.query.country,
-    county: req.query.county,
-    town: req.query.town,
-    mobileOnly: req.query.mobileOnly === 'true',
-    workshopOnly: req.query.workshopOnly === 'true',
-    sameDayAvailable: req.query.sameDayAvailable === 'true',
-    weekendAvailable: req.query.weekendAvailable === 'true',
-    vehicleTypes: req.query.vehicleTypes ? req.query.vehicleTypes.split(',') : null,
-    inspectionType: req.query.inspectionType,
-    commercialVehicles: req.query.commercialVehicles === 'true',
-    electricVehicles: req.query.electricVehicles === 'true',
-    luxuryVehicles: req.query.luxuryVehicles === 'true',
-    minRating: parseFloat(req.query.minRating) || null,
-    sortBy: req.query.sortBy,
-    page: req.query.page,
-    limit: req.query.limit,
-  };
-
-  const providers = await providerService.searchProviders(filters);
+  // Raw query is handed to the discovery service, which whitelists, validates
+  // and ignores any client-supplied status / verified values.
+  const providers = await providerService.searchProviders(req.query || {});
   response.success(res, providers);
 });
 

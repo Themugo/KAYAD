@@ -9,6 +9,7 @@ import { auditLog } from "../middleware/auditLog.js";
 import bcrypt from "bcryptjs";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { getIO } from "../utils/io.js";
+import inspectionGovernanceRoutes from "./adminInspectionGovernanceRoutes.js";
 
 import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
@@ -140,6 +141,9 @@ router.use((req, res, next) => {
   if (!permission) return next();
   return requirePermission(permission)(req, res, next);
 });
+
+// Provider-network governance (path contains "inspection" => MANAGE_INSPECTIONS applies above).
+router.use("/inspection-governance", inspectionGovernanceRoutes);
 
 // =============================
 // ⚙️ SAFE PAGINATION HELPER

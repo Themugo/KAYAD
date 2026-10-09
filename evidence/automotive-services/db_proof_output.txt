@@ -1,0 +1,19 @@
+T1 under_review => status/verification: pending/unverified
+T2 ACTIVE => active/verified
+T3 SUSPENDED => suspended/verified
+T4 eligible-for-search rows after suspend: 0
+T5 capability insert ok
+17: ERROR:  duplicate key value violates unique constraint "uq_provider_capability_scope"
+DETAIL:  Key (provider_id, category_code, COALESCE(subcategory_code, ''::text), COALESCE(staff_id, '00000000-0000-0000-0000-000000000000'::uuid))=(22222222-2222-4222-8222-222222222222, diagnostics, , 00000000-0000-0000-0000-000000000000) already exists.
+T6 duplicate rejected (error above)
+21: ERROR:  new row for relation "provider_service_capabilities" violates check constraint "provider_service_capabilities_status_check"
+DETAIL:  Failing row contains (70ac7312-203d-4d8c-85ab-5d56d4f5e7c7, 22222222-2222-4222-8222-222222222222, null, diagnostics, null, trusted, [], f, [], f, null, null, 2026-10-09 03:00:53.809146+00, null, null, null, 2026-10-09 03:00:53.809146+00, 2026-10-09 03:00:53.809146+00).
+T7 invalid status rejected (error above)
+25: ERROR:  new row for relation "inspection_staff" violates check constraint "chk_inspection_staff_affiliation_status"
+DETAIL:  Failing row contains (076810ee-fd42-4bb6-b7cf-c7c23f3f0b3e, 22222222-2222-4222-8222-222222222222, 11111111-1111-4111-8111-111111111111, A, null, null, null, t, 2026-10-09 03:00:53.809146+00, 2026-10-09 03:00:53.809146+00, t, bogus, null, null, null, null).
+T8 invalid affiliation_status rejected (error above)
+T8b new staff row default affiliation: pending active=true
+T9 RLS enabled on provider_service_capabilities: true
+T10 anon/authenticated privileges on table: 0
+T11 service_role privileges: 7
+T12 registration RPC present: 1

@@ -747,3 +747,11 @@ No new blocking items were introduced by Stage 14.
 
 ## Update — Frontend Test Recovery complete (2026-10-09)
 Frontend suite is fully green; no design stage was started. Carry-forward: desktop hero pair-index effect-reset race; reduced-motion handling for the Featured vehicles smooth scroll; run the two environment-blocked validators on Node ≥ 22.22.2 with real provider credentials; deploy order for Stage 14A migration `20261008150000_platform_config_navigation.sql` unchanged.
+
+
+## Update — Inspection convergence complete (2026-10-09)
+No further stage started. Ranked carry-forward: (1) owner decision on charging for KAYAD inspections + settlement path; (2) refund execution for paid provider cancellations; (3) `ghostCheckFee` single store; (4) wizard walkthrough test for BookingFlow; (5) staging browser run with real accounts; (6) inspector/provider-staff surfaces and role confusion (D9). Earlier carry-forward unchanged.
+
+
+## Update — Automotive Services convergence complete (2026-10-09)
+Ranked carry-forward: (1) owner decisions on charging for KAYAD inspections, commission posture and any escrow (nothing assumed); (2) staging run on live Supabase with the new migration applied first, real accounts and storage; (3) dispute/refund/complaint process for providers; (4) repair/roadside request journeys only once a provider-side workflow exists; (5) model-level compatibility catalog and travel-time; (6) optional price sort; (7) bring legacy individual-inspector approval onto the evidence rules; (8) nav-chrome touch targets. Earlier carry-forward unchanged.

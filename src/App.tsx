@@ -116,6 +116,7 @@ function AppInner() {
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create'>('journey');
   const [escrowLaunchNonce, setEscrowLaunchNonce] = useState(0);
+  const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fixed (Final Integration - real data integration): this was
@@ -364,6 +365,16 @@ function AppInner() {
     setActiveNav('escrow');
   }, []);
 
+  // Inspection launch: keep the vehicle the customer was looking at (it used to be discarded).
+  const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | null }) => {
+    setInspectionLaunch((prev) => ({ vehicle: next.vehicle ?? null, tab: next.tab ?? 'service', action: next.action ?? null, nonce: prev.nonce + 1 }));
+    setActiveNav('inspections');
+  }, []);
+  const handleRequestInspection = useCallback((vehicle: Vehicle) => {
+    handleCloseVehicleDetails();
+    launchInspections({ vehicle, action: 'request' });
+  }, [handleCloseVehicleDetails, launchInspections]);
+
   // Contact Seller Handler
   const handleContactSeller = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
@@ -509,6 +520,10 @@ function AppInner() {
 
           {activeNav === 'inspections' && (
             <InspectionsView
+              key={inspectionLaunch.nonce}
+              initialSelectedVehicle={inspectionLaunch.vehicle}
+              initialTab={inspectionLaunch.tab}
+              launchAction={inspectionLaunch.action}
               vehicles={vehicles}
               user={user}
               onOpenAuth={handleOpenAuth}
@@ -518,7 +533,10 @@ function AppInner() {
           )}
 
           {activeNav === 'inspection-marketplace' && (
-            <InspectionMarketplacePage />
+            <InspectionMarketplacePage
+              onViewMyInspections={() => launchInspections({ tab: 'mine' })}
+              onApplyAsProvider={() => launchInspections({ action: 'apply-provider' })}
+            />
           )}
 
           {(activeNav === 'financing' || activeNav === 'finance') && (
@@ -673,7 +691,7 @@ function AppInner() {
         onClose={handleCloseVehicleDetails}
         onStartEscrow={handleStartEscrow}
         onContactSeller={handleContactSeller}
-        onRequestInspection={() => setActiveNav('inspections')}
+        onRequestInspection={handleRequestInspection}
         isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}

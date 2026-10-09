@@ -5,6 +5,8 @@
 import express from 'express';
 import * as controller from '../controllers/providerController.js';
 import * as legacy from '../controllers/legacyCompatibilityController.js';
+import * as gov from '../controllers/governanceController.js';
+import { declareCapabilitySchema, inviteStaffSchema, requestAffiliationSchema, addCredentialSchema } from '../../validation/automotiveServices.schema.js';
 import { requireAuth, optionalAuth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/auth.js';
 import requireProviderOwnership from '../middleware/requireProviderOwnership.js';
@@ -40,6 +42,9 @@ router.get('/reports/share/:token', controller.getReportByShareToken);
 // Get inspection categories (public)
 router.get('/categories', controller.getInspectionCategories);
 
+// Canonical expertise taxonomy + symptom hints (public, read-only)
+router.get('/service-taxonomy', gov.getServiceTaxonomy);
+
 /**
  * ============================================================
  * CUSTOMER ROUTES (Authenticated)
@@ -68,6 +73,25 @@ router.post('/reviews', requireAuth, controller.submitReview);
  * ============================================================
  */
 
+// The signed-in user's own business application (owner-scoped by user id)
+router.get('/provider-me', requireAuth, gov.myProvider);
+
+// Capabilities (declared by the business; verified only by an administrator)
+router.get('/provider/:providerId/capabilities', requireAuth, requireProviderOwnership, gov.listCapabilities);
+router.post('/provider/:providerId/capabilities', requireAuth, requireProviderOwnership, validate(declareCapabilitySchema), gov.declareCapability);
+
+// Team affiliations (two-sided: business and individual must both confirm)
+router.get('/provider/:providerId/staff', requireAuth, requireProviderOwnership, gov.listStaff);
+router.post('/provider/:providerId/staff', requireAuth, requireProviderOwnership, validate(inviteStaffSchema), gov.inviteStaff);
+router.post('/provider/:providerId/staff/:staffId/confirm', requireAuth, requireProviderOwnership, gov.confirmStaff);
+router.post('/provider/:providerId/staff/:staffId/end', requireAuth, requireProviderOwnership, gov.endStaff);
+
+// The individual's own side of an affiliation
+router.get('/affiliations/my', requireAuth, gov.myAffiliations);
+router.post('/affiliations', requireAuth, validate(requestAffiliationSchema), gov.requestAffiliation);
+router.post('/affiliations/:staffId/accept', requireAuth, gov.acceptAffiliation);
+router.post('/affiliations/:staffId/leave', requireAuth, gov.leaveAffiliation);
+
 // Provider dashboard
 router.get('/provider/:providerId/dashboard', requireAuth, requireProviderOwnership, controller.getProviderDashboard);
 
@@ -75,7 +99,7 @@ router.get('/provider/:providerId/dashboard', requireAuth, requireProviderOwners
 router.put('/provider/:providerId', requireAuth, requireProviderOwnership, controller.updateProvider);
 
 // Add credential
-router.post('/provider/:providerId/credentials', requireAuth, requireProviderOwnership, controller.addCredential);
+router.post('/provider/:providerId/credentials', requireAuth, requireProviderOwnership, validate(addCredentialSchema), controller.addCredential);
 
 // Get provider bookings
 router.get('/provider/:providerId/bookings', requireAuth, requireProviderOwnership, controller.getProviderBookings);

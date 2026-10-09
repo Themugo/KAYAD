@@ -2,7 +2,6 @@ import asyncHandler from '../../middleware/asyncHandler.js';
 import { protect, adminOnly } from '../../middleware/auth.js';
 import { getSupabase } from '../../utils/supabase.js';
 import { AppError } from '../../utils/AppError.js';
-import { initiatePayment } from '../../services/paymentService.js';
 import { getIO } from '../../utils/io.js';
 import Car from '../../models/Car.js';
 import User from '../../models/User.js';
@@ -37,6 +36,21 @@ async function assertAccess(inspection, user) {
   throw new AppError('Access denied', 403);
 }
 
+// The performing party must be identifiable from authoritative data: the inspector's display name
+// and the independent business (inspection_providers) they work as. Never email, phone or other PII.
+async function businessNamesByUser(userIds) {
+  const ids = [...new Set((userIds || []).filter(Boolean).map(String))];
+  if (!ids.length) return new Map();
+  const { data, error } = await getSupabase().from('inspection_providers').select('user_id,company_name,trading_name').in('user_id', ids);
+  if (error) return new Map();
+  return new Map((data || []).map((r) => [String(r.user_id), r.trading_name || r.company_name || null]));
+}
+function publicInspector(user, businessName) {
+  if (!user) return null;
+  const id = user.id || user._id;
+  return { id, _id: id, name: user.name, businessName: businessName || null };
+}
+
 function legacyOrder(inspection, car, buyer = null, inspector = null) {
   const notes = (() => { try { return JSON.parse(inspection.notes || '{}'); } catch { return {}; } })();
   return {
@@ -61,7 +75,9 @@ function legacyOrder(inspection, car, buyer = null, inspector = null) {
     location: notes.location || null,
     checkoutRequestID: notes.checkoutRequestID || null,
     checklist: inspection.checklist || [],
-    overallScore: inspection.overall_score || 0,
+    // Stage 15: null (not 0) until an inspector has recorded a score - a pending request has no score, and
+    // clients show "0/100" for a defined number.
+    overallScore: inspection.overall_score ?? null,
     conditionRating: inspection.condition_rating || 'fair',
     inspectorNotes: inspection.inspector_notes || '',
     images: inspection.evidence || [],
@@ -74,10 +90,38 @@ function legacyOrder(inspection, car, buyer = null, inspector = null) {
   };
 }
 
+// INSPECTION EXPERIENCE CONVERGENCE (Stage 15): listMine used to return the raw
+// `vehicle_inspections` rows while every other endpoint in this file
+// (createOrder, getById, getByCar, assign, start, submit) returns legacyOrder().
+// The buyer client (src/services/inspectionApi.ts::BackendInspectionOrder) is
+// written against the legacyOrder shape, so the buyer's own order list could
+// never show the vehicle, fee, score or inspector notes. The list now uses the
+// same projection. Scope is unchanged (own rows only, requester_id = caller);
+// the projection omits the raw `notes` blob (which carried the phone number).
+// Only the assigned inspector's id and display name are exposed, never email.
 export const listMine = asyncHandler(async (req, res) => {
   const { data, error } = await getSupabase().from('vehicle_inspections').select('*').eq('requester_id', req.user.id).order('created_at', { ascending: false });
   if (error) throw new AppError(error.message, 500);
-  res.json({ success: true, orders: data || [] });
+  const rows = data || [];
+  const carIds = [...new Set(rows.map((row) => row.car_id).filter(Boolean).map(String))];
+  const inspectorIds = [...new Set(rows.map((row) => row.inspector_id).filter(Boolean).map(String))];
+  const [carEntries, inspectorEntries] = await Promise.all([
+    Promise.all(carIds.map(async (id) => [id, await Car.findById(id).catch(() => null)])),
+    Promise.all(inspectorIds.map(async (id) => [id, await User.findById(id).catch(() => null)])),
+  ]);
+  const cars = new Map(carEntries);
+  const inspectors = new Map(inspectorEntries);
+  const businesses = await businessNamesByUser(inspectorIds);
+  const orders = rows.map((row) => {
+    const inspector = inspectors.get(String(row.inspector_id));
+    return legacyOrder(
+      row,
+      cars.get(String(row.car_id)) || null,
+      null,
+      inspector ? publicInspector(inspector, businesses.get(String(row.inspector_id))) : null,
+    );
+  });
+  res.json({ success: true, orders });
 });
 
 export const createOrder = asyncHandler(async (req, res) => {
@@ -98,8 +142,21 @@ export const createOrder = asyncHandler(async (req, res) => {
     }
   } catch {}
 
-  const payment = await initiatePayment({ userId: req.user.id, carId, type: 'inspection', amount: fee, phone, metadata: { service: 'inspection', canonical: true } });
-  const notes = JSON.stringify({ fee, payment: payment._id || payment.id || null, checkoutRequestID: payment.checkoutID || payment.checkoutRequestID || null, phone, location });
+  // INSPECTION EXPERIENCE CONVERGENCE (Stage 15) - D1/D2: this used to call
+  // initiatePayment({ type: 'inspection', metadata: { service, canonical } }),
+  // i.e. send the customer an M-Pesa prompt for the flat fee. That charge can
+  // never be settled: the payment callback's inspection branch requires
+  // payment.metadata.bookingId and throws "Inspection payment is missing its
+  // booking reference" otherwise (services/paymentCallback.service.js), and the
+  // settlement RPC kayad_process_inspection_payment_atomic only operates on
+  // inspection_bookings, not vehicle_inspections. The result of initiatePayment
+  // was also never checked, so an invalid phone number or an in-flight payment
+  // still created the inspection. A request must not take money KAYAD cannot
+  // attribute, so this request records the order and the quoted fee only; it
+  // does NOT charge. Payment for a KAYAD vehicle inspection needs a
+  // vehicle_inspections settlement path (RPC + callback branch) before it can
+  // be re-enabled - see INSPECTION_EXPERIENCE_CONVERGENCE_REPORT.md.
+  const notes = JSON.stringify({ fee, payment: null, checkoutRequestID: null, phone, location });
   const { data: inspection, error } = await getSupabase().from('vehicle_inspections').insert({ car_id: carId, requester_id: req.user.id, status: 'requested', notes }).select('*').single();
   if (error) throw new AppError(error.message, 500);
 
@@ -108,7 +165,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   const chatId = bridge?.chatId || null;
   if (getIO()) getIO().to(`user_${req.user.id}`).emit('inspectionUpdated', { inspectionId: inspection.id, status: 'pending_payment', digitalInspectionId: inspection.id, chatId });
   await emitCommunication({ userId: req.user.id, eventType: COMMUNICATION_EVENTS.INSPECTION_BOOKED, title: 'Inspection booked', message: `Your vehicle inspection for ${car.title || 'the vehicle'} has been booked.`, channels: ['in_app', 'email', 'sms', 'whatsapp'], metadata: { inspectionId: inspection.id, carId } }).catch(() => {});
-  res.json({ success: true, order: legacyOrder({ ...inspection, chat_id: chatId }, car), checkoutRequestID: payment.checkoutID || payment.checkoutRequestID });
+  res.json({ success: true, order: legacyOrder({ ...inspection, chat_id: chatId }, car), checkoutRequestID: null });
 });
 
 export const getById = asyncHandler(async (req, res) => {
@@ -119,7 +176,8 @@ export const getById = asyncHandler(async (req, res) => {
     User.findById(inspection.requester_id).catch(() => null),
     inspection.inspector_id ? User.findById(inspection.inspector_id).catch(() => null) : null,
   ]);
-  res.json({ success: true, order: legacyOrder(inspection, car, buyer, inspector) });
+  const businesses = await businessNamesByUser([inspection.inspector_id]);
+  res.json({ success: true, order: legacyOrder(inspection, car, buyer, publicInspector(inspector, businesses.get(String(inspection.inspector_id)))) });
 });
 
 export const getByCar = asyncHandler(async (req, res) => {
@@ -127,7 +185,8 @@ export const getByCar = asyncHandler(async (req, res) => {
   if (error) throw new AppError(error.message, 500);
   if (!inspection) return res.json({ success: true, inspection: null });
   const [car, inspector] = await Promise.all([Car.findById(inspection.car_id).catch(() => null), inspection.inspector_id ? User.findById(inspection.inspector_id).catch(() => null) : null]);
-  res.json({ success: true, inspection: legacyOrder(inspection, car, null, inspector) });
+  const businesses = await businessNamesByUser([inspection.inspector_id]);
+  res.json({ success: true, inspection: legacyOrder(inspection, car, null, publicInspector(inspector, businesses.get(String(inspection.inspector_id)))) });
 });
 
 export const assign = asyncHandler(async (req, res) => {
@@ -136,6 +195,13 @@ export const assign = asyncHandler(async (req, res) => {
   if (inspection.status !== 'requested') return res.status(400).json({ success: false, message: 'Inspection must be requested before assignment' });
   const { inspectorId } = req.body;
   if (!inspectorId) return res.status(400).json({ success: false, message: 'inspectorId required' });
+  // Eligibility is enforced here, not only in a badge: the inspector must be the owner of an ACTIVE,
+  // verified provider. A suspended, unverified or unknown inspector cannot be assigned.
+  const { data: perfProvider, error: perfError } = await getSupabase().from('inspection_providers').select('id,status,verification_status,lifecycle_stage').eq('user_id', inspectorId).limit(1).maybeSingle();
+  if (perfError) throw new AppError(perfError.message, 500);
+  if (!perfProvider || perfProvider.lifecycle_stage !== 'ACTIVE' || perfProvider.status !== 'active' || perfProvider.verification_status !== 'verified') {
+    return res.status(409).json({ success: false, message: 'That inspector is not an active, verified provider and cannot be assigned' });
+  }
   // STAGE 2 API CONTRACT CONVERGENCE FIX: this re-set status to 'requested'
   // (a no-op, since the precondition above already requires it to be
   // 'requested') instead of ever advancing it. Two existing, already-shipped
@@ -192,8 +258,28 @@ export const submit = asyncHandler(async (req, res) => {
   res.json({ success: true, order: legacyOrder(data) });
 });
 
+// Assignable inspectors for the admin who assigns a KAYAD inspection (Product A). Built from the single
+// provider network: only users who own an ACTIVE, verified provider are returned, so a suspended or
+// unverified inspector can never be offered here (and assign() re-checks the same rule server-side).
 export const availableInspectors = asyncHandler(async (req, res) => {
-  const inspectors = await User.find({ role: 'ghost_checker', isInspector: true }).select('name email phone locationCity inspectionSpecialty averageRating completedChecks').lean();
+  const sb = getSupabase();
+  const { data: providers, error } = await sb.from('inspection_providers')
+    .select('id,user_id,company_name,trading_name,county,town')
+    .eq('status', 'active').eq('verification_status', 'verified').eq('lifecycle_stage', 'ACTIVE')
+    .not('user_id', 'is', null).limit(200);
+  if (error) throw new AppError(error.message, 500);
+  const ids = [...new Set((providers || []).map((p) => p.user_id).filter(Boolean))];
+  let users = [];
+  if (ids.length) {
+    const res2 = await sb.from('users').select('id,name,email,phone').in('id', ids);
+    if (res2.error) throw new AppError(res2.error.message, 500);
+    users = res2.data || [];
+  }
+  const byId = new Map(users.map((u) => [String(u.id), u]));
+  const inspectors = (providers || []).filter((p) => byId.has(String(p.user_id))).map((p) => {
+    const u = byId.get(String(p.user_id));
+    return { id: u.id, _id: u.id, name: u.name, email: u.email, phone: u.phone, businessName: p.trading_name || p.company_name, location: [p.town, p.county].filter(Boolean).join(', ') || null };
+  });
   res.json({ success: true, inspectors });
 });
 
