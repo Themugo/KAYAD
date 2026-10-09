@@ -1,0 +1,58 @@
+PASS  desktop guest: sign-in prompt, no case form
+PASS  desktop guest: no response/resolution time promises
+PASS  desktop guest: no support API call
+PASS  desktop guest: no horizontal scroll
+PASS  desktop guest: no page errors
+PASS  desktop customer: topics include service providers + something else, no insurance  Buying or listing a vehicle,Selling or my listings,Auctions and bidding,Inspections,Automotive service providers,Escrow and payment protection,Financing,Ownership transfer,My account and verification,Something is not working,Something else
+PASS  desktop customer: escrow topic shows an Escrow ID field
+PASS  desktop customer: submit disabled until valid
+PASS  desktop customer: draft preserved after a network failure
+PASS  desktop customer: retry reused the same idempotency key
+PASS  desktop customer: reference sent as a linked field, description untouched
+PASS  desktop customer: payload carries no priority/status/assignment
+PASS  desktop customer: exactly one case exists
+PASS  desktop customer: confirmation shows reference, no invented SLA
+PASS  desktop customer: reply appears in thread
+PASS  desktop customer: rating sent once as {rating, comment} and form disappears
+PASS  desktop customer: closed case offers no reply box
+PASS  desktop customer: no horizontal scroll
+PASS  desktop customer: no page errors
+PASS  desktop staff: no target compliance claimed when none configured
+PASS  desktop staff: internal note sent with isInternal=true
+PASS  desktop staff: resolve blocked without a note
+PASS  desktop staff: status change carries note + expected version
+PASS  desktop staff: no horizontal scroll
+PASS  desktop staff: no page errors
+PASS  mobile guest: sign-in prompt, no case form
+PASS  mobile guest: no response/resolution time promises
+PASS  mobile guest: no support API call
+PASS  mobile guest: no horizontal scroll
+PASS  mobile guest: no page errors
+PASS  mobile customer: topics include service providers + something else, no insurance  Buying or listing a vehicle,Selling or my listings,Auctions and bidding,Inspections,Automotive service providers,Escrow and payment protection,Financing,Ownership transfer,My account and verification,Something is not working,Something else
+PASS  mobile customer: escrow topic shows an Escrow ID field
+PASS  mobile customer: submit disabled until valid
+PASS  mobile customer: draft preserved after a network failure
+PASS  mobile customer: retry reused the same idempotency key
+PASS  mobile customer: reference sent as a linked field, description untouched
+PASS  mobile customer: payload carries no priority/status/assignment
+PASS  mobile customer: exactly one case exists
+PASS  mobile customer: confirmation shows reference, no invented SLA
+PASS  mobile customer: reply appears in thread
+PASS  mobile customer: rating sent once as {rating, comment} and form disappears
+PASS  mobile customer: closed case offers no reply box
+PASS  mobile customer: no horizontal scroll
+PASS  mobile customer: no page errors
+PASS  mobile staff: no target compliance claimed when none configured
+PASS  mobile staff: internal note sent with isInternal=true
+PASS  mobile staff: resolve blocked without a note
+PASS  mobile staff: status change carries note + expected version
+PASS  mobile staff: no horizontal scroll
+PASS  mobile staff: no page errors
+PASS  marketing staff: told they have no support access (server 403), sees no cases
+PASS  oversight: case is not fetched before a reason is given
+PASS  oversight: reason sent to the server
+PASS  oversight: internal notes absent
+PASS  oversight: no reply or status controls
+PASS  oversight: no page errors
+
+56/56 PASS

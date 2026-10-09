@@ -25,6 +25,13 @@ export async function assertStaffAssignable(providerId, staffId) {
   if (!staff || String(staff.provider_id) !== String(providerId)) {
     throw new AppError('Invalid inspector', 400);
   }
+  if (staff.affiliation_status !== 'confirmed') {
+    throw new AppError('Inspector affiliation is not confirmed with this business', 409);
+  }
+  const provider = await db.findById('inspection_providers', providerId);
+  if (!provider || provider.lifecycle_stage !== 'ACTIVE' || provider.status !== 'active' || provider.verification_status !== 'verified') {
+    throw new AppError('This business is not currently eligible to take jobs', 409);
+  }
   if (!staff.is_active || !staff.is_available) {
     throw new AppError('Inspector is inactive or unavailable', 409);
   }

@@ -3,6 +3,7 @@ import { Heart, ShoppingBag, ClipboardCheck, Loader2 } from 'lucide-react';
 import { getFavorites, BackendFavoriteCar } from '../../../services/favoriteApi';
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
 import { getMyInspections, BackendInspectionOrder } from '../../../services/inspectionApi';
+import { kayadStatusView } from '../../InspectionsView/inspectionJourney';
 import { getOwnershipDashboard, OwnershipVehicle } from '../../../services/ownershipApi';
 import type { UserProfile } from '../../../types';
 
@@ -168,9 +169,9 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
                   >
                     <div>
                       <p className="text-xs font-semibold text-[#176B87]">{insp.car?.title || 'Vehicle'}</p>
-                      <p className="text-[11px] text-slate-500 capitalize">{insp.status.replace('_', ' ')}</p>
+                      <p className="text-[11px] text-slate-500">{kayadStatusView(insp.status).label}</p>
                     </div>
-                    {insp.overallScore != null && (
+                    {insp.status === 'completed' && insp.overallScore != null && (
                       <p className="text-xs font-bold text-[#176B87]">{insp.overallScore}/100</p>
                     )}
                   </button>

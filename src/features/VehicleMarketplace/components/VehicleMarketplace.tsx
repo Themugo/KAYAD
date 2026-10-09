@@ -457,7 +457,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     let cancelled = false;
     getCars({ page: 1, limit: 100, featured: true, sort: 'newest' })
       .then((res) => {
-        if (!cancelled) setFeaturedVehicles(res.cars.map(mapBackendCarToVehicle));
+        if (!cancelled) setFeaturedVehicles((res.data || res.cars || []).map(mapBackendCarToVehicle));
       })
       .catch(() => {
         if (!cancelled) setFeaturedVehicles([]);
@@ -692,8 +692,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // Mobile presents ONE featured vehicle at a time (desktop keeps the pair).
   // Same canonical source list; only the presentation differs.
-  const [heroMobileIndex, setHeroMobileIndex] = useState(0);
-  useEffect(() => { setHeroMobileIndex(0); }, [heroSourceVehicles.map((vehicle) => vehicle.id).join('|')]);
+  // The active index is stored together with the hero list it belongs to and is
+  // derived (not reset in an effect): when the featured list changes the index
+  // is 0 on that very render, so a tap landing between the list paint and a
+  // deferred reset effect can never be silently discarded.
+  const heroMobileKey = heroSourceVehicles.map((vehicle) => vehicle.id).join('|');
+  const [heroMobileSlot, setHeroMobileSlot] = useState<{ key: string; index: number }>({ key: heroMobileKey, index: 0 });
+  const heroMobileIndex = heroMobileSlot.key === heroMobileKey ? heroMobileSlot.index : 0;
   // Direction of the last change (animation metadata only; the active slide is still heroMobileIndex).
   const heroMobileDirection = useRef<'next' | 'prev'>('next');
   const heroSwipeStart = useRef<{ x: number; y: number } | null>(null);
@@ -704,7 +709,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (normalized === heroMobileIndex % count) return;
     const forward = (normalized - (heroMobileIndex % count) + count) % count <= count / 2;
     heroMobileDirection.current = forward ? 'next' : 'prev';
-    setHeroMobileIndex(normalized);
+    setHeroMobileSlot({ key: heroMobileKey, index: normalized });
   };
   const onHeroSwipeStart = (event: React.TouchEvent) => {
     const touch = event.touches[0];
@@ -1170,7 +1175,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Make</label>
+            {/* The label follows its select: when the select is hidden by the sidebar the label stays in the grid cell (layout unchanged) but is invisible, so no orphaned "MAKE" caption remains. */}
+            <label className={`text-[10px] font-bold uppercase tracking-wide text-slate-400 ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
             {/* Fixed: this select was always visible regardless of the
                 sidebar, but the sidebar has its own Make selector too -
                 showing both at once above the lg: breakpoint is
@@ -1297,20 +1303,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-navy-700">
-                  <LayoutGrid className="h-3.5 w-3.5" /> Marketplace inventory
+                  <LayoutGrid className="h-3.5 w-3.5" /> {savedOnly ? 'Saved vehicles' : 'Marketplace inventory'}
                 </span>
                 <span className="text-[11px] font-semibold text-slate-400">{selectedCounty}</span>
               </div>
               <h2 className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-navy-900">
-                Vehicle Inventory
+                {/* The Saved destination reuses this grid but must identify itself as the buyer's saved list, not the full inventory. */}
+                {savedOnly ? 'Saved Vehicles' : 'Vehicle Inventory'}
                 {!isLoading && (
                   <span className="inline-flex items-center rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[11px] font-bold tracking-[0.02em] text-navy-700">
-                    {serverError || loadError ? 'Inventory unavailable' : `${serverTotal.toLocaleString()} vehicle${serverTotal === 1 ? '' : 's'}`}
+                    {serverError || loadError ? (savedOnly ? 'Saved vehicles unavailable' : 'Inventory unavailable') : `${serverTotal.toLocaleString()} vehicle${serverTotal === 1 ? '' : 's'}`}
                   </span>
                 )}
               </h2>
               <p className="mt-1 max-w-2xl text-xs sm:text-[13px] leading-relaxed text-slate-500">
-                Compare verified marketplace listings, inspection status, pricing and auction availability in one clear view.
+                {savedOnly ? 'The vehicles you have saved, with their inspection status, pricing and auction availability.' : 'Compare verified marketplace listings, inspection status, pricing and auction availability in one clear view.'}
               </p>
             </div>
 

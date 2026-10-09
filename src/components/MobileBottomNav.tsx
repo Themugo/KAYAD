@@ -56,9 +56,9 @@ export default function MobileBottomNav({
       },
     },
     // Same destinations as the desktop navigation: 'discovery' is the canonical
-    // Auction surface and 'inspections' is Pre-Purchase Inspection ("Inspection").
+    // Auction surface and 'inspections' is the Auto Services hub ("Services").
     { key: 'auction', label: 'Auction', icon: Gavel, action: () => onNavigate('discovery') },
-    { key: 'inspection', label: 'Inspection', icon: ShieldCheck, action: () => onNavigate('inspections') },
+    { key: 'inspection', label: 'Services', icon: ShieldCheck, action: () => onNavigate('inspections') },
     {
       key: 'menu',
       label: 'Menu',

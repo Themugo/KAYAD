@@ -21,9 +21,9 @@ export const getOperationsDashboard = async (req, res) => {
         {
           $facet: {
             pending: [{ $match: { status: "pending", createdAt: { $gte: today } } }, { $count: "count" }],
-            held: [{ $match: { status: "held", createdAt: { $gte: today } } }, { $count: "count" }],
+            held: [{ $match: { status: { $in: ["funded", "vehicle_confirmed", "delivered"] }, createdAt: { $gte: today } } }, { $count: "count" }],
             disputed: [{ $match: { status: "disputed", createdAt: { $gte: today } } }, { $count: "count" }],
-            stalled: [{ $match: { status: "held", createdAt: { $lt: yesterday }, updatedAt: { $lt: yesterday } } }, { $count: "count" }],
+            stalled: [{ $match: { status: { $in: ["funded", "vehicle_confirmed", "delivered"] }, createdAt: { $lt: yesterday }, updatedAt: { $lt: yesterday } } }, { $count: "count" }],
           },
         },
       ]),

@@ -175,7 +175,21 @@ export async function createOptionalEscrowForOutcome({ outcomeId, actorId, req =
   if (outcome.paymentStatus !== "paid") throw Object.assign(new Error("Winner payment must be received before escrow funding"), { status: 409 });
   if (outcome.escrowId) return outcome;
 
+  // Eligibility: the SAME authority the auction badge and the marketplace use
+  // (platform switch AND the seller's current capability AND the vehicle flag).
+  // Settlement mode alone is dealer-chosen configuration and is not authority
+  // to hold a buyer's money.
+  // Loaded on demand: these services pull in the platform-config readers, which
+  // the payment-deadline paths in this file do not need.
+  const { getEffectiveEscrowForCar } = await import("./escrowCapability.service.js");
+  const { resolveEscrowCustody } = await import("./escrowConfiguration.service.js");
+  const car = await findById("cars", outcome.carId, "escrowEnabled");
+  const eligible = await getEffectiveEscrowForCar({ carEscrowEnabled: car?.escrowEnabled, sellerId: outcome.organizerId });
+  if (!eligible) throw Object.assign(new Error("Escrow is not currently enabled for this seller and vehicle"), { status: 409, code: "ESCROW_NOT_ELIGIBLE" });
+  const custody = await resolveEscrowCustody({ amount: Number(outcome.paymentDueAmount ?? outcome.winningAmount) });
+
   const escrow = await create("escrows", {
+    ...custody,
     car: outcome.carId,
     buyer: outcome.winnerUserId,
     seller: outcome.organizerId,

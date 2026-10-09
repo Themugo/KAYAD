@@ -6,6 +6,7 @@ import db from './dbAdapter.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 import { incrementCounter } from '../../config/metrics.js';
+import { assertStaffAssignable } from './workforceService.js';
 
 /**
  * Generate booking reference
@@ -401,11 +402,8 @@ class BookingService {
       throw new AppError('Cannot assign inspector at this stage', 400);
     }
 
-    // Verify staff belongs to provider
-    const staff = await db.findById('inspection_staff', staffId);
-    if (!staff || staff.provider_id !== booking.provider_id) {
-      throw new AppError('Invalid inspector', 400);
-    }
+    // The inspector must be a confirmed, active member of an eligible business.
+    await assertStaffAssignable(booking.provider_id, staffId);
 
     await db.update('inspection_bookings', bookingId, {
       assigned_staff_id: staffId,

@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { buildAuthPath } from '../../utils/authIntent';
 import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -67,7 +68,7 @@ export const SellPage: FC = () => {
       // session here. Send the user to real registration to finish
       // creating their account instead of faking a login.
       setTimeout(() => {
-        navigate('/register');
+        navigate(buildAuthPath('register', { intent: 'seller' }));
       }, 1800);
     }, 1000);
   };
@@ -90,7 +91,7 @@ export const SellPage: FC = () => {
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed max-w-2xl mx-auto">
-            Connect directly with thousands of pre-verified buyers across Kenya. Benefit from CBK-regulated Escrow Vault payment protection, standardized 150-point inspection certification, and nationwide marketplace exposure.
+            Connect directly with thousands of pre-verified buyers across Kenya. Benefit from Escrow payment protection on approved listings, access to independent pre-purchase inspection, and nationwide marketplace exposure.
           </p>
 
           {/* Value Props Bar */}
@@ -114,7 +115,7 @@ export const SellPage: FC = () => {
             <div className="p-2.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-2">
               <FileCheck2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
               <div>
-                <span className="font-bold text-white block text-[11px]">150-Pt Audits</span>
+                <span className="font-bold text-white block text-[11px]">Inspections</span>
                 <span className="text-[9px] text-slate-300 block">Certified reports</span>
               </div>
             </div>
@@ -239,7 +240,7 @@ export const SellPage: FC = () => {
                   </li>
                   <li className="flex items-center gap-2.5 text-xs text-[#176B87] font-semibold">
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
-                    <span>CBK-regulated Escrow Vault payment protection</span>
+                    <span>Escrow payment protection on approved listings</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs text-[#176B87] font-semibold">
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
@@ -514,7 +515,7 @@ export const SellPage: FC = () => {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                 <p className="text-xs text-[#66808A] font-semibold flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-[#13B8A6]" />
-                  Protected under Central Bank of Kenya ring-fenced escrow guidelines
+                  Escrow is offered only to approved sellers and vehicles
                 </p>
 
                 <Button

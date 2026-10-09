@@ -129,26 +129,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
   // Reviews Data
   const reviewsList = useMemo(() => {
     if (!dealer) return [];
-    const base = dealer.reviews || [
-      {
-        id: 'r1',
-        buyerName: 'Hon. Peter Njuguna',
-        rating: 5,
-        date: '2026-07-20',
-        vehicleTitle: '2021 Toyota Land Cruiser Prado TX-L',
-        comment: 'Flawless transaction through KAYAD Escrow. Logbook delivered within 48 hours. Showroom quality service.',
-        verifiedPurchase: true
-      },
-      {
-        id: 'r2',
-        buyerName: 'Dr. Mary Atieno',
-        rating: 5,
-        date: '2026-07-14',
-        vehicleTitle: '2019 Mercedes-Benz E250 AMG Line',
-        comment: 'Cleanest yard on Mombasa Road. The 150-point inspection report matched every detail.',
-        verifiedPurchase: true
-      }
-    ];
+    // Only real reviews are shown. Two invented "verified purchase" reviews used to be substituted when a dealer had none.
+    const base = dealer.reviews || [];
 
     return [...base].sort((a, b) => {
       if (reviewsSortBy === 'highest') return b.rating - a.rating;
@@ -465,7 +447,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
           <div className="hidden lg:flex items-center gap-3 text-slate-500 font-semibold px-2">
             <span className="flex items-center gap-1 text-emerald-700">
-              <Lock className="w-3.5 h-3.5" /> Bank Escrow Vault Protected
+              <Lock className="w-3.5 h-3.5" /> Escrow available (approved listings)
             </span>
           </div>
         </div>
@@ -481,7 +463,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             <p className="text-2xl font-black text-[#176B87] font-display">
               {dealer.completedEscrowDeals || 7} <span className="text-xs text-emerald-600 font-bold">Closed</span>
             </p>
-            <p className="text-[10px] text-slate-500 font-medium">100% Protected through KAYAD</p>
+            <p className="text-[10px] text-slate-500 font-medium">Escrow where the listing shows it</p>
           </div>
 
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-1">
@@ -613,7 +595,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     className="rounded accent-[#176B87]"
                   />
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>150-Pt Inspected</span>
+                  <span>Inspected</span>
                 </label>
 
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#176B87]">
@@ -811,7 +793,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <strong className="text-white font-extrabold flex items-center gap-1 mb-0.5">
                     <Lock className="w-4 h-4 text-amber-400" /> Concise KAYAD Escrow Notice:
                   </strong>
-                  "This private sale is protected through KAYAD Escrow. Funds remain secure in a bank-backed vault until physical inspection and NTSA TIMS ownership transfer are successfully completed."
+                  "This private sale is protected through KAYAD Escrow. Where escrow applies, KAYAD records the payment as held until the buyer accepts the vehicle or a dispute is decided."
                 </div>
               )}
             </div>
@@ -841,9 +823,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <span>2. Escrow Protected</span>
                   </div>
                   <p className="text-slate-600 leading-relaxed text-[11px]">
-                    100% of purchase deposit is stored in bank-backed KAYAD Escrow Vault. Zero risk of upfront fraud.
+                    Where escrow applies, KAYAD records the deposit as held until release. Escrow does not remove all risk.
                   </p>
-                  <Badge variant="escrow" size="sm">✓ Bank Vault Holds Funds</Badge>
+                  <Badge variant="escrow" size="sm">Held in KAYAD escrow records</Badge>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
@@ -852,9 +834,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <span>3. Independent Inspection</span>
                   </div>
                   <p className="text-slate-600 leading-relaxed text-[11px]">
-                    Option to dispatch 150-point independent certified mechanic prior to fund release.
+                    Ask an independent, verified inspection provider to inspect the vehicle before you commit. KAYAD connects you; the provider carries out the inspection.
                   </p>
-                  <Badge variant="neutral" size="sm">✓ 150-Point Audit Ready</Badge>
+                  <Badge variant="neutral" size="sm">Independent inspection available</Badge>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
@@ -896,8 +878,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
                   { step: '1', title: 'Contact Seller', desc: 'Initiate encrypted in-platform chat to discuss vehicle details & schedule meet-up.', icon: <MessageSquare className="w-4 h-4 text-blue-600" /> },
-                  { step: '2', title: 'Book Pre-Purchase Inspection', desc: 'Request 150-point independent mechanic audit at a verified public inspection hub.', icon: <FileCheck className="w-4 h-4 text-emerald-600" /> },
-                  { step: '3', title: 'Escrow Deposit', desc: 'Deposit funds safely into bank-backed KAYAD Escrow Vault. Seller sees deposit locked.', icon: <Lock className="w-4 h-4 text-amber-500" /> },
+                  { step: '2', title: 'Book Pre-Purchase Inspection', desc: 'Request an independent inspection by a verified provider before you commit.', icon: <FileCheck className="w-4 h-4 text-emerald-600" /> },
+                  { step: '3', title: 'Escrow Deposit', desc: 'Pay into escrow where it applies; KAYAD marks it funded once verified.', icon: <Lock className="w-4 h-4 text-amber-500" /> },
                   { step: '4', title: 'Physical Inspection & Test Drive', desc: 'Meet seller at verified public hub, inspect car, test drive, and verify engine numbers.', icon: <Car className="w-4 h-4 text-[#176B87]" /> },
                   { step: '5', title: 'Logbook Transfer', desc: 'Execute instant electronic logbook transfer via NTSA TIMS portal.', icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" /> },
                   { step: '6', title: 'Seller Paid', desc: 'Click "Release Funds" in buyer portal. Escrow releases money to seller instantly.', icon: <Sparkles className="w-4 h-4 text-[#176B87]" /> }
@@ -930,11 +912,11 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
                   <p className="font-extrabold text-[#176B87] text-xs">Inspection Marketplace</p>
-                  <p className="text-[10px] text-slate-500">150-Point mechanic audit</p>
+                  <p className="text-[10px] text-slate-500">Independent verified providers</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
                   <p className="font-extrabold text-[#176B87] text-xs">Escrow Protection</p>
-                  <p className="text-[10px] text-slate-500">Bank vault security</p>
+                  <p className="text-[10px] text-slate-500">Escrow where approved</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-amber-200 space-y-1">
                   <p className="font-extrabold text-[#176B87] text-xs">Fraud Prevention</p>
@@ -979,6 +961,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
             {/* Reviews Cards */}
             <div className="space-y-3">
+              {reviewsList.length === 0 && <p className="bg-white p-6 rounded-2xl border border-slate-200 text-center text-sm text-slate-600">No reviews yet.</p>}
               {reviewsList.map((rev) => (
                 <div key={rev.id} className="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-2xs">
                   <div className="flex items-center justify-between">
@@ -1250,7 +1233,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                       if (dealerVehicles.length > 0) {
                         onStartEscrow(dealerVehicles[0]);
                       } else {
-                        setToastMessage('Escrow vault initialized for this deal!');
+                        setToastMessage('Escrow is arranged when you buy a listing that shows the Escrow badge.');
                       }
                     }}
                     className="w-full p-3.5 bg-[#176B87] hover:bg-[#B44E28] text-white rounded-xl font-bold flex items-center justify-between transition-colors shadow-sm text-left"
@@ -1259,7 +1242,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                       <Lock className="w-5 h-5 text-amber-300" />
                       <div>
                         <p className="font-extrabold">Start KAYAD Bank Escrow Purchase</p>
-                        <p className="text-[11px] text-amber-100">Locks deposit safely in bank vault until inspection is complete</p>
+                        <p className="text-[11px] text-amber-100">Deposit is recorded as held until you accept the vehicle</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-amber-300" />
@@ -1277,8 +1260,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <div className="flex items-center gap-3">
                       <FileCheck className="w-5 h-5 text-emerald-600" />
                       <div>
-                        <p className="font-extrabold">Book Independent 150-Point Inspection</p>
-                        <p className="text-[11px] text-emerald-800">Dispatch certified mechanic before releasing funds</p>
+                        <p className="font-extrabold">Book an independent inspection</p>
+                        <p className="text-[11px] text-emerald-800">Carried out by an independent verified provider</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-emerald-600" />

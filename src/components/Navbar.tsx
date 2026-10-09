@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Car,
@@ -31,7 +31,7 @@ import {
 import { UserProfile } from '../types';
 import { useBranding } from '../context/BrandingContext';
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
-import { NAV_PRIMARY, visibleChildren, type NavPrimary } from './navigation/navConfig';
+import { applyNavigationConfig, visibleChildren, type NavPrimary } from './navigation/navConfig';
 import '../styles/kayad-navigation.css';
 
 interface NavbarProps {
@@ -72,7 +72,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   unreadCount = 0,
   authLoading = false,
 }) => {
-  const { branding } = useBranding();
+  const { branding, navigation } = useBranding();
+  // Admin-controlled presentation state over the code-owned destinations;
+  // falls back to the canonical navigation for any missing/invalid config.
+  const navItems = useMemo(() => applyNavigationConfig(navigation), [navigation]);
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
@@ -264,7 +267,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             destinations only (see navigation/navConfig.ts). */}
         <nav className="kayad-navfield" aria-label="Primary">
           <ul>
-            {NAV_PRIMARY.map((item) => {
+            {navItems.map((item) => {
               const children = visibleChildren(item, signedIn);
               const hasChildren = children.length > 0;
               const isOpen = openMenu === item.id;
@@ -587,7 +590,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           className="w-full text-left px-4 py-1.5 hover:bg-emerald-100/70 flex items-center gap-2.5 font-bold text-emerald-900"
                         >
                           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                          <span>Pre-Purchase Inspection OS</span>
+                          <span>Inspections</span>
                         </button>
                         <button
                           onClick={() => handleNavSelect('inspections')}
@@ -601,7 +604,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           className="w-full text-left px-4 py-1.5 hover:bg-emerald-100/70 flex items-center gap-2.5 font-bold text-emerald-900"
                         >
                           <FileText className="w-4 h-4 text-emerald-600" />
-                          <span>150-Point Reports</span>
+                          <span>Inspection reports</span>
                         </button>
                       </div>
                     )}
@@ -701,7 +704,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <section className="mb-4" aria-labelledby="kayad-drawer-explore">
                   <div className="mb-2 flex items-center justify-between px-1"><span id="kayad-drawer-explore" className="text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Explore KAYAD</span></div>
                   <nav aria-label="Primary">
-                    {NAV_PRIMARY.map((item) => {
+                    {navItems.map((item) => {
                       const Icon = item.icon;
                       const active = isSectionActive(item);
                       const children = visibleChildren(item, signedIn);

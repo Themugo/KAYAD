@@ -32,14 +32,14 @@ expect(
 expect(
   "C2 password reset token hashing",
   authController.includes("resetToken: hashToken(token)") &&
-    authController.includes("resetTokenExpire: { $gt: Date.now() }"),
+    /resetTokenExpire: \{ \$gt: (Date\.now\(\)|new Date\(\)) \}/.test(authController),
   "reset token is hashed at rest and expiry is enforced",
 );
 
 expect(
   "C1 email verification token hashing",
   authController.includes("emailVerifyToken: hashToken(token)") &&
-    authController.includes("emailVerifyExpire: { $gt: Date.now() }"),
+    /emailVerifyExpire: \{ \$gt: (Date\.now\(\)|new Date\(\)) \}/.test(authController),
   "verification token is hashed at rest and expiry is enforced",
 );
 

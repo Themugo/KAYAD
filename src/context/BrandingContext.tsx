@@ -40,6 +40,8 @@ interface BrandingContextValue {
   branding: Branding;
   loading: boolean;
   hydrated: boolean;
+  /** Raw admin navigation presentation state from the public config (unvalidated; resolved defensively by applyNavigationConfig). */
+  navigation: unknown;
   // Helper to get computed CSS variables
   getCSSVariables: () => Record<string, string>;
 }
@@ -87,6 +89,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
   const [branding, setBranding] = useState<Branding | null>(null);
   const [loading, setLoading] = useState(true);
   const [hydrated, setHydrated] = useState(false);
+  const [navigation, setNavigation] = useState<unknown>(null);
 
   // Hydration guard - prevent flash on SSR/client mismatch
   useEffect(() => {
@@ -112,6 +115,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
       .then(cfg => {
         const configBranding = cfg.config?.branding || cfg.branding;
         setBranding({ ...DEFAULT_BRANDING, ...configBranding });
+        setNavigation(cfg.config?.navigation ?? cfg.navigation ?? null);
         setLoading(false);
       })
       .catch(() => {
@@ -155,8 +159,9 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     branding: branding || DEFAULT_BRANDING,
     loading,
     hydrated,
+    navigation,
     getCSSVariables: branding ? () => getCSSVariables(branding) : () => getCSSVariables(DEFAULT_BRANDING),
-  }), [branding, loading, hydrated]);
+  }), [branding, loading, hydrated, navigation]);
 
   // Render immediately with the local default palette; public configuration
   // hydrates after mount without leaving the entire application blank.

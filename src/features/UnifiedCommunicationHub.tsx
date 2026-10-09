@@ -331,7 +331,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         return { icon: <Gavel className="w-4 h-4 text-[#176B87]" />, badgeBg: 'bg-[#176B87]/10 text-[#176B87] border-[#176B87]/20', label: 'Live Auction' };
       case 'inspection':
       case 'inspections':
-        return { icon: <ClipboardCheck className="w-4 h-4 text-emerald-600" />, badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: '150-Pt Audit' };
+        return { icon: <ClipboardCheck className="w-4 h-4 text-emerald-600" />, badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'Inspection' };
       case 'finance':
         return { icon: <Landmark className="w-4 h-4 text-blue-600" />, badgeBg: 'bg-blue-50 text-blue-700 border-blue-200', label: 'Bank Finance' };
       case 'dealer':
@@ -355,7 +355,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     { id: 'purchase', label: 'Vehicle Purchases', icon: <Car className="w-3.5 h-3.5 text-emerald-600" /> },
     { id: 'escrow', label: 'Escrow Deals', icon: <Lock className="w-3.5 h-3.5 text-[#D96B43]" /> },
     { id: 'auctions', label: 'Live Auctions', icon: <Gavel className="w-3.5 h-3.5 text-[#176B87]" /> },
-    { id: 'inspections', label: '150-Pt Audits', icon: <ClipboardCheck className="w-3.5 h-3.5 text-emerald-500" /> },
+    { id: 'inspections', label: 'Inspections', icon: <ClipboardCheck className="w-3.5 h-3.5 text-emerald-500" /> },
     { id: 'finance', label: 'Bank Financing', icon: <Landmark className="w-3.5 h-3.5 text-blue-500" /> },
     { id: 'support', label: 'Support Tickets', icon: <Ticket className="w-3.5 h-3.5 text-rose-500" /> }
   ];
@@ -394,7 +394,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               Marketplace Transaction Communications Hub
             </h1>
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Every conversation remains strictly attached to its active vehicle transaction context — linking CBK escrow vaults, NTSA TIMS logbook verification, 150-point technical audits, and bank financing under one command console.
+              Every conversation remains strictly attached to its active vehicle transaction context — linking escrow records, NTSA TIMS logbook verification, inspection records, and bank financing under one command console.
             </p>
           </div>
         </div>
@@ -783,7 +783,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                                   }`}>
                                     <div className="flex justify-between items-center">
                                       <span className="font-black text-emerald-700 flex items-center gap-1.5">
-                                        <ShieldCheck className="w-4 h-4 text-emerald-600" /> CBK Vault Receipt Confirmed
+                                        <ShieldCheck className="w-4 h-4 text-emerald-600" /> Receipt confirmed
                                       </span>
                                       <Badge variant="success" size="sm">Locked</Badge>
                                     </div>
@@ -1037,7 +1037,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               {activeThread.escrowSummary && (
                 <div className="p-4 space-y-2">
                   <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#D96B43]" /> CBK Trustee Escrow Vault
+                    <ShieldCheck className="w-4 h-4 text-[#D96B43]" /> Escrow record
                   </h4>
                   <div className="p-3 bg-[#D96B43]/10 border border-[#D96B43]/30 rounded-xl space-y-1.5">
                     <div className="flex justify-between text-xs">
@@ -1057,17 +1057,17 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               {activeThread.inspectionSummary && (
                 <div className="p-4 space-y-2">
                   <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <ClipboardCheck className="w-4 h-4 text-emerald-600" /> 150-Point Audit Status
+                    <ClipboardCheck className="w-4 h-4 text-emerald-600" /> Inspection status
                   </h4>
                   <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1.5">
                     <div className="flex justify-between text-xs">
-                      <span className="font-bold text-[#176B87]">Certified Score</span>
+                      <span className="font-bold text-[#176B87]">Inspection score</span>
                       <span className="font-black text-emerald-700 text-sm">{activeThread.inspectionSummary.score}/100 Passed</span>
                     </div>
                     <p className="text-[10px] text-slate-600 font-medium">Chassis: {activeThread.inspectionSummary.chassisStatus}</p>
                     {onNavigateToInspections && (
                       <Button variant="outline" size="sm" onClick={onNavigateToInspections} className="w-full text-[10px] py-1 bg-white">
-                        View 150-Pt Certificate
+                        View inspection
                       </Button>
                     )}
                   </div>

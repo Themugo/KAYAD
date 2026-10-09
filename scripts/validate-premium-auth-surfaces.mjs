@@ -6,8 +6,9 @@ const checks = [
   ['registration uses shared premium shell', fs.readFileSync('src/components/OnboardingFlow.tsx', 'utf8').includes('<PremiumAuthShell')],
   ['login remains canonical /login route', fs.readFileSync('src/App.tsx', 'utf8').includes("path === '/login'" )],
   ['registration remains canonical /register route', fs.readFileSync('src/App.tsx', 'utf8').includes("path === '/register'" )],
-  ['ad surface is present', fs.readFileSync('src/components/auth/PremiumAuthShell.jsx', 'utf8').includes('kayad-auth-ad-panel')],
-  ['ad surface is isolated from auth submission', !fs.readFileSync('src/components/auth/PremiumAuthShell.jsx', 'utf8').includes('onSubmit=')],
+  ['no advertising panel on auth screens (one task per screen)', !/kayad-auth-ad-panel|adTitle|adDescription/.test(fs.readFileSync('src/components/auth/PremiumAuthShell.jsx', 'utf8')) && !fs.readFileSync('src/index.css', 'utf8').includes('.kayad-auth-ad-panel')],
+  ['forgot, reset and verify pages use the shared shell', ['ForgotPasswordPage.tsx', 'ResetPasswordPage.tsx', 'VerifyEmailPage.tsx'].every((f) => fs.readFileSync('src/pages/' + f, 'utf8').includes('<PremiumAuthShell'))],
+  ['shell does not own form submission', !fs.readFileSync('src/components/auth/PremiumAuthShell.jsx', 'utf8').includes('onSubmit=')],
   ['responsive auth styling exists', fs.readFileSync('src/index.css', 'utf8').includes('@media (max-width: 900px)') && fs.readFileSync('src/index.css', 'utf8').includes('.kayad-auth-layout')],
   ['reduced motion support exists', fs.readFileSync('src/index.css', 'utf8').includes('prefers-reduced-motion')],
 ];

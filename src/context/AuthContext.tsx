@@ -10,6 +10,7 @@ import {
 } from '../services/authApi';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
 import { clearCSRFToken } from '../utils/csrf';
+import { loginPathFor } from '../utils/authIntent';
 import { STAFF_ROLES, isSellerRole, type User } from '../utils/authRoutes';
 import {
   getEffectivePermissions,
@@ -219,7 +220,7 @@ export function RequireAuth({ children }: RequireAuthProps) {
   const { isAuth, loading } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!isAuth) return <Navigate to="/login" state={{ from: loc }} replace />;
+  if (!isAuth) return <Navigate to={loginPathFor(loc)} replace />;
   return children;
 }
 
@@ -239,15 +240,17 @@ export function RequireSeller({ children }: RequireAuthProps) {
 
 export function RequireEmailVerified({ children }: RequireAuthProps) {
   const { isEmailVerified, loading } = useAuth();
+  const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!isEmailVerified) return <Navigate to="/login?verify=required" replace />;
+  if (!isEmailVerified) return <Navigate to={`${loginPathFor(loc)}${loginPathFor(loc).includes("?") ? "&" : "?"}verify=required`} replace />;
   return children;
 }
 
 export function RequireAdmin({ children }: RequireAuthProps) {
   const { isAdmin, isAuth, loading } = useAuth();
+  const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!isAuth) return <Navigate to="/login" replace />;
+  if (!isAuth) return <Navigate to={loginPathFor(loc)} replace />;
   if (!isAdmin) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
       <div style={{ fontSize:'4rem' }}>🚫</div>
@@ -291,7 +294,7 @@ export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
   const { user, isAdmin, isAuth, loading, can } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!isAuth) return <Navigate to="/login" replace />;
+  if (!isAuth) return <Navigate to={loginPathFor(loc)} replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
   const path = loc.pathname;

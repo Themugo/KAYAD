@@ -129,9 +129,9 @@ export default function DealerOnboarding() {
       });
 
       if (dealer) {
-        toast('Onboarding complete. Your verification is now with KAYAD.', 'success');
+        toast('Submitted. Your dealer account is now under review.', 'success');
       } else {
-        toast('Onboarding submitted. Your verification is now with KAYAD.', 'success');
+        toast('Submitted. Your dealer account is now under review.', 'success');
       }
       navigate('/dealer/onboarding?complete=1', { replace: true });
     } catch (error) {
@@ -146,16 +146,20 @@ export default function DealerOnboarding() {
   const completed = new URLSearchParams(window.location.search).get('complete') === '1';
 
   if (completed) {
+    // The `complete` query flag only chooses which screen to show; it is not proof of anything.
+    // What the account may do is decided by the approval status the server reports for it.
+    const approved = user.status === 'approved';
     return (
       <div className="page">
-        <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-          <h2>Onboarding Complete</h2>
-          <p style={{ color: 'rgba(15, 23, 42, 0.5)', marginBottom: 24 }}>
-            Your seller profile is all set up.
+        <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }} role="status">
+          <h2>{approved ? 'Your dealer account is approved' : 'Submitted for review'}</h2>
+          <p style={{ color: 'rgba(15, 23, 42, 0.6)', marginBottom: 24 }}>
+            {approved
+              ? 'You can now list vehicles and manage your inventory.'
+              : 'Thanks. KAYAD is reviewing your details and documents. You cannot list vehicles until your dealer account is approved, and we will email you the outcome. If we need anything else, you will find it here.'}
           </p>
-          <button onClick={() => navigate('/')} className="btn btn-gold">
-            Return to KAYAD
+          <button onClick={() => navigate(approved ? '/dealer' : '/')} className="btn btn-gold">
+            {approved ? 'Go to dealer dashboard' : 'Browse KAYAD while you wait'}
           </button>
         </div>
       </div>

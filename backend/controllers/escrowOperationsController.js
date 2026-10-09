@@ -11,6 +11,8 @@ import { runAnomalyDetection } from "../services/escrowAnomalyDetectionService.j
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { getSupabase } from "../utils/supabase.js";
 import { disburseB2C } from "../services/mpesaB2C.service.js";
+import { escrowStaffCapabilities } from "../utils/escrowAccess.js";
+import { staffActionsFor } from "../utils/escrowViewModel.js";
 
 const safeEscrow = (e) => ({
   id: e.id || e._id,
@@ -44,7 +46,7 @@ export const getEscrowOperationsDashboard = async (req, res) => {
     EscrowAnomaly.find({ status: { $in: ["detected", "under_review", "confirmed"] } }).sort({ createdAt: -1 }).limit(limit).lean(),
   ]);
 
-  const [fundedCount, vehicleConfirmedCount, deliveredCount, disputedCount, releasedCount, refundsPendingCount, unreconciledCount, anomalyCount, heldAgg] = await Promise.all([
+  const [fundedCount, vehicleConfirmedCount, deliveredCount, disputedCount, releasedCount, refundsPendingCount, unreconciledCount, anomalyCount, heldAgg, allHeldAgg] = await Promise.all([
     Escrow.countDocuments({ status: "funded" }),
     Escrow.countDocuments({ status: "vehicle_confirmed" }),
     Escrow.countDocuments({ status: "delivered" }),
@@ -54,6 +56,7 @@ export const getEscrowOperationsDashboard = async (req, res) => {
     ReconciliationReport.countDocuments({ "issueDetails.resolved": false }),
     EscrowAnomaly.countDocuments({ status: { $in: ["detected", "under_review", "confirmed"] } }),
     Escrow.aggregate([{ $match: { status: "funded" } }, { $group: { _id: null, total: { $sum: "$amount" } } }]),
+    Escrow.aggregate([{ $match: { status: { $in: ["funded", "vehicle_confirmed", "delivered", "disputed"] } } }, { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }]),
   ]);
 
   res.json({
@@ -69,7 +72,11 @@ export const getEscrowOperationsDashboard = async (req, res) => {
         reconciliation: { count: unreconciledCount, items: reconciliation.map(r => ({ id: r.id || r._id, status: r.status, createdAt: r.createdAt, issueCount: Array.isArray(r.issueDetails) ? r.issueDetails.filter(i => i.resolved === false).length : 0 })) },
         anomalies: { count: anomalyCount, items: anomalies.map(a => ({ id: a.id || a._id, category: a.category, severity: a.severity, status: a.status, escrow: a.escrow || null, createdAt: a.createdAt, summary: a.summary })) },
       },
+      // Platform-wide totals for staff. `scope` makes that explicit so the UI
+      // can never present them as a customer's own balance.
+      totals: { scope: "platform", currency: "KES", heldAmount: Number(allHeldAgg[0]?.total || 0), heldCount: Number(allHeldAgg[0]?.count || 0) },
       operator: {
+        can: escrowStaffCapabilities(req.user),
         role: req.user.role,
         permissions: req.user.permissions || req.user.customPermissions || [],
       },
@@ -89,7 +96,7 @@ export const getEscrowOperationsCase = async (req, res) => {
     getSupabase().from("dealer_payouts").select("id,status,amount,net_amount,conversation_id,transaction_id,failure_reason,metadata").eq("escrow", req.params.id).maybeSingle().then(r => r.data || null),
   ]);
   const caseEscrow = { ...escrow, refund, payout };
-  res.json({ success: true, data: { escrow: safeEscrow(caseEscrow), timeline: audits.map(a => ({ id: a.id || a._id, action: a.action, actor: a.performedByName || "Operator", role: a.performedByRole, timestamp: a.timestamp, reason: a.reason || null, notes: a.notes || null, stateChanges: a.stateChanges || {} })), anomalies, reconciliation } });
+  res.json({ success: true, data: { escrow: { ...safeEscrow(caseEscrow), staffActions: staffActionsFor(caseEscrow, escrowStaffCapabilities(req.user), { refund, payout }) }, timeline: audits.map(a => ({ id: a.id || a._id, action: a.action, actor: a.performedByName || "Operator", role: a.performedByRole, timestamp: a.timestamp, reason: a.reason || null, notes: a.notes || null, stateChanges: a.stateChanges || {} })), anomalies, reconciliation } });
 };
 
 export const initiateEscrowPayout = async (req, res) => {

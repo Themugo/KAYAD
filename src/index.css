@@ -339,26 +339,6 @@
 .kayad-auth-alert p { margin: 5px 0 11px; font-size: 11px; line-height: 1.55; color: #806c3b; }
 .kayad-auth-alert-button { min-height: 39px; padding: 0 13px; border: 1px solid #e6cd86; border-radius: 10px; background: white; color: #725817; font-size: 11px; font-weight: 900; cursor: pointer; }
 .kayad-auth-alert-button:disabled { opacity: .6; }
-.kayad-auth-ad-panel { min-height: 650px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; border-radius: 30px; border: 1px solid rgba(255,255,255,.55); background: linear-gradient(145deg, #0a3340 0%, #104c5d 45%, #08756f 100%); color: white; padding: 28px; box-shadow: 0 30px 80px rgba(10,51,64,.16); }
-.kayad-auth-ad-panel::before { content: ''; position: absolute; width: 420px; height: 420px; border-radius: 50%; right: -180px; top: -160px; background: rgba(19,184,166,.19); filter: blur(5px); }
-.kayad-auth-ad-topline, .kayad-auth-ad-copy, .kayad-auth-ad-footer { position: relative; z-index: 2; }
-.kayad-auth-ad-topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.66); }
-.kayad-auth-ad-topline span:first-child { display: inline-flex; align-items: center; gap: 7px; }
-.kayad-auth-ad-dot { width: 7px; height: 7px; border-radius: 50%; background: #65e2cf; box-shadow: 0 0 0 5px rgba(101,226,207,.10); }
-.kayad-auth-ad-label { padding: 6px 9px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(255,255,255,.06); }
-.kayad-auth-ad-art { min-height: 290px; position: relative; display: grid; place-items: center; margin: 15px -10px 10px; overflow: hidden; }
-.kayad-auth-ad-glow { position: absolute; width: 260px; height: 150px; border-radius: 50%; background: rgba(101,226,207,.18); filter: blur(35px); transform: translateY(30px); }
-.kayad-auth-ad-grid { position: absolute; inset: 15% 0 0; opacity: .16; background-image: linear-gradient(rgba(255,255,255,.32) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.32) 1px, transparent 1px); background-size: 28px 28px; mask-image: linear-gradient(to bottom, transparent, black 35%, transparent); }
-.kayad-auth-car-silhouette { position: relative; color: rgba(255,255,255,.82); filter: drop-shadow(0 25px 28px rgba(0,0,0,.23)); transform: scale(1.15); }
-.kayad-auth-ad-badge { position: absolute; right: 12%; bottom: 16%; display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.15); border-radius: 10px; background: rgba(4,30,38,.5); backdrop-filter: blur(10px); font-size: 10px; font-weight: 800; }
-.kayad-auth-ad-copy { max-width: 440px; }
-.kayad-auth-ad-kicker { color: #77e3d4; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .14em; }
-.kayad-auth-ad-copy h2 { margin: 8px 0 9px; font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.02; letter-spacing: -.05em; font-weight: 900; }
-.kayad-auth-ad-copy p { margin: 0; color: rgba(255,255,255,.65); font-size: 12px; line-height: 1.7; }
-.kayad-auth-ad-footer { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 26px; padding-top: 17px; border-top: 1px solid rgba(255,255,255,.11); color: rgba(255,255,255,.58); font-size: 9px; font-weight: 800; }
-.kayad-auth-ad-footer > div { display: inline-flex; align-items: center; gap: 6px; }
-.kayad-auth-ad-link { display: inline-flex; align-items: center; gap: 4px; color: white; text-decoration: none; font-size: 10px; }
-.kayad-auth-ad-link:hover { color: #8be9dc; }
 .kayad-auth-footer { max-width: 1240px; margin: 17px auto 0; display: flex; justify-content: space-between; gap: 12px; color: #84969c; font-size: 9px; font-weight: 700; }
 .kayad-register-content { max-width: 720px; }
 .kayad-register-progress { color: #8a9a9f; }
@@ -368,17 +348,14 @@
 .kayad-register-complete > div { max-width: 560px; }
 @media (max-width: 900px) {
   .kayad-auth-layout { grid-template-columns: 1fr; }
-  .kayad-auth-ad-panel { min-height: 430px; }
-  .kayad-auth-ad-art { min-height: 180px; }
   .kayad-auth-card { min-height: 0; }
 }
 @media (max-width: 560px) {
   .kayad-auth-page { padding: 16px 12px 14px; }
   .kayad-auth-header { padding-bottom: 17px; }
   .kayad-auth-header-action > span { display: none; }
-  .kayad-auth-card, .kayad-auth-ad-panel { border-radius: 22px; padding: 22px; }
+  .kayad-auth-card { border-radius: 22px; padding: 22px; }
   .kayad-auth-intro h1 { font-size: 2.25rem; }
-  .kayad-auth-ad-panel { min-height: 390px; }
   .kayad-auth-footer { flex-wrap: wrap; justify-content: center; }
   .kayad-auth-footer span:last-child { display: none; }
   .kayad-register-role-grid { grid-template-columns: 1fr; }
@@ -402,20 +379,11 @@
 .kayad-auth-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; border-radius: 16px; }
 .kayad-auth-submit svg { transition: transform .18s ease; }
 .kayad-auth-submit:hover:not(:disabled) svg { transform: translateX(2px); }
-.kayad-auth-ad-panel { min-height: 620px; border-color: rgba(255,255,255,.20); background: linear-gradient(155deg, #082f3c 0%, #0b4858 48%, #086e69 100%); box-shadow: 0 34px 90px rgba(10,51,64,.18); }
-.kayad-auth-ad-art { min-height: 300px; margin-top: 10px; }
-.kayad-auth-ad-road { position: absolute; left: 2%; right: 2%; bottom: 5%; height: 92px; border-radius: 50%; background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(2,22,29,.35)); transform: perspective(250px) rotateX(58deg); box-shadow: 0 25px 50px rgba(0,0,0,.22); }
-.kayad-auth-ad-car { position: relative; z-index: 2; width: min(88%, 440px); transform: translateY(14px) rotate(-1deg); filter: drop-shadow(0 28px 24px rgba(0,0,0,.34)); transition: transform .45s ease; }
-.kayad-auth-ad-car img { display: block; width: 100%; height: auto; object-fit: contain; }
-.kayad-auth-ad-panel:hover .kayad-auth-ad-car { transform: translateY(8px) rotate(-1deg) scale(1.015); }
-.kayad-auth-ad-badge { z-index: 4; right: 9%; bottom: 11%; background: rgba(4,30,38,.66); }
-.kayad-auth-ad-copy h2 { font-size: clamp(1.75rem, 3vw, 2.65rem); }
 
 /* Premium hero stage: preserve the existing 390/420px footprint and behavior. */
 .kayad-homepage section:first-of-type .group { will-change: transform; }
 @media (prefers-reduced-motion: reduce) {
   .kayad-homepage section:first-of-type .group,
-  .kayad-auth-ad-car,
   .kayad-auth-submit svg { transition: none !important; }
 }
 
@@ -764,3 +732,39 @@
 body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-events: none; transform: translateY(18px); }
 .kayad-mobile-menu button { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) { .kayad-mobile-menu { animation: none; } body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { transform: none; transition: none; } }
+
+
+/* 2026-10-09 identity convergence: one focused task per screen. The former
+   advertising panel is gone; wide (registration) layouts get a "what happens
+   next" rail instead, and phones get a single column. */
+.kayad-auth-layout { grid-template-columns: minmax(0, 560px); justify-content: center; }
+.kayad-auth-layout[data-wide="true"] { grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); max-width: 1080px; justify-content: stretch; }
+.kayad-auth-card { min-height: 0; height: auto; }
+.kayad-auth-intro h1 { font-size: clamp(1.75rem, 3.4vw, 2.5rem); line-height: 1.05; }
+.kayad-auth-rail { align-self: start; position: sticky; top: 18px; border: 1px solid rgba(10,51,64,.09); border-radius: 24px; background: rgba(255,255,255,.72); padding: 22px; color: #25414b; }
+.kayad-auth-rail h2 { margin: 0 0 12px; font-size: 13px; font-weight: 900; color: var(--auth-ink); }
+.kayad-auth-rail ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: rail; }
+.kayad-auth-rail li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; font-size: 12px; line-height: 1.5; counter-increment: rail; }
+.kayad-auth-rail li::before { content: counter(rail); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #e7f4f1; color: var(--auth-brand); font-size: 11px; font-weight: 900; }
+.kayad-auth-rail li strong { display: block; color: var(--auth-ink); font-size: 12px; }
+.kayad-auth-rail p { margin: 14px 0 0; font-size: 11px; line-height: 1.55; color: #647983; }
+.kayad-auth-field-error { color: #b4233c; font-size: 11px; font-weight: 700; }
+.kayad-auth-input[aria-invalid="true"] { border-color: #d6455d; background: #fff7f8; }
+.kayad-auth-input:focus-visible, .kayad-auth-submit:focus-visible, .kayad-auth-secondary-action:focus-visible, .kayad-auth-password-toggle:focus-visible { outline: 3px solid rgba(19,184,166,.55); outline-offset: 2px; }
+.kayad-auth-submit, .kayad-auth-secondary-action, .kayad-auth-password-toggle, .kayad-auth-alert-button { min-height: 44px; }
+.kayad-auth-error { margin-bottom: 18px; padding: 13px 15px; border: 1px solid #f0c2c9; border-radius: 14px; background: #fff5f6; color: #8f1d31; font-size: 12px; font-weight: 700; line-height: 1.5; }
+.kayad-auth-notice { margin-bottom: 18px; padding: 13px 15px; border: 1px solid #cfe5e1; border-radius: 14px; background: #f2faf8; color: #14504b; font-size: 12px; line-height: 1.55; }
+.kayad-role-card { display: grid; gap: 4px; text-align: left; width: 100%; min-height: 96px; padding: 15px 16px; border: 1px solid #d7e4e2; border-radius: 16px; background: #fff; color: var(--auth-ink); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.kayad-role-card:hover { border-color: #9ccbc3; box-shadow: 0 10px 24px rgba(10,51,64,.07); }
+.kayad-role-card[aria-checked="true"] { border-color: var(--auth-ink); box-shadow: 0 0 0 2px var(--auth-ink); background: #f6fbfa; }
+.kayad-role-card:focus-visible { outline: 3px solid rgba(19,184,166,.55); outline-offset: 2px; }
+.kayad-role-card strong { font-size: 14px; font-weight: 900; }
+.kayad-role-card span { font-size: 12px; line-height: 1.5; color: #55707a; }
+.kayad-role-card em { font-style: normal; font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--auth-brand); }
+@media (max-width: 900px) {
+  .kayad-auth-layout[data-wide="true"] { grid-template-columns: minmax(0, 1fr); }
+  .kayad-auth-rail { position: static; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-role-card { transition: none; }
+}

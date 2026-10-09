@@ -14,7 +14,7 @@ export const WhyKayadComparison: FC = () => {
     {
       feature: 'Payment Security',
       traditional: 'Risky cash meetups or unsecured bank wires',
-      kayad: 'CBK-Regulated Bank Escrow Vault with OTP',
+      kayad: 'Escrow on approved listings, with a dispute process',
     },
     {
       feature: 'Vehicle History',

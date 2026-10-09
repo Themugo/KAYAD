@@ -82,7 +82,7 @@ const toAuctionResponse = (car) => ({
 
 const buildAuctionFilter = ({ status, search } = {}) => {
   const filter = {
-    deletedAt: null,
+    deletedAt: { $exists: false }, // soft-deleted vehicles are never public auctions (bare null is ignored by the adapter)
     auctionStatus: { $in: ["live", "ended"] },
   };
 
@@ -113,7 +113,7 @@ export const listAuctions = async (req, res) => {
       .sort((a, b) => Date.parse(a.config.startsAt) - Date.parse(b.config.startsAt));
     const pageRows = scheduled.slice(skip, skip + limit);
     const ids = pageRows.map((setup) => setup.car_id).filter(Boolean);
-    const cars = ids.length ? await Car.find({ deletedAt: null, id: { $in: ids } }).lean() : [];
+    const cars = ids.length ? await Car.find({ deletedAt: { $exists: false }, id: { $in: ids } }).lean() : [];
     const byId = new Map(cars.map((car) => [String(car.id), car]));
     const auctions = pageRows.map((setup) => {
       const car = byId.get(String(setup.car_id));
@@ -156,7 +156,7 @@ export const listAuctions = async (req, res) => {
 
 export const getAuction = async (req, res) => {
   const car = await Car.findById(req.params.id).populate("dealer", "name businessName avatar dealerApprovedAt dealerRating").lean();
-  if (!car || !["draft", "live", "ended"].includes(car.auctionStatus)) {
+  if (!car || car.deletedAt || !["draft", "live", "ended"].includes(car.auctionStatus)) {
     return res.status(404).json({ success: false, message: "Auction not found" });
   }
 
@@ -258,7 +258,7 @@ export const getMyAuctions = async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const skip = (page - 1) * limit;
   const filter = {
-    deletedAt: null,
+    deletedAt: { $exists: false },
     dealer: userId,
     auctionStatus: { $in: ["live", "ended"] },
   };
@@ -283,7 +283,7 @@ export const getActiveAuctions = async (req, res) => {
   const skip = (page - 1) * limit;
   const now = new Date().toISOString();
   const filter = {
-    deletedAt: null,
+    deletedAt: { $exists: false },
     auctionStatus: "live",
     allowBid: true,
     auctionStartTime: { $lte: now },

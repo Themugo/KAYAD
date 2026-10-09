@@ -1,393 +1,80 @@
-import SupportTicket from "../models/SupportTicket.js";
-import User from "../models/User.js";
-import { logError } from '../infrastructure/logging/index.js';
-import { emitCommunication, COMMUNICATION_EVENTS } from '../services/communicationEvents.service.js';
-import { getSupabase } from '../utils/supabase.js';
+import { logError } from "../infrastructure/logging/index.js";
+import { SupportError } from "../services/support/supportPolicy.js";
+import * as svc from "../services/support/supportCase.service.js";
+import { SUPPORT_CATEGORIES, reopenWindowDays } from "../services/support/supportPolicy.js";
 
-const canAccessTicket = (ticket, user) => {
-  const userId = String(user?.id || user?._id || '');
-  const ticketUserId = String(ticket?.user?.id || ticket?.user?._id || ticket?.user || '');
-  const role = String(user?.role || '').toLowerCase();
-  return Boolean(userId) && (userId === ticketUserId || ['admin', 'superadmin', 'support', 'staff'].includes(role));
-};
-
-// =============================
-// 🎫 CREATE SUPPORT TICKET
-// =============================
-
-export const createTicket = async (req, res) => {
+const wrap = (fn, failure) => async (req, res) => {
   try {
-    const { category, priority, subject, description, relatedEscrow, relatedCar, relatedPayment } = req.body;
-    const userId = req.user.id || req.user._id;
-
-    const ticket = await SupportTicket.create({
-      user: userId,
-      category,
-      priority,
-      subject,
-      description,
-      relatedEscrow,
-      relatedCar,
-      relatedPayment,
-      sla: {
-        firstResponseTarget: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
-        resolutionTarget: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-      },
-    });
-
-    const populatedTicket = await SupportTicket.findById(ticket._id).populate("user", "name email");
-
-    await emitCommunication({ userId, eventType: COMMUNICATION_EVENTS.SUPPORT_CASE_CREATED, title: "Support case created", message: `Your support case ${populatedTicket.ticketNumber || populatedTicket._id} has been created.`, channels: ["in_app", "email", "sms", "whatsapp"], metadata: { ticketId: populatedTicket._id, category, priority } }).catch(() => {});
-    res.json({ success: true, ticket: populatedTicket });
+    await fn(req, res);
   } catch (error) {
-    logError("Error creating ticket:", error);
-    res.status(500).json({ success: false, message: "Failed to create ticket" });
+    if (error instanceof SupportError) {
+      return res.status(error.status).json({ success: false, code: error.code, message: error.message });
+    }
+    logError(`Support: ${failure}`, { message: error?.message, code: error?.code });
+    res.status(500).json({ success: false, message: failure });
   }
 };
 
-// =============================
-// 📋 GET ALL TICKETS (ADMIN - Phase 3 Query Optimization)
-// =============================
+// ---- customer ----
+export const getSupportConfig = wrap(async (_req, res) => {
+  res.json({ success: true, categories: SUPPORT_CATEGORIES, reopenWindowDays: reopenWindowDays(), attachments: false });
+}, "Failed to load support options");
 
-export const getAllTickets = async (req, res) => {
-  try {
-    const { status, priority, category, assignedTo } = req.query;
-    const filter = {};
+export const createTicket = wrap(async (req, res) => {
+  const out = await svc.createCase(req.user, { ...(req.body || {}), idempotencyKey: req.body?.idempotencyKey ?? req.get("Idempotency-Key") });
+  res.status(out.deduplicated ? 200 : 201).json({ success: true, ...out, ticket: out.case });
+}, "Failed to create support case");
 
-    if (status) filter.status = status;
-    if (priority) filter.priority = priority;
-    if (category) filter.category = category;
-    if (assignedTo) filter.assignedTo = assignedTo;
+export const getUserTickets = wrap(async (req, res) => {
+  const out = await svc.listOwnCases(req.user, req.query);
+  res.json({ success: true, ...out, tickets: out.cases });
+}, "Failed to load your support cases");
 
-    const tickets = await SupportTicket.find(filter)
-      .populate("user", "name email phone")
-      .populate("assignedTo", "name email")
-      .populate("escalatedTo", "name email")
-      .populate("relatedEscrow", "amount status buyer seller")
-      .populate("relatedCar", "title price brand model year images")
-      .select("user status priority category subject createdAt sla assignedTo escalatedTo relatedEscrow relatedCar")
-      .sort({ createdAt: -1 })
-      .limit(100);
+export const getTicket = wrap(async (req, res) => {
+  const c = await svc.getOwnCase(req.user, req.params.id);
+  res.json({ success: true, case: c, ticket: c });
+}, "Failed to load support case");
 
-    res.json({ success: true, tickets });
-  } catch (error) {
-    logError("Error getting tickets:", error);
-    res.status(500).json({ success: false, message: "Failed to get tickets" });
-  }
-};
+export const addMessage = wrap(async (req, res) => {
+  const out = await svc.customerReply(req.user, req.params.id, req.body);
+  res.json({ success: true, ...out, ticket: out.case });
+}, "Failed to send message");
 
-// =============================
-// 👤 GET USER TICKETS (Phase 3 Query Optimization)
-// =============================
+export const rateTicket = wrap(async (req, res) => {
+  const out = await svc.rateCase(req.user, req.params.id, req.body);
+  res.json({ success: true, ...out, ticket: out.case });
+}, "Failed to save rating");
 
-export const getUserTickets = async (req, res) => {
-  try {
-    const userId = req.user.id || req.user._id;
+// ---- staff ----
+export const staffQueue = wrap(async (req, res) => {
+  const out = await svc.listQueue(req.query);
+  res.json({ success: true, ...out, tickets: out.cases, capability: req.supportCapability });
+}, "Failed to load the support queue");
 
-    const tickets = await SupportTicket.find({ user: userId })
-      .populate("assignedTo", "name email")
-      .populate("relatedEscrow", "amount status")
-      .populate("relatedCar", "title price brand model year images")
-      .select("ticketNumber status priority category subject createdAt updatedAt sla assignedTo relatedEscrow relatedCar")
-      .sort({ createdAt: -1 });
+export const staffMetrics = wrap(async (req, res) => {
+  res.json({ success: true, metrics: await svc.supportMetrics({ days: req.query.days }) });
+}, "Failed to load support metrics");
 
-    res.json({ success: true, tickets });
-  } catch (error) {
-    logError("Error getting user tickets:", error);
-    res.status(500).json({ success: false, message: "Failed to get user tickets" });
-  }
-};
+export const staffTeam = wrap(async (_req, res) => {
+  res.json({ success: true, staff: await svc.listAssignableStaff() });
+}, "Failed to load support staff");
 
-// =============================
-// 📄 GET TICKET DETAILS (Phase 3 Query Optimization)
-// =============================
+export const staffGetCase = wrap(async (req, res) => {
+  const c = await svc.getStaffCase(req.params.id, req.user, req.supportCapability, req.query.reason);
+  res.json({ success: true, case: c, ticket: c, capability: req.supportCapability });
+}, "Failed to load support case");
 
-export const getTicket = async (req, res) => {
-  try {
-    const { ticketId } = req.params;
+export const staffReply = wrap(async (req, res) => {
+  const out = await svc.staffReply(req.user, req.params.id, req.body);
+  res.json({ success: true, ...out, ticket: out.case });
+}, "Failed to send reply");
 
-    const ticket = await SupportTicket.findById(ticketId)
-      .populate("user", "name email phone")
-      .populate("assignedTo", "name email")
-      .populate("escalatedTo", "name email")
-      .populate("messages.sender", "name email")
-      .populate("relatedEscrow", "amount status buyer seller")
-      .populate("relatedCar", "title price brand model year images")
-      .populate("relatedPayment", "amount status type")
-      .select("user ticketNumber status priority category subject description createdAt updatedAt sla assignedTo escalatedTo messages relatedEscrow relatedCar relatedPayment satisfactionRating resolutionNotes closedAt closedBy");
+export const staffUpdate = wrap(async (req, res) => {
+  const out = await svc.staffUpdate(req.user, req.params.id, req.body);
+  res.json({ success: true, ...out, ticket: out.case });
+}, "Failed to update support case");
 
-    if (!ticket) {
-      return res.status(404).json({ success: false, message: "Ticket not found" });
-    }
-    if (!canAccessTicket(ticket, req.user)) {
-      return res.status(403).json({ success: false, message: "You do not have access to this support ticket" });
-    }
-
-    res.json({ success: true, ticket });
-  } catch (error) {
-    logError("Error getting ticket:", error);
-    res.status(500).json({ success: false, message: "Failed to get ticket" });
-  }
-};
-
-// =============================
-// 💬 ADD MESSAGE TO TICKET (Phase 3 Query Optimization)
-// =============================
-
-export const addMessage = async (req, res) => {
-  try {
-    const { ticketId } = req.params;
-    const { content, isInternal = false, attachments = [] } = req.body;
-    const userId = req.user.id || req.user._id;
-    const userRole = req.user.role;
-
-    const ticket = await SupportTicket.findById(ticketId);
-    if (!ticket) return res.status(404).json({ success: false, message: "Ticket not found" });
-
-    if (!canAccessTicket(ticket, req.user)) {
-      return res.status(403).json({ success: false, message: "You do not have access to this support ticket" });
-    }
-
-    // Internal notes are operator-only; customers cannot create hidden
-    // messages by toggling a browser-supplied flag.
-    if (isInternal && !['admin', 'superadmin', 'support', 'staff'].includes(String(userRole || '').toLowerCase())) {
-      return res.status(403).json({ success: false, message: "Internal messages are restricted to support staff" });
-    }
-
-    const { data: message, error } = await getSupabase().rpc('kayad_append_support_message', {
-      p_ticket_id: String(ticketId),
-      p_sender_id: String(userId),
-      p_sender_role: String(userRole || 'user'),
-      p_content: String(content || ''),
-      p_is_internal: Boolean(isInternal),
-      p_attachments: Array.isArray(attachments) ? attachments : [],
-    });
-    if (error) throw error;
-
-    const updatedTicket = await SupportTicket.findById(ticketId)
-      .populate("user", "name email phone")
-      .populate("assignedTo", "name email")
-      .populate("escalatedTo", "name email")
-      .lean();
-
-    await emitCommunication({
-      userId: String(ticket.user),
-      eventType: COMMUNICATION_EVENTS.SUPPORT_CASE_UPDATED,
-      title: "Support case updated",
-      message: `Your support case has been updated to ${updatedTicket?.status || 'in_progress'}.`,
-      channels: ["in_app", "email", "sms", "whatsapp"],
-      metadata: { ticketId, status: updatedTicket?.status || 'in_progress' },
-    }).catch(() => {});
-
-    res.json({ success: true, message, ticket: updatedTicket });
-  } catch (error) {
-    logError("Error adding message:", error);
-    res.status(500).json({ success: false, message: "Failed to add message" });
-  }
-};
-
-// =============================
-// 🔄 UPDATE TICKET STATUS (Phase 3 Query Optimization)
-// =============================
-
-export const updateTicketStatus = async (req, res) => {
-  try {
-    const { ticketId } = req.params;
-    const { status, assignedTo, escalatedTo, priority } = req.body;
-    const userId = req.user.id || req.user._id;
-    const allowedStatuses = new Set(["open", "in_progress", "waiting_on_user", "waiting_on_internal", "escalated", "resolved", "closed"]);
-    const allowedPriorities = new Set(["low", "medium", "high", "urgent"]);
-    if (status !== undefined && !allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid support ticket status" });
-    if (priority !== undefined && !allowedPriorities.has(priority)) return res.status(400).json({ success: false, message: "Invalid support ticket priority" });
-
-    const ticket = await SupportTicket.findById(ticketId);
-    if (!ticket) {
-      return res.status(404).json({ success: false, message: "Ticket not found" });
-    }
-
-    if (status) ticket.status = status;
-    if (assignedTo) ticket.assignedTo = assignedTo;
-    if (escalatedTo) {
-      ticket.escalatedTo = escalatedTo;
-      ticket.status = "escalated";
-    }
-    if (priority) ticket.priority = priority;
-
-    // Update resolution SLA if closing
-    if (status === "resolved" || status === "closed") {
-      ticket.sla.resolutionActual = new Date();
-      ticket.sla.resolutionMet = ticket.sla.resolutionActual <= ticket.sla.resolutionTarget;
-      ticket.closedAt = new Date();
-      ticket.closedBy = userId;
-    }
-
-    await ticket.save();
-
-    // Use aggregation to avoid N+1 query
-    const updatedTicket = await SupportTicket.aggregate([
-      { $match: { _id: ticket._id } },
-      {
-        $project: {
-          user: 1,
-          status: 1,
-          priority: 1,
-          category: 1,
-          subject: 1,
-          description: 1,
-          createdAt: 1,
-          sla: 1,
-          assignedTo: 1,
-          escalatedTo: 1,
-          relatedEscrow: 1,
-          relatedCar: 1,
-          relatedPayment: 1,
-          satisfactionRating: 1,
-          resolutionNotes: 1,
-          closedAt: 1,
-          closedBy: 1,
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "assignedTo",
-          foreignField: "_id",
-          as: "assignedTo",
-        },
-      },
-      {
-        $unwind: { path: "$assignedTo", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "escalatedTo",
-          foreignField: "_id",
-          as: "escalatedTo",
-        },
-      },
-      {
-        $unwind: { path: "$escalatedTo", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $project: {
-          "assignedTo.name": 1,
-          "assignedTo.email": 1,
-          "escalatedTo.name": 1,
-          "escalatedTo.email": 1,
-          user: 1,
-          status: 1,
-          priority: 1,
-          category: 1,
-          subject: 1,
-          description: 1,
-          createdAt: 1,
-          sla: 1,
-          assignedTo: 1,
-          escalatedTo: 1,
-          relatedEscrow: 1,
-          relatedCar: 1,
-          relatedPayment: 1,
-          satisfactionRating: 1,
-          resolutionNotes: 1,
-          closedAt: 1,
-          closedBy: 1,
-        },
-      },
-    ]);
-
-    res.json({ success: true, ticket: updatedTicket[0] || ticket });
-  } catch (error) {
-    logError("Error updating ticket status:", error);
-    res.status(500).json({ success: false, message: "Failed to update ticket status" });
-  }
-};
-
-// =============================
-// ⭐ RATE TICKET SATISFACTION
-// =============================
-
-export const rateTicket = async (req, res) => {
-  try {
-    const { ticketId } = req.params;
-    const { rating, resolutionNotes } = req.body;
-    const userId = req.user.id || req.user._id;
-
-    const ticket = await SupportTicket.findById(ticketId);
-    if (!ticket) {
-      return res.status(404).json({ success: false, message: "Ticket not found" });
-    }
-
-    if (ticket.user.toString() !== userId.toString()) {
-      return res.status(403).json({ success: false, message: "Not authorized to rate this ticket" });
-    }
-
-    ticket.satisfactionRating = rating;
-    ticket.resolutionNotes = resolutionNotes;
-
-    await ticket.save();
-
-    res.json({ success: true, ticket });
-  } catch (error) {
-    logError("Error rating ticket:", error);
-    res.status(500).json({ success: false, message: "Failed to rate ticket" });
-  }
-};
-
-// =============================
-// 📊 GET SUPPORT ANALYTICS
-// =============================
-
-export const getSupportAnalytics = async (req, res) => {
-  try {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-
-    const [totalTickets, openTickets, resolvedTickets, escalatedTickets] = await Promise.all([
-      SupportTicket.countDocuments({ createdAt: { $gte: thirtyDaysAgo } }),
-      SupportTicket.countDocuments({ status: "open", createdAt: { $gte: thirtyDaysAgo } }),
-      SupportTicket.countDocuments({ status: "resolved", createdAt: { $gte: thirtyDaysAgo } }),
-      SupportTicket.countDocuments({ status: "escalated", createdAt: { $gte: thirtyDaysAgo } }),
-    ]);
-
-    const slaMetrics = await SupportTicket.aggregate([
-      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
-      {
-        $group: {
-          _id: null,
-          firstResponseMetCount: { $sum: { $cond: ["$sla.firstResponseMet", 1, 0] } },
-          resolutionMetCount: { $sum: { $cond: ["$sla.resolutionMet", 1, 0] } },
-          avgFirstResponseTime: { $avg: { $subtract: ["$sla.firstResponseActual", "$sla.firstResponseTarget"] } },
-          avgResolutionTime: { $avg: { $subtract: ["$sla.resolutionActual", "$sla.resolutionTarget"] } },
-        },
-      },
-    ]);
-
-    const categoryBreakdown = await SupportTicket.aggregate([
-      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
-      { $group: { _id: "$category", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-    ]);
-
-    res.json({
-      success: true,
-      analytics: {
-        totalTickets,
-        openTickets,
-        resolvedTickets,
-        escalatedTickets,
-        slaMetrics: slaMetrics[0] || {
-          firstResponseMetCount: 0,
-          resolutionMetCount: 0,
-          avgFirstResponseTime: 0,
-          avgResolutionTime: 0,
-        },
-        categoryBreakdown,
-      },
-    });
-  } catch (error) {
-    logError("Error getting support analytics:", error);
-    res.status(500).json({ success: false, message: "Failed to get support analytics" });
-  }
-};
+// Legacy aliases (kept so existing callers do not break); same service, same authorization.
+export const getAllTickets = staffQueue;
+export const getSupportAnalytics = staffMetrics;
+export const updateTicketStatus = staffUpdate;

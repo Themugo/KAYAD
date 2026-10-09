@@ -1393,13 +1393,15 @@ export const detectNegativeBalances = async (startDate, endDate) => {
 export const detectUnreleasedEscrows = async (startDate, endDate) => {
   try {
     const unreleasedEscrows = [];
+    // "held" is not an escrow status (the 8-state CHECK has no such value), so
+    // this query always returned nothing and stale escrows were never flagged.
     const heldEscrows = await findAll("escrows", { filters: {
-      status: "held",
+      status: ["funded", "vehicle_confirmed", "delivered"],
       createdAt: { $gte: startDate, $lte: endDate },
     } });
 
     for (const escrow of heldEscrows) {
-      const daysHeld = (Date.now() - new Date(escrow.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+      const daysHeld = (Date.now() - new Date(escrow.fundedAt || escrow.createdAt).getTime()) / (1000 * 60 * 60 * 24);
       if (daysHeld > 7) {
         unreleasedEscrows.push({
           _id: escrow.id,

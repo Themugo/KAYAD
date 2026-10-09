@@ -1451,3 +1451,79 @@ new `validate-navigation-convergence` 27/27. Zero backend changes.
 
 **STAGE 15 — NAVIGATION CONVERGENCE: COMPLETE.** Reference image was not
 attached to the upload; design followed the written principles.
+
+---
+
+## STAGE 14A — NAVIGATION AUTHORITY CONTROL — 2026-10-08
+
+**Question.** Can the frozen Stage 15 navigation become admin-controlled via
+the existing control plane? **Answer: yes, by extension.** The existing
+architecture could not already do it (no navigation field anywhere), so the
+smallest backend extension was made: `platform_config.navigation` JSONB
+column (migration `20261008150000_platform_config_navigation.sql`), strict
+validator `backend/utils/navigationConfig.js`, validate/replace/audit inside
+the existing `PUT /api/admin/config`, and `navigation` added to the existing
+`/admin/public/config` whitelist (normalised on read). Frontend:
+`applyNavigationConfig` (total, canonical fallback), carried by the existing
+`BrandingContext` fetch; `Navbar` wiring only (CSS/markup untouched); editor in
+the live admin console (`AdminNavigationControl` in `AdminView`).
+
+**Controls.** Item show/hide, order, dropdown on/off, child show/hide/order.
+Not configurable: labels, destinations, hrefs, icons, roles, CSS, markup.
+Marketplace and Support can never be hidden.
+
+**Validation.** Authorization matrix over HTTP on the real `adminRoutes.js`
+(admin/superadmin 200; user, seller, dealer, ghost_checker and all
+departmental staff 403; anonymous 401; 15 hostile payloads 400). Real
+PostgreSQL 16 RLS proof (anon/authenticated blocked, service_role OK).
+Browser: 180/180 (Stage 15 suite) + 94/94 (fallback/controlled/visual-freeze
+at 10 viewports) + 11/11 (admin UI round trip). Eight REVERT→FAIL→RESTORE→PASS
+cycles. tsc/build clean; frontend 377/11/1 (baseline-identical failures);
+backend Jest 694/694 + Vitest 16 + node:test 1; navigation validator 40/40;
+other validators identical to baseline.
+
+**Findings.** `pages/admin/AdminSettings*.jsx` is unreachable; the editor lives
+in `AdminView`. Whole-config echo saves from other screens required `{}` to be
+a valid "no override" value.
+
+**STAGE 14A — ADMIN-CONTROLLED NAVIGATION: COMPLETE** (apply the migration
+before deploying; staging smoke of PUT→GET recommended).
+
+
+## Frontend Test Recovery — 2026-10-09
+Resolved all 11 failing frontend tests (9 VehicleMarketplace mobile hero/saved, 2 Navbar). 3 app defects fixed (featured feed `data`/`cars`, hero index race, Saved page identity); remaining were stale expectations proven against the documented contract. Frontend 388 pass / 0 fail / 1 skip (baseline skip); tsc and build clean; 5 stale validators corrected; 2 validators environment-blocked (provider credentials, Node 22.22.2). No backend/migration/RLS change. See `FRONTEND_FAILURE_ROOT_CAUSE_AUDIT.md` and `FRONTEND_FAILURE_REPAIR_REPORT.md`.
+
+
+## Pre-Purchase Inspection — Product Discovery & Public Experience Convergence — 2026-10-09
+Discovery written first (`INSPECTION_PRODUCT_DISCOVERY.md`), then implemented without a second system or new API. Backend: one controller corrected (`listMine` projection, no unsettleable M-Pesa charge) with tests. Frontend: new InspectionsView (two truthful routes, tracked My inspections/Reports, pay/cancel for unpaid provider bookings, provider application), vehicle-preserving launch from every vehicle type, booking retry reuses the booking, marketplace error/confirmation/Apply. Frontend 419/0/1 (baseline 388/0/1); backend Jest 698 (+4), Vitest 16, node 1; tsc/build clean; validators identical to baseline (1 updated, stricter); browser 66/66; revert-proofs recorded. See `INSPECTION_EXPERIENCE_CONVERGENCE_REPORT.md`. Owner decision pending: whether KAYAD vehicle inspections are charged (needs a `vehicle_inspections` settlement path).
+
+
+## Automotive Services Marketplace — Master Convergence — 2026-10-09
+Discovery first (`AUTOMOTIVE_SERVICES_PRODUCT_DISCOVERY.md`), then one additive migration (`20261009120000_automotive_services_governance.sql`: capabilities table, staff affiliation), a backend taxonomy, discovery + governance services, admin governance sub-router, A-system eligibility enforcement, and the marketplace/application/admin/report UI wired to them. Found and fixed the `/api/api` transport bug. FE 455/0/1; BE Jest 770 (baseline 698), Vitest 16, node 1; validators identical to baseline (1 updated); tsc/build clean; browser 50/50 + 66/66; revert-proofs 16/15/6. No escrow or other stage started. See `AUTOMOTIVE_SERVICES_MARKETPLACE_CONVERGENCE_REPORT.md`.
+
+
+## Automotive Services — UX Convergence — 2026-10-09
+Hub reframed to the platform/independent-provider model; nav "Auto Services" with four real destinations; invented vehicle-detail certificate, dispatch promise, fixed 150-point claims and fake dealer reviews removed; seller inspection API minimised. No migration/RLS/financial change. FE 480/0/1; BE Jest 771; validators = baseline; tsc/build clean; browser 71/71 + 66/66; revert-proofs 14 + 2. See `KAYAD_AUTOMOTIVE_SERVICES_UX_CONVERGENCE_REPORT.md`. Escrow not started.
+
+---
+## 2026-10-09 — Escrow backend-first discovery, financial lifecycle & multi-audience experience convergence
+- Discovery written first: `ESCROW_PRODUCT_DISCOVERY.md`. Report: `ESCROW_EXPERIENCE_CONVERGENCE_REPORT.md`. Evidence: `evidence/escrow/`.
+- Backend: custody binding (RPC + creation, enforces admin min/max), cron `deliveredAt`, counterparty privacy projection (`utils/escrowViewModel.js`), request-release guard + admins room, retired `held` status removed from stats/reconciliation (except `compareEscrowBalances`), seller-capability gate on the auction path, purchase eligibility frozen at initiation (migration `20261009130000`), public `GET /api/escrow/program`, staff `totals`/`operator.can`/`staffActions`.
+- Frontend: rewritten API client and EscrowView; new public / participant / operations surfaces; unsupported claims removed; orphan `EscrowPage` removed; static claims test.
+- Results: backend 937/62 suites; frontend 508 (+1 skip); validators 164/10 (baseline); tsc 0; build 0; mocked-HTTP Playwright 33/33; revert→fail→restore→pass recorded.
+- NOT certified: live Supabase/RLS, Redis, M-Pesa, webhooks (ENVIRONMENT-BLOCKED). No business decision was made (see report section 17).
+
+---
+## 2026-10-09 — Identity, registration & onboarding convergence + CI repair
+- Discovery first: `KAYAD_IDENTITY_ONBOARDING_DISCOVERY.md`. Reports: `KAYAD_IDENTITY_ONBOARDING_CONVERGENCE_REPORT.md`, `KAYAD_CI_FAILURE_REPAIR_REPORT.md`. Evidence: `evidence/identity/`.
+- CI: remote run logs unobtainable; reproduced locally. Security Audit and Backend Quality fail on `npm audit` (1 high root; 4 incl. 1 critical `proxy-addr` backend). Fixed by minimal lockfile bumps; no audit/threshold/workflow/test change. Bundle Analysis skipped by design (`pull_request` only).
+- Frontend: one canonical auth system (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`); validated `next`/`intent` carried through every entry point; role-aware registration (buyer, private seller, dealer, garage/inspection business, independent inspector, employed mechanic); AuthModal reduced to a redirect shim; orphan `pages/register/*` removed; truthful dealer completion state; ad panel removed; Forgot/Reset/Verify restyled.
+- Backend: contract unchanged; added a test that registration rejects every privileged role.
+- Validators: six source-string gates updated to the new contract (not weakened; assertions on the same behaviours plus new ones).
+- Revert → fail → restore → pass recorded for the redirect validator and for dealer-completion truth.
+
+## 2026-10-09 — Support & Resolution Center audit and convergence
+- Discovery first: `KAYAD_SUPPORT_DISCOVERY_AUDIT.md`. Proven P0: case creation failed on a migration-built DB (`ticket_number` NOT NULL, no generator). High: internal notes returned by `getTicket` and readable via owner RLS, every staff role admitted by `adminOnly`, append RPC trusted a caller-supplied role (customer reply counted as staff first response), function grants to anon/authenticated (staging check pending).
+- Migration `20261009150000_support_resolution_hardening.sql`; backend `services/support/*`, `middleware/supportAccess.js`; legacy facades reduced to aliases; orphans removed; customer page rewritten; staff Support module added to AdminView; shared Select/Textarea labels fixed.
+- Results: backend 978/63 suites (was 937/62); frontend 520 pass / 0 fail (was 505 / 3 fail); validators 10 failing = baseline; tsc 0; build 0; Playwright (mocked) 51/51; PG proof P1–P21; revert→fail→restore→pass recorded.
+- NOT certified: Supabase-hosted grants/RLS, provider delivery, load (see `KAYAD_SUPPORT_RUNTIME_CERTIFICATION.md`). Business decisions listed in the Convergence Report §10.

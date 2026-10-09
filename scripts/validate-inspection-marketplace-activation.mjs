@@ -12,8 +12,11 @@ const checks = [
   ['inspection callback uses atomic settlement RPC', read('backend/services/paymentCallback.service.js').includes('kayad_process_inspection_payment_atomic')],
   ['inspection callback is payment-state idempotent', read('backend/services/paymentCallback.service.js').includes("'inspection'" ) && read('backend/services/paymentCallback.service.js').includes('payment.metadata?.bookingId')],
   ['inspection payment history type is supported', read('backend/services/paymentCallback.service.js').includes("'inspection'")],
-  ['frontend booking flow initiates payment', read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('inspectionApi.initiatePayment')],
-  ['frontend waits for authoritative payment success', read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('getPaymentStatus') && read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes("status.status === 'success'")],
+  // Payment now lives in one shared helper used by the booking wizard AND "My inspections" (retry/pay an unpaid booking).
+  ['frontend booking flow pays through the shared settlement helper', read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('settleBookingPayment(')],
+  ['booking retry reuses the created booking instead of creating another', read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('if (!createdBooking.current)')],
+  ['shared helper initiates payment for an existing booking', read('src/features/InspectionMarketplace/services/inspectionPayment.ts').includes('inspectionApi.initiatePayment')],
+  ['shared helper waits for authoritative payment success', read('src/features/InspectionMarketplace/services/inspectionPayment.ts').includes('getPaymentStatus') && read('src/features/InspectionMarketplace/services/inspectionPayment.ts').includes("status.status === 'success'")],
   ['frontend uses M-Pesa-only truthful copy', !read('src/features/InspectionMarketplace/pages/BookingFlow.tsx').includes('M-PESA or card')],
   ['inspection API exposes booking payment', read('src/features/InspectionMarketplace/services/api.ts').includes('initiatePayment')],
   ['inspection payment schema requires bookingId', read('backend/validation/phase22.schema.js').includes('bookingId') && read('backend/validation/phase22.schema.js').includes('phone')],

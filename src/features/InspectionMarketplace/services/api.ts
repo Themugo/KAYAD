@@ -2,11 +2,28 @@
 // KAYAD INSPECTION MARKETPLACE - API SERVICE
 // ============================================================
 
-import { api as apiClient } from '../../../api/api';
+import type { AxiosRequestConfig } from 'axios';
+import { api as http } from '../../../api/api';
+
+/**
+ * The shared transport already carries the canonical `/api` prefix in its baseURL, so a path written
+ * as `/api/inspection/...` would be sent to `/api/api/inspection/...` and 404. This file's paths are
+ * written with the full `/api/...` route for readability, so strip that one leading prefix exactly once
+ * (the same rule httpRequest.ts applies for every other service module).
+ */
+export const stripApiPrefix = (url: string): string => (/^\/api(?:\/|$)/.test(url) ? url.slice(4) || '/' : url);
+
+const apiClient = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig) => http.get<T>(stripApiPrefix(url), config),
+  post: <T = any>(url: string, data?: unknown, config?: AxiosRequestConfig) => http.post<T>(stripApiPrefix(url), data, config),
+  put: <T = any>(url: string, data?: unknown, config?: AxiosRequestConfig) => http.put<T>(stripApiPrefix(url), data, config),
+  delete: <T = any>(url: string, config?: AxiosRequestConfig) => http.delete<T>(stripApiPrefix(url), config),
+};
 const unwrapInspectionResponse = <T>(response: { data?: any }): T =>
   (response?.data?.data ?? response?.data) as T;
 
 import type {
+  ServiceTaxonomy,
   InspectionProvider,
   InspectionPackage,
   Booking,
@@ -30,11 +47,22 @@ export interface SearchProvidersParams {
   commercialVehicles?: boolean;
   electricVehicles?: boolean;
   luxuryVehicles?: boolean;
-  minRating?: number;
-  sortBy?: 'rating' | 'reviews' | 'price_low' | 'price_high' | 'completions';
+  // Canonical taxonomy filters (validated again by the server).
+  category?: string;
+  subcategory?: string;
+  make?: string;
+  powertrain?: string;
+  /** The vehicle is somewhere else and the provider must come to it (roadside / mobile). */
+  atVehicleLocation?: boolean;
+  /** Only providers whose matching capability has been verified by KAYAD. */
+  verifiedOnly?: boolean;
+  /** A point the customer chose to share. Used only to compute straight-line distance. */
+  nearLat?: number;
+  nearLng?: number;
+  withinServiceRadius?: boolean;
+  maxDistanceKm?: number;
   page?: number;
   limit?: number;
-  verified?: boolean;
 }
 
 export interface CreateBookingParams {
@@ -241,7 +269,7 @@ export const inspectionApi = {
       '/api/inspection/bookings',
       { params }
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<{ bookings: Booking[] }>(response);
   },
 
   /**
@@ -341,7 +369,7 @@ export const inspectionApi = {
     const response = await apiClient.get<InspectionReport>(
       `/api/inspection/reports/${reportId}`
     );
-    return unwrapInspectionResponse(response);
+    return unwrapInspectionResponse<InspectionReport>(response);
   },
 
   /**
@@ -468,3 +496,94 @@ export const inspectionApi = {
 };
 
 export default inspectionApi;
+
+
+// ============================================================
+// AUTOMOTIVE SERVICES: taxonomy, capabilities, affiliations, governance
+// ============================================================
+
+export interface DeclareCapabilityInput {
+  category: string;
+  subcategory?: string | null;
+  vehicleMakes?: string[];
+  allMakes?: boolean;
+  powertrains?: string[];
+  staffId?: string | null;
+  evidenceCredentialId?: string | null;
+  travelsToCustomer?: boolean;
+}
+
+export const automotiveApi = {
+  /** The one canonical expertise taxonomy (also used by registration, admin and matching). */
+  getServiceTaxonomy: async (): Promise<ServiceTaxonomy> => {
+    const response = await apiClient.get('/api/inspection/service-taxonomy');
+    return unwrapInspectionResponse<ServiceTaxonomy>(response);
+  },
+
+  /** Canonical vehicle master data (makes). Reused, not duplicated. */
+  getVehicleMakes: async (): Promise<string[]> => {
+    const response = await apiClient.get('/api/config/vehicle/makes');
+    const rows = (response?.data?.data ?? response?.data ?? []) as Array<{ value?: string; name?: string } | string>;
+    return (Array.isArray(rows) ? rows : [])
+      .map((r) => (typeof r === 'string' ? r : r.value || r.name || ''))
+      .filter(Boolean);
+  },
+
+  /** The signed-in user's own business application, or null. */
+  getMyProvider: async () =>
+    unwrapInspectionResponse<{ provider: null | { id: string; company_name: string; trading_name?: string; lifecycle_stage: string; verification_route?: string | null; rejection_reason?: string | null; info_requested?: string | null; suspended_reason?: string | null; registration_number?: string | null; has_workshop?: boolean; address?: string | null } }>(await apiClient.get('/api/inspection/provider-me')),
+  updateProviderProfile: async (providerId: string, patch: Record<string, unknown>) =>
+    unwrapInspectionResponse<any>(await apiClient.put(`/api/inspection/provider/${providerId}`, patch)),
+  addCredential: async (providerId: string, input: { type: string; name: string; issuingBody?: string; certificateNumber?: string; expiryDate?: string; documentUrl?: string }) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/inspection/provider/${providerId}/credentials`, input)),
+  /** Evidence upload through the existing private "documents" upload endpoint. */
+  uploadEvidence: async (file: File): Promise<string> => {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('folder', 'documents');
+    const response = await apiClient.post('/api/upload', form);
+    const url = (response as any)?.data?.url;
+    if (!url) throw new Error('The upload did not return a file location.');
+    return String(url);
+  },
+
+  // ---- business (provider owner) ----
+  listCapabilities: async (providerId: string) =>
+    unwrapInspectionResponse<{ capabilities: any[] }>(await apiClient.get(`/api/inspection/provider/${providerId}/capabilities`)),
+  declareCapability: async (providerId: string, input: DeclareCapabilityInput) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/inspection/provider/${providerId}/capabilities`, input)),
+  listStaff: async (providerId: string) =>
+    unwrapInspectionResponse<{ staff: any[] }>(await apiClient.get(`/api/inspection/provider/${providerId}/staff`)),
+  inviteStaff: async (providerId: string, email: string, role?: string) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/inspection/provider/${providerId}/staff`, { email, role })),
+  confirmStaff: async (providerId: string, staffId: string) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/inspection/provider/${providerId}/staff/${staffId}/confirm`, {})),
+  endStaff: async (providerId: string, staffId: string) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/inspection/provider/${providerId}/staff/${staffId}/end`, {})),
+
+  // ---- the individual ----
+  myAffiliations: async () =>
+    unwrapInspectionResponse<{ affiliations: any[] }>(await apiClient.get('/api/inspection/affiliations/my')),
+  requestAffiliation: async (providerId: string, role?: string) =>
+    unwrapInspectionResponse<any>(await apiClient.post('/api/inspection/affiliations', { providerId, role })),
+  acceptAffiliation: async (staffId: string) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/inspection/affiliations/${staffId}/accept`, {})),
+  leaveAffiliation: async (staffId: string) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/inspection/affiliations/${staffId}/leave`, {})),
+};
+
+/** Admin governance of the single provider network (existing admin control plane; audited server-side). */
+export const providerGovernanceApi = {
+  list: async (params: { stage?: string; page?: number; limit?: number } = {}) =>
+    unwrapInspectionResponse<{ items: any[]; total: number; page: number }>(await apiClient.get('/api/admin/inspection-governance/providers', { params })),
+  get: async (id: string) =>
+    unwrapInspectionResponse<any>(await apiClient.get(`/api/admin/inspection-governance/providers/${id}`)),
+  decideProvider: async (id: string, body: { decision: string; route?: string; notes?: string; reason?: string }) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/admin/inspection-governance/providers/${id}/decision`, body)),
+  decideCredential: async (id: string, body: { decision: 'verify' | 'reject'; notes?: string }) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/admin/inspection-governance/credentials/${id}/decision`, body)),
+  decideCapability: async (id: string, body: { decision: 'verify' | 'revoke'; notes?: string }) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/admin/inspection-governance/capabilities/${id}/decision`, body)),
+  endStaff: async (id: string) =>
+    unwrapInspectionResponse<any>(await apiClient.post(`/api/admin/inspection-governance/staff/${id}/end`, {})),
+};

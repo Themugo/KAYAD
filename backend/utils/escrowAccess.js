@@ -96,3 +96,26 @@ export const escrowReconcileOnly = requireEscrowPermission(PERM.RECONCILE_ESCROW
 export const escrowConfigureOnly = requireEscrowPermission(PERM.CONFIGURE_ESCROW);
 
 export const canViewEscrow = (escrow, user) => !!user && (isEscrowParty(escrow, user.id) || canViewAnyEscrow(user));
+
+/**
+ * What an escrow operator may do, derived from the SAME predicates the route
+ * middleware above uses (requireEscrowPermission + canActAsEscrowAdmin). The
+ * operations dashboard returns this so the browser never has to guess from a
+ * role string; enforcement stays on each route. tests/escrow/escrowViewModel
+ * asserts this table and the middleware cannot drift apart.
+ */
+export function escrowStaffCapabilities(user) {
+  if (!user) return { view: false, operate: false, reconcile: false, release: false, refund: false, settle: false, completeRefund: false, close: false };
+  const has = (perm) => userHasPermission(user, perm) || userHasPermission(user, PERM.MANAGE_ESCROW);
+  const admin = canActAsEscrowAdmin(user);
+  return {
+    view: has(PERM.VIEW_ESCROW),
+    operate: has(PERM.OPERATE_ESCROW),
+    reconcile: has(PERM.RECONCILE_ESCROW),
+    release: admin && has(PERM.APPROVE_ESCROW_RELEASE),
+    refund: admin && has(PERM.APPROVE_ESCROW_REFUND),
+    settle: has(PERM.SETTLE_ESCROW_PAYOUT),
+    completeRefund: admin && has(PERM.SETTLE_ESCROW_PAYOUT),
+    close: admin && has(PERM.EMERGENCY_ESCROW_CONTROL),
+  };
+}

@@ -3,8 +3,9 @@
 // ============================================================
 
 import { motion } from 'framer-motion';
-import { Star, MapPin, Clock, Shield, CheckCircle, Car, Zap, ChevronRight } from 'lucide-react';
-import type { InspectionProvider } from '../types/inspection';
+import { Star, MapPin, Clock, Shield, CheckCircle, Car, ChevronRight } from 'lucide-react';
+import type { InspectionProvider, ServiceTaxonomy } from '../types/inspection';
+import CapabilityBadges from './CapabilityBadges';
 
 const KAYAD_COLORS = {
   lightNavy: '#12576D',
@@ -18,9 +19,10 @@ const KAYAD_COLORS = {
 interface ProviderCardProps {
   provider: InspectionProvider;
   onSelect?: (provider: InspectionProvider) => void;
+  taxonomy?: ServiceTaxonomy | null;
 }
 
-export default function ProviderCard({ provider, onSelect }: ProviderCardProps) {
+export default function ProviderCard({ provider, onSelect, taxonomy = null }: ProviderCardProps) {
   const {
     companyName,
     logo,
@@ -79,7 +81,7 @@ export default function ProviderCard({ provider, onSelect }: ProviderCardProps) 
             style={{ backgroundColor: KAYAD_COLORS.emerald, color: KAYAD_COLORS.white }}
           >
             <Shield size={12} />
-            Verified profile
+            Verified business
           </div>
         )}
       </div>
@@ -103,84 +105,76 @@ export default function ProviderCard({ provider, onSelect }: ProviderCardProps) 
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex items-center gap-1">
-            <Star
-              size={16}
-              fill={KAYAD_COLORS.mutedTerracotta}
-              color={KAYAD_COLORS.mutedTerracotta}
-            />
-            <span
-              className="font-semibold"
-              style={{ color: KAYAD_COLORS.lightNavy }}
-            >
-              {stats.averageRating.toFixed(1)}
-            </span>
-            <span style={{ color: KAYAD_COLORS.softBlue }}>
-              ({stats.totalReviews})
-            </span>
-          </div>
-          <div
-            className="flex items-center gap-1 text-sm"
-            style={{ color: KAYAD_COLORS.softBlue }}
-          >
-            <CheckCircle size={14} className="text-[#13B8A6]" />
-            <span>{stats.completedInspections} inspections</span>
-          </div>
+        {/* Stats: only what exists. No review means no rating, never 0.0. */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3">
+          {stats.totalReviews > 0 && stats.averageRating != null ? (
+            <div className="flex items-center gap-1">
+              <Star size={16} fill={KAYAD_COLORS.mutedTerracotta} color={KAYAD_COLORS.mutedTerracotta} aria-hidden />
+              <span className="font-semibold" style={{ color: KAYAD_COLORS.lightNavy }}>{stats.averageRating.toFixed(1)}</span>
+              <span style={{ color: KAYAD_COLORS.softBlue }}>({stats.totalReviews} {stats.totalReviews === 1 ? 'review' : 'reviews'})</span>
+            </div>
+          ) : (
+            <span className="text-sm" style={{ color: KAYAD_COLORS.softBlue }}>No reviews yet</span>
+          )}
+          {stats.completedInspections > 0 && (
+            <div className="flex items-center gap-1 text-sm" style={{ color: KAYAD_COLORS.softBlue }}>
+              <CheckCircle size={14} className="text-[#13B8A6]" aria-hidden />
+              <span>{stats.completedInspections} inspections completed</span>
+            </div>
+          )}
         </div>
 
-        {/* Specializations */}
+        {/* Services: verified vs declared are visibly different */}
+        <div className="mb-3">
+          <CapabilityBadges capabilities={provider.capabilities} taxonomy={taxonomy} max={4} />
+        </div>
+
+        {typeof provider.distanceKm === 'number' && (
+          <p className="text-xs mb-3" style={{ color: KAYAD_COLORS.softBlue }}>
+            About {provider.distanceKm} km away in a straight line
+            {provider.withinServiceRadius === true && ' · inside their stated service area'}
+            {provider.withinServiceRadius === false && ' · outside their stated service area'}
+          </p>
+        )}
+
+        {/* Operating model the business declared */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {specializations.electricVehicles && (
-            <SpecializationBadge icon={<Zap size={12} />} label="EV" />
-          )}
-          {specializations.luxuryVehicles && (
-            <SpecializationBadge icon={<Car size={12} />} label="Luxury" />
-          )}
-          {specializations.commercialVehicles && (
-            <SpecializationBadge icon={<Car size={12} />} label="Commercial" />
-          )}
-          {operatingModel.offersMobile && (
-            <SpecializationBadge icon={<MapPin size={12} />} label="Mobile" />
-          )}
-          {operatingModel.sameDayAvailable && (
-            <SpecializationBadge icon={<Clock size={12} />} label="Same Day" />
-          )}
+          {specializations.luxuryVehicles && <SpecializationBadge icon={<Car size={12} />} label="Luxury (declared)" />}
+          {specializations.commercialVehicles && <SpecializationBadge icon={<Car size={12} />} label="Commercial (declared)" />}
+          {operatingModel.offersMobile && <SpecializationBadge icon={<MapPin size={12} />} label="Mobile" />}
+          {operatingModel.hasWorkshop && <SpecializationBadge icon={<Shield size={12} />} label="Workshop" />}
+          {operatingModel.sameDayAvailable && <SpecializationBadge icon={<Clock size={12} />} label="Same day (declared)" />}
         </div>
 
         {/* Experience */}
         <div className="text-sm mb-4" style={{ color: KAYAD_COLORS.softBlue }}>
           {experience.yearsInBusiness > 0 && (
-            <span>{experience.yearsInBusiness} years operating</span>
+            <span>{experience.yearsInBusiness} years in business (as stated by the business)</span>
           )}
         </div>
 
         {/* Price and CTA */}
         <div className="mt-auto pt-4 border-t flex items-center justify-between" style={{ borderColor: KAYAD_COLORS.warmBeige }}>
           <div>
-            {lowestPrice && (
-              <p className="text-sm" style={{ color: KAYAD_COLORS.softBlue }}>
-                Starting from
-              </p>
+            {lowestPrice ? (
+              <>
+                <p className="text-sm" style={{ color: KAYAD_COLORS.softBlue }}>Inspection from (set by the business)</p>
+                <p className="text-xl font-bold" style={{ color: KAYAD_COLORS.lightNavy }}>KES {lowestPrice.toLocaleString()}</p>
+              </>
+            ) : (
+              <p className="text-sm font-medium" style={{ color: KAYAD_COLORS.softBlue }}>Prices set by the business</p>
             )}
-            <p
-              className="text-xl font-bold"
-              style={{ color: KAYAD_COLORS.lightNavy }}
-            >
-              {lowestPrice ? `KES ${lowestPrice.toLocaleString()}` : 'View provider'}
-            </p>
           </div>
           <button
             type="button"
             onClick={() => onSelect?.(provider)}
             className="flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-colors"
             style={{
-              backgroundColor: KAYAD_COLORS.emerald,
+              backgroundColor: '#0F766E',
               color: KAYAD_COLORS.white
             }}
           >
-            View
+            View business
             <ChevronRight size={16} />
           </button>
         </div>

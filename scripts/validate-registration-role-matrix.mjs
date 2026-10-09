@@ -3,7 +3,10 @@ import path from 'node:path';
 
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
-const onboarding = read('src/components/OnboardingFlow.tsx');
+const flow = read('src/components/OnboardingFlow.tsx');
+const roles = read('src/components/onboarding/roles.ts');
+const validation = read('src/components/onboarding/validation.ts');
+const onboarding = flow + roles + validation;
 const schema = read('backend/validation/auth.schema.js');
 const controller = read('backend/controllers/authController.js');
 const routes = read('backend/routes/authRoutes.js');
@@ -12,18 +15,19 @@ const httpClient = read('src/api/httpClient.ts');
 const responseSchema = read('backend/validation/response.schema.js');
 
 const checks = [
+  ['staff and broker roles are never offered on the public matrix', !/id: '(admin|superadmin|moderator|broker|ghost_checker)'/.test(roles) && /NON_SELF_REGISTRABLE/.test(roles)],
   ['buyer UI role exists', /id: 'buyer'/.test(onboarding)],
-  ['private seller UI role exists', /id: 'individual_seller'/.test(onboarding)],
+  ['private seller UI role exists', /id: 'seller'[\s\S]{0,300}backendRole: 'individual_seller'/.test(roles)],
   ['dealer UI role exists', /id: 'dealer'/.test(onboarding)],
-  ['buyer maps to canonical backend user role', /role: role === 'buyer' \? 'user' : role/.test(onboarding)],
-  ['private seller maps to canonical individual_seller role', /role: role === 'buyer' \? 'user' : role/.test(onboarding) && /id: 'individual_seller'/.test(onboarding)],
-  ['dealer maps to canonical dealer role', /role: role === 'buyer' \? 'user' : role/.test(onboarding) && /id: 'dealer'/.test(onboarding)],
+  ['buyer maps to canonical backend user role', /id: 'buyer'[\s\S]{0,300}backendRole: 'user'/.test(roles) && /role: backendRole/.test(flow)],
+  ['private seller maps to canonical individual_seller role', /backendRole: 'individual_seller'/.test(roles)],
+  ['dealer maps to canonical dealer role', /id: 'dealer'[\s\S]{0,300}backendRole: 'dealer'/.test(roles)],
   ['backend schema accepts all three public roles', /z\.enum\(\["dealer", "individual_seller", "user"\]\)/.test(schema)],
-  ['dealer requires business name client-side', /role === 'dealer' && !form\.businessName\.trim\(\)/.test(onboarding)],
-  ['dealer requires location client-side', /role === 'dealer' && !form\.location\.trim\(\)/.test(onboarding)],
+  ['dealer requires business name client-side', /backendRole === 'dealer'[\s\S]{0,80}!form\.businessName\.trim\(\)/.test(validation)],
+  ['dealer requires location client-side', /backendRole === 'dealer'[\s\S]{0,200}!form\.location\.trim\(\)/.test(validation)],
   ['dealer requires business name server-side', /role === "dealer" && !businessName/.test(controller)],
   ['dealer requires location server-side', /role === "dealer" && !location/.test(controller)],
-  ['private seller business fields remain optional', /role === 'dealer' \? 'Business name' : 'Trading name \(optional\)'/.test(onboarding)],
+  ['private seller business fields remain optional', /label="Trading name" optional/.test(flow)],
   ['backend preserves seller role instead of silently converting it', /requestedRole === "dealer" \|\| requestedRole === "individual_seller" \? requestedRole : "user"/.test(controller)],
   ['buyer registration creates approved user status', /CASE WHEN p_role = 'user' THEN 'approved' ELSE 'pending' END/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
   ['seller registration remains pending for platform verification', /CASE WHEN p_role = 'user' THEN 'approved' ELSE 'pending' END/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
@@ -38,12 +42,12 @@ const checks = [
   ['inspector application table exists in migration chain', /CREATE TABLE IF NOT EXISTS public\.inspector_applications/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
   ['registration does not issue an authenticated session', (() => { const a = controller.indexOf('export const register'); const b = controller.indexOf('// =============================\n// 🔑 LOGIN', a); const register = controller.slice(a, b); return !/sendAuthResponse\(res,/.test(register); })()],
   ['registration route uses canonical auth endpoint', /router\.post\("\/register"/.test(routes)],
-  ['frontend uses canonical auth service', /authRegister\(registration\)/.test(onboarding) && /authFetch\('\/api\/v1\/auth\/register'/.test(authApi)],
+  ['frontend uses canonical auth service', /authRegister\(body\)/.test(flow) && /authFetch\('\/api\/v1\/auth\/register'/.test(authApi)],
   ['state-changing requests bootstrap CSRF', /await ensureCsrfToken\(\)/.test(httpClient)],
   ['CSRF endpoint remains canonical', /CSRF_BOOTSTRAP_PATH = '\/v1\/auth\/csrf'/.test(httpClient)],
   ['auth response contract accepts created user', /user: z\.object\(\{[\s\S]*_id: z\.string\(\)/.test(responseSchema)],
-  ['private seller completion messaging is distinct', /Private seller account created/.test(onboarding)],
-  ['dealer completion messaging is distinct', /Your dealer account is created/.test(onboarding)],
+  ['private seller completion messaging is distinct', /cannot list a vehicle until KAYAD approves your seller account/.test(flow)],
+  ['dealer completion messaging is distinct', /taken to business verification/.test(flow)],
 ];
 
 let passed = 0;

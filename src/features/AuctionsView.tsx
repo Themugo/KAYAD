@@ -63,6 +63,9 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const [ended, setEnded] = useState<DisplayAuction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Each list loads independently: one failing request must not blank the others, and a failed list is
+  // reported as unavailable — never as zero auctions.
+  const [failed, setFailed] = useState<{ live: boolean; scheduled: boolean; ended: boolean }>({ live: false, scheduled: false, ended: false });
   const [search, setSearch] = useState('');
   // The tab is readable from `?auctionTab=` so the global navigation (and any
   // copied link) can open an existing tab directly. Unknown values fall back to live.
@@ -79,16 +82,27 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const sections = [
+      { key: 'live' as const, label: 'Live now', run: () => fetchList({ page: 1, limit: 100, status: 'live' }) },
+      { key: 'scheduled' as const, label: 'Starting soon', run: () => fetchList({ page: 1, limit: 100, status: 'draft' }) },
+      { key: 'ended' as const, label: 'Completed', run: () => fetchList({ page: 1, limit: 100, status: 'ended' }) },
+    ];
     try {
-      const [liveResult, scheduledResult, endedResult] = await Promise.all([
-        fetchList({ page: 1, limit: 100, status: 'live' }),
-        fetchList({ page: 1, limit: 100, status: 'draft' }),
-        fetchList({ page: 1, limit: 100, status: 'ended' }),
-      ]);
-      setLive((liveResult.auctions || []) as DisplayAuction[]);
-      setScheduled((scheduledResult.auctions || []) as DisplayAuction[]);
-      setEnded((endedResult.auctions || []) as DisplayAuction[]);
+      const results = await Promise.allSettled(sections.map((section) => section.run()));
+      const rows = (r: PromiseSettledResult<{ auctions: unknown[] }>) => (r.status === 'fulfilled' ? ((r.value.auctions || []) as DisplayAuction[]) : []);
+      setLive(rows(results[0])); setScheduled(rows(results[1])); setEnded(rows(results[2]));
+      const next = { live: results[0].status === 'rejected', scheduled: results[1].status === 'rejected', ended: results[2].status === 'rejected' };
+      setFailed(next);
+      const rejected = results.map((r, i) => ({ r, section: sections[i] })).filter((x) => x.r.status === 'rejected') as Array<{ r: PromiseRejectedResult; section: typeof sections[number] }>;
+      if (rejected.length) {
+        const reason = rejected[0].r.reason as any;
+        const detail = reason?.response?.data?.message || reason?.message || 'Unable to load auctions from KAYAD.';
+        setError(rejected.length === sections.length
+          ? detail
+          : `${rejected.map((x) => x.section.label).join(' and ')} could not be loaded (${detail}). The rest of the auction floor is shown below — use Refresh to try again.`);
+      }
     } catch (err: any) {
+      setFailed({ live: true, scheduled: true, ended: true });
       setError(err?.response?.data?.message || err?.message || 'Unable to load auctions from KAYAD.');
     } finally {
       setLoading(false);
@@ -128,16 +142,19 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const gridAuctions = spotlightId ? filtered.filter((auction) => String(auction.carId || auction.id) !== spotlightId) : filtered;
 
   const marketHeadline = useMemo(() => {
+    if (failed.live) return 'Live auctions are temporarily unavailable';
     if (live.length > 0) return `${live.length} vehicle${live.length === 1 ? '' : 's'} up for bid right now`;
+    if (failed.scheduled) return 'Some of the auction floor could not be loaded';
     if (scheduled.length > 0) return `No auctions live right now — ${scheduled.length} starting soon`;
     return 'The auction floor is quiet right now';
-  }, [live.length, scheduled.length]);
+  }, [live.length, scheduled.length, failed.live, failed.scheduled]);
 
   const marketSubcopy = useMemo(() => {
+    if (failed.live || (live.length === 0 && failed.scheduled)) return 'We could not reach the auction service just now. Nothing has been lost — use Refresh to try again.';
     if (live.length > 0) return 'Follow live bidding, save what you want to return to, and move from registration to fulfilment in one connected room.';
     if (scheduled.length > 0) return 'New auctions are queued and will open automatically — save a listing or check back to be first in the room.';
     return 'KAYAD opens auctions as verified vehicles clear registration. Browse the marketplace in the meantime, or save a search to be notified the moment one goes live.';
-  }, [live.length, scheduled.length]);
+  }, [live.length, scheduled.length, failed.live, failed.scheduled]);
 
   const openAuction = (auction: DisplayAuction) => {
     navigate(`/auction/${encodeURIComponent(String(auction.carId || auction.id))}`);
@@ -219,6 +236,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
     );
   };
 
+  const tabFailed = (tab === 'live' && failed.live) || (tab === 'scheduled' && failed.scheduled) || (tab === 'ended' && failed.ended) || (tab === 'saved' && (failed.live || failed.scheduled || failed.ended));
   const emptyStateCopy = tab === 'saved'
     ? { title: 'Your watchlist is ready for its first favourite.', body: 'Save a vehicle from any room and it will return here with the same live data.' }
     : tab === 'live'
@@ -249,13 +267,13 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
         <div className="auction-market-controls">
           <div className="auction-segment-grid" role="tablist" aria-label="Auction sections">
             <button role="tab" aria-selected={tab === 'live'} onClick={() => setTab('live')} className={`auction-segment ${tab === 'live' ? 'is-active' : ''}`}>
-              <div className="auction-segment-icon"><Radio size={16} /></div><div><div className="auction-segment-label">Live now</div><div className="auction-segment-value">{live.length}</div></div>
+              <div className="auction-segment-icon"><Radio size={16} /></div><div><div className="auction-segment-label">Live now</div><div className="auction-segment-value">{failed.live ? '—' : live.length}</div></div>
             </button>
             <button role="tab" aria-selected={tab === 'scheduled'} onClick={() => setTab('scheduled')} className={`auction-segment ${tab === 'scheduled' ? 'is-active' : ''}`}>
-              <div className="auction-segment-icon"><TimerReset size={16} /></div><div><div className="auction-segment-label">Starting soon</div><div className="auction-segment-value">{scheduled.length}</div></div>
+              <div className="auction-segment-icon"><TimerReset size={16} /></div><div><div className="auction-segment-label">Starting soon</div><div className="auction-segment-value">{failed.scheduled ? '—' : scheduled.length}</div></div>
             </button>
             <button role="tab" aria-selected={tab === 'ended'} onClick={() => setTab('ended')} className={`auction-segment ${tab === 'ended' ? 'is-active' : ''}`}>
-              <div className="auction-segment-icon"><CheckCircle2 size={16} /></div><div><div className="auction-segment-label">Completed</div><div className="auction-segment-value">{ended.length}</div></div>
+              <div className="auction-segment-icon"><CheckCircle2 size={16} /></div><div><div className="auction-segment-label">Completed</div><div className="auction-segment-value">{failed.ended ? '—' : ended.length}</div></div>
             </button>
             <button role="tab" aria-selected={tab === 'saved'} onClick={() => setTab('saved')} className={`auction-segment ${tab === 'saved' ? 'is-active' : ''}`}>
               <div className="auction-segment-icon"><Heart size={16} /></div><div><div className="auction-segment-label">Saved for you</div><div className="auction-segment-value">{favorites.size}</div></div>
@@ -279,7 +297,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
           current bid, bid count — is what frames it, not a marketing banner. */}
       {spotlight && renderAuctionCard(spotlight, 'spotlight')}
 
-      {!loading && !error && filtered.length === 0 && (
+      {!loading && !tabFailed && filtered.length === 0 && (
         <Card className="p-10 text-center auction-interaction-glow">
           <Gavel className="w-8 h-8 mx-auto text-slate-400 mb-3" />
           <p className="font-bold text-slate-800">{emptyStateCopy.title}</p>

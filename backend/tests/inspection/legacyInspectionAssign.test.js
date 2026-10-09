@@ -66,8 +66,12 @@ describe("legacy inspection assign() — status transition", () => {
     // car lookup -> .from('cars').select('dealer_id').eq('id', ...).maybeSingle()
     const carBuilder = makeQueryBuilder({ data: { dealer_id: "dealer-1" }, error: null });
 
+    // assign() now requires the inspector to own an ACTIVE, verified provider.
+    const providerBuilder = makeQueryBuilder({ data: { id: "prov-1", status: "active", verification_status: "verified", lifecycle_stage: "ACTIVE" }, error: null });
+
     fromMock.mockImplementation((table) => {
       if (table === "cars") return carBuilder;
+      if (table === "inspection_providers") return providerBuilder;
       // First call to vehicle_inspections is the read (getInspection), the
       // second is the update — return them in that order.
       return fromMock.mock.calls.filter((c) => c[0] === "vehicle_inspections").length <= 1 ? getBuilder : updateBuilder;

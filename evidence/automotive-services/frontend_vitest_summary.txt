@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /tmp/claude-0/-home-claude/9cccf2fd-fe77-5914-aa11-45af2d198133/scratchpad/kayad_audit/extracted
+
+
+ Test Files  63 passed (63)
+      Tests  455 passed | 1 skipped (456)
+   Start at  06:28:34
+   Duration  85.79s (transform 3.02s, setup 6.20s, import 8.60s, tests 24.93s, environment 37.45s)
+
+exit 0

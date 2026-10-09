@@ -309,7 +309,7 @@ export const DashboardPage: FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="List New Vehicle on KAYAD"
-        subtitle="Your listing will undergo 150-point inspection verification & Escrow integration"
+        subtitle="Add your vehicle details. Buyers can request an independent inspection before they commit"
       >
         <form onSubmit={handleCreateListing} className="space-y-4">
           <Input label="Vehicle Title" placeholder="e.g. 2023 Porsche 911 Carrera S" value={newTitle} onChange={e => setNewTitle(e.target.value)} required />

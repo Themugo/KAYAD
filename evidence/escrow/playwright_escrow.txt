@@ -1,0 +1,35 @@
+PASS  visitor desktop: explainer + programme status
+PASS  visitor desktop: no unsupported claims
+PASS  visitor desktop: no deal/ops requests
+PASS  visitor desktop: no Operations tab
+PASS  visitor desktop: no horizontal scroll
+PASS  visitor desktop: sign-in prompt, still no deal request
+PASS  buyer desktop: scoped summary shown
+PASS  buyer desktop: server-driven action button
+PASS  buyer desktop: no commission/vault wording
+PASS  buyer desktop: dialog focus inside
+PASS  buyer desktop: Escape closes + focus returns
+PASS  buyer desktop: action posted then state refetched
+PASS  buyer desktop: no horizontal scroll
+PASS  visitor mobile: explainer + programme status
+PASS  visitor mobile: no unsupported claims
+PASS  visitor mobile: no deal/ops requests
+PASS  visitor mobile: no Operations tab
+PASS  visitor mobile: no horizontal scroll
+PASS  visitor mobile: sign-in prompt, still no deal request
+PASS  buyer mobile: scoped summary shown
+PASS  buyer mobile: server-driven action button
+PASS  buyer mobile: no commission/vault wording
+PASS  buyer mobile: dialog focus inside
+PASS  buyer mobile: Escape closes + focus returns
+PASS  buyer mobile: action posted then state refetched
+PASS  buyer mobile: no horizontal scroll
+PASS  buyer error: alert, no KES 0
+PASS  buyer empty: honest empty state, no totals
+PASS  outage: says it cannot tell, not "off"
+PASS  staff: totals labelled platform-wide
+PASS  staff: only server staffActions offered
+PASS  reduced motion: no infinite animations on the escrow page  running=0
+PASS  keyboard: arrow keys move through tabs
+
+33/33 PASS

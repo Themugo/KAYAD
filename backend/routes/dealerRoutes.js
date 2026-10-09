@@ -341,7 +341,7 @@ router.get(
 
       sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "live").then(({ count }) => count || 0),
 
-      sb.from("escrows").select("id", { count: 'exact', head: true }).eq("seller", dealerId).eq("status", "held").then(({ count }) => count || 0),
+      sb.from("escrows").select("id", { count: 'exact', head: true }).eq("seller", dealerId).in("status", ["funded", "vehicle_confirmed", "delivered"]).then(({ count }) => count || 0),
 
       dealerCarIds.length > 0
         ? sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCarIds).eq("status", "pending").then(({ count }) => count || 0)

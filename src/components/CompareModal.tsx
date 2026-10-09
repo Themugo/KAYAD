@@ -184,7 +184,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
 
               {/* Row: 150-Point Inspection */}
               <TableRow className={highlightDifferences && areValuesDifferent((v) => v.inspectionPassed) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">150-Point Inspection</TableCell>
+                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Pre-purchase inspection</TableCell>
                 {vehicles.map((v) => (
                   <TableCell key={v.id}>
                     <Badge variant={v.inspectionPassed ? 'success' : 'neutral'}>

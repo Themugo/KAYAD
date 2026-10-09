@@ -11,12 +11,12 @@ const marketplace = read('src/features/VehicleMarketplace/components/VehicleMark
 const detail = read('src/components/VehicleDetailModal.tsx');
 const registerDir = path.join(root, 'src/pages/register');
 const backendAuth = read('backend/controllers/authController.js');
-check('single onboarding flow', onboarding.includes("type OnboardingRole = 'buyer' | 'individual_seller' | 'dealer' | 'inspector'") && onboarding.includes('authRegister'));
-check('registration surface uses canonical register flow', fs.existsSync(registerDir) && fs.existsSync(path.join(registerDir, 'components/RoleSelectorStep.jsx')) && fs.existsSync(path.join(registerDir, 'components/AccountFormStep.jsx')));
-check('buyer seller dealer registration routes', onboarding.includes("id: 'buyer'") && onboarding.includes("id: 'individual_seller'") && onboarding.includes("id: 'dealer'") && onboarding.includes("id: 'inspector'") && onboarding.includes('authRegister'));
+check('single onboarding flow', onboarding.includes('PUBLIC_ROLES') && onboarding.includes('authRegister') && !fs.existsSync(registerDir));
+check('registration surface uses canonical register flow', fs.existsSync(path.join(root, 'src/components/onboarding/roles.ts')) && fs.existsSync(path.join(root, 'src/components/onboarding/validation.ts')) && fs.existsSync(path.join(root, 'src/components/onboarding/fields.tsx')));
+check('buyer seller dealer registration routes', ['buyer', 'seller', 'dealer', 'service_business', 'professional'].every((id) => read('src/components/onboarding/roles.ts').includes(`id: '${id}'`)) && onboarding.includes('authRegister'));
 check('inspector application uses canonical API', onboarding.includes('inspectorAPI.apply'));
-check('staff self registration blocked', onboarding.includes('invitation/admin managed'));
-check('auth modal uses AuthContext', auth.includes('useAuth()') && auth.includes('login(email.trim(), password)'));
+check('staff self registration blocked', read('src/components/onboarding/roles.ts').includes('NON_SELF_REGISTRABLE') && !/id: '(admin|broker|ghost_checker|moderator)'/.test(read('src/components/onboarding/roles.ts')));
+check('login page uses AuthContext (the modal is a redirect shim)', read('src/pages/LoginPage.jsx').includes('useAuth()') && read('src/pages/LoginPage.jsx').includes('login({') && auth.includes('loginPathFor'));
 check('dashboard role shell', dashboard.includes('const configs') && dashboard.includes('ghost_checker') && dashboard.includes('dealer') && dashboard.includes('individual_seller'));
 check('dashboard live control-plane source', dashboard.includes('getControlPlaneSnapshot') && dashboard.includes('getDealerDashboard') && dashboard.includes('getOwnershipDashboard'));
 check('dashboard wired into app', app.includes('<DashboardHub user={authUser} vehicles={vehicles}') && app.includes("activeNav === 'dashboard'"));

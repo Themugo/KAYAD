@@ -1,5 +1,8 @@
+import { useState } from 'react';
+import { automotiveApi } from '../services/api';
 import { ArrowLeft, CheckCircle2, Clock, FileCheck2, MapPin, Phone, Shield, Star, Wrench } from 'lucide-react';
-import type { InspectionProvider, InspectionPackage } from '../types/inspection';
+import type { InspectionProvider, InspectionPackage, ServiceTaxonomy } from '../types/inspection';
+import CapabilityBadges, { categoryLabel, capabilityScope } from '../components/CapabilityBadges';
 import type React from 'react';
 
 const COLORS = {
@@ -17,10 +20,23 @@ interface ProviderProfilePageProps {
   error?: string | null;
   onBack: () => void;
   onBook: () => void;
+  taxonomy?: ServiceTaxonomy | null;
 }
 
-export default function ProviderProfilePage({ provider, loading, error, onBack, onBook }: ProviderProfilePageProps) {
+export default function ProviderProfilePage({ provider, loading, error, onBack, onBook, taxonomy = null }: ProviderProfilePageProps) {
   const packages = provider.packages || [];
+  const [aff, setAff] = useState<{ state: 'idle' | 'busy' | 'ok' | 'error'; text?: string }>({ state: 'idle' });
+  const requestAffiliation = async () => {
+    setAff({ state: 'busy' });
+    try {
+      await automotiveApi.requestAffiliation(provider.id);
+      setAff({ state: 'ok', text: 'Request sent. It only counts once this business confirms you.' });
+    } catch (e: any) {
+      const status = e?.response?.status;
+      setAff({ state: 'error', text: status === 401 ? 'Sign in to request an affiliation.' : (e?.response?.data?.message || 'The request could not be sent.') });
+    }
+  };
+  const caps = provider.capabilities || [];
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.bg }}>
@@ -29,7 +45,7 @@ export default function ProviderProfilePage({ provider, loading, error, onBack, 
           <button type="button" onClick={onBack} className="inline-flex items-center gap-2 font-semibold" style={{ color: COLORS.navy }}>
             <ArrowLeft size={18} /> Back to providers
           </button>
-          <span className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: COLORS.muted }}>Inspection provider</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: COLORS.muted }}>Independent business</span>
         </div>
       </header>
 
@@ -50,7 +66,7 @@ export default function ProviderProfilePage({ provider, loading, error, onBack, 
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h1 className="text-2xl md:text-3xl font-bold">{provider.companyName}</h1>
-                      {provider.verification.status === 'verified' && <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold bg-white/15"><Shield size={13} /> Verified</span>}
+                      {provider.verification.status === 'verified' && <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold bg-white/15"><Shield size={13} /> Verified business</span>}
                     </div>
                     <p className="mt-1 text-sm text-white/80">{provider.location.town}, {provider.location.county}</p>
                   </div>
@@ -60,10 +76,29 @@ export default function ProviderProfilePage({ provider, loading, error, onBack, 
               <div className="p-6 md:p-8 grid lg:grid-cols-[1.5fr_1fr] gap-8">
                 <div>
                   <div className="flex flex-wrap gap-5 text-sm mb-6" style={{ color: COLORS.muted }}>
-                    <span className="inline-flex items-center gap-1.5"><Star size={16} fill="#B8EEE7" color="#2F8F87" /> <strong style={{ color: COLORS.navy }}>{Number(provider.stats.averageRating || 0).toFixed(1)}</strong> ({provider.stats.totalReviews} reviews)</span>
-                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 size={16} /> {provider.stats.completedInspections} completed</span>
-                    {provider.stats.responseTimeMinutes > 0 && <span className="inline-flex items-center gap-1.5"><Clock size={16} /> ~{provider.stats.responseTimeMinutes} min response</span>}
+                    {provider.stats.totalReviews > 0 && provider.stats.averageRating != null
+                      ? <span className="inline-flex items-center gap-1.5"><Star size={16} fill="#B8EEE7" color="#2F8F87" /> <strong style={{ color: COLORS.navy }}>{Number(provider.stats.averageRating).toFixed(1)}</strong> ({provider.stats.totalReviews} reviews)</span>
+                      : <span>No reviews yet</span>}
+                    {provider.stats.completedInspections > 0 && <span className="inline-flex items-center gap-1.5"><CheckCircle2 size={16} /> {provider.stats.completedInspections} inspections completed</span>}
+                    {provider.team && provider.team.confirmedMembers > 0 && <span className="inline-flex items-center gap-1.5"><Shield size={16} /> {provider.team.confirmedMembers} confirmed team {provider.team.confirmedMembers === 1 ? 'member' : 'members'}</span>}
                   </div>
+
+                  <div role="note" className="mb-6 rounded-xl border px-4 py-3 text-sm" style={{ borderColor: COLORS.line, backgroundColor: COLORS.bg, color: COLORS.muted }}>
+                    <strong style={{ color: COLORS.navy }}>{provider.tradingName || provider.companyName} is an independent business.</strong>{' '}
+                    It performs and is responsible for its own work and sets its own prices. KAYAD lists businesses and checks the evidence described below;
+                    it does not perform these services, and a verified badge reduces risk but is not a guarantee.
+                  </div>
+
+                  <h2 className="text-sm font-bold mb-3" style={{ color: COLORS.navy }}>Services</h2>
+                  <CapabilityBadges capabilities={caps} taxonomy={taxonomy} />
+                  {caps.length > 0 && (
+                    <ul className="mt-3 space-y-1 text-xs" style={{ color: COLORS.muted }}>
+                      {caps.map((c, i) => (
+                        <li key={i}><strong style={{ color: COLORS.navy }}>{categoryLabel(taxonomy, c.category)}</strong>: {c.status === 'verified' ? 'verified by KAYAD' : 'declared by the business, not verified'} · {capabilityScope(c)}{c.travelsToCustomer ? ' · says it travels to the vehicle' : ''}{c.individual ? ' · specific team member' : ''}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="mb-6" />
 
                   {provider.description && <p className="text-base leading-7" style={{ color: COLORS.muted }}>{provider.description}</p>}
 
@@ -80,18 +115,24 @@ export default function ProviderProfilePage({ provider, loading, error, onBack, 
 
                 <aside className="rounded-2xl p-5 md:p-6 h-fit" style={{ backgroundColor: COLORS.bg }}>
                   <div className="flex items-center gap-2 font-semibold" style={{ color: COLORS.navy }}><FileCheck2 size={18} /> What you can book</div>
-                  <p className="text-sm mt-2" style={{ color: COLORS.muted }}>Select from this provider’s published packages. Final pricing is calculated and confirmed by KAYAD before payment.</p>
+                  <p className="text-sm mt-2" style={{ color: COLORS.muted }}>Select from this business’s published inspection packages. The price is the business’s own; the amount you pay is calculated from your booking when you pay.</p>
                   <div className="mt-5 space-y-3">
                     {packages.length ? packages.map((pkg) => <PackageRow key={pkg.id} pkg={pkg} />) : <p className="text-sm" style={{ color: COLORS.muted }}>No active packages are currently published.</p>}
                   </div>
-                  {packages.length > 0 && <button type="button" onClick={onBook} className="mt-5 w-full rounded-xl py-3.5 font-bold text-white shadow-sm" style={{ backgroundColor: COLORS.teal }}>Continue to booking</button>}
-                  <p className="text-xs mt-3 text-center" style={{ color: COLORS.muted }}>Availability is checked again when you choose a time.</p>
+                  {packages.length > 0 && <button type="button" onClick={onBook} className="mt-5 w-full rounded-xl py-3.5 font-bold text-white shadow-sm min-h-[44px]" style={{ backgroundColor: '#0F766E' }}>Continue to booking</button>}
+                  {packages.length === 0 && <p className="mt-4 text-sm" style={{ color: COLORS.muted }}>KAYAD does not take bookings or payments for this business’s other services yet. Contact the business directly to arrange work and agree the price.</p>}
+                  <div className="mt-5 pt-4 border-t text-center" style={{ borderColor: COLORS.line }}>
+                    <button type="button" onClick={() => void requestAffiliation()} disabled={aff.state === 'busy'} className="min-h-[44px] px-3 text-sm font-semibold underline" style={{ color: COLORS.navy }}>I work at this business</button>
+                    <p className="text-xs" style={{ color: COLORS.muted }}>Asks the business to confirm you as part of its team.</p>
+                    {aff.text && <p role={aff.state === 'error' ? 'alert' : 'status'} className="text-xs mt-1" style={{ color: aff.state === 'error' ? '#b91c1c' : COLORS.navy }}>{aff.text}</p>}
+                  </div>
+                  <p className="text-xs mt-3 text-center" style={{ color: COLORS.muted }}>Availability is checked again when you choose a time. Roadside help is not dispatched or tracked by KAYAD.</p>
                 </aside>
               </div>
             </section>
 
             {(provider.credentials?.length || provider.recentReviews?.length) ? <section className="mt-6 grid md:grid-cols-2 gap-6">
-              {!!provider.credentials?.length && <Panel title="Verified credentials"><div className="space-y-3">{provider.credentials.map(c => <div key={c.id} className="flex gap-3"><Shield size={17} style={{ color: COLORS.teal }} /><div><p className="font-semibold" style={{ color: COLORS.navy }}>{c.name}</p><p className="text-sm" style={{ color: COLORS.muted }}>{[c.issuingBody, c.expiryDate && `Valid to ${c.expiryDate}`].filter(Boolean).join(' · ')}</p></div></div>)}</div></Panel>}
+              {!!provider.credentials?.length && <Panel title="Credentials checked by KAYAD"><p className="text-xs mb-3" style={{ color: COLORS.muted }}>These are business credentials. They do not certify the qualifications of individual staff.</p><div className="space-y-3">{provider.credentials.map(c => <div key={c.id} className="flex gap-3"><Shield size={17} style={{ color: COLORS.teal }} /><div><p className="font-semibold" style={{ color: COLORS.navy }}>{c.name}</p><p className="text-sm" style={{ color: COLORS.muted }}>{[c.issuingBody, c.expiryDate && `Valid to ${c.expiryDate}`].filter(Boolean).join(' · ')}</p></div></div>)}</div></Panel>}
               {!!provider.recentReviews?.length && <Panel title="Recent reviews"><div className="space-y-4">{provider.recentReviews.slice(0, 5).map(r => <div key={r.id}><div className="flex gap-1">{Array.from({length: 5}).map((_, i) => <Star key={i} size={14} fill={i < r.rating ? '#B8EEE7' : 'none'} color="#2F8F87" />)}</div>{r.comment && <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>{r.comment}</p>}</div>)}</div></Panel>}
             </section> : null}
           </>

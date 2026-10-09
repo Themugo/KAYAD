@@ -34,9 +34,9 @@ export const EscrowWorkflowSection: FC = () => {
       step: '02',
       title: 'Segregated Bank Deposit',
       actor: 'Buyer → Escrow Vault',
-      desc: 'Buyer deposits funds into KAYAD regulated CBK-licensed bank escrow account.',
+      desc: 'Buyer pays using the funding method shown for the deal; KAYAD marks it funded once it verifies receipt.',
       icon: <Lock className="w-5 h-5 text-[#13B8A6]" />,
-      badge: 'FUNDS VAULTED'
+      badge: 'FUNDING VERIFIED'
     },
     {
       step: '03',
@@ -81,7 +81,7 @@ export const EscrowWorkflowSection: FC = () => {
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-slate-100 font-mono font-black text-xs uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4 text-[#13B8A6]" />
-              <span>REGULATED MULTI-SIGNATURE ESCROW VAULT</span>
+              <span>ESCROW ON APPROVED LISTINGS</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl font-black text-[#176B87] dark:text-white font-serif tracking-tight leading-tight">
@@ -89,7 +89,7 @@ export const EscrowWorkflowSection: FC = () => {
             </h2>
 
             <p className="text-xs sm:text-sm text-[#66808A] dark:text-slate-300 font-sans font-medium leading-relaxed">
-              Your money is never sent directly to a stranger. Funds remain 100% secured in CBK-regulated bank escrow until you physically inspect and approve the vehicle.
+              Your money is never sent directly to a stranger. Where escrow applies, KAYAD records your payment as held until you inspect and accept the vehicle or a dispute is decided.
             </p>
           </div>
 
@@ -177,7 +177,7 @@ export const EscrowWorkflowSection: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">Regulated Custody</p>
-              <p className="text-[10px] text-slate-300 font-sans">CBK Licensed Bank Accounts</p>
+              <p className="text-[10px] text-slate-300 font-sans">Funding verified by KAYAD</p>
             </div>
           </div>
 
@@ -206,8 +206,8 @@ export const EscrowWorkflowSection: FC = () => {
               <Award className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">100% Protection</p>
-              <p className="text-[10px] text-slate-300 font-sans">Buyer Money-Back Guarantee</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Dispute process</p>
+              <p className="text-[10px] text-slate-300 font-sans">Refunds only if staff approve one</p>
             </div>
           </div>
 

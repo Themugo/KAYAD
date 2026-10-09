@@ -11,7 +11,7 @@ const atomic = read('backend/utils/atomicTransactions.js');
 const routes = read('backend/routes/disputeRoutes.js');
 const migrationDir = path.join(root, 'supabase/migrations');
 const migrations = fs.readdirSync(migrationDir).filter((f) => f.includes('dispute_escrow_consolidation'));
-const activeEscrowSurface = read('src/features/EscrowView.tsx');
+const activeEscrowSurface = read('src/features/escrow/ParticipantEscrowDesk.tsx') + read('src/services/escrowApi.ts');
 const evidencePanel = read('src/components/EvidenceUpload.jsx');
 
 assert(service.includes('export async function openDispute'), 'canonical openDispute service missing');

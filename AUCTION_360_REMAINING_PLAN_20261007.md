@@ -725,3 +725,66 @@ No new blocking items were introduced by Stage 14.
 7. Items from Stage 13/14 carry-forward (Supabase / M-Pesa / deployment
    credentials, `/api/cars/:id` winner exposure, `idempotencyCheck`
    ordering review, sandbox `EBADENGINE`) are unchanged.
+
+---
+
+## STAGE 14A carry-forward — 2026-10-08
+
+1. **Closed:** "Navigation structure has no admin authority" (Stage 15 item 1).
+   See `NAVIGATION_AUTHORITY_MODEL_20261008.md`.
+2. Deploy order: apply `20261008150000_platform_config_navigation.sql`, then
+   the backend. Staging smoke: admin `PUT /api/admin/config {navigation}` →
+   `GET /api/admin/public/config` → confirm the header and the
+   `"Navigation configuration updated"` audit row.
+3. Navigation changes take effect on next page load (no live push); the
+   four-fold `/admin/public/config` fetch would be removed by a shared cache.
+4. Labels and role-based visibility are deliberately not admin-configurable;
+   revisit only with a controlled-label model.
+5. `pages/admin/AdminSettings*.jsx` (and sibling legacy admin pages) are not
+   reachable from the app; schedule a dedicated sweep.
+6. Stage 15 items 2–7 and the Stage 13/14 carry-forward are unchanged.
+
+
+## Update — Frontend Test Recovery complete (2026-10-09)
+Frontend suite is fully green; no design stage was started. Carry-forward: desktop hero pair-index effect-reset race; reduced-motion handling for the Featured vehicles smooth scroll; run the two environment-blocked validators on Node ≥ 22.22.2 with real provider credentials; deploy order for Stage 14A migration `20261008150000_platform_config_navigation.sql` unchanged.
+
+
+## Update — Inspection convergence complete (2026-10-09)
+No further stage started. Ranked carry-forward: (1) owner decision on charging for KAYAD inspections + settlement path; (2) refund execution for paid provider cancellations; (3) `ghostCheckFee` single store; (4) wizard walkthrough test for BookingFlow; (5) staging browser run with real accounts; (6) inspector/provider-staff surfaces and role confusion (D9). Earlier carry-forward unchanged.
+
+
+## Update — Automotive Services convergence complete (2026-10-09)
+Ranked carry-forward: (1) owner decisions on charging for KAYAD inspections, commission posture and any escrow (nothing assumed); (2) staging run on live Supabase with the new migration applied first, real accounts and storage; (3) dispute/refund/complaint process for providers; (4) repair/roadside request journeys only once a provider-side workflow exists; (5) model-level compatibility catalog and travel-time; (6) optional price sort; (7) bring legacy individual-inspector approval onto the evidence rules; (8) nav-chrome touch targets. Earlier carry-forward unchanged.
+
+
+## Update — UX convergence complete (2026-10-09)
+Added to the ranked carry-forward: sweep remaining unsupported trust claims ("Guaranteed", "100% Verified", dormant `VehicleDetailPage.tsx`); owner decision on whether sellers may see inspection reports; provider job dashboard only after a request workflow exists. Earlier carry-forward unchanged.
+
+---
+## 2026-10-09 — Escrow remaining work (ranked by financial risk)
+1. DECISION: real custody model (bank transfer vs M-Pesa path); no regulated-account claim until evidenced.
+2. ENV: run RPC/RLS proofs on real Supabase and an M-Pesa sandbox end to end (funding, callback replay, refund completion, payout failure).
+3. Unify the three auto-release clocks (DB 3d from funding, cron 7d from creation, STK RPC +3d).
+4. DECISION: auction escrow creation is unreachable (`paymentStatus=paid` required but escrow payment paths refused).
+5. DECISION: should `closed` require verified payout/refund completion?
+6. Finish `compareEscrowBalances` (still counts retired `held`) and add payout reconciliation.
+7. DECISION: dealer team-member access to escrows.
+8. Replace mock `AdminPage` escrow screens; decide the "Escrow Vault" naming; regenerate the stale route security matrix as its own change.
+9. Out of scope, noted: `dealerRoutes` `PUT /settlement` shadows imported `update`.
+
+---
+## 2026-10-09 — Identity & onboarding remaining work (ranked)
+1. VERIFY REMOTELY: push, confirm `Security Audit` and `Backend Quality Checks` green on the new commit and that `Bundle Analysis` runs on the next pull request (remote run `37886372392` log was not obtainable here).
+2. ENV: exercise the real register → email → verify → sign-in → onboarding path against a live backend and a real mailbox (all browser journeys here used a mocked backend).
+3. DECISION: fold the anonymous independent-inspector application into an account-first flow (needs a backend contract change; today it is account-less until admin approval).
+4. DECISION: broker role: support end to end (schema, approval, workspace) or retire the DB enum value; it is currently not offered anywhere publicly.
+5. Provider/affiliation: a signed-in, email-verified `user` still reaches the provider form only through `/?nav=inspections&action=apply-provider`; consider a status panel that shows the application's state (submitted / info required / approved / rejected) using the existing provider endpoints.
+6. Dealer onboarding page still uses legacy inline styling; restyle on `PremiumAuthShell` (functionality and truthful completion states are already fixed).
+7. Server-side: expose a single `GET /me/onboarding-status` aggregating account, dealer and provider states so the frontend need not infer them.
+8. Remove the legacy `/admin/login` alias once admin bookmarks are migrated.
+
+## Support follow-ups (2026-10-09)
+1. Staging: run the privilege queries and a staff/marketing round-trip (Runtime Certification).
+2. DECISION: reopen window (14d), SLA targets (none), attachments (private storage + scanning first), whether `admin` keeps support powers.
+3. Provider-side cases for inspection/service bookings; support-specific rate limits; case assignment rules/auto-routing; canned replies.
+4. Shared adapter `aggregate()` still caps at 1000 rows and mishandles `$gte` in `$match` (other domains).

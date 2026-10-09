@@ -45,17 +45,57 @@ export interface InspectionProvider {
     verifiedAt?: string;
   };
   stats: {
-    averageRating: number;
+    /** null when the provider has no reviews yet: "no rating", never 0. */
+    averageRating: number | null;
     totalReviews: number;
     completedInspections: number;
-    responseTimeMinutes: number;
-    acceptanceRate: number;
+    responseTimeMinutes: number | null;
+    acceptanceRate: number | null;
   };
+  /** Declared vs administrator-verified capabilities from the canonical taxonomy. */
+  capabilities?: ProviderCapability[];
+  /** Straight-line distance from the point the customer chose, only when both points are known. Not a travel time. */
+  distanceKm?: number | null;
+  /** True/false only when the provider travels, has a stored radius and a distance could be computed; otherwise null. */
+  withinServiceRadius?: boolean | null;
+  team?: { confirmedMembers: number };
   packages?: InspectionPackage[];
   startingPrice?: number | null;
   branches?: Branch[];
   credentials?: Credential[];
   recentReviews?: Review[];
+}
+
+export type CapabilityStatus = 'declared' | 'verified';
+
+export interface ProviderCapability {
+  category: string;
+  subcategory: string | null;
+  status: CapabilityStatus;
+  vehicleMakes: 'all' | string[];
+  powertrains: string[];
+  travelsToCustomer: boolean;
+  /** True when this belongs to one affiliated person rather than the business. */
+  individual: boolean;
+}
+
+export interface TaxonomySubcategory { code: string; label: string }
+export interface TaxonomyCategory {
+  code: string;
+  label: string;
+  description: string;
+  highRisk: boolean;
+  bookable: boolean;
+  requestable: boolean;
+  travelsToCustomer: boolean;
+  appliesToPowertrains?: string[];
+  subcategories: TaxonomySubcategory[];
+}
+export interface TaxonomySymptom { code: string; label: string; suggests: string[] }
+export interface ServiceTaxonomy {
+  categories: TaxonomyCategory[];
+  powertrains: { code: string; label: string }[];
+  symptoms: TaxonomySymptom[];
 }
 
 export interface InspectionPackage {

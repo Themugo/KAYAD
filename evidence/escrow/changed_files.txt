@@ -1,0 +1,54 @@
+Files OLD/backend/controllers/escrowController.js and NEW/backend/controllers/escrowController.js differ
+Files OLD/backend/controllers/escrowOperationsController.js and NEW/backend/controllers/escrowOperationsController.js differ
+Files OLD/backend/controllers/operationsController.js and NEW/backend/controllers/operationsController.js differ
+Files OLD/backend/openapi.yaml and NEW/backend/openapi.yaml differ
+Files OLD/backend/routes/adminRoutes.js and NEW/backend/routes/adminRoutes.js differ
+Files OLD/backend/routes/dealerRoutes.js and NEW/backend/routes/dealerRoutes.js differ
+Files OLD/backend/routes/escrowRoutes.js and NEW/backend/routes/escrowRoutes.js differ
+Files OLD/backend/services/auctionSettlement.service.js and NEW/backend/services/auctionSettlement.service.js differ
+Files OLD/backend/services/escrow.service.js and NEW/backend/services/escrow.service.js differ
+Files OLD/backend/services/escrowConfiguration.service.js and NEW/backend/services/escrowConfiguration.service.js differ
+Files OLD/backend/services/escrowCron.js and NEW/backend/services/escrowCron.js differ
+Files OLD/backend/services/paymentService.js and NEW/backend/services/paymentService.js differ
+Files OLD/backend/services/reconciliationService.js and NEW/backend/services/reconciliationService.js differ
+Files OLD/backend/utils/escrowAccess.js and NEW/backend/utils/escrowAccess.js differ
+Files OLD/scripts/validate-dispute-canonical-lifecycle.mjs and NEW/scripts/validate-dispute-canonical-lifecycle.mjs differ
+Files OLD/src/App.tsx and NEW/src/App.tsx differ
+Files OLD/src/__tests__/components/EscrowView.test.tsx and NEW/src/__tests__/components/EscrowView.test.tsx differ
+Files OLD/src/__tests__/features/escrowDeepLink.test.tsx and NEW/src/__tests__/features/escrowDeepLink.test.tsx differ
+Files OLD/src/components/TrustBadgeMatrix.tsx and NEW/src/components/TrustBadgeMatrix.tsx differ
+Files OLD/src/components/detail/VehicleDetailPage.tsx and NEW/src/components/detail/VehicleDetailPage.tsx differ
+Files OLD/src/components/home/EscrowTrustBanner.tsx and NEW/src/components/home/EscrowTrustBanner.tsx differ
+Files OLD/src/components/home/EscrowWorkflowSection.tsx and NEW/src/components/home/EscrowWorkflowSection.tsx differ
+Files OLD/src/components/home/GlobalSearchSection.tsx and NEW/src/components/home/GlobalSearchSection.tsx differ
+Files OLD/src/components/home/TrustMetricsBar.tsx and NEW/src/components/home/TrustMetricsBar.tsx differ
+Files OLD/src/components/home/WhyKayadComparison.tsx and NEW/src/components/home/WhyKayadComparison.tsx differ
+Files OLD/src/components/reports/ArchitectureReportModal.tsx and NEW/src/components/reports/ArchitectureReportModal.tsx differ
+Files OLD/src/components/sell/SellPage.tsx and NEW/src/components/sell/SellPage.tsx differ
+Files OLD/src/context/MarketplaceContext.tsx and NEW/src/context/MarketplaceContext.tsx differ
+Files OLD/src/features/DealersView.tsx and NEW/src/features/DealersView.tsx differ
+Files OLD/src/features/DealersView/components/DealerProfileModal.tsx and NEW/src/features/DealersView/components/DealerProfileModal.tsx differ
+Files OLD/src/features/DealersView/components/DealersView.tsx and NEW/src/features/DealersView/components/DealersView.tsx differ
+Files OLD/src/features/EscrowView.tsx and NEW/src/features/EscrowView.tsx differ
+Files OLD/src/features/UnifiedCommunicationHub.tsx and NEW/src/features/UnifiedCommunicationHub.tsx differ
+Files OLD/src/features/escrow/index.ts and NEW/src/features/escrow/index.ts differ
+Files OLD/src/services/escrowApi.ts and NEW/src/services/escrowApi.ts differ
+Only in NEW/backend/data: uploads.json
+Only in NEW/backend/tests/escrow: auctionEscrowCreation.test.js
+Only in NEW/backend/tests/escrow: escrowControllerPrivacy.test.js
+Only in NEW/backend/tests/escrow: escrowCron.test.js
+Only in NEW/backend/tests/escrow: escrowOperationsDashboard.test.js
+Only in NEW/backend/tests/escrow: escrowProgramAndOperations.test.js
+Only in NEW/backend/tests/escrow: escrowViewModel.test.js
+Only in NEW/backend/tests/escrow: purchaseEscrowDecision.test.js
+Only in NEW/backend/utils: escrowViewModel.js
+Only in NEW/src/__tests__/features: escrow
+Only in NEW/src/__tests__/features: escrowClaims.test.ts
+Only in NEW/src/features/escrow: ActionDialog.tsx
+Only in NEW/src/features/escrow: EscrowOperationsDesk.tsx
+Only in NEW/src/features/escrow: ParticipantEscrowDesk.tsx
+Only in NEW/src/features/escrow: PublicEscrowExplainer.tsx
+Only in NEW/src/features/escrow: escrowModel.ts
+Only in NEW/supabase/migrations: 20261009130000_escrow_custody_binding_and_purchase_eligibility.sql
+Only in NEW: ESCROW_PRODUCT_DISCOVERY.md
+Only in OLD/src/components: escrow

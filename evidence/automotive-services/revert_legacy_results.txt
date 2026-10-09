@@ -1,0 +1,14 @@
+M1 drop lifecycle check in assign
+Tests:       1 failed, 5 passed, 6 total
+M2 drop verification check in assign
+Tests:       1 failed, 5 passed, 6 total
+M3 drop assign provider gate
+Tests:       2 failed, 4 passed, 6 total
+M4 availableInspectors lifecycle filter removed
+Tests:       1 failed, 5 passed, 6 total
+M5 availableInspectors status filter removed
+Tests:       1 failed, 5 passed, 6 total
+M6 availableInspectors verification filter removed
+Tests:       1 failed, 5 passed, 6 total
+RESTORED
+Tests:       6 passed, 6 total

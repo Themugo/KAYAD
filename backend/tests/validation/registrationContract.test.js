@@ -57,9 +57,9 @@ describe("registration contract", () => {
   });
 
   it("keeps dealer registration fields required at the onboarding surface", () => {
-    const source = fs.readFileSync(new URL("../../../src/components/OnboardingFlow.tsx", import.meta.url), "utf8");
-    expect(source).toMatch(/role === 'dealer' && !form\.businessName\.trim\(\)/);
-    expect(source).toMatch(/role === 'dealer' && !form\.location\.trim\(\)/);
+    const source = fs.readFileSync(new URL("../../../src/components/onboarding/validation.ts", import.meta.url), "utf8");
+    expect(source).toMatch(/backendRole === 'dealer'[\s\S]{0,80}!form\.businessName\.trim\(\)/);
+    expect(source).toMatch(/backendRole === 'dealer'[\s\S]{0,200}!form\.location\.trim\(\)/);
   });
 
   it("does not block resend verification on external email delivery", () => {
@@ -80,10 +80,12 @@ describe("registration contract", () => {
 
 describe("registration onboarding integration contract", () => {
   it("frontend onboarding includes the canonical buyer-to-user mapping", () => {
-    const source = fs.readFileSync(new URL("../../../src/components/OnboardingFlow.tsx", import.meta.url), "utf8");
-    expect(source).toMatch(/role === 'buyer' \? 'user' : role/);
-    expect(source).toMatch(/businessName/);
-    expect(source).toMatch(/location/);
+    const roles = fs.readFileSync(new URL("../../../src/components/onboarding/roles.ts", import.meta.url), "utf8");
+    const flow = fs.readFileSync(new URL("../../../src/components/OnboardingFlow.tsx", import.meta.url), "utf8");
+    expect(roles).toMatch(/id: 'buyer'[\s\S]{0,300}backendRole: 'user'/);
+    expect(flow).toMatch(/role: backendRole/);
+    expect(flow).toMatch(/businessName/);
+    expect(flow).toMatch(/location/);
   });
 
   it("verification email links target the frontend verification page", () => {

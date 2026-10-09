@@ -2,7 +2,7 @@
 // KAYAD INSPECTION MARKETPLACE - BOOKING FLOW
 // ============================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -17,7 +17,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { inspectionApi } from '../services/api';
-import { getPaymentStatus } from '../../../services/paymentApi';
+import { settleBookingPayment, InspectionPaymentError } from '../services/inspectionPayment';
 import type {
   InspectionProvider,
   InspectionPackage,
@@ -37,7 +37,8 @@ const KAYAD_COLORS = {
 
 interface BookingFlowProps {
   provider: InspectionProvider;
-  onComplete?: (bookingId: string) => void;
+  /** Called only after the server reports the booking paid. `reference` is the server-issued booking reference. */
+  onComplete?: (bookingId: string, reference?: string) => void;
   onCancel?: () => void;
 }
 
@@ -55,6 +56,11 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
   const [loading, setLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // The booking created by the first submit. A payment retry must pay THIS booking:
+  // creating another one collides with the slot the unpaid booking still holds.
+  const createdBooking = useRef<{ id: string; reference?: string } | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const [formData, setFormData] = useState({
     // Vehicle
@@ -129,62 +135,54 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
     if (loading) return;
     setErrorMessage(null);
     setLoading(true);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
-      const booking = await inspectionApi.createBooking({
-        packageId: formData.selectedPackage!.id,
-        customerName: formData.customerName,
-        customerEmail: formData.customerEmail,
-        customerPhone: formData.customerPhone,
-        vehicleMake: formData.vehicleMake,
-        vehicleModel: formData.vehicleModel,
-        vehicleYear: formData.vehicleYear,
-        vehicleRegistration: formData.vehicleRegistration,
-        vehicleVin: formData.vehicleVin,
-        vehicleType: formData.vehicleType,
-        county: formData.county,
-        town: formData.town,
-        inspectionAddress: formData.inspectionAddress,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-        isMobile: formData.isMobile,
-        sellerName: formData.sellerName,
-        sellerPhone: formData.sellerPhone,
-        sellerIsDealer: formData.sellerIsDealer,
-        scheduledDate: formData.selectedDate,
-        scheduledTime: formData.selectedTime,
-        staffId: formData.selectedStaff,
-        notes: formData.notes,
-      });
-      const payment = await inspectionApi.initiatePayment(booking.id, formData.customerPhone);
-      if (payment?.paymentStatus === 'fully_paid') {
-        onComplete?.(booking.id);
-        return;
-      }
-      const checkoutRequestId = payment?.checkoutRequestID || payment?.checkoutID;
-      if (!checkoutRequestId) {
-        throw new Error('Payment prompt could not be started. Your booking remains pending payment.');
+      if (!createdBooking.current) {
+        const booking = await inspectionApi.createBooking({
+          packageId: formData.selectedPackage!.id,
+          customerName: formData.customerName,
+          customerEmail: formData.customerEmail,
+          customerPhone: formData.customerPhone,
+          vehicleMake: formData.vehicleMake,
+          vehicleModel: formData.vehicleModel,
+          vehicleYear: formData.vehicleYear,
+          vehicleRegistration: formData.vehicleRegistration,
+          vehicleVin: formData.vehicleVin,
+          vehicleType: formData.vehicleType,
+          county: formData.county,
+          town: formData.town,
+          inspectionAddress: formData.inspectionAddress,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          isMobile: formData.isMobile,
+          sellerName: formData.sellerName,
+          sellerPhone: formData.sellerPhone,
+          sellerIsDealer: formData.sellerIsDealer,
+          scheduledDate: formData.selectedDate,
+          scheduledTime: formData.selectedTime,
+          staffId: formData.selectedStaff,
+          notes: formData.notes,
+        });
+        const raw = booking as unknown as { id: string; reference?: string; booking_reference?: string };
+        createdBooking.current = { id: raw.id, reference: raw.reference || raw.booking_reference };
       }
 
-      // The STK initiation response only proves that a prompt was sent.
-      // Completion is authoritative only after the backend payment record is
-      // settled by the M-Pesa callback and the inspection atomic RPC.
-      for (let attempt = 0; attempt < 30; attempt += 1) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        const status = await getPaymentStatus(checkoutRequestId);
-        if (status.status === 'success') {
-          onComplete?.(booking.id);
-          return;
-        }
-        if (['failed', 'cancelled', 'refunded'].includes(status.status)) {
-          throw new Error('M-Pesa payment was not completed. Your booking remains pending payment.');
-        }
-      }
-      throw new Error('Payment is still pending. Please wait for the M-Pesa confirmation before leaving this screen.');
+      const { id, reference } = createdBooking.current;
+      await settleBookingPayment(id, formData.customerPhone, { signal: controller.signal });
+      onComplete?.(id, reference);
     } catch (error) {
+      if (error instanceof InspectionPaymentError && error.kind === 'aborted') return;
       console.error('Booking failed:', error);
-      setErrorMessage(error instanceof Error ? error.message : 'We could not complete the booking. Please try again.');
+      const saved = createdBooking.current?.reference ? ` Reference ${createdBooking.current.reference}.` : '';
+      setErrorMessage(
+        error instanceof Error
+          ? (error instanceof InspectionPaymentError && saved ? `${error.message}${saved} You can retry payment from this screen or from My inspections.` : error.message)
+          : 'We could not complete the booking. Please try again.'
+      );
     } finally {
-      setLoading(false);
+      if (abortRef.current === controller) setLoading(false);
     }
   };
 
@@ -349,7 +347,9 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
         <div className="flex justify-between mt-8 pt-6 border-t" style={{ borderColor: KAYAD_COLORS.warmBeige }}>
           <button
             onClick={handleBack}
-            disabled={currentStep === 0}
+            // Once the server has created the booking its details are fixed: a payment retry pays that
+            // booking, so letting the customer edit earlier steps would show details that are not what is paid for.
+            disabled={currentStep === 0 || loading || Boolean(createdBooking.current)}
             className="px-6 py-3 rounded-lg font-medium disabled:opacity-50 flex items-center gap-2"
             style={{
               backgroundColor: KAYAD_COLORS.white,
@@ -383,7 +383,7 @@ export default function BookingFlow({ provider, onComplete, onCancel }: BookingF
                 color: KAYAD_COLORS.white
               }}
             >
-              {loading ? 'Starting payment...' : `Pay KES ${totalPrice.toLocaleString()}`}
+              {loading ? 'Waiting for M-Pesa…' : createdBooking.current ? 'Retry payment' : `Pay KES ${totalPrice.toLocaleString()}`}
             </button>
           )}
         </div>

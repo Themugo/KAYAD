@@ -1,0 +1,52 @@
+PASS  desktop finder: one h1 and platform notice
+PASS  desktop finder: both businesses listed, no 0.0 rating
+PASS  desktop finder: verified and declared badges differ
+PASS  desktop finder: request carried no status/verified/sort
+PASS  desktop finder: no horizontal scroll
+PASS  desktop hybrid: category sent; declared-only business is shown only because the (mock) server returned it
+PASS  desktop symptom: not a diagnosis
+PASS  desktop roadside: no-dispatch notice and emergency numbers
+PASS  desktop roadside: empty result is explained with a broader search
+PASS  desktop profile: no fake booking button for a non-bookable business
+PASS  desktop profile: no horizontal scroll
+PASS  desktop finder: no page errors
+PASS  desktop location: nothing sent before consent
+PASS  desktop location: only an approximate point is sent  {"page":"1","limit":"12","nearLat":"-1.29","nearLng":"36.82"}
+PASS  desktop location: denial falls back to county/town
+PASS  desktop location: manual county works
+PASS  desktop failure: error with retry, not "no businesses"
+PASS  mobile finder: one h1 and platform notice
+PASS  mobile finder: both businesses listed, no 0.0 rating
+PASS  mobile finder: verified and declared badges differ
+PASS  mobile finder: request carried no status/verified/sort
+PASS  mobile finder: no horizontal scroll
+PASS  mobile hybrid: category sent; declared-only business is shown only because the (mock) server returned it
+PASS  mobile symptom: not a diagnosis
+PASS  mobile roadside: no-dispatch notice and emergency numbers
+PASS  mobile roadside: empty result is explained with a broader search
+PASS  mobile profile: no fake booking button for a non-bookable business
+PASS  mobile profile: no horizontal scroll
+PASS  mobile finder: no page errors
+PASS  mobile location: nothing sent before consent
+PASS  mobile location: only an approximate point is sent  {"page":"1","limit":"12","nearLat":"-1.29","nearLng":"36.82"}
+PASS  mobile location: denial falls back to county/town
+PASS  mobile location: manual county works
+PASS  mobile failure: error with retry, not "no businesses"
+PASS  a11y: every visible control has an accessible name
+PASS  a11y: finder controls are at least 40px tall (site navigation chrome is out of scope for this page)
+PASS  a11y: keyboard focus moves
+PASS  desktop admin: approve is disabled with no written basis
+PASS  desktop admin: document link is a safe https link
+PASS  desktop admin: server refusal is shown and stage did not change
+PASS  desktop admin: approval posts the chosen route and notes
+PASS  desktop admin: no horizontal scroll
+PASS  desktop admin: no page errors
+PASS  mobile admin: approve is disabled with no written basis
+PASS  mobile admin: document link is a safe https link
+PASS  mobile admin: server refusal is shown and stage did not change
+PASS  mobile admin: approval posts the chosen route and notes
+PASS  mobile admin: no horizontal scroll
+PASS  mobile admin: no page errors
+PASS  non-admin: admin governance is not rendered
+
+50/50 passed

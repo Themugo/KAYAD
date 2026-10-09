@@ -1,4 +1,5 @@
 import { useState, useEffect, type ReactNode } from 'react';
+import { loginPathFor } from '../../utils/authIntent';
 import AdminSidebar from './AdminSidebar';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
@@ -28,7 +29,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   if (loading) return null;
 
   if (!isAuth) {
-    return <Navigate to="/login" state={{ from: loc }} replace />;
+    return <Navigate to={loginPathFor(loc)} replace />;
   }
 
   const STAFF_ROLES = ['admin', 'superadmin', 'moderator', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager', 'ghost_checker'];

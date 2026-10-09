@@ -1,64 +1,64 @@
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { resetPassword } from '../services/authApi';
-
-const strong = (value: string) => value.length >= 8 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value) && /[^A-Za-z0-9]/.test(value);
+import PremiumAuthShell from '../components/auth/PremiumAuthShell';
+import { PasswordField } from '../components/onboarding/fields';
+import { passwordProblems } from '../components/onboarding/validation';
+import { buildAuthPath, readAuthContext } from '../utils/authIntent';
 
 export default function ResetPasswordPage() {
-  const token = useMemo(() => new URLSearchParams(window.location.search).get('token') || '', []);
+  const location = useLocation();
+  const ctx = readAuthContext(location, { useStored: true });
+  const loginPath = buildAuthPath('login', ctx);
+  const token = useMemo(() => new URLSearchParams(location.search).get('token') || '', [location.search]);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-  const [error, setError] = useState(token ? '' : 'This password-reset link is missing its token.');
+  const [errors, setErrors] = useState<{ password?: string; confirm?: string; form?: string }>(token ? {} : { form: 'This password-reset link is missing its token. Request a new one.' });
+  const inFlight = useRef(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!token) return;
-    if (!strong(password)) {
-      setError('Password must be 8+ characters and include uppercase, lowercase, number and special character.');
-      return;
-    }
-    if (password !== confirm) {
-      setError('Passwords do not match.');
-      return;
-    }
+    if (!token || inFlight.current) return;
+    const next: typeof errors = {};
+    const problems = passwordProblems(password);
+    if (problems.length) next.password = `Password needs: ${problems.join(', ').toLowerCase()}.`;
+    if (password !== confirm) next.confirm = 'Passwords do not match.';
+    setErrors(next);
+    if (next.password || next.confirm) return;
+    inFlight.current = true;
     setLoading(true);
-    setError('');
     try {
       await resetPassword({ token, password });
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'This reset link is invalid or expired.');
+      setErrors({ form: err instanceof Error ? err.message : 'This reset link is invalid or expired. Request a new one.' });
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0A3340] text-xl font-black text-amber-300">K</div>
-        <h1 className="mt-5 text-center text-2xl font-black text-[#0A3340]">Choose a new password</h1>
-        {done ? (
-          <div className="mt-6 space-y-4">
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">Your password has been reset successfully. You can now sign in with the new password.</div>
-            <Link to="/login" className="block w-full rounded-xl bg-[#0A3340] px-5 py-3 text-center text-sm font-bold text-white">Continue to sign in</Link>
-          </div>
-        ) : (
-          <form onSubmit={submit} className="mt-7 space-y-4">
-            <label className="text-xs font-bold text-slate-600">New password
-              <input className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm outline-none focus:border-[#176B87]" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required />
-            </label>
-            <label className="text-xs font-bold text-slate-600">Confirm password
-              <input className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm outline-none focus:border-[#176B87]" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" required />
-            </label>
-            <p className="text-[11px] leading-5 text-slate-500">Use at least 8 characters with uppercase, lowercase, a number and a special character.</p>
-            {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</div>}
-            <button disabled={loading || !token} className="w-full rounded-xl bg-[#0A3340] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{loading ? 'Updating…' : 'Update password'}</button>
-          </form>
-        )}
-      </section>
-    </main>
+    <PremiumAuthShell mode="signin" eyebrow="Account recovery" title="Choose a new password" description="Pick a strong password you do not use anywhere else.">
+      {done ? (
+        <div className="kayad-auth-form">
+          <div className="kayad-auth-notice" role="status">Your password has been reset. Sign in with the new password.</div>
+          <Link to={loginPath} className="kayad-auth-submit text-center">Continue to sign in</Link>
+        </div>
+      ) : (
+        <form onSubmit={submit} className="kayad-auth-form" noValidate>
+          {errors.form && (
+            <div className="kayad-auth-error" role="alert">
+              {errors.form} <Link to="/forgot-password" className="font-bold underline">Request a new link</Link>
+            </div>
+          )}
+          <PasswordField label="New password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} showRules required />
+          <PasswordField label="Confirm password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} error={errors.confirm} required />
+          <button className="kayad-auth-submit" type="submit" disabled={loading || !token}>{loading ? 'Updating…' : 'Update password'}</button>
+        </form>
+      )}
+    </PremiumAuthShell>
   );
 }

@@ -62,7 +62,7 @@ export const FeaturedVehicles: FC<FeaturedVehiclesProps> = ({ isLoading: propsIs
               Featured Vehicles
             </h2>
             <p className="text-xs sm:text-sm text-[#66808A] font-sans font-medium mt-0.5">
-              Handpicked quality luxury & utility vehicles across Kenya, verified by 150-point inspection.
+              Handpicked quality luxury & utility vehicles across Kenya.
             </p>
           </div>
 
@@ -105,7 +105,7 @@ export const FeaturedVehicles: FC<FeaturedVehiclesProps> = ({ isLoading: propsIs
 
           <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>150-Point Inspection Guaranteed</span>
+            <span>Independent inspection available</span>
           </div>
         </div>
 

@@ -1,50 +1,37 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { protect, adminOnly } from "../middleware/auth.js";
+import { protect } from "../middleware/auth.js";
+import { requireSupportViewer, requireSupportAgent } from "../middleware/supportAccess.js";
 import { validateObjectId } from "../middleware/validate.js";
+import { createLimiter, chatLimiter } from "../middleware/rateLimiter.js";
 import {
-  createTicket,
-  getAllTickets,
-  getUserTickets,
-  getTicket,
-  addMessage,
-  updateTicketStatus,
-  rateTicket,
-  getSupportAnalytics,
+  getSupportConfig, createTicket, getUserTickets, getTicket, addMessage, rateTicket,
+  staffQueue, staffMetrics, staffTeam, staffGetCase, staffReply, staffUpdate,
+  getAllTickets, getSupportAnalytics, updateTicketStatus,
 } from "../controllers/supportController.js";
 
 const router = express.Router();
 
-// =============================
-// 🎫 SUPPORT TICKETS
-// =============================
-
-// Create support ticket
-router.post("/", protect, asyncHandler(createTicket));
-
-// Get user's tickets
+// Customer: only ever the caller's own cases, customer projection (no internal notes, no staff identities).
+router.get("/config", protect, asyncHandler(getSupportConfig));
+router.post("/", protect, createLimiter, asyncHandler(createTicket));
 router.get("/my-tickets", protect, asyncHandler(getUserTickets));
 
-// Get all tickets (admin only)
-router.get("/all", protect, adminOnly, asyncHandler(getAllTickets));
+// Staff workspace: agents (PERM.SUPPORT_AGENT) read+work; oversight (PERM.SUPPORT_OVERSIGHT) is read-only, reasoned and audited. Declared before "/:id" so literal segments win.
+router.get("/staff/queue", protect, requireSupportViewer, asyncHandler(staffQueue));
+router.get("/staff/metrics", protect, requireSupportViewer, asyncHandler(staffMetrics));
+router.get("/staff/team", protect, requireSupportViewer, asyncHandler(staffTeam));
+router.get("/staff/:id", protect, requireSupportViewer, validateObjectId, asyncHandler(staffGetCase));
+router.post("/staff/:id/messages", protect, requireSupportAgent, chatLimiter, validateObjectId, asyncHandler(staffReply));
+router.patch("/staff/:id", protect, requireSupportAgent, validateObjectId, asyncHandler(staffUpdate));
 
-// Get support analytics (admin only)
-router.get("/analytics", protect, adminOnly, asyncHandler(getSupportAnalytics));
+// Legacy staff aliases -> same service and the same permission.
+router.get("/all", protect, requireSupportViewer, asyncHandler(getAllTickets));
+router.get("/analytics", protect, requireSupportViewer, asyncHandler(getSupportAnalytics));
 
-// =============================
-// 📄 TICKET OPERATIONS
-// =============================
-
-// Get ticket details
-router.get("/:ticketId", protect, validateObjectId, asyncHandler(getTicket));
-
-// Add message to ticket
-router.post("/:ticketId/messages", protect, validateObjectId, asyncHandler(addMessage));
-
-// Update ticket status (admin only)
-router.put("/:ticketId/status", protect, adminOnly, validateObjectId, asyncHandler(updateTicketStatus));
-
-// Rate ticket satisfaction
-router.post("/:ticketId/rate", protect, validateObjectId, asyncHandler(rateTicket));
+router.get("/:id", protect, validateObjectId, asyncHandler(getTicket));
+router.post("/:id/messages", protect, chatLimiter, validateObjectId, asyncHandler(addMessage));
+router.post("/:id/rate", protect, validateObjectId, asyncHandler(rateTicket));
+router.put("/:id/status", protect, requireSupportAgent, validateObjectId, asyncHandler(updateTicketStatus));
 
 export default router;

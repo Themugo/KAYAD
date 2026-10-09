@@ -9,6 +9,7 @@ import { auditLog } from "../middleware/auditLog.js";
 import bcrypt from "bcryptjs";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { getIO } from "../utils/io.js";
+import inspectionGovernanceRoutes from "./adminInspectionGovernanceRoutes.js";
 
 import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
@@ -39,6 +40,7 @@ import { getEscrowRules, getActiveEscrowAccounts, saveEscrowAccount, removeEscro
 import { setSellerEscrowCapability, getSellerEscrowCapabilityStatus } from "../services/escrowCapability.service.js";
 import { setEscrowCapabilitySchema } from "../validation/escrow.schema.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
+import { normalizeNavigation, validateNavigationInput } from "../utils/navigationConfig.js";
 
 
 // Routes that only admin/superadmin can access
@@ -81,7 +83,7 @@ router.get(
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne()
       .select(
-        "platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing heroCarIds heroFeaturedMode heroPresentation heroCardContent",
+        "platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing heroCarIds heroFeaturedMode heroPresentation heroCardContent navigation",
       )
       .lean();
 
@@ -89,6 +91,10 @@ router.get(
       config = await PlatformConfig.create({});
       config = config.toObject();
     }
+
+    // Serve only the normalised, registry-bound navigation state. Whatever
+    // is stored, the public client never receives unknown or malformed data.
+    config = { ...config, navigation: normalizeNavigation(config.navigation) };
 
     res.json({ success: true, config });
   }),
@@ -135,6 +141,9 @@ router.use((req, res, next) => {
   if (!permission) return next();
   return requirePermission(permission)(req, res, next);
 });
+
+// Provider-network governance (path contains "inspection" => MANAGE_INSPECTIONS applies above).
+router.use("/inspection-governance", inspectionGovernanceRoutes);
 
 // =============================
 // ⚙️ SAFE PAGINATION HELPER
@@ -193,7 +202,7 @@ router.get(
       Payment.countDocuments({ status: "success" }),                                  // totalPayments
       User.countDocuments({ role: "dealer", approved: false }),                       // pendingDealers
       Car.countDocuments({ status: "pending" }),                                      // pendingCars
-      Escrow.countDocuments({ status: "held" }),                                      // openEscrows
+      Escrow.countDocuments({ status: { $in: ["funded", "vehicle_confirmed", "delivered"] } }),                                      // openEscrows
       Escrow.countDocuments({ status: "disputed" }),                                  // disputedEscrows
       Escrow.aggregate([{ $match: { status: "released" } }, { $group: { _id: null, total: { $sum: "$commission" } } }]), // revenueAgg
       Bid.countDocuments(),                                                           // totalBidsAll
@@ -661,6 +670,22 @@ router.put(
       "heroCardContent",
     ];
 
+    // Navigation presentation state: strictly validated and REPLACED (not
+    // shallow-merged) so an item can be un-hidden. Same route, same guards,
+    // same audit as every other platform setting.
+    let navigationAudit = null;
+    if (req.body.navigation !== undefined) {
+      const checked = validateNavigationInput(req.body.navigation);
+      if (!checked.ok) {
+        return res.status(400).json({ success: false, message: "Invalid navigation configuration", errors: checked.errors });
+      }
+      navigationAudit = {
+        before: normalizeNavigation(config.navigation?.toObject?.() || config.navigation),
+        after: checked.value,
+      };
+      config.navigation = checked.value;
+    }
+
     for (const key of allowed) {
       if (req.body[key] !== undefined) {
         if (typeof req.body[key] === "object" && !Array.isArray(req.body[key])) {
@@ -678,6 +703,15 @@ router.put(
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
     });
+
+    if (navigationAudit) {
+      await AuditLog.create({
+        action: "Navigation configuration updated",
+        admin: req.user.name || req.user.email,
+        adminId: req.user.id,
+        details: navigationAudit,
+      });
+    }
 
     res.json({ success: true, config });
   }),
@@ -2112,7 +2146,7 @@ router.get(
         Car.countDocuments(),
         Car.countDocuments({ auctionStatus: "live" }),
         Escrow.countDocuments({ status: "pending" }),
-        Escrow.countDocuments({ status: "held" }),
+        Escrow.countDocuments({ status: { $in: ["funded", "vehicle_confirmed", "delivered"] } }),
         Car.countDocuments({ status: "pending" }),
         AdminAlert.countDocuments({
           severity: "critical",

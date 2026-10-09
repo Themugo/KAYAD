@@ -5,6 +5,7 @@ import { auctionRegistrationAPI, formatKES } from '../api/api';
 import { fetchAuction, fetchAuctionBids, fetchAuctionOutcome, initiateAuctionWinnerPayment } from '../services/auctionService';
 import { placeBid, BidApiError } from '../services/bidApi';
 import { useAuth } from '../context/AuthContext';
+import { loginPathFor } from '../utils/authIntent';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../components/CountdownDisplay';
@@ -116,7 +117,7 @@ export default function AuctionLivePage() {
   }, [id, isAuth, car?.auctionStatus]);
 
   const handleRegister = async () => {
-    if (!isAuth) { navigate('/login'); return; }
+    if (!isAuth) { navigate(loginPathFor(location)); return; }
     if (roomState?.biddingRoomClosed || roomState?.registrationOpen === false) {
       toast('Bidding room is closed. You can watch the live auction, but new bidders cannot join.', 'info');
       return;
@@ -213,7 +214,7 @@ export default function AuctionLivePage() {
   }, [id, car?.auctionStatus, ended, connected]);
 
   const handlePlaceBid = async () => {
-    if (!isAuth) { navigate('/login'); return; }
+    if (!isAuth) { navigate(loginPathFor(location)); return; }
     const amount = Number(bidAmount);
     if (amount <= currentBid) {
       toast(`Bid must be above ${formatKES(currentBid)}`, 'error'); return;
@@ -231,7 +232,7 @@ export default function AuctionLivePage() {
   };
 
   const handleWinnerSettlement = async () => {
-    if (!isAuth || !outcome) { navigate('/login'); return; }
+    if (!isAuth || !outcome) { navigate(loginPathFor(location)); return; }
     setSettling(true);
     try {
       const mode = String(outcome.settlement_mode || registrationSetup?.config?.settlement?.mode || 'direct');
@@ -465,7 +466,7 @@ export default function AuctionLivePage() {
                       </label>
                     )}
                     {!isAuth ? (
-                      <button className="btn btn-gold btn-full" onClick={() => navigate('/login')}>Sign in to register</button>
+                      <button className="btn btn-gold btn-full" onClick={() => navigate(loginPathFor(location))}>Sign in to register</button>
                     ) : registration?.status === 'active' ? (
                       <div style={{ color: 'var(--green)', fontSize: 12 }}>✓ You are registered and cleared to bid when the auction opens.</div>
                     ) : !roomState?.registrationOpen ? (

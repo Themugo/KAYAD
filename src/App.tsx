@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, Suspense } from 'react';
+import { buildAuthPath, loginPathFor } from './utils/authIntent';
 import Navbar from './components/Navbar';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import TopNoticeStrip from './components/TopNoticeStrip';
@@ -91,6 +92,12 @@ function AppInner() {
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('nav');
     setActiveNav(normalizeNav(requested));
+    // Deep link used as a sign-in return destination: /?nav=inspections&action=apply-provider.
+    // The action only opens a form; the backend still decides what the account may do.
+    const action = new URLSearchParams(location.search).get('action');
+    if (requested === 'inspections' && (action === 'apply-provider' || action === 'manage-business')) {
+      setInspectionLaunch((prev) => ({ vehicle: null, tab: 'service', action, nonce: prev.nonce + 1 }));
+    }
   }, [location.search, normalizeNav]);
 
   // Client-side navigation state is convenience only, but it must never
@@ -102,7 +109,7 @@ function AppInner() {
     const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard']);
     if (!protectedNavs.has(activeNav)) return;
     if (!isAuth) {
-      navigate('/login', { replace: true, state: { from: location } });
+      navigate(loginPathFor(location), { replace: true });
       return;
     }
     if (activeNav === 'admin' && !isAdmin) {
@@ -114,8 +121,11 @@ function AppInner() {
     }
   }, [activeNav, authLoading, isAuth, isAdmin, isDealer, location, navigate]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
-  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create'>('journey');
+  // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
+  const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
+  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create' | 'operations'>('journey');
   const [escrowLaunchNonce, setEscrowLaunchNonce] = useState(0);
+  const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | 'manage-business' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fixed (Final Integration - real data integration): this was
@@ -135,9 +145,10 @@ function AppInner() {
   // provide, except isVerified (backend has no such field - mapped
   // from the real, existing emailVerified boolean).
   const handleOpenAuth = useCallback(() => {
-    navigate('/login', {
-      state: { from: { pathname: window.location.pathname } },
-    });
+    navigate(loginPathFor(window.location));
+  }, [navigate]);
+  const handleOpenRegister = useCallback((intent: string, next: string) => {
+    navigate(buildAuthPath('register', { next, intent }));
   }, [navigate]);
   const user: UserProfile | null = useMemo(() => {
     if (!authUser) return null;
@@ -364,6 +375,16 @@ function AppInner() {
     setActiveNav('escrow');
   }, []);
 
+  // Inspection launch: keep the vehicle the customer was looking at (it used to be discarded).
+  const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | 'manage-business' | null }) => {
+    setInspectionLaunch((prev) => ({ vehicle: next.vehicle ?? null, tab: next.tab ?? 'service', action: next.action ?? null, nonce: prev.nonce + 1 }));
+    setActiveNav('inspections');
+  }, []);
+  const handleRequestInspection = useCallback((vehicle: Vehicle) => {
+    handleCloseVehicleDetails();
+    launchInspections({ vehicle, action: 'request' });
+  }, [handleCloseVehicleDetails, launchInspections]);
+
   // Contact Seller Handler
   const handleContactSeller = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
@@ -389,16 +410,25 @@ function AppInner() {
       setActiveNav('auctions');
       return;
     }
+    // `services:*` ids open an existing destination of the automotive services hub. They create no route.
+    if (nav.startsWith('services:')) {
+      const where = nav.slice('services:'.length);
+      if (where === 'find') { setFinderLaunch((p) => ({ nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); return; }
+      if (where === 'roadside') { setFinderLaunch((p) => ({ category: 'roadside_recovery', nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); return; }
+      if (where === 'mine') { launchInspections({ tab: 'mine' }); return; }
+      launchInspections({});
+      return;
+    }
     if (nav.startsWith('escrow:')) {
       const tab = nav.slice('escrow:'.length);
-      setEscrowLaunchTab(tab === 'create' || tab === 'deals' ? tab : 'journey');
+      setEscrowLaunchTab(tab === 'create' || tab === 'deals' || tab === 'operations' ? tab : 'journey');
       setEscrowLaunchNonce((n) => n + 1);
       setActiveNav('escrow');
       return;
     }
     if (nav === 'escrow') setEscrowLaunchTab('journey');
     setActiveNav(nav);
-  }, []);
+  }, [launchInspections]);
 
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
   const privateWorkspaceNavs = new Set([
@@ -504,21 +534,32 @@ function AppInner() {
               user={user}
               onOpenAuth={handleOpenAuth}
               initialTab={escrowLaunchTab}
+              onNavigate={handleNavClick}
             />
           )}
 
           {activeNav === 'inspections' && (
             <InspectionsView
+              key={inspectionLaunch.nonce}
+              initialSelectedVehicle={inspectionLaunch.vehicle}
+              initialTab={inspectionLaunch.tab}
+              launchAction={inspectionLaunch.action}
               vehicles={vehicles}
               user={user}
               onOpenAuth={handleOpenAuth}
+              onOpenRegister={handleOpenRegister}
               onViewVehicleDetails={handleOpenVehicleDetails}
-              onOpenInspectionMarketplace={() => setActiveNav('inspection-marketplace')}
+              onOpenInspectionMarketplace={(category) => { setFinderLaunch((p) => ({ category, nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); }}
             />
           )}
 
           {activeNav === 'inspection-marketplace' && (
-            <InspectionMarketplacePage />
+            <InspectionMarketplacePage
+              key={finderLaunch.nonce}
+              initialFilters={finderLaunch.category ? { category: finderLaunch.category } : undefined}
+              onViewMyInspections={() => launchInspections({ tab: 'mine' })}
+              onApplyAsProvider={() => launchInspections({ action: 'apply-provider' })}
+            />
           )}
 
           {(activeNav === 'financing' || activeNav === 'finance') && (
@@ -673,7 +714,7 @@ function AppInner() {
         onClose={handleCloseVehicleDetails}
         onStartEscrow={handleStartEscrow}
         onContactSeller={handleContactSeller}
-        onRequestInspection={() => setActiveNav('inspections')}
+        onRequestInspection={handleRequestInspection}
         isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}

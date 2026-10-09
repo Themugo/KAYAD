@@ -90,6 +90,32 @@ export async function validatePrivateSellerEscrow({ car, seller, amount }) {
   return { rules, account };
 }
 
+/**
+ * Custody terms for a NEW escrow. Applied by every code path that inserts an
+ * escrow so that:
+ *  - the admin-configured minimum/maximum are actually enforced (they were
+ *    displayed in the funding instructions but nothing enforced them), and
+ *  - the escrow is bound to the custody account the buyer is told to pay into
+ *    (kayad_verify_escrow_funding_atomic refuses an escrow with no bound
+ *    account, so an unbound escrow could never be funded).
+ * Fails closed: no active account, or an amount outside the rules, means no
+ * escrow is created.
+ */
+export async function resolveEscrowCustody({ amount }) {
+  const rules = await getEscrowRules();
+  const value = Number(amount);
+  if (!Number.isFinite(value) || value <= 0) throw Object.assign(new Error("Escrow amount must be greater than zero"), { status: 400 });
+  if (rules.minimumAmount > 0 && value < Number(rules.minimumAmount)) {
+    throw Object.assign(new Error(`Escrow minimum is KES ${Number(rules.minimumAmount).toLocaleString("en-KE")}`), { status: 409 });
+  }
+  if (rules.maximumAmount != null && value > Number(rules.maximumAmount)) {
+    throw Object.assign(new Error(`Escrow maximum is KES ${Number(rules.maximumAmount).toLocaleString("en-KE")}`), { status: 409 });
+  }
+  const account = await getPrimaryEscrowAccount();
+  if (!account) throw Object.assign(new Error("No active KAYAD escrow bank account is configured by an administrator"), { status: 409 });
+  return { custodianAccount: account.id, fundingMethod: "bank_transfer" };
+}
+
 export function sanitizeEscrowAccount(account) {
   if (!account) return null;
   return {

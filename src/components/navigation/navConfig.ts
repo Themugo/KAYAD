@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Heart,
   Landmark,
+  LifeBuoy,
   Lock,
   MapPin,
   PlusCircle,
@@ -86,16 +87,20 @@ export const NAV_PRIMARY: NavPrimary[] = [
     ],
   },
   {
+    // Id stays 'inspection' (stored navigation config and links key on it); the destination is now the automotive
+    // services hub: inspection before purchase AND discovery of independent garages, mechanics and roadside providers.
     id: 'inspection',
-    label: 'Pre-Purchase Inspection',
-    compactLabel: 'Inspection',
+    label: 'Auto Services',
+    compactLabel: 'Services',
     icon: ShieldCheck,
     navId: 'inspections',
     href: '/?nav=inspections',
     match: ['inspections', 'inspection-marketplace'],
     children: [
-      { id: 'request', label: 'Request an inspection', description: 'Inspect a vehicle before you commit', icon: ClipboardCheck, navId: 'inspections', href: '/?nav=inspections' },
-      { id: 'providers', label: 'Find an inspection provider', description: 'Compare providers by location and service', icon: MapPin, navId: 'inspection-marketplace', href: '/?nav=inspection-marketplace' },
+      { id: 'request', label: 'Inspect a car before you buy', description: 'Get matched with, or choose, an independent inspector', icon: ClipboardCheck, navId: 'services:inspect', href: '/?nav=inspections' },
+      { id: 'providers', label: 'Find a mechanic or garage', description: 'Verified independent businesses and specialists', icon: MapPin, navId: 'services:find', href: '/?nav=inspection-marketplace' },
+      { id: 'roadside', label: 'Roadside and recovery', description: 'Find providers; KAYAD does not dispatch help', icon: LifeBuoy, navId: 'services:roadside', href: '/?nav=inspection-marketplace' },
+      { id: 'mine', label: 'My requests and reports', description: 'Your inspections, bookings and reports', icon: FileText, navId: 'services:mine', href: '/?nav=inspections', requiresAuth: true },
     ],
   },
   {
@@ -123,3 +128,75 @@ export const NAV_PRIMARY: NavPrimary[] = [
 
 export const visibleChildren = (item: NavPrimary, signedIn: boolean): NavChild[] =>
   (item.children || []).filter((child) => !child.requiresAuth || signedIn);
+
+/**
+ * ── Admin navigation authority (Stage 14A) ───────────────────────────────
+ *
+ * The admin (PUT /api/admin/config -> platform_config.navigation, read back
+ * through GET /api/admin/public/config) may control PRESENTATION STATE of the
+ * destinations above: primary visible/hidden, primary order, dropdown on/off,
+ * child visible/hidden, child order. It can NOT add a destination, route,
+ * label, href, icon, style or markup: this function only ever selects and
+ * reorders entries of the code-owned NAV_PRIMARY.
+ *
+ * It is total and defensive. Anything missing, malformed or unknown is
+ * ignored, and the canonical NAV_PRIMARY is the result for any config that is
+ * absent, unusable or would leave no navigation. Marketplace and Support can
+ * never be hidden (mirrors backend NAVIGATION_LOCKED_VISIBLE).
+ */
+export const NAV_LOCKED_VISIBLE: readonly string[] = ['marketplace', 'support'];
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  v !== null && typeof v === 'object' && !Array.isArray(v);
+
+/** Items named in `listed` first (in that order), then the rest in canonical order. */
+function orderByListed<T extends { id: string }>(canonical: T[], listed: string[]): T[] {
+  const byId = new Map(canonical.map((c) => [c.id, c] as const));
+  const out: T[] = [];
+  const used = new Set<string>();
+  for (const id of listed) {
+    const hit = byId.get(id);
+    if (hit && !used.has(id)) { out.push(hit); used.add(id); }
+  }
+  for (const c of canonical) if (!used.has(c.id)) out.push(c);
+  return out;
+}
+
+export function applyNavigationConfig(raw: unknown, base: NavPrimary[] = NAV_PRIMARY): NavPrimary[] {
+  try {
+    if (!isRecord(raw) || !Array.isArray(raw.items) || raw.items.length === 0) return base;
+    const entries = new Map<string, Record<string, unknown>>();
+    const listedIds: string[] = [];
+    for (const e of raw.items) {
+      if (!isRecord(e) || typeof e.id !== 'string' || entries.has(e.id)) continue;
+      if (!base.some((b) => b.id === e.id)) continue;
+      entries.set(e.id, e);
+      listedIds.push(e.id);
+    }
+    if (entries.size === 0) return base;
+
+    const resolved: NavPrimary[] = [];
+    for (const item of orderByListed(base, listedIds)) {
+      const e = entries.get(item.id);
+      const hidden = !!e && e.visible === false && !NAV_LOCKED_VISIBLE.includes(item.id);
+      if (hidden) continue;
+      if (!item.children || !e) { resolved.push(item); continue; }
+
+      let children = item.children;
+      if (Array.isArray(e.children)) {
+        const kids = e.children.filter((c): c is Record<string, unknown> => isRecord(c) && typeof c.id === 'string');
+        const hiddenKids = new Set(kids.filter((c) => c.visible === false).map((c) => c.id as string));
+        children = orderByListed(children, kids.map((c) => c.id as string)).filter((c) => !hiddenKids.has(c.id));
+      }
+      // dropdown off (or every child hidden) => direct link, same destination.
+      if (e.dropdown === false || children.length === 0) {
+        resolved.push({ ...item, children: undefined });
+      } else {
+        resolved.push({ ...item, children });
+      }
+    }
+    return resolved.length > 0 ? resolved : base;
+  } catch {
+    return base;
+  }
+}

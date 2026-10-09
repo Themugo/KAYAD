@@ -1,0 +1,7 @@
+UPDATE 1
+B2 (pre-migration schema) customer A reads own row via authenticated role: internal staff note visible?
+BEGIN
+SET
+t
+t
+ROLLBACK

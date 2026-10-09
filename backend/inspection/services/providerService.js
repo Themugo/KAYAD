@@ -5,6 +5,7 @@
 import db from './dbAdapter.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
+import { searchEligibleProviders, publicCapability } from './providerDiscoveryService.js';
 
 const providersCollection = 'inspection_providers';
 
@@ -64,8 +65,18 @@ class ProviderService {
       'weekend_available', 'same_day_available', 'languages', 'vehicle_types',
       'inspection_types', 'commercial_vehicles', 'electric_vehicles', 'luxury_vehicles',
       'business_hours', 'payment_methods', 'bank_name', 'bank_account_name', 'bank_account_number',
-      'mpesa_paybill', 'mpesa_account', 'insurance_policy', 'insurance_expires_at'
+      'mpesa_paybill', 'mpesa_account', 'insurance_policy', 'insurance_expires_at',
+      // Identity evidence for the alternative verification route (locked once verified, see below).
+      'registration_number', 'tax_id'
     ];
+    const identityFields = ['registration_number', 'tax_id'];
+    if (identityFields.some((k) => updates[k] !== undefined)) {
+      const current = await db.findById(providersCollection, providerId);
+      if (!current) throw new AppError('Provider not found', 404);
+      if (['ACTIVE', 'SUSPENDED'].includes(current.lifecycle_stage)) {
+        throw new AppError('Business identity cannot be changed after verification. Contact KAYAD to correct it.', 409);
+      }
+    }
 
     const sanitizedUpdates = {};
     for (const key of allowedUpdates) {
@@ -81,169 +92,12 @@ class ProviderService {
   }
 
   /**
-   * Search providers with filters
+   * Search providers. Delegates to the discovery service, which enforces
+   * eligibility (ACTIVE + verified) on the server. Client status/verified
+   * parameters are not honoured.
    */
   async searchProviders(filters = {}) {
-    const query = {}; // inspection_providers has no deleted_at column; lifecycle/status is authoritative.
-
-    // Status filter
-    if (filters.status) {
-      query.status = filters.status;
-    } else {
-      query.status = 'active';
-    }
-
-    // Verification filter
-    if (filters.verified !== false) {
-      query.verification_status = 'verified';
-    }
-
-    // Location filters
-    if (filters.country) query.country = filters.country;
-    if (filters.county) query.county = filters.county;
-    if (filters.town) query.town = filters.town;
-
-    // Service filters
-    if (filters.mobileOnly) {
-      query.offers_mobile = true;
-    }
-    if (filters.workshopOnly) {
-      query.has_workshop = true;
-    }
-    if (filters.sameDayAvailable) {
-      query.same_day_available = true;
-    }
-    if (filters.weekendAvailable) {
-      query.weekend_available = true;
-    }
-
-    // Vehicle types
-    if (filters.vehicleTypes && filters.vehicleTypes.length > 0) {
-      query.vehicle_types = { $in: filters.vehicleTypes };
-    }
-
-    // Inspection types
-    if (filters.inspectionType) {
-      query.inspection_types = { $in: [filters.inspectionType] };
-    }
-
-    // Specializations
-    if (filters.commercialVehicles) {
-      query.commercial_vehicles = true;
-    }
-    if (filters.electricVehicles) {
-      query.electric_vehicles = true;
-    }
-    if (filters.luxuryVehicles) {
-      query.luxury_vehicles = true;
-    }
-
-    // Rating filter
-    if (filters.minRating) {
-      query.average_rating = { $gte: filters.minRating };
-    }
-
-    // Sort options
-    let sort = { average_rating: -1, total_completed_inspections: -1 };
-    if (filters.sortBy === 'price_low') {
-      sort = { starting_price: 1 };
-    } else if (filters.sortBy === 'price_high') {
-      sort = { starting_price: -1 };
-    } else if (filters.sortBy === 'rating') {
-      sort = { average_rating: -1 };
-    } else if (filters.sortBy === 'reviews') {
-      sort = { total_reviews: -1 };
-    } else if (filters.sortBy === 'completions') {
-      sort = { total_completed_inspections: -1 };
-    }
-
-    // Pagination
-    const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 20;
-    const skip = (page - 1) * limit;
-
-    const [providers, total] = await Promise.all([
-      db.findWithPagination(providersCollection, query, {
-        sort,
-        skip,
-        limit,
-        projection: {
-          company_name: 1,
-          trading_name: 1,
-          logo_url: 1,
-          country: 1,
-          county: 1,
-          town: 1,
-          years_in_business: 1,
-          average_rating: 1,
-          total_reviews: 1,
-          reviews_count: 1,
-          total_completed_inspections: 1,
-          response_time_minutes: 1,
-          languages: 1,
-          has_workshop: 1,
-          offers_mobile: 1,
-          mobile_inspection_fee: 1,
-          starting_price: 1,
-          weekend_available: 1,
-          same_day_available: 1,
-          vehicle_types: 1,
-          inspection_types: 1,
-          commercial_vehicles: 1,
-          electric_vehicles: 1,
-          luxury_vehicles: 1,
-          verification_status: 1,
-          status: 1,
-        }
-      }),
-      db.count(providersCollection, query),
-    ]);
-
-    const items = providers.map((provider) => ({
-      id: provider.id,
-      companyName: provider.company_name,
-      tradingName: provider.trading_name,
-      logo: provider.logo_url,
-      location: {
-        country: provider.country,
-        county: provider.county,
-        town: provider.town,
-      },
-      businessHours: {},
-      operatingModel: {
-        hasWorkshop: Boolean(provider.has_workshop),
-        offersMobile: Boolean(provider.offers_mobile),
-        mobileFee: Number(provider.mobile_inspection_fee || 0),
-        weekendAvailable: Boolean(provider.weekend_available),
-        sameDayAvailable: Boolean(provider.same_day_available),
-      },
-      specializations: {
-        vehicleTypes: provider.vehicle_types || [],
-        inspectionTypes: provider.inspection_types || [],
-        commercialVehicles: Boolean(provider.commercial_vehicles),
-        electricVehicles: Boolean(provider.electric_vehicles),
-        luxuryVehicles: Boolean(provider.luxury_vehicles),
-      },
-      experience: { yearsInBusiness: Number(provider.years_in_business || 0) },
-      verification: { status: provider.verification_status === 'verified' ? 'verified' : 'unverified' },
-      stats: {
-        averageRating: Number(provider.average_rating || 0),
-        totalReviews: Number(provider.total_reviews ?? provider.reviews_count ?? 0),
-        completedInspections: Number(provider.total_completed_inspections || 0),
-        responseTimeMinutes: Number(provider.response_time_minutes || 0),
-        acceptanceRate: 0,
-      },
-      packages: [],
-      startingPrice: provider.starting_price == null ? null : Number(provider.starting_price),
-    }));
-
-    return {
-      items,
-      total: Number(total || 0),
-      page,
-      limit,
-      totalPages: Math.ceil(Number(total || 0) / limit),
-    };
+    return searchEligibleProviders(filters);
   }
 
   /**
@@ -251,7 +105,7 @@ class ProviderService {
    */
   async getProviderProfile(providerId) {
     const provider = await db.findById(providersCollection, providerId);
-    if (!provider || provider.status !== 'active' || provider.verification_status !== 'verified') {
+    if (!provider || provider.status !== 'active' || provider.verification_status !== 'verified' || provider.lifecycle_stage !== 'ACTIVE') {
       throw new AppError('Provider not available', 404);
     }
 
@@ -268,10 +122,22 @@ class ProviderService {
     });
 
     // Get credentials
-    const credentials = await db.find('provider_credentials', {
+    // Only admin-verified, unexpired credentials are ever shown publicly.
+    const allVerified = await db.find('provider_credentials', {
       provider_id: providerId,
-      is_verified: true
+      verification_status: 'verified'
     });
+    const now = Date.now();
+    const credentials = (allVerified || []).filter((c) => !c.expires_at || new Date(c.expires_at).getTime() > now);
+
+    // Declared vs admin-verified capabilities, and the confirmed team size.
+    const capRows = await db.find('provider_service_capabilities', { provider_id: providerId });
+    const staffRows = await db.find('inspection_staff', { provider_id: providerId });
+    const liveStaff = (staffRows || []).filter((st) => st.affiliation_status === 'confirmed' && st.is_active !== false);
+    const liveStaffIds = new Set(liveStaff.map((st) => st.id));
+    const capabilities = (capRows || [])
+      .filter((c) => c.status !== 'revoked' && (!c.staff_id || liveStaffIds.has(c.staff_id)))
+      .map(publicCapability);
 
     // Get recent reviews
     const recentReviews = await db.find('inspection_reviews', {
@@ -322,11 +188,11 @@ class ProviderService {
         verifiedAt: provider.verified_at,
       },
       stats: {
-        averageRating: provider.average_rating,
-        totalReviews: provider.total_reviews,
-        completedInspections: provider.total_completed_inspections,
-        responseTimeMinutes: provider.response_time_minutes,
-        acceptanceRate: provider.acceptance_rate,
+        averageRating: Number(provider.total_reviews || 0) > 0 ? Number(provider.average_rating) : null,
+        totalReviews: Number(provider.total_reviews || 0),
+        completedInspections: Number(provider.total_completed_inspections || 0),
+        responseTimeMinutes: provider.response_time_minutes == null ? null : Number(provider.response_time_minutes),
+        acceptanceRate: null,
       },
       packages: packages.map(pkg => ({
         id: pkg.id,
@@ -353,11 +219,14 @@ class ProviderService {
       })),
       credentials: credentials.map(c => ({
         id: c.id,
-        type: c.type,
-        name: c.name,
-        issuingBody: c.issuing_body,
-        expiryDate: c.expiry_date,
+        type: c.credential_type,
+        name: c.title,
+        issuingBody: c.issued_by,
+        expiryDate: c.expires_at,
+        verified: true,
       })),
+      capabilities,
+      team: { confirmedMembers: liveStaff.length },
       recentReviews: recentReviews.map(r => ({
         id: r.id,
         rating: r.overall_rating,
@@ -546,15 +415,15 @@ class ProviderService {
   async addCredential(providerId, credentialData) {
     const credential = {
       provider_id: providerId,
-      type: credentialData.type,
-      name: credentialData.name,
-      issuing_body: credentialData.issuingBody,
-      certificate_number: credentialData.certificateNumber,
-      issue_date: credentialData.issueDate,
-      expiry_date: credentialData.expiryDate,
-      document_url: credentialData.documentUrl,
-      is_verified: false,
-      created_at: new Date()
+      credential_type: credentialData.type,
+      title: credentialData.name,
+      issued_by: credentialData.issuingBody || null,
+      certificate_number: credentialData.certificateNumber || null,
+      issued_at: credentialData.issueDate || null,
+      expires_at: credentialData.expiryDate || null,
+      document_url: credentialData.documentUrl || null,
+      // A submitted credential is never verified until an administrator decides.
+      verification_status: 'unverified',
     };
 
     const result = await db.create('provider_credentials', credential);
