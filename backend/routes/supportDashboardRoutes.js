@@ -1,29 +1,12 @@
-// backend/routes/supportDashboardRoutes.js
-// Support Dashboard routes
-
+// Legacy support-analytics mount. Delegates to the single support metrics service (SQL-computed, no row cap).
 import express from "express";
-import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
-import { validateObjectId } from "../middleware/validate.js";
-import {
-  getSupportDashboard,
-  getTicketMetrics,
-  getAgentPerformance,
-} from "../controllers/supportDashboardController.js";
+import asyncHandler from "../middleware/asyncHandler.js";
+import { protect } from "../middleware/auth.js";
+import { requireSupportStaff } from "../middleware/supportAccess.js";
+import { staffMetrics } from "../controllers/supportController.js";
 
 const router = express.Router();
-
-// =============================
-// 📊 SUPPORT DASHBOARD ROUTES
-// =============================
-
-// Full dashboard (support only)
-router.get("/", protect, adminOnly, getSupportDashboard);
-
-// Ticket metrics
-router.get("/tickets", protect, adminOnly, getTicketMetrics);
-
-// Agent performance
-router.get("/agents/:agentId", protect, adminOnly, validateObjectId, getAgentPerformance);
-router.get("/agents", protect, adminOnly, getAgentPerformance);
+router.get("/", protect, requireSupportStaff, asyncHandler(staffMetrics));
+router.get("/tickets", protect, requireSupportStaff, asyncHandler(staffMetrics));
 
 export default router;

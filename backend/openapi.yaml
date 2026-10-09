@@ -17475,6 +17475,149 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/support/config:
+    get:
+      tags:
+      - Api
+      summary: GET /api/support/config
+      description: 'Route contract: GET /api/support/config'
+      operationId: getApiSupportConfig
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+  /api/support/staff/queue:
+    get:
+      tags:
+      - Api
+      summary: GET /api/support/staff/queue
+      description: 'Route contract: GET /api/support/staff/queue'
+      operationId: getApiSupportStaffQueue
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+  /api/support/staff/metrics:
+    get:
+      tags:
+      - Api
+      summary: GET /api/support/staff/metrics
+      description: 'Route contract: GET /api/support/staff/metrics'
+      operationId: getApiSupportStaffMetrics
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+  /api/support/staff/team:
+    get:
+      tags:
+      - Api
+      summary: GET /api/support/staff/team
+      description: 'Route contract: GET /api/support/staff/team'
+      operationId: getApiSupportStaffTeam
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+  /api/support/staff/{id}:
+    get:
+      tags:
+      - Api
+      summary: GET /api/support/staff/{id}
+      description: 'Route contract: GET /api/support/staff/{id}'
+      operationId: getApiSupportStaffId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+      - Api
+      summary: PATCH /api/support/staff/{id}
+      description: 'Route contract: PATCH /api/support/staff/{id}'
+      operationId: patchApiSupportStaffId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+  /api/support/staff/{id}/messages:
+    post:
+      tags:
+      - Api
+      summary: POST /api/support/staff/{id}/messages
+      description: 'Route contract: POST /api/support/staff/{id}/messages'
+      operationId: postApiSupportStaffIdMessages
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
   /api/support:
     post:
       tags:

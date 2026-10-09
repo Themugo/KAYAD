@@ -782,3 +782,9 @@ Added to the ranked carry-forward: sweep remaining unsupported trust claims ("Gu
 6. Dealer onboarding page still uses legacy inline styling; restyle on `PremiumAuthShell` (functionality and truthful completion states are already fixed).
 7. Server-side: expose a single `GET /me/onboarding-status` aggregating account, dealer and provider states so the frontend need not infer them.
 8. Remove the legacy `/admin/login` alias once admin bookmarks are migrated.
+
+## Support follow-ups (2026-10-09)
+1. Staging: run the privilege queries and a staff/marketing round-trip (Runtime Certification).
+2. DECISION: reopen window (14d), SLA targets (none), attachments (private storage + scanning first), whether `admin` keeps support powers.
+3. Provider-side cases for inspection/service bookings; support-specific rate limits; case assignment rules/auto-routing; canned replies.
+4. Shared adapter `aggregate()` still caps at 1000 rows and mishandles `$gte` in `$match` (other domains).

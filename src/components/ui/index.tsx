@@ -188,14 +188,18 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
   children?: React.ReactNode;
 }
 
-export const Select: React.FC<SelectProps> = ({ label, options, children, className = '', ...props }) => (
+export const Select: React.FC<SelectProps> = ({ label, options, children, className = '', id, ...props }) => {
+  const autoId = React.useId();
+  const controlId = id || autoId;
+  return (
   <div className="space-y-1 w-full">
     {label && (
-      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+      <label htmlFor={controlId} className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
         {label}
       </label>
     )}
     <select
+      id={controlId}
       className={`w-full px-3.5 py-2.5 bg-slate-50 text-slate-800 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white cursor-pointer transition-all ${className}`}
       {...props}
     >
@@ -208,25 +212,31 @@ export const Select: React.FC<SelectProps> = ({ label, options, children, classN
         : children}
     </select>
   </div>
-);
+  );
+};
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
 }
 
-export const Textarea: React.FC<TextareaProps> = ({ label, className = '', ...props }) => (
+export const Textarea: React.FC<TextareaProps> = ({ label, className = '', id, ...props }) => {
+  const autoId = React.useId();
+  const controlId = id || autoId;
+  return (
   <div className="space-y-1 w-full">
     {label && (
-      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+      <label htmlFor={controlId} className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
         {label}
       </label>
     )}
     <textarea
+      id={controlId}
       className={`w-full p-3 bg-slate-50 text-slate-800 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white transition-all ${className}`}
       {...props}
     />
   </div>
-);
+  );
+};
 
 // --- TABLE COMPONENTS ---
 export const Table: React.FC<React.TableHTMLAttributes<HTMLTableElement>> = ({ children, className = '', ...props }) => (

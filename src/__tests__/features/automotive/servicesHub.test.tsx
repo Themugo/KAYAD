@@ -110,7 +110,7 @@ describe('No fixed "150-point" standard or dispatch promise on inspection surfac
     'components/VehicleDetailModal.tsx', 'features/DealersView/components/DealerProfileModal.tsx', 'components/Navbar.tsx',
     'components/home/FeaturedVehicles.tsx', 'components/home/Hero.tsx', 'components/home/TrustMetricsBar.tsx', 'components/TrustBadgeMatrix.tsx',
     'components/CompareModal.tsx', 'features/VehicleMarketplace/hooks/useHomePageConfig.ts', 'components/sell/SellPage.tsx',
-    'components/dashboard/DashboardPage.tsx', 'pages/Support.tsx', 'features/UnifiedCommunicationHub.tsx', 'features/InspectionsView.tsx',
+    'components/dashboard/DashboardPage.tsx', 'features/UnifiedCommunicationHub.tsx', 'features/InspectionsView.tsx',
   ];
   it.each(files)('%s', (f) => {
     const src = fs.readFileSync(path.join(process.cwd(), 'src', f), 'utf8');

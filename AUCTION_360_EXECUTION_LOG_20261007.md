@@ -1521,3 +1521,9 @@ Hub reframed to the platform/independent-provider model; nav "Auto Services" wit
 - Backend: contract unchanged; added a test that registration rejects every privileged role.
 - Validators: six source-string gates updated to the new contract (not weakened; assertions on the same behaviours plus new ones).
 - Revert → fail → restore → pass recorded for the redirect validator and for dealer-completion truth.
+
+## 2026-10-09 — Support & Resolution Center audit and convergence
+- Discovery first: `KAYAD_SUPPORT_DISCOVERY_AUDIT.md`. Proven P0: case creation failed on a migration-built DB (`ticket_number` NOT NULL, no generator). High: internal notes returned by `getTicket` and readable via owner RLS, every staff role admitted by `adminOnly`, append RPC trusted a caller-supplied role (customer reply counted as staff first response), function grants to anon/authenticated (staging check pending).
+- Migration `20261009150000_support_resolution_hardening.sql`; backend `services/support/*`, `middleware/supportAccess.js`; legacy facades reduced to aliases; orphans removed; customer page rewritten; staff Support module added to AdminView; shared Select/Textarea labels fixed.
+- Results: backend 978/63 suites (was 937/62); frontend 520 pass / 0 fail (was 505 / 3 fail); validators 10 failing = baseline; tsc 0; build 0; Playwright (mocked) 51/51; PG proof P1–P21; revert→fail→restore→pass recorded.
+- NOT certified: Supabase-hosted grants/RLS, provider delivery, load (see `KAYAD_SUPPORT_RUNTIME_CERTIFICATION.md`). Business decisions listed in the Convergence Report §10.

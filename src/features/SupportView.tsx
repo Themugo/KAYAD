@@ -22,13 +22,16 @@ import {
 import { PageHeader, Card, Select, Textarea, Button } from '../components/ui';
 import SupportFAQ from './SupportFAQ';
 import {
-  addSupportTicketMessage,
-  createSupportTicket,
-  getMySupportTickets,
-  getSupportTicket,
-  rateSupportTicket,
+  createSupportCase,
+  getMySupportCases,
+  getSupportCase,
+  newIdempotencyKey,
+  rateSupportCase,
+  replyToSupportCase,
   SupportApiError,
-  SupportTicket,
+  SupportCase,
+  SupportCaseSummary,
+  SupportReferenceKind,
 } from '../services/supportApi';
 import { UserProfile } from '../types';
 
@@ -57,17 +60,33 @@ const HELP_PATHS = [
   { id: 'account', icon: UserRound, title: 'Account & access', text: 'Sign-in, missing transactions and account access.', nav: 'profile' },
 ];
 
-const CATEGORY_OPTIONS = [
-  { value: 'marketplace', label: 'Marketplace / vehicle' },
-  { value: 'auction', label: 'Auction / bidding' },
-  { value: 'inspection', label: 'Pre-purchase inspection' },
-  { value: 'escrow', label: 'Escrow / payment / refund' },
-  { value: 'financing', label: 'Financing' },
-  { value: 'transfer', label: 'Ownership / transfer' },
-  { value: 'seller', label: 'Seller / dealer' },
-  { value: 'account', label: 'Account / access' },
-  { value: 'technical', label: 'Technical problem' },
+// Mirrors backend/services/support/supportPolicy.js (the server validates; this only drives the form).
+const CATEGORY_OPTIONS: { value: string; label: string; reference: SupportReferenceKind | null }[] = [
+  { value: 'marketplace', label: 'Buying or listing a vehicle', reference: 'vehicle' },
+  { value: 'seller', label: 'Selling or my listings', reference: 'vehicle' },
+  { value: 'auction', label: 'Auctions and bidding', reference: 'auction' },
+  { value: 'inspection', label: 'Inspections', reference: 'inspection' },
+  { value: 'service_provider', label: 'Automotive service providers', reference: 'inspection' },
+  { value: 'escrow', label: 'Escrow and payment protection', reference: 'escrow' },
+  { value: 'financing', label: 'Financing', reference: null },
+  { value: 'transfer', label: 'Ownership transfer', reference: 'vehicle' },
+  { value: 'account', label: 'My account and verification', reference: null },
+  { value: 'technical', label: 'Something is not working', reference: null },
+  { value: 'general', label: 'Something else', reference: null },
 ];
+
+const REFERENCE_LABEL: Record<SupportReferenceKind, string> = {
+  vehicle: 'Vehicle ID', escrow: 'Escrow ID', payment: 'Payment ID', inspection: 'Inspection or booking ID', auction: 'Auction vehicle ID',
+};
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function minutesLabel(minutes: number | null | undefined) {
+  if (!minutes) return null;
+  if (minutes % 1440 === 0) return `${minutes / 1440} day${minutes === 1440 ? '' : 's'}`;
+  if (minutes % 60 === 0) return `${minutes / 60} hour${minutes === 60 ? '' : 's'}`;
+  return `${minutes} minutes`;
+}
 
 function formatDate(value?: string) {
   if (!value) return 'Recently';
@@ -76,30 +95,27 @@ function formatDate(value?: string) {
   return new Intl.DateTimeFormat('en-KE', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
-function ticketReference(ticket: SupportTicket) {
+function ticketReference(ticket: Pick<SupportCaseSummary, 'id' | 'ticketNumber'>) {
   return ticket.ticketNumber || `Case ${ticket.id.slice(0, 8).toUpperCase()}`;
-}
-
-function formatDateTime(value?: string) {
-  if (!value) return 'Not recorded';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Not recorded';
-  return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
 }
 
 export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNavigate }) => {
   const formRef = useRef<HTMLDivElement>(null);
-  const [category, setCategory] = useState('escrow');
+  const [category, setCategory] = useState('general');
   const [reference, setReference] = useState('');
+  const [subject, setSubject] = useState('');
   const [issue, setIssue] = useState('');
+  const [notice, setNotice] = useState<string | null>(null);
+  // One key per form attempt: a retry after a timeout cannot create a second case.
+  const idempotencyKey = useRef(newIdempotencyKey());
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submittedTicket, setSubmittedTicket] = useState<SupportTicket | null>(null);
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [submittedTicket, setSubmittedTicket] = useState<SupportCase | null>(null);
+  const [tickets, setTickets] = useState<SupportCaseSummary[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(false);
   const [ticketsError, setTicketsError] = useState<string | null>(null);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<SupportCase | null>(null);
   const [ticketLoading, setTicketLoading] = useState(false);
   const [ticketMessage, setTicketMessage] = useState('');
   const [messageSending, setMessageSending] = useState(false);
@@ -114,8 +130,8 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
     setTicketsLoading(true);
     setTicketsError(null);
     try {
-      const result = await getMySupportTickets();
-      setTickets(result.tickets || []);
+      const result = await getMySupportCases();
+      setTickets(result.cases || []);
     } catch (error) {
       if (error instanceof SupportApiError && error.kind === 'unauthenticated') {
         onOpenAuth?.();
@@ -136,9 +152,9 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
     setTicketLoading(true);
     setMessageError(null);
     try {
-      const result = await getSupportTicket(ticketId);
-      setSelectedTicket(result.ticket);
-      setRating(result.ticket.satisfactionRating || null);
+      const result = await getSupportCase(ticketId);
+      setSelectedTicket(result.case);
+      setRating(result.case.rating || null);
     } catch (error) {
       setMessageError(error instanceof SupportApiError ? error.message : 'Unable to load this support case.');
     } finally {
@@ -148,7 +164,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!issue.trim()) return;
+    if (!issue.trim() || !subject.trim()) return;
     if (!user) {
       onOpenAuth?.();
       return;
@@ -156,15 +172,21 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const description = reference.trim()
-        ? `Reference: ${reference.trim()}\n\n${issue.trim()}`
-        : issue.trim();
-      const result = await createSupportTicket({
+      const refKind = CATEGORY_OPTIONS.find(o => o.value === category)?.reference;
+      const refId = reference.trim();
+      const result = await createSupportCase({
         category,
-        subject: issue.trim().slice(0, 80),
-        description,
+        subject: subject.trim(),
+        description: issue.trim(),
+        reference: refKind && refId ? { kind: refKind, id: refId } : undefined,
+        idempotencyKey: idempotencyKey.current,
       });
-      setSubmittedTicket(result.ticket);
+      setSubmittedTicket(result.case);
+      setNotice(refId && result.referenceLinked === false
+        ? 'Your case was created, but we could not link that reference to your account, so it was left off. Support can still help from your description.'
+        : null);
+      idempotencyKey.current = newIdempotencyKey();
+      setSubject('');
       setIssue('');
       setReference('');
       await loadTickets();
@@ -172,7 +194,9 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
       if (error instanceof SupportApiError && error.kind === 'unauthenticated') {
         onOpenAuth?.();
       } else {
-        setSubmitError(error instanceof SupportApiError ? error.message : 'Could not submit your case. Please try again.');
+        setSubmitError(error instanceof SupportApiError
+          ? (error.kind === 'network' ? 'We could not reach KAYAD. Check your connection and try again; your case will not be duplicated.' : error.message)
+          : 'Could not submit your case. Please try again.');
       }
     } finally {
       setSubmitting(false);
@@ -184,8 +208,8 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
     setMessageSending(true);
     setMessageError(null);
     try {
-      const result = await addSupportTicketMessage(selectedTicket.id, ticketMessage.trim());
-      setSelectedTicket(result.ticket);
+      const result = await replyToSupportCase(selectedTicket.id, ticketMessage.trim());
+      setSelectedTicket(result.case);
       setTicketMessage('');
       await loadTickets();
     } catch (error) {
@@ -200,8 +224,8 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
     setRatingSending(true);
     setMessageError(null);
     try {
-      const result = await rateSupportTicket(selectedTicket.id, rating, ratingNote.trim() || undefined);
-      setSelectedTicket(result.ticket);
+      const result = await rateSupportCase(selectedTicket.id, rating, ratingNote.trim() || undefined);
+      setSelectedTicket(result.case);
       await loadTickets();
     } catch (error) {
       setMessageError(error instanceof SupportApiError ? error.message : 'Could not save your feedback.');
@@ -220,6 +244,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
     window.location.href = `/?nav=${encodeURIComponent(target)}`;
   };
 
+  const referenceKind = CATEGORY_OPTIONS.find(o => o.value === category)?.reference || null;
   const activeCases = useMemo(() => tickets.filter(ticket => !['resolved', 'closed'].includes(ticket.status)), [tickets]);
 
   return (
@@ -251,7 +276,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
             { icon: Search, title: 'Find an answer', text: 'Search verified help' },
             { icon: Ticket, title: 'Open a case', text: 'Create a traceable request' },
             { icon: MessageSquare, title: 'Continue the case', text: 'Reply from your account' },
-            { icon: ShieldCheck, title: 'Reach resolution', text: 'Status and SLA stay visible' },
+            { icon: ShieldCheck, title: 'Reach resolution', text: 'Status stays visible' },
           ].map(item => (
             <div key={item.title} className="px-4 py-4 sm:px-5">
               <item.icon className="w-4 h-4 text-[#176B87]" />
@@ -297,7 +322,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <h2 className="mt-1 text-xl font-black text-[#0A3340]">Open a support case</h2>
               <p className="mt-1 text-xs leading-5 text-slate-500">Tell us what happened and include the vehicle, auction, inspection or escrow reference when you have one.</p>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><Clock3 className="w-3.5 h-3.5 text-[#176B87]" /> 1h first-response target</div>
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><Clock3 className="w-3.5 h-3.5 text-[#176B87]" /> Replies appear in your case</div>
           </div>
 
           {!user ? (
@@ -312,7 +337,8 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
               <p className="mt-3 text-sm font-extrabold text-emerald-900">Case created</p>
               <p className="mt-1 text-xs text-emerald-800">Reference: <strong>{ticketReference(submittedTicket)}</strong></p>
-              <p className="mt-2 text-xs leading-5 text-emerald-800">Your case is now in the KAYAD support workflow. The backend records a 1-hour first-response target and a 24-hour resolution target for new cases.</p>
+              <p className="mt-2 text-xs leading-5 text-emerald-800">Your case is now with KAYAD support. Replies and status changes appear in this page and in your notifications.{minutesLabel(submittedTicket.expectations?.firstResponseMinutes) ? ` We aim to reply within ${minutesLabel(submittedTicket.expectations.firstResponseMinutes)}.` : ''}</p>
+              {notice && <p className="mt-2 text-xs font-semibold text-amber-800">{notice}</p>}
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button variant="primary" size="sm" onClick={() => loadTicket(submittedTicket.id)}>View case</Button>
                 <Button variant="outline" size="sm" onClick={() => setSubmittedTicket(null)}>Open another case</Button>
@@ -321,15 +347,22 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {submitError && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">{submitError}</div>}
-              <Select label="What is the issue about?" value={category} onChange={e => setCategory(e.target.value)} options={CATEGORY_OPTIONS} />
+              <Select label="What is the issue about?" value={category} onChange={e => { setCategory(e.target.value); setReference(''); }} options={CATEGORY_OPTIONS.map(o => ({ value: o.value, label: o.label }))} />
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Reference (optional)</label>
-                <input value={reference} onChange={e => setReference(e.target.value)} placeholder="Vehicle, auction, inspection or escrow reference" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
+                <label htmlFor="support-subject" className="block text-xs font-bold text-slate-700 mb-1.5">Short summary</label>
+                <input id="support-subject" value={subject} maxLength={200} onChange={e => setSubject(e.target.value)} placeholder="e.g. Escrow payment not showing" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
               </div>
+              {referenceKind && (
+                <div>
+                  <label htmlFor="support-reference" className="block text-xs font-bold text-slate-700 mb-1.5">{REFERENCE_LABEL[referenceKind]} (optional)</label>
+                  <input id="support-reference" value={reference} onChange={e => setReference(e.target.value)} placeholder="Paste the ID from the page or email" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
+                  {reference.trim() && !UUID_RE.test(reference.trim()) && <p className="mt-1 text-[11px] text-amber-700">That does not look like a valid ID, so it will not be linked.</p>}
+                </div>
+              )}
               <Textarea label="What happened?" rows={6} value={issue} onChange={e => setIssue(e.target.value)} placeholder="Explain the problem, what you expected, and what you need resolved…" />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                 <p className="text-[11px] text-slate-500">Do not send passwords, OTPs or unnecessary financial credentials in a support description.</p>
-                <Button type="submit" variant="primary" size="md" disabled={submitting || !issue.trim()}>{submitting ? <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Creating case…</span> : 'Create support case'}</Button>
+                <Button type="submit" variant="primary" size="md" disabled={submitting || subject.trim().length < 3 || issue.trim().length < 10}>{submitting ? <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Creating case…</span> : 'Create support case'}</Button>
               </div>
             </form>
           )}
@@ -370,7 +403,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
                       <div className="min-w-0">
                         <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{ticketReference(ticket)}</p>
                         <p className="mt-1 text-sm font-extrabold text-[#0A3340] truncate">{ticket.subject}</p>
-                        <p className="mt-1 text-[11px] text-slate-500">{ticket.category || 'Support'} · {formatDate(ticket.createdAt)}</p>
+                        <p className="mt-1 text-[11px] text-slate-500">{CATEGORY_OPTIONS.find(o => o.value === ticket.category)?.label || 'Support'} · {formatDate(ticket.createdAt)}</p>
                       </div>
                       <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${status.tone}`}>{status.label}</span>
                     </div>
@@ -404,21 +437,23 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
                 </div>
 
                 <div className="mt-5 space-y-3">
-                  {(selectedTicket.messages || []).filter(message => !message.isInternal).map((message, index) => (
-                    <div key={`${message.createdAt || 'message'}-${index}`} className="rounded-2xl border border-slate-200 p-4">
-                      <div className="flex items-center justify-between gap-3 mb-2"><span className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{message.senderRole === 'user' || message.senderRole === 'customer' ? 'You' : 'KAYAD Support'}</span><span className="text-[10px] text-slate-400">{formatDate(message.createdAt)}</span></div>
+                  {(selectedTicket.messages || []).map((message, index) => (
+                    <div key={message.id || `${message.createdAt || 'message'}-${index}`} className="rounded-2xl border border-slate-200 p-4">
+                      <div className="flex items-center justify-between gap-3 mb-2"><span className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{message.from === 'you' ? 'You' : 'KAYAD Support'}</span><span className="text-[10px] text-slate-400">{formatDate(message.createdAt)}</span></div>
                       <p className="text-sm leading-6 text-slate-700 whitespace-pre-wrap">{message.content}</p>
                     </div>
                   ))}
                 </div>
 
-                {!['closed', 'resolved'].includes(selectedTicket.status) && (
+                {selectedTicket.canReply ? (
                   <div className="mt-5">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Reply to this case</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{selectedTicket.status === 'resolved' ? 'Not fixed? Reply to reopen this case' : 'Reply to this case'}</label>
                     <textarea value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} rows={4} placeholder="Add information or reply to the support team…" className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
                     {messageError && <p className="mt-2 text-xs font-semibold text-rose-700">{messageError}</p>}
                     <div className="mt-2 flex justify-end"><Button variant="primary" size="sm" disabled={messageSending || !ticketMessage.trim()} onClick={() => void sendMessage()}>{messageSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-3.5 h-3.5" /> Send reply</>}</Button></div>
                   </div>
+                ) : (
+                  <p className="mt-5 rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600">This case is closed. If you still need help, open a new case.</p>
                 )}
               </div>
 
@@ -427,12 +462,13 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Case timing</p>
                   <div className="mt-3 space-y-2 text-xs">
                     <div className="flex justify-between gap-3"><span className="text-slate-500">Created</span><strong className="text-slate-700">{formatDate(selectedTicket.createdAt)}</strong></div>
-                    <div className="flex justify-between gap-3"><span className="text-slate-500">First response target</span><strong className="text-slate-700">{selectedTicket.sla?.firstResponseTarget ? formatDateTime(selectedTicket.sla.firstResponseTarget) : '1 hour'}</strong></div>
-                    <div className="flex justify-between gap-3"><span className="text-slate-500">Resolution target</span><strong className="text-slate-700">{selectedTicket.sla?.resolutionTarget ? formatDateTime(selectedTicket.sla.resolutionTarget) : '24 hours'}</strong></div>
+                    <div className="flex justify-between gap-3"><span className="text-slate-500">Last update</span><strong className="text-slate-700">{formatDate(selectedTicket.updatedAt)}</strong></div>
+                    {minutesLabel(selectedTicket.expectations.firstResponseMinutes) && <div className="flex justify-between gap-3"><span className="text-slate-500">We aim to reply within</span><strong className="text-slate-700">{minutesLabel(selectedTicket.expectations.firstResponseMinutes)}</strong></div>}
+                    {selectedTicket.resolvedAt && <div className="flex justify-between gap-3"><span className="text-slate-500">Resolved</span><strong className="text-slate-700">{formatDate(selectedTicket.resolvedAt)}</strong></div>}
                   </div>
                 </div>
 
-                {['resolved', 'closed'].includes(selectedTicket.status) && (
+                {selectedTicket.canRate && (
                   <div className="pt-4 border-t border-slate-100">
                     <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">How was the resolution?</p>
                     <div className="mt-3 flex gap-2">
@@ -441,6 +477,10 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
                     <textarea value={ratingNote} onChange={e => setRatingNote(e.target.value)} rows={3} placeholder="Optional feedback" className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none focus:border-[#176B87]" />
                     <Button variant="outline" size="sm" className="mt-2 w-full" disabled={!rating || ratingSending} onClick={() => void submitRating()}>{ratingSending ? 'Saving…' : 'Save feedback'}</Button>
                   </div>
+                )}
+
+                {selectedTicket.rating != null && (
+                  <div className="pt-4 border-t border-slate-100 text-xs text-slate-600">You rated this case <strong>{selectedTicket.rating}/5</strong>. Thank you.</div>
                 )}
 
                 <div className="pt-4 border-t border-slate-100">

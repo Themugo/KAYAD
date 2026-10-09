@@ -1,0 +1,4 @@
+# REVERTED (internal filter removed):
+Tests:       1 failed, 40 passed, 41 total
+# RESTORED:
+Tests:       41 passed, 41 total

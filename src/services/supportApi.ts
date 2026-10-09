@@ -1,136 +1,149 @@
 import { request, HttpRequestError } from '../api/httpRequest';
 
-export interface SupportTicketMessage {
-  sender?: string;
-  senderRole?: string;
+// ---- Customer projection (what the backend returns to the case owner; never contains staff data) ----
+export interface SupportReference { kind: SupportReferenceKind; id: string }
+export type SupportReferenceKind = 'vehicle' | 'escrow' | 'payment' | 'inspection' | 'auction';
+
+export interface SupportMessage {
+  id: string | null;
+  from: 'you' | 'support';
   content: string;
-  isInternal?: boolean;
-  createdAt?: string;
+  createdAt: string | null;
 }
 
-export interface SupportTicket {
+export interface SupportCaseSummary {
   id: string;
-  ticketNumber?: string;
-  category?: string;
-  priority?: string;
-  subject: string;
-  description: string;
-  status: string;
-  createdAt?: string;
-  updatedAt?: string;
-  closedAt?: string;
-  messages?: SupportTicketMessage[];
-  satisfactionRating?: number;
-  resolutionNotes?: string;
-  sla?: {
-    firstResponseTarget?: string;
-    firstResponseActual?: string;
-    firstResponseMet?: boolean;
-    resolutionTarget?: string;
-    resolutionActual?: string;
-    resolutionMet?: boolean;
-  };
-  relatedEscrow?: { id?: string; amount?: number; status?: string } | string;
-  relatedCar?: { id?: string; title?: string; brand?: string; model?: string; year?: number } | string;
-  relatedPayment?: { id?: string; amount?: number; status?: string } | string;
-  assignedTo?: { id?: string; name?: string; email?: string } | string;
-  escalatedTo?: { id?: string; name?: string; email?: string } | string;
-}
-
-export interface CreateTicketPayload {
+  ticketNumber: string;
   category: string;
-  priority?: string;
   subject: string;
-  description: string;
-  relatedCar?: string;
-  relatedEscrow?: string;
-  relatedPayment?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+  rated: boolean;
+  messageCount: number;
 }
 
-export type SupportApiErrorKind = 'network' | 'unauthenticated' | 'not_found' | 'server' | 'unknown';
+export interface SupportCase extends SupportCaseSummary {
+  description: string;
+  references: SupportReference[];
+  messages: SupportMessage[];
+  rating: number | null;
+  ratingComment: string | null;
+  canReply: boolean;
+  canRate: boolean;
+  /** Present only when operations configured targets; null means KAYAD makes no timing promise. */
+  expectations: { firstResponseMinutes: number | null; resolutionMinutes: number | null };
+}
+
+export interface SupportCategory { value: string; label: string; reference: SupportReferenceKind | null }
+export interface SupportConfig { categories: SupportCategory[]; reopenWindowDays: number; attachments: boolean }
+
+export interface CreateCasePayload {
+  category: string;
+  subject: string;
+  description: string;
+  reference?: SupportReference;
+  /** One per form submission; makes retries safe (no duplicate cases). */
+  idempotencyKey: string;
+}
+
+export type SupportApiErrorKind = 'network' | 'unauthenticated' | 'forbidden' | 'not_found' | 'conflict' | 'validation' | 'rate_limited' | 'server' | 'unknown';
 
 export class SupportApiError extends Error {
   kind: SupportApiErrorKind;
   status?: number;
-  constructor(message: string, kind: SupportApiErrorKind, status?: number) {
+  code?: string;
+  constructor(message: string, kind: SupportApiErrorKind, status?: number, code?: string) {
     super(message);
     this.kind = kind;
     this.status = status;
+    this.code = code;
   }
 }
 
-async function supportFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+export function newIdempotencyKey(): string {
+  const c = (globalThis as { crypto?: Crypto }).crypto;
+  if (c?.randomUUID) return `sup-${c.randomUUID()}`;
+  return `sup-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+async function supportFetch<T>(path: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
   try {
     return await request<T>(path, {
       method: options.method,
-      body: options.body,
-      headers: options.headers as Record<string, string>,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
     });
   } catch (err) {
-    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
-    const kind: SupportApiErrorKind = error.status === 401
-      ? 'unauthenticated'
-      : error.status === 404
-        ? 'not_found'
-        : error.status && error.status >= 500
-          ? 'server'
-          : 'unknown';
-    throw new SupportApiError(error.message, kind, error.status);
+    const e = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    const s = e.status;
+    const kind: SupportApiErrorKind = !s ? 'network'
+      : s === 401 ? 'unauthenticated'
+      : s === 403 ? 'forbidden'
+      : s === 404 ? 'not_found'
+      : s === 409 ? 'conflict'
+      : s === 429 ? 'rate_limited'
+      : s >= 500 ? 'server'
+      : s >= 400 ? 'validation'
+      : 'unknown';
+    throw new SupportApiError(e.message, kind, s, (e as { code?: string }).code);
   }
 }
 
-export async function createSupportTicket(
-  payload: CreateTicketPayload
-): Promise<{ success: boolean; ticket: SupportTicket }> {
-  return supportFetch('/api/support', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
+export const getSupportConfig = () => supportFetch<{ success: boolean } & SupportConfig>('/api/support/config');
+
+export const createSupportCase = (payload: CreateCasePayload) =>
+  supportFetch<{ success: boolean; case: SupportCase; referenceLinked: boolean | null; deduplicated: boolean }>('/api/support', { method: 'POST', body: payload });
+
+export const getMySupportCases = () =>
+  supportFetch<{ success: boolean; cases: SupportCaseSummary[]; total: number }>('/api/support/my-tickets');
+
+export const getSupportCase = (id: string) =>
+  supportFetch<{ success: boolean; case: SupportCase }>(`/api/support/${encodeURIComponent(id)}`);
+
+export const replyToSupportCase = (id: string, content: string) =>
+  supportFetch<{ success: boolean; case: SupportCase; reopened: boolean }>(`/api/support/${encodeURIComponent(id)}/messages`, { method: 'POST', body: { content } });
+
+export const rateSupportCase = (id: string, rating: number, comment?: string) =>
+  supportFetch<{ success: boolean; case: SupportCase }>(`/api/support/${encodeURIComponent(id)}/rate`, { method: 'POST', body: { rating, comment } });
+
+// ---- Staff workspace (PERM.MANAGE_SUPPORT) ----
+export interface StaffPerson { id: string; name: string | null; role: string | null }
+export interface StaffCaseSummary {
+  id: string; ticketNumber: string; category: string; priority: string; subject: string; status: string;
+  customer: StaffPerson | null; assignedTo: StaffPerson | null; escalatedTo: StaffPerson | null;
+  firstResponseAt: string | null; resolvedAt: string | null; messageCount: number; rowVersion: number;
+  createdAt: string; updatedAt: string; awaitingStaff: boolean;
+}
+export interface StaffMessage { id: string | null; kind: 'customer' | 'staff'; internal: boolean; senderName: string | null; content: string; createdAt: string | null }
+export interface StaffCase extends StaffCaseSummary {
+  description: string; references: SupportReference[]; messages: StaffMessage[];
+  resolutionNote: string | null; rating: number | null; ratingComment: string | null; reopenCount: number;
+}
+export interface SupportMetrics {
+  total: number; windowDays: number; slaConfigured: boolean;
+  byStatus: Record<string, number>; byCategory: Record<string, number>;
+  openBacklog: number; unassignedOpen: number; awaitingFirstResponse: number;
+  medianFirstResponseMinutes: number | null; medianResolutionMinutes: number | null;
+  firstResponseWithinTarget: number | null; resolutionWithinTarget: number | null;
+  averageRating: number | null; ratedCount: number;
 }
 
-export async function getMySupportTickets(): Promise<{ success: boolean; tickets: SupportTicket[] }> {
-  return supportFetch('/api/support/my-tickets', { method: 'GET' });
-}
+const qs = (p: Record<string, string | number | undefined>) => {
+  const q = new URLSearchParams();
+  Object.entries(p).forEach(([k, v]) => { if (v !== undefined && v !== '') q.set(k, String(v)); });
+  return q.toString() ? `?${q}` : '';
+};
 
-export async function getSupportTicket(ticketId: string): Promise<{ success: boolean; ticket: SupportTicket }> {
-  return supportFetch(`/api/support/${encodeURIComponent(ticketId)}`, { method: 'GET' });
-}
-
-export async function addSupportTicketMessage(
-  ticketId: string,
-  content: string,
-): Promise<{ success: boolean; message: SupportTicketMessage; ticket: SupportTicket }> {
-  return supportFetch(`/api/support/${encodeURIComponent(ticketId)}/messages`, {
-    method: 'POST',
-    body: JSON.stringify({ content }),
-  });
-}
-
-export async function rateSupportTicket(
-  ticketId: string,
-  rating: number,
-  resolutionNotes?: string,
-): Promise<{ success: boolean; ticket: SupportTicket }> {
-  return supportFetch(`/api/support/${encodeURIComponent(ticketId)}/rate`, {
-    method: 'POST',
-    body: JSON.stringify({ rating, resolutionNotes }),
-  });
-}
-
-export async function getAdminSupportTickets(params: Record<string, string | number | undefined> = {}): Promise<{ success: boolean; tickets: SupportTicket[] }> {
-  const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') query.set(key, String(value));
-  });
-  return supportFetch(`/api/support/all${query.toString() ? `?${query}` : ''}`, { method: 'GET' });
-}
-
-export async function updateSupportTicketStatus(
-  ticketId: string,
-  body: { status?: string; assignedTo?: string; escalatedTo?: string; priority?: string },
-): Promise<{ success: boolean; ticket: SupportTicket }> {
-  return supportFetch(`/api/support/${encodeURIComponent(ticketId)}/status`, {
-    method: 'PUT',
-    body: JSON.stringify(body),
-  });
-}
+export const getStaffQueue = (params: Record<string, string | number | undefined> = {}) =>
+  supportFetch<{ success: boolean; cases: StaffCaseSummary[]; total: number; limit: number; offset: number }>(`/api/support/staff/queue${qs(params)}`);
+export const getStaffMetrics = (days = 30) =>
+  supportFetch<{ success: boolean; metrics: SupportMetrics }>(`/api/support/staff/metrics${qs({ days })}`);
+export const getStaffTeam = () =>
+  supportFetch<{ success: boolean; staff: StaffPerson[] }>('/api/support/staff/team');
+export const getStaffCase = (id: string) =>
+  supportFetch<{ success: boolean; case: StaffCase }>(`/api/support/staff/${encodeURIComponent(id)}`);
+export const staffReplyToCase = (id: string, content: string, isInternal: boolean) =>
+  supportFetch<{ success: boolean; case: StaffCase }>(`/api/support/staff/${encodeURIComponent(id)}/messages`, { method: 'POST', body: { content, isInternal } });
+export const staffUpdateCase = (id: string, body: { status?: string; priority?: string; assignedTo?: string | null; escalatedTo?: string; resolutionNote?: string; expectedVersion?: number }) =>
+  supportFetch<{ success: boolean; case: StaffCase }>(`/api/support/staff/${encodeURIComponent(id)}`, { method: 'PATCH', body });

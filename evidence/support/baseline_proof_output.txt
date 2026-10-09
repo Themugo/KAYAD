@@ -1,0 +1,22 @@
+B1 ticket creation without ticket_number (what createTicket does):
+psql:baseline_proof.sql:17: ERROR:  SAVEPOINT can only be used in transaction blocks
+psql:baseline_proof.sql:18: ERROR:  null value in column "ticket_number" of relation "support_tickets" violates not-null constraint
+DETAIL:  Failing row contains (e8e825f5-bd19-43c9-8263-08f8dfb015a7, aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa, escrow, medium, x, y, null, null, null, open, null, null, [], {}, null, null, null, null, 2026-10-09 07:03:20.189026+00, 2026-10-09 07:03:20.189026+00, null, null, null, f, 0).
+psql:baseline_proof.sql:19: ERROR:  ROLLBACK TO SAVEPOINT can only be used in transaction blocks
+B2 customer A reads own ticket row directly (RLS owner policy) -> internal note visible?
+{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}
+B3 customer B reads ticket of A directly -> rows visible:
+{"sub":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","role":"authenticated"}
+0
+B4 customer B inserts a ticket directly with forged status/messages/assignee:
+{"sub":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","role":"authenticated"}
+psql:baseline_proof.sql:32: ERROR:  new row violates row-level security policy for table "support_tickets"
+psql:baseline_proof.sql:33: ERROR:  current transaction is aborted, commands ignored until end of transaction block
+B5 customer B calls the append RPC directly as an admin on A's ticket (emulated Supabase function grant):
+{"sub":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","role":"authenticated"}
+psql:baseline_proof.sql:37: ERROR:  SUPPORT_TICKET_NOT_FOUND
+CONTEXT:  PL/pgSQL function kayad_append_support_message(uuid,uuid,text,text,boolean,jsonb) line 12 at RAISE
+B6 after that: first_response_at set=false status=open
+B7 ordinary customer reply with app role "dealer" (req.user.role) counts as staff first response:
+t
+B7 result: first_response_at set=true status=in_progress

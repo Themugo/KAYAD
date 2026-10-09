@@ -492,16 +492,6 @@ export const verificationAPI = {
   verifyPhoneOTP: (code: string) => api.post('/verification/phone/verify', { code }).then(unwrap),
 };
 
-// ── SUPPORT ───────────────────────────────────────────
-export const supportAPI = {
-  list:          (params?: any) => api.get('/support/all', { params }).then(unwrap),
-  getById:       (id: string)   => api.get(`/support/${id}`).then(unwrap),
-  updateStatus:  (id: string, body: any) => api.put(`/support/${id}/status`, body).then(unwrap),
-  analytics:     ()             => api.get('/support/analytics').then(unwrap),
-  myTickets:     (params?: any) => api.get('/support/my-tickets', { params }).then(unwrap),
-  create:        (body: any)    => api.post('/support', body).then(unwrap),
-};
-
 // ── REPORTS ───────────────────────────────────────────
 export const reportAPI = {
   submit:      (body: any) => api.post('/reports/submit', body).then(unwrap),
