@@ -1512,3 +1512,12 @@ Hub reframed to the platform/independent-provider model; nav "Auto Services" wit
 - Frontend: rewritten API client and EscrowView; new public / participant / operations surfaces; unsupported claims removed; orphan `EscrowPage` removed; static claims test.
 - Results: backend 937/62 suites; frontend 508 (+1 skip); validators 164/10 (baseline); tsc 0; build 0; mocked-HTTP Playwright 33/33; revert→fail→restore→pass recorded.
 - NOT certified: live Supabase/RLS, Redis, M-Pesa, webhooks (ENVIRONMENT-BLOCKED). No business decision was made (see report section 17).
+
+---
+## 2026-10-09 — Identity, registration & onboarding convergence + CI repair
+- Discovery first: `KAYAD_IDENTITY_ONBOARDING_DISCOVERY.md`. Reports: `KAYAD_IDENTITY_ONBOARDING_CONVERGENCE_REPORT.md`, `KAYAD_CI_FAILURE_REPAIR_REPORT.md`. Evidence: `evidence/identity/`.
+- CI: remote run logs unobtainable; reproduced locally. Security Audit and Backend Quality fail on `npm audit` (1 high root; 4 incl. 1 critical `proxy-addr` backend). Fixed by minimal lockfile bumps; no audit/threshold/workflow/test change. Bundle Analysis skipped by design (`pull_request` only).
+- Frontend: one canonical auth system (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`); validated `next`/`intent` carried through every entry point; role-aware registration (buyer, private seller, dealer, garage/inspection business, independent inspector, employed mechanic); AuthModal reduced to a redirect shim; orphan `pages/register/*` removed; truthful dealer completion state; ad panel removed; Forgot/Reset/Verify restyled.
+- Backend: contract unchanged; added a test that registration rejects every privileged role.
+- Validators: six source-string gates updated to the new contract (not weakened; assertions on the same behaviours plus new ones).
+- Revert → fail → restore → pass recorded for the redirect validator and for dealer-completion truth.

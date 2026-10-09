@@ -1,0 +1,28 @@
+PASS  open-redirect next is ignored; user stays on the app origin  http://localhost:3000/dashboard
+PASS  safe next is honoured after sign-in  http://localhost:3000/?nav=inspections
+PASS  login sent exactly email+password (no role)
+PASS  login -> register link carries next+intent  /register?next=%2F%3Fnav%3Dinspections&intent=provider
+PASS  dealer: missing business fields blocks submit with field errors
+PASS  dealer: exactly one register POST with role dealer
+PASS  dealer: no session after registration (still signed out)
+PASS  no password or email in browser storage  {"kayad:auth-intent":"{\"next\":\"/dealer/onboarding\",\"intent\":\"dealer\",\"at\":1791528083397}","kayad_compare_ids":
+PASS  dealer: next step is business verification, dealer tools stay locked
+PASS  dealer: sign-in link returns to /dealer/onboarding
+PASS  unknown intent shows the picker with 5 public roles only
+PASS  role sent is user despite ?role=admin
+PASS  duplicate email: recovery actions (sign in / reset password)
+PASS  guarded route redirects to /login with next  http://localhost:3000/login?next=%2Fdashboard
+PASS  verify=required shows banner with resend
+PASS  mobile /login: no horizontal scroll, one h1, no tiny controls  h1=1 small=0
+PASS  mobile /register: no horizontal scroll, one h1, no tiny controls  h1=1 small=0
+PASS  mobile /register?intent=dealer: no horizontal scroll, one h1, no tiny controls  h1=1 small=0
+PASS  mobile /forgot-password: no horizontal scroll, one h1, no tiny controls  h1=1 small=0
+PASS  mobile /reset-password?token=abc: no horizontal scroll, one h1, no tiny controls  h1=1 small=0
+PASS  mobile /verify-email: no horizontal scroll, one h1, no tiny controls  h1=1 small=0
+PASS  keyboard-only: Tab reaches the sign-in button
+PASS  reduced motion: no running decorative animation on the login page  animated=0
+PASS  provider deep link opens the application, signed-out users get sign-in/create actions
+PASS  create business account -> /register?intent=provider with return to the application  http://localhost:3000/register?next=%2F%3Fnav%3Dinspections%26action%3Dapply-provider&intent=provider
+PASS  and the provider role is preselected (account form, no role picker)  Create your account.
+
+26/26 PASS

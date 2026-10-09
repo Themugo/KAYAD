@@ -1,77 +1,65 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, BadgeCheck, CarFront, ShieldCheck, Sparkles } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowUpRight, CarFront } from 'lucide-react';
+import { buildAuthPath, readAuthContext } from '../../utils/authIntent';
 
-export default function PremiumAuthShell({
-  mode = 'signin',
-  eyebrow,
-  title,
-  description,
-  children,
-  adTitle = 'Reach serious automotive buyers',
-  adDescription = 'A premium advertising surface for dealers, brands, auctions and featured vehicles.',
-}) {
+/**
+ * Shared frame for every authentication and onboarding screen.
+ *
+ * One task per screen: a focused card, with an optional "what happens next"
+ * rail for the longer registration journey. There is deliberately no
+ * advertising on these screens - they exist to finish one job.
+ *
+ * `rail` = { title, steps: [{ title, body }], note }.
+ */
+export default function PremiumAuthShell({ mode = 'signin', eyebrow, title, description, children, rail, headerAction }) {
+  const location = useLocation();
   const isRegister = mode === 'register';
+  const ctx = readAuthContext(location);
+  const switchTo = headerAction?.to || buildAuthPath(isRegister ? 'login' : 'register', ctx);
+  const switchPrompt = headerAction?.prompt ?? (isRegister ? 'Already have an account?' : 'New to KAYAD?');
+  const switchLabel = headerAction?.label ?? (isRegister ? 'Sign in' : 'Create account');
 
   return (
-    <main className="kayad-auth-page">
-      <div className="kayad-auth-orb kayad-auth-orb-one" />
-      <div className="kayad-auth-orb kayad-auth-orb-two" />
-
+    <main className="kayad-auth-page" id="main-content">
       <header className="kayad-auth-header">
         <Link to="/" className="kayad-auth-brand" aria-label="KAYAD home">
-          <span className="kayad-auth-brand-mark"><CarFront size={19} strokeWidth={2.4} /></span>
+          <span className="kayad-auth-brand-mark"><CarFront size={19} strokeWidth={2.4} aria-hidden="true" /></span>
           <span className="kayad-auth-brand-copy"><strong>KAYAD</strong><small>Kenya’s trusted vehicle marketplace</small></span>
         </Link>
         <div className="kayad-auth-header-action">
-          <span>{isRegister ? 'Already have an account?' : 'New to KAYAD?'}</span>
-          <Link to={isRegister ? '/login' : '/register'} className="kayad-auth-header-link">
-            {isRegister ? 'Sign In' : 'Create Account'} <ArrowUpRight size={15} />
-          </Link>
+          <span>{switchPrompt}</span>
+          <Link to={switchTo} className="kayad-auth-header-link">{switchLabel} <ArrowUpRight size={15} aria-hidden="true" /></Link>
         </div>
       </header>
 
-      <section className="kayad-auth-layout">
+      <section className="kayad-auth-layout" data-wide={rail ? 'true' : 'false'}>
         <div className="kayad-auth-card-wrap">
           <div className="kayad-auth-card">
             <div className="kayad-auth-intro">
-              <div className="kayad-auth-eyebrow"><Sparkles size={13} /> {eyebrow || (isRegister ? 'KAYAD membership' : 'Secure marketplace access')}</div>
+              {eyebrow && <div className="kayad-auth-eyebrow">{eyebrow}</div>}
               <h1>{title}</h1>
-              <p>{description}</p>
+              {description && <p>{description}</p>}
             </div>
             {children}
           </div>
         </div>
 
-        <aside className="kayad-auth-ad-panel" aria-label="KAYAD advertising space">
-          <div className="kayad-auth-ad-topline">
-            <span><span className="kayad-auth-ad-dot" /> Featured placement</span>
-            <span className="kayad-auth-ad-label">KAYAD Ads</span>
-          </div>
-          <div className="kayad-auth-ad-art" aria-hidden="true">
-            <div className="kayad-auth-ad-glow" />
-            <div className="kayad-auth-ad-grid" />
-            <div className="kayad-auth-ad-road" />
-            <div className="kayad-auth-ad-car">
-              <img src="/hero/kayad-prado.png" alt="" />
-            </div>
-            <div className="kayad-auth-ad-badge"><BadgeCheck size={15} /> KAYAD Select</div>
-          </div>
-          <div className="kayad-auth-ad-copy">
-            <span className="kayad-auth-ad-kicker">Advertise where intent is high</span>
-            <h2>{adTitle}</h2>
-            <p>{adDescription}</p>
-          </div>
-          <div className="kayad-auth-ad-footer">
-            <div><ShieldCheck size={15} /> Secure, contextual placements</div>
-            <Link to="/" className="kayad-auth-ad-link">Explore KAYAD <ArrowRight size={15} /></Link>
-          </div>
-        </aside>
+        {rail && (
+          <aside className="kayad-auth-rail" aria-label={rail.title}>
+            <h2>{rail.title}</h2>
+            <ol>
+              {rail.steps.map((step) => (
+                <li key={step.title}><span><strong>{step.title}</strong>{step.body}</span></li>
+              ))}
+            </ol>
+            {rail.note && <p>{rail.note}</p>}
+          </aside>
+        )}
       </section>
 
       <footer className="kayad-auth-footer">
         <span>© {new Date().getFullYear()} KAYAD</span>
-        <span>Trusted marketplace access</span>
-        <span>Privacy · Security · Support</span>
+        <span><Link to="/?nav=support">Help and support</Link></span>
       </footer>
     </main>
   );

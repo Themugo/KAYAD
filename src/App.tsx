@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, Suspense } from 'react';
+import { buildAuthPath, loginPathFor } from './utils/authIntent';
 import Navbar from './components/Navbar';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import TopNoticeStrip from './components/TopNoticeStrip';
@@ -91,6 +92,12 @@ function AppInner() {
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('nav');
     setActiveNav(normalizeNav(requested));
+    // Deep link used as a sign-in return destination: /?nav=inspections&action=apply-provider.
+    // The action only opens a form; the backend still decides what the account may do.
+    const action = new URLSearchParams(location.search).get('action');
+    if (requested === 'inspections' && (action === 'apply-provider' || action === 'manage-business')) {
+      setInspectionLaunch((prev) => ({ vehicle: null, tab: 'service', action, nonce: prev.nonce + 1 }));
+    }
   }, [location.search, normalizeNav]);
 
   // Client-side navigation state is convenience only, but it must never
@@ -102,7 +109,7 @@ function AppInner() {
     const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard']);
     if (!protectedNavs.has(activeNav)) return;
     if (!isAuth) {
-      navigate('/login', { replace: true, state: { from: location } });
+      navigate(loginPathFor(location), { replace: true });
       return;
     }
     if (activeNav === 'admin' && !isAdmin) {
@@ -118,7 +125,7 @@ function AppInner() {
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
   const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create' | 'operations'>('journey');
   const [escrowLaunchNonce, setEscrowLaunchNonce] = useState(0);
-  const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
+  const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | 'manage-business' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fixed (Final Integration - real data integration): this was
@@ -138,9 +145,10 @@ function AppInner() {
   // provide, except isVerified (backend has no such field - mapped
   // from the real, existing emailVerified boolean).
   const handleOpenAuth = useCallback(() => {
-    navigate('/login', {
-      state: { from: { pathname: window.location.pathname } },
-    });
+    navigate(loginPathFor(window.location));
+  }, [navigate]);
+  const handleOpenRegister = useCallback((intent: string, next: string) => {
+    navigate(buildAuthPath('register', { next, intent }));
   }, [navigate]);
   const user: UserProfile | null = useMemo(() => {
     if (!authUser) return null;
@@ -368,7 +376,7 @@ function AppInner() {
   }, []);
 
   // Inspection launch: keep the vehicle the customer was looking at (it used to be discarded).
-  const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | null }) => {
+  const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | 'manage-business' | null }) => {
     setInspectionLaunch((prev) => ({ vehicle: next.vehicle ?? null, tab: next.tab ?? 'service', action: next.action ?? null, nonce: prev.nonce + 1 }));
     setActiveNav('inspections');
   }, []);
@@ -539,6 +547,7 @@ function AppInner() {
               vehicles={vehicles}
               user={user}
               onOpenAuth={handleOpenAuth}
+              onOpenRegister={handleOpenRegister}
               onViewVehicleDetails={handleOpenVehicleDetails}
               onOpenInspectionMarketplace={(category) => { setFinderLaunch((p) => ({ category, nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); }}
             />

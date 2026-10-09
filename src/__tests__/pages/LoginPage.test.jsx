@@ -74,4 +74,33 @@ describe('LoginPage', () => {
     );
     expect(screen.getByText(/Create your KAYAD account/i)).toBeInTheDocument();
   });
+
+  it('carries a validated next/intent to the register link', () => {
+    render(
+      <MemoryRouter initialEntries={['/login?next=%2Fauctions%2F42&intent=seller']}>
+        <AuthProvider><LoginPage /></AuthProvider>
+      </MemoryRouter>
+    );
+    const link = screen.getByText(/Create your KAYAD account/i).closest('a');
+    expect(link.getAttribute('href')).toBe('/register?next=%2Fauctions%2F42&intent=seller');
+  });
+
+  it('drops an open-redirect next from the register link', () => {
+    render(
+      <MemoryRouter initialEntries={['/login?next=https%3A%2F%2Fevil.example%2F']}>
+        <AuthProvider><LoginPage /></AuthProvider>
+      </MemoryRouter>
+    );
+    const link = screen.getByText(/Create your KAYAD account/i).closest('a');
+    expect(link.getAttribute('href')).toBe('/register');
+  });
+
+  it('shows the verification banner when redirected with verify=required', () => {
+    render(
+      <MemoryRouter initialEntries={['/login?verify=required']}>
+        <AuthProvider><LoginPage /></AuthProvider>
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Email verification required/i)).toBeInTheDocument();
+  });
 });

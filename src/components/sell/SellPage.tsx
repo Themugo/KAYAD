@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { buildAuthPath } from '../../utils/authIntent';
 import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -67,7 +68,7 @@ export const SellPage: FC = () => {
       // session here. Send the user to real registration to finish
       // creating their account instead of faking a login.
       setTimeout(() => {
-        navigate('/register');
+        navigate(buildAuthPath('register', { intent: 'seller' }));
       }, 1800);
     }, 1000);
   };

@@ -771,3 +771,14 @@ Added to the ranked carry-forward: sweep remaining unsupported trust claims ("Gu
 7. DECISION: dealer team-member access to escrows.
 8. Replace mock `AdminPage` escrow screens; decide the "Escrow Vault" naming; regenerate the stale route security matrix as its own change.
 9. Out of scope, noted: `dealerRoutes` `PUT /settlement` shadows imported `update`.
+
+---
+## 2026-10-09 — Identity & onboarding remaining work (ranked)
+1. VERIFY REMOTELY: push, confirm `Security Audit` and `Backend Quality Checks` green on the new commit and that `Bundle Analysis` runs on the next pull request (remote run `37886372392` log was not obtainable here).
+2. ENV: exercise the real register → email → verify → sign-in → onboarding path against a live backend and a real mailbox (all browser journeys here used a mocked backend).
+3. DECISION: fold the anonymous independent-inspector application into an account-first flow (needs a backend contract change; today it is account-less until admin approval).
+4. DECISION: broker role: support end to end (schema, approval, workspace) or retire the DB enum value; it is currently not offered anywhere publicly.
+5. Provider/affiliation: a signed-in, email-verified `user` still reaches the provider form only through `/?nav=inspections&action=apply-provider`; consider a status panel that shows the application's state (submitted / info required / approved / rejected) using the existing provider endpoints.
+6. Dealer onboarding page still uses legacy inline styling; restyle on `PremiumAuthShell` (functionality and truthful completion states are already fixed).
+7. Server-side: expose a single `GET /me/onboarding-status` aggregating account, dealer and provider states so the frontend need not infer them.
+8. Remove the legacy `/admin/login` alias once admin bookmarks are migrated.

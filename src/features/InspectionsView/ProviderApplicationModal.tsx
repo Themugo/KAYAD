@@ -6,18 +6,21 @@ import { inspectionApi, automotiveApi } from '../InspectionMarketplace/services/
 import type { ServiceTaxonomy } from '../InspectionMarketplace/types/inspection';
 import { isPlausiblePhone } from './inspectionJourney';
 
+const APPLY_PATH = '/?nav=inspections&action=apply-provider';
+
 interface Props {
   isOpen: boolean;
   signedIn: boolean;
   onClose: () => void;
   onOpenAuth?: () => void;
+  onOpenRegister?: (intent: string, next: string) => void;
 }
 
 const fieldClass =
   'w-full px-3.5 py-3 bg-slate-50 text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white';
 
 /** Provider application: authenticated, reviewed by KAYAD, grants no access by itself. */
-export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, onClose, onOpenAuth }) => {
+export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, onClose, onOpenAuth, onOpenRegister }) => {
   const uid = useId();
   const [form, setForm] = useState({ companyName: '', phone: '', county: '', town: '', address: '' });
   const [hasWorkshop, setHasWorkshop] = useState(false);
@@ -95,8 +98,11 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
       {!signedIn ? (
         <div className="py-4 text-center space-y-4">
           <BriefcaseBusiness className="w-8 h-8 mx-auto text-[#176B87]" aria-hidden="true" />
-          <p className="text-sm text-slate-600 max-w-md mx-auto">Provider applications are tied to a KAYAD account and reviewed by KAYAD. Sign in or create an account to apply.</p>
-          <Button variant="primary" onClick={onOpenAuth}>Sign in / Create account</Button>
+          <p className="text-sm text-slate-600 max-w-md mx-auto">Provider applications are tied to a KAYAD account and reviewed by KAYAD. Applying does not grant access automatically. You will confirm your email first, then return here to apply.</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in to apply</Button>
+            {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('provider', APPLY_PATH)}>Create a business account</Button>}
+          </div>
         </div>
       ) : done ? (
         <div role="status" className="py-4 text-center space-y-3">

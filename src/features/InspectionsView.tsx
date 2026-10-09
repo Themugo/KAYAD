@@ -17,12 +17,14 @@ import { ProviderApplicationModal } from './InspectionsView/ProviderApplicationM
 import { ProviderServicesModal } from './InspectionsView/ProviderServicesModal';
 
 export type InspectionsTab = 'service' | 'mine' | 'reports';
-export type InspectionLaunchAction = 'request' | 'apply-provider' | null;
+export type InspectionLaunchAction = 'request' | 'apply-provider' | 'manage-business' | null;
 
 interface InspectionsViewProps {
   vehicles: Vehicle[];
   user?: UserProfile | null;
   onOpenAuth?: () => void;
+  /** Opens the canonical /register page with a validated return path and intent. */
+  onOpenRegister?: (intent: string, next: string) => void;
   /** Vehicle the customer came from (vehicle details). Preselects the request form. */
   initialSelectedVehicle?: Vehicle | null;
   /** Opens a tab on arrival (e.g. "mine" after a booking). */
@@ -111,6 +113,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   vehicles,
   user,
   onOpenAuth,
+  onOpenRegister,
   initialSelectedVehicle,
   initialTab,
   launchAction,
@@ -122,7 +125,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   const [tab, setTab] = useState<InspectionsTab>(initialTab || 'service');
   const [requestOpen, setRequestOpen] = useState(launchAction === 'request');
   const [providerOpen, setProviderOpen] = useState(launchAction === 'apply-provider');
-  const [manageOpen, setManageOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(launchAction === 'manage-business' && signedIn);
   const [reportRecord, setReportRecord] = useState<InspectionRecord | null>(null);
   const [payRecord, setPayRecord] = useState<InspectionRecord | null>(null);
   const [cancelRecord, setCancelRecord] = useState<InspectionRecord | null>(null);
@@ -264,7 +267,10 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         ) : !signedIn ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center space-y-3">
             <p className="text-sm text-slate-700">Sign in to see your inspection requests, bookings and reports.</p>
-            <Button variant="primary" onClick={onOpenAuth}>Sign in / Create account</Button>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in</Button>
+              {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('buyer', '/?nav=inspections')}>Create an account</Button>}
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -336,7 +342,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       <PayBookingModal record={payRecord} onClose={() => setPayRecord(null)} onPaid={() => { void refresh(); }} />
       <CancelBookingModal record={cancelRecord} onClose={() => setCancelRecord(null)} onCancelled={() => { void refresh(); }} />
       {signedIn && <ProviderServicesModal isOpen={manageOpen} onClose={() => setManageOpen(false)} />}
-      <ProviderApplicationModal isOpen={providerOpen} signedIn={signedIn} onClose={() => setProviderOpen(false)} onOpenAuth={onOpenAuth} />
+      <ProviderApplicationModal isOpen={providerOpen} signedIn={signedIn} onClose={() => setProviderOpen(false)} onOpenAuth={onOpenAuth} onOpenRegister={onOpenRegister} />
     </div>
   );
 };
