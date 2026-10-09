@@ -9,7 +9,7 @@ interface SupportProps {
 
 const TOPICS = [
   { icon: Shield, title: 'Escrow Vault', desc: 'Secure payment protection and fund management', page: 'escrow' },
-  { icon: ClipboardCheck, title: 'Pre-Inspection', desc: '150-point vehicle assessment before purchase', page: 'pre-inspection' },
+  { icon: ClipboardCheck, title: 'Pre-Inspection', desc: 'Independent provider inspection before purchase', page: 'pre-inspection' },
   { icon: Car, title: 'Buying a Car', desc: 'Browse, compare, and purchase with confidence', page: 'gallery' },
   { icon: Tag, title: 'Selling a Vehicle', desc: 'List your car and reach thousands of buyers', page: 'sell' },
   { icon: Banknote, title: 'Financing', desc: 'Affordable car loans from trusted partners', page: 'payments' },

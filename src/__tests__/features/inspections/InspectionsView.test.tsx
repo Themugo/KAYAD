@@ -34,7 +34,7 @@ describe('InspectionsView', () => {
     const onOpenAuth = vi.fn();
     renderView({ user: null, onOpenAuth });
     expect(screen.getByRole('heading', { level: 1 })).toBeTruthy();
-    fireEvent.click(screen.getAllByRole('button', { name: /Request a KAYAD inspection/ })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: /Inspect a car before you buy/ })[0]);
     expect(onOpenAuth).toHaveBeenCalled();
     fireEvent.click(screen.getByRole('tab', { name: 'My inspections' }));
     expect(screen.getByText(/Sign in to see your inspection requests/)).toBeTruthy();
@@ -98,7 +98,7 @@ describe('InspectionsView', () => {
     getMy.mockResolvedValue({ success: true, orders: [] });
     getBookings.mockResolvedValue({ bookings: [] });
     renderView();
-    const first = screen.getByRole('tab', { name: 'Get an inspection' });
+    const first = screen.getByRole('tab', { name: 'Services' });
     expect(first.getAttribute('tabindex')).toBe('0');
     fireEvent.keyDown(first, { key: 'ArrowRight' });
     const second = screen.getByRole('tab', { name: 'My inspections' });

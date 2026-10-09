@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Heart,
   Landmark,
+  LifeBuoy,
   Lock,
   MapPin,
   PlusCircle,
@@ -86,16 +87,20 @@ export const NAV_PRIMARY: NavPrimary[] = [
     ],
   },
   {
+    // Id stays 'inspection' (stored navigation config and links key on it); the destination is now the automotive
+    // services hub: inspection before purchase AND discovery of independent garages, mechanics and roadside providers.
     id: 'inspection',
-    label: 'Pre-Purchase Inspection',
-    compactLabel: 'Inspection',
+    label: 'Auto Services',
+    compactLabel: 'Services',
     icon: ShieldCheck,
     navId: 'inspections',
     href: '/?nav=inspections',
     match: ['inspections', 'inspection-marketplace'],
     children: [
-      { id: 'request', label: 'Request an inspection', description: 'Inspect a vehicle before you commit', icon: ClipboardCheck, navId: 'inspections', href: '/?nav=inspections' },
-      { id: 'providers', label: 'Find an inspection provider', description: 'Compare providers by location and service', icon: MapPin, navId: 'inspection-marketplace', href: '/?nav=inspection-marketplace' },
+      { id: 'request', label: 'Inspect a car before you buy', description: 'Get matched with, or choose, an independent inspector', icon: ClipboardCheck, navId: 'services:inspect', href: '/?nav=inspections' },
+      { id: 'providers', label: 'Find a mechanic or garage', description: 'Verified independent businesses and specialists', icon: MapPin, navId: 'services:find', href: '/?nav=inspection-marketplace' },
+      { id: 'roadside', label: 'Roadside and recovery', description: 'Find providers; KAYAD does not dispatch help', icon: LifeBuoy, navId: 'services:roadside', href: '/?nav=inspection-marketplace' },
+      { id: 'mine', label: 'My requests and reports', description: 'Your inspections, bookings and reports', icon: FileText, navId: 'services:mine', href: '/?nav=inspections', requiresAuth: true },
     ],
   },
   {

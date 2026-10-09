@@ -129,7 +129,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Request a KAYAD inspection" description="For a vehicle listed on KAYAD. KAYAD assigns the inspector." size="lg">
+    <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Get matched with an inspector" description="For a vehicle listed on KAYAD. KAYAD assigns a verified independent inspector; their business carries out the inspection." size="lg">
       <form onSubmit={submit} noValidate className="space-y-5" aria-busy={submitting}>
         <fieldset className="space-y-2" disabled={submitting}>
           <legend className="text-xs font-bold text-slate-600 mb-1">Vehicle to inspect</legend>
@@ -189,7 +189,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
 
         <div className="bg-[#E8F5F3] p-3.5 rounded-xl border border-[#CDE9E5] text-xs text-[#0A5A50] flex items-start gap-2">
           <ShieldCheck className="w-4 h-4 text-[#13B8A6] shrink-0 mt-0.5" aria-hidden="true" />
-          <span><strong>No payment is taken when you submit.</strong> KAYAD records your request against the vehicle, assigns an inspector, and shows each step in My inspections.</span>
+          <span><strong>No payment is taken when you submit.</strong> KAYAD records your request against the vehicle and assigns a verified independent inspector. You will see the inspector’s business name and each step in My inspections.</span>
         </div>
 
         {error && (

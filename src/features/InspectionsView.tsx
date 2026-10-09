@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowRight, BriefcaseBusiness, ClipboardCheck, FileCheck, Loader2, MapPin, RefreshCw, ShieldCheck, UserCheck,
+  ArrowRight, BriefcaseBusiness, ClipboardCheck, FileCheck, Loader2, MapPin, RefreshCw, ShieldCheck, UserCheck, Wrench,
 } from 'lucide-react';
 import type { UserProfile, Vehicle } from '../types';
 import { getMyInspections, InspectionApiError } from '../services/inspectionApi';
@@ -30,7 +30,8 @@ interface InspectionsViewProps {
   /** Opens a flow on arrival. Re-applied whenever the parent remounts this view with a new key. */
   launchAction?: InspectionLaunchAction;
   onViewVehicleDetails?: (vehicleId: string) => void;
-  onOpenInspectionMarketplace?: () => void;
+  /** Opens the provider finder, optionally on a canonical service category. */
+  onOpenInspectionMarketplace?: (category?: string) => void;
 }
 
 const TONE: Record<string, string> = {
@@ -41,7 +42,7 @@ const TONE: Record<string, string> = {
 };
 
 const TABS: Array<{ id: InspectionsTab; label: string }> = [
-  { id: 'service', label: 'Get an inspection' },
+  { id: 'service', label: 'Services' },
   { id: 'mine', label: 'My inspections' },
   { id: 'reports', label: 'Reports' },
 ];
@@ -164,12 +165,12 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   return (
     <div className="space-y-8 pb-16">
       <section className="rounded-3xl bg-[#0F5D73] text-white p-6 sm:p-10" aria-labelledby="insp-title">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">Pre-purchase inspection</p>
-        <h1 id="insp-title" className="mt-2 text-2xl sm:text-4xl font-black font-display max-w-2xl">Know the car before you pay for it</h1>
-        <p className="mt-3 text-sm sm:text-base text-slate-100 max-w-2xl">Have a vehicle inspected before you commit. Ask KAYAD to arrange an inspection of a car listed on KAYAD, or book a verified independent inspection business. Every request is recorded and every step is tracked below.</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">Automotive services</p>
+        <h1 id="insp-title" className="mt-2 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
+        <p className="mt-3 text-sm sm:text-base text-slate-100 max-w-2xl">KAYAD is the platform that connects you with independent, verified inspection businesses, garages and specialists. They carry out the work, not KAYAD, and you see who they are before you act.</p>
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <Button variant="accent" size="lg" className="font-bold" onClick={startRequest}>Request a KAYAD inspection</Button>
-          <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Browse inspection providers</Button>
+          <Button variant="accent" size="lg" className="font-bold" onClick={startRequest}>Inspect a car before you buy</Button>
+          <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
         </div>
       </section>
 
@@ -196,25 +197,44 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         {tab === 'service' ? (
           <div className="space-y-8">
             <div className="grid md:grid-cols-2 gap-5">
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 flex flex-col">
+              <article className="rounded-2xl border border-slate-200 bg-white p-6 flex flex-col" aria-labelledby="lane-inspect">
                 <ShieldCheck className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
-                <h2 className="mt-3 text-lg font-black text-[#0F5D73]">KAYAD vehicle inspection</h2>
-                <p className="mt-1.5 text-sm text-slate-600 flex-1">For a vehicle listed on KAYAD. You submit a request and KAYAD assigns one of its verified, independent inspectors. The inspection is carried out by that inspector’s own business, whose name appears once assigned. Submitting takes no payment.</p>
-                <Button variant="primary" className="mt-5 self-start" onClick={startRequest}>{signedIn ? 'Request an inspection' : 'Sign in to request'}</Button>
+                <h2 id="lane-inspect" className="mt-3 text-lg font-black text-[#0F5D73]">Inspect a car before you buy</h2>
+                <p className="mt-1.5 text-sm text-slate-600">An independent inspector checks the vehicle for you. Two ways to arrange it:</p>
+                <ul className="mt-3 space-y-3 text-sm text-slate-600 flex-1">
+                  <li><strong className="text-slate-800">Get matched.</strong> For a car listed on KAYAD: send a request and KAYAD assigns one of its verified independent inspectors. Their business name appears once assigned. Submitting takes no payment.</li>
+                  <li><strong className="text-slate-800">Choose yourself.</strong> Compare independent inspection businesses, pick a package and a time slot, and pay by M-Pesa to confirm the booking.</li>
+                </ul>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Button variant="primary" className="min-h-[44px]" onClick={startRequest}>{signedIn ? 'Get matched with an inspector' : 'Sign in to get matched'}</Button>
+                  <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('pre_purchase_inspection')}>Choose a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
+                </div>
               </article>
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 flex flex-col">
-                <UserCheck className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
-                <h2 className="mt-3 text-lg font-black text-[#0F5D73]">Book a verified provider</h2>
-                <p className="mt-1.5 text-sm text-slate-600 flex-1">Compare independent inspection businesses, choose a package and a time slot, and pay by M-Pesa to confirm the booking. Looking for a garage, mechanic or specialist instead? The same finder lists them; KAYAD does not take repair bookings or payments for those services yet.</p>
-                <Button variant="secondary" className="mt-5 self-start" onClick={() => onOpenInspectionMarketplace?.()}>Browse providers <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
+              <article className="rounded-2xl border border-slate-200 bg-white p-6 flex flex-col" aria-labelledby="lane-fix">
+                <Wrench className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
+                <h2 id="lane-fix" className="mt-3 text-lg font-black text-[#0F5D73]">Repairs, diagnostics and roadside help</h2>
+                <p className="mt-1.5 text-sm text-slate-600 flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYAD lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Button variant="primary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.()}>Find a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
+                  <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('roadside_recovery')}>Roadside and recovery</Button>
+                </div>
               </article>
             </div>
 
+            <section aria-labelledby="insp-trust" className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 id="insp-trust" className="text-base font-black text-[#0F5D73]">What verified means here</h2>
+              <ul className="mt-3 grid md:grid-cols-3 gap-4 text-sm text-slate-600">
+                <li><strong className="block text-slate-800">The business is reviewed</strong>KAYAD reviews a business’s identity and evidence before it is listed. It is not verified just by registering.</li>
+                <li><strong className="block text-slate-800">Services are checked separately</strong>Each service a business offers is labelled declared or verified. Specialist work such as hybrid and electric vehicles is shown only once verified.</li>
+                <li><strong className="block text-slate-800">People are linked, not assumed</strong>A mechanic is shown as part of a business only when both sides have confirmed it. Verification is not a guarantee of quality.</li>
+              </ul>
+            </section>
+
             <section aria-labelledby="insp-next" className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 id="insp-next" className="text-base font-black text-[#0F5D73]">What happens next</h2>
+              <h2 id="insp-next" className="text-base font-black text-[#0F5D73]">After you request or book an inspection</h2>
               <ol className="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                 {[
-                  [ClipboardCheck, 'Request or book', 'Your request is saved against the vehicle with a reference.'],
+                  [ClipboardCheck, 'Request or book', 'Your request or booking is saved against the vehicle with a reference.'],
                   [UserCheck, 'Inspector assigned', 'An inspector is assigned and the status updates here.'],
                   [MapPin, 'Vehicle inspected', 'The inspector records findings and photos.'],
                   [FileCheck, 'Report in your account', 'The report appears under Reports. Only you can open it.'],
@@ -232,8 +252,8 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 
             <section aria-labelledby="insp-providers" className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 id="insp-providers" className="text-sm font-black text-[#0F5D73] flex items-center gap-2"><BriefcaseBusiness className="w-4 h-4" aria-hidden="true" />Run an inspection business?</h2>
-                <p className="text-xs text-slate-600 mt-1">Apply to be listed. Applications are reviewed by KAYAD and do not grant access automatically.</p>
+                <h2 id="insp-providers" className="text-sm font-black text-[#0F5D73] flex items-center gap-2"><BriefcaseBusiness className="w-4 h-4" aria-hidden="true" />Run an inspection, garage or specialist business?</h2>
+                <p className="text-xs text-slate-600 mt-1">Apply to be listed with the services you offer. Applications are reviewed by KAYAD and do not grant access automatically.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="secondary" size="sm" className="min-h-[44px]" onClick={() => setProviderOpen(true)}>Apply as a provider</Button>
@@ -273,7 +293,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className="text-base font-black text-[#0F5D73] break-words">{r.vehicleTitle}</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">{r.product === 'kayad' ? `KAYAD inspection${r.providerName ? ` · carried out by ${r.providerName}` : ''}` : `Provider booking${r.providerName ? ` · ${r.providerName}` : ''}`} · Ref <span className="font-mono break-all">{r.reference}</span></p>
+                        <p className="text-xs text-slate-500 mt-0.5">{r.product === 'kayad' ? `Matched inspection${r.providerName ? ` · carried out by ${r.providerName}` : ' · KAYAD is matching a provider'}` : `Provider booking${r.providerName ? ` · ${r.providerName}` : ''}`} · Ref <span className="font-mono break-all">{r.reference}</span></p>
                       </div>
                       <span className={`self-start text-xs font-bold px-3 py-1 rounded-full border ${TONE[r.status.tone]}`}>{r.status.label}</span>
                     </div>

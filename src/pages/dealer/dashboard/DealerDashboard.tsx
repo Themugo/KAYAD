@@ -884,6 +884,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 </div>
               ) : (
                 <div className="space-y-3">
+                  <p className="text-xs text-slate-500">Inspections of your vehicles, requested by buyers and carried out by independent providers. You see that an inspection exists and its stage. The buyer’s details and the report stay with the buyer who requested it.</p>
                   {(operations.inspections?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No inspection orders found for this dealership.</p> : (operations.inspections.items || []).map((inspection) => (
                     <div key={inspection.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl"><div><p className="font-medium text-slate-800">{inspection.vehicle}</p><p className="text-xs text-slate-500">{inspection.id}</p></div><span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs capitalize">{inspection.status}</span></div>
                   ))}

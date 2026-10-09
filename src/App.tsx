@@ -114,6 +114,8 @@ function AppInner() {
     }
   }, [activeNav, authLoading, isAuth, isAdmin, isDealer, location, navigate]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
+  // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
+  const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
   const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create'>('journey');
   const [escrowLaunchNonce, setEscrowLaunchNonce] = useState(0);
   const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
@@ -400,6 +402,15 @@ function AppInner() {
       setActiveNav('auctions');
       return;
     }
+    // `services:*` ids open an existing destination of the automotive services hub. They create no route.
+    if (nav.startsWith('services:')) {
+      const where = nav.slice('services:'.length);
+      if (where === 'find') { setFinderLaunch((p) => ({ nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); return; }
+      if (where === 'roadside') { setFinderLaunch((p) => ({ category: 'roadside_recovery', nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); return; }
+      if (where === 'mine') { launchInspections({ tab: 'mine' }); return; }
+      launchInspections({});
+      return;
+    }
     if (nav.startsWith('escrow:')) {
       const tab = nav.slice('escrow:'.length);
       setEscrowLaunchTab(tab === 'create' || tab === 'deals' ? tab : 'journey');
@@ -409,7 +420,7 @@ function AppInner() {
     }
     if (nav === 'escrow') setEscrowLaunchTab('journey');
     setActiveNav(nav);
-  }, []);
+  }, [launchInspections]);
 
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
   const privateWorkspaceNavs = new Set([
@@ -528,12 +539,14 @@ function AppInner() {
               user={user}
               onOpenAuth={handleOpenAuth}
               onViewVehicleDetails={handleOpenVehicleDetails}
-              onOpenInspectionMarketplace={() => setActiveNav('inspection-marketplace')}
+              onOpenInspectionMarketplace={(category) => { setFinderLaunch((p) => ({ category, nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); }}
             />
           )}
 
           {activeNav === 'inspection-marketplace' && (
             <InspectionMarketplacePage
+              key={finderLaunch.nonce}
+              initialFilters={finderLaunch.category ? { category: finderLaunch.category } : undefined}
               onViewMyInspections={() => launchInspections({ tab: 'mine' })}
               onApplyAsProvider={() => launchInspections({ action: 'apply-provider' })}
             />

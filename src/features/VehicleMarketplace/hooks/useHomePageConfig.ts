@@ -92,7 +92,7 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
   },
   trustPillars: {
     escrow: { heading: 'Escrow Protection', subtext: 'Required for private sellers, available for dealers' },
-    inspection: { heading: '150-Point Inspection', subtext: 'On certified listings only - look for the badge' },
+    inspection: { heading: 'Pre-Purchase Inspection', subtext: 'Independent providers - request one before you commit' },
     auctions: { heading: 'Live Auctions', subtext: 'Bid live on select auction vehicles' },
   },
   accentTheme: 'slate',

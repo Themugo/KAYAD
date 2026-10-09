@@ -89,3 +89,6 @@ Mutate → fail → restore → pass, all in `evidence/`: backend **16/16** muta
 6. Re-introduce a price sort if wanted (`starting_price` is real; null last).
 7. Bring the legacy individual-inspector approval onto the evidence rules; retire dead modules.
 8. Raise nav-chrome touch targets to 40 px.
+
+
+> Update 2026-10-09 (UX convergence): customer-facing naming, hub, navigation and the seller-view privacy fix are in `KAYAD_AUTOMOTIVE_SERVICES_UX_CONVERGENCE_REPORT.md`. Counts above are as of that earlier delivery (FE 455, BE 770); current: FE 480, BE 771, browser 71/71.

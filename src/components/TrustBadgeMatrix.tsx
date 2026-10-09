@@ -54,7 +54,7 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
         {isInspectionActive && (
           <span className="inline-flex items-center gap-1 bg-emerald-700 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
             <CheckCircle2 className="w-3 h-3 shrink-0" />
-            150-Pt Inspected
+            Inspected
           </span>
         )}
 
@@ -108,7 +108,7 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
           <div className="bg-emerald-50/80 p-2 rounded-xl border border-emerald-200 flex items-center gap-2 flex-1 min-w-[130px]">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <div className="min-w-0">
-              <p className="text-[9px] text-emerald-800 font-bold uppercase truncate">150-Pt Audit</p>
+              <p className="text-[9px] text-emerald-800 font-bold uppercase truncate">Inspection</p>
               <p className="font-extrabold text-emerald-900 truncate text-[11px]">Certified Passed</p>
             </div>
           </div>
@@ -186,7 +186,7 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
             <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Technical Audit
             </p>
-            <p className="font-bold text-emerald-300 text-xs">150-Point Certified</p>
+            <p className="font-bold text-emerald-300 text-xs">Inspection on record</p>
             <p className="text-[10px] text-slate-300">Logbook & Engine Audited</p>
           </div>
         )}

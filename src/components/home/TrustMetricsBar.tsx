@@ -50,7 +50,7 @@ export const TrustMetricsBar: FC = () => {
     {
       label: 'Audited Vehicles',
       value: `${vehicles.toLocaleString()}+`,
-      subtitle: '150-Point Structural Audits',
+      subtitle: 'Independent inspections available',
       icon: <Car className="w-5 h-5 text-[#13B8A6]" />,
     },
     {

@@ -46,7 +46,7 @@ const noHScroll = (page) => page.evaluate(() => document.documentElement.scrollW
   // 1. Guest, desktop
   { const st = fresh({ user: false }); const { ctx, page, errors } = await open({ width: 1440, height: 900 }, st);
     await page.goto(BASE + '/?nav=inspections', { waitUntil: 'networkidle' });
-    ok('guest: one h1 and the two routes are explained', await page.locator('h1').count() === 1 && await page.getByRole('heading', { name: 'KAYAD vehicle inspection' }).isVisible() && await page.getByRole('heading', { name: 'Book a verified provider' }).isVisible());
+    ok('guest: one h1 and both service lanes are explained', await page.locator('h1').count() === 1 && await page.getByRole('heading', { name: 'Inspect a car before you buy', level: 2 }).isVisible() && await page.getByRole('heading', { name: 'Repairs, diagnostics and roadside help' }).isVisible());
     ok('guest: no false claims (no payment/verdict/ratings text)', !/Passed \(Clean|Payment not created|reserve/i.test(await page.locator('main').innerText()));
     const tabs = page.getByRole('tab');
     ok('guest: three tabs, first selected', await tabs.count() === 3 && await tabs.first().getAttribute('aria-selected') === 'true');
@@ -61,11 +61,11 @@ const noHScroll = (page) => page.evaluate(() => document.documentElement.scrollW
     await page.goto(BASE + '/?nav=inspections', { waitUntil: 'networkidle' });
     await page.getByRole('tab', { name: 'My inspections' }).click();
     ok('empty: honest empty state', await page.getByText('No inspections yet').isVisible());
-    await page.getByRole('tab', { name: 'Get an inspection' }).click();
-    const trigger = page.locator('#insp-panel').getByRole('button', { name: 'Request an inspection' });
+    await page.getByRole('tab', { name: 'Services' }).click();
+    const trigger = page.locator('#insp-panel').getByRole('button', { name: 'Get matched with an inspector' });
     await trigger.focus(); await page.keyboard.press('Enter');
     const dlg = page.getByRole('dialog');
-    ok('request: dialog opens with accessible name', await dlg.isVisible() && /Request a KAYAD inspection/.test(await dlg.getAttribute('aria-label') || await dlg.locator('h2,h1,h3').first().innerText()));
+    ok('request: dialog opens with accessible name', await dlg.isVisible() && /Get matched with an inspector/.test(await dlg.getAttribute('aria-label') || await dlg.locator('h2,h1,h3').first().innerText()));
     ok('request: focus moved inside the dialog', await page.evaluate(() => !!document.activeElement?.closest('[role=dialog]')));
     const sel = dlg.getByLabel('KAYAD marketplace vehicle');
     ok('request: no vehicle is preselected by default', (await sel.inputValue()) === '');
@@ -86,7 +86,7 @@ const noHScroll = (page) => page.evaluate(() => document.documentElement.scrollW
     ok('tracked: stage progress is exposed as a list with current step', await page.locator('ol[aria-label="Inspection progress"] [aria-current="step"]').count() === 1);
     ok('tracked: no payment/pay button for a KAYAD request', await page.getByRole('button', { name: 'Pay now' }).count() === 0);
     // duplicate
-    await page.getByRole('tab', { name: 'Get an inspection' }).click();
+    await page.getByRole('tab', { name: 'Services' }).click();
     ok('no page errors', errors.length === 0, errors[0] || ''); await ctx.close(); }
 
   // 3. Failures: both sources down, then partial

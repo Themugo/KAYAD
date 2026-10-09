@@ -798,46 +798,31 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           </div>
 
           {/* ==========================================
-              8. 150-POINT INSPECTION CERTIFICATE
+              8. PRE-PURCHASE INSPECTION
+              Previously a hard-coded fixed-depth "PASSED & CERTIFIED" certificate (compression pass, accident-free
+              structure, zero encumbrances) was rendered for EVERY vehicle. That was an invented report. This panel states
+              only what is known: whether the listing carries an inspection-passed flag, and how to get an independent one.
               ========================================== */}
-          <div className="bg-emerald-50/70 border border-emerald-200 rounded-3xl p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-emerald-200 pb-4 flex-wrap gap-2">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-emerald-600 text-white rounded-2xl shadow-xs">
-                  <FileCheck className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-emerald-950 text-base font-display">150-Point Technical Inspection Certificate</h3>
-                  <p className="text-xs text-emerald-800">Verified by Certified Independent Automotive Engineers</p>
-                </div>
-              </div>
-              <Badge variant="success" size="md">
-                ✓ PASSED & CERTIFIED
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-              <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#176B87]">1. Engine & Mechanical</p>
-                <p className="text-emerald-700 font-extrabold text-[11px]">100% Compression Pass</p>
-              </div>
-
-              <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#176B87]">2. Transmission & Drivetrain</p>
-                <p className="text-emerald-700 font-extrabold text-[11px]">100% Shift Smoothness</p>
-              </div>
-
-              <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#176B87]">3. Structural Frame</p>
-                <p className="text-emerald-700 font-extrabold text-[11px]">Accident-Free Structure</p>
-              </div>
-
-              <div className="bg-white p-4 rounded-2xl border border-emerald-200 space-y-1 shadow-xs">
-                <p className="font-extrabold text-[#176B87]">4. TIMS Logbook Clear</p>
-                <p className="text-emerald-700 font-extrabold text-[11px]">Zero Bank Encumbrances</p>
+          <section aria-labelledby="vd-inspection-title" className="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-[#176B87] text-white rounded-2xl shadow-xs"><FileCheck className="w-6 h-6" aria-hidden="true" /></div>
+              <div>
+                <h3 id="vd-inspection-title" className="font-extrabold text-[#0F5D73] text-base font-display">Pre-purchase inspection</h3>
+                <p className="text-xs text-slate-600">Carried out by an independent, verified inspection provider, not by KAYAD.</p>
               </div>
             </div>
-          </div>
+            <p className="text-sm text-slate-700">
+              {vehicle.inspectionPassed
+                ? 'This listing is marked as having passed an inspection. Findings are only shown in the report of the customer who requested it, so you should still arrange your own inspection before you commit.'
+                : 'No inspection report is attached to this listing. Ask an independent provider to inspect the vehicle before you commit.'}
+            </p>
+            {onRequestInspection && (
+              <Button variant="secondary" size="md" onClick={() => onRequestInspection(vehicle)} className="font-bold text-sm">
+                <ShieldCheck className="w-4 h-4 text-[#176B87]" aria-hidden="true" />
+                <span>Arrange an inspection of this vehicle</span>
+              </Button>
+            )}
+          </section>
 
           {/* ==========================================
               9. ASSET FINANCING ESTIMATOR MODULE

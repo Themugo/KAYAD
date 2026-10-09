@@ -727,6 +727,9 @@ export async function getInspectionOrders(req, res) {
       return res.json({ success: true, data: { items: [], stats: { total: 0, completed: 0, inProgress: 0, scheduled: 0 } } });
     }
     const inspections = await InspectionOrder.find({ car: { $in: carIds } }).sort({ createdAt: -1 });
+    // PRIVACY: the sellers' view is deliberately minimal. `notes` holds the BUYER's request details
+    // (phone, location, fee) and the report belongs to the requester, so neither is exposed here.
+    // A seller learns only that an inspection of their vehicle exists, its stage and its dates.
     const items = inspections.map((inspection) => ({
       id: inspection.id,
       vehicleId: inspection.car,
@@ -734,8 +737,6 @@ export async function getInspectionOrders(req, res) {
       status: inspection.status,
       scheduledAt: inspection.scheduledAt || null,
       completedAt: inspection.completedAt || null,
-      report: inspection.report || null,
-      notes: inspection.notes || null,
       createdAt: inspection.createdAt,
     }));
     res.json({

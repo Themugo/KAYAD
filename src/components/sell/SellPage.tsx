@@ -90,7 +90,7 @@ export const SellPage: FC = () => {
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed max-w-2xl mx-auto">
-            Connect directly with thousands of pre-verified buyers across Kenya. Benefit from CBK-regulated Escrow Vault payment protection, standardized 150-point inspection certification, and nationwide marketplace exposure.
+            Connect directly with thousands of pre-verified buyers across Kenya. Benefit from CBK-regulated Escrow Vault payment protection, access to independent pre-purchase inspection, and nationwide marketplace exposure.
           </p>
 
           {/* Value Props Bar */}
@@ -114,7 +114,7 @@ export const SellPage: FC = () => {
             <div className="p-2.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-2">
               <FileCheck2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
               <div>
-                <span className="font-bold text-white block text-[11px]">150-Pt Audits</span>
+                <span className="font-bold text-white block text-[11px]">Inspections</span>
                 <span className="text-[9px] text-slate-300 block">Certified reports</span>
               </div>
             </div>

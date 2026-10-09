@@ -19,12 +19,13 @@ for (const id of new Set(navIds)) {
   const [scope, value] = id.split(':');
   const exists = value
     ? (scope === 'auctions' ? app.includes("nav.startsWith('auctions:')") && ['live', 'scheduled', 'ended', 'saved'].includes(value) && auctions.includes(`'${value}'`)
+      : scope === 'services' ? app.includes("nav.startsWith('services:')") && ['inspect', 'find', 'roadside', 'mine'].includes(value) && app.includes(`where === '${value}'`) || (scope === 'services' && value === 'inspect' && app.includes("nav.startsWith('services:')"))
       : scope === 'escrow' ? app.includes("nav.startsWith('escrow:')") && ['journey', 'deals', 'create'].includes(value)
       : false)
     : app.includes(`activeNav === '${scope}'`) || (scope === 'financing' && app.includes("activeNav === 'financing'")) || (scope === 'discovery' && app.includes("activeNav === 'discovery'"));
   add(`nav destination "${id}" resolves to an existing App.tsx surface/tab`, exists);
 }
-add('primary nav is exactly Marketplace, Auction, Pre-Purchase Inspection, Escrow, Support', ['Marketplace', 'Auction', 'Pre-Purchase Inspection', 'Escrow', 'Support'].every((l) => cfg.includes(`label: '${l}'`)) && (cfg.match(/^    id: '/gm) || []).length === 5);
+add('primary nav is exactly Marketplace, Auction, Auto Services, Escrow, Support', ['Marketplace', 'Auction', 'Auto Services', 'Escrow', 'Support'].every((l) => cfg.includes(`label: '${l}'`)) && (cfg.match(/^    id: '/gm) || []).length === 5);
 add('Support stays a direct link (no invented submenu)', !/id: 'support'[\s\S]*?children:/.test(cfg.split("id: 'support'")[1] || ''));
 add('auth-gated entries are presentation only (App protectedNavs + backend remain authority)', /not a\s+\*?\s*security boundary/.test(cfg) && app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard'])"));
 add('ticker is still rendered above the navigation', app.indexOf('<TopNoticeStrip />') > -1 && app.indexOf('<TopNoticeStrip />') < app.indexOf('<Navbar'));

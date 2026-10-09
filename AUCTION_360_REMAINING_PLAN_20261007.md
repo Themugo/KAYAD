@@ -755,3 +755,7 @@ No further stage started. Ranked carry-forward: (1) owner decision on charging f
 
 ## Update — Automotive Services convergence complete (2026-10-09)
 Ranked carry-forward: (1) owner decisions on charging for KAYAD inspections, commission posture and any escrow (nothing assumed); (2) staging run on live Supabase with the new migration applied first, real accounts and storage; (3) dispute/refund/complaint process for providers; (4) repair/roadside request journeys only once a provider-side workflow exists; (5) model-level compatibility catalog and travel-time; (6) optional price sort; (7) bring legacy individual-inspector approval onto the evidence rules; (8) nav-chrome touch targets. Earlier carry-forward unchanged.
+
+
+## Update — UX convergence complete (2026-10-09)
+Added to the ranked carry-forward: sweep remaining unsupported trust claims ("Guaranteed", "100% Verified", dormant `VehicleDetailPage.tsx`); owner decision on whether sellers may see inspection reports; provider job dashboard only after a request workflow exists. Earlier carry-forward unchanged.

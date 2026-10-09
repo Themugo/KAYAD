@@ -164,6 +164,40 @@ const noHScroll = (page) => page.evaluate(() => document.documentElement.scrollW
     ok('non-admin: admin governance is not rendered', await page.locator('[data-testid="admin-provider-governance"]').count() === 0);
     await ctx.close(); }
 
+  // 7. Automotive services hub and navigation (UX convergence)
+  for (const [label, vp] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 375, height: 800 }]]) {
+    { const st = fresh(); const { ctx, page, errors } = await open(vp, st);
+      await page.goto(BASE + '/?nav=inspections', { waitUntil: 'networkidle' });
+      await page.getByRole('heading', { level: 1, name: /Find the right independent expert/ }).waitFor({ timeout: 20000 });
+      const body = await page.locator('main, body').first().innerText();
+      ok(`${label} hub: states KAYAD is the platform and providers perform the work`, /KAYAD is the platform/.test(body) && /They carry out the work, not KAYAD/.test(body));
+      ok(`${label} hub: no "KAYAD vehicle inspection" wording`, !/KAYAD vehicle inspection|Request a KAYAD inspection/.test(body));
+      ok(`${label} hub: repair/roadside limits are stated`, /does not take repair bookings, take payments for them or dispatch roadside help/.test(body));
+      ok(`${label} hub: no horizontal scroll`, await noHScroll(page));
+      const h = await page.locator('#insp-panel').getByRole('button', { name: /Choose a provider/ }).evaluate((el) => el.getBoundingClientRect().height);
+      ok(`${label} hub: lane actions are at least 44px tall`, h >= 44, String(h));
+      await Promise.all([page.waitForResponse((r) => /inspection\/providers\?/.test(r.url()) && /category=roadside_recovery/.test(r.url())), page.locator('#insp-panel').getByRole('button', { name: /Roadside and recovery/ }).click()]);
+      await page.getByText(/does not dispatch, track or guarantee roadside help/).waitFor();
+      ok(`${label} hub -> roadside: finder opens on the roadside category with the no-dispatch notice`, st.searches.at(-1).category === 'roadside_recovery');
+      await page.goto(BASE + '/?nav=inspections', { waitUntil: 'networkidle' });
+      await Promise.all([page.waitForResponse((r) => /inspection\/providers\?/.test(r.url()) && /category=pre_purchase_inspection/.test(r.url())), page.locator('#insp-panel').getByRole('button', { name: /Choose a provider/ }).click()]);
+      ok(`${label} hub -> choose a provider: finder opens on pre-purchase inspection`, st.searches.at(-1).category === 'pre_purchase_inspection');
+      await page.goto(BASE + '/?nav=inspections', { waitUntil: 'networkidle' });
+      await page.locator('#insp-panel').getByRole('button', { name: /Get matched|Sign in to get matched/ }).first().click();
+      ok(`${label} hub: a guest asked to get matched is sent to sign in, not to a form`, await page.getByRole('dialog', { name: /Get matched with an inspector/ }).count() === 0);
+      ok(`${label} hub: no page errors`, errors.length === 0, errors.join(' | '));
+      await ctx.close(); }
+  }
+  { const st = fresh(); const { ctx, page } = await open({ width: 1440, height: 900 }, st);
+    await page.goto(BASE + '/?nav=marketplace', { waitUntil: 'networkidle' });
+    const primary = page.getByRole('navigation', { name: 'Primary' });
+    ok('desktop nav: the entry is "Auto Services", not "Pre-Purchase Inspection"', await primary.getByText('Auto Services').first().isVisible() && await primary.getByText('Pre-Purchase Inspection').count() === 0);
+    await primary.getByRole('button', { name: /Auto Services|Open .*Auto Services|Auto Services menu/ }).first().click().catch(async () => { await primary.getByText('Auto Services').first().hover(); });
+    ok('desktop nav: dropdown lists inspect, find, roadside (and hides signed-in "My requests" from a guest)', await page.getByText('Inspect a car before you buy').first().isVisible() && await page.getByText('Find a mechanic or garage').first().isVisible() && await page.getByText('Roadside and recovery').first().isVisible() && await page.getByText('My requests and reports').count() === 0);
+    await Promise.all([page.waitForResponse((r) => /inspection\/providers\?/.test(r.url()) && /category=roadside_recovery/.test(r.url())), page.getByRole('link', { name: /Roadside and recovery/ }).first().click()]);
+    ok('desktop nav: "Roadside and recovery" opens the finder on that category', st.searches.at(-1).category === 'roadside_recovery');
+    await ctx.close(); }
+
   await browser.close();
   console.log(out.join('\n')); console.log(`\n${out.length - fails}/${out.length} passed`);
   process.exit(fails ? 1 : 0);

@@ -590,7 +590,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           className="w-full text-left px-4 py-1.5 hover:bg-emerald-100/70 flex items-center gap-2.5 font-bold text-emerald-900"
                         >
                           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                          <span>Pre-Purchase Inspection OS</span>
+                          <span>Inspections</span>
                         </button>
                         <button
                           onClick={() => handleNavSelect('inspections')}
@@ -604,7 +604,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           className="w-full text-left px-4 py-1.5 hover:bg-emerald-100/70 flex items-center gap-2.5 font-bold text-emerald-900"
                         >
                           <FileText className="w-4 h-4 text-emerald-600" />
-                          <span>150-Point Reports</span>
+                          <span>Inspection reports</span>
                         </button>
                       </div>
                     )}

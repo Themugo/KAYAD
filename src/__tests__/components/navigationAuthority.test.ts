@@ -50,7 +50,7 @@ describe('applyNavigationConfig — controlled state', () => {
   it('hides and reorders children; all children hidden => direct link', () => {
     const out = applyNavigationConfig({ items: [{ id: 'auction', children: [{ id: 'ended' }, { id: 'live', visible: false }] }] });
     expect(ids(out.find((i) => i.id === 'auction')!.children!)).toEqual(['ended', 'scheduled', 'saved']);
-    const none = applyNavigationConfig({ items: [{ id: 'inspection', children: [{ id: 'request', visible: false }, { id: 'providers', visible: false }] }] });
+    const none = applyNavigationConfig({ items: [{ id: 'inspection', children: [{ id: 'request', visible: false }, { id: 'providers', visible: false }, { id: 'roadside', visible: false }, { id: 'mine', visible: false }] }] });
     expect(none.find((i) => i.id === 'inspection')!.children).toBeUndefined();
   });
   it('ignores unknown children and children of other parents', () => {

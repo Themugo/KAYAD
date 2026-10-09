@@ -70,3 +70,7 @@ Fresh-extract validation (zip extracted to a clean directory, dependencies linke
 ---
 ## Addendum — Automotive Services convergence (2026-10-09; earlier sections unchanged)
 Changes touching this report's surfaces: the marketplace finder is taxonomy- and location-aware and truthful (no rating/price sort, "No reviews yet"); the shipped marketplace API calls had been going to `/api/api/...` and now resolve (guarded by `transportPaths.test.ts`); the provider application modal declares services via the canonical taxonomy; inspection reports show "carried out by {business}". Validators: `validate-inspection-marketplace.mjs` updated to the new code locations (eligibility check is stricter). Counts: FE 455/0/1, BE Jest 770, validators 164/10 (baseline set), browser 66/66 + 50/50.
+
+---
+## Addendum 2 — UX convergence (2026-10-09; earlier text unchanged)
+The page described above ("KAYAD vehicle inspection" / "Book a verified provider", tab "Get an inspection") was reworked into the Auto Services hub (tab "Services", lanes "Inspect a car before you buy" and "Repairs, diagnostics and roadside help"). The 66-step browser journey was updated for the new names and still passes 66/66. A hard-coded fake inspection certificate on vehicle details was removed. See `KAYAD_AUTOMOTIVE_SERVICES_UX_CONVERGENCE_REPORT.md`.

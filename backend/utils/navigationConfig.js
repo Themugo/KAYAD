@@ -20,7 +20,7 @@
 export const NAVIGATION_REGISTRY = Object.freeze({
   marketplace: ["browse", "saved", "financing"],
   auction: ["live", "scheduled", "ended", "saved"],
-  inspection: ["request", "providers"],
+  inspection: ["request", "providers", "roadside", "mine"],
   escrow: ["journey", "deals", "create"],
   support: [],
 });

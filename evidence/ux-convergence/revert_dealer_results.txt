@@ -1,0 +1,6 @@
+D1 notes re-exposed
+Tests:       1 failed, 1 total
+D2 report re-exposed
+Tests:       1 failed, 1 total
+RESTORED
+Tests:       1 passed, 1 total

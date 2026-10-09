@@ -98,3 +98,7 @@ Ownership checks in `assertAccess`/`getBookingDetails`/`getReportDetails`; `requ
 ---
 ## Addendum — Automotive Services convergence (2026-10-09; earlier sections unchanged)
 Superseded/extended facts: the performing provider is now identifiable on System A records (`businessName` from `inspection_providers`); A's `assign` and admin inspector list enforce the same ACTIVE+verified eligibility as B; the provider network gained per-service capabilities and two-sided staff affiliation. The A/B split, A's lack of payment, and the unresolved charging decision stand. See `AUTOMOTIVE_SERVICES_MARKETPLACE_CONVERGENCE_REPORT.md` §11–12.
+
+---
+## Addendum 2 — UX convergence (2026-10-09; earlier text unchanged)
+Customer-facing naming changed: System A is presented as "Get matched with an inspector" (KAYAD assigns a verified independent provider; their business is named on the record), System B as "Choose a provider". The hub now also covers general automotive-service discovery. A seller-facing leak (buyer notes/report in `GET /api/dealer/inspections`) was found and closed. See `KAYAD_AUTOMOTIVE_SERVICES_UX_CONVERGENCE_REPORT.md`.

@@ -1500,3 +1500,7 @@ Discovery written first (`INSPECTION_PRODUCT_DISCOVERY.md`), then implemented wi
 
 ## Automotive Services Marketplace — Master Convergence — 2026-10-09
 Discovery first (`AUTOMOTIVE_SERVICES_PRODUCT_DISCOVERY.md`), then one additive migration (`20261009120000_automotive_services_governance.sql`: capabilities table, staff affiliation), a backend taxonomy, discovery + governance services, admin governance sub-router, A-system eligibility enforcement, and the marketplace/application/admin/report UI wired to them. Found and fixed the `/api/api` transport bug. FE 455/0/1; BE Jest 770 (baseline 698), Vitest 16, node 1; validators identical to baseline (1 updated); tsc/build clean; browser 50/50 + 66/66; revert-proofs 16/15/6. No escrow or other stage started. See `AUTOMOTIVE_SERVICES_MARKETPLACE_CONVERGENCE_REPORT.md`.
+
+
+## Automotive Services — UX Convergence — 2026-10-09
+Hub reframed to the platform/independent-provider model; nav "Auto Services" with four real destinations; invented vehicle-detail certificate, dispatch promise, fixed 150-point claims and fake dealer reviews removed; seller inspection API minimised. No migration/RLS/financial change. FE 480/0/1; BE Jest 771; validators = baseline; tsc/build clean; browser 71/71 + 66/66; revert-proofs 14 + 2. See `KAYAD_AUTOMOTIVE_SERVICES_UX_CONVERGENCE_REPORT.md`. Escrow not started.
