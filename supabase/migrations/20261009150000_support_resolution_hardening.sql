@@ -7,9 +7,16 @@ CREATE SEQUENCE IF NOT EXISTS support_ticket_number_seq;
 
 CREATE OR REPLACE FUNCTION kayad_support_assign_ticket_number() RETURNS trigger
 LANGUAGE plpgsql SET search_path = public AS $$
+DECLARE v_candidate text;
 BEGIN
   IF NEW.ticket_number IS NULL OR btrim(NEW.ticket_number) = '' THEN
-    NEW.ticket_number := 'SUP-' || to_char(now(), 'YYYYMMDD') || '-' || lpad(nextval('support_ticket_number_seq')::text, 6, '0');
+    -- Legacy rows were back-filled as SUP-YYYYMMDD-<6 hex>; a hex tail can be all digits, so never assume the
+    -- sequence value is free: draw until the number is unused (unique index remains the final guard).
+    LOOP
+      v_candidate := 'SUP-' || to_char(now(), 'YYYYMMDD') || '-' || lpad(nextval('support_ticket_number_seq')::text, 6, '0');
+      EXIT WHEN NOT EXISTS (SELECT 1 FROM support_tickets WHERE ticket_number = v_candidate);
+    END LOOP;
+    NEW.ticket_number := v_candidate;
   END IF;
   RETURN NEW;
 END $$;
@@ -34,24 +41,41 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_support_tickets_user_idempotency
   ON support_tickets(user_id, idempotency_key) WHERE idempotency_key IS NOT NULL;
 
 -- Customer rating text used to be written into the staff-semantic resolution_notes column.
-UPDATE support_tickets
-SET satisfaction_comment = resolution_notes, resolution_notes = NULL
-WHERE satisfaction_rating IS NOT NULL AND resolution_notes IS NOT NULL AND satisfaction_comment IS NULL;
+-- Data-preservation: the original value is copied to legacy_resolution_notes BEFORE it is cleared, so the move is
+-- lossless and reversible; one aggregate audit row records how many rows were touched.
+ALTER TABLE support_tickets ADD COLUMN IF NOT EXISTS legacy_resolution_notes TEXT;
+DO $$
+DECLARE v_moved integer;
+BEGIN
+  WITH moved AS (
+    UPDATE support_tickets
+    SET legacy_resolution_notes = resolution_notes,
+        satisfaction_comment = resolution_notes,
+        resolution_notes = NULL
+    WHERE satisfaction_rating IS NOT NULL AND resolution_notes IS NOT NULL AND satisfaction_comment IS NULL
+      AND legacy_resolution_notes IS NULL
+    RETURNING 1)
+  SELECT count(*) INTO v_moved FROM moved;
+  IF v_moved > 0 THEN
+    INSERT INTO audit_logs(action, entity_type, details)
+    VALUES ('support.migration_rating_comment_moved', 'support_ticket',
+            jsonb_build_object('rows', v_moved, 'migration', '20261009150000', 'backup_column', 'legacy_resolution_notes'));
+  END IF;
+END $$;
 
+-- Category / length are validated inside kayad_support_create_case (and by the Node policy). Table-level CHECKs are
+-- intentionally NOT added: NOT VALID checks would still block any UPDATE of a legacy row that violates them.
 ALTER TABLE support_tickets DROP CONSTRAINT IF EXISTS support_ticket_category_check;
-ALTER TABLE support_tickets ADD CONSTRAINT support_ticket_category_check
-  CHECK (category IS NULL OR category IN ('marketplace','seller','auction','inspection','service_provider','escrow','financing','transfer','account','technical','general')) NOT VALID;
 ALTER TABLE support_tickets DROP CONSTRAINT IF EXISTS support_ticket_length_check;
-ALTER TABLE support_tickets ADD CONSTRAINT support_ticket_length_check
-  CHECK (char_length(subject) <= 200 AND char_length(description) <= 5000) NOT VALID;
 
 -- ---------------------------------------------------------------------------
--- Staff roles allowed to be assigned / escalated to (mirrors config/roles.js MANAGE_SUPPORT holders).
+-- Only support agents (role technical_support = PERM.SUPPORT_AGENT default) may be assigned / escalated to.
+-- admin/superadmin hold read-only oversight and are never case assignees.
 CREATE OR REPLACE FUNCTION kayad_support_is_staff_user(p_user_id uuid) RETURNS boolean
 LANGUAGE sql STABLE SET search_path = public AS $$
   SELECT EXISTS (SELECT 1 FROM users u WHERE u.id = p_user_id AND u.deleted_at IS NULL
                  AND COALESCE(u.status,'approved') NOT IN ('suspended','banned','rejected','deleted')
-                 AND u.role IN ('technical_support','admin','superadmin'));
+                 AND u.role = 'technical_support');
 $$;
 
 CREATE OR REPLACE FUNCTION kayad_support_transition_allowed(p_from text, p_to text) RETURNS boolean
@@ -77,6 +101,12 @@ DECLARE v_row support_tickets%ROWTYPE;
 BEGIN
   IF NULLIF(btrim(p_subject),'') IS NULL OR NULLIF(btrim(p_description),'') IS NULL THEN
     RAISE EXCEPTION 'SUPPORT_CASE_INVALID' USING ERRCODE = 'P0001';
+  END IF;
+  IF p_category IS NULL OR p_category NOT IN ('marketplace','seller','auction','inspection','service_provider','escrow','financing','transfer','account','technical','general') THEN
+    RAISE EXCEPTION 'SUPPORT_CATEGORY_INVALID' USING ERRCODE = 'P0001';
+  END IF;
+  IF char_length(btrim(p_subject)) > 200 OR char_length(btrim(p_description)) > 5000 THEN
+    RAISE EXCEPTION 'SUPPORT_CASE_TOO_LONG' USING ERRCODE = 'P0001';
   END IF;
   IF p_idempotency_key IS NOT NULL THEN
     SELECT * INTO v_row FROM support_tickets WHERE user_id = p_user_id AND idempotency_key = p_idempotency_key;
@@ -268,6 +298,7 @@ DO $$
 DECLARE f text;
 BEGIN
   FOREACH f IN ARRAY ARRAY[
+    'kayad_support_assign_ticket_number()',
     'kayad_support_is_staff_user(uuid)',
     'kayad_support_transition_allowed(text,text)',
     'kayad_support_create_case(uuid,text,text,text,text,jsonb,text,jsonb)',

@@ -7,12 +7,21 @@ export const CUSTOMER_DETAIL_COLUMNS = "id,user_id,ticket_number,category,subjec
 export const STAFF_LIST_COLUMNS = "id,user_id,ticket_number,category,priority,subject,status,assigned_to,escalated_to,first_response_at,resolved_at,message_count,row_version,sla,created_at,updated_at,last_customer_message_at,last_staff_message_at,satisfaction_rating";
 export const STAFF_DETAIL_COLUMNS = "*";
 
-const publicMessages = (messages) =>
+// Messages written before the hardening migration carry no senderKind: they are the customer's when the sender is the
+// case owner (or the recorded role is a customer role), otherwise staff.
+const CUSTOMER_ROLES = new Set(["user", "customer", "buyer", "dealer", "individual_seller", "broker"]);
+export const messageKind = (m, ownerId) => {
+  if (m?.senderKind === "customer" || m?.senderKind === "staff") return m.senderKind;
+  if (ownerId && m?.sender && String(m.sender) === String(ownerId)) return "customer";
+  return CUSTOMER_ROLES.has(String(m?.senderRole || "").toLowerCase()) ? "customer" : "staff";
+};
+
+const publicMessages = (messages, ownerId) =>
   (Array.isArray(messages) ? messages : [])
     .filter((m) => m && m.isInternal !== true)
     .map((m) => ({
       id: m.id || null,
-      from: m.senderKind === "staff" ? "support" : "you",
+      from: messageKind(m, ownerId) === "staff" ? "support" : "you",
       content: String(m.content ?? ""),
       createdAt: m.createdAt || null,
     }));
@@ -42,17 +51,25 @@ export function customerListItem(t) {
   };
 }
 
-export function customerDetail(t) {
+const withinReopenWindow = (t, days) => {
+  if (t.status !== "resolved") return true;
+  if (!t.resolved_at) return true;
+  return Date.now() - new Date(t.resolved_at).getTime() <= Math.max(Number(days) || 0, 0) * 86400000;
+};
+
+export function customerDetail(t, { reopenWindowDays = 14 } = {}) {
   const cfg = slaConfig();
   const resolved = t.status === "resolved" || t.status === "closed";
   return {
     ...customerListItem(t),
     description: t.description,
     references: references(t),
-    messages: publicMessages(t.messages),
+    messages: publicMessages(t.messages, t.user_id),
     rating: t.satisfaction_rating ?? null,
     ratingComment: t.satisfaction_comment ?? null,
-    canReply: t.status !== "closed",
+    // Mirrors the database rule: closed never accepts replies; resolved only inside the reopen window.
+    canReply: t.status !== "closed" && withinReopenWindow(t, reopenWindowDays),
+    reopenWindowDays: t.status === "resolved" ? reopenWindowDays : null,
     canRate: resolved && t.satisfaction_rating == null,
     // Timing is only stated when operations configured a target; otherwise no promise is made.
     expectations: {
@@ -90,20 +107,21 @@ export function staffListItem(t, users) {
   };
 }
 
-export function staffDetail(t, users) {
+export function staffDetail(t, users, { redactInternal = false } = {}) {
   return {
     ...staffListItem(t, users),
     description: t.description,
     references: references(t),
-    messages: (Array.isArray(t.messages) ? t.messages : []).map((m) => ({
+    readOnly: redactInternal,
+    messages: (Array.isArray(t.messages) ? t.messages : []).filter((m) => !(redactInternal && m?.isInternal === true)).map((m) => ({
       id: m.id || null,
-      kind: m.senderKind || (m.isInternal ? "staff" : "customer"),
+      kind: messageKind(m, t.user_id),
       internal: m.isInternal === true,
       senderName: staffPerson(users, m.sender)?.name || null,
       content: String(m.content ?? ""),
       createdAt: m.createdAt || null,
     })),
-    resolutionNote: t.resolution_notes || null,
+    resolutionNote: redactInternal ? null : t.resolution_notes || null,
     rating: t.satisfaction_rating ?? null,
     ratingComment: t.satisfaction_comment ?? null,
     reopenCount: t.reopen_count || 0,

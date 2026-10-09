@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /tmp/g3/x1/backend
+
+
+ Test Files  5 passed (5)
+      Tests  16 passed (16)
+   Start at  12:41:34
+   Duration  3.95s (transform 96ms, setup 0ms, import 190ms, tests 3.04s, environment 0ms)
+
+exit=0

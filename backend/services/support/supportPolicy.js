@@ -137,6 +137,13 @@ export function validateStaffUpdate(body = {}) {
   return out;
 }
 
+export function validateOversightReason(raw) {
+  const why = clean(typeof raw === "string" ? raw : "");
+  if (why.length < 10) throw new SupportError(400, "SUPPORT_REASON_REQUIRED", "State why you need to view this case (at least 10 characters). The reason is recorded in the audit log.");
+  if (why.length > 300) throw new SupportError(400, "SUPPORT_REASON_TOO_LONG", "Keep the reason under 300 characters.");
+  return why;
+}
+
 const DB_ERROR_MAP = {
   SUPPORT_TICKET_NOT_FOUND: [404, "Case not found."],
   SUPPORT_TICKET_CLOSED: [409, "This case is closed. Open a new case if you still need help."],
@@ -154,6 +161,8 @@ const DB_ERROR_MAP = {
   SUPPORT_PRIORITY_INVALID: [400, "Invalid case priority."],
   SUPPORT_STATUS_INVALID: [400, "Invalid case status."],
   SUPPORT_CASE_INVALID: [400, "Subject and description are required."],
+  SUPPORT_CATEGORY_INVALID: [400, "Choose one of the listed topics."],
+  SUPPORT_CASE_TOO_LONG: [400, "Subject or description is too long."],
 };
 
 export function mapDbError(error) {

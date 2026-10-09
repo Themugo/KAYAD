@@ -1,0 +1,55 @@
+# EXISTING-DATA REVIEW on a representative legacy fixture (local PG16; sanitized aggregates). 2026-10-09T09:36:46Z
+## PRE
+BEGIN
+Output format is unaligned.
+pre.rows|7
+pre.rated|3
+pre.rated_with_resolution_notes (will move to satisfaction_comment, original kept in legacy_resolution_notes)|2
+pre.unrated_with_resolution_notes (stay untouched)|1
+pre.ambiguous: rated AND status not in (resolved,closed) AND notes present (review by a human)|1
+pre.ticket_number null|0
+pre.ticket_number duplicates|0
+pre.ticket_number already in new format SUP-YYYYMMDD-dddddd|1
+pre.unknown category (kept, still updatable)|1
+pre.subject>200 or description>5000 (kept, still updatable)|1
+pre.status values|closed|1
+pre.status values|open|4
+pre.status values|resolved|2
+pre.messages entries without senderKind (projected by sender==owner fallback)|2
+pre.internal notes present (tickets)|1
+pre.user_id null (orphans, not visible to any customer)|0
+pre.audit_logs rows|2
+ROLLBACK
+## APPLY x2
+apply 1 rc=1
+apply 2 rc=1
+## POST
+BEGIN
+Output format is unaligned.
+post.rows|7
+post.backup rows == pre.rated_with_resolution_notes|2
+post.comment preserved byte-for-byte (expect 0 mismatches)|0
+post.rated rows still holding customer text in resolution_notes (expect 0)|0
+post.unrated staff notes untouched (== pre.unrated_with_resolution_notes)|1
+post.ticket_number null (expect 0)|0
+post.ticket_number duplicates (expect 0)|0
+post.unique index present (expect 1)|1
+post.audit rows for the move (expect 1 if anything moved, 1 after re-run)|1|2
+post.pre-existing audit rows preserved (expect >= pre.audit_logs rows)|3
+post.no table CHECK named support_ticket_category/length (expect 0)|0
+post.service_role EXECUTE count (expect 9)|9
+post.authenticated column SELECT on messages/resolution_notes/legacy/assigned_to/sla (expect all f)|messages|f
+post.authenticated column SELECT on messages/resolution_notes/legacy/assigned_to/sla (expect all f)|resolution_notes|f
+post.authenticated column SELECT on messages/resolution_notes/legacy/assigned_to/sla (expect all f)|legacy_resolution_notes|f
+post.authenticated column SELECT on messages/resolution_notes/legacy/assigned_to/sla (expect all f)|assigned_to|f
+post.authenticated column SELECT on messages/resolution_notes/legacy/assigned_to/sla (expect all f)|escalated_to|f
+post.authenticated column SELECT on messages/resolution_notes/legacy/assigned_to/sla (expect all f)|sla|f
+post.anon/authenticated INSERT,UPDATE,DELETE (expect all f)|anon|f|f|f
+post.anon/authenticated INSERT,UPDATE,DELETE (expect all f)|authenticated|f|f|f
+post.policies on support_tickets (expect only owner read)|support_tickets_user_read|SELECT
+ROLLBACK
+## NEW CASE after migration (ticket-number collision draw)
+SUP-20261009-000002
+dupes|0
+third application psql exit code: 0 (stderr non-NOTICE lines: 0)
+audit move rows after 3 applications: 1

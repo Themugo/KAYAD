@@ -23,3 +23,21 @@ Revert-proof: removing the internal-note filter fails the Jest guard (`revert_pr
 - Free-text customer content is stored as text and rendered by React (escaped); no HTML rendering path exists. Email bodies carry only generic text and the case number — never subject/description/notes.
 - No attachments: the API rejects them (nothing to scan/serve). Do not enable until private storage + signed URLs exist.
 - Rate limits reuse the shared `createLimiter`/`chatLimiter`; limits are not support-specific.
+
+## Integration gate addendum — migration safety, RLS and data preservation
+
+Environment: **local PostgreSQL 16 only** (Supabase-role shim). This is *not* Supabase staging evidence.
+
+**Legacy-data test** (`evidence/support/migration_legacy_*`): pre-migration schema + five representative rows — rated with a comment in `resolution_notes`, rated without, unrated with a staff note, unknown category, 300-char subject / 6000-char description — migration applied **twice**:
+- Both applications succeed; second is a no-op (backup guard + `satisfaction_comment IS NULL` guard): exactly one audit row `support.migration_rating_comment_moved {rows:1}`.
+- Rated comment preserved in `satisfaction_comment` **and** copied to `legacy_resolution_notes` before `resolution_notes` is cleared (lossless, reversible). Rated-without-comment and unrated staff note untouched.
+- Legacy rows with an unknown category or over-length text remain **updatable** (the earlier NOT VALID CHECKs would have rejected any UPDATE of them; removed). New cases are validated inside `kayad_support_create_case` (`SUPPORT_CATEGORY_INVALID`, `SUPPORT_CASE_TOO_LONG`).
+- *Residual risk:* a rated ticket whose `resolution_notes` was a genuine staff note (not the customer comment) cannot be told apart in the data; it is moved but retained in `legacy_resolution_notes`. Operators should review `select count(*) from support_tickets where legacy_resolution_notes is not null` on a production copy before release.
+
+**Grants** (`has_function_privilege`/`has_column_privilege`/`has_table_privilege`): all 9 support functions incl. the trigger function and the inert legacy RPC → `anon=f`, `authenticated=f`, `service_role=t`. `authenticated` may SELECT only the customer-safe columns (no `messages`, `resolution_notes`, `legacy_resolution_notes`, `assigned_to`, `sla`); no INSERT/UPDATE/DELETE for anon/authenticated; no views or other functions read `support_tickets` messages; the only policy is owner-read. Direct DB access therefore cannot reach internal notes.
+
+**Assignee rule in SQL:** `kayad_support_is_staff_user` = active `technical_support` only (admin → `f`, customer → `f`), so oversight roles can never be assigned or escalated to.
+
+Original behavioural proof P1–P21 re-run after the edits: same outcomes (`support_hardening_proof_output_post_integration.txt`).
+
+**Not proven:** Supabase staging RLS/grants, production-volume timing of the UPDATE, migration ordering against a live `schema_migrations` table (file sorts after the latest existing `20261009130000`; local chain applies in order).

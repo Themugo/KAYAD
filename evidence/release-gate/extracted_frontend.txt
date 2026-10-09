@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /tmp/g3/x1
+
+
+ Test Files  73 passed (73)
+      Tests  567 passed | 1 skipped (568)
+   Start at  12:48:01
+   Duration  105.57s (transform 3.91s, setup 7.18s, import 11.01s, tests 31.94s, environment 44.98s)
+
+exit=0

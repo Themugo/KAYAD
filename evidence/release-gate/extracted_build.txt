@@ -1,0 +1,55 @@
+vite v8.2.0 building client environment for production...
+transforming...
+✓ 2388 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/release.json                                    0.12 kB │ gzip:   0.12 kB
+dist/index.html                                      2.52 kB │ gzip:   0.96 kB
+dist/assets/index-DPRES6GF.css                     290.17 kB │ gzip:  46.83 kB
+dist/assets/check-JReXmnJb.js                        0.11 kB │ gzip:   0.13 kB
+dist/assets/x-ClBfw_nD.js                            0.14 kB │ gzip:   0.14 kB
+dist/assets/arrow-right-CAKX2IIK.js                  0.16 kB │ gzip:   0.15 kB
+dist/assets/user-round-BX7rkBew.js                   0.17 kB │ gzip:   0.17 kB
+dist/assets/info-CP8ws-CK.js                         0.19 kB │ gzip:   0.17 kB
+dist/assets/credit-card-De8wVUYq.js                  0.20 kB │ gzip:   0.18 kB
+dist/assets/rotate-ccw-clock-Bq86wYJP.js             0.24 kB │ gzip:   0.19 kB
+dist/assets/send-DKwYrI96.js                         0.28 kB │ gzip:   0.22 kB
+dist/assets/gavel-B9bsaq-7.js                        0.31 kB │ gzip:   0.21 kB
+dist/assets/shield-check-Dm0zub7r.js                 0.31 kB │ gzip:   0.24 kB
+dist/assets/ticket-epObqyaR.js                       0.31 kB │ gzip:   0.20 kB
+dist/assets/sparkles-w-jQ6yEG.js                     0.48 kB │ gzip:   0.27 kB
+dist/assets/paymentApi-BHmdPEjO.js                   0.75 kB │ gzip:   0.47 kB
+dist/assets/auctionService-pdlmMyHH.js               0.90 kB │ gzip:   0.40 kB
+dist/assets/dealerPlatformApi-hNGdxSIE.js            1.01 kB │ gzip:   0.35 kB
+dist/assets/inspectionPayment-CflCiEMa.js            1.25 kB │ gzip:   0.69 kB
+dist/assets/supportApi-Dv-Ups-v.js                   1.66 kB │ gzip:   0.81 kB
+dist/assets/escrowApi-DQ1D_Y7D.js                    2.26 kB │ gzip:   0.84 kB
+dist/assets/KAYADLive-DC5XUsgC.js                    4.39 kB │ gzip:   1.56 kB
+dist/assets/OwnershipPlatform-CAsLrerH.js            4.88 kB │ gzip:   1.44 kB
+dist/assets/api-45XyRz48.js                          5.63 kB │ gzip:   1.46 kB
+dist/assets/inspectionJourney-DwPHh20L.js            5.71 kB │ gzip:   2.15 kB
+dist/assets/FinancePlatform-DTM2JrfT.js              8.20 kB │ gzip:   2.51 kB
+dist/assets/PaymentHistoryView-Bi55DJDM.js           9.51 kB │ gzip:   2.92 kB
+dist/assets/jsx-runtime-Cl86B321.js                 10.06 kB │ gzip:   3.98 kB
+dist/assets/AuctionsView-Bg7oipc4.js                14.91 kB │ gzip:   4.75 kB
+dist/assets/PrivateSellerPlatform-DfA2Yb41.js       24.21 kB │ gzip:   6.81 kB
+dist/assets/DealerDashboard-DIBrZ0h7.js             30.09 kB │ gzip:   6.35 kB
+dist/assets/AuctionLivePage-DS6zZ9xF.js             34.30 kB │ gzip:  10.41 kB
+dist/assets/SupportView-Gr5-4ATp.js                 36.31 kB │ gzip:   9.73 kB
+dist/assets/chunk-62JRHF6Z-1XWE3SP9.js              36.82 kB │ gzip:  13.33 kB
+dist/assets/ChatView-BR83g3Bs.js                    41.06 kB │ gzip:   9.75 kB
+dist/assets/EscrowView-CJAim7zQ.js                  48.63 kB │ gzip:  13.11 kB
+dist/assets/AdminView-D26Z2J0i.js                   49.22 kB │ gzip:  12.17 kB
+dist/assets/httpRequest-EMkuNKkX.js                 52.91 kB │ gzip:  19.78 kB
+dist/assets/InspectionMarketplacePage-CK74wp-d.js   55.46 kB │ gzip:  14.32 kB
+dist/assets/DealersView-CyubWs88.js                 60.09 kB │ gzip:  12.78 kB
+dist/assets/InspectionsView-ChTXaI--.js             63.88 kB │ gzip:  16.20 kB
+dist/assets/index-DksjhD-G.js                      726.40 kB │ gzip: 197.26 kB
+
+✓ built in 1.31s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+exit=0

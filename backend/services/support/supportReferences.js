@@ -37,8 +37,11 @@ const checks = {
     const car = await one("cars", "id,dealer_id", { id });
     if (!car) return null;
     if (car.dealer_id === userId) return { related_auction: id };
+    // Participation = placed a bid OR registered as a bidder for this auction.
     const bid = await one("bids", "id", { car_id: id, user_id: userId });
-    return bid ? { related_auction: id } : null;
+    if (bid) return { related_auction: id };
+    const reg = await one("auction_registrations", "id", { auction_id: id, bidder_id: userId });
+    return reg ? { related_auction: id } : null;
   },
 };
 

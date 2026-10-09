@@ -1,0 +1,17 @@
+Lead CRM domain validation: 15/16 PASS
+PASS - canonical lead service exists
+PASS - canonical timeline service uses DB adapter
+PASS - no LeadActivity model methods remain
+FAIL - obsolete lead model wrappers removed
+PASS - no Lead model methods remain in backend
+PASS - atomic lead creation RPC wired
+PASS - atomic stage transition RPC wired
+PASS - stage transition records activity atomically
+PASS - stage state machine is constrained
+PASS - lead activity table has FK and index
+PASS - lead business identity is concurrency-indexed
+PASS - lead RLS enabled
+PASS - lead controller validates authorization
+PASS - dealer platform delegates to canonical lead service
+PASS - canonical frontend lead API exists
+PASS - dealer leads UI uses canonical lead API

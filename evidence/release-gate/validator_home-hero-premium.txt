@@ -1,0 +1,14 @@
+PASS continuous hero stage remains canonical
+PASS full Nairobi background remains configurable
+PASS Drive Your Dream headline remains canonical
+PASS desktop featured vehicle subjects remain data-driven
+FAIL clean showcase assets are configured
+PASS vehicle info cards are contained within vehicle stages
+PASS center card remains configurable
+PASS admin-controlled vehicle positioning remains wired
+PASS existing carousel controls remain wired
+PASS mobile hero has its own responsive composition
+PASS mobile hero preserves the canonical headline and CTAs
+PASS existing search bridge remains below hero
+
+Premium homepage hero validation: 11/12 FAIL

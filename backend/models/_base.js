@@ -572,6 +572,10 @@ export function createModel(name) {
         if (v.$gt !== undefined) q = q.gt(col, toComparable(v.$gt));
         if (v.$lt !== undefined) q = q.lt(col, toComparable(v.$lt));
         if (v.$ne !== undefined) q = q.neq(col, v.$ne);
+        // Additive: `{ $exists: false }` = IS NULL, `{ $exists: true }` = IS NOT NULL. A bare `null` filter value is
+        // skipped by this adapter (legacy behaviour relied on by callers), so soft-delete checks must use this form.
+        if (v.$exists === false) q = q.is(col, null);
+        if (v.$exists === true) q = q.not(col, "is", null);
         if (v.$in !== undefined) q = q.in(col, v.$in);
         if (v.$nin !== undefined) q = q.not(col, "in", `(${v.$nin.join(",")})`);
         if (v.$regex !== undefined) {

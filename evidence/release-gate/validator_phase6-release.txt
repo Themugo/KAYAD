@@ -1,0 +1,40 @@
+Phase 6 release contract: 38/39 PASS
+FAIL Node runtime >= 22.22.2 — Running v22.22.0; certification must run on Node 22.22.2+
+PASS Root Node engine pinned
+PASS Backend Node engine pinned
+PASS .nvmrc pins Node 22.22.2
+PASS Production contract contains SUPABASE_URL
+PASS Production contract contains SUPABASE_SERVICE_ROLE_KEY
+PASS Production contract contains JWT_SECRET
+PASS Production contract contains REFRESH_TOKEN_SECRET
+PASS Production contract contains SESSION_SECRET
+PASS Production contract contains REDIS_URL
+PASS Production contract contains BREVO_API_KEY
+PASS Production contract contains BREVO_FROM_EMAIL
+PASS Production contract contains AT_API_KEY
+PASS Production contract contains AT_USERNAME
+PASS Production contract contains TWILIO_ACCOUNT_SID
+PASS Production contract contains TWILIO_AUTH_TOKEN
+PASS Production contract contains TWILIO_WHATSAPP_NUMBER
+PASS Production contract contains MPESA_CALLBACK_URL
+PASS Render declares managed kayad-redis
+PASS Render binds REDIS_URL
+PASS Playwright supports remote BASE_URL
+PASS Remote E2E disables local webServer
+PASS Playwright release gate present
+PASS Phase 5 E2E validator retained
+PASS Phase 4 transaction validator retained
+PASS Phase 4 lifecycle certification retained
+PASS Phase 3 infrastructure validator retained
+PASS Phase 6 release validator registered
+PASS Phase 6 live certification command registered
+PASS Release journey contract declares E2E_BUYER_EMAIL
+PASS Release journey contract declares E2E_BUYER_PASSWORD
+PASS Release journey contract declares E2E_DEALER_EMAIL
+PASS Release journey contract declares E2E_DEALER_PASSWORD
+PASS Release journey contract declares E2E_RELEASE_CAR_ID
+PASS No hard-coded credential pattern: /sk-[A-Za-z0-9_-]{20,}/
+PASS No hard-coded credential pattern: /xkeysib-[A-Za-z0-9_-]{20,}/i
+PASS No hard-coded credential pattern: /AT_API_KEY\s*=\s*['"][^$][^'"]+['"]/
+PASS No hard-coded credential pattern: /TWILIO_AUTH_TOKEN\s*=\s*['"][^$][^'"]+['"]/
+PASS No hard-coded credential pattern: /SUPABASE_SERVICE_ROLE_KEY\s*=\s*['"][^$][^'"]+['"]/

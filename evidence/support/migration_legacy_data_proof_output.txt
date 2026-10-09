@@ -1,0 +1,81 @@
+# Legacy-data migration proof (local Postgres 16, NOT Supabase staging). 2026-10-09T08:54:14Z
+## seed
+delete from support_tickets;
+insert into users(id,name,email,role,status) values
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Customer A','a@x.co','user','approved'),
+ ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','Customer B','b@x.co','user','approved'),
+ ('dddddddd-dddd-4ddd-8ddd-dddddddddddd','Agent','agent@x.co','technical_support','approved'),
+ ('ffffffff-ffff-4fff-8fff-ffffffffffff','Adm','adm@x.co','admin','approved') on conflict do nothing;
+insert into support_tickets(id,user_id,category,priority,subject,description,status,ticket_number,satisfaction_rating,resolution_notes,messages,resolved_at) values
+ ('10000000-0000-4000-8000-000000000001','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','escrow','medium','rated w/ comment','d','resolved','T-1',5,'Great service!', '[{"id":"m1","sender":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","senderRole":"user","content":"hi","isInternal":false},{"id":"m2","sender":"dddddddd-dddd-4ddd-8ddd-dddddddddddd","senderRole":"technical_support","content":"INTERNAL","isInternal":true}]', now()),
+ ('10000000-0000-4000-8000-000000000002','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','escrow','medium','rated no comment','d','closed','T-2',3,NULL,'[]',now()),
+ ('10000000-0000-4000-8000-000000000003','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','auction','high','staff note unrated','d','resolved','T-3',NULL,'Staff: refunded',  '[]',now()),
+ ('10000000-0000-4000-8000-000000000004','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','legacy-weird-cat','low','unknown cat','d','open','T-4',NULL,NULL,'[]',NULL),
+ ('10000000-0000-4000-8000-000000000005','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',NULL,'low',repeat('s',300),repeat('d',6000),'open','T-5',NULL,NULL,'[]',NULL);
+## apply x2 + checks
+(both applications completed without error)
+Output format is unaligned.
+rows|5
+T1|5|Great service!||Great service!
+T2|3|t|t
+T3 staff note preserved|Staff: refunded|t
+T4/T5 legacy rows updatable|2
+UPDATE 2
+T4/T5 update ok
+audit rows moved|{"rows": 1, "migration": "20261009150000", "backup_column": "legacy_resolution_notes"}
+legacy_notes populated|1
+Output format is unaligned.
+FN|kayad_append_support_message|anon|f
+FN|kayad_append_support_message|authenticated|f
+FN|kayad_append_support_message|service_role|t
+FN|kayad_support_append_message|anon|f
+FN|kayad_support_append_message|authenticated|f
+FN|kayad_support_append_message|service_role|t
+FN|kayad_support_assign_ticket_number|anon|f
+FN|kayad_support_assign_ticket_number|authenticated|f
+FN|kayad_support_assign_ticket_number|service_role|t
+FN|kayad_support_create_case|anon|f
+FN|kayad_support_create_case|authenticated|f
+FN|kayad_support_create_case|service_role|t
+FN|kayad_support_is_staff_user|anon|f
+FN|kayad_support_is_staff_user|authenticated|f
+FN|kayad_support_is_staff_user|service_role|t
+FN|kayad_support_metrics|anon|f
+FN|kayad_support_metrics|authenticated|f
+FN|kayad_support_metrics|service_role|t
+FN|kayad_support_rate_case|anon|f
+FN|kayad_support_rate_case|authenticated|f
+FN|kayad_support_rate_case|service_role|t
+FN|kayad_support_transition_allowed|anon|f
+FN|kayad_support_transition_allowed|authenticated|f
+FN|kayad_support_transition_allowed|service_role|t
+FN|kayad_support_update_case|anon|f
+FN|kayad_support_update_case|authenticated|f
+FN|kayad_support_update_case|service_role|t
+COLPRIV messages/resolution_notes/legacy/assigned|anon|messages|f
+COLPRIV messages/resolution_notes/legacy/assigned|authenticated|messages|f
+COLPRIV messages/resolution_notes/legacy/assigned|anon|resolution_notes|f
+COLPRIV messages/resolution_notes/legacy/assigned|authenticated|resolution_notes|f
+COLPRIV messages/resolution_notes/legacy/assigned|anon|legacy_resolution_notes|f
+COLPRIV messages/resolution_notes/legacy/assigned|authenticated|legacy_resolution_notes|f
+COLPRIV messages/resolution_notes/legacy/assigned|anon|assigned_to|f
+COLPRIV messages/resolution_notes/legacy/assigned|authenticated|assigned_to|f
+COLPRIV messages/resolution_notes/legacy/assigned|anon|sla|f
+COLPRIV messages/resolution_notes/legacy/assigned|authenticated|sla|f
+COLPRIV messages/resolution_notes/legacy/assigned|anon|subject|f
+COLPRIV messages/resolution_notes/legacy/assigned|authenticated|subject|t
+COLPRIV messages/resolution_notes/legacy/assigned|anon|satisfaction_comment|f
+COLPRIV messages/resolution_notes/legacy/assigned|authenticated|satisfaction_comment|t
+TABLEPRIV|anon|f|f|f|f
+TABLEPRIV|authenticated|f|f|f|f
+TABLEPRIV|service_role|t|t|t|t
+VIEWS/MATVIEWS referencing support_tickets|0
+policies|support_tickets_user_read|SELECT|{authenticated}
+rls|t
+is_staff_user: agent / admin / customer|t|f|f
+create invalid category|1
+ERROR:  SUPPORT_CATEGORY_INVALID
+CONTEXT:  PL/pgSQL function kayad_support_create_case(uuid,text,text,text,text,jsonb,text,jsonb) line 8 at RAISE
+ERROR:  SUPPORT_CASE_TOO_LONG
+CONTEXT:  PL/pgSQL function kayad_support_create_case(uuid,text,text,text,text,jsonb,text,jsonb) line 11 at RAISE
+create ok|SUP-20261009-000001

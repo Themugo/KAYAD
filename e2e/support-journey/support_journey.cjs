@@ -7,6 +7,7 @@ const out = []; let fails = 0;
 const ok = (n, c, x = '') => { out.push(`${c ? 'PASS' : 'FAIL'}  ${n}${x ? '  ' + x : ''}`); if (!c) fails++; };
 const USER = { id: 'u1', _id: 'u1', name: 'Amina Buyer', email: 'amina@example.test', role: 'user', emailVerified: true, status: 'approved' };
 const ADMIN = { id: 'a1', _id: 'a1', name: 'Ada Support', email: 'ada@example.test', role: 'technical_support', emailVerified: true, status: 'approved' };
+const ADM = { id: 'ad1', _id: 'ad1', name: 'Ad Min', email: 'admin@example.test', role: 'admin', emailVerified: true, status: 'approved' };
 const MKT = { id: 'm1', _id: 'm1', name: 'Mo Marketing', email: 'mo@example.test', role: 'marketing', emailVerified: true, status: 'approved' };
 const json = (r, body, status = 200) => r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
 const API = (p) => new RegExp(`^https?://[^/]+/api/${p}`);
@@ -22,7 +23,7 @@ const mkCase = (st, over = {}) => ({
 const summary = (c) => { const { description, references, messages, rating, ratingComment, canReply, canRate, expectations, ...s } = c; return s; };
 
 async function install(page, st) {
-  const who = () => ({ customer: USER, staff: ADMIN, marketing: MKT }[st.who]);
+  const who = () => ({ customer: USER, staff: ADMIN, marketing: MKT, oversight: ADM }[st.who]);
   await page.route('**/api/v1/auth/me', (r) => st.who ? json(r, { success: true, user: who() }) : json(r, { success: false, message: 'Unauthenticated' }, 401));
   await page.route(/\/v1\/auth\/csrf/, (r) => json(r, { success: true, csrfToken: 'test-csrf-token-0123456789abcdef0123456789' }));
   await page.route(API('favorites'), (r) => json(r, { success: true, data: [] }));
@@ -42,12 +43,18 @@ async function install(page, st) {
       return json(r, { success: true, case: c, referenceLinked: body.reference ? body.reference.id === ESCROW : null, deduplicated: false }, 201);
     }
     if (path === '/my-tickets') return json(r, { success: true, cases: st.cases.map(summary), total: st.cases.length });
-    if (path === '/staff/queue') return json(r, { success: true, cases: st.cases.map((c) => ({ ...summary(c), priority: 'medium', customer: { id: 'u1', name: 'Amina Buyer', role: 'user' }, assignedTo: null, escalatedTo: null, firstResponseAt: null, rowVersion: 1, awaitingStaff: true })), total: st.cases.length, limit: 50, offset: 0 });
+    if (path === '/staff/queue') return json(r, { success: true, cases: st.cases.map((c) => ({ ...summary(c), priority: 'medium', customer: { id: 'u1', name: 'Amina Buyer', role: 'user' }, assignedTo: null, escalatedTo: null, firstResponseAt: null, rowVersion: 1, awaitingStaff: true })), total: st.cases.length, limit: 50, offset: 0, capability: st.who === 'oversight' ? 'oversight' : 'agent' });
     if (path === '/staff/metrics') return json(r, { success: true, metrics: { total: st.cases.length, windowDays: 30, slaConfigured: false, byStatus: {}, byCategory: {}, openBacklog: st.cases.length, unassignedOpen: st.cases.length, awaitingFirstResponse: st.cases.length, medianFirstResponseMinutes: null, medianResolutionMinutes: null, firstResponseWithinTarget: null, resolutionWithinTarget: null, averageRating: null, ratedCount: 0 } });
     if (path === '/staff/team') return json(r, { success: true, staff: [{ id: 'a1', name: 'Ada Support', role: 'technical_support' }] });
     let mm;
     if ((mm = path.match(/^\/staff\/([^/]+)\/messages$/)) && m === 'POST') { st.staffMsgs.push(body); return json(r, { success: true, case: staffDetail(st, mm[1]) }); }
     if ((mm = path.match(/^\/staff\/([^/]+)$/))) {
+      if (st.who === 'oversight') {
+        if (m !== 'GET') return json(r, { success: false, message: 'Only support agents can work on cases' }, 403);
+        const why = url.searchParams.get('reason') || ''; if (why.trim().length < 10) return json(r, { success: false, code: 'SUPPORT_REASON_REQUIRED', message: 'Give a reason' }, 400);
+        st.oversightReasons.push(why); const d = staffDetail(st, mm[1]);
+        return json(r, { success: true, capability: 'oversight', case: { ...d, readOnly: true, messages: d.messages.filter((x) => !x.internal) } });
+      }
       if (m === 'PATCH') { st.patches.push(body); const c = st.cases.find((x) => x.id === mm[1]); if (body.status) c.status = body.status; }
       return json(r, { success: true, case: staffDetail(st, mm[1]) });
     }
@@ -63,7 +70,7 @@ function staffDetail(st, id) {
     description: c.description, references: [], reopenCount: 0, resolutionNote: null, rating: null, ratingComment: null,
     messages: [{ id: 'x1', kind: 'customer', internal: false, senderName: 'Amina Buyer', content: 'Please help', createdAt: null }, { id: 'x2', kind: 'staff', internal: true, senderName: 'Ada Support', content: 'INTERNAL: check ledger', createdAt: null }] };
 }
-const fresh = (over = {}) => ({ who: null, cases: [], calls: [], staffMsgs: [], patches: [], ratings: [], failNext: false, ...over });
+const fresh = (over = {}) => ({ who: null, cases: [], calls: [], staffMsgs: [], patches: [], oversightReasons: [], ratings: [], failNext: false, ...over });
 const noHScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
 const text = (page) => page.evaluate(() => document.body.innerText);
 
@@ -141,6 +148,20 @@ const text = (page) => page.evaluate(() => document.body.innerText);
     await page.goto(BASE + '/?nav=admin', { waitUntil: 'networkidle' }); await page.getByRole('button', { name: 'Support', exact: true }).click();
     await page.getByText(/does not include customer support access/).waitFor({ timeout: 15000 });
     ok('marketing staff: told they have no support access (server 403), sees no cases', true); await ctx.close(); }
+
+  // Oversight (admin): read-only, reason required, no internal notes, no write controls
+  { const st = fresh({ who: 'oversight' }); st.cases.push(mkCase(st)); const { ctx, page, errors } = await open({ width: 1440, height: 900 }, st);
+    await page.goto(BASE + '/?nav=admin', { waitUntil: 'networkidle' }); await page.getByRole('button', { name: 'Support', exact: true }).click();
+    await page.getByText('SUP-20261009-000001').first().waitFor({ timeout: 15000 });
+    await page.getByText('Escrow stuck').first().click();
+    const openBtn = page.getByRole('button', { name: /open case read-only/i }); await openBtn.waitFor();
+    ok('oversight: case is not fetched before a reason is given', !st.calls.some((c) => c.path.startsWith('/staff/1') ) && st.oversightReasons.length === 0 && await openBtn.isDisabled());
+    await page.getByLabel(/Reason for opening/).fill('Quality review of a complaint'); await openBtn.click(); await page.getByText('Please help').waitFor();
+    const t = await text(page);
+    ok('oversight: reason sent to the server', st.oversightReasons[0] === 'Quality review of a complaint');
+    ok('oversight: internal notes absent', !/INTERNAL: check ledger/.test(t) && (await page.getByText('Internal note', { exact: true }).count()) === 0);
+    ok('oversight: no reply or status controls', (await page.getByLabel('Reply').count()) === 0 && (await page.getByLabel('Change status').count()) === 0);
+    ok('oversight: no page errors', errors.length === 0, errors.join('|')); await ctx.close(); }
 
   await browser.close();
   console.log(out.join('\n')); console.log(`\n${out.length - fails}/${out.length} PASS`); process.exit(fails ? 1 : 0);

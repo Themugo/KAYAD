@@ -1,0 +1,15 @@
+PASS  desktop: partial-failure banner names the failed section and the server message
+PASS  desktop: live data still rendered
+PASS  desktop: failed list shows an em dash, not 0
+PASS  desktop: failed tab makes no "no auctions scheduled" claim
+PASS  desktop: Refresh recovers and clears the banner
+PASS  desktop: no horizontal scroll
+PASS  desktop: no page errors
+PASS  mobile: partial-failure banner names the failed section and the server message
+PASS  mobile: live data still rendered
+PASS  mobile: failed list shows an em dash, not 0
+PASS  mobile: failed tab makes no "no auctions scheduled" claim
+PASS  mobile: Refresh recovers and clears the banner
+PASS  mobile: no horizontal scroll
+PASS  mobile: no page errors
+14/14 PASS

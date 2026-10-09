@@ -1,0 +1,16 @@
+PASS admin custody account table migration
+PASS EscrowAccount canonical mapping
+PASS private seller only at payment boundary
+PASS M-Pesa excluded from vehicle escrow
+PASS bank transfer custody mode
+PASS admin escrow rules endpoint
+PASS admin escrow accounts endpoint
+PASS atomic bank funding verification
+PASS funding instructions endpoint
+FAIL dealer listings cannot enable escrow
+PASS legacy dealer escrow admin controls removed
+PASS M-Pesa callback cannot fund escrow
+PASS generic admin config cannot override escrow custody rules
+PASS admin UI for custody
+
+Escrow custody domain gate: 13/14 PASS

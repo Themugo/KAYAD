@@ -32,6 +32,8 @@ export interface SupportCase extends SupportCaseSummary {
   ratingComment: string | null;
   canReply: boolean;
   canRate: boolean;
+  /** Configured reopen window (days) after which a resolved case can no longer be reopened by replying. */
+  reopenWindowDays?: number;
   /** Present only when operations configured targets; null means KAYAD makes no timing promise. */
   expectations: { firstResponseMinutes: number | null; resolutionMinutes: number | null };
 }
@@ -119,6 +121,8 @@ export interface StaffMessage { id: string | null; kind: 'customer' | 'staff'; i
 export interface StaffCase extends StaffCaseSummary {
   description: string; references: SupportReference[]; messages: StaffMessage[];
   resolutionNote: string | null; rating: number | null; ratingComment: string | null; reopenCount: number;
+  /** True for oversight views: no internal notes, no write controls. */
+  readOnly?: boolean;
 }
 export interface SupportMetrics {
   total: number; windowDays: number; slaConfigured: boolean;
@@ -136,13 +140,14 @@ const qs = (p: Record<string, string | number | undefined>) => {
 };
 
 export const getStaffQueue = (params: Record<string, string | number | undefined> = {}) =>
-  supportFetch<{ success: boolean; cases: StaffCaseSummary[]; total: number; limit: number; offset: number }>(`/api/support/staff/queue${qs(params)}`);
+  supportFetch<{ success: boolean; cases: StaffCaseSummary[]; total: number; limit: number; offset: number; capability?: 'agent' | 'oversight' }>(`/api/support/staff/queue${qs(params)}`);
 export const getStaffMetrics = (days = 30) =>
   supportFetch<{ success: boolean; metrics: SupportMetrics }>(`/api/support/staff/metrics${qs({ days })}`);
 export const getStaffTeam = () =>
   supportFetch<{ success: boolean; staff: StaffPerson[] }>('/api/support/staff/team');
-export const getStaffCase = (id: string) =>
-  supportFetch<{ success: boolean; case: StaffCase }>(`/api/support/staff/${encodeURIComponent(id)}`);
+/** Oversight (read-only) access must state a reason; it is audited server-side. Agents omit it. */
+export const getStaffCase = (id: string, reason?: string) =>
+  supportFetch<{ success: boolean; case: StaffCase; capability?: 'agent' | 'oversight' }>(`/api/support/staff/${encodeURIComponent(id)}${qs({ reason })}`);
 export const staffReplyToCase = (id: string, content: string, isInternal: boolean) =>
   supportFetch<{ success: boolean; case: StaffCase }>(`/api/support/staff/${encodeURIComponent(id)}/messages`, { method: 'POST', body: { content, isInternal } });
 export const staffUpdateCase = (id: string, body: { status?: string; priority?: string; assignedTo?: string | null; escalatedTo?: string; resolutionNote?: string; expectedVersion?: number }) =>

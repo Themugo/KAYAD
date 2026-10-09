@@ -1175,7 +1175,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Make</label>
+            {/* The label follows its select: when the select is hidden by the sidebar the label stays in the grid cell (layout unchanged) but is invisible, so no orphaned "MAKE" caption remains. */}
+            <label className={`text-[10px] font-bold uppercase tracking-wide text-slate-400 ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
             {/* Fixed: this select was always visible regardless of the
                 sidebar, but the sidebar has its own Make selector too -
                 showing both at once above the lg: breakpoint is

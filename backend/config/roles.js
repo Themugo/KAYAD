@@ -67,6 +67,11 @@ export const PERM = {
   MANAGE_ADS: "manage_ads",
   MANAGE_MODERATION: "manage_moderation",
   MANAGE_SUPPORT: "manage_support",
+  // Support case access is deliberately split from MANAGE_SUPPORT and is evaluated WITHOUT the superadmin/owner
+  // "all permissions" shortcut (see middleware/supportAccess.js): working a customer conversation needs SUPPORT_AGENT;
+  // administrative oversight is read-only, requires a stated reason and is audited.
+  SUPPORT_AGENT: "support_agent",
+  SUPPORT_OVERSIGHT: "support_oversight",
   MANAGE_FINANCE: "manage_finance",
   MANAGE_STAFF: "manage_staff",
   VIEW_LOGS: "view_logs",
@@ -92,7 +97,7 @@ export const ROLE_PERMISSIONS = {
     PERM.VIEW_ESCROW_AUDIT,
     PERM.VIEW_LOGS,
   ],
-  technical_support: [PERM.MANAGE_SUPPORT, PERM.VIEW_LOGS, PERM.MANAGE_USERS],
+  technical_support: [PERM.MANAGE_SUPPORT, PERM.SUPPORT_AGENT, PERM.VIEW_LOGS, PERM.MANAGE_USERS],
   hr: [PERM.MANAGE_STAFF, PERM.MANAGE_USERS],
   accounts: [
     PERM.MANAGE_FINANCE,
@@ -120,6 +125,7 @@ export const ROLE_PERMISSIONS = {
     PERM.MANAGE_ADS,
     PERM.MANAGE_MODERATION,
     PERM.MANAGE_SUPPORT,
+    PERM.SUPPORT_OVERSIGHT,
     PERM.MANAGE_FINANCE,
     PERM.MANAGE_STAFF,
     PERM.VIEW_LOGS,
@@ -178,6 +184,8 @@ export const ASSIGNABLE_PERMISSIONS = [
   PERM.MANAGE_ADS,
   PERM.MANAGE_MODERATION,
   PERM.MANAGE_SUPPORT,
+  PERM.SUPPORT_AGENT,
+  PERM.SUPPORT_OVERSIGHT,
   PERM.MANAGE_FINANCE,
   PERM.MANAGE_STAFF,
   PERM.VIEW_LOGS,
@@ -216,7 +224,9 @@ export const PERM_LABELS = {
   [PERM.MANAGE_ADS]: { label: "Ads & Promotions", desc: "Manage ad placements and campaigns", group: "Growth" },
   [PERM.VIEW_ANALYTICS]: { label: "View Analytics", desc: "Access reports and market data", group: "Growth" },
   [PERM.MANAGE_INSPECTIONS]: { label: "Inspections", desc: "Ghost-check vehicles & NTSA queue", group: "Operations" },
-  [PERM.MANAGE_SUPPORT]: { label: "Support", desc: "Handle support tickets and user help", group: "Operations" },
+  [PERM.MANAGE_SUPPORT]: { label: "Support", desc: "Legacy support umbrella (does not open customer conversations)", group: "Operations" },
+  [PERM.SUPPORT_AGENT]: { label: "Support Agent", desc: "Read and answer customer support conversations, including internal notes", group: "Operations" },
+  [PERM.SUPPORT_OVERSIGHT]: { label: "Support Oversight", desc: "Read-only, audited, reason-required review of support cases (internal notes hidden)", group: "Operations" },
   [PERM.VIEW_LOGS]: { label: "View Security Logs", desc: "Read audit and security logs", group: "Operations" },
   [PERM.MANAGE_PLATFORM]: { label: "Platform Settings", desc: "Edit platform-wide settings", group: "System" },
   [PERM.BYPASS_RATE_LIMIT]: { label: "Bypass Rate Limit", desc: "Exempt from API rate limiting", group: "System" },

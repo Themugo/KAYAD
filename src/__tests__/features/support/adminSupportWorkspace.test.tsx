@@ -72,4 +72,28 @@ describe('AdminSupportWorkspace', () => {
     expect(values).not.toContain('closed');
     expect(values).toContain('resolved');
   });
+
+  it('oversight: asks for a reason first, opens read-only with the reason, and shows no write controls', async () => {
+    api.getStaffQueue.mockResolvedValue({ cases: [row], total: 1, limit: 50, offset: 0, capability: 'oversight' });
+    api.getStaffCase.mockResolvedValue({ case: { ...detail, readOnly: true, messages: [detail.messages[0]] } });
+    render(<AdminSupportWorkspace />);
+    fireEvent.click(await screen.findByText('Escrow stuck'));
+    expect(api.getStaffCase).not.toHaveBeenCalled();
+    const open = await screen.findByRole('button', { name: /open case read-only/i }) as HTMLButtonElement;
+    expect(open.disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText(/Reason for opening/), { target: { value: 'Quality review of complaint' } });
+    fireEvent.click(open);
+    await waitFor(() => expect(api.getStaffCase).toHaveBeenCalledWith(ID, 'Quality review of complaint'));
+    await screen.findByText('help');
+    expect(screen.queryByText('Internal note')).toBeNull();
+    expect(screen.queryByLabelText('Reply')).toBeNull();
+    expect(screen.queryByLabelText('Change status')).toBeNull();
+  });
+
+  it('agent: opens a case without a reason prompt', async () => {
+    render(<AdminSupportWorkspace />);
+    fireEvent.click(await screen.findByText('Escrow stuck'));
+    await screen.findByText('Internal note');
+    expect(api.getStaffCase).toHaveBeenCalledWith(ID, undefined);
+  });
 });

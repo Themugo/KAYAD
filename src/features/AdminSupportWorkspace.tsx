@@ -42,13 +42,16 @@ export const AdminSupportWorkspace: React.FC = () => {
   const [internal, setInternal] = useState(false);
   const [nextStatus, setNextStatus] = useState('');
   const [resolution, setResolution] = useState('');
+  const [capability, setCapability] = useState<'agent' | 'oversight'>('agent');
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [q, m] = await Promise.all([getStaffQueue({ ...filters, limit: 50 }), getStaffMetrics(30)]);
-      setRows(q.cases); setTotal(q.total); setMetrics(m.metrics); setForbidden(false);
+      setRows(q.cases); setTotal(q.total); setCapability(q.capability === 'oversight' ? 'oversight' : 'agent'); setMetrics(m.metrics); setForbidden(false);
     } catch (e) {
       if (e instanceof SupportApiError && e.kind === 'forbidden') setForbidden(true);
       setError(errText(e, 'Unable to load the support queue.'));
@@ -60,9 +63,11 @@ export const AdminSupportWorkspace: React.FC = () => {
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { getStaffTeam().then((r) => setTeam(r.staff)).catch(() => setTeam([])); }, []);
 
-  const open = async (id: string) => {
-    setDetailBusy(true); setDetailError(null); setReply(''); setInternal(false); setNextStatus(''); setResolution('');
-    try { setSelected((await getStaffCase(id)).case); } catch (e) { setDetailError(errText(e, 'Unable to load this case.')); } finally { setDetailBusy(false); }
+  const open = async (id: string, why?: string) => {
+    setReply(''); setInternal(false); setNextStatus(''); setResolution(''); setDetailError(null);
+    if (capability === 'oversight' && !why) { setSelected(null); setPendingId(id); setReason(''); return; }
+    setDetailBusy(true); setPendingId(null);
+    try { setSelected((await getStaffCase(id, why)).case); } catch (e) { setDetailError(errText(e, 'Unable to load this case.')); } finally { setDetailBusy(false); }
   };
 
   const apply = async (fn: () => Promise<{ case: StaffCase }>, ok?: () => void) => {
@@ -133,7 +138,15 @@ export const AdminSupportWorkspace: React.FC = () => {
         </Card>
 
         <Card className="p-4">
-          {!selected && !detailBusy && <p className="text-sm text-slate-500">Select a case to read the thread, reply, or change its status.</p>}
+          {capability === 'oversight' && <p className="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-600"><Lock className="w-3 h-3 inline mr-1" />Oversight access is read-only. Internal notes are hidden, and each case you open is recorded with your stated reason.</p>}
+          {pendingId && !selected && (
+            <form className="space-y-2" onSubmit={(e) => { e.preventDefault(); void open(pendingId, reason.trim()); }}>
+              <label htmlFor="support-oversight-reason" className="text-xs font-bold text-slate-600">Reason for opening this case (10–300 characters, recorded)</label>
+              <textarea id="support-oversight-reason" rows={2} maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} className="w-full rounded-lg border border-slate-200 px-2 py-2 text-sm" />
+              <Button size="sm" variant="primary" type="submit" disabled={detailBusy || reason.trim().length < 10}>Open case read-only</Button>
+            </form>
+          )}
+          {!selected && !pendingId && !detailBusy && <p className="text-sm text-slate-500">Select a case to read the thread, reply, or change its status.</p>}
           {detailBusy && !selected && <p className="text-xs text-slate-500"><Loader2 className="w-4 h-4 animate-spin inline" /> Loading…</p>}
           {detailError && <p className="mb-3 text-xs font-semibold text-rose-700" role="alert">{detailError}</p>}
           {selected && (
@@ -155,7 +168,7 @@ export const AdminSupportWorkspace: React.FC = () => {
                 ))}
               </ul>
 
-              {selected.status !== 'closed' && (
+              {selected.status !== 'closed' && !selected.readOnly && (
                 <div>
                   <textarea aria-label="Reply" rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder={internal ? 'Internal note (never shown to the customer)…' : 'Reply to the customer…'} className={`w-full rounded-xl border px-3 py-2 text-sm ${internal ? 'border-amber-300 bg-amber-50' : 'border-slate-200'}`} />
                   <div className="mt-2 flex items-center justify-between">
@@ -165,7 +178,7 @@ export const AdminSupportWorkspace: React.FC = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+              {!selected.readOnly && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-3">
                 <label className="text-xs font-bold text-slate-600">Assign to
                   <select className="mt-1 block w-full rounded-lg border border-slate-200 px-2 py-2 text-sm" value={selected.assignedTo?.id || ''} disabled={detailBusy || selected.status === 'closed'}
                     onChange={(e) => void apply(() => staffUpdateCase(selected.id, { assignedTo: e.target.value || null, expectedVersion: selected.rowVersion }))}>
@@ -186,7 +199,7 @@ export const AdminSupportWorkspace: React.FC = () => {
                   <div className="sm:col-span-2"><Button size="sm" variant="primary" disabled={detailBusy || (nextStatus === 'resolved' && !resolution.trim())}
                     onClick={() => void apply(() => staffUpdateCase(selected.id, { status: nextStatus, resolutionNote: resolution.trim() || undefined, expectedVersion: selected.rowVersion }), () => { setNextStatus(''); setResolution(''); })}>Apply status change</Button></div>
                 )}
-              </div>
+              </div>}
               {selected.rating != null && <p className="text-xs text-slate-600">Customer rating: <strong>{selected.rating}/5</strong>{selected.ratingComment ? ` — “${selected.ratingComment}”` : ''}</p>}
             </div>
           )}

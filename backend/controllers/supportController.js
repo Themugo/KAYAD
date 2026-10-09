@@ -48,7 +48,7 @@ export const rateTicket = wrap(async (req, res) => {
 // ---- staff ----
 export const staffQueue = wrap(async (req, res) => {
   const out = await svc.listQueue(req.query);
-  res.json({ success: true, ...out, tickets: out.cases });
+  res.json({ success: true, ...out, tickets: out.cases, capability: req.supportCapability });
 }, "Failed to load the support queue");
 
 export const staffMetrics = wrap(async (req, res) => {
@@ -60,8 +60,8 @@ export const staffTeam = wrap(async (_req, res) => {
 }, "Failed to load support staff");
 
 export const staffGetCase = wrap(async (req, res) => {
-  const c = await svc.getStaffCase(req.params.id);
-  res.json({ success: true, case: c, ticket: c });
+  const c = await svc.getStaffCase(req.params.id, req.user, req.supportCapability, req.query.reason);
+  res.json({ success: true, case: c, ticket: c, capability: req.supportCapability });
 }, "Failed to load support case");
 
 export const staffReply = wrap(async (req, res) => {

@@ -1,0 +1,13 @@
+PASS canonical public URL is www.kayad.space
+file:///tmp/g3/found/scripts/validate-production-host-contract.mjs:7
+const fail = (message) => { throw new Error(`FAIL ${message}`); };
+                                  ^
+
+Error: FAIL production browser API URL
+    at fail (file:///tmp/g3/found/scripts/validate-production-host-contract.mjs:7:35)
+    at file:///tmp/g3/found/scripts/validate-production-host-contract.mjs:18:64
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.0

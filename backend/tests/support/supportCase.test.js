@@ -9,6 +9,7 @@ const CAR = "99999999-9999-4999-8999-999999999999";
 let tables;
 const rpcCalls = [];
 let rpcImpl;
+let auditFail = false;
 
 // Minimal chainable PostgREST stand-in (select/eq/in/is/ilike/order/range/limit/maybeSingle).
 function from(name) {
@@ -16,6 +17,7 @@ function from(name) {
   let rangeArr = null;
   const q = {
     select: () => q,
+    insert: async (row) => { if (auditFail) return { error: { message: "down" } }; (tables[name] = tables[name] || []).push(row); return { error: null }; },
     eq: (c, v) => (f.push((r) => r[c] === v), q),
     in: (c, vs) => (f.push((r) => vs.includes(r[c])), q),
     is: (c, v) => (f.push((r) => (r[c] ?? null) === v), q),
@@ -46,7 +48,7 @@ jest.unstable_mockModule("../../infrastructure/logging/index.js", () => ({ logEr
 const svc = await import("../../services/support/supportCase.service.js");
 const pol = await import("../../services/support/supportPolicy.js");
 const ser = await import("../../services/support/supportSerializers.js");
-const { requireSupportStaff } = await import("../../middleware/supportAccess.js");
+const { requireSupportStaff, requireSupportViewer, requireSupportAgent, supportCapability } = await import("../../middleware/supportAccess.js");
 
 const ticket = (over = {}) => ({
   id: T, user_id: A, ticket_number: "SUP-20261009-000001", category: "escrow", priority: "high", subject: "Escrow stuck",
@@ -65,6 +67,7 @@ const ticket = (over = {}) => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  auditFail = false;
   rpcCalls.length = 0;
   delete process.env.SUPPORT_SLA_FIRST_RESPONSE_MINUTES;
   delete process.env.SUPPORT_SLA_RESOLUTION_MINUTES;
@@ -72,7 +75,7 @@ beforeEach(() => {
     support_tickets: [ticket()],
     users: [{ id: A, name: "Alice", role: "user" }, { id: AGENT, name: "Agent", role: "technical_support" }],
     cars: [{ id: CAR, dealer_id: B, status: "hidden" }],
-    escrows: [], payments: [], bids: [], inspection_bookings: [], vehicle_inspections: [],
+    escrows: [], payments: [], bids: [], auction_registrations: [], inspection_bookings: [], vehicle_inspections: [],
   };
   rpcImpl = async (n, a) => {
     if (n === "kayad_support_create_case") return { id: T, ticket_number: "SUP-20261009-000001", deduplicated: Boolean(a.p_idempotency_key === "dup") };
@@ -226,7 +229,7 @@ describe("staff authorization", () => {
     requireSupportStaff({ user }, res, () => { nexted = true; });
     return { nexted, code: res.code };
   };
-  test.each(["technical_support", "admin", "superadmin"])("%s is support staff", (role) => expect(run({ id: AGENT, role }).nexted).toBe(true));
+  test.each(["technical_support", "admin", "superadmin"])("%s may enter the support workspace (viewer gate)", (role) => expect(run({ id: AGENT, role }).nexted).toBe(true));
   test.each(["user", "dealer", "marketing", "hr", "accounts", "ad_manager", "moderator", "ghost_checker", "support", "staff"])("%s is not", (role) => expect(run({ id: AGENT, role })).toEqual({ nexted: false, code: 403 }));
   test("no user is 401", () => expect(run(null).code).toBe(401));
   test("staff list view shows customer name but never email", async () => {
@@ -240,5 +243,96 @@ describe("staff authorization", () => {
     expect(a).toMatchObject({ p_expected_version: 4, p_status: "resolved", p_resolution_note: "Fixed" });
     expect(emit).toHaveBeenCalledTimes(1);
     expect(emit.mock.calls[0][0].metadata.idempotencyKey).toBe(`support-status:${T}:5`);
+  });
+});
+
+
+describe("least-privilege capability matrix", () => {
+  const cap = (role, extra = {}) => supportCapability({ id: AGENT, role, ...extra });
+  test("only technical_support is an agent; admin/superadmin are read-only oversight", () => {
+    expect(cap("technical_support")).toBe("agent");
+    expect(cap("admin")).toBe("oversight");
+    expect(cap("superadmin")).toBe("oversight");
+  });
+  test.each(["user", "dealer", "marketing", "hr", "accounts", "ad_manager", "moderator", "support", "staff"])("%s has no support capability", (role) => expect(cap(role)).toBeNull());
+  test("agent-only gate rejects oversight roles with 403", () => {
+    for (const role of ["admin", "superadmin"]) {
+      const res = { code: 200, status(c) { this.code = c; return this; }, json() { return this; } };
+      let next = false;
+      requireSupportAgent({ user: { id: AGENT, role } }, res, () => { next = true; });
+      expect({ next, code: res.code }).toEqual({ next: false, code: 403 });
+    }
+    let ok = false; requireSupportAgent({ user: { id: AGENT, role: "technical_support" } }, { status() { return this; }, json() {} }, () => { ok = true; });
+    expect(ok).toBe(true);
+  });
+  test("viewer gate stamps the capability on the request", () => {
+    const req = { user: { id: AGENT, role: "admin" } }; requireSupportViewer(req, {}, () => {});
+    expect(req.supportCapability).toBe("oversight");
+  });
+});
+
+describe("oversight access is reasoned, audited, redacted and read-only", () => {
+  const admin = { id: "ffffffff-ffff-4fff-8fff-ffffffffffff", role: "admin" };
+  test("a reason is mandatory", async () => {
+    await expect(svc.getStaffCase(T, admin, "oversight", undefined)).rejects.toMatchObject({ code: "SUPPORT_REASON_REQUIRED" });
+    await expect(svc.getStaffCase(T, admin, "oversight", "short")).rejects.toMatchObject({ code: "SUPPORT_REASON_REQUIRED" });
+  });
+  test("oversight view contains no internal notes and records an audit row with the reason", async () => {
+    const c = await svc.getStaffCase(T, admin, "oversight", "Escalated complaint review for QA");
+    const json = JSON.stringify(c);
+    expect(json).not.toContain("INTERNAL: suspect fraud");
+    expect(json).not.toContain("STAFF ONLY");
+    expect(c.readOnly).toBe(true);
+    const row = tables.audit_logs.find((r) => r.action === "support.oversight_viewed");
+    expect(row).toMatchObject({ actor_id: admin.id, entity_id: T });
+    expect(row.details.reason).toBe("Escalated complaint review for QA");
+  });
+  test("fails closed: if the audit cannot be written the case is not returned", async () => {
+    auditFail = true;
+    await expect(svc.getStaffCase(T, admin, "oversight", "Escalated complaint review for QA")).rejects.toMatchObject({ status: 503, code: "SUPPORT_AUDIT_UNAVAILABLE" });
+  });
+  test("agent view includes internal notes and is audited", async () => {
+    const c = await svc.getStaffCase(T, { id: AGENT, role: "technical_support" }, "agent");
+    expect(JSON.stringify(c)).toContain("INTERNAL: suspect fraud");
+    expect(c.readOnly).toBeFalsy();
+    expect(tables.audit_logs.some((r) => r.action === "support.case_viewed")).toBe(true);
+  });
+});
+
+describe("agents only work on unassigned or own cases", () => {
+  const other = { id: "12121212-1212-4212-8212-121212121212", role: "technical_support" };
+  test("another agent cannot reply or change status on a case assigned elsewhere", async () => {
+    await expect(svc.staffReply(other, T, { content: "hi" })).rejects.toMatchObject({ status: 403, code: "SUPPORT_ASSIGNED_TO_OTHER" });
+    await expect(svc.staffUpdate(other, T, { status: "resolved", resolutionNote: "x" })).rejects.toMatchObject({ code: "SUPPORT_ASSIGNED_TO_OTHER" });
+    expect(rpcCalls.length).toBe(0);
+  });
+  test("an unassigned case can be worked, and take-over by reassignment is allowed", async () => {
+    tables.support_tickets[0].assigned_to = null;
+    await svc.staffReply(other, T, { content: "On it" });
+    expect(rpcCalls.some(([n]) => n === "kayad_support_append_message")).toBe(true);
+    tables.support_tickets[0].assigned_to = AGENT;
+    await svc.staffUpdate(other, T, { assignedTo: other.id });
+    expect(rpcCalls.some(([n]) => n === "kayad_support_update_case")).toBe(true);
+  });
+  test("assignable staff list contains only support agents", async () => {
+    tables.users.push({ id: "ffffffff-ffff-4fff-8fff-ffffffffffff", name: "Adm", role: "admin", status: "approved" });
+    const staff = await svc.listAssignableStaff();
+    expect(JSON.stringify(staff)).not.toContain("Adm");
+  });
+});
+
+
+describe("auction reference requires real participation", () => {
+  const refs = () => import("../../services/support/supportReferences.js");
+  test("seller, bidder and registered bidder may link; a stranger and a missing auction may not", async () => {
+    const { resolveReference } = await refs();
+    expect((await resolveReference({ kind: "auction", id: CAR }, B)).linked).toBe(true); // dealer/seller of the car
+    expect((await resolveReference({ kind: "auction", id: CAR }, A)).linked).toBe(false); // stranger
+    tables.bids.push({ id: "b1", car_id: CAR, user_id: A });
+    expect((await resolveReference({ kind: "auction", id: CAR }, A)).linked).toBe(true); // bidder
+    tables.bids.length = 0;
+    tables.auction_registrations.push({ id: "r1", auction_id: CAR, bidder_id: A });
+    expect((await resolveReference({ kind: "auction", id: CAR }, A)).linked).toBe(true); // registered, no bid yet
+    expect((await resolveReference({ kind: "auction", id: "00000000-0000-4000-8000-000000000000" }, A)).linked).toBe(false);
   });
 });
