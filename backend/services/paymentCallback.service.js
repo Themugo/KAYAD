@@ -10,6 +10,7 @@ import { assertPaymentTransition } from "./paymentStateMachine.js";
 import { activateDealerSubscriptionFromPayment } from "./dealerSubscription.service.js";
 import { getSupabase } from "../utils/supabase.js";
 import { recordPurchasePayment } from "./ledgerService.js";
+import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -232,10 +233,55 @@ export const handleMpesaCallback = async (callbackData) => {
             currentBid: Number(settled.amount || 0),
             bidsCount: Number(settledCar?.bidsCount || settledCar?.bids_count || 0),
           });
+
+          // These are existing transactional event contracts. Emit only after
+          // the canonical payment/market settlement succeeds; never on a
+          // pending bid or a failed M-Pesa callback. Communication delivery
+          // remains the gateway's responsibility and is not claimed here.
+          if (settledBid?.user || settled?.user_id) {
+            const bidderId = settledBid?.user || settled?.user_id;
+            await emitCommunication({
+              userId: bidderId,
+              eventType: COMMUNICATION_EVENTS.BID_CONFIRMED,
+              title: "Bid confirmed",
+              message: `Your bid of KES ${Number(settled.amount || 0).toLocaleString("en-KE")} has been confirmed.`,
+              channels: ["in_app", "email"],
+              metadata: { carId: String(settled.car_id), bidId: String(settled.bid_id) },
+            }).catch((e) => logWarn("Bid confirmation communication failed", { error: e.message, paymentId: payment.id }));
+          }
+
+          // Notify bidders whose confirmed bids are now below the accepted
+          // market-leading bid. This is informational only; auction state and
+          // bid validity remain owned by the atomic settlement function.
+          if (settled.applied_to_market) {
+            const confirmedBids = await findAll("bids", {
+              filters: { carId: settled.car_id, status: "paid" },
+              limit: 500,
+            }).catch((e) => {
+              logWarn("Outbid recipient lookup failed", { error: e.message, carId: settled.car_id });
+              return [];
+            });
+            const recipients = new Map();
+            for (const priorBid of confirmedBids || []) {
+              const priorBidId = String(priorBid.id || priorBid._id || "");
+              const priorUserId = priorBid.user || priorBid.userId || priorBid.user_id;
+              if (!priorUserId || priorBidId === String(settled.bid_id) || String(priorUserId) === String(settled.user_id || settledBid?.user)) continue;
+              if (Number(priorBid.amount || 0) >= Number(settled.amount || 0)) continue;
+              recipients.set(String(priorUserId), priorBid);
+            }
+            await Promise.all([...recipients.keys()].map((userId) => emitCommunication({
+              userId,
+              eventType: COMMUNICATION_EVENTS.OUTBID,
+              title: "You have been outbid",
+              message: `A higher confirmed bid has been placed on ${settledCar?.title || "this vehicle"}.`,
+              channels: ["in_app", "email"],
+              metadata: { carId: String(settled.car_id), currentBid: Number(settled.amount || 0) },
+            }).catch((e) => logWarn("Outbid communication failed", { error: e.message, carId: settled.car_id }))));
+          }
         } catch (emitErr) {
-          // A missed realtime emit must never fail payment confirmation -
-          // the page's own authoritative-state poll is the backstop.
-          logWarn("Bid settlement realtime emit failed", { error: emitErr.message, paymentId: payment.id });
+          // A missed realtime/communication emit must never reverse payment
+          // confirmation. The authoritative-state poll remains the backstop.
+          logWarn("Bid settlement follow-up failed", { error: emitErr.message, paymentId: payment.id });
         }
       }
     }

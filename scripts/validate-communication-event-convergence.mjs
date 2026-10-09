@@ -9,11 +9,11 @@ const required = [
   ['backend/services/paymentService.js', ['COMMUNICATION_EVENTS.PAYMENT_SUCCESS','emitCommunication']],
   ['backend/services/auctionLifecycle.service.js', ['COMMUNICATION_EVENTS.AUCTION_STARTED','COMMUNICATION_EVENTS.AUCTION_EXTENDED']],
   ['backend/services/auctionClose.service.js', ['emitAuctionOutcome','COMMUNICATION_EVENTS']],
-  ['backend/controllers/bidController.js', ['COMMUNICATION_EVENTS.BID_CONFIRMED','COMMUNICATION_EVENTS.OUTBID']],
+  ['backend/services/paymentCallback.service.js', ['COMMUNICATION_EVENTS.BID_CONFIRMED','COMMUNICATION_EVENTS.OUTBID','atomicSettleBidPayment']],
   ['backend/inspection/controllers/legacyCompatibilityController.js', ['COMMUNICATION_EVENTS.INSPECTION_BOOKED','COMMUNICATION_EVENTS.INSPECTION_COMPLETED']],
   ['backend/controllers/disputeController.js', ['COMMUNICATION_EVENTS.DISPUTE_OPENED','COMMUNICATION_EVENTS.DISPUTE_RESOLVED']],
   ['backend/services/dealerSubscription.service.js', ['COMMUNICATION_EVENTS.SUBSCRIPTION_ACTIVATED']],
-  ['backend/controllers/supportController.js', ['COMMUNICATION_EVENTS.SUPPORT_CASE_CREATED','COMMUNICATION_EVENTS.SUPPORT_CASE_UPDATED']],
+  ['backend/services/support/supportCase.service.js', ['COMMUNICATION_EVENTS.SUPPORT_CASE_CREATED','COMMUNICATION_EVENTS.SUPPORT_CASE_UPDATED']],
   ['backend/controllers/authController.js', ['COMMUNICATION_EVENTS.REGISTRATION','COMMUNICATION_EVENTS.EMAIL_VERIFICATION']],
 ];
 let passed=0;

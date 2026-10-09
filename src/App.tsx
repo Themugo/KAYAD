@@ -39,6 +39,7 @@ import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
+import { navLocationFor } from './utils/navLocation';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 // Views
@@ -68,25 +69,26 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // App() is now a thin wrapper providing that, with the real logic in
 // AppInner().
 function AppInner() {
-  const [activeNav, setActiveNav] = useState<string>('marketplace');
+  const [activeNav, setActiveNavState] = useState<string>('marketplace');
   const location = useLocation();
   const { user: authUser, logout: authLogout, isAdmin, isDealer, isAuth, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const normalizeNav = useCallback((requested: string | null): string => {
-    const aliases: Record<string, string> = {
-      home: 'marketplace',
-      gallery: 'marketplace',
-      auction: 'discovery',
-      escrow: 'escrow',
-      chat: 'chat',
-      dashboard: 'dashboard',
-      signin: 'support',
-      login: 'support',
-      seller: 'seller-platform',
-      'seller-dashboard': 'seller-platform',
-    };
-    const value = (requested || '').trim();
-    return aliases[value] || value || 'marketplace';
+    return navLocationFor(requested || '', window.location.href).nav;
+  }, []);
+
+  // Keep the query-backed single-shell navigation canonical. AuctionsView
+  // writes its active tab into the URL for shareable deep links; without
+  // syncing subsequent navigation, leaving Auctions could leave `?nav=auctions`
+  // behind and make a later refresh reopen Auctions instead of Marketplace.
+  const setActiveNav = useCallback((requested: string) => {
+    const next = navLocationFor(requested, window.location.href);
+    setActiveNavState(next.nav);
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (next.href !== current) {
+      window.history.replaceState(window.history.state, '', next.href);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
   }, []);
 
   useEffect(() => {
@@ -98,7 +100,7 @@ function AppInner() {
     if (requested === 'inspections' && (action === 'apply-provider' || action === 'manage-business')) {
       setInspectionLaunch((prev) => ({ vehicle: null, tab: 'service', action, nonce: prev.nonce + 1 }));
     }
-  }, [location.search, normalizeNav]);
+  }, [location.search, normalizeNav, setActiveNav]);
 
   // Client-side navigation state is convenience only, but it must never
   // expose a private workspace to the wrong account. Backend authorization

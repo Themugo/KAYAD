@@ -76,6 +76,15 @@ jest.unstable_mockModule("../../utils/supabase.js", () => ({
 jest.unstable_mockModule("../../services/ledgerService.js", () => ({
   recordPurchasePayment: jest.fn(),
 }));
+const emitCommunicationMock = jest.fn().mockResolvedValue([]);
+const communicationEvents = {
+  BID_CONFIRMED: "auction.bid_confirmed",
+  OUTBID: "auction.outbid",
+};
+jest.unstable_mockModule("../../services/communicationEvents.service.js", () => ({
+  emitCommunication: emitCommunicationMock,
+  COMMUNICATION_EVENTS: communicationEvents,
+}));
 
 const { handleMpesaCallback } = await import("../../services/paymentCallback.service.js");
 
@@ -125,7 +134,9 @@ describe("handleMpesaCallback — bid payment settlement realtime emit", () => {
       payment_id: "pay-1",
       bid_id: "bid-1",
       car_id: "car-1",
+      user_id: "user-1",
       amount: 2500000,
+      applied_to_market: true,
       ledger_recorded: true,
     });
 
@@ -142,6 +153,10 @@ describe("handleMpesaCallback — bid payment settlement realtime emit", () => {
     expect(emitListingUpdateMock).toHaveBeenCalledWith("car-1", expect.objectContaining({
       currentBid: 2500000,
       bidsCount: 5,
+    }));
+    expect(emitCommunicationMock).toHaveBeenCalledWith(expect.objectContaining({
+      userId: "user-1",
+      eventType: "auction.bid_confirmed",
     }));
   });
 

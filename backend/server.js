@@ -369,7 +369,7 @@ const allowedOrigins = [
     .filter(Boolean),
   // Add specific Vercel deployment URLs (not wildcard)
   ...(!IS_DEVELOPMENT && !IS_TEST
-    ? ["https://kayad-motors.vercel.app", "https://kayad-motors-themugos-projects.vercel.app"]
+    ? ["https://kayad-space.vercel.app", "https://kayad-space-themugos-projects.vercel.app"]
     : []),
   // Add custom domain if configured
   ...(process.env.CUSTOM_DOMAIN
@@ -378,7 +378,7 @@ const allowedOrigins = [
 ];
 
 // Stricter Vercel regex - only allow specific known deployment patterns
-const vercelPattern = /^https:\/\/kayad-motors(-themugos-projects)?\.vercel\.app$/;
+const vercelPattern = /^https:\/\/kayad-space(-themugos-projects)?\.vercel\.app$/;
 
 app.use(
   cors({

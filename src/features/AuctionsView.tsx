@@ -75,7 +75,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   };
   const [tab, setTab] = useState<'live' | 'scheduled' | 'ended' | 'saved'>(readTab);
   useEffect(() => { const sync = () => setTab(readTab()); window.addEventListener('popstate', sync); return () => window.removeEventListener('popstate', sync); }, []);
-  useEffect(() => { const url = new URL(window.location.href); if (tab !== 'live') url.searchParams.set('auctionTab', tab); else url.searchParams.delete('auctionTab'); url.searchParams.set('nav', 'auctions'); window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`); }, [tab]);
+  useEffect(() => { const url = new URL(window.location.href); if (tab !== 'live') url.searchParams.set('auctionTab', tab); else url.searchParams.delete('auctionTab'); const query = url.searchParams.toString(); window.history.replaceState(window.history.state, '', `${url.pathname}${query ? `?${query}` : ''}${url.hash}`); }, [tab]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState<string | null>(null);
 

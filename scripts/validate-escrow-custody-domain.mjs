@@ -10,7 +10,7 @@ const checks = [
   ['admin escrow accounts endpoint', fs.readFileSync('backend/routes/adminRoutes.js','utf8').includes('router.get("/escrow/accounts"')],
   ['atomic bank funding verification', fs.readFileSync('supabase/migrations/20260907150000_escrow_custody_admin_configuration.sql','utf8').includes('kayad_verify_escrow_funding_atomic')],
   ['funding instructions endpoint', fs.readFileSync('backend/routes/escrowRoutes.js','utf8').includes('router.get("/:id/funding-instructions"')],
-  ['dealer listings cannot enable escrow', fs.readFileSync('backend/controllers/carController.js','utf8').includes('if (isDealer) req.body.escrowEnabled = false;') && fs.readFileSync('backend/controllers/carController.js','utf8').includes('if (isSeller) req.body.escrowEnabled = true;')],
+  ['listing escrow eligibility is server-computed from canonical seller capability', fs.readFileSync('backend/controllers/carController.js','utf8').includes('req.body.escrowEnabled = await getEscrowEnabledForNewOrEditedCar(seller.id, seller.role);') && fs.readFileSync('backend/services/escrowCapability.service.js','utf8').includes('getEscrowEnabledForNewOrEditedCar')],
   ['legacy dealer escrow admin controls removed', !fs.readFileSync('backend/routes/adminRoutes.js','utf8').includes('/users/:id/escrow-approve')],
   ['M-Pesa callback cannot fund escrow', fs.readFileSync('backend/services/paymentCallback.service.js','utf8').includes('Vehicle escrow cannot be funded through M-Pesa STK')],
   ['generic admin config cannot override escrow custody rules', !fs.readFileSync('backend/routes/adminRoutes.js','utf8').match(/const allowed = \[[\s\S]*?\"escrowRules"/)],
