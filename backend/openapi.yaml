@@ -9345,6 +9345,19 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/escrow/program:
+    get:
+      tags:
+      - Api
+      summary: GET /api/escrow/program
+      description: 'Public, cached (60s). Whether escrow is switched on and the
+        non-sensitive programme limits. No deal, balance or account data.'
+      operationId: getApiEscrowProgram
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Internal server error
   /api/escrow/{id}/funding-instructions:
     get:
       tags:

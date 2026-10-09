@@ -759,3 +759,15 @@ Ranked carry-forward: (1) owner decisions on charging for KAYAD inspections, com
 
 ## Update — UX convergence complete (2026-10-09)
 Added to the ranked carry-forward: sweep remaining unsupported trust claims ("Guaranteed", "100% Verified", dormant `VehicleDetailPage.tsx`); owner decision on whether sellers may see inspection reports; provider job dashboard only after a request workflow exists. Earlier carry-forward unchanged.
+
+---
+## 2026-10-09 — Escrow remaining work (ranked by financial risk)
+1. DECISION: real custody model (bank transfer vs M-Pesa path); no regulated-account claim until evidenced.
+2. ENV: run RPC/RLS proofs on real Supabase and an M-Pesa sandbox end to end (funding, callback replay, refund completion, payout failure).
+3. Unify the three auto-release clocks (DB 3d from funding, cron 7d from creation, STK RPC +3d).
+4. DECISION: auction escrow creation is unreachable (`paymentStatus=paid` required but escrow payment paths refused).
+5. DECISION: should `closed` require verified payout/refund completion?
+6. Finish `compareEscrowBalances` (still counts retired `held`) and add payout reconciliation.
+7. DECISION: dealer team-member access to escrows.
+8. Replace mock `AdminPage` escrow screens; decide the "Escrow Vault" naming; regenerate the stale route security matrix as its own change.
+9. Out of scope, noted: `dealerRoutes` `PUT /settlement` shadows imported `update`.

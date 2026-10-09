@@ -10,6 +10,7 @@ import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { atomicTransitionEscrow } from "../utils/atomicTransactions.js";
 import { recordEscrowDeposit } from "./ledgerService.js";
 import { syncPurchaseOutcomeFromEscrow } from "./marketplaceFulfilment.service.js";
+import { resolveEscrowCustody } from "./escrowConfiguration.service.js";
 
 const getCommissionRate = async () => {
   try {
@@ -28,8 +29,11 @@ const calculateCommission = async (amount) => {
 export const createEscrow = async (data) => {
   try {
     const { commission, sellerAmount } = await calculateCommission(data.amount);
+    // Bind the custody account at creation unless the caller already did.
+    const custody = data.custodianAccount ? {} : await resolveEscrowCustody({ amount: data.amount });
 
     const escrow = await create("escrows", {
+      ...custody,
       ...data,
       commission,
       sellerAmount,

@@ -35,6 +35,29 @@ import {
 const router = express.Router();
 
 // =============================
+// 🌐 PUBLIC PROGRAM STATUS
+// The only unauthenticated escrow endpoint. It exposes whether the program is
+// switched on and the admin-published rules — nothing about any deal, balance
+// or account — so public pages can describe escrow from the platform's actual
+// state instead of a hard-coded claim.
+// =============================
+router.get("/program", asyncHandler(async (req, res) => {
+  const rules = await getEscrowRules();
+  res.set("Cache-Control", "public, max-age=60");
+  res.json({
+    success: true,
+    data: {
+      enabled: rules.enabled === true,
+      fundingMethods: rules.fundingMethods,
+      releaseDays: Number(rules.releaseDays),
+      minimumAmount: Number(rules.minimumAmount || 0),
+      maximumAmount: rules.maximumAmount == null ? null : Number(rules.maximumAmount),
+      currency: "KES",
+    },
+  });
+}));
+
+// =============================
 // 🏦 ESCROW OPERATIONS CENTER
 // Projection/control layer over canonical escrow services.
 // =============================

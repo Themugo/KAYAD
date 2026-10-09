@@ -90,7 +90,7 @@ export const SellPage: FC = () => {
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed max-w-2xl mx-auto">
-            Connect directly with thousands of pre-verified buyers across Kenya. Benefit from CBK-regulated Escrow Vault payment protection, access to independent pre-purchase inspection, and nationwide marketplace exposure.
+            Connect directly with thousands of pre-verified buyers across Kenya. Benefit from Escrow payment protection on approved listings, access to independent pre-purchase inspection, and nationwide marketplace exposure.
           </p>
 
           {/* Value Props Bar */}
@@ -239,7 +239,7 @@ export const SellPage: FC = () => {
                   </li>
                   <li className="flex items-center gap-2.5 text-xs text-[#176B87] font-semibold">
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
-                    <span>CBK-regulated Escrow Vault payment protection</span>
+                    <span>Escrow payment protection on approved listings</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs text-[#176B87] font-semibold">
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
@@ -514,7 +514,7 @@ export const SellPage: FC = () => {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                 <p className="text-xs text-[#66808A] font-semibold flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-[#13B8A6]" />
-                  Protected under Central Bank of Kenya ring-fenced escrow guidelines
+                  Escrow is offered only to approved sellers and vehicles
                 </p>
 
                 <Button

@@ -61,7 +61,7 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold text-slate-900 dark:text-white">Escrow Milestone Tracker</td>
-                  <td className="p-3"><code>/components/escrow/EscrowPage.tsx</code></td>
+                  <td className="p-3"><code>/features/escrow/</code></td>
                   <td className="p-3">Escrow status state machine & payout holds</td>
                   <td className="p-3"><Badge variant="emerald">Active</Badge></td>
                 </tr>

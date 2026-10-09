@@ -1504,3 +1504,11 @@ Discovery first (`AUTOMOTIVE_SERVICES_PRODUCT_DISCOVERY.md`), then one additive 
 
 ## Automotive Services — UX Convergence — 2026-10-09
 Hub reframed to the platform/independent-provider model; nav "Auto Services" with four real destinations; invented vehicle-detail certificate, dispatch promise, fixed 150-point claims and fake dealer reviews removed; seller inspection API minimised. No migration/RLS/financial change. FE 480/0/1; BE Jest 771; validators = baseline; tsc/build clean; browser 71/71 + 66/66; revert-proofs 14 + 2. See `KAYAD_AUTOMOTIVE_SERVICES_UX_CONVERGENCE_REPORT.md`. Escrow not started.
+
+---
+## 2026-10-09 — Escrow backend-first discovery, financial lifecycle & multi-audience experience convergence
+- Discovery written first: `ESCROW_PRODUCT_DISCOVERY.md`. Report: `ESCROW_EXPERIENCE_CONVERGENCE_REPORT.md`. Evidence: `evidence/escrow/`.
+- Backend: custody binding (RPC + creation, enforces admin min/max), cron `deliveredAt`, counterparty privacy projection (`utils/escrowViewModel.js`), request-release guard + admins room, retired `held` status removed from stats/reconciliation (except `compareEscrowBalances`), seller-capability gate on the auction path, purchase eligibility frozen at initiation (migration `20261009130000`), public `GET /api/escrow/program`, staff `totals`/`operator.can`/`staffActions`.
+- Frontend: rewritten API client and EscrowView; new public / participant / operations surfaces; unsupported claims removed; orphan `EscrowPage` removed; static claims test.
+- Results: backend 937/62 suites; frontend 508 (+1 skip); validators 164/10 (baseline); tsc 0; build 0; mocked-HTTP Playwright 33/33; revert→fail→restore→pass recorded.
+- NOT certified: live Supabase/RLS, Redis, M-Pesa, webhooks (ENVIRONMENT-BLOCKED). No business decision was made (see report section 17).

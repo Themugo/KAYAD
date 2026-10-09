@@ -202,7 +202,7 @@ router.get(
       Payment.countDocuments({ status: "success" }),                                  // totalPayments
       User.countDocuments({ role: "dealer", approved: false }),                       // pendingDealers
       Car.countDocuments({ status: "pending" }),                                      // pendingCars
-      Escrow.countDocuments({ status: "held" }),                                      // openEscrows
+      Escrow.countDocuments({ status: { $in: ["funded", "vehicle_confirmed", "delivered"] } }),                                      // openEscrows
       Escrow.countDocuments({ status: "disputed" }),                                  // disputedEscrows
       Escrow.aggregate([{ $match: { status: "released" } }, { $group: { _id: null, total: { $sum: "$commission" } } }]), // revenueAgg
       Bid.countDocuments(),                                                           // totalBidsAll
@@ -2146,7 +2146,7 @@ router.get(
         Car.countDocuments(),
         Car.countDocuments({ auctionStatus: "live" }),
         Escrow.countDocuments({ status: "pending" }),
-        Escrow.countDocuments({ status: "held" }),
+        Escrow.countDocuments({ status: { $in: ["funded", "vehicle_confirmed", "delivered"] } }),
         Car.countDocuments({ status: "pending" }),
         AdminAlert.countDocuments({
           severity: "critical",

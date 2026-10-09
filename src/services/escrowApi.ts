@@ -1,31 +1,27 @@
 import { request, HttpRequestError } from '../api/httpRequest';
 /**
- * Real backend escrow API client, and an honest mapper from the
- * real escrow shape into this frontend's own EscrowTransaction type.
+ * Escrow API client.
  *
- * Follows the exact pattern established in services/vehicleApi.ts,
- * bidApi.ts, inspectionApi.ts, chatApi.ts: typed error class with a
- * `kind` field, `credentials: 'include'` on every request (the real
- * backend requires auth for this entire route file - confirmed via
- * `protect` middleware on every real route in
- * backend/routes/escrowRoutes.js).
+ * Contract notes (verified against backend/controllers/escrowController.js,
+ * backend/utils/escrowViewModel.js and backend/routes/escrowRoutes.js):
  *
- * SCOPE, STATED HONESTLY: the real backend has a clear, 8-state
- * status enum ('pending' | 'funded' | 'vehicle_confirmed' |
- * 'delivered' | 'disputed' | 'refunded' | 'released' | 'closed'),
- * real amount/commission/sellerAmount, and real per-stage timestamps
- * (fundedAt, vehicleConfirmedAt, deliveredAt, releasedAt) - all
- * mapped directly, nothing invented. It has NO real NTSA TIMS
- * integration, no per-escrow linked inspection report/score, and no
- * "create a new escrow" endpoint at all (every real POST route acts
- * on an escrow that already exists) - the mapper below omits those
- * concepts entirely rather than fabricate them.
+ * - `GET /api/escrow/my` returns only deals the signed-in user is a party to,
+ *   already projected for that viewer: the counterparty is `{ id, name }`
+ *   (no contact or account data), the fee split is present only for the
+ *   seller/staff, and each deal carries `viewerRole` and `availableActions`
+ *   computed by the server from the same state machine the action endpoints
+ *   enforce. The browser therefore never decides what a user "may" do.
+ * - The accompanying `summary` is explicitly `scope: 'participant'`: totals
+ *   over the viewer's own deals, never a platform balance.
+ * - `GET /api/escrow/program` is public and returns only whether the program
+ *   is switched on and the admin-published rules.
+ * - Operator endpoints (`/operations/*`) are staff-only; `operator.can` and
+ *   per-case `staffActions` say what the signed-in operator may do.
+ * - There is no endpoint that creates an escrow from this client: escrows are
+ *   created by the purchase and auction settlement workflows.
  */
 
-import { EscrowTransaction } from '../types';
-
-
-export type EscrowApiErrorKind = 'network' | 'unauthenticated' | 'forbidden' | 'validation' | 'not_found' | 'server';
+export type EscrowApiErrorKind = 'network' | 'unauthenticated' | 'forbidden' | 'validation' | 'not_found' | 'conflict' | 'server';
 
 export class EscrowApiError extends Error {
   kind: EscrowApiErrorKind;
@@ -37,21 +33,20 @@ export class EscrowApiError extends Error {
   }
 }
 
-interface BackendUser {
-  id: string;
-  name: string;
-  phone?: string;
-  email?: string;
-  role?: string;
-}
+export type EscrowStatus = 'pending' | 'funded' | 'vehicle_confirmed' | 'delivered' | 'disputed' | 'refunded' | 'released' | 'closed';
+export type EscrowViewerRole = 'buyer' | 'seller' | 'staff' | null;
+export type EscrowPartyAction = 'view_funding_instructions' | 'confirm_vehicle' | 'request_release' | 'confirm_delivery' | 'open_dispute';
+export type EscrowStaffAction = 'verify_funding' | 'release' | 'refund' | 'complete_refund' | 'payout' | 'close';
 
-interface BackendCarRef {
-  id: string;
-  title: string;
-  images?: { url: string }[];
-  price?: number;
-  vin?: string;
-  registrationNumber?: string;
+export interface BackendUser { id: string | null; name: string | null; businessName?: string | null }
+
+export interface BackendCarRef {
+  id: string | null;
+  title: string | null;
+  images?: { url: string | null }[];
+  price?: number | null;
+  vin?: string | null;
+  registrationNumber?: string | null;
 }
 
 export interface BackendEscrow {
@@ -60,174 +55,172 @@ export interface BackendEscrow {
   seller: BackendUser;
   car: BackendCarRef | null;
   amount: number;
+  currency?: 'KES';
   commission?: number;
   sellerAmount?: number;
-  status: 'pending' | 'funded' | 'vehicle_confirmed' | 'delivered' | 'disputed' | 'refunded' | 'released' | 'closed';
+  status: EscrowStatus;
+  viewerRole?: EscrowViewerRole;
+  availableActions?: EscrowPartyAction[];
+  createdAt: string;
+  updatedAt: string;
   fundedAt?: string | null;
+  fundingVerifiedAt?: string | null;
   vehicleConfirmedAt?: string | null;
   deliveredAt?: string | null;
+  autoReleaseEligibleAt?: string | null;
   releasedAt?: string | null;
+  refundedAt?: string | null;
   closedAt?: string | null;
+  disputedAt?: string | null;
+  disputedBy?: string | null;
   disputeReason?: string | null;
   disputeTitle?: string | null;
   disputeDescription?: string | null;
-  disputedAt?: string | null;
-  disputedBy?: string | null;
   disputeWorkflowStatus?: 'open' | 'under_review' | 'mediation' | 'resolved' | 'appealed' | 'closed' | null;
-  disputeEvidence?: Array<{ _id?: string; type?: string; fileName?: string; mimeType?: string; size?: number; url?: string; thumbnailUrl?: string; description?: string; uploadedBy?: string; uploadedByRole?: string; createdAt?: string; verified?: boolean; verifiedBy?: string; verifiedAt?: string }>;
-  disputeTimeline?: Array<{ action?: string; actor?: string; assigneeId?: string; at?: string; note?: string; fromStatus?: string; toStatus?: string }>;
-  createdAt: string;
-  updatedAt: string;
+  disputeEvidence?: Array<{ type?: string | null; fileName?: string | null; mimeType?: string | null; size?: number | null; createdAt?: string | null; verified?: boolean }>;
+  disputeTimeline?: Array<{ action?: string | null; at?: string | null; note?: string | null; fromStatus?: string | null; toStatus?: string | null }>;
 }
 
-async function escrowFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+export interface EscrowParticipantSummary {
+  scope: 'participant';
+  currency: 'KES';
+  totalDeals: number;
+  heldAmount: number;
+  heldCount: number;
+  pendingFundingCount: number;
+  activeCount: number;
+  settledCount: number;
+  needsActionCount: number;
+}
+
+export interface EscrowProgram {
+  enabled: boolean;
+  fundingMethods: string[];
+  releaseDays: number;
+  minimumAmount: number;
+  maximumAmount: number | null;
+  currency: 'KES';
+}
+
+function kindFor(status?: number): EscrowApiErrorKind {
+  if (status === 401) return 'unauthenticated';
+  if (status === 403) return 'forbidden';
+  if (status === 404) return 'not_found';
+  if (status === 409) return 'conflict';
+  if (status === 400) return 'validation';
+  return status && status >= 500 ? 'server' : status ? 'server' : 'network';
+}
+
+async function escrowFetch<T>(path: string, options: { method?: string; body?: string; headers?: Record<string, string> } = {}): Promise<T> {
   try {
-    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+    return await request<T>(path, { method: options.method, body: options.body ? JSON.parse(options.body) : undefined, headers: options.headers });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
-    const kind: EscrowApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 403 ? 'forbidden' : error.status === 404 ? 'not_found' : error.status === 400 ? 'validation' : 'server';
-    throw new EscrowApiError(error.message, kind, error.status);
+    throw new EscrowApiError(error.message, kindFor(error.status), error.status);
   }
 }
 
-/** GET /api/escrow/my - every real escrow deal the current user is a
- * real party to (buyer or seller). */
+// Idempotency: the server derives a deterministic key per escrow/operation for
+// every escrow action (backend/middleware/idempotency.js), so the browser does
+// not send its own (a custom header would also need to be CORS-allowed).
+
+// ── Public ────────────────────────────────────────────────────────────────
+/** GET /api/escrow/program — public, no deal or balance data. */
+export async function getEscrowProgram(): Promise<EscrowProgram> {
+  const body = await escrowFetch<{ data: EscrowProgram }>('/api/escrow/program');
+  return body.data;
+}
+
+// ── Participants ──────────────────────────────────────────────────────────
+/** GET /api/escrow/my — the signed-in user's own deals, projected for them. */
+export async function getMyEscrowOverview(): Promise<{ escrows: BackendEscrow[]; summary: EscrowParticipantSummary | null }> {
+  const body = await escrowFetch<{ data: BackendEscrow[]; summary?: EscrowParticipantSummary }>('/api/escrow/my');
+  return { escrows: body.data || [], summary: body.summary || null };
+}
+
+/** Deals only (used by the seller and buyer dashboards). */
 export async function getMyEscrows(): Promise<BackendEscrow[]> {
-  const body = await escrowFetch<{ data: BackendEscrow[] }>('/api/escrow/my');
-  return body.data || [];
+  return (await getMyEscrowOverview()).escrows;
 }
 
-/** POST /api/escrow/:id/confirm-vehicle - buyer confirms the vehicle
- * matches inspection/expectations, moving the deal forward. */
-export async function confirmVehicle(escrowId: string): Promise<BackendEscrow> {
-  const body = await escrowFetch<{ data: BackendEscrow }>(`/api/escrow/${escrowId}/confirm-vehicle`, { method: 'POST' });
-  return body.data;
+export async function confirmVehicle(escrowId: string): Promise<void> {
+  await escrowFetch(`/api/escrow/${escrowId}/confirm-vehicle`, { method: 'POST' });
 }
-
-/** POST /api/escrow/:id/confirm-delivery - seller confirms delivery. */
-export async function confirmDelivery(escrowId: string): Promise<BackendEscrow> {
-  const body = await escrowFetch<{ data: BackendEscrow }>(`/api/escrow/${escrowId}/confirm-delivery`, { method: 'POST' });
-  return body.data;
+export async function confirmDelivery(escrowId: string): Promise<void> {
+  await escrowFetch(`/api/escrow/${escrowId}/confirm-delivery`, { method: 'POST' });
 }
-
-/** POST /api/escrow/:id/request-release - buyer requests admin release. */
 export async function requestRelease(escrowId: string): Promise<{ message: string }> {
   const body = await escrowFetch<{ message: string }>(`/api/escrow/${escrowId}/request-release`, { method: 'POST' });
   return { message: body.message };
 }
+export async function disputeEscrow(escrowId: string, reason: string): Promise<void> {
+  await escrowFetch(`/api/escrow/${escrowId}/dispute`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
 
-/** GET /api/escrow/:id/state - canonical state-machine history and next-state contract. */
-export async function getEscrowState(escrowId: string): Promise<{ currentState: BackendEscrow['status']; allowedTransitions: BackendEscrow['status'][]; history: Array<{ action?: string; by?: string; at?: string; reason?: string }> }> {
-  const body = await escrowFetch<{ data: { currentState: BackendEscrow['status']; allowedTransitions: BackendEscrow['status'][]; history: Array<{ action?: string; by?: string; at?: string; reason?: string }> } }>(`/api/escrow/${escrowId}/state`);
+export interface EscrowStateInfo { currentState: EscrowStatus; allowedTransitions: EscrowStatus[]; history: Array<{ action?: string; by?: string; at?: string; reason?: string }> }
+/** GET /api/escrow/:id/state — canonical history. */
+export async function getEscrowState(escrowId: string): Promise<EscrowStateInfo> {
+  const body = await escrowFetch<{ data: EscrowStateInfo }>(`/api/escrow/${escrowId}/state`);
   return body.data;
 }
 
-/** GET /api/escrow/:id/funding-instructions - real custody funding instructions. */
-export async function getFundingInstructions(escrowId: string): Promise<{ fundingMethod: string; rules: { releaseDays: number; minimumAmount: number; maximumAmount?: number | null }; account: { accountName?: string; bankName?: string; accountNumber?: string; branch?: string; currency?: string } | null; amount: number; reference: string }> {
-  const body = await escrowFetch<{ data: { fundingMethod: string; rules: { releaseDays: number; minimumAmount: number; maximumAmount?: number | null }; account: { accountName?: string; bankName?: string; accountNumber?: string; branch?: string; currency?: string } | null; amount: number; reference: string } }>(`/api/escrow/${escrowId}/funding-instructions`);
+export interface FundingInstructions {
+  fundingMethod: string;
+  rules: { releaseDays: number; minimumAmount: number; maximumAmount?: number | null };
+  account: { accountName?: string; bankName?: string; accountNumber?: string; branch?: string; currency?: string } | null;
+  amount: number;
+  reference: string;
+}
+/** GET /api/escrow/:id/funding-instructions */
+export async function getFundingInstructions(escrowId: string): Promise<FundingInstructions> {
+  const body = await escrowFetch<{ data: FundingInstructions }>(`/api/escrow/${escrowId}/funding-instructions`);
   return body.data;
 }
 
-/** POST /api/escrow/:id/dispute - buyer, seller, or staff raises a
- * real dispute, freezing the deal. */
-export async function disputeEscrow(escrowId: string, reason: string): Promise<BackendEscrow> {
-  const body = await escrowFetch<{ data: BackendEscrow }>(`/api/escrow/${escrowId}/dispute`, {
-    method: 'POST',
-    body: JSON.stringify({ reason }),
-  });
-  return body.data;
+// ── Operators (staff) ─────────────────────────────────────────────────────
+export interface EscrowStaffCapabilities { view: boolean; operate: boolean; reconcile: boolean; release: boolean; refund: boolean; settle: boolean; completeRefund: boolean; close: boolean }
+export interface OpsEscrow {
+  id: string; status: EscrowStatus; amount: number; commission: number; sellerAmount: number;
+  createdAt?: string; updatedAt?: string; fundedAt?: string | null; releasedAt?: string | null; refundedAt?: string | null; disputedAt?: string | null;
+  buyer: { id: string; name: string } | null; seller: { id: string; name: string } | null;
+  car: { id: string; title: string; registrationNumber?: string; vinLast4?: string | null } | null;
+  refund?: { id: string; status: string; amount: number } | null;
+  payout?: { id: string; status: string; amount: number; netAmount: number; failureReason?: string | null } | null;
+  staffActions?: EscrowStaffAction[];
 }
-
-/** POST /api/escrow/:id/release - admin-only, confirmed directly
- * (backend/routes/escrowRoutes.js's own real route gate). Releases
- * the real, held funds to the seller. The real response only
- * contains { sellerAmount, commission }, not the full updated escrow
- * - callers should re-fetch the deal list afterward for the real,
- * current state rather than construct one from this response alone. */
-export async function releaseEscrow(escrowId: string): Promise<{ sellerAmount: number; commission: number }> {
-  const body = await escrowFetch<{ data: { sellerAmount: number; commission: number } }>(`/api/escrow/${escrowId}/release`, { method: 'POST' });
-  return body.data;
-}
-
-const STATUS_LABELS: Record<BackendEscrow['status'], string> = {
-  pending: 'Awaiting Buyer Deposit',
-  funded: 'Funds Held in Escrow',
-  vehicle_confirmed: 'Buyer Approved Vehicle',
-  delivered: 'Vehicle Delivered',
-  disputed: 'Dispute Under Review',
-  refunded: 'Refunded to Buyer',
-  released: 'Funds Released to Seller',
-  closed: 'Completed',
-};
-
-// The real backend's 8 statuses honestly compressed to a linear
-// step count for a simple progress indicator - 'disputed'/'refunded'
-// are shown via their own real status label instead of a step number,
-// since they are not points on the normal, linear happy path.
-const STATUS_STEP: Record<BackendEscrow['status'], number> = {
-  pending: 1,
-  funded: 2,
-  vehicle_confirmed: 3,
-  delivered: 4,
-  released: 5,
-  closed: 5,
-  disputed: 0,
-  refunded: 0,
-};
-
-/** Honestly maps a real escrow into this frontend's own
- * EscrowTransaction shape - see this file's own header for exactly
- * which concepts (TIMS, a linked inspection score, deal creation)
- * have no real backend equivalent and are correctly omitted rather
- * than invented. */
-export function mapBackendEscrowToTransaction(e: BackendEscrow): EscrowTransaction {
-  return {
-    id: e.id,
-    vehicleId: e.car?.id || '',
-    vehicleTitle: e.car?.title || 'Vehicle',
-    vehicleImage: e.car?.images?.[0]?.url,
-    vehiclePrice: e.car?.price,
-    vin: e.car?.vin,
-    plateNumber: e.car?.registrationNumber,
-    amount: e.amount,
-    buyerName: e.buyer?.name || 'Buyer',
-    buyerPhone: e.buyer?.phone,
-    buyerEmail: e.buyer?.email,
-    sellerName: e.seller?.name || 'Seller',
-    sellerPhone: e.seller?.phone,
-    sellerEmail: e.seller?.email,
-    sellerType: e.seller?.role === 'dealer' ? 'Verified Dealer' : 'Private Seller',
-    status: STATUS_LABELS[e.status] || e.status,
-    backendStatus: e.status,
-    fundedAt: e.fundedAt || undefined,
-    vehicleConfirmedAt: e.vehicleConfirmedAt || undefined,
-    deliveredAt: e.deliveredAt || undefined,
-    releasedAt: e.releasedAt || undefined,
-    closedAt: e.closedAt || undefined,
-    step: STATUS_STEP[e.status] ?? 0,
-    updatedAt: e.updatedAt,
-    depositDate: e.fundedAt || undefined,
-    bankReference: undefined,
-    vaultHolder: undefined,
-    whoControlsFunds: e.status === 'released' || e.status === 'closed' ? 'Released' : 'KAYAD Escrow (Neutral Hold)',
-    ...(e.status === 'disputed' || e.disputeWorkflowStatus ? {
-      dispute: {
-        id: e.id,
-        openedAt: e.disputedAt || e.updatedAt,
-        openedBy: e.disputedBy && String(e.disputedBy) === String(e.buyer?.id) ? 'Buyer' : 'Seller',
-        reason: e.disputeDescription || e.disputeReason || 'Dispute opened',
-        status: ({ open: 'Under Review', under_review: 'Under Review', mediation: 'Mediation In Progress', appealed: 'Evidence Gathering', resolved: e.status === 'refunded' ? 'Resolved - Refunded' : 'Resolved - Released', closed: 'Resolved - Released' } as const)[e.disputeWorkflowStatus || 'open'],
-        evidence: (e.disputeEvidence || []).map((item) => ({
-          title: item.fileName || item.type || 'Evidence file',
-          fileType: item.mimeType || item.type || 'unknown',
-          uploadedAt: item.createdAt || e.updatedAt,
-        })),
-        updates: (e.disputeTimeline || []).map((item, index) => ({
-          timestamp: item.at || e.updatedAt,
-          note: item.note || item.action || 'Dispute updated',
-          author: item.actor ? `${item.actor}${item.action ? ` — ${item.action}` : ''}` : item.action || `Update ${index + 1}`,
-        })),
-      },
-    } : {}),
+export interface OpsQueue { count: number; amount?: number; items: OpsEscrow[] }
+export interface OpsDashboard {
+  queues: Record<'funded' | 'vehicleConfirmed' | 'delivered' | 'released' | 'disputed', OpsQueue> & {
+    refunds: { count: number; items: Array<{ id: string; status: string; amount: number; escrow: string | null; createdAt?: string }> };
+    reconciliation: { count: number; items: Array<{ id: string; status: string; createdAt?: string; issueCount: number }> };
+    anomalies: { count: number; items: Array<{ id: string; category?: string; severity?: string; status: string; escrow: string | null; createdAt?: string; summary?: string }> };
   };
+  totals: { scope: 'platform'; currency: 'KES'; heldAmount: number; heldCount: number };
+  operator: { can: EscrowStaffCapabilities; role: string };
+  generatedAt: string;
 }
+export async function getOperationsDashboard(): Promise<OpsDashboard> {
+  return (await escrowFetch<{ data: OpsDashboard }>('/api/escrow/operations/dashboard')).data;
+}
+export async function getOperationsPending(): Promise<OpsEscrow[]> {
+  return (await escrowFetch<{ data: OpsEscrow[] }>('/api/escrow?status=pending&limit=25')).data || [];
+}
+export interface OpsCase {
+  escrow: OpsEscrow;
+  timeline: Array<{ id: string; action: string; actor: string; role?: string; timestamp: string; reason?: string | null; notes?: string | null }>;
+  anomalies: Array<{ id?: string; category?: string; severity?: string; status?: string; summary?: string }>;
+  reconciliation: Array<{ id?: string; status?: string; createdAt?: string }>;
+}
+export async function getOperationsCase(id: string): Promise<OpsCase> {
+  return (await escrowFetch<{ data: OpsCase }>(`/api/escrow/operations/case/${id}`)).data;
+}
+export const verifyFunding = (id: string, fundingReference: string) =>
+  escrowFetch(`/api/escrow/${id}/verify-funding`, { method: 'POST', body: JSON.stringify({ fundingReference }) });
+export const releaseEscrow = (id: string) => escrowFetch(`/api/escrow/${id}/release`, { method: 'POST' });
+export const refundEscrow = (id: string, reason: string) => escrowFetch(`/api/escrow/${id}/refund`, { method: 'POST', body: JSON.stringify({ reason }) });
+export const completeRefund = (id: string, refundId: string, providerReference: string, cashAccountCode: '1000' | '1200') =>
+  escrowFetch(`/api/escrow/${id}/refund/${refundId}/complete`, { method: 'POST', body: JSON.stringify({ providerReference, cashAccountCode }) });
+export const initiatePayout = (id: string) => escrowFetch(`/api/escrow/operations/case/${id}/payout`, { method: 'POST' });
+export const closeEscrow = (id: string, reason: string) => escrowFetch(`/api/escrow/${id}/close`, { method: 'POST', body: JSON.stringify({ reason }) });
+export const runReconciliation = () => escrowFetch('/api/escrow/operations/reconcile', { method: 'POST', body: JSON.stringify({}) });
+export const runAnomalyScan = () => escrowFetch('/api/escrow/operations/anomaly-scan', { method: 'POST', body: JSON.stringify({}) });

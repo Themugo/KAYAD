@@ -391,7 +391,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
         { step: 1, title: 'Escrow Agreement Initiated', description: 'Buyer accepted deal terms and inspection policy', status: 'completed', timestamp: 'Just now' },
         { step: 2, title: 'Buyer Funds Deposit', description: `Awaiting wire/card transfer of $${(price + fee).toLocaleString()}`, status: 'current' },
         { step: 3, title: 'Title & Lien Audit', description: 'KAYAD legal team verifies vehicle ownership and clear title', status: 'upcoming' },
-        { step: 4, title: 'Insured Transport Dispatch', description: 'Carrier collects vehicle from seller', status: 'upcoming' },
+        { step: 4, title: 'Collection and handover', description: 'Carrier collects vehicle from seller', status: 'upcoming' },
         { step: 5, title: 'Buyer Inspection Window', description: '48-Hour evaluation period before funds payout', status: 'upcoming' },
         { step: 6, title: 'Disbursement to Seller', description: 'Funds released from segregated escrow account', status: 'upcoming' }
       ],

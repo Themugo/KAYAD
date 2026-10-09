@@ -394,7 +394,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               Marketplace Transaction Communications Hub
             </h1>
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Every conversation remains strictly attached to its active vehicle transaction context — linking CBK escrow vaults, NTSA TIMS logbook verification, inspection records, and bank financing under one command console.
+              Every conversation remains strictly attached to its active vehicle transaction context — linking escrow records, NTSA TIMS logbook verification, inspection records, and bank financing under one command console.
             </p>
           </div>
         </div>
@@ -783,7 +783,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                                   }`}>
                                     <div className="flex justify-between items-center">
                                       <span className="font-black text-emerald-700 flex items-center gap-1.5">
-                                        <ShieldCheck className="w-4 h-4 text-emerald-600" /> CBK Vault Receipt Confirmed
+                                        <ShieldCheck className="w-4 h-4 text-emerald-600" /> Receipt confirmed
                                       </span>
                                       <Badge variant="success" size="sm">Locked</Badge>
                                     </div>
@@ -1037,7 +1037,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               {activeThread.escrowSummary && (
                 <div className="p-4 space-y-2">
                   <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#D96B43]" /> CBK Trustee Escrow Vault
+                    <ShieldCheck className="w-4 h-4 text-[#D96B43]" /> Escrow record
                   </h4>
                   <div className="p-3 bg-[#D96B43]/10 border border-[#D96B43]/30 rounded-xl space-y-1.5">
                     <div className="flex justify-between text-xs">

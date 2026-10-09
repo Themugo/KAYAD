@@ -116,7 +116,7 @@ function AppInner() {
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
-  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create'>('journey');
+  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create' | 'operations'>('journey');
   const [escrowLaunchNonce, setEscrowLaunchNonce] = useState(0);
   const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -413,7 +413,7 @@ function AppInner() {
     }
     if (nav.startsWith('escrow:')) {
       const tab = nav.slice('escrow:'.length);
-      setEscrowLaunchTab(tab === 'create' || tab === 'deals' ? tab : 'journey');
+      setEscrowLaunchTab(tab === 'create' || tab === 'deals' || tab === 'operations' ? tab : 'journey');
       setEscrowLaunchNonce((n) => n + 1);
       setActiveNav('escrow');
       return;
@@ -526,6 +526,7 @@ function AppInner() {
               user={user}
               onOpenAuth={handleOpenAuth}
               initialTab={escrowLaunchTab}
+              onNavigate={handleNavClick}
             />
           )}
 

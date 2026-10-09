@@ -112,7 +112,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
             badgeIcon={<Building2 className="w-4 h-4 text-amber-500" />}
             badgeText="Verified Seller & Dealership Directory"
             title="Trusted Showrooms & Verified Private Sellers"
-            description="Every enterprise dealership and private individual seller on KAYAD is 100% verified with KRA tax compliance, NTSA TIMS logbook audits, and bank-secured Escrow Vault protection."
+            description="Every enterprise dealership and private individual seller on KAYAD is verified by KAYAD, with escrow available on approved listings."
             rightElement={
               <Badge variant="success" size="md">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" /> 100% Audited Sellers

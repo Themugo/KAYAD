@@ -1045,7 +1045,7 @@ export const VehicleDetailPage: FC = () => {
                   <span>Buy Now via M-Pesa Escrow</span>
                 </button>
                 <p className="text-[11px] text-[#66808A] text-center leading-normal font-medium">
-                  Protected by M-Pesa Regulated Escrow. Funds released only after 48-hr buyer inspection.
+                  Escrow applies only where this listing shows the Escrow badge. Release timing is set per deal.
                 </p>
               </div>
             )}

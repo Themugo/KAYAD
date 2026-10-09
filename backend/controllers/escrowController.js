@@ -27,6 +27,7 @@ import {
 import { STATES, getAllowedTransitions } from "../services/escrowStateMachine.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { toIdString, isEscrowParty, isEscrowBuyer, isEscrowSeller, canViewEscrow, canViewAnyEscrow, canActAsEscrowAdmin } from "../utils/escrowAccess.js";
+import { projectEscrowForViewer, summarizeForViewer, canRequestRelease } from "../utils/escrowViewModel.js";
 
 // =============================
 // 📄 GET ALL (ADMIN)
@@ -81,14 +82,20 @@ export const getAllEscrows = async (req, res) => {
 // =============================
 export const getUserEscrows = async (req, res) => {
   try {
+    // Field lists are deliberate: an unrestricted populate returned the other
+    // party's whole user row. The projector below is the second line of
+    // defence and the only shape the browser ever receives.
     const escrows = await Escrow.find({
       $or: [{ buyer: req.user.id }, { seller: req.user.id }],
     })
       .sort({ createdAt: -1 })
-      .populate("car buyer seller payment")
+      .populate("car", "title images price vin registrationNumber")
+      .populate("buyer", "name")
+      .populate("seller", "name businessName")
       .lean();
 
-    res.json({ success: true, data: escrows });
+    const data = escrows.map((e) => projectEscrowForViewer(e, req.user));
+    res.json({ success: true, data, summary: summarizeForViewer(data) });
   } catch (err) {
     logError("USER ESCROW ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
@@ -101,7 +108,10 @@ export const getUserEscrows = async (req, res) => {
 export const getEscrowById = async (req, res) => {
   try {
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
-    const escrow = await Escrow.findById(req.params.id).populate("car buyer seller payment");
+    const escrow = await Escrow.findById(req.params.id)
+      .populate("car", "title images price vin registrationNumber")
+      .populate("buyer", "name")
+      .populate("seller", "name businessName");
 
     if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
 
@@ -111,7 +121,7 @@ export const getEscrowById = async (req, res) => {
 
     const allowedTransitions = getAllowedTransitions(escrow.status);
 
-    res.json({ success: true, data: { ...escrow.toObject(), allowedTransitions } });
+    res.json({ success: true, data: { ...projectEscrowForViewer(escrow, req.user), allowedTransitions } });
   } catch (err) {
     logError("GET ESCROW ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
@@ -225,11 +235,19 @@ export const requestRelease = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
+    // A release request only means something once the buyer has accepted the
+    // vehicle. Anything earlier (pending/funded) or later (released, refunded,
+    // closed, disputed) used to be written into the audit history anyway.
+    if (!canRequestRelease(escrow)) {
+      return res.status(409).json({ success: false, message: `A release request is not available while the escrow is ${escrow.status}` });
+    }
+
     escrow.history.push({ action: "Buyer requested release", by: req.user.id, at: new Date() });
     await escrow.save();
 
+    // Staff only. This used to be a broadcast to every connected socket.
     if (getIO()) {
-      getIO().emit("adminAlert", {
+      getIO().to("admins").emit("adminAlert", {
         type: "escrow_release_requested",
         message: `Buyer requested release of escrow KES ${Number(escrow.amount).toLocaleString("en-KE")} for ${escrow.car?.title || "vehicle"}`,
         escrowId: escrow._id, severity: "info",

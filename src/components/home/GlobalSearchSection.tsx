@@ -242,7 +242,7 @@ export const GlobalSearchSection: FC = () => {
         <div className="flex items-center justify-between text-[11px] text-slate-300 pt-1 font-sans">
           <div className="flex items-center gap-1.5 text-[#13B8A6]">
             <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
-            <span className="font-mono font-bold">100% Verified Inventory • CBK Bank Escrow Protected</span>
+            <span className="font-mono font-bold">Escrow available on approved listings</span>
           </div>
           <span className="hidden sm:inline text-slate-400 font-mono">
             Directly linked to KRA & NTSA verification systems

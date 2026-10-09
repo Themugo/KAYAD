@@ -27,7 +27,7 @@ export const EscrowTrustBanner: FC = () => {
     {
       step: '02',
       title: 'Segregated Deposit',
-      desc: 'Buyer wires funds into KAYAD regulated CBK-licensed bank escrow account.',
+      desc: 'Buyer pays using the funding method shown for the deal; KAYAD marks it funded once it verifies receipt.',
       icon: <Lock className="w-5 h-5 text-[#176B87] group-hover:text-white transition-colors" />
     },
     {
@@ -38,8 +38,8 @@ export const EscrowTrustBanner: FC = () => {
     },
     {
       step: '04',
-      title: 'Insured Transport',
-      desc: 'Enclosed carrier shipping dispatched with live GPS tracking to buyer.',
+      title: 'Collection & handover',
+      desc: 'Collection and handover are arranged between buyer and seller.',
       icon: <Truck className="w-5 h-5 text-[#176B87] group-hover:text-white transition-colors" />
     },
     {
@@ -65,7 +65,7 @@ export const EscrowTrustBanner: FC = () => {
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 border border-[#176B87]/20 text-[#176B87] font-mono font-black text-xs uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4 text-[#13B8A6]" />
-              <span>MULTI-SIGNATURE ESCROW VAULT</span>
+              <span>ESCROW ON APPROVED LISTINGS</span>
             </div>
 
             <h2 className="text-2xl sm:text-4xl font-black text-[#176B87] font-serif tracking-tight leading-tight">
@@ -73,7 +73,7 @@ export const EscrowTrustBanner: FC = () => {
             </h2>
 
             <p className="text-xs sm:text-sm text-[#66808A] font-sans font-medium leading-relaxed">
-              Your funds remain 100% protected in CBK-regulated bank escrow until you physically inspect and approve the vehicle.
+              Where escrow applies, KAYAD records your payment as held until you inspect and accept the vehicle or a dispute is decided.
             </p>
           </div>
 
@@ -126,7 +126,7 @@ export const EscrowTrustBanner: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">Regulated Custody</p>
-              <p className="text-[10px] text-slate-300 font-sans">CBK Licensed Bank Accounts</p>
+              <p className="text-[10px] text-slate-300 font-sans">Funding verified by KAYAD</p>
             </div>
           </div>
 
@@ -155,8 +155,8 @@ export const EscrowTrustBanner: FC = () => {
               <Award className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">100% Protection</p>
-              <p className="text-[10px] text-slate-300 font-sans">Buyer Money-Back Guarantee</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Dispute process</p>
+              <p className="text-[10px] text-slate-300 font-sans">Refunds only if staff approve one</p>
             </div>
           </div>
 

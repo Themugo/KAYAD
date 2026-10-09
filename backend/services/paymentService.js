@@ -17,7 +17,20 @@ const formatPhone = (phone) => {
 };
 
 // ── INITIATE ─────────────────────────────────────────────────
-export const initiatePayment = async ({ userId, carId, type, amount, phone, metadata = {} }) => {
+export const initiatePayment = async ({ userId, carId, type, amount, phone, metadata: suppliedMetadata = {} }) => {
+  // Freeze the escrow decision at the moment the buyer is shown the price. The
+  // settlement RPC (kayad_settle_purchase_payment_atomic) reads this instead of
+  // the raw cars.escrow_enabled column, so the vehicle badge, the platform
+  // switch and the seller's current capability (computeEffectiveEscrowEnabled)
+  // are what decides whether a purchase is escrow-protected — not whatever the
+  // column holds minutes later when the callback arrives.
+  let metadata = suppliedMetadata;
+  if (type === "purchase" && carId && metadata.escrowEligible === undefined) {
+    const { getEffectiveEscrowForCar } = await import("./escrowCapability.service.js");
+    const car = await findById("cars", carId, "escrowEnabled,dealer");
+    const escrowEligible = car ? await getEffectiveEscrowForCar({ carEscrowEnabled: car.escrowEnabled, sellerId: car.dealer }) : false;
+    metadata = { ...metadata, escrowEligible };
+  }
   const formattedPhone = formatPhone(phone);
   if (!formattedPhone) return { success: false, message: "Invalid Safaricom number" };
 

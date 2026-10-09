@@ -36,6 +36,10 @@ const notify = async (userId, title, message, type = "escrow") => {
   }
 };
 
+// NOTE: the delivered-state filters below query `deliveredAt`. They used to
+// query `deliveryConfirmedAt`, a column that does not exist; PostgREST rejects
+// that, findAll() throws, and the throw aborted runDisputeWarnings() before
+// runAutoRelease() was ever reached, so neither ran.
 // ── AUTO-RELEASE ────────────────────────────────────────────
 const runAutoRelease = async () => {
   const cutoff = new Date(Date.now() - RELEASE_DAYS * 86_400_000).toISOString();
@@ -45,7 +49,7 @@ const runAutoRelease = async () => {
     filters: { status: [STATES.FUNDED, STATES.VEHICLE_CONFIRMED], createdAt: { $lte: cutoff } },
   });
   const delivered = await findAll("escrows", {
-    filters: { status: STATES.DELIVERED, deliveryConfirmedAt: { $lte: deliverCutoff } },
+    filters: { status: STATES.DELIVERED, deliveredAt: { $lte: deliverCutoff } },
   });
   const stale = [...funded, ...delivered];
 
@@ -74,7 +78,10 @@ const runAutoRelease = async () => {
           `Your escrow for ${carTitle} was automatically released after ${RELEASE_DAYS} days. Deal complete.`);
       }
 
-      getIO()?.emit("escrowReleased", { escrowId: escrow.id, amount: escrow.amount, autoReleased: true });
+      // Parties only (this was a broadcast to every connected socket, with the amount).
+      for (const userId of [escrow.buyer, escrow.seller].filter(Boolean)) {
+        getIO()?.to(`user_${userId}`).emit("escrowReleased", { escrowId: escrow.id, amount: escrow.amount, autoReleased: true });
+      }
       logInfo("Auto-released escrow", { escrowId: escrow.id, amount: escrow.amount });
     } catch (err) {
       logError("Auto-release failed", err, { escrowId: escrow.id });
@@ -91,7 +98,7 @@ const runDisputeWarnings = async () => {
     filters: { status: [STATES.FUNDED, STATES.VEHICLE_CONFIRMED], createdAt: { $lte: warningDate }, warningSent: { $ne: true } },
   });
   const delivered = await findAll("escrows", {
-    filters: { status: STATES.DELIVERED, deliveryConfirmedAt: { $lte: deliverWarningDate }, warningSent: { $ne: true } },
+    filters: { status: STATES.DELIVERED, deliveredAt: { $lte: deliverWarningDate }, warningSent: { $ne: true } },
   });
   const approaching = [...funded, ...delivered];
 
