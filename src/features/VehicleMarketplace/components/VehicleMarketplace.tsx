@@ -1046,7 +1046,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
 
               <div className="relative pb-4 pt-4 lg:hidden" aria-label="KAYAD mobile hero">
-                <div className="rounded-[26px] border border-white/70 bg-white/95 px-5 py-5 text-center shadow-[0_24px_55px_rgba(3,19,27,.20)] backdrop-blur-xl">
+                <div className="mx-auto w-full max-w-[460px] rounded-[26px] border border-white/70 bg-white/95 px-4 py-4 text-center shadow-[0_24px_55px_rgba(3,19,27,.20)] backdrop-blur-xl min-[390px]:px-5 min-[390px]:py-5">
                   <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-navy-600"><span className="h-1.5 w-1.5 rounded-full bg-[var(--kayad-cyan)]" />{heroEyebrowDisplay}</span>
                   <h1 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.45rem)] font-black leading-[1.02] tracking-[-.045em] text-navy-900">{heroHeadlineNode}</h1>
                   <p className="mx-auto mt-2.5 max-w-[320px] text-[13px] font-medium leading-5 text-[#58717B]">{heroSupportCopy}</p>

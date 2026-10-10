@@ -26,6 +26,7 @@ describe('buildAuthPath / loginPathFor', () => {
   it('encodes next and intent', () => {
     expect(buildAuthPath('register', { next: '/sell?x=1', intent: 'seller' })).toBe('/register?next=%2Fsell%3Fx%3D1&intent=seller');
     expect(loginPathFor({ pathname: '/auctions/1', search: '?a=b' })).toBe('/login?next=%2Fauctions%2F1%3Fa%3Db');
+    expect(loginPathFor({ pathname: '/', search: '?nav=chat' })).toBe('/login?next=%2F%3Fnav%3Dchat');
   });
   it('never emits an external next', () => {
     expect(buildAuthPath('login', { next: 'https://evil.example' })).toBe('/login');
