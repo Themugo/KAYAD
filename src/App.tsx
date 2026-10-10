@@ -13,6 +13,7 @@ import OnboardingFlow from './components/OnboardingFlow';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForcePasswordChange from './pages/ForcePasswordChange';
+import NotificationsPage from './pages/NotificationsPage';
 import DealerOnboarding from './pages/dealer/DealerOnboarding';
 import DealerAuctionSetupWizard from './pages/dealer/DealerAuctionSetupWizard';
 import DealerAuctionOperations from './pages/dealer/DealerAuctionOperations';
@@ -770,6 +771,10 @@ function AuthRouteSurface() {
   // real <Route path="/auction/:id"> would behave.
   if (path.startsWith('/auction/')) return <AuctionLivePage key={path} />;
   if (path === '/force-password-change') return <ForcePasswordChange />;
+  // All notification entry points use this canonical authenticated destination.
+  // Previously /notifications had no route, while the panel's 'View All' sent
+  // users to /dashboard; that protected dashboard route redirected to /login.
+  if (path === '/notifications') return <RequireAuth><NotificationsPage /></RequireAuth>;
 
   // Canonicalize legacy/direct routes into the single AppInner navigation
   // surface. This prevents stale links such as /gallery, /auction, /escrow,

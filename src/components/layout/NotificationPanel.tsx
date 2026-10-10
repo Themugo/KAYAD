@@ -122,12 +122,12 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
         <div className="p-3 border-t border-[#D7E7E4] dark:border-[#0A3340] text-center bg-[#EEF7F5]/50 dark:bg-[#0A3340]/50">
           <button
             onClick={() => {
-              navigate('/dashboard');
+              navigate('/notifications');
               onClose();
             }}
             className="text-xs font-semibold text-[#13b8a6] hover:text-[#13b8a6] inline-flex items-center gap-1"
           >
-            <span>View All Activity in Dashboard</span>
+            <span>View All Notifications</span>
             <ExternalLink className="w-3 h-3" />
           </button>
         </div>
