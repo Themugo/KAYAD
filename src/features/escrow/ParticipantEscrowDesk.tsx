@@ -16,9 +16,9 @@ type Load =
 type Filter = 'all' | 'needs_action' | 'in_progress' | 'settled';
 
 const TONE_CLASS: Record<Tone, string> = {
-  neutral: 'bg-slate-100 text-slate-700 border-slate-200',
-  progress: 'bg-sky-50 text-sky-800 border-sky-200',
-  attention: 'bg-amber-50 text-amber-900 border-amber-200',
+  neutral: 'bg-[#EEF7F5] text-[#12576D] border-[#D7E7E4]',
+  progress: 'bg-[#F3FAF9] text-[#0E4655] border-[#D7E7E4]',
+  attention: 'bg-[#F3FAF9] text-[#0A3340] border-[#BDE5DE]',
   success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   danger: 'bg-red-50 text-red-800 border-red-200',
 };
@@ -46,16 +46,16 @@ const errorText = (err: unknown): { message: string; kind: EscrowApiError['kind'
 };
 
 const SummaryCard: React.FC<{ label: string; value: string; hint?: string }> = ({ label, value, hint }) => (
-  <div className="rounded-xl border border-slate-200 bg-white p-4">
-    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-    <p className="mt-1 text-xl font-semibold text-slate-900">{value}</p>
-    {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
+  <div className="rounded-xl border border-[#D7E7E4] bg-white p-4">
+    <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">{label}</p>
+    <p className="mt-1 text-xl font-semibold text-[#0A3340]">{value}</p>
+    {hint && <p className="mt-1 text-xs text-[#64748B]">{hint}</p>}
   </div>
 );
 
 const SummarySkeleton: React.FC = () => (
   <div className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-hidden="true" data-testid="escrow-summary-skeleton">
-    {[0, 1, 2, 3].map((i) => <div key={i} className="h-20 rounded-xl border border-slate-200 bg-slate-100 motion-safe:animate-pulse" />)}
+    {[0, 1, 2, 3].map((i) => <div key={i} className="h-20 rounded-xl border border-[#D7E7E4] bg-[#EEF7F5] motion-safe:animate-pulse" />)}
   </div>
 );
 
@@ -141,8 +141,8 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
   return (
     <section aria-labelledby="my-deals-heading" className="space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 id="my-deals-heading" className="text-lg font-semibold text-slate-900">My escrow deals</h2>
-        <button type="button" onClick={() => void refresh()} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
+        <h2 id="my-deals-heading" className="text-lg font-semibold text-[#0A3340]">My escrow deals</h2>
+        <button type="button" onClick={() => void refresh()} className="inline-flex items-center gap-1.5 rounded-lg border border-[#D7E7E4] px-3 py-1.5 text-sm text-[#12576D] hover:bg-[#F6FAF9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">
           <RefreshCw className="h-4 w-4" aria-hidden="true" /> Refresh
         </button>
       </div>
@@ -166,11 +166,11 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
       )}
 
       {load.status === 'ready' && deals.length === 0 && (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center" data-testid="escrow-empty">
-          <p className="font-medium text-slate-900">You have no escrow deals yet.</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">An escrow starts when a vehicle and seller that KAYAD has approved for escrow are bought through KAYAD. If a listing does not show the Escrow badge, it is not escrow-protected.</p>
-          {onNavigate && <button type="button" onClick={() => onNavigate('marketplace')} className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">Browse vehicles</button>}
-          <p className="mx-auto mt-4 max-w-md text-xs text-slate-500">Dealer team members: deals are currently visible only to the account that owns them, not to its team members.</p>
+        <div className="rounded-xl border border-dashed border-[#BDE5DE] bg-white p-8 text-center" data-testid="escrow-empty">
+          <p className="font-medium text-[#0A3340]">You have no escrow deals yet.</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-[#64748B]">An escrow starts when a vehicle and seller that KAYAD has approved for escrow are bought through KAYAD. If a listing does not show the Escrow badge, it is not escrow-protected.</p>
+          {onNavigate && <button type="button" onClick={() => onNavigate('marketplace')} className="mt-4 rounded-lg bg-[#0A3340] px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">Browse vehicles</button>}
+          <p className="mx-auto mt-4 max-w-md text-xs text-[#64748B]">Dealer team members: deals are currently visible only to the account that owns them, not to its team members.</p>
         </div>
       )}
 
@@ -180,23 +180,23 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
             <div role="group" aria-label="Filter deals" className="mb-3 flex flex-wrap gap-2">
               {FILTERS.map((f) => (
                 <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}
-                  className={`rounded-full border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${filter === f.id ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}>
+                  className={`rounded-full border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4] ${filter === f.id ? 'border-[#0A3340] bg-[#0A3340] text-white' : 'border-[#D7E7E4] bg-white text-[#12576D]'}`}>
                   {f.label}
                 </button>
               ))}
             </div>
-            {visible.length === 0 ? <p className="text-sm text-slate-600">No deals match this filter.</p> : (
+            {visible.length === 0 ? <p className="text-sm text-[#64748B]">No deals match this filter.</p> : (
               <ul className="space-y-2">
                 {visible.map((d) => (
                   <li key={d.id}>
                     <button type="button" onClick={() => select(d.id)} aria-current={selectedId === d.id ? 'true' : undefined}
-                      className={`w-full rounded-xl border p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${selectedId === d.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white hover:bg-slate-50'}`}>
+                      className={`w-full rounded-xl border p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4] ${selectedId === d.id ? 'border-[#0A3340] bg-[#F6FAF9]' : 'border-[#D7E7E4] bg-white hover:bg-[#F6FAF9]'}`}>
                       <div className="flex items-start justify-between gap-2">
-                        <span className="font-medium text-slate-900">{d.car?.title || 'Vehicle'}</span>
+                        <span className="font-medium text-[#0A3340]">{d.car?.title || 'Vehicle'}</span>
                         <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs ${TONE_CLASS[STATUS_TONE[d.status]]}`}>{STATUS_LABEL[d.status]}</span>
                       </div>
-                      <p className="mt-1 text-sm text-slate-600">{formatKes(d.amount)} · you are the {d.viewerRole}</p>
-                      {needsAction(d) && <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-amber-800"><Clock className="h-3 w-3" aria-hidden="true" /> Needs your action</p>}
+                      <p className="mt-1 text-sm text-[#64748B]">{formatKes(d.amount)} · you are the {d.viewerRole}</p>
+                      {needsAction(d) && <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-[#0A3340]"><Clock className="h-3 w-3" aria-hidden="true" /> Needs your action</p>}
                     </button>
                   </li>
                 ))}
@@ -205,8 +205,8 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
           </div>
 
           <div aria-live="polite">
-            {unknownLink && <p role="status" data-testid="escrow-unknown-link" className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">The deal in that link is not one of your deals, or no longer exists. Pick one from your list.</p>}
-            {!selected && <p className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600">Select a deal to see where it stands and what you can do.</p>}
+            {unknownLink && <p role="status" data-testid="escrow-unknown-link" className="mb-3 rounded-lg border border-[#BDE5DE] bg-[#F3FAF9] p-3 text-sm text-[#0A3340]">The deal in that link is not one of your deals, or no longer exists. Pick one from your list.</p>}
+            {!selected && <p className="rounded-xl border border-[#D7E7E4] bg-white p-6 text-sm text-[#64748B]">Select a deal to see where it stands and what you can do.</p>}
             {selected && <DealDetail deal={selected} funding={funding?.id === selected.id ? funding : null} copied={copied}
               notice={notice} onLoadFunding={() => void loadFunding(selected.id)} onCopy={copyRef} onEvidenceUploaded={() => void refresh(true)}
               onAction={(a) => { setActionError(null); setReason(''); setPending(a); }} />}
@@ -227,16 +227,16 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
         confirmDisabled={reason.trim().length < 10}
         description="Opening a dispute stops release and refund until KAYAD staff decide. Describe what is wrong (at least 10 characters)."
         onConfirm={() => void runAction()} onClose={() => { if (!busy) setPending(null); }}>
-        <label className="mt-3 block text-sm font-medium text-slate-800" htmlFor="dispute-reason">What is the problem?</label>
+        <label className="mt-3 block text-sm font-medium text-[#0A3340]" htmlFor="dispute-reason">What is the problem?</label>
         <textarea id="dispute-reason" value={reason} onChange={(e) => setReason(e.target.value)} rows={4}
-          className="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500" />
+          className="mt-1 w-full rounded-lg border border-[#BDE5DE] p-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]" />
       </ActionDialog>
     </section>
   );
 };
 
 const Fact: React.FC<{ label: string; value?: string | null }> = ({ label, value }) => value ? (
-  <div><dt className="text-xs uppercase tracking-wide text-slate-500">{label}</dt><dd className="text-sm text-slate-900">{value}</dd></div>
+  <div><dt className="text-xs uppercase tracking-wide text-[#64748B]">{label}</dt><dd className="text-sm text-[#0A3340]">{value}</dd></div>
 ) : null;
 
 interface DetailProps {
@@ -259,10 +259,10 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
   const other = role === 'buyer' ? deal.seller : deal.buyer;
 
   return (
-    <article className="space-y-4 rounded-xl border border-slate-200 bg-white p-5" aria-labelledby="deal-title">
+    <article className="space-y-4 rounded-xl border border-[#D7E7E4] bg-white p-5" aria-labelledby="deal-title">
       <header>
-        <h3 id="deal-title" className="text-base font-semibold text-slate-900">{deal.car?.title || 'Vehicle'}</h3>
-        <p className="text-sm text-slate-600">{formatKes(deal.amount)} · {STATUS_LABEL[deal.status]}</p>
+        <h3 id="deal-title" className="text-base font-semibold text-[#0A3340]">{deal.car?.title || 'Vehicle'}</h3>
+        <p className="text-sm text-[#64748B]">{formatKes(deal.amount)} · {STATUS_LABEL[deal.status]}</p>
       </header>
 
       {notice && <p role="status" className="flex items-center gap-2 rounded-lg bg-emerald-50 p-2 text-sm text-emerald-800"><CheckCircle2 className="h-4 w-4" aria-hidden="true" />{notice}</p>}
@@ -276,10 +276,10 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
       <ol className="space-y-1" aria-label="Deal progress">
         {steps.map((s) => (
           <li key={s.key} className="flex items-center gap-2 text-sm" aria-current={s.state === 'current' ? 'step' : undefined}>
-            <span className={`h-2.5 w-2.5 rounded-full ${s.state === 'done' ? 'bg-emerald-500' : s.state === 'current' ? 'bg-sky-500' : 'bg-slate-300'}`} aria-hidden="true" />
-            <span className={s.state === 'upcoming' ? 'text-slate-500' : 'text-slate-900'}>{s.label}</span>
+            <span className={`h-2.5 w-2.5 rounded-full ${s.state === 'done' ? 'bg-emerald-500' : s.state === 'current' ? 'bg-[#13B8A6]' : 'bg-[#BDE5DE]'}`} aria-hidden="true" />
+            <span className={s.state === 'upcoming' ? 'text-[#64748B]' : 'text-[#0A3340]'}>{s.label}</span>
             <span className="sr-only">{s.state === 'done' ? '(done)' : s.state === 'current' ? '(current)' : '(upcoming)'}</span>
-            {s.at && <span className="text-xs text-slate-500">{formatDate(s.at)}</span>}
+            {s.at && <span className="text-xs text-[#64748B]">{formatDate(s.at)}</span>}
           </li>
         ))}
       </ol>
@@ -295,13 +295,13 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
       </dl>
 
       {canSeeFunding && (
-        <div className="rounded-lg border border-slate-200 p-3">
-          <p className="text-sm font-medium text-slate-900">How to pay</p>
-          {!funding && <button type="button" onClick={onLoadFunding} className="mt-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">Show payment instructions</button>}
-          {funding?.state === 'loading' && <p className="mt-2 flex items-center gap-2 text-sm text-slate-600"><Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />Loading…</p>}
+        <div className="rounded-lg border border-[#D7E7E4] p-3">
+          <p className="text-sm font-medium text-[#0A3340]">How to pay</p>
+          {!funding && <button type="button" onClick={onLoadFunding} className="mt-2 rounded-lg border border-[#BDE5DE] px-3 py-1.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">Show payment instructions</button>}
+          {funding?.state === 'loading' && <p className="mt-2 flex items-center gap-2 text-sm text-[#64748B]"><Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />Loading…</p>}
           {funding?.state === 'error' && <p role="alert" className="mt-2 text-sm text-red-700">{funding.message}</p>}
           {funding?.state === 'ready' && funding.data && (
-            <div className="mt-2 space-y-1 text-sm text-slate-800">
+            <div className="mt-2 space-y-1 text-sm text-[#0A3340]">
               {funding.data.account ? (
                 <>
                   <p>Pay {formatKes(funding.data.amount)} to {funding.data.account.accountName} — {funding.data.account.bankName}{funding.data.account.branch ? `, ${funding.data.account.branch}` : ''}</p>
@@ -309,8 +309,8 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
                 </>
               ) : <p>No payment account is available for this deal yet. Contact KAYAD support.</p>}
               <p className="flex items-center gap-2">Reference: <span className="font-mono">{funding.data.reference}</span>
-                <button type="button" onClick={() => onCopy(funding.data!.reference)} className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-0.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"><Copy className="h-3 w-3" aria-hidden="true" />{copied ? 'Copied' : 'Copy'}</button></p>
-              <p className="text-xs text-slate-500">Your deal shows as funded only after KAYAD verifies the transfer.</p>
+                <button type="button" onClick={() => onCopy(funding.data!.reference)} className="inline-flex items-center gap-1 rounded border border-[#BDE5DE] px-2 py-0.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]"><Copy className="h-3 w-3" aria-hidden="true" />{copied ? 'Copied' : 'Copy'}</button></p>
+              <p className="text-xs text-[#64748B]">Your deal shows as funded only after KAYAD verifies the transfer.</p>
             </div>
           )}
         </div>
@@ -320,13 +320,13 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
         <div className="flex flex-wrap gap-2" role="group" aria-label="Actions available to you">
           {actions.map((a) => (
             <button key={a} type="button" onClick={() => onAction(a)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${a === 'open_dispute' ? 'border border-red-300 text-red-700 hover:bg-red-50' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+              className={`rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4] ${a === 'open_dispute' ? 'border border-red-300 text-red-700 hover:bg-red-50' : 'bg-[#0A3340] text-white hover:bg-[#12576D]'}`}>
               {ACTION_LABEL[a]}
             </button>
           ))}
         </div>
       )}
-      {actions.length === 0 && story.waitingOn !== 'none' && <p className="text-sm text-slate-600">Nothing for you to do right now.</p>}
+      {actions.length === 0 && story.waitingOn !== 'none' && <p className="text-sm text-[#64748B]">Nothing for you to do right now.</p>}
 
       {deal.status === 'disputed' || deal.disputedAt ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-900">
@@ -336,7 +336,7 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
             <ul className="mt-2 list-disc pl-5">{deal.disputeEvidence!.map((e, i) => <li key={i}>{e.fileName || e.type || 'Evidence'}{e.verified ? ' (verified)' : ''}</li>)}</ul>
           )}
           {deal.status === 'disputed' && (
-            <div className="mt-3 rounded-lg bg-white p-3 text-slate-900">
+            <div className="mt-3 rounded-lg bg-white p-3 text-[#0A3340]">
               {/* The dispute is stored on the escrow row, so the escrow id is the dispute id. */}
               <EvidenceUpload disputeId={deal.id} onUploaded={onEvidenceUploaded} />
             </div>

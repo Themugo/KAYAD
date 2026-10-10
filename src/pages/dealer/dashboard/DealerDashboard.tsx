@@ -21,12 +21,12 @@ const colors = {
   beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
-  terracotta: '#C77B58',
-  softBlue: '#60A5FA',
-  mutedOrange: '#FB923C',
+  terracotta: '#5aafa4',
+  softBlue: '#5AAFA4',
+  mutedOrange: '#13b8a6',
   mutedCrimson: '#EF4444',
-  purple: '#8B5CF6',
-  amber: '#F59E0B',
+  purple: '#5aafa4',
+  amber: '#176b87',
 };
 
 // ============================================================
@@ -47,11 +47,11 @@ type DealerOperationResponse = {
 type StatCardProps = { title: string; value: React.ReactNode; change?: number; icon: React.ElementType; color?: string };
 
 const StatCard = ({ title, value, change, icon: Icon, color = colors.navy }: StatCardProps) => (
-  <div className="bg-white rounded-xl border border-slate-100 p-5 hover:shadow-md transition-shadow">
+  <div className="bg-white rounded-xl border border-[#D7E7E4] p-5 hover:shadow-md transition-shadow">
     <div className="flex items-start justify-between">
       <div>
-        <p className="text-sm text-slate-500 mb-1">{title}</p>
-        <p className="text-2xl font-bold text-slate-800">{value}</p>
+        <p className="text-sm text-[#64748B] mb-1">{title}</p>
+        <p className="text-2xl font-bold text-[#0A3340]">{value}</p>
         {change !== undefined && (
           <div className={`flex items-center gap-1 mt-2 ${change >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
             {change >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
@@ -68,13 +68,13 @@ const StatCard = ({ title, value, change, icon: Icon, color = colors.navy }: Sta
 
 /** Lead Pipeline Stage */
 const PipelineStage = ({ stage, count, value, color }: { stage: string; count: number; value?: number; color: string }) => (
-  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100">
+  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-[#D7E7E4]">
     <div className="flex items-center gap-3">
       <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: color }} />
-      <span className="font-medium text-slate-700">{stage}</span>
+      <span className="font-medium text-[#12576D]">{stage}</span>
     </div>
     <div className="text-right">
-      <p className="font-bold text-slate-800">{count}</p>
+      <p className="font-bold text-[#0A3340]">{count}</p>
     </div>
   </div>
 );
@@ -88,7 +88,7 @@ const QuickAction = ({ icon: Icon, label, color, onClick }) => (
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} bg-opacity-10`}>
       <Icon className="w-6 h-6" style={{ color }} />
     </div>
-    <span className="text-sm font-medium text-slate-700">{label}</span>
+    <span className="text-sm font-medium text-[#12576D]">{label}</span>
   </button>
 );
 
@@ -101,13 +101,13 @@ const ActivityItem = ({ type, message, time, icon: Icon }) => {
     listing: colors.purple,
   };
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
+    <div className="flex items-start gap-3 py-3 border-b border-[#D7E7E4] last:border-0">
       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0`} style={{ backgroundColor: `${typeColors[type]}20` }}>
         <Icon className="w-4 h-4" style={{ color: typeColors[type] }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-slate-700">{message}</p>
-        <p className="text-xs text-slate-400 mt-1">{time}</p>
+        <p className="text-sm text-[#12576D]">{message}</p>
+        <p className="text-xs text-[#94A3B8] mt-1">{time}</p>
       </div>
     </div>
   );
@@ -115,36 +115,36 @@ const ActivityItem = ({ type, message, time, icon: Icon }) => {
 
 /** Top Vehicle Card */
 const TopVehicle = ({ vehicle, rank }) => (
-  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100">
-    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
+  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-[#D7E7E4]">
+    <div className="w-8 h-8 rounded-full bg-[#EEF7F5] flex items-center justify-center font-bold text-[#64748B]">
       {rank}
     </div>
-    <div className="w-12 h-12 bg-slate-100 rounded-lg flex-shrink-0">
-      <Car className="w-6 h-6 text-slate-400 m-auto" />
+    <div className="w-12 h-12 bg-[#EEF7F5] rounded-lg flex-shrink-0">
+      <Car className="w-6 h-6 text-[#94A3B8] m-auto" />
     </div>
     <div className="flex-1 min-w-0">
-      <p className="font-medium text-slate-800 truncate">{vehicle.title}</p>
-      <div className="flex items-center gap-3 text-xs text-slate-500">
+      <p className="font-medium text-[#0A3340] truncate">{vehicle.title}</p>
+      <div className="flex items-center gap-3 text-xs text-[#64748B]">
         <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{vehicle.views}</span>
         <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{vehicle.leads}</span>
       </div>
     </div>
     <div className="text-right">
-      <p className="font-bold text-slate-800">Ksh {(vehicle.price / 1000000).toFixed(1)}M</p>
+      <p className="font-bold text-[#0A3340]">Ksh {(vehicle.price / 1000000).toFixed(1)}M</p>
     </div>
   </div>
 );
 
 /** AI Copilot */
 const AICopilot = () => (
-  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-    <div className="p-4 bg-gradient-to-r from-purple-600 to-purple-500 text-white">
+  <div className="bg-white rounded-xl border border-[#D7E7E4] overflow-hidden">
+    <div className="p-4 bg-gradient-to-r from-[#176B87] to-[#13B8A6] text-white">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Bot className="w-5 h-5" /></div>
-        <div><h3 className="font-bold">AI Dealer Copilot</h3><p className="text-xs text-purple-100">KAYAD Intelligence</p></div>
+        <div><h3 className="font-bold">AI Dealer Copilot</h3><p className="text-xs text-[#DDF4F0]">KAYAD Intelligence</p></div>
       </div>
     </div>
-    <div className="p-6 text-sm text-slate-600">
+    <div className="p-6 text-sm text-[#64748B]">
       AI dealer insights are not enabled for this deployment yet. No simulated recommendations, forecasts, leads, or revenue figures are shown here.
     </div>
   </div>
@@ -155,13 +155,13 @@ const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
   <button
     onClick={onClick}
     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-      active ? 'bg-purple-100 text-purple-700' : 'text-slate-600 hover:bg-slate-50'
+      active ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-[#64748B] hover:bg-[#F6FAF9]'
     }`}
   >
     <Icon className="w-5 h-5" />
     <span className="font-medium text-sm">{label}</span>
     {badge && (
-      <span className="ml-auto px-2 py-0.5 bg-purple-600 text-white text-xs rounded-full">
+      <span className="ml-auto px-2 py-0.5 bg-[#176B87] text-white text-xs rounded-full">
         {badge}
       </span>
     )}
@@ -346,17 +346,17 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+      <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#176B87] animate-spin" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-slate-600 mb-4">Sign in to manage your dealership.</p>
+          <p className="text-sm text-[#64748B] mb-4">Sign in to manage your dealership.</p>
           <button onClick={onOpenAuth} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5">
             Sign In
           </button>
@@ -367,9 +367,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
         <div className="text-center max-w-sm">
-          <p className="text-sm text-slate-600 mb-4">{loadError}</p>
+          <p className="text-sm text-[#64748B] mb-4">{loadError}</p>
           <button onClick={loadDashboard} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5">
             Try Again
           </button>
@@ -394,17 +394,17 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#F6FAF9] flex">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
-        <div className="p-4 border-b border-slate-200">
+      <aside className="w-64 bg-white border-r border-[#D7E7E4] flex flex-col">
+        <div className="p-4 border-b border-[#D7E7E4]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center">
               <Car className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-slate-800">Dealer Hub</h1>
-              <p className="text-xs text-slate-500">{user?.businessName || user?.name || "Dealer account"}</p>
+              <h1 className="font-bold text-[#0A3340]">Dealer Hub</h1>
+              <p className="text-xs text-[#64748B]">{user?.businessName || user?.name || "Dealer account"}</p>
             </div>
           </div>
         </div>
@@ -422,14 +422,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-200">
-          <div className="p-4 bg-gradient-to-r from-purple-100 to-purple-50 rounded-xl">
+        <div className="p-4 border-t border-[#D7E7E4]">
+          <div className="p-4 bg-gradient-to-r from-[#DDF4F0] to-[#F3FAF9] rounded-xl">
             <div className="flex items-center gap-3 mb-3">
-              <Shield className="w-5 h-5 text-purple-600" />
-              <span className="font-semibold text-purple-800">Dealer account</span>
+              <Shield className="w-5 h-5 text-[#176B87]" />
+              <span className="font-semibold text-[#0E4655]">Dealer account</span>
             </div>
-            <p className="text-xs text-purple-600 mb-3">Plan information is not available.</p>
-            <button className="w-full py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700">
+            <p className="text-xs text-[#176B87] mb-3">Plan information is not available.</p>
+            <button className="w-full py-2 bg-[#176B87] text-white text-sm font-medium rounded-lg hover:bg-[#12576D]">
               Plan unavailable
             </button>
           </div>
@@ -442,14 +442,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
-              <p className="text-slate-500">Welcome back, {user?.name || "dealer"}</p>
+              <h2 className="text-2xl font-bold text-[#0A3340]">Dashboard</h2>
+              <p className="text-[#64748B]">Welcome back, {user?.name || "dealer"}</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">
-                <Bell className="w-5 h-5 text-slate-600" />
+              <button className="p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9]">
+                <Bell className="w-5 h-5 text-[#64748B]" />
               </button>
-              <button className="px-4 py-2 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 flex items-center gap-2">
+              <button className="px-4 py-2 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2">
                 <Plus className="w-5 h-5" />
                 Add Listing
               </button>
@@ -488,10 +488,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
               <div className="grid grid-cols-3 gap-6 mb-8">
                 {/* Lead Pipeline */}
-                <div className="col-span-2 bg-white rounded-xl border border-slate-100 p-6">
+                <div className="col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-slate-800">Lead Pipeline</h3>
-                    <button className="text-sm text-purple-600 font-medium hover:text-purple-700">View All</button>
+                    <h3 className="font-bold text-[#0A3340]">Lead Pipeline</h3>
+                    <button className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View All</button>
                   </div>
                   <div className="grid grid-cols-4 gap-3">
                     <PipelineStage stage="New" count={dashboard?.overview?.leads?.new ?? 0} color={colors.softBlue} />
@@ -499,23 +499,23 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     <PipelineStage stage="Negotiating" count={dashboard?.overview?.leads?.negotiating ?? 0} color={colors.amber} />
                     <PipelineStage stage="Reserved" count={dashboard?.overview?.leads?.reserved ?? 0} color={colors.emerald} />
                   </div>
-                  <div className="mt-4 p-4 bg-slate-50 rounded-xl">
+                  <div className="mt-4 p-4 bg-[#F6FAF9] rounded-xl">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-500">Conversion Rate</p>
+                        <p className="text-sm text-[#64748B]">Conversion Rate</p>
                         <p className="text-2xl font-bold text-emerald-600">{dashboard?.overview?.performance?.leadConversion ?? 0}%</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-slate-500">Avg Response Rate</p>
-                        <p className="text-2xl font-bold text-purple-600">{dashboard?.overview?.performance?.responseRate ?? 0}%</p>
+                        <p className="text-sm text-[#64748B]">Avg Response Rate</p>
+                        <p className="text-2xl font-bold text-[#176B87]">{dashboard?.overview?.performance?.responseRate ?? 0}%</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Recent Activity */}
-                <div className="bg-white rounded-xl border border-slate-100 p-6">
-                  <h3 className="font-bold text-slate-800 mb-4">Recent Activity</h3>
+                <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+                  <h3 className="font-bold text-[#0A3340] mb-4">Recent Activity</h3>
                   <div className="space-y-1">
                     {dashboard?.recentActivity?.map((activity, i) => (
                       <ActivityItem
@@ -537,10 +537,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
               <div className="grid grid-cols-3 gap-6">
                 {/* Top Performing Vehicles */}
-                <div className="col-span-2 bg-white rounded-xl border border-slate-100 p-6">
+                <div className="col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-slate-800">Top Performing Vehicles</h3>
-                    <button className="text-sm text-purple-600 font-medium hover:text-purple-700">View Inventory</button>
+                    <h3 className="font-bold text-[#0A3340]">Top Performing Vehicles</h3>
+                    <button className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View Inventory</button>
                   </div>
                   <div className="space-y-3">
                     {dashboard?.topPerformers?.vehicles?.map((vehicle, i) => (
@@ -550,8 +550,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-white rounded-xl border border-slate-100 p-6">
-                  <h3 className="font-bold text-slate-800 mb-4">Quick Actions</h3>
+                <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+                  <h3 className="font-bold text-[#0A3340] mb-4">Quick Actions</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <QuickAction icon={Plus} label="Add Listing" color={colors.emerald} onClick={() => onNavigate?.('seller-platform')} />
                     <QuickAction icon={Users} label="View Leads" color={colors.purple} onClick={() => setActiveSection('leads')} />
@@ -564,11 +564,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           )}
 
           {activeSection === 'inventory' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-slate-800">Inventory Management</h3>
+                <h3 className="text-xl font-bold text-[#0A3340]">Inventory Management</h3>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => onNavigate?.('seller-platform')} className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center gap-2">
+                  <button onClick={() => onNavigate?.('seller-platform')} className="px-4 py-2 bg-[#176B87] text-white rounded-xl font-medium hover:bg-[#12576D] flex items-center gap-2">
                     <Plus className="w-4 h-4" />
                     Add Listing
                   </button>
@@ -588,12 +588,12 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   exists here to wire it to. */}
               {listingsLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
               ) : listingsError ? (
                 <div className="text-center py-12">
-                  <p className="text-sm text-slate-500 mb-3">{listingsError}</p>
-                  <button onClick={() => setListingsLoaded(false)} className="text-xs font-bold text-purple-600">Try Again</button>
+                  <p className="text-sm text-[#64748B] mb-3">{listingsError}</p>
+                  <button onClick={() => setListingsLoaded(false)} className="text-xs font-bold text-[#176B87]">Try Again</button>
                 </div>
               ) : (
                 <>
@@ -602,37 +602,37 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       <p className="text-2xl font-bold text-emerald-600">{myListings.filter((l) => l.status === 'available' || l.status === 'active').length}</p>
                       <p className="text-xs text-emerald-600">Published</p>
                     </div>
-                    <div className="p-3 bg-amber-50 rounded-xl text-center">
-                      <p className="text-2xl font-bold text-amber-600">{myListings.filter((l) => l.status === 'draft').length}</p>
-                      <p className="text-xs text-amber-600">Draft</p>
+                    <div className="p-3 bg-[#F3FAF9] rounded-xl text-center">
+                      <p className="text-2xl font-bold text-[#176B87]">{myListings.filter((l) => l.status === 'draft').length}</p>
+                      <p className="text-xs text-[#176B87]">Draft</p>
                     </div>
-                    <div className="p-3 bg-purple-50 rounded-xl text-center">
-                      <p className="text-2xl font-bold text-purple-600">{myListings.filter((l) => l.status === 'reserved').length}</p>
-                      <p className="text-xs text-purple-600">Reserved</p>
+                    <div className="p-3 bg-[#F3FAF9] rounded-xl text-center">
+                      <p className="text-2xl font-bold text-[#176B87]">{myListings.filter((l) => l.status === 'reserved').length}</p>
+                      <p className="text-xs text-[#176B87]">Reserved</p>
                     </div>
-                    <div className="p-3 bg-slate-100 rounded-xl text-center">
-                      <p className="text-2xl font-bold text-slate-600">{myListings.filter((l) => l.status === 'sold').length}</p>
-                      <p className="text-xs text-slate-600">Sold</p>
+                    <div className="p-3 bg-[#EEF7F5] rounded-xl text-center">
+                      <p className="text-2xl font-bold text-[#64748B]">{myListings.filter((l) => l.status === 'sold').length}</p>
+                      <p className="text-xs text-[#64748B]">Sold</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     {myListings.length === 0 ? (
-                      <p className="text-sm text-slate-400 text-center py-8">You haven't listed any vehicles yet.</p>
+                      <p className="text-sm text-[#94A3B8] text-center py-8">You haven't listed any vehicles yet.</p>
                     ) : myListings.map((car) => {
                       const image = car.images?.[0]?.thumb || car.images?.[0]?.url;
                       return (
-                        <div key={car.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
-                          <div className="w-16 h-12 bg-slate-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                            {image ? <img src={image} alt={car.title} className="w-full h-full object-cover" /> : <Car className="w-6 h-6 text-slate-400" />}
+                        <div key={car.id} className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                          <div className="w-16 h-12 bg-[#DDF4F0] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                            {image ? <img src={image} alt={car.title} className="w-full h-full object-cover" /> : <Car className="w-6 h-6 text-[#94A3B8]" />}
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-slate-800">{car.title || `${car.year} ${car.brand} ${car.model}`}</p>
-                            <p className="text-sm text-slate-500">Ksh {(car.price / 1000000).toFixed(1)}M • {car.views || 0} views</p>
+                            <p className="font-medium text-[#0A3340]">{car.title || `${car.year} ${car.brand} ${car.model}`}</p>
+                            <p className="text-sm text-[#64748B]">Ksh {(car.price / 1000000).toFixed(1)}M • {car.views || 0} views</p>
                           </div>
                           <span className={`px-3 py-1 text-xs font-medium rounded-full ${
                             car.status === 'available' || car.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
-                            car.status === 'reserved' ? 'bg-purple-100 text-purple-700' :
-                            'bg-slate-100 text-slate-600'
+                            car.status === 'reserved' ? 'bg-[#DDF4F0] text-[#12576D]' :
+                            'bg-[#EEF7F5] text-[#64748B]'
                           }`}>
                             {car.status || 'draft'}
                           </span>
@@ -646,9 +646,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           )}
 
           {activeSection === 'leads' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-slate-800">Lead Management (CRM)</h3>
+                <h3 className="text-xl font-bold text-[#0A3340]">Lead Management (CRM)</h3>
               </div>
               {/* Fixed: this whole table previously showed 5
                   entirely invented leads - fake emails, a fake "lead
@@ -662,48 +662,48 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   either) were removed rather than left non-functional. */}
               {leadsLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
               ) : leadsError ? (
                 <div className="text-center py-12">
-                  <p className="text-sm text-slate-500 mb-3">{leadsError}</p>
-                  <button onClick={loadLeads} className="text-xs font-bold text-purple-600">Try Again</button>
+                  <p className="text-sm text-[#64748B] mb-3">{leadsError}</p>
+                  <button onClick={loadLeads} className="text-xs font-bold text-[#176B87]">Try Again</button>
                 </div>
               ) : leads.length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-12">No leads yet.</p>
+                <p className="text-sm text-[#94A3B8] text-center py-12">No leads yet.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Lead</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Vehicle</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Source</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Stage</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Last Activity</th>
+                      <tr className="border-b border-[#D7E7E4]">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Lead</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Vehicle</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Source</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Stage</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Last Activity</th>
                       </tr>
                     </thead>
                     <tbody>
                       {leads.map((lead) => (
-                        <tr key={lead.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <tr key={lead.id} className="border-b border-[#D7E7E4] hover:bg-[#F6FAF9]">
                           <td className="py-3 px-4">
-                            <p className="font-medium text-slate-800">{lead.buyer?.name || 'Unknown'}</p>
-                            <p className="text-xs text-slate-500">{lead.buyer?.email}</p>
+                            <p className="font-medium text-[#0A3340]">{lead.buyer?.name || 'Unknown'}</p>
+                            <p className="text-xs text-[#64748B]">{lead.buyer?.email}</p>
                           </td>
-                          <td className="py-3 px-4 text-slate-700">{lead.vehicle?.title || 'Vehicle'}</td>
-                          <td className="py-3 px-4 text-slate-700">{lead.source || '—'}</td>
+                          <td className="py-3 px-4 text-[#12576D]">{lead.vehicle?.title || 'Vehicle'}</td>
+                          <td className="py-3 px-4 text-[#12576D]">{lead.source || '—'}</td>
                           <td className="py-3 px-4">
                             <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                              lead.stage === 'new' ? 'bg-blue-100 text-blue-700' :
-                              lead.stage === 'contacted' ? 'bg-purple-100 text-purple-700' :
-                              lead.stage === 'negotiating' ? 'bg-amber-100 text-amber-700' :
+                              lead.stage === 'new' ? 'bg-[#DDF4F0] text-[#12576D]' :
+                              lead.stage === 'contacted' ? 'bg-[#DDF4F0] text-[#12576D]' :
+                              lead.stage === 'negotiating' ? 'bg-[#DDF4F0] text-[#12576D]' :
                               lead.stage === 'sold' ? 'bg-emerald-100 text-emerald-700' :
-                              'bg-slate-100 text-slate-600'
+                              'bg-[#EEF7F5] text-[#64748B]'
                             }`}>
                               {(lead.stage || 'new').replace(/([A-Z])/g, ' $1').trim()}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-slate-500">{lead.last_activity_at ? new Date(lead.last_activity_at).toLocaleDateString() : 'Never'}</td>
+                          <td className="py-3 px-4 text-[#64748B]">{lead.last_activity_at ? new Date(lead.last_activity_at).toLocaleDateString() : 'Never'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -714,8 +714,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           )}
 
           {activeSection === 'pipeline' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-bold text-slate-800 mb-6">Sales Pipeline</h3>
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+              <h3 className="text-xl font-bold text-[#0A3340] mb-6">Sales Pipeline</h3>
               {/* Fixed: this section had a real nav entry (Pipeline)
                   but zero content behind it at all - clicking it
                   showed nothing. Real, working kanban-style view now,
@@ -726,12 +726,12 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   database at all - fixed as part of this same pass). */}
               {leadsLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
               ) : leadsError ? (
                 <div className="text-center py-12">
-                  <p className="text-sm text-slate-500 mb-3">{leadsError}</p>
-                  <button onClick={loadLeads} className="text-xs font-bold text-purple-600">Try Again</button>
+                  <p className="text-sm text-[#64748B] mb-3">{leadsError}</p>
+                  <button onClick={loadLeads} className="text-xs font-bold text-[#176B87]">Try Again</button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -739,20 +739,20 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     const nextStage = ['new', 'contacted', 'negotiating', 'sold'][stageIdx + 1];
                     const stageLeads = leads.filter((l) => (l.stage || 'new') === stage);
                     return (
-                      <div key={stage} className="bg-slate-50 rounded-xl p-3">
-                        <h4 className="text-xs font-bold text-slate-500 uppercase mb-3">{stage} ({stageLeads.length})</h4>
+                      <div key={stage} className="bg-[#F6FAF9] rounded-xl p-3">
+                        <h4 className="text-xs font-bold text-[#64748B] uppercase mb-3">{stage} ({stageLeads.length})</h4>
                         <div className="space-y-2">
                           {stageLeads.length === 0 ? (
-                            <p className="text-xs text-slate-400">Empty</p>
+                            <p className="text-xs text-[#94A3B8]">Empty</p>
                           ) : stageLeads.map((lead) => (
-                            <div key={lead.id} className="bg-white rounded-lg p-3 border border-slate-100 shadow-xs">
-                              <p className="text-xs font-bold text-slate-800">{lead.buyer?.name || 'Unknown'}</p>
-                              <p className="text-[11px] text-slate-500 mb-2">{lead.vehicle?.title || 'Vehicle'}</p>
+                            <div key={lead.id} className="bg-white rounded-lg p-3 border border-[#D7E7E4] shadow-xs">
+                              <p className="text-xs font-bold text-[#0A3340]">{lead.buyer?.name || 'Unknown'}</p>
+                              <p className="text-[11px] text-[#64748B] mb-2">{lead.vehicle?.title || 'Vehicle'}</p>
                               {nextStage && (
                                 <button
                                   onClick={() => advanceLeadStage(lead.id, nextStage)}
                                   disabled={leadUpdating === lead.id}
-                                  className="text-[10px] font-bold text-purple-600 disabled:opacity-50"
+                                  className="text-[10px] font-bold text-[#176B87] disabled:opacity-50"
                                 >
                                   {leadUpdating === lead.id ? 'Moving…' : `Move to ${nextStage} →`}
                                 </button>
@@ -769,8 +769,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           )}
 
           {activeSection === 'customers' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-bold text-slate-800 mb-6">Customers</h3>
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+              <h3 className="text-xl font-bold text-[#0A3340] mb-6">Customers</h3>
               {/* Fixed: this section had a real nav entry but zero
                   content behind it at all. Real customers below,
                   honestly derived from this dealer's own real,
@@ -779,24 +779,24 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   schema). */}
               {customersLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
               ) : customersError ? (
                 <div className="text-center py-12">
-                  <p className="text-sm text-slate-500 mb-3">{customersError}</p>
-                  <button onClick={() => setCustomersLoaded(false)} className="text-xs font-bold text-purple-600">Try Again</button>
+                  <p className="text-sm text-[#64748B] mb-3">{customersError}</p>
+                  <button onClick={() => setCustomersLoaded(false)} className="text-xs font-bold text-[#176B87]">Try Again</button>
                 </div>
               ) : customers.length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-12">No customers yet - customers appear here once a real deal completes.</p>
+                <p className="text-sm text-[#94A3B8] text-center py-12">No customers yet - customers appear here once a real deal completes.</p>
               ) : (
                 <div className="space-y-3">
                   {customers.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                    <div key={c.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
                       <div>
-                        <p className="font-medium text-slate-800">{c.name}</p>
-                        <p className="text-xs text-slate-500">{c.email} • {c.vehicles.length} vehicle{c.vehicles.length === 1 ? '' : 's'}</p>
+                        <p className="font-medium text-[#0A3340]">{c.name}</p>
+                        <p className="text-xs text-[#64748B]">{c.email} • {c.vehicles.length} vehicle{c.vehicles.length === 1 ? '' : 's'}</p>
                       </div>
-                      <p className="text-sm font-bold text-slate-800">Ksh {(c.totalSpent / 1000000).toFixed(2)}M</p>
+                      <p className="text-sm font-bold text-[#0A3340]">Ksh {(c.totalSpent / 1000000).toFixed(2)}M</p>
                     </div>
                   ))}
                 </div>
@@ -805,8 +805,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           )}
 
           {activeSection === 'marketing' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-bold text-slate-800 mb-6">Marketing</h3>
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+              <h3 className="text-xl font-bold text-[#0A3340] mb-6">Marketing</h3>
               {/* Fixed: this section had a real nav entry but zero
                   content behind it at all. Real campaigns below, with
                   a real create form - performance metrics
@@ -818,39 +818,39 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   value={newCampaignName}
                   onChange={(e) => setNewCampaignName(e.target.value)}
                   placeholder="New campaign name"
-                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                  className="flex-1 border border-[#D7E7E4] rounded-xl px-3 py-2 text-sm"
                 />
                 <button
                   onClick={handleCreateCampaign}
                   disabled={creatingCampaign || !newCampaignName.trim()}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-[#176B87] text-white rounded-xl font-medium hover:bg-[#12576D] disabled:opacity-50"
                 >
                   {creatingCampaign ? 'Creating…' : 'Create Campaign'}
                 </button>
               </div>
               {campaignsLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
               ) : campaignsError ? (
                 <div className="text-center py-12">
-                  <p className="text-sm text-slate-500 mb-3">{campaignsError}</p>
-                  <button onClick={loadCampaigns} className="text-xs font-bold text-purple-600">Try Again</button>
+                  <p className="text-sm text-[#64748B] mb-3">{campaignsError}</p>
+                  <button onClick={loadCampaigns} className="text-xs font-bold text-[#176B87]">Try Again</button>
                 </div>
               ) : campaigns.length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-8">No campaigns yet.</p>
+                <p className="text-sm text-[#94A3B8] text-center py-8">No campaigns yet.</p>
               ) : (
                 <div className="space-y-3">
                   {campaigns.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                    <div key={c.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
                       <div>
-                        <p className="font-medium text-slate-800">{c.name}</p>
-                        <p className="text-xs text-slate-500 capitalize">{c.campaign_type} • Budget Ksh {Number(c.budget).toLocaleString()}</p>
+                        <p className="font-medium text-[#0A3340]">{c.name}</p>
+                        <p className="text-xs text-[#64748B] capitalize">{c.campaign_type} • Budget Ksh {Number(c.budget).toLocaleString()}</p>
                       </div>
                       <span className={`px-3 py-1 text-xs font-medium rounded-full ${
                         c.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
-                        c.status === 'draft' ? 'bg-slate-100 text-slate-600' :
-                        'bg-blue-100 text-blue-700'
+                        c.status === 'draft' ? 'bg-[#EEF7F5] text-[#64748B]' :
+                        'bg-[#DDF4F0] text-[#12576D]'
                       }`}>
                         {c.status}
                       </span>
@@ -862,31 +862,31 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           )}
 
           {['auctions', 'finance', 'inspections', 'team', 'settings'].includes(activeSection) && (
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-bold text-slate-800 capitalize mb-2">{activeSection}</h3>
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+              <h3 className="text-xl font-bold text-[#0A3340] capitalize mb-2">{activeSection}</h3>
               {['finance', 'team', 'settings'].includes(activeSection) ? (
                 <div className="py-12 text-center">
-                  <p className="text-sm text-slate-500">This dealer capability is not backed by a canonical dealer-scoped data contract yet.</p>
-                  <p className="text-xs text-slate-400 mt-2">KAYAD will not display simulated records here.</p>
+                  <p className="text-sm text-[#64748B]">This dealer capability is not backed by a canonical dealer-scoped data contract yet.</p>
+                  <p className="text-xs text-[#94A3B8] mt-2">KAYAD will not display simulated records here.</p>
                 </div>
               ) : operationsLoading ? (
-                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-purple-600 animate-spin" /></div>
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div>
               ) : operationsError ? (
-                <div className="py-12 text-center"><p className="text-sm text-slate-500 mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, [activeSection]: undefined }))} className="text-xs font-bold text-purple-600">Try Again</button></div>
+                <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, [activeSection]: undefined }))} className="text-xs font-bold text-[#176B87]">Try Again</button></div>
               ) : activeSection === 'auctions' ? (
                 <div className="space-y-3">
-                  {(operations.auctions?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No auctions found for this dealership.</p> : (operations.auctions.items || []).map((auction) => (
-                    <div key={auction.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                      <div><p className="font-medium text-slate-800">{auction.title}</p><p className="text-xs text-slate-500">{auction.bidsCount} bids • {auction.views} views</p></div>
-                      <div className="text-right"><p className="font-bold text-slate-800">Ksh {Number(auction.currentBid || auction.startingBid || 0).toLocaleString()}</p><span className="text-xs capitalize text-slate-500">{auction.status}</span></div>
+                  {(operations.auctions?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-[#94A3B8]">No auctions found for this dealership.</p> : (operations.auctions.items || []).map((auction) => (
+                    <div key={auction.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
+                      <div><p className="font-medium text-[#0A3340]">{auction.title}</p><p className="text-xs text-[#64748B]">{auction.bidsCount} bids • {auction.views} views</p></div>
+                      <div className="text-right"><p className="font-bold text-[#0A3340]">Ksh {Number(auction.currentBid || auction.startingBid || 0).toLocaleString()}</p><span className="text-xs capitalize text-[#64748B]">{auction.status}</span></div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-slate-500">Inspections of your vehicles, requested by buyers and carried out by independent providers. You see that an inspection exists and its stage. The buyer’s details and the report stay with the buyer who requested it.</p>
-                  {(operations.inspections?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No inspection orders found for this dealership.</p> : (operations.inspections.items || []).map((inspection) => (
-                    <div key={inspection.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl"><div><p className="font-medium text-slate-800">{inspection.vehicle}</p><p className="text-xs text-slate-500">{inspection.id}</p></div><span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs capitalize">{inspection.status}</span></div>
+                  <p className="text-xs text-[#64748B]">Inspections of your vehicles, requested by buyers and carried out by independent providers. You see that an inspection exists and its stage. The buyer’s details and the report stay with the buyer who requested it.</p>
+                  {(operations.inspections?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-[#94A3B8]">No inspection orders found for this dealership.</p> : (operations.inspections.items || []).map((inspection) => (
+                    <div key={inspection.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl"><div><p className="font-medium text-[#0A3340]">{inspection.vehicle}</p><p className="text-xs text-[#64748B]">{inspection.id}</p></div><span className="px-3 py-1 rounded-full bg-[#EEF7F5] text-[#64748B] text-xs capitalize">{inspection.status}</span></div>
                   ))}
                 </div>
               )}
@@ -895,14 +895,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
           {activeSection === 'analytics' && (
             <div className="space-y-6">
-              {operationsLoading ? <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-purple-600 animate-spin" /></div> : operationsError ? <div className="py-12 text-center"><p className="text-sm text-slate-500 mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, analytics: undefined }))} className="text-xs font-bold text-purple-600">Try Again</button></div> : <>
+              {operationsLoading ? <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div> : operationsError ? <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, analytics: undefined }))} className="text-xs font-bold text-[#176B87]">Try Again</button></div> : <>
                 <div className="grid grid-cols-4 gap-4">
                   <StatCard title="Total Revenue" value={`Ksh ${Number(operations.analytics?.overview?.totalRevenue || 0).toLocaleString()}`} icon={DollarSign} color={colors.emerald} />
                   <StatCard title="Total Sales" value={operations.analytics?.overview?.totalSales || 0} icon={ShoppingCart} color={colors.navy} />
                   <StatCard title="Avg Deal Size" value={`Ksh ${Number(operations.analytics?.performance?.avgDealSize || 0).toLocaleString()}`} icon={Target} color={colors.purple} />
                   <StatCard title="Total Views" value={operations.analytics?.overview?.totalViews || 0} icon={Eye} color={colors.amber} />
                 </div>
-                <div className="bg-white rounded-xl border border-slate-100 p-6"><h3 className="font-bold text-slate-800 mb-4">Top Vehicles by Views</h3>{(operations.analytics?.topVehicles || []).length ? (operations.analytics.topVehicles.map((vehicle) => <div key={vehicle.id} className="flex justify-between py-3 border-b last:border-0 border-slate-100"><span className="text-sm text-slate-700">{vehicle.title}</span><span className="text-sm font-semibold text-slate-800">{vehicle.views} views</span></div>)) : <p className="text-sm text-slate-400">No vehicle analytics yet.</p>}</div>
+                <div className="bg-white rounded-xl border border-[#D7E7E4] p-6"><h3 className="font-bold text-[#0A3340] mb-4">Top Vehicles by Views</h3>{(operations.analytics?.topVehicles || []).length ? (operations.analytics.topVehicles.map((vehicle) => <div key={vehicle.id} className="flex justify-between py-3 border-b last:border-0 border-[#D7E7E4]"><span className="text-sm text-[#12576D]">{vehicle.title}</span><span className="text-sm font-semibold text-[#0A3340]">{vehicle.views} views</span></div>)) : <p className="text-sm text-[#94A3B8]">No vehicle analytics yet.</p>}</div>
               </>}
             </div>
           )}

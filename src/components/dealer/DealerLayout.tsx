@@ -39,12 +39,12 @@ export default function DealerLayout({ children }: DealerLayoutProps) {
   }, [sidebarOpen]);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#050505' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a3340' }}>
       <DealerSidebar mobileOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top header bar */}
         <div style={{
-          height: 48, background: '#080808', borderBottom: '1px solid rgba(255,255,255,0.04)',
+          height: 48, background: '#0a3340', borderBottom: '1px solid rgba(255,255,255,0.04)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '0 24px', flexShrink: 0,
         }}>
@@ -57,7 +57,7 @@ export default function DealerLayout({ children }: DealerLayoutProps) {
             >
               <Menu size={18} />
             </button>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', color: 'var(--gold)', fontWeight: 700, textDecoration: 'none' }} title="Back to homepage">
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }} title="Back to homepage">
               <Home size={12} />
               <span style={{ marginLeft: 4 }}>Kayad</span>
             </Link>
@@ -82,7 +82,7 @@ export default function DealerLayout({ children }: DealerLayoutProps) {
             </span>
             <div style={{
               width: 28, height: 28, borderRadius: '50%',
-              background: 'rgba(212,196,168,0.15)', color: 'var(--gold)',
+              background: 'rgba(19, 184, 166, 0.15)', color: 'var(--brand)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 11, fontWeight: 700,
             }}>

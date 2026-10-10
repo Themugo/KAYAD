@@ -27,9 +27,9 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '28px' }}>
         {/* KPI Row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 28 }}>
-          <EnterpriseKPI icon={<Smartphone size={18} />} label="Awaiting Payment" value={totalPayment} sub="pending confirmation" accent="#f59e0b" />
-          <EnterpriseKPI icon={<ClipboardCheck size={18} />} label="Assigned" value={totalAssigned} sub="awaiting start" accent="#3b82f6" />
-          <EnterpriseKPI icon={<Play size={18} />} label="In Progress" value={totalInProgress} sub="active inspections" accent="var(--gold)" />
+          <EnterpriseKPI icon={<Smartphone size={18} />} label="Awaiting Payment" value={totalPayment} sub="pending confirmation" accent="#176b87" />
+          <EnterpriseKPI icon={<ClipboardCheck size={18} />} label="Assigned" value={totalAssigned} sub="awaiting start" accent="#176B87" />
+          <EnterpriseKPI icon={<Play size={18} />} label="In Progress" value={totalInProgress} sub="active inspections" accent="var(--brand)" />
           <EnterpriseKPI icon={<CheckCircle size={18} />} label="Completed" value={totalCompleted} sub="all time" accent="#22c55e" />
           <EnterpriseKPI icon={<BarChart3 size={18} />} label="Total Tasks" value={tasks.length} sub="assigned to you" accent="rgba(255,255,255,0.4)" />
         </div>
@@ -38,10 +38,10 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
         <div style={{ marginBottom: 28 }}>
           <EnterpriseCard>
             <EnterpriseTaskSummary tasks={[
-              { label: 'Assigned', count: totalAssigned, color: '#3b82f6' },
-              { label: 'In Progress', count: totalInProgress, color: 'var(--gold)' },
+              { label: 'Assigned', count: totalAssigned, color: '#176B87' },
+              { label: 'In Progress', count: totalInProgress, color: 'var(--brand)' },
               { label: 'Completed', count: totalCompleted, color: '#22c55e' },
-              { label: 'Pending Pay', count: totalPayment, color: '#f59e0b' },
+              { label: 'Pending Pay', count: totalPayment, color: '#176b87' },
               { label: 'Total', count: tasks.length, color: 'rgba(255,255,255,0.4)' },
             ]} />
           </EnterpriseCard>
@@ -57,10 +57,10 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
             <button key={t.key} onClick={() => setTab(t.key)}
               style={{
                 padding: '7px 16px', borderRadius: 8,
-                background: tab === t.key ? 'rgba(37, 99, 235,0.1)' : 'transparent',
+                background: tab === t.key ? 'rgba(23, 107, 135, 0.1)' : 'transparent',
                 border: '1px solid',
-                borderColor: tab === t.key ? 'rgba(37, 99, 235,0.2)' : 'transparent',
-                color: tab === t.key ? 'var(--gold)' : 'rgba(255,255,255,0.35)',
+                borderColor: tab === t.key ? 'rgba(23, 107, 135, 0.2)' : 'transparent',
+                color: tab === t.key ? 'var(--brand)' : 'rgba(255,255,255,0.35)',
                 fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
               }}>
               {t.label}{t.count > 0 ? ` (${t.count})` : ''}
@@ -102,7 +102,7 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
                 const img = car.images?.[0]?.url || car.images?.[0] || car.image;
                 return (
                   <div key={t._id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: '16px 20px', transition: 'border-color 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(23, 107, 135, 0.2)'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
                     <InspectorWorkflowProgress status={t.status} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
@@ -125,7 +125,7 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
                             <span>·</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                               <DollarSign size={10} style={{ color: 'rgba(255,255,255,0.2)' }} />
-                              Fee: <strong style={{ color: 'var(--gold)' }}>KES {Number(t.fee || 2500).toLocaleString()}</strong>
+                              Fee: <strong style={{ color: 'var(--brand)' }}>KES {Number(t.fee || 2500).toLocaleString()}</strong>
                             </span>
                           </div>
                         </div>
@@ -133,22 +133,22 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
                       </div>
                       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                         {t.status === 'assigned' && (
-                          <button onClick={() => handleStart(t._id)} style={{ padding: '8px 16px', borderRadius: 8, background: 'var(--gold)', color: '#000', border: 'none', fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <button onClick={() => handleStart(t._id)} style={{ padding: '8px 16px', borderRadius: 8, background: 'var(--brand)', color: '#0a3340', border: 'none', fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                             <Play size={12} /> Start Inspection
                           </button>
                         )}
                         {t.status === 'in_progress' && (
-                          <button onClick={() => handleBeginChecklist(t)} style={{ padding: '8px 16px', borderRadius: 8, background: '#22c55e', color: '#000', border: 'none', fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <button onClick={() => handleBeginChecklist(t)} style={{ padding: '8px 16px', borderRadius: 8, background: '#22c55e', color: '#0a3340', border: 'none', fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                             <ClipboardCheck size={12} /> Continue 150-Point Check
                           </button>
                         )}
                         {t.status === 'paid' && (
-                          <div style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)', color: '#3b82f6', fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <div style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(23, 107, 135, 0.08)', border: '1px solid rgba(23, 107, 135, 0.15)', color: '#176B87', fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
                             <Clock size={11} /> Awaiting Admin Assignment
                           </div>
                         )}
                         {t.status === 'pending_payment' && (
-                          <div style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.15)', color: '#f59e0b', fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <div style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(19, 184, 166, 0.08)', border: '1px solid rgba(19, 184, 166, 0.15)', color: '#176b87', fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
                             <Smartphone size={11} /> Buyer Payment Pending
                           </div>
                         )}

@@ -79,7 +79,7 @@ export const PhoneVerification: React.FC = () => {
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center py-10">
-        <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+        <Loader2 className="w-5 h-5 text-[#94A3B8] animate-spin" />
       </div>
     );
   }
@@ -98,24 +98,24 @@ export const PhoneVerification: React.FC = () => {
 
   if (status === 'no_phone') {
     return (
-      <div className="p-5 bg-white border border-slate-200 rounded-2xl">
+      <div className="p-5 bg-white border border-[#D7E7E4] rounded-2xl">
         <div className="flex items-center gap-2 mb-2">
           <Phone className="w-4 h-4 text-[#176B87]" />
           <h3 className="text-sm font-bold text-[#176B87]">Phone Verification</h3>
         </div>
-        <p className="text-xs text-slate-500">Add a phone number to your account in Account Settings before you can verify it.</p>
+        <p className="text-xs text-[#64748B]">Add a phone number to your account in Account Settings before you can verify it.</p>
       </div>
     );
   }
 
   return (
-    <div className="p-5 bg-white border border-slate-200 rounded-2xl space-y-4">
+    <div className="p-5 bg-white border border-[#D7E7E4] rounded-2xl space-y-4">
       <div className="flex items-center gap-2">
         <Phone className="w-4 h-4 text-[#176B87]" />
         <h3 className="text-sm font-bold text-[#176B87]">Phone Verification</h3>
       </div>
-      <p className="text-xs text-slate-500">
-        Verify <span className="font-semibold text-slate-700">{phone}</span> to add a real trust badge to your listings.
+      <p className="text-xs text-[#64748B]">
+        Verify <span className="font-semibold text-[#12576D]">{phone}</span> to add a real trust badge to your listings.
       </p>
 
       {error && (
@@ -135,7 +135,7 @@ export const PhoneVerification: React.FC = () => {
       ) : (
         <form onSubmit={handleVerify} className="space-y-3">
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1.5">Enter the 4-digit code sent to {phone}</label>
+            <label className="text-xs font-bold text-[#64748B] block mb-1.5">Enter the 4-digit code sent to {phone}</label>
             <input
               type="text"
               inputMode="numeric"
@@ -143,7 +143,7 @@ export const PhoneVerification: React.FC = () => {
               value={otpInput}
               onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
               placeholder="1234"
-              className="w-32 border border-slate-200 rounded-lg px-3 py-2.5 text-lg font-mono tracking-widest text-center"
+              className="w-32 border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-lg font-mono tracking-widest text-center"
               autoFocus
             />
           </div>

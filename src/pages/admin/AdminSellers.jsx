@@ -159,7 +159,7 @@ export default function AdminSellers() {
                         <span>{s.discount > 0 ? `${s.discount}%` : '—'}</span>
                       )}
                     </td>
-                    <td style={{ fontWeight: 600, color: 'var(--gold-light)' }}>{formatKES(s.totalSales)}</td>
+                    <td style={{ fontWeight: 600, color: 'var(--brand-light)' }}>{formatKES(s.totalSales)}</td>
                     <td>
                       <span className={`badge ${s.status === 'approved' ? 'badge-green' : s.status === 'pending' ? 'badge-orange' : 'badge-muted'}`}>
                         {s.status}

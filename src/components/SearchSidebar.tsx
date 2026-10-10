@@ -9,9 +9,10 @@ const FUELS = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','CNG'];
 const TRANSMISSIONS = ['Automatic','Manual','CVT','AMT'];
 const CONDITIONS = ['New','Used','Foreign Used','Locally Used','Reconditioned','Damaged'];
 const COLOR_MAP = {
-  Black:'#111',White:'#f5f5f5',Silver:'#C0C0C0',Gray:'#808080',Blue:'#3B82F6',
-  Red:'#EF4444',Green:'#22C55E',Brown:'#8B4513',Beige:'#D2B48C',Gold:'#D4C4A8',
-  Burgundy:'#800020',Orange:'#F97316',Purple:'#A855F7',Yellow:'#EAB308',
+  // These are vehicle paint swatches, not interface theme colors; keep them true to the vehicle color.
+  Black:'#1A1A1A',White:'#FFFFFF',Silver:'#C0C0C0',Gray:'#808080',Blue:'#3B82F6',
+  Red:'#EF4444',Green:'#22C55E',Brown:'#8B4513',Beige:'#D2B48C',Gold:'#D4AF37',
+  Burgundy:'#800020',Orange:'#F97316',Purple:'#8B5CF6',Yellow:'#FACC15',
   Maroon:'#7B0000',Pearl:'#F0EAD6',Navy:'#1E3A5F',Teal:'#14B8A6',
 };
 
@@ -126,7 +127,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
                 <X size={16} />
               </button>
             )}
-            <SlidersHorizontal size={15} color="var(--gold)" />
+            <SlidersHorizontal size={15} color="var(--brand)" />
             <span className="search-sidebar-title">
               Refine
             </span>
@@ -293,7 +294,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
                 className={`search-color-swatch ${active ? 'search-color-swatch-active' : ''}`}
                 style={{ background: hex }}>
                 {active && (
-                  <span className="search-color-check" style={{ color: isLight ? '#000' : '#fff' }}>✓</span>
+                  <span className="search-color-check" style={{ color: isLight ? '#0a3340' : '#fff' }}>✓</span>
                 )}
               </button>
             );

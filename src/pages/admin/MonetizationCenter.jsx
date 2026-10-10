@@ -63,20 +63,20 @@ export default function MonetizationCenter() {
         {/* Decorative accent */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-          background: 'linear-gradient(90deg, transparent, var(--gold), transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--brand), transparent)',
           opacity: 0.5,
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 12,
-            background: 'linear-gradient(135deg, var(--gold), #e6c288)',
+            background: 'linear-gradient(135deg, var(--brand), #5aafa4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <DollarSign size={24} style={{ color: '#0A3340' }} />
           </div>
           <div>
-            <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
+            <div style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
               Admin Hub
             </div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
@@ -92,9 +92,9 @@ export default function MonetizationCenter() {
       {/* Configuration Cards */}
       <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', marginBottom: 32 }}>
         {[
-          { icon: Star, label: 'Hero Vehicles', desc: 'Vehicle IDs shown in homepage hero slider', value: heroCarIds, onChange: setHeroCarIds, placeholder: 'carId1, carId2, carId3', color: '#F59E0B' },
-          { icon: Crown, label: 'Sponsored Vehicles', desc: 'Vehicle IDs marked as sponsored', value: sponsorCarIds, onChange: setSponsorCarIds, placeholder: 'carId1, carId2', color: '#8B5CF6' },
-          { icon: Shield, label: 'Sponsored Dealers', desc: 'Dealer IDs to show as sponsored', value: sponsorDealers, onChange: setSponsorDealers, placeholder: 'dealerId1, dealerId2', color: '#3B82F6' },
+          { icon: Star, label: 'Hero Vehicles', desc: 'Vehicle IDs shown in homepage hero slider', value: heroCarIds, onChange: setHeroCarIds, placeholder: 'carId1, carId2, carId3', color: '#176b87' },
+          { icon: Crown, label: 'Sponsored Vehicles', desc: 'Vehicle IDs marked as sponsored', value: sponsorCarIds, onChange: setSponsorCarIds, placeholder: 'carId1, carId2', color: '#5aafa4' },
+          { icon: Shield, label: 'Sponsored Dealers', desc: 'Dealer IDs to show as sponsored', value: sponsorDealers, onChange: setSponsorDealers, placeholder: 'dealerId1, dealerId2', color: '#176B87' },
           { icon: Crown, label: 'Featured Dealers', desc: 'Dealer IDs shown as #1 in Top-Rated section', value: featuredDealerIds, onChange: setFeaturedDealerIds, placeholder: 'dealerId1, dealerId2', color: '#22C55E' },
         ].map((item, i) => (
           <div role="presentation" key={i} style={{
@@ -102,7 +102,7 @@ export default function MonetizationCenter() {
             background: 'rgba(255,255,255,0.02)', padding: 20,
             transition: 'all 0.2s',
           }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(23, 107, 135, 0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -129,7 +129,7 @@ export default function MonetizationCenter() {
                 background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
                 color: '#fff', fontSize: 13, transition: 'all 0.2s',
               }}
-              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(23, 107, 135, 0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
               onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
             />
           </div>
@@ -143,7 +143,7 @@ export default function MonetizationCenter() {
           disabled={saving}
           style={{
             padding: '12px 32px', borderRadius: 10, fontWeight: 700, fontSize: 14,
-            background: 'linear-gradient(135deg, var(--gold), #e6c288)',
+            background: 'linear-gradient(135deg, var(--brand), #5aafa4)',
             color: '#0A3340', border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
             transition: 'all 0.2s', opacity: saving ? 0.6 : 1,
           }}
@@ -157,8 +157,8 @@ export default function MonetizationCenter() {
       {/* Quick Links */}
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', marginTop: 40 }}>
         {[
-          { icon: Megaphone, label: 'Homepage Ads', desc: 'Manage banner ads, sponsored placements, and promotional campaigns', to: '/admin/reports', color: '#8B5CF6' },
-          { icon: Settings, label: 'Platform Config', desc: 'System settings, branding, and global platform configuration', to: '/admin/settings', color: '#3B82F6' },
+          { icon: Megaphone, label: 'Homepage Ads', desc: 'Manage banner ads, sponsored placements, and promotional campaigns', to: '/admin/reports', color: '#5aafa4' },
+          { icon: Settings, label: 'Platform Config', desc: 'System settings, branding, and global platform configuration', to: '/admin/settings', color: '#176B87' },
           { icon: Car, label: 'Featured Vehicles', desc: 'Manage all vehicle listings and toggle featured status', to: '/admin/cars', color: '#22C55E' },
         ].map((item, i) => (
           <Link key={i} to={item.to} style={{ textDecoration: 'none' }}>
@@ -200,10 +200,10 @@ export default function MonetizationCenter() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width: 36, height: 36, borderRadius: 8,
-                background: 'rgba(37, 99, 235,0.15)', border: '1px solid rgba(37, 99, 235,0.3)',
+                background: 'rgba(23, 107, 135, 0.15)', border: '1px solid rgba(23, 107, 135, 0.3)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
+                <TrendingUp size={18} style={{ color: 'var(--brand)' }} />
               </div>
               <div>
                 <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: '#fff' }}>
@@ -214,7 +214,7 @@ export default function MonetizationCenter() {
                 </p>
               </div>
             </div>
-            <Link to="/admin/cars" style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600, textDecoration: 'none' }}>
+            <Link to="/admin/cars" style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}>
               Manage All →
             </Link>
           </div>
@@ -226,7 +226,7 @@ export default function MonetizationCenter() {
                 border: '1px solid rgba(255,255,255,0.04)',
                 transition: 'all 0.2s',
               }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(23, 107, 135, 0.2)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'; }}
               >
                 <div style={{ width: 56, height: 40, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
@@ -236,7 +236,7 @@ export default function MonetizationCenter() {
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {car.title}
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 700, marginTop: 2 }}>
                     KES {(car.price || 0).toLocaleString()}
                   </div>
                 </div>

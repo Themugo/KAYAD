@@ -60,7 +60,7 @@ export default function DealerSidebar({ mobileOpen, onToggle }: DealerSidebarPro
     <div className={`dealer-sidebar ${mobileOpen ? 'open' : ''}`} style={{
       width: collapsed ? 52 : 220,
       transition: 'width 0.25s ease, transform 0.3s ease',
-      background: '#080808',
+      background: '#0a3340',
       borderRight: '1px solid rgba(255,255,255,0.05)',
       display: 'flex', flexDirection: 'column',
       overflow: 'hidden', flexShrink: 0,
@@ -113,8 +113,8 @@ export default function DealerSidebar({ mobileOpen, onToggle }: DealerSidebarPro
               margin: '1px 6px', borderRadius: 8,
               textDecoration: 'none',
               fontSize: 12, fontWeight: 600,
-              color: isActive ? 'var(--gold)' : 'rgba(255,255,255,0.5)',
-              background: isActive ? 'rgba(212,196,168,0.06)' : 'transparent',
+              color: isActive ? 'var(--brand)' : 'rgba(255,255,255,0.5)',
+              background: isActive ? 'rgba(19, 184, 166, 0.06)' : 'transparent',
               justifyContent: collapsed ? 'center' : 'flex-start',
               whiteSpace: 'nowrap',
               transition: 'all 0.15s',
@@ -136,7 +136,7 @@ export default function DealerSidebar({ mobileOpen, onToggle }: DealerSidebarPro
           fontSize: 10, color: 'rgba(255,255,255,0.2)',
           letterSpacing: '0.1em', textTransform: 'uppercase',
         }}>
-          <span style={{ color: 'var(--gold)' }}>◆</span> Kayad Marketplace
+          <span style={{ color: 'var(--brand)' }}>◆</span> Kayad Marketplace
         </div>
       )}
     </div>

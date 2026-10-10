@@ -134,25 +134,25 @@ export const COMPLIANCE_CATEGORIES: Record<ComplianceCategory, {
   organization: {
     label: 'Organization Compliance',
     icon: 'building',
-    color: '#6366F1',
+    color: '#176b87',
     description: 'Business verification and licensing',
   },
   vehicle: {
     label: 'Vehicle Compliance',
     icon: 'car',
-    color: '#8B5CF6',
+    color: '#5aafa4',
     description: 'Vehicle ownership and documentation',
   },
   auction: {
     label: 'Auction Compliance',
     icon: 'gavel',
-    color: '#EC4899',
+    color: '#13B8A6',
     description: 'Auction settings and configuration',
   },
   financial: {
     label: 'Financial Compliance',
     icon: 'banknote',
-    color: '#F59E0B',
+    color: '#176b87',
     description: 'Payment and settlement configuration',
   },
   inspection: {
@@ -170,7 +170,7 @@ export const COMPLIANCE_CATEGORIES: Record<ComplianceCategory, {
   marketplace_policy: {
     label: 'Marketplace Policy',
     icon: 'shield',
-    color: '#3B82F6',
+    color: '#176B87',
     description: 'Policy acknowledgements',
   },
   customer_protection: {
@@ -195,17 +195,17 @@ export const COMPLIANCE_STATUS_STYLES: Record<ComplianceStatus, {
 }> = {
   pending: {
     label: 'Pending',
-    color: '#6B7280',
-    bgColor: 'bg-slate-100',
-    borderColor: 'border-slate-300',
+    color: '#64748b',
+    bgColor: 'bg-[#EEF7F5]',
+    borderColor: 'border-[#BDE5DE]',
     icon: 'clock',
     isBlocking: true,
   },
   under_review: {
     label: 'Under Review',
-    color: '#3B82F6',
-    bgColor: 'bg-blue-100',
-    borderColor: 'border-blue-300',
+    color: '#176B87',
+    bgColor: 'bg-[#DDF4F0]',
+    borderColor: 'border-[#BDE5DE]',
     icon: 'eye',
     isBlocking: true,
   },
@@ -219,9 +219,9 @@ export const COMPLIANCE_STATUS_STYLES: Record<ComplianceStatus, {
   },
   conditional_approval: {
     label: 'Conditional',
-    color: '#F59E0B',
-    bgColor: 'bg-amber-100',
-    borderColor: 'border-amber-300',
+    color: '#176b87',
+    bgColor: 'bg-[#DDF4F0]',
+    borderColor: 'border-[#BDE5DE]',
     icon: 'alert-circle',
     isBlocking: false,
   },
@@ -243,9 +243,9 @@ export const COMPLIANCE_STATUS_STYLES: Record<ComplianceStatus, {
   },
   expired: {
     label: 'Expired',
-    color: '#78716C',
-    bgColor: 'bg-stone-100',
-    borderColor: 'border-stone-300',
+    color: '#64748b',
+    bgColor: 'bg-[#EEF7F5]',
+    borderColor: 'border-[#BDE5DE]',
     icon: 'clock',
     isBlocking: true,
   },

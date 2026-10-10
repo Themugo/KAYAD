@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 
-export function StatBox({ icon: Icon, label, value, sub, color = 'var(--gold)', to }) {
+export function StatBox({ icon: Icon, label, value, sub, color = 'var(--brand)', to }) {
   const inner = (
     <div style={{
-      background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)',
+      background: '#0a3340', border: '1px solid rgba(255,255,255,0.07)',
       borderRadius: 16, padding: '22px', position: 'relative', overflow: 'hidden',
       transition: 'border-color 0.2s, transform 0.2s',
     }}
@@ -24,18 +24,18 @@ export function StatBox({ icon: Icon, label, value, sub, color = 'var(--gold)', 
 }
 
 export function NavTile({ to, icon: Icon, label, desc, danger }) {
-  const accent = danger ? '#ef4444' : 'var(--gold)';
+  const accent = danger ? '#ef4444' : 'var(--brand)';
   return (
     <Link to={to} style={{ textDecoration: 'none' }}>
       <div style={{
-        background: '#0C0C0C',
+        background: '#0a3340',
         border: `1px solid ${danger ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.07)'}`,
         borderRadius: 14, padding: '18px 20px',
         display: 'flex', alignItems: 'center', gap: 14,
         transition: 'all 0.2s',
       }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = `${accent}35`; e.currentTarget.style.background = danger ? 'rgba(239,68,68,0.04)' : '#111'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = danger ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = '#0C0C0C'; }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = `${accent}35`; e.currentTarget.style.background = danger ? 'rgba(239,68,68,0.04)' : '#0a3340'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = danger ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = '#0a3340'; }}
       >
         <div style={{ width: 40, height: 40, borderRadius: 10, background: `${accent}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Icon size={18} style={{ color: accent }} />
@@ -51,7 +51,7 @@ export function NavTile({ to, icon: Icon, label, desc, danger }) {
 }
 
 export function AlertDot({ severity }) {
-  const map = { critical: 'var(--red)', warning: 'var(--orange)', info: 'var(--gold)', low: '#eab308' };
+  const map = { critical: 'var(--red)', warning: 'var(--orange)', info: 'var(--brand)', low: '#13b8a6' };
   return (
     <span style={{
       width: 8, height: 8, borderRadius: '50%',

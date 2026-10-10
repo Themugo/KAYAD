@@ -28,13 +28,13 @@ export default function SkipLink({
       className={`
         fixed top-4 left-4 z-[100]
         px-4 py-2
-        bg-gold-500 text-charcoal-900
+        bg-[#13B8A6] text-[#0A3340]
         font-sans font-semibold text-sm
         rounded-lg shadow-lg
         transform -translate-y-full opacity-0
         focus:translate-y-0 focus:opacity-100
         transition-all duration-200
-        hover:bg-gold-600
+        hover:bg-[#176B87]
         ${className}
       `}
     >

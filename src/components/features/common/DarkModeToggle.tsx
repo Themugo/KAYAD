@@ -28,7 +28,7 @@ export const DarkModeToggle: FC<DarkModeToggleProps> = ({
 
   if (loading) {
     return (
-      <div className={`${sizeClasses[size]} ${className} animate-pulse bg-cream-200 dark:bg-charcoal-700 rounded-full`} />
+      <div className={`${sizeClasses[size]} ${className} animate-pulse bg-[#DDF4F0] dark:bg-[#12576D] rounded-full`} />
     );
   }
 
@@ -40,8 +40,8 @@ export const DarkModeToggle: FC<DarkModeToggleProps> = ({
         ${className}
         relative inline-flex items-center justify-center
         rounded-full
-        bg-cream-100 dark:bg-charcoal-700
-        hover:bg-cream-200 dark:hover:bg-charcoal-600
+        bg-[#EEF7F5] dark:bg-[#12576D]
+        hover:bg-[#DDF4F0] dark:hover:bg-[#176B87]
         transition-all duration-200
         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2
         dark:focus:ring-offset-charcoal-900
@@ -68,7 +68,7 @@ export const DarkModeToggle: FC<DarkModeToggleProps> = ({
 
       {/* Moon icon (shown in light mode) */}
       <svg
-        className={`${iconSizes[size]} text-charcoal-600 dark:text-cream-100 absolute transition-all duration-300 ${
+        className={`${iconSizes[size]} text-[#176B87] dark:text-[#64748B] absolute transition-all duration-300 ${
           isDarkMode ? 'opacity-0 -rotate-90' : 'opacity-100 rotate-0'
         }`}
         fill="none"
@@ -84,7 +84,7 @@ export const DarkModeToggle: FC<DarkModeToggleProps> = ({
       </svg>
 
       {showLabel && (
-        <span className="ml-2 text-sm font-medium text-charcoal-600 dark:text-cream-100">
+        <span className="ml-2 text-sm font-medium text-[#176B87] dark:text-[#64748B]">
           {isDarkMode ? 'Dark' : 'Light'}
         </span>
       )}

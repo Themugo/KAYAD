@@ -6,7 +6,7 @@ const OP_CARDS = [
     icon: Users,
     label: 'Pending Dealers',
     key: 'pendingDealers',
-    color: '#f97316',
+    color: '#176b87',
     to: '/admin/sellers',
     desc: 'Dealers awaiting approval',
   },
@@ -15,7 +15,7 @@ const OP_CARDS = [
     icon: Car,
     label: 'Pending Listings',
     key: 'pendingCars',
-    color: '#8b5cf6',
+    color: '#5aafa4',
     to: '/admin/cars',
     desc: 'Listings awaiting moderation',
   },
@@ -24,7 +24,7 @@ const OP_CARDS = [
     icon: FileText,
     label: 'Pending Reports',
     key: 'pendingReports',
-    color: '#eab308',
+    color: '#13b8a6',
     to: '/admin/support',
     desc: 'Unread contact submissions',
   },
@@ -33,7 +33,7 @@ const OP_CARDS = [
     icon: Shield,
     label: 'Verification Queue',
     key: 'verificationQueue',
-    color: '#3b82f6',
+    color: '#176B87',
     to: '/admin/sellers',
     desc: 'Dealers pending verification',
   },
@@ -42,7 +42,7 @@ const OP_CARDS = [
     icon: Clock,
     label: 'Support Queue',
     key: 'supportQueue',
-    color: '#06b6d4',
+    color: '#13B8A6',
     to: '/admin/support',
     desc: 'Open support tickets',
   },
@@ -71,7 +71,7 @@ export default function AdminOperationalOverview({ stats, sysHealth }) {
   return (
     <div style={{ marginBottom: 24 }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: '1.1rem', color: '#fff', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ width: 3, height: 18, background: 'var(--gold)', borderRadius: 2 }} />
+        <span style={{ width: 3, height: 18, background: 'var(--brand)', borderRadius: 2 }} />
         Operations Hub
       </h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: 12 }}>
@@ -107,8 +107,8 @@ export default function AdminOperationalOverview({ stats, sysHealth }) {
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>{card.desc}</div>
                 {card.to && !card.isHealth && (
                   <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4, paddingTop: 6, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                    <Eye size={9} style={{ color: 'var(--gold)' }} />
-                    <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 600 }}>View queue</span>
+                    <Eye size={9} style={{ color: 'var(--brand)' }} />
+                    <span style={{ fontSize: 9, color: 'var(--brand)', fontWeight: 600 }}>View queue</span>
                   </div>
                 )}
                 {isUrgent && (

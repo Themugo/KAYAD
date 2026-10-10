@@ -33,7 +33,7 @@ export default function BuyerOverviewTab({
       const t = car.bodyType || car.brand || 'Other';
       m[t] = (m[t] || 0) + 1;
     });
-    const colors = ['var(--gold)', '#3b82f6', '#22c55e', '#a855f7', '#f97316'];
+    const colors = ['var(--brand)', '#176B87', '#22c55e', '#5aafa4', '#176b87'];
     return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 5)
       .map(([name, count], i) => ({ name, count, color: colors[i % colors.length] }));
   })();
@@ -54,8 +54,8 @@ export default function BuyerOverviewTab({
     <>
       <div className="overview-stats">
         <StatCard icon="♥" label="Saved Cars" value={favorites.length} sub={favorites.length ? 'in your wishlist' : 'no saved cars'} accent="#ef4444" to="/favorites" />
-        <StatCard icon="⚡" label="Active Bids" value={myBids.filter(b => !b.status || ['pending','active'].includes(b.status)).length} sub={myBids.length ? 'across auctions' : 'place a bid to start'} accent="var(--gold)" to="/showroom?filter=auction" />
-        <StatCard icon="⭐" label="Watchlist" value={watchlist.length || '-'} sub={watchlist.length ? 'saved searches' : 'track vehicles'} accent="#3b82f6" to="/showroom" />
+        <StatCard icon="⚡" label="Active Bids" value={myBids.filter(b => !b.status || ['pending','active'].includes(b.status)).length} sub={myBids.length ? 'across auctions' : 'place a bid to start'} accent="var(--brand)" to="/showroom?filter=auction" />
+        <StatCard icon="⭐" label="Watchlist" value={watchlist.length || '-'} sub={watchlist.length ? 'saved searches' : 'track vehicles'} accent="#176B87" to="/showroom" />
         <StatCard icon="✉" label="Messages" value={unreadMessages || (chats.length || '-')} sub={unreadMessages > 0 ? `${unreadMessages} unread` : chats.length ? 'all read' : 'no messages'} accent="var(--purple)" to="/chat" />
       </div>
 
@@ -73,7 +73,7 @@ export default function BuyerOverviewTab({
           </div>
           <div className="spending-body">
             {totalSpent > 0
-              ? <MiniBarChart data={spendMonthly} color="var(--gold)" height={160} format={(v) => `KES ${fmtK(v)}`} />
+              ? <MiniBarChart data={spendMonthly} color="var(--brand)" height={160} format={(v) => `KES ${fmtK(v)}`} />
               : <div className="spending-empty">No payments yet — your purchases will appear here</div>}
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function BuyerOverviewTab({
               <QuickLink to="/showroom" icon="🚗" label="Browse Gallery" desc="Discover all vehicles" />
               <QuickLink to="/showroom?filter=auction" icon="🔨" label="Live Auctions" desc="Bid in real-time" />
               <QuickLink to="/favorites" icon="♥" label="Saved Cars" desc={`${favorites.length} vehicles saved`} accent="rgba(239,68,68,0.1)" />
-              <QuickLink to="/chat" icon="💬" label="Messages" desc="Chat with dealers" accent="rgba(59,130,246,0.1)" />
+              <QuickLink to="/chat" icon="💬" label="Messages" desc="Chat with dealers" accent="rgba(23, 107, 135, 0.1)" />
             </div>
           </div>
 
@@ -121,7 +121,7 @@ export default function BuyerOverviewTab({
                 <div className="activity-list">
                   {myBids.slice(0, 3).map(bid => (
                     <div key={bid._id} className="activity-row">
-                      <div className="activity-icon-box" style={{ background: 'rgba(37, 99, 235,0.1)' }}>🔨</div>
+                      <div className="activity-icon-box" style={{ background: 'rgba(23, 107, 135, 0.1)' }}>🔨</div>
                       <div className="activity-info">
                         <div className="activity-title">Bid placed on {bid.car?.title || 'a vehicle'}</div>
                         <div className="activity-meta">KES {Number(bid.amount || 0).toLocaleString()} · {bid.createdAt ? new Date(bid.createdAt).toLocaleDateString() : ''}</div>
@@ -144,7 +144,7 @@ export default function BuyerOverviewTab({
                   })}
                   {chats.slice(0, 2).map(c => (
                     <div key={c._id} className="activity-row activity-row-last">
-                      <div className="activity-icon-box" style={{ background: 'rgba(59,130,246,0.1)' }}>💬</div>
+                      <div className="activity-icon-box" style={{ background: 'rgba(23, 107, 135, 0.1)' }}>💬</div>
                       <div className="activity-info">
                         <div className="activity-title">Message from {c.participants?.[0]?.name || 'dealer'}</div>
                         <div className="activity-meta">{c.lastMessage?.text?.slice(0, 50) || 'New conversation'}</div>

@@ -254,7 +254,7 @@ function MobileStatsBar({ stats, className = '' }) {
     <div className="mobile-stats-bar" style={{ margin: '0 var(--mobile-space-4) var(--mobile-space-4)' }}>
       {stats.map((stat, i) => (
         <div key={i} className="mobile-stat">
-          <div className="mobile-stat__value" style={{ color: stat.color || 'var(--gold-400)' }}>
+          <div className="mobile-stat__value" style={{ color: stat.color || 'var(--brand-400)' }}>
             {stat.value}
           </div>
           <div className="mobile-stat__label">{stat.label}</div>

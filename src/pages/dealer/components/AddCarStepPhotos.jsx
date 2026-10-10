@@ -75,7 +75,7 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
       {previews.length > 0 && (
         <div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 10, fontWeight: 600 }}>
-            📌 Drag photos to reorder. Click to set cover. <strong style={{ color: 'var(--gold)' }}>{previews.length}/8</strong>
+            📌 Drag photos to reorder. Click to set cover. <strong style={{ color: 'var(--brand)' }}>{previews.length}/8</strong>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 10 }}>
             {previews.map((src, i) => (
@@ -92,18 +92,18 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
                 role="button" tabIndex={0} aria-label={`Set photo ${i + 1} as cover image`}
                 style={{
                   aspectRatio: '4/3', borderRadius: 10, overflow: 'hidden', position: 'relative',
-                  border: `2px solid ${i === coverImage ? 'var(--gold)' : overIdx === i ? 'rgba(37, 99, 235,0.5)' : dragIdx === i ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                  border: `2px solid ${i === coverImage ? 'var(--brand)' : overIdx === i ? 'rgba(23, 107, 135, 0.5)' : dragIdx === i ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'}`,
                   transition: 'all 0.15s', cursor: 'grab', opacity: dragIdx === i ? 0.5 : 1,
                   transform: overIdx === i ? 'scale(1.03)' : 'none',
                 }}>
                 <img src={src} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', inset: 0, background: i === coverImage ? 'transparent' : 'rgba(0,0,0,0.15)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: i === coverImage ? 'transparent' : 'rgba(10, 51, 64, 0.15)' }} />
                 {i === coverImage ? (
-                  <div style={{ position: 'absolute', top: 6, left: 6, background: 'var(--gold)', color: '#000', fontSize: 8, fontWeight: 900, padding: '3px 8px', borderRadius: 5, letterSpacing: '0.06em' }}>
+                  <div style={{ position: 'absolute', top: 6, left: 6, background: 'var(--brand)', color: '#0a3340', fontSize: 8, fontWeight: 900, padding: '3px 8px', borderRadius: 5, letterSpacing: '0.06em' }}>
                     ★ MAIN
                   </div>
                 ) : (
-                  <div style={{ position: 'absolute', top: 6, left: 6, background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 5 }}>
+                  <div style={{ position: 'absolute', top: 6, left: 6, background: 'rgba(10, 51, 64, 0.6)', color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 5 }}>
                     {i + 1}
                   </div>
                 )}

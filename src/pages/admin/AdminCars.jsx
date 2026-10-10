@@ -64,9 +64,9 @@ export default function AdminCars() {
 
         <div className="stat-grid" style={{ marginBottom: 24 }}>
           {[
-            { label: 'Total Listings', value: filteredStats.total, color: 'var(--gold)' },
+            { label: 'Total Listings', value: filteredStats.total, color: 'var(--brand)' },
             { label: 'Live Auctions', value: filteredStats.live, color: 'var(--green-400)' },
-            { label: 'Sold', value: filteredStats.sold, color: 'var(--gold)' },
+            { label: 'Sold', value: filteredStats.sold, color: 'var(--brand)' },
             { label: 'Pending', value: filteredStats.pending, color: 'var(--orange-400)' },
           ].map(s => (
             <div key={s.label} className="stat-box" style={{ textAlign: 'center', padding: 16 }}>

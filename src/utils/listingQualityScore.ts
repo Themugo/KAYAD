@@ -138,14 +138,14 @@ export function calculateListingQualityScore(factors: Partial<ListingQualityFact
 
 export function getQualityScoreColor(score: number): string {
   if (score >= 85) return '#22C55E'; // Green
-  if (score >= 65) return '#84CC16'; // Lime
-  if (score >= 40) return '#F59E0B'; // Amber
+  if (score >= 65) return '#5AAFA4'; // Muted brand teal
+  if (score >= 40) return '#176B87'; // Slate Teal brand primary
   return '#EF4444'; // Red
 }
 
 export function getQualityScoreGradient(score: number): string {
   if (score >= 85) return 'linear-gradient(135deg, #22C55E, #16A34A)';
-  if (score >= 65) return 'linear-gradient(135deg, #84CC16, #65A30D)';
-  if (score >= 40) return 'linear-gradient(135deg, #F59E0B, #D97706)';
+  if (score >= 65) return 'linear-gradient(135deg, #5AAFA4, #2F8F87)';
+  if (score >= 40) return 'linear-gradient(135deg, #176B87, #12576D)';
   return 'linear-gradient(135deg, #EF4444, #DC2626)';
 }

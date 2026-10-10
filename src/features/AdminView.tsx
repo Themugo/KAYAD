@@ -151,7 +151,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     <div className="space-y-6">
       <PageHeader
         variant="navy"
-        badgeIcon={<ShieldCheck className="w-4 h-4 text-amber-400" />}
+        badgeIcon={<ShieldCheck className="w-4 h-4 text-[#13B8A6]" />}
         badgeText="KAYAD Administration"
         title="Production Operations Console"
         description="Live administration data from the protected KAYAD backend. This console does not create or display fabricated operational records."
@@ -159,7 +159,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       />
 
       {(error || actionError) && (
-        <Card className="p-4 border-amber-300 bg-amber-50 text-amber-900 text-sm flex items-start gap-2">
+        <Card className="p-4 border-[#BDE5DE] bg-[#F3FAF9] text-[#0A3340] text-sm flex items-start gap-2">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <span>{actionError || error}</span>
         </Card>
@@ -204,7 +204,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 ['Disputes', stat('pendingReports')],
                 ['Pending reviews', stat('pendingReviews')],
                 ['Unread alerts', stat('activeAlerts')],
-              ].map(([label, value]) => <div key={label} className="p-3 rounded-xl bg-slate-50 border border-slate-200"><div className="text-[10px] uppercase font-bold text-slate-500">{label}</div><div className="text-xl font-black text-[#176B87] mt-1">{value}</div></div>)}
+              ].map(([label, value]) => <div key={label} className="p-3 rounded-xl bg-[#F6FAF9] border border-[#D7E7E4]"><div className="text-[10px] uppercase font-bold text-[#64748B]">{label}</div><div className="text-xl font-black text-[#176B87] mt-1">{value}</div></div>)}
             </div>
           </Card>
         </>
@@ -216,12 +216,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             <TableHeader><TableRow><TableHead>User</TableHead><TableHead>Role</TableHead><TableHead>Status</TableHead><TableHead>Action</TableHead></TableRow></TableHeader>
             <TableBody>
               {filteredUsers.map((u) => <TableRow key={u._id}>
-                <TableCell><div className="font-bold">{u.name || 'Unnamed user'}</div><div className="text-xs text-slate-500">{u.email || 'No email returned'}</div></TableCell>
+                <TableCell><div className="font-bold">{u.name || 'Unnamed user'}</div><div className="text-xs text-[#64748B]">{u.email || 'No email returned'}</div></TableCell>
                 <TableCell><Badge variant="neutral">{u.role || 'unknown'}</Badge></TableCell>
                 <TableCell>{u.isBanned ? <Badge variant="warning">Banned</Badge> : <Badge variant="success">Active</Badge>}</TableCell>
                 <TableCell><Button size="sm" variant="outline" disabled={busyId === u._id} onClick={() => void toggleBan(u)}><Ban className="w-3.5 h-3.5" /> {u.isBanned ? 'Unban' : 'Ban'}</Button></TableCell>
               </TableRow>)}
-              {!filteredUsers.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-slate-500">No live users returned by the server.</TableCell></TableRow>}
+              {!filteredUsers.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">No live users returned by the server.</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Card>
@@ -233,12 +233,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             <TableHeader><TableRow><TableHead>Vehicle</TableHead><TableHead>Status</TableHead><TableHead>Price</TableHead><TableHead>Action</TableHead></TableRow></TableHeader>
             <TableBody>
               {filteredCars.map((c) => <TableRow key={c._id}>
-                <TableCell><div className="font-bold">{c.title || 'Untitled vehicle'}</div><div className="text-xs text-slate-500">{c._id}</div></TableCell>
+                <TableCell><div className="font-bold">{c.title || 'Untitled vehicle'}</div><div className="text-xs text-[#64748B]">{c._id}</div></TableCell>
                 <TableCell><Badge variant="neutral">{c.status || 'unknown'}</Badge></TableCell>
                 <TableCell>{typeof c.price === 'number' ? `Ksh ${c.price.toLocaleString()}` : 'Not provided'}</TableCell>
                 <TableCell><div className="flex gap-2"><Button size="sm" variant="outline" disabled={busyId === c._id} onClick={() => void verifyCar(c)}><FileCheck className="w-3.5 h-3.5" /> Verify</Button>{onQuickViewVehicle && <Button size="sm" variant="outline" onClick={() => { const v = vehicles.find((x) => x.id === c._id); if (v) onQuickViewVehicle(v); }}>View</Button>}</div></TableCell>
               </TableRow>)}
-              {!filteredCars.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-slate-500">No live vehicles returned by the server.</TableCell></TableRow>}
+              {!filteredCars.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">No live vehicles returned by the server.</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Card>
@@ -262,7 +262,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 <TableCell className="font-mono text-xs">{log.targetId || '—'}</TableCell>
                 <TableCell>{log.actor?.email || log.user?.email || 'Server record'}</TableCell>
               </TableRow>)}
-              {!auditLogs.length && <TableRow><TableCell colSpan={5} className="text-center py-8 text-slate-500">No live audit records returned by the server.</TableCell></TableRow>}
+              {!auditLogs.length && <TableRow><TableCell colSpan={5} className="text-center py-8 text-[#64748B]">No live audit records returned by the server.</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Card>

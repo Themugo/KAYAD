@@ -37,8 +37,8 @@ interface InspectionsViewProps {
 }
 
 const TONE: Record<string, string> = {
-  neutral: 'bg-slate-100 text-slate-700 border-slate-200',
-  active: 'bg-[#E8F5F3] text-[#0F5D73] border-[#CDE9E5]',
+  neutral: 'bg-[#EEF7F5] text-[#12576D] border-[#D7E7E4]',
+  active: 'bg-[#E8F5F3] text-[#12576d] border-[#CDE9E5]',
   success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   danger: 'bg-rose-50 text-rose-700 border-rose-200',
 };
@@ -99,8 +99,8 @@ const StageTrack: React.FC<{ record: InspectionRecord }> = ({ record }) => {
     <ol className="grid grid-cols-4 gap-1.5" aria-label="Inspection progress">
       {INSPECTION_STAGES.map((name, i) => (
         <li key={name} className="min-w-0" aria-current={i === stage ? 'step' : undefined}>
-          <span className={`block h-1.5 rounded-full ${i <= stage ? 'bg-[#13B8A6]' : 'bg-slate-200'}`} />
-          <span className={`block mt-1 text-[10px] sm:text-[11px] truncate ${i === stage ? 'font-bold text-[#0F5D73]' : 'text-slate-500'}`}>
+          <span className={`block h-1.5 rounded-full ${i <= stage ? 'bg-[#13B8A6]' : 'bg-[#DDF4F0]'}`} />
+          <span className={`block mt-1 text-[10px] sm:text-[11px] truncate ${i === stage ? 'font-bold text-[#12576d]' : 'text-[#64748B]'}`}>
             {name}<span className="sr-only">{i < stage ? ' (done)' : i === stage ? ' (current)' : ' (upcoming)'}</span>
           </span>
         </li>
@@ -167,17 +167,17 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 
   return (
     <div className="space-y-8 pb-16">
-      <section className="rounded-3xl bg-[#0F5D73] text-white p-6 sm:p-10" aria-labelledby="insp-title">
+      <section className="rounded-3xl bg-[#12576d] text-white p-6 sm:p-10" aria-labelledby="insp-title">
         <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">Automotive services</p>
         <h1 id="insp-title" className="mt-2 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
-        <p className="mt-3 text-sm sm:text-base text-slate-100 max-w-2xl">KAYAD is the platform that connects you with independent, verified inspection businesses, garages and specialists. They carry out the work, not KAYAD, and you see who they are before you act.</p>
+        <p className="mt-3 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYAD is the platform that connects you with independent, verified inspection businesses, garages and specialists. They carry out the work, not KAYAD, and you see who they are before you act.</p>
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           <Button variant="accent" size="lg" className="font-bold" onClick={startRequest}>Inspect a car before you buy</Button>
           <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
         </div>
       </section>
 
-      <div role="tablist" aria-label="Inspection sections" className="flex gap-1 border-b border-slate-200 overflow-x-auto">
+      <div role="tablist" aria-label="Inspection sections" className="flex gap-1 border-b border-[#D7E7E4] overflow-x-auto">
         {TABS.map((t, i) => (
           <button
             key={t.id}
@@ -189,7 +189,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             tabIndex={tab === t.id ? 0 : -1}
             onClick={() => setTab(t.id)}
             onKeyDown={(e) => onTabKey(e, i)}
-            className={`px-4 py-3 min-h-[44px] text-sm font-bold whitespace-nowrap border-b-2 -mb-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87] ${tab === t.id ? 'border-[#13B8A6] text-[#0F5D73]' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+            className={`px-4 py-3 min-h-[44px] text-sm font-bold whitespace-nowrap border-b-2 -mb-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87] ${tab === t.id ? 'border-[#13B8A6] text-[#12576d]' : 'border-transparent text-[#64748B] hover:text-[#0A3340]'}`}
           >
             {t.label}
           </button>
@@ -200,23 +200,23 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         {tab === 'service' ? (
           <div className="space-y-8">
             <div className="grid md:grid-cols-2 gap-5">
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 flex flex-col" aria-labelledby="lane-inspect">
+              <article className="rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-inspect">
                 <ShieldCheck className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
-                <h2 id="lane-inspect" className="mt-3 text-lg font-black text-[#0F5D73]">Inspect a car before you buy</h2>
-                <p className="mt-1.5 text-sm text-slate-600">An independent inspector checks the vehicle for you. Two ways to arrange it:</p>
-                <ul className="mt-3 space-y-3 text-sm text-slate-600 flex-1">
-                  <li><strong className="text-slate-800">Get matched.</strong> For a car listed on KAYAD: send a request and KAYAD assigns one of its verified independent inspectors. Their business name appears once assigned. Submitting takes no payment.</li>
-                  <li><strong className="text-slate-800">Choose yourself.</strong> Compare independent inspection businesses, pick a package and a time slot, and pay by M-Pesa to confirm the booking.</li>
+                <h2 id="lane-inspect" className="mt-3 text-lg font-black text-[#12576d]">Inspect a car before you buy</h2>
+                <p className="mt-1.5 text-sm text-[#64748B]">An independent inspector checks the vehicle for you. Two ways to arrange it:</p>
+                <ul className="mt-3 space-y-3 text-sm text-[#64748B] flex-1">
+                  <li><strong className="text-[#0A3340]">Get matched.</strong> For a car listed on KAYAD: send a request and KAYAD assigns one of its verified independent inspectors. Their business name appears once assigned. Submitting takes no payment.</li>
+                  <li><strong className="text-[#0A3340]">Choose yourself.</strong> Compare independent inspection businesses, pick a package and a time slot, and pay by M-Pesa to confirm the booking.</li>
                 </ul>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Button variant="primary" className="min-h-[44px]" onClick={startRequest}>{signedIn ? 'Get matched with an inspector' : 'Sign in to get matched'}</Button>
                   <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('pre_purchase_inspection')}>Choose a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
                 </div>
               </article>
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 flex flex-col" aria-labelledby="lane-fix">
+              <article className="rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-fix">
                 <Wrench className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
-                <h2 id="lane-fix" className="mt-3 text-lg font-black text-[#0F5D73]">Repairs, diagnostics and roadside help</h2>
-                <p className="mt-1.5 text-sm text-slate-600 flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYAD lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>
+                <h2 id="lane-fix" className="mt-3 text-lg font-black text-[#12576d]">Repairs, diagnostics and roadside help</h2>
+                <p className="mt-1.5 text-sm text-[#64748B] flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYAD lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Button variant="primary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.()}>Find a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
                   <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('roadside_recovery')}>Roadside and recovery</Button>
@@ -224,17 +224,17 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               </article>
             </div>
 
-            <section aria-labelledby="insp-trust" className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 id="insp-trust" className="text-base font-black text-[#0F5D73]">What verified means here</h2>
-              <ul className="mt-3 grid md:grid-cols-3 gap-4 text-sm text-slate-600">
-                <li><strong className="block text-slate-800">The business is reviewed</strong>KAYAD reviews a business’s identity and evidence before it is listed. It is not verified just by registering.</li>
-                <li><strong className="block text-slate-800">Services are checked separately</strong>Each service a business offers is labelled declared or verified. Specialist work such as hybrid and electric vehicles is shown only once verified.</li>
-                <li><strong className="block text-slate-800">People are linked, not assumed</strong>A mechanic is shown as part of a business only when both sides have confirmed it. Verification is not a guarantee of quality.</li>
+            <section aria-labelledby="insp-trust" className="rounded-2xl border border-[#D7E7E4] bg-white p-6">
+              <h2 id="insp-trust" className="text-base font-black text-[#12576d]">What verified means here</h2>
+              <ul className="mt-3 grid md:grid-cols-3 gap-4 text-sm text-[#64748B]">
+                <li><strong className="block text-[#0A3340]">The business is reviewed</strong>KAYAD reviews a business’s identity and evidence before it is listed. It is not verified just by registering.</li>
+                <li><strong className="block text-[#0A3340]">Services are checked separately</strong>Each service a business offers is labelled declared or verified. Specialist work such as hybrid and electric vehicles is shown only once verified.</li>
+                <li><strong className="block text-[#0A3340]">People are linked, not assumed</strong>A mechanic is shown as part of a business only when both sides have confirmed it. Verification is not a guarantee of quality.</li>
               </ul>
             </section>
 
-            <section aria-labelledby="insp-next" className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 id="insp-next" className="text-base font-black text-[#0F5D73]">After you request or book an inspection</h2>
+            <section aria-labelledby="insp-next" className="rounded-2xl border border-[#D7E7E4] bg-white p-6">
+              <h2 id="insp-next" className="text-base font-black text-[#12576d]">After you request or book an inspection</h2>
               <ol className="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                 {[
                   [ClipboardCheck, 'Request or book', 'Your request or booking is saved against the vehicle with a reference.'],
@@ -245,18 +245,18 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   const I = Icon as typeof ClipboardCheck;
                   return (
                     <li key={title as string} className="flex gap-3">
-                      <span className="w-8 h-8 shrink-0 rounded-full bg-[#E8F5F3] text-[#0F5D73] flex items-center justify-center"><I className="w-4 h-4" aria-hidden="true" /></span>
-                      <span><strong className="block text-slate-800">{i + 1}. {title as string}</strong><span className="text-slate-600">{copy as string}</span></span>
+                      <span className="w-8 h-8 shrink-0 rounded-full bg-[#E8F5F3] text-[#12576d] flex items-center justify-center"><I className="w-4 h-4" aria-hidden="true" /></span>
+                      <span><strong className="block text-[#0A3340]">{i + 1}. {title as string}</strong><span className="text-[#64748B]">{copy as string}</span></span>
                     </li>
                   );
                 })}
               </ol>
             </section>
 
-            <section aria-labelledby="insp-providers" className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <section aria-labelledby="insp-providers" className="rounded-2xl border border-dashed border-[#BDE5DE] bg-[#F6FAF9] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 id="insp-providers" className="text-sm font-black text-[#0F5D73] flex items-center gap-2"><BriefcaseBusiness className="w-4 h-4" aria-hidden="true" />Run an inspection, garage or specialist business?</h2>
-                <p className="text-xs text-slate-600 mt-1">Apply to be listed with the services you offer. Applications are reviewed by KAYAD and do not grant access automatically.</p>
+                <h2 id="insp-providers" className="text-sm font-black text-[#12576d] flex items-center gap-2"><BriefcaseBusiness className="w-4 h-4" aria-hidden="true" />Run an inspection, garage or specialist business?</h2>
+                <p className="text-xs text-[#64748B] mt-1">Apply to be listed with the services you offer. Applications are reviewed by KAYAD and do not grant access automatically.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="secondary" size="sm" className="min-h-[44px]" onClick={() => setProviderOpen(true)}>Apply as a provider</Button>
@@ -265,8 +265,8 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             </section>
           </div>
         ) : !signedIn ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center space-y-3">
-            <p className="text-sm text-slate-700">Sign in to see your inspection requests, bookings and reports.</p>
+          <div className="rounded-2xl border border-[#D7E7E4] bg-white p-8 text-center space-y-3">
+            <p className="text-sm text-[#12576D]">Sign in to see your inspection requests, bookings and reports.</p>
             <div className="flex flex-wrap justify-center gap-2">
               <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in</Button>
               {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('buyer', '/?nav=inspections')}>Create an account</Button>}
@@ -275,7 +275,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         ) : (
           <div className="space-y-4">
             {(kayadError || providerError) && (
-              <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 space-y-1">
+              <div role="alert" className="rounded-xl border border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340] space-y-1">
                 {kayadError && <p>{kayadError}</p>}
                 {providerError && <p>{providerError}</p>}
                 {records.length > 0 && <p className="text-xs">Showing what could be loaded. The list above may be incomplete.</p>}
@@ -283,35 +283,35 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               </div>
             )}
             {loading ? (
-              <p role="status" className="flex items-center justify-center gap-2 py-12 text-sm text-slate-600"><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Loading your inspections…</p>
+              <p role="status" className="flex items-center justify-center gap-2 py-12 text-sm text-[#64748B]"><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Loading your inspections…</p>
             ) : shown.length === 0 ? (
               !kayadError && !providerError && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center space-y-3">
-                  <p className="text-base font-bold text-slate-800">{tab === 'reports' ? 'No reports yet' : 'No inspections yet'}</p>
-                  <p className="text-sm text-slate-600">{tab === 'reports' ? 'A report appears here once an inspection you requested or booked is complete.' : 'Requests and bookings you make appear here with their progress.'}</p>
+                <div className="rounded-2xl border border-[#D7E7E4] bg-white p-10 text-center space-y-3">
+                  <p className="text-base font-bold text-[#0A3340]">{tab === 'reports' ? 'No reports yet' : 'No inspections yet'}</p>
+                  <p className="text-sm text-[#64748B]">{tab === 'reports' ? 'A report appears here once an inspection you requested or booked is complete.' : 'Requests and bookings you make appear here with their progress.'}</p>
                   <Button variant="primary" onClick={() => setTab('service')}>Get an inspection</Button>
                 </div>
               )
             ) : (
               <ul className="space-y-4">
                 {shown.map((r) => (
-                  <li key={r.key} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+                  <li key={r.key} className="rounded-2xl border border-[#D7E7E4] bg-white p-5 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-base font-black text-[#0F5D73] break-words">{r.vehicleTitle}</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">{r.product === 'kayad' ? `Matched inspection${r.providerName ? ` · carried out by ${r.providerName}` : ' · KAYAD is matching a provider'}` : `Provider booking${r.providerName ? ` · ${r.providerName}` : ''}`} · Ref <span className="font-mono break-all">{r.reference}</span></p>
+                        <h3 className="text-base font-black text-[#12576d] break-words">{r.vehicleTitle}</h3>
+                        <p className="text-xs text-[#64748B] mt-0.5">{r.product === 'kayad' ? `Matched inspection${r.providerName ? ` · carried out by ${r.providerName}` : ' · KAYAD is matching a provider'}` : `Provider booking${r.providerName ? ` · ${r.providerName}` : ''}`} · Ref <span className="font-mono break-all">{r.reference}</span></p>
                       </div>
                       <span className={`self-start text-xs font-bold px-3 py-1 rounded-full border ${TONE[r.status.tone]}`}>{r.status.label}</span>
                     </div>
                     <StageTrack record={r} />
-                    <p className="text-sm text-slate-600">{r.status.detail}</p>
-                    <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-slate-600">
-                      {r.location && <div className="flex gap-2"><dt className="text-slate-400">Location</dt><dd>{r.location}</dd></div>}
-                      {r.inspectorName && <div className="flex gap-2"><dt className="text-slate-400">Inspector</dt><dd>{r.inspectorName}</dd></div>}
-                      {r.packageName && <div className="flex gap-2"><dt className="text-slate-400">Package</dt><dd>{r.packageName}</dd></div>}
-                      {r.schedule && <div className="flex gap-2"><dt className="text-slate-400">Slot</dt><dd>{r.schedule}</dd></div>}
-                      {r.priceText && <div className="flex gap-2"><dt className="text-slate-400">{r.product === 'provider' ? 'Price' : 'Quoted fee'}</dt><dd>{r.priceText}</dd></div>}
-                      {r.paymentText && <div className="flex gap-2"><dt className="text-slate-400">Payment</dt><dd>{r.paymentText}</dd></div>}
+                    <p className="text-sm text-[#64748B]">{r.status.detail}</p>
+                    <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-[#64748B]">
+                      {r.location && <div className="flex gap-2"><dt className="text-[#94A3B8]">Location</dt><dd>{r.location}</dd></div>}
+                      {r.inspectorName && <div className="flex gap-2"><dt className="text-[#94A3B8]">Inspector</dt><dd>{r.inspectorName}</dd></div>}
+                      {r.packageName && <div className="flex gap-2"><dt className="text-[#94A3B8]">Package</dt><dd>{r.packageName}</dd></div>}
+                      {r.schedule && <div className="flex gap-2"><dt className="text-[#94A3B8]">Slot</dt><dd>{r.schedule}</dd></div>}
+                      {r.priceText && <div className="flex gap-2"><dt className="text-[#94A3B8]">{r.product === 'provider' ? 'Price' : 'Quoted fee'}</dt><dd>{r.priceText}</dd></div>}
+                      {r.paymentText && <div className="flex gap-2"><dt className="text-[#94A3B8]">Payment</dt><dd>{r.paymentText}</dd></div>}
                     </dl>
                     <div className="flex flex-wrap gap-2">
                       {r.hasReport && <Button size="sm" className="min-h-[44px]" variant="primary" onClick={() => setReportRecord(r)}><FileCheck className="w-4 h-4" aria-hidden="true" /> View report</Button>}

@@ -42,7 +42,7 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 shadow-[0_10px_35px_rgba(15,23,42,.08)]">
+    <header className="fixed top-0 left-0 right-0 z-50 shadow-[0_10px_35px_rgba(10, 51, 64, .08)]">
       {/* Top utility bar - contact info + social, desktop only */}
       <div className="hidden lg:block bg-navy-950 text-white">
         <div className="max-w-7xl mx-auto px-6 xl:px-8">
@@ -111,7 +111,7 @@ export function Header() {
                   className={`relative px-4 py-2.5 text-[13px] font-semibold rounded-xl transition-colors ${
                     isActive(link.href)
                       ? 'text-primary-600'
-                      : 'text-navy-700 hover:text-primary-600 hover:bg-gray-50'
+                      : 'text-navy-700 hover:text-primary-600 hover:bg-[#F6FAF9]'
                   }`}
                 >
                   {link.label}
@@ -125,7 +125,7 @@ export function Header() {
             <div className="flex items-center gap-2 lg:gap-3">
               <Link
                 href="/portal"
-                className="hidden sm:flex items-center gap-2 px-3 py-2 text-[13px] font-semibold text-navy-700 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-colors"
+                className="hidden sm:flex items-center gap-2 px-3 py-2 text-[13px] font-semibold text-navy-700 hover:text-primary-600 hover:bg-[#F6FAF9] rounded-xl transition-colors"
                 aria-label="Customer account"
               >
                 <UserRound className="w-4 h-4" />
@@ -175,7 +175,7 @@ export function Header() {
       </div>
 
       {mobileMenuOpen && (
-        <div id="mobile-menu" className="lg:hidden bg-white border-t border-gray-200 max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <div id="mobile-menu" className="lg:hidden bg-white border-t border-[#D7E7E4] max-h-[calc(100vh-4rem)] overflow-y-auto">
           <nav className="max-w-7xl mx-auto px-4 py-4 space-y-1" aria-label="Mobile navigation">
             {navLinks.map((link) => (
               <Link
@@ -186,13 +186,13 @@ export function Header() {
                 className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive(link.href)
                     ? 'text-primary-600 bg-primary-50'
-                    : 'text-navy-700 hover:text-primary-600 hover:bg-gray-50'
+                    : 'text-navy-700 hover:text-primary-600 hover:bg-[#F6FAF9]'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-4 mt-4 border-t border-gray-200 space-y-1">
+            <div className="pt-4 mt-4 border-t border-[#D7E7E4] space-y-1">
               <Link href="/portal" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-primary-700 bg-primary-50 rounded-xl">
                 <UserRound className="w-4 h-4" />
                 <span>My Customer Account</span>

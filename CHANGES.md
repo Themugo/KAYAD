@@ -8,6 +8,17 @@ status: active
 tags: [general]
 ---
 # KAYAD — Audit Fix Log
+
+## 2026-10-10 — KAYAD Slate Teal Palette Convergence
+
+- Replaced rendered legacy amber/gold/yellow/orange accents with the canonical Slate Teal brand scale.
+- Replaced true-black and neutral-black visual surfaces/overlays with deep brand teal; body ink now uses the brand's deep teal/slate text palette.
+- Converged legacy charcoal/cream/surface/accent utility palettes to the existing KAYAD theme tokens.
+- Added runtime normalization for legacy admin-saved branding colors while preserving unrelated dealer white-label custom colors.
+- Added `npm run validate:brand-palette-convergence` to prevent palette regression.
+- Scope intentionally excludes semantic danger/error red and success green states, and does not change marketplace architecture, routes, data, payments, auction lifecycle, or backend behavior.
+- Validation status: source palette validator passed; full dependency-backed build/typecheck/tests still require the project's supported Node.js `22.22.2+` and dependency installation.
+
 *Audited and fixed by Claude, May 2026*
 
 > **Round 2 Complete** — All 6 remaining items from the original audit have been verified/fixed. See ✅ table below.
@@ -982,3 +993,7 @@ CHANGES.md                       (this entry)
 | Build | clean |
 | Lint | 0 errors, 189 warnings |
 | Tests | 23/23 files, 151/151 pass |
+
+## 2026-10-10 — Project-wide Slate Teal theme convergence
+
+Extended the existing Slate Teal palette through marketplace, auction, escrow, seller/dealer, inspector, admin/CMS/XOS, dashboards, mobile/PWA assets, email, reminders, PDF receipts and CMS defaults. Replaced remaining non-semantic blue/purple/pink accents, converged warning/info display tokens to the brand family, normalized known legacy saved site-brand values, and added an idempotent site-theme migration plus a wider palette regression validator. Functional success/error colors, vehicle paint swatches, existing architecture, routes, APIs and business logic remain intact. No migration was executed and no production deployment was performed. See `docs/design/THEME_CONVERGENCE_REPORT_20261010.md`.

@@ -131,7 +131,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       if (!error) {
         e.target.style.borderColor = 'var(--brand)';
-        e.target.style.boxShadow = '0 0 0 3px rgba(22, 196, 164, 0.15)';
+        e.target.style.boxShadow = '0 0 0 3px rgba(19, 184, 166, 0.15)';
       }
     };
 

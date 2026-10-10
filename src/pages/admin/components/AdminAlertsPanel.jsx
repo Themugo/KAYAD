@@ -10,7 +10,7 @@ export default function AdminAlertsPanel({ alerts, onMarkRead, onMarkAllRead }) 
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Bell size={14} style={{ color: 'var(--gold)' }} /> Alerts
+          <Bell size={14} style={{ color: 'var(--brand)' }} /> Alerts
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {alerts.length > 0 && (
@@ -18,7 +18,7 @@ export default function AdminAlertsPanel({ alerts, onMarkRead, onMarkAllRead }) 
               Mark All Read
             </button>
           )}
-          <Link to="/admin/security-log" style={{ fontSize: 10, color: 'var(--gold)', textDecoration: 'none', fontWeight: 600 }}>View All</Link>
+          <Link to="/admin/security-log" style={{ fontSize: 10, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>View All</Link>
         </div>
       </div>
       {alerts.length === 0 ? (
@@ -30,12 +30,12 @@ export default function AdminAlertsPanel({ alerts, onMarkRead, onMarkAllRead }) 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
           {alerts.slice(0, 6).map(a => {
             const sev = a.severity === 'critical' ? 'high' : a.severity === 'warning' ? 'medium' : 'low';
-            const sevColor = sev === 'high' ? 'var(--red)' : sev === 'medium' ? 'var(--orange)' : '#eab308';
+            const sevColor = sev === 'high' ? 'var(--red)' : sev === 'medium' ? 'var(--orange)' : '#13b8a6';
             return (
               <div key={a._id} style={{
                 padding: '10px 12px', borderRadius: 10,
-                background: sev === 'high' ? 'rgba(239,68,68,0.04)' : sev === 'medium' ? 'rgba(245,158,11,0.04)' : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${sev === 'high' ? 'rgba(239,68,68,0.12)' : sev === 'medium' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)'}`,
+                background: sev === 'high' ? 'rgba(239,68,68,0.04)' : sev === 'medium' ? 'rgba(23, 107, 135, 0.04)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${sev === 'high' ? 'rgba(239,68,68,0.12)' : sev === 'medium' ? 'rgba(23, 107, 135, 0.12)' : 'rgba(255,255,255,0.04)'}`,
                 fontSize: 12,
               }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
@@ -48,7 +48,7 @@ export default function AdminAlertsPanel({ alerts, onMarkRead, onMarkAllRead }) 
                       <span style={{ fontWeight: 600, color: '#fff', fontSize: 11, textTransform: 'capitalize' }}>{a.type?.replace(/_/g, ' ')}</span>
                       <span style={{
                         fontSize: 9, padding: '1px 5px', borderRadius: 4, fontWeight: 600,
-                        background: sev === 'high' ? 'rgba(239,68,68,0.12)' : sev === 'medium' ? 'rgba(245,158,11,0.12)' : 'rgba(234,179,8,0.12)',
+                        background: sev === 'high' ? 'rgba(239,68,68,0.12)' : sev === 'medium' ? 'rgba(23, 107, 135, 0.12)' : 'rgba(234,179,8,0.12)',
                         color: sevColor,
                       }}>
                         {sev.toUpperCase()}

@@ -83,7 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         color: '#ffffff',
         borderColor: 'transparent',
         // Stitch: Primary glow shadow
-        boxShadow: '0 4px 15px rgba(22, 196, 164, 0.25)',
+        boxShadow: '0 4px 15px rgba(19, 184, 166, 0.25)',
       },
       secondary: {
         background: 'transparent',
@@ -103,7 +103,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       outline: {
         background: 'transparent',
         color: 'var(--text-primary)',
-        borderColor: 'var(--border, #cbd5e1)',
+        borderColor: 'var(--border, #d7e7e4)',
       },
       accent: {
         background: 'var(--color-accent, #176B87)',

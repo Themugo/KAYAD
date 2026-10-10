@@ -76,7 +76,7 @@ export function Tooltip({
             ${positionStyles[position]}
             px-3 py-2
             text-sm text-white
-            bg-[var(--tooltip-bg,#334155)]
+            bg-[var(--tooltip-bg,#12576d)]
             rounded-lg
             shadow-lg
             whitespace-nowrap

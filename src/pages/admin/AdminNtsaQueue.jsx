@@ -3,8 +3,8 @@ import { ntsaAPI } from '../../api/api';
 import { ShieldCheck, Search, CheckCircle, XCircle, FileText, X } from 'lucide-react';
 
 const STATUS_COLORS = {
-  pending: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
-  in_review: { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6' },
+  pending: { bg: 'rgba(19, 184, 166, 0.1)', color: '#176b87' },
+  in_review: { bg: 'rgba(23, 107, 135, 0.1)', color: '#176B87' },
   passed: { bg: 'rgba(34,197,94,0.1)', color: '#22c55e' },
   failed: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444' },
 };
@@ -14,16 +14,16 @@ function Modal({ title, children, onClose }) {
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+      background: 'rgba(10, 51, 64, 0.8)', backdropFilter: 'blur(8px)',
     }} onClick={onClose} role="presentation">
       <div onClick={e => e.stopPropagation()} role="presentation" style={{
-        background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)',
+        background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.1)',
         borderRadius: 16, padding: 28, width: 420, maxWidth: '90vw',
         position: 'relative',
       }}>
         <button onClick={onClose} style={{
           position: 'absolute', top: 12, right: 12,
-          background: 'none', border: 'none', color: 'rgba(15, 23, 42, 0.3)',
+          background: 'none', border: 'none', color: 'rgba(10, 51, 64, 0.3)',
           cursor: 'pointer', fontSize: 18,
         }}><X size={18} /></button>
         <h3 style={{ marginTop: 0, marginBottom: 18 }}>{title}</h3>
@@ -106,7 +106,7 @@ export default function AdminNtsaQueue() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-              style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 8, padding: '6px 10px', color: '#0F172A', fontSize: 12 }}>
+              style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '6px 10px', color: '#0a3340', fontSize: 12 }}>
               <option value="">All Status</option>
               <option value="pending">Pending</option>
               <option value="in_review">In Review</option>
@@ -133,7 +133,7 @@ export default function AdminNtsaQueue() {
               const car = r.car || {};
               return (
                 <div key={r._id} style={{
-                  background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 12,
+                  background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 12,
                   padding: '14px 18px', cursor: 'pointer', transition: 'all 0.2s',
                 }}
                   onClick={() => setSelected(selected?._id === r._id ? null : r)}
@@ -146,8 +146,8 @@ export default function AdminNtsaQueue() {
                         <FileText size={16} style={{ color: sc.color }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{car.title || car._id}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', marginTop: 2 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0a3340' }}>{car.title || car._id}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', marginTop: 2 }}>
                           Requested {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -160,23 +160,23 @@ export default function AdminNtsaQueue() {
                   </div>
 
                   {selected?._id === r._id && (
-                    <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(15, 23, 42, 0.06)' }}>
+                    <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(10, 51, 64, 0.06)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-                        <div><span style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)' }}>Duty Status</span><div style={{ fontSize: 12, color: '#0F172A', marginTop: 2 }}>{r.dutyStatus}</div></div>
-                        <div><span style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)' }}>Chassis Verified</span><div style={{ fontSize: 12, color: '#0F172A', marginTop: 2 }}>{r.chassisVerified ? '✅' : '⏳'}</div></div>
-                        <div><span style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)' }}>Logbook Verified</span><div style={{ fontSize: 12, color: '#0F172A', marginTop: 2 }}>{r.logbookVerified ? '✅' : '⏳'}</div></div>
-                        <div><span style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)' }}>Import Verified</span><div style={{ fontSize: 12, color: '#0F172A', marginTop: 2 }}>{r.importVerified ? '✅' : '⏳'}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Duty Status</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.dutyStatus}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Chassis Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.chassisVerified ? '✅' : '⏳'}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Logbook Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.logbookVerified ? '✅' : '⏳'}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Import Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.importVerified ? '✅' : '⏳'}</div></div>
                       </div>
                       {r.adminNotes && (
-                        <div style={{ background: 'rgba(15, 23, 42, 0.03)', borderRadius: 8, padding: '10px 14px', marginBottom: 14 }}>
-                          <div style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)', marginBottom: 4 }}>Admin Notes</div>
-                          <div style={{ fontSize: 12, color: 'rgba(15, 23, 42, 0.6)' }}>{r.adminNotes}</div>
+                        <div style={{ background: 'rgba(10, 51, 64, 0.03)', borderRadius: 8, padding: '10px 14px', marginBottom: 14 }}>
+                          <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)', marginBottom: 4 }}>Admin Notes</div>
+                          <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.6)' }}>{r.adminNotes}</div>
                         </div>
                       )}
                       {r.status === 'pending' && (
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button onClick={(e) => { e.stopPropagation(); openProcessModal(r._id, 'passed'); }}
-                            className="btn btn-sm" style={{ background: '#22c55e', color: '#000', fontWeight: 800, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}>
+                            className="btn btn-sm" style={{ background: '#22c55e', color: '#0a3340', fontWeight: 800, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}>
                             <CheckCircle size={12} style={{ marginRight: 4 }} /> Approve
                           </button>
                           <button onClick={(e) => { e.stopPropagation(); openProcessModal(r._id, 'failed'); }}
@@ -187,10 +187,10 @@ export default function AdminNtsaQueue() {
                       )}
                       {r.documents?.length > 0 && (
                         <div style={{ marginTop: 12 }}>
-                          <div style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)', marginBottom: 6 }}>Documents ({r.documents.length})</div>
+                          <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)', marginBottom: 6 }}>Documents ({r.documents.length})</div>
                           {r.documents.map((d, i) => (
                             <a key={i} href={d.url} target="_blank" rel="noopener noreferrer"
-                              style={{ display: 'block', fontSize: 11, color: '#3b82f6', marginBottom: 3 }}>
+                              style={{ display: 'block', fontSize: 11, color: '#176B87', marginBottom: 3 }}>
                               {d.label || `Document ${i + 1}`}
                             </a>
                           ))}
@@ -209,28 +209,28 @@ export default function AdminNtsaQueue() {
       {processModal && (
         <Modal title={processModal.status === 'passed' ? 'Approve Verification' : 'Reject Verification'} onClose={() => setProcessModal(null)}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.4)', display: 'block', marginBottom: 6 }}>
               Admin Notes {processModal.status === 'failed' ? <span style={{ color: '#ef4444' }}>(required)</span> : ''}
             </label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)}
               placeholder="Enter notes about this decision…"
               style={{
                 width: '100%', minHeight: 80, resize: 'vertical',
-                background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)',
-                borderRadius: 8, padding: '10px 12px', color: '#0F172A', fontSize: 12,
+                background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.1)',
+                borderRadius: 8, padding: '10px 12px', color: '#0a3340', fontSize: 12,
               }}
             />
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <button onClick={() => setProcessModal(null)}
-              style={{ background: 'transparent', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 8, padding: '8px 18px', color: '#0F172A', fontSize: 12, cursor: 'pointer' }}>
+              style={{ background: 'transparent', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '8px 18px', color: '#0a3340', fontSize: 12, cursor: 'pointer' }}>
               Cancel
             </button>
             <button onClick={handleProcess} disabled={processing || (processModal.status === 'failed' && !notes.trim())}
               style={{
                 background: processModal.status === 'passed' ? '#22c55e' : '#ef4444',
                 border: 'none', borderRadius: 8, padding: '8px 18px',
-                color: processModal.status === 'passed' ? '#000' : '#fff',
+                color: processModal.status === 'passed' ? '#0a3340' : '#fff',
                 fontWeight: 800, fontSize: 12, cursor: processing ? 'wait' : 'pointer',
                 opacity: (processing || (processModal.status === 'failed' && !notes.trim())) ? 0.5 : 1,
               }}>
@@ -244,27 +244,27 @@ export default function AdminNtsaQueue() {
       {queueModal && (
         <Modal title="Queue Car for NTSA Verification" onClose={() => setQueueModal(false)}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.4)', display: 'block', marginBottom: 6 }}>
               Car ID
             </label>
             <input value={carIdInput} onChange={e => setCarIdInput(e.target.value)}
               placeholder="Enter car _id to queue…"
               style={{
                 width: '100%',
-                background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)',
-                borderRadius: 8, padding: '10px 12px', color: '#0F172A', fontSize: 12,
+                background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.1)',
+                borderRadius: 8, padding: '10px 12px', color: '#0a3340', fontSize: 12,
               }}
             />
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <button onClick={() => setQueueModal(false)}
-              style={{ background: 'transparent', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 8, padding: '8px 18px', color: '#0F172A', fontSize: 12, cursor: 'pointer' }}>
+              style={{ background: 'transparent', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '8px 18px', color: '#0a3340', fontSize: 12, cursor: 'pointer' }}>
               Cancel
             </button>
             <button onClick={handleQueueCar} disabled={processing || !carIdInput.trim()}
               style={{
-                background: 'var(--gold)', border: 'none', borderRadius: 8, padding: '8px 18px',
-                color: '#000', fontWeight: 800, fontSize: 12, cursor: processing ? 'wait' : 'pointer',
+                background: 'var(--brand)', border: 'none', borderRadius: 8, padding: '8px 18px',
+                color: '#0a3340', fontWeight: 800, fontSize: 12, cursor: processing ? 'wait' : 'pointer',
                 opacity: (processing || !carIdInput.trim()) ? 0.5 : 1,
               }}>
               {processing ? 'Queueing…' : 'Queue'}

@@ -72,15 +72,15 @@ const SEVERITY_STYLES: Record<ReadinessSeverity, {
   },
   warning: {
     icon: <AlertTriangle className="w-4 h-4" />,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
-    borderColor: 'border-amber-200'
+    color: 'text-[#176B87]',
+    bgColor: 'bg-[#F3FAF9]',
+    borderColor: 'border-[#BDE5DE]'
   },
   info: {
     icon: <Info className="w-4 h-4" />,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200'
+    color: 'text-[#176B87]',
+    bgColor: 'bg-[#F3FAF9]',
+    borderColor: 'border-[#D7E7E4]'
   },
 };
 
@@ -107,7 +107,7 @@ const ScoreRing: React.FC<{ score: number; size?: 'sm' | 'md' | 'lg' }> = ({
           cy={dim / 2}
           r={radius}
           fill="none"
-          stroke="#E2E8F0"
+          stroke="#d7e7e4"
           strokeWidth={strokeWidth}
         />
         <circle
@@ -115,7 +115,7 @@ const ScoreRing: React.FC<{ score: number; size?: 'sm' | 'md' | 'lg' }> = ({
           cy={dim / 2}
           r={radius}
           fill="none"
-          stroke={score === 100 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444'}
+          stroke={score === 100 ? '#10B981' : score >= 70 ? '#176b87' : '#EF4444'}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -125,7 +125,7 @@ const ScoreRing: React.FC<{ score: number; size?: 'sm' | 'md' | 'lg' }> = ({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`font-black ${fontSize} text-white`}>{score}%</span>
-        <span className={`${labelSize} text-slate-400 font-medium`}>READY</span>
+        <span className={`${labelSize} text-[#94A3B8] font-medium`}>READY</span>
       </div>
     </div>
   );
@@ -151,7 +151,7 @@ const CheckItem: React.FC<{
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-medium ${check.isComplete ? 'text-slate-700 line-through' : 'text-slate-900'}`}>
+          <span className={`text-sm font-medium ${check.isComplete ? 'text-[#12576D] line-through' : 'text-[#0A3340]'}`}>
             {check.label}
           </span>
           {isRequired && !check.isComplete && (
@@ -160,12 +160,12 @@ const CheckItem: React.FC<{
             </Badge>
           )}
           {!isRequired && (
-            <Badge variant="neutral" size="sm" className="text-[10px] bg-slate-100 text-slate-600 border-slate-200">
+            <Badge variant="neutral" size="sm" className="text-[10px] bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]">
               Optional
             </Badge>
           )}
         </div>
-        <p className="text-xs text-slate-500 mt-0.5">{check.description}</p>
+        <p className="text-xs text-[#64748B] mt-0.5">{check.description}</p>
         {!check.isComplete && check.actionLabel && (
           <button className="text-xs text-[#176B87] font-medium mt-1 hover:underline flex items-center gap-1">
             {check.actionLabel}
@@ -178,7 +178,7 @@ const CheckItem: React.FC<{
           onClick={() => onToggle?.(check.id, !check.isComplete)}
           className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
             check.isComplete
-              ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+              ? 'bg-[#DDF4F0] text-[#12576D] hover:bg-[#BDE5DE]'
               : 'bg-emerald-600 text-white hover:bg-emerald-700'
           }`}
         >
@@ -204,21 +204,21 @@ const ReadinessSectionAccordion: React.FC<{
   const hasCritical = checks.some(c => c.severity === 'critical' && !c.isComplete);
 
   return (
-    <div className={`border rounded-xl overflow-hidden ${isComplete ? 'border-emerald-200' : hasCritical ? 'border-red-200' : 'border-slate-200'}`}>
+    <div className={`border rounded-xl overflow-hidden ${isComplete ? 'border-emerald-200' : hasCritical ? 'border-red-200' : 'border-[#D7E7E4]'}`}>
       <button
         onClick={onToggle}
         className={`w-full flex items-center gap-4 p-4 text-left transition-colors ${
-          isComplete ? 'bg-emerald-50 hover:bg-emerald-100' : hasCritical ? 'bg-red-50 hover:bg-red-100' : 'bg-slate-50 hover:bg-slate-100'
+          isComplete ? 'bg-emerald-50 hover:bg-emerald-100' : hasCritical ? 'bg-red-50 hover:bg-red-100' : 'bg-[#F6FAF9] hover:bg-[#EEF7F5]'
         }`}
       >
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-          isComplete ? 'bg-emerald-100 text-emerald-600' : hasCritical ? 'bg-red-100 text-red-600' : 'bg-white text-slate-600'
+          isComplete ? 'bg-emerald-100 text-emerald-600' : hasCritical ? 'bg-red-100 text-red-600' : 'bg-white text-[#64748B]'
         }`}>
           {SECTION_ICONS[section.icon] || <Settings className="w-5 h-5" />}
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-bold text-[#176B87]">{section.title}</h4>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[#64748B]">
             {completedCount} of {totalCount} completed
           </p>
         </div>
@@ -234,15 +234,15 @@ const ReadinessSectionAccordion: React.FC<{
               {totalCount - completedCount} Required
             </Badge>
           ) : (
-            <Badge variant="warning" size="sm" className="bg-amber-100 text-amber-700 border-amber-200">
+            <Badge variant="warning" size="sm" className="bg-[#DDF4F0] text-[#12576D] border-[#BDE5DE]">
               <AlertTriangle className="w-3 h-3 mr-1" />
               {totalCount - completedCount} Pending
             </Badge>
           )}
           {isExpanded ? (
-            <ChevronDown className="w-5 h-5 text-slate-400" />
+            <ChevronDown className="w-5 h-5 text-[#94A3B8]" />
           ) : (
-            <ChevronRight className="w-5 h-5 text-slate-400" />
+            <ChevronRight className="w-5 h-5 text-[#94A3B8]" />
           )}
         </div>
       </button>
@@ -312,7 +312,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
   return (
     <div className="space-y-6">
       {/* Header Dashboard */}
-      <Card className="p-6 bg-gradient-to-r from-[#0A3340] to-[#1a2a4a] text-white border-none">
+      <Card className="p-6 bg-gradient-to-r from-[#0A3340] to-[#12576d] text-white border-none">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <ScoreRing score={result.score} size="lg" />
 
@@ -320,7 +320,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
             <h3 className="text-xl font-black mb-2">
               Auction Readiness Score
             </h3>
-            <p className="text-slate-300 text-sm mb-4">
+            <p className="text-[#BDE5DE] text-sm mb-4">
               {result.isPublishable
                 ? 'This auction is ready to be published.'
                 : `${result.criticalIssues.length} critical items must be completed before publishing.`
@@ -330,18 +330,18 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm text-slate-300">{result.completedChecks} Completed</span>
+                <span className="text-sm text-[#BDE5DE]">{result.completedChecks} Completed</span>
               </div>
               {result.criticalIssues.length > 0 && (
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-slate-300">{result.criticalIssues.length} Critical</span>
+                  <span className="text-sm text-[#BDE5DE]">{result.criticalIssues.length} Critical</span>
                 </div>
               )}
               {result.warnings.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-400" />
-                  <span className="text-sm text-slate-300">{result.warnings.length} Warnings</span>
+                  <AlertTriangle className="w-4 h-4 text-[#13B8A6]" />
+                  <span className="text-sm text-[#BDE5DE]">{result.warnings.length} Warnings</span>
                 </div>
               )}
             </div>
@@ -361,18 +361,18 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
         </div>
 
         {result.nextAction && !result.isPublishable && (
-          <div className="mt-4 p-3 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+          <div className="mt-4 p-3 bg-[#13B8A6]/20 border border-[#5AAFA4]/30 rounded-xl flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-[#13B8A6] flex-shrink-0" />
             <div>
-              <span className="text-sm font-bold text-amber-400">Next Required Action:</span>
+              <span className="text-sm font-bold text-[#13B8A6]">Next Required Action:</span>
               <span className="text-sm text-white ml-2">{result.nextAction.label}</span>
-              <span className="text-xs text-slate-400 ml-2">({result.nextAction.section})</span>
+              <span className="text-xs text-[#94A3B8] ml-2">({result.nextAction.section})</span>
             </div>
           </div>
         )}
 
         <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="text-xs text-slate-400 flex items-center gap-2">
+          <p className="text-xs text-[#94A3B8] flex items-center gap-2">
             <Info className="w-4 h-4" />
             This readiness score is visible only to the Auction Organizer and KAYAD Administrators.
             Buyers will only see fully validated auctions.
@@ -389,7 +389,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
           className={`px-8 font-bold ${
             result.isPublishable
               ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-              : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              : 'bg-[#BDE5DE] text-[#64748B] cursor-not-allowed'
           }`}
         >
           {result.isPublishable ? (
@@ -407,7 +407,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
       </div>
 
       {!result.isPublishable && (
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-[#64748B]">
           Complete all required checklist items before publishing this auction.
         </p>
       )}
@@ -429,7 +429,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
 
       {/* QA Validation Results */}
       {isAdminView && (
-        <Card className="p-6 bg-white border-slate-200">
+        <Card className="p-6 bg-white border-[#D7E7E4]">
           <h4 className="font-bold text-[#176B87] mb-4 flex items-center gap-2">
             <ClipboardCheck className="w-5 h-5" />
             Quality Assurance Validation
@@ -458,7 +458,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mt-4 pt-4 border-t border-[#D7E7E4]">
             <Badge
               variant={qaResult.passed ? 'success' : 'danger'}
               className={qaResult.passed ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-red-100 text-red-800 border-red-200'}

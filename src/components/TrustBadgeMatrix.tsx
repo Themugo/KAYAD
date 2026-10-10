@@ -45,7 +45,7 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
         {/* Verified Seller / Dealer Badge */}
         {isVerifiedSeller && (
           <span className="inline-flex items-center gap-1 bg-[#176B87] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
-            <ShieldCheck className="w-3 h-3 text-amber-400 shrink-0" />
+            <ShieldCheck className="w-3 h-3 text-[#13B8A6] shrink-0" />
             {vehicle.sellerType}
           </span>
         )}
@@ -60,7 +60,7 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
 
         {/* Escrow Badge - ONLY when applicable (Always for private, explicit for dealer) */}
         {isEscrowActive && (
-          <span className="inline-flex items-center gap-1 bg-amber-400 text-[#0A3340] text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
+          <span className="inline-flex items-center gap-1 bg-[#13B8A6] text-[#0A3340] text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
             <Lock className="w-3 h-3 shrink-0" />
             {isPrivateSeller ? 'Escrow Required' : 'Escrow Vault Enabled'}
           </span>
@@ -69,15 +69,15 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
         {/* Auction Badge - ONLY when isAuction is true */}
         {isAuctionActive && (
           <span className="inline-flex items-center gap-1 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs animate-pulse">
-            <Gavel className="w-3 h-3 shrink-0 text-amber-300" />
+            <Gavel className="w-3 h-3 shrink-0 text-[#5AAFA4]" />
             Live Auction
           </span>
         )}
 
         {/* Finance Badge */}
         {isFinanceActive && (
-          <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-900 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md">
-            <Landmark className="w-3 h-3 text-blue-600 shrink-0" />
+          <span className="inline-flex items-center gap-1 bg-[#F3FAF9] text-[#0A3340] border border-[#D7E7E4] text-[10px] font-bold px-2 py-0.5 rounded-md">
+            <Landmark className="w-3 h-3 text-[#176B87] shrink-0" />
             Finance Ready
           </span>
         )}
@@ -90,14 +90,14 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
       <div className={`flex flex-wrap gap-2 text-xs ${className}`}>
         {/* Seller Trust Pill */}
         {isVerifiedSeller && (
-          <div className="bg-slate-50 p-2 rounded-xl border border-slate-200 flex items-center gap-2 flex-1 min-w-[130px]">
+          <div className="bg-[#F6FAF9] p-2 rounded-xl border border-[#D7E7E4] flex items-center gap-2 flex-1 min-w-[130px]">
             {isPrivateSeller ? (
               <UserCheck className="w-4 h-4 text-[#176B87] shrink-0" />
             ) : (
               <ShieldCheck className="w-4 h-4 text-[#176B87] shrink-0" />
             )}
             <div className="min-w-0">
-              <p className="text-[9px] text-slate-400 font-bold uppercase truncate">Seller</p>
+              <p className="text-[9px] text-[#94A3B8] font-bold uppercase truncate">Seller</p>
               <p className="font-extrabold text-[#176B87] truncate text-[11px]">{vehicle.sellerType}</p>
             </div>
           </div>
@@ -116,10 +116,10 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
 
         {/* Escrow Pill - Only if escrow active */}
         {isEscrowActive && (
-          <div className="bg-amber-50 p-2 rounded-xl border border-amber-200 flex items-center gap-2 flex-1 min-w-[130px]">
-            <Lock className="w-4 h-4 text-amber-600 shrink-0" />
+          <div className="bg-[#F3FAF9] p-2 rounded-xl border border-[#BDE5DE] flex items-center gap-2 flex-1 min-w-[130px]">
+            <Lock className="w-4 h-4 text-[#176B87] shrink-0" />
             <div className="min-w-0">
-              <p className="text-[9px] text-amber-800 font-bold uppercase truncate">Escrow Vault</p>
+              <p className="text-[9px] text-[#0A3340] font-bold uppercase truncate">Escrow Vault</p>
               <p className="font-extrabold text-[#0A3340] truncate text-[11px]">
                 {isPrivateSeller ? 'Mandatory Escrow' : 'Verified Escrow'}
               </p>
@@ -140,11 +140,11 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
 
         {/* Financing Pill - Only if finance active */}
         {isFinanceActive && (
-          <div className="bg-blue-50/80 p-2 rounded-xl border border-blue-200 flex items-center gap-2 flex-1 min-w-[130px]">
-            <Landmark className="w-4 h-4 text-blue-600 shrink-0" />
+          <div className="bg-[#F3FAF9]/80 p-2 rounded-xl border border-[#D7E7E4] flex items-center gap-2 flex-1 min-w-[130px]">
+            <Landmark className="w-4 h-4 text-[#176B87] shrink-0" />
             <div className="min-w-0">
-              <p className="text-[9px] text-blue-800 font-bold uppercase truncate">Asset Finance</p>
-              <p className="font-extrabold text-blue-900 truncate text-[11px]">Pre-Approved</p>
+              <p className="text-[9px] text-[#0E4655] font-bold uppercase truncate">Asset Finance</p>
+              <p className="font-extrabold text-[#0A3340] truncate text-[11px]">Pre-Approved</p>
             </div>
           </div>
         )}
@@ -157,13 +157,13 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
   if (activeBadgesCount === 0) return null;
 
   return (
-    <div className={`bg-gradient-to-r from-slate-900 via-[#176B87] to-[#0A3340] text-white p-4 rounded-2xl shadow-lg border border-amber-400/30 space-y-3 ${className}`}>
+    <div className={`bg-gradient-to-r from-[#0A3340] via-[#176B87] to-[#0A3340] text-white p-4 rounded-2xl shadow-lg border border-[#91CEC5]/30 space-y-3 ${className}`}>
       <div className="flex items-center justify-between pb-2 border-b border-white/10 text-xs">
-        <span className="font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 font-display">
+        <span className="font-extrabold uppercase tracking-wider text-[#13B8A6] flex items-center gap-1.5 font-display">
           <ShieldCheck className="w-4 h-4" />
           Verified Listing Specifications
         </span>
-        <span className="bg-amber-400 text-[#0A3340] text-[10px] font-black px-2.5 py-0.5 rounded-full">
+        <span className="bg-[#13B8A6] text-[#0A3340] text-[10px] font-black px-2.5 py-0.5 rounded-full">
           {vehicle.sellerType}
         </span>
       </div>
@@ -172,67 +172,67 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
         {/* 1. Verified Seller */}
         {isVerifiedSeller && (
           <div className="space-y-0.5 min-w-[120px]">
-            <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-amber-400" /> Seller Status
+            <p className="text-[10px] text-[#BDE5DE] uppercase font-bold flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-[#13B8A6]" /> Seller Status
             </p>
             <p className="font-bold text-white text-xs">{vehicle.sellerType}</p>
-            <p className="text-[10px] text-slate-300">{vehicle.sellerName}</p>
+            <p className="text-[10px] text-[#BDE5DE]">{vehicle.sellerName}</p>
           </div>
         )}
 
         {/* 2. Inspection Status - Only when passed */}
         {isInspectionActive && (
           <div className="space-y-0.5 min-w-[120px]">
-            <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
+            <p className="text-[10px] text-[#BDE5DE] uppercase font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Technical Audit
             </p>
             <p className="font-bold text-emerald-300 text-xs">Inspection on record</p>
-            <p className="text-[10px] text-slate-300">Logbook & Engine Audited</p>
+            <p className="text-[10px] text-[#BDE5DE]">Logbook & Engine Audited</p>
           </div>
         )}
 
         {/* 3. Escrow Status - Only when active */}
         {isEscrowActive && (
           <div className="space-y-0.5 min-w-[120px]">
-            <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
-              <Lock className="w-3 h-3 text-amber-400" /> Payment Protection
+            <p className="text-[10px] text-[#BDE5DE] uppercase font-bold flex items-center gap-1">
+              <Lock className="w-3 h-3 text-[#13B8A6]" /> Payment Protection
             </p>
-            <p className="font-bold text-amber-300 text-xs">
+            <p className="font-bold text-[#5AAFA4] text-xs">
               {isPrivateSeller ? 'Escrow Mandatory' : 'Escrow Vault Enabled'}
             </p>
-            <p className="text-[10px] text-slate-300">Funds recorded as held by KAYAD</p>
+            <p className="text-[10px] text-[#BDE5DE]">Funds recorded as held by KAYAD</p>
           </div>
         )}
 
         {/* 4. Auction Status - Only when active */}
         {isAuctionActive && (
           <div className="space-y-0.5 min-w-[120px]">
-            <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
+            <p className="text-[10px] text-[#BDE5DE] uppercase font-bold flex items-center gap-1">
               <Gavel className="w-3 h-3 text-rose-400" /> Sale Format
             </p>
             <p className="font-bold text-rose-300 text-xs">Live Auction Bidding</p>
-            <p className="text-[10px] text-slate-300">Reserve Price Set</p>
+            <p className="text-[10px] text-[#BDE5DE]">Reserve Price Set</p>
           </div>
         )}
 
         {/* 5. Financing - Only when active */}
         {isFinanceActive && (
           <div className="space-y-0.5 min-w-[120px]">
-            <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
-              <Landmark className="w-3 h-3 text-blue-400" /> Financing
+            <p className="text-[10px] text-[#BDE5DE] uppercase font-bold flex items-center gap-1">
+              <Landmark className="w-3 h-3 text-[#5AAFA4]" /> Financing
             </p>
-            <p className="font-bold text-blue-300 text-xs">Lender Feed Pending</p>
-            <p className="text-[10px] text-slate-300">Verified lender terms not connected</p>
+            <p className="font-bold text-[#91CEC5] text-xs">Lender Feed Pending</p>
+            <p className="text-[10px] text-[#BDE5DE]">Verified lender terms not connected</p>
           </div>
         )}
 
         {/* 6. Responsiveness */}
         <div className="space-y-0.5 min-w-[120px]">
-          <p className="text-[10px] text-slate-300 uppercase font-bold flex items-center gap-1">
-            <Zap className="w-3 h-3 text-amber-400" /> Response Time
+          <p className="text-[10px] text-[#BDE5DE] uppercase font-bold flex items-center gap-1">
+            <Zap className="w-3 h-3 text-[#13B8A6]" /> Response Time
           </p>
-          <p className="font-bold text-amber-300 text-xs">{vehicle.responseTime || '< 15 mins'}</p>
-          <p className="text-[10px] text-slate-300">{vehicle.condition || 'Foreign Used'}</p>
+          <p className="font-bold text-[#5AAFA4] text-xs">{vehicle.responseTime || '< 15 mins'}</p>
+          <p className="text-[10px] text-[#BDE5DE]">{vehicle.condition || 'Foreign Used'}</p>
         </div>
       </div>
     </div>

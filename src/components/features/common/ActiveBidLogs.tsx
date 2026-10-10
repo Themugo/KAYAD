@@ -43,10 +43,10 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
 
   if (loading) {
     return (
-      <div className={`bg-white dark:bg-charcoal-800 rounded-xl p-4 ${className}`}>
+      <div className={`bg-white dark:bg-[#12576D] rounded-xl p-4 ${className}`}>
         <div className="animate-pulse space-y-3">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-12 bg-cream-200 dark:bg-charcoal-700 rounded" />
+            <div key={i} className="h-12 bg-[#DDF4F0] dark:bg-[#12576D] rounded" />
           ))}
         </div>
       </div>
@@ -54,11 +54,11 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-charcoal-800 rounded-xl ${className}`}>
+    <div className={`bg-white dark:bg-[#12576D] rounded-xl ${className}`}>
       {/* Header */}
-      <div className="p-4 border-b border-cream-200 dark:border-charcoal-700">
+      <div className="p-4 border-b border-[#D7E7E4] dark:border-[#12576D]">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-charcoal-700 dark:text-cream-100">
+          <h3 className="font-semibold text-[#12576D] dark:text-[#64748B]">
             Live Bid Activity
           </h3>
           <span className="flex items-center gap-1 text-xs text-emerald-600">
@@ -74,40 +74,40 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
 
       {/* Stats */}
       {showStats && stats && (
-        <div className="grid grid-cols-4 gap-2 p-4 bg-cream-50 dark:bg-charcoal-700/50">
+        <div className="grid grid-cols-4 gap-2 p-4 bg-[#F6FAF9] dark:bg-[#12576D]/50">
           <div className="text-center">
-            <p className="text-lg font-bold text-charcoal-700 dark:text-cream-100">
+            <p className="text-lg font-bold text-[#12576D] dark:text-[#64748B]">
               {stats.totalBids}
             </p>
-            <p className="text-xs text-charcoal-500">Total Bids</p>
+            <p className="text-xs text-[#64748B]">Total Bids</p>
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-brand-500">
               {stats.uniqueBidders}
             </p>
-            <p className="text-xs text-charcoal-500">Bidders</p>
+            <p className="text-xs text-[#64748B]">Bidders</p>
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-emerald-600">
               {formatKES(stats.highestBid)}
             </p>
-            <p className="text-xs text-charcoal-500">Highest</p>
+            <p className="text-xs text-[#64748B]">Highest</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-charcoal-600 dark:text-cream-200">
+            <p className="text-lg font-bold text-[#176B87] dark:text-[#64748B]">
               {formatKES(stats.averageBid)}
             </p>
-            <p className="text-xs text-charcoal-500">Average</p>
+            <p className="text-xs text-[#64748B]">Average</p>
           </div>
         </div>
       )}
 
       {/* Bid List */}
-      <div className="divide-y divide-cream-100 dark:divide-charcoal-700">
+      <div className="divide-y divide-[#EEF7F5] dark:divide-[#12576D]">
         {logs.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-charcoal-500 dark:text-cream-300">No bids yet</p>
-            <p className="text-sm text-charcoal-400 dark:text-cream-400">
+            <p className="text-[#64748B] dark:text-[#5AAFA4]">No bids yet</p>
+            <p className="text-sm text-[#0A3340] dark:text-[#176B87]">
               Be the first to place a bid!
             </p>
           </div>
@@ -125,10 +125,10 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
                   index === 0
                     ? 'bg-brand-500 text-white'
                     : index === 1
-                    ? 'bg-cream-300 text-charcoal-700'
+                    ? 'bg-[#BDE5DE] text-[#12576D]'
                     : index === 2
-                    ? 'bg-amber-600 text-white'
-                    : 'bg-cream-200 dark:bg-charcoal-600 text-charcoal-500'
+                    ? 'bg-[#176B87] text-white'
+                    : 'bg-[#DDF4F0] dark:bg-[#176B87] text-[#64748B]'
                 }`}>
                   {index + 1}
                 </div>
@@ -136,11 +136,11 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
                 {/* Bidder Info */}
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-charcoal-700 dark:text-cream-100">
+                    <p className="font-medium text-[#12576D] dark:text-[#64748B]">
                       {log.pseudonym}
                     </p>
                     {log.isAutoBid && (
-                      <span className="px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                      <span className="px-1.5 py-0.5 rounded text-xs bg-[#DDF4F0] text-[#176B87] dark:bg-[#0A3340]/30 dark:text-[#5AAFA4]">
                         AUTO
                       </span>
                     )}
@@ -150,7 +150,7 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-charcoal-500 dark:text-cream-300">
+                  <p className="text-xs text-[#64748B] dark:text-[#5AAFA4]">
                     {new Date(log.createdAt).toLocaleTimeString()}
                   </p>
                 </div>
@@ -161,12 +161,12 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
                 <p className={`font-bold ${
                   index === 0
                     ? 'text-brand-600 dark:text-brand-400'
-                    : 'text-charcoal-700 dark:text-cream-100'
+                    : 'text-[#12576D] dark:text-[#64748B]'
                 }`}>
                   {formatKES(log.amount)}
                 </p>
                 <p className={`text-xs ${
-                  log.status === 'active' ? 'text-emerald-600' : 'text-charcoal-500'
+                  log.status === 'active' ? 'text-emerald-600' : 'text-[#64748B]'
                 }`}>
                   {log.status === 'active' ? 'Leading' : log.status}
                 </p>
@@ -177,8 +177,8 @@ export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
       </div>
 
       {/* Source indicator */}
-      <div className="p-3 border-t border-cream-200 dark:border-charcoal-700 text-center">
-        <span className="text-xs text-charcoal-400 dark:text-cream-400">
+      <div className="p-3 border-t border-[#D7E7E4] dark:border-[#12576D] text-center">
+        <span className="text-xs text-[#0A3340] dark:text-[#176B87]">
           Showing {Math.min(logs.length, maxItems)} of {stats?.totalBids || logs.length} bids
         </span>
       </div>

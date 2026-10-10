@@ -93,57 +93,57 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       <div className="text-center py-6">
         <h1 className="text-2xl font-bold text-[#176B87] font-display">Vehicle Financing</h1>
-        <p className="text-sm text-slate-500 mt-1">Estimate your monthly payment and apply for financing</p>
+        <p className="text-sm text-[#64748B] mt-1">Estimate your monthly payment and apply for financing</p>
       </div>
 
       {/* CALCULATOR - honest, local arithmetic, no named lenders */}
-      <section className="bg-white border border-slate-200 rounded-2xl p-5">
+      <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <Calculator className="w-4 h-4 text-[#176B87]" />
           <h2 className="text-sm font-bold text-[#176B87]">Affordability Calculator</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <label className="text-xs text-slate-600">
+          <label className="text-xs text-[#64748B]">
             Vehicle price (Ksh)
-            <input type="number" value={vehiclePrice} onChange={(e) => setVehiclePrice(Number(e.target.value) || 0)} className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+            <input type="number" value={vehiclePrice} onChange={(e) => setVehiclePrice(Number(e.target.value) || 0)} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
           </label>
-          <label className="text-xs text-slate-600">
+          <label className="text-xs text-[#64748B]">
             Deposit (Ksh)
-            <input type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value) || 0)} className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+            <input type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value) || 0)} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
           </label>
-          <label className="text-xs text-slate-600">
+          <label className="text-xs text-[#64748B]">
             Term (months)
-            <select value={termMonths} onChange={(e) => setTermMonths(Number(e.target.value))} className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm">
+            <select value={termMonths} onChange={(e) => setTermMonths(Number(e.target.value))} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm">
               <option value={24}>24</option>
               <option value={36}>36</option>
               <option value={48}>48</option>
               <option value={60}>60</option>
             </select>
           </label>
-          <label className="text-xs text-slate-600">
+          <label className="text-xs text-[#64748B]">
             Estimated interest rate (% p.a.)
-            <input type="number" value={rate} onChange={(e) => setRate(Number(e.target.value) || 0)} className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+            <input type="number" value={rate} onChange={(e) => setRate(Number(e.target.value) || 0)} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
           </label>
         </div>
         <div className="bg-[#F5F2EB] rounded-xl p-4 flex flex-wrap gap-6">
           <div>
-            <p className="text-[10px] text-slate-500 uppercase font-bold">Loan Amount</p>
+            <p className="text-[10px] text-[#64748B] uppercase font-bold">Loan Amount</p>
             <p className="text-sm font-bold text-[#176B87]">Ksh {loanAmount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-[10px] text-slate-500 uppercase font-bold">Est. Monthly Payment</p>
+            <p className="text-[10px] text-[#64748B] uppercase font-bold">Est. Monthly Payment</p>
             <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(monthlyPayment).toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-[10px] text-slate-500 uppercase font-bold">Total Cost</p>
+            <p className="text-[10px] text-[#64748B] uppercase font-bold">Total Cost</p>
             <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(totalCost).toLocaleString()}</p>
           </div>
         </div>
-        <p className="text-[10px] text-slate-400 mt-2">Estimate only - actual rates and terms depend on the lender's own assessment.</p>
+        <p className="text-[10px] text-[#94A3B8] mt-2">Estimate only - actual rates and terms depend on the lender's own assessment.</p>
       </section>
 
       {/* REAL APPLICATION FORM */}
-      <section className="bg-white border border-slate-200 rounded-2xl p-5">
+      <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="w-4 h-4 text-[#176B87]" />
           <h2 className="text-sm font-bold text-[#176B87]">Apply for Financing</h2>
@@ -160,20 +160,20 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold">{submitError}</div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="text-xs text-slate-600">
+              <label className="text-xs text-[#64748B]">
                 Monthly income (Ksh)
-                <input type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} required className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                <input type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} required className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
               </label>
-              <label className="text-xs text-slate-600">
+              <label className="text-xs text-[#64748B]">
                 Employment status
-                <select value={employmentStatus} onChange={(e) => setEmploymentStatus(e.target.value)} className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                <select value={employmentStatus} onChange={(e) => setEmploymentStatus(e.target.value)} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm">
                   <option value="employed">Employed</option>
                   <option value="self_employed">Self-employed</option>
                   <option value="business_owner">Business owner</option>
                 </select>
               </label>
             </div>
-            <p className="text-[10px] text-slate-400">Uses the vehicle price, deposit, and term from the calculator above.</p>
+            <p className="text-[10px] text-[#94A3B8]">Uses the vehicle price, deposit, and term from the calculator above.</p>
             <button type="submit" disabled={submitting} className="bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5 disabled:opacity-50">
               {submitting ? 'Submitting…' : user ? 'Submit Application' : 'Sign In to Apply'}
             </button>
@@ -183,29 +183,29 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
 
       {/* REAL TRACKER - the user's own real applications */}
       {user && (
-        <section className="bg-white border border-slate-200 rounded-2xl p-5">
+        <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <ClipboardList className="w-4 h-4 text-[#176B87]" />
             <h2 className="text-sm font-bold text-[#176B87]">My Applications</h2>
           </div>
           {loadingApps ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+              <Loader2 className="w-5 h-5 text-[#94A3B8] animate-spin" />
             </div>
           ) : myApplications.length === 0 ? (
-            <p className="text-xs text-slate-400">No applications yet.</p>
+            <p className="text-xs text-[#94A3B8]">No applications yet.</p>
           ) : (
             <div className="space-y-2">
               {myApplications.map((app) => (
-                <div key={app.id} className="border border-slate-200 rounded-xl p-3.5 flex items-center justify-between">
+                <div key={app.id} className="border border-[#D7E7E4] rounded-xl p-3.5 flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold text-[#176B87]">Ksh {app.loanAmount.toLocaleString()} over {app.termMonths} months</p>
-                    <p className="text-[11px] text-slate-500">Submitted {new Date(app.createdAt).toLocaleDateString()}</p>
+                    <p className="text-[11px] text-[#64748B]">Submitted {new Date(app.createdAt).toLocaleDateString()}</p>
                   </div>
                   <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
                     app.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
                     app.status === 'declined' ? 'bg-rose-100 text-rose-700' :
-                    'bg-amber-100 text-amber-700'
+                    'bg-[#DDF4F0] text-[#12576D]'
                   }`}>
                     {app.status.replace('_', ' ')}
                   </span>

@@ -40,12 +40,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const segments = loc.pathname.split('/').filter(Boolean);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#050505' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a3340' }}>
       <AdminSidebar mobileOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top header bar */}
         <div style={{
-          height: 48, background: '#080808', borderBottom: '1px solid rgba(255,255,255,0.04)',
+          height: 48, background: '#0a3340', borderBottom: '1px solid rgba(255,255,255,0.04)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '0 24px', flexShrink: 0,
         }}>
@@ -58,7 +58,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             >
               <Menu size={18} />
             </button>
-            <span style={{ color: 'var(--gold)', fontWeight: 700 }}>Kayad</span>
+            <span style={{ color: 'var(--brand)', fontWeight: 700 }}>Kayad</span>
             {segments.map((seg, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <ChevronRight size={12} />
@@ -79,7 +79,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </span>
             <div style={{
               width: 28, height: 28, borderRadius: '50%',
-              background: 'rgba(212,196,168,0.15)', color: 'var(--gold)',
+              background: 'rgba(19, 184, 166, 0.15)', color: 'var(--brand)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 11, fontWeight: 700,
             }}>

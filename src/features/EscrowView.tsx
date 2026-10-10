@@ -61,15 +61,15 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth, initia
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-900">Escrow</h1>
-        <p className="mt-1 text-sm text-slate-600">Where a purchase made through KAYAD stands, and what happens next.</p>
+        <h1 className="text-2xl font-semibold text-[#0A3340]">Escrow</h1>
+        <p className="mt-1 text-sm text-[#64748B]">Where a purchase made through KAYAD stands, and what happens next.</p>
       </header>
 
-      <div role="tablist" aria-label="Escrow sections" className="flex gap-1 overflow-x-auto border-b border-slate-200">
+      <div role="tablist" aria-label="Escrow sections" className="flex gap-1 overflow-x-auto border-b border-[#D7E7E4]">
         {tabs.map((t, i) => (
           <button key={t.id} ref={(el) => { tabRefs.current[t.id] = el; }} role="tab" id={`escrow-tab-${t.id}`} aria-selected={active === t.id}
             aria-controls={`escrow-panel-${t.id}`} tabIndex={active === t.id ? 0 : -1} type="button" onClick={() => setTab(t.id)} onKeyDown={(e) => onKey(e, i)}
-            className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${active === t.id ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
+            className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4] ${active === t.id ? 'border-[#0A3340] text-[#0A3340]' : 'border-transparent text-[#64748B] hover:text-[#0A3340]'}`}>
             {t.label}
           </button>
         ))}
@@ -84,10 +84,10 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth, initia
         {active === 'deals' && (signedIn
           ? <ParticipantEscrowDesk initialEscrowId={deepLink} onNavigate={onNavigate} />
           : (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 text-center">
-              <p className="font-medium text-slate-900">Sign in to see your escrow deals.</p>
-              <p className="mt-1 text-sm text-slate-600">Deals are private to the buyer and seller.</p>
-              {onOpenAuth && <button type="button" onClick={onOpenAuth} className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">Sign in</button>}
+            <div className="rounded-xl border border-[#D7E7E4] bg-white p-6 text-center">
+              <p className="font-medium text-[#0A3340]">Sign in to see your escrow deals.</p>
+              <p className="mt-1 text-sm text-[#64748B]">Deals are private to the buyer and seller.</p>
+              {onOpenAuth && <button type="button" onClick={onOpenAuth} className="mt-4 rounded-lg bg-[#0A3340] px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">Sign in</button>}
             </div>
           ))}
         {active === 'operations' && staff && <EscrowOperationsDesk />}

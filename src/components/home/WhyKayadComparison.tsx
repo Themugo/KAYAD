@@ -53,7 +53,7 @@ export const WhyKayadComparison: FC = () => {
             Why Kenya Chooses KAYAD
           </h2>
 
-          <p className="text-xs sm:text-sm text-slate-300 font-sans font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-[#BDE5DE] font-sans font-medium leading-relaxed max-w-2xl mx-auto">
             See how KAYAD transforms vehicle buying and selling compared to traditional classifieds and unverified peer-to-peer social groups.
           </p>
         </div>
@@ -62,8 +62,8 @@ export const WhyKayadComparison: FC = () => {
         <div className="bg-[#176B87]/80 border border-white/15 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
 
           {/* Table Header */}
-          <div className="grid grid-cols-1 md:grid-cols-3 bg-[#12576D] p-4 sm:p-6 border-b border-white/15 text-xs font-mono font-black uppercase tracking-wider text-slate-300">
-            <div className="hidden md:block text-slate-400">Marketplace Standard</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 bg-[#12576D] p-4 sm:p-6 border-b border-white/15 text-xs font-mono font-black uppercase tracking-wider text-[#BDE5DE]">
+            <div className="hidden md:block text-[#94A3B8]">Marketplace Standard</div>
             <div className="text-rose-400 flex items-center gap-2">
               <X className="w-4 h-4 text-rose-500 stroke-[3]" />
               <span>Traditional Classifieds</span>
@@ -87,7 +87,7 @@ export const WhyKayadComparison: FC = () => {
                 </div>
 
                 {/* Traditional */}
-                <div className="flex items-start gap-2 text-xs sm:text-sm text-slate-300 font-sans">
+                <div className="flex items-start gap-2 text-xs sm:text-sm text-[#BDE5DE] font-sans">
                   <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5 stroke-[3]" />
                   <span>{row.traditional}</span>
                 </div>
@@ -107,7 +107,7 @@ export const WhyKayadComparison: FC = () => {
         <div className="text-center pt-2">
           <button
             onClick={() => navigateTo('escrow')}
-            className="px-8 py-4 bg-[#13B8A6] hover:bg-[#00B0B5] text-[#176B87] font-mono font-black text-xs uppercase tracking-wider rounded-2xl inline-flex items-center gap-2 shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
+            className="px-8 py-4 bg-[#13B8A6] hover:bg-[#13B8A6] text-[#176B87] font-mono font-black text-xs uppercase tracking-wider rounded-2xl inline-flex items-center gap-2 shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
           >
             <span>Experience Escrow-Protected Trading</span>
             <ArrowRight className="w-4 h-4 text-[#176B87]" />

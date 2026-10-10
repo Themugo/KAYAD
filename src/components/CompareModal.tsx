@@ -36,7 +36,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
   const title = (
     <div className="flex items-center justify-between w-full pr-8">
       <div className="flex items-center gap-2">
-        <ArrowRightLeft className="w-5 h-5 text-amber-500" />
+        <ArrowRightLeft className="w-5 h-5 text-[#176B87]" />
         <span>Vehicle Comparison Matrix ({vehicles.length} Selected)</span>
       </div>
 
@@ -53,8 +53,8 @@ export const CompareModal: React.FC<CompareModalProps> = ({
     <Modal isOpen={vehicles.length > 0} onClose={onClose} title={title} maxWidth="5xl">
       <div className="space-y-4">
         {/* Toggle Highlight Differences Bar */}
-        <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-          <span className="text-slate-600 font-medium">
+        <div className="flex items-center justify-between bg-[#F6FAF9] p-3 rounded-xl border border-[#D7E7E4] text-xs">
+          <span className="text-[#64748B] font-medium">
             Comparing specifications side-by-side across East Africa certified inventory
           </span>
 
@@ -65,30 +65,30 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               onChange={(e) => setHighlightDifferences(e.target.checked)}
               className="accent-[#176B87] w-4 h-4 rounded"
             />
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <Sparkles className="w-3.5 h-3.5 text-[#176B87]" />
             <span>Highlight Differences</span>
           </label>
         </div>
 
         {/* Comparison Matrix Table */}
-        <div className="overflow-x-auto border border-slate-200 rounded-xl">
+        <div className="overflow-x-auto border border-[#D7E7E4] rounded-xl">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-44 bg-slate-100 font-bold text-slate-700">Specification</TableHead>
+                <TableHead className="w-44 bg-[#EEF7F5] font-bold text-[#12576D]">Specification</TableHead>
                 {vehicles.map((v) => (
-                  <TableHead key={v.id} className="min-w-[220px] bg-slate-50">
+                  <TableHead key={v.id} className="min-w-[220px] bg-[#F6FAF9]">
                     <div className="space-y-2 relative pt-2">
                       <button
                         onClick={() => onRemove(v.id)}
-                        className="absolute top-0 right-0 p-1 bg-slate-200 hover:bg-rose-500 hover:text-white text-slate-600 rounded-full transition-colors"
+                        className="absolute top-0 right-0 p-1 bg-[#DDF4F0] hover:bg-rose-500 hover:text-white text-[#64748B] rounded-full transition-colors"
                         title="Remove vehicle from compare"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
 
                       <div
-                        className="h-32 rounded-lg overflow-hidden border border-slate-200 relative group cursor-pointer"
+                        className="h-32 rounded-lg overflow-hidden border border-[#D7E7E4] relative group cursor-pointer"
                         onClick={() => onQuickViewVehicle?.(v)}
                         title="View vehicle details"
                       >
@@ -104,8 +104,8 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                         className="cursor-pointer group"
                         onClick={() => onQuickViewVehicle?.(v)}
                       >
-                        <p className="font-extrabold text-[#176B87] line-clamp-1 text-xs font-display group-hover:text-amber-600 transition-colors">{v.title}</p>
-                        <p className="text-[10px] text-slate-500 font-medium">{v.location} ({v.county})</p>
+                        <p className="font-extrabold text-[#176B87] line-clamp-1 text-xs font-display group-hover:text-[#176B87] transition-colors">{v.title}</p>
+                        <p className="text-[10px] text-[#64748B] font-medium">{v.location} ({v.county})</p>
                       </div>
                     </div>
                   </TableHead>
@@ -115,13 +115,13 @@ export const CompareModal: React.FC<CompareModalProps> = ({
 
             <TableBody>
               {/* Row: Price */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.price) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Price (Ksh)</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.price) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Price (Ksh)</TableCell>
                 {vehicles.map((v) => (
                   <TableCell key={v.id} className="font-black text-base text-[#176B87] font-display">
                     Ksh {v.price.toLocaleString()}
                     {v.marketPriceAvg && (
-                      <span className="block text-[10px] text-slate-400 font-normal line-through">
+                      <span className="block text-[10px] text-[#94A3B8] font-normal line-through">
                         Avg: Ksh {v.marketPriceAvg.toLocaleString()}
                       </span>
                     )}
@@ -130,61 +130,61 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               </TableRow>
 
               {/* Row: Year & Mileage */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.year}-${v.mileage}`) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Year / Mileage</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.year}-${v.mileage}`) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Year / Mileage</TableCell>
                 {vehicles.map((v) => (
-                  <TableCell key={v.id} className="font-bold text-slate-800">
+                  <TableCell key={v.id} className="font-bold text-[#0A3340]">
                     {v.year} • {v.mileage.toLocaleString()} km
                   </TableCell>
                 ))}
               </TableRow>
 
               {/* Row: Fuel & Transmission */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.fuelType}-${v.transmission}`) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Fuel & Transmission</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.fuelType}-${v.transmission}`) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Fuel & Transmission</TableCell>
                 {vehicles.map((v) => (
-                  <TableCell key={v.id} className="font-medium text-slate-700">
+                  <TableCell key={v.id} className="font-medium text-[#12576D]">
                     {v.fuelType} ({v.transmission})
                   </TableCell>
                 ))}
               </TableRow>
 
               {/* Row: Engine & Drive */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.engineSize}-${v.driveType}`) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Engine / Drive</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.engineSize}-${v.driveType}`) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Engine / Drive</TableCell>
                 {vehicles.map((v) => (
-                  <TableCell key={v.id} className="font-medium text-slate-700">
+                  <TableCell key={v.id} className="font-medium text-[#12576D]">
                     {v.engineSize || 'N/A'} • {v.driveType || '2WD'}
                   </TableCell>
                 ))}
               </TableRow>
 
               {/* Row: Body Style & Condition */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.bodyStyle}-${v.condition}`) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Body & Condition</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.bodyStyle}-${v.condition}`) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Body & Condition</TableCell>
                 {vehicles.map((v) => (
-                  <TableCell key={v.id} className="font-medium text-slate-700">
+                  <TableCell key={v.id} className="font-medium text-[#12576D]">
                     {v.bodyStyle || 'N/A'} ({v.condition || 'Used'})
                   </TableCell>
                 ))}
               </TableRow>
 
               {/* Row: Seller & Rating */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.sellerName) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Seller & Rating</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.sellerName) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Seller & Rating</TableCell>
                 {vehicles.map((v) => (
-                  <TableCell key={v.id} className="font-semibold text-slate-800">
+                  <TableCell key={v.id} className="font-semibold text-[#0A3340]">
                     <p>{v.sellerName}</p>
-                    <p className="text-amber-600 font-bold text-[11px] flex items-center gap-1 mt-0.5">
-                      ★ {v.sellerRating} <span className="text-slate-400 font-normal">({v.sellerType})</span>
+                    <p className="text-[#176B87] font-bold text-[11px] flex items-center gap-1 mt-0.5">
+                      ★ {v.sellerRating} <span className="text-[#94A3B8] font-normal">({v.sellerType})</span>
                     </p>
                   </TableCell>
                 ))}
               </TableRow>
 
               {/* Row: 150-Point Inspection */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.inspectionPassed) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Pre-purchase inspection</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.inspectionPassed) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Pre-purchase inspection</TableCell>
                 {vehicles.map((v) => (
                   <TableCell key={v.id}>
                     <Badge variant={v.inspectionPassed ? 'success' : 'neutral'}>
@@ -195,8 +195,8 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               </TableRow>
 
               {/* Row: Escrow Protection */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => isEscrowApplicable(v)) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Escrow Protection</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => isEscrowApplicable(v)) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Escrow Protection</TableCell>
                 {vehicles.map((v) => {
                   const escrowActive = isEscrowApplicable(v);
                   return (
@@ -210,8 +210,8 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               </TableRow>
 
               {/* Row: Financing Availability */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.financeAvailable) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Financing</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => v.financeAvailable) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Financing</TableCell>
                 {vehicles.map((v) => (
                   <TableCell key={v.id}>
                     <Badge variant={v.financeAvailable ? 'success' : 'neutral'}>
@@ -222,19 +222,19 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               </TableRow>
 
               {/* Row: Response Time & Freshness */}
-              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.responseTime}-${v.listingFreshness}`) ? 'bg-amber-50/70' : ''}>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Response & Freshness</TableCell>
+              <TableRow className={highlightDifferences && areValuesDifferent((v) => `${v.responseTime}-${v.listingFreshness}`) ? 'bg-[#F3FAF9]/70' : ''}>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Response & Freshness</TableCell>
                 {vehicles.map((v) => (
-                  <TableCell key={v.id} className="text-[11px] font-medium text-slate-700">
-                    <p className="font-bold text-amber-700">{v.responseTime || '< 15 mins'}</p>
-                    <p className="text-slate-400">{v.listingFreshness}</p>
+                  <TableCell key={v.id} className="text-[11px] font-medium text-[#12576D]">
+                    <p className="font-bold text-[#12576D]">{v.responseTime || '< 15 mins'}</p>
+                    <p className="text-[#94A3B8]">{v.listingFreshness}</p>
                   </TableCell>
                 ))}
               </TableRow>
 
               {/* Row: CTA Actions */}
               <TableRow>
-                <TableCell className="font-bold text-slate-600 bg-slate-50/50">Purchase Option</TableCell>
+                <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Purchase Option</TableCell>
                 {vehicles.map((v) => (
                   <TableCell key={v.id}>
                     <Button
@@ -246,7 +246,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                         onStartEscrow(v);
                       }}
                     >
-                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <Lock className="w-3.5 h-3.5 text-[#13B8A6]" />
                       Buy with Escrow
                     </Button>
                   </TableCell>

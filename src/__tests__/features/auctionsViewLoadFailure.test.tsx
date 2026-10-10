@@ -37,7 +37,7 @@ describe('AuctionsView load failure handling', () => {
   it('when everything fails the error is shown and nothing claims the floor is empty', async () => {
     svc.fetchList.mockRejectedValue(boom());
     renderView();
-    await screen.findByText('Internal server error');
+    await screen.findByText(/Internal server error/);
     expect(screen.queryByText(/The auction floor is quiet right now/)).toBeNull();
     expect(screen.queryByText('Nothing live this moment.')).toBeNull();
     expect(screen.getByText(/Live auctions are temporarily unavailable/)).toBeTruthy();

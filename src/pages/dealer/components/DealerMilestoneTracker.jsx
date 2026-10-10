@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 
 const HEALTH_COLORS = {
   platinum: '#22c55e',
-  gold: 'var(--gold)',
-  silver: '#60a5fa',
-  warning: '#f59e0b',
+  gold: 'var(--brand)',
+  silver: '#5AAFA4',
+  warning: '#176b87',
   high_risk: '#ef4444',
   unscored: 'rgba(255,255,255,0.2)',
 };
@@ -23,7 +23,7 @@ function CircularScore({ score, size = 80 }) {
   const r = (size - 10) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (score / 100) * circ;
-  const color = score >= 80 ? '#22c55e' : score >= 50 ? 'var(--gold)' : score >= 25 ? '#f59e0b' : '#ef4444';
+  const color = score >= 80 ? '#22c55e' : score >= 50 ? 'var(--brand)' : score >= 25 ? '#176b87' : '#ef4444';
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
@@ -56,8 +56,8 @@ export default function DealerMilestoneTracker() {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(37, 99, 235,0.06), rgba(0,0,0,0.2))',
-      border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 16, padding: 24, marginBottom: 24,
+      background: 'linear-gradient(135deg, rgba(23, 107, 135, 0.06), rgba(10, 51, 64, 0.2))',
+      border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 16, padding: 24, marginBottom: 24,
     }}>
       {/* Top row: score + key stats */}
       <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
@@ -78,8 +78,8 @@ export default function DealerMilestoneTracker() {
 
         {/* Quick stat pills */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <StatPill label="Vehicles" value={stats.vehiclesCount} color="var(--gold)" />
-          <StatPill label="Leads" value={stats.leadsCount} color="#60a5fa" />
+          <StatPill label="Vehicles" value={stats.vehiclesCount} color="var(--brand)" />
+          <StatPill label="Leads" value={stats.leadsCount} color="#5AAFA4" />
           <StatPill label="Auctions" value={(stats.auctionsLive || 0) + (stats.auctionsSold || 0)} color="#a78bfa" />
           <StatPill label="Health" value={healthCategory} color={HEALTH_COLORS[healthCategory] || HEALTH_COLORS.unscored} />
         </div>
@@ -112,7 +112,7 @@ export default function DealerMilestoneTracker() {
               </div>
               {!m.completed && action && (
                 <Link to={action.to} style={{
-                  fontSize: 10, fontWeight: 700, color: 'var(--gold)',
+                  fontSize: 10, fontWeight: 700, color: 'var(--brand)',
                   textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
                 }}>
                   {action.label} →

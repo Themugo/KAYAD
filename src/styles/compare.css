@@ -38,7 +38,7 @@
   flex: 1; display: flex; flex-direction: column;
   align-items: center; gap: 4px;
 }
-.velocity-count { font-size: 13px; font-weight: 900; color: var(--gold); }
+.velocity-count { font-size: 13px; font-weight: 900; color: var(--brand); }
 .velocity-bar {
   width: 100%; border-radius: 3px 3px 0 0;
   transition: height 0.4s ease;
@@ -78,7 +78,7 @@
 .compare-remove-btn {
   position: absolute; top: -4px; right: -4px;
   width: 18px; height: 18px; border-radius: 50%;
-  background: rgba(0,0,0,0.7);
+  background: rgba(10, 51, 64, 0.7);
   border: 1px solid rgba(255,255,255,0.1);
   color: #fff; cursor: pointer; display: flex;
   align-items: center; justify-content: center; font-size: 8px;
@@ -89,12 +89,12 @@
 }
 .compare-car-link {
   display: inline-block; margin-top: 6px; font-size: 9px;
-  color: var(--gold); font-weight: 700; text-decoration: none;
+  color: var(--brand); font-weight: 700; text-decoration: none;
 }
 
 /* ---- Table body ---- */
 .compare-section-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
-.compare-section-row-alt { background: rgba(37, 99, 235,0.02); }
+.compare-section-row-alt { background: rgba(23, 107, 135, 0.02); }
 .compare-section-row-even { background: rgba(255,255,255,0.01); }
 .compare-label-cell {
   padding: 10px 16px; font-size: 11px; font-weight: 700;
@@ -114,8 +114,8 @@
 /* ---- Feature tags ---- */
 .feature-tag-compare {
   font-size: 9px; padding: 2px 6px; border-radius: 4px;
-  background: rgba(37, 99, 235,0.08);
-  border: 1px solid rgba(37, 99, 235,0.12);
+  background: rgba(23, 107, 135, 0.08);
+  border: 1px solid rgba(23, 107, 135, 0.12);
   color: rgba(255,255,255,0.6);
 }
 .feature-more-count {
@@ -128,15 +128,15 @@
   text-align: center; margin-top: 24px;
   color: rgba(255,255,255,0.2); font-size: 12px;
 }
-.compare-add-more a { color: var(--gold); }
+.compare-add-more a { color: var(--brand); }
 
 /* ---- Compare Drawer ---- */
 .compare-drawer {
   position: fixed; bottom: 16px; left: 50%;
   transform: translateX(-50%); z-index: 9999;
-  background: rgba(12,12,12,0.94);
-  border: 1px solid rgba(37, 99, 235,0.25);
-  box-shadow: 0 8px 36px rgba(0,0,0,0.55);
+  background: rgba(10, 51, 64, 0.94);
+  border: 1px solid rgba(23, 107, 135, 0.25);
+  box-shadow: 0 8px 36px rgba(10, 51, 64, 0.55);
   border-radius: 9999px;
   padding: 7px 10px 7px 14px;
   display: flex; align-items: center; gap: 12px;
@@ -147,23 +147,23 @@
   display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
 }
 .compare-drawer-label {
-  font-size: 12px; font-weight: 800; color: var(--gold);
+  font-size: 12px; font-weight: 800; color: var(--brand);
 }
 .compare-drawer-thumbs { display: flex; gap: 6px; }
 .compare-drawer-thumb {
   width: 40px; height: 30px; border-radius: 5px;
   overflow: hidden; position: relative;
-  border: 1px solid rgba(37, 99, 235,0.25);
+  border: 1px solid rgba(23, 107, 135, 0.25);
   background: var(--bg-card); flex-shrink: 0;
 }
 .compare-drawer-thumb-img {
   width: 100%; height: 100%; object-fit: cover;
 }
-.compare-drawer-count-icon { color: var(--gold); }
+.compare-drawer-count-icon { color: var(--brand); }
 .compare-drawer-thumb-remove {
   position: absolute; top: 0; right: 0;
   width: 14px; height: 14px; border-radius: 0 0 0 5px;
-  background: rgba(0,0,0,0.75); border: none;
+  background: rgba(10, 51, 64, 0.75); border: none;
   color: #fff; cursor: pointer;
   display: flex; align-items: center;
   justify-content: center; line-height: 1;
@@ -178,8 +178,8 @@
 }
 .compare-drawer-link {
   display: inline-flex; align-items: center; gap: 5px;
-  background: var(--gold); border-radius: 9999px;
-  padding: 6px 14px; color: #000;
+  background: var(--brand); border-radius: 9999px;
+  padding: 6px 14px; color: #0a3340;
   font-size: 11px; font-weight: 800; text-decoration: none;
 }
 .compare-drawer-link-disabled {

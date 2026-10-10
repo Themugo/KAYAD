@@ -123,7 +123,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               {meta.label}
             </div>
             <h3 style={{ marginTop: 4 }}>{title || 'Complete Payment'}</h3>
@@ -132,10 +132,10 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
         </div>
 
         <div style={{
-          background: 'var(--gold-glow)', border: '1px solid rgba(212,196,168,0.2)',
+          background: 'var(--brand-glow)', border: '1px solid rgba(19, 184, 166, 0.2)',
           borderRadius: 'var(--radius)', padding: '16px', marginBottom: 24, textAlign: 'center',
         }}>
-          <div style={{ fontSize: 11, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Amount</div>
+          <div style={{ fontSize: 11, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Amount</div>
           <div className="price-tag" style={{ fontSize: '2rem', marginTop: 4 }}>{formatKES(amount)}</div>
         </div>
 

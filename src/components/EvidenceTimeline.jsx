@@ -6,12 +6,12 @@ import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 
 const TYPE_META = {
-  image:             { icon: '📷', label: 'Image', color: 'text-blue-400' },
-  video:             { icon: '🎥', label: 'Video', color: 'text-purple-400' },
-  document:          { icon: '📄', label: 'Document', color: 'text-yellow-400' },
+  image:             { icon: '📷', label: 'Image', color: 'text-[#5AAFA4]' },
+  video:             { icon: '🎥', label: 'Video', color: 'text-[#5AAFA4]' },
+  document:          { icon: '📄', label: 'Document', color: 'text-[#13B8A6]' },
   inspection_report: { icon: '🔍', label: 'Inspection Report', color: 'text-green-400' },
   payment_record:    { icon: '💳', label: 'Payment Record', color: 'text-emerald-400' },
-  chat_log:          { icon: '💬', label: 'Chat Log', color: 'text-cyan-400' },
+  chat_log:          { icon: '💬', label: 'Chat Log', color: 'text-[#5AAFA4]' },
 };
 
 export default function EvidenceTimeline({ evidence, disputeId, onRefresh }) {
@@ -43,7 +43,7 @@ export default function EvidenceTimeline({ evidence, disputeId, onRefresh }) {
 
   if (!evidence || evidence.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-[#64748B]">
         <p className="text-3xl mb-2">📁</p>
         <p className="text-sm">No evidence uploaded yet</p>
       </div>
@@ -53,17 +53,17 @@ export default function EvidenceTimeline({ evidence, disputeId, onRefresh }) {
   return (
     <div className="space-y-3">
       {evidence.map((item) => {
-        const meta = TYPE_META[item.type] || { icon: '📄', label: item.type, color: 'text-gray-400' };
+        const meta = TYPE_META[item.type] || { icon: '📄', label: item.type, color: 'text-[#94A3B8]' };
         const isOwner = item.uploadedBy?._id === user?.id || item.uploadedBy === user?.id;
 
         return (
-          <div key={item._id} className="bg-gray-900 border border-gray-700 rounded-lg p-3 flex items-start gap-3 group">
+          <div key={item._id} className="bg-[#0A3340] border border-[#12576D] rounded-lg p-3 flex items-start gap-3 group">
             <span className={`text-xl mt-1 ${meta.color}`}>{meta.icon}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-200 truncate">{item.fileName}</p>
-              <p className="text-xs text-gray-500">{meta.label}</p>
-              {item.description && <p className="text-xs text-gray-400 mt-1">{item.description}</p>}
-              <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+              <p className="text-sm font-medium text-[#DDF4F0] truncate">{item.fileName}</p>
+              <p className="text-xs text-[#64748B]">{meta.label}</p>
+              {item.description && <p className="text-xs text-[#94A3B8] mt-1">{item.description}</p>}
+              <div className="flex items-center gap-3 mt-2 text-xs text-[#64748B]">
                 <span>{(item.size / 1024).toFixed(0)}KB</span>
                 <span>{item.uploadedBy?.name || 'Unknown'}</span>
                 <span>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</span>
@@ -72,22 +72,22 @@ export default function EvidenceTimeline({ evidence, disputeId, onRefresh }) {
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
               <button onClick={() => setPreviewUrl(previewUrl === item.url ? null : item.url)}
-                className="p-1.5 hover:bg-gray-700 rounded text-gray-400 hover:text-gray-200" title="Preview">
+                className="p-1.5 hover:bg-[#12576D] rounded text-[#94A3B8] hover:text-[#DDF4F0]" title="Preview">
                 <Eye size={16} />
               </button>
               <a href={item.url} download={item.fileName}
-                className="p-1.5 hover:bg-gray-700 rounded text-gray-400 hover:text-gray-200" title="Download">
+                className="p-1.5 hover:bg-[#12576D] rounded text-[#94A3B8] hover:text-[#DDF4F0]" title="Download">
                 <Download size={16} />
               </a>
               {isAdmin && !item.verified && (
                 <button onClick={() => handleVerify(item._id)}
-                  className="p-1.5 hover:bg-gray-700 rounded text-green-400 hover:text-green-300" title="Verify">
+                  className="p-1.5 hover:bg-[#12576D] rounded text-green-400 hover:text-green-300" title="Verify">
                   <CheckCircle size={16} />
                 </button>
               )}
               {(isAdmin || isOwner) && (
                 <button onClick={() => handleDelete(item._id)}
-                  className="p-1.5 hover:bg-gray-700 rounded text-red-400 hover:text-red-300" title="Delete">
+                  className="p-1.5 hover:bg-[#12576D] rounded text-red-400 hover:text-red-300" title="Delete">
                   <Trash2 size={16} />
                 </button>
               )}
@@ -97,7 +97,7 @@ export default function EvidenceTimeline({ evidence, disputeId, onRefresh }) {
       })}
 
       {previewUrl && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
+        <div className="fixed inset-0 z-50 bg-[#0A3340]/80 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
           <div className="max-w-4xl max-h-[90vh]" onClick={e => e.stopPropagation()}>
             {previewUrl.match(/\.(mp4|webm|mov)$/i) ? (
               <video src={previewUrl} controls className="max-h-[80vh] rounded-lg" />

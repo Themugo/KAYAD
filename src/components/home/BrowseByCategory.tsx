@@ -57,7 +57,7 @@ export const BrowseByCategory: FC = () => {
       title: 'Luxury',
       desc: 'Flagship European performance & luxury classics',
       image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
-      icon: <Crown className="w-5 h-5 text-amber-400" />,
+      icon: <Crown className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({
@@ -120,7 +120,7 @@ export const BrowseByCategory: FC = () => {
             <h2 className="text-3xl sm:text-4xl font-black text-[#176B87] font-serif tracking-tight">
               Browse by Category
             </h2>
-            <p className="text-xs sm:text-sm text-[#66808A] font-sans font-medium">
+            <p className="text-xs sm:text-sm text-[#64748b] font-sans font-medium">
               Filter Kenya's verified inventory by body style and drive type.
             </p>
           </div>
@@ -173,7 +173,7 @@ export const BrowseByCategory: FC = () => {
                   {cat.title}
                 </h3>
 
-                <p className="text-xs text-slate-300 font-sans font-medium line-clamp-1">
+                <p className="text-xs text-[#BDE5DE] font-sans font-medium line-clamp-1">
                   {cat.desc}
                 </p>
               </div>

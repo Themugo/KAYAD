@@ -137,7 +137,7 @@ export const GalleryPage: FC = () => {
             KAYAD Premium Showroom
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-200 font-sans font-medium max-w-xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#DDF4F0] font-sans font-medium max-w-xl leading-relaxed">
             Curated luxury stock, transparent pricing, M-Pesa escrow protected transactions.
           </p>
         </div>
@@ -148,7 +148,7 @@ export const GalleryPage: FC = () => {
             <ShieldCheck className="w-4 h-4 text-[#13B8A6] shrink-0" />
             <div>
               <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">M-Pesa Escrow</p>
-              <p className="text-[11px] font-medium text-slate-200">100% Guaranteed</p>
+              <p className="text-[11px] font-medium text-[#DDF4F0]">100% Guaranteed</p>
             </div>
           </div>
 
@@ -156,7 +156,7 @@ export const GalleryPage: FC = () => {
             <Car className="w-4 h-4 text-[#13B8A6] shrink-0" />
             <div>
               <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">150-Pt Audited</p>
-              <p className="text-[11px] font-medium text-slate-200">Verified Condition</p>
+              <p className="text-[11px] font-medium text-[#DDF4F0]">Verified Condition</p>
             </div>
           </div>
         </div>
@@ -224,7 +224,7 @@ export const GalleryPage: FC = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-[#66808A] font-bold">
+            <div className="flex items-center gap-2 text-xs text-[#64748b] font-bold">
               <span className="flex items-center gap-1.5 text-[#176B87] bg-white px-3 py-1 rounded-full border border-[#D7E7E4] shadow-2xs">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
                 100% Escrow Protected
@@ -241,7 +241,7 @@ export const GalleryPage: FC = () => {
               <h3 className="text-xl font-black text-[#176B87] font-serif">
                 No matching vehicles were found. Adjust your filters or explore our latest certified arrivals.
               </h3>
-              <p className="text-sm text-slate-600 max-w-md mx-auto">
+              <p className="text-sm text-[#64748B] max-w-md mx-auto">
                 Try clearing active filters or adjusting your budget slider to view all verified stock in our vault.
               </p>
               <button

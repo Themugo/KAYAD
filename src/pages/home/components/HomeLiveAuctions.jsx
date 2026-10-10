@@ -48,10 +48,10 @@ export default function HomeLiveAuctions({ cars, isMobile }) {
             const endTime = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
             return (
               <div key={car._id} className="relative">
-                <div className="absolute top-2 left-2 z-[2] flex items-center gap-1.5 rounded-md px-2.5 py-1" style={{ background: 'rgba(212,196,168,0.9)' }}>
+                <div className="absolute top-2 left-2 z-[2] flex items-center gap-1.5 rounded-md px-2.5 py-1" style={{ background: 'rgba(19, 184, 166, 0.9)' }}>
                   <span className="w-1 h-1 rounded-full bg-red-500 block animate-pulse" />
-                  <span className="text-[8px] text-black font-extrabold tracking-[0.06em]">LIVE</span>
-                  <span className="text-[8px] text-black/70 font-semibold ml-0.5">
+                  <span className="text-[8px] text-[#0A3340] font-extrabold tracking-[0.06em]">LIVE</span>
+                  <span className="text-[8px] text-[#0A3340]/70 font-semibold ml-0.5">
                     <LiveCountdown endTime={endTime} />
                   </span>
                 </div>

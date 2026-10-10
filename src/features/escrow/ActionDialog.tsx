@@ -53,7 +53,7 @@ export const ActionDialog: React.FC<ActionDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-slate-900/50 p-0 sm:p-4" onMouseDown={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}>
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-[#0A3340]/50 p-0 sm:p-4" onMouseDown={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}>
       <div
         ref={ref}
         role="dialog"
@@ -65,11 +65,11 @@ export const ActionDialog: React.FC<ActionDialogProps> = ({
         className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl p-5 space-y-4 max-h-[90vh] overflow-y-auto focus:outline-none"
       >
         <h2 id={titleId} className="text-base font-extrabold text-[#0A3340]">{title}</h2>
-        {description && <div id={descId} className="text-sm text-slate-600 leading-relaxed">{description}</div>}
+        {description && <div id={descId} className="text-sm text-[#64748B] leading-relaxed">{description}</div>}
         {children}
         {error && <p role="alert" className="text-sm font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{error}</p>}
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">
-          <button type="button" onClick={onClose} disabled={busy} className="min-h-[44px] px-4 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">{cancelLabel}</button>
+          <button type="button" onClick={onClose} disabled={busy} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9] disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">{cancelLabel}</button>
           <button
             type="button"
             onClick={onConfirm}

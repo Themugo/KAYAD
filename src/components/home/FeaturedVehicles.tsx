@@ -61,20 +61,20 @@ export const FeaturedVehicles: FC<FeaturedVehiclesProps> = ({ isLoading: propsIs
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#176B87] font-serif tracking-tight">
               Featured Vehicles
             </h2>
-            <p className="text-xs sm:text-sm text-[#66808A] font-sans font-medium mt-0.5">
+            <p className="text-xs sm:text-sm text-[#64748b] font-sans font-medium mt-0.5">
               Handpicked quality luxury & utility vehicles across Kenya.
             </p>
           </div>
 
           {/* Compact Inline Search Form */}
           <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80 shrink-0">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#66808A]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search Toyota, Prado, Land Rover..."
-              className="w-full pl-10 pr-20 py-2.5 rounded-xl bg-white border border-[#D7E7E4] text-[#176B87] placeholder-[#66808A]/70 text-xs font-sans font-medium focus:outline-none focus:border-[#13B8A6] focus:ring-2 focus:ring-[#13B8A6]/20 transition-all shadow-xs"
+              className="w-full pl-10 pr-20 py-2.5 rounded-xl bg-white border border-[#D7E7E4] text-[#176B87] placeholder-[#64748b]/70 text-xs font-sans font-medium focus:outline-none focus:border-[#13B8A6] focus:ring-2 focus:ring-[#13B8A6]/20 transition-all shadow-xs"
             />
             <button
               type="submit"
@@ -118,7 +118,7 @@ export const FeaturedVehicles: FC<FeaturedVehiclesProps> = ({ isLoading: propsIs
           </div>
         ) : (
           <div className="text-center py-12 bg-white rounded-2xl border border-[#D7E7E4] p-6 space-y-3">
-            <p className="text-sm font-mono text-[#66808A]">
+            <p className="text-sm font-mono text-[#64748b]">
               No vehicles matched your quick search "{searchQuery}".
             </p>
             <button

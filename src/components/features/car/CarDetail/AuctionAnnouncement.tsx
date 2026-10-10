@@ -60,16 +60,16 @@ export default function AuctionAnnouncement({ car, onClose }: AuctionAnnouncemen
     }
     if (isEnded) {
       return {
-        bg: 'bg-gray-500/10 border-gray-500/20',
-        text: 'text-gray-600',
+        bg: 'bg-[#5AAFA4]/10 border-[#5AAFA4]/20',
+        text: 'text-[#64748B]',
         icon: Clock,
         title: 'Auction Ended',
         sub: car.winner ? `Won by ${car.winner.user?.name || 'Winner'}` : 'No winner',
       };
     }
     return {
-      bg: 'bg-amber-500/10 border-amber-500/20',
-      text: 'text-amber-600',
+      bg: 'bg-[#13B8A6]/10 border-[#5AAFA4]/20',
+      text: 'text-[#176B87]',
       icon: Clock,
       title: 'Upcoming Auction',
       sub: 'Auction starts soon',
@@ -95,7 +95,7 @@ export default function AuctionAnnouncement({ car, onClose }: AuctionAnnouncemen
           <p className="font-sans text-xs text-warm-500 mt-0.5">{info.sub}</p>
 
           {isLive && car.currentBid && (
-            <p className="font-sans text-sm font-bold text-charcoal-900 mt-2">
+            <p className="font-sans text-sm font-bold text-[#0A3340] mt-2">
               Current: {formatKES(car.currentBid)}
             </p>
           )}

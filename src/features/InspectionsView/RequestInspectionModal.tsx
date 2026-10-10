@@ -21,7 +21,7 @@ interface RequestInspectionModalProps {
 }
 
 const fieldClass =
-  'w-full px-3.5 py-3 bg-slate-50 text-slate-800 placeholder-slate-400 border rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white';
+  'w-full px-3.5 py-3 bg-[#F6FAF9] text-[#0A3340] placeholder-[#91CEC5] border rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white';
 
 export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
   isOpen,
@@ -106,18 +106,18 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
     return (
       <Modal isOpen={isOpen} onClose={onClose} title="Inspection requested" size="lg">
         <div className="text-center space-y-4 py-2" role="status">
-          <div className="w-14 h-14 rounded-full bg-[#E8F5F3] text-[#0F5D73] flex items-center justify-center mx-auto border border-[#CDE9E5]">
+          <div className="w-14 h-14 rounded-full bg-[#E8F5F3] text-[#12576d] flex items-center justify-center mx-auto border border-[#CDE9E5]">
             <CheckCircle2 className="w-8 h-8" aria-hidden="true" />
           </div>
           <div>
-            <h3 className="text-xl font-extrabold text-[#0F5D73] font-display">Your request is saved</h3>
-            <p className="text-sm text-slate-600 mt-1">{confirmed.vehicleTitle}</p>
-            <p className="text-xs text-slate-500 mt-1">Order reference: <strong className="font-mono text-slate-800 break-all">{confirmed.reference}</strong></p>
+            <h3 className="text-xl font-extrabold text-[#12576d] font-display">Your request is saved</h3>
+            <p className="text-sm text-[#64748B] mt-1">{confirmed.vehicleTitle}</p>
+            <p className="text-xs text-[#64748B] mt-1">Order reference: <strong className="font-mono text-[#0A3340] break-all">{confirmed.reference}</strong></p>
           </div>
-          <dl className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm space-y-2 max-w-md mx-auto">
-            <div className="flex justify-between gap-4"><dt className="text-slate-500">Status</dt><dd className="font-bold text-slate-800">{confirmed.status.label}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-slate-500">Next</dt><dd className="font-semibold text-slate-800 text-right">{confirmed.status.detail}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-slate-500">Payment</dt><dd className="font-semibold text-slate-800 text-right">{confirmed.paymentText}</dd></div>
+          <dl className="bg-[#F6FAF9] p-4 rounded-xl border border-[#D7E7E4] text-left text-sm space-y-2 max-w-md mx-auto">
+            <div className="flex justify-between gap-4"><dt className="text-[#64748B]">Status</dt><dd className="font-bold text-[#0A3340]">{confirmed.status.label}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-[#64748B]">Next</dt><dd className="font-semibold text-[#0A3340] text-right">{confirmed.status.detail}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-[#64748B]">Payment</dt><dd className="font-semibold text-[#0A3340] text-right">{confirmed.paymentText}</dd></div>
           </dl>
           <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
             <Button variant="primary" onClick={() => { onClose(); onViewMyInspections(); }}>View my inspections</Button>
@@ -132,43 +132,43 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
     <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Get matched with an inspector" description="For a vehicle listed on KAYAD. KAYAD assigns a verified independent inspector; their business carries out the inspection." size="lg">
       <form onSubmit={submit} noValidate className="space-y-5" aria-busy={submitting}>
         <fieldset className="space-y-2" disabled={submitting}>
-          <legend className="text-xs font-bold text-slate-600 mb-1">Vehicle to inspect</legend>
+          <legend className="text-xs font-bold text-[#64748B] mb-1">Vehicle to inspect</legend>
           {selected && !choosing ? (
             <div className="flex items-start justify-between gap-3 rounded-xl border border-[#CDE9E5] bg-[#F5FBFA] p-4">
               <div className="min-w-0">
-                <p className="text-sm font-bold text-[#0F5D73] truncate">{selected.title}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{selected.location} · KSh {selected.price.toLocaleString()}</p>
+                <p className="text-sm font-bold text-[#12576d] truncate">{selected.title}</p>
+                <p className="text-xs text-[#64748B] mt-0.5">{selected.location} · KSh {selected.price.toLocaleString()}</p>
               </div>
-              <button type="button" className="text-xs font-bold text-[#0F5D73] underline underline-offset-2 whitespace-nowrap min-h-[44px] px-1" onClick={() => setChoosing(true)}>Change vehicle</button>
+              <button type="button" className="text-xs font-bold text-[#12576d] underline underline-offset-2 whitespace-nowrap min-h-[44px] px-1" onClick={() => setChoosing(true)}>Change vehicle</button>
             </div>
           ) : options.length === 0 ? (
-            <p className="text-sm text-slate-600 rounded-xl border border-slate-200 bg-slate-50 p-4">No KAYAD vehicles are available to inspect right now. Open a vehicle from the marketplace and choose “Request an inspection”.</p>
+            <p className="text-sm text-[#64748B] rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">No KAYAD vehicles are available to inspect right now. Open a vehicle from the marketplace and choose “Request an inspection”.</p>
           ) : (
             <div className="space-y-2">
               <label htmlFor={searchId} className="sr-only">Search vehicles by make, model or location</label>
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
-                <input id={searchId} type="search" className={`${fieldClass} pl-10 border-slate-200`} placeholder="Search by make, model or location" value={query} onChange={(e) => setQuery(e.target.value)} />
+                <Search className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+                <input id={searchId} type="search" className={`${fieldClass} pl-10 border-[#D7E7E4]`} placeholder="Search by make, model or location" value={query} onChange={(e) => setQuery(e.target.value)} />
               </div>
-              <label htmlFor={vehicleId} className="text-xs font-semibold text-slate-600 block">KAYAD marketplace vehicle</label>
+              <label htmlFor={vehicleId} className="text-xs font-semibold text-[#64748B] block">KAYAD marketplace vehicle</label>
               <select
                 id={vehicleId}
                 value={selectedId}
                 onChange={(e) => { setSelectedId(e.target.value); if (e.target.value) setChoosing(false); }}
-                className={`${fieldClass} border-slate-200`}
+                className={`${fieldClass} border-[#D7E7E4]`}
               >
                 <option value="">Select a vehicle…</option>
                 {filtered.map((v) => (
                   <option key={v.id} value={v.id}>{v.title} — KSh {v.price.toLocaleString()} ({v.location})</option>
                 ))}
               </select>
-              <p className="text-[11px] text-slate-500">Showing vehicles currently loaded from the KAYAD marketplace ({filtered.length}).</p>
+              <p className="text-[11px] text-[#64748B]">Showing vehicles currently loaded from the KAYAD marketplace ({filtered.length}).</p>
             </div>
           )}
         </fieldset>
 
         <div className="space-y-1.5">
-          <label htmlFor={phoneId} className="text-xs font-bold text-slate-600 block">Your phone number</label>
+          <label htmlFor={phoneId} className="text-xs font-bold text-[#64748B] block">Your phone number</label>
           <input
             id={phoneId}
             type="tel"
@@ -182,7 +182,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
             aria-invalid={phoneInvalid || undefined}
             aria-describedby={phoneInvalid ? phoneErrorId : undefined}
             aria-required="true"
-            className={`${fieldClass} ${phoneInvalid ? 'border-rose-400' : 'border-slate-200'}`}
+            className={`${fieldClass} ${phoneInvalid ? 'border-rose-400' : 'border-[#D7E7E4]'}`}
           />
           {phoneInvalid && <p id={phoneErrorId} className="text-xs font-semibold text-rose-600">Enter a valid phone number (9–15 digits).</p>}
         </div>
@@ -200,13 +200,13 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
           </div>
         )}
 
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-slate-200">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-[#D7E7E4]">
           <Button type="button" variant="secondary" onClick={onClose} disabled={submitting}>Cancel</Button>
           <Button type="submit" variant="accent" className="font-bold" disabled={!canSubmit} aria-disabled={!canSubmit}>
             {submitting ? 'Submitting request…' : 'Submit inspection request'}
           </Button>
         </div>
-        <p className="flex items-start gap-1.5 text-[11px] text-slate-500"><Info className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />Your phone number is saved with this request so KAYAD can reach you about it.</p>
+        <p className="flex items-start gap-1.5 text-[11px] text-[#64748B]"><Info className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />Your phone number is saved with this request so KAYAD can reach you about it.</p>
       </form>
     </Modal>
   );

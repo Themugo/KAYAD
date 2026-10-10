@@ -5,10 +5,10 @@ import { getTeamMembers, inviteTeamMember, updateTeamMember, removeTeamMember } 
 import { Shield, UserPlus, Mail, X, Check, Users } from 'lucide-react';
 
 export const DEALER_ROLES = [
-  { id: 'manager',        label: 'Manager',        color: '#f97316', desc: 'Full control except team deletion' },
-  { id: 'sales_agent',   label: 'Sales Agent',    color: '#3b82f6', desc: 'List, edit, chat with buyers' },
+  { id: 'manager',        label: 'Manager',        color: '#176b87', desc: 'Full control except team deletion' },
+  { id: 'sales_agent',   label: 'Sales Agent',    color: '#176B87', desc: 'List, edit, chat with buyers' },
   { id: 'lot_agent',     label: 'Lot Agent',      color: '#22c55e', desc: 'List and edit cars only' },
-  { id: 'finance_officer',label: 'Finance Officer',color: '#8b5cf6', desc: 'View earnings and transactions' },
+  { id: 'finance_officer',label: 'Finance Officer',color: '#5aafa4', desc: 'View earnings and transactions' },
   { id: 'viewer',         label: 'Viewer',         color: 'rgba(255,255,255,0.4)', desc: 'Read-only access' },
 ];
 
@@ -84,7 +84,7 @@ export default function TeamTab({ toast }) {
     } catch { toast('Failed to remove', 'error'); }
   };
 
-  const statusColor = { active: '#22c55e', invited: '#f97316', suspended: '#ef4444' };
+  const statusColor = { active: '#22c55e', invited: '#176b87', suspended: '#ef4444' };
 
   return (
     <div>
@@ -92,10 +92,10 @@ export default function TeamTab({ toast }) {
         <div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: '0 0 6px' }}>Team Management</h2>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>
-            You are the <strong style={{ color: 'var(--gold)' }}>Business Owner</strong>. Invite staff and assign role-based access.
+            You are the <strong style={{ color: 'var(--brand)' }}>Business Owner</strong>. Invite staff and assign role-based access.
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 9999, padding: '6px 14px', fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(23, 107, 135, 0.08)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 9999, padding: '6px 14px', fontSize: 11, color: 'var(--brand)', fontWeight: 700 }}>
           <Shield size={12} /> Business Owner
         </div>
       </div>
@@ -119,7 +119,7 @@ export default function TeamTab({ toast }) {
             style={{ padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: 'var(--card)', color: '#fff', fontSize: 13, outline: 'none', flex: 1, minWidth: 160 }}>
             {DEALER_ROLES.map(r => <option key={r.id} value={r.id} style={{ background: 'var(--card)' }}>{r.label}</option>)}
           </select>
-          <button onClick={invite} disabled={inviting || !invEmail.trim()} style={{ padding: '10px 22px', background: invEmail.trim() ? 'var(--gold)' : 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 9, color: invEmail.trim() ? '#000' : 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 900, cursor: invEmail.trim() ? 'pointer' : 'default', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
+          <button onClick={invite} disabled={inviting || !invEmail.trim()} style={{ padding: '10px 22px', background: invEmail.trim() ? 'var(--brand)' : 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 9, color: invEmail.trim() ? '#0a3340' : 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 900, cursor: invEmail.trim() ? 'pointer' : 'default', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
             {inviting ? 'Sending…' : 'Send Invite'}
           </button>
         </div>
@@ -166,11 +166,11 @@ export default function TeamTab({ toast }) {
                     style={{ padding: '6px 12px', borderRadius: 8, border: `1px solid ${roleInfo.color}30`, background: `${roleInfo.color}10`, color: roleInfo.color, fontSize: 12, fontWeight: 700, outline: 'none', cursor: 'pointer' }}>
                     {DEALER_ROLES.map(r => <option key={r.id} value={r.id} style={{ background: 'var(--card)', color: '#fff' }}>{r.label}</option>)}
                   </select>
-                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: `${statusColor[m.status] || '#666'}15`, color: statusColor[m.status] || '#666', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
+                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: `${statusColor[m.status] || '#64748b'}15`, color: statusColor[m.status] || '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
                     {m.status}
                   </span>
                   <button onClick={() => setExpanded(isExp ? null : m._id)}
-                    style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(37, 99, 235,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(37, 99, 235,0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--gold)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                    style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(23, 107, 135, 0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(23, 107, 135, 0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--brand)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                     Permissions
                   </button>
                   <button onClick={() => remove(m._id)}
@@ -189,7 +189,7 @@ export default function TeamTab({ toast }) {
                           <button key={key} onClick={() => togglePerm(m._id, key)}
                             style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(34,197,94,0.25)' : 'rgba(255,255,255,0.07)'}`, background: on ? 'rgba(34,197,94,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: on ? '#22c55e' : 'rgba(255,255,255,0.4)', transition: 'all 0.15s' }}>
                             <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${on ? '#22c55e' : 'rgba(255,255,255,0.2)'}`, background: on ? '#22c55e' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              {on && <Check size={9} style={{ color: '#000' }} />}
+                              {on && <Check size={9} style={{ color: '#0a3340' }} />}
                             </div>
                             {label}
                           </button>

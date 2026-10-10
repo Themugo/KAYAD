@@ -37,9 +37,9 @@ const KAYAD_COLORS = {
   emerald: '#10b981',
   mutedTerracotta: '#5AAFA4',
   softBlue: '#64748b',
-  amber: '#f59e0b',
+  amber: '#176b87',
   red: '#ef4444',
-  orange: '#ea580c',
+  orange: '#176b87',
 };
 
 // Sample orchestration data

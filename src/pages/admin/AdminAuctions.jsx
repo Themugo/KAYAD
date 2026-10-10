@@ -122,7 +122,7 @@ export default function AdminAuctions() {
         <div className="grid-3" style={{ marginBottom: 28 }}>
           {[
             { label: 'Live Auctions', val: liveCars.length,  color: 'var(--green)', icon: '🔴' },
-            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--gold-light)', icon: '⏸' },
+            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--brand-light)', icon: '⏸' },
             { label: 'Completed', val: endedCars.length,     color: 'var(--text-muted)', icon: '🏁' },
           ].map(s => (
             <div key={s.label} className="stat-box">
@@ -266,7 +266,7 @@ export default function AdminAuctions() {
               <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
-            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
+            <div style={{ background: 'var(--brand-glow)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Starting Price</div>
               <div className="price-tag" style={{ fontSize: '1.6rem' }}>{formatKES(selected.price)}</div>
             </div>
@@ -298,7 +298,7 @@ export default function AdminAuctions() {
           <div className="modal-box" style={{ maxWidth: 540 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Declare Winner</div>
+                <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Declare Winner</div>
                 <h3 style={{ marginTop: 4 }}>{winnerModal.car.title}</h3>
               </div>
               <button onClick={() => setWinnerModal(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
@@ -319,8 +319,8 @@ export default function AdminAuctions() {
                   const confirmed = ['paid', 'won', 'lost'].includes(String(bid.status || '').toLowerCase()) || bid.mpesaPaid === true;
                   return (
                     <div key={bid._id} style={{
-                      background: i === 0 ? 'var(--gold-glow)' : 'var(--surface)',
-                      border: `1px solid ${i === 0 ? 'rgba(37, 99, 235,0.3)' : 'var(--border)'}`,
+                      background: i === 0 ? 'var(--brand-glow)' : 'var(--surface)',
+                      border: `1px solid ${i === 0 ? 'rgba(23, 107, 135, 0.3)' : 'var(--border)'}`,
                       borderRadius: 'var(--radius)', padding: '14px 16px',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}>

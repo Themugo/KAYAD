@@ -83,7 +83,7 @@ export const AdminPage: FC = () => {
           <h1 className="text-3xl font-extrabold text-[#176B87] font-serif tracking-tight">
             KAYAD Platform Oversight & Marketing
           </h1>
-          <p className="text-sm text-[#365563] mt-1 font-medium">
+          <p className="text-sm text-[#176b87] mt-1 font-medium">
             Manage active escrow compliance, platform analytics, and live advertisement banners.
           </p>
         </div>
@@ -92,19 +92,19 @@ export const AdminPage: FC = () => {
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase block">Total Active Listings</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase block">Total Active Listings</span>
           <span className="text-3xl font-black text-[#176B87] font-serif">{vehicles.length}</span>
         </div>
         <div className="p-5 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase block">Escrow Vault Contracts</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase block">Escrow Vault Contracts</span>
           <span className="text-3xl font-black text-[#2ECC71] font-serif">{escrowContracts.length}</span>
         </div>
         <div className="p-5 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase block">Published Adverts</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase block">Published Adverts</span>
           <span className="text-3xl font-black text-[#13B8A6] font-serif">{adverts.length}</span>
         </div>
         <div className="p-5 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase block">150-Pt Audited</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase block">150-Pt Audited</span>
           <span className="text-3xl font-black text-[#176B87] font-serif">100%</span>
         </div>
       </div>
@@ -120,7 +120,7 @@ export const AdminPage: FC = () => {
               <h2 className="text-xl font-extrabold text-[#176B87] font-serif">
                 Create & Publish Marketplace Advertisements
               </h2>
-              <p className="text-xs text-[#66808A] font-medium">
+              <p className="text-xs text-[#64748b] font-medium">
                 Design custom promotion banners using only verified offers, live inventory, and approved marketing claims.
               </p>
             </div>
@@ -253,7 +253,7 @@ export const AdminPage: FC = () => {
 
           {/* Real-time Advert Live Preview */}
           <div className="lg:col-span-5 space-y-3">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-[#66808A] flex items-center gap-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-[#64748b] flex items-center gap-1.5">
               <Eye className="w-3.5 h-3.5 text-[#13B8A6]" /> Real-time Live Ad Preview
             </span>
 
@@ -272,7 +272,7 @@ export const AdminPage: FC = () => {
                 <h3 className="text-xl font-extrabold text-white font-serif leading-tight">
                   {formTitle || 'Your Advert Headline Here'}
                 </h3>
-                <p className="text-xs text-slate-200 font-medium leading-relaxed">
+                <p className="text-xs text-[#DDF4F0] font-medium leading-relaxed">
                   {formSubtitle || 'Your promotional offer copy and target benefits will display right here on KAYAD.'}
                 </p>
                 <div className="pt-2">
@@ -283,7 +283,7 @@ export const AdminPage: FC = () => {
               </div>
             </div>
 
-            <p className="text-[11px] text-[#66808A] italic text-center">
+            <p className="text-[11px] text-[#64748b] italic text-center">
               Target Slot: <span className="font-bold text-[#176B87]">{formPlacement}</span>
             </p>
           </div>
@@ -302,7 +302,7 @@ export const AdminPage: FC = () => {
                 className={`p-4 rounded-2xl border transition-all flex gap-4 ${
                   ad.isActive
                     ? 'bg-white border-[#D7E7E4] shadow-xs'
-                    : 'bg-[#EEF7F5]/50 border-slate-200 opacity-60'
+                    : 'bg-[#EEF7F5]/50 border-[#D7E7E4] opacity-60'
                 }`}
               >
                 <img src={ad.imageUrl} alt="" loading="lazy" decoding="async" className="w-20 h-20 rounded-xl object-cover shrink-0 border border-[#D7E7E4]" />
@@ -311,10 +311,10 @@ export const AdminPage: FC = () => {
                     <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-[#176B87]/10 text-[#176B87]">
                       {ad.badge}
                     </span>
-                    <span className="text-[10px] text-[#66808A] font-medium">{ad.placement}</span>
+                    <span className="text-[10px] text-[#64748b] font-medium">{ad.placement}</span>
                   </div>
                   <h4 className="text-xs font-extrabold text-[#176B87] font-serif truncate">{ad.title}</h4>
-                  <p className="text-[11px] text-[#365563] line-clamp-2">{ad.subtitle}</p>
+                  <p className="text-[11px] text-[#176b87] line-clamp-2">{ad.subtitle}</p>
 
                   <div className="pt-2 flex items-center justify-between">
                     <button
@@ -322,7 +322,7 @@ export const AdminPage: FC = () => {
                       className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${
                         ad.isActive
                           ? 'bg-[#2ECC71]/15 text-[#176B87] border-[#2ECC71]/40'
-                          : 'bg-slate-200 text-slate-600 border-slate-300'
+                          : 'bg-[#DDF4F0] text-[#64748B] border-[#BDE5DE]'
                       }`}
                     >
                       {ad.isActive ? '● Active Live' : '○ Paused'}
@@ -362,7 +362,7 @@ export const AdminPage: FC = () => {
                 <tr key={c.id}>
                   <td className="p-3 font-mono font-bold text-[#176B87]">{c.id}</td>
                   <td className="p-3 font-semibold text-[#176B87]">{c.vehicleTitle}</td>
-                  <td className="p-3 text-[#365563] font-medium">{c.buyerName} ➔ {c.sellerName}</td>
+                  <td className="p-3 text-[#176b87] font-medium">{c.buyerName} ➔ {c.sellerName}</td>
                   <td className="p-3 font-bold text-[#13B8A6]">KSh {(c.agreedPrice * (c.agreedPrice < 1000000 ? 100 : 1)).toLocaleString()}</td>
                   <td className="p-3"><Badge variant="emerald">{c.status}</Badge></td>
                 </tr>

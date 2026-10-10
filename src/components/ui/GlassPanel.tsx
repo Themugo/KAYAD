@@ -39,7 +39,7 @@ export function GlassPanel({
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
       border: '1px solid rgba(255, 255, 255, 0.08)',
-      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.24)',
+      boxShadow: '0 8px 32px 0 rgba(10, 51, 64, 0.24)',
     }),
   };
 

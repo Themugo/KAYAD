@@ -225,7 +225,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                 <ShieldCheck className="w-3.5 h-3.5" /> Verified help for the KAYAD journey
               </div>
               <h2 id="support-knowledge-heading" className="text-2xl sm:text-3xl font-black tracking-tight">Find the answer before you open a case.</h2>
-              <p className="text-sm leading-6 text-slate-300">Search the same language used across Marketplace, Auctions, Inspection, Escrow, Financing and transaction fulfilment.</p>
+              <p className="text-sm leading-6 text-[#BDE5DE]">Search the same language used across Marketplace, Auctions, Inspection, Escrow, Financing and transaction fulfilment.</p>
             </div>
             <div className="w-full lg:w-[380px]">
               <Input
@@ -233,14 +233,14 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                 placeholder="Search by problem, transaction or service…"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                icon={<Search className="w-4 h-4 text-slate-400" />}
-                className="bg-white text-slate-900 border-white/20 shadow-lg"
+                icon={<Search className="w-4 h-4 text-[#94A3B8]" />}
+                className="bg-white text-[#0A3340] border-white/20 shadow-lg"
               />
             </div>
           </div>
         </div>
 
-        <div className="px-4 sm:px-5 py-3 border-b border-slate-100 overflow-x-auto">
+        <div className="px-4 sm:px-5 py-3 border-b border-[#D7E7E4] overflow-x-auto">
           <div className="flex items-center gap-1.5 min-w-max">
             {categories.map(category => {
               const count = category.id === 'all' ? FAQ_DATA.length : FAQ_DATA.filter(item => item.category === category.id).length;
@@ -250,11 +250,11 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                   key={category.id}
                   type="button"
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${active ? 'bg-[#176B87] text-white' : 'text-slate-600 hover:bg-[#EEF7F5]'}`}
+                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${active ? 'bg-[#176B87] text-white' : 'text-[#64748B] hover:bg-[#EEF7F5]'}`}
                 >
                   {category.icon}
                   {category.label}
-                  <span className={`px-1.5 rounded-full text-[10px] ${active ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500'}`}>{count}</span>
+                  <span className={`px-1.5 rounded-full text-[10px] ${active ? 'bg-white/15 text-white' : 'bg-[#EEF7F5] text-[#64748B]'}`}>{count}</span>
                 </button>
               );
             })}
@@ -264,9 +264,9 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
 
       {filteredFaqs.length === 0 ? (
         <Card className="p-10 text-center bg-white">
-          <HelpCircle className="w-10 h-10 mx-auto text-slate-300" />
+          <HelpCircle className="w-10 h-10 mx-auto text-[#BDE5DE]" />
           <h3 className="mt-3 text-sm font-extrabold text-[#0A3340]">No matching answer</h3>
-          <p className="mt-1 text-xs text-slate-500">Try a vehicle, auction, inspection, escrow, financing or account term.</p>
+          <p className="mt-1 text-xs text-[#64748B]">Try a vehicle, auction, inspection, escrow, financing or account term.</p>
           <Button variant="outline" size="sm" className="mt-4" onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}>Reset search</Button>
         </Card>
       ) : (
@@ -274,23 +274,23 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
           {filteredFaqs.map(faq => {
             const expanded = expandedIds.includes(faq.id);
             return (
-              <div key={faq.id} className={`rounded-2xl border bg-white overflow-hidden transition-shadow ${expanded ? 'border-[#176B87]/25 shadow-sm' : 'border-slate-200'}`}>
+              <div key={faq.id} className={`rounded-2xl border bg-white overflow-hidden transition-shadow ${expanded ? 'border-[#176B87]/25 shadow-sm' : 'border-[#D7E7E4]'}`}>
                 <button type="button" onClick={() => toggleItem(faq.id)} className="w-full text-left px-4 sm:px-5 py-4 flex items-start gap-4">
                   <div className="mt-0.5 w-8 h-8 rounded-xl bg-[#EEF7F5] text-[#176B87] flex items-center justify-center shrink-0">{faq.categoryIcon}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#176B87]">{faq.categoryLabel}</span>
-                      {faq.popular && <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5">Popular</span>}
+                      {faq.popular && <span className="text-[9px] font-bold text-[#12576D] bg-[#F3FAF9] border border-[#D7E7E4] rounded-full px-2 py-0.5">Popular</span>}
                     </div>
                     <h3 className="text-sm sm:text-[15px] font-extrabold text-[#0A3340] leading-snug">{faq.question}</h3>
                   </div>
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${expanded ? 'bg-[#176B87] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${expanded ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#64748B]'}`}>
                     {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </span>
                 </button>
                 {expanded && (
                   <div className="px-4 sm:px-5 pb-5 pl-16 sm:pl-[68px]">
-                    <p className="text-sm leading-6 text-slate-600 max-w-4xl">{faq.answer}</p>
+                    <p className="text-sm leading-6 text-[#64748B] max-w-4xl">{faq.answer}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {faq.nextStep && (
                         <button type="button" onClick={() => handleNextStep(faq)} className="inline-flex items-center gap-2 rounded-xl bg-[#176B87] text-white px-3.5 py-2.5 text-xs font-extrabold hover:bg-[#0A3340] transition-colors">
@@ -298,7 +298,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                         </button>
                       )}
                       {onContactSupport && faq.nextStep !== 'Open support case' && (
-                        <button type="button" onClick={onContactSupport} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 text-[#176B87] px-3.5 py-2.5 text-xs font-extrabold hover:bg-slate-50">
+                        <button type="button" onClick={onContactSupport} className="inline-flex items-center gap-2 rounded-xl border border-[#D7E7E4] text-[#176B87] px-3.5 py-2.5 text-xs font-extrabold hover:bg-[#F6FAF9]">
                           Still need help
                         </button>
                       )}

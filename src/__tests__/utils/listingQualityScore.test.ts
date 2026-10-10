@@ -258,10 +258,10 @@ describe('getQualityScoreColor', () => {
   it.each([
     [100, '#22C55E'],
     [85, '#22C55E'],
-    [84, '#84CC16'],
-    [65, '#84CC16'],
-    [64, '#F59E0B'],
-    [40, '#F59E0B'],
+    [84, '#5AAFA4'],
+    [65, '#5AAFA4'],
+    [64, '#176B87'],
+    [40, '#176B87'],
     [39, '#EF4444'],
     [0, '#EF4444'],
   ])('for score %i returns %s', (score, expectedColor) => {
@@ -272,8 +272,8 @@ describe('getQualityScoreColor', () => {
 describe('getQualityScoreGradient', () => {
   it.each([
     [90, 'linear-gradient(135deg, #22C55E, #16A34A)'],
-    [70, 'linear-gradient(135deg, #84CC16, #65A30D)'],
-    [50, 'linear-gradient(135deg, #F59E0B, #D97706)'],
+    [70, 'linear-gradient(135deg, #5AAFA4, #2F8F87)'],
+    [50, 'linear-gradient(135deg, #176B87, #12576D)'],
     [10, 'linear-gradient(135deg, #EF4444, #DC2626)'],
   ])('returns the expected gradient for score %i', (score, expectedGradient) => {
     expect(getQualityScoreGradient(score)).toBe(expectedGradient);

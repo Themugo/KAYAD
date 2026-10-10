@@ -44,7 +44,7 @@ export const NavigationBar: FC<NavigationBarProps> = ({
         >
           <ArrowLeft className="w-3.5 h-3.5 text-[#13B8A6] group-hover:-translate-x-0.5 transition-transform" />
           <span>Back</span>
-          <span className="hidden md:inline font-normal text-slate-300 text-[11px] ml-0.5">({prevTitle})</span>
+          <span className="hidden md:inline font-normal text-[#BDE5DE] text-[11px] ml-0.5">({prevTitle})</span>
         </button>
 
         {canGoForward && (
@@ -58,16 +58,16 @@ export const NavigationBar: FC<NavigationBarProps> = ({
         )}
 
         {showBreadcrumbs && (
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 overflow-x-auto py-0.5">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-[#64748B] overflow-x-auto py-0.5">
             <button
               onClick={() => navigateTo('home')}
               className="flex items-center gap-1 text-[#176B87] hover:text-[#13B8A6] transition-colors cursor-pointer"
             >
-              <Home className="w-3.5 h-3.5 text-slate-400" />
+              <Home className="w-3.5 h-3.5 text-[#94A3B8]" />
               <span className="hidden sm:inline font-bold">Home</span>
             </button>
 
-            <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+            <ChevronRight className="w-3 h-3 text-[#94A3B8] shrink-0" />
 
             <button
               onClick={() => navigateTo('gallery')}
@@ -79,7 +79,7 @@ export const NavigationBar: FC<NavigationBarProps> = ({
 
             {activePage !== 'gallery' && (
               <>
-                <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+                <ChevronRight className="w-3 h-3 text-[#94A3B8] shrink-0" />
                 <span className="font-extrabold text-[#176B87] truncate max-w-[180px] sm:max-w-[280px]">
                   {currentTitle || pageTitles[activePage]}
                 </span>

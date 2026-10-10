@@ -8,18 +8,18 @@ import { getSystemHealth, getSystemMetrics, mediaEventEngine } from '../index.js
  * Design System Colors for Dashboard
  */
 export const DashboardColors = {
-  lightNavy: '#1e3a5f',
-  warmBeige: '#f5f0e8',
+  lightNavy: '#12576D',
+  warmBeige: '#F6FAF9',
   white: '#ffffff',
   emerald: '#10b981',
-  mutedTerracotta: '#c4a484',
+  mutedTerracotta: '#5AAFA4',
   softBlue: '#64748b',
   lightGray: '#f1f5f9',
   darkText: '#1e293b',
   success: '#10b981',
-  warning: '#f59e0b',
+  warning: '#176B87',
   error: '#ef4444',
-  info: '#3b82f6',
+  info: '#13B8A6',
 };
 
 /**

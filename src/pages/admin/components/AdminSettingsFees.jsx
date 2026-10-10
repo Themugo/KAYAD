@@ -1,7 +1,7 @@
 export default function AdminSettingsFees({ config, setConfig, saveConfig, saving }) {
   return (
     <div style={{ display: 'grid', gap: 24 }}>
-      <section style={{ background: '#111', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <section style={{ background: '#0a3340', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
         <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 24 }}>Fee Structure</h4>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
           {[
@@ -22,10 +22,10 @@ export default function AdminSettingsFees({ config, setConfig, saveConfig, savin
         </div>
       </section>
 
-      <section style={{ background: '#111', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <section style={{ background: '#0a3340', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Active Discount Codes</h4>
-          <button style={{ background: 'var(--gold)', color: 'black', fontSize: 10, padding: '6px 16px', borderRadius: 8, fontWeight: 700, border: 'none', cursor: 'pointer' }}
+          <button style={{ background: 'var(--brand)', color: 'black', fontSize: 10, padding: '6px 16px', borderRadius: 8, fontWeight: 700, border: 'none', cursor: 'pointer' }}
             onClick={() => {
               const code = prompt('Enter promo code:');
               const pct = prompt('Discount percentage:');
@@ -45,7 +45,7 @@ export default function AdminSettingsFees({ config, setConfig, saveConfig, savin
           ) : (config.activePromos || []).map((promo, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'black', padding: 16, borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div>
-                <p style={{ fontFamily: 'monospace', color: 'var(--gold)', fontWeight: 700 }}>{promo.code}</p>
+                <p style={{ fontFamily: 'monospace', color: 'var(--brand)', fontWeight: 700 }}>{promo.code}</p>
                 <p style={{ fontSize: 10, color: 'var(--text-muted)' }}>{promo.discountPercent}% Off Listings • Expiry: {promo.expiryDate ? new Date(promo.expiryDate).toLocaleDateString('en-KE') : 'N/A'}</p>
               </div>
               <button style={{ color: '#f43f5e', fontSize: 12, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}

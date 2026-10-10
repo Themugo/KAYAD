@@ -168,10 +168,10 @@ export default function AddCarPage() {
               onClick={() => setStep(i + 1)}
               style={{
                 flex: 1, textAlign: 'center', padding: '10px 8px', borderRadius: 8,
-                background: step === i + 1 ? 'var(--gold-glow)' : 'var(--surface)',
-                border: `1px solid ${step === i + 1 ? 'var(--gold)' : 'var(--border)'}`,
+                background: step === i + 1 ? 'var(--brand-glow)' : 'var(--surface)',
+                border: `1px solid ${step === i + 1 ? 'var(--brand)' : 'var(--border)'}`,
                 cursor: 'pointer', fontSize: 13, fontWeight: step === i + 1 ? 600 : 400,
-                color: step === i + 1 ? 'var(--gold)' : 'var(--text-muted)',
+                color: step === i + 1 ? 'var(--brand)' : 'var(--text-muted)',
               }}
             >
               <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 2 }}>{i + 1}</div>
@@ -251,8 +251,8 @@ export default function AddCarPage() {
                       onClick={() => set(opt.key, !form[opt.key])}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 14,
-                        background: form[opt.key] ? 'var(--gold-glow)' : 'var(--surface)',
-                        border: `2px solid ${form[opt.key] ? 'var(--gold)' : 'var(--border)'}`,
+                        background: form[opt.key] ? 'var(--brand-glow)' : 'var(--surface)',
+                        border: `2px solid ${form[opt.key] ? 'var(--brand)' : 'var(--border)'}`,
                         borderRadius: 10, padding: '14px 16px', cursor: 'pointer',
                         transition: 'all 0.2s',
                       }}
@@ -264,8 +264,8 @@ export default function AddCarPage() {
                       </div>
                       <div style={{
                         width: 22, height: 22, borderRadius: '50%',
-                        background: form[opt.key] ? 'var(--gold)' : 'transparent',
-                        border: `2px solid ${form[opt.key] ? 'var(--gold)' : 'var(--border)'}`,
+                        background: form[opt.key] ? 'var(--brand)' : 'transparent',
+                        border: `2px solid ${form[opt.key] ? 'var(--brand)' : 'var(--border)'}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: '#0A3340', fontSize: 12, fontWeight: 700,
                       }}>
@@ -330,7 +330,7 @@ export default function AddCarPage() {
                       <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       {i === 0 && (
                         <div style={{
-                          position: 'absolute', top: 4, left: 4, background: 'var(--gold)',
+                          position: 'absolute', top: 4, left: 4, background: 'var(--brand)',
                           color: '#0A3340', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
                         }}>MAIN</div>
                       )}

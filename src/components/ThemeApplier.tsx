@@ -6,7 +6,7 @@ import { publicSupabase } from '@/lib/supabase';
 
 const DEFAULT_THEME = {
   primary_color: '#c9971f',
-  secondary_color: '#f59e0b',
+  secondary_color: '#176b87',
   accent_color: '#0369a1',
   heading_font: 'Space Grotesk',
   body_font: 'Inter',

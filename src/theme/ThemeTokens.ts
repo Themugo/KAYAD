@@ -32,8 +32,8 @@ export const ThemeDesignTokens = {
     accent: AuctionTheme.accent,
     text: {
       primary: '#176B87',
-      body: '#365563',
-      muted: '#66808A',
+      body: '#176b87',
+      muted: '#64748b',
       light: '#F6FAF9',
     }
   },
@@ -58,8 +58,8 @@ export const ThemeTokens = {
     backgroundLight: AuctionTheme.cream.primary,
     backgroundSand: AuctionTheme.cream.sand,
     textDark: AuctionTheme.navy.primary,
-    textBody: '#365563',
-    textMuted: '#66808A',
+    textBody: '#176b87',
+    textMuted: '#64748b',
     crimsonRed: AuctionTheme.accent.crimson,
     navActive: '#13B8A6',
     warningAmber: AuctionTheme.gold.amber,

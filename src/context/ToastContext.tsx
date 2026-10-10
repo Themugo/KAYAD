@@ -122,8 +122,8 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
   const borderColors: Record<ToastType, string> = {
     success: '#22C55E',
     error: '#EF4444',
-    warning: '#F59E0B',
-    info: '#3B82F6',
+    warning: '#176b87',
+    info: '#176B87',
   };
 
   return (
@@ -139,7 +139,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        boxShadow: '0 8px 32px rgba(10, 51, 64, 0.4)',
         animation: 'slideInRight 0.3s ease',
         maxWidth: 360,
         cursor: 'pointer',

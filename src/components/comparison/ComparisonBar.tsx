@@ -17,7 +17,7 @@ export function ComparisonBar() {
   if (!isVisible || loading) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#D7E7E4] shadow-lg z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -25,7 +25,7 @@ export function ComparisonBar() {
               <Scale className="w-5 h-5" />
               <span className="font-semibold">{productCount} product{productCount !== 1 ? 's' : ''} to compare</span>
             </div>
-            <p className="text-sm text-gray-500 hidden sm:block">
+            <p className="text-sm text-[#64748B] hidden sm:block">
               Compare up to 4 products side-by-side
             </p>
           </div>
@@ -34,7 +34,7 @@ export function ComparisonBar() {
               onClick={() => {
                 clearComparison();
               }}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"
+              className="text-sm text-[#64748B] hover:text-[#12576D] transition-colors flex items-center gap-1"
             >
               <X className="w-4 h-4" />
               Clear

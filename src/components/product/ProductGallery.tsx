@@ -34,7 +34,7 @@ export function ProductGallery({ images, videoUrl, videoThumbnail, image360Url, 
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden group">
+      <div className="relative aspect-square bg-[#EEF7F5] rounded-xl overflow-hidden group">
         {selectedMedia.type === 'image' && (
           <>
             <img
@@ -56,7 +56,7 @@ export function ProductGallery({ images, videoUrl, videoThumbnail, image360Url, 
         )}
 
         {selectedMedia.type === 'video' && (
-          <div className="w-full h-full flex items-center justify-center bg-black">
+          <div className="w-full h-full flex items-center justify-center bg-[#0A3340]">
             {showVideo ? (
               <video
                 src={selectedMedia.url}
@@ -81,9 +81,9 @@ export function ProductGallery({ images, videoUrl, videoThumbnail, image360Url, 
                     <Play className="w-16 h-16 text-white" />
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover/video:bg-black/40 transition-colors">
+                <div className="absolute inset-0 flex items-center justify-center bg-[#0A3340]/30 group-hover/video:bg-[#0A3340]/40 transition-colors">
                   <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                    <Play className="w-8 h-8 text-gray-900 ml-1" />
+                    <Play className="w-8 h-8 text-[#0A3340] ml-1" />
                   </div>
                 </div>
               </button>
@@ -92,11 +92,11 @@ export function ProductGallery({ images, videoUrl, videoThumbnail, image360Url, 
         )}
 
         {selectedMedia.type === '360' && (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+          <div className="w-full h-full flex items-center justify-center bg-[#EEF7F5]">
             <div className="text-center">
-              <RotateCw className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">360° View</p>
-              <p className="text-xs text-gray-400 mt-1">Drag to rotate</p>
+              <RotateCw className="w-12 h-12 text-[#94A3B8] mx-auto mb-2" />
+              <p className="text-sm text-[#64748B]">360° View</p>
+              <p className="text-xs text-[#94A3B8] mt-1">Drag to rotate</p>
             </div>
           </div>
         )}
@@ -134,7 +134,7 @@ export function ProductGallery({ images, videoUrl, videoThumbnail, image360Url, 
                 setIsZoomed(false);
               }}
               className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                selectedImage === idx ? 'border-primary-500' : 'border-transparent hover:border-gray-300'
+                selectedImage === idx ? 'border-primary-500' : 'border-transparent hover:border-[#BDE5DE]'
               }`}
               aria-label={`View ${idx + 1}`}
             >
@@ -154,14 +154,14 @@ export function ProductGallery({ images, videoUrl, videoThumbnail, image360Url, 
                     loading="lazy"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#0A3340]/30">
                     <Play className="w-4 h-4 text-white" />
                   </div>
                 </>
               )}
               {media.type === '360' && (
-                <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                  <RotateCw className="w-6 h-6 text-gray-400" />
+                <div className="w-full h-full flex items-center justify-center bg-[#DDF4F0]">
+                  <RotateCw className="w-6 h-6 text-[#94A3B8]" />
                 </div>
               )}
             </button>
@@ -171,7 +171,7 @@ export function ProductGallery({ images, videoUrl, videoThumbnail, image360Url, 
 
       {/* Fullscreen Modal */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[#0A3340]/95 flex items-center justify-center p-4">
           <button
             onClick={() => setIsFullscreen(false)}
             className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full transition-colors"

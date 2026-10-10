@@ -38,9 +38,9 @@ export default function NtsaStatusCard({
   const badgeClasses = {
     passed: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600',
     failed: 'bg-red-500/10 border-red-500/20 text-red-600',
-    pending: 'bg-amber-500/10 border-amber-500/20 text-amber-600',
-    review: 'bg-amber-500/10 border-amber-500/20 text-amber-600',
-    unknown: 'bg-gray-500/10 border-gray-500/20 text-gray-500',
+    pending: 'bg-[#13B8A6]/10 border-[#5AAFA4]/20 text-[#176B87]',
+    review: 'bg-[#13B8A6]/10 border-[#5AAFA4]/20 text-[#176B87]',
+    unknown: 'bg-[#5AAFA4]/10 border-[#5AAFA4]/20 text-[#64748B]',
   };
 
   return (
@@ -62,8 +62,8 @@ export default function NtsaStatusCard({
           disabled={loading}
           className={`w-full mt-3 py-2 px-3 rounded-lg font-sans text-xs font-semibold transition-all ${
             loading
-              ? 'bg-gray-200 text-gray-500 cursor-wait'
-              : 'bg-white/80 hover:bg-white text-charcoal-800'
+              ? 'bg-[#DDF4F0] text-[#64748B] cursor-wait'
+              : 'bg-white/80 hover:bg-white text-[#0A3340]'
           }`}
         >
           {loading ? (

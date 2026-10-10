@@ -26,7 +26,7 @@ export function WhatsAppButton() {
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
       {/* Sleek Quick Chat Popover */}
       {isOpen && (
-        <div className="mb-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="mb-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-[#D7E7E4] overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
           <div className="px-3.5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-white/20 rounded-xl">
@@ -50,8 +50,8 @@ export function WhatsAppButton() {
             </button>
           </div>
 
-          <form onSubmit={handleStartChat} className="p-3 bg-gray-50/60 space-y-2.5 text-xs">
-            <p className="text-[11px] text-gray-600 leading-snug">
+          <form onSubmit={handleStartChat} className="p-3 bg-[#F6FAF9]/60 space-y-2.5 text-xs">
+            <p className="text-[11px] text-[#64748B] leading-snug">
               Chat live with our technical flooring & waterproofing specialists on WhatsApp:
             </p>
 
@@ -60,14 +60,14 @@ export function WhatsAppButton() {
               value={customMsg}
               onChange={(e) => setCustomMsg(e.target.value)}
               aria-label="WhatsApp message"
-              className="w-full p-2 bg-white border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              className="w-full p-2 bg-white border border-[#BDE5DE] rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               placeholder="Type your inquiry..."
             />
 
             <div className="flex items-center justify-between gap-2 pt-0.5">
               <a
                 href={`tel:+${phoneNumber}`}
-                className="px-2.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-[11px] flex items-center gap-1 transition-colors"
+                className="px-2.5 py-2 bg-[#EEF7F5] hover:bg-[#DDF4F0] text-[#12576D] rounded-xl font-semibold text-[11px] flex items-center gap-1 transition-colors"
               >
                 <PhoneCall className="w-3 h-3 text-emerald-600" /> Call
               </a>
@@ -85,7 +85,7 @@ export function WhatsAppButton() {
       {/* Small & Communicating Floating Toggle */}
       <div className="relative flex items-center group">
         {/* Hover label tooltip */}
-        <span className="mr-2 text-xs font-semibold px-2.5 py-1 bg-gray-900 text-white rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden sm:inline-block">
+        <span className="mr-2 text-xs font-semibold px-2.5 py-1 bg-[#0A3340] text-white rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden sm:inline-block">
           Chat on WhatsApp
         </span>
 

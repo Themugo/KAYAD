@@ -446,7 +446,7 @@ function AppInner() {
   const showPublicMobileDock = !privateWorkspaceNavs.has(activeNav) && !['auctions', 'payments', 'profile'].includes(activeNav);
 
   return (
-    <div className="min-h-screen bg-[#EEF7F5] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#EEF7F5] text-[#0A3340] flex flex-col font-sans">
       {/* 0. Top notice/advertisement strip - real, backend-driven,
           admin-managed entirely through the Ad Manager panel, no code
           changes needed to add/edit/recolor/remove an entry. */}
@@ -482,8 +482,8 @@ function AppInner() {
         <Suspense fallback={
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">
-              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-amber-400" aria-hidden="true" />
-              <p className="text-sm font-medium text-slate-600">Loading KAYAD workspace…</p>
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#BDE5DE] border-t-amber-400" aria-hidden="true" />
+              <p className="text-sm font-medium text-[#64748B]">Loading KAYAD workspace…</p>
             </div>
           </div>
         }>
@@ -687,23 +687,23 @@ function AppInner() {
       )}
 
       {/* 3. Footer */}
-      <footer className="bg-[#0A3340] text-slate-300 text-xs py-8 border-t border-navy-600/40 mt-12">
+      <footer className="bg-[#0A3340] text-[#BDE5DE] text-xs py-8 border-t border-navy-600/40 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-400 text-[#0A3340] font-black flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#13B8A6] text-[#0A3340] font-black flex items-center justify-center">
               K
             </div>
             <div>
               <p className="font-bold text-white">KAYAD Automotive Marketplace East Africa</p>
-              <p className="text-[11px] text-slate-400">Verified Automotive & Escrow Platform East Africa</p>
+              <p className="text-[11px] text-[#94A3B8]">Verified Automotive & Escrow Platform East Africa</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 text-slate-300">
-            <button onClick={() => setActiveNav('marketplace')} className="hover:text-amber-300">Marketplace</button>
-            <button onClick={() => setActiveNav('escrow')} className="hover:text-amber-300">Escrow Vault</button>
-            <button onClick={() => setActiveNav('financing')} className="hover:text-amber-300">Financing</button>
-            <button onClick={() => setActiveNav('support')} className="hover:text-amber-300">Support & Disputes</button>
+          <div className="flex items-center gap-6 text-[#BDE5DE]">
+            <button onClick={() => setActiveNav('marketplace')} className="hover:text-[#5AAFA4]">Marketplace</button>
+            <button onClick={() => setActiveNav('escrow')} className="hover:text-[#5AAFA4]">Escrow Vault</button>
+            <button onClick={() => setActiveNav('financing')} className="hover:text-[#5AAFA4]">Financing</button>
+            <button onClick={() => setActiveNav('support')} className="hover:text-[#5AAFA4]">Support & Disputes</button>
           </div>
         </div>
       </footer>

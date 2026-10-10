@@ -77,9 +77,9 @@ export default function AdminUsers() {
 
         <div className="stat-grid" style={{ marginBottom: 24 }}>
           {[
-            { label: 'Total Users', value: filteredStats.total, color: 'var(--gold)' },
+            { label: 'Total Users', value: filteredStats.total, color: 'var(--brand)' },
             { label: 'Admins', value: filteredStats.admins, color: 'var(--red-400)' },
-            { label: 'Dealers', value: filteredStats.dealers, color: 'var(--gold)' },
+            { label: 'Dealers', value: filteredStats.dealers, color: 'var(--brand)' },
             { label: 'Banned', value: filteredStats.banned, color: 'var(--red-500)' },
             { label: 'Pending Approval', value: filteredStats.pending, color: 'var(--orange-400)' },
           ].map(s => (

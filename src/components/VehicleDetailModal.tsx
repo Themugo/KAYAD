@@ -185,14 +185,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             <h3 className="text-2xl font-black text-[#176B87] font-display">
               Vehicle #{notFoundId} Not Available
             </h3>
-            <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+            <p className="text-xs text-[#64748B] max-w-md mx-auto leading-relaxed">
               This vehicle may have been sold, unlisted, or completed through the KAYAD Escrow Vault.
             </p>
           </div>
 
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-xs text-slate-700 space-y-2 max-w-md mx-auto">
+          <div className="bg-[#F6FAF9] p-4 rounded-xl border border-[#D7E7E4] text-left text-xs text-[#12576D] space-y-2 max-w-md mx-auto">
             <p className="font-bold text-[#176B87]">Recommended Next Steps:</p>
-            <ul className="list-disc list-inside space-y-1 text-slate-600">
+            <ul className="list-disc list-inside space-y-1 text-[#64748B]">
               <li>Explore verified inventory in the active marketplace</li>
               <li>Filter by make, model, county, or budget</li>
               <li>Contact support if you hold an active escrow deposit for this listing</li>
@@ -201,7 +201,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
           <div className="flex justify-center pt-2">
             <Button variant="primary" size="md" onClick={onClose}>
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Sparkles className="w-4 h-4 text-[#13B8A6]" />
               <span>Return to Marketplace</span>
             </Button>
           </div>
@@ -283,13 +283,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
         <span className="text-[#176B87] font-black text-lg font-display tracking-tight">
           {vehicle.year} {vehicle.make} {vehicle.model}
         </span>
-        <span className="text-slate-400 font-medium text-xs">| Ref #{vehicle.id}</span>
+        <span className="text-[#94A3B8] font-medium text-xs">| Ref #{vehicle.id}</span>
       </div>
 
       <div className="flex items-center gap-2">
         <button
           onClick={handleShare}
-          className="p-2 rounded-full border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+          className="p-2 rounded-full border border-[#D7E7E4] text-[#64748B] hover:text-[#0A3340] hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           title="Share Listing"
         >
           {shareSuccess ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
@@ -297,7 +297,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
         <button
           onClick={() => onToggleSave(vehicle.id)}
           className={`p-2 rounded-full border transition-all cursor-pointer ${
-            isSaved ? 'bg-rose-50 text-rose-600 border-rose-200' : 'text-slate-500 border-slate-200 hover:bg-slate-100'
+            isSaved ? 'bg-rose-50 text-rose-600 border-rose-200' : 'text-[#64748B] border-[#D7E7E4] hover:bg-[#EEF7F5]'
           }`}
           title={isSaved ? 'Saved in Watchlist' : 'Save to Watchlist'}
         >
@@ -322,7 +322,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               {/* Primary Large Image Viewer */}
               <div
                 onClick={() => setIsLightboxOpen(true)}
-                className="h-80 sm:h-[420px] rounded-3xl overflow-hidden bg-slate-950 border border-slate-200 relative group shadow-lg cursor-zoom-in"
+                className="h-80 sm:h-[420px] rounded-3xl overflow-hidden bg-[#0A3340] border border-[#D7E7E4] relative group shadow-lg cursor-zoom-in"
               >
                 <LazyImage
                   src={activeImage}
@@ -334,7 +334,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 {/* Overlays: Condition & Interactive Media Chips */}
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap z-10">
                   <Badge variant="verified" size="sm" className="shadow-xs">
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
                     {vehicle.condition || 'Foreign Used'}
                   </Badge>
 
@@ -342,13 +342,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
                 {/* Floating Location Overlay */}
                 <div className="absolute bottom-4 left-4 bg-[#176B87]/90 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 backdrop-blur-md shadow-md z-10">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-[#13B8A6] shrink-0" />
                   <span>{vehicle.location}, {vehicle.county}</span>
                 </div>
 
                 {/* Counter & Fullscreen Controls */}
                 <div className="absolute bottom-4 right-4 flex items-center gap-2 z-10">
-                  <span className="bg-black/75 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
+                  <span className="bg-[#0A3340]/75 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
                     📷 {allImages.indexOf(activeImage) + 1} / {allImages.length}
                   </span>
                   <button
@@ -357,7 +357,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       e.stopPropagation();
                       setIsLightboxOpen(true);
                     }}
-                    className="p-2 bg-black/75 hover:bg-black text-white rounded-xl backdrop-blur-md transition-colors border border-white/10 cursor-pointer"
+                    className="p-2 bg-[#0A3340]/75 hover:bg-[#0A3340] text-white rounded-xl backdrop-blur-md transition-colors border border-white/10 cursor-pointer"
                     title="Fullscreen Lightbox"
                   >
                     <Maximize2 className="w-4 h-4" />
@@ -375,7 +375,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         const prevIdx = (currentIdx - 1 + allImages.length) % allImages.length;
                         setActiveImage(allImages[prevIdx]);
                       }}
-                      className="pointer-events-auto w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
+                      className="pointer-events-auto w-10 h-10 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
@@ -387,7 +387,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         const nextIdx = (currentIdx + 1) % allImages.length;
                         setActiveImage(allImages[nextIdx]);
                       }}
-                      className="pointer-events-auto w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
+                      className="pointer-events-auto w-10 h-10 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
@@ -403,7 +403,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       key={idx}
                       onClick={() => setActiveImage(img)}
                       className={`h-20 w-28 shrink-0 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        activeImage === img ? 'border-[#176B87] ring-2 ring-[#176B87]/20 scale-95 shadow-xs' : 'border-slate-200 opacity-70 hover:opacity-100'
+                        activeImage === img ? 'border-[#176B87] ring-2 ring-[#176B87]/20 scale-95 shadow-xs' : 'border-[#D7E7E4] opacity-70 hover:opacity-100'
                       }`}
                     >
                       <LazyImage src={img} alt={`Thumb ${idx + 1}`} wrapperClassName="w-full h-full" className="w-full h-full object-cover" />
@@ -434,10 +434,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 {/* ==========================================
                     2. PREMIUM PRICE PANEL
                     ========================================== */}
-                <Card className="p-5 bg-gradient-to-br from-slate-50 via-amber-50/30 to-slate-50 border-amber-300/80 shadow-xs space-y-3">
+                <Card className="p-5 bg-gradient-to-br from-[#F6FAF9] via-[#F3FAF9]/30 to-[#F6FAF9] border-[#BDE5DE]/80 shadow-xs space-y-3">
                   <div className="flex items-baseline justify-between flex-wrap gap-2">
                     <div>
-                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                      <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">
                         {isAuction ? 'Current Highest Bid' : 'Listed Price'}
                       </p>
                       <span className="text-3xl font-black text-[#176B87] font-display tracking-tight">
@@ -449,7 +449,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       <span className={`text-xs font-extrabold px-3 py-1 rounded-xl border ${
                         marketDiff.isBelow
                           ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                          : 'bg-slate-100 text-slate-700 border-slate-200'
+                          : 'bg-[#EEF7F5] text-[#12576D] border-[#D7E7E4]'
                       }`}>
                         {marketDiff.isBelow ? `Ksh ${marketDiff.amount.toLocaleString()} Below Market` : 'Fair Market Price'}
                       </span>
@@ -458,9 +458,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
                   {/* Monthly Finance Estimate Indicator */}
                   {isFinanceActive && (
-                    <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
-                      <span className="text-slate-600 font-bold flex items-center gap-1.5">
-                        <Landmark className="w-4 h-4 text-blue-600" /> Estimated Monthly Finance:
+                    <div className="pt-3 border-t border-[#D7E7E4]/80 flex items-center justify-between text-xs">
+                      <span className="text-[#64748B] font-bold flex items-center gap-1.5">
+                        <Landmark className="w-4 h-4 text-[#176B87]" /> Estimated Monthly Finance:
                       </span>
                       <span className="font-black text-[#176B87] text-sm font-display">
                         Ksh {Math.round(monthlyPayment).toLocaleString()} / mo
@@ -472,18 +472,18 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 {/* ==========================================
                     3. SELLER SUMMARY CARD
                     ========================================== */}
-                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                <div className="p-4 bg-white rounded-2xl border border-[#D7E7E4] shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-[#176B87] text-amber-400 font-black flex items-center justify-center font-display text-base shadow-xs">
+                      <div className="w-11 h-11 rounded-2xl bg-[#176B87] text-[#13B8A6] font-black flex items-center justify-center font-display text-base shadow-xs">
                         {vehicle.sellerName.charAt(0)}
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
                           <h4 className="font-extrabold text-[#176B87] text-sm font-display">{vehicle.sellerName}</h4>
-                          <ShieldCheck className="w-4 h-4 text-amber-500" />
+                          <ShieldCheck className="w-4 h-4 text-[#176B87]" />
                         </div>
-                        <p className="text-[11px] text-slate-500 font-medium">
+                        <p className="text-[11px] text-[#64748B] font-medium">
                           {vehicle.sellerRating ? `★ ${vehicle.sellerRating} Rating` : 'Rating not available'} • {vehicle.sellerType || 'Seller'}{vehicle.responseTime ? ` • Response: ${vehicle.responseTime}` : ''}
                         </p>
                       </div>
@@ -491,13 +491,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   </div>
 
                   {/* Dealer Primary & Secondary CTAs */}
-                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#D7E7E4]">
                     <Button
                       variant="primary"
                       size="sm"
                       onClick={() => (onViewShowroom ? onViewShowroom(vehicle.sellerName) : onContactSeller(vehicle))}
                     >
-                      <Building2 className="w-3.5 h-3.5 text-amber-400" />
+                      <Building2 className="w-3.5 h-3.5 text-[#13B8A6]" />
                       <span>View Showroom</span>
                     </Button>
 
@@ -535,7 +535,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     onClick={() => onStartEscrow(vehicle)}
                     className="shadow-md font-black text-sm"
                   >
-                    <Lock className="w-5 h-5 text-amber-400" />
+                    <Lock className="w-5 h-5 text-[#13B8A6]" />
                     <span>{isEscrowLive() ? 'Start Secure Escrow Purchase' : 'Review Escrow Workflow'}</span>
                   </Button>
                 ) : (
@@ -587,10 +587,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 { label: 'Condition', val: vehicle.condition || 'Foreign Used', icon: <Award className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Verification', val: vehicle.verified ? 'Verified' : 'Pending verification', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> }
               ].map((chip, idx) => (
-                <div key={idx} className="p-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-2xl border border-slate-200/80 text-center space-y-1 transition-colors">
+                <div key={idx} className="p-3.5 bg-[#F6FAF9] hover:bg-[#EEF7F5]/80 rounded-2xl border border-[#D7E7E4]/80 text-center space-y-1 transition-colors">
                   <div className="flex justify-center">{chip.icon}</div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{chip.label}</p>
-                  <p className="font-black text-slate-800 text-xs truncate">{chip.val}</p>
+                  <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">{chip.label}</p>
+                  <p className="font-black text-[#0A3340] text-xs truncate">{chip.val}</p>
                 </div>
               ))}
             </div>
@@ -599,12 +599,12 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           {/* ==========================================
               5. BUYER ASSURANCE (KAYAD Transaction Safeguards)
               ========================================== */}
-          <div className="p-6 bg-gradient-to-r from-slate-900 via-[#176B87] to-slate-900 text-white rounded-3xl shadow-md space-y-4 border border-amber-400/20">
+          <div className="p-6 bg-gradient-to-r from-[#0A3340] via-[#176B87] to-[#0A3340] text-white rounded-3xl shadow-md space-y-4 border border-[#91CEC5]/20">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <span className="text-sm font-black text-amber-400 uppercase tracking-wider font-display flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-amber-400" /> KAYAD Transaction Safeguards
+              <span className="text-sm font-black text-[#13B8A6] uppercase tracking-wider font-display flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-[#13B8A6]" /> KAYAD Transaction Safeguards
               </span>
-              <span className="text-xs text-slate-300 font-semibold">Max 6 Verified Safeguards</span>
+              <span className="text-xs text-[#BDE5DE] font-semibold">Max 6 Verified Safeguards</span>
             </div>
 
             {/* Exactly 6 Concise Trust Chips */}
@@ -619,7 +619,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               ].map((item, idx) => (
                 <div key={idx} className={`p-3 rounded-2xl backdrop-blur-md border space-y-0.5 ${item.enabled ? 'bg-white/10 border-white/15' : 'bg-white/5 border-white/10 opacity-60'}`}>
                   <p className="font-extrabold text-white text-xs">{item.title}</p>
-                  <p className="text-[10px] text-slate-300 font-medium">{item.desc}</p>
+                  <p className="text-[10px] text-[#BDE5DE] font-medium">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -630,62 +630,62 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               ========================================== */}
           <div className="space-y-4">
             <h3 className="text-sm font-black text-[#176B87] uppercase tracking-wider font-display flex items-center gap-2">
-              <Compass className="w-4 h-4 text-amber-500" />
+              <Compass className="w-4 h-4 text-[#176B87]" />
               The Vehicle Story & Detailed Assessment
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
 
-              <Card className="p-5 space-y-2 bg-white border-slate-200">
+              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
                 <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <Car className="w-4 h-4 text-amber-500" />
+                  <Car className="w-4 h-4 text-[#176B87]" />
                   <span>Vehicle Overview</span>
                 </div>
-                <p className="text-slate-600 leading-relaxed text-xs">
+                <p className="text-[#64748B] leading-relaxed text-xs">
                   {vehicle.description || `Pristine ${vehicle.year} ${vehicle.make} ${vehicle.model} presented in immaculate mechanical state in ${vehicle.location}. Inspected for long-distance durability across East African roads.`}
                 </p>
               </Card>
 
-              <Card className="p-5 space-y-2 bg-white border-slate-200">
+              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
                 <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
                   <Wrench className="w-4 h-4 text-emerald-600" />
                   <span>Maintenance History</span>
                 </div>
-                <p className="text-slate-600 leading-relaxed text-xs">
+                <p className="text-[#64748B] leading-relaxed text-xs">
                   Full service log recorded with authorized brand workshops. Fluid replacements, brake system overhaul, and brand new set of heavy-duty all-terrain tires recently fitted.
                 </p>
               </Card>
 
-              <Card className="p-5 space-y-2 bg-white border-slate-200">
+              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
                 <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <ShieldCheck className="w-4 h-4 text-blue-600" />
+                  <ShieldCheck className="w-4 h-4 text-[#176B87]" />
                   <span>Ownership History</span>
                 </div>
-                <p className="text-slate-600 leading-relaxed text-xs">
+                <p className="text-[#64748B] leading-relaxed text-xs">
                   Single non-smoking owner since import. Complete NTSA TIMS logbook documentation available with zero bank encumbrances or outstanding traffic penalties.
                 </p>
               </Card>
 
-              <Card className="p-5 space-y-2 bg-white border-slate-200">
+              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
                 <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <Sparkles className="w-4 h-4 text-[#176B87]" />
                   <span>Why This Vehicle Stands Out</span>
                 </div>
-                <p className="text-slate-600 leading-relaxed text-xs">
+                <p className="text-[#64748B] leading-relaxed text-xs">
                   Rare trim package featuring advanced driver safety assist systems, exceptional fuel efficiency, high ground clearance, and strong resale value retention in the regional market.
                 </p>
               </Card>
 
-              <Card className="p-5 space-y-2 bg-white border-slate-200 md:col-span-2 lg:col-span-2">
+              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4] md:col-span-2 lg:col-span-2">
                 <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
                   <CheckSquare className="w-4 h-4 text-emerald-600" />
                   <span>Condition Summary</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-slate-700 font-semibold">
-                  <div className="bg-slate-50 p-2 rounded-xl text-center">Engine: Excellent (100%)</div>
-                  <div className="bg-slate-50 p-2 rounded-xl text-center">Transmission: Smooth</div>
-                  <div className="bg-slate-50 p-2 rounded-xl text-center">Bodywork: Factory Paint</div>
-                  <div className="bg-slate-50 p-2 rounded-xl text-center">Interior: Grade A Clean</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[#12576D] font-semibold">
+                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Engine: Excellent (100%)</div>
+                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Transmission: Smooth</div>
+                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Bodywork: Factory Paint</div>
+                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Interior: Grade A Clean</div>
                 </div>
               </Card>
 
@@ -703,10 +703,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
 
               {/* Safety Category */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+              <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('safety')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
+                  className="w-full p-4 bg-[#F6FAF9] flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-rose-600" /> Safety Systems ({featureGroups.safety.length})
@@ -714,9 +714,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   {openFeatureCategories.safety ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {openFeatureCategories.safety && (
-                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-slate-200">
+                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-[#D7E7E4]">
                     {featureGroups.safety.map((feat, i) => (
-                      <div key={i} className="flex items-center gap-2 font-bold text-slate-700">
+                      <div key={i} className="flex items-center gap-2 font-bold text-[#12576D]">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>{feat}</span>
                       </div>
@@ -726,20 +726,20 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </div>
 
               {/* Comfort Category */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+              <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('comfort')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
+                  className="w-full p-4 bg-[#F6FAF9] flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" /> Comfort & Interior ({featureGroups.comfort.length})
+                    <Sparkles className="w-4 h-4 text-[#176B87]" /> Comfort & Interior ({featureGroups.comfort.length})
                   </span>
                   {openFeatureCategories.comfort ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {openFeatureCategories.comfort && (
-                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-slate-200">
+                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-[#D7E7E4]">
                     {featureGroups.comfort.map((feat, i) => (
-                      <div key={i} className="flex items-center gap-2 font-bold text-slate-700">
+                      <div key={i} className="flex items-center gap-2 font-bold text-[#12576D]">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>{feat}</span>
                       </div>
@@ -749,20 +749,20 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </div>
 
               {/* Technology Category */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+              <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('technology')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
+                  className="w-full p-4 bg-[#F6FAF9] flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-blue-600" /> Technology & Infotainment ({featureGroups.technology.length})
+                    <Zap className="w-4 h-4 text-[#176B87]" /> Technology & Infotainment ({featureGroups.technology.length})
                   </span>
                   {openFeatureCategories.technology ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {openFeatureCategories.technology && (
-                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-slate-200">
+                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-[#D7E7E4]">
                     {featureGroups.technology.map((feat, i) => (
-                      <div key={i} className="flex items-center gap-2 font-bold text-slate-700">
+                      <div key={i} className="flex items-center gap-2 font-bold text-[#12576D]">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>{feat}</span>
                       </div>
@@ -772,10 +772,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </div>
 
               {/* Utility Category */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+              <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('utility')}
-                  className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
+                  className="w-full p-4 bg-[#F6FAF9] flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-emerald-600" /> Utility & Exterior ({featureGroups.utility.length})
@@ -783,9 +783,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   {openFeatureCategories.utility ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {openFeatureCategories.utility && (
-                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-slate-200">
+                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-[#D7E7E4]">
                     {featureGroups.utility.map((feat, i) => (
-                      <div key={i} className="flex items-center gap-2 font-bold text-slate-700">
+                      <div key={i} className="flex items-center gap-2 font-bold text-[#12576D]">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>{feat}</span>
                       </div>
@@ -803,15 +803,15 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               structure, zero encumbrances) was rendered for EVERY vehicle. That was an invented report. This panel states
               only what is known: whether the listing carries an inspection-passed flag, and how to get an independent one.
               ========================================== */}
-          <section aria-labelledby="vd-inspection-title" className="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4">
+          <section aria-labelledby="vd-inspection-title" className="bg-[#F6FAF9] border border-[#D7E7E4] rounded-3xl p-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-[#176B87] text-white rounded-2xl shadow-xs"><FileCheck className="w-6 h-6" aria-hidden="true" /></div>
               <div>
-                <h3 id="vd-inspection-title" className="font-extrabold text-[#0F5D73] text-base font-display">Pre-purchase inspection</h3>
-                <p className="text-xs text-slate-600">Carried out by an independent, verified inspection provider, not by KAYAD.</p>
+                <h3 id="vd-inspection-title" className="font-extrabold text-[#12576d] text-base font-display">Pre-purchase inspection</h3>
+                <p className="text-xs text-[#64748B]">Carried out by an independent, verified inspection provider, not by KAYAD.</p>
               </div>
             </div>
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-[#12576D]">
               {vehicle.inspectionPassed
                 ? 'This listing is marked as having passed an inspection. Findings are only shown in the report of the customer who requested it, so you should still arrange your own inspection before you commit.'
                 : 'No inspection report is attached to this listing. Ask an independent provider to inspect the vehicle before you commit.'}
@@ -827,15 +827,15 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           {/* ==========================================
               9. ASSET FINANCING ESTIMATOR MODULE
               ========================================== */}
-          <div className="bg-blue-50/60 border border-blue-200 rounded-3xl p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-blue-200 pb-4">
+          <div className="bg-[#F3FAF9]/60 border border-[#D7E7E4] rounded-3xl p-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-[#D7E7E4] pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-xs">
+                <div className="p-3 bg-[#176B87] text-white rounded-2xl shadow-xs">
                   <Calculator className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-blue-950 text-base font-display">Financing Marketplace Estimator</h3>
-                  <p className="text-xs text-blue-800">Compare pre-approval offers from multiple lenders</p>
+                  <h3 className="font-extrabold text-[#0A3340] text-base font-display">Financing Marketplace Estimator</h3>
+                  <p className="text-xs text-[#0E4655]">Compare pre-approval offers from multiple lenders</p>
                 </div>
               </div>
               <Badge variant="success" size="md">
@@ -844,11 +844,11 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-              <div className="space-y-4 bg-white p-5 rounded-2xl border border-blue-200 shadow-xs">
+              <div className="space-y-4 bg-white p-5 rounded-2xl border border-[#D7E7E4] shadow-xs">
                 <div className="space-y-2">
-                  <div className="flex justify-between font-bold text-slate-700">
+                  <div className="flex justify-between font-bold text-[#12576D]">
                     <span>Down Payment Deposit</span>
-                    <span className="text-blue-900 font-extrabold">{depositPercent}% (Ksh {depositAmount.toLocaleString()})</span>
+                    <span className="text-[#0A3340] font-extrabold">{depositPercent}% (Ksh {depositAmount.toLocaleString()})</span>
                   </div>
                   <input
                     type="range"
@@ -857,14 +857,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     step={5}
                     value={depositPercent}
                     onChange={(e) => setDepositPercent(Number(e.target.value))}
-                    className="w-full accent-blue-600 cursor-pointer"
+                    className="w-full accent-[#13B8A6] cursor-pointer"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between font-bold text-slate-700">
+                  <div className="flex justify-between font-bold text-[#12576D]">
                     <span>Loan Repayment Period</span>
-                    <span className="text-blue-900 font-extrabold">{loanTermMonths} Months ({(loanTermMonths / 12).toFixed(1)} Yrs)</span>
+                    <span className="text-[#0A3340] font-extrabold">{loanTermMonths} Months ({(loanTermMonths / 12).toFixed(1)} Yrs)</span>
                   </div>
                   <input
                     type="range"
@@ -873,18 +873,18 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     step={6}
                     value={loanTermMonths}
                     onChange={(e) => setLoanTermMonths(Number(e.target.value))}
-                    className="w-full accent-blue-600 cursor-pointer"
+                    className="w-full accent-[#13B8A6] cursor-pointer"
                   />
                 </div>
               </div>
 
               <div className="bg-gradient-to-br from-[#176B87] to-[#0A3340] text-white p-6 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
                 <div>
-                  <p className="text-[10px] text-amber-400 font-extrabold uppercase tracking-wider">Estimated Monthly Payment</p>
+                  <p className="text-[10px] text-[#13B8A6] font-extrabold uppercase tracking-wider">Estimated Monthly Payment</p>
                   <p className="text-3xl font-black text-white font-display mt-1">
-                    Ksh {Math.round(monthlyPayment).toLocaleString()} <span className="text-xs font-normal text-slate-300">/ mo</span>
+                    Ksh {Math.round(monthlyPayment).toLocaleString()} <span className="text-xs font-normal text-[#BDE5DE]">/ mo</span>
                   </p>
-                  <p className="text-[11px] text-slate-300 mt-2">
+                  <p className="text-[11px] text-[#BDE5DE] mt-2">
                     Financed Principal: Ksh {loanPrincipal.toLocaleString()}
                   </p>
                 </div>
@@ -910,33 +910,33 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               Technical Specifications & Chassis Data
             </h3>
 
-            <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+            <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
               <button
                 onClick={() => toggleSpecSection('powertrain')}
-                className="w-full p-4 bg-slate-50 flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
+                className="w-full p-4 bg-[#F6FAF9] flex items-center justify-between font-black text-xs text-[#176B87] cursor-pointer"
               >
                 <span className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-500" /> Powertrain & Engine Specifications
+                  <Zap className="w-4 h-4 text-[#176B87]" /> Powertrain & Engine Specifications
                 </span>
                 {openSpecSections.powertrain ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
               {openSpecSections.powertrain && (
-                <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t border-slate-200">
+                <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t border-[#D7E7E4]">
                   <div>
-                    <p className="text-slate-400 font-bold uppercase text-[10px]">Engine Capacity</p>
-                    <p className="font-extrabold text-slate-800 mt-0.5">{vehicle.engineSize || '2500 cc'}</p>
+                    <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Engine Capacity</p>
+                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.engineSize || '2500 cc'}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 font-bold uppercase text-[10px]">Transmission</p>
-                    <p className="font-extrabold text-slate-800 mt-0.5">{vehicle.transmission}</p>
+                    <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Transmission</p>
+                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.transmission}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 font-bold uppercase text-[10px]">Drive System</p>
-                    <p className="font-extrabold text-slate-800 mt-0.5">{vehicle.driveType || 'All-Wheel Drive'}</p>
+                    <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Drive System</p>
+                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.driveType || 'All-Wheel Drive'}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 font-bold uppercase text-[10px]">Fuel Type</p>
-                    <p className="font-extrabold text-slate-800 mt-0.5">{vehicle.fuelType}</p>
+                    <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Fuel Type</p>
+                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.fuelType}</p>
                   </div>
                 </div>
               )}
@@ -947,9 +947,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               11. SIMILAR VEHICLES SHOWROOM
               ========================================== */}
           {relatedVehicles.length > 0 && (
-            <div className="pt-6 border-t border-slate-200 space-y-4">
+            <div className="pt-6 border-t border-[#D7E7E4] space-y-4">
               <h4 className="text-sm font-black text-[#176B87] uppercase tracking-wider font-display flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-500" />
+                <Sparkles className="w-4 h-4 text-[#176B87]" />
                 Similar Verified Showroom Vehicles
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -957,13 +957,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   <div
                     key={rel.id}
                     onClick={() => onSelectVehicle ? onSelectVehicle(rel) : null}
-                    className="p-3.5 bg-slate-50 hover:bg-amber-50/80 transition-all cursor-pointer rounded-2xl border border-slate-200 text-xs flex gap-3.5 items-center group shadow-xs"
+                    className="p-3.5 bg-[#F6FAF9] hover:bg-[#F3FAF9]/80 transition-all cursor-pointer rounded-2xl border border-[#D7E7E4] text-xs flex gap-3.5 items-center group shadow-xs"
                   >
                     <LazyImage src={rel.image} alt={rel.title} wrapperClassName="w-20 h-16 rounded-xl shrink-0 overflow-hidden" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     <div className="min-w-0 flex-1 space-y-0.5">
-                      <p className="font-extrabold text-[#176B87] truncate group-hover:text-amber-800">{rel.title}</p>
-                      <p className="text-xs font-black text-slate-800">Ksh {rel.price.toLocaleString()}</p>
-                      <p className="text-[10px] text-slate-400 font-medium">{rel.location}</p>
+                      <p className="font-extrabold text-[#176B87] truncate group-hover:text-[#0A3340]">{rel.title}</p>
+                      <p className="text-xs font-black text-[#0A3340]">Ksh {rel.price.toLocaleString()}</p>
+                      <p className="text-[10px] text-[#94A3B8] font-medium">{rel.location}</p>
                     </div>
                   </div>
                 ))}
@@ -977,9 +977,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       {/* ==========================================
           MOBILE STICKY BOTTOM PURCHASE BAR
           ========================================== */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 lg:hidden shadow-lg flex items-center justify-between gap-3">
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#D7E7E4] p-3 lg:hidden shadow-lg flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">{isAuction ? 'Current Highest Bid' : 'Listed Price'}</p>
+          <p className="text-[10px] font-bold text-[#94A3B8] uppercase">{isAuction ? 'Current Highest Bid' : 'Listed Price'}</p>
           <p className="text-base font-black text-[#176B87] font-display">
             Ksh {displayPrice.toLocaleString()}
           </p>
@@ -1001,7 +1001,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               size="sm"
               onClick={() => onStartEscrow(vehicle)}
             >
-              <Lock className="w-3.5 h-3.5 text-amber-400" />
+              <Lock className="w-3.5 h-3.5 text-[#13B8A6]" />
               <span>{isEscrowLive() ? 'Start Escrow' : 'Review Escrow'}</span>
             </Button>
           ) : (
@@ -1020,14 +1020,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           FULLSCREEN LIGHTBOX MODAL
           ========================================== */}
       {isLightboxOpen && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-[#0A3340]/95 backdrop-blur-md flex flex-col justify-between p-4 animate-fade-in">
           <div className="flex justify-between items-center text-white px-2 pt-2">
             <span className="font-bold text-xs">
               {vehicle.title} (Photo {allImages.indexOf(activeImage) + 1} of {allImages.length})
             </span>
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="p-2 text-white hover:text-amber-400 rounded-full transition-colors cursor-pointer"
+              className="p-2 text-white hover:text-[#13B8A6] rounded-full transition-colors cursor-pointer"
             >
               Close ✕
             </button>
@@ -1077,7 +1077,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 key={idx}
                 onClick={() => setActiveImage(img)}
                 className={`h-16 w-24 shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                  activeImage === img ? 'border-amber-400 scale-95' : 'border-transparent opacity-60 hover:opacity-100'
+                  activeImage === img ? 'border-[#91CEC5] scale-95' : 'border-transparent opacity-60 hover:opacity-100'
                 }`}
               >
                 <LazyImage src={img} alt={`Thumb ${idx + 1}`} wrapperClassName="w-full h-full" className="w-full h-full object-cover" />

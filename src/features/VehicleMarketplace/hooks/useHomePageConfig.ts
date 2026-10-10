@@ -77,8 +77,8 @@ export const ACCENT_THEME_CLASSES: Record<HomePageConfig['accentTheme'], {
   text400: string; text500: string; text600: string;
   bg400: string; bg400Hover: string; border400: string; bg400Subtle: string;
 }> = {
-  blue: { text400: 'text-[#176B87]', text500: 'text-[#176B87]', text600: 'text-[#0F6ED8]', bg400: 'bg-[#176B87]', bg400Hover: 'hover:bg-[#0F6ED8]', border400: 'border-[#176B87]/25', bg400Subtle: 'bg-[#176B87]/10' },
-  cyan: { text400: 'text-[#13B8A6]', text500: 'text-[#13B8A6]', text600: 'text-[#159BC7]', bg400: 'bg-[#13B8A6]', bg400Hover: 'hover:bg-[#159BC7]', border400: 'border-[#13B8A6]/25', bg400Subtle: 'bg-[#13B8A6]/10' },
+  blue: { text400: 'text-[#176B87]', text500: 'text-[#176B87]', text600: 'text-[#0A3340]', bg400: 'bg-[#176B87]', bg400Hover: 'hover:bg-[#0A3340]', border400: 'border-[#176B87]/25', bg400Subtle: 'bg-[#176B87]/10' },
+  cyan: { text400: 'text-[#13B8A6]', text500: 'text-[#13B8A6]', text600: 'text-[#176B87]', bg400: 'bg-[#13B8A6]', bg400Hover: 'hover:bg-[#176B87]', border400: 'border-[#13B8A6]/25', bg400Subtle: 'bg-[#13B8A6]/10' },
   slate: { text400: 'text-[#176B87]', text500: 'text-[#176B87]', text600: 'text-[#12576D]', bg400: 'bg-[#176B87]', bg400Hover: 'hover:bg-[#12576D]', border400: 'border-[#176B87]/25', bg400Subtle: 'bg-[#176B87]/10' },
 };
 

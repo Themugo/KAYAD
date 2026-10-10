@@ -21,7 +21,7 @@ export const SellCarBanner: FC = () => {
         </h2>
 
         {/* Subtitle */}
-        <p className="text-slate-200 text-xs sm:text-sm max-w-2xl mx-auto font-sans font-medium leading-relaxed">
+        <p className="text-[#DDF4F0] text-xs sm:text-sm max-w-2xl mx-auto font-sans font-medium leading-relaxed">
           Join thousands of Kenyan car buyers and sellers who trust KAYAD for secure M-Pesa & bank escrow transactions.
         </p>
 

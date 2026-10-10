@@ -4,13 +4,13 @@ import type { FC } from 'react';
 export const CustomerTestimonials: FC = () => {
   const testimonials: Array<{ name: string; location: string; role: string; vehicle: string; quote: string; rating: number; date: string; avatar: string }> = [];
   return (
-    <section className="py-14 sm:py-20 bg-[#F6FAF9] dark:bg-[#0A3340] text-[#176B87] dark:text-slate-100 border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
+    <section className="py-14 sm:py-20 bg-[#F6FAF9] dark:bg-[#0A3340] text-[#176B87] dark:text-[#EEF7F5] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-slate-100 font-mono font-black text-xs uppercase tracking-wider">
-            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-[#EEF7F5] font-mono font-black text-xs uppercase tracking-wider">
+            <Star className="w-4 h-4 text-[#176B87] fill-[#176B87]" />
             <span>4.9 / 5.0 VERIFIED MEMBER TRUST SCORE</span>
           </div>
 
@@ -18,7 +18,7 @@ export const CustomerTestimonials: FC = () => {
             Trusted by Car Buyers & Sellers Across Kenya
           </h2>
 
-          <p className="text-xs sm:text-sm text-[#66808A] dark:text-slate-300 font-sans font-medium">
+          <p className="text-xs sm:text-sm text-[#64748b] dark:text-[#BDE5DE] font-sans font-medium">
             Verified member reviews will appear here once they are loaded from the live review records.
           </p>
         </div>
@@ -35,9 +35,9 @@ export const CustomerTestimonials: FC = () => {
 
                 {/* Top Rating & Escrow Badge */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-amber-500">
+                  <div className="flex items-center gap-1 text-[#176B87]">
                     {[...Array(item.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-500" />
+                      <Star key={i} className="w-4 h-4 fill-[#176B87]" />
                     ))}
                   </div>
 
@@ -48,7 +48,7 @@ export const CustomerTestimonials: FC = () => {
                 </div>
 
                 {/* Quote Text */}
-                <p className="text-xs sm:text-sm text-[#176B87] dark:text-slate-200 font-sans italic leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#176B87] dark:text-[#DDF4F0] font-sans italic leading-relaxed">
                   "{item.quote}"
                 </p>
 
@@ -71,7 +71,7 @@ export const CustomerTestimonials: FC = () => {
                   <h4 className="text-xs font-serif font-black text-[#176B87] dark:text-white truncate">
                     {item.name}
                   </h4>
-                  <div className="flex items-center gap-1.5 text-[10px] text-[#66808A] dark:text-slate-400 font-sans">
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#64748b] dark:text-[#94A3B8] font-sans">
                     <MapPin className="w-3 h-3 text-[#13B8A6]" />
                     <span>{item.location}</span>
                   </div>
@@ -82,7 +82,7 @@ export const CustomerTestimonials: FC = () => {
           ))}
         </div>
         ) : (
-          <div className="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-[#12576D] border border-[#D7E7E4] dark:border-white/10 p-8 text-center text-sm text-[#66808A] dark:text-slate-300">
+          <div className="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-[#12576D] border border-[#D7E7E4] dark:border-white/10 p-8 text-center text-sm text-[#64748b] dark:text-[#BDE5DE]">
             No verified member reviews are available yet.
           </div>
         )}

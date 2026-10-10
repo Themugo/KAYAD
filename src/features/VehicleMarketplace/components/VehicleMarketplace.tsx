@@ -106,7 +106,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     stageHeightPct: 100, stageMaxWidthPct: 100, cardScalePct: 80, cardWidthPct: 42, cardOffsetXPct: 0, cardOffsetYPct: 0,
     cardBgOpacityPct: 95, cardBlurPx: 18, cardBorderColor: '#FFFFFF', cardTextColor: 'var(--color-navy-900)',
     backgroundUrl: '/hero/kayad-nairobi-kicc.jpg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
-    overlayColor: '#EAF5F7', overlayOpacityPct: 18, secondaryOverlayColor: '#FFFFFF', secondaryOverlayOpacityPct: 10,
+    overlayColor: '#EEF7F5', overlayOpacityPct: 18, secondaryOverlayColor: '#FFFFFF', secondaryOverlayOpacityPct: 10,
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: 'var(--kayad-cyan)', secondaryButtonBorderColor: '#C7DAD8',
     arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
@@ -629,7 +629,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     backgroundSize: 'cover',
     backgroundPosition: `${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionX) || 50))}% ${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionY) || 50))}%`,
     backgroundRepeat: 'no-repeat',
-    backgroundColor: '#EAF5F7',
+    backgroundColor: '#EEF7F5',
   };
 
   // Vehicle artwork always comes from the vehicle record/configuration.
@@ -894,7 +894,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
       <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 pb-2 pt-4 sm:px-6 lg:px-8">
         <span className="text-[9px] font-black uppercase tracking-[0.22em] text-navy-600 sm:text-[10px]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
-        <div role="group" aria-label="Marketplace at a glance" className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-slate-500 sm:gap-2 sm:text-[10px]">
+        <div role="group" aria-label="Marketplace at a glance" className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-[#64748B] sm:gap-2 sm:text-[10px]">
           <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverError ? (savedOnly ? 'Saved vehicles unavailable' : 'Inventory unavailable') : savedOnly ? `${serverTotal.toLocaleString()} saved` : `${serverTotal.toLocaleString()} vehicles`}</span>
           {savedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>}
           {comparedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>}
@@ -903,7 +903,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 1. HERO - one continuous commercial composition. */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
-        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] bg-[#EAF5F7] text-white">
+        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] bg-[#EEF7F5] text-white">
           <div
             className="absolute inset-0 transition-transform duration-500"
             style={{
@@ -1147,7 +1147,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               }
               type="button"
               onClick={action as () => void}
-              className={`shrink-0 rounded-full border px-4 py-2 text-[11px] font-extrabold transition ${(label === 'All' ? selectedBodyStyle === 'All' && selectedFuel === 'All' : label === 'Electric' || label === 'Hybrid' ? selectedFuel === label : selectedBodyStyle === label) ? 'border-navy-600 bg-navy-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-navy-600 hover:text-navy-600'}`}
+              className={`shrink-0 rounded-full border px-4 py-2 text-[11px] font-extrabold transition ${(label === 'All' ? selectedBodyStyle === 'All' && selectedFuel === 'All' : label === 'Electric' || label === 'Hybrid' ? selectedFuel === label : selectedBodyStyle === label) ? 'border-navy-600 bg-navy-600 text-white shadow-sm' : 'border-[#D7E7E4] bg-white text-[#64748B] hover:border-navy-600 hover:text-navy-600'}`}
             >
               {label as string}
             </button>
@@ -1163,9 +1163,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       <div className="kayad-search-bridge relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
         <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
           <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Search</label>
-            <div className="border border-slate-200 rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F8FBFF]">
-              <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Search</label>
+            <div className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F6FAF9]">
+              <Search className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
               <input
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
@@ -1176,7 +1176,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
             {/* The label follows its select: when the select is hidden by the sidebar the label stays in the grid cell (layout unchanged) but is invisible, so no orphaned "MAKE" caption remains. */}
-            <label className={`text-[10px] font-bold uppercase tracking-wide text-slate-400 ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
+            <label className={`text-[10px] font-bold uppercase tracking-wide text-[#94A3B8] ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
             {/* Fixed: this select was always visible regardless of the
                 sidebar, but the sidebar has its own Make selector too -
                 showing both at once above the lg: breakpoint is
@@ -1189,18 +1189,18 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               value={selectedMake}
               onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }}
               aria-label="Hero make filter"
-              className={`border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
+              className={`border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
             >
               {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Price up to</label>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Price up to</label>
             <select
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               aria-label="Hero maximum price filter"
-              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
+              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
             >
               <option value={20000000}>All</option>
               <option value={2500000}>Ksh 2.5M</option>
@@ -1209,12 +1209,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Year</label>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Year</label>
             <select
               value={minYear}
               onChange={(e) => setMinYear(Number(e.target.value))}
               aria-label="Hero year filter"
-              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
+              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
             >
               <option value={2005}>2005 – 2026</option>
               <option value={2020}>2020 – 2026</option>
@@ -1222,12 +1222,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Body Style</label>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Body Style</label>
             <select
               value={selectedBodyStyle}
               onChange={(e) => setSelectedBodyStyle(e.target.value)}
               aria-label="Hero body style filter"
-              className="border border-slate-200 rounded-lg px-3 py-2.5 text-xs bg-[#F8FBFF] outline-none"
+              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
             >
               {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
             </select>
@@ -1248,7 +1248,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <div>
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-navy-600">KAYAD SELECT</span>
               <h2 id="featured-vehicles-heading" className="mt-1 font-display text-xl font-black tracking-[-0.025em] text-navy-900">Featured vehicles</h2>
-              <p className="mt-0.5 text-xs text-slate-500">Real listings worth a closer look, selected from the live catalogue.</p>
+              <p className="mt-0.5 text-xs text-[#64748B]">Real listings worth a closer look, selected from the live catalogue.</p>
             </div>
             <button type="button" onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="hidden text-[11px] font-extrabold text-navy-600 sm:block">View all →</button>
           </div>
@@ -1284,7 +1284,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <button
                 key={f.id}
                 onClick={f.onClear}
-                className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-navy-600 hover:text-navy-600 transition-colors"
+                className="flex items-center gap-1.5 bg-white border border-[#D7E7E4] rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#64748B] hover:border-navy-600 hover:text-navy-600 transition-colors"
               >
                 {f.label}
                 <X className="w-3 h-3" />
@@ -1305,7 +1305,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-navy-700">
                   <LayoutGrid className="h-3.5 w-3.5" /> {savedOnly ? 'Saved vehicles' : 'Marketplace inventory'}
                 </span>
-                <span className="text-[11px] font-semibold text-slate-400">{selectedCounty}</span>
+                <span className="text-[11px] font-semibold text-[#94A3B8]">{selectedCounty}</span>
               </div>
               <h2 className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-navy-900">
                 {/* The Saved destination reuses this grid but must identify itself as the buyer's saved list, not the full inventory. */}
@@ -1316,28 +1316,28 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   </span>
                 )}
               </h2>
-              <p className="mt-1 max-w-2xl text-xs sm:text-[13px] leading-relaxed text-slate-500">
+              <p className="mt-1 max-w-2xl text-xs sm:text-[13px] leading-relaxed text-[#64748B]">
                 {savedOnly ? 'The vehicles you have saved, with their inspection status, pricing and auction availability.' : 'Compare verified marketplace listings, inspection status, pricing and auction availability in one clear view.'}
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="kayad-toolbar-control flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1" aria-label="Results per page">
-                <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Show</span>
+              <div className="kayad-toolbar-control flex h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1" aria-label="Results per page">
+                <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#94A3B8]">Show</span>
                 {[12, 24, 48].map((n) => (
                   <button
                     key={n}
                     onClick={() => setPageSize(n)}
                     aria-pressed={pageSize === n}
-                    className={`h-8 min-w-9 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${pageSize === n ? 'bg-navy-900 text-white shadow-sm' : 'text-slate-500 hover:bg-white hover:text-navy-900'}`}
+                    className={`h-8 min-w-9 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${pageSize === n ? 'bg-navy-900 text-white shadow-sm' : 'text-[#64748B] hover:bg-white hover:text-navy-900'}`}
                   >
                     {n}
                   </button>
                 ))}
               </div>
 
-              <label className="kayad-toolbar-control flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 focus-within:border-navy-600">
-                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Sort</span>
+              <label className="kayad-toolbar-control flex h-10 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 focus-within:border-navy-600">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Sort</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -1355,13 +1355,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </label>
 
               {viewMode === 'grid' && (
-                <div className="kayad-toolbar-control hidden h-10 items-center gap-1 rounded-xl border border-slate-200 bg-[#F8FBFF] p-1 md:flex" aria-label="Desktop grid columns">
+                <div className="kayad-toolbar-control hidden h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1 md:flex" aria-label="Desktop grid columns">
                   {[3, 4, 5].map((n) => (
                     <button
                       key={n}
                       onClick={() => setGridColumns(n as 3 | 4 | 5)}
                       aria-pressed={gridColumns === n}
-                      className={`h-8 min-w-9 rounded-lg px-2 text-[11px] font-bold transition-colors ${gridColumns === n ? 'bg-navy-600 text-white' : 'text-slate-500 hover:bg-white hover:text-navy-900'}`}
+                      className={`h-8 min-w-9 rounded-lg px-2 text-[11px] font-bold transition-colors ${gridColumns === n ? 'bg-navy-600 text-white' : 'text-[#64748B] hover:bg-white hover:text-navy-900'}`}
                       title={`${n} columns`}
                       aria-label={`${n}×`}
                     >
@@ -1371,12 +1371,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               )}
 
-              <div className="kayad-toolbar-control flex h-10 items-center rounded-xl border border-slate-200 bg-white p-1" aria-label="Inventory view">
+              <div className="kayad-toolbar-control flex h-10 items-center rounded-xl border border-[#D7E7E4] bg-white p-1" aria-label="Inventory view">
                 <button
                   onClick={() => setViewMode('grid')}
                   aria-pressed={viewMode === 'grid'}
                   title="Grid view"
-                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-navy-700' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#94A3B8] hover:text-[#12576D]'}`}
                 >
                   <Grid className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Grid</span>
                 </button>
@@ -1384,7 +1384,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   onClick={() => setViewMode('list')}
                   aria-pressed={viewMode === 'list'}
                   title="List view"
-                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#DDF4F0] text-navy-700' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#94A3B8] hover:text-[#12576D]'}`}
                 >
                   <ListIcon className="w-3.5 h-3.5" /> <span className="hidden xl:inline">List</span>
                 </button>
@@ -1394,7 +1394,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
               <button
                 onClick={() => setShowMobileFilterDrawer(true)}
-                className="lg:hidden flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600"
+                className="lg:hidden flex h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
               >
                 <Filter className="w-3.5 h-3.5" /> Filters
               </button>
@@ -1405,7 +1405,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </button>
               )}
               {isAdmin && (
-                <button onClick={() => setShowAdManager(true)} className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 hover:bg-[#F8FBFF]" title="Manage Ads">
+                <button onClick={() => setShowAdManager(true)} className="flex items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 py-2 text-[10px] font-bold text-[#64748B] hover:bg-[#F6FAF9]" title="Manage Ads">
                   <Megaphone className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Ads</span>
                 </button>
               )}
@@ -1422,45 +1422,45 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         <div className={`grid ${showDesktopSidebar ? 'lg:grid-cols-[236px_minmax(0,1fr)]' : 'lg:grid-cols-1'} gap-6 items-start`}>
           {/* SIDEBAR */}
           {showDesktopSidebar && (
-          <aside className="hidden lg:block bg-white border border-slate-200 rounded-2xl p-5 sticky top-20">
+          <aside className="hidden lg:block bg-white border border-[#D7E7E4] rounded-2xl p-5 sticky top-20">
             <div className="flex items-center justify-between mb-3.5">
               <div>
                 <h3 className="text-sm font-extrabold text-navy-900">Refine inventory</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">Narrow the marketplace without leaving the page.</p>
+                <p className="text-[10px] text-[#94A3B8] mt-0.5">Narrow the marketplace without leaving the page.</p>
               </div>
               <button onClick={resetFilters} className="text-[11px] font-bold text-navy-600 hover:underline">Reset all</button>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
-              <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Make</label>
+              <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Model</label>
-              <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Model</label>
+              <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Price Range · {formatPriceM(maxPrice)}</label>
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Price Range · {formatPriceM(maxPrice)}</label>
               <div className="flex gap-2 mb-2">
                 <input
                   type="number"
                   placeholder="Min"
                   value={minPrice || ''}
                   onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
-                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                  className="w-full border border-[#D7E7E4] rounded-lg px-2 py-1.5 text-[11px] font-mono"
                 />
                 <input
                   type="number"
                   placeholder="Max"
                   value={maxPrice === 20000000 ? '' : maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)}
-                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                  className="w-full border border-[#D7E7E4] rounded-lg px-2 py-1.5 text-[11px] font-mono"
                 />
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -1468,7 +1468,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <button
                     key={c.label}
                     onClick={() => setMaxPrice(c.v)}
-                    className={`border rounded-full px-2.5 py-1 text-[10.5px] font-medium ${maxPrice === c.v ? 'border-navy-600 bg-[#DDF4F0] text-navy-600' : 'border-slate-200 text-slate-500'}`}
+                    className={`border rounded-full px-2.5 py-1 text-[10.5px] font-medium ${maxPrice === c.v ? 'border-navy-600 bg-[#DDF4F0] text-navy-600' : 'border-[#D7E7E4] text-[#64748B]'}`}
                   >
                     {c.label}
                   </button>
@@ -1476,50 +1476,50 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Year Range</label>
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Year Range</label>
               <div className="flex gap-2">
                 <input
                   type="number"
                   placeholder={`Min (2005)`}
                   value={minYear === 2005 ? '' : minYear}
                   onChange={(e) => setMinYear(Number(e.target.value) || 2005)}
-                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                  className="w-full border border-[#D7E7E4] rounded-lg px-2 py-1.5 text-[11px] font-mono"
                 />
                 <input
                   type="number"
                   placeholder={`Max (2026)`}
                   value={maxYear === 2026 ? '' : maxYear}
                   onChange={(e) => setMaxYear(Number(e.target.value) || 2026)}
-                  className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-mono"
+                  className="w-full border border-[#D7E7E4] rounded-lg px-2 py-1.5 text-[11px] font-mono"
                 />
               </div>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body Style</label>
-              <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Body Style</label>
+              <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel Type</label>
-              <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Fuel Type</label>
+              <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
               </select>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Transmission</label>
-              <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Transmission</label>
+              <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
               </select>
             </div>
 
-            <div className="border-b border-slate-100 py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Seller Type</label>
-              <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs bg-[#F8FBFF]">
+            <div className="border-b border-[#D7E7E4] py-3.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Seller Type</label>
+              <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
             </div>
@@ -1529,7 +1529,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </button>
 
             {sidebarAds.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
+              <div className="mt-4 pt-4 border-t border-[#D7E7E4] space-y-3">
                 {sidebarAds.map((slot) => (
                   <a
                     key={slot.id}
@@ -1556,22 +1556,22 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <div role="status" className="rounded-2xl border border-[#D7E7E4] bg-white px-6 py-14 text-center shadow-sm">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5F3] text-navy-600"><AlertTriangle className="h-5 w-5" aria-hidden="true" /></div>
                 <h3 className="font-display text-base font-bold text-navy-900">Inventory is temporarily unavailable</h3>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
+                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[#64748B]">
                   We couldn&apos;t load vehicles just now. This is usually brief. Your filters and saved vehicles are kept, so you can pick up right where you left off.
                 </p>
                 {(() => {
                   const code = /\b(4\d\d|5\d\d)\b/.exec(String(loadError || serverError || ''))?.[1];
-                  return code ? <p className="mt-2 text-xs text-slate-400">Reference: HTTP {code}</p> : null;
+                  return code ? <p className="mt-2 text-xs text-[#94A3B8]">Reference: HTTP {code}</p> : null;
                 })()}
                 <button onClick={() => { onRetryLoad?.(); setServerRetryKey((key) => key + 1); }} className="mt-5 inline-flex h-10 items-center rounded-xl bg-navy-900 px-5 text-sm font-bold text-white transition hover:bg-navy-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--kayad-cyan)]">
                   Retry inventory
                 </button>
               </div>
             ) : filteredVehicles.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
-                <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+              <div className="text-center py-16 bg-white border border-dashed border-[#D7E7E4] rounded-2xl">
+                <Search className="w-8 h-8 text-[#BDE5DE] mx-auto mb-3" />
                 <h4 className="text-sm font-bold text-navy-900 mb-1">No vehicles match your filters</h4>
-                <p className="text-xs text-slate-500 mb-4">Try widening your price range or clearing a filter to see more results.</p>
+                <p className="text-xs text-[#64748B] mb-4">Try widening your price range or clearing a filter to see more results.</p>
                 <button onClick={resetFilters} className="bg-navy-900 text-white text-xs font-bold rounded-lg px-4 py-2">
                   Reset Filters
                 </button>
@@ -1598,7 +1598,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         fix only, not a lifecycle-accuracy fix. */}
                     <span className="self-start inline-flex items-center gap-1 bg-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3"><Gavel className="w-3 h-3" aria-hidden="true" /> LIVE AUCTIONS</span>
                     <h3 className="text-lg font-bold mb-2">Live Vehicle Auctions</h3>
-                    <p className="text-xs text-slate-300 mb-4">Bid on quality vehicles from trusted, verified sellers across East Africa.</p>
+                    <p className="text-xs text-[#BDE5DE] mb-4">Bid on quality vehicles from trusted, verified sellers across East Africa.</p>
                     <button onClick={() => onNavigate('discovery')} className="self-start bg-navy-600 hover:bg-navy-700 text-white text-xs font-bold px-4 py-2 rounded-lg mt-auto">
                       View Auctions →
                     </button>
@@ -1637,7 +1637,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       key={v.id}
                       className={`kayad-vehicle-card group bg-white border border-[#D7E7E4] rounded-2xl overflow-hidden flex shadow-[0_6px_22px_rgba(11,29,58,0.055)] hover:shadow-[0_14px_34px_rgba(11,29,58,0.12)] hover:-translate-y-0.5 transition-all duration-200 ${viewMode === 'list' ? 'flex-col sm:flex-row' : 'flex-col'}`}
                     >
-                      <div className={`relative bg-[#EEF4FA] shrink-0 overflow-hidden ${viewMode === 'list' ? 'h-44 w-full sm:h-auto sm:w-64' : inventoryDensity.image}`}>
+                      <div className={`relative bg-[#EEF7F5] shrink-0 overflow-hidden ${viewMode === 'list' ? 'h-44 w-full sm:h-auto sm:w-64' : inventoryDensity.image}`}>
                         {v.images?.[0] ? (
                           <img
                             src={v.images[0]}
@@ -1646,7 +1646,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <div className="w-full h-full flex items-center justify-center text-[#94A3B8]">
                             <LayoutGrid className="w-8 h-8" />
                           </div>
                         )}
@@ -1663,7 +1663,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                               </span>
                             )}
                             {showEndedAuction && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-slate-500">
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-[#5AAFA4]">
                                 <Gavel className="w-2.5 h-2.5" />Auction Ended
                               </span>
                             )}
@@ -1693,7 +1693,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                             banner implying it is bid-ready. */}
                         {showLiveAuction && v.currentBid && (
                           <div className="absolute bottom-0 left-0 right-0 bg-navy-900/90 backdrop-blur-sm text-white text-[10px] px-3 py-2 flex items-center justify-between gap-2">
-                            <span className="font-semibold text-slate-200">Current bid</span>
+                            <span className="font-semibold text-[#DDF4F0]">Current bid</span>
                             <span className="font-black">{formatPriceM(v.currentBid)}</span>
                           </div>
                         )}
@@ -1712,21 +1712,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                         <div className={`mt-2 ${inventoryDensity.price} font-black tracking-tight text-navy-900`}>{formatPriceM(v.price)}</div>
 
-                        <div className={`mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5 ${inventoryDensity.meta} font-medium text-slate-500`}>
+                        <div className={`mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5 ${inventoryDensity.meta} font-medium text-[#64748B]`}>
                           <span className="inline-flex items-center gap-1.5 min-w-0"><Gauge className="w-3 h-3 text-navy-600 shrink-0" />{v.mileage.toLocaleString()} km</span>
                           <span className="inline-flex items-center gap-1.5 min-w-0"><Fuel className="w-3 h-3 text-[var(--kayad-cyan)] shrink-0" />{v.fuelType}</span>
-                          <span className="inline-flex items-center gap-1.5 min-w-0"><ArrowRightLeft className="w-3 h-3 text-slate-400 shrink-0" />{v.transmission}</span>
-                          <span className="inline-flex items-center gap-1.5 min-w-0 truncate"><MapPin className="w-3 h-3 text-slate-400 shrink-0" />{v.location}</span>
+                          <span className="inline-flex items-center gap-1.5 min-w-0"><ArrowRightLeft className="w-3 h-3 text-[#94A3B8] shrink-0" />{v.transmission}</span>
+                          <span className="inline-flex items-center gap-1.5 min-w-0 truncate"><MapPin className="w-3 h-3 text-[#94A3B8] shrink-0" />{v.location}</span>
                         </div>
 
-                        <div className={`mt-3 rounded-xl border ${v.inspectionPassed ? 'border-emerald-100 bg-emerald-50/70' : 'border-slate-200 bg-[#F8FBFF]'} px-2.5 ${inventoryDensity.detail}`}>
+                        <div className={`mt-3 rounded-xl border ${v.inspectionPassed ? 'border-emerald-100 bg-emerald-50/70' : 'border-[#D7E7E4] bg-[#F6FAF9]'} px-2.5 ${inventoryDensity.detail}`}>
                           {v.inspectionPassed ? (
                             <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
                               <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                               <span>Inspection report available</span>
                             </div>
                           ) : (
-                            <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-slate-500">
+                            <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[#64748B]">
                               <span>No inspection report yet</span>
                               <button onClick={() => onNavigate('inspections')} className="text-navy-600 font-bold hover:text-navy-700 whitespace-nowrap">Request →</button>
                             </div>
@@ -1763,16 +1763,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="min-h-11 min-w-11 flex items-center justify-center border border-slate-200 rounded-lg disabled:opacity-40"
+                  className="min-h-11 min-w-11 flex items-center justify-center border border-[#D7E7E4] rounded-lg disabled:opacity-40"
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
-                <span className="text-xs text-slate-500 font-medium">Page {currentPage} of {totalPages}</span>
+                <span className="text-xs text-[#64748B] font-medium">Page {currentPage} of {totalPages}</span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="min-h-11 min-w-11 flex items-center justify-center border border-slate-200 rounded-lg disabled:opacity-40"
+                  className="min-h-11 min-w-11 flex items-center justify-center border border-[#D7E7E4] rounded-lg disabled:opacity-40"
                   aria-label="Next page"
                 >
                   <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -1794,7 +1794,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           <div className="bg-gradient-to-br from-navy-700 to-navy-900 text-white p-8 sm:p-10 flex flex-col justify-center gap-4">
             <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--kayad-cyan)]">Buy with more confidence</span>
             <h3 className="text-xl sm:text-2xl font-bold font-display max-w-md">A registered local mechanic inspects it. The report stays on file — for you and every buyer after you.</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs text-slate-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs text-[#BDE5DE]">
               <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Registered mechanic near the vehicle</div>
               <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Pay the mechanic directly</div>
               <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Report uploaded to the listing</div>
@@ -1806,7 +1806,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
           <div className="bg-[#F4F8FC] p-8 sm:p-9 flex flex-col justify-center">
             <h4 className="text-lg font-bold text-navy-900 mb-2 max-w-xs">Ready to sell your vehicle?</h4>
-            <p className="text-xs text-slate-600 mb-4 max-w-xs">Reach verified buyers across East Africa through the KAYAD marketplace and escrow network.</p>
+            <p className="text-xs text-[#64748B] mb-4 max-w-xs">Reach verified buyers across East Africa through the KAYAD marketplace and escrow network.</p>
             <button onClick={() => onNavigate('seller-platform')} className="self-start bg-navy-900 hover:bg-navy-700 text-white text-sm font-bold px-5 py-2.5 rounded-full">
               Sell Your Vehicle →
             </button>
@@ -1828,77 +1828,77 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {/* MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden">
-          <div className="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-            <div><h3 className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-slate-400 mt-0.5">Adjust any filter, then return to the results.</p></div>
+          <div className="sticky top-0 bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
+            <div><h3 className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#94A3B8] mt-0.5">Adjust any filter, then return to the results.</p></div>
             <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5" aria-label="Close filters">
-              <X className="w-5 h-5 text-slate-500" aria-hidden="true" />
+              <X className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
             </button>
           </div>
           <div className="p-4 space-y-4 pb-8">
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Make</label>
-              <select aria-label="Mobile make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Make</label>
+              <select aria-label="Mobile make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Model</label>
-              <select aria-label="Mobile model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Model</label>
+              <select aria-label="Mobile model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Min price</label>
-                <input type="number" value={minPrice || ''} onChange={(e) => setMinPrice(Number(e.target.value) || 0)} placeholder="Ksh 50K" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Min price</label>
+                <input type="number" value={minPrice || ''} onChange={(e) => setMinPrice(Number(e.target.value) || 0)} placeholder="Ksh 50K" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Max price</label>
-                <input type="number" value={maxPrice === 20000000 ? '' : maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)} placeholder="Ksh 20M" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Max price</label>
+                <input type="number" value={maxPrice === 20000000 ? '' : maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)} placeholder="Ksh 20M" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">From year</label>
-                <input type="number" value={minYear === 2005 ? '' : minYear} onChange={(e) => setMinYear(Number(e.target.value) || 2005)} placeholder="2005" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">From year</label>
+                <input type="number" value={minYear === 2005 ? '' : minYear} onChange={(e) => setMinYear(Number(e.target.value) || 2005)} placeholder="2005" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">To year</label>
-                <input type="number" value={maxYear === 2026 ? '' : maxYear} onChange={(e) => setMaxYear(Number(e.target.value) || 2026)} placeholder="2026" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]" />
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">To year</label>
+                <input type="number" value={maxYear === 2026 ? '' : maxYear} onChange={(e) => setMaxYear(Number(e.target.value) || 2026)} placeholder="2026" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Body style</label>
-              <select aria-label="Mobile body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Body style</label>
+              <select aria-label="Mobile body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Fuel type</label>
-                <select aria-label="Mobile fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Fuel type</label>
+                <select aria-label="Mobile fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                   {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Transmission</label>
-                <select aria-label="Mobile transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Transmission</label>
+                <select aria-label="Mobile transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                   {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Seller type</label>
-              <select aria-label="Mobile seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-[#F8FBFF]">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Seller type</label>
+              <select aria-label="Mobile seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
             </div>
-            <label className="flex items-center gap-3 rounded-xl border border-[#D7E7E4] bg-[#F8FBFF] px-3 py-3 text-sm font-semibold text-slate-700">
+            <label className="flex items-center gap-3 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] px-3 py-3 text-sm font-semibold text-[#12576D]">
               <input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-navy-600 w-4 h-4" />
-              <span><span className="block text-xs font-bold text-navy-900">Live auction listings</span><span className="block text-[10px] font-normal text-slate-500 mt-0.5">Show vehicles currently available for bidding.</span></span>
+              <span><span className="block text-xs font-bold text-navy-900">Live auction listings</span><span className="block text-[10px] font-normal text-[#64748B] mt-0.5">Show vehicles currently available for bidding.</span></span>
             </label>
             <div className="flex gap-2 pt-2">
-              <button onClick={resetFilters} className="flex-1 border border-slate-200 rounded-xl py-3 text-xs font-bold text-slate-600 hover:bg-slate-50">Reset all</button>
+              <button onClick={resetFilters} className="flex-1 border border-[#D7E7E4] rounded-xl py-3 text-xs font-bold text-[#64748B] hover:bg-[#F6FAF9]">Reset all</button>
               <button onClick={() => setShowMobileFilterDrawer(false)} className="flex-1 bg-navy-900 hover:bg-navy-700 text-white rounded-xl py-3 text-xs font-bold">Show results</button>
             </div>
           </div>

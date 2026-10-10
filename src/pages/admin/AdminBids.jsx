@@ -7,7 +7,7 @@ import { timeAgo } from '../../utils/helpers';
 
 const FRAUD_META = {
   low:    { label: 'Low',    color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
-  medium: { label: 'Medium', color: 'var(--orange)', bg: 'rgba(249,115,22,0.1)' },
+  medium: { label: 'Medium', color: 'var(--orange)', bg: 'rgba(19, 184, 166, 0.1)' },
   high:   { label: 'High',   color: 'var(--red)',    bg: 'rgba(239,68,68,0.1)' },
 };
 
@@ -75,7 +75,7 @@ export default function AdminBids() {
         {/* Stats row */}
         <div className="grid-4" style={{ marginBottom: 24 }}>
           {[
-            { label: 'Total Bids',    val: total.toLocaleString(),   icon: '⚡', color: 'var(--gold)' },
+            { label: 'Total Bids',    val: total.toLocaleString(),   icon: '⚡', color: 'var(--brand)' },
             { label: 'M-Pesa Paid',   val: formatKES(paidTotal),     icon: '✅', color: 'var(--green)' },
             { label: 'Unpaid Bids',   val: unpaidCount,              icon: '⏳', color: 'var(--orange)' },
             { label: 'Suspicious',    val: suspicious.length,        icon: '⚠️', color: 'var(--red)' },
@@ -162,12 +162,12 @@ export default function AdminBids() {
                         </td>
                         <td>
                           <Link to={`/cars/${bid.car?._id || bid.car}`}
-                            style={{ color: 'var(--gold)', fontSize: 13, fontWeight: 500 }}
+                            style={{ color: 'var(--brand)', fontSize: 13, fontWeight: 500 }}
                             onClick={e => e.stopPropagation()}>
                             {bid.car?.title || `#${String(bid.car || '').slice(-6)}`}
                           </Link>
                         </td>
-                        <td style={{ fontWeight: 700, color: 'var(--gold-light)' }}>{formatKES(bid.amount)}</td>
+                        <td style={{ fontWeight: 700, color: 'var(--brand-light)' }}>{formatKES(bid.amount)}</td>
                         <td>
                           <span className={`badge ${bid.status === 'paid' ? 'badge-green' : 'badge-orange'}`}>
                             {bid.status === 'paid' ? '✓ Paid' : 'Pending'}
@@ -221,13 +221,13 @@ export default function AdminBids() {
           <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Bid Detail</div>
+                <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Bid Detail</div>
                 <h3 style={{ marginTop: 4 }}>{selected.car?.title || 'Bid Record'}</h3>
               </div>
               <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
-            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 'var(--radius)', padding: 16, textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ background: 'var(--brand-glow)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 'var(--radius)', padding: 16, textAlign: 'center', marginBottom: 20 }}>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Bid Amount</div>
               <div className="price-tag" style={{ fontSize: '2rem' }}>{formatKES(selected.amount)}</div>
               {selected.commitmentAmount && (

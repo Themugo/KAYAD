@@ -3,10 +3,10 @@ import { inspectionAPI, formatKES } from '../../api/api';
 import { UserCheck, ClipboardCheck } from 'lucide-react';
 
 const STATUS_COLORS = {
-  pending_payment: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
-  paid: { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6' },
-  assigned: { bg: 'rgba(139,92,246,0.1)', color: '#8b5cf6' },
-  in_progress: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
+  pending_payment: { bg: 'rgba(19, 184, 166, 0.1)', color: '#176b87' },
+  paid: { bg: 'rgba(23, 107, 135, 0.1)', color: '#176B87' },
+  assigned: { bg: 'rgba(139,92,246,0.1)', color: '#5aafa4' },
+  in_progress: { bg: 'rgba(19, 184, 166, 0.1)', color: '#176b87' },
   completed: { bg: 'rgba(34,197,94,0.1)', color: '#22c55e' },
   cancelled: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444' },
 };
@@ -66,7 +66,7 @@ export default function AdminInspections() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-              style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 8, padding: '6px 10px', color: '#0F172A', fontSize: 12 }}>
+              style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '6px 10px', color: '#0a3340', fontSize: 12 }}>
               <option value="">All Status</option>
               <option value="pending_payment">Pending Payment</option>
               <option value="paid">Paid</option>
@@ -92,14 +92,14 @@ export default function AdminInspections() {
               const car = o.car || {};
               return (
                 <div key={o._id} style={{
-                  background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 12, padding: '14px 18px',
+                  background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 12, padding: '14px 18px',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <ClipboardCheck size={18} style={{ color: sc.color }} />
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{car.title || car._id}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', marginTop: 2 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0a3340' }}>{car.title || car._id}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', marginTop: 2 }}>
                           Fee: {formatKES(o.fee)} · {o.location || 'No location'}
                         </div>
                       </div>
@@ -112,7 +112,7 @@ export default function AdminInspections() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 11, color: 'rgba(10, 51, 64, 0.4)', flexWrap: 'wrap' }}>
                     <span>Buyer: {o.buyer?.name || o.buyer?.email || '—'}</span>
                     {o.inspector && <span>Inspector: {o.inspector.name || o.inspector.email}</span>}
                     {o.overallScore && <span>Score: {o.overallScore}/100</span>}
@@ -126,14 +126,14 @@ export default function AdminInspections() {
                             <button key={ins._id} onClick={() => handleAssignSelector(o._id, ins._id)}
                               style={{
                                 background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)',
-                                borderRadius: 8, padding: '6px 12px', color: '#8b5cf6', fontSize: 11,
+                                borderRadius: 8, padding: '6px 12px', color: '#5aafa4', fontSize: 11,
                                 fontWeight: 700, cursor: 'pointer',
                               }}>
                               {ins.name || ins.email} {ins.locationCity ? `(${ins.locationCity})` : ''}
                             </button>
                           ))}
                           <button onClick={() => setAssigning(null)} style={{
-                            background: 'transparent', border: 'none', color: 'rgba(15, 23, 42, 0.3)',
+                            background: 'transparent', border: 'none', color: 'rgba(10, 51, 64, 0.3)',
                             fontSize: 11, cursor: 'pointer',
                           }}>Cancel</button>
                         </div>
@@ -141,7 +141,7 @@ export default function AdminInspections() {
                         <button onClick={() => setAssigning(o._id)} style={{
                           display: 'flex', alignItems: 'center', gap: 5,
                           background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)',
-                          borderRadius: 8, padding: '6px 14px', color: '#8b5cf6', fontSize: 11,
+                          borderRadius: 8, padding: '6px 14px', color: '#5aafa4', fontSize: 11,
                           fontWeight: 700, cursor: 'pointer',
                         }}>
                           <UserCheck size={13} /> Assign Inspector
@@ -154,14 +154,14 @@ export default function AdminInspections() {
                     <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
                       <div style={{
                         width: 36, height: 36, borderRadius: '50%',
-                        background: o.overallScore >= 80 ? 'rgba(34,197,94,0.15)' : o.overallScore >= 60 ? 'rgba(251,191,36,0.15)' : 'rgba(239,68,68,0.15)',
+                        background: o.overallScore >= 80 ? 'rgba(34,197,94,0.15)' : o.overallScore >= 60 ? 'rgba(19, 184, 166, 0.15)' : 'rgba(239,68,68,0.15)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 12, fontWeight: 900,
-                        color: o.overallScore >= 80 ? '#22c55e' : o.overallScore >= 60 ? '#f59e0b' : '#ef4444',
+                        color: o.overallScore >= 80 ? '#22c55e' : o.overallScore >= 60 ? '#176b87' : '#ef4444',
                       }}>{o.overallScore}</div>
                       <div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', textTransform: 'capitalize' }}>{o.conditionRating} condition</div>
-                        <div style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)' }}>{o.checklist?.length || 0} items checked</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#0a3340', textTransform: 'capitalize' }}>{o.conditionRating} condition</div>
+                        <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>{o.checklist?.length || 0} items checked</div>
                       </div>
                     </div>
                   )}

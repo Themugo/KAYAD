@@ -95,7 +95,7 @@ export default function DealerAuctionDraftCard({ car, expanded, isLoading, onTog
                 onChange={(e) => onChange('_reserveMode', e.target.value)}
                 style={currencyInputStyle}>
                 {RESERVE_MODES.map((mode) => (
-                  <option key={mode.value} value={mode.value} style={{ background: '#111' }}>{mode.label}</option>
+                  <option key={mode.value} value={mode.value} style={{ background: '#0a3340' }}>{mode.label}</option>
                 ))}
               </select>
             </DealerAuctionField>
@@ -110,9 +110,9 @@ export default function DealerAuctionDraftCard({ car, expanded, isLoading, onTog
                 onChange={(e) => { if (e.target.value !== 'custom') onChange('_durationHours', Number(e.target.value)); }}
                 style={currencyInputStyle}>
                 {DURATIONS.map((duration) => (
-                  <option key={duration.value} value={duration.value} style={{ background: '#111' }}>{duration.label}</option>
+                  <option key={duration.value} value={duration.value} style={{ background: '#0a3340' }}>{duration.label}</option>
                 ))}
-                <option value="custom" style={{ background: '#111' }}>Custom hours</option>
+                <option value="custom" style={{ background: '#0a3340' }}>Custom hours</option>
               </select>
             </DealerAuctionField>
             <DealerAuctionField label="Custom hours" hint="Auctions must run at least 24 hours.">

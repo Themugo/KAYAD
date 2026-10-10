@@ -57,12 +57,12 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate }) => {
     <div className="space-y-8 pb-12">
       <div className="text-center py-6">
         <h1 className="text-2xl font-bold text-[#176B87] font-display">KAYAD Live</h1>
-        <p className="text-sm text-slate-500 mt-1">What's new on the marketplace</p>
+        <p className="text-sm text-[#64748B] mt-1">What's new on the marketplace</p>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#94A3B8] animate-spin" />
         </div>
       ) : (
         <>
@@ -73,21 +73,21 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate }) => {
               <h2 className="text-base font-bold text-[#176B87]">New Arrivals</h2>
             </div>
             {newArrivals.length === 0 ? (
-              <p className="text-xs text-slate-400">No new listings yet.</p>
+              <p className="text-xs text-[#94A3B8]">No new listings yet.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {newArrivals.map((v) => (
                   <button
                     key={v.id}
                     onClick={() => onNavigate('marketplace')}
-                    className="text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                    className="text-left bg-white border border-[#D7E7E4] rounded-xl overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    <div className="h-20 bg-slate-100">
+                    <div className="h-20 bg-[#EEF7F5]">
                       {v.images?.[0] && <img src={v.images[0]} alt={v.title} className="w-full h-full object-cover" />}
                     </div>
                     <div className="p-2">
                       <p className="text-[11px] font-semibold text-[#176B87] truncate">{v.year} {v.make} {v.model}</p>
-                      <p className="text-[10px] text-slate-500">Ksh {(v.price / 1000000).toFixed(2)}M</p>
+                      <p className="text-[10px] text-[#64748B]">Ksh {(v.price / 1000000).toFixed(2)}M</p>
                     </div>
                   </button>
                 ))}
@@ -104,9 +104,9 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate }) => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {news.map((item) => (
-                  <div key={item.id} className="bg-white border border-slate-200 rounded-xl p-4">
+                  <div key={item.id} className="bg-white border border-[#D7E7E4] rounded-xl p-4">
                     <h3 className="text-sm font-bold text-[#176B87] mb-1">{item.title}</h3>
-                    {item.excerpt && <p className="text-xs text-slate-500">{item.excerpt}</p>}
+                    {item.excerpt && <p className="text-xs text-[#64748B]">{item.excerpt}</p>}
                   </div>
                 ))}
               </div>
@@ -122,10 +122,10 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate }) => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {guides.map((item) => (
-                  <div key={item.id} className="bg-white border border-slate-200 rounded-xl p-4">
+                  <div key={item.id} className="bg-white border border-[#D7E7E4] rounded-xl p-4">
                     <h3 className="text-sm font-bold text-[#176B87] mb-1">{item.title}</h3>
-                    {item.excerpt && <p className="text-xs text-slate-500">{item.excerpt}</p>}
-                    {item.reading_time ? <p className="text-[10px] text-slate-400 mt-1.5">{item.reading_time} min read</p> : null}
+                    {item.excerpt && <p className="text-xs text-[#64748B]">{item.excerpt}</p>}
+                    {item.reading_time ? <p className="text-[10px] text-[#94A3B8] mt-1.5">{item.reading_time} min read</p> : null}
                   </div>
                 ))}
               </div>
@@ -134,7 +134,7 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate }) => {
 
           {newArrivals.length === 0 && news.length === 0 && guides.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-sm text-slate-400">Nothing to show here yet.</p>
+              <p className="text-sm text-[#94A3B8]">Nothing to show here yet.</p>
             </div>
           )}
         </>

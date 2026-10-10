@@ -73,13 +73,13 @@ export const EscrowWorkflowSection: FC = () => {
   ];
 
   return (
-    <section className="py-14 sm:py-20 bg-[#F6FAF9] dark:bg-[#0A3340] text-[#176B87] dark:text-slate-100 border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
+    <section className="py-14 sm:py-20 bg-[#F6FAF9] dark:bg-[#0A3340] text-[#176B87] dark:text-[#EEF7F5] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#D7E7E4] dark:border-white/10">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-slate-100 font-mono font-black text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-[#EEF7F5] font-mono font-black text-xs uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4 text-[#13B8A6]" />
               <span>ESCROW ON APPROVED LISTINGS</span>
             </div>
@@ -88,7 +88,7 @@ export const EscrowWorkflowSection: FC = () => {
               The 6-Step Protected Escrow Flow
             </h2>
 
-            <p className="text-xs sm:text-sm text-[#66808A] dark:text-slate-300 font-sans font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#64748b] dark:text-[#BDE5DE] font-sans font-medium leading-relaxed">
               Your money is never sent directly to a stranger. Where escrow applies, KAYAD records your payment as held until you inspect and accept the vehicle or a dispute is decided.
             </p>
           </div>
@@ -113,7 +113,7 @@ export const EscrowWorkflowSection: FC = () => {
                 className={`p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-4 cursor-pointer relative ${
                   isActive
                     ? 'bg-[#176B87] text-white border-[#13B8A6] shadow-2xl scale-[1.02]'
-                    : 'bg-white dark:bg-[#12576D] text-[#176B87] dark:text-slate-100 border-[#D7E7E4] dark:border-white/10 hover:border-[#176B87] dark:hover:border-[#13B8A6] shadow-xs'
+                    : 'bg-white dark:bg-[#12576D] text-[#176B87] dark:text-[#EEF7F5] border-[#D7E7E4] dark:border-white/10 hover:border-[#176B87] dark:hover:border-[#13B8A6] shadow-xs'
                 }`}
               >
                 <div className="space-y-3">
@@ -125,7 +125,7 @@ export const EscrowWorkflowSection: FC = () => {
                     </span>
 
                     <span className={`text-[10px] font-mono font-bold uppercase ${
-                      isActive ? 'text-[#13B8A6]' : 'text-[#66808A] dark:text-slate-400'
+                      isActive ? 'text-[#13B8A6]' : 'text-[#64748b] dark:text-[#94A3B8]'
                     }`}>
                       {item.badge}
                     </span>
@@ -144,24 +144,24 @@ export const EscrowWorkflowSection: FC = () => {
                       <h3 className={`text-base font-serif font-black ${isActive ? 'text-white' : 'text-[#176B87] dark:text-white'}`}>
                         {item.title}
                       </h3>
-                      <p className={`text-[11px] font-mono font-semibold ${isActive ? 'text-[#13B8A6]' : 'text-[#66808A] dark:text-slate-400'}`}>
+                      <p className={`text-[11px] font-mono font-semibold ${isActive ? 'text-[#13B8A6]' : 'text-[#64748b] dark:text-[#94A3B8]'}`}>
                         {item.actor}
                       </p>
                     </div>
                   </div>
 
                   <p className={`text-xs font-sans font-normal leading-relaxed ${
-                    isActive ? 'text-slate-200' : 'text-[#66808A] dark:text-slate-300'
+                    isActive ? 'text-[#DDF4F0]' : 'text-[#64748b] dark:text-[#BDE5DE]'
                   }`}>
                     {item.desc}
                   </p>
                 </div>
 
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
-                  <span className={isActive ? 'text-[#13B8A6] font-bold' : 'text-slate-400'}>
+                  <span className={isActive ? 'text-[#13B8A6] font-bold' : 'text-[#94A3B8]'}>
                     {isActive ? '● CURRENT ACTIVE STEP' : 'CLICK TO VIEW DETAILS'}
                   </span>
-                  <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#13B8A6]' : 'text-slate-400'}`} />
+                  <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#13B8A6]' : 'text-[#94A3B8]'}`} />
                 </div>
               </div>
             );
@@ -177,7 +177,7 @@ export const EscrowWorkflowSection: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">Regulated Custody</p>
-              <p className="text-[10px] text-slate-300 font-sans">Funding verified by KAYAD</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Funding verified by KAYAD</p>
             </div>
           </div>
 
@@ -187,7 +187,7 @@ export const EscrowWorkflowSection: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">OTP Signing</p>
-              <p className="text-[10px] text-slate-300 font-sans">M-Pesa Digital Contracts</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">M-Pesa Digital Contracts</p>
             </div>
           </div>
 
@@ -197,7 +197,7 @@ export const EscrowWorkflowSection: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">KRA Verified</p>
-              <p className="text-[10px] text-slate-300 font-sans">Clean Logbook Transfer</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Clean Logbook Transfer</p>
             </div>
           </div>
 
@@ -207,7 +207,7 @@ export const EscrowWorkflowSection: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">Dispute process</p>
-              <p className="text-[10px] text-slate-300 font-sans">Refunds only if staff approve one</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Refunds only if staff approve one</p>
             </div>
           </div>
 

@@ -53,17 +53,17 @@ export const DealersView: React.FC<DealersViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Top View Toggle */}
-      <div className="bg-white p-2 rounded-2xl shadow-card border border-slate-200 flex items-center justify-between gap-4 overflow-x-auto">
+      <div className="bg-white p-2 rounded-2xl shadow-card border border-[#D7E7E4] flex items-center justify-between gap-4 overflow-x-auto">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setViewMode('platform')}
             className={`px-5 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               viewMode === 'platform'
                 ? 'bg-[#176B87] text-white shadow-md'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-[#64748B] hover:bg-[#EEF7F5]'
             }`}
           >
-            <Crown className="w-4 h-4 text-amber-400" />
+            <Crown className="w-4 h-4 text-[#13B8A6]" />
             <span>Dealer Business Platform & Sales Suite</span>
             <Badge variant="accent" size="sm">MANAGEMENT CONSOLE</Badge>
           </button>
@@ -73,7 +73,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
             className={`px-5 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               viewMode === 'directory'
                 ? 'bg-[#176B87] text-white shadow-md'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-[#64748B] hover:bg-[#EEF7F5]'
             }`}
           >
             <Building2 className="w-4 h-4 text-emerald-500" />
@@ -93,7 +93,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
         <div className="space-y-6">
           {/* Header Banner */}
           <PageHeader
-            badgeIcon={<Building2 className="w-4 h-4 text-amber-500" />}
+            badgeIcon={<Building2 className="w-4 h-4 text-[#176B87]" />}
             badgeText="Verified Seller & Dealership Directory"
             title="Trusted Showrooms & Verified Private Sellers"
             description="Every enterprise dealership and private individual seller on KAYAD is verified by KAYAD, with escrow available on approved listings."
@@ -105,9 +105,9 @@ export const DealersView: React.FC<DealersViewProps> = ({
           />
 
       {/* Seller Type Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex items-center gap-2 border-b border-[#D7E7E4] overflow-x-auto pb-2 scrollbar-none">
         {[
-          { id: 'All', label: 'All Verified Sellers', icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
+          { id: 'All', label: 'All Verified Sellers', icon: <Sparkles className="w-4 h-4 text-[#176B87]" /> },
           { id: 'Enterprise Dealer', label: 'Verified Enterprise Dealerships', icon: <Building2 className="w-4 h-4 text-[#176B87]" /> },
           { id: 'Private Seller', label: 'Verified Private Individual Owners', icon: <UserCheck className="w-4 h-4 text-emerald-600" /> }
         ].map((tab) => (
@@ -117,7 +117,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
             className={`px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all whitespace-nowrap ${
               sellerTypeFilter === tab.id
                 ? 'bg-[#176B87] text-white shadow-md'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                : 'bg-white text-[#64748B] hover:bg-[#EEF7F5] border border-[#D7E7E4]'
             }`}
           >
             {tab.icon}
@@ -127,7 +127,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white rounded-2xl p-4 shadow-card border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl p-4 shadow-card border border-[#D7E7E4] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex-1 w-full">
           <Input
             placeholder="Search dealership, seller name, or yard location (e.g. Crown Motors, Westlands, Nyali)..."
@@ -137,8 +137,8 @@ export const DealersView: React.FC<DealersViewProps> = ({
           />
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-medium bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200 shrink-0">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
+        <div className="flex items-center gap-2 text-xs font-medium bg-[#F6FAF9] px-3.5 py-2.5 rounded-xl border border-[#D7E7E4] shrink-0">
+          <Filter className="w-3.5 h-3.5 text-[#94A3B8]" />
           <span>County:</span>
           <select
             value={selectedCounty}
@@ -157,9 +157,9 @@ export const DealersView: React.FC<DealersViewProps> = ({
       {/* Seller Cards Grid */}
       {filteredDealers.length === 0 ? (
         <Card className="p-8 text-center space-y-3">
-          <Building2 className="w-10 h-10 text-slate-300 mx-auto" />
-          <p className="font-bold text-slate-700">No verified sellers match your selected criteria</p>
-          <p className="text-xs text-slate-500">Try broadening your search or resetting county filters.</p>
+          <Building2 className="w-10 h-10 text-[#BDE5DE] mx-auto" />
+          <p className="font-bold text-[#12576D]">No verified sellers match your selected criteria</p>
+          <p className="text-xs text-[#64748B]">Try broadening your search or resetting county filters.</p>
           <Button
             variant="outline"
             size="sm"
@@ -175,7 +175,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
             return (
               <Card
                 key={d.id}
-                className="p-6 flex flex-col justify-between space-y-4 hover:border-amber-400 transition-all border border-slate-200"
+                className="p-6 flex flex-col justify-between space-y-4 hover:border-[#91CEC5] transition-all border border-[#D7E7E4]"
               >
                 <div className="space-y-3">
                   {/* Logo / Avatar & Rating Badge */}
@@ -184,12 +184,12 @@ export const DealersView: React.FC<DealersViewProps> = ({
                       src={d.logo}
                       alt={d.name}
                       wrapperClassName={`w-14 h-14 rounded-2xl border-2 shadow-sm ${
-                        isPrivate ? 'border-emerald-300' : 'border-amber-300'
+                        isPrivate ? 'border-emerald-300' : 'border-[#BDE5DE]'
                       }`}
                       className="w-full h-full object-cover"
                     />
                     <Badge variant="warning" size="md">
-                      <Star className="w-3.5 h-3.5 fill-current text-amber-600" /> {d.rating} ({d.reviewsCount} reviews)
+                      <Star className="w-3.5 h-3.5 fill-current text-[#176B87]" /> {d.rating} ({d.reviewsCount} reviews)
                     </Badge>
                   </div>
 
@@ -200,15 +200,15 @@ export const DealersView: React.FC<DealersViewProps> = ({
                         {isPrivate ? (
                           <UserCheck className="w-3 h-3 text-emerald-600 shrink-0" />
                         ) : (
-                          <Building2 className="w-3 h-3 text-amber-400 shrink-0" />
+                          <Building2 className="w-3 h-3 text-[#13B8A6] shrink-0" />
                         )}
                         {d.type || (isPrivate ? 'Private Seller' : 'Enterprise Dealer')}
                       </Badge>
                     </div>
 
                     <h3 className="text-lg font-extrabold text-[#176B87] font-display">{d.name}</h3>
-                    <p className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-1">
-                      <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0" /> {d.location} ({d.county})
+                    <p className="text-xs text-[#64748B] font-medium flex items-center gap-1 mt-1">
+                      <MapPin className="w-3.5 h-3.5 text-[#176B87] shrink-0" /> {d.location} ({d.county})
                     </p>
                   </div>
 
@@ -223,30 +223,30 @@ export const DealersView: React.FC<DealersViewProps> = ({
 
                   {/* Seller Bio / Description */}
                   {d.description && (
-                    <p className="text-xs text-slate-600 line-clamp-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 italic">
+                    <p className="text-xs text-[#64748B] line-clamp-2 bg-[#F6FAF9] p-2.5 rounded-xl border border-[#D7E7E4] italic">
                       "{d.description}"
                     </p>
                   )}
 
                   {/* Trust & Response Stats */}
-                  <div className="space-y-1 text-xs text-slate-500 pt-2 border-t border-slate-100">
+                  <div className="space-y-1 text-xs text-[#64748B] pt-2 border-t border-[#D7E7E4]">
                     <p className="flex items-center gap-1.5 font-medium">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" /> {d.phone}
+                      <Phone className="w-3.5 h-3.5 text-[#94A3B8]" /> {d.phone}
                     </p>
                     <p className="flex items-center gap-1.5 font-medium">
-                      <Mail className="w-3.5 h-3.5 text-slate-400" /> {d.email}
+                      <Mail className="w-3.5 h-3.5 text-[#94A3B8]" /> {d.email}
                     </p>
-                    <p className="flex items-center gap-1.5 font-bold text-amber-700">
+                    <p className="flex items-center gap-1.5 font-bold text-[#12576D]">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Avg Response Time: {d.responseTime || '< 15 mins'}
                     </p>
                   </div>
                 </div>
 
                 {/* Footer CTAs */}
-                <div className="pt-3 border-t border-slate-100 space-y-3 text-xs">
-                  <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                    <span className="text-slate-600 font-bold">Showroom Inventory:</span>
-                    <span className="font-extrabold text-[#176B87] bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-md">
+                <div className="pt-3 border-t border-[#D7E7E4] space-y-3 text-xs">
+                  <div className="flex justify-between items-center bg-[#F6FAF9] p-2.5 rounded-xl border border-[#D7E7E4]">
+                    <span className="text-[#64748B] font-bold">Showroom Inventory:</span>
+                    <span className="font-extrabold text-[#176B87] bg-[#DDF4F0] text-[#0A3340] px-2.5 py-0.5 rounded-md">
                       {d.activeListingsCount} Vehicles
                     </span>
                   </div>
@@ -266,7 +266,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
                       onClick={() => onSelectDealerVehicles(d.name)}
                     >
                       <span>Show Stock</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                      <ExternalLink className="w-3.5 h-3.5 text-[#13B8A6]" />
                     </Button>
                   </div>
                 </div>

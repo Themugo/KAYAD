@@ -75,19 +75,19 @@ export default function ReportButton({ targetType, targetId, onReported }: Repor
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-72 bg-white border border-cream-200 rounded-xl shadow-xl overflow-hidden">
+        <div className="absolute right-0 top-full z-50 mt-2 w-72 bg-white border border-[#D7E7E4] rounded-xl shadow-xl overflow-hidden">
           {done ? (
             <div className="p-4 text-center">
               <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
                 <span className="text-emerald-500 text-xl">✓</span>
               </div>
-              <p className="font-sans text-sm font-semibold text-charcoal-900">Report submitted</p>
+              <p className="font-sans text-sm font-semibold text-[#0A3340]">Report submitted</p>
               <p className="font-sans text-xs text-warm-400 mt-1">We'll review and take action if needed.</p>
             </div>
           ) : (
             <>
-              <div className="p-4 border-b border-cream-100">
-                <p className="font-sans text-sm font-semibold text-charcoal-900 mb-1">
+              <div className="p-4 border-b border-[#D7E7E4]">
+                <p className="font-sans text-sm font-semibold text-[#0A3340] mb-1">
                   Report this {targetType}
                 </p>
                 <p className="font-sans text-xs text-warm-400">
@@ -99,7 +99,7 @@ export default function ReportButton({ targetType, targetId, onReported }: Repor
                 <select
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="w-full px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg font-sans text-sm text-charcoal-800 outline-none focus:border-gold-500"
+                  className="w-full px-3 py-2 bg-[#F6FAF9] border border-[#D7E7E4] rounded-lg font-sans text-sm text-[#0A3340] outline-none focus:border-[#5AAFA4]"
                 >
                   <option value="">Select a reason...</option>
                   {REPORT_REASONS.map(r => (
@@ -112,13 +112,13 @@ export default function ReportButton({ targetType, targetId, onReported }: Repor
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Additional details (optional)..."
                   rows={2}
-                  className="w-full px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg font-sans text-sm text-charcoal-800 placeholder-warm-300 outline-none focus:border-gold-500 resize-none"
+                  className="w-full px-3 py-2 bg-[#F6FAF9] border border-[#D7E7E4] rounded-lg font-sans text-sm text-[#0A3340] placeholder-warm-300 outline-none focus:border-[#5AAFA4] resize-none"
                 />
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => setOpen(false)}
-                    className="flex-1 px-3 py-2 bg-cream-100 text-charcoal-800 font-sans text-xs font-semibold rounded-lg hover:bg-cream-200 transition-colors"
+                    className="flex-1 px-3 py-2 bg-[#EEF7F5] text-[#0A3340] font-sans text-xs font-semibold rounded-lg hover:bg-[#DDF4F0] transition-colors"
                   >
                     Cancel
                   </button>
@@ -127,7 +127,7 @@ export default function ReportButton({ targetType, targetId, onReported }: Repor
                     disabled={!reason || submitting}
                     className={`flex-1 px-3 py-2 font-sans text-xs font-semibold rounded-lg transition-colors ${
                       !reason || submitting
-                        ? 'bg-cream-200 text-warm-400 cursor-not-allowed'
+                        ? 'bg-[#DDF4F0] text-warm-400 cursor-not-allowed'
                         : 'bg-red-500 text-white hover:bg-red-600'
                     }`}
                   >

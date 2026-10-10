@@ -426,7 +426,7 @@ export default function Showroom() {
                   className={`sort-select ${isMobile ? 'sort-select-mobile' : 'sort-select-desktop'}`}
                 >
                   {SORT_OPTIONS.map(o => (
-                    <option key={o.value} value={o.value} style={{ background: '#0c0c0c' }}>
+                    <option key={o.value} value={o.value} style={{ background: '#0a3340' }}>
                       {o.label}
                     </option>
                   ))}

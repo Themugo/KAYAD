@@ -39,13 +39,13 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-cream-50 flex items-center justify-center px-4">
-          <div className="max-w-md w-full bg-white rounded-2xl border border-cream-200 p-8 text-center shadow-sm">
+        <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center px-4">
+          <div className="max-w-md w-full bg-white rounded-2xl border border-[#D7E7E4] p-8 text-center shadow-sm">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertTriangle className="w-8 h-8 text-red-500" />
             </div>
 
-            <h1 className="font-serif text-2xl text-charcoal-900 font-bold mb-3">
+            <h1 className="font-serif text-2xl text-[#0A3340] font-bold mb-3">
               Something went wrong
             </h1>
 
@@ -54,9 +54,9 @@ export class ErrorBoundary extends Component<Props, State> {
             </p>
 
             {this.state.error && (
-              <div className="bg-cream-50 rounded-lg p-4 mb-6 text-left">
+              <div className="bg-[#F6FAF9] rounded-lg p-4 mb-6 text-left">
                 <p className="font-sans text-xs text-warm-400 font-semibold mb-1">Error details:</p>
-                <p className="font-sans text-xs text-charcoal-600 break-all">
+                <p className="font-sans text-xs text-[#176B87] break-all">
                   {this.state.error.message || 'Unknown error'}
                 </p>
               </div>
@@ -65,7 +65,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={this.handleReset}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-charcoal-900 text-white rounded-xl font-sans text-sm font-semibold hover:bg-charcoal-800 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#0A3340] text-white rounded-xl font-sans text-sm font-semibold hover:bg-[#12576D] transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
                 Try Again
@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
               <Link
                 to="/"
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gold-500 text-charcoal-900 rounded-xl font-sans text-sm font-semibold hover:bg-gold-600 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#13B8A6] text-[#0A3340] rounded-xl font-sans text-sm font-semibold hover:bg-[#176B87] transition-colors"
               >
                 <Home className="w-4 h-4" />
                 Go Home
@@ -118,7 +118,7 @@ export function SectionErrorBoundary({
     <ErrorBoundary
       fallback={
         fallback || (
-          <div className="bg-cream-50 rounded-xl p-6 text-center border border-cream-200">
+          <div className="bg-[#F6FAF9] rounded-xl p-6 text-center border border-[#D7E7E4]">
             <AlertTriangle className="w-8 h-8 text-warm-400 mx-auto mb-3" />
             <p className="font-sans text-sm text-warm-500">
               {sectionName} couldn't load. Please refresh the page.

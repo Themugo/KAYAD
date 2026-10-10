@@ -82,7 +82,7 @@ export const DashboardPage: FC = () => {
             <Badge variant="blue" icon={<LayoutDashboard className="w-3.5 h-3.5" />}>
               KAYAD Workspace
             </Badge>
-            <span className="text-xs text-[#66808A] capitalize font-bold">Role: {user?.role ?? 'user'}</span>
+            <span className="text-xs text-[#64748b] capitalize font-bold">Role: {user?.role ?? 'user'}</span>
           </div>
           <h1 className="text-3xl font-extrabold text-[#176B87] font-serif tracking-tight mt-1">
             Welcome back, {user?.name || 'Member'}
@@ -106,23 +106,23 @@ export const DashboardPage: FC = () => {
       {/* Workspace Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider block">Active Bids</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider block">Active Bids</span>
           <span className="text-2xl font-black text-[#176B87] font-serif">{myBids.length}</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider block">Saved Vehicles</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider block">Saved Vehicles</span>
           <span className="text-2xl font-black text-[#DC3545] font-serif">{savedVehicles.length}</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider block">Price Alerts</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider block">Price Alerts</span>
           <span className="text-2xl font-black text-[#13B8A6] font-serif">{priceAlerts.length}</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider block">Escrow Deals</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider block">Escrow Deals</span>
           <span className="text-2xl font-black text-[#13B8A6] font-serif">{escrowContracts.length}</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#D7E7E4] shadow-xs">
-          <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider block">Inventory</span>
+          <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider block">Inventory</span>
           <span className="text-2xl font-black text-[#176B87] font-serif">{vehicles.length}</span>
         </div>
       </div>
@@ -142,7 +142,7 @@ export const DashboardPage: FC = () => {
             className={`px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeTab === tab.id
                 ? 'bg-[#176B87] text-white font-bold shadow-xs'
-                : 'text-[#66808A] hover:text-[#176B87]'
+                : 'text-[#64748b] hover:text-[#176B87]'
             }`}
           >
             {tab.label}
@@ -176,7 +176,7 @@ export const DashboardPage: FC = () => {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#66808A] font-mono text-xs">
+            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#64748b] font-mono text-xs">
               No matching saved vehicles found in workspace.
             </div>
           )}
@@ -193,7 +193,7 @@ export const DashboardPage: FC = () => {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#66808A] font-mono text-xs">
+            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#64748b] font-mono text-xs">
               No matching saved vehicles found.
             </div>
           )}
@@ -209,7 +209,7 @@ export const DashboardPage: FC = () => {
                 <div key={idx} className="p-4 flex items-center justify-between text-xs font-mono font-bold">
                   <div>
                     <span className="text-[#176B87] font-extrabold block">Vehicle ID: {bid.vehicleId}</span>
-                    <span className="text-[#66808A]">Placed by: {bid.bidderName}</span>
+                    <span className="text-[#64748b]">Placed by: {bid.bidderName}</span>
                   </div>
                   <span className="text-[#13B8A6] bg-[#176B87] px-3 py-1 rounded-xl font-mono font-black">
                     KES {bid.amount.toLocaleString()}
@@ -218,7 +218,7 @@ export const DashboardPage: FC = () => {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#66808A] font-mono text-xs">
+            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#64748b] font-mono text-xs">
               No active bid records matching query.
             </div>
           )}
@@ -242,7 +242,7 @@ export const DashboardPage: FC = () => {
                         <span className="text-sm font-extrabold text-[#176B87] block">
                           {alert.vehicleTitle}
                         </span>
-                        <div className="flex flex-wrap items-center gap-2 mt-0.5 text-xs text-[#66808A]">
+                        <div className="flex flex-wrap items-center gap-2 mt-0.5 text-xs text-[#64748b]">
                           <span>Current: <strong className="text-[#176B87]">KSh {targetVehicle?.price.toLocaleString() || alert.currentPriceAtSet.toLocaleString()}</strong></span>
                           <span>•</span>
                           <span className="text-emerald-700 font-bold">Alert Target: KSh {alert.targetPrice.toLocaleString()}</span>
@@ -272,7 +272,7 @@ export const DashboardPage: FC = () => {
               })}
             </div>
           ) : (
-            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#66808A] font-mono text-xs">
+            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#64748b] font-mono text-xs">
               No active price alerts set. Browse vehicles and click "Set Price Alert" to get notified on price drops!
             </div>
           )}
@@ -288,7 +288,7 @@ export const DashboardPage: FC = () => {
                 <div key={contract.id} className="p-4 flex items-center justify-between text-xs font-mono font-bold">
                   <div>
                     <span className="text-[#176B87] font-extrabold block">Contract ID: {contract.id}</span>
-                    <span className="text-[#66808A]">Status: {contract.status}</span>
+                    <span className="text-[#64748b]">Status: {contract.status}</span>
                   </div>
                   <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
                     KES {contract.agreedPrice.toLocaleString()}
@@ -297,7 +297,7 @@ export const DashboardPage: FC = () => {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#66808A] font-mono text-xs">
+            <div className="p-8 text-center rounded-2xl bg-white border border-[#D7E7E4] text-[#64748b] font-mono text-xs">
               No active escrow contracts found.
             </div>
           )}

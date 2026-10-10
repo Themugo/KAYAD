@@ -13,9 +13,9 @@ const colors = {
   beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
-  terracotta: '#C77B58',
-  softBlue: '#60A5FA',
-  mutedOrange: '#FB923C',
+  terracotta: '#5aafa4',
+  softBlue: '#5AAFA4',
+  mutedOrange: '#13b8a6',
   mutedCrimson: '#EF4444',
 };
 
@@ -90,8 +90,8 @@ const actions = [
 
 const statusColors = {
   active: 'bg-emerald-100 text-emerald-700',
-  paused: 'bg-amber-100 text-amber-700',
-  draft: 'bg-slate-100 text-slate-700',
+  paused: 'bg-[#DDF4F0] text-[#12576D]',
+  draft: 'bg-[#EEF7F5] text-[#12576D]',
 };
 
 // Rules are backend-authoritative. Never seed fabricated rules, execution counts, or timestamps.
@@ -254,10 +254,10 @@ export default function BusinessRulesManager() {
   return (
     <div className="flex h-full bg-[#EEF7F5]">
       {/* Rules List */}
-      <div className={`${showBuilder ? 'w-1/2' : 'w-full'} bg-white border-r border-slate-200 flex flex-col transition-all`}>
-        <div className="p-4 border-b border-slate-200">
+      <div className={`${showBuilder ? 'w-1/2' : 'w-full'} bg-white border-r border-[#D7E7E4] flex flex-col transition-all`}>
+        <div className="p-4 border-b border-[#D7E7E4]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-800">Business Rules</h2>
+            <h2 className="text-lg font-bold text-[#0A3340]">Business Rules</h2>
             <button
               onClick={() => {
                 setEditingRule({
@@ -281,19 +281,19 @@ export default function BusinessRulesManager() {
 
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={18} />
               <input
                 type="text"
                 placeholder="Search rules..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
               />
             </div>
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
+              className="px-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] outline-none"
             >
               <option value="all">All Categories</option>
               <option value="dealer">Dealer</option>
@@ -307,20 +307,20 @@ export default function BusinessRulesManager() {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {error && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
-          {loading && <div className="rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">Loading business rules…</div>}
-          {!loading && !filteredRules.length && !error && <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">No business rules found.</div>}
+          {loading && <div className="rounded-lg border border-[#D7E7E4] bg-white px-4 py-6 text-sm text-[#64748B]">Loading business rules…</div>}
+          {!loading && !filteredRules.length && !error && <div className="rounded-lg border border-dashed border-[#BDE5DE] bg-white px-4 py-8 text-center text-sm text-[#64748B]">No business rules found.</div>}
           {filteredRules.map((rule) => (
             <div
               key={rule.id}
               onClick={() => setSelectedRule(rule)}
               className={`bg-white rounded-xl border-2 p-4 cursor-pointer transition-all ${
-                selectedRule?.id === rule.id ? 'border-[#0A3340]' : 'border-slate-100 hover:border-slate-200'
+                selectedRule?.id === rule.id ? 'border-[#0A3340]' : 'border-[#D7E7E4] hover:border-[#D7E7E4]'
               }`}
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="font-semibold text-slate-800">{rule.name}</h3>
-                  <p className="text-xs text-slate-400 capitalize">{rule.category}</p>
+                  <h3 className="font-semibold text-[#0A3340]">{rule.name}</h3>
+                  <p className="text-xs text-[#94A3B8] capitalize">{rule.category}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[rule.status]}`}>
@@ -328,12 +328,12 @@ export default function BusinessRulesManager() {
                   </span>
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleRuleStatus(rule.id); }}
-                    className="p-1.5 hover:bg-slate-100 rounded-lg"
+                    className="p-1.5 hover:bg-[#EEF7F5] rounded-lg"
                   >
-                    {rule.status === 'active' ? <Pause size={16} className="text-slate-500" /> : <Play size={16} className="text-slate-500" />}
+                    {rule.status === 'active' ? <Pause size={16} className="text-[#64748B]" /> : <Play size={16} className="text-[#64748B]" />}
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); editRule(rule); }} className="p-1.5 hover:bg-slate-100 rounded-lg" aria-label="Edit rule">
-                    <Edit size={16} className="text-slate-500" />
+                  <button onClick={(e) => { e.stopPropagation(); editRule(rule); }} className="p-1.5 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit rule">
+                    <Edit size={16} className="text-[#64748B]" />
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); void removeRule(rule.id); }} className="p-1.5 hover:bg-red-50 rounded-lg" aria-label="Delete rule">
                     <Trash2 size={16} className="text-red-500" />
@@ -341,41 +341,41 @@ export default function BusinessRulesManager() {
                 </div>
               </div>
 
-              <p className="text-sm text-slate-500 mb-4">{rule.description}</p>
+              <p className="text-sm text-[#64748B] mb-4">{rule.description}</p>
 
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1">
-                  <span className="text-slate-400">Priority:</span>
-                  <span className="font-medium text-slate-600">{rule.priority}</span>
+                  <span className="text-[#94A3B8]">Priority:</span>
+                  <span className="font-medium text-[#64748B]">{rule.priority}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-slate-400">Conditions:</span>
-                  <span className="font-medium text-slate-600">{rule.conditions.length}</span>
+                  <span className="text-[#94A3B8]">Conditions:</span>
+                  <span className="font-medium text-[#64748B]">{rule.conditions.length}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-slate-400">Actions:</span>
-                  <span className="font-medium text-slate-600">{rule.actions.length}</span>
+                  <span className="text-[#94A3B8]">Actions:</span>
+                  <span className="font-medium text-[#64748B]">{rule.actions.length}</span>
                 </div>
-                <div className="ml-auto text-slate-400">
+                <div className="ml-auto text-[#94A3B8]">
                   {Number(rule.executions || 0).toLocaleString()} executions
                 </div>
               </div>
 
               {/* Conditions Preview */}
-              <div className="mt-4 pt-4 border-t border-slate-100">
+              <div className="mt-4 pt-4 border-t border-[#D7E7E4]">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-medium text-slate-500">IF</span>
+                  <span className="text-xs font-medium text-[#64748B]">IF</span>
                   {rule.conditions.map((cond, i) => (
                     <React.Fragment key={i}>
-                      <span className="px-2 py-0.5 bg-slate-100 rounded text-xs text-slate-600">
+                      <span className="px-2 py-0.5 bg-[#EEF7F5] rounded text-xs text-[#64748B]">
                         {cond.field.split('.')[1]} {cond.operator.replace('_', ' ')} {cond.value}
                       </span>
-                      {i < rule.conditions.length - 1 && <span className="text-xs text-slate-400">AND</span>}
+                      {i < rule.conditions.length - 1 && <span className="text-xs text-[#94A3B8]">AND</span>}
                     </React.Fragment>
                   ))}
                 </div>
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className="text-xs font-medium text-slate-500">THEN</span>
+                  <span className="text-xs font-medium text-[#64748B]">THEN</span>
                   {rule.actions.map((action, i) => (
                     <span key={i} className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-xs">
                       {action.type.split('.')[1]}
@@ -391,14 +391,14 @@ export default function BusinessRulesManager() {
       {/* Rule Builder */}
       {showBuilder && (
         <div className="w-1/2 flex flex-col bg-[#EEF7F5]">
-          <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800">
+          <div className="p-4 bg-white border-b border-[#D7E7E4] flex items-center justify-between">
+            <h2 className="text-lg font-bold text-[#0A3340]">
               {selectedRule ? 'Edit Rule' : 'Create New Rule'}
             </h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowBuilder(false)}
-                className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 border border-[#D7E7E4] rounded-lg hover:bg-[#F6FAF9]"
               >
                 Cancel
               </button>
@@ -415,35 +415,35 @@ export default function BusinessRulesManager() {
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* Basic Info */}
             <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h3 className="font-semibold text-slate-800 mb-4">Basic Information</h3>
+              <h3 className="font-semibold text-[#0A3340] mb-4">Basic Information</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-1">Rule Name</label>
+                  <label className="block text-sm font-medium text-[#64748B] mb-1">Rule Name</label>
                   <input
                     type="text"
                     value={editingRule.name}
                     onChange={(e) => setEditingRule(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                     placeholder="Enter rule name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-1">Description</label>
+                  <label className="block text-sm font-medium text-[#64748B] mb-1">Description</label>
                   <textarea
                     value={editingRule.description}
                     onChange={(e) => setEditingRule(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none resize-none"
+                    className="w-full px-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none resize-none"
                     rows={2}
                     placeholder="Describe what this rule does"
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Category</label>
+                    <label className="block text-sm font-medium text-[#64748B] mb-1">Category</label>
                     <select
                       value={editingRule.category}
                       onChange={(e) => setEditingRule(prev => ({ ...prev, category: e.target.value }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] outline-none"
                     >
                       <option value="dealer">Dealer</option>
                       <option value="vehicle">Vehicle</option>
@@ -455,11 +455,11 @@ export default function BusinessRulesManager() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Priority</label>
+                    <label className="block text-sm font-medium text-[#64748B] mb-1">Priority</label>
                     <select
                       value={editingRule.priority}
                       onChange={(e) => setEditingRule(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] outline-none"
                     >
                       <option value="1">1 - Highest</option>
                       <option value="2">2 - High</option>
@@ -469,11 +469,11 @@ export default function BusinessRulesManager() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Status</label>
+                    <label className="block text-sm font-medium text-[#64748B] mb-1">Status</label>
                     <select
                       value={editingRule.status}
                       onChange={(e) => setEditingRule(prev => ({ ...prev, status: e.target.value }))}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] outline-none"
                     >
                       <option value="draft">Draft</option>
                       <option value="active">Active</option>
@@ -487,7 +487,7 @@ export default function BusinessRulesManager() {
             {/* Conditions */}
             <div className="bg-white rounded-xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-800">Conditions</h3>
+                <h3 className="font-semibold text-[#0A3340]">Conditions</h3>
                 <button
                   onClick={addCondition}
                   className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#0A3340] hover:bg-[#0A3340]/10 rounded-lg"
@@ -496,18 +496,18 @@ export default function BusinessRulesManager() {
                   Add Condition
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mb-4">All conditions must be met (AND logic)</p>
+              <p className="text-xs text-[#64748B] mb-4">All conditions must be met (AND logic)</p>
 
               <div className="space-y-3">
                 {editingRule.conditions.map((condition, index) => (
                   <div key={index} className="flex items-center gap-2">
                     {index > 0 && (
-                      <span className="px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-600">AND</span>
+                      <span className="px-2 py-1 bg-[#EEF7F5] rounded text-xs font-medium text-[#64748B]">AND</span>
                     )}
                     <select
                       value={condition.field}
                       onChange={(e) => updateCondition(index, 'field', e.target.value)}
-                      className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                      className="flex-1 px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm"
                     >
                       <option value="">Select field...</option>
                       {fields.map(cat => (
@@ -521,7 +521,7 @@ export default function BusinessRulesManager() {
                     <select
                       value={condition.operator}
                       onChange={(e) => updateCondition(index, 'operator', e.target.value)}
-                      className="w-40 px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                      className="w-40 px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm"
                     >
                       {operators.map(op => (
                         <option key={op.value} value={op.value}>{op.label}</option>
@@ -531,7 +531,7 @@ export default function BusinessRulesManager() {
                       type="text"
                       value={condition.value}
                       onChange={(e) => updateCondition(index, 'value', e.target.value)}
-                      className="w-32 px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                      className="w-32 px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm"
                       placeholder="Value"
                     />
                     {editingRule.conditions.length > 1 && (
@@ -550,7 +550,7 @@ export default function BusinessRulesManager() {
             {/* Actions */}
             <div className="bg-white rounded-xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-800">Actions</h3>
+                <h3 className="font-semibold text-[#0A3340]">Actions</h3>
                 <button
                   onClick={addAction}
                   className="flex items-center gap-1 px-3 py-1.5 text-sm text-[#0A3340] hover:bg-[#0A3340]/10 rounded-lg"
@@ -559,16 +559,16 @@ export default function BusinessRulesManager() {
                   Add Action
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mb-4">All actions will be executed when conditions are met</p>
+              <p className="text-xs text-[#64748B] mb-4">All actions will be executed when conditions are met</p>
 
               <div className="space-y-3">
                 {editingRule.actions.map((action, index) => (
-                  <div key={index} className="p-3 bg-slate-50 rounded-lg">
+                  <div key={index} className="p-3 bg-[#F6FAF9] rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <select
                         value={action.type}
                         onChange={(e) => updateAction(index, 'type', e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white"
+                        className="flex-1 px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm bg-white"
                       >
                         <option value="">Select action...</option>
                         {actions.map(a => (
@@ -585,8 +585,8 @@ export default function BusinessRulesManager() {
                       )}
                     </div>
                     {action.type && (
-                      <div className="p-3 bg-white rounded border border-slate-200">
-                        <p className="text-xs text-slate-500">Configure action parameters...</p>
+                      <div className="p-3 bg-white rounded border border-[#D7E7E4]">
+                        <p className="text-xs text-[#64748B]">Configure action parameters...</p>
                       </div>
                     )}
                   </div>

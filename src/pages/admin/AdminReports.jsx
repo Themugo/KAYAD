@@ -64,7 +64,7 @@ export default function AdminReports() {
                     <td>
                       {r.status === 'pending' && (
                         <div style={{ display: 'flex', gap: 8 }}>
-                          <button className="btn btn-sm" style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }} onClick={() => handleUpdate(r._id, 'reviewed')}>Mark Reviewed</button>
+                          <button className="btn btn-sm" style={{ background: '#22c55e', color: '#0a3340', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }} onClick={() => handleUpdate(r._id, 'reviewed')}>Mark Reviewed</button>
                           <button className="btn btn-sm" style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }} onClick={() => handleUpdate(r._id, 'dismissed')}>Dismiss</button>
                         </div>
                       )}

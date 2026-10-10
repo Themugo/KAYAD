@@ -170,7 +170,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
             </div>
             {resend === 'sent' && <p className="kayad-auth-notice m-0" role="status">If that account exists and is not yet verified, a new link is on its way.</p>}
             {resend === 'failed' && <p className="kayad-auth-error m-0" role="alert">We could not send that just now. Please try again in a minute.</p>}
-            <p className="m-0 text-xs text-slate-500">Can’t find it? Check spam. The link works for 24 hours.</p>
+            <p className="m-0 text-xs text-[#64748B]">Can’t find it? Check spam. The link works for 24 hours.</p>
           </div>
         </PremiumAuthShell>
       );
@@ -179,11 +179,11 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       return (
         <PremiumAuthShell {...common} eyebrow="Application received" title="Your application is with KAYAD." description="This is an application, not an account yet.">
           <div className="space-y-4" role="status">
-            <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div className="flex items-start gap-3 rounded-2xl border border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340]">
               <Clock3 className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
               <p className="m-0">KAYAD reviews applications by hand. If yours is approved we email {form.email.trim() || 'you'} a link to set your password (valid for 72 hours); then you can sign in. Nothing is activated until then.</p>
             </div>
-            <p className="m-0 text-xs text-slate-500">If you work for a garage or inspection company that is already on KAYAD, you do not need to apply on your own: create an account and ask the business to confirm you.</p>
+            <p className="m-0 text-xs text-[#64748B]">If you work for a garage or inspection company that is already on KAYAD, you do not need to apply on your own: create an account and ask the business to confirm you.</p>
             <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYAD</Link>
           </div>
         </PremiumAuthShell>
@@ -193,7 +193,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       return (
         <PremiumAuthShell {...common} eyebrow="Already applied" title="You already have an application waiting." description="KAYAD has an application for this email address that is still being reviewed.">
           <div className="space-y-4" role="status">
-            <p className="m-0 text-sm text-slate-600">You do not need to apply again. If approved, an email with a link to set your password will be sent to that address.</p>
+            <p className="m-0 text-sm text-[#64748B]">You do not need to apply again. If approved, an email with a link to set your password will be sent to that address.</p>
             <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYAD</Link>
           </div>
         </PremiumAuthShell>
@@ -210,7 +210,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
             </div>
             {resend === 'sent' && <p className="kayad-auth-notice m-0" role="status">If that account exists and is not yet verified, a new link is on its way.</p>}
             {resend === 'failed' && <p className="kayad-auth-error m-0" role="alert">We could not send that just now. Please try again in a minute.</p>}
-            {role && role.route !== 'account' && <p className="m-0 text-xs text-slate-500">Signing in with your existing account is how you continue as {role.title.toLowerCase()}; you do not need a second account.</p>}
+            {role && role.route !== 'account' && <p className="m-0 text-xs text-[#64748B]">Signing in with your existing account is how you continue as {role.title.toLowerCase()}; you do not need a second account.</p>}
             <button type="button" className="inline-flex min-h-[44px] items-center text-xs font-bold text-[#176B87] underline" onClick={() => setOutcome(null)}>Use a different email</button>
           </div>
         </PremiumAuthShell>
@@ -219,7 +219,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     return (
       <PremiumAuthShell {...common} eyebrow="Connection problem" title="We couldn’t confirm that went through." description="Your connection dropped before we heard back, so we don’t know whether your details were received.">
         <div className="space-y-4" role="alert">
-          <p className="m-0 text-sm text-slate-700">Nothing is duplicated if you try again: KAYAD refuses a second account or application for the same email. If you already received a verification email, you are done - just sign in.</p>
+          <p className="m-0 text-sm text-[#12576D]">Nothing is duplicated if you try again: KAYAD refuses a second account or application for the same email. If you already received a verification email, you are done - just sign in.</p>
           <div className="flex flex-wrap gap-3">
             <button type="button" className="kayad-auth-submit px-6" onClick={() => setOutcome(null)}>Go back and try again</button>
             <Link to={buildAuthPath('login', { next: destination })} state={{ email: form.email.trim() }} className="kayad-auth-secondary-action px-5 no-underline">I may already have an account</Link>
@@ -261,8 +261,8 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
             </button>
           ))}
         </div>
-        <p className="mt-5 text-xs text-slate-500">Already have an account? <Link to={buildAuthPath('login', ctx)} className="font-black text-[#176B87] underline">Sign in</Link></p>
-        {onClose && <button type="button" onClick={onClose} className="mt-3 inline-flex min-h-[44px] items-center px-2 text-xs font-bold text-slate-500 underline">Not now</button>}
+        <p className="mt-5 text-xs text-[#64748B]">Already have an account? <Link to={buildAuthPath('login', ctx)} className="font-black text-[#176B87] underline">Sign in</Link></p>
+        {onClose && <button type="button" onClick={onClose} className="mt-3 inline-flex min-h-[44px] items-center px-2 text-xs font-bold text-[#64748B] underline">Not now</button>}
       </PremiumAuthShell>
     );
   }
@@ -276,7 +276,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   return (
     <PremiumAuthShell mode="register" eyebrow={role.title} title={independent ? 'Apply as an independent inspector.' : 'Create your account.'} description={independent ? 'KAYAD reviews every application. You will not get an account until it is approved.' : role.summary} rail={rail}>
       <h2 ref={headingRef} tabIndex={-1} className="sr-only">{role.title} details</h2>
-      <div className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600">
+      <div className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-[#F6FAF9] px-4 py-3 text-xs text-[#64748B]">
         <span><strong className="text-[#0A3340]">{role.title}</strong> · {role.outcome}</span>
         <button type="button" className="inline-flex min-h-[44px] items-center px-2 font-black text-[#176B87] underline" onClick={() => { setRoleId(null); setMode(null); setErrors({}); setServerError(''); }}>Change</button>
       </div>
@@ -339,7 +339,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
           )}
 
           <button type="submit" className="kayad-auth-submit" disabled={submitting}>{submitting ? <><span className="kayad-auth-spinner" aria-hidden="true" /> Working…</> : submitLabel}</button>
-          <p className="m-0 text-[11px] text-slate-500"><Mail className="mr-1 inline h-3 w-3" aria-hidden="true" />{independent ? 'We will only use these details to review your application.' : 'We will email you a link to confirm your address.'}</p>
+          <p className="m-0 text-[11px] text-[#64748B]"><Mail className="mr-1 inline h-3 w-3" aria-hidden="true" />{independent ? 'We will only use these details to review your application.' : 'We will email you a link to confirm your address.'}</p>
         </form>
       )}
     </PremiumAuthShell>

@@ -50,16 +50,16 @@ const BADGE_CONFIG: Record<string, {
   },
   licensed_auctioneer: {
     icon: <Award className="w-3.5 h-3.5" />,
-    bgColor: 'bg-amber-50',
-    textColor: 'text-amber-800',
-    borderColor: 'border-amber-200',
+    bgColor: 'bg-[#F3FAF9]',
+    textColor: 'text-[#0A3340]',
+    borderColor: 'border-[#BDE5DE]',
     defaultLabel: 'Licensed Auctioneer',
   },
   government_approved: {
     icon: <Landmark className="w-3.5 h-3.5" />,
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-800',
-    borderColor: 'border-blue-200',
+    bgColor: 'bg-[#F3FAF9]',
+    textColor: 'text-[#0E4655]',
+    borderColor: 'border-[#D7E7E4]',
     defaultLabel: 'Government Approved',
   },
   verified_dealer: {
@@ -71,16 +71,16 @@ const BADGE_CONFIG: Record<string, {
   },
   verified_bank: {
     icon: <Banknote className="w-3.5 h-3.5" />,
-    bgColor: 'bg-purple-50',
-    textColor: 'text-purple-800',
-    borderColor: 'border-purple-200',
+    bgColor: 'bg-[#F3FAF9]',
+    textColor: 'text-[#0E4655]',
+    borderColor: 'border-[#D7E7E4]',
     defaultLabel: 'Verified Bank',
   },
   fleet_partner: {
     icon: <Users className="w-3.5 h-3.5" />,
-    bgColor: 'bg-slate-50',
-    textColor: 'text-slate-800',
-    borderColor: 'border-slate-200',
+    bgColor: 'bg-[#F6FAF9]',
+    textColor: 'text-[#0A3340]',
+    borderColor: 'border-[#D7E7E4]',
     defaultLabel: 'Fleet Partner',
   },
   business_verified: {
@@ -92,9 +92,9 @@ const BADGE_CONFIG: Record<string, {
   },
   identity_verified: {
     icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-    bgColor: 'bg-cyan-50',
-    textColor: 'text-cyan-800',
-    borderColor: 'border-cyan-200',
+    bgColor: 'bg-[#F3FAF9]',
+    textColor: 'text-[#0E4655]',
+    borderColor: 'border-[#D7E7E4]',
     defaultLabel: 'Identity Verified',
   },
   payment_verified: {
@@ -106,16 +106,16 @@ const BADGE_CONFIG: Record<string, {
   },
   compliance_verified: {
     icon: <FileCheck className="w-3.5 h-3.5" />,
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-800',
-    borderColor: 'border-blue-200',
+    bgColor: 'bg-[#F3FAF9]',
+    textColor: 'text-[#0E4655]',
+    borderColor: 'border-[#D7E7E4]',
     defaultLabel: 'Compliance Verified',
   },
   quick_responder: {
     icon: <Clock className="w-3.5 h-3.5" />,
-    bgColor: 'bg-amber-50',
-    textColor: 'text-amber-800',
-    borderColor: 'border-amber-200',
+    bgColor: 'bg-[#F3FAF9]',
+    textColor: 'text-[#0A3340]',
+    borderColor: 'border-[#BDE5DE]',
     defaultLabel: 'Quick Responder',
   },
   top_rated: {
@@ -221,7 +221,7 @@ export const OrganizerTypeBadge: React.FC<{ type: AuctionOrganizerType }> = ({ t
   };
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold border border-slate-200">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#EEF7F5] text-[#12576D] rounded-full text-xs font-semibold border border-[#D7E7E4]">
       {typeIcons[type]}
       {typeLabels[type]}
     </span>

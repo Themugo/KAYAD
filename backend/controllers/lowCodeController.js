@@ -143,7 +143,7 @@ export async function createBusinessObject(req, res) {
     description,
     category: category || 'custom',
     icon: icon || 'box',
-    color: color || '#17244B',
+    color: color || '#176B87',
     objectKey: key,
     status: 'draft',
     settings: typeof settings === 'object' ? JSON.stringify(settings) : settings,

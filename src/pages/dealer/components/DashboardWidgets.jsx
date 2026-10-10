@@ -16,23 +16,23 @@ export const TABS_CONFIG = [
 
 export const STATUS_CONFIG = {
   active:  { label: 'Active',  color: '#22c55e', bg: 'rgba(34,197,94,0.1)'  },
-  sold:    { label: 'Sold',    color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-  pending: { label: 'Pending', color: '#f97316', bg: 'rgba(249,115,22,0.1)' },
+  sold:    { label: 'Sold',    color: '#176B87', bg: 'rgba(23, 107, 135, 0.1)' },
+  pending: { label: 'Pending', color: '#176b87', bg: 'rgba(19, 184, 166, 0.1)' },
   draft:   { label: 'Draft',   color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.04)' },
   live:    { label: 'Live Auction', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
 };
 
 export const BID_STATUS_CONFIG = {
-  pending:  { label: 'Pending',  color: '#f97316', bg: 'rgba(249,115,22,0.1)' },
+  pending:  { label: 'Pending',  color: '#176b87', bg: 'rgba(19, 184, 166, 0.1)' },
   accepted: { label: 'Accepted', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
   rejected: { label: 'Rejected', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
 };
 
 export const ESCROW_STEPS = [
-  { key: 'pending',  label: 'Pending',  color: '#f97316' },
-  { key: 'held',     label: 'Held',     color: '#3b82f6' },
+  { key: 'pending',  label: 'Pending',  color: '#176b87' },
+  { key: 'held',     label: 'Held',     color: '#176B87' },
   { key: 'released', label: 'Released', color: '#22c55e' },
-  { key: 'refunded', label: 'Refunded', color: '#6b7280' },
+  { key: 'refunded', label: 'Refunded', color: '#64748b' },
 ];
 
 export function timeAgo(date) {
@@ -47,7 +47,7 @@ export function timeAgo(date) {
   return new Date(date).toLocaleDateString();
 }
 
-export function StatCard({ icon, label, value, sub, color = 'var(--gold)', to, trend }) {
+export function StatCard({ icon, label, value, sub, color = 'var(--brand)', to, trend }) {
   const isUp = trend > 0;
   const showTrend = trend !== undefined && trend !== null;
   const inner = (
@@ -77,7 +77,7 @@ export function StatCard({ icon, label, value, sub, color = 'var(--gold)', to, t
 }
 
 export function StatusBadge({ status, custom }) {
-  const config = custom || STATUS_CONFIG[status] || { label: status, color: '#999', bg: 'rgba(255,255,255,0.05)' };
+  const config = custom || STATUS_CONFIG[status] || { label: status, color: '#64748b', bg: 'rgba(255,255,255,0.05)' };
   return (
     <span style={{
       display: 'inline-block', padding: '3px 10px', borderRadius: 9999,
@@ -94,8 +94,8 @@ export function DemoBadge({ edited }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: '2px 8px', borderRadius: 9999, fontSize: 9, fontWeight: 700,
-      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(37, 99, 235,0.1)',
-      color: edited ? '#22c55e' : 'var(--gold)',
+      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(23, 107, 135, 0.1)',
+      color: edited ? '#22c55e' : 'var(--brand)',
       textTransform: 'uppercase', letterSpacing: '0.06em',
     }}>
       {edited ? <><Check size={8} /> Edited</> : 'Demo'}
@@ -105,7 +105,7 @@ export function DemoBadge({ edited }) {
 
 // Lightweight dependency-free bar chart (matches the hand-rolled inline style).
 // data: [{ label, value }]. format(value) controls the hover/peak label.
-export function MiniBarChart({ data = [], color = 'var(--gold)', height = 150, format = (v) => v }) {
+export function MiniBarChart({ data = [], color = 'var(--brand)', height = 150, format = (v) => v }) {
   const max = Math.max(...data.map(d => d.value || 0), 1);
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height, padding: '0 2px' }}>
@@ -156,7 +156,7 @@ export function EscrowProgress({ status }) {
           </div>
         );
       })}
-      <span style={{ fontSize: 10, fontWeight: 700, color: ESCROW_STEPS[idx]?.color || '#666', marginLeft: 6, textTransform: 'capitalize' }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: ESCROW_STEPS[idx]?.color || '#64748b', marginLeft: 6, textTransform: 'capitalize' }}>
         {status}
       </span>
     </div>

@@ -15,7 +15,7 @@ export function ToastContainer() {
           className={`flex items-start gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-up max-w-sm cursor-pointer ${
             toast.variant === 'destructive'
               ? 'bg-red-50 border border-red-200 text-red-900'
-              : 'bg-white border border-gray-200 text-gray-900'
+              : 'bg-white border border-[#D7E7E4] text-[#0A3340]'
           }`}
         >
           {toast.variant === 'destructive' ? (
@@ -28,7 +28,7 @@ export function ToastContainer() {
               <p className="font-medium text-sm">{toast.title}</p>
             )}
             {toast.description && (
-              <p className="text-sm text-gray-600 mt-1">{toast.description}</p>
+              <p className="text-sm text-[#64748B] mt-1">{toast.description}</p>
             )}
           </div>
         </div>

@@ -135,15 +135,15 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-[#0A3340]/50 z-[60] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto shadow-2xl">
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white border-b border-[#D7E7E4] px-5 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-[#0A3340]">Hero Editor</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Edit the existing hero content, vehicle imagery, promotion copy, and presentation layout. All changes are persisted for every visitor.</p>
+            <p className="text-xs text-[#64748B] mt-0.5">Edit the existing hero content, vehicle imagery, promotion copy, and presentation layout. All changes are persisted for every visitor.</p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg">
-            <X className="w-5 h-5 text-slate-500" />
+          <button onClick={onClose} className="p-1.5 hover:bg-[#EEF7F5] rounded-lg">
+            <X className="w-5 h-5 text-[#64748B]" />
           </button>
         </div>
 
@@ -156,25 +156,25 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+              <Loader2 className="w-5 h-5 text-[#94A3B8] animate-spin" />
             </div>
           ) : (
             <>
               {slides.length === 0 && (
-                <p className="text-xs text-slate-500 text-center py-4">
+                <p className="text-xs text-[#64748B] text-center py-4">
                   No real slides yet - the page shows a default hero until you add one here.
                 </p>
               )}
 
               {slides.map((slide) => (
-                <div key={slide.id} className="border border-slate-200 rounded-xl p-4 space-y-3">
+                <div key={slide.id} className="border border-[#D7E7E4] rounded-xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#0A3340]">Slide</span>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleVisible(slide)}
                         disabled={savingId === slide.id}
-                        className={`p-1.5 rounded-lg ${slide.isVisible ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 bg-slate-100'}`}
+                        className={`p-1.5 rounded-lg ${slide.isVisible ? 'text-emerald-600 bg-emerald-50' : 'text-[#94A3B8] bg-[#EEF7F5]'}`}
                         title={slide.isVisible ? 'Visible on page' : 'Hidden from page'}
                       >
                         {slide.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -194,66 +194,66 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                     value={slide.eyebrowText || ''}
                     onChange={(e) => handleFieldChange(slide.id, 'eyebrowText', e.target.value)}
                     placeholder="Eyebrow text (small label above the headline)"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                    className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                   />
                   <input
                     value={slide.headline}
                     onChange={(e) => handleFieldChange(slide.id, 'headline', e.target.value)}
                     placeholder="Headline"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold"
+                    className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm font-semibold"
                   />
                   <textarea
                     value={slide.subheadline || ''}
                     onChange={(e) => handleFieldChange(slide.id, 'subheadline', e.target.value)}
                     placeholder="Subheadline"
                     rows={2}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                    className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       value={slide.ctaPrimaryText || ''}
                       onChange={(e) => handleFieldChange(slide.id, 'ctaPrimaryText', e.target.value)}
                       placeholder="Primary button text"
-                      className="border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                      className="border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                     />
                     <input
                       value={slide.ctaPrimaryLink || ''}
                       onChange={(e) => handleFieldChange(slide.id, 'ctaPrimaryLink', e.target.value)}
                       placeholder="Primary button page (e.g. marketplace)"
-                      className="border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                      className="border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                     />
                     <input
                       value={slide.ctaSecondaryText || ''}
                       onChange={(e) => handleFieldChange(slide.id, 'ctaSecondaryText', e.target.value)}
                       placeholder="Secondary button text"
-                      className="border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                      className="border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                     />
                     <input
                       value={slide.ctaSecondaryLink || ''}
                       onChange={(e) => handleFieldChange(slide.id, 'ctaSecondaryLink', e.target.value)}
                       placeholder="Secondary button page"
-                      className="border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                      className="border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                     />
                   </div>
 
-                  <div className="flex items-center gap-4 flex-wrap pt-2 border-t border-slate-100">
-                    <label className="flex items-center gap-2 text-xs text-slate-600">
+                  <div className="flex items-center gap-4 flex-wrap pt-2 border-t border-[#D7E7E4]">
+                    <label className="flex items-center gap-2 text-xs text-[#64748B]">
                       Display
                       <select
                         value={slide.displayMode}
                         onChange={(e) => handleFieldChange(slide.id, 'displayMode', e.target.value)}
-                        className="border border-slate-200 rounded-lg px-2 py-1"
+                        className="border border-[#D7E7E4] rounded-lg px-2 py-1"
                       >
                         <option value="boxed">Windowed (compact)</option>
                         <option value="fullscreen">Fit to screen</option>
                       </select>
                     </label>
-                    <label className="flex items-center gap-2 text-xs text-slate-600">
+                    <label className="flex items-center gap-2 text-xs text-[#64748B]">
                       Background
                       <select
                         value={slide.backgroundType}
                         onChange={(e) => handleFieldChange(slide.id, 'backgroundType', e.target.value)}
-                        className="border border-slate-200 rounded-lg px-2 py-1"
+                        className="border border-[#D7E7E4] rounded-lg px-2 py-1"
                       >
                         <option value="gradient">Default gradient</option>
                         <option value="color">Solid color</option>
@@ -263,13 +263,13 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                   </div>
 
                   {slide.backgroundType === 'color' && (
-                    <label className="flex items-center gap-2 text-xs text-slate-600">
+                    <label className="flex items-center gap-2 text-xs text-[#64748B]">
                       Background color
                       <input
                         type="color"
                         value={slide.backgroundValue || '#0A3340'}
                         onChange={(e) => handleFieldChange(slide.id, 'backgroundValue', e.target.value)}
-                        className="w-8 h-8 rounded border border-slate-200 cursor-pointer"
+                        className="w-8 h-8 rounded border border-[#D7E7E4] cursor-pointer"
                       />
                     </label>
                   )}
@@ -278,21 +278,21 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                       value={slide.backgroundValue || ''}
                       onChange={(e) => handleFieldChange(slide.id, 'backgroundValue', e.target.value)}
                       placeholder="Background image URL"
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                      className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                     />
                   )}
 
                   <div className="flex items-center gap-4 flex-wrap">
-                    <label className="flex items-center gap-2 text-xs text-slate-600">
+                    <label className="flex items-center gap-2 text-xs text-[#64748B]">
                       Overlay color
                       <input
                         type="color"
                         value={slide.overlayColor}
                         onChange={(e) => handleFieldChange(slide.id, 'overlayColor', e.target.value)}
-                        className="w-8 h-8 rounded border border-slate-200 cursor-pointer"
+                        className="w-8 h-8 rounded border border-[#D7E7E4] cursor-pointer"
                       />
                     </label>
-                    <label className="flex items-center gap-2 text-xs text-slate-600 flex-1 min-w-[160px]">
+                    <label className="flex items-center gap-2 text-xs text-[#64748B] flex-1 min-w-[160px]">
                       Overlay opacity (layer over the background)
                       <input
                         type="range"
@@ -306,13 +306,13 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                     </label>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-3">
-                    <label className="flex flex-col gap-1 text-xs text-slate-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-[#D7E7E4] pt-3">
+                    <label className="flex flex-col gap-1 text-xs text-[#64748B]">
                       Hero layout
                       <select
                         value={slide.layout || 'four-corner'}
                         onChange={(e) => handleFieldChange(slide.id, 'layout', e.target.value)}
-                        className="border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                        className="border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                       >
                         <option value="four-corner">Four-corner vehicle layout</option>
                         <option value="media-left">Vehicle media left</option>
@@ -320,10 +320,10 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                         <option value="centered">Centered hero</option>
                       </select>
                     </label>
-                    <div className="text-[11px] text-slate-500 self-end">Use the same existing hero content fields for promotions, feature messages and calls to action; no new homepage modules are required.</div>
+                    <div className="text-[11px] text-[#64748B] self-end">Use the same existing hero content fields for promotions, feature messages and calls to action; no new homepage modules are required.</div>
                   </div>
 
-                  <div className="border-t border-slate-100 pt-3 space-y-2">
+                  <div className="border-t border-[#D7E7E4] pt-3 space-y-2">
                     <div className="text-xs font-bold text-[#0A3340]">Vehicle imagery</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {[
@@ -332,19 +332,19 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                         ['rightTopImage', 'rightTopLabel', 'Right top vehicle'],
                         ['rightBottomImage', 'rightBottomLabel', 'Right bottom vehicle'],
                       ].map(([imageKey, labelKey, label]) => (
-                        <div key={imageKey} className="rounded-lg border border-slate-200 p-2 space-y-2">
-                          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</div>
+                        <div key={imageKey} className="rounded-lg border border-[#D7E7E4] p-2 space-y-2">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">{label}</div>
                           <input
                             value={String((slide.mediaConfig as Record<string, string> | undefined)?.[imageKey] || '')}
                             onChange={(e) => handleMediaChange(slide.id, imageKey, e.target.value)}
                             placeholder="Image URL (https://...)"
-                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                            className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                           />
                           <input
                             value={String((slide.mediaConfig as Record<string, string> | undefined)?.[labelKey] || '')}
                             onChange={(e) => handleMediaChange(slide.id, labelKey, e.target.value)}
                             placeholder="Vehicle label"
-                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                            className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                           />
                         </div>
                       ))}
@@ -368,19 +368,19 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
                     onChange={(e) => setDraft((d) => ({ ...d, headline: e.target.value }))}
                     placeholder="Headline"
                     required
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm"
                   />
                   <input
                     value={draft.subheadline}
                     onChange={(e) => setDraft((d) => ({ ...d, subheadline: e.target.value }))}
                     placeholder="Subheadline"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                    className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                   />
                   <div className="flex gap-2">
                     <button type="submit" disabled={creating} className="bg-[#176B87] hover:bg-[#12576D] text-white text-xs font-bold rounded-lg px-4 py-2 disabled:opacity-50">
                       {creating ? 'Creating…' : 'Add Slide'}
                     </button>
-                    <button type="button" onClick={() => setShowAddForm(false)} className="text-xs font-semibold text-slate-500 px-4 py-2">
+                    <button type="button" onClick={() => setShowAddForm(false)} className="text-xs font-semibold text-[#64748B] px-4 py-2">
                       Cancel
                     </button>
                   </div>
@@ -388,7 +388,7 @@ export const HeroEditorPanel: React.FC<HeroEditorPanelProps> = ({ onClose }) => 
               ) : (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="w-full border-2 border-dashed border-slate-200 hover:border-[#176B87] rounded-xl py-3 text-xs font-bold text-slate-500 hover:text-[#176B87] flex items-center justify-center gap-1.5"
+                  className="w-full border-2 border-dashed border-[#D7E7E4] hover:border-[#176B87] rounded-xl py-3 text-xs font-bold text-[#64748B] hover:text-[#176B87] flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" /> Add Slide
                 </button>

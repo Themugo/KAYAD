@@ -133,7 +133,7 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
             className="w-full flex-shrink-0"
             onClick={() => onViewCar(car as any)}
           >
-            <div className="relative aspect-[21/9] bg-charcoal-800 overflow-hidden">
+            <div className="relative aspect-[21/9] bg-[#12576D] overflow-hidden">
               <img
                 src={firstImage(car)}
                 alt={car.title}
@@ -142,8 +142,8 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
               />
 
               {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-charcoal-950/90 via-charcoal-950/50 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0A3340]/90 via-[#0A3340]/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A3340]/80 via-transparent to-transparent" />
 
               {/* Content */}
               <div className="absolute inset-0 flex items-center">
@@ -152,12 +152,12 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
                     {/* Badges */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {car.isPromoted && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gold-500/90 text-charcoal-900 text-xs font-bold rounded-full">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#13B8A6]/90 text-[#0A3340] text-xs font-bold rounded-full">
                           <Star size={12} /> FEATURED
                         </span>
                       )}
                       {car.escrowEnabled && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-charcoal-800/80 text-white text-xs font-semibold rounded-full backdrop-blur-sm">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#12576D]/80 text-white text-xs font-semibold rounded-full backdrop-blur-sm">
                           <Shield size={12} /> ESCROW
                         </span>
                       )}
@@ -191,7 +191,7 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
                         <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-1">
                           {car.currentBid ? 'Current Bid' : 'Price'}
                         </p>
-                        <p className="font-serif text-3xl sm:text-4xl text-gold-400 font-bold">
+                        <p className="font-serif text-3xl sm:text-4xl text-[#13B8A6] font-bold">
                           {formatKES(car.currentBid || car.price)}
                         </p>
                       </div>
@@ -252,7 +252,7 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
               onClick={(e) => { e.stopPropagation(); goToSlide(idx); }}
               className={`w-2 h-2 rounded-full transition-all ${
                 idx === currentIndex
-                  ? 'w-6 bg-gold-400'
+                  ? 'w-6 bg-[#13B8A6]'
                   : 'bg-white/40 hover:bg-white/60'
               }`}
             />
@@ -262,8 +262,8 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
 
       {/* Loading State */}
       {loading && (
-        <div className="absolute inset-0 bg-charcoal-800 animate-pulse flex items-center justify-center">
-          <div className="text-gold-400 font-serif text-xl">Loading featured vehicles...</div>
+        <div className="absolute inset-0 bg-[#12576D] animate-pulse flex items-center justify-center">
+          <div className="text-[#13B8A6] font-serif text-xl">Loading featured vehicles...</div>
         </div>
       )}
     </div>

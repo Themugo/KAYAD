@@ -92,17 +92,17 @@ export default function AdManager() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
           <div>
             <div className="section-eyebrow">Admin</div>
-            <h2 style={{ fontStyle: 'italic' }}>AD <span style={{ color: 'var(--gold)' }}>TRAFFIC CONTROL</span></h2>
+            <h2 style={{ fontStyle: 'italic' }}>AD <span style={{ color: 'var(--brand)' }}>TRAFFIC CONTROL</span></h2>
           </div>
           <button onClick={() => { setShowForm(!showForm); setForm(emptyForm()); setEditing(null); }}
-            style={{ background: 'var(--gold)', color: 'black', padding: '12px 24px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer' }}>
+            style={{ background: 'var(--brand)', color: 'black', padding: '12px 24px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer' }}>
             {showForm ? 'Cancel' : '+ New Campaign'}
           </button>
         </div>
 
         {showForm && (
-          <div style={{ background: '#111', padding: 32, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 40 }}>
-            <h4 style={{ marginBottom: 24, color: 'var(--gold)' }}>{editing ? 'Edit Campaign' : 'New Campaign'}</h4>
+          <div style={{ background: '#0a3340', padding: 32, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 40 }}>
+            <h4 style={{ marginBottom: 24, color: 'var(--brand)' }}>{editing ? 'Edit Campaign' : 'New Campaign'}</h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
               <div>
                 <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Client Name *</label>
@@ -134,7 +134,7 @@ export default function AdManager() {
               </div>
             </div>
             <button onClick={handleSave} disabled={saving || !form.clientName}
-              style={{ marginTop: 24, background: 'var(--gold)', color: 'black', padding: '12px 32px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer', opacity: saving || !form.clientName ? 0.5 : 1 }}>
+              style={{ marginTop: 24, background: 'var(--brand)', color: 'black', padding: '12px 32px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer', opacity: saving || !form.clientName ? 0.5 : 1 }}>
               {saving ? 'Saving...' : editing ? 'Update Campaign' : 'Create Campaign'}
             </button>
           </div>
@@ -151,7 +151,7 @@ export default function AdManager() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {ads.map(ad => (
-              <div key={ad._id} style={{ background: '#111', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div key={ad._id} style={{ background: '#0a3340', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{
@@ -161,7 +161,7 @@ export default function AdManager() {
                     }}>
                       {ad.isActive ? 'ACTIVE' : 'PAUSED'}
                     </span>
-                    <span style={{ background: 'rgba(37, 99, 235,0.1)', color: 'var(--gold)', fontSize: 10, padding: '4px 8px', borderRadius: 4, fontWeight: 500 }}>
+                    <span style={{ background: 'rgba(23, 107, 135, 0.1)', color: 'var(--brand)', fontSize: 10, padding: '4px 8px', borderRadius: 4, fontWeight: 500 }}>
                       {PLACEMENTS.find(p => p.value === ad.placement)?.label || ad.placement}
                     </span>
                   </div>
@@ -171,7 +171,7 @@ export default function AdManager() {
                       {ad.isActive ? 'Pause' : 'Activate'}
                     </button>
                     <button onClick={() => handleEdit(ad)}
-                      style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--gold)', cursor: 'pointer' }}>
+                      style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--brand)', cursor: 'pointer' }}>
                       Edit
                     </button>
                     <button onClick={() => handleDelete(ad._id)}
@@ -182,7 +182,7 @@ export default function AdManager() {
                 </div>
                 <h4 style={{ fontWeight: 700, color: 'white' }}>{ad.clientName}</h4>
                 {ad.targetLink && (
-                  <p style={{ fontSize: 12, color: 'var(--gold)', marginTop: 4, wordBreak: 'break-all' }}>{ad.targetLink}</p>
+                  <p style={{ fontSize: 12, color: 'var(--brand)', marginTop: 4, wordBreak: 'break-all' }}>{ad.targetLink}</p>
                 )}
                 <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div style={{ background: 'black', padding: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
@@ -191,7 +191,7 @@ export default function AdManager() {
                   </div>
                   <div style={{ background: 'black', padding: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
                     <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Clicks</p>
-                    <p style={{ fontSize: '1.125rem', fontFamily: 'monospace', color: 'var(--gold)' }}>{ad.clickCount?.toLocaleString() || 0}</p>
+                    <p style={{ fontSize: '1.125rem', fontFamily: 'monospace', color: 'var(--brand)' }}>{ad.clickCount?.toLocaleString() || 0}</p>
                   </div>
                 </div>
                 {ad.budgetRemaining > 0 && (

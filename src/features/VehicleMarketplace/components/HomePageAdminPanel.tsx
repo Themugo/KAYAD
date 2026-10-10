@@ -177,17 +177,17 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0A3340]/40" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg max-h-[85vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-xl border border-[#D7E7E4] w-full max-w-lg max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
+        <div className="flex items-center justify-between p-4 border-b border-[#D7E7E4] sticky top-0 bg-white rounded-t-2xl">
           <div className="flex items-center gap-2">
             <Settings className="w-4 h-4 text-[#0A3340]" />
             <h2 className="text-sm font-black text-[#0A3340]">Customize Home Page (Admin)</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -195,18 +195,18 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
         <div className="p-4 space-y-5 text-xs">
           {/* Section visibility */}
           <div className="space-y-2">
-            <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide">Sections</h3>
+            <h3 className="font-bold text-[#12576D] uppercase text-[10px] tracking-wide">Sections</h3>
             {(Object.keys(SECTION_LABELS) as (keyof HomePageConfig['sectionVisibility'])[]).map((key) => (
               <button
                 key={key}
                 onClick={() => toggleSection(key)}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors"
+                className="w-full flex items-center justify-between p-2.5 rounded-xl border border-[#D7E7E4] hover:border-[#BDE5DE] transition-colors"
               >
-                <span className="font-semibold text-slate-700">{SECTION_LABELS[key]}</span>
+                <span className="font-semibold text-[#12576D]">{SECTION_LABELS[key]}</span>
                 {config.sectionVisibility[key] ? (
                   <Eye className="w-4 h-4 text-emerald-600" />
                 ) : (
-                  <EyeOff className="w-4 h-4 text-slate-400" />
+                  <EyeOff className="w-4 h-4 text-[#94A3B8]" />
                 )}
               </button>
             ))}
@@ -214,55 +214,55 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
 
           {/* Accent color */}
           <div className="space-y-2">
-            <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide">Accent Color</h3>
+            <h3 className="font-bold text-[#12576D] uppercase text-[10px] tracking-wide">Accent Color</h3>
             <div className="flex gap-2">
               {ACCENT_THEME_OPTIONS.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => onUpdate((prev) => ({ ...prev, accentTheme: opt.id }))}
                   className={`flex-1 flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all ${
-                    config.accentTheme === opt.id ? 'border-[#176B87] bg-[#DDF4F0]' : 'border-slate-200'
+                    config.accentTheme === opt.id ? 'border-[#176B87] bg-[#DDF4F0]' : 'border-[#D7E7E4]'
                   }`}
                 >
-                  <span className="w-5 h-5 rounded-full border border-black/10" style={{ backgroundColor: opt.swatch }} />
-                  <span className="font-semibold text-slate-600 text-[10px]">{opt.label}</span>
+                  <span className="w-5 h-5 rounded-full border border-[#12576D]/10" style={{ backgroundColor: opt.swatch }} />
+                  <span className="font-semibold text-[#64748B] text-[10px]">{opt.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Hero featured vehicle selection - uses real promoted listings only. */}
-          <div className="space-y-3 rounded-2xl border border-[#B8D9D6] bg-[#F8FBFF] p-3.5">
+          <div className="space-y-3 rounded-2xl border border-[#B8D9D6] bg-[#F6FAF9] p-3.5">
             <div className="flex items-start gap-2">
               <CarFront className="mt-0.5 h-4 w-4 text-[#176B87] shrink-0" />
               <div>
                 <h3 className="font-bold text-[#0A3340] uppercase text-[10px] tracking-wide">Hero Featured Vehicles</h3>
-                <p className="text-[11px] leading-relaxed text-slate-500 mt-1">The hero pulls real vehicles marked Featured/Promoted. Choose all featured vehicles or a selective set.</p>
+                <p className="text-[11px] leading-relaxed text-[#64748B] mt-1">The hero pulls real vehicles marked Featured/Promoted. Choose all featured vehicles or a selective set.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setHeroMode('all')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'all' ? 'border-[#176B87] bg-white text-[#12576D]' : 'border-slate-200 bg-white text-slate-600'}`}>
+              <button type="button" onClick={() => setHeroMode('all')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'all' ? 'border-[#176B87] bg-white text-[#12576D]' : 'border-[#D7E7E4] bg-white text-[#64748B]'}`}>
                 <span className="block text-xs font-black">All featured</span>
-                <span className="block text-[10px] mt-0.5 text-slate-400">Auto-use every promoted car</span>
+                <span className="block text-[10px] mt-0.5 text-[#94A3B8]">Auto-use every promoted car</span>
               </button>
-              <button type="button" onClick={() => setHeroMode('selected')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'selected' ? 'border-[#176B87] bg-white text-[#12576D]' : 'border-slate-200 bg-white text-slate-600'}`}>
+              <button type="button" onClick={() => setHeroMode('selected')} className={`rounded-xl border p-2.5 text-left ${heroMode === 'selected' ? 'border-[#176B87] bg-white text-[#12576D]' : 'border-[#D7E7E4] bg-white text-[#64748B]'}`}>
                 <span className="block text-xs font-black">Selective</span>
-                <span className="block text-[10px] mt-0.5 text-slate-400">Choose exact hero cars</span>
+                <span className="block text-[10px] mt-0.5 text-[#94A3B8]">Choose exact hero cars</span>
               </button>
             </div>
 
             {heroMode === 'selected' && (
-              <div className="max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
+              <div className="max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-[#D7E7E4] bg-white p-2">
                 {featuredVehicles.length === 0 ? (
-                  <p className="p-3 text-[11px] text-slate-500">No promoted vehicles are currently available.</p>
+                  <p className="p-3 text-[11px] text-[#64748B]">No promoted vehicles are currently available.</p>
                 ) : featuredVehicles.map((vehicle) => (
-                  <label key={vehicle.id} className="flex cursor-pointer items-center gap-2 rounded-lg p-2 hover:bg-[#F8FBFF]">
+                  <label key={vehicle.id} className="flex cursor-pointer items-center gap-2 rounded-lg p-2 hover:bg-[#F6FAF9]">
                     <input type="checkbox" checked={heroIds.includes(vehicle.id)} onChange={() => toggleHeroVehicle(vehicle.id)} className="accent-[#176B87]" />
-                    <img src={vehicle.images?.[0]} alt="" className="h-9 w-12 rounded-md object-cover bg-slate-100" />
+                    <img src={vehicle.images?.[0]} alt="" className="h-9 w-12 rounded-md object-cover bg-[#EEF7F5]" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[11px] font-bold text-[#0A3340]">{vehicle.year} {vehicle.make} {vehicle.model}</span>
-                      <span className="block truncate text-[10px] text-slate-400">{vehicle.location || 'Location not specified'} · {formatAdminPrice(vehicle.price)}</span>
+                      <span className="block truncate text-[10px] text-[#94A3B8]">{vehicle.location || 'Location not specified'} · {formatAdminPrice(vehicle.price)}</span>
                     </span>
                   </label>
                 ))}
@@ -275,10 +275,10 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
           </div>
 
           {/* Unified hero composition controls: backend-persisted through platform_config. */}
-          <div className="space-y-3 rounded-2xl border border-[#B8D9D6] bg-[#F8FBFF] p-3.5">
+          <div className="space-y-3 rounded-2xl border border-[#B8D9D6] bg-[#F6FAF9] p-3.5">
             <div>
               <h3 className="font-bold text-[#0A3340] uppercase text-[10px] tracking-wide">Hero Composition & Commercial Card</h3>
-              <p className="text-[11px] leading-relaxed text-slate-500 mt-1">Position the existing hero without changing its architecture. The center card, vehicle subjects and broadcast strip remain the same canonical surfaces.</p>
+              <p className="text-[11px] leading-relaxed text-[#64748B] mt-1">Position the existing hero without changing its architecture. The center card, vehicle subjects and broadcast strip remain the same canonical surfaces.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
@@ -287,79 +287,79 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                 ['leftOffsetPct','Left vehicle outward','0–30%'],
                 ['rightOffsetPct','Right vehicle outward','0–30%'],
               ].map(([key,label,hint]) => (
-                <label key={key} className="rounded-xl border border-slate-200 bg-white p-2.5">
-                  <span className="block text-[9px] font-black uppercase tracking-wide text-slate-500">{label}</span>
-                  <input type="number" min={key === 'stageHeightPct' ? 70 : key === 'cardScalePct' ? 70 : 0} max={key === 'stageHeightPct' ? 120 : key === 'cardScalePct' ? 100 : 30} value={(heroLayout as any)[key]} onChange={(e) => setHeroLayout((prev) => ({ ...prev, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold text-[#0A3340]" />
-                  <span className="mt-1 block text-[9px] text-slate-400">{hint}</span>
+                <label key={key} className="rounded-xl border border-[#D7E7E4] bg-white p-2.5">
+                  <span className="block text-[9px] font-black uppercase tracking-wide text-[#64748B]">{label}</span>
+                  <input type="number" min={key === 'stageHeightPct' ? 70 : key === 'cardScalePct' ? 70 : 0} max={key === 'stageHeightPct' ? 120 : key === 'cardScalePct' ? 100 : 30} value={(heroLayout as any)[key]} onChange={(e) => setHeroLayout((prev) => ({ ...prev, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs font-bold text-[#0A3340]" />
+                  <span className="mt-1 block text-[9px] text-[#94A3B8]">{hint}</span>
                 </label>
               ))}
             </div>
-            <label className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3">
-              <span><span className="block text-xs font-bold text-[#0A3340]">Broadcast ticker</span><span className="block text-[10px] text-slate-400">Keep the dark TV-style notice strip above navigation.</span></span>
+            <label className="flex items-center justify-between rounded-xl border border-[#D7E7E4] bg-white p-3">
+              <span><span className="block text-xs font-bold text-[#0A3340]">Broadcast ticker</span><span className="block text-[10px] text-[#94A3B8]">Keep the dark TV-style notice strip above navigation.</span></span>
               <input type="checkbox" checked={heroLayout.tickerEnabled} onChange={(e) => setHeroLayout((prev) => ({ ...prev, tickerEnabled: e.target.checked }))} className="accent-[#176B87] h-4 w-4" />
             </label>
 
-            <div className="rounded-xl border border-[#B8D9D6] bg-[#F8FBFF] p-3 space-y-3">
-              <div><div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Hero Marketing System</div><div className="text-[10px] text-slate-500 mt-1">Control the visual system here. No code changes are required for future campaigns.</div></div>
-              <label className="block"><span className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Vehicle source</span><select value={heroLayout.vehicleSource} onChange={(e) => setHeroLayout((p) => ({ ...p, vehicleSource: e.target.value as HeroPresentationConfig['vehicleSource'] }))} className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold"><option value="featured">All featured vehicles</option><option value="selected">Selected featured vehicles</option></select></label>
+            <div className="rounded-xl border border-[#B8D9D6] bg-[#F6FAF9] p-3 space-y-3">
+              <div><div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Hero Marketing System</div><div className="text-[10px] text-[#64748B] mt-1">Control the visual system here. No code changes are required for future campaigns.</div></div>
+              <label className="block"><span className="block text-[9px] font-bold uppercase text-[#64748B] mb-1">Vehicle source</span><select value={heroLayout.vehicleSource} onChange={(e) => setHeroLayout((p) => ({ ...p, vehicleSource: e.target.value as HeroPresentationConfig['vehicleSource'] }))} className="w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs font-bold"><option value="featured">All featured vehicles</option><option value="selected">Selected featured vehicles</option></select></label>
               <div className="grid grid-cols-2 gap-2">
-                {([['stageMaxWidthPct','Hero width','90–100'],['cardWidthPct','Card width','28–50'],['vehicleScalePct','Vehicle scale','75–125'],['leftVehicleNudgePct','Left car outward','0–40'],['rightVehicleNudgePct','Right car outward','0–40'],['vehicleTopPct','Vehicle vertical','35–65'],['vehicleWidthPct','Vehicle stage width','32–48'],['backgroundScalePct','Background scale','100–130'],['backgroundPositionX','Background X','0–100'],['backgroundPositionY','Background Y','0–100'],['cardOffsetXPct','Card X offset','-10–10'],['cardOffsetYPct','Card Y offset','-10–10'],['cardBgOpacityPct','Card opacity','70–100'],['cardBlurPx','Card blur','0–40']] as const).map(([key,label,hint]) => <label key={key} className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">{label}</span><input type="number" value={Number((heroLayout as any)[key])} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /><span className="block text-[8px] text-slate-400 mt-0.5">{hint}</span></label>)}
+                {([['stageMaxWidthPct','Hero width','90–100'],['cardWidthPct','Card width','28–50'],['vehicleScalePct','Vehicle scale','75–125'],['leftVehicleNudgePct','Left car outward','0–40'],['rightVehicleNudgePct','Right car outward','0–40'],['vehicleTopPct','Vehicle vertical','35–65'],['vehicleWidthPct','Vehicle stage width','32–48'],['backgroundScalePct','Background scale','100–130'],['backgroundPositionX','Background X','0–100'],['backgroundPositionY','Background Y','0–100'],['cardOffsetXPct','Card X offset','-10–10'],['cardOffsetYPct','Card Y offset','-10–10'],['cardBgOpacityPct','Card opacity','70–100'],['cardBlurPx','Card blur','0–40']] as const).map(([key,label,hint]) => <label key={key} className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">{label}</span><input type="number" value={Number((heroLayout as any)[key])} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-xs font-bold" /><span className="block text-[8px] text-[#94A3B8] mt-0.5">{hint}</span></label>)}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Nairobi background URL</span><input value={heroLayout.backgroundUrl} onChange={(e) => setHeroLayout((p) => ({ ...p, backgroundUrl: e.target.value }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" /></label>
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker fallback text</span><input value={heroLayout.tickerFallbackText} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerFallbackText: e.target.value }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Nairobi background URL</span><input value={heroLayout.backgroundUrl} onChange={(e) => setHeroLayout((p) => ({ ...p, backgroundUrl: e.target.value }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Ticker fallback text</span><input value={heroLayout.tickerFallbackText} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerFallbackText: e.target.value }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]" /></label>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker background</span><input type="color" value={heroLayout.tickerBackgroundColor} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerBackgroundColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-slate-200" /></label>
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker text</span><input type="color" value={heroLayout.tickerTextColor} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerTextColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-slate-200" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Ticker background</span><input type="color" value={heroLayout.tickerBackgroundColor} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerBackgroundColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-[#D7E7E4]" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Ticker text</span><input type="color" value={heroLayout.tickerTextColor} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerTextColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-[#D7E7E4]" /></label>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {([['primaryButtonColor','Primary button'],['secondaryButtonBorderColor','Secondary button border'],['cardTextColor','Hero card text'],['secondaryOverlayColor','Secondary overlay']] as const).map(([key,label]) => <label key={key} className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">{label}</span><input type="color" value={/^#[0-9a-fA-F]{6}$/.test(String(heroLayout[key])) ? String(heroLayout[key]) : '#000000'} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-slate-200" /></label>)}
+                {([['primaryButtonColor','Primary button'],['secondaryButtonBorderColor','Secondary button border'],['cardTextColor','Hero card text'],['secondaryOverlayColor','Secondary overlay']] as const).map(([key,label]) => <label key={key} className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">{label}</span><input type="color" value={/^#[0-9a-fA-F]{6}$/.test(String(heroLayout[key])) ? String(heroLayout[key]) : '#0a3340'} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-[#D7E7E4]" /></label>)}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker height</span><input type="number" min={28} max={60} value={heroLayout.tickerHeightPx} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerHeightPx: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /></label>
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Ticker speed (sec)</span><input type="number" min={10} max={90} value={heroLayout.tickerScrollSeconds} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerScrollSeconds: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Ticker height</span><input type="number" min={28} max={60} value={heroLayout.tickerHeightPx} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerHeightPx: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-xs font-bold" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Ticker speed (sec)</span><input type="number" min={10} max={90} value={heroLayout.tickerScrollSeconds} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerScrollSeconds: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-xs font-bold" /></label>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Overlay color</span><input type="color" value={heroLayout.overlayColor} onChange={(e) => setHeroLayout((p) => ({ ...p, overlayColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-slate-200" /></label>
-                <label className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">Card border</span><input type="color" value={heroLayout.cardBorderColor} onChange={(e) => setHeroLayout((p) => ({ ...p, cardBorderColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-slate-200" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Overlay color</span><input type="color" value={heroLayout.overlayColor} onChange={(e) => setHeroLayout((p) => ({ ...p, overlayColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-[#D7E7E4]" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Card border</span><input type="color" value={heroLayout.cardBorderColor} onChange={(e) => setHeroLayout((p) => ({ ...p, cardBorderColor: e.target.value }))} className="mt-1 h-8 w-full rounded-md border border-[#D7E7E4]" /></label>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {([['showVehicleInfoCards','Vehicle info cards'],['showVehicleLabels','Vehicle labels'],['arrowEnabled','Navigation arrows'],['dotsEnabled','Rotation dots']] as const).map(([key,label]) => <label key={key} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-2.5"><span className="text-[10px] font-bold text-slate-600">{label}</span><input type="checkbox" checked={Boolean((heroLayout as any)[key])} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.checked }))} className="accent-[#176B87]" /></label>)}
+                {([['showVehicleInfoCards','Vehicle info cards'],['showVehicleLabels','Vehicle labels'],['arrowEnabled','Navigation arrows'],['dotsEnabled','Rotation dots']] as const).map(([key,label]) => <label key={key} className="flex items-center justify-between rounded-lg border border-[#D7E7E4] bg-white p-2.5"><span className="text-[10px] font-bold text-[#64748B]">{label}</span><input type="checkbox" checked={Boolean((heroLayout as any)[key])} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.checked }))} className="accent-[#176B87]" /></label>)}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {([['mobileStageMinPx','Mobile vehicle min height (px)',120,320],['mobileStageMaxPx','Mobile vehicle max height (px)',168,420],['mobileTransitionMs','Mobile slide speed (ms, 0 = instant)',0,1000],['rotationSeconds','Hero auto-rotate (sec, 0 = off; mobile carousel stays manual)',0,60]] as const).map(([key,label,min,max]) => <label key={key} className="rounded-lg border border-slate-200 bg-white p-2"><span className="block text-[9px] font-bold uppercase text-slate-500">{label}</span><input type="number" min={min} max={max} step={key === 'rotationSeconds' ? 0.5 : 1} value={heroLayout[key]} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.value === '' ? 0 : Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /></label>)}
+                {([['mobileStageMinPx','Mobile vehicle min height (px)',120,320],['mobileStageMaxPx','Mobile vehicle max height (px)',168,420],['mobileTransitionMs','Mobile slide speed (ms, 0 = instant)',0,1000],['rotationSeconds','Hero auto-rotate (sec, 0 = off; mobile carousel stays manual)',0,60]] as const).map(([key,label,min,max]) => <label key={key} className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">{label}</span><input type="number" min={min} max={max} step={key === 'rotationSeconds' ? 0.5 : 1} value={heroLayout[key]} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: e.target.value === '' ? 0 : Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-xs font-bold" /></label>)}
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#B8D9D6] bg-[#F8FBFF] p-3 space-y-1.5">
+            <div className="rounded-xl border border-[#B8D9D6] bg-[#F6FAF9] p-3 space-y-1.5">
               <div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Featured Vehicle Source</div>
-              <p className="text-[10px] leading-relaxed text-slate-500">The public hero uses real promoted marketplace inventory. Choose all featured vehicles or the selected featured vehicles below; legacy marketing-only showcase cars are no longer a public inventory source.</p>
+              <p className="text-[10px] leading-relaxed text-[#64748B]">The public hero uses real promoted marketplace inventory. Choose all featured vehicles or the selected featured vehicles below; legacy marketing-only showcase cars are no longer a public inventory source.</p>
             </div>
 
             <div className="rounded-xl border border-[#B8D9D6] bg-white p-3 space-y-3">
-              <div className="flex items-center justify-between"><div><div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Floating Marketing Cards</div><div className="text-[10px] text-slate-500">Add, position, edit or remove promotional cards without code.</div></div><button type="button" onClick={addFloatingCard} className="rounded-lg bg-[#0A3340] px-2.5 py-1.5 text-[10px] font-black text-white">+ Add card</button></div>
-              {heroLayout.floatingCards.map((card) => <div key={card.id} className="rounded-lg border border-slate-200 p-2.5 space-y-2">
-                <div className="grid grid-cols-2 gap-2"><input value={card.eyebrow || ''} onChange={(e) => updateFloatingCard(card.id, { eyebrow: e.target.value })} placeholder="Eyebrow" className="rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" /><input value={card.title} onChange={(e) => updateFloatingCard(card.id, { title: e.target.value })} placeholder="Title" className="rounded-md border border-slate-200 px-2 py-1.5 text-xs font-bold" /><textarea value={card.body || ''} onChange={(e) => updateFloatingCard(card.id, { body: e.target.value })} placeholder="Message" rows={2} className="col-span-2 rounded-md border border-slate-200 px-2 py-1.5 text-[10px] resize-none" /></div>
-                <div className="grid grid-cols-4 gap-2">{([['leftPct','X'],['topPct','Y'],['widthPct','Width'],['opacityPct','Opacity']] as const).map(([key,label]) => <label key={key}><span className="block text-[8px] font-bold uppercase text-slate-400">{label}</span><input type="number" value={Number((card as any)[key] ?? 0)} onChange={(e) => updateFloatingCard(card.id, { [key]: Number(e.target.value) } as Partial<HeroFloatingCard>)} className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[10px]" /></label>)}</div>
-                <div className="flex items-center justify-between"><label className="flex items-center gap-2 text-[10px] font-bold text-slate-600"><input type="checkbox" checked={card.enabled !== false} onChange={(e) => updateFloatingCard(card.id, { enabled: e.target.checked })} className="accent-[#176B87]" /> Visible</label><button type="button" onClick={() => removeFloatingCard(card.id)} className="text-[10px] font-black text-rose-600">Remove</button></div>
+              <div className="flex items-center justify-between"><div><div className="text-[10px] font-black uppercase tracking-wide text-[#176B87]">Floating Marketing Cards</div><div className="text-[10px] text-[#64748B]">Add, position, edit or remove promotional cards without code.</div></div><button type="button" onClick={addFloatingCard} className="rounded-lg bg-[#0A3340] px-2.5 py-1.5 text-[10px] font-black text-white">+ Add card</button></div>
+              {heroLayout.floatingCards.map((card) => <div key={card.id} className="rounded-lg border border-[#D7E7E4] p-2.5 space-y-2">
+                <div className="grid grid-cols-2 gap-2"><input value={card.eyebrow || ''} onChange={(e) => updateFloatingCard(card.id, { eyebrow: e.target.value })} placeholder="Eyebrow" className="rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]" /><input value={card.title} onChange={(e) => updateFloatingCard(card.id, { title: e.target.value })} placeholder="Title" className="rounded-md border border-[#D7E7E4] px-2 py-1.5 text-xs font-bold" /><textarea value={card.body || ''} onChange={(e) => updateFloatingCard(card.id, { body: e.target.value })} placeholder="Message" rows={2} className="col-span-2 rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px] resize-none" /></div>
+                <div className="grid grid-cols-4 gap-2">{([['leftPct','X'],['topPct','Y'],['widthPct','Width'],['opacityPct','Opacity']] as const).map(([key,label]) => <label key={key}><span className="block text-[8px] font-bold uppercase text-[#94A3B8]">{label}</span><input type="number" value={Number((card as any)[key] ?? 0)} onChange={(e) => updateFloatingCard(card.id, { [key]: Number(e.target.value) } as Partial<HeroFloatingCard>)} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]" /></label>)}</div>
+                <div className="flex items-center justify-between"><label className="flex items-center gap-2 text-[10px] font-bold text-[#64748B]"><input type="checkbox" checked={card.enabled !== false} onChange={(e) => updateFloatingCard(card.id, { enabled: e.target.checked })} className="accent-[#176B87]" /> Visible</label><button type="button" onClick={() => removeFloatingCard(card.id)} className="text-[10px] font-black text-rose-600">Remove</button></div>
               </div>)}
-              {!heroLayout.floatingCards.length && <div className="rounded-lg bg-slate-50 p-3 text-[10px] text-slate-400">No floating cards. Add one only when a campaign needs it.</div>}
+              {!heroLayout.floatingCards.length && <div className="rounded-lg bg-[#F6FAF9] p-3 text-[10px] text-[#94A3B8]">No floating cards. Add one only when a campaign needs it.</div>}
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
-              <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">Per-vehicle hero card message</div>
-              <select value={heroCopyVehicleId} onChange={(e) => setHeroCopyVehicleId(e.target.value)} className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs">
+            <div className="rounded-xl border border-[#D7E7E4] bg-white p-3 space-y-2">
+              <div className="text-[10px] font-black uppercase tracking-wide text-[#64748B]">Per-vehicle hero card message</div>
+              <select value={heroCopyVehicleId} onChange={(e) => setHeroCopyVehicleId(e.target.value)} className="w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs">
                 <option value="">Select featured vehicle</option>
                 {featuredVehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.year} {vehicle.make} {vehicle.model}{vehicle.isAuction ? ' · Auction' : ''}</option>)}
               </select>
               {heroCopyVehicleId && <div className="space-y-2">
-                <input value={activeCopy.eyebrow || ''} onChange={(e) => updateActiveCopy('eyebrow', e.target.value)} placeholder="Eyebrow / campaign label" className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
-                <textarea value={activeCopy.message || ''} onChange={(e) => updateActiveCopy('message', e.target.value)} placeholder="Hero message shown with this vehicle" rows={3} className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs resize-none" />
-                <input value={activeCopy.detail || ''} onChange={(e) => updateActiveCopy('detail', e.target.value)} placeholder="Supporting detail / promotion" className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
+                <input value={activeCopy.eyebrow || ''} onChange={(e) => updateActiveCopy('eyebrow', e.target.value)} placeholder="Eyebrow / campaign label" className="w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs" />
+                <textarea value={activeCopy.message || ''} onChange={(e) => updateActiveCopy('message', e.target.value)} placeholder="Hero message shown with this vehicle" rows={3} className="w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs resize-none" />
+                <input value={activeCopy.detail || ''} onChange={(e) => updateActiveCopy('detail', e.target.value)} placeholder="Supporting detail / promotion" className="w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs" />
                 <div className="grid grid-cols-2 gap-2">
-                  <input value={activeCopy.ctaLabel || ''} onChange={(e) => updateActiveCopy('ctaLabel', e.target.value)} placeholder="CTA label" className="rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
-                  <input value={activeCopy.ctaLink || ''} onChange={(e) => updateActiveCopy('ctaLink', e.target.value)} placeholder="CTA link / route" className="rounded-lg border border-slate-200 px-2.5 py-2 text-xs" />
+                  <input value={activeCopy.ctaLabel || ''} onChange={(e) => updateActiveCopy('ctaLabel', e.target.value)} placeholder="CTA label" className="rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs" />
+                  <input value={activeCopy.ctaLink || ''} onChange={(e) => updateActiveCopy('ctaLink', e.target.value)} placeholder="CTA link / route" className="rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs" />
                 </div>
               </div>}
             </div>
@@ -370,8 +370,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
           {/* Inventory presentation - existing marketplace controls only */}
           <div className="space-y-3">
             <div>
-              <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide">Inventory Presentation</h3>
-              <p className="text-[11px] leading-relaxed text-slate-500 mt-1">Choose how the existing vehicle inventory is arranged. These settings change presentation only; vehicle data, filters and business rules stay untouched.</p>
+              <h3 className="font-bold text-[#12576D] uppercase text-[10px] tracking-wide">Inventory Presentation</h3>
+              <p className="text-[11px] leading-relaxed text-[#64748B] mt-1">Choose how the existing vehicle inventory is arranged. These settings change presentation only; vehicle data, filters and business rules stay untouched.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -386,7 +386,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                     key={option.value}
                     type="button"
                     onClick={() => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, viewMode: option.value } }))}
-                    className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-colors ${active ? 'border-[#176B87] bg-[#176B87]/10 text-[#12576D]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                    className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-colors ${active ? 'border-[#176B87] bg-[#176B87]/10 text-[#12576D]' : 'border-[#D7E7E4] text-[#64748B] hover:border-[#BDE5DE]'}`}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
                     <span className="text-xs font-bold">{option.label}</span>
@@ -397,12 +397,12 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 mb-1">Desktop columns</label>
+                <label className="block text-[10px] font-bold text-[#64748B] mb-1">Desktop columns</label>
                 <select
                   aria-label="Desktop inventory columns"
                   value={config.inventoryLayout.columns}
                   onChange={(e) => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, columns: Number(e.target.value) as 3 | 4 | 5 } }))}
-                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                  className="w-full px-2.5 py-2 border border-[#D7E7E4] rounded-lg font-semibold text-[#12576D] focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                 >
                   <option value={3}>3 columns</option>
                   <option value={4}>4 columns</option>
@@ -410,12 +410,12 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 mb-1">Card density</label>
+                <label className="block text-[10px] font-bold text-[#64748B] mb-1">Card density</label>
                 <select
                   aria-label="Inventory card density"
                   value={config.inventoryLayout.cardDensity}
                   onChange={(e) => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, cardDensity: e.target.value as HomePageConfig['inventoryLayout']['cardDensity'] } }))}
-                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                  className="w-full px-2.5 py-2 border border-[#D7E7E4] rounded-lg font-semibold text-[#12576D] focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                 >
                   <option value="compact">Compact · more cars</option>
                   <option value="standard">Standard · balanced</option>
@@ -428,8 +428,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
               <span className="flex items-center gap-2">
                 <PanelLeftOpen className="w-4 h-4 text-[#176B87]" />
                 <span className="text-left">
-                  <span className="block text-xs font-bold text-slate-700">Desktop filter sidebar</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">Required marketplace panel · always visible on desktop</span>
+                  <span className="block text-xs font-bold text-[#12576D]">Desktop filter sidebar</span>
+                  <span className="block text-[10px] text-[#64748B] mt-0.5">Required marketplace panel · always visible on desktop</span>
                 </span>
               </span>
               <span className="text-[10px] font-black px-2 py-1 rounded-full bg-[#176B87] text-white">ON</span>
@@ -438,28 +438,28 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
 
           {/* Escrow rules & activation */}
           <div className="space-y-2">
-            <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide flex items-center gap-1.5">
+            <h3 className="font-bold text-[#12576D] uppercase text-[10px] tracking-wide flex items-center gap-1.5">
               <ShieldAlert className="w-3 h-3" /> Escrow Rules & Activation
             </h3>
-            <div className="p-2.5 rounded-xl border border-slate-200 space-y-2.5">
+            <div className="p-2.5 rounded-xl border border-[#D7E7E4] space-y-2.5">
               <button
                 type="button"
                 aria-label={`Escrow Live Mode: ${escrowConfig.liveMode ? 'ON' : 'OFF'}`}
                 onClick={() => updateEscrowConfig({ ...escrowConfig, liveMode: !escrowConfig.liveMode })}
                 className={`w-full flex items-center justify-between p-2 rounded-lg border ${
-                  escrowConfig.liveMode ? 'border-emerald-300 bg-emerald-50' : 'border-amber-300 bg-amber-50'
+                  escrowConfig.liveMode ? 'border-emerald-300 bg-emerald-50' : 'border-[#BDE5DE] bg-[#F3FAF9]'
                 }`}
               >
-                <span className="font-bold text-slate-700 text-left">
+                <span className="font-bold text-[#12576D] text-left">
                   Escrow Live Mode
-                  <span className="block font-normal text-[10px] text-slate-500 mt-0.5">
+                  <span className="block font-normal text-[10px] text-[#64748B] mt-0.5">
                     {escrowConfig.liveMode
                       ? 'Live - real escrow guarantee shown to buyers'
                       : 'Preview mode - pending CBK certification'}
                   </span>
                 </span>
                 <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ml-2 ${
-                  escrowConfig.liveMode ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                  escrowConfig.liveMode ? 'bg-emerald-500 text-white' : 'bg-[#13B8A6] text-white'
                 }`}>
                   {escrowConfig.liveMode ? 'ON' : 'OFF'}
                 </span>
@@ -467,12 +467,12 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">Verified Dealers</label>
+                  <label className="block text-[10px] font-bold text-[#64748B] mb-1">Verified Dealers</label>
                   <select
                     aria-label="Verified dealer escrow requirement"
                     value={escrowConfig.dealerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, dealerRequirement: e.target.value as SellerEscrowRequirement })}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                    className="w-full px-2 py-1.5 border border-[#D7E7E4] rounded-lg font-semibold text-[#12576D] focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   >
                     {REQUIREMENT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -480,12 +480,12 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">Private Sellers</label>
+                  <label className="block text-[10px] font-bold text-[#64748B] mb-1">Private Sellers</label>
                   <select
                     aria-label="Private seller escrow requirement"
                     value={escrowConfig.privateSellerRequirement}
                     onChange={(e) => updateEscrowConfig({ ...escrowConfig, privateSellerRequirement: e.target.value as SellerEscrowRequirement })}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                    className="w-full px-2 py-1.5 border border-[#D7E7E4] rounded-lg font-semibold text-[#12576D] focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   >
                     {REQUIREMENT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -505,20 +505,20 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
               onClick={() => setShowAuditLog(!showAuditLog)}
               className="w-full flex items-center justify-between text-left"
             >
-              <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide flex items-center gap-1.5">
+              <h3 className="font-bold text-[#12576D] uppercase text-[10px] tracking-wide flex items-center gap-1.5">
                 <History className="w-3 h-3" /> Admin Change Log (Immutable)
               </h3>
-              <span className="text-[10px] text-slate-400 font-semibold">{showAuditLog ? 'Hide' : 'Show'}</span>
+              <span className="text-[10px] text-[#94A3B8] font-semibold">{showAuditLog ? 'Hide' : 'Show'}</span>
             </button>
             {showAuditLog && (
-              <div className="max-h-40 overflow-y-auto space-y-1.5 border border-slate-200 rounded-xl p-2">
+              <div className="max-h-40 overflow-y-auto space-y-1.5 border border-[#D7E7E4] rounded-xl p-2">
                 {readLogEntries().length === 0 ? (
-                  <p className="text-slate-400 text-center py-2">No changes logged yet.</p>
+                  <p className="text-[#94A3B8] text-center py-2">No changes logged yet.</p>
                 ) : (
                   [...readLogEntries()].reverse().map((entry) => (
-                    <div key={entry.id} className="p-2 bg-slate-50 rounded-lg">
-                      <p className="text-slate-700 font-semibold">{entry.summary}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
+                    <div key={entry.id} className="p-2 bg-[#F6FAF9] rounded-lg">
+                      <p className="text-[#12576D] font-semibold">{entry.summary}</p>
+                      <p className="text-[10px] text-[#94A3B8] mt-0.5">
                         {entry.adminName} · {new Date(entry.timestamp).toLocaleString('en-KE')} · {entry.area}
                       </p>
                     </div>
@@ -530,19 +530,19 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
 
           {/* Trust pillar text */}
           <div className="space-y-2">
-            <h3 className="font-bold text-slate-700 uppercase text-[10px] tracking-wide">Trust Pillar Text</h3>
+            <h3 className="font-bold text-[#12576D] uppercase text-[10px] tracking-wide">Trust Pillar Text</h3>
             {(Object.keys(config.trustPillars) as (keyof HomePageConfig['trustPillars'])[]).map((pillar) => (
-              <div key={pillar} className="p-2.5 rounded-xl border border-slate-200 space-y-1.5">
+              <div key={pillar} className="p-2.5 rounded-xl border border-[#D7E7E4] space-y-1.5">
                 <input
                   value={config.trustPillars[pillar].heading}
                   onChange={(e) => updatePillarText(pillar, 'heading', e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                  className="w-full px-2 py-1.5 border border-[#D7E7E4] rounded-lg font-bold text-[#0A3340] focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   placeholder="Heading"
                 />
                 <input
                   value={config.trustPillars[pillar].subtext}
                   onChange={(e) => updatePillarText(pillar, 'subtext', e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                  className="w-full px-2 py-1.5 border border-[#D7E7E4] rounded-lg text-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#176B87]"
                   placeholder="Subtext"
                 />
               </div>
@@ -550,10 +550,10 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
           </div>
         </div>
 
-        <div className="p-4 border-t border-slate-200 flex justify-between items-center">
+        <div className="p-4 border-t border-[#D7E7E4] flex justify-between items-center">
           <button
             onClick={onReset}
-            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-700 font-semibold text-xs"
+            className="flex items-center gap-1.5 text-[#64748B] hover:text-[#12576D] font-semibold text-xs"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset to Defaults
           </button>

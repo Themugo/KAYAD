@@ -14,8 +14,8 @@ const colors = {
   beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
-  terracotta: '#C77B58',
-  softBlue: '#60A5FA',
+  terracotta: '#5aafa4',
+  softBlue: '#5AAFA4',
 };
 
 // Node Types with Icons and Default Config
@@ -35,15 +35,15 @@ const nodeTypes = [
       { type: 'notification_email', label: 'Email', icon: Mail, color: colors.navy, defaultData: { template: '', recipient: '' } },
       { type: 'notification_sms', label: 'SMS', icon: MessageSquare, color: colors.terracotta, defaultData: { template: '', recipient: '' } },
       { type: 'notification_push', label: 'Push', icon: Bell, color: colors.mutedOrange, defaultData: { title: '', body: '' } },
-      { type: 'task_create', label: 'Create Task', icon: CheckSquare, color: '#8B5CF6', defaultData: { title: '', assignee: '', priority: 'medium' } },
-      { type: 'task_assign', label: 'Assign Task', icon: UserPlus, color: '#06B6D4', defaultData: { assignee: '' } },
+      { type: 'task_create', label: 'Create Task', icon: CheckSquare, color: '#5aafa4', defaultData: { title: '', assignee: '', priority: 'medium' } },
+      { type: 'task_assign', label: 'Assign Task', icon: UserPlus, color: '#13B8A6', defaultData: { assignee: '' } },
       { type: 'approval_request', label: 'Request Approval', icon: CheckCircle, color: colors.emerald, defaultData: { approverRole: '', priority: 'medium' } },
     ]
   },
   {
     category: 'Integrations',
     nodes: [
-      { type: 'webhook', label: 'Webhook', icon: Webhook, color: '#A855F7', defaultData: { url: '', method: 'POST' } },
+      { type: 'webhook', label: 'Webhook', icon: Webhook, color: '#5aafa4', defaultData: { url: '', method: 'POST' } },
       { type: 'api_call', label: 'API Call', icon: Code, color: colors.navy, defaultData: { endpoint: '', method: 'GET' } },
       { type: 'database_update', label: 'Database', icon: Database, color: colors.softBlue, defaultData: { table: '', operation: 'update' } },
     ]
@@ -56,7 +56,7 @@ const nodeTypes = [
       { type: 'listing_update', label: 'Update Listing', icon: FileText, color: colors.softBlue, defaultData: { field: '', value: '' } },
       { type: 'listing_archive', label: 'Archive Listing', icon: RefreshCw, color: colors.mutedOrange, defaultData: {} },
       { type: 'listing_hide', label: 'Hide Listing', icon: Eye, color: colors.mutedCrimson, defaultData: { reason: '' } },
-      { type: 'escalate', label: 'Escalate', icon: ArrowUpCircle, color: '#EC4899', defaultData: { level: 1, reason: '' } },
+      { type: 'escalate', label: 'Escalate', icon: ArrowUpCircle, color: '#13B8A6', defaultData: { level: 1, reason: '' } },
     ]
   },
 ];
@@ -70,7 +70,7 @@ const WorkflowNode = ({ node, isSelected, onSelect, onDelete, canvasOffset }) =>
   return (
     <div
       className={`absolute w-48 bg-white rounded-xl shadow-lg border-2 cursor-move transition-all ${
-        isSelected ? 'border-[#0A3340] ring-2 ring-[#0A3340]/20' : 'border-slate-200 hover:border-slate-300'
+        isSelected ? 'border-[#0A3340] ring-2 ring-[#0A3340]/20' : 'border-[#D7E7E4] hover:border-[#BDE5DE]'
       }`}
       style={{
         left: node.position?.x || 100,
@@ -85,7 +85,7 @@ const WorkflowNode = ({ node, isSelected, onSelect, onDelete, canvasOffset }) =>
           <Icon size={16} style={{ color }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-800 truncate">{nodeDef?.label || node.type}</p>
+          <p className="text-sm font-medium text-[#0A3340] truncate">{nodeDef?.label || node.type}</p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
@@ -98,22 +98,22 @@ const WorkflowNode = ({ node, isSelected, onSelect, onDelete, canvasOffset }) =>
       {/* Content */}
       <div className="px-3 py-2">
         {node.data && Object.keys(node.data).length > 0 ? (
-          <div className="space-y-1 text-xs text-slate-500">
+          <div className="space-y-1 text-xs text-[#64748B]">
             {Object.entries(node.data).slice(0, 2).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
                 <span className="capitalize">{key}:</span>
-                <span className="text-slate-700 truncate">{String(value)}</span>
+                <span className="text-[#12576D] truncate">{String(value)}</span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-slate-400">Click to configure</p>
+          <p className="text-xs text-[#94A3B8]">Click to configure</p>
         )}
       </div>
 
       {/* Connection Points */}
-      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-slate-300 hover:border-[#0A3340] cursor-crosshair" />
-      <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-slate-300 hover:border-[#0A3340] cursor-crosshair" />
+      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#BDE5DE] hover:border-[#0A3340] cursor-crosshair" />
+      <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#BDE5DE] hover:border-[#0A3340] cursor-crosshair" />
     </div>
   );
 };
@@ -158,7 +158,7 @@ const WorkflowEdge = ({ edge, nodes }) => {
           height="24"
           className="overflow-visible"
         >
-          <div className="bg-amber-50 border border-amber-200 rounded px-2 py-1 text-xs text-amber-700 text-center">
+          <div className="bg-[#F3FAF9] border border-[#BDE5DE] rounded px-2 py-1 text-xs text-[#12576D] text-center">
             {edge.condition}
           </div>
         </foreignObject>
@@ -299,17 +299,17 @@ export default function VisualWorkflowBuilder() {
     <div className="flex h-screen bg-[#EEF7F5]">
       {/* Node Library Panel */}
       {showNodePanel && (
-        <aside className="w-72 bg-white border-r border-slate-200 flex flex-col">
-          <div className="p-4 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-800 mb-3">Node Library</h2>
+        <aside className="w-72 bg-white border-r border-[#D7E7E4] flex flex-col">
+          <div className="p-4 border-b border-[#D7E7E4]">
+            <h2 className="text-lg font-semibold text-[#0A3340] mb-3">Node Library</h2>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={16} />
               <input
                 type="text"
                 placeholder="Search nodes..."
                 value={searchNodes}
                 onChange={(e) => setSearchNodes(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
+                className="w-full pl-9 pr-3 py-2 rounded-lg border border-[#D7E7E4] text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
               />
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function VisualWorkflowBuilder() {
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
             {filteredNodes.map((category) => (
               <div key={category.category}>
-                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-2">
                   {category.category}
                 </h3>
                 <div className="space-y-2">
@@ -327,13 +327,13 @@ export default function VisualWorkflowBuilder() {
                       <button
                         key={node.type}
                         onClick={() => addNode(node.type)}
-                        className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
+                        className="w-full flex items-center gap-3 p-3 rounded-lg border border-[#D7E7E4] hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
                       >
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${node.color}20` }}>
                           <Icon size={16} style={{ color: node.color }} />
                         </div>
-                        <span className="text-sm font-medium text-slate-700">{node.label}</span>
-                        <Plus size={14} className="ml-auto text-slate-400" />
+                        <span className="text-sm font-medium text-[#12576D]">{node.label}</span>
+                        <Plus size={14} className="ml-auto text-[#94A3B8]" />
                       </button>
                     );
                   })}
@@ -347,12 +347,12 @@ export default function VisualWorkflowBuilder() {
       {/* Canvas */}
       <main className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+        <div className="bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               onClick={undo}
               disabled={historyIndex <= 0}
-              className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30"
+              className="p-2 rounded-lg hover:bg-[#EEF7F5] disabled:opacity-30"
               title="Undo"
             >
               <Undo size={18} />
@@ -360,22 +360,22 @@ export default function VisualWorkflowBuilder() {
             <button
               onClick={redo}
               disabled={historyIndex >= history.length - 1}
-              className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30"
+              className="p-2 rounded-lg hover:bg-[#EEF7F5] disabled:opacity-30"
               title="Redo"
             >
               <Redo size={18} />
             </button>
-            <div className="w-px h-6 bg-slate-200 mx-2" />
+            <div className="w-px h-6 bg-[#DDF4F0] mx-2" />
             <button
               onClick={() => setShowNodePanel(!showNodePanel)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${showNodePanel ? 'bg-[#0A3340] text-white' : 'bg-slate-100 text-slate-600'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${showNodePanel ? 'bg-[#0A3340] text-white' : 'bg-[#EEF7F5] text-[#64748B]'}`}
             >
               Nodes
             </button>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-[#EEF7F5] rounded-lg p-1">
               <button onClick={() => setZoom(Math.max(0.5, zoom - 0.1))} className="p-2 rounded hover:bg-white">
                 <ZoomOut size={16} />
               </button>
@@ -384,7 +384,7 @@ export default function VisualWorkflowBuilder() {
                 <ZoomIn size={16} />
               </button>
             </div>
-            <button onClick={() => setZoom(1)} className="p-2 rounded-lg hover:bg-slate-100" title="Reset zoom">
+            <button onClick={() => setZoom(1)} className="p-2 rounded-lg hover:bg-[#EEF7F5]" title="Reset zoom">
               <Grid3X3 size={16} />
             </button>
           </div>
@@ -392,12 +392,12 @@ export default function VisualWorkflowBuilder() {
           <div className="flex items-center gap-2">
             <button
               onClick={simulate}
-              className="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-2 text-sm font-medium"
+              className="px-4 py-2 rounded-lg border border-[#D7E7E4] hover:bg-[#F6FAF9] flex items-center gap-2 text-sm font-medium"
             >
               <FlaskConical size={16} />
               Simulate
             </button>
-            <button className="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-2 text-sm font-medium">
+            <button className="px-4 py-2 rounded-lg border border-[#D7E7E4] hover:bg-[#F6FAF9] flex items-center gap-2 text-sm font-medium">
               <Eye size={16} />
               Preview
             </button>
@@ -413,7 +413,7 @@ export default function VisualWorkflowBuilder() {
           ref={setCanvasRef}
           className="flex-1 overflow-hidden relative cursor-grab"
           style={{
-            backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, #d7e7e4 1px, transparent 1px)',
             backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
             backgroundPosition: `${panOffset.x}px ${panOffset.y}px`,
           }}
@@ -452,9 +452,9 @@ export default function VisualWorkflowBuilder() {
           {nodes.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <GitBranch size={64} className="mx-auto text-slate-300 mb-4" />
-                <p className="text-lg font-medium text-slate-500 mb-2">Start Building Your Workflow</p>
-                <p className="text-sm text-slate-400">Click on nodes from the left panel to add them</p>
+                <GitBranch size={64} className="mx-auto text-[#BDE5DE] mb-4" />
+                <p className="text-lg font-medium text-[#64748B] mb-2">Start Building Your Workflow</p>
+                <p className="text-sm text-[#94A3B8]">Click on nodes from the left panel to add them</p>
               </div>
             </div>
           )}
@@ -463,14 +463,14 @@ export default function VisualWorkflowBuilder() {
 
       {/* Properties Panel */}
       {selectedNode && (
-        <aside className="w-80 bg-white border-l border-slate-200 flex flex-col">
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-800">Node Properties</h2>
+        <aside className="w-80 bg-white border-l border-[#D7E7E4] flex flex-col">
+          <div className="p-4 border-b border-[#D7E7E4] flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[#0A3340]">Node Properties</h2>
             <button
               onClick={() => setSelectedNode(null)}
-              className="p-1 rounded hover:bg-slate-100"
+              className="p-1 rounded hover:bg-[#EEF7F5]"
             >
-              <X size={16} className="text-slate-400" />
+              <X size={16} className="text-[#94A3B8]" />
             </button>
           </div>
 
@@ -482,25 +482,25 @@ export default function VisualWorkflowBuilder() {
 
               return (
                 <>
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-[#F6FAF9] rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${nodeDef.color}20` }}>
                         <nodeDef.icon size={20} style={{ color: nodeDef.color }} />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{nodeDef.label}</p>
-                        <p className="text-xs text-slate-500">ID: {node.id}</p>
+                        <p className="font-medium text-[#0A3340]">{nodeDef.label}</p>
+                        <p className="text-xs text-[#64748B]">ID: {node.id}</p>
                       </div>
                     </div>
                   </div>
 
                   {node.type === 'start' || node.type === 'end' ? (
-                    <p className="text-sm text-slate-500">No configuration needed</p>
+                    <p className="text-sm text-[#64748B]">No configuration needed</p>
                   ) : (
                     <div className="space-y-4">
                       {Object.entries(node.data || {}).map(([key, value]) => (
                         <div key={key}>
-                          <label className="block text-sm font-medium text-slate-600 mb-1 capitalize">
+                          <label className="block text-sm font-medium text-[#64748B] mb-1 capitalize">
                             {key.replace(/_/g, ' ')}
                           </label>
                           {typeof value === 'string' ? (
@@ -514,7 +514,7 @@ export default function VisualWorkflowBuilder() {
                                       : n
                                   ));
                                 }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm resize-none"
+                                className="w-full px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm resize-none"
                                 rows={3}
                               />
                             ) : (
@@ -528,7 +528,7 @@ export default function VisualWorkflowBuilder() {
                                       : n
                                   ));
                                 }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                                className="w-full px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm"
                               />
                             )
                           ) : typeof value === 'number' ? (
@@ -542,7 +542,7 @@ export default function VisualWorkflowBuilder() {
                                     : n
                                 ));
                               }}
-                              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm"
                             />
                           ) : typeof value === 'boolean' ? (
                             <label className="flex items-center gap-2">
@@ -556,9 +556,9 @@ export default function VisualWorkflowBuilder() {
                                       : n
                                   ));
                                 }}
-                                className="rounded border-slate-300"
+                                className="rounded border-[#BDE5DE]"
                               />
-                              <span className="text-sm text-slate-500">{value ? 'Enabled' : 'Disabled'}</span>
+                              <span className="text-sm text-[#64748B]">{value ? 'Enabled' : 'Disabled'}</span>
                             </label>
                           ) : (
                             <select
@@ -570,7 +570,7 @@ export default function VisualWorkflowBuilder() {
                                     : n
                                 ));
                               }}
-                              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm"
                             >
                               <option value="low">Low</option>
                               <option value="medium">Medium</option>
@@ -583,7 +583,7 @@ export default function VisualWorkflowBuilder() {
                   )}
 
                   {node.type !== 'start' && node.type !== 'end' && (
-                    <div className="pt-4 border-t border-slate-100">
+                    <div className="pt-4 border-t border-[#D7E7E4]">
                       <button
                         onClick={() => deleteNode(node.id)}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg"
@@ -602,11 +602,11 @@ export default function VisualWorkflowBuilder() {
 
       {/* Simulation Modal */}
       {showSimulation && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#0A3340]/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-800">Workflow Simulation</h2>
-              <button onClick={() => setShowSimulation(false)} className="p-2 hover:bg-slate-100 rounded-lg">
+            <div className="p-4 border-b border-[#D7E7E4] flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[#0A3340]">Workflow Simulation</h2>
+              <button onClick={() => setShowSimulation(false)} className="p-2 hover:bg-[#EEF7F5] rounded-lg">
                 <X size={20} />
               </button>
             </div>
@@ -622,36 +622,36 @@ export default function VisualWorkflowBuilder() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-slate-800 mb-3">Execution Path</h3>
+                <h3 className="font-semibold text-[#0A3340] mb-3">Execution Path</h3>
                 <div className="space-y-2">
                   {['Start → Email Notification → Approval → End'].map((step, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm">
-                      <span className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-medium">{i + 1}</span>
-                      <span className="text-slate-600">{step}</span>
-                      <ArrowRight size={14} className="text-slate-400" />
+                      <span className="w-6 h-6 rounded-full bg-[#EEF7F5] flex items-center justify-center text-xs font-medium">{i + 1}</span>
+                      <span className="text-[#64748B]">{step}</span>
+                      <ArrowRight size={14} className="text-[#94A3B8]" />
                     </div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold text-slate-800 mb-3">Warnings</h3>
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+                <h3 className="font-semibold text-[#0A3340] mb-3">Warnings</h3>
+                <div className="p-3 bg-[#F3FAF9] border border-[#BDE5DE] rounded-lg text-sm text-[#12576D]">
                   No warnings detected
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold text-slate-800 mb-3">Possible Outcomes</h3>
+                <h3 className="font-semibold text-[#0A3340] mb-3">Possible Outcomes</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { name: 'Complete', probability: 85 },
                     { name: 'Needs Approval', probability: 10 },
                     { name: 'Failed', probability: 5 },
                   ].map((outcome, i) => (
-                    <div key={i} className="p-3 bg-slate-50 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-slate-800">{outcome.probability}%</div>
-                      <div className="text-xs text-slate-500">{outcome.name}</div>
+                    <div key={i} className="p-3 bg-[#F6FAF9] rounded-lg text-center">
+                      <div className="text-2xl font-bold text-[#0A3340]">{outcome.probability}%</div>
+                      <div className="text-xs text-[#64748B]">{outcome.name}</div>
                     </div>
                   ))}
                 </div>

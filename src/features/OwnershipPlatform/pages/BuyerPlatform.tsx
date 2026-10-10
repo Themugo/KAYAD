@@ -68,7 +68,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
   if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-sm text-slate-500 mb-4">Sign in to see your saved vehicles, purchases, and inspection reports.</p>
+        <p className="text-sm text-[#64748B] mb-4">Sign in to see your saved vehicles, purchases, and inspection reports.</p>
         <button onClick={onOpenAuth} className="bg-[#176B87] text-white text-xs font-bold rounded-lg px-5 py-2.5">
           Sign In
         </button>
@@ -80,7 +80,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
     <div className="space-y-8 pb-12">
       <div className="text-center py-6">
         <h1 className="text-2xl font-bold text-[#176B87] font-display">My Garage</h1>
-        <p className="text-sm text-slate-500 mt-1">Your saved vehicles, purchases, and inspection reports</p>
+        <p className="text-sm text-[#64748B] mt-1">Your saved vehicles, purchases, and inspection reports</p>
       </div>
 
       {error && (
@@ -91,7 +91,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#94A3B8] animate-spin" />
         </div>
       ) : (
         <>
@@ -102,21 +102,21 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
               <h2 className="text-base font-bold text-[#176B87]">Saved Vehicles</h2>
             </div>
             {favorites.length === 0 ? (
-              <p className="text-xs text-slate-400">No saved vehicles yet.</p>
+              <p className="text-xs text-[#94A3B8]">No saved vehicles yet.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {favorites.map((f) => (
                   <button
                     key={f.id || f._id}
                     onClick={() => onNavigate?.('marketplace')}
-                    className="text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                    className="text-left bg-white border border-[#D7E7E4] rounded-xl overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    <div className="h-24 bg-slate-100">
+                    <div className="h-24 bg-[#EEF7F5]">
                       {f.images?.[0]?.url && <img src={f.images[0].url} alt={f.title} className="w-full h-full object-cover" />}
                     </div>
                     <div className="p-2.5">
                       <p className="text-xs font-semibold text-[#176B87] truncate">{f.title}</p>
-                      <p className="text-[11px] text-slate-500">Ksh {(f.price / 1000000).toFixed(2)}M</p>
+                      <p className="text-[11px] text-[#64748B]">Ksh {(f.price / 1000000).toFixed(2)}M</p>
                     </div>
                   </button>
                 ))}
@@ -131,18 +131,18 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
               <h2 className="text-base font-bold text-[#176B87]">My Purchases</h2>
             </div>
             {escrows.length === 0 ? (
-              <p className="text-xs text-slate-400">No purchases yet.</p>
+              <p className="text-xs text-[#94A3B8]">No purchases yet.</p>
             ) : (
               <div className="space-y-2">
                 {escrows.map((e) => (
                   <button
                     key={e.id}
                     onClick={() => onNavigate?.('escrow')}
-                    className="w-full text-left bg-white border border-slate-200 rounded-xl p-3.5 flex items-center justify-between hover:shadow-md transition-shadow"
+                    className="w-full text-left bg-white border border-[#D7E7E4] rounded-xl p-3.5 flex items-center justify-between hover:shadow-md transition-shadow"
                   >
                     <div>
                       <p className="text-xs font-semibold text-[#176B87]">{e.car?.title || 'Vehicle'}</p>
-                      <p className="text-[11px] text-slate-500 capitalize">{e.status.replace('_', ' ')}</p>
+                      <p className="text-[11px] text-[#64748B] capitalize">{e.status.replace('_', ' ')}</p>
                     </div>
                     <p className="text-xs font-bold text-[#176B87]">Ksh {(e.amount / 1000000).toFixed(2)}M</p>
                   </button>
@@ -158,18 +158,18 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
               <h2 className="text-base font-bold text-[#176B87]">My Inspection Reports</h2>
             </div>
             {inspections.length === 0 ? (
-              <p className="text-xs text-slate-400">No inspection reports yet.</p>
+              <p className="text-xs text-[#94A3B8]">No inspection reports yet.</p>
             ) : (
               <div className="space-y-2">
                 {inspections.map((insp) => (
                   <button
                     key={insp.id || insp._id}
                     onClick={() => onNavigate?.('inspections')}
-                    className="w-full text-left bg-white border border-slate-200 rounded-xl p-3.5 flex items-center justify-between hover:shadow-md transition-shadow"
+                    className="w-full text-left bg-white border border-[#D7E7E4] rounded-xl p-3.5 flex items-center justify-between hover:shadow-md transition-shadow"
                   >
                     <div>
                       <p className="text-xs font-semibold text-[#176B87]">{insp.car?.title || 'Vehicle'}</p>
-                      <p className="text-[11px] text-slate-500">{kayadStatusView(insp.status).label}</p>
+                      <p className="text-[11px] text-[#64748B]">{kayadStatusView(insp.status).label}</p>
                     </div>
                     {insp.status === 'completed' && insp.overallScore != null && (
                       <p className="text-xs font-bold text-[#176B87]">{insp.overallScore}/100</p>

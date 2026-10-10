@@ -32,12 +32,12 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
 
   if (compareCount === 0) {
     return (
-      <div className="min-h-screen bg-cream-50 pt-16">
+      <div className="min-h-screen bg-[#F6FAF9] pt-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <div className="w-20 h-20 bg-cream-200 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-[#DDF4F0] rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">📊</span>
           </div>
-          <h1 className="font-serif text-3xl text-charcoal-900 font-bold mb-4">
+          <h1 className="font-serif text-3xl text-[#0A3340] font-bold mb-4">
             No Vehicles to Compare
           </h1>
           <p className="font-sans text-warm-500 mb-8">
@@ -56,13 +56,13 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-16">
+    <div className="min-h-screen bg-[#F6FAF9] pt-16">
       {/* Header */}
-      <div className="bg-charcoal-900 py-8">
+      <div className="bg-[#0A3340] py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <p className="section-label text-gold-400 mb-2">Compare</p>
+              <p className="section-label text-[#13B8A6] mb-2">Compare</p>
               <h1 className="font-serif text-3xl text-white font-bold">
                 Vehicle Comparison
               </h1>
@@ -82,9 +82,9 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
 
       {/* Comparison Table */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-2xl border border-cream-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#D7E7E4] overflow-hidden">
           {/* Car Headers */}
-          <div className="grid gap-4 p-4 border-b border-cream-200"
+          <div className="grid gap-4 p-4 border-b border-[#D7E7E4]"
             style={{ gridTemplateColumns: `200px repeat(${compareCount}, 1fr)` }}>
             {/* Empty corner cell */}
             <div />
@@ -111,10 +111,10 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
                   <X size={12} />
                 </button>
                 <p className="section-label mt-2">{car.make}</p>
-                <h3 className="font-serif text-lg text-charcoal-900 font-semibold line-clamp-1">
+                <h3 className="font-serif text-lg text-[#0A3340] font-semibold line-clamp-1">
                   {car.model}
                 </h3>
-                <p className="font-serif text-xl text-gold-700 font-bold mt-1">
+                <p className="font-serif text-xl text-[#12576D] font-bold mt-1">
                   {formatKES(car.price)}
                 </p>
               </div>
@@ -122,7 +122,7 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
 
             {/* Empty slots */}
             {Array.from({ length: 4 - compareCount }).map((_, idx) => (
-              <div key={`empty-${idx}`} className="flex items-center justify-center border-2 border-dashed border-cream-300 rounded-xl">
+              <div key={`empty-${idx}`} className="flex items-center justify-center border-2 border-dashed border-[#BDE5DE] rounded-xl">
                 <div className="text-center text-warm-400">
                   <span className="text-3xl">+</span>
                   <p className="text-xs mt-1">Add vehicle</p>
@@ -132,13 +132,13 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
           </div>
 
           {/* Price Row */}
-          <div className="grid gap-4 p-4 border-b border-cream-200 bg-cream-50"
+          <div className="grid gap-4 p-4 border-b border-[#D7E7E4] bg-[#F6FAF9]"
             style={{ gridTemplateColumns: `200px repeat(${compareCount}, 1fr)` }}>
             <div className="font-sans text-sm font-semibold text-warm-500 uppercase tracking-wider">
               Price
             </div>
             {compareCars.map(car => car && (
-              <div key={car.id} className="font-sans text-sm font-bold text-charcoal-900">
+              <div key={car.id} className="font-sans text-sm font-bold text-[#0A3340]">
                 {formatKES(car.price)}
               </div>
             ))}
@@ -149,14 +149,14 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
 
           {/* Spec Rows */}
           {specs.map(spec => (
-            <div key={spec.key} className="grid gap-4 p-4 border-b border-cream-200 hover:bg-cream-50 transition-colors"
+            <div key={spec.key} className="grid gap-4 p-4 border-b border-[#D7E7E4] hover:bg-[#F6FAF9] transition-colors"
               style={{ gridTemplateColumns: `200px repeat(${compareCount}, 1fr)` }}>
               <div className="flex items-center gap-2 font-sans text-sm font-semibold text-warm-500 uppercase tracking-wider">
                 <spec.icon size={14} />
                 {spec.label}
               </div>
               {compareCars.map(car => car && (
-                <div key={car.id} className="font-sans text-sm text-charcoal-800">
+                <div key={car.id} className="font-sans text-sm text-[#0A3340]">
                   {(car as any)[spec.key] || '-'}
                 </div>
               ))}
@@ -167,14 +167,14 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
           ))}
 
           {/* Type Row */}
-          <div className="grid gap-4 p-4 border-b border-cream-200 bg-cream-50"
+          <div className="grid gap-4 p-4 border-b border-[#D7E7E4] bg-[#F6FAF9]"
             style={{ gridTemplateColumns: `200px repeat(${compareCount}, 1fr)` }}>
             <div className="flex items-center gap-2 font-sans text-sm font-semibold text-warm-500 uppercase tracking-wider">
               Body Type
             </div>
             {compareCars.map(car => car && (
-              <div key={car.id} className="font-sans text-sm text-charcoal-800">
-                <span className="inline-flex px-3 py-1 bg-cream-200 rounded-full text-xs font-medium">
+              <div key={car.id} className="font-sans text-sm text-[#0A3340]">
+                <span className="inline-flex px-3 py-1 bg-[#DDF4F0] rounded-full text-xs font-medium">
                   {car.type}
                 </span>
               </div>
@@ -185,7 +185,7 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
           </div>
 
           {/* Badges Row */}
-          <div className="grid gap-4 p-4 bg-cream-50"
+          <div className="grid gap-4 p-4 bg-[#F6FAF9]"
             style={{ gridTemplateColumns: `200px repeat(${compareCount}, 1fr)` }}>
             <div className="flex items-center gap-2 font-sans text-sm font-semibold text-warm-500 uppercase tracking-wider">
               Features
@@ -198,7 +198,7 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
                   </span>
                 )}
                 {car.badges.includes('auction') && (
-                  <span className="inline-flex px-2 py-0.5 bg-gold-100 text-gold-700 text-xs rounded-full">
+                  <span className="inline-flex px-2 py-0.5 bg-[#DDF4F0] text-[#12576D] text-xs rounded-full">
                     Auction
                   </span>
                 )}
@@ -214,7 +214,7 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
         <div className="flex justify-between items-center mt-8">
           <button
             onClick={() => setPage('gallery')}
-            className="flex items-center gap-2 text-warm-500 hover:text-charcoal-900 transition-colors"
+            className="flex items-center gap-2 text-warm-500 hover:text-[#0A3340] transition-colors"
           >
             <ArrowLeft size={16} /> Back to Gallery
           </button>

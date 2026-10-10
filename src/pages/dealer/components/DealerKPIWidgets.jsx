@@ -71,7 +71,7 @@ export function InventoryKPI({ cars = [] }) {
   return (
     <div style={widgetStyle}>
       <div style={widgetHeader}>
-        <Car size={16} style={{ color: 'var(--gold)' }} />
+        <Car size={16} style={{ color: 'var(--brand)' }} />
         Inventory
       </div>
       <div style={metricGrid}>
@@ -85,11 +85,11 @@ export function InventoryKPI({ cars = [] }) {
         </div>
         <div style={metricStyle}>
           <span style={metricLabel}>Pending Approval</span>
-          <span style={{ ...metricValue, color: '#f97316' }}>{pendingCars}</span>
+          <span style={{ ...metricValue, color: '#176b87' }}>{pendingCars}</span>
         </div>
         <div style={metricStyle}>
           <span style={metricLabel}>Sold</span>
-          <span style={{ ...metricValue, color: '#3b82f6' }}>{soldCars}</span>
+          <span style={{ ...metricValue, color: '#176B87' }}>{soldCars}</span>
         </div>
       </div>
     </div>
@@ -140,7 +140,7 @@ export function RevenueKPI({ earnings = [] }) {
         </div>
         <div style={metricStyle}>
           <span style={metricLabel}>Lifetime</span>
-          <span style={{ ...metricValue, color: 'var(--gold)' }}>{formatCurrency(lifetimeRevenue)}</span>
+          <span style={{ ...metricValue, color: 'var(--brand)' }}>{formatCurrency(lifetimeRevenue)}</span>
         </div>
       </div>
     </div>
@@ -169,7 +169,7 @@ export function AuctionsKPI({ cars = [] }) {
   return (
     <div style={widgetStyle}>
       <div style={widgetHeader}>
-        <Gavel size={16} style={{ color: '#f97316' }} />
+        <Gavel size={16} style={{ color: '#176b87' }} />
         Auctions
       </div>
       <div style={metricGrid}>
@@ -183,7 +183,7 @@ export function AuctionsKPI({ cars = [] }) {
         </div>
         <div style={metricStyle}>
           <span style={metricLabel}>Expired</span>
-          <span style={{ ...metricValue, color: '#6b7280' }}>{expiredAuctions}</span>
+          <span style={{ ...metricValue, color: '#64748b' }}>{expiredAuctions}</span>
         </div>
       </div>
     </div>
@@ -201,13 +201,13 @@ export function EscrowKPI({ escrows = [] }) {
   return (
     <div style={widgetStyle}>
       <div style={widgetHeader}>
-        <Shield size={16} style={{ color: '#a855f7' }} />
+        <Shield size={16} style={{ color: '#5aafa4' }} />
         Escrow
       </div>
       <div style={metricGrid}>
         <div style={metricStyle}>
           <span style={metricLabel}>Pending</span>
-          <span style={{ ...metricValue, color: '#f97316' }}>{pendingEscrows}</span>
+          <span style={{ ...metricValue, color: '#176b87' }}>{pendingEscrows}</span>
         </div>
         <div style={metricStyle}>
           <span style={metricLabel}>Released</span>

@@ -107,7 +107,7 @@ const StatusSummaryCard: React.FC<{
         </div>
         <div>
           <div className="text-2xl font-black" style={{ color: style.color }}>{count}</div>
-          <div className="text-xs text-slate-600 font-medium">{label}</div>
+          <div className="text-xs text-[#64748B] font-medium">{label}</div>
         </div>
       </div>
     </Card>
@@ -131,10 +131,10 @@ const ComplianceItemCard: React.FC<{
   const checksByCategory = getChecksByCategory(item.checks);
 
   return (
-    <Card className={`overflow-hidden border ${item.status === 'approved' ? 'border-emerald-200' : item.status === 'suspended' || item.status === 'rejected' ? 'border-red-200' : 'border-slate-200'}`}>
+    <Card className={`overflow-hidden border ${item.status === 'approved' ? 'border-emerald-200' : item.status === 'suspended' || item.status === 'rejected' ? 'border-red-200' : 'border-[#D7E7E4]'}`}>
       {/* Header */}
       <div
-        className="flex items-center gap-4 p-4 cursor-pointer hover:bg-slate-50"
+        className="flex items-center gap-4 p-4 cursor-pointer hover:bg-[#F6FAF9]"
         onClick={onToggleExpand}
       >
         <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: statusStyle.color + '20', color: statusStyle.color }}>
@@ -153,38 +153,38 @@ const ComplianceItemCard: React.FC<{
               {statusStyle.label}
             </Badge>
           </div>
-          <p className="text-xs text-slate-500 truncate">
+          <p className="text-xs text-[#64748B] truncate">
             {session?.organizer?.name || 'Unknown Organizer'}
           </p>
         </div>
         <div className="text-right">
           <div className="text-lg font-black text-[#176B87]">{summary.percentage}%</div>
-          <div className="text-[10px] text-slate-500">
+          <div className="text-[10px] text-[#64748B]">
             {summary.requiredCompleted}/{summary.required} required
           </div>
         </div>
         {expanded ? (
-          <ChevronDown className="w-5 h-5 text-slate-400" />
+          <ChevronDown className="w-5 h-5 text-[#94A3B8]" />
         ) : (
-          <ChevronRight className="w-5 h-5 text-slate-400" />
+          <ChevronRight className="w-5 h-5 text-[#94A3B8]" />
         )}
       </div>
 
       {/* Expanded Details */}
       {expanded && (
-        <div className="border-t border-slate-200 p-4 bg-slate-50 space-y-4">
+        <div className="border-t border-[#D7E7E4] p-4 bg-[#F6FAF9] space-y-4">
           {/* Progress Bar */}
           <div>
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-600">Compliance Progress</span>
+              <span className="text-[#64748B]">Compliance Progress</span>
               <span className="font-bold text-[#176B87]">{summary.percentage}%</span>
             </div>
-            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-[#DDF4F0] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{
                   width: `${summary.percentage}%`,
-                  backgroundColor: summary.requiredCompleted === summary.required ? '#10B981' : '#F59E0B'
+                  backgroundColor: summary.requiredCompleted === summary.required ? '#10B981' : '#176b87'
                 }}
               />
             </div>
@@ -200,13 +200,13 @@ const ComplianceItemCard: React.FC<{
                 return (
                   <div
                     key={category}
-                    className="p-2 rounded-lg border border-slate-200 bg-white"
+                    className="p-2 rounded-lg border border-[#D7E7E4] bg-white"
                   >
                     <div className="flex items-center gap-1.5 mb-1" style={{ color: catInfo.color }}>
                       {CATEGORY_ICONS[category]}
                       <span className="text-[10px] font-medium truncate">{catInfo.label}</span>
                     </div>
-                    <div className="text-sm font-bold text-slate-700">
+                    <div className="text-sm font-bold text-[#12576D]">
                       {completed}/{checks.length}
                     </div>
                   </div>
@@ -243,7 +243,7 @@ const ComplianceItemCard: React.FC<{
 
           {/* Actions */}
           {isAdmin && (
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+            <div className="flex items-center gap-2 pt-2 border-t border-[#D7E7E4]">
               <Button size="sm" variant="success" onClick={onApprove}>
                 <CheckCheck className="w-3.5 h-3.5 mr-1" />
                 Approve
@@ -265,7 +265,7 @@ const ComplianceItemCard: React.FC<{
           )}
 
           {/* Metadata */}
-          <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-200">
+          <div className="flex items-center gap-4 text-xs text-[#64748B] pt-2 border-t border-[#D7E7E4]">
             <span>Created: {new Date(item.createdAt).toLocaleDateString()}</span>
             {item.reviewedAt && (
               <span>Reviewed: {new Date(item.reviewedAt).toLocaleDateString()}</span>
@@ -359,12 +359,12 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
   return (
     <div className="space-y-6">
       {/* Confidentiality Notice */}
-      <Card className="p-4 bg-blue-50 border border-blue-200">
+      <Card className="p-4 bg-[#F3FAF9] border border-[#D7E7E4]">
         <div className="flex items-center gap-3">
-          <Shield className="w-5 h-5 text-blue-600 flex-shrink-0" />
+          <Shield className="w-5 h-5 text-[#176B87] flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-blue-800">Internal Compliance Center</p>
-            <p className="text-xs text-blue-600">
+            <p className="text-sm font-bold text-[#0E4655]">Internal Compliance Center</p>
+            <p className="text-xs text-[#176B87]">
               This information is confidential and visible only to Auction Organizers, KAYAD Administrators, and Compliance Officers.
             </p>
           </div>
@@ -392,39 +392,39 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
           <div className="text-2xl font-black text-red-600">{metrics.pendingReview}</div>
           <div className="text-xs text-red-600">Awaiting Review</div>
         </Card>
-        <Card className="p-4 text-center bg-amber-50 border-amber-200">
-          <div className="text-2xl font-black text-amber-600">{metrics.expiringWithin7Days}</div>
-          <div className="text-xs text-amber-600">Expiring Soon (7 days)</div>
+        <Card className="p-4 text-center bg-[#F3FAF9] border-[#BDE5DE]">
+          <div className="text-2xl font-black text-[#176B87]">{metrics.expiringWithin7Days}</div>
+          <div className="text-xs text-[#176B87]">Expiring Soon (7 days)</div>
         </Card>
-        <Card className="p-4 text-center bg-blue-50 border-blue-200">
-          <div className="text-2xl font-black text-blue-600">{metrics.expiringWithin30Days}</div>
-          <div className="text-xs text-blue-600">Expiring Soon (30 days)</div>
+        <Card className="p-4 text-center bg-[#F3FAF9] border-[#D7E7E4]">
+          <div className="text-2xl font-black text-[#176B87]">{metrics.expiringWithin30Days}</div>
+          <div className="text-xs text-[#176B87]">Expiring Soon (30 days)</div>
         </Card>
       </div>
 
       {/* Expiry Reminders */}
       {reminders.length > 0 && (
-        <Card className="p-4 bg-amber-50 border-amber-200">
+        <Card className="p-4 bg-[#F3FAF9] border-[#BDE5DE]">
           <div className="flex items-center gap-2 mb-3">
-            <Bell className="w-5 h-5 text-amber-600" />
-            <h3 className="font-bold text-amber-800">Upcoming Expirations</h3>
+            <Bell className="w-5 h-5 text-[#176B87]" />
+            <h3 className="font-bold text-[#0A3340]">Upcoming Expirations</h3>
           </div>
           <div className="space-y-2">
             {reminders.slice(0, 5).map(reminder => (
               <div
                 key={reminder.id}
                 className={`flex items-center gap-3 p-2 rounded-lg ${
-                  reminder.severity === 'critical' ? 'bg-red-100' : 'bg-amber-50'
+                  reminder.severity === 'critical' ? 'bg-red-100' : 'bg-[#F3FAF9]'
                 }`}
               >
-                <AlertTriangle className={`w-4 h-4 ${reminder.severity === 'critical' ? 'text-red-600' : 'text-amber-600'}`} />
+                <AlertTriangle className={`w-4 h-4 ${reminder.severity === 'critical' ? 'text-red-600' : 'text-[#176B87]'}`} />
                 <div className="flex-1">
-                  <span className="text-sm font-medium text-slate-800">{reminder.documentName}</span>
-                  <span className="text-xs text-slate-500 ml-2">({reminder.documentType})</span>
+                  <span className="text-sm font-medium text-[#0A3340]">{reminder.documentName}</span>
+                  <span className="text-xs text-[#64748B] ml-2">({reminder.documentType})</span>
                 </div>
                 <Badge
                   size="sm"
-                  className={reminder.severity === 'critical' ? 'bg-red-200 text-red-800' : 'bg-amber-200 text-amber-800'}
+                  className={reminder.severity === 'critical' ? 'bg-red-200 text-red-800' : 'bg-[#BDE5DE] text-[#0A3340]'}
                 >
                   {reminder.daysUntilExpiry} days
                 </Badge>
@@ -439,23 +439,23 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search by auction ID or organizer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20 focus:border-[#176B87]"
+              className="w-full pl-10 pr-4 py-2 border border-[#D7E7E4] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20 focus:border-[#176B87]"
             />
           </div>
 
           {/* Status Filter */}
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-500" />
+            <Filter className="w-4 h-4 text-[#64748B]" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ComplianceStatus | 'all')}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
+              className="px-3 py-2 border border-[#D7E7E4] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
             >
               <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
@@ -471,7 +471,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as ComplianceCategory | 'all')}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
+            className="px-3 py-2 border border-[#D7E7E4] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20"
           >
             <option value="all">All Categories</option>
             {Object.entries(COMPLIANCE_CATEGORIES).map(([key, cat]) => (
@@ -506,10 +506,10 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
         {filteredItems.length === 0 ? (
           <Card className="p-12 text-center">
             <ShieldCheck className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-800 mb-2">
+            <h3 className="text-lg font-bold text-[#0A3340] mb-2">
               {statusFilter === 'all' ? 'No Compliance Items' : `No ${COMPLIANCE_STATUS_STYLES[statusFilter].label} Items`}
             </h3>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[#64748B]">
               {statusFilter === 'all'
                 ? 'Compliance items will appear here as auctions are created.'
                 : `There are no auctions with ${COMPLIANCE_STATUS_STYLES[statusFilter].label} status.`

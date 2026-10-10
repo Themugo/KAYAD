@@ -80,7 +80,7 @@ export const Modal: React.FC<ModalProps> = ({
   const backdropStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0, 0, 0, 0.7)',
+    background: 'rgba(10, 51, 64, 0.7)',
     backdropFilter: 'blur(4px)',
     display: 'flex',
     alignItems: 'center',
@@ -185,7 +185,7 @@ export const Modal: React.FC<ModalProps> = ({
                 style={closeButtonStyle}
                 onClick={onClose}
                 aria-label="Close modal"
-                className="hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gold-500/30"
+                className="hover:bg-[#EEF7F5] focus:outline-none focus:ring-2 focus:ring-[#5AAFA4]/30"
               >
                 <X size={16} />
               </button>

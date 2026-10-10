@@ -83,7 +83,7 @@ export const VehicleCard: FC<VehicleCardProps> = ({ vehicle, viewMode = 'grid' }
             <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#13B8A6]">
               KAYAD VERIFIED ASSET
             </span>
-            <span className="text-[11px] font-serif font-bold text-slate-200 line-clamp-1">
+            <span className="text-[11px] font-serif font-bold text-[#DDF4F0] line-clamp-1">
               {fullTitle}
             </span>
           </div>
@@ -167,7 +167,7 @@ export const VehicleCard: FC<VehicleCardProps> = ({ vehicle, viewMode = 'grid' }
       <div className="flex-1 flex flex-col justify-between space-y-3 min-w-0">
         <div className="space-y-1.5">
           {/* Make / Brand & Location Header */}
-          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#66808A] gap-2">
+          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#64748b] gap-2">
             <span className="uppercase tracking-wider truncate">{vehicle.make}</span>
             <span className="flex items-center gap-1 shrink-0">
               <MapPin className="w-3 h-3 text-[#13B8A6] shrink-0" />
@@ -181,7 +181,7 @@ export const VehicleCard: FC<VehicleCardProps> = ({ vehicle, viewMode = 'grid' }
           </h3>
 
           {/* Specs Row */}
-          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#66808A] pt-0.5 gap-2">
+          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#64748b] pt-0.5 gap-2">
             <span className="flex items-center gap-1 shrink-0">
               <Gauge className="w-3.5 h-3.5 text-[#176B87] shrink-0" />
               {vehicle.mileage ? vehicle.mileage.toLocaleString() : '18,000'} km
@@ -194,7 +194,7 @@ export const VehicleCard: FC<VehicleCardProps> = ({ vehicle, viewMode = 'grid' }
 
           {/* Sleek Price Box */}
           <div className="px-3 py-2 rounded-xl bg-[#EEF7F5] border border-[#D7E7E4]/80 flex items-center justify-between gap-2 overflow-hidden">
-            <span className="text-[#66808A] font-mono font-bold uppercase text-[10px] tracking-wider truncate min-w-0">
+            <span className="text-[#64748b] font-mono font-bold uppercase text-[10px] tracking-wider truncate min-w-0">
               {isAuction ? 'Current High Bid' : 'Verified Price'}
             </span>
             <span className="text-base sm:text-lg font-serif font-black text-[#176B87] whitespace-nowrap shrink-0">

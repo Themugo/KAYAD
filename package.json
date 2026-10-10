@@ -95,6 +95,7 @@
     "validate:premium-auth-surfaces": "node scripts/validate-premium-auth-surfaces.mjs",
     "validate:registration-role-matrix": "node scripts/validate-registration-role-matrix.mjs",
     "validate:premium-presentation-pass": "node scripts/validate-premium-presentation-pass.mjs",
+    "validate:brand-palette-convergence": "node scripts/validate-brand-palette-convergence.mjs",
     "validate:database-contract-alignment": "node scripts/validate-database-contract-alignment.mjs",
     "validate:domain-lifecycle-integrity": "node scripts/validate-domain-lifecycle-integrity.mjs",
     "validate:refresh-reuse-integrity": "node scripts/validate-refresh-reuse-integrity.mjs",

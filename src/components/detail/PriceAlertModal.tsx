@@ -111,7 +111,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A3340]/70 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -135,7 +135,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-[#BDE5DE] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -154,9 +154,9 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
               />
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-[#176B87] truncate">{vehicle.title}</h4>
-                <p className="text-xs text-[#66808A]">VIN: {vehicle.vin}</p>
+                <p className="text-xs text-[#64748b]">VIN: {vehicle.vin}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs font-semibold text-[#66808A]">Current Listed Price:</span>
+                  <span className="text-xs font-semibold text-[#64748b]">Current Listed Price:</span>
                   <span className="text-sm font-black text-[#176B87] font-serif">
                     KSh {currentPrice.toLocaleString()}
                   </span>
@@ -179,7 +179,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
               </div>
 
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-[#66808A] font-mono">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-[#64748b] font-mono">
                   KSh
                 </span>
                 <input
@@ -194,7 +194,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
 
               {/* Quick Discount Presets */}
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-[11px] font-bold text-[#66808A]">Quick Target Presets:</span>
+                <span className="text-[11px] font-bold text-[#64748b]">Quick Target Presets:</span>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(0)}
@@ -245,7 +245,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                       <TrendingDown className="w-3.5 h-3.5 text-[#13B8A6]" />
                       <span>Notify when Price Drops below threshold</span>
                     </span>
-                    <span className="text-[11px] text-[#66808A]">
+                    <span className="text-[11px] text-[#64748b]">
                       Receive instant notification if seller reduces price or auction reserve lowers.
                     </span>
                   </div>
@@ -260,10 +260,10 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
                   />
                   <div>
                     <span className="text-xs font-extrabold text-[#176B87] block flex items-center gap-1.5">
-                      <Tag className="w-3.5 h-3.5 text-[#E67E22]" />
+                      <Tag className="w-3.5 h-3.5 text-[#176b87]" />
                       <span>Notify when Vehicle Status Changes</span>
                     </span>
-                    <span className="text-[11px] text-[#66808A]">
+                    <span className="text-[11px] text-[#64748b]">
                       Alert when marked as Sold, Reserved under Escrow, or Live Auction Floor opens.
                     </span>
                   </div>

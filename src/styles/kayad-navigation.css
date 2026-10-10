@@ -57,7 +57,7 @@
 /* Utility field — separated from primary navigation. */
 .kayad-utilities{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
 @media(min-width:1024px){.kayad-utilities{margin-left:0;gap:8px}}
-.kayad-util{position:relative;display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;color:#475569;background:transparent;border:0;cursor:pointer;transition:background .18s ease,color .18s ease}
+.kayad-util{position:relative;display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;color:#64748b;background:transparent;border:0;cursor:pointer;transition:background .18s ease,color .18s ease}
 .kayad-util:hover{background:#F0FAF8;color:var(--kn-ink)}
 .kayad-util.is-active{background:var(--kn-ink);color:#fff}
 .kayad-hamburger{width:44px;height:44px}

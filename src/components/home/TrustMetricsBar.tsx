@@ -62,12 +62,12 @@ export const TrustMetricsBar: FC = () => {
   ];
 
   return (
-    <section className="py-10 bg-[#0A3340] dark:bg-[#080E1A] text-white border-y border-white/10 relative overflow-hidden">
+    <section className="py-10 bg-[#0A3340] dark:bg-[#0a3340] text-white border-y border-white/10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header Label */}
         <div className="text-center mb-6">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[11px] font-mono font-bold uppercase tracking-widest">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#BDE5DE] text-[11px] font-mono font-bold uppercase tracking-widest">
             <Award className="w-3.5 h-3.5 text-[#13B8A6]" />
             PROVEN MARKETPLACE TRUST AT SCALE
           </span>
@@ -93,7 +93,7 @@ export const TrustMetricsBar: FC = () => {
                 </span>
               </div>
 
-              <p className="text-[11px] text-slate-300 font-sans font-medium line-clamp-1">
+              <p className="text-[11px] text-[#BDE5DE] font-sans font-medium line-clamp-1">
                 {item.subtitle}
               </p>
             </div>

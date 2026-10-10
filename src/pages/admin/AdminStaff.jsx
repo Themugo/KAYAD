@@ -62,29 +62,29 @@ export default function AdminStaff() {
   };
 
   return (
-    <div style={{ background:'#F8FAFC', minHeight:'100vh' }}>
+    <div style={{ background:'#f6faf9', minHeight:'100vh' }}>
       {/* Header */}
-      <div style={{ background:'linear-gradient(180deg, rgba(37, 99, 235,0.04) 0%, transparent 100%)', borderBottom:'1px solid rgba(15, 23, 42, 0.05)', padding:'36px 0 0' }}>
+      <div style={{ background:'linear-gradient(180deg, rgba(23, 107, 135, 0.04) 0%, transparent 100%)', borderBottom:'1px solid rgba(10, 51, 64, 0.05)', padding:'36px 0 0' }}>
         <div style={{ maxWidth:1300, margin:'0 auto', padding:'0 32px' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24, flexWrap:'wrap', gap:16 }}>
             <div>
-              <div style={{ fontSize:9, color:'var(--gold)', fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', marginBottom:6 }}>Admin Centre</div>
-              <h1 style={{ fontFamily:'var(--font-display)', fontWeight:900, fontStyle:'italic', fontSize:'clamp(1.6rem,3vw,2.2rem)', color:'#0F172A', margin:'0 0 6px' }}>
-                Staff <span style={{ color:'var(--gold)' }}>Hierarchy</span>
+              <div style={{ fontSize:9, color:'var(--brand)', fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', marginBottom:6 }}>Admin Centre</div>
+              <h1 style={{ fontFamily:'var(--font-display)', fontWeight:900, fontStyle:'italic', fontSize:'clamp(1.6rem,3vw,2.2rem)', color:'#0a3340', margin:'0 0 6px' }}>
+                Staff <span style={{ color:'var(--brand)' }}>Hierarchy</span>
               </h1>
-              <p style={{ color:'rgba(15, 23, 42, 0.3)', fontSize:13, margin:0 }}>
+              <p style={{ color:'rgba(10, 51, 64, 0.3)', fontSize:13, margin:0 }}>
                 Manage platform staff, roles and access levels · {staff.length} active staff
               </p>
             </div>
             {isSuperAdmin && (
-              <button onClick={() => setShowAdd(true)} style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 20px', background:'var(--gold)', border:'none', borderRadius:10, color:'#000', fontSize:13, fontWeight:900, cursor:'pointer', textTransform:'uppercase', letterSpacing:'0.06em' }}>
+              <button onClick={() => setShowAdd(true)} style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 20px', background:'var(--brand)', border:'none', borderRadius:10, color:'#0a3340', fontSize:13, fontWeight:900, cursor:'pointer', textTransform:'uppercase', letterSpacing:'0.06em' }}>
                 <Plus size={14}/> Add Staff
               </button>
             )}
           </div>
           <div style={{ display:'flex', gap:2 }}>
             {[{id:'hierarchy', label:'Org Chart'}, {id:'staff', label:'All Staff'}, {id:'permissions', label:'Permission Matrix'}].map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ padding:'11px 18px', background:'none', border:'none', cursor:'pointer', fontSize:13, fontWeight: tab===t.id ? 700 : 500, color: tab===t.id ? '#0F172A' : 'rgba(15, 23, 42, 0.4)', borderBottom:`2px solid ${tab===t.id ? 'var(--gold)' : 'transparent'}`, transition:'all 0.2s' }}>
+              <button key={t.id} onClick={() => setTab(t.id)} style={{ padding:'11px 18px', background:'none', border:'none', cursor:'pointer', fontSize:13, fontWeight: tab===t.id ? 700 : 500, color: tab===t.id ? '#0a3340' : 'rgba(10, 51, 64, 0.4)', borderBottom:`2px solid ${tab===t.id ? 'var(--brand)' : 'transparent'}`, transition:'all 0.2s' }}>
                 {t.label}
               </button>
             ))}

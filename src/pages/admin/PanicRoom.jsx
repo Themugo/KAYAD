@@ -14,25 +14,25 @@ const KILL_SWITCHES = [
   {
     id: 'payments', label: 'Financial Gateway', icon: DollarSign,
     desc: 'Disables M-Pesa STK pushes and bank verification uploads.',
-    killColor: '#d97706', killBg: 'rgba(245,158,11,0.05)', killBorder: 'rgba(245,158,11,0.3)',
+    killColor: '#12576d', killBg: 'rgba(23, 107, 135, 0.05)', killBorder: 'rgba(23, 107, 135, 0.3)',
     killLabel: 'FREEZE PAYMENTS', recoverLabel: 'Re-enable Payments',
   },
   {
     id: 'registrations', label: 'User Registrations', icon: Shield,
     desc: 'Blocks new account creation. Existing users unaffected.',
-    killColor: '#8b5cf6', killBg: 'rgba(139,92,246,0.05)', killBorder: 'rgba(139,92,246,0.3)',
+    killColor: '#5aafa4', killBg: 'rgba(139,92,246,0.05)', killBorder: 'rgba(139,92,246,0.3)',
     killLabel: 'BLOCK REGISTRATIONS', recoverLabel: 'Open Registrations',
   },
   {
     id: 'inspection', label: 'Pre-Inspection Detection', icon: ShieldOff,
     desc: 'Disables automated inspection account detection checks.',
-    killColor: '#f97316', killBg: 'rgba(249,115,22,0.05)', killBorder: 'rgba(249,115,22,0.3)',
+    killColor: '#176b87', killBg: 'rgba(19, 184, 166, 0.05)', killBorder: 'rgba(19, 184, 166, 0.3)',
     killLabel: 'DISABLE PRE-INSPECTION', recoverLabel: 'Enable Pre-Inspection',
   },
   {
     id: 'escrows', label: 'Escrow Transactions', icon: Shield,
     desc: 'Pauses all escrow creation and releases.',
-    killColor: '#06b6d4', killBg: 'rgba(6,182,212,0.05)', killBorder: 'rgba(6,182,212,0.3)',
+    killColor: '#13B8A6', killBg: 'rgba(19,184,166,0.05)', killBorder: 'rgba(19,184,166,0.3)',
     killLabel: 'FREEZE ESCROWS', recoverLabel: 'Re-enable Escrows',
   },
   {
@@ -76,20 +76,20 @@ export default function PanicRoom() {
     finally { setLoading(null); }
   };
 
-  if (!isSuperAdmin) return <div className="page loading-center"><p className="text-slate-500">Access denied. Super admin only.</p></div>;
+  if (!isSuperAdmin) return <div className="page loading-center"><p className="text-[#64748B]">Access denied. Super admin only.</p></div>;
 
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh' }}>
+    <div style={{ background: '#f6faf9', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 32px 60px' }}>
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
             <AlertTriangle size={12} style={{ color: '#ef4444' }} />
             <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Super Admin</span>
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#0F172A', margin: '0 0 8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#0a3340', margin: '0 0 8px' }}>
             Panic <span style={{ color: '#ef4444' }}>Room</span>
           </h1>
-          <p style={{ color: 'rgba(15, 23, 42, 0.3)', fontSize: 13 }}>System-wide emergency controls. Use only in production incidents.</p>
+          <p style={{ color: 'rgba(10, 51, 64, 0.3)', fontSize: 13 }}>System-wide emergency controls. Use only in production incidents.</p>
         </div>
 
         {/* System Health Banner */}
@@ -104,7 +104,7 @@ export default function PanicRoom() {
             <span style={{ fontWeight: 600, color: health.status === 'healthy' ? '#22c55e' : '#ef4444', fontSize: 13, textTransform: 'uppercase' }}>
               {health.status === 'healthy' ? 'System Healthy' : 'System Warning'}
             </span>
-            <span style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.35)' }}>
+            <span style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)' }}>
               {health.users} users · {health.listings} listings · {health.liveAuctions} live auctions · {health.criticalAlerts24h > 0 ? `${health.criticalAlerts24h} critical alerts (24h)` : 'no critical alerts'}
             </span>
           </div>
@@ -116,7 +116,7 @@ export default function PanicRoom() {
             <div key={sw.id} style={{ border: `1px solid ${sw.killBorder}`, background: sw.killBg, borderRadius: 16, padding: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <sw.icon size={18} style={{ color: sw.killColor }} />
-                <h4 style={{ color: '#0F172A', fontWeight: 700, fontSize: 14, margin: 0 }}>{sw.label}</h4>
+                <h4 style={{ color: '#0a3340', fontWeight: 700, fontSize: 14, margin: 0 }}>{sw.label}</h4>
               </div>
               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.5 }}>{sw.desc}</p>
               <button onClick={() => handleKillSwitch(sw.id)} disabled={loading === sw.id}
@@ -124,7 +124,7 @@ export default function PanicRoom() {
                 {loading === sw.id ? '...' : sw.killLabel}
               </button>
               <button onClick={() => handleRecover(sw.id)} disabled={loading === `recover_${sw.id}`}
-                style={{ width: '100%', padding: '8px 0', marginTop: 8, background: 'transparent', color: 'var(--text-muted)', borderRadius: 8, border: '1px solid rgba(15, 23, 42, 0.1)', cursor: 'pointer', fontSize: 11 }}>
+                style={{ width: '100%', padding: '8px 0', marginTop: 8, background: 'transparent', color: 'var(--text-muted)', borderRadius: 8, border: '1px solid rgba(10, 51, 64, 0.1)', cursor: 'pointer', fontSize: 11 }}>
                 {loading === `recover_${sw.id}` ? '...' : `↩ ${sw.recoverLabel}`}
               </button>
             </div>
@@ -132,20 +132,20 @@ export default function PanicRoom() {
         </div>
 
         {/* Maintenance Mode */}
-        <div style={{ border: '1px solid rgba(15, 23, 42, 0.05)', background: '#FFFFFF', borderRadius: 16, padding: 28 }}>
-          <h4 style={{ color: '#0F172A', fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <AlertTriangle size={16} style={{ color: '#f97316' }} /> Maintenance Mode (Total Blackout)
+        <div style={{ border: '1px solid rgba(10, 51, 64, 0.05)', background: '#FFFFFF', borderRadius: 16, padding: 28 }}>
+          <h4 style={{ color: '#0a3340', fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlertTriangle size={16} style={{ color: '#176b87' }} /> Maintenance Mode (Total Blackout)
           </h4>
           <input placeholder="Emergency message for users..."
             value={msg} onChange={e => setMsg(e.target.value)}
-            style={{ width: '100%', background: '#F8FAFC', border: '1px solid rgba(15, 23, 42, 0.1)', padding: 14, borderRadius: 10, marginBottom: 16, color: '#0F172A', fontSize: 13, outline: 'none' }} />
+            style={{ width: '100%', background: '#f6faf9', border: '1px solid rgba(10, 51, 64, 0.1)', padding: 14, borderRadius: 10, marginBottom: 16, color: '#0a3340', fontSize: 13, outline: 'none' }} />
           <div style={{ display: 'flex', gap: 12 }}>
             <button onClick={() => handleKillSwitch('full_maintenance', { message: msg })} disabled={loading === 'full_maintenance'}
-              style={{ flex: 1, padding: '14px 0', border: '1px solid rgba(15, 23, 42, 0.15)', color: '#0F172A', fontWeight: 700, fontSize: 13, borderRadius: 10, background: 'transparent', cursor: 'pointer' }}>
+              style={{ flex: 1, padding: '14px 0', border: '1px solid rgba(10, 51, 64, 0.15)', color: '#0a3340', fontWeight: 700, fontSize: 13, borderRadius: 10, background: 'transparent', cursor: 'pointer' }}>
               {loading === 'full_maintenance' ? '...' : 'ACTIVATE GLOBAL MAINTENANCE'}
             </button>
             <button onClick={() => handleRecover('maintenance')} disabled={loading === 'recover_maintenance'}
-              style={{ flex: 1, padding: '14px 0', background: 'var(--gold)', color: '#000', fontWeight: 700, fontSize: 13, borderRadius: 10, border: 'none', cursor: 'pointer' }}>
+              style={{ flex: 1, padding: '14px 0', background: 'var(--brand)', color: '#0a3340', fontWeight: 700, fontSize: 13, borderRadius: 10, border: 'none', cursor: 'pointer' }}>
               {loading === 'recover_maintenance' ? '...' : 'END MAINTENANCE'}
             </button>
           </div>

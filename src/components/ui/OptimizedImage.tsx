@@ -62,7 +62,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   if (hasError) {
     return (
       <div
-        className={`bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-4 rounded text-gray-400 text-xs ${className}`}
+        className={`bg-[#EEF7F5] dark:bg-[#12576D] flex items-center justify-center p-4 rounded text-[#94A3B8] text-xs ${className}`}
         style={containerStyle}
       >
         <div className="flex flex-col items-center gap-1">

@@ -17,7 +17,7 @@ export const DealerProfilePage: FC = () => {
     return (
       <div className="py-16 px-6 text-center max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold text-[#176B87]">Dealer profile unavailable</h1>
-        <p className="mt-2 text-sm text-[#66808A]">A real dealer profile must be loaded from the KAYAD backend before inventory is displayed.</p>
+        <p className="mt-2 text-sm text-[#64748b]">A real dealer profile must be loaded from the KAYAD backend before inventory is displayed.</p>
       </div>
     );
   }
@@ -62,7 +62,7 @@ export const DealerProfilePage: FC = () => {
                   {dealer.badge}
                 </span>
                 <h1 className="text-2xl sm:text-4xl font-extrabold text-white font-serif mt-1">{dealer.name}</h1>
-                <p className="text-xs text-slate-300 flex items-center gap-1 mt-1 font-medium">
+                <p className="text-xs text-[#BDE5DE] flex items-center gap-1 mt-1 font-medium">
                   <MapPin className="w-3.5 h-3.5 text-[#13B8A6]" /> {dealer.address}
                 </p>
               </div>
@@ -87,7 +87,7 @@ export const DealerProfilePage: FC = () => {
             <h2 className="text-2xl font-extrabold text-[#176B87] font-serif">
               Certified Dealership Inventory ({dealerVehicles.length})
             </h2>
-            <p className="text-xs text-[#66808A] font-medium mt-0.5">
+            <p className="text-xs text-[#64748b] font-medium mt-0.5">
               Verified listings, documented vehicle details, and concierge pre-purchase inspection support.
             </p>
           </div>
@@ -130,7 +130,7 @@ export const DealerProfilePage: FC = () => {
           <div className="p-6 text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-[#13B8A6] mx-auto" />
             <h4 className="text-base font-bold text-[#176B87] font-serif">Appointment Requested</h4>
-            <p className="text-xs text-[#365563] font-medium">
+            <p className="text-xs text-[#176b87] font-medium">
               The concierge team at {dealer.name} will contact you shortly to confirm your private viewing.
             </p>
           </div>

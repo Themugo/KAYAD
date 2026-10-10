@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 import { PlusCircle, Users, Lock, AlertTriangle, ChevronRight, Activity } from 'lucide-react';
 
 const ACTIONS = [
-  { to: '/admin/cars', icon: PlusCircle, label: 'Manage Cars', desc: 'View and manage all listings', color: 'var(--gold)' },
-  { to: '/admin/users', icon: Users, label: 'Manage Users', desc: 'Accounts, roles & permissions', color: '#3b82f6' },
+  { to: '/admin/cars', icon: PlusCircle, label: 'Manage Cars', desc: 'View and manage all listings', color: 'var(--brand)' },
+  { to: '/admin/users', icon: Users, label: 'Manage Users', desc: 'Accounts, roles & permissions', color: '#176B87' },
   { to: '/admin/escrows', icon: Lock, label: 'View All Escrows', desc: 'Active escrow ledger', color: 'var(--green)' },
   { to: '/admin/security', icon: AlertTriangle, label: 'Security', desc: 'Security logs & system controls', color: 'var(--red)', danger: true },
 ];
@@ -16,7 +16,7 @@ export default function AdminQuickActions() {
       display: 'flex', flexDirection: 'column',
     }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Activity size={14} style={{ color: 'var(--gold)' }} /> Quick Actions
+        <Activity size={14} style={{ color: 'var(--brand)' }} /> Quick Actions
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
         {ACTIONS.map(action => (

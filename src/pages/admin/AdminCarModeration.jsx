@@ -144,11 +144,11 @@ export default function AdminCarModeration() {
         ) : (
           <>
           {selectedIds.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(37, 99, 235,0.08)', borderRadius: 10, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(23, 107, 135, 0.08)', borderRadius: 10, marginBottom: 16 }}>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{selectedIds.length} selected</span>
               <button
                 className="btn btn-sm"
-                style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                style={{ background: '#22c55e', color: '#0a3340', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
                 disabled={bulkAction !== null}
                 onClick={() => handleBulkModerate('approve')}>
                 <CheckCircle size={12} style={{ marginRight: 4 }} />
@@ -177,7 +177,7 @@ export default function AdminCarModeration() {
                     <input type="checkbox" checked={cars.length > 0 && selectedIds.length === cars.length}
                       onChange={toggleSelectAll}
                       onClick={e => e.stopPropagation()} role="presentation"
-                      style={{ accentColor: 'var(--gold)', cursor: 'pointer' }} />
+                      style={{ accentColor: 'var(--brand)', cursor: 'pointer' }} />
                   </th>
                   <th>Listing</th>
                   <th>Dealer</th>
@@ -195,7 +195,7 @@ export default function AdminCarModeration() {
                     <td onClick={e => e.stopPropagation()} role="presentation">
                       <input type="checkbox" checked={isSelected}
                         onChange={() => toggleSelect(car._id)}
-                        style={{ accentColor: 'var(--gold)', cursor: 'pointer' }} />
+                        style={{ accentColor: 'var(--brand)', cursor: 'pointer' }} />
                     </td>
                     <td>
                       <div style={{ fontWeight: 600 }}>{car.title || `${car.brand} ${car.model || ''}`}</div>
@@ -220,7 +220,7 @@ export default function AdminCarModeration() {
                         onClick={e => e.stopPropagation()} role="presentation">
                         <button
                           className="btn btn-sm"
-                          style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                          style={{ background: '#22c55e', color: '#0a3340', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
                           disabled={actionId === car._id}
                           onClick={() => handleModerate(car._id, 'approve')}>
                           <CheckCircle size={12} style={{ marginRight: 4 }} />
@@ -289,7 +289,7 @@ export default function AdminCarModeration() {
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                 <button className="btn btn-sm btn-outline" onClick={() => setSelected(null)}>Cancel</button>
                 <button className="btn btn-sm"
-                  style={{ background: '#22c55e', color: '#000', fontWeight: 700, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer' }}
+                  style={{ background: '#22c55e', color: '#0a3340', fontWeight: 700, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer' }}
                   disabled={actionId === selected._id}
                   onClick={() => { handleModerate(selected._id, 'approve'); setSelected(null); }}>
                   <CheckCircle size={14} style={{ marginRight: 6 }} /> Approve Listing

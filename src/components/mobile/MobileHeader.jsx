@@ -201,8 +201,8 @@ function MobileTabHeader({
               fontWeight: 500,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
-              background: activeTab === (tab.id || tab) ? 'var(--gold-500)' : 'var(--surface)',
-              color: activeTab === (tab.id || tab) ? '#000' : 'var(--text-secondary)',
+              background: activeTab === (tab.id || tab) ? 'var(--brand-500)' : 'var(--surface)',
+              color: activeTab === (tab.id || tab) ? '#0a3340' : 'var(--text-secondary)',
               transition: 'all 0.15s ease',
             }}
           >

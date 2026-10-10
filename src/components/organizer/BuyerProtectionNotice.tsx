@@ -20,9 +20,9 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
   // Compact variant - for use in headers
   if (variant === 'compact') {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
-        <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />
-        <span className="text-xs text-blue-800 font-medium">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F3FAF9] border border-[#D7E7E4] rounded-lg">
+        <Shield className="w-4 h-4 text-[#176B87] flex-shrink-0" />
+        <span className="text-xs text-[#0E4655] font-medium">
           Auction conducted by organizer
         </span>
       </div>
@@ -32,10 +32,10 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
   // Full variant - standalone card
   if (variant === 'full') {
     return (
-      <Card className="p-5 bg-gradient-to-r from-blue-50 to-slate-50 border border-blue-200">
+      <Card className="p-5 bg-gradient-to-r from-[#F3FAF9] to-[#F6FAF9] border border-[#D7E7E4]">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <Shield className="w-6 h-6 text-blue-600" />
+          <div className="w-12 h-12 rounded-full bg-[#DDF4F0] flex items-center justify-center flex-shrink-0">
+            <Shield className="w-6 h-6 text-[#176B87]" />
           </div>
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-2">
@@ -44,11 +44,11 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
                 ACTIVE
               </span>
             </div>
-            <p className="text-sm text-slate-700 leading-relaxed">
+            <p className="text-sm text-[#12576D] leading-relaxed">
               {fullText}
             </p>
-            <div className="pt-2 border-t border-blue-200">
-              <div className="flex items-center gap-4 text-xs text-slate-600">
+            <div className="pt-2 border-t border-[#D7E7E4]">
+              <div className="flex items-center gap-4 text-xs text-[#64748B]">
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
                   Secure Auction Technology
@@ -71,18 +71,18 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
 
   // Inline variant - default (for use within other cards)
   return (
-    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+    <div className="p-4 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl space-y-3">
       <div className="flex items-center gap-2">
         <Shield className="w-5 h-5 text-[#176B87]" />
         <span className="font-black text-sm text-[#176B87]">Auction Transparency Notice</span>
       </div>
-      <p className="text-xs text-slate-600 leading-relaxed">
+      <p className="text-xs text-[#64748B] leading-relaxed">
         {showReadMore ? fullText : baseText}
       </p>
-      <div className="pt-2 border-t border-slate-200">
+      <div className="pt-2 border-t border-[#D7E7E4]">
         <div className="flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-800 font-medium">
+          <AlertCircle className="w-4 h-4 text-[#176B87] flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-[#0A3340] font-medium">
             Bid security and final vehicle settlement follow the published payment instructions for <strong>{organizerName}</strong>. A separate nominal bid-confirmation M-Pesa payment may be required when submitting a bid.
           </p>
         </div>
@@ -93,9 +93,9 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
 
 // Compact inline notice for forms and modals
 export const CompactProtectionNotice: React.FC = () => (
-  <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
-    <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
-    <span className="text-xs text-amber-800">
+  <div className="flex items-center gap-2 px-3 py-2 bg-[#F3FAF9] border border-[#BDE5DE] rounded-lg">
+    <Info className="w-4 h-4 text-[#176B87] flex-shrink-0" />
+    <span className="text-xs text-[#0A3340]">
       Final settlement follows the published auction payment rule
     </span>
   </div>
@@ -105,19 +105,19 @@ export const CompactProtectionNotice: React.FC = () => (
 export const TrustFooter: React.FC<{ organizerName?: string }> = ({
   organizerName = 'the auction organizer'
 }) => (
-  <div className="flex items-center justify-center gap-6 py-4 border-t border-slate-200 bg-slate-50">
-    <div className="flex items-center gap-2 text-xs text-slate-600">
+  <div className="flex items-center justify-center gap-6 py-4 border-t border-[#D7E7E4] bg-[#F6FAF9]">
+    <div className="flex items-center gap-2 text-xs text-[#64748B]">
       <Shield className="w-4 h-4 text-emerald-600" />
       <span>KAYAD Verified Marketplace</span>
     </div>
-    <div className="w-px h-4 bg-slate-300"></div>
-    <div className="flex items-center gap-2 text-xs text-slate-600">
-      <AlertCircle className="w-4 h-4 text-amber-600" />
+    <div className="w-px h-4 bg-[#BDE5DE]"></div>
+    <div className="flex items-center gap-2 text-xs text-[#64748B]">
+      <AlertCircle className="w-4 h-4 text-[#176B87]" />
       <span>Direct payment to {organizerName}</span>
     </div>
-    <div className="w-px h-4 bg-slate-300"></div>
-    <div className="flex items-center gap-2 text-xs text-slate-600">
-      <Info className="w-4 h-4 text-blue-600" />
+    <div className="w-px h-4 bg-[#BDE5DE]"></div>
+    <div className="flex items-center gap-2 text-xs text-[#64748B]">
+      <Info className="w-4 h-4 text-[#176B87]" />
       <span>Technology provider only</span>
     </div>
   </div>

@@ -52,7 +52,7 @@ export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[999] bg-charcoal-950 border-t border-white/5 pb-safe flex h-16 lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-[999] bg-[#0A3340] border-t border-white/5 pb-safe flex h-16 lg:hidden">
       {tabs.map(tab => {
         const active = isActive(tab.href);
         const Icon = tab.icon;
@@ -65,7 +65,7 @@ export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {
             className={`
               flex-1 flex flex-col items-center justify-center gap-0.5
               text-[10px] font-semibold no-underline transition-colors
-              ${active ? 'text-gold-400' : 'text-white/35'}
+              ${active ? 'text-[#13B8A6]' : 'text-white/35'}
             `}
           >
             <Icon size={20} />

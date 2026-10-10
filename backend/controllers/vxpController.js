@@ -508,18 +508,18 @@ export async function getDefaultTheme(req, res) {
       data: {
         name: 'KAYAD Default',
         colors: {
-          primary: '#17244B',
-          secondary: '#F6F1E8',
-          accent: '#C77B58',
+          primary: '#176B87',
+          secondary: '#F6FAF9',
+          accent: '#13B8A6',
           success: '#10B981',
-          info: '#60A5FA',
-          warning: '#FB923C',
+          info: '#13B8A6',
+          warning: '#176B87',
           danger: '#EF4444',
-          background: '#F6F1E8',
+          background: '#F6FAF9',
           surface: '#FFFFFF',
           text: '#1F2937',
           textSecondary: '#6B7280',
-          border: '#E5E7EB',
+          border: '#D7E7E4',
         },
       },
     });
@@ -798,9 +798,9 @@ export async function aiDesignAssist(req, res) {
 
   if (instructionLower.includes('premium') || instructionLower.includes('luxury')) {
     suggestions.colors = [
-      { property: 'primary', value: '#1a1a2e' },
-      { property: 'accent', value: '#c9a227' },
-      { property: 'background', value: '#fafafa' },
+      { property: 'primary', value: '#176B87' },
+      { property: 'accent', value: '#13B8A6' },
+      { property: 'background', value: '#F6FAF9' },
     ];
     suggestions.typography = [
       { property: 'heading', value: 'Playfair Display' },

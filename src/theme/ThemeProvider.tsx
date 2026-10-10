@@ -52,20 +52,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.classList.toggle('dark', isDark);
 
     if (isDark) {
-      root.style.setProperty('--primary-navy', '#0F172A');
-      root.style.setProperty('--secondary-navy', '#1E293B');
+      root.style.setProperty('--primary-navy', '#0a3340');
+      root.style.setProperty('--secondary-navy', '#12576D');
       root.style.setProperty('--aqua-accent', '#13B8A6');
       root.style.setProperty('--success-green', '#10B981');
       root.style.setProperty('--bg-light', '#0A3340');
-      root.style.setProperty('--text-dark', '#F8FAFC');
+      root.style.setProperty('--text-dark', '#f6faf9');
       root.style.setProperty('--danger-red', '#EF4444');
       root.style.setProperty('--nav-active', '#13B8A6');
-      root.style.setProperty('--warning-gold', '#F59E0B');
-      root.style.setProperty('--info-indigo', '#6366F1');
+      root.style.setProperty('--warning-gold', '#176b87');
+      root.style.setProperty('--info-indigo', '#176b87');
       root.style.setProperty('--deepest-navy', '#061F28');
       root.style.setProperty('--deep-navy', '#083441');
       root.style.setProperty('--navy-highlight', '#13B8A6');
-      root.style.setProperty('--warm-accent-bg', '#1E293B');
+      root.style.setProperty('--warm-accent-bg', '#12576D');
       root.style.setProperty('--muted-text', '#94A3B8');
     } else {
       root.style.setProperty('--primary-navy', defaultThemeConfig.tokens.colors.primaryNavy || '#176B87');
@@ -82,7 +82,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.style.setProperty('--deep-navy', defaultThemeConfig.tokens.colors.deepNavy || '#12576D');
       root.style.setProperty('--navy-highlight', defaultThemeConfig.tokens.colors.navyHighlight || '#176B87');
       root.style.setProperty('--warm-accent-bg', defaultThemeConfig.tokens.colors.warmAccentBg || '#DDF4F0');
-      root.style.setProperty('--muted-text', defaultThemeConfig.tokens.colors.textMuted || '#66808A');
+      root.style.setProperty('--muted-text', defaultThemeConfig.tokens.colors.textMuted || '#64748b');
     }
   }, [mode]);
 

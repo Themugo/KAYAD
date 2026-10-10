@@ -28,9 +28,9 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
   // Compact variant - single line
   if (variant === 'compact') {
     return (
-      <div className={`flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg ${className}`}>
-        {showIcon && <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />}
-        <span className="text-xs text-blue-800 font-medium">
+      <div className={`flex items-center gap-2 px-3 py-2 bg-[#F3FAF9] border border-[#D7E7E4] rounded-lg ${className}`}>
+        {showIcon && <Shield className="w-4 h-4 text-[#176B87] flex-shrink-0" />}
+        <span className="text-xs text-[#0E4655] font-medium">
           Auctions conducted by verified organizers • Final settlement follows the published auction rule
         </span>
       </div>
@@ -40,11 +40,11 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
   // Full variant - detailed card
   if (variant === 'full') {
     return (
-      <Card className={`p-6 bg-gradient-to-r from-blue-50 to-slate-50 border border-blue-200 ${className}`}>
+      <Card className={`p-6 bg-gradient-to-r from-[#F3FAF9] to-[#F6FAF9] border border-[#D7E7E4] ${className}`}>
         <div className="flex items-start gap-4">
           {showIcon && (
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <Shield className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-full bg-[#DDF4F0] flex items-center justify-center flex-shrink-0">
+              <Shield className="w-6 h-6 text-[#176B87]" />
             </div>
           )}
           <div className="flex-1 space-y-4">
@@ -52,7 +52,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
               <h4 className="font-black text-[#176B87] text-lg mb-2">
                 Auction Transparency Notice
               </h4>
-              <p className="text-sm text-slate-700 leading-relaxed">
+              <p className="text-sm text-[#12576D] leading-relaxed">
                 Every auction published on KAYAD is independently conducted by the verified
                 Auction Organizer displayed on each listing. KAYAD provides the digital marketplace
                 and auction technology tools.
@@ -61,49 +61,49 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
 
             {/* Key Points */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200">
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-[#D7E7E4]">
                 <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
                   <Building2 className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-700 mb-1">Auction Organizer</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs font-bold text-[#12576D] mb-1">Auction Organizer</p>
+                  <p className="text-xs text-[#64748B]">
                     Each auction is independently conducted by the verified organizer displayed on the listing.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200">
-                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="w-4 h-4 text-amber-600" />
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-[#D7E7E4]">
+                <div className="w-8 h-8 rounded-lg bg-[#DDF4F0] flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-4 h-4 text-[#176B87]" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-700 mb-1">Payment Recipient</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs font-bold text-[#12576D] mb-1">Payment Recipient</p>
+                  <p className="text-xs text-[#64748B]">
                     Bid security deposits and final vehicle settlement follow the published organizer payment instructions and settlement mode.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Gavel className="w-4 h-4 text-blue-600" />
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-[#D7E7E4]">
+                <div className="w-8 h-8 rounded-lg bg-[#DDF4F0] flex items-center justify-center flex-shrink-0">
+                  <Gavel className="w-4 h-4 text-[#176B87]" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-700 mb-1">KAYAD's Role</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs font-bold text-[#12576D] mb-1">KAYAD's Role</p>
+                  <p className="text-xs text-[#64748B]">
                     Digital marketplace, bidder registration, live auction technology, and auction management tools.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200">
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-[#D7E7E4]">
                 <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
                   <Shield className="w-4 h-4 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-700 mb-1">KAYAD Does NOT</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs font-bold text-[#12576D] mb-1">KAYAD Does NOT</p>
+                  <p className="text-xs text-[#64748B]">
                     Receive bid security deposits or vehicle purchase payments from buyers.
                   </p>
                 </div>
@@ -118,7 +118,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
                   <p className="text-sm font-bold text-[#176B87] mb-1">
                     Important Payment Information
                   </p>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-[#64748B] leading-relaxed">
                     Final vehicle payments and bid security follow the payment recipient and settlement mode published
                     for this auction. KAYAD's bid-confirmation payment is a separate platform transaction; where escrow
                     is selected, custody funding follows the controlled escrow workflow.
@@ -134,18 +134,18 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
 
   // Standard variant - default
   return (
-    <div className={`p-4 bg-slate-50 border border-slate-200 rounded-xl ${className}`}>
+    <div className={`p-4 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl ${className}`}>
       <div className="flex items-start gap-3">
         {showIcon && (
-          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <Shield className="w-5 h-5 text-blue-600" />
+          <div className="w-10 h-10 rounded-lg bg-[#DDF4F0] flex items-center justify-center flex-shrink-0">
+            <Shield className="w-5 h-5 text-[#176B87]" />
           </div>
         )}
         <div className="flex-1">
           <h4 className="font-bold text-[#176B87] mb-2">
             Auction Disclaimer
           </h4>
-          <div className="space-y-2 text-sm text-slate-600">
+          <div className="space-y-2 text-sm text-[#64748B]">
             <p>
               Every auction on KAYAD is independently conducted by the verified Auction Organizer
               shown on each listing.
@@ -155,7 +155,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
               published payment and settlement instructions.</strong> A separate nominal bid-confirmation M-Pesa
               payment may be required when you submit a bid.
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#64748B]">
               KAYAD provides the digital marketplace, bidder registration, live auction technology,
               digital certificates and auction management tools. Final vehicle settlement follows the
               published direct or escrow mode.
@@ -169,9 +169,9 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
 
 // Inline version for forms and modals
 export const AuctionDisclaimerInline: React.FC<{ className?: string }> = ({ className }) => (
-  <div className={`flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg ${className}`}>
-    <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />
-    <span className="text-xs text-blue-800">
+  <div className={`flex items-center gap-2 px-3 py-2 bg-[#F3FAF9] border border-[#D7E7E4] rounded-lg ${className}`}>
+    <Shield className="w-4 h-4 text-[#176B87] flex-shrink-0" />
+    <span className="text-xs text-[#0E4655]">
       Final settlement follows the published auction payment rule
     </span>
   </div>

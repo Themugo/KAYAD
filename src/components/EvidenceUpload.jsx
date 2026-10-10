@@ -63,14 +63,14 @@ export default function EvidenceUpload({ disputeId, onUploaded }) {
   const selectedType = EVIDENCE_TYPES.find(t => t.value === type);
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wide">Upload Evidence</h3>
+    <div className="bg-[#0A3340] border border-[#12576D] rounded-lg p-4 space-y-3">
+      <h3 className="text-sm font-semibold text-[#DDF4F0] uppercase tracking-wide">Upload Evidence</h3>
 
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
         {EVIDENCE_TYPES.map(t => (
           <button key={t.value} type="button" onClick={() => setType(t.value)}
             className={`flex flex-col items-center gap-1 p-2 rounded-lg border text-xs transition
-              ${type === t.value ? 'border-gold bg-gold/10 text-gold' : 'border-gray-600 text-gray-400 hover:border-gray-500'}`}>
+              ${type === t.value ? 'border-gold bg-gold/10 text-gold' : 'border-[#176B87] text-[#94A3B8] hover:border-[#5AAFA4]'}`}>
             <span className="text-lg">{t.icon}</span>
             <span className="truncate w-full text-center">{t.label}</span>
           </button>
@@ -80,25 +80,25 @@ export default function EvidenceUpload({ disputeId, onUploaded }) {
       <div className="flex items-center gap-4">
         <label className="flex-1">
           <input ref={inputRef} type="file" accept={selectedType?.accept || '*'} onChange={handleFileChange}
-            className="block w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-700 file:text-gray-200 hover:file:bg-gray-600" />
+            className="block w-full text-sm text-[#94A3B8] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#12576D] file:text-[#DDF4F0] hover:file:bg-[#176B87]" />
         </label>
       </div>
 
       {preview && (
-        <div className="relative w-32 h-24 rounded overflow-hidden border border-gray-700">
+        <div className="relative w-32 h-24 rounded overflow-hidden border border-[#12576D]">
           <img src={preview} alt="preview" className="w-full h-full object-cover" />
         </div>
       )}
 
       {file && (
-        <p className="text-xs text-gray-500">{file.name} ({(file.size / 1024 / 1024).toFixed(1)}MB)</p>
+        <p className="text-xs text-[#64748B]">{file.name} ({(file.size / 1024 / 1024).toFixed(1)}MB)</p>
       )}
 
       <input type="text" placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)}
-        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gold" />
+        className="w-full px-3 py-2 bg-[#12576D] border border-[#12576D] rounded-lg text-sm text-[#DDF4F0] placeholder-[#5AAFA4] focus:outline-none focus:border-gold" />
 
       <button type="button" onClick={handleUpload} disabled={!file || uploading}
-        className="w-full py-2 bg-gold text-black font-semibold rounded-lg hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+        className="w-full py-2 bg-gold text-[#0A3340] font-semibold rounded-lg hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
         {uploading ? 'Uploading...' : `Upload ${selectedType?.icon || ''}`}
       </button>
     </div>

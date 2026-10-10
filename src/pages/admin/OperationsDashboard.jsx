@@ -134,11 +134,11 @@ const OperationsDashboard = () => {
       case "healthy":
         return "text-green-600 bg-green-100";
       case "warning":
-        return "text-yellow-600 bg-yellow-100";
+        return "text-[#176B87] bg-[#DDF4F0]";
       case "critical":
         return "text-red-600 bg-red-100";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-[#64748B] bg-[#EEF7F5]";
     }
   };
 
@@ -229,25 +229,25 @@ const OperationsDashboard = () => {
             <div className="text-3xl font-bold text-green-600">
               {dashboardData.systemHealth.apiResponseTime.p50}ms
             </div>
-            <div className="text-sm text-gray-500">P50</div>
+            <div className="text-sm text-[#64748B]">P50</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-yellow-600">
+            <div className="text-3xl font-bold text-[#176B87]">
               {dashboardData.systemHealth.apiResponseTime.p95}ms
             </div>
-            <div className="text-sm text-gray-500">P95</div>
+            <div className="text-sm text-[#64748B]">P95</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-red-600">
               {dashboardData.systemHealth.apiResponseTime.p99}ms
             </div>
-            <div className="text-sm text-gray-500">P99</div>
+            <div className="text-sm text-[#64748B]">P99</div>
           </div>
         </div>
       </div>
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold mb-4">Active Sessions</h3>
-        <div className="text-4xl font-bold text-blue-600">
+        <div className="text-4xl font-bold text-[#176B87]">
           {dashboardData.systemHealth.activeSessions.toLocaleString()}
         </div>
       </div>
@@ -460,15 +460,15 @@ const OperationsDashboard = () => {
                 </h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Size:</span>
+                    <span className="text-sm text-[#64748B]">Size:</span>
                     <span className="font-semibold">{data.size}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Rate:</span>
+                    <span className="text-sm text-[#64748B]">Rate:</span>
                     <span className="font-semibold">{data.processingRate}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Failed:</span>
+                    <span className="text-sm text-[#64748B]">Failed:</span>
                     <span className={`font-semibold ${data.failedJobs > 0 ? "text-red-600" : "text-green-600"}`}>
                       {data.failedJobs}
                     </span>
@@ -620,19 +620,19 @@ const OperationsDashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#176B87]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F6FAF9]">
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 bg-white shadow-lg min-h-screen">
           <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-800">Operations Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-1">Platform Management</p>
+            <h1 className="text-2xl font-bold text-[#0A3340]">Operations Dashboard</h1>
+            <p className="text-sm text-[#64748B] mt-1">Platform Management</p>
           </div>
           <nav className="mt-6">
             {widgets.map((widget) => {
@@ -643,8 +643,8 @@ const OperationsDashboard = () => {
                   onClick={() => setActiveWidget(widget.id)}
                   className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
                     activeWidget === widget.id
-                      ? "bg-blue-50 text-blue-600 border-r-4 border-blue-600"
-                      : "text-gray-600 hover:bg-gray-50"
+                      ? "bg-[#F3FAF9] text-[#176B87] border-r-4 border-[#176B87]"
+                      : "text-[#64748B] hover:bg-[#F6FAF9]"
                   }`}
                 >
                   <Icon className="w-5 h-5 mr-3" />
@@ -658,10 +658,10 @@ const OperationsDashboard = () => {
         {/* Main Content */}
         <div className="flex-1 p-8">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">
+            <h2 className="text-3xl font-bold text-[#0A3340]">
               {widgets.find((w) => w.id === activeWidget)?.name}
             </h2>
-            <p className="text-gray-500 mt-1">
+            <p className="text-[#64748B] mt-1">
               Real-time monitoring and management
             </p>
           </div>
@@ -675,22 +675,22 @@ const OperationsDashboard = () => {
 const MetricCard = ({ title, value, icon: Icon, color, trend }) => {
   const colorClasses = {
     green: "bg-green-50 text-green-600",
-    blue: "bg-blue-50 text-blue-600",
+    blue: "bg-[#F3FAF9] text-[#176B87]",
     red: "bg-red-50 text-red-600",
-    orange: "bg-orange-50 text-orange-600",
-    yellow: "bg-yellow-50 text-yellow-600",
-    purple: "bg-purple-50 text-purple-600",
-    cyan: "bg-cyan-50 text-cyan-600",
-    indigo: "bg-indigo-50 text-indigo-600",
+    orange: "bg-[#F3FAF9] text-[#176B87]",
+    yellow: "bg-[#F3FAF9] text-[#176B87]",
+    purple: "bg-[#F3FAF9] text-[#176B87]",
+    cyan: "bg-[#F3FAF9] text-[#176B87]",
+    indigo: "bg-[#F3FAF9] text-[#176B87]",
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        <Icon className={`w-5 h-5 ${colorClasses[color]?.split(" ")[1] || "text-gray-600"}`} />
+        <h3 className="text-sm font-medium text-[#64748B]">{title}</h3>
+        <Icon className={`w-5 h-5 ${colorClasses[color]?.split(" ")[1] || "text-[#64748B]"}`} />
       </div>
-      <div className="text-3xl font-bold text-gray-800">{value}</div>
+      <div className="text-3xl font-bold text-[#0A3340]">{value}</div>
       {trend && (
         <div className={`mt-2 text-sm ${trend.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
           {trend}
@@ -703,7 +703,7 @@ const MetricCard = ({ title, value, icon: Icon, color, trend }) => {
 const HealthCard = ({ title, status, details }) => {
   const statusColors = {
     healthy: "bg-green-100 text-green-600",
-    warning: "bg-yellow-100 text-yellow-600",
+    warning: "bg-[#DDF4F0] text-[#176B87]",
     critical: "bg-red-100 text-red-600",
   };
 
@@ -715,7 +715,7 @@ const HealthCard = ({ title, status, details }) => {
           {status}
         </span>
       </div>
-      <p className="text-sm text-gray-500">{details}</p>
+      <p className="text-sm text-[#64748B]">{details}</p>
     </div>
   );
 };

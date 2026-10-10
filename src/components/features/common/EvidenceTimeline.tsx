@@ -19,15 +19,15 @@ export default function EvidenceTimeline({ events, className = '' }: EvidenceTim
   const getEventIcon = (type: TimelineEvent['type']) => {
     switch (type) {
       case 'upload':
-        return <FileText className="h-4 w-4 text-blue-500" />;
+        return <FileText className="h-4 w-4 text-[#2F8F87]" />;
       case 'note':
-        return <User className="h-4 w-4 text-gray-500" />;
+        return <User className="h-4 w-4 text-[#64748B]" />;
       case 'status_change':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
+        return <Clock className="h-4 w-4 text-[#176B87]" />;
       case 'escalation':
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4 text-[#64748B]" />;
     }
   };
 
@@ -38,7 +38,7 @@ export default function EvidenceTimeline({ events, className = '' }: EvidenceTim
       case 'note':
         return 'border-l-gray-400';
       case 'status_change':
-        return 'border-l-yellow-500';
+        return 'border-l-[#13B8A6]';
       case 'escalation':
         return 'border-l-red-500';
       default:
@@ -48,7 +48,7 @@ export default function EvidenceTimeline({ events, className = '' }: EvidenceTim
 
   if (events.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-[#64748B]">
         No activity yet
       </div>
     );
@@ -66,13 +66,13 @@ export default function EvidenceTimeline({ events, className = '' }: EvidenceTim
           </div>
 
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-900">{event.description}</p>
+            <p className="text-sm font-medium text-[#0A3340]">{event.description}</p>
 
             {event.details && (
-              <p className="mt-1 text-sm text-gray-600">{event.details}</p>
+              <p className="mt-1 text-sm text-[#64748B]">{event.details}</p>
             )}
 
-            <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+            <div className="mt-1 flex items-center gap-2 text-xs text-[#64748B]">
               {event.user && <span>by {event.user}</span>}
               <span>{timeAgo(event.timestamp)}</span>
             </div>

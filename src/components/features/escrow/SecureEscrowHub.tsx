@@ -42,13 +42,13 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
 
   if (loading) {
     return (
-      <div className={`bg-white dark:bg-charcoal-800 rounded-xl p-6 ${className}`}>
+      <div className={`bg-white dark:bg-[#12576D] rounded-xl p-6 ${className}`}>
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-cream-200 dark:bg-charcoal-700 rounded w-1/3" />
+          <div className="h-8 bg-[#DDF4F0] dark:bg-[#12576D] rounded w-1/3" />
           <div className="grid grid-cols-3 gap-4">
-            <div className="h-24 bg-cream-200 dark:bg-charcoal-700 rounded" />
-            <div className="h-24 bg-cream-200 dark:bg-charcoal-700 rounded" />
-            <div className="h-24 bg-cream-200 dark:bg-charcoal-700 rounded" />
+            <div className="h-24 bg-[#DDF4F0] dark:bg-[#12576D] rounded" />
+            <div className="h-24 bg-[#DDF4F0] dark:bg-[#12576D] rounded" />
+            <div className="h-24 bg-[#DDF4F0] dark:bg-[#12576D] rounded" />
           </div>
         </div>
       </div>
@@ -56,9 +56,9 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-charcoal-800 rounded-xl shadow-sm ${className}`}>
+    <div className={`bg-white dark:bg-[#12576D] rounded-xl shadow-sm ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b border-cream-200 dark:border-charcoal-700">
+      <div className="p-6 border-b border-[#D7E7E4] dark:border-[#12576D]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
@@ -67,17 +67,17 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-charcoal-800 dark:text-cream-100">
+              <h2 className="text-lg font-bold text-[#0A3340] dark:text-[#64748B]">
                 Secure Escrow Hub
               </h2>
-              <p className="text-sm text-charcoal-500 dark:text-cream-300">
+              <p className="text-sm text-[#64748B] dark:text-[#5AAFA4]">
                 Immutable transaction ledger
               </p>
             </div>
           </div>
           {summary && (
             <div className="text-right">
-              <p className="text-sm text-charcoal-500 dark:text-cream-300">Net Balance</p>
+              <p className="text-sm text-[#64748B] dark:text-[#5AAFA4]">Net Balance</p>
               <p className="text-xl font-bold text-emerald-600">
                 {formatKES(summary.netBalance)}
               </p>
@@ -96,19 +96,19 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
       {!compact && (
         <div className="p-6 grid grid-cols-3 gap-4">
           <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
-            <p className="text-sm text-charcoal-500 dark:text-cream-300">Total In</p>
+            <p className="text-sm text-[#64748B] dark:text-[#5AAFA4]">Total In</p>
             <p className="text-lg font-bold text-emerald-600">
               {formatKES(summary?.totalIn || 0)}
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20">
-            <p className="text-sm text-charcoal-500 dark:text-cream-300">Total Out</p>
-            <p className="text-lg font-bold text-amber-600">
+          <div className="p-4 rounded-xl bg-[#F3FAF9] dark:bg-[#0A3340]/20">
+            <p className="text-sm text-[#64748B] dark:text-[#5AAFA4]">Total Out</p>
+            <p className="text-lg font-bold text-[#176B87]">
               {formatKES(summary?.totalOut || 0)}
             </p>
           </div>
           <div className="p-4 rounded-xl bg-brand-50 dark:bg-brand-900/20">
-            <p className="text-sm text-charcoal-500 dark:text-cream-300">Transactions</p>
+            <p className="text-sm text-[#64748B] dark:text-[#5AAFA4]">Transactions</p>
             <p className="text-lg font-bold text-brand-600">
               {(Object.values(summary?.byType || {}) as any[]).reduce((sum: number, t: any) => sum + t.count, 0)}
             </p>
@@ -135,32 +135,32 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
       )}
 
       {/* Transaction List */}
-      <div className="border-t border-cream-200 dark:border-charcoal-700">
+      <div className="border-t border-[#D7E7E4] dark:border-[#12576D]">
         <div className="px-6 py-4 flex items-center justify-between">
-          <h3 className="font-semibold text-charcoal-700 dark:text-cream-100">
+          <h3 className="font-semibold text-[#12576D] dark:text-[#64748B]">
             Recent Transactions
           </h3>
-          <span className="text-sm text-charcoal-500 dark:text-cream-300">
+          <span className="text-sm text-[#64748B] dark:text-[#5AAFA4]">
             Chain verified ✓
           </span>
         </div>
 
         {transactions.length === 0 ? (
           <div className="px-6 py-8 text-center">
-            <p className="text-charcoal-500 dark:text-cream-300">No transactions yet</p>
+            <p className="text-[#64748B] dark:text-[#5AAFA4]">No transactions yet</p>
           </div>
         ) : (
-          <div className="divide-y divide-cream-200 dark:divide-charcoal-700">
+          <div className="divide-y divide-[#DDF4F0] dark:divide-[#12576D]">
             {transactions.slice(0, compact ? 5 : 10).map((txn) => (
               <div
                 key={txn.ledgerId || txn._id}
-                className="px-6 py-3 flex items-center justify-between hover:bg-cream-50 dark:hover:bg-charcoal-700/50"
+                className="px-6 py-3 flex items-center justify-between hover:bg-[#F6FAF9] dark:hover:bg-[#12576D]/50"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     txn.direction === 'in' || txn.type === 'deposit'
                       ? 'bg-emerald-100 text-emerald-600'
-                      : 'bg-amber-100 text-amber-600'
+                      : 'bg-[#DDF4F0] text-[#176B87]'
                   }`}>
                     {txn.direction === 'in' || txn.type === 'deposit' ? (
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,10 +173,10 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-charcoal-700 dark:text-cream-100 capitalize">
+                    <p className="font-medium text-[#12576D] dark:text-[#64748B] capitalize">
                       {txn.type?.replace(/_/g, ' ') || 'Transaction'}
                     </p>
-                    <p className="text-xs text-charcoal-500 dark:text-cream-300">
+                    <p className="text-xs text-[#64748B] dark:text-[#5AAFA4]">
                       {txn.ledgerId} • {new Date(txn.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -185,11 +185,11 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
                   <p className={`font-semibold ${
                     txn.direction === 'in' || txn.type === 'deposit'
                       ? 'text-emerald-600'
-                      : 'text-charcoal-700 dark:text-cream-100'
+                      : 'text-[#12576D] dark:text-[#64748B]'
                   }`}>
                     {txn.direction === 'in' ? '+' : '-'}{formatKES(txn.amount)}
                   </p>
-                  <p className="text-xs text-charcoal-500 dark:text-cream-300 capitalize">
+                  <p className="text-xs text-[#64748B] dark:text-[#5AAFA4] capitalize">
                     {txn.status}
                   </p>
                 </div>
@@ -199,7 +199,7 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
         )}
 
         {!compact && transactions.length > 0 && (
-          <div className="p-4 border-t border-cream-200 dark:border-charcoal-700">
+          <div className="p-4 border-t border-[#D7E7E4] dark:border-[#12576D]">
             <button className="w-full py-2 text-brand-500 hover:text-brand-600 font-medium">
               View All Transactions
             </button>

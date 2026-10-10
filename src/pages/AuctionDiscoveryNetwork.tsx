@@ -161,14 +161,14 @@ function mapCarToAuction(car: BackendCar): Auction {
 const HeroSummary: React.FC<{ liveCount: number; scheduledCount: number; totalBidsToday: number; nextAuctionTime: string }> = ({
   liveCount, scheduledCount, totalBidsToday, nextAuctionTime
 }) => (
-  <div className="bg-gradient-to-br from-[#176B87] to-[#2a4080] py-12">
+  <div className="bg-gradient-to-br from-[#176B87] to-[#176b87] py-12">
     <div className="max-w-7xl mx-auto px-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
         {[
           { label: 'Live Auctions', value: liveCount, icon: <Radio className="w-5 h-5" />, color: 'text-red-400' },
-          { label: 'Scheduled', value: scheduledCount, icon: <Clock className="w-5 h-5" />, color: 'text-blue-400' },
-          { label: 'Live Bids', value: totalBidsToday, icon: <Users className="w-5 h-5" />, color: 'text-amber-400' },
-          { label: 'Next Starts In', value: nextAuctionTime, icon: <CalendarClock className="w-5 h-5" />, color: 'text-cyan-400', isText: true },
+          { label: 'Scheduled', value: scheduledCount, icon: <Clock className="w-5 h-5" />, color: 'text-[#5AAFA4]' },
+          { label: 'Live Bids', value: totalBidsToday, icon: <Users className="w-5 h-5" />, color: 'text-[#13B8A6]' },
+          { label: 'Next Starts In', value: nextAuctionTime, icon: <CalendarClock className="w-5 h-5" />, color: 'text-[#5AAFA4]', isText: true },
         ].map((item, i) => (
           <div key={i} className="text-center">
             <div className={`flex items-center justify-center mb-2 ${item.color}`}>{item.icon}</div>
@@ -177,7 +177,7 @@ const HeroSummary: React.FC<{ liveCount: number; scheduledCount: number; totalBi
             ) : (
               <p className="text-2xl font-black text-white">{item.value}</p>
             )}
-            <p className="text-xs text-slate-300 mt-1">{item.label}</p>
+            <p className="text-xs text-[#BDE5DE] mt-1">{item.label}</p>
           </div>
         ))}
       </div>
@@ -205,29 +205,29 @@ const LiveAuctionCard: React.FC<{ auction: Auction; onWatch: () => void }> = ({ 
       </div>
       <div className="absolute top-3 right-3">
         <button className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
-          <Bookmark className="w-4 h-4 text-slate-600" />
+          <Bookmark className="w-4 h-4 text-[#64748B]" />
         </button>
       </div>
     </div>
     <div className="p-4">
       <h3 className="font-bold text-[#176B87] text-sm mb-2 line-clamp-1">{auction.vehicle.title}</h3>
-      <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <div className="flex items-center gap-2 text-xs text-[#64748B] mb-3">
         <MapPin className="w-3 h-3" />
         <span>{auction.vehicle.location}</span>
       </div>
-      <div className="bg-gradient-to-br from-[#176B87] to-[#2a4080] rounded-lg p-3 text-white mb-3">
+      <div className="bg-gradient-to-br from-[#176B87] to-[#176b87] rounded-lg p-3 text-white mb-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-300">Current Bid</p>
+            <p className="text-xs text-[#BDE5DE]">Current Bid</p>
             <p className="text-lg font-black">{formatCurrency(auction.currentBid)}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-300">Ends In</p>
-            <p className="text-sm font-bold text-amber-300">{formatTimeRemaining(auction.endsAt)}</p>
+            <p className="text-xs text-[#BDE5DE]">Ends In</p>
+            <p className="text-sm font-bold text-[#5AAFA4]">{formatTimeRemaining(auction.endsAt)}</p>
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+      <div className="flex items-center justify-between text-xs text-[#64748B] mb-3">
         <span>{auction.bidsCount} bids</span>
       </div>
       {auction.organizerName && (
@@ -235,11 +235,11 @@ const LiveAuctionCard: React.FC<{ auction: Auction; onWatch: () => void }> = ({ 
           <div className="w-6 h-6 rounded-full bg-[#176B87] flex items-center justify-center text-white text-xs font-bold">
             {auction.organizerName.charAt(0)}
           </div>
-          <span className="text-xs text-slate-600 truncate">{auction.organizerName}</span>
+          <span className="text-xs text-[#64748B] truncate">{auction.organizerName}</span>
           {auction.organizerVerified && <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
         </div>
       )}
-      <Button className="w-full bg-[#176B87] hover:bg-[#a84a28]" onClick={onWatch}>
+      <Button className="w-full bg-[#176B87] hover:bg-[#12576d]" onClick={onWatch}>
         <Play className="w-4 h-4 mr-2" /> Watch Live
       </Button>
     </div>
@@ -252,7 +252,7 @@ const UpcomingAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
       <img src={auction.vehicle.image} alt={auction.vehicle.title} className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <Badge className="bg-blue-100 text-blue-700 text-xs">
+          <Badge className="bg-[#DDF4F0] text-[#12576D] text-xs">
             <CalendarClock className="w-3 h-3 mr-1" />
             {auction.startsAt ? `Starts ${formatDate(auction.startsAt)}` : 'Date TBD'}
           </Badge>
@@ -263,9 +263,9 @@ const UpcomingAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
           )}
         </div>
         <h3 className="font-bold text-[#176B87] text-sm mb-1">{auction.vehicle.title}</h3>
-        <p className="text-xs text-slate-500 mb-2">{auction.vehicle.year} {auction.vehicle.mileage && `• ${auction.vehicle.mileage}`}</p>
+        <p className="text-xs text-[#64748B] mb-2">{auction.vehicle.year} {auction.vehicle.mileage && `• ${auction.vehicle.mileage}`}</p>
         {auction.organizerName && (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-[#64748B]">
             <div className="flex items-center gap-1">
               <Building2 className="w-3 h-3" />
               <span>{auction.organizerName}</span>
@@ -276,9 +276,9 @@ const UpcomingAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
       </div>
     </div>
     {auction.startingBid > 0 && (
-      <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+      <div className="px-4 pb-4 border-t border-[#D7E7E4] pt-3">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-500">Starting Bid</span>
+          <span className="text-[#64748B]">Starting Bid</span>
           <span className="font-bold text-[#176B87]">{formatCurrency(auction.startingBid)}</span>
         </div>
       </div>
@@ -292,28 +292,28 @@ const CompletedAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
       <img src={auction.vehicle.image} alt={auction.vehicle.title} className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <Badge className="bg-slate-100 text-slate-600 text-xs">
+          <Badge className="bg-[#EEF7F5] text-[#64748B] text-xs">
             <CheckCircle2 className="w-3 h-3 mr-1" /> Completed
           </Badge>
-          {auction.endsAt && <span className="text-xs text-slate-500">{formatDate(auction.endsAt)}</span>}
+          {auction.endsAt && <span className="text-xs text-[#64748B]">{formatDate(auction.endsAt)}</span>}
         </div>
         <h3 className="font-bold text-[#176B87] text-sm mb-1">{auction.vehicle.title}</h3>
         {auction.organizerName && (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-[#64748B]">
             <Building2 className="w-3 h-3" />
             <span>{auction.organizerName}</span>
           </div>
         )}
       </div>
     </div>
-    <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+    <div className="px-4 pb-4 border-t border-[#D7E7E4] pt-3">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-xs text-slate-500">Final Price</p>
+          <p className="text-xs text-[#64748B]">Final Price</p>
           <p className="text-lg font-black text-[#176B87]">{formatCurrency(auction.currentBid)}</p>
         </div>
       </div>
-      <div className="flex items-center justify-between text-xs text-slate-500">
+      <div className="flex items-center justify-between text-xs text-[#64748B]">
         <span>{auction.bidsCount} bids</span>
         <span>{auction.bidsCount > 10 ? 'Competitive' : 'Standard'}</span>
       </div>
@@ -329,8 +329,8 @@ const LearningArticleCard: React.FC<{ article: LearningArticle }> = ({ article }
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="font-bold text-[#176B87] text-sm mb-1 group-hover:text-[#176B87] transition-colors">{article.title}</h3>
-        <p className="text-xs text-slate-500 mb-2 line-clamp-2">{article.description}</p>
-        <span className="text-xs text-slate-400">{article.readTime} read</span>
+        <p className="text-xs text-[#64748B] mb-2 line-clamp-2">{article.description}</p>
+        <span className="text-xs text-[#94A3B8]">{article.readTime} read</span>
       </div>
     </div>
   </Card>
@@ -344,7 +344,7 @@ const NewsletterSection: React.FC = () => {
     if (email) setSubscribed(true);
   };
   return (
-    <div className="bg-gradient-to-br from-[#176B87] to-[#a84a28] py-12">
+    <div className="bg-gradient-to-br from-[#176B87] to-[#12576d] py-12">
       <div className="max-w-2xl mx-auto px-4 text-center">
         <Mail className="w-12 h-12 text-white/80 mx-auto mb-4" />
         <h2 className="text-2xl font-black text-white mb-2">Stay in the Loop</h2>
@@ -454,19 +454,19 @@ const WatchLiveModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-[#0A3340]/70 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+        <div className="flex items-center justify-between p-4 border-b border-[#D7E7E4]">
           <h2 className="font-bold text-[#176B87] flex items-center gap-2">
             <Radio className="w-4 h-4 text-red-500" /> Watch Live
           </h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg">
-            <X className="w-5 h-5 text-slate-500" />
+          <button onClick={onClose} className="p-1.5 hover:bg-[#EEF7F5] rounded-lg">
+            <X className="w-5 h-5 text-[#64748B]" />
           </button>
         </div>
 
         {loading ? (
-          <div className="p-10 text-center text-slate-400">
+          <div className="p-10 text-center text-[#94A3B8]">
             <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" />
             <p className="text-sm">Loading live auction…</p>
           </div>
@@ -480,49 +480,49 @@ const WatchLiveModal: React.FC<{
             <img src={auction.vehicle.image} alt={auction.vehicle.title} className="w-full h-40 object-cover rounded-xl" />
             <div>
               <h3 className="font-bold text-[#176B87]">{auction.vehicle.title}</h3>
-              <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+              <p className="text-xs text-[#64748B] flex items-center gap-1 mt-1">
                 <MapPin className="w-3 h-3" /> {auction.vehicle.location}
               </p>
             </div>
-            <div className="bg-gradient-to-br from-[#176B87] to-[#2a4080] rounded-xl p-4 text-white grid grid-cols-3 gap-2 text-center">
+            <div className="bg-gradient-to-br from-[#176B87] to-[#176b87] rounded-xl p-4 text-white grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-[10px] text-slate-300">Current Bid</p>
+                <p className="text-[10px] text-[#BDE5DE]">Current Bid</p>
                 <p className="text-base font-black">{formatCurrency(auction.currentBid)}</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-300">Bids</p>
+                <p className="text-[10px] text-[#BDE5DE]">Bids</p>
                 <p className="text-base font-black">{auction.bidsCount}</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-300">Ends In</p>
-                <p className="text-base font-black text-amber-300">{formatTimeRemaining(auction.endsAt)}</p>
+                <p className="text-[10px] text-[#BDE5DE]">Ends In</p>
+                <p className="text-base font-black text-[#5AAFA4]">{formatTimeRemaining(auction.endsAt)}</p>
               </div>
             </div>
 
             {auction.allowBid ? (
-              <form onSubmit={handleBid} className="space-y-2 pt-2 border-t border-slate-100">
-                <label className="text-xs font-bold text-slate-600 block">Place a real bid</label>
+              <form onSubmit={handleBid} className="space-y-2 pt-2 border-t border-[#D7E7E4]">
+                <label className="text-xs font-bold text-[#64748B] block">Place a real bid</label>
                 <input
                   type="number"
                   placeholder={`More than ${formatCurrency(auction.currentBid)}`}
                   value={bidAmount}
                   onChange={(e) => setBidAmount(e.target.value)}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
+                  className="w-full p-3 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-sm"
                 />
                 <input
                   type="tel"
                   placeholder="Phone number for bid confirmation"
                   value={bidPhone}
                   onChange={(e) => setBidPhone(e.target.value)}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
+                  className="w-full p-3 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-sm"
                 />
                 {bidError && <p className="text-xs text-rose-600">{bidError}</p>}
-                <Button type="submit" disabled={placing} className="w-full bg-[#176B87] hover:bg-[#a84a28]">
+                <Button type="submit" disabled={placing} className="w-full bg-[#176B87] hover:bg-[#12576d]">
                   {placing ? 'Placing Bid…' : user ? 'Place Bid' : 'Sign In to Bid'}
                 </Button>
               </form>
             ) : (
-              <p className="text-xs text-slate-400 text-center pt-2 border-t border-slate-100">Bidding is not currently open on this auction.</p>
+              <p className="text-xs text-[#94A3B8] text-center pt-2 border-t border-[#D7E7E4]">Bidding is not currently open on this auction.</p>
             )}
           </div>
         ) : null}
@@ -625,16 +625,16 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
         nextAuctionTime={nextAuctionTime}
       />
 
-      <div className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <div className="sticky top-0 z-40 bg-white border-b border-[#D7E7E4] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search auctions by vehicle or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/30"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/30"
             />
           </div>
         </div>
@@ -642,7 +642,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         {loading ? (
-          <div className="py-20 text-center text-slate-400">
+          <div className="py-20 text-center text-[#94A3B8]">
             <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" />
             <p className="text-sm">Loading auctions…</p>
           </div>
@@ -659,10 +659,10 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
                 <h2 className="text-2xl font-black text-[#176B87] flex items-center gap-2">
                   <Radio className="w-5 h-5 text-red-500" /> Live Now
                 </h2>
-                <span className="text-xs text-slate-500">{filteredLive.length} active auctions</span>
+                <span className="text-xs text-[#64748B]">{filteredLive.length} active auctions</span>
               </div>
               {filteredLive.length === 0 ? (
-                <p className="text-sm text-slate-400 py-6 text-center">No live auctions right now. Check back soon.</p>
+                <p className="text-sm text-[#94A3B8] py-6 text-center">No live auctions right now. Check back soon.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredLive.map((a) => (
@@ -676,10 +676,10 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-black text-[#176B87]">Starting Soon</h2>
-                <span className="text-xs text-slate-500">Beginning soon</span>
+                <span className="text-xs text-[#64748B]">Beginning soon</span>
               </div>
               {filteredUpcoming.length === 0 ? (
-                <p className="text-sm text-slate-400 py-6 text-center">No upcoming auctions scheduled right now.</p>
+                <p className="text-sm text-[#94A3B8] py-6 text-center">No upcoming auctions scheduled right now.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredUpcoming.map((a) => <UpcomingAuctionCard key={a.id} auction={a} />)}
@@ -693,7 +693,7 @@ const AuctionDiscoveryNetwork: React.FC<AuctionDiscoveryNetworkProps> = ({ user,
                 <h2 className="text-2xl font-black text-[#176B87]">Recently Completed</h2>
               </div>
               {filteredCompleted.length === 0 ? (
-                <p className="text-sm text-slate-400 py-6 text-center">No completed auctions to show yet.</p>
+                <p className="text-sm text-[#94A3B8] py-6 text-center">No completed auctions to show yet.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredCompleted.map((a) => <CompletedAuctionCard key={a.id} auction={a} />)}

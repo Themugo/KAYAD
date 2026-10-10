@@ -63,10 +63,10 @@ export default function CarCard({
     return (
       <div
         onClick={onClick}
-        className="group flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-cream-200 hover:border-gold-500/50"
+        className="group flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-[#D7E7E4] hover:border-[#5AAFA4]/50"
       >
         {/* Image */}
-        <div className="relative w-full sm:w-72 h-48 sm:h-auto flex-shrink-0 overflow-hidden bg-cream-100">
+        <div className="relative w-full sm:w-72 h-48 sm:h-auto flex-shrink-0 overflow-hidden bg-[#EEF7F5]">
           <LazyImage
             src={car.image}
             alt={`${car.make} ${car.model}`}
@@ -77,9 +77,9 @@ export default function CarCard({
             style={{ opacity: imgLoaded ? 1 : 0 }}
           />
           {!imgLoaded && (
-            <div className="absolute inset-0 bg-cream-200 animate-pulse" />
+            <div className="absolute inset-0 bg-[#DDF4F0] animate-pulse" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0A3340]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -90,7 +90,7 @@ export default function CarCard({
               </span>
             )}
             {(car.badges ?? []).includes('escrow') && (
-              <span className="card-badge bg-charcoal-900/90 text-white backdrop-blur-sm">
+              <span className="card-badge bg-[#0A3340]/90 text-white backdrop-blur-sm">
                 <Shield size={10} />
                 ESCROW
               </span>
@@ -108,8 +108,8 @@ export default function CarCard({
               onClick={(e) => { e.stopPropagation(); onToggleCompare(); }}
               className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all hover:scale-110 border ${
                 isComparing
-                  ? 'bg-gold-500 text-white border-gold-500 opacity-100'
-                  : 'bg-black/60 text-white border-white/20 hover:border-gold-500 opacity-0 group-hover:opacity-100'
+                  ? 'bg-[#13B8A6] text-white border-[#5AAFA4] opacity-100'
+                  : 'bg-[#0A3340]/60 text-white border-white/20 hover:border-[#5AAFA4] opacity-0 group-hover:opacity-100'
               }`}
               title={isComparing ? 'Remove from compare' : 'Add to compare'}
             >
@@ -123,7 +123,7 @@ export default function CarCard({
           <div className="flex justify-between items-start gap-4">
             <div className="flex-1 min-w-0">
               <p className="section-label mb-1">{car.make}</p>
-              <h3 className="font-serif text-xl text-charcoal-900 font-semibold mb-2 group-hover:text-gold-600 transition-colors">
+              <h3 className="font-serif text-xl text-[#0A3340] font-semibold mb-2 group-hover:text-[#176B87] transition-colors">
                 {car.model}
               </h3>
 
@@ -147,7 +147,7 @@ export default function CarCard({
               <p className="text-[10px] font-sans font-semibold tracking-widest text-warm-400 uppercase mb-1">
                 {isOnAuction ? (car.currentBid ? 'Current Bid' : 'Starting Bid') : 'Price'}
               </p>
-              <p className="font-serif text-2xl text-charcoal-900 font-semibold">
+              <p className="font-serif text-2xl text-[#0A3340] font-semibold">
                 {formatKES(currentPrice)}
               </p>
               {car.isNegotiable && (
@@ -157,7 +157,7 @@ export default function CarCard({
           </div>
 
           {/* Footer */}
-          <div className="mt-auto pt-4 border-t border-cream-200 flex items-center justify-between">
+          <div className="mt-auto pt-4 border-t border-[#D7E7E4] flex items-center justify-between">
             <div className="flex items-center gap-3">
               {car.dealerName && (
                 <span className="text-sm text-warm-400">
@@ -173,7 +173,7 @@ export default function CarCard({
               {onFavorite && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onFavorite(car.id); }}
-                  className="p-2 rounded-full hover:bg-cream-100 transition-colors"
+                  className="p-2 rounded-full hover:bg-[#EEF7F5] transition-colors"
                 >
                   <Heart
                     size={18}
@@ -181,7 +181,7 @@ export default function CarCard({
                   />
                 </button>
               )}
-              <span className="text-gold-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
+              <span className="text-[#176B87] text-sm font-medium group-hover:translate-x-1 transition-transform">
                 View →
               </span>
             </div>
@@ -195,7 +195,7 @@ export default function CarCard({
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-cream-200 hover:border-gold-500/50 hover:-translate-y-1"
+      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-[#D7E7E4] hover:border-[#5AAFA4]/50 hover:-translate-y-1"
     >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
@@ -209,11 +209,11 @@ export default function CarCard({
           style={{ opacity: imgLoaded ? 1 : 0 }}
         />
         {!imgLoaded && (
-          <div className="absolute inset-0 bg-cream-200 animate-pulse" />
+          <div className="absolute inset-0 bg-[#DDF4F0] animate-pulse" />
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0A3340]/60 to-transparent" />
 
         {/* Badges - Top Left */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -224,7 +224,7 @@ export default function CarCard({
             </span>
           )}
           {(car.badges ?? []).includes('escrow') && (
-            <span className="card-badge bg-charcoal-900/90 text-white backdrop-blur-sm">
+            <span className="card-badge bg-[#0A3340]/90 text-white backdrop-blur-sm">
               <Shield size={10} />
               ESCROW
             </span>
@@ -241,7 +241,7 @@ export default function CarCard({
           {onFavorite && (
             <button
               onClick={(e) => { e.stopPropagation(); onFavorite(car.id); }}
-              className="p-2 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full transition-all hover:scale-110"
+              className="p-2 bg-[#0A3340]/60 hover:bg-[#0A3340]/80 backdrop-blur-sm rounded-full transition-all hover:scale-110"
             >
               <Heart
                 size={18}
@@ -257,8 +257,8 @@ export default function CarCard({
             onClick={(e) => { e.stopPropagation(); onToggleCompare(); }}
             className={`absolute top-3 right-14 p-2 rounded-full backdrop-blur-md transition-all hover:scale-110 border ${
               isComparing
-                ? 'bg-gold-500 text-white border-gold-500'
-                : 'bg-black/60 text-white border-white/20 hover:border-gold-500 opacity-0 group-hover:opacity-100'
+                ? 'bg-[#13B8A6] text-white border-[#5AAFA4]'
+                : 'bg-[#0A3340]/60 text-white border-white/20 hover:border-[#5AAFA4] opacity-0 group-hover:opacity-100'
             }`}
             title={isComparing ? 'Remove from compare' : 'Add to compare'}
           >
@@ -276,7 +276,7 @@ export default function CarCard({
         {/* Year badge */}
         {car.year && (
           <div className="absolute bottom-3 left-3">
-            <span className="bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <span className="bg-[#0A3340]/60 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
               {car.year}
             </span>
           </div>
@@ -286,20 +286,20 @@ export default function CarCard({
       {/* Details */}
       <div className="p-5">
         <p className="section-label mb-1">{car.make}</p>
-        <h3 className="font-serif text-xl text-charcoal-900 font-semibold mb-2 line-clamp-1 group-hover:text-gold-600 transition-colors duration-200">
+        <h3 className="font-serif text-xl text-[#0A3340] font-semibold mb-2 line-clamp-1 group-hover:text-[#176B87] transition-colors duration-200">
           {car.model}
         </h3>
 
         {/* Quick Specs */}
         <div className="flex flex-wrap gap-2 mb-3">
-          <span className="text-xs px-2.5 py-1 bg-cream-100 rounded-md text-warm-500">
+          <span className="text-xs px-2.5 py-1 bg-[#EEF7F5] rounded-md text-warm-500">
             {car.mileage}
           </span>
-          <span className="text-xs px-2.5 py-1 bg-cream-100 rounded-md text-warm-500">
+          <span className="text-xs px-2.5 py-1 bg-[#EEF7F5] rounded-md text-warm-500">
             {car.fuel}
           </span>
           {car.transmission && (
-            <span className="text-xs px-2.5 py-1 bg-cream-100 rounded-md text-warm-500">
+            <span className="text-xs px-2.5 py-1 bg-[#EEF7F5] rounded-md text-warm-500">
               {car.transmission}
             </span>
           )}
@@ -321,7 +321,7 @@ export default function CarCard({
         )}
 
         {/* Divider */}
-        <div className="h-px bg-gold-500/20 my-3" />
+        <div className="h-px bg-[#13B8A6]/20 my-3" />
 
         {/* Price */}
         <div className="flex items-end justify-between">
@@ -329,7 +329,7 @@ export default function CarCard({
             <p className="text-[10px] font-sans font-semibold tracking-widest text-warm-400 uppercase">
               {isOnAuction ? (car.currentBid ? 'Current Bid' : 'Starting Bid') : 'Price'}
             </p>
-            <p className="font-serif text-2xl text-charcoal-900 font-semibold tracking-wide">
+            <p className="font-serif text-2xl text-[#0A3340] font-semibold tracking-wide">
               {formatKES(currentPrice)}
             </p>
             {car.isNegotiable && (
@@ -337,7 +337,7 @@ export default function CarCard({
             )}
           </div>
 
-          <span className="text-gold-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
+          <span className="text-[#176B87] text-sm font-medium group-hover:translate-x-1 transition-transform">
             View →
           </span>
         </div>

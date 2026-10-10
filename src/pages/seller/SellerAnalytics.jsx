@@ -89,7 +89,7 @@ export default function SellerAnalytics() {
               onClick={() => setPeriod(p)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 period === p
-                  ? 'bg-gold text-black'
+                  ? 'bg-gold text-[#0A3340]'
                   : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}
             >
@@ -170,7 +170,7 @@ export default function SellerAnalytics() {
                         car.status === 'sold'
                           ? 'bg-green-500/20 text-green-400'
                           : car.status === 'active'
-                          ? 'bg-blue-500/20 text-blue-400'
+                          ? 'bg-[#13B8A6]/20 text-[#5AAFA4]'
                           : 'bg-white/10 text-white/40'
                       }`}>
                         {car.status}

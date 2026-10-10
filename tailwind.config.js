@@ -11,91 +11,56 @@ export default {
         technical: ['Outfit', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Midnight navy — replaces brownish charcoal throughout
+        // KAYAD Slate Teal compatibility palette
         charcoal: {
-          950: '#060D18',
-          900: '#0A1626',
-          800: '#0D1E33',
-          700: '#112440',
-          600: '#15294A',
+          950: '#0A3340', 900: '#0A3340', 800: '#12576D', 700: '#12576D', 600: '#176B87',
         },
         cream: {
-          50:  '#FDFAF5',
-          100: '#F7F2E8',
-          200: '#EDE7D9',
-          300: '#E0D8C8',
-          400: '#CEC4B0',
+          50: '#F6FAF9', 100: '#EEF7F5', 200: '#DDF4F0', 300: '#BDE5DE', 400: '#91CEC5',
         },
-        // Surface containers (Stitch Design System)
+        // Cool white and mint surface containers
         surface: {
-          base:   '#fcf9f4',
-          dim:    '#dcdad5',
-          bright: '#fcf9f4',
-          lowest: '#ffffff',
-          low:    '#f6f3ee',
-          DEFAULT:'#f0ede9',
-          high:   '#ebe8e3',
-          highest:'#e5e2dd',
+          base: '#F6FAF9', dim: '#D7E7E4', bright: '#F6FAF9', lowest: '#FFFFFF',
+          low: '#EEF7F5', DEFAULT: '#F6FAF9', high: '#DDF4F0', highest: '#BDE5DE',
         },
-        // Vivid mint-teal / emerald — main brand color (green)
+        // Canonical KAYAD Slate Teal brand scale
         brand: {
-          50:  '#ECFDF5',
-          100: '#D1FAE5',
-          200: '#A7F3D0',
-          300: '#6EE7B7',
-          400: '#2DD9BE',
-          500: '#16C4A4',   // Primary brand green
-          600: '#109E85',
-          700: '#0C7B68',
-          800: '#065F46',
-          900: '#064E3B',
+          50: '#F3FAF9', 100: '#DDF4F0', 200: '#BDE5DE', 300: '#91CEC5',
+          400: '#5AAFA4', 500: '#2F8F87', 600: '#176B87', 700: '#12576D',
+          800: '#0E4655', 900: '#0A3340',
         },
-        // Legacy "gold" references mapped to brand (green)
+        // Deprecated gold utility names resolve to the original KAYAD Slate Teal palette.
         gold: {
-          50:  '#ECFDF5',
-          100: '#D1FAE5',
-          200: '#A7F3D0',
-          300: '#6EE7B7',
-          400: '#2DD9BE',
-          500: '#16C4A4',   // Primary brand green
-          600: '#109E85',
-          700: '#0C7B68',
-          800: '#065F46',
-          900: '#064E3B',
+          50: '#F3FAF9', 100: '#DDF4F0', 200: '#BDE5DE', 300: '#91CEC5',
+          400: '#5AAFA4', 500: '#2F8F87', 600: '#176B87', 700: '#12576D',
+          800: '#0E4655', 900: '#0A3340',
         },
-        // Accent colors
+        // Accent aliases from the canonical brand scale
         accent: {
-          400: '#60A5FA',
-          500: '#3B82F6',
-          600: '#2563EB',
+          400: '#5AAFA4', 500: '#176B87', 600: '#12576D',
         },
         warm: {
-          100: '#F5EFE6',
-          200: '#E8DFD0',
-          300: '#C8BFB0',
-          400: '#9A9088',
-          500: '#6E6660',
-          600: '#4A4540',
-          700: '#2E2B28',
+          100: '#F6FAF9', 200: '#EEF7F5', 300: '#DDF4F0',
+          400: '#BDE5DE', 500: '#91CEC5', 600: '#5AAFA4', 700: '#176B87',
         },
-        // Semantic colors
-        success: '#10B981',
+        // Semantic colors: status meaning remains distinct; warning/info use the brand palette
+        success: '#2F8F87',
         danger: '#EF4444',
-        warning: '#F59E0B',
-        info: '#3B82F6',
+        warning: '#176B87',
+        info: '#176B87',
       },
       backgroundImage: {
-        // Updated to use navy rgba (0A1626 = rgb 10,22,38)
-        'hero-gradient': 'linear-gradient(to right, rgba(10,22,38,0.95) 45%, rgba(10,22,38,0.5) 100%)',
-        'dark-gradient': 'linear-gradient(180deg, rgba(10,22,38,0) 0%, rgba(10,22,38,0.85) 100%)',
+        // Deep Slate Teal overlays for premium, brand-consistent hero surfaces
+        'hero-gradient': 'linear-gradient(to right, rgba(10,51,64,0.95) 45%, rgba(10,51,64,0.5) 100%)',
+        'dark-gradient': 'linear-gradient(180deg, rgba(10,51,64,0) 0%, rgba(10,51,64,0.85) 100%)',
         // Brand gradient
-        'brand-gradient': 'linear-gradient(135deg, #16C4A4, #0C7B68)',
-        'brand-gradient-light': 'linear-gradient(135deg, #2DD9BE, #16C4A4)',
+        'brand-gradient': 'linear-gradient(135deg, #176B87, #12576D)',
+        'brand-gradient-light': 'linear-gradient(135deg, #13B8A6, #176B87)',
       },
       boxShadow: {
-        'brand': '0 4px 14px 0 rgba(22, 196, 164, 0.25)',
-        'brand-lg': '0 8px 30px 0 rgba(22, 196, 164, 0.35)',
-        'brand-glow': '0 0 20px rgba(22, 196, 164, 0.3)',
+        'brand': '0 4px 14px 0 rgba(19, 184, 166, 0.25)',
+        'brand-lg': '0 8px 30px 0 rgba(19, 184, 166, 0.35)',
+        'brand-glow': '0 0 20px rgba(19, 184, 166, 0.3)',
       },
       borderRadius: {
         DEFAULT: '12px',

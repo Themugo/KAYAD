@@ -402,19 +402,19 @@ export async function deleteSeasonalTheme(req, res) {
 
 export async function getSeasonalThemeTemplates(req, res) {
   const templates = [
-    { id: 'christmas', name: 'Christmas', icon: 'gift', colors: ['#C41E3A', '#228B22', '#FFD700'] },
-    { id: 'new_year', name: 'New Year', icon: 'sparkles', colors: ['#1a1a2e', '#FFD700', '#C0C0C0'] },
-    { id: 'easter', name: 'Easter', icon: 'egg', colors: ['#FFB6C1', '#98FB98', '#87CEEB'] },
-    { id: 'eid', name: 'Eid', icon: 'moon', colors: ['#1B4D3E', '#C9A227', '#FFFFFF'] },
-    { id: 'madaraka', name: 'Madaraka Day', icon: 'flag', colors: ['#006600', '#BB0000', '#FFFFFF'] },
-    { id: 'jamhuri', name: 'Jamhuri Day', icon: 'star', colors: ['#00008B', '#FFD700', '#FFFFFF'] },
-    { id: 'auction_week', name: 'Auction Week', icon: 'gavel', colors: ['#17244B', '#C77B58', '#FFFFFF'] },
-    { id: 'dealer_week', name: 'Dealer Week', icon: 'building', colors: ['#10B981', '#17244B', '#FFFFFF'] },
-    { id: 'finance_week', name: 'Finance Week', icon: 'calculator', colors: ['#60A5FA', '#17244B', '#FFFFFF'] },
-    { id: 'motor_show', name: 'Motor Show', icon: 'car', colors: ['#17244B', '#FB923C', '#FFFFFF'] },
-    { id: 'vehicle_expo', name: 'Vehicle Expo', icon: 'zap', colors: ['#8B5CF6', '#17244B', '#FFFFFF'] },
-    { id: 'summer_sale', name: 'Summer Sale', icon: 'sun', colors: ['#FB923C', '#F59E0B', '#FFFFFF'] },
-    { id: 'appreciation', name: 'Customer Appreciation', icon: 'heart', colors: ['#EC4899', '#F472B6', '#FFFFFF'] },
+    { id: 'christmas', name: 'Christmas', icon: 'gift', colors: ['#0A3340', '#176B87', '#13B8A6'] },
+    { id: 'new_year', name: 'New Year', icon: 'sparkles', colors: ['#0A3340', '#13B8A6', '#F6FAF9'] },
+    { id: 'easter', name: 'Easter', icon: 'egg', colors: ['#DDF4F0', '#5AAFA4', '#176B87'] },
+    { id: 'eid', name: 'Eid', icon: 'moon', colors: ['#0A3340', '#13B8A6', '#FFFFFF'] },
+    { id: 'madaraka', name: 'Madaraka Day', icon: 'flag', colors: ['#12576D', '#13B8A6', '#FFFFFF'] },
+    { id: 'jamhuri', name: 'Jamhuri Day', icon: 'star', colors: ['#0A3340', '#13B8A6', '#FFFFFF'] },
+    { id: 'auction_week', name: 'Auction Week', icon: 'gavel', colors: ['#176B87', '#13B8A6', '#FFFFFF'] },
+    { id: 'dealer_week', name: 'Dealer Week', icon: 'building', colors: ['#5AAFA4', '#0A3340', '#FFFFFF'] },
+    { id: 'finance_week', name: 'Finance Week', icon: 'calculator', colors: ['#13B8A6', '#0A3340', '#FFFFFF'] },
+    { id: 'motor_show', name: 'Motor Show', icon: 'car', colors: ['#176B87', '#13B8A6', '#FFFFFF'] },
+    { id: 'vehicle_expo', name: 'Vehicle Expo', icon: 'zap', colors: ['#5AAFA4', '#0A3340', '#FFFFFF'] },
+    { id: 'summer_sale', name: 'Summer Sale', icon: 'sun', colors: ['#13B8A6', '#176B87', '#FFFFFF'] },
+    { id: 'appreciation', name: 'Customer Appreciation', icon: 'heart', colors: ['#5AAFA4', '#DDF4F0', '#FFFFFF'] },
   ];
 
   res.json({ success: true, data: templates });

@@ -5,10 +5,10 @@ import { timeAgo } from './DashboardWidgets';
 
 const STAGE_CONFIG = {
   new:             { label: 'New',           color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
-  contacted:       { label: 'Contacted',     color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-  negotiating:     { label: 'Negotiating',   color: '#f97316', bg: 'rgba(249,115,22,0.1)' },
-  test_drive:      { label: 'Test Drive',    color: '#a855f7', bg: 'rgba(168,85,247,0.1)' },
-  escrow_started:  { label: 'Escrow',         color: '#ec4899', bg: 'rgba(236,72,153,0.1)' },
+  contacted:       { label: 'Contacted',     color: '#176B87', bg: 'rgba(23, 107, 135, 0.1)' },
+  negotiating:     { label: 'Negotiating',   color: '#176b87', bg: 'rgba(19, 184, 166, 0.1)' },
+  test_drive:      { label: 'Test Drive',    color: '#5aafa4', bg: 'rgba(168,85,247,0.1)' },
+  escrow_started:  { label: 'Escrow',         color: '#13B8A6', bg: 'rgba(19, 184, 166, 0.1)' },
   sold:            { label: 'Sold',           color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
   lost:            { label: 'Lost',           color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
 };
@@ -88,9 +88,9 @@ export default function DealerLeadsTab({ toast }) {
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
         <button onClick={() => setFilter('')}
           style={{ padding: '5px 12px', borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: 'pointer',
-            background: !filter ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${!filter ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
-            color: !filter ? '#000' : 'rgba(255,255,255,0.5)' }}>
+            background: !filter ? 'var(--brand)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${!filter ? 'var(--brand)' : 'rgba(255,255,255,0.08)'}`,
+            color: !filter ? '#0a3340' : 'rgba(255,255,255,0.5)' }}>
           All
         </button>
         {Object.entries(STAGE_CONFIG).map(([key, cfg]) => (
@@ -157,7 +157,7 @@ export default function DealerLeadsTab({ toast }) {
                       </span>}
                     </div>
                     {vehicle.title && (
-                      <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600 }}>
+                      <span style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600 }}>
                         Interested in: {vehicle.title}
                       </span>
                     )}

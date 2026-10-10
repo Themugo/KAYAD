@@ -19,11 +19,11 @@ export default function CompareDrawer() {
   if (compareIds.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] bg-charcoal-950/95 border border-gold-500/25 rounded-full px-3 py-2 flex items-center gap-3 shadow-xl backdrop-blur-md max-w-[calc(100vw-2rem)]">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] bg-[#0A3340]/95 border border-[#5AAFA4]/25 rounded-full px-3 py-2 flex items-center gap-3 shadow-xl backdrop-blur-md max-w-[calc(100vw-2rem)]">
       {/* Icon and count */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        <BarChart3 size={14} className="text-gold-400" />
-        <span className="text-xs font-bold text-gold-400">
+        <BarChart3 size={14} className="text-[#13B8A6]" />
+        <span className="text-xs font-bold text-[#13B8A6]">
           Compare {compareCount}/{maxCompare}
         </span>
       </div>
@@ -31,7 +31,7 @@ export default function CompareDrawer() {
       {/* Car thumbnails */}
       <div className="flex gap-1.5">
         {cars.slice(0, maxCompare).map(car => (
-          <div key={car.id} className="relative w-10 h-7 rounded overflow-hidden border border-gold-500/25 bg-charcoal-800 flex-shrink-0">
+          <div key={car.id} className="relative w-10 h-7 rounded overflow-hidden border border-[#5AAFA4]/25 bg-[#12576D] flex-shrink-0">
             <img
               src={car.image}
               alt={car.model}
@@ -43,7 +43,7 @@ export default function CompareDrawer() {
             <button
               onClick={() => removeCar(String(car.id))}
               aria-label="Remove"
-              className="absolute top-0 right-0 w-3.5 h-3.5 rounded-bl bg-black/75 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
+              className="absolute top-0 right-0 w-3.5 h-3.5 rounded-bl bg-[#0A3340]/75 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
             >
               <X size={8} />
             </button>
@@ -61,7 +61,7 @@ export default function CompareDrawer() {
         </button>
         <Link
           to="/compare"
-          className={`inline-flex items-center gap-1 bg-gold-500 rounded-full px-3 py-1.5 text-charcoal-950 text-xs font-bold no-underline transition-all ${
+          className={`inline-flex items-center gap-1 bg-[#13B8A6] rounded-full px-3 py-1.5 text-[#0A3340] text-xs font-bold no-underline transition-all ${
             compareCount < 2 ? 'opacity-50 pointer-events-none' : ''
           }`}
         >

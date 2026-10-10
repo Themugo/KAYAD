@@ -3,17 +3,17 @@ import type { FC } from 'react';
 
 export const PartnerEcosystem: FC = () => {
   const services = [
-    { name: 'M-Pesa', role: 'Payment Integration', icon: <CreditCard className="w-5 h-5 text-slate-400" /> },
-    { name: 'KAYAD Escrow', role: 'Transaction Workflow', icon: <Workflow className="w-5 h-5 text-slate-400" /> },
-    { name: 'KAYAD Inspections', role: 'Inspection Workflow', icon: <ShieldCheck className="w-5 h-5 text-slate-400" /> },
+    { name: 'M-Pesa', role: 'Payment Integration', icon: <CreditCard className="w-5 h-5 text-[#94A3B8]" /> },
+    { name: 'KAYAD Escrow', role: 'Transaction Workflow', icon: <Workflow className="w-5 h-5 text-[#94A3B8]" /> },
+    { name: 'KAYAD Inspections', role: 'Inspection Workflow', icon: <ShieldCheck className="w-5 h-5 text-[#94A3B8]" /> },
   ];
   return (
-    <section className="py-10 bg-[#EEF7F5] dark:bg-[#080E1A] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
+    <section className="py-10 bg-[#EEF7F5] dark:bg-[#0a3340] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
         {/* Header Label */}
         <div className="text-center">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#66808A] dark:text-slate-400">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#64748b] dark:text-[#94A3B8]">
             Verified Integrations & Services
           </span>
         </div>
@@ -28,10 +28,10 @@ export const PartnerEcosystem: FC = () => {
               <div className="w-8 h-8 rounded-xl bg-[#176B87]/10 dark:bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform">
                 {partner.icon}
               </div>
-              <span className="text-xs font-serif font-black text-[#176B87] dark:text-slate-200 line-clamp-1">
+              <span className="text-xs font-serif font-black text-[#176B87] dark:text-[#DDF4F0] line-clamp-1">
                 {partner.name}
               </span>
-              <span className="text-[9px] font-mono text-[#66808A] dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-[9px] font-mono text-[#64748b] dark:text-[#94A3B8] uppercase tracking-wider">
                 {partner.role}
               </span>
             </div>

@@ -325,7 +325,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   const getCategoryTheme = (category: string) => {
     switch (category) {
       case 'escrow':
-        return { icon: <ShieldCheck className="w-4 h-4 text-[#D96B43]" />, badgeBg: 'bg-[#D96B43]/10 text-[#D96B43] border-[#D96B43]/20', label: 'Escrow Vault' };
+        return { icon: <ShieldCheck className="w-4 h-4 text-[#176b87]" />, badgeBg: 'bg-[#176b87]/10 text-[#176b87] border-[#176b87]/20', label: 'Escrow Vault' };
       case 'auction':
       case 'auctions':
         return { icon: <Gavel className="w-4 h-4 text-[#176B87]" />, badgeBg: 'bg-[#176B87]/10 text-[#176B87] border-[#176B87]/20', label: 'Live Auction' };
@@ -333,18 +333,18 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       case 'inspections':
         return { icon: <ClipboardCheck className="w-4 h-4 text-emerald-600" />, badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'Inspection' };
       case 'finance':
-        return { icon: <Landmark className="w-4 h-4 text-blue-600" />, badgeBg: 'bg-blue-50 text-blue-700 border-blue-200', label: 'Bank Finance' };
+        return { icon: <Landmark className="w-4 h-4 text-[#176B87]" />, badgeBg: 'bg-[#F3FAF9] text-[#12576D] border-[#D7E7E4]', label: 'Bank Finance' };
       case 'dealer':
         return { icon: <Building2 className="w-4 h-4 text-teal-600" />, badgeBg: 'bg-teal-50 text-teal-700 border-teal-200', label: 'Verified Dealer' };
       case 'seller':
-        return { icon: <Users className="w-4 h-4 text-indigo-600" />, badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200', label: 'Private Seller' };
+        return { icon: <Users className="w-4 h-4 text-[#176B87]" />, badgeBg: 'bg-[#F3FAF9] text-[#12576D] border-[#D7E7E4]', label: 'Private Seller' };
       case 'support':
         return { icon: <Ticket className="w-4 h-4 text-rose-600" />, badgeBg: 'bg-rose-50 text-rose-700 border-rose-200', label: 'Resolution Desk' };
       case 'notification':
       case 'notifications':
-        return { icon: <Bell className="w-4 h-4 text-purple-600" />, badgeBg: 'bg-purple-50 text-purple-700 border-purple-200', label: 'System Alert' };
+        return { icon: <Bell className="w-4 h-4 text-[#176B87]" />, badgeBg: 'bg-[#F3FAF9] text-[#12576D] border-[#D7E7E4]', label: 'System Alert' };
       default:
-        return { icon: <MessageSquare className="w-4 h-4 text-slate-600" />, badgeBg: 'bg-slate-100 text-slate-700 border-slate-200', label: 'Marketplace Chat' };
+        return { icon: <MessageSquare className="w-4 h-4 text-[#64748B]" />, badgeBg: 'bg-[#EEF7F5] text-[#12576D] border-[#D7E7E4]', label: 'Marketplace Chat' };
     }
   };
 
@@ -353,10 +353,10 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     { id: 'all', label: 'All Activity', icon: <Layers className="w-3.5 h-3.5" /> },
     { id: 'unread', label: 'Unread Alerts', icon: <Bell className="w-3.5 h-3.5 text-rose-500" /> },
     { id: 'purchase', label: 'Vehicle Purchases', icon: <Car className="w-3.5 h-3.5 text-emerald-600" /> },
-    { id: 'escrow', label: 'Escrow Deals', icon: <Lock className="w-3.5 h-3.5 text-[#D96B43]" /> },
+    { id: 'escrow', label: 'Escrow Deals', icon: <Lock className="w-3.5 h-3.5 text-[#176b87]" /> },
     { id: 'auctions', label: 'Live Auctions', icon: <Gavel className="w-3.5 h-3.5 text-[#176B87]" /> },
     { id: 'inspections', label: 'Inspections', icon: <ClipboardCheck className="w-3.5 h-3.5 text-emerald-500" /> },
-    { id: 'finance', label: 'Bank Financing', icon: <Landmark className="w-3.5 h-3.5 text-blue-500" /> },
+    { id: 'finance', label: 'Bank Financing', icon: <Landmark className="w-3.5 h-3.5 text-[#2F8F87]" /> },
     { id: 'support', label: 'Support Tickets', icon: <Ticket className="w-3.5 h-3.5 text-rose-500" /> }
   ];
 
@@ -364,8 +364,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     <div className="space-y-6 relative pb-16">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-20 right-4 z-50 bg-[#176B87] text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#D96B43] flex items-center gap-3 animate-fade-in">
-          <Sparkles className="w-5 h-5 text-[#D96B43] shrink-0" />
+        <div className="fixed top-20 right-4 z-50 bg-[#176B87] text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#176b87] flex items-center gap-3 animate-fade-in">
+          <Sparkles className="w-5 h-5 text-[#176b87] shrink-0" />
           <span className="text-xs font-extrabold">{toast}</span>
         </div>
       )}
@@ -377,7 +377,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="accent" size="md" className="bg-[#D96B43] text-white font-black border-none">
+              <Badge variant="accent" size="md" className="bg-[#176b87] text-white font-black border-none">
                 <MessageSquare className="w-3.5 h-3.5 text-white" /> Unified Operations Communication Center
               </Badge>
               <Badge variant="verified" size="md" className="bg-emerald-500/20 text-emerald-300 border-emerald-400/40">
@@ -393,7 +393,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
             <h1 className="text-2xl sm:text-3xl font-black font-display text-white">
               Marketplace Transaction Communications Hub
             </h1>
-            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+            <p className="text-xs text-[#BDE5DE] max-w-2xl leading-relaxed">
               Every conversation remains strictly attached to its active vehicle transaction context — linking escrow records, NTSA TIMS logbook verification, inspection records, and bank financing under one command console.
             </p>
           </div>
@@ -401,8 +401,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
         {/* Actionable Notifications Ticker */}
         <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3 overflow-x-auto scrollbar-none">
-          <span className="text-[10px] uppercase font-black tracking-wider text-[#D96B43] shrink-0 flex items-center gap-1">
-            <Bell className="w-3 h-3 text-[#D96B43]" /> Actionable Alerts:
+          <span className="text-[10px] uppercase font-black tracking-wider text-[#176b87] shrink-0 flex items-center gap-1">
+            <Bell className="w-3 h-3 text-[#176b87]" /> Actionable Alerts:
           </span>
           <div className="flex items-center gap-3">
             {actionableNotifications.map((n) => (
@@ -414,7 +414,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                 <span className="font-extrabold">{n.title}:</span>
                 <span className="opacity-90 max-w-xs truncate">{n.text}</span>
-                <span className="text-[9px] text-slate-400 font-bold ml-1">{n.time}</span>
+                <span className="text-[9px] text-[#94A3B8] font-bold ml-1">{n.time}</span>
               </button>
             ))}
           </div>
@@ -424,7 +424,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       {/* ==========================================
           FILTER TABS BAR
           ========================================== */}
-      <div className="bg-white border border-slate-200 py-2.5 px-3 rounded-2xl shadow-xs overflow-x-auto">
+      <div className="bg-white border border-[#D7E7E4] py-2.5 px-3 rounded-2xl shadow-xs overflow-x-auto">
         <div className="flex items-center gap-1.5 min-w-max">
           {filterTabs.map((tab) => {
             let count = 0;
@@ -441,13 +441,13 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'bg-[#176B87] text-white shadow-md'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    : 'text-[#64748B] hover:text-[#0A3340] hover:bg-[#EEF7F5]'
                 }`}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
                 <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
-                  isActive ? 'bg-[#D96B43] text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-[#176b87] text-white' : 'bg-[#DDF4F0] text-[#12576D]'
                 }`}>
                   {count}
                 </span>
@@ -465,30 +465,30 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         {/* ------------------------------------------
             COLUMN 1: CONVERSATION LIST SIDEBAR (3 Cols)
             ------------------------------------------ */}
-        <Card className={`lg:col-span-3 flex flex-col h-full overflow-hidden bg-white border-slate-200 shadow-card ${
+        <Card className={`lg:col-span-3 flex flex-col h-full overflow-hidden bg-white border-[#D7E7E4] shadow-card ${
           mobileView !== 'list' ? 'hidden lg:flex' : 'flex'
         }`}>
           {/* Search Header */}
-          <div className="p-3 border-b border-slate-100 bg-slate-50/70">
+          <div className="p-3 border-b border-[#D7E7E4] bg-[#F6FAF9]/70">
             <Input
               placeholder="Search vehicle, Ref #, dealer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              icon={<Search className="w-4 h-4 text-slate-400" />}
+              icon={<Search className="w-4 h-4 text-[#94A3B8]" />}
               className="text-xs"
             />
           </div>
 
           {/* Threads List */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+          <div className="flex-1 overflow-y-auto divide-y divide-[#D7E7E4]">
             {/* Fixed: previously only handled "filtered to nothing" -
                 now honestly distinguishes still loading real data,
                 a real fetch failure, and genuinely zero real
                 conversations, rather than collapsing all three into
                 one generic message. */}
             {threadsLoading ? (
-              <div className="p-8 text-center text-slate-400 text-xs space-y-2">
-                <MessageSquare className="w-8 h-8 mx-auto text-slate-300 animate-pulse" />
+              <div className="p-8 text-center text-[#94A3B8] text-xs space-y-2">
+                <MessageSquare className="w-8 h-8 mx-auto text-[#BDE5DE] animate-pulse" />
                 <p>Loading your conversations…</p>
               </div>
             ) : threadsError ? (
@@ -497,18 +497,18 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 <p>{threadsError}</p>
               </div>
             ) : !user ? (
-              <div className="p-8 text-center text-slate-400 text-xs space-y-2">
-                <MessageSquare className="w-8 h-8 mx-auto text-slate-300" />
+              <div className="p-8 text-center text-[#94A3B8] text-xs space-y-2">
+                <MessageSquare className="w-8 h-8 mx-auto text-[#BDE5DE]" />
                 <p>Sign in to see your conversations.</p>
               </div>
             ) : filteredThreads.length === 0 && threads.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs space-y-2">
-                <MessageSquare className="w-8 h-8 mx-auto text-slate-300" />
+              <div className="p-8 text-center text-[#94A3B8] text-xs space-y-2">
+                <MessageSquare className="w-8 h-8 mx-auto text-[#BDE5DE]" />
                 <p>No conversations yet.</p>
               </div>
             ) : filteredThreads.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs space-y-2">
-                <Search className="w-8 h-8 mx-auto text-slate-300" />
+              <div className="p-8 text-center text-[#94A3B8] text-xs space-y-2">
+                <Search className="w-8 h-8 mx-auto text-[#BDE5DE]" />
                 <p>No conversations found matching filter.</p>
               </div>
             ) : (
@@ -522,8 +522,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                     onClick={() => handleSelectThread(thread.id)}
                     className={`w-full text-left p-3.5 transition-all flex items-start gap-3 cursor-pointer ${
                       isSelected
-                        ? 'bg-amber-50/80 border-l-4 border-[#176B87]'
-                        : 'hover:bg-slate-50 border-l-4 border-transparent'
+                        ? 'bg-[#F3FAF9]/80 border-l-4 border-[#176B87]'
+                        : 'hover:bg-[#F6FAF9] border-l-4 border-transparent'
                     }`}
                   >
                     {/* Participant Avatar */}
@@ -531,7 +531,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                       <img
                         src={thread.participantAvatar}
                         alt={thread.participantName}
-                        className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                        className="w-10 h-10 rounded-full object-cover border border-[#D7E7E4]"
                       />
                       {thread.participantStatus === 'online' && (
                         <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" title="Online" />
@@ -541,17 +541,17 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                     {/* Content Details */}
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className={`text-xs truncate ${isSelected ? 'font-black text-[#176B87]' : 'font-bold text-slate-800'}`}>
+                        <span className={`text-xs truncate ${isSelected ? 'font-black text-[#176B87]' : 'font-bold text-[#0A3340]'}`}>
                           {thread.participantName}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-medium shrink-0 ml-1">
+                        <span className="text-[10px] text-[#94A3B8] font-medium shrink-0 ml-1">
                           {thread.lastTimestamp}
                         </span>
                       </div>
 
                       {/* Ref & Category Pill */}
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[9px] font-mono bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded font-bold">
+                        <span className="text-[9px] font-mono bg-[#EEF7F5] text-[#12576D] px-1.5 py-0.2 rounded font-bold">
                           {thread.referenceNumber}
                         </span>
                         <Badge variant="outline" size="sm" className={`text-[9px] py-0 px-1 ${theme.badgeBg}`}>
@@ -561,13 +561,13 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
                       {/* Linked Vehicle Title */}
                       {thread.vehicleTitle && (
-                        <div className="flex items-center gap-1 text-[10px] font-extrabold text-[#176B87] bg-slate-100 px-2 py-0.5 rounded-md truncate">
-                          <Car className="w-3 h-3 text-[#D96B43] shrink-0" />
+                        <div className="flex items-center gap-1 text-[10px] font-extrabold text-[#176B87] bg-[#EEF7F5] px-2 py-0.5 rounded-md truncate">
+                          <Car className="w-3 h-3 text-[#176b87] shrink-0" />
                           <span className="truncate">{thread.vehicleTitle}</span>
                         </div>
                       )}
 
-                      <p className="text-[11px] text-slate-500 truncate font-medium">
+                      <p className="text-[11px] text-[#64748B] truncate font-medium">
                         {thread.lastMessage}
                       </p>
 
@@ -589,7 +589,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         {/* ------------------------------------------
             COLUMN 2: ACTIVE CONVERSATION STREAM (6 Cols)
             ------------------------------------------ */}
-        <Card className={`lg:col-span-5 xl:col-span-6 flex flex-col h-full overflow-hidden bg-white border-slate-200 shadow-card ${
+        <Card className={`lg:col-span-5 xl:col-span-6 flex flex-col h-full overflow-hidden bg-white border-[#D7E7E4] shadow-card ${
           mobileView !== 'chat' ? 'hidden lg:flex' : 'flex'
         }`}>
           {activeThread ? (
@@ -600,7 +600,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                   {/* Mobile Back Button */}
                   <button
                     onClick={() => setMobileView('list')}
-                    className="lg:hidden p-1.5 text-slate-300 hover:text-white rounded-lg bg-white/10"
+                    className="lg:hidden p-1.5 text-[#BDE5DE] hover:text-white rounded-lg bg-white/10"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
@@ -613,7 +613,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                       className="w-11 h-11 rounded-lg object-cover border border-white/20 shrink-0"
                     />
                   ) : (
-                    <div className="w-11 h-11 rounded-lg bg-[#176B87] text-[#D96B43] flex items-center justify-center shrink-0">
+                    <div className="w-11 h-11 rounded-lg bg-[#176B87] text-[#176b87] flex items-center justify-center shrink-0">
                       <Car className="w-5 h-5" />
                     </div>
                   )}
@@ -623,13 +623,13 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                       <h3 className="font-extrabold text-xs sm:text-sm text-white truncate">
                         {activeThread.vehicleTitle || activeThread.participantName}
                       </h3>
-                      <span className="text-[9px] font-mono bg-[#D96B43] text-white px-1.5 py-0.2 rounded font-black">
+                      <span className="text-[9px] font-mono bg-[#176b87] text-white px-1.5 py-0.2 rounded font-black">
                         {activeThread.referenceNumber}
                       </span>
                     </div>
 
                     {/* Header Details: Status | Stage | Participants */}
-                    <div className="flex items-center gap-2 text-[11px] text-slate-300 font-medium truncate mt-0.5">
+                    <div className="flex items-center gap-2 text-[11px] text-[#BDE5DE] font-medium truncate mt-0.5">
                       <span className="font-extrabold text-emerald-400">{activeThread.currentStatus}</span>
                       <span>•</span>
                       <span className="truncate">{activeThread.transactionType}</span>
@@ -641,7 +641,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => setMobileView('context')}
-                    className="lg:hidden px-2.5 py-1 rounded-xl bg-[#D96B43] text-white text-xs font-bold flex items-center gap-1"
+                    className="lg:hidden px-2.5 py-1 rounded-xl bg-[#176b87] text-white text-xs font-bold flex items-center gap-1"
                   >
                     <Info className="w-3.5 h-3.5" /> Details
                   </button>
@@ -652,12 +652,12 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               </div>
 
               {/* STAGE & PARTICIPANTS SUB-HEADER BAR */}
-              <div className="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between text-xs text-slate-700 font-medium shrink-0">
+              <div className="bg-[#EEF7F5] border-b border-[#D7E7E4] px-4 py-2 flex items-center justify-between text-xs text-[#12576D] font-medium shrink-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase font-black text-slate-500">Participants:</span>
+                  <span className="text-[10px] uppercase font-black text-[#64748B]">Participants:</span>
                   <div className="flex items-center gap-1.5">
                     {activeThread.participants.map(p => (
-                      <span key={p.id} className="text-[10px] font-bold bg-white px-2 py-0.5 rounded border border-slate-200 text-[#176B87]">
+                      <span key={p.id} className="text-[10px] font-bold bg-white px-2 py-0.5 rounded border border-[#D7E7E4] text-[#176B87]">
                         {p.name} ({p.role})
                       </span>
                     ))}
@@ -674,9 +674,9 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
               {/* SMART ACTIONS DOCK */}
               {activeThread.smartActions && activeThread.smartActions.length > 0 && (
-                <div className="bg-amber-50/90 border-b border-amber-200 px-4 py-2.5 flex items-center gap-2 overflow-x-auto shrink-0">
+                <div className="bg-[#F3FAF9]/90 border-b border-[#BDE5DE] px-4 py-2.5 flex items-center gap-2 overflow-x-auto shrink-0">
                   <span className="text-[10px] uppercase font-black tracking-wider text-[#176B87] shrink-0 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-[#D96B43]" /> Smart Actions:
+                    <Sparkles className="w-3.5 h-3.5 text-[#176b87]" /> Smart Actions:
                   </span>
                   <div className="flex items-center gap-2 min-w-max">
                     {activeThread.smartActions.map((sa) => (
@@ -695,7 +695,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               )}
 
               {/* MESSAGES THREAD STREAM */}
-              <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 bg-slate-50/60 text-xs">
+              <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 bg-[#F6FAF9]/60 text-xs">
                 {activeThread.messages.map((m) => {
                   const isUser = m.sender === 'user';
                   const isSystem = m.sender === 'system';
@@ -703,12 +703,12 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                   if (isSystem) {
                     return (
                       <div key={m.id} className="my-3 flex justify-center">
-                        <div className="bg-slate-200/90 text-[#176B87] border border-slate-300 text-[11px] px-4 py-2 rounded-2xl max-w-md text-center shadow-2xs space-y-1">
-                          <p className="font-extrabold flex items-center justify-center gap-1.5 text-[#D96B43]">
-                            <Info className="w-3.5 h-3.5 text-[#D96B43]" /> System Milestone Event
+                        <div className="bg-[#DDF4F0]/90 text-[#176B87] border border-[#BDE5DE] text-[11px] px-4 py-2 rounded-2xl max-w-md text-center shadow-2xs space-y-1">
+                          <p className="font-extrabold flex items-center justify-center gap-1.5 text-[#176b87]">
+                            <Info className="w-3.5 h-3.5 text-[#176b87]" /> System Milestone Event
                           </p>
-                          <p className="font-medium text-slate-700">{m.text}</p>
-                          <p className="text-[9px] text-slate-500 font-bold">{m.timestamp}</p>
+                          <p className="font-medium text-[#12576D]">{m.text}</p>
+                          <p className="text-[9px] text-[#64748B] font-bold">{m.timestamp}</p>
                         </div>
                       </div>
                     );
@@ -719,11 +719,11 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                       <div className={`max-w-[85%] sm:max-w-[78%] space-y-2 p-4 rounded-2xl shadow-xs ${
                         isUser
                           ? 'bg-[#176B87] text-white rounded-br-none'
-                          : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
+                          : 'bg-white text-[#0A3340] border border-[#D7E7E4] rounded-bl-none'
                       }`}>
                         {/* Sender Label */}
                         {!isUser && (
-                          <div className="flex items-center justify-between pb-1 border-b border-slate-100 text-[11px] font-extrabold text-[#176B87]">
+                          <div className="flex items-center justify-between pb-1 border-b border-[#D7E7E4] text-[11px] font-extrabold text-[#176B87]">
                             <span>{m.senderName}</span>
                           </div>
                         )}
@@ -738,14 +738,14 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                               <div key={idx}>
                                 {/* IMAGE */}
                                 {att.type === 'image' && (
-                                  <div className="relative group rounded-xl overflow-hidden border border-slate-200">
+                                  <div className="relative group rounded-xl overflow-hidden border border-[#D7E7E4]">
                                     <img
                                       src={att.url}
                                       alt={att.fileName || 'Photo'}
                                       className="w-full h-44 object-cover cursor-pointer hover:scale-105 transition-all"
                                       onClick={() => setPreviewMediaModal({ title: att.fileName || 'Image Photo', type: 'image', url: att.url })}
                                     />
-                                    <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-bold">
+                                    <span className="absolute bottom-2 left-2 bg-[#0A3340]/70 text-white text-[10px] px-2 py-0.5 rounded font-bold">
                                       📷 {att.fileName}
                                     </span>
                                   </div>
@@ -757,7 +757,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                                     isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-emerald-50/80 border-emerald-200 text-[#176B87]'
                                   }`}>
                                     <div className="flex items-center gap-2.5 min-w-0">
-                                      <FileText className="w-5 h-5 text-[#D96B43] shrink-0" />
+                                      <FileText className="w-5 h-5 text-[#176b87] shrink-0" />
                                       <div className="min-w-0">
                                         <p className="font-extrabold truncate">{att.fileName}</p>
                                         <p className="text-[10px] opacity-80">
@@ -769,7 +769,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                                       variant="accent"
                                       size="sm"
                                       onClick={() => setPreviewMediaModal({ title: att.fileName || 'PDF Vault File', type: 'pdf' })}
-                                      className="bg-[#D96B43] text-white font-extrabold shrink-0 border-none text-[11px] py-1"
+                                      className="bg-[#176b87] text-white font-extrabold shrink-0 border-none text-[11px] py-1"
                                     >
                                       <Download className="w-3.5 h-3.5" /> Open PDF
                                     </Button>
@@ -795,16 +795,16 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                                 {/* GPS LOCATION PIN */}
                                 {att.type === 'location' && (
                                   <div className={`p-3 rounded-xl border space-y-1 text-xs ${
-                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-slate-100 border-slate-200 text-slate-800'
+                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-[#EEF7F5] border-[#D7E7E4] text-[#0A3340]'
                                   }`}>
-                                    <div className="flex items-center gap-1.5 font-extrabold text-[#D96B43]">
+                                    <div className="flex items-center gap-1.5 font-extrabold text-[#176b87]">
                                       <MapPin className="w-4 h-4" />
                                       <span>{att.locationName}</span>
                                     </div>
                                     <p className="text-[11px] opacity-90">{att.locationAddress}</p>
                                     <button
                                       onClick={() => showToast(`Opening GPS navigation to ${att.locationName}`)}
-                                      className="text-[10px] font-black underline flex items-center gap-1 cursor-pointer text-[#D96B43]"
+                                      className="text-[10px] font-black underline flex items-center gap-1 cursor-pointer text-[#176b87]"
                                     >
                                       Launch Google Maps <ArrowUpRight className="w-3 h-3" />
                                     </button>
@@ -814,11 +814,11 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                                 {/* APPOINTMENT */}
                                 {att.type === 'appointment' && (
                                   <div className={`p-3 rounded-xl border space-y-2 text-xs ${
-                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-amber-50 border-amber-300 text-[#176B87]'
+                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-[#F3FAF9] border-[#BDE5DE] text-[#176B87]'
                                   }`}>
                                     <div className="flex justify-between items-center">
                                       <span className="font-extrabold flex items-center gap-1.5 text-[#176B87]">
-                                        <Calendar className="w-4 h-4 text-[#D96B43]" /> {att.appointmentTitle}
+                                        <Calendar className="w-4 h-4 text-[#176b87]" /> {att.appointmentTitle}
                                       </span>
                                       <Badge variant="accent" size="sm">{att.appointmentStatus}</Badge>
                                     </div>
@@ -842,15 +842,15 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
                         {/* Timestamp & Read Receipts */}
                         <div className="flex items-center justify-end gap-1.5 pt-1 text-[9px]">
-                          <span className={isUser ? 'text-slate-300 font-bold' : 'text-slate-400 font-bold'}>
+                          <span className={isUser ? 'text-[#BDE5DE] font-bold' : 'text-[#94A3B8] font-bold'}>
                             {m.timestamp}
                           </span>
                           {isUser && (
-                            <span className="text-[#D96B43]">
+                            <span className="text-[#176b87]">
                               {m.readStatus === 'read' ? (
-                                <CheckCheck className="w-3.5 h-3.5 text-[#D96B43]" />
+                                <CheckCheck className="w-3.5 h-3.5 text-[#176b87]" />
                               ) : (
-                                <Check className="w-3.5 h-3.5 text-slate-300" />
+                                <Check className="w-3.5 h-3.5 text-[#BDE5DE]" />
                               )}
                             </span>
                           )}
@@ -863,30 +863,30 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               </div>
 
               {/* INPUT BAR & ATTACHMENT MENU */}
-              <div className="p-3 bg-white border-t border-slate-200 relative shrink-0">
+              <div className="p-3 bg-white border-t border-[#D7E7E4] relative shrink-0">
                 {showAttachMenu && (
-                  <div className="absolute bottom-16 left-4 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 flex flex-col gap-1 w-60 text-xs animate-fade-in">
+                  <div className="absolute bottom-16 left-4 z-30 bg-white border border-[#D7E7E4] rounded-2xl shadow-xl p-2 flex flex-col gap-1 w-60 text-xs animate-fade-in">
                     <button
                       onClick={() => handleSendAttachment('image')}
-                      className="p-2.5 hover:bg-slate-100 rounded-xl flex items-center gap-2 text-slate-800 font-bold cursor-pointer"
+                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
                     >
-                      <ImageIcon className="w-4 h-4 text-blue-600" /> Share Vehicle Photo
+                      <ImageIcon className="w-4 h-4 text-[#176B87]" /> Share Vehicle Photo
                     </button>
                     <button
                       onClick={() => handleSendAttachment('document')}
-                      className="p-2.5 hover:bg-slate-100 rounded-xl flex items-center gap-2 text-slate-800 font-bold cursor-pointer"
+                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
                     >
-                      <FileText className="w-4 h-4 text-[#D96B43]" /> Attach TIMS Document (PDF)
+                      <FileText className="w-4 h-4 text-[#176b87]" /> Attach TIMS Document (PDF)
                     </button>
                     <button
                       onClick={() => handleSendAttachment('location')}
-                      className="p-2.5 hover:bg-slate-100 rounded-xl flex items-center gap-2 text-slate-800 font-bold cursor-pointer"
+                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
                     >
                       <MapPin className="w-4 h-4 text-rose-600" /> Share Showroom Location
                     </button>
                     <button
                       onClick={() => handleSendAttachment('appointment')}
-                      className="p-2.5 hover:bg-slate-100 rounded-xl flex items-center gap-2 text-slate-800 font-bold cursor-pointer"
+                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
                     >
                       <Calendar className="w-4 h-4 text-emerald-600" /> Schedule Test Drive / Handover
                     </button>
@@ -897,10 +897,10 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                   <button
                     type="button"
                     onClick={() => setShowAttachMenu(!showAttachMenu)}
-                    className="p-2.5 text-slate-500 hover:text-[#176B87] hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                    className="p-2.5 text-[#64748B] hover:text-[#176B87] hover:bg-[#EEF7F5] rounded-xl transition-all cursor-pointer"
                     title="Attach File or Location"
                   >
-                    <Paperclip className="w-5 h-5 text-[#D96B43]" />
+                    <Paperclip className="w-5 h-5 text-[#176b87]" />
                   </button>
 
                   <input
@@ -908,7 +908,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder="Type transaction message or status update inquiry..."
-                    className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#176B87] font-medium text-slate-800"
+                    className="flex-1 px-4 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#176B87] font-medium text-[#0A3340]"
                   />
 
                   <Button type="submit" variant="primary" size="md" className="bg-[#176B87] text-white">
@@ -918,8 +918,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               </div>
             </>
           ) : (
-            <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center h-full space-y-3">
-              <MessageSquare className="w-12 h-12 text-slate-300" />
+            <div className="p-12 text-center text-[#94A3B8] flex flex-col items-center justify-center h-full space-y-3">
+              <MessageSquare className="w-12 h-12 text-[#BDE5DE]" />
               <p className="font-bold text-sm">Select a transaction conversation thread.</p>
             </div>
           )}
@@ -928,16 +928,16 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         {/* ------------------------------------------
             COLUMN 3: CONTEXT INFORMATION PANEL (4/3 Cols)
             ------------------------------------------ */}
-        <Card className={`lg:col-span-4 xl:col-span-3 flex flex-col h-full overflow-hidden bg-white border-slate-200 shadow-card ${
+        <Card className={`lg:col-span-4 xl:col-span-3 flex flex-col h-full overflow-hidden bg-white border-[#D7E7E4] shadow-card ${
           mobileView !== 'context' ? 'hidden lg:flex' : 'flex'
         }`}>
           {activeThread ? (
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 text-xs">
+            <div className="flex-1 overflow-y-auto divide-y divide-[#D7E7E4] text-xs">
 
               {/* Mobile Back Header */}
               <div className="lg:hidden p-3 bg-[#0A3340] text-white flex items-center justify-between">
                 <span className="font-extrabold">Transaction Context</span>
-                <button onClick={() => setMobileView('chat')} className="text-xs text-slate-300 underline">
+                <button onClick={() => setMobileView('chat')} className="text-xs text-[#BDE5DE] underline">
                   Back to Chat
                 </button>
               </div>
@@ -945,7 +945,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               {/* 1. VEHICLE SUMMARY CARD */}
               <div className="p-4 space-y-3">
                 <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center justify-between">
-                  <span className="flex items-center gap-1.5"><Car className="w-4 h-4 text-[#D96B43]" /> Vehicle Summary</span>
+                  <span className="flex items-center gap-1.5"><Car className="w-4 h-4 text-[#176b87]" /> Vehicle Summary</span>
                   {activeThread.vehicleId && onQuickViewVehicle && (
                     <button
                       onClick={() => onQuickViewVehicle(activeThread.vehicleId!)}
@@ -957,26 +957,26 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 </h4>
 
                 {activeThread.vehicleImage ? (
-                  <div className="relative rounded-xl overflow-hidden border border-slate-200">
+                  <div className="relative rounded-xl overflow-hidden border border-[#D7E7E4]">
                     <LazyImage src={activeThread.vehicleImage} alt={activeThread.vehicleTitle || 'Vehicle'} wrapperClassName="w-full h-32" className="w-full h-full object-cover" />
                     {activeThread.vehiclePrice && (
-                      <span className="absolute bottom-2 right-2 bg-[#0A3340] text-[#D96B43] font-black text-xs px-2.5 py-1 rounded-lg">
+                      <span className="absolute bottom-2 right-2 bg-[#0A3340] text-[#176b87] font-black text-xs px-2.5 py-1 rounded-lg">
                         Ksh {activeThread.vehiclePrice.toLocaleString()}
                       </span>
                     )}
                   </div>
                 ) : null}
 
-                <div className="space-y-1 font-medium text-slate-700">
+                <div className="space-y-1 font-medium text-[#12576D]">
                   <p className="font-black text-sm text-[#176B87]">{activeThread.vehicleTitle}</p>
                   <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
                     <div>
-                      <span className="text-slate-400 block text-[9px]">VIN Number</span>
-                      <span className="font-mono font-bold text-slate-800">{activeThread.vehicleVin || 'NTSA Verified'}</span>
+                      <span className="text-[#94A3B8] block text-[9px]">VIN Number</span>
+                      <span className="font-mono font-bold text-[#0A3340]">{activeThread.vehicleVin || 'NTSA Verified'}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[9px]">Location</span>
-                      <span className="font-bold text-slate-800">{activeThread.vehicleLocation || 'Nairobi'}</span>
+                      <span className="text-[#94A3B8] block text-[9px]">Location</span>
+                      <span className="font-bold text-[#0A3340]">{activeThread.vehicleLocation || 'Nairobi'}</span>
                     </div>
                   </div>
                 </div>
@@ -988,12 +988,12 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                   <UserCheck className="w-4 h-4 text-emerald-600" /> Counterparty Clearance
                 </h4>
 
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="p-3 bg-[#F6FAF9] rounded-xl border border-[#D7E7E4] space-y-2">
                   <div className="flex items-center gap-3">
-                    <img src={activeThread.counterpartyInfo.avatar || activeThread.participantAvatar} alt={activeThread.counterpartyInfo.name} className="w-10 h-10 rounded-full object-cover border border-slate-300" />
+                    <img src={activeThread.counterpartyInfo.avatar || activeThread.participantAvatar} alt={activeThread.counterpartyInfo.name} className="w-10 h-10 rounded-full object-cover border border-[#BDE5DE]" />
                     <div>
                       <p className="font-extrabold text-[#176B87]">{activeThread.counterpartyInfo.name}</p>
-                      <p className="text-[10px] text-slate-500 font-bold">{activeThread.counterpartyInfo.role}</p>
+                      <p className="text-[10px] text-[#64748B] font-bold">{activeThread.counterpartyInfo.role}</p>
                     </div>
                   </div>
 
@@ -1002,10 +1002,10 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                       no real masked phone on record. Only shown when
                       real data exists. */}
                   {(activeThread.counterpartyInfo.maskedPhone || activeThread.counterpartyInfo.unmaskedPhone) && (
-                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/80">
-                      <span className="text-slate-500 font-medium">Contact Phone:</span>
+                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[#D7E7E4]/80">
+                      <span className="text-[#64748B] font-medium">Contact Phone:</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-bold text-slate-800">
+                        <span className="font-mono font-bold text-[#0A3340]">
                           {unmaskedPii[activeThread.id] ? (activeThread.counterpartyInfo.unmaskedPhone || activeThread.counterpartyInfo.maskedPhone) : activeThread.counterpartyInfo.maskedPhone}
                         </span>
                         <button
@@ -1013,7 +1013,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                           className="text-[10px] font-bold text-[#176B87] hover:underline flex items-center gap-0.5 cursor-pointer"
                           title="Audit logged unmask"
                         >
-                          {unmaskedPii[activeThread.id] ? <Lock className="w-3 h-3 text-slate-400" /> : <Unlock className="w-3 h-3 text-[#D96B43]" />}
+                          {unmaskedPii[activeThread.id] ? <Lock className="w-3 h-3 text-[#94A3B8]" /> : <Unlock className="w-3 h-3 text-[#176b87]" />}
                           {unmaskedPii[activeThread.id] ? 'Mask' : 'Unmask'}
                         </button>
                       </div>
@@ -1026,7 +1026,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                       shown when real data exists. */}
                   {activeThread.counterpartyInfo.trustScore !== undefined && (
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-500 font-medium">Trust Score:</span>
+                      <span className="text-[#64748B] font-medium">Trust Score:</span>
                       <span className="font-black text-emerald-700">{activeThread.counterpartyInfo.trustScore}% Verified</span>
                     </div>
                   )}
@@ -1037,14 +1037,14 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               {activeThread.escrowSummary && (
                 <div className="p-4 space-y-2">
                   <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#D96B43]" /> Escrow record
+                    <ShieldCheck className="w-4 h-4 text-[#176b87]" /> Escrow record
                   </h4>
-                  <div className="p-3 bg-[#D96B43]/10 border border-[#D96B43]/30 rounded-xl space-y-1.5">
+                  <div className="p-3 bg-[#176b87]/10 border border-[#176b87]/30 rounded-xl space-y-1.5">
                     <div className="flex justify-between text-xs">
                       <span className="font-bold text-[#176B87]">Locked Amount</span>
                       <span className="font-black text-emerald-700">Ksh {activeThread.escrowSummary.amountLocked.toLocaleString()}</span>
                     </div>
-                    <p className="text-[11px] text-slate-600 font-medium">{activeThread.escrowSummary.bankVault} • Vault #{activeThread.escrowSummary.vaultId}</p>
+                    <p className="text-[11px] text-[#64748B] font-medium">{activeThread.escrowSummary.bankVault} • Vault #{activeThread.escrowSummary.vaultId}</p>
                     {onNavigateToEscrow && (
                       <Button variant="accent" size="sm" onClick={onNavigateToEscrow} className="w-full bg-[#176B87] text-white text-[10px] py-1 mt-1">
                         Open Escrow Vault Dashboard
@@ -1064,7 +1064,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                       <span className="font-bold text-[#176B87]">Inspection score</span>
                       <span className="font-black text-emerald-700 text-sm">{activeThread.inspectionSummary.score}/100 Passed</span>
                     </div>
-                    <p className="text-[10px] text-slate-600 font-medium">Chassis: {activeThread.inspectionSummary.chassisStatus}</p>
+                    <p className="text-[10px] text-[#64748B] font-medium">Chassis: {activeThread.inspectionSummary.chassisStatus}</p>
                     {onNavigateToInspections && (
                       <Button variant="outline" size="sm" onClick={onNavigateToInspections} className="w-full text-[10px] py-1 bg-white">
                         View inspection
@@ -1077,15 +1077,15 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               {activeThread.financeSummary && (
                 <div className="p-4 space-y-2">
                   <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <Landmark className="w-4 h-4 text-blue-600" /> Bank Finance Pre-Approval
+                    <Landmark className="w-4 h-4 text-[#176B87]" /> Bank Finance Pre-Approval
                   </h4>
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1.5">
+                  <div className="p-3 bg-[#F3FAF9] border border-[#D7E7E4] rounded-xl space-y-1.5">
                     <div className="flex justify-between text-xs">
                       <span className="font-bold text-[#176B87]">{activeThread.financeSummary.partnerBank}</span>
-                      <span className="font-black text-blue-700">Pre-Approved</span>
+                      <span className="font-black text-[#12576D]">Pre-Approved</span>
                     </div>
                     <p className="text-xs font-black text-emerald-800">Ksh {activeThread.financeSummary.approvedLimit.toLocaleString()} Facility</p>
-                    <p className="text-[10px] text-slate-600 font-medium">Est. Repayment: Ksh {activeThread.financeSummary.monthlyInstallment.toLocaleString()} / mo</p>
+                    <p className="text-[10px] text-[#64748B] font-medium">Est. Repayment: Ksh {activeThread.financeSummary.monthlyInstallment.toLocaleString()} / mo</p>
                   </div>
                 </div>
               )}
@@ -1093,10 +1093,10 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               {/* 4. TRANSACTION TIMELINE HISTORY */}
               <div className="p-4 space-y-3">
                 <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-[#D96B43]" /> Permanent Audit Timeline
+                  <Clock className="w-4 h-4 text-[#176b87]" /> Permanent Audit Timeline
                 </h4>
 
-                <div className="relative border-l-2 border-slate-200 ml-2 space-y-4 pl-4 pt-1">
+                <div className="relative border-l-2 border-[#D7E7E4] ml-2 space-y-4 pl-4 pt-1">
                   {activeThread.timeline.map((t) => (
                     <div key={t.id} className="relative">
                       {/* Node Bullet */}
@@ -1104,16 +1104,16 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                         t.status === 'completed'
                           ? 'bg-emerald-500'
                           : t.status === 'current'
-                          ? 'bg-[#D96B43] animate-pulse'
-                          : 'bg-slate-300'
+                          ? 'bg-[#176b87] animate-pulse'
+                          : 'bg-[#BDE5DE]'
                       }`} />
 
                       <div>
-                        <p className={`font-extrabold text-xs ${t.status === 'current' ? 'text-[#D96B43]' : 'text-[#176B87]'}`}>
+                        <p className={`font-extrabold text-xs ${t.status === 'current' ? 'text-[#176b87]' : 'text-[#176B87]'}`}>
                           {t.title}
                         </p>
-                        <p className="text-[11px] text-slate-500 font-medium">{t.description}</p>
-                        <span className="text-[9px] text-slate-400 font-bold block mt-0.5">{t.timestamp} • {t.actor}</span>
+                        <p className="text-[11px] text-[#64748B] font-medium">{t.description}</p>
+                        <span className="text-[9px] text-[#94A3B8] font-bold block mt-0.5">{t.timestamp} • {t.actor}</span>
                       </div>
                     </div>
                   ))}
@@ -1124,27 +1124,27 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <FileCheck className="w-4 h-4 text-[#D96B43]" /> Shared Transaction Vault
+                    <FileCheck className="w-4 h-4 text-[#176b87]" /> Shared Transaction Vault
                   </h4>
                   <button
                     onClick={() => setShowUploadModal(true)}
                     className="text-[10px] font-bold text-[#176B87] hover:underline flex items-center gap-1 cursor-pointer"
                   >
-                    <Upload className="w-3 h-3 text-[#D96B43]" /> Upload File
+                    <Upload className="w-3 h-3 text-[#176b87]" /> Upload File
                   </button>
                 </div>
 
                 <div className="space-y-2">
                   {activeThread.sharedFiles.length === 0 ? (
-                    <p className="text-[11px] text-slate-400 font-medium italic text-center py-2">No files shared yet in this transaction.</p>
+                    <p className="text-[11px] text-[#94A3B8] font-medium italic text-center py-2">No files shared yet in this transaction.</p>
                   ) : (
                     activeThread.sharedFiles.map((f) => (
-                      <div key={f.id} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-2 text-xs">
+                      <div key={f.id} className="p-2.5 bg-[#F6FAF9] rounded-xl border border-[#D7E7E4] flex items-center justify-between gap-2 text-xs">
                         <div className="flex items-center gap-2 min-w-0">
-                          <FileText className="w-4 h-4 text-[#D96B43] shrink-0" />
+                          <FileText className="w-4 h-4 text-[#176b87] shrink-0" />
                           <div className="min-w-0">
                             <p className="font-extrabold text-[#176B87] truncate">{f.fileName}</p>
-                            <p className="text-[9px] text-slate-400">{f.fileSize || 'Doc'} • {f.uploadedAt}</p>
+                            <p className="text-[9px] text-[#94A3B8]">{f.fileSize || 'Doc'} • {f.uploadedAt}</p>
                           </div>
                         </div>
                         <Button
@@ -1153,7 +1153,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                           onClick={() => setPreviewMediaModal({ title: f.fileName, type: 'pdf' })}
                           className="bg-white text-[10px] py-0.5 px-2 shrink-0 font-bold"
                         >
-                          <Eye className="w-3 h-3 text-slate-600" />
+                          <Eye className="w-3 h-3 text-[#64748B]" />
                         </Button>
                       </div>
                     ))
@@ -1163,8 +1163,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
             </div>
           ) : (
-            <div className="p-8 text-center text-slate-400">
-              <Info className="w-8 h-8 mx-auto text-slate-300" />
+            <div className="p-8 text-center text-[#94A3B8]">
+              <Info className="w-8 h-8 mx-auto text-[#BDE5DE]" />
               <p className="text-xs mt-2 font-bold">Select a thread to view live transaction context.</p>
             </div>
           )}
@@ -1179,17 +1179,17 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         <Modal isOpen={true} onClose={() => setPreviewMediaModal(null)} title={previewMediaModal.title}>
           <div className="space-y-4 text-xs p-2">
             {previewMediaModal.type === 'image' && previewMediaModal.url && (
-              <img src={previewMediaModal.url} alt={previewMediaModal.title} className="w-full max-h-[450px] object-contain rounded-xl border border-slate-200" />
+              <img src={previewMediaModal.url} alt={previewMediaModal.title} className="w-full max-h-[450px] object-contain rounded-xl border border-[#D7E7E4]" />
             )}
 
             {previewMediaModal.type === 'pdf' && (
-              <div className="p-8 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-4">
-                <FileText className="w-16 h-16 text-[#D96B43] mx-auto" />
+              <div className="p-8 bg-[#F6FAF9] rounded-2xl border border-[#D7E7E4] text-center space-y-4">
+                <FileText className="w-16 h-16 text-[#176b87] mx-auto" />
                 <div>
                   <h4 className="font-black text-sm text-[#176B87]">{previewMediaModal.title}</h4>
-                  <p className="text-slate-500 text-xs mt-1">Official NTSA / KAYAD Verified Encrypted PDF Vault File</p>
+                  <p className="text-[#64748B] text-xs mt-1">Official NTSA / KAYAD Verified Encrypted PDF Vault File</p>
                 </div>
-                <Button variant="accent" size="md" onClick={() => { setPreviewMediaModal(null); showToast(`Downloaded ${previewMediaModal.title}`); }} className="bg-[#D96B43] text-white">
+                <Button variant="accent" size="md" onClick={() => { setPreviewMediaModal(null); showToast(`Downloaded ${previewMediaModal.title}`); }} className="bg-[#176b87] text-white">
                   <Download className="w-4 h-4" /> Download PDF File
                 </Button>
               </div>
@@ -1205,23 +1205,23 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         <Modal isOpen={true} onClose={() => setShowUploadModal(false)} title="Upload Document to Transaction Vault">
           <form onSubmit={handleUploadFileToVault} className="space-y-4 text-xs p-2">
             <div>
-              <label className="block text-slate-700 font-extrabold mb-1">Document Title / File Name</label>
+              <label className="block text-[#12576D] font-extrabold mb-1">Document Title / File Name</label>
               <input
                 type="text"
                 value={newFileName}
                 onChange={(e) => setNewFileName(e.target.value)}
                 placeholder="e.g. National_ID_Copy.pdf or Bank_Statement.pdf"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87]"
+                className="w-full px-3 py-2 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87]"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-extrabold mb-1">Document Category</label>
+              <label className="block text-[#12576D] font-extrabold mb-1">Document Category</label>
               <select
                 value={newFileType}
                 onChange={(e: any) => setNewFileType(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87]"
+                className="w-full px-3 py-2 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87]"
               >
                 <option value="pdf">Official PDF Certificate</option>
                 <option value="logbook">Logbook / Title Copy</option>
@@ -1231,9 +1231,9 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               </select>
             </div>
 
-            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-[#176B87] font-medium space-y-1">
+            <div className="p-4 bg-[#F3FAF9] rounded-xl border border-[#BDE5DE] text-[11px] text-[#176B87] font-medium space-y-1">
               <p className="font-bold flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#D96B43]" /> Encrypted Transaction Storage
+                <ShieldCheck className="w-4 h-4 text-[#176b87]" /> Encrypted Transaction Storage
               </p>
               <p>Uploaded files are permanently attached to transaction reference #{activeThread.referenceNumber} and shared only with verified counterparties.</p>
             </div>

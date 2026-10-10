@@ -61,14 +61,14 @@ export function ImageUpload({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label className="block text-sm font-medium text-[#12576D] mb-1.5">
           {label}
         </label>
       )}
 
       {value ? (
         <div className="relative group">
-          <div className="w-full h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+          <div className="w-full h-40 rounded-lg overflow-hidden border border-[#D7E7E4] bg-[#F6FAF9]">
             <img
               src={value}
               alt="Preview"
@@ -94,7 +94,7 @@ export function ImageUpload({
             <button
               type="button"
               onClick={() => setLibraryOpen(true)}
-              className="text-xs text-gray-500 hover:text-gray-700 font-medium flex items-center gap-1"
+              className="text-xs text-[#64748B] hover:text-[#12576D] font-medium flex items-center gap-1"
             >
               <FolderOpen className="w-3.5 h-3.5" /> Browse Library
             </button>
@@ -111,7 +111,7 @@ export function ImageUpload({
           className={`w-full rounded-lg border-2 border-dashed transition-colors ${
             dragOver
               ? 'border-primary-500 bg-primary-50'
-              : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+              : 'border-[#BDE5DE] hover:border-primary-400 hover:bg-[#F6FAF9]'
           } ${uploading ? 'pointer-events-none' : ''}`}
         >
           <div
@@ -121,17 +121,17 @@ export function ImageUpload({
             {uploading ? (
               <>
                 <Loader2 className="w-7 h-7 text-primary-500 animate-spin mb-2" />
-                <p className="text-sm text-gray-500">Uploading...</p>
+                <p className="text-sm text-[#64748B]">Uploading...</p>
               </>
             ) : (
               <>
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                  <Upload className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 rounded-full bg-[#EEF7F5] flex items-center justify-center mb-2">
+                  <Upload className="w-5 h-5 text-[#94A3B8]" />
                 </div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-[#64748B]">
                   Click to upload or drag & drop
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-[#94A3B8] mt-1">
                   PNG, JPG, WebP, GIF, AVIF up to 5MB
                 </p>
               </>
@@ -140,7 +140,7 @@ export function ImageUpload({
           <button
             type="button"
             onClick={() => setLibraryOpen(true)}
-            className="w-full py-2 text-xs text-gray-500 hover:text-primary-600 font-medium border-t border-gray-200 flex items-center justify-center gap-1.5"
+            className="w-full py-2 text-xs text-[#64748B] hover:text-primary-600 font-medium border-t border-[#D7E7E4] flex items-center justify-center gap-1.5"
           >
             <FolderOpen className="w-3.5 h-3.5" /> Or browse Media Library
           </button>
@@ -151,7 +151,7 @@ export function ImageUpload({
         <p className="mt-1.5 text-xs text-red-600">{error}</p>
       )}
       {warning && (
-        <p className="mt-1.5 text-xs text-amber-600">{warning}</p>
+        <p className="mt-1.5 text-xs text-[#176B87]">{warning}</p>
       )}
 
       <input
@@ -225,7 +225,7 @@ export function MultiImageUpload({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label className="block text-sm font-medium text-[#12576D] mb-1.5">
           {label}
         </label>
       )}
@@ -233,7 +233,7 @@ export function MultiImageUpload({
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
         {value.map((url, i) => (
           <div key={i} className="relative group">
-            <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+            <div className="aspect-square rounded-lg overflow-hidden border border-[#D7E7E4] bg-[#F6FAF9]">
               <img src={url} alt="" className="w-full h-full object-cover" />
             </div>
             <button
@@ -248,21 +248,21 @@ export function MultiImageUpload({
 
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-primary-400 hover:bg-gray-50 flex flex-col items-center justify-center cursor-pointer transition-colors"
+          className="aspect-square rounded-lg border-2 border-dashed border-[#BDE5DE] hover:border-primary-400 hover:bg-[#F6FAF9] flex flex-col items-center justify-center cursor-pointer transition-colors"
         >
           {uploading ? (
             <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
           ) : (
             <>
-              <ImageIcon className="w-6 h-6 text-gray-400 mb-1" />
-              <span className="text-xs text-gray-500">Add</span>
+              <ImageIcon className="w-6 h-6 text-[#94A3B8] mb-1" />
+              <span className="text-xs text-[#64748B]">Add</span>
             </>
           )}
         </div>
       </div>
 
       {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
-      {warning && <p className="mt-1.5 text-xs text-amber-600">{warning}</p>}
+      {warning && <p className="mt-1.5 text-xs text-[#176B87]">{warning}</p>}
 
       <input
         ref={fileInputRef}

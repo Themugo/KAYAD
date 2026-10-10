@@ -26,9 +26,9 @@ const DEFAULT_BRANDING = {
   primaryLight: '#13B8A6',
   primaryDark: '#0A3340',
   primaryGlow: 'rgba(22, 132, 255, 0.25)',
-  accentColor: '#3B82F6',
+  accentColor: '#176B87',
   backgroundColor: '#F7F9FC',
-  surfaceColor: '#EEF4FA',
+  surfaceColor: '#EEF7F5',
   cardColor: '#FFFFFF',
   textColor: '#0A3340',
   textMutedColor: '#64748B',
@@ -36,8 +36,8 @@ const DEFAULT_BRANDING = {
   borderColor: '#D7E7E4',
   successColor: '#10B981',
   dangerColor: '#EF4444',
-  warningColor: '#F59E0B',
-  infoColor: '#3B82F6',
+  warningColor: '#176b87',
+  infoColor: '#176B87',
 };
 
 export default function AdminSettings() {
@@ -262,7 +262,7 @@ export default function AdminSettings() {
               ].map(f => (
                 <label key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '8px 0' }}>
                   <input type="checkbox" checked={config[f.key]} onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.checked }))}
-                    style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
+                    style={{ width: 18, height: 18, accentColor: 'var(--brand)' }} />
                   <span style={{ fontSize: 14 }}>{f.label}</span>
                 </label>
               ))}
@@ -391,7 +391,7 @@ export default function AdminSettings() {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={reconcile.autoReconcile}
                     onChange={e => setReconcile(p => ({ ...p, autoReconcile: e.target.checked }))}
-                    style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
+                    style={{ width: 18, height: 18, accentColor: 'var(--brand)' }} />
                   <span style={{ fontSize: 13 }}>Enabled</span>
                 </label>
               </Field>
@@ -423,7 +423,7 @@ export default function AdminSettings() {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={reconcile.notifyOnMismatch}
                     onChange={e => setReconcile(p => ({ ...p, notifyOnMismatch: e.target.checked }))}
-                    style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
+                    style={{ width: 18, height: 18, accentColor: 'var(--brand)' }} />
                   <span style={{ fontSize: 13 }}>Send email alert</span>
                 </label>
               </Field>

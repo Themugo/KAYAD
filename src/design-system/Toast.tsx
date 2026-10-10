@@ -32,7 +32,7 @@ export const Toast: React.FC<ToastProps> = ({
       {onClose && (
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
+          className="text-[#94A3B8] hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>

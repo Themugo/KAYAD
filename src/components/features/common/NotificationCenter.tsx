@@ -19,14 +19,14 @@ interface NotificationCenterProps {
 }
 
 const TYPE_CONFIG = {
-  bid: { icon: DollarSign, color: 'text-gold-400', bg: 'bg-gold-500/10' },
+  bid: { icon: DollarSign, color: 'text-[#13B8A6]', bg: 'bg-[#13B8A6]/10' },
   payment: { icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  escrow: { icon: Shield, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  chat: { icon: MessageCircle, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+  escrow: { icon: Shield, color: 'text-[#5AAFA4]', bg: 'bg-[#13B8A6]/10' },
+  chat: { icon: MessageCircle, color: 'text-[#5AAFA4]', bg: 'bg-[#13B8A6]/10' },
   auction: { icon: Gavel, color: 'text-red-400', bg: 'bg-red-500/10' },
   system: { icon: Bell, color: 'text-warm-400', bg: 'bg-warm-500/10' },
   info: { icon: Bell, color: 'text-warm-400', bg: 'bg-warm-500/10' },
-  referral: { icon: Bell, color: 'text-gold-400', bg: 'bg-gold-500/10' },
+  referral: { icon: Bell, color: 'text-[#13B8A6]', bg: 'bg-[#13B8A6]/10' },
 };
 
 export default function NotificationCenter({ onClose }: NotificationCenterProps) {
@@ -39,21 +39,21 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
   };
 
   return (
-    <div className="absolute top-full right-0 mt-3 w-[min(370px,calc(100vw-1.5rem))] bg-charcoal-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[200]">
+    <div className="absolute top-full right-0 mt-3 w-[min(370px,calc(100vw-1.5rem))] bg-[#0A3340] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[200]">
       {/* Header */}
       <div className="px-5 py-4 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-2">
           <span className="font-sans font-bold text-white">
             Notifications
             {unreadCount > 0 && (
-              <span className="ml-2 text-xs text-gold-400 font-bold">({unreadCount})</span>
+              <span className="ml-2 text-xs text-[#13B8A6] font-bold">({unreadCount})</span>
             )}
           </span>
         </div>
         {unreadCount > 0 && (
           <button
             onClick={markAllRead}
-            className="bg-transparent border-none text-gold-400 text-xs font-semibold cursor-pointer hover:text-gold-300 transition-colors"
+            className="bg-transparent border-none text-[#13B8A6] text-xs font-semibold cursor-pointer hover:text-[#5AAFA4] transition-colors"
           >
             Mark all read
           </button>
@@ -76,7 +76,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
             const content = (
               <div
                 className={`px-5 py-3 border-b border-white/3 flex gap-3 items-start cursor-pointer transition-colors ${
-                  n.read ? 'hover:bg-white/2' : 'bg-gold-500/3 hover:bg-gold-500/5'
+                  n.read ? 'hover:bg-white/2' : 'bg-[#13B8A6]/3 hover:bg-[#13B8A6]/5'
                 }`}
                 onClick={() => void markAsRead(n._id)}
               >
@@ -94,7 +94,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
                     {!n.read && (
                       <button
                         onClick={(e) => { e.stopPropagation(); markAsRead(n._id); }}
-                        className="bg-transparent border-none text-gold-400/40 text-xs cursor-pointer hover:text-gold-400 flex-shrink-0"
+                        className="bg-transparent border-none text-[#13B8A6]/40 text-xs cursor-pointer hover:text-[#13B8A6] flex-shrink-0"
                       >
                         <Check size={14} />
                       </button>
@@ -141,7 +141,7 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
       <Link
         to="/notifications"
         onClick={onClose}
-        className="block px-5 py-3.5 text-center font-sans text-sm text-gold-400 border-t border-white/5 hover:text-gold-300 no-underline font-semibold transition-colors"
+        className="block px-5 py-3.5 text-center font-sans text-sm text-[#13B8A6] border-t border-white/5 hover:text-[#5AAFA4] no-underline font-semibold transition-colors"
       >
         View all →
       </Link>

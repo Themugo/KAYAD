@@ -94,16 +94,16 @@ export function ProductFilters({
       </div>
 
       {/* Price Range */}
-      <div className="border-b border-gray-100 pb-4">
+      <div className="border-b border-[#D7E7E4] pb-4">
         <button
           onClick={() => toggleSection('price')}
           className="flex items-center justify-between w-full text-left"
         >
-          <h3 className="text-sm font-medium text-gray-700">Price Range</h3>
+          <h3 className="text-sm font-medium text-[#12576D]">Price Range</h3>
           {expandedSections.price ? (
-            <ChevronUp className="w-4 h-4 text-gray-400" />
+            <ChevronUp className="w-4 h-4 text-[#94A3B8]" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+            <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
           )}
         </button>
         
@@ -121,9 +121,9 @@ export function ProductFilters({
                     priceRange: { min: min || 0, max: options.priceRange?.max || 100000 }
                   });
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-[#BDE5DE] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              <span className="text-gray-400">-</span>
+              <span className="text-[#94A3B8]">-</span>
               <input
                 type="number"
                 placeholder="Max"
@@ -135,13 +135,13 @@ export function ProductFilters({
                     priceRange: { min: options.priceRange?.min || 0, max: max || 100000 }
                   });
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-[#BDE5DE] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             {options.priceRange && (
               <button
                 onClick={() => onChange({ ...options, priceRange: undefined })}
-                className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                className="text-xs text-[#64748B] hover:text-[#12576D] flex items-center gap-1"
               >
                 <X className="w-3 h-3" />
                 Clear price
@@ -153,16 +153,16 @@ export function ProductFilters({
 
       {/* Brands */}
       {availableBrands.length > 0 && (
-        <div className="border-b border-gray-100 pb-4">
+        <div className="border-b border-[#D7E7E4] pb-4">
           <button
             onClick={() => toggleSection('brands')}
             className="flex items-center justify-between w-full text-left"
           >
-            <h3 className="text-sm font-medium text-gray-700">Brands</h3>
+            <h3 className="text-sm font-medium text-[#12576D]">Brands</h3>
             {expandedSections.brands ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
+              <ChevronUp className="w-4 h-4 text-[#94A3B8]" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
             )}
           </button>
           
@@ -174,9 +174,9 @@ export function ProductFilters({
                     type="checkbox"
                     checked={options.brands?.includes(brand) || false}
                     onChange={() => toggleBrand(brand)}
-                    className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                    className="w-4 h-4 text-primary-600 rounded border-[#BDE5DE] focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-600">{brand}</span>
+                  <span className="text-sm text-[#64748B]">{brand}</span>
                 </label>
               ))}
             </div>
@@ -186,16 +186,16 @@ export function ProductFilters({
 
       {/* Materials */}
       {availableMaterials.length > 0 && (
-        <div className="border-b border-gray-100 pb-4">
+        <div className="border-b border-[#D7E7E4] pb-4">
           <button
             onClick={() => toggleSection('materials')}
             className="flex items-center justify-between w-full text-left"
           >
-            <h3 className="text-sm font-medium text-gray-700">Materials</h3>
+            <h3 className="text-sm font-medium text-[#12576D]">Materials</h3>
             {expandedSections.materials ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
+              <ChevronUp className="w-4 h-4 text-[#94A3B8]" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
             )}
           </button>
           
@@ -207,9 +207,9 @@ export function ProductFilters({
                     type="checkbox"
                     checked={options.materials?.includes(material) || false}
                     onChange={() => toggleMaterial(material)}
-                    className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                    className="w-4 h-4 text-primary-600 rounded border-[#BDE5DE] focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-600">{material}</span>
+                  <span className="text-sm text-[#64748B]">{material}</span>
                 </label>
               ))}
             </div>
@@ -218,16 +218,16 @@ export function ProductFilters({
       )}
 
       {/* Status */}
-      <div className="border-b border-gray-100 pb-4">
+      <div className="border-b border-[#D7E7E4] pb-4">
         <button
           onClick={() => toggleSection('status')}
           className="flex items-center justify-between w-full text-left"
         >
-          <h3 className="text-sm font-medium text-gray-700">Status</h3>
+          <h3 className="text-sm font-medium text-[#12576D]">Status</h3>
           {expandedSections.status ? (
-            <ChevronUp className="w-4 h-4 text-gray-400" />
+            <ChevronUp className="w-4 h-4 text-[#94A3B8]" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+            <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
           )}
         </button>
         
@@ -238,36 +238,36 @@ export function ProductFilters({
                 type="checkbox"
                 checked={options.inStock || false}
                 onChange={(e) => onChange({ ...options, inStock: e.target.checked || undefined })}
-                className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                className="w-4 h-4 text-primary-600 rounded border-[#BDE5DE] focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-600">In Stock</span>
+              <span className="text-sm text-[#64748B]">In Stock</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={options.isNewArrival || false}
                 onChange={(e) => onChange({ ...options, isNewArrival: e.target.checked || undefined })}
-                className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                className="w-4 h-4 text-primary-600 rounded border-[#BDE5DE] focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-600">New Arrivals</span>
+              <span className="text-sm text-[#64748B]">New Arrivals</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={options.isBestSeller || false}
                 onChange={(e) => onChange({ ...options, isBestSeller: e.target.checked || undefined })}
-                className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                className="w-4 h-4 text-primary-600 rounded border-[#BDE5DE] focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-600">Best Sellers</span>
+              <span className="text-sm text-[#64748B]">Best Sellers</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={options.isClearance || false}
                 onChange={(e) => onChange({ ...options, isClearance: e.target.checked || undefined })}
-                className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                className="w-4 h-4 text-primary-600 rounded border-[#BDE5DE] focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-600">Clearance</span>
+              <span className="text-sm text-[#64748B]">Clearance</span>
             </label>
           </div>
         )}
@@ -279,11 +279,11 @@ export function ProductFilters({
           onClick={() => toggleSection('sort')}
           className="flex items-center justify-between w-full text-left"
         >
-          <h3 className="text-sm font-medium text-gray-700">Sort By</h3>
+          <h3 className="text-sm font-medium text-[#12576D]">Sort By</h3>
           {expandedSections.sort ? (
-            <ChevronUp className="w-4 h-4 text-gray-400" />
+            <ChevronUp className="w-4 h-4 text-[#94A3B8]" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+            <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
           )}
         </button>
         
@@ -297,9 +297,9 @@ export function ProductFilters({
                   value={option.value}
                   checked={options.sortBy === option.value}
                    onChange={(e) => onChange({ ...options, sortBy: e.target.value as FilterOptions['sortBy'] })}
-                  className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-600 border-[#BDE5DE] focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-600">{option.label}</span>
+                <span className="text-sm text-[#64748B]">{option.label}</span>
               </label>
             ))}
           </div>
@@ -308,8 +308,8 @@ export function ProductFilters({
 
       {/* Active Filters Summary */}
       {hasActiveFilters && (
-        <div className="pt-4 border-t border-gray-200">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+        <div className="pt-4 border-t border-[#D7E7E4]">
+          <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-2">
             Active Filters
           </p>
           <div className="flex flex-wrap gap-2">

@@ -40,13 +40,13 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onOpenGallery }:
 
   return (
     <div
-      className="relative w-full aspect-video bg-charcoal-800 rounded-2xl overflow-hidden cursor-pointer"
+      className="relative w-full aspect-video bg-[#12576D] rounded-2xl overflow-hidden cursor-pointer"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={onOpenGallery}
     >
       {!loaded && (
-        <div className="absolute inset-0 bg-charcoal-800 animate-pulse" />
+        <div className="absolute inset-0 bg-[#12576D] animate-pulse" />
       )}
       <img
         src={src}
@@ -62,7 +62,7 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onOpenGallery }:
       />
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0A3340]/30 via-transparent to-[#0A3340]/20 pointer-events-none" />
 
       {/* Navigation arrows */}
       {total > 1 && (
@@ -79,7 +79,7 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onOpenGallery }:
           >
             <ChevronRight size={18} />
           </button>
-          <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/60 text-white text-xs font-semibold rounded-full backdrop-blur-sm z-10">
+          <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-[#0A3340]/60 text-white text-xs font-semibold rounded-full backdrop-blur-sm z-10">
             {idx + 1} / {total}
           </div>
         </>
@@ -87,7 +87,7 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onOpenGallery }:
 
       {/* Featured badge */}
       {car?.isPromoted && (
-        <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-gold-500/90 text-charcoal-900 text-xs font-bold rounded-full z-10">
+        <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-[#13B8A6]/90 text-[#0A3340] text-xs font-bold rounded-full z-10">
           <Star size={12} />
           FEATURED
         </div>
@@ -127,7 +127,7 @@ export function GalleryThumbnails({ car, selectedIdx, onSelect }: GalleryThumbna
             onClick={() => onSelect(idx)}
             className={`relative w-16 h-12 rounded-lg overflow-hidden transition-all ${
               isActive
-                ? 'ring-2 ring-gold-500 opacity-100'
+                ? 'ring-2 ring-[#5AAFA4] opacity-100'
                 : 'opacity-50 hover:opacity-80'
             }`}
           >
@@ -156,14 +156,14 @@ export function SpecItem({ icon: Icon, label, value, delay = 0 }: SpecItemProps)
   if (!value) return null;
   return (
     <div
-      className="bg-white rounded-xl p-4 border border-cream-200 hover:border-gold-500/30 transition-all"
+      className="bg-white rounded-xl p-4 border border-[#D7E7E4] hover:border-[#5AAFA4]/30 transition-all"
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <Icon size={14} className="text-gold-600" />
+        <Icon size={14} className="text-[#176B87]" />
         <span className="text-[10px] text-warm-400 uppercase tracking-wider font-bold">{label}</span>
       </div>
-      <div className="font-sans text-sm font-bold text-charcoal-900">{value}</div>
+      <div className="font-sans text-sm font-bold text-[#0A3340]">{value}</div>
     </div>
   );
 }
@@ -195,10 +195,10 @@ export function CompareToggle({ car }: CompareToggleProps) {
       disabled={full}
       className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all ${
         isComp
-          ? 'bg-gold-500/10 border border-gold-500/30 text-gold-700'
+          ? 'bg-[#13B8A6]/10 border border-[#5AAFA4]/30 text-[#12576D]'
           : full
-            ? 'bg-cream-100 border border-cream-200 text-warm-400 cursor-not-allowed'
-            : 'bg-white border border-cream-200 text-charcoal-800 hover:border-gold-500/30'
+            ? 'bg-[#EEF7F5] border border-[#D7E7E4] text-warm-400 cursor-not-allowed'
+            : 'bg-white border border-[#D7E7E4] text-[#0A3340] hover:border-[#5AAFA4]/30'
       }`}
     >
       <BarChart3 size={16} />

@@ -83,17 +83,17 @@ export const tokens = {
     },
     // Surface (Dark)
     surface: {
-      50: '#F8FAFC',
-      100: '#F1F5F9',
-      200: '#E2E8F0',
-      300: '#CBD5E1',
+      50: '#f6faf9',
+      100: '#f6faf9',
+      200: '#d7e7e4',
+      300: '#d7e7e4',
       400: '#94A3B8',
       500: '#64748B',
-      600: '#475569',
-      700: '#334155',
+      600: '#64748b',
+      700: '#12576d',
       800: '#1E293B',
-      900: '#0F172A',
-      950: '#0A1626',
+      900: '#0a3340',
+      950: '#0a3340',
     },
     // Background (Light)
     background: {
@@ -108,19 +108,19 @@ export const tokens = {
     status: {
       success: '#10B981',
       danger: '#EF4444',
-      warning: '#F59E0B',
-      info: '#3B82F6',
+      warning: '#176b87',
+      info: '#176B87',
     },
   },
 
   // Shadows
   shadows: {
     none: 'none',
-    sm: '0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06)',
-    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+    sm: '0 1px 2px rgba(10, 51, 64, 0.04), 0 1px 3px rgba(10, 51, 64, 0.06)',
+    md: '0 4px 6px -1px rgba(10, 51, 64, 0.06), 0 2px 4px -2px rgba(10, 51, 64, 0.04)',
+    lg: '0 10px 15px -3px rgba(10, 51, 64, 0.08), 0 4px 6px -4px rgba(10, 51, 64, 0.04)',
+    xl: '0 20px 25px -5px rgba(10, 51, 64, 0.1), 0 8px 10px -6px rgba(10, 51, 64, 0.06)',
+    '2xl': '0 25px 50px -12px rgba(10, 51, 64, 0.15)',
     brand: '0 4px 14px rgba(19, 184, 166, 0.24)',
     'brand-lg': '0 8px 30px rgba(19, 184, 166, 0.30)',
   },

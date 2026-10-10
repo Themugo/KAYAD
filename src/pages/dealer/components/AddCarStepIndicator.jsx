@@ -15,7 +15,7 @@ export default function AddCarStepIndicator({ step, setStep, completed = {} }) {
       }}>
         <div style={{
           height: '100%', width: `${(step / 4) * 100}%`,
-          background: 'linear-gradient(90deg, var(--gold), #e6c288)',
+          background: 'linear-gradient(90deg, var(--brand), #5aafa4)',
           transition: 'width 0.3s ease', borderRadius: 2,
         }} />
       </div>
@@ -33,24 +33,24 @@ export default function AddCarStepIndicator({ step, setStep, completed = {} }) {
               role="tab" aria-selected={isCurrent} tabIndex={0} aria-label={s.label || `Step ${s.id}`}
               style={{
                 flex: 1, textAlign: 'center', padding: '12px 8px', borderRadius: 12,
-                background: isCurrent ? 'rgba(37, 99, 235,0.12)' : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${isCurrent ? 'rgba(37, 99, 235,0.3)' : isCompleted ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                background: isCurrent ? 'rgba(23, 107, 135, 0.12)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${isCurrent ? 'rgba(23, 107, 135, 0.3)' : isCompleted ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
                 cursor: isUpcoming ? 'not-allowed' : 'pointer',
                 fontSize: 13, fontWeight: isCurrent ? 600 : 500,
-                color: isCurrent ? 'var(--gold)' : isCompleted ? '#22C55E' : 'rgba(255,255,255,0.5)',
+                color: isCurrent ? 'var(--brand)' : isCompleted ? '#22C55E' : 'rgba(255,255,255,0.5)',
                 transition: 'all 0.2s', opacity: isUpcoming ? 0.5 : 1,
                 position: 'relative',
               }}
-              onMouseEnter={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(37, 99, 235,0.18)' : 'rgba(255,255,255,0.05)'; } }}
-              onMouseLeave={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(37, 99, 235,0.12)' : 'rgba(255,255,255,0.02)'; } }}
+              onMouseEnter={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(23, 107, 135, 0.18)' : 'rgba(255,255,255,0.05)'; } }}
+              onMouseLeave={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(23, 107, 135, 0.12)' : 'rgba(255,255,255,0.02)'; } }}
             >
               {/* Step number with status */}
               <div style={{
                 width: 32, height: 32, borderRadius: '50%',
                 margin: '0 auto 8px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: isCurrent ? 'var(--gold)' : isCompleted ? '#22C55E' : 'rgba(255,255,255,0.1)',
-                color: isCurrent || isCompleted ? '#000' : 'rgba(255,255,255,0.5)',
+                background: isCurrent ? 'var(--brand)' : isCompleted ? '#22C55E' : 'rgba(255,255,255,0.1)',
+                color: isCurrent || isCompleted ? '#0a3340' : 'rgba(255,255,255,0.5)',
                 fontWeight: 800, fontSize: 14,
                 transition: 'all 0.2s',
               }}>
@@ -64,8 +64,8 @@ export default function AddCarStepIndicator({ step, setStep, completed = {} }) {
                 <div style={{
                   position: 'absolute', top: -2, left: '50%', transform: 'translateX(-50%)',
                   width: 4, height: 4, borderRadius: '50%',
-                  background: 'var(--gold)',
-                  boxShadow: '0 0 8px var(--gold)',
+                  background: 'var(--brand)',
+                  boxShadow: '0 0 8px var(--brand)',
                 }} />
               )}
             </div>

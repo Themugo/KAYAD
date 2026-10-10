@@ -14,7 +14,7 @@ export default function BuyerBidsTab({ myBids, bidLoading }) {
       <div className="bids-empty-card">
         <div className="bids-empty-header">
           <div className="bids-empty-title">Your Bids</div>
-          <Link to="/showroom?filter=auction" style={{ fontSize: 11, color: 'var(--gold)', textDecoration: 'none', fontWeight: 600 }}>Browse Auctions →</Link>
+          <Link to="/showroom?filter=auction" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>Browse Auctions →</Link>
         </div>
         <div className="bids-empty-body">
           <div className="bids-empty-icon">🔨</div>

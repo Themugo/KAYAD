@@ -17,15 +17,15 @@ export default function GovernanceDashboard() {
   }, []);
 
   return (
-    <section className="min-h-[400px] rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+    <section className="min-h-[400px] rounded-xl border border-[#D7E7E4] bg-white p-8 shadow-sm">
       <div className="flex items-start gap-4">
-        <div className="rounded-lg bg-slate-100 p-3"><Shield className="text-slate-700" size={24} /></div>
+        <div className="rounded-lg bg-[#EEF7F5] p-3"><Shield className="text-[#12576D]" size={24} /></div>
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Governance & Risk</h1>
-          <p className="mt-1 text-sm text-slate-600">Production governance data is shown only when backed by the authoritative database.</p>
+          <h1 className="text-xl font-semibold text-[#0A3340]">Governance & Risk</h1>
+          <p className="mt-1 text-sm text-[#64748B]">Production governance data is shown only when backed by the authoritative database.</p>
         </div>
       </div>
-      <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="mt-8 rounded-lg border border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340]">
         <div className="flex gap-3"><AlertTriangle size={20} className="mt-0.5 shrink-0" /><span>{message}</span></div>
       </div>
     </section>

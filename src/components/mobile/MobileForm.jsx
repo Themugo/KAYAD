@@ -209,10 +209,10 @@ function MobileToggle({
 }) {
   return (
     <label className={`mobile-form__checkbox ${className}`} style={{
-      background: checked ? 'var(--gold-100)' : 'var(--surface)',
+      background: checked ? 'var(--brand-100)' : 'var(--surface)',
       borderRadius: 'var(--mobile-radius-md)',
       padding: 'var(--mobile-space-4)',
-      border: `1px solid ${checked ? 'var(--gold-400)' : 'var(--border)'}`,
+      border: `1px solid ${checked ? 'var(--brand-400)' : 'var(--border)'}`,
     }}>
       <input
         type="checkbox"
@@ -235,7 +235,7 @@ function MobileToggle({
           width: 52,
           height: 32,
           borderRadius: 16,
-          background: checked ? 'var(--gold-500)' : 'var(--bg-muted)',
+          background: checked ? 'var(--brand-500)' : 'var(--bg-muted)',
           position: 'relative',
           transition: 'background 0.2s',
           flexShrink: 0,
@@ -251,7 +251,7 @@ function MobileToggle({
             top: 2,
             left: checked ? 22 : 2,
             transition: 'left 0.2s',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            boxShadow: '0 2px 4px rgba(10, 51, 64, 0.2)',
           }}
         />
       </div>

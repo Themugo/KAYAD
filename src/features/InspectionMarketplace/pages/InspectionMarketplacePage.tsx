@@ -168,7 +168,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
             <Info size={18} className="mt-0.5 shrink-0" aria-hidden />
             <p>KAYAD is a technology platform. The businesses listed are independent: they do the work, set their prices and are responsible for it. “Verified” means KAYAD reviewed the evidence shown. It reduces risk but is not a guarantee of any outcome.</p>
           </div>
-          <div className="max-w-2xl mx-auto mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-slate-200">
+          <div className="max-w-2xl mx-auto mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-[#DDF4F0]">
             <span>Run an automotive business?</span>
             <button type="button" className="font-bold text-[#B8EEE7] hover:text-white underline underline-offset-2 min-h-[44px] px-2" onClick={onApplyAsProvider}>Apply to join KAYAD</button>
           </div>
@@ -179,15 +179,15 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
         <div className="max-w-7xl mx-auto px-4 pt-6">
           <div role="status" className="rounded-xl border border-[#CDE9E5] bg-white px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <p className="font-semibold text-[#0F5D73]">Booking paid and confirmed.</p>
-              <p className="text-sm text-slate-600">
+              <p className="font-semibold text-[#12576d]">Booking paid and confirmed.</p>
+              <p className="text-sm text-[#64748B]">
                 {confirmation.reference ? <>Your reference is <strong className="font-mono">{confirmation.reference}</strong>. </> : null}
                 Follow its status and open the report in My inspections.
               </p>
             </div>
             <div className="flex gap-2">
               {onViewMyInspections && <button type="button" onClick={onViewMyInspections} className="px-4 min-h-[44px] rounded-lg font-semibold text-white" style={{ backgroundColor: C.teal }}>View my inspections</button>}
-              <button type="button" onClick={() => setConfirmation(null)} className="px-4 min-h-[44px] rounded-lg font-medium border border-slate-200 text-slate-600">Dismiss</button>
+              <button type="button" onClick={() => setConfirmation(null)} className="px-4 min-h-[44px] rounded-lg font-medium border border-[#D7E7E4] text-[#64748B]">Dismiss</button>
             </div>
           </div>
         </div>
@@ -202,7 +202,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
 
         <div className="mb-4">
           <label htmlFor="symptom" className="block text-sm font-medium mb-1" style={{ color: C.navy }}>Not sure what is wrong?</label>
-          <select id="symptom" className="w-full sm:w-96 px-3 py-2.5 rounded-lg border border-slate-300 bg-white min-h-[44px]" value={symptom} onChange={(e) => setSymptom(e.target.value)} disabled={!taxonomy}>
+          <select id="symptom" className="w-full sm:w-96 px-3 py-2.5 rounded-lg border border-[#BDE5DE] bg-white min-h-[44px]" value={symptom} onChange={(e) => setSymptom(e.target.value)} disabled={!taxonomy}>
             <option value="">Choose what you notice…</option>
             {(taxonomy?.symptoms || []).map((s) => <option key={s.code} value={s.code}>{s.label}</option>)}
           </select>
@@ -238,7 +238,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
         )}
 
         {roadside && (
-          <div role="note" className="mt-4 rounded-xl border-2 border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex gap-2">
+          <div role="note" className="mt-4 rounded-xl border-2 border-[#BDE5DE] bg-[#F3FAF9] px-4 py-3 text-sm text-[#0A3340] flex gap-2">
             <PhoneCall size={18} className="mt-0.5 shrink-0" aria-hidden />
             <div>
               <p className="font-semibold">KAYAD does not dispatch, track or guarantee roadside help.</p>
@@ -250,7 +250,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-6">
-        <button type="button" onClick={() => setShowRefine((v) => !v)} aria-expanded={showRefine} aria-controls="refine-panel" className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-lg border border-slate-300 bg-white font-medium" style={{ color: C.navy }}>
+        <button type="button" onClick={() => setShowRefine((v) => !v)} aria-expanded={showRefine} aria-controls="refine-panel" className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-lg border border-[#BDE5DE] bg-white font-medium" style={{ color: C.navy }}>
           <SlidersHorizontal size={16} aria-hidden /> Vehicle, location and other refinements{refinementsActive ? ' (active)' : ''}
         </button>
         {showRefine && (
@@ -302,9 +302,9 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
       </section>
 
       <section className="max-w-7xl mx-auto px-4 pb-12">
-        <div className="rounded-xl border bg-white px-5 py-4 text-sm text-slate-600" style={{ borderColor: C.line }}>
+        <div className="rounded-xl border bg-white px-5 py-4 text-sm text-[#64748B]" style={{ borderColor: C.line }}>
           <div className="flex gap-2"><Shield size={18} className="mt-0.5 shrink-0 text-[#0F766E]" aria-hidden />
-            <p><span className="font-semibold text-[#0F5D73]">How businesses get listed:</span> each application is reviewed by a KAYAD administrator against submitted evidence, and only active, verified businesses appear here. “Verified” for a service means an administrator reviewed the evidence for that service; “declared” means the business says so and KAYAD has not verified it. KAYAD does not currently show prices, ratings or availability it has not been given.</p>
+            <p><span className="font-semibold text-[#12576d]">How businesses get listed:</span> each application is reviewed by a KAYAD administrator against submitted evidence, and only active, verified businesses appear here. “Verified” for a service means an administrator reviewed the evidence for that service; “declared” means the business says so and KAYAD has not verified it. KAYAD does not currently show prices, ratings or availability it has not been given.</p>
           </div>
         </div>
       </section>
@@ -318,7 +318,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`px-4 min-h-[44px] rounded-full text-sm font-medium border transition-colors ${active ? 'text-white border-transparent shadow-md' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'}`}
+      className={`px-4 min-h-[44px] rounded-full text-sm font-medium border transition-colors ${active ? 'text-white border-transparent shadow-md' : 'bg-white text-[#12576D] border-[#BDE5DE] hover:bg-[#F6FAF9]'}`}
       style={active ? { backgroundColor: C.teal } : undefined}
     >
       {children}

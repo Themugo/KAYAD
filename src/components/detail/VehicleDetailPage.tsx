@@ -150,7 +150,7 @@ export const VehicleDetailPage: FC = () => {
           <Info className="w-8 h-8 text-[var(--kayad-cyan)]" />
         </div>
         <h2 className="text-2xl font-black text-navy-600 font-serif">Vehicle Not Selected</h2>
-        <p className="text-slate-500 font-medium text-sm">Please select a vehicle from our showroom inventory to view full specifications and inspection reports.</p>
+        <p className="text-[#64748B] font-medium text-sm">Please select a vehicle from our showroom inventory to view full specifications and inspection reports.</p>
         <Button onClick={() => navigateTo('gallery')} className="mt-4 bg-navy-600 text-white font-bold hover:bg-navy-900">
           Return to Showroom Inventory
         </Button>
@@ -306,7 +306,7 @@ export const VehicleDetailPage: FC = () => {
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-5 border-b border-[#D7E7E4]">
         <div className="space-y-2.5 max-w-3xl">
           {/* Breadcrumb path */}
-          <div className="flex items-center gap-2 text-xs text-[#66808A] font-semibold">
+          <div className="flex items-center gap-2 text-xs text-[#64748b] font-semibold">
             <button
               className="hover:underline hover:text-navy-600 cursor-pointer"
               onClick={() => navigateTo('gallery')}
@@ -357,16 +357,16 @@ export const VehicleDetailPage: FC = () => {
               onClick={() => navigateTo('auctions')}
               className={`px-3 py-1.5 rounded-xl border text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs ${
                 vehicle.auctionLifecycle === 'live'
-                  ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 border-amber-400'
+                  ? 'bg-[#13B8A6]/15 hover:bg-[#13B8A6]/25 text-[#0A3340] border-[#91CEC5]'
                   : vehicle.auctionLifecycle === 'draft'
-                    ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-900 border-blue-400'
+                    ? 'bg-[#13B8A6]/15 hover:bg-[#13B8A6]/25 text-[#0A3340] border-[#91CEC5]'
                     : vehicle.auctionLifecycle === 'ended'
-                      ? 'bg-slate-200/60 hover:bg-slate-200 text-slate-700 border-slate-400'
+                      ? 'bg-[#DDF4F0]/60 hover:bg-[#DDF4F0] text-[#12576D] border-[#91CEC5]'
                       : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-900 border-emerald-400'
               }`}
               title="Click to view the auction floor"
             >
-              <Gavel className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform" />
+              <Gavel className="w-3.5 h-3.5 text-[#176B87] group-hover:scale-110 transition-transform" />
               <span>
                 {vehicle.auctionLifecycle === 'live'
                   ? 'Live Auction Floor'
@@ -376,7 +376,7 @@ export const VehicleDetailPage: FC = () => {
                       ? 'Auction Ended'
                       : 'Verified Fixed Price'}
               </span>
-              <ChevronRight className="w-3 h-3 text-slate-500" />
+              <ChevronRight className="w-3 h-3 text-[#64748B]" />
             </button>
 
             {/* Inspection Badge — claims "Inspected" only once the
@@ -404,7 +404,7 @@ export const VehicleDetailPage: FC = () => {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-[#365563]">
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-[#176b87]">
             <span className="flex items-center gap-1 font-semibold">
               <MapPin className="w-3.5 h-3.5 text-[var(--kayad-cyan)]" />
               {vehicle.location}
@@ -417,14 +417,14 @@ export const VehicleDetailPage: FC = () => {
               </code>
               <button
                 onClick={handleCopyVin}
-                className="p-1 text-[#66808A] hover:text-navy-600 transition-colors cursor-pointer"
+                className="p-1 text-[#64748b] hover:text-navy-600 transition-colors cursor-pointer"
                 title="Copy VIN"
               >
                 {copiedVin ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </span>
             <span className="text-[#D7E7E4]">•</span>
-            <span className="flex items-center gap-1 text-[#66808A] font-medium">
+            <span className="flex items-center gap-1 text-[#64748b] font-medium">
               <Eye className="w-3.5 h-3.5" />
               <span>{vehicle.viewsCount != null ? `${vehicle.viewsCount} Views` : 'Views unavailable'}</span>
             </span>
@@ -494,7 +494,7 @@ export const VehicleDetailPage: FC = () => {
           {/* Main Hero Gallery Image Frame */}
           <div className="space-y-3">
             <div
-              className="relative h-[420px] sm:h-[520px] lg:h-[580px] rounded-3xl overflow-hidden border border-[#D7E7E4] shadow-xl bg-slate-900 select-none cursor-crosshair group"
+              className="relative h-[420px] sm:h-[520px] lg:h-[580px] rounded-3xl overflow-hidden border border-[#D7E7E4] shadow-xl bg-[#0A3340] select-none cursor-crosshair group"
               onMouseEnter={() => setIsHoverZooming(true)}
               onMouseLeave={() => setIsHoverZooming(false)}
               onMouseMove={handleImageMouseMove}
@@ -505,16 +505,16 @@ export const VehicleDetailPage: FC = () => {
             >
               {/* Image Skeleton Loader Placeholder */}
               {isImageLoading && (
-                <Skeleton className="absolute inset-0 w-full h-full z-0 rounded-3xl bg-slate-800 animate-pulse" />
+                <Skeleton className="absolute inset-0 w-full h-full z-0 rounded-3xl bg-[#12576D] animate-pulse" />
               )}
 
               {!hasImages ? (
-                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-slate-800 text-white space-y-3">
+                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-[#12576D] text-white space-y-3">
                   <div className="w-16 h-16 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center">
                     <Info className="w-8 h-8 text-[var(--kayad-cyan)]" />
                   </div>
                   <h2 className="text-lg font-serif font-black">Vehicle photos unavailable</h2>
-                  <p className="text-xs text-slate-300 max-w-sm">No vehicle images were supplied by the authoritative listing record.</p>
+                  <p className="text-xs text-[#BDE5DE] max-w-sm">No vehicle images were supplied by the authoritative listing record.</p>
                 </div>
               ) : !imageFailed ? (
                 <img
@@ -547,7 +547,7 @@ export const VehicleDetailPage: FC = () => {
                     <ShieldCheck className="w-8 h-8" />
                   </div>
                   <h2 className="text-lg font-serif font-black">{formattedFullTitle}</h2>
-                  <p className="text-xs text-slate-300 max-w-sm">Verified Showroom Vehicle • High Resolution Photography Loading</p>
+                  <p className="text-xs text-[#BDE5DE] max-w-sm">Verified Showroom Vehicle • High Resolution Photography Loading</p>
                 </div>
               )}
 
@@ -657,36 +657,36 @@ export const VehicleDetailPage: FC = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Year</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Year</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.year}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Mileage</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Mileage</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.mileage.toLocaleString()} km</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Fuel Type</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Fuel Type</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.fuelType}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Transmission</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Transmission</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.transmission}</span>
               </div>
 
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Engine</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Engine</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.engine}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Horsepower</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Horsepower</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.horsepower} HP</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Exterior Color</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Exterior Color</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.exteriorColor || 'Not provided'}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4]">
-                <span className="text-[#66808A] font-bold uppercase block text-[10px]">Condition</span>
+                <span className="text-[#64748b] font-bold uppercase block text-[10px]">Condition</span>
                 <span className="text-sm font-extrabold text-navy-600">{vehicle.condition || 'Not provided'}</span>
               </div>
             </div>
@@ -699,8 +699,8 @@ export const VehicleDetailPage: FC = () => {
                   to h2 in this pass, so this subsection needs to drop one
                   level too to keep h2 -> h3 -> ... unbroken instead of
                   skipping straight to h4. */}
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#66808A]">Seller Description</h3>
-              <p className="text-xs text-[#365563] leading-relaxed font-medium">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#64748b]">Seller Description</h3>
+              <p className="text-xs text-[#176b87] leading-relaxed font-medium">
                 {vehicle.description || 'The seller has not provided a description for this listing.'}
               </p>
             </div>
@@ -709,7 +709,7 @@ export const VehicleDetailPage: FC = () => {
             <div className="pt-2 border-t border-[#D7E7E4]">
               {/* STAGE 12 PHASE D: same demotion as "Seller Description"
                   just above, for the same reason. */}
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#66808A] mb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#64748b] mb-2">
                 Installed Features & Options
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -742,7 +742,7 @@ export const VehicleDetailPage: FC = () => {
                         Verified
                       </span>
                     </div>
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-[#BDE5DE]">
                       Inspected on {vehicle.inspection.inspectedAt} by Senior Inspector {vehicle.inspection.inspectorName}
                     </p>
                   </div>
@@ -759,15 +759,15 @@ export const VehicleDetailPage: FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                 <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 space-y-1">
-                  <span className="text-[10px] text-slate-300 font-bold block uppercase tracking-wider">Engine & Powertrain</span>
+                  <span className="text-[10px] text-[#BDE5DE] font-bold block uppercase tracking-wider">Engine & Powertrain</span>
                   <span className="text-xs font-extrabold text-[var(--kayad-cyan)]">{vehicle.inspection.engineHealth}</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 space-y-1">
-                  <span className="text-[10px] text-slate-300 font-bold block uppercase tracking-wider">Body & Chassis Integrity</span>
+                  <span className="text-[10px] text-[#BDE5DE] font-bold block uppercase tracking-wider">Body & Chassis Integrity</span>
                   <span className="text-xs font-extrabold text-[var(--kayad-cyan)]">{vehicle.inspection.bodyCondition}</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 space-y-1">
-                  <span className="text-[10px] text-slate-300 font-bold block uppercase tracking-wider">Electronics & Systems</span>
+                  <span className="text-[10px] text-[#BDE5DE] font-bold block uppercase tracking-wider">Electronics & Systems</span>
                   <span className="text-xs font-extrabold text-[var(--kayad-cyan)]">{vehicle.inspection.interiorHealth}</span>
                 </div>
               </div>
@@ -793,7 +793,7 @@ export const VehicleDetailPage: FC = () => {
                 <CheckCircle2 className="w-4 h-4 text-[var(--kayad-cyan)] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Official Title & Logbook Cleared</span>
-                  <span className="text-slate-300 text-[11px] leading-relaxed">NTSA logbook ownership verified with zero outstanding encumbrances.</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">NTSA logbook ownership verified with zero outstanding encumbrances.</span>
                 </div>
               </div>
 
@@ -801,7 +801,7 @@ export const VehicleDetailPage: FC = () => {
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Accident & Chassis Inspection Passed</span>
-                  <span className="text-slate-300 text-[11px] leading-relaxed">Structural chassis integrity and body alignment scan passed without defect.</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Structural chassis integrity and body alignment scan passed without defect.</span>
                 </div>
               </div>
 
@@ -809,7 +809,7 @@ export const VehicleDetailPage: FC = () => {
                 <Lock className="w-4 h-4 text-[var(--kayad-cyan)] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Secure M-Pesa Buyer Protection</span>
-                  <span className="text-slate-300 text-[11px] leading-relaxed">Direct M-Pesa or bank transfer backed by 48-hour physical inspection.</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Direct M-Pesa or bank transfer backed by 48-hour physical inspection.</span>
                 </div>
               </div>
 
@@ -817,7 +817,7 @@ export const VehicleDetailPage: FC = () => {
                 <FileText className="w-4 h-4 text-[var(--kayad-cyan)] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Complete Service History</span>
-                  <span className="text-slate-300 text-[11px] leading-relaxed">Verified franchise maintenance logbook and authentic odometer check.</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Verified franchise maintenance logbook and authentic odometer check.</span>
                 </div>
               </div>
             </div>
@@ -845,7 +845,7 @@ export const VehicleDetailPage: FC = () => {
               </span>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed font-medium">
+            <p className="text-xs text-[#BDE5DE] leading-relaxed font-medium">
               Want independent peace of mind before buying this <strong className="text-white">{vehicle.title.startsWith(String(vehicle.year)) ? vehicle.title : `${vehicle.year} ${vehicle.title}`}</strong>? Book an on-demand physical and mechanical scan. Our certified master engineers check 150 points, scan OBD-II fault codes, verify paint depth & test drive the vehicle.
             </p>
 
@@ -878,7 +878,7 @@ export const VehicleDetailPage: FC = () => {
 
             {/* Price Header */}
             <div className="space-y-3 border-b border-[#D7E7E4] pb-4">
-              <span className="text-[10px] font-bold text-[#66808A] uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
                 Listed Purchase Price
               </span>
               <div className="flex items-baseline justify-between gap-2">
@@ -905,7 +905,7 @@ export const VehicleDetailPage: FC = () => {
                 <span>Buy Now via M-Pesa Protection</span>
               </button>
 
-              <p className="text-[11px] text-[#66808A] text-center leading-normal font-medium pt-1">
+              <p className="text-[11px] text-[#64748b] text-center leading-normal font-medium pt-1">
                 Protected by M-Pesa Direct Payment. Backup guaranteed by 48-hr physical vehicle inspection.
               </p>
 
@@ -920,7 +920,7 @@ export const VehicleDetailPage: FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <BellRing className={`w-4 h-4 ${existingAlert ? 'text-[var(--kayad-cyan)] animate-pulse' : 'text-[#66808A]'}`} />
+                  <BellRing className={`w-4 h-4 ${existingAlert ? 'text-[var(--kayad-cyan)] animate-pulse' : 'text-[#64748b]'}`} />
                   <span className="truncate">
                     {existingAlert ? `Price Alert: < KSh ${existingAlert.targetPrice.toLocaleString()}` : 'Get notified if price drops'}
                   </span>
@@ -946,7 +946,7 @@ export const VehicleDetailPage: FC = () => {
               vehicle.auctionLifecycle === 'live' ? (
                 <div className="space-y-4 pt-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider">
+                    <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider">
                       Current High Bid
                     </span>
                     <Badge variant="amber" icon={<Gavel className="w-3 h-3" />}>
@@ -1004,7 +1004,7 @@ export const VehicleDetailPage: FC = () => {
               ) : (
                 <div className="space-y-2 pt-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider">
+                    <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider">
                       {vehicle.auctionLifecycle === 'draft' ? 'Starting Price' : 'Final Price'}
                     </span>
                     <Badge
@@ -1017,7 +1017,7 @@ export const VehicleDetailPage: FC = () => {
                   <p className="text-2xl font-black text-navy-600 font-serif">
                     KSh {currentPrice.toLocaleString()}
                   </p>
-                  <p className="text-xs text-[#66808A]">
+                  <p className="text-xs text-[#64748b]">
                     {vehicle.auctionLifecycle === 'draft'
                       ? 'Bidding opens once this auction goes live.'
                       : 'This auction has closed and is no longer accepting bids.'}
@@ -1030,7 +1030,7 @@ export const VehicleDetailPage: FC = () => {
             {vehicle.buyNowPrice && (
               <div className="pt-2 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#66808A] uppercase tracking-wider">
+                  <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider">
                     Buy Now Instant Price
                   </span>
                   <span className="text-lg font-black text-navy-600 font-serif">
@@ -1044,7 +1044,7 @@ export const VehicleDetailPage: FC = () => {
                   <Lock className="w-4 h-4 text-[var(--kayad-cyan)]" />
                   <span>Buy Now via M-Pesa Escrow</span>
                 </button>
-                <p className="text-[11px] text-[#66808A] text-center leading-normal font-medium">
+                <p className="text-[11px] text-[#64748b] text-center leading-normal font-medium">
                   Escrow applies only where this listing shows the Escrow badge. Release timing is set per deal.
                 </p>
               </div>
@@ -1058,12 +1058,12 @@ export const VehicleDetailPage: FC = () => {
                 {vehicle.sellerName.charAt(0)}
               </div>
               <div>
-                <p className="text-xs text-slate-300 font-semibold">Listed by {vehicle.sellerType || 'Seller'}</p>
+                <p className="text-xs text-[#BDE5DE] font-semibold">Listed by {vehicle.sellerType || 'Seller'}</p>
                 <h2 className="text-base font-bold text-white font-serif">{vehicle.sellerName}</h2>
                 {vehicle.sellerRating > 0 ? (
                   <p className="text-xs text-[var(--kayad-cyan)] font-bold">★ {vehicle.sellerRating}</p>
                 ) : (
-                  <p className="text-xs text-slate-300 font-medium">Seller rating not yet available</p>
+                  <p className="text-xs text-[#BDE5DE] font-medium">Seller rating not yet available</p>
                 )}
               </div>
             </div>
@@ -1089,16 +1089,16 @@ export const VehicleDetailPage: FC = () => {
                 <button
                   type="button"
                   onClick={() => showToast('Seller phone number is not available for this listing.')}
-                  className="py-2.5 px-3 rounded-xl bg-white/10 text-slate-300 font-extrabold text-xs flex items-center justify-center gap-1.5 border border-white/20 cursor-not-allowed"
+                  className="py-2.5 px-3 rounded-xl bg-white/10 text-[#BDE5DE] font-extrabold text-xs flex items-center justify-center gap-1.5 border border-white/20 cursor-not-allowed"
                 >
-                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  <Phone className="w-3.5 h-3.5 text-[#94A3B8]" />
                   <span>Phone Unavailable</span>
                 </button>
               )}
             </div>
 
             <button
-              className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs border border-white/10 transition-all cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-[#BDE5DE] font-bold text-xs border border-white/10 transition-all cursor-pointer"
               onClick={() => navigateTo('dealer_profile')}
             >
               View Dealer Profile & Inventory
@@ -1114,7 +1114,7 @@ export const VehicleDetailPage: FC = () => {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-[#365563] font-bold block mb-1">Down Payment (KSh)</label>
+                <label className="text-[#176b87] font-bold block mb-1">Down Payment (KSh)</label>
                 <input
                   type="number"
                   value={downPayment}
@@ -1124,7 +1124,7 @@ export const VehicleDetailPage: FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[#365563] font-bold block mb-1">Term (Months)</label>
+                  <label className="text-[#176b87] font-bold block mb-1">Term (Months)</label>
                   <select
                     value={loanTerm}
                     onChange={e => setLoanTerm(parseInt(e.target.value))}
@@ -1137,7 +1137,7 @@ export const VehicleDetailPage: FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[#365563] font-bold block mb-1">APR Rate (%)</label>
+                  <label className="text-[#176b87] font-bold block mb-1">APR Rate (%)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -1149,7 +1149,7 @@ export const VehicleDetailPage: FC = () => {
               </div>
 
               <div className="p-3 rounded-2xl bg-[#EEF7F5] border border-[#D7E7E4] text-center">
-                <span className="text-[10px] text-[#66808A] font-bold uppercase block">Estimated Monthly Payment</span>
+                <span className="text-[10px] text-[#64748b] font-bold uppercase block">Estimated Monthly Payment</span>
                 <span className="text-2xl font-black text-navy-600 font-serif">KSh {estimatedMonthly.toLocaleString()}/mo</span>
               </div>
             </div>
@@ -1188,7 +1188,7 @@ export const VehicleDetailPage: FC = () => {
 
       {/* Fullscreen Lightbox Gallery Modal */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-[#0A3340]/95 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 animate-in fade-in duration-200">
 
           {/* Modal Top Bar */}
           <div className="flex items-center justify-between text-white border-b border-white/10 pb-4">
@@ -1240,14 +1240,14 @@ export const VehicleDetailPage: FC = () => {
             {/* Left/Right Modal Arrows */}
             <button
               onClick={handlePrevImage}
-              className="absolute left-2 sm:left-6 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-all cursor-pointer"
+              className="absolute left-2 sm:left-6 p-3 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white border border-white/20 backdrop-blur-md transition-all cursor-pointer"
               aria-label="Previous"
             >
               <ChevronLeft className="w-7 h-7" />
             </button>
             <button
               onClick={handleNextImage}
-              className="absolute right-2 sm:right-6 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-all cursor-pointer"
+              className="absolute right-2 sm:right-6 p-3 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white border border-white/20 backdrop-blur-md transition-all cursor-pointer"
               aria-label="Next"
             >
               <ChevronRight className="w-7 h-7" />

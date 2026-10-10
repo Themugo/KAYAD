@@ -59,13 +59,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             placeholder={placeholder}
             value={value}
             onChange={e => onChange(e.target.value)}
-            className="w-full h-12 pl-11 pr-10 bg-[#F6FAF9] border border-[#D7E7E4] focus:border-[#176B87] focus:ring-2 focus:ring-[#13B8A6]/40 rounded-2xl text-xs sm:text-sm text-[#176B87] font-mono font-bold placeholder:text-[#66808A] focus:outline-none transition-all shadow-2xs"
+            className="w-full h-12 pl-11 pr-10 bg-[#F6FAF9] border border-[#D7E7E4] focus:border-[#176B87] focus:ring-2 focus:ring-[#13B8A6]/40 rounded-2xl text-xs sm:text-sm text-[#176B87] font-mono font-bold placeholder:text-[#64748b] focus:outline-none transition-all shadow-2xs"
           />
           {value && (
             <button
               type="button"
               onClick={() => onChange('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-[#66808A] hover:text-[#176B87] hover:bg-[#D7E7E4]/50 transition-colors cursor-pointer"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-[#64748b] hover:text-[#176B87] hover:bg-[#D7E7E4]/50 transition-colors cursor-pointer"
               title="Clear search"
             >
               <X className="w-4 h-4" />
@@ -89,7 +89,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     className={`h-10 px-4 text-xs font-mono font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 ${
                       isActive
                         ? 'bg-[#176B87] text-white shadow-md ring-1 ring-[#13B8A6]/30'
-                        : 'text-[#66808A] hover:text-[#176B87] hover:bg-[#D7E7E4]/50'
+                        : 'text-[#64748b] hover:text-[#176B87] hover:bg-[#D7E7E4]/50'
                     }`}
                   >
                     {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#13B8A6] animate-pulse" />}
@@ -116,7 +116,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           {sortOptions && sortOptions.length > 0 && onSortChange && (
             <div className="relative flex items-center h-12 bg-[#EEF7F5] border border-[#D7E7E4] hover:border-[#176B87] rounded-2xl px-3.5 text-xs font-mono font-black uppercase tracking-wider transition-all shadow-2xs">
               <ArrowUpDown className="w-3.5 h-3.5 text-[#13B8A6] shrink-0 mr-2" />
-              <span className="text-[#66808A] hidden sm:inline mr-1">Sort:</span>
+              <span className="text-[#64748b] hidden sm:inline mr-1">Sort:</span>
               <select
                 value={activeSort}
                 onChange={e => onSortChange(e.target.value)}
@@ -141,7 +141,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 className={`h-10 w-10 flex items-center justify-center rounded-xl transition-all cursor-pointer ${
                   viewMode === 'grid'
                     ? 'bg-[#176B87] text-white shadow-xs'
-                    : 'text-[#66808A] hover:text-[#176B87]'
+                    : 'text-[#64748b] hover:text-[#176B87]'
                 }`}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -153,7 +153,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 className={`h-10 w-10 flex items-center justify-center rounded-lg transition-all cursor-pointer ${
                   viewMode === 'list'
                     ? 'bg-[#176B87] text-white shadow-xs'
-                    : 'text-[#66808A] hover:text-[#176B87]'
+                    : 'text-[#64748b] hover:text-[#176B87]'
                 }`}
               >
                 <List className="w-4 h-4" />

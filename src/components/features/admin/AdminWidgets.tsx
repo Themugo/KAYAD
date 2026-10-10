@@ -16,7 +16,7 @@ interface StatTileProps {
 }
 
 // Rich stat tile: icon chip + decorative corner + optional trend/footer.
-export function StatTile({ icon, label, value, sub, color = 'var(--gold)', to, trend, kes }: StatTileProps) {
+export function StatTile({ icon, label, value, sub, color = 'var(--brand)', to, trend, kes }: StatTileProps) {
   const showTrend = trend !== undefined && trend !== null && trend !== 0;
   const isUp = trend > 0;
   const display = kes
@@ -44,7 +44,7 @@ export function StatTile({ icon, label, value, sub, color = 'var(--gold)', to, t
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 9, display: 'flex', alignItems: 'center', gap: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
           {sub}
           {showTrend && <span style={{ color: isUp ? '#22c55e' : '#ef4444', fontWeight: 700, fontSize: 10 }}>{isUp ? '↑' : '↓'}{Math.abs(trend)}%</span>}
-          {to && !sub && !showTrend && <span style={{ color: 'var(--gold)', fontWeight: 600 }}>View details →</span>}
+          {to && !sub && !showTrend && <span style={{ color: 'var(--brand)', fontWeight: 600 }}>View details →</span>}
         </div>
       )}
     </div>
@@ -60,7 +60,7 @@ interface MiniBarChartProps {
 }
 
 // Dependency-free bar chart. data: [{ label, value }].
-export function MiniBarChart({ data = [], color = 'var(--gold)', height = 150, format = (v) => String(v) }: MiniBarChartProps) {
+export function MiniBarChart({ data = [], color = 'var(--brand)', height = 150, format = (v) => String(v) }: MiniBarChartProps) {
   const max = Math.max(...data.map(d => d.value || 0), 1);
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height, padding: '0 2px' }}>

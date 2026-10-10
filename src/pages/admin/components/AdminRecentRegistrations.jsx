@@ -10,9 +10,9 @@ export default function AdminRecentRegistrations({ recentUsers, roleLabel }) {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <UserCheck size={14} style={{ color: 'var(--gold)' }} /> Recent Registrations
+          <UserCheck size={14} style={{ color: 'var(--brand)' }} /> Recent Registrations
         </div>
-        <Link to="/admin/users" style={{ fontSize: 10, color: 'var(--gold)', textDecoration: 'none', fontWeight: 600 }}>View All</Link>
+        <Link to="/admin/users" style={{ fontSize: 10, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>View All</Link>
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
@@ -33,7 +33,7 @@ export default function AdminRecentRegistrations({ recentUsers, roleLabel }) {
                 <td style={{ padding: '10px 12px', color: '#fff', fontWeight: 600, fontSize: 12 }}>{u.name || '—'}</td>
                 <td style={{ padding: '10px 12px', color: 'var(--text-muted)', fontSize: 12 }}>{u.email}</td>
                 <td style={{ padding: '10px 12px', fontSize: 12 }}>
-                  <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{roleLabel(u.role)}</span>
+                  <span style={{ color: 'var(--brand)', fontWeight: 600 }}>{roleLabel(u.role)}</span>
                 </td>
                 <td style={{ padding: '10px 12px', color: 'var(--text-muted)', fontSize: 11 }}>
                   {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}

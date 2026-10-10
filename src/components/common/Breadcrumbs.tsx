@@ -89,24 +89,24 @@ export const Breadcrumbs: FC = () => {
   return (
     <nav aria-label="Breadcrumb" className="bg-[#F6FAF9] dark:bg-[#12576D] border-b border-[#176B87]/10 dark:border-white/10 py-3 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
-        <ol className="flex items-center flex-wrap gap-1.5 text-xs font-medium text-[#66808A] dark:text-slate-400">
+        <ol className="flex items-center flex-wrap gap-1.5 text-xs font-medium text-[#64748b] dark:text-[#94A3B8]">
           {breadcrumbs.map((item, index) => {
             const isLast = index === breadcrumbs.length - 1 || item.isCurrent;
 
             return (
               <li key={index} className="flex items-center gap-1.5">
                 {index > 0 && (
-                  <ChevronRight className="w-3.5 h-3.5 text-[#176B87]/40 dark:text-slate-500 shrink-0" />
+                  <ChevronRight className="w-3.5 h-3.5 text-[#176B87]/40 dark:text-[#64748B] shrink-0" />
                 )}
 
                 {isLast ? (
-                  <span className="font-semibold text-[#176B87] dark:text-slate-100 truncate max-w-[200px] sm:max-w-xs" aria-current="page">
+                  <span className="font-semibold text-[#176B87] dark:text-[#EEF7F5] truncate max-w-[200px] sm:max-w-xs" aria-current="page">
                     {item.label}
                   </span>
                 ) : (
                   <button
                     onClick={() => item.page && navigateTo(item.page)}
-                    className="flex items-center gap-1 text-[#66808A] dark:text-slate-400 hover:text-[#176B87] dark:hover:text-white transition-colors cursor-pointer group"
+                    className="flex items-center gap-1 text-[#64748b] dark:text-[#94A3B8] hover:text-[#176B87] dark:hover:text-white transition-colors cursor-pointer group"
                   >
                     {index === 0 && <Home className="w-3.5 h-3.5 group-hover:text-[#176B87] dark:group-hover:text-white transition-colors" />}
                     <span>{item.label}</span>

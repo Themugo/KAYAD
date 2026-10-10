@@ -28,9 +28,9 @@ export default function AppInstallPrompt() {
       display: 'flex', alignItems: 'center', gap: 8,
     }}>
       <div onClick={handleInstall} style={{
-        background: 'var(--gold)', padding: '8px 14px', borderRadius: '2rem',
+        background: 'var(--brand)', padding: '8px 14px', borderRadius: '2rem',
         display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)', fontSize: 11,
+        boxShadow: '0 4px 20px rgba(10, 51, 64, 0.3)', fontSize: 11,
         fontWeight: 700, color: '#0A3340', textTransform: 'uppercase',
         letterSpacing: '0.04em', whiteSpace: 'nowrap',
       }}>

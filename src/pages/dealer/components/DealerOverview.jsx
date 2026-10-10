@@ -62,13 +62,13 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
   );
 
   const recent = cars.slice(0, 5);
-  const TYPE_COLORS = ['var(--gold)', '#3b82f6', '#22c55e', '#a855f7', '#f97316'];
+  const TYPE_COLORS = ['var(--brand)', '#176B87', '#22c55e', '#5aafa4', '#176b87'];
 
   const quickActions = [
-    { to: '/dealer/add-car', icon: Plus, label: 'New Listing', desc: 'List a vehicle', color: 'var(--gold)' },
-    { to: '/dealer/auction-setup', icon: Gavel, label: 'Start Auction', desc: 'Set up bidding', color: '#f97316' },
-    { to: '/dealer/analytics', icon: BarChart3, label: 'Analytics', desc: 'View reports', color: '#3b82f6' },
-    { to: '/dealer/settings', icon: Settings, label: 'Settings', desc: 'Shop & payments', color: '#a855f7' },
+    { to: '/dealer/add-car', icon: Plus, label: 'New Listing', desc: 'List a vehicle', color: 'var(--brand)' },
+    { to: '/dealer/auction-setup', icon: Gavel, label: 'Start Auction', desc: 'Set up bidding', color: '#176b87' },
+    { to: '/dealer/analytics', icon: BarChart3, label: 'Analytics', desc: 'View reports', color: '#176B87' },
+    { to: '/dealer/settings', icon: Settings, label: 'Settings', desc: 'Shop & payments', color: '#5aafa4' },
   ];
 
   return (
@@ -78,16 +78,16 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
 
       {/* ── STAT CARDS ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 16, marginBottom: 20 }}>
-        <StatCard icon="🚗" label="Listings"       value={s.totalCars || cars.length}        color="var(--gold)" trend={trends?.viewsToBids} />
-        <StatCard icon="👁️" label="Total Views"    value={s.totalViews ?? 0}                  color="#3b82f6" trend={0} />
-        <StatCard icon="🔨" label="Active Bids"     value={s.activeBids ?? 0}                  color="#f97316" to="/dealer" trend={2.5} />
+        <StatCard icon="🚗" label="Listings"       value={s.totalCars || cars.length}        color="var(--brand)" trend={trends?.viewsToBids} />
+        <StatCard icon="👁️" label="Total Views"    value={s.totalViews ?? 0}                  color="#176B87" trend={0} />
+        <StatCard icon="🔨" label="Active Bids"     value={s.activeBids ?? 0}                  color="#176b87" to="/dealer" trend={2.5} />
         <StatCard icon="💰" label="Revenue"
           value={totalRevenue >= 1e6 ? `${(totalRevenue / 1e6).toFixed(1)}M` : totalRevenue ? `${Math.round(totalRevenue / 1000)}K` : '—'}
           sub="KES" color="#22c55e" trend={5.2} />
-        <StatCard icon="💬" label="Inquiries"       value={s.totalInquiries || 0}              color="#8b5cf6" trend={trends?.viewsToInquiries} />
+        <StatCard icon="💬" label="Inquiries"       value={s.totalInquiries || 0}              color="#5aafa4" trend={trends?.viewsToInquiries} />
         <StatCard icon="❤️" label="Favorites"       value={s.totalFavorites || 0}              color="#ef4444" trend={trends?.viewsToFavorites} />
-        <StatCard icon="📋" label="Draft Auctions"  value={s.draftAuctions ?? s.draftCount ?? 0} color="#6b7280" trend={0} />
-        <StatCard icon="📊" label="Conversion"      value={s.conversionRate ? `${(s.conversionRate * 100).toFixed(1)}%` : '—'} color="#a855f7" trend={trends?.viewsToBids} />
+        <StatCard icon="📋" label="Draft Auctions"  value={s.draftAuctions ?? s.draftCount ?? 0} color="#64748b" trend={0} />
+        <StatCard icon="📊" label="Conversion"      value={s.conversionRate ? `${(s.conversionRate * 100).toFixed(1)}%` : '—'} color="#5aafa4" trend={trends?.viewsToBids} />
       </div>
 
       {/* ── SokoAI Market Insights ── */}
@@ -105,12 +105,12 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
               <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Inventory Value Added</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Listing value by month · last 6 months</div>
             </div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--gold)', fontWeight: 700, background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.18)', borderRadius: 8, padding: '5px 10px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--brand)', fontWeight: 700, background: 'rgba(23, 107, 135, 0.08)', border: '1px solid rgba(23, 107, 135, 0.18)', borderRadius: 8, padding: '5px 10px' }}>
               <TrendingUp size={12} /> KES
             </span>
           </div>
           <div style={{ padding: '24px 22px 18px' }}>
-            <MiniBarChart data={monthly} color="var(--gold)" height={170} format={(v) => `KES ${fmtK(v)}`} />
+            <MiniBarChart data={monthly} color="var(--brand)" height={170} format={(v) => `KES ${fmtK(v)}`} />
           </div>
         </div>
 
@@ -149,7 +149,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
         <div style={cardStyle}>
           <div style={cardHeader}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}>
-              <Package size={15} style={{ color: 'var(--gold)' }} /> Inventory by Type
+              <Package size={15} style={{ color: 'var(--brand)' }} /> Inventory by Type
             </span>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{cars.length} total</span>
           </div>
@@ -179,21 +179,21 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}>
               <TrendingUp size={15} style={{ color: '#22c55e' }} /> Top Performing
             </span>
-            <button onClick={() => goToTab?.('listings')} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>All →</button>
+            <button onClick={() => goToTab?.('listings')} style={{ background: 'none', border: 'none', color: 'var(--brand)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>All →</button>
           </div>
           <div>
             {topPerformers.length === 0 ? (
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '28px 0' }}>No listings to rank yet</div>
             ) : topPerformers.map((c, i) => (
               <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 22px', borderBottom: i === topPerformers.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)' }}>
-                <span style={{ width: 20, fontSize: 13, fontWeight: 900, color: i === 0 ? 'var(--gold)' : 'rgba(255,255,255,0.25)', fontFamily: 'var(--font-display)', fontStyle: 'italic', flexShrink: 0 }}>{i + 1}</span>
+                <span style={{ width: 20, fontSize: 13, fontWeight: 900, color: i === 0 ? 'var(--brand)' : 'rgba(255,255,255,0.25)', fontFamily: 'var(--font-display)', fontStyle: 'italic', flexShrink: 0 }}>{i + 1}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 5, marginTop: 1 }}>
                     <Eye size={10} /> {c.views || 0} views
                   </div>
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic', flexShrink: 0 }}>KES {fmtK(Number(c.price) || 0)}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--brand)', fontFamily: 'var(--font-display)', fontStyle: 'italic', flexShrink: 0 }}>KES {fmtK(Number(c.price) || 0)}</div>
               </div>
             ))}
           </div>
@@ -206,7 +206,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
         <div style={cardStyle}>
           <div style={cardHeader}>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Recent Listings</span>
-            <button onClick={() => goToTab?.('listings')} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View All →</button>
+            <button onClick={() => goToTab?.('listings')} style={{ background: 'none', border: 'none', color: 'var(--brand)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View All →</button>
           </div>
           {recent.map(car => {
             const img = car.images?.[0]?.url || car.images?.[0] || car.image;
@@ -221,7 +221,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{car.views || 0} views · {car.year}</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0, marginRight: 12 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price || 0).toLocaleString()}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price || 0).toLocaleString()}</div>
                 </div>
                 <StatusBadge status={car.status || (car.auctionStatus === 'live' ? 'active' : 'draft')} />
                 <div style={{ display: 'flex', gap: 6, marginLeft: 4 }}>
@@ -239,7 +239,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
             <div style={{ padding: '48px', textAlign: 'center' }}>
               <div style={{ fontSize: 36, marginBottom: 12 }}>🚗</div>
               <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>No listings yet</div>
-              <Link to="/dealer/add-car" style={{ padding: '10px 24px', background: 'var(--gold)', color: '#000', borderRadius: 9999, fontSize: 12, fontWeight: 900, textDecoration: 'none' }}>Add Your First Car</Link>
+              <Link to="/dealer/add-car" style={{ padding: '10px 24px', background: 'var(--brand)', color: '#0a3340', borderRadius: 9999, fontSize: 12, fontWeight: 900, textDecoration: 'none' }}>Add Your First Car</Link>
             </div>
           )}
         </div>
@@ -248,7 +248,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
         <div style={cardStyle}>
           <div style={cardHeader}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}>
-              <Activity size={15} style={{ color: '#3b82f6' }} /> Recent Activity
+              <Activity size={15} style={{ color: '#176B87' }} /> Recent Activity
             </span>
           </div>
           <div style={{ padding: '8px 22px 18px' }}>
@@ -257,7 +257,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
             ) : activity.map((c, i) => (
               <div key={c._id} style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: i === activity.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--gold)', marginTop: 5 }} />
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', marginTop: 5 }} />
                   {i < activity.length - 1 && <div style={{ width: 1, flex: 1, background: 'rgba(255,255,255,0.08)', marginTop: 4 }} />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0, paddingBottom: 2 }}>

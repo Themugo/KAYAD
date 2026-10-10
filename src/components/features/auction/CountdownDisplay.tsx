@@ -29,7 +29,7 @@ export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: Co
   }[size] || { box: 54, num: 24, lbl: 9, gap: 7, sep: 20 };
 
   const includeDays = showDays === true || (showDays === 'auto' && d > 0);
-  const accent = urgent ? '#ef4444' : 'var(--gold, #D4C4A8)';
+  const accent = urgent ? '#ef4444' : 'var(--brand, #13b8a6)';
 
   const segments: [number, string][] = [
     ...(includeDays ? [[d, 'Days'] as [number, string]] : []),
@@ -50,7 +50,7 @@ export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: Co
           minWidth: dims.box, height: dims.box,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
-          border: `1px solid ${urgent ? 'rgba(239,68,68,0.4)' : 'rgba(37, 99, 235,0.22)'}`,
+          border: `1px solid ${urgent ? 'rgba(239,68,68,0.4)' : 'rgba(23, 107, 135, 0.22)'}`,
           borderRadius: 10,
           fontFamily: "'JetBrains Mono', 'SF Mono', ui-monospace, monospace",
           fontSize: dims.num, fontWeight: 800, color: '#fff',

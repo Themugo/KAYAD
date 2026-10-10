@@ -19,7 +19,7 @@ interface ProviderFiltersProps {
   onClearLocation: () => void;
 }
 
-const field = 'w-full px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:border-[#13B8A6] bg-white min-h-[44px]';
+const field = 'w-full px-3 py-2.5 rounded-lg border border-[#BDE5DE] outline-none focus:border-[#13B8A6] bg-white min-h-[44px]';
 
 export default function ProviderFilters({ filters, onChange, taxonomy, makes, locationState, onUseLocation, onClearLocation }: ProviderFiltersProps) {
   const category = taxonomy?.categories.find((c) => c.code === filters.category) || null;
@@ -39,7 +39,7 @@ export default function ProviderFilters({ filters, onChange, taxonomy, makes, lo
             onChange={(e) => onChange({ make: e.target.value || undefined })}
           />
           <datalist id="f-make-list">{makes.map((m) => <option key={m} value={m} />)}</datalist>
-          <p className="text-xs text-slate-500 mt-1">Matches businesses that serve this make or say they serve all makes.</p>
+          <p className="text-xs text-[#64748B] mt-1">Matches businesses that serve this make or say they serve all makes.</p>
         </div>
 
         <div>
@@ -48,7 +48,7 @@ export default function ProviderFilters({ filters, onChange, taxonomy, makes, lo
             <option value="">Any</option>
             {(taxonomy?.powertrains || []).map((p) => <option key={p.code} value={p.code}>{p.label}</option>)}
           </select>
-          {category?.highRisk && <p className="text-xs text-slate-600 mt-1">High-voltage work only lists businesses KAYAD has verified for it.</p>}
+          {category?.highRisk && <p className="text-xs text-[#64748B] mt-1">High-voltage work only lists businesses KAYAD has verified for it.</p>}
         </div>
 
         <div>
@@ -61,15 +61,15 @@ export default function ProviderFilters({ filters, onChange, taxonomy, makes, lo
         <div>
           <span className="block text-sm font-medium mb-1 text-[#12576D]">Near me</span>
           {!hasPoint ? (
-            <button type="button" onClick={onUseLocation} disabled={locationState === 'asking'} className="inline-flex items-center gap-2 min-h-[44px] px-3 rounded-lg border border-[#13B8A6] text-[#0F5D73] font-medium disabled:opacity-60">
+            <button type="button" onClick={onUseLocation} disabled={locationState === 'asking'} className="inline-flex items-center gap-2 min-h-[44px] px-3 rounded-lg border border-[#13B8A6] text-[#12576d] font-medium disabled:opacity-60">
               <Crosshair size={16} aria-hidden /> {locationState === 'asking' ? 'Asking your device…' : 'Use my location'}
             </button>
           ) : (
-            <button type="button" onClick={onClearLocation} className="inline-flex items-center gap-2 min-h-[44px] px-3 rounded-lg border border-slate-300 text-slate-700 font-medium">
+            <button type="button" onClick={onClearLocation} className="inline-flex items-center gap-2 min-h-[44px] px-3 rounded-lg border border-[#BDE5DE] text-[#12576D] font-medium">
               <MapPin size={16} aria-hidden /> Stop using my location
             </button>
           )}
-          <p className="text-xs text-slate-500 mt-1" role="status">
+          <p className="text-xs text-[#64748B] mt-1" role="status">
             {locationState === 'denied' && 'Location permission was declined. Enter a county or town instead.'}
             {locationState === 'unavailable' && 'Your device could not provide a location. Enter a county or town instead.'}
             {hasPoint && 'Distances are straight-line, from an approximate point. They are not travel times.'}
@@ -78,7 +78,7 @@ export default function ProviderFilters({ filters, onChange, taxonomy, makes, lo
         </div>
       </div>
 
-      <div className="mt-5 pt-5 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mt-5 pt-5 border-t border-[#D7E7E4] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Check label="Only businesses KAYAD verified for this service" checked={!!filters.verifiedOnly} disabled={!filters.category} onChange={(v) => onChange({ verifiedOnly: v || undefined })} />
         <Check label="Travels to the vehicle (mobile)" checked={!!filters.mobileOnly} onChange={(v) => onChange({ mobileOnly: v || undefined })} />
         <Check label="Has a workshop" checked={!!filters.workshopOnly} onChange={(v) => onChange({ workshopOnly: v || undefined })} />
@@ -104,7 +104,7 @@ export default function ProviderFilters({ filters, onChange, taxonomy, makes, lo
 
 function Check({ label, checked, onChange, disabled }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <label className={`flex items-start gap-2 text-sm min-h-[44px] items-center ${disabled ? 'opacity-50' : 'cursor-pointer'} text-slate-700`}>
+    <label className={`flex items-start gap-2 text-sm min-h-[44px] items-center ${disabled ? 'opacity-50' : 'cursor-pointer'} text-[#12576D]`}>
       <input type="checkbox" className="w-4 h-4 rounded accent-[#13B8A6]" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
       <span>{label}</span>
     </label>

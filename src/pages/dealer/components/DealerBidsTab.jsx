@@ -14,9 +14,9 @@ export default function DealerBidsTab({ bids, setBids, toast }) {
           {['all', 'pending', 'accepted', 'rejected'].map(status => (
             <button key={status} onClick={() => setBidFilter(status)} style={{
               padding: '6px 14px', borderRadius: 8,
-              background: bidFilter === status ? 'rgba(37, 99, 235,0.1)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${bidFilter === status ? 'rgba(37, 99, 235,0.25)' : 'rgba(255,255,255,0.07)'}`,
-              color: bidFilter === status ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
+              background: bidFilter === status ? 'rgba(23, 107, 135, 0.1)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${bidFilter === status ? 'rgba(23, 107, 135, 0.25)' : 'rgba(255,255,255,0.07)'}`,
+              color: bidFilter === status ? 'var(--brand)' : 'rgba(255,255,255,0.4)',
               fontSize: 11, fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
             }}>
               {status === 'all' ? 'All' : status}
@@ -50,12 +50,12 @@ export default function DealerBidsTab({ bids, setBids, toast }) {
                   <span>{bidderName}</span>
                   <span>·</span>
                   <span>{timeAgo(b.createdAt)}</span>
-                  {b.isAuto && <span>· <span style={{ color: 'var(--gold)' }}>Auto-bid</span></span>}
+                  {b.isAuto && <span>· <span style={{ color: 'var(--brand)' }}>Auto-bid</span></span>}
                 </div>
               </div>
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(b.amount||0).toLocaleString()}</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--brand)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(b.amount||0).toLocaleString()}</div>
             </div>
             {b.status === 'pending' && (
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>

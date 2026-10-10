@@ -18,9 +18,9 @@ const colors = {
   beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
-  terracotta: '#C77B58',
-  softBlue: '#60A5FA',
-  mutedOrange: '#FB923C',
+  terracotta: '#5aafa4',
+  softBlue: '#5AAFA4',
+  mutedOrange: '#13b8a6',
   mutedCrimson: '#EF4444',
 };
 
@@ -29,27 +29,27 @@ const modules = [
   { id: 'pages', label: 'Pages', icon: FileText, color: colors.softBlue },
   { id: 'landing', label: 'Landing Pages', icon: LandingPage, color: colors.emerald },
   { id: 'blog', label: 'Blog', icon: Newspaper, color: colors.terracotta },
-  { id: 'news', label: 'News', icon: BookOpen, color: '#8B5CF6' },
-  { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen, color: '#06B6D4' },
-  { id: 'help', label: 'Help Center', icon: HelpCircle, color: '#F59E0B' },
+  { id: 'news', label: 'News', icon: BookOpen, color: '#5aafa4' },
+  { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen, color: '#13B8A6' },
+  { id: 'help', label: 'Help Center', icon: HelpCircle, color: '#176b87' },
   { id: 'faq', label: 'FAQ', icon: HelpCircle, color: colors.mutedOrange },
   { id: 'announcements', label: 'Announcements', icon: Bell, color: colors.mutedCrimson },
-  { id: 'campaigns', label: 'Campaigns', icon: Megaphone, color: '#EC4899' },
+  { id: 'campaigns', label: 'Campaigns', icon: Megaphone, color: '#13B8A6' },
   { id: 'promotions', label: 'Promotions', icon: TrendingUp, color: colors.emerald },
-  { id: 'banners', label: 'Banners', icon: Image, color: '#A855F7' },
+  { id: 'banners', label: 'Banners', icon: Image, color: '#5aafa4' },
   { id: 'media', label: 'Media Library', icon: FolderOpen, color: colors.softBlue },
   { id: 'seo', label: 'SEO', icon: Globe, color: colors.navy },
   { id: 'calendar', label: 'Calendar', icon: Calendar, color: '#14B8A6' },
-  { id: 'abtests', label: 'A/B Tests', icon: SplitSquareVertical, color: '#F97316' },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3, color: '#6366F1' },
+  { id: 'abtests', label: 'A/B Tests', icon: SplitSquareVertical, color: '#176b87' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, color: '#176b87' },
   { id: 'widgets', label: 'Widgets', icon: Palette, color: '#D946EF' },
 ];
 
 const statusColors = {
-  draft: 'bg-slate-100 text-slate-700',
-  scheduled: 'bg-blue-100 text-blue-700',
+  draft: 'bg-[#EEF7F5] text-[#12576D]',
+  scheduled: 'bg-[#DDF4F0] text-[#12576D]',
   published: 'bg-emerald-100 text-emerald-700',
-  archived: 'bg-slate-100 text-slate-500',
+  archived: 'bg-[#EEF7F5] text-[#64748B]',
 };
 
 const statusIcons = {
@@ -126,7 +126,7 @@ export default function ContentStudio() {
   const renderDashboard = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Content Overview</h2>
+        <h2 className="text-2xl font-bold text-[#0A3340]">Content Overview</h2>
         <button onClick={createNewPage} className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] transition-colors">
           <Plus size={18} />
           Create Page
@@ -140,44 +140,44 @@ export default function ContentStudio() {
           { label: 'Articles', value: stats?.content?.total || 0, sub: `${stats?.content?.published || 0} published`, color: colors.terracotta },
           { label: 'Media Files', value: stats?.media?.total || 0, sub: 'in library', color: colors.emerald },
           { label: 'FAQs', value: stats?.faqs?.total || 0, sub: 'articles', color: colors.mutedOrange },
-          { label: 'Active Campaigns', value: stats?.campaigns?.active || 0, sub: 'running', color: '#EC4899' },
-          { label: 'Active Banners', value: stats?.banners?.active || 0, sub: 'on site', color: '#A855F7' },
+          { label: 'Active Campaigns', value: stats?.campaigns?.active || 0, sub: 'running', color: '#13B8A6' },
+          { label: 'Active Banners', value: stats?.banners?.active || 0, sub: 'on site', color: '#5aafa4' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+          <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${stat.color}20` }}>
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stat.color }} />
               </div>
-              <span className="text-sm text-slate-500">{stat.label}</span>
+              <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <div className="text-2xl font-bold text-slate-800">{stat.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{stat.sub}</div>
+            <div className="text-2xl font-bold text-[#0A3340]">{stat.value}</div>
+            <div className="text-xs text-[#94A3B8] mt-1">{stat.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Weekly Analytics */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">This Week's Performance</h3>
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D7E7E4]">
+        <h3 className="text-lg font-semibold text-[#0A3340] mb-4">This Week's Performance</h3>
         <div className="grid grid-cols-3 gap-6">
           <div className="text-center">
             <div className="text-3xl font-bold text-[#0A3340]">{stats?.analytics?.weekViews?.toLocaleString() || 0}</div>
-            <div className="text-sm text-slate-500 mt-1">Page Views</div>
+            <div className="text-sm text-[#64748B] mt-1">Page Views</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-emerald-600">{stats?.analytics?.weekClicks?.toLocaleString() || 0}</div>
-            <div className="text-sm text-slate-500 mt-1">Clicks</div>
+            <div className="text-sm text-[#64748B] mt-1">Clicks</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-[#C77B58]">{stats?.analytics?.weekConversions?.toLocaleString() || 0}</div>
-            <div className="text-sm text-slate-500 mt-1">Conversions</div>
+            <div className="text-3xl font-bold text-[#5aafa4]">{stats?.analytics?.weekConversions?.toLocaleString() || 0}</div>
+            <div className="text-sm text-[#64748B] mt-1">Conversions</div>
           </div>
         </div>
       </div>
 
       {/* Recent Content */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Quick Actions</h3>
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D7E7E4]">
+        <h3 className="text-lg font-semibold text-[#0A3340] mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: 'New Page', icon: FileText, module: 'pages' },
@@ -192,10 +192,10 @@ export default function ContentStudio() {
             <button
               key={i}
               onClick={() => setActiveModule(action.module)}
-              className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all"
+              className="flex items-center gap-3 p-3 rounded-lg border border-[#D7E7E4] hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all"
             >
-              <action.icon size={20} className="text-slate-600" />
-              <span className="text-sm font-medium text-slate-700">{action.label}</span>
+              <action.icon size={20} className="text-[#64748B]" />
+              <span className="text-sm font-medium text-[#12576D]">{action.label}</span>
             </button>
           ))}
         </div>
@@ -215,28 +215,28 @@ export default function ContentStudio() {
       });
       return (
         <div className="min-h-[calc(100vh-73px)] flex flex-col">
-          <div className="p-6 border-b border-slate-200 bg-white">
+          <div className="p-6 border-b border-[#D7E7E4] bg-white">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">{activeModule === 'landing' ? 'Landing Pages' : 'Pages'}</h2>
-                <p className="text-sm text-slate-500">Build and publish real site pages from persisted content.</p>
+                <h2 className="text-2xl font-bold text-[#0A3340]">{activeModule === 'landing' ? 'Landing Pages' : 'Pages'}</h2>
+                <p className="text-sm text-[#64748B]">Build and publish real site pages from persisted content.</p>
               </div>
               <button onClick={createNewPage} className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg"><Plus size={18} /> New Page</button>
             </div>
             {pageError && <div className="mt-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">{pageError}</div>}
           </div>
           <div className="flex flex-1 min-h-0">
-            <aside className="w-80 bg-white border-r border-slate-200 overflow-y-auto p-4">
-              {pagesLoading ? <div className="text-sm text-slate-400 p-4">Loading pages…</div> : filteredPages.length === 0 ? <div className="text-sm text-slate-400 p-4">No pages found.</div> : filteredPages.map((page) => (
-                <button key={page.id} onClick={() => setSelectedPage(page)} className={`w-full text-left p-4 rounded-lg mb-2 border ${selectedPage?.id === page.id ? 'border-[#0A3340] bg-[#0A3340]/5' : 'border-slate-200 hover:border-slate-300'}`}>
-                  <div className="font-medium text-slate-800 truncate">{page.title || page.pageName || 'Untitled page'}</div>
-                  <div className="text-xs text-slate-500 mt-1 truncate">/{page.slug}</div>
+            <aside className="w-80 bg-white border-r border-[#D7E7E4] overflow-y-auto p-4">
+              {pagesLoading ? <div className="text-sm text-[#94A3B8] p-4">Loading pages…</div> : filteredPages.length === 0 ? <div className="text-sm text-[#94A3B8] p-4">No pages found.</div> : filteredPages.map((page) => (
+                <button key={page.id} onClick={() => setSelectedPage(page)} className={`w-full text-left p-4 rounded-lg mb-2 border ${selectedPage?.id === page.id ? 'border-[#0A3340] bg-[#0A3340]/5' : 'border-[#D7E7E4] hover:border-[#BDE5DE]'}`}>
+                  <div className="font-medium text-[#0A3340] truncate">{page.title || page.pageName || 'Untitled page'}</div>
+                  <div className="text-xs text-[#64748B] mt-1 truncate">/{page.slug}</div>
                   <span className={`inline-flex mt-2 px-2 py-0.5 rounded-full text-xs ${statusColors[page.status] || statusColors.draft}`}>{page.status || 'draft'}</span>
                 </button>
               ))}
             </aside>
             <main className="flex-1 min-w-0">
-              {selectedPage ? <VisualPageBuilder page={selectedPage} onSaved={handlePageSaved} /> : <div className="h-full flex items-center justify-center text-slate-400">Create or select a page to begin.</div>}
+              {selectedPage ? <VisualPageBuilder page={selectedPage} onSaved={handlePageSaved} /> : <div className="h-full flex items-center justify-center text-[#94A3B8]">Create or select a page to begin.</div>}
             </main>
           </div>
         </div>
@@ -253,8 +253,8 @@ export default function ContentStudio() {
               <Icon size={24} style={{ color: module?.color }} />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">{module?.label}</h2>
-              <p className="text-sm text-slate-500">Manage your {module?.label?.toLowerCase()} content</p>
+              <h2 className="text-2xl font-bold text-[#0A3340]">{module?.label}</h2>
+              <p className="text-sm text-[#64748B]">Manage your {module?.label?.toLowerCase()} content</p>
             </div>
           </div>
           <button className="flex items-center gap-2 px-4 py-2 bg-[#0A3340] text-white rounded-lg hover:bg-[#12576D] transition-colors">
@@ -266,19 +266,19 @@ export default function ContentStudio() {
         {/* Search & Filters */}
         <div className="flex items-center gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={20} />
             <input
               type="text"
               placeholder={`Search ${module?.label.toLowerCase()}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none transition-all"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#0A3340] outline-none"
+            className="px-4 py-2.5 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] outline-none"
           >
             <option value="all">All Status</option>
             <option value="draft">Draft</option>
@@ -286,17 +286,17 @@ export default function ContentStudio() {
             <option value="published">Published</option>
             <option value="archived">Archived</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 hover:bg-slate-50">
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#D7E7E4] hover:bg-[#F6FAF9]">
             <Filter size={18} />
             More Filters
           </button>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-[#D7E7E4] p-8">
           <div className="text-center max-w-xl mx-auto">
-            <Icon size={36} className="mx-auto text-slate-300 mb-3" />
-            <h3 className="text-lg font-semibold text-slate-800">{module?.label} is not connected to a canonical editor yet</h3>
-            <p className="text-sm text-slate-500 mt-2">No synthetic records are shown. Connect this module to its persisted CMS domain before publishing it.</p>
+            <Icon size={36} className="mx-auto text-[#BDE5DE] mb-3" />
+            <h3 className="text-lg font-semibold text-[#0A3340]">{module?.label} is not connected to a canonical editor yet</h3>
+            <p className="text-sm text-[#64748B] mt-2">No synthetic records are shown. Connect this module to its persisted CMS domain before publishing it.</p>
           </div>
         </div>
       </div>
@@ -306,7 +306,7 @@ export default function ContentStudio() {
   return (
     <div className="min-h-screen bg-[#EEF7F5]">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-[#D7E7E4] sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -315,24 +315,24 @@ export default function ContentStudio() {
                   <Palette size={20} className="text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-slate-800">Content Studio</h1>
-                  <p className="text-xs text-slate-500">KAYAD Enterprise CMS</p>
+                  <h1 className="text-lg font-bold text-[#0A3340]">Content Studio</h1>
+                  <p className="text-xs text-[#64748B]">KAYAD Enterprise CMS</p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={18} />
                 <input
                   type="text"
                   placeholder="Quick search..."
-                  className="pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none w-64"
+                  className="pl-10 pr-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none w-64"
                 />
               </div>
-              <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
+              <button className="p-2 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]">
                 <Bell size={20} />
               </button>
-              <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
+              <button className="p-2 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]">
                 <Settings size={20} />
               </button>
             </div>
@@ -342,7 +342,7 @@ export default function ContentStudio() {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto">
+        <aside className="w-64 bg-white border-r border-[#D7E7E4] min-h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto">
           <nav className="p-4 space-y-1">
             {modules.map((module) => {
               const Icon = module.icon;
@@ -354,7 +354,7 @@ export default function ContentStudio() {
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
                       ? 'bg-[#0A3340] text-white'
-                      : 'text-slate-600 hover:bg-slate-100'
+                      : 'text-[#64748B] hover:bg-[#EEF7F5]'
                   }`}
                 >
                   <Icon size={18} />

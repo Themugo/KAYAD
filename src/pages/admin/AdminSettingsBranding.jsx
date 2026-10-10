@@ -37,7 +37,7 @@ const ColorField = ({ label, value, onChange, description }) => (
     <input className="input" type="text" value={value}
       onChange={(e) => onChange(e.target.value)}
       style={{ height: 38, fontFamily: 'monospace', fontSize: 13, marginTop: 6 }}
-      placeholder="#000000"
+      placeholder="#0a3340"
     />
   </div>
 );
@@ -64,7 +64,7 @@ const LogoTypeButton = ({ id, label, isSelected, onClick }) => (
       fontSize: 13,
       fontWeight: 700,
       transition: 'all 0.2s ease',
-      background: isSelected ? 'var(--brand)' : 'rgba(22, 196, 164, 0.08)',
+      background: isSelected ? 'var(--brand)' : 'rgba(19, 184, 166, 0.08)',
       border: `2px solid ${isSelected ? 'var(--brand)' : 'var(--border)'}`,
       color: isSelected ? '#fff' : 'var(--text-secondary)',
     }}
@@ -88,7 +88,7 @@ const BrandingPreview = ({ branding }) => (
 
     {/* Navbar preview */}
     <div style={{
-      background: '#0A1626',
+      background: '#0a3340',
       borderRadius: 8,
       padding: '12px 16px',
       display: 'flex',
@@ -304,7 +304,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
           style={{
             marginTop: 16,
             padding: '8px 16px',
-            background: 'var(--gold-100, rgba(22, 196, 164, 0.1))',
+            background: 'var(--brand-100, rgba(19, 184, 166, 0.1))',
             border: '1px solid var(--border)',
             borderRadius: 8,
             color: 'var(--brand)',

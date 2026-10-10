@@ -25,11 +25,11 @@ function RecommendationCard({ rec, key: _key }: RecommendationCardProps) {
       borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
       textDecoration: 'none', transition: 'all 0.15s', marginBottom: 6,
     }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)40'; e.currentTarget.style.background = 'var(--gold)0d'; }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand)40'; e.currentTarget.style.background = 'var(--brand)0d'; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
     >
-      <div style={{ width: 32, height: 32, borderRadius: 8, background: isOverpriced ? 'rgba(239,68,68,0.12)' : isUnderpriced ? 'rgba(34,197,94,0.12)' : 'rgba(59,130,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        {isOverpriced ? <TrendingDown size={14} style={{ color: '#ef4444' }} /> : isUnderpriced ? <TrendingUp size={14} style={{ color: '#22c55e' }} /> : <DollarSign size={14} style={{ color: '#3b82f6' }} />}
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: isOverpriced ? 'rgba(239,68,68,0.12)' : isUnderpriced ? 'rgba(34,197,94,0.12)' : 'rgba(23, 107, 135, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {isOverpriced ? <TrendingDown size={14} style={{ color: '#ef4444' }} /> : isUnderpriced ? <TrendingUp size={14} style={{ color: '#22c55e' }} /> : <DollarSign size={14} style={{ color: '#176B87' }} />}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 12, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.title}</div>
@@ -40,7 +40,7 @@ function RecommendationCard({ rec, key: _key }: RecommendationCardProps) {
         </div>
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: isOverpriced ? '#ef4444' : isUnderpriced ? '#22c55e' : 'var(--gold)' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: isOverpriced ? '#ef4444' : isUnderpriced ? '#22c55e' : 'var(--brand)' }}>
           {isOverpriced ? '+' : ''}{rec.priceDiff}%
         </div>
         <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>
@@ -87,7 +87,7 @@ export default function DealerMarketInsights() {
     <div style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 20 }}>
       <div style={{ padding: '16px 22px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}>
-          <BarChart3 size={15} style={{ color: 'var(--gold)' }} /> SokoAI Insights
+          <BarChart3 size={15} style={{ color: 'var(--brand)' }} /> SokoAI Insights
         </span>
         <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{data.totalCars} cars analyzed</span>
       </div>
@@ -95,10 +95,10 @@ export default function DealerMarketInsights() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '14px 22px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: '12px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-            <Camera size={12} style={{ color: '#3b82f6' }} />
+            <Camera size={12} style={{ color: '#176B87' }} />
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Photo Quality</span>
           </div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: data.photoScore >= 80 ? '#22c55e' : data.photoScore >= 50 ? 'var(--gold)' : '#ef4444', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: data.photoScore >= 80 ? '#22c55e' : data.photoScore >= 50 ? 'var(--brand)' : '#ef4444', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
             {data.photoScore}/100
           </div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
@@ -107,10 +107,10 @@ export default function DealerMarketInsights() {
         </div>
         <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: '12px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-            <TrendingUp size={12} style={{ color: 'var(--gold)' }} />
+            <TrendingUp size={12} style={{ color: 'var(--brand)' }} />
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Engagement Avg</span>
           </div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: data.averageScore >= 75 ? '#22c55e' : data.averageScore >= 50 ? 'var(--gold)' : '#ef4444', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: data.averageScore >= 75 ? '#22c55e' : data.averageScore >= 50 ? 'var(--brand)' : '#ef4444', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
             {data.averageScore}/100
           </div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
@@ -122,7 +122,7 @@ export default function DealerMarketInsights() {
       {(data.recommendations?.length ?? 0) > 0 && (
         <div style={{ padding: '14px 22px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <Lightbulb size={12} style={{ color: 'var(--gold)' }} />
+            <Lightbulb size={12} style={{ color: 'var(--brand)' }} />
             <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pricing Recommendations</span>
           </div>
           {data.recommendations?.slice(0, 4).map(rec => (
@@ -133,7 +133,7 @@ export default function DealerMarketInsights() {
 
       {(data.recommendations?.length ?? 0) === 0 && (
         <div style={{ padding: '24px', textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
-          <Lightbulb size={20} style={{ color: 'var(--gold)', marginBottom: 8 }} />
+          <Lightbulb size={20} style={{ color: 'var(--brand)', marginBottom: 8 }} />
           <div>List vehicles to receive AI-powered pricing insights</div>
         </div>
       )}

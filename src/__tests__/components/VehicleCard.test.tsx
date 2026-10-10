@@ -18,7 +18,7 @@ describe('VehicleCard - size reduction (scale/density pass)', () => {
 
   it('renders the image container at the reduced height, not the old h-48/h-52', () => {
     const { container: c } = render(<VehicleCard {...baseProps} />);
-    const imageWrapper = c.querySelector('.relative.overflow-hidden.bg-slate-100');
+    const imageWrapper = c.querySelector('.relative.h-32.overflow-hidden');
     expect(imageWrapper).toBeTruthy();
     expect(imageWrapper?.className).toMatch(/h-32/);
     expect(imageWrapper?.className).not.toMatch(/h-48/);

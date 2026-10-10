@@ -13,7 +13,7 @@ export const FinalCtaSection: FC = () => {
           Ready to Find or Sell Your Car?
         </h2>
 
-        <p className="text-sm sm:text-base text-[#66808A] font-sans font-medium max-w-xl mx-auto">
+        <p className="text-sm sm:text-base text-[#64748b] font-sans font-medium max-w-xl mx-auto">
           Explore thousands of verified listings across Kenya or list your vehicle for sale or live auction today.
         </p>
 

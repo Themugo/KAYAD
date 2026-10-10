@@ -76,7 +76,7 @@ export default function AdminFeedback() {
         <div style={{ marginBottom: 24 }}>
           <div className="section-eyebrow">Admin</div>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <MessageSquare size={22} style={{ color: 'var(--gold)' }} />
+            <MessageSquare size={22} style={{ color: 'var(--brand)' }} />
             User Feedback
           </h2>
         </div>

@@ -6,7 +6,7 @@ import type { ServiceTaxonomy } from '../InspectionMarketplace/types/inspection'
 
 interface Props { isOpen: boolean; onClose: () => void }
 
-const field = 'w-full px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-sm min-h-[44px]';
+const field = 'w-full px-3 py-2.5 bg-white border border-[#BDE5DE] rounded-lg text-sm min-h-[44px]';
 const reason = (e: any) => e?.response?.data?.message || e?.message || 'The request could not be completed.';
 
 type MyProvider = NonNullable<Awaited<ReturnType<typeof automotiveApi.getMyProvider>>['provider']>;
@@ -64,19 +64,19 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <Modal isOpen={isOpen} onClose={() => { if (!busy) onClose(); }} title="My business and affiliations" size="lg">
       <div className="space-y-6" aria-busy={loading}>
-        {loading && <p className="text-sm text-slate-600" role="status">Loading…</p>}
+        {loading && <p className="text-sm text-[#64748B]" role="status">Loading…</p>}
         {loadError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{loadError}</p>}
-        {msg && <p role={msg.kind === 'error' ? 'alert' : 'status'} className={`rounded-xl p-3 text-sm ${msg.kind === 'ok' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}`}>{msg.text}</p>}
+        {msg && <p role={msg.kind === 'error' ? 'alert' : 'status'} className={`rounded-xl p-3 text-sm ${msg.kind === 'ok' ? 'bg-emerald-50 text-emerald-800' : 'bg-[#F3FAF9] text-[#0A3340]'}`}>{msg.text}</p>}
 
         {!loading && !loadError && (
           <>
             <section aria-labelledby={`${uid}-aff`}>
-              <h3 id={`${uid}-aff`} className="font-bold text-slate-800">Businesses you work with</h3>
-              <p className="text-xs text-slate-500">A business and the person must both confirm an affiliation. A name typed on a profile is not proof.</p>
-              {affs.length === 0 && <p className="text-sm text-slate-600 mt-2">None yet. Open a business in the finder and choose “I work here” to ask it to confirm you.</p>}
+              <h3 id={`${uid}-aff`} className="font-bold text-[#0A3340]">Businesses you work with</h3>
+              <p className="text-xs text-[#64748B]">A business and the person must both confirm an affiliation. A name typed on a profile is not proof.</p>
+              {affs.length === 0 && <p className="text-sm text-[#64748B] mt-2">None yet. Open a business in the finder and choose “I work here” to ask it to confirm you.</p>}
               <ul className="space-y-2 mt-2">
                 {affs.map((a) => (
-                  <li key={a.id} className="rounded-lg border border-slate-200 p-3 text-sm flex flex-wrap items-center gap-2">
+                  <li key={a.id} className="rounded-lg border border-[#D7E7E4] p-3 text-sm flex flex-wrap items-center gap-2">
                     <span className="flex-1 min-w-[160px]"><strong>{a.businessName || 'Business'}</strong> · {a.role || 'role not stated'} · {a.affiliation_status}
                       {a.affiliation_status === 'pending' && (a.provider_confirmed_at && !a.user_confirmed_at ? ' · invited by the business' : ' · waiting for the business')}</span>
                     {a.affiliation_status === 'pending' && a.provider_confirmed_at && !a.user_confirmed_at && <Button size="sm" disabled={busy} onClick={() => void run(() => automotiveApi.acceptAffiliation(a.id), 'Affiliation accepted.')}>Accept</Button>}
@@ -86,23 +86,23 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
               </ul>
             </section>
 
-            {!provider && <p className="text-sm text-slate-600">You have not applied to list a business. Use “Apply to list your business” first.</p>}
+            {!provider && <p className="text-sm text-[#64748B]">You have not applied to list a business. Use “Apply to list your business” first.</p>}
 
             {provider && (
               <>
-                <section aria-labelledby={`${uid}-status`} className="rounded-xl bg-[#F5F8F8] border border-slate-200 p-4">
-                  <h3 id={`${uid}-status`} className="font-bold text-slate-800">{provider.trading_name || provider.company_name}</h3>
+                <section aria-labelledby={`${uid}-status`} className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-4">
+                  <h3 id={`${uid}-status`} className="font-bold text-[#0A3340]">{provider.trading_name || provider.company_name}</h3>
                   <p className="text-sm mt-1">Status: <strong>{provider.lifecycle_stage.replace(/_/g, ' ').toLowerCase()}</strong>{provider.verification_route ? ` (${provider.verification_route} route)` : ''}</p>
-                  {provider.info_requested && <p className="text-sm mt-1 text-amber-900">KAYAD asked for: {provider.info_requested}</p>}
+                  {provider.info_requested && <p className="text-sm mt-1 text-[#0A3340]">KAYAD asked for: {provider.info_requested}</p>}
                   {provider.rejection_reason && <p className="text-sm mt-1 text-rose-800">Not approved: {provider.rejection_reason}</p>}
                   {provider.suspended_reason && <p className="text-sm mt-1 text-rose-800">Suspended: {provider.suspended_reason}. You are not listed and cannot take new jobs.</p>}
-                  {!live && <p className="text-xs text-slate-500 mt-2">You are not listed until a KAYAD administrator approves the business. Services you declare stay “declared” until each is verified.</p>}
+                  {!live && <p className="text-xs text-[#64748B] mt-2">You are not listed until a KAYAD administrator approves the business. Services you declare stay “declared” until each is verified.</p>}
                 </section>
 
                 {editable && !live && (
                   <section aria-labelledby={`${uid}-reg`}>
-                    <h3 id={`${uid}-reg`} className="font-bold text-slate-800">Business identity</h3>
-                    <p className="text-xs text-slate-500">Needed for the evidence-based route when you have no customer-facing premises. Current: {provider.registration_number || 'none supplied'}.</p>
+                    <h3 id={`${uid}-reg`} className="font-bold text-[#0A3340]">Business identity</h3>
+                    <p className="text-xs text-[#64748B]">Needed for the evidence-based route when you have no customer-facing premises. Current: {provider.registration_number || 'none supplied'}.</p>
                     <div className="flex flex-wrap gap-2 mt-2">
                       <label htmlFor={`${uid}-regno`} className="sr-only">Business registration or tax number</label>
                       <input id={`${uid}-regno`} className={`${field} sm:w-72`} placeholder="Registration or tax number" value={regNo} onChange={(e) => setRegNo(e.target.value)} maxLength={60} />
@@ -113,8 +113,8 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
                 {editable && (
                   <section aria-labelledby={`${uid}-ev`}>
-                    <h3 id={`${uid}-ev`} className="font-bold text-slate-800">Evidence</h3>
-                    <p className="text-xs text-slate-500">Upload certificates, registrations or licences. KAYAD reviews each one; an expired or document-less item cannot be verified. Business documents do not certify individual staff.</p>
+                    <h3 id={`${uid}-ev`} className="font-bold text-[#0A3340]">Evidence</h3>
+                    <p className="text-xs text-[#64748B]">Upload certificates, registrations or licences. KAYAD reviews each one; an expired or document-less item cannot be verified. Business documents do not certify individual staff.</p>
                     <div className="grid sm:grid-cols-2 gap-2 mt-2">
                       <div><label className="text-xs font-bold block" htmlFor={`${uid}-etype`}>Type</label>
                         <select id={`${uid}-etype`} className={field} value={ev.type} onChange={(e) => setEv({ ...ev, type: e.target.value })}>
@@ -132,30 +132,30 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       const created = await automotiveApi.addCredential(provider.id, { type: ev.type, name: ev.name.trim(), issuingBody: ev.issuer.trim() || undefined, certificateNumber: ev.number.trim() || undefined, expiryDate: ev.expiry || undefined, documentUrl: url });
                       setCreds((c) => [...c, created]); setEv({ ...ev, name: '', issuer: '', number: '', expiry: '' }); setEvFile(null);
                     }, 'Evidence submitted for review. It is not verified until an administrator decides.')}>Submit evidence</Button>
-                    {creds.length > 0 && <ul className="mt-2 text-xs text-slate-600 space-y-1">{creds.map((c) => <li key={c.id}>Submitted: {c.title} (unverified)</li>)}</ul>}
+                    {creds.length > 0 && <ul className="mt-2 text-xs text-[#64748B] space-y-1">{creds.map((c) => <li key={c.id}>Submitted: {c.title} (unverified)</li>)}</ul>}
                   </section>
                 )}
 
                 <section aria-labelledby={`${uid}-caps`}>
-                  <h3 id={`${uid}-caps`} className="font-bold text-slate-800">Services</h3>
-                  {caps.length === 0 && <p className="text-sm text-slate-600 mt-1">No services declared.</p>}
+                  <h3 id={`${uid}-caps`} className="font-bold text-[#0A3340]">Services</h3>
+                  {caps.length === 0 && <p className="text-sm text-[#64748B] mt-1">No services declared.</p>}
                   <ul className="space-y-1 mt-1">
                     {caps.map((c) => (
                       <li key={c.id} className="text-sm flex flex-wrap gap-2 items-center">
                         <strong>{catLabel(c.category_code)}</strong>
-                        <span className={`text-xs rounded-full px-2 py-0.5 border ${c.status === 'verified' ? 'bg-[#E7F7F4] border-[#13B8A6]' : c.status === 'revoked' ? 'bg-rose-50 border-rose-300' : 'border-slate-300'}`}>{c.status === 'verified' ? 'verified by KAYAD' : c.status === 'revoked' ? 'revoked' : 'declared, not verified'}</span>
-                        <span className="text-xs text-slate-500">{c.all_makes ? 'all makes' : (c.vehicle_makes || []).join(', ') || 'makes not stated'}</span>
+                        <span className={`text-xs rounded-full px-2 py-0.5 border ${c.status === 'verified' ? 'bg-[#E7F7F4] border-[#13B8A6]' : c.status === 'revoked' ? 'bg-rose-50 border-rose-300' : 'border-[#BDE5DE]'}`}>{c.status === 'verified' ? 'verified by KAYAD' : c.status === 'revoked' ? 'revoked' : 'declared, not verified'}</span>
+                        <span className="text-xs text-[#64748B]">{c.all_makes ? 'all makes' : (c.vehicle_makes || []).join(', ') || 'makes not stated'}</span>
                       </li>
                     ))}
                   </ul>
                   {editable && (
-                    <div className="mt-3 rounded-xl border border-slate-200 p-3 space-y-2">
+                    <div className="mt-3 rounded-xl border border-[#D7E7E4] p-3 space-y-2">
                       <label className="text-xs font-bold block" htmlFor={`${uid}-cat`}>Add or update a service</label>
                       <select id={`${uid}-cat`} className={field} value={cap.category} onChange={(e) => setCap({ ...cap, category: e.target.value })}>
                         <option value="">Choose…</option>
                         {(taxonomy?.categories || []).map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
                       </select>
-                      {selected?.highRisk && <p className="text-xs text-amber-900">High-voltage work is listed only after KAYAD verifies a qualification. Submit that evidence above, then select it here.</p>}
+                      {selected?.highRisk && <p className="text-xs text-[#0A3340]">High-voltage work is listed only after KAYAD verifies a qualification. Submit that evidence above, then select it here.</p>}
                       {selected?.highRisk && (
                         <div><label className="text-xs font-bold block" htmlFor={`${uid}-evid`}>Qualification evidence</label>
                           <select id={`${uid}-evid`} className={field} value={cap.evidence} onChange={(e) => setCap({ ...cap, evidence: e.target.value })}>
@@ -178,11 +178,11 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 </section>
 
                 <section aria-labelledby={`${uid}-team`}>
-                  <h3 id={`${uid}-team`} className="font-bold text-slate-800">Team</h3>
-                  {!live && <p className="text-xs text-slate-500">You can add staff once your business is approved.</p>}
+                  <h3 id={`${uid}-team`} className="font-bold text-[#0A3340]">Team</h3>
+                  {!live && <p className="text-xs text-[#64748B]">You can add staff once your business is approved.</p>}
                   <ul className="space-y-2 mt-1">
                     {staff.map((s) => (
-                      <li key={s.id} className="rounded-lg border border-slate-200 p-3 text-sm flex flex-wrap items-center gap-2">
+                      <li key={s.id} className="rounded-lg border border-[#D7E7E4] p-3 text-sm flex flex-wrap items-center gap-2">
                         <span className="flex-1 min-w-[160px]">{[s.first_name, s.last_name].filter(Boolean).join(' ') || 'Team member'} · {s.role || 'role not stated'} · <strong>{s.affiliation_status}</strong>
                           {s.affiliation_status === 'pending' && (s.user_confirmed_at && !s.provider_confirmed_at ? ' · asked to join' : ' · invited, waiting for them')}</span>
                         {s.affiliation_status === 'pending' && s.user_confirmed_at && !s.provider_confirmed_at && <Button size="sm" disabled={busy || !live} onClick={() => void run(() => automotiveApi.confirmStaff(provider.id, s.id), 'Team member confirmed.')}>Confirm</Button>}
@@ -197,7 +197,7 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       <Button size="sm" disabled={busy || !inviteEmail.trim()} onClick={() => void run(async () => { await automotiveApi.inviteStaff(provider.id, inviteEmail.trim(), 'mechanic'); setInviteEmail(''); }, 'Invitation sent. They must accept before they count as part of your team.')}>Invite</Button>
                     </div>
                   )}
-                  <p className="text-xs text-slate-500 mt-2">Confirming someone proves a working relationship. It does not certify their qualifications; qualifications are verified separately.</p>
+                  <p className="text-xs text-[#64748B] mt-2">Confirming someone proves a working relationship. It does not certify their qualifications; qualifications are verified separately.</p>
                 </section>
               </>
             )}

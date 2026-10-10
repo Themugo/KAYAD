@@ -35,7 +35,7 @@ export function AdminCarRow({
   onDelete?: () => void;
 }) {
   return (
-    <tr className="border-b border-gray-200 hover:bg-gray-50">
+    <tr className="border-b border-[#D7E7E4] hover:bg-[#F6FAF9]">
       <td className="py-3 px-4">
         <div className="flex items-center gap-3">
           {car.image && (
@@ -49,7 +49,7 @@ export function AdminCarRow({
           )}
           <div>
             <p className="font-medium">{car.title || car.brand}</p>
-            <p className="text-sm text-gray-500">{car.year} • {car.mileage?.toLocaleString()} km</p>
+            <p className="text-sm text-[#64748B]">{car.year} • {car.mileage?.toLocaleString()} km</p>
           </div>
         </div>
       </td>
@@ -59,8 +59,8 @@ export function AdminCarRow({
       <td className="py-3 px-4">
         <span className={`px-2 py-1 rounded text-xs font-medium ${
           car.status === 'active' ? 'bg-green-100 text-green-700' :
-          car.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-          'bg-gray-100 text-gray-700'
+          car.status === 'pending' ? 'bg-[#DDF4F0] text-[#12576D]' :
+          'bg-[#EEF7F5] text-[#12576D]'
         }`}>
           {car.status || 'Unknown'}
         </span>
@@ -68,17 +68,17 @@ export function AdminCarRow({
       <td className="py-3 px-4">
         <div className="flex items-center gap-2">
           {onView && (
-            <button onClick={onView} className="p-1 hover:bg-gray-100 rounded">
-              <Eye className="h-4 w-4 text-gray-500" />
+            <button onClick={onView} className="p-1 hover:bg-[#EEF7F5] rounded">
+              <Eye className="h-4 w-4 text-[#64748B]" />
             </button>
           )}
           {onEdit && (
-            <button onClick={onEdit} className="p-1 hover:bg-gray-100 rounded">
-              <Edit className="h-4 w-4 text-blue-500" />
+            <button onClick={onEdit} className="p-1 hover:bg-[#EEF7F5] rounded">
+              <Edit className="h-4 w-4 text-[#2F8F87]" />
             </button>
           )}
           {onDelete && (
-            <button onClick={onDelete} className="p-1 hover:bg-gray-100 rounded">
+            <button onClick={onDelete} className="p-1 hover:bg-[#EEF7F5] rounded">
               <Trash2 className="h-4 w-4 text-red-500" />
             </button>
           )}
@@ -100,25 +100,25 @@ export function AdminUserRow({
   onDelete?: () => void;
 }) {
   return (
-    <tr className="border-b border-gray-200 hover:bg-gray-50">
+    <tr className="border-b border-[#D7E7E4] hover:bg-[#F6FAF9]">
       <td className="py-3 px-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <span className="text-blue-700 font-medium">
+          <div className="w-10 h-10 bg-[#DDF4F0] rounded-full flex items-center justify-center">
+            <span className="text-[#12576D] font-medium">
               {user.name?.[0] || user.email?.[0] || '?'}
             </span>
           </div>
           <div>
             <p className="font-medium">{user.name || 'Unknown'}</p>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="text-sm text-[#64748B]">{user.email}</p>
           </div>
         </div>
       </td>
       <td className="py-3 px-4">
         <span className={`px-2 py-1 rounded text-xs font-medium ${
-          user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-          user.role === 'dealer' ? 'bg-blue-100 text-blue-700' :
-          'bg-gray-100 text-gray-700'
+          user.role === 'admin' ? 'bg-[#DDF4F0] text-[#12576D]' :
+          user.role === 'dealer' ? 'bg-[#DDF4F0] text-[#12576D]' :
+          'bg-[#EEF7F5] text-[#12576D]'
         }`}>
           {user.role || 'user'}
         </span>
@@ -127,7 +127,7 @@ export function AdminUserRow({
         <span className={`px-2 py-1 rounded text-xs font-medium ${
           user.status === 'active' ? 'bg-green-100 text-green-700' :
           user.status === 'suspended' ? 'bg-red-100 text-red-700' :
-          'bg-yellow-100 text-yellow-700'
+          'bg-[#DDF4F0] text-[#12576D]'
         }`}>
           {user.status || 'pending'}
         </span>
@@ -135,17 +135,17 @@ export function AdminUserRow({
       <td className="py-3 px-4">
         <div className="flex items-center gap-2">
           {onView && (
-            <button onClick={onView} className="p-1 hover:bg-gray-100 rounded">
-              <Eye className="h-4 w-4 text-gray-500" />
+            <button onClick={onView} className="p-1 hover:bg-[#EEF7F5] rounded">
+              <Eye className="h-4 w-4 text-[#64748B]" />
             </button>
           )}
           {onSuspend && (
-            <button onClick={onSuspend} className="p-1 hover:bg-gray-100 rounded">
-              <XCircle className="h-4 w-4 text-yellow-500" />
+            <button onClick={onSuspend} className="p-1 hover:bg-[#EEF7F5] rounded">
+              <XCircle className="h-4 w-4 text-[#176B87]" />
             </button>
           )}
           {onDelete && (
-            <button onClick={onDelete} className="p-1 hover:bg-gray-100 rounded">
+            <button onClick={onDelete} className="p-1 hover:bg-[#EEF7F5] rounded">
               <Trash2 className="h-4 w-4 text-red-500" />
             </button>
           )}

@@ -137,7 +137,7 @@ function ColorField({
             color: 'var(--text-primary)',
             height: 32,
           }}
-          placeholder="#000000"
+          placeholder="#176B87"
         />
       </div>
     </div>
@@ -682,8 +682,8 @@ export default function ThemeStudio() {
                     <span
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
                       style={{
-                        background: isDay ? 'rgba(251, 191, 36, 0.15)' : 'rgba(99, 102, 241, 0.15)',
-                        color: isDay ? '#d97706' : '#6366f1',
+                        background: isDay ? 'rgba(19, 184, 166, 0.15)' : 'rgba(19, 184, 166, 0.15)',
+                        color: isDay ? '#12576d' : '#176b87',
                       }}
                     >
                       {isDay ? 'Day Mode' : 'Night Mode'}

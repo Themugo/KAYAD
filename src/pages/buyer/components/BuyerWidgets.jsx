@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../../styles/dashboard.css';
 
-export function StatCard({ icon, label, value, sub, accent = 'var(--gold)', to }) {
+export function StatCard({ icon, label, value, sub, accent = 'var(--brand)', to }) {
   const inner = (
     <div className="ov-card ov-card-padded stat-card-outer" style={{ cursor: to ? 'pointer' : 'default' }}>
       <div className="stat-card-circle" style={{ background: accent }} />
@@ -17,7 +17,7 @@ export function StatCard({ icon, label, value, sub, accent = 'var(--gold)', to }
   return to ? <Link to={to}>{inner}</Link> : inner;
 }
 
-export function QuickLink({ to, icon, label, desc, accent = 'var(--gold-glow)' }) {
+export function QuickLink({ to, icon, label, desc, accent = 'var(--brand-glow)' }) {
   return (
     <Link to={to}>
       <div className="quick-link-card">

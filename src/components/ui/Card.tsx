@@ -36,7 +36,7 @@ export const Card: React.FC<CardProps> = ({
     background: 'var(--surface-container-lowest, #ffffff)',
     border: '1px solid var(--surface-dim)',
     borderRadius: 'var(--radius-lg)', // Stitch: 12px for cards
-    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+    boxShadow: '0 1px 3px rgba(10, 51, 64, 0.04)',
     // Stitch: Hover animation - translate -2px
     transition: 'transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease',
     cursor: interactive || onClick ? 'pointer' : 'default',

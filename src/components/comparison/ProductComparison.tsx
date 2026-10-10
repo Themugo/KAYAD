@@ -50,9 +50,9 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
   const getSpecIcon = (key: string) => {
     switch (key) {
       case 'water_resistance':
-        return <span className="text-blue-500">💧</span>;
+        return <span className="text-[#2F8F87]">💧</span>;
       case 'fire_rating':
-        return <span className="text-orange-500">🔥</span>;
+        return <span className="text-[#2F8F87]">🔥</span>;
       case 'slip_rating':
         return <span className="text-green-500">🦶</span>;
       default:
@@ -62,31 +62,31 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-        <p className="text-gray-500 mb-2">No products to compare</p>
-        <p className="text-sm text-gray-400">Add products from the shop to compare them side-by-side</p>
+      <div className="text-center py-12 bg-white rounded-xl border border-[#D7E7E4]">
+        <p className="text-[#64748B] mb-2">No products to compare</p>
+        <p className="text-sm text-[#94A3B8]">Add products from the shop to compare them side-by-side</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-[#D7E7E4] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200">
+      <div className="flex items-center justify-between p-6 border-b border-[#D7E7E4]">
         <h2 className="font-display text-xl font-bold text-navy-900">
           Compare Products ({products.length})
         </h2>
         <button
           onClick={onClearAll}
-          className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          className="text-sm text-[#64748B] hover:text-[#12576D] transition-colors"
         >
           Clear All
         </button>
       </div>
 
       {/* Spec Selector */}
-      <div className="p-4 bg-gray-50 border-b border-gray-200">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+      <div className="p-4 bg-[#F6FAF9] border-b border-[#D7E7E4]">
+        <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-3">
           Select Specifications to Compare
         </p>
         <div className="flex flex-wrap gap-2">
@@ -97,7 +97,7 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
               className={`px-3 py-1.5 text-xs rounded-full transition-colors ${
                 selectedSpecs.includes(spec.key)
                   ? 'bg-primary-500 text-white'
-                  : 'bg-white border border-gray-300 text-gray-600 hover:border-gray-400'
+                  : 'bg-white border border-[#BDE5DE] text-[#64748B] hover:border-[#91CEC5]'
               }`}
             >
               {spec.label}
@@ -111,7 +111,7 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
         <table className="w-full">
           <thead>
             <tr>
-              <th className="p-4 text-left font-medium text-gray-700 bg-gray-50 min-w-[150px]">
+              <th className="p-4 text-left font-medium text-[#12576D] bg-[#F6FAF9] min-w-[150px]">
                 Product
               </th>
               {products.map((product) => (
@@ -139,7 +139,7 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
                       {product.name}
                     </Link>
                     {product.category && (
-                      <p className="text-xs text-gray-500 mt-1">{product.category.name}</p>
+                      <p className="text-xs text-[#64748B] mt-1">{product.category.name}</p>
                     )}
                   </div>
                 </th>
@@ -148,8 +148,8 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
           </thead>
           <tbody>
             {/* Price */}
-            <tr className="border-t border-gray-100">
-              <td className="p-4 font-medium text-gray-700 bg-gray-50">Price</td>
+            <tr className="border-t border-[#D7E7E4]">
+              <td className="p-4 font-medium text-[#12576D] bg-[#F6FAF9]">Price</td>
               {products.map((product) => (
                 <td key={product.id} className="p-4">
                   <div className="space-y-1">
@@ -157,7 +157,7 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
                       {formatKES(product.price)}
                     </p>
                     {product.unit && (
-                      <p className="text-xs text-gray-500">per {product.unit}</p>
+                      <p className="text-xs text-[#64748B]">per {product.unit}</p>
                     )}
                     {product.sale_price && (
                       <p className="text-xs text-red-600 line-through">
@@ -170,8 +170,8 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
             </tr>
 
             {/* Stock Status */}
-            <tr className="border-t border-gray-100">
-              <td className="p-4 font-medium text-gray-700 bg-gray-50">Availability</td>
+            <tr className="border-t border-[#D7E7E4]">
+              <td className="p-4 font-medium text-[#12576D] bg-[#F6FAF9]">Availability</td>
               {products.map((product) => (
                 <td key={product.id} className="p-4">
                   {product.stock_quantity > 0 ? (
@@ -192,8 +192,8 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
               if (!spec) return null;
               
               return (
-                <tr key={specKey} className="border-t border-gray-100">
-                  <td className="p-4 font-medium text-gray-700 bg-gray-50">
+                <tr key={specKey} className="border-t border-[#D7E7E4]">
+                  <td className="p-4 font-medium text-[#12576D] bg-[#F6FAF9]">
                     <div className="flex items-center gap-2">
                       {getSpecIcon(specKey)}
                       {spec.label}
@@ -209,18 +209,18 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
             })}
 
             {/* Description */}
-            <tr className="border-t border-gray-100">
-              <td className="p-4 font-medium text-gray-700 bg-gray-50">Description</td>
+            <tr className="border-t border-[#D7E7E4]">
+              <td className="p-4 font-medium text-[#12576D] bg-[#F6FAF9]">Description</td>
               {products.map((product) => (
-                <td key={product.id} className="p-4 text-sm text-gray-600 line-clamp-3">
+                <td key={product.id} className="p-4 text-sm text-[#64748B] line-clamp-3">
                   {product.short_description || product.description || '-'}
                 </td>
               ))}
             </tr>
 
             {/* Features */}
-            <tr className="border-t border-gray-100">
-              <td className="p-4 font-medium text-gray-700 bg-gray-50">Features</td>
+            <tr className="border-t border-[#D7E7E4]">
+              <td className="p-4 font-medium text-[#12576D] bg-[#F6FAF9]">Features</td>
               {products.map((product) => (
                 <td key={product.id} className="p-4">
                   <div className="space-y-1">
@@ -230,7 +230,7 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
                       </span>
                     )}
                     {product.is_best_seller && (
-                      <span className="inline-block px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">
+                      <span className="inline-block px-2 py-1 bg-[#DDF4F0] text-[#12576D] text-xs rounded-full">
                         Best Seller
                       </span>
                     )}
@@ -240,7 +240,7 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
                       </span>
                     )}
                     {!product.is_new_arrival && !product.is_best_seller && !product.is_clearance && (
-                      <span className="text-gray-400 text-sm">-</span>
+                      <span className="text-[#94A3B8] text-sm">-</span>
                     )}
                   </div>
                 </td>
@@ -248,8 +248,8 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
             </tr>
 
             {/* Action */}
-            <tr className="border-t border-gray-200 bg-gray-50">
-              <td className="p-4 font-medium text-gray-700">Action</td>
+            <tr className="border-t border-[#D7E7E4] bg-[#F6FAF9]">
+              <td className="p-4 font-medium text-[#12576D]">Action</td>
               {products.map((product) => (
                 <td key={product.id} className="p-4">
                   <Link
@@ -267,11 +267,11 @@ export function ProductComparison({ products, onRemove, onClearAll }: ProductCom
       </div>
 
       {/* Footer */}
-      <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-        <p className="text-sm text-gray-500">
+      <div className="p-4 bg-[#F6FAF9] border-t border-[#D7E7E4] flex items-center justify-between">
+        <p className="text-sm text-[#64748B]">
           Comparing {products.length} of 4 maximum products
         </p>
-        <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
+        <button className="flex items-center gap-2 text-sm text-[#64748B] hover:text-[#0A3340] transition-colors">
           <Share2 className="w-4 h-4" />
           Share Comparison
         </button>

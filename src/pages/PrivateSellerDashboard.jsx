@@ -57,25 +57,25 @@ export default function PrivateSellerDashboard() {
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
   const totalRevenue = escrows.reduce((sum, e) => sum + (e.amount || 0), 0);
-  const statusColor = (status) => status === 'sold' ? '#22c55e' : status === 'active' ? '#3b82f6' : 'rgba(255,255,255,0.3)';
+  const statusColor = (status) => status === 'sold' ? '#22c55e' : status === 'active' ? '#176B87' : 'rgba(255,255,255,0.3)';
 
   return (
     <div className="page dashboard-page">
       <DashboardHeader badge="Private Seller Hub" greeting="Welcome" name={user?.name?.split(' ')[0] || 'Seller'}
         subtitle="Manage your vehicle listings and track sales"
         actions={
-          <Link to="/sell" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--gold)', color: '#000', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>+ List a Vehicle</Link>
+          <Link to="/sell" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--brand)', color: '#0a3340', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>+ List a Vehicle</Link>
         }
       />
 
       <div className="dash-body">
         {/* KPI Row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 14, marginBottom: 28 }}>
-          <EnterpriseKPI icon="🚗" label="Active Listings" value={stats?.activeListings || 0} trend={12} accent="var(--gold)" />
+          <EnterpriseKPI icon="🚗" label="Active Listings" value={stats?.activeListings || 0} trend={12} accent="var(--brand)" />
           <EnterpriseKPI icon="💰" label="Sold Vehicles" value={stats?.soldListings || 0} trend={8} accent="#22c55e" />
-          <EnterpriseKPI icon="👁" label="Total Views" value={stats?.totalViews || 0} trend={15} accent="#3b82f6" />
-          <EnterpriseKPI icon="📈" label="Total Revenue" value={`KES ${totalRevenue.toLocaleString()}`} trend={20} accent="var(--gold)" />
-          <EnterpriseKPI icon="💬" label="Inquiries" value={stats?.totalInquiries || 0} accent="#8b5cf6" />
+          <EnterpriseKPI icon="👁" label="Total Views" value={stats?.totalViews || 0} trend={15} accent="#176B87" />
+          <EnterpriseKPI icon="📈" label="Total Revenue" value={`KES ${totalRevenue.toLocaleString()}`} trend={20} accent="var(--brand)" />
+          <EnterpriseKPI icon="💬" label="Inquiries" value={stats?.totalInquiries || 0} accent="#5aafa4" />
         </div>
 
         {/* Quick Actions */}
@@ -92,7 +92,7 @@ export default function PrivateSellerDashboard() {
         {/* Main Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 24, marginBottom: 28 }}>
           {/* Listings Performance */}
-          <EnterpriseCard header="📊 Listings Performance" action={<Link to="/seller" style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>View All →</Link>}>
+          <EnterpriseCard header="📊 Listings Performance" action={<Link to="/seller" style={{ color: 'var(--brand)', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>View All →</Link>}>
             <EnterpriseTable
               columns={[
                 { key: 'title', label: 'Vehicle' },
@@ -117,11 +117,11 @@ export default function PrivateSellerDashboard() {
                 title: l.status === 'sold' ? 'Vehicle Sold' : 'Active Listing',
                 description: l.title || `${l.brand || ''} ${l.model || ''}`,
                 time: l.createdAt ? timeAgo(l.createdAt) : '',
-                color: l.status === 'sold' ? '#22c55e' : 'var(--gold)',
+                color: l.status === 'sold' ? '#22c55e' : 'var(--brand)',
               }))} />
             ) : (
               <EnterpriseTimeline items={[
-                { title: 'Welcome to KAYAD', description: 'List your first vehicle to get started', color: 'var(--gold)' },
+                { title: 'Welcome to KAYAD', description: 'List your first vehicle to get started', color: 'var(--brand)' },
               ]} />
             )}
           </EnterpriseCard>
@@ -141,7 +141,7 @@ export default function PrivateSellerDashboard() {
                   title: `${e.car?.title || 'Vehicle'} — KES ${(e.amount || 0).toLocaleString()}`,
                   description: `Status: ${e.status}`,
                   time: e.createdAt ? timeAgo(e.createdAt) : '',
-                  color: e.status === 'completed' ? '#22c55e' : e.status === 'pending' ? '#f59e0b' : '#3b82f6',
+                  color: e.status === 'completed' ? '#22c55e' : e.status === 'pending' ? '#176b87' : '#176B87',
                 }))} />
               </div>
             )}
@@ -167,7 +167,7 @@ export default function PrivateSellerDashboard() {
 
         {/* Recent Listings */}
         {listings.length > 0 && (
-          <EnterpriseCard header="🚗 Recent Listings" action={<Link to="/seller" style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>View All →</Link>}>
+          <EnterpriseCard header="🚗 Recent Listings" action={<Link to="/seller" style={{ color: 'var(--brand)', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>View All →</Link>}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
               {listings.slice(0, 4).map(car => (
                 <div key={car._id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
@@ -179,7 +179,7 @@ export default function PrivateSellerDashboard() {
                   </div>
                   <div style={{ padding: 14 }}>
                     <div style={{ fontWeight: 600, fontSize: 13, color: '#fff', marginBottom: 4 }}>{car.title || `${car.brand || ''} ${car.model || ''}`}</div>
-                    <div style={{ fontFamily: 'var(--font-display)', color: 'var(--gold-light)', fontWeight: 700, fontSize: '0.95rem' }}>KES {(car.price || 0).toLocaleString()}</div>
+                    <div style={{ fontFamily: 'var(--font-display)', color: 'var(--brand-light)', fontWeight: 700, fontSize: '0.95rem' }}>KES {(car.price || 0).toLocaleString()}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{(car.views || 0).toLocaleString()} views · {car.inquiries || 0} inquiries</div>
                   </div>
                 </div>
@@ -194,7 +194,7 @@ export default function PrivateSellerDashboard() {
               <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.3 }}>🚗</div>
               <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>No Listings Yet</div>
               <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginBottom: 20 }}>Start selling by listing your first vehicle</div>
-              <Link to="/sell" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--gold)', color: '#000', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>List Your First Vehicle</Link>
+              <Link to="/sell" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--brand)', color: '#0a3340', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>List Your First Vehicle</Link>
             </div>
           </EnterpriseCard>
         )}

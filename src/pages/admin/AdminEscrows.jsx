@@ -133,9 +133,9 @@ export default function AdminEscrows() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 12, marginBottom: 18 }}>
           <Queue title="Funds held" count={queues.funded?.count || 0} amount={queues.funded?.amount || 0} tone="var(--blue)" onOpen={() => setFilter('funded')} />
           <Queue title="Buyer confirmation" count={queues.vehicleConfirmed?.count || 0} tone="var(--blue)" onOpen={() => setFilter('vehicle_confirmed')} />
-          <Queue title="Delivered / settlement" count={queues.delivered?.count || 0} tone="var(--gold)" onOpen={() => setFilter('delivered')} />
+          <Queue title="Delivered / settlement" count={queues.delivered?.count || 0} tone="var(--brand)" onOpen={() => setFilter('delivered')} />
           <Queue title="Disputes" count={queues.disputed?.count || 0} tone="var(--red)" onOpen={() => setFilter('disputed')} />
-          <Queue title="Refund work" count={queues.refunds?.count || 0} tone="var(--gold)" />
+          <Queue title="Refund work" count={queues.refunds?.count || 0} tone="var(--brand)" />
           <Queue title="Control exceptions" count={(queues.reconciliation?.count || 0) + (queues.anomalies?.count || 0)} tone="var(--orange)"><div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{queues.reconciliation?.count || 0} reconciliation · {queues.anomalies?.count || 0} anomalies</div></Queue>
         </div>
 

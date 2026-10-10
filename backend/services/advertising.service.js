@@ -65,7 +65,7 @@ export const advertisingService = {
       ...data,
       status: data.status || 'active',
       isVisible: data.isVisible !== false,
-      backgroundColor: data.backgroundColor || '#1E3063',
+      backgroundColor: data.backgroundColor || '#0A3340',
       textColor: data.textColor || '#FFFFFF',
       opacity: data.opacity ?? 100,
       sortOrder: data.sortOrder ?? 0,

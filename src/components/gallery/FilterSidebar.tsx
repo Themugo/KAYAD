@@ -120,14 +120,14 @@ export const FilterSidebar: FC = () => {
             {totalCount} Cars
           </span>
         </div>
-        <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+        <p className="text-[11px] text-[#64748B] font-medium leading-relaxed">
           Filter by Make, Model, Transmission, Fuel, Body & Budget.
         </p>
       </div>
 
       {/* FILTERS SECTION ACCORDIONS */}
       <div className="space-y-3 pt-1">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#66808A] block">
+        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#64748b] block">
           SPECIFICATIONS
         </span>
 
@@ -138,7 +138,7 @@ export const FilterSidebar: FC = () => {
             className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">Brand / Manufacturer</span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.brand ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSection.brand ? 'rotate-180' : ''}`} />
           </button>
           {openSection.brand && (
             <div className="p-2 space-y-1 max-h-48 overflow-y-auto no-scrollbar border-t border-[#D7E7E4]/60 bg-white">
@@ -175,7 +175,7 @@ export const FilterSidebar: FC = () => {
                 </span>
               )}
             </span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.transmission ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSection.transmission ? 'rotate-180' : ''}`} />
           </button>
           {openSection.transmission && (
             <div className="p-2 space-y-1 border-t border-[#D7E7E4]/60 bg-white">
@@ -205,7 +205,7 @@ export const FilterSidebar: FC = () => {
             className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">Body Configuration</span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.body ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSection.body ? 'rotate-180' : ''}`} />
           </button>
           {openSection.body && (
             <div className="p-2.5 flex flex-wrap gap-1.5 border-t border-[#D7E7E4]/60 bg-white">
@@ -236,7 +236,7 @@ export const FilterSidebar: FC = () => {
             className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">Fuel & Powertrain</span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.fuel ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSection.fuel ? 'rotate-180' : ''}`} />
           </button>
           {openSection.fuel && (
             <div className="p-2 space-y-1 border-t border-[#D7E7E4]/60 bg-white">
@@ -266,7 +266,7 @@ export const FilterSidebar: FC = () => {
             className="w-full p-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#176B87] bg-[#EEF7F5]/70 hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           >
             <span className="font-serif">City / Hub</span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${openSection.city ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSection.city ? 'rotate-180' : ''}`} />
           </button>
           {openSection.city && (
             <div className="p-2 space-y-1 border-t border-[#D7E7E4]/60 bg-white">

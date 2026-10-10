@@ -101,7 +101,7 @@ const SeveritySummaryCard: React.FC<{
       </div>
       <div>
         <div className="text-2xl font-black" style={{ color: style.color }}>{count}</div>
-        <div className="text-xs text-slate-600 font-medium">{label}</div>
+        <div className="text-xs text-[#64748B] font-medium">{label}</div>
       </div>
     </div>
   );
@@ -130,7 +130,7 @@ const RiskAlert: React.FC<{
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm text-slate-900">{risk.title}</span>
+            <span className="font-bold text-sm text-[#0A3340]">{risk.title}</span>
             <Badge
               size="sm"
               className="text-[10px]"
@@ -143,7 +143,7 @@ const RiskAlert: React.FC<{
               {style.label}
             </Badge>
           </div>
-          <p className="text-xs text-slate-600 mt-0.5 truncate">{risk.description}</p>
+          <p className="text-xs text-[#64748B] mt-0.5 truncate">{risk.description}</p>
         </div>
         <div className="flex items-center gap-2">
           <div
@@ -154,9 +154,9 @@ const RiskAlert: React.FC<{
             <span className="hidden sm:inline">{category.label}</span>
           </div>
           {expanded ? (
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-slate-400" />
+            <ChevronRight className="w-4 h-4 text-[#94A3B8]" />
           )}
         </div>
       </div>
@@ -165,42 +165,42 @@ const RiskAlert: React.FC<{
         <div className="px-4 pb-4 pt-2 border-t" style={{ borderColor: style.borderColor }}>
           {/* Recommendation */}
           <div className="bg-white rounded-lg p-4 space-y-3">
-            <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Recommendation</h5>
+            <h5 className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Recommendation</h5>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <p className="text-[10px] text-slate-500 font-medium uppercase">Problem</p>
-                <p className="text-sm text-slate-800">{risk.recommendation.problem}</p>
+                <p className="text-[10px] text-[#64748B] font-medium uppercase">Problem</p>
+                <p className="text-sm text-[#0A3340]">{risk.recommendation.problem}</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-500 font-medium uppercase">Why It Matters</p>
-                <p className="text-sm text-slate-800">{risk.recommendation.whyItMatters}</p>
+                <p className="text-[10px] text-[#64748B] font-medium uppercase">Why It Matters</p>
+                <p className="text-sm text-[#0A3340]">{risk.recommendation.whyItMatters}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-[10px] text-slate-500 font-medium uppercase">Solution</p>
-              <p className="text-sm text-slate-800">{risk.recommendation.solution}</p>
+              <p className="text-[10px] text-[#64748B] font-medium uppercase">Solution</p>
+              <p className="text-sm text-[#0A3340]">{risk.recommendation.solution}</p>
             </div>
 
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1">
-                <User className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-slate-600">
+                <User className="w-3.5 h-3.5 text-[#94A3B8]" />
+                <span className="text-[#64748B]">
                   Responsible: <span className="font-medium capitalize">{risk.recommendation.responsibleParty}</span>
                 </span>
               </div>
               {risk.recommendation.estimatedTime && (
                 <div className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-slate-600">{risk.recommendation.estimatedTime}</span>
+                  <Clock className="w-3.5 h-3.5 text-[#94A3B8]" />
+                  <span className="text-[#64748B]">{risk.recommendation.estimatedTime}</span>
                 </div>
               )}
             </div>
 
             {/* Code reference */}
-            <div className="pt-2 border-t border-slate-100">
-              <span className="text-[10px] text-slate-400 font-mono">{risk.code}</span>
+            <div className="pt-2 border-t border-[#D7E7E4]">
+              <span className="text-[10px] text-[#94A3B8] font-mono">{risk.code}</span>
             </div>
           </div>
 
@@ -373,12 +373,12 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
   return (
     <div className="space-y-6">
       {/* Confidentiality Notice */}
-      <Card className="p-4 bg-blue-50 border border-blue-200">
+      <Card className="p-4 bg-[#F3FAF9] border border-[#D7E7E4]">
         <div className="flex items-center gap-3">
-          <Shield className="w-5 h-5 text-blue-600 flex-shrink-0" />
+          <Shield className="w-5 h-5 text-[#176B87] flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-blue-800">Internal Risk Dashboard</p>
-            <p className="text-xs text-blue-600">
+            <p className="text-sm font-bold text-[#0E4655]">Internal Risk Dashboard</p>
+            <p className="text-xs text-[#176B87]">
               This information is confidential and visible only to Auction Organizers, KAYAD Administrators, and Compliance Officers.
             </p>
           </div>
@@ -402,7 +402,7 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
               <h3 className={`font-black text-lg ${canPublish ? 'text-emerald-800' : 'text-red-800'}`}>
                 {canPublish ? 'Auction Publication Enabled' : 'Publication Blocked'}
               </h3>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-[#64748B]">
                 {canPublish
                   ? 'No critical or high-severity risks blocking publication.'
                   : `${blockingRisks.length} risk(s) must be resolved before publishing.`
@@ -429,9 +429,9 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
 
       {/* Quick Stats */}
       <div className="flex flex-wrap gap-4">
-        <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl">
-          <AlertCircle className="w-4 h-4 text-slate-600" />
-          <span className="text-sm text-slate-700">
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#EEF7F5] rounded-xl">
+          <AlertCircle className="w-4 h-4 text-[#64748B]" />
+          <span className="text-sm text-[#12576D]">
             <strong>{metrics.totalActive}</strong> Active Risks
           </span>
         </div>
@@ -442,9 +442,9 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
           </span>
         </div>
         {metrics.requiresReview > 0 && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-xl">
-            <Eye className="w-4 h-4 text-amber-600" />
-            <span className="text-sm text-amber-700">
+          <div className="flex items-center gap-2 px-4 py-2 bg-[#F3FAF9] rounded-xl">
+            <Eye className="w-4 h-4 text-[#176B87]" />
+            <span className="text-sm text-[#12576D]">
               <strong>{metrics.requiresReview}</strong> Requires Review
             </span>
           </div>
@@ -456,21 +456,21 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
         <div className="space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search risks by title, description, or code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20 focus:border-[#176B87]"
+              className="w-full pl-10 pr-4 py-2 border border-[#D7E7E4] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#176B87]/20 focus:border-[#176B87]"
             />
           </div>
 
           {/* Category Filters */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Filter className="w-4 h-4 text-slate-500" />
-              <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Categories</span>
+              <Filter className="w-4 h-4 text-[#64748B]" />
+              <span className="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Categories</span>
             </div>
             <CategoryFilter
               selectedCategories={selectedCategories}
@@ -500,15 +500,15 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
           </div>
 
           {/* Additional Options */}
-          <div className="flex items-center gap-4 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-4 pt-2 border-t border-[#D7E7E4]">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={showResolved}
                 onChange={(e) => setShowResolved(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-[#176B87] focus:ring-[#176B87]/20"
+                className="w-4 h-4 rounded border-[#BDE5DE] text-[#176B87] focus:ring-[#176B87]/20"
               />
-              <span className="text-sm text-slate-600">Show resolved</span>
+              <span className="text-sm text-[#64748B]">Show resolved</span>
             </label>
 
             <div className="flex-1" />
@@ -571,8 +571,8 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
       {filteredRisks.length === 0 && (
         <Card className="p-12 text-center">
           <ShieldCheck className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-slate-800 mb-2">No Risks Detected</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="text-lg font-bold text-[#0A3340] mb-2">No Risks Detected</h3>
+          <p className="text-sm text-[#64748B]">
             {searchQuery || selectedCategories.length > 0 || selectedSeverities.length > 0
               ? 'No risks match your current filters. Try adjusting your search criteria.'
               : 'All auctions are operating within normal parameters.'

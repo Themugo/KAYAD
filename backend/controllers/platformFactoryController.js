@@ -299,10 +299,10 @@ export async function getSharedServices(req, res) {
 
 export async function getBrands(req, res) {
   const brands = [
-    { id: '1', name: 'KAYAD Cars', primaryColor: '#17244B', accentColor: '#C77B58', logo: 'kayad-logo.svg', status: 'active' },
-    { id: '2', name: 'KAYAD Fleet', primaryColor: '#1E3A5F', accentColor: '#E67E22', logo: 'fleet-logo.svg', status: 'active' },
-    { id: '3', name: 'KAYAD Rentals', primaryColor: '#2ECC71', accentColor: '#17244B', logo: 'rentals-logo.svg', status: 'active' },
-    { id: '4', name: 'Trucks Kenya', primaryColor: '#E74C3C', accentColor: '#F39C12', logo: 'trucks-logo.svg', status: 'staging' },
+    { id: '1', name: 'KAYAD Cars', primaryColor: '#176B87', accentColor: '#13B8A6', logo: 'kayad-logo.svg', status: 'active' },
+    { id: '2', name: 'KAYAD Fleet', primaryColor: '#12576D', accentColor: '#13B8A6', logo: 'fleet-logo.svg', status: 'active' },
+    { id: '3', name: 'KAYAD Rentals', primaryColor: '#176B87', accentColor: '#5AAFA4', logo: 'rentals-logo.svg', status: 'active' },
+    { id: '4', name: 'Trucks Kenya', primaryColor: '#0A3340', accentColor: '#13B8A6', logo: 'trucks-logo.svg', status: 'staging' },
   ];
 
   res.json({ success: true, data: brands });
@@ -314,9 +314,9 @@ export async function getBrandDetails(req, res) {
   const brand = {
     id: brandId,
     name: 'KAYAD Cars',
-    primaryColor: '#17244B',
-    secondaryColor: '#F6F1E8',
-    accentColor: '#C77B58',
+    primaryColor: '#176B87',
+    secondaryColor: '#F6FAF9',
+    accentColor: '#13B8A6',
     typography: {
       heading: 'Inter',
       body: 'Inter',

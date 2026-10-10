@@ -37,7 +37,7 @@ export default function DealerEscrowsTab({ escrows, escrowLoading, onRefresh }) 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Amount</div>
-                    <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(amount).toLocaleString()}</div>
+                    <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--brand)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(amount).toLocaleString()}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Step {stepIndex + 1}/{ESCROW_STEPS.length}</div>

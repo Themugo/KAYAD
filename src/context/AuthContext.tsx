@@ -255,7 +255,7 @@ export function RequireAdmin({ children }: RequireAuthProps) {
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
       <div style={{ fontSize:'4rem' }}>🚫</div>
       <h1 style={{ fontSize:'2rem', fontWeight:'bold' }}>Access Denied</h1>
-      <p style={{ color:'#888', maxWidth:'400px' }}>You don't have permission to access this area. Contact your administrator if you believe this is an error.</p>
+      <p style={{ color:'#64748b', maxWidth:'400px' }}>You don't have permission to access this area. Contact your administrator if you believe this is an error.</p>
     </div>
   );
   return children;
@@ -308,7 +308,7 @@ export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
         <div style={{ fontSize:'4rem' }}>🔒</div>
         <h1 style={{ fontSize:'1.5rem', fontWeight:'bold', color:'#fff' }}>Superadmin Only</h1>
-        <p style={{ color:'#888', maxWidth:'400px', fontSize: 14 }}>This area is restricted to the platform superadmin.</p>
+        <p style={{ color:'#64748b', maxWidth:'400px', fontSize: 14 }}>This area is restricted to the platform superadmin.</p>
       </div>
     );
   }
@@ -325,7 +325,7 @@ export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
         <div style={{ fontSize:'4rem' }}>🔒</div>
         <h1 style={{ fontSize:'1.5rem', fontWeight:'bold', color:'#fff' }}>Insufficient Permissions</h1>
-        <p style={{ color:'#888', maxWidth:'400px', fontSize: 14 }}>Your role (<strong>{user?.role}</strong>) does not have access to this page. Ask a superadmin to assign you the relevant duty.</p>
+        <p style={{ color:'#64748b', maxWidth:'400px', fontSize: 14 }}>Your role (<strong>{user?.role}</strong>) does not have access to this page. Ask a superadmin to assign you the relevant duty.</p>
       </div>
     );
   }

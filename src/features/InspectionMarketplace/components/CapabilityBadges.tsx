@@ -18,7 +18,7 @@ export function capabilityScope(cap: ProviderCapability): string {
  */
 export default function CapabilityBadges({ capabilities, taxonomy, max }: { capabilities?: ProviderCapability[]; taxonomy: ServiceTaxonomy | null; max?: number }) {
   const list = (capabilities || []).slice().sort((a, b) => Number(b.status === 'verified') - Number(a.status === 'verified'));
-  if (!list.length) return <p className="text-xs text-slate-500">No services published yet.</p>;
+  if (!list.length) return <p className="text-xs text-[#64748B]">No services published yet.</p>;
   const shown = typeof max === 'number' ? list.slice(0, max) : list;
   return (
     <ul className="flex flex-wrap gap-2" aria-label="Services">
@@ -27,7 +27,7 @@ export default function CapabilityBadges({ capabilities, taxonomy, max }: { capa
         return (
           <li
             key={`${cap.category}-${cap.subcategory || ''}-${i}`}
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium border ${verified ? 'bg-[#E7F7F4] border-[#13B8A6] text-[#0F5D73]' : 'bg-white border-slate-300 text-slate-600'}`}
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium border ${verified ? 'bg-[#E7F7F4] border-[#13B8A6] text-[#12576d]' : 'bg-white border-[#BDE5DE] text-[#64748B]'}`}
             title={`${verified ? 'Verified by KAYAD' : 'Declared by the business, not verified by KAYAD'} · ${capabilityScope(cap)}`}
           >
             {verified ? <Shield size={12} aria-hidden /> : <CircleDashed size={12} aria-hidden />}
@@ -37,7 +37,7 @@ export default function CapabilityBadges({ capabilities, taxonomy, max }: { capa
           </li>
         );
       })}
-      {typeof max === 'number' && list.length > max && <li className="text-xs text-slate-500 self-center">+{list.length - max} more</li>}
+      {typeof max === 'number' && list.length > max && <li className="text-xs text-[#64748B] self-center">+{list.length - max} more</li>}
     </ul>
   );
 }

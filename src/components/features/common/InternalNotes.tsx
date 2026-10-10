@@ -52,18 +52,18 @@ export default function InternalNotes({
             onChange={(e) => setNewNote(e.target.value)}
             placeholder="Add an internal note..."
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-[#BDE5DE] rounded-lg focus:ring-2 focus:ring-[#5AAFA4] focus:border-transparent resize-none"
           />
-          <MessageSquare className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+          <MessageSquare className="absolute right-3 top-3 h-5 w-5 text-[#94A3B8]" />
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-sm text-gray-600">
+          <label className="flex items-center gap-2 text-sm text-[#64748B]">
             <input
               type="checkbox"
               checked={isPrivate}
               onChange={(e) => setIsPrivate(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-[#BDE5DE] text-[#176B87] focus:ring-[#5AAFA4]"
             />
             <Lock className="h-4 w-4" />
             Private note
@@ -72,7 +72,7 @@ export default function InternalNotes({
           <button
             type="submit"
             disabled={!newNote.trim()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-[#176B87] text-white rounded-lg hover:bg-[#12576D] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="h-4 w-4" />
             Add Note
@@ -85,22 +85,22 @@ export default function InternalNotes({
           <div
             key={note.id}
             className={`p-3 rounded-lg ${
-              note.isPrivate ? 'bg-amber-50 border border-amber-200' : 'bg-gray-50'
+              note.isPrivate ? 'bg-[#F3FAF9] border border-[#BDE5DE]' : 'bg-[#F6FAF9]'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium text-sm">{note.author}</span>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-[#64748B]">
                 {note.isPrivate && <Lock className="h-3 w-3" />}
                 <span>{new Date(note.createdAt).toLocaleString()}</span>
               </div>
             </div>
-            <p className="text-sm text-gray-700">{note.content}</p>
+            <p className="text-sm text-[#12576D]">{note.content}</p>
           </div>
         ))}
 
         {notes.length === 0 && (
-          <p className="text-center text-sm text-gray-500 py-4">
+          <p className="text-center text-sm text-[#64748B] py-4">
             No internal notes yet
           </p>
         )}

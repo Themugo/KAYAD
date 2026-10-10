@@ -12,7 +12,7 @@ export default function AdminSettingsReconciliation({ reconcile, setReconcile, s
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={reconcile.autoReconcile}
               onChange={e => setReconcile(p => ({ ...p, autoReconcile: e.target.checked }))}
-              style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
+              style={{ width: 18, height: 18, accentColor: 'var(--brand)' }} />
             <span style={{ fontSize: 13 }}>Enabled</span>
           </label>
         </AdminSettingsField>
@@ -44,7 +44,7 @@ export default function AdminSettingsReconciliation({ reconcile, setReconcile, s
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={reconcile.notifyOnMismatch}
               onChange={e => setReconcile(p => ({ ...p, notifyOnMismatch: e.target.checked }))}
-              style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
+              style={{ width: 18, height: 18, accentColor: 'var(--brand)' }} />
             <span style={{ fontSize: 13 }}>Send email alert</span>
           </label>
         </AdminSettingsField>

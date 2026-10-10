@@ -88,7 +88,7 @@ export const GlobalSearchSection: FC = () => {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="Search by make, model, VIN, or keyword (e.g. Prado TX, Land Cruiser V8)..."
-              className="w-full pl-12 pr-4 py-3.5 bg-[#12576D] dark:bg-[#0A3340] text-white placeholder-slate-300 dark:placeholder-slate-400 rounded-2xl text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-[#13B8A6] border border-white/15 transition-all"
+              className="w-full pl-12 pr-4 py-3.5 bg-[#12576D] dark:bg-[#0A3340] text-white placeholder-[#BDE5DE] dark:placeholder-[#91CEC5] rounded-2xl text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-[#13B8A6] border border-white/15 transition-all"
             />
           </div>
 
@@ -145,7 +145,7 @@ export const GlobalSearchSection: FC = () => {
               className={`p-3.5 rounded-2xl border transition-colors cursor-pointer flex items-center justify-center ${
                 isExpandedFilters
                   ? 'bg-[#13B8A6] text-[#176B87] border-[#13B8A6]'
-                  : 'bg-[#12576D] text-slate-200 border-white/15 hover:bg-white/10'
+                  : 'bg-[#12576D] text-[#DDF4F0] border-white/15 hover:bg-white/10'
               }`}
               title="More Filters"
             >
@@ -154,7 +154,7 @@ export const GlobalSearchSection: FC = () => {
 
             <button
               type="submit"
-              className="flex-1 lg:flex-none px-6 py-3.5 bg-[#13B8A6] hover:bg-[#00B0B5] text-[#176B87] font-mono font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02] cursor-pointer shrink-0"
+              className="flex-1 lg:flex-none px-6 py-3.5 bg-[#13B8A6] hover:bg-[#13B8A6] text-[#176B87] font-mono font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.02] cursor-pointer shrink-0"
             >
               <span>Search Verified Vehicles</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
@@ -168,7 +168,7 @@ export const GlobalSearchSection: FC = () => {
           <div className="pt-3 border-t border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fadeIn">
 
             <div>
-              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#BDE5DE] block mb-1">
                 Location
               </label>
               <select
@@ -184,7 +184,7 @@ export const GlobalSearchSection: FC = () => {
             </div>
 
             <div>
-              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#BDE5DE] block mb-1">
                 Min Year
               </label>
               <select
@@ -202,7 +202,7 @@ export const GlobalSearchSection: FC = () => {
             </div>
 
             <div>
-              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#BDE5DE] block mb-1">
                 Fuel Type
               </label>
               <select
@@ -219,7 +219,7 @@ export const GlobalSearchSection: FC = () => {
             </div>
 
             <div>
-              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#BDE5DE] block mb-1">
                 Condition
               </label>
               <select
@@ -239,12 +239,12 @@ export const GlobalSearchSection: FC = () => {
         )}
 
         {/* Footer info pill inside search card */}
-        <div className="flex items-center justify-between text-[11px] text-slate-300 pt-1 font-sans">
+        <div className="flex items-center justify-between text-[11px] text-[#BDE5DE] pt-1 font-sans">
           <div className="flex items-center gap-1.5 text-[#13B8A6]">
             <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
             <span className="font-mono font-bold">Escrow available on approved listings</span>
           </div>
-          <span className="hidden sm:inline text-slate-400 font-mono">
+          <span className="hidden sm:inline text-[#94A3B8] font-mono">
             Directly linked to KRA & NTSA verification systems
           </span>
         </div>

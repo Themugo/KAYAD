@@ -83,16 +83,16 @@ export default function SearchBar({
           alignItems: 'center',
           width: '100%',
           background: focused ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.02)',
-          border: `1px solid ${focused ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+          border: `1px solid ${focused ? 'var(--brand)' : 'rgba(255,255,255,0.08)'}`,
           borderRadius: 10,
-          boxShadow: focused ? '0 0 0 3px rgba(37, 99, 235,0.10)' : 'none',
+          boxShadow: focused ? '0 0 0 3px rgba(23, 107, 135, 0.10)' : 'none',
           transition: 'all 0.2s ease',
         }}
       >
         <Search
           size={iconSize}
           style={{
-            color: focused || value ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
+            color: focused || value ? 'var(--brand)' : 'rgba(255,255,255,0.4)',
             marginLeft: 12,
             flexShrink: 0,
             transition: 'color 0.2s',
@@ -158,12 +158,12 @@ export default function SearchBar({
             position: 'absolute',
             top: 'calc(100% + 6px)',
             left: 0, right: 0,
-            background: '#0c0c0c',
+            background: '#0a3340',
             border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: 10,
             overflow: 'hidden',
             zIndex: 50,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            boxShadow: '0 8px 32px rgba(10, 51, 64, 0.5)',
             maxHeight: 320, overflowY: 'auto',
           }}
         >
@@ -225,7 +225,7 @@ export default function SearchBar({
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <Search size={12} style={{ color: 'var(--gold)', flexShrink: 0 }} />
+              <Search size={12} style={{ color: 'var(--brand)', flexShrink: 0 }} />
               <span>{brand}</span>
             </button>
           ))}

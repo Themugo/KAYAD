@@ -61,7 +61,7 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
           >
             <Star
               size={interactive ? 20 : 14}
-              className={star <= count ? 'fill-gold-500 text-gold-500' : 'text-cream-300'}
+              className={star <= count ? 'fill-[#176B87] text-[#176B87]' : 'text-[#5AAFA4]'}
             />
           </button>
         ))}
@@ -75,7 +75,7 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <span className="font-serif text-2xl font-bold text-charcoal-900">{avgRating}</span>
+            <span className="font-serif text-2xl font-bold text-[#0A3340]">{avgRating}</span>
             <span className="text-warm-400 text-sm">/ 5</span>
           </div>
           <div>
@@ -88,7 +88,7 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
 
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-charcoal-900 text-white text-sm font-semibold rounded-xl hover:bg-charcoal-800 transition-colors"
+          className="px-4 py-2 bg-[#0A3340] text-white text-sm font-semibold rounded-xl hover:bg-[#12576D] transition-colors"
         >
           Write Review
         </button>
@@ -96,8 +96,8 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
 
       {/* Review form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-cream-50 rounded-xl p-5 border border-cream-200">
-          <h4 className="font-sans text-sm font-semibold text-charcoal-900 mb-3">
+        <form onSubmit={handleSubmit} className="bg-[#F6FAF9] rounded-xl p-5 border border-[#D7E7E4]">
+          <h4 className="font-sans text-sm font-semibold text-[#0A3340] mb-3">
             Rate this dealer
           </h4>
 
@@ -115,7 +115,7 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
             onChange={(e) => setComment(e.target.value)}
             placeholder="Share your experience with this dealer..."
             rows={3}
-            className="w-full px-4 py-3 bg-white border border-cream-200 rounded-xl font-sans text-sm text-charcoal-800 placeholder-warm-400 outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 resize-none"
+            className="w-full px-4 py-3 bg-white border border-[#D7E7E4] rounded-xl font-sans text-sm text-[#0A3340] placeholder-warm-400 outline-none focus:border-[#5AAFA4] focus:ring-1 focus:ring-[#5AAFA4]/30 resize-none"
           />
 
           <div className="flex gap-2 mt-3">
@@ -131,8 +131,8 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
               disabled={submitting || !comment.trim()}
               className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
                 submitting || !comment.trim()
-                  ? 'bg-cream-200 text-warm-400 cursor-not-allowed'
-                  : 'bg-gold-500 text-white hover:bg-gold-600'
+                  ? 'bg-[#DDF4F0] text-warm-400 cursor-not-allowed'
+                  : 'bg-[#13B8A6] text-white hover:bg-[#176B87]'
               }`}
             >
               {submitting ? 'Submitting...' : 'Submit Review'}
@@ -145,16 +145,16 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
       {reviews.length > 0 ? (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <div key={review._id} className="border-b border-cream-200 pb-4 last:border-0">
+            <div key={review._id} className="border-b border-[#D7E7E4] pb-4 last:border-0">
               <div className="flex items-start gap-3">
                 {/* Avatar */}
-                <div className="w-10 h-10 bg-cream-200 rounded-full flex items-center justify-center text-charcoal-800 font-bold text-sm">
+                <div className="w-10 h-10 bg-[#DDF4F0] rounded-full flex items-center justify-center text-[#0A3340] font-bold text-sm">
                   {review.user?.name?.[0]?.toUpperCase() || 'U'}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-sans text-sm font-semibold text-charcoal-900">
+                    <span className="font-sans text-sm font-semibold text-[#0A3340]">
                       {review.user?.name || 'Anonymous'}
                     </span>
                     <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
         </div>
       ) : (
         <div className="text-center py-8">
-          <MessageCircle size={32} className="text-cream-300 mx-auto mb-3" />
+          <MessageCircle size={32} className="text-[#5AAFA4] mx-auto mb-3" />
           <p className="font-sans text-sm text-warm-400">
             No reviews yet. Be the first to share your experience!
           </p>

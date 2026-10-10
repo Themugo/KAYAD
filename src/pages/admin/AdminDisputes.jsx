@@ -8,19 +8,19 @@ import { Shield, Search, BarChart3, Clock, AlertTriangle, CheckCircle, RefreshCw
 import { LoadingPage } from '../../components/features/common/LoadingPage';
 
 const STATUS_META = {
-  open:          { label: 'Open',           badge: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: '🆕' },
-  under_review:  { label: 'Under Review',   badge: 'bg-blue-500/20 text-blue-400 border-blue-500/30',     icon: '🔍' },
-  mediation:     { label: 'Mediation',      badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30', icon: '🤝' },
+  open:          { label: 'Open',           badge: 'bg-[#13B8A6]/20 text-[#13B8A6] border-[#5AAFA4]/30', icon: '🆕' },
+  under_review:  { label: 'Under Review',   badge: 'bg-[#13B8A6]/20 text-[#5AAFA4] border-[#5AAFA4]/30',     icon: '🔍' },
+  mediation:     { label: 'Mediation',      badge: 'bg-[#13B8A6]/20 text-[#5AAFA4] border-[#5AAFA4]/30', icon: '🤝' },
   resolved:      { label: 'Resolved',       badge: 'bg-green-500/20 text-green-400 border-green-500/30',   icon: '✅' },
-  appealed:      { label: 'Appealed',       badge: 'bg-orange-500/20 text-orange-400 border-orange-500/30', icon: '🔄' },
-  closed:        { label: 'Closed',         badge: 'bg-gray-500/20 text-gray-400 border-gray-500/30',     icon: '🔒' },
+  appealed:      { label: 'Appealed',       badge: 'bg-[#13B8A6]/20 text-[#5AAFA4] border-[#5AAFA4]/30', icon: '🔄' },
+  closed:        { label: 'Closed',         badge: 'bg-[#5AAFA4]/20 text-[#94A3B8] border-[#5AAFA4]/30',     icon: '🔒' },
 };
 
 const _PRIORITY_COLORS = {
   urgent: 'text-red-400',
-  high:   'text-orange-400',
-  medium: 'text-yellow-400',
-  low:    'text-gray-400',
+  high:   'text-[#5AAFA4]',
+  medium: 'text-[#13B8A6]',
+  low:    'text-[#94A3B8]',
 };
 
 export default function AdminDisputes() {
@@ -69,12 +69,12 @@ export default function AdminDisputes() {
   if (loading && disputes.length === 0) return <LoadingPage />;
 
   return (
-    <div style={{ padding: '40px 28px', maxWidth: 1400, margin: '0 auto', background: '#0a0a0a', minHeight: '100vh' }}>
+    <div style={{ padding: '40px 28px', maxWidth: 1400, margin: '0 auto', background: '#0a3340', minHeight: '100vh' }}>
       {/* Header */}
       <div style={{ marginBottom: 36, position: 'relative' }}>
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-          background: 'linear-gradient(90deg, transparent, var(--gold), transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--brand), transparent)',
           opacity: 0.5,
         }} />
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -87,7 +87,7 @@ export default function AdminDisputes() {
               <Shield size={24} style={{ color: '#fff' }} />
             </div>
             <div>
-              <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
+              <div style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
                 Admin Hub
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
@@ -100,7 +100,7 @@ export default function AdminDisputes() {
             borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
             color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(23, 107, 135, 0.2)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
           >
             <RefreshCw size={14} /> Refresh
@@ -115,13 +115,13 @@ export default function AdminDisputes() {
       {stats && (
         <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', marginBottom: 32 }}>
           {[
-            { label: 'Total', count: stats.total, icon: <Shield size={16} />, color: '#3B82F6' },
-            { label: 'Open', count: stats.statusBreakdown?.open || 0, icon: <AlertTriangle size={16} />, color: '#F59E0B' },
-            { label: 'Review', count: stats.statusBreakdown?.under_review || 0, icon: <Search size={16} />, color: '#3B82F6' },
-            { label: 'Mediation', count: stats.statusBreakdown?.mediation || 0, icon: <Clock size={16} />, color: '#8B5CF6' },
+            { label: 'Total', count: stats.total, icon: <Shield size={16} />, color: '#176B87' },
+            { label: 'Open', count: stats.statusBreakdown?.open || 0, icon: <AlertTriangle size={16} />, color: '#176b87' },
+            { label: 'Review', count: stats.statusBreakdown?.under_review || 0, icon: <Search size={16} />, color: '#176B87' },
+            { label: 'Mediation', count: stats.statusBreakdown?.mediation || 0, icon: <Clock size={16} />, color: '#5aafa4' },
             { label: 'Resolved', count: stats.statusBreakdown?.resolved || 0, icon: <CheckCircle size={16} />, color: '#22C55E' },
-            { label: 'Appealed', count: stats.statusBreakdown?.appealed || 0, icon: <RefreshCw size={16} />, color: '#F97316' },
-            { label: 'Evidence Files', count: stats.totalEvidence || 0, icon: <BarChart3 size={16} />, color: '#06B6D4' },
+            { label: 'Appealed', count: stats.statusBreakdown?.appealed || 0, icon: <RefreshCw size={16} />, color: '#176b87' },
+            { label: 'Evidence Files', count: stats.totalEvidence || 0, icon: <BarChart3 size={16} />, color: '#13B8A6' },
           ].map(s => (
             <div key={s.label} style={{
               borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
@@ -143,7 +143,7 @@ export default function AdminDisputes() {
             <button key={s} onClick={() => { setFilter(s); setPage(1); }}
               style={{
                 padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                background: filter === s ? 'var(--gold)' : 'transparent',
+                background: filter === s ? 'var(--brand)' : 'transparent',
                 color: filter === s ? '#0A3340' : 'rgba(255,255,255,0.5)',
                 border: 'none', cursor: 'pointer', transition: 'all 0.2s',
               }}
@@ -162,7 +162,7 @@ export default function AdminDisputes() {
               borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
               color: '#fff', fontSize: 13, outline: 'none', transition: 'all 0.2s',
             }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(23, 107, 135, 0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
             onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
           />
         </div>
@@ -184,9 +184,9 @@ export default function AdminDisputes() {
             </thead>
             <tbody>
               {filtered.map(d => {
-                const meta = STATUS_META[d.status] || { label: d.status, badge: 'bg-gray-500/20 text-gray-400', icon: '❓' };
-                const statusColor = d.status === 'open' ? '#F59E0B' : d.status === 'under_review' ? '#3B82F6' : d.status === 'mediation' ? '#8B5CF6' : d.status === 'resolved' ? '#22C55E' : d.status === 'appealed' ? '#F97316' : '#6B7280';
-                const priorityColor = d.priority === 'urgent' ? '#EF4444' : d.priority === 'high' ? '#F97316' : d.priority === 'medium' ? '#F59E0B' : '#6B7280';
+                const meta = STATUS_META[d.status] || { label: d.status, badge: 'bg-[#5AAFA4]/20 text-[#94A3B8]', icon: '❓' };
+                const statusColor = d.status === 'open' ? '#176b87' : d.status === 'under_review' ? '#176B87' : d.status === 'mediation' ? '#5aafa4' : d.status === 'resolved' ? '#22C55E' : d.status === 'appealed' ? '#176b87' : '#64748b';
+                const priorityColor = d.priority === 'urgent' ? '#EF4444' : d.priority === 'high' ? '#176b87' : d.priority === 'medium' ? '#176b87' : '#64748b';
                 return (
                   <tr key={d._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
@@ -213,7 +213,7 @@ export default function AdminDisputes() {
                     <td style={{ padding: 16, color: 'rgba(255,255,255,0.5)', fontSize: 12, textTransform: 'capitalize' }}>{d.category?.replace('_', ' ')}</td>
                     <td style={{ padding: 16, color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{timeAgo(d.createdAt)}</td>
                     <td style={{ padding: 16, textAlign: 'right' }}>
-                      <Link to={`/admin/disputes/${d._id}`} style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600, textDecoration: 'none' }}>View →</Link>
+                      <Link to={`/admin/disputes/${d._id}`} style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}>View →</Link>
                     </td>
                   </tr>
                 );
@@ -223,8 +223,8 @@ export default function AdminDisputes() {
         </div>
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(37, 99, 235,0.1)', border: '1px solid rgba(37, 99, 235,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Shield size={24} style={{ color: 'var(--gold)' }} />
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(23, 107, 135, 0.1)', border: '1px solid rgba(23, 107, 135, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Shield size={24} style={{ color: 'var(--brand)' }} />
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>No disputes match your filter</p>
           </div>
@@ -238,7 +238,7 @@ export default function AdminDisputes() {
             <button key={p} onClick={() => setPage(p)}
               style={{
                 width: 40, height: 40, borderRadius: 10, fontSize: 13, fontWeight: 600,
-                background: page === p ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
+                background: page === p ? 'var(--brand)' : 'rgba(255,255,255,0.04)',
                 color: page === p ? '#0A3340' : 'rgba(255,255,255,0.5)',
                 border: 'none', cursor: 'pointer', transition: 'all 0.2s',
               }}

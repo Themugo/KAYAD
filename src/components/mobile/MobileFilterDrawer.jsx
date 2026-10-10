@@ -357,8 +357,8 @@ function MobileFilterDrawer({
                 { key: 'inspectedOnly', label: '🔍 Inspected Vehicles', desc: 'Vehicles with inspection reports' },
               ].map(filter => (
                 <label key={filter.key} className="mobile-form__checkbox" style={{
-                  background: localFilters[filter.key] ? 'var(--gold-100)' : 'var(--surface)',
-                  borderColor: localFilters[filter.key] ? 'var(--gold-400)' : 'var(--border)',
+                  background: localFilters[filter.key] ? 'var(--brand-100)' : 'var(--surface)',
+                  borderColor: localFilters[filter.key] ? 'var(--brand-400)' : 'var(--border)',
                   borderRadius: 'var(--mobile-radius-md)',
                   padding: 'var(--mobile-space-3) var(--mobile-space-4)',
                 }}>
@@ -371,8 +371,8 @@ function MobileFilterDrawer({
                   <div
                     className="mobile-form__checkbox-box"
                     style={{
-                      background: localFilters[filter.key] ? 'var(--gold-500)' : 'transparent',
-                      borderColor: localFilters[filter.key] ? 'var(--gold-500)' : 'var(--border-light)',
+                      background: localFilters[filter.key] ? 'var(--brand-500)' : 'transparent',
+                      borderColor: localFilters[filter.key] ? 'var(--brand-500)' : 'var(--border-light)',
                     }}
                   >
                     {localFilters[filter.key] && (

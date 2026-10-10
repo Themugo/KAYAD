@@ -75,7 +75,7 @@ export default function DealerAuctionOperations() {
               <div className="dao-case-main">
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}><Icon size={15} /><span style={pill}>{label}</span><span style={smallPill}>{row.settlement_mode === 'escrow' ? 'Escrow' : 'Direct'}</span></div>
-                  <div style={{ fontWeight: 900, color: '#0A2731', fontSize: 17 }}>{row.car?.title || 'Auction vehicle'}</div>
+                  <div style={{ fontWeight: 900, color: '#0a3340', fontSize: 17 }}>{row.car?.title || 'Auction vehicle'}</div>
                   <div style={{ marginTop: 6, color: '#71868C', fontSize: 12 }}>Winner: {row.winner_user_id || '—'} · Outcome {String(row.id).slice(0, 8)}</div>
                 </div>
                 <div><div className="dao-stat-label">Winning amount</div><div className="dao-stat-value">{money(row.winning_amount)}</div></div>
@@ -97,13 +97,13 @@ export default function DealerAuctionOperations() {
 }
 
 const button = {
-  primary: { padding: '10px 14px', border: 0, borderRadius: 8, background: 'var(--gold)', color: '#000', fontWeight: 900, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer' },
-  secondary: { padding: '9px 13px', border: '1px solid rgba(15,23,42,.1)', borderRadius: 8, background: '#fff', color: '#0F172A', fontWeight: 800, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer' },
-  tab: { padding: '12px 13px', background: 'transparent', border: 0, color: '#0F172A', fontSize: 11, fontWeight: 850, cursor: 'pointer', whiteSpace: 'nowrap' },
+  primary: { padding: '10px 14px', border: 0, borderRadius: 8, background: 'var(--brand)', color: '#0a3340', fontWeight: 900, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer' },
+  secondary: { padding: '9px 13px', border: '1px solid rgba(10, 51, 64, .1)', borderRadius: 8, background: '#fff', color: '#0a3340', fontWeight: 800, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer' },
+  tab: { padding: '12px 13px', background: 'transparent', border: 0, color: '#0a3340', fontSize: 11, fontWeight: 850, cursor: 'pointer', whiteSpace: 'nowrap' },
 };
-const card = { background: '#fff', border: '1px solid rgba(15,23,42,.07)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 12px 35px rgba(15,23,42,.05)' };
-const empty = { padding: 70, textAlign: 'center', background: '#fff', border: '1px solid rgba(15,23,42,.07)', borderRadius: 12, color: 'rgba(15,23,42,.5)' };
-const pill = { padding: '4px 8px', borderRadius: 999, background: 'rgba(37,99,235,.08)', color: '#2563EB', fontSize: 10, fontWeight: 900 };
-const smallPill = { padding: '4px 8px', borderRadius: 999, background: 'rgba(15,23,42,.05)', color: '#0F172A', fontSize: 10, fontWeight: 800 };
-const labelStyle = { fontSize: 9, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 800, color: 'rgba(15,23,42,.38)', marginBottom: 4 };
-const valueStyle = { fontSize: 16, fontWeight: 900, fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--gold)' };
+const card = { background: '#fff', border: '1px solid rgba(10, 51, 64, .07)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 12px 35px rgba(10, 51, 64, .05)' };
+const empty = { padding: 70, textAlign: 'center', background: '#fff', border: '1px solid rgba(10, 51, 64, .07)', borderRadius: 12, color: 'rgba(10, 51, 64, .5)' };
+const pill = { padding: '4px 8px', borderRadius: 999, background: 'rgba(23, 107, 135, .08)', color: '#176B87', fontSize: 10, fontWeight: 900 };
+const smallPill = { padding: '4px 8px', borderRadius: 999, background: 'rgba(10, 51, 64, .05)', color: '#0a3340', fontSize: 10, fontWeight: 800 };
+const labelStyle = { fontSize: 9, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 800, color: 'rgba(10, 51, 64, .38)', marginBottom: 4 };
+const valueStyle = { fontSize: 16, fontWeight: 900, fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--brand)' };

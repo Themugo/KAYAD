@@ -3,13 +3,13 @@ import { adminAPI } from '../../api/api';
 
 const SEVERITY_COLORS = {
   critical: { bg: 'rgba(239,68,68,0.1)', color: 'var(--red)' },
-  warning: { bg: 'rgba(37, 99, 235,0.1)', color: 'var(--gold)' },
-  info: { bg: 'rgba(59,130,246,0.08)', color: '#3B82F6' },
+  warning: { bg: 'rgba(23, 107, 135, 0.1)', color: 'var(--brand)' },
+  info: { bg: 'rgba(23, 107, 135, 0.08)', color: '#176B87' },
 };
 
 const ACTION_COLORS = {
   vehicle_created: 'var(--green)',
-  vehicle_edited: 'var(--gold)',
+  vehicle_edited: 'var(--brand)',
   vehicle_deleted: 'var(--red)',
   auction_created: 'var(--blue)',
   auction_bid_placed: 'var(--purple)',
@@ -21,7 +21,7 @@ const ACTION_COLORS = {
   dealer_verification_approved: 'var(--green)',
   user_created: 'var(--blue)',
   role_changed: 'var(--purple)',
-  admin_login: 'var(--gold)',
+  admin_login: 'var(--brand)',
   admin_logout: 'var(--gray)',
   dispute_created: 'var(--red)',
   dispute_resolved: 'var(--green)',
@@ -144,7 +144,7 @@ export default function AdminSecurityLog() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Logs</div>
-                <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--gold)' }}>{statistics.totalLogs}</div>
+                <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--brand)' }}>{statistics.totalLogs}</div>
               </div>
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Top Actions</div>
@@ -272,7 +272,7 @@ export default function AdminSecurityLog() {
                             <div style={{ fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Changes:</div>
                             {log.changes.map((change, i) => (
                               <div key={i} style={{ marginBottom: 2 }}>
-                                <span style={{ color: 'var(--gold)' }}>{change.field}:</span>
+                                <span style={{ color: 'var(--brand)' }}>{change.field}:</span>
                                 <span style={{ color: 'var(--red)', marginLeft: 4 }}>{JSON.stringify(change.oldValue)}</span>
                                 <span style={{ color: 'var(--text-dim)', margin: '0 4px' }}>→</span>
                                 <span style={{ color: 'var(--green)' }}>{JSON.stringify(change.newValue)}</span>

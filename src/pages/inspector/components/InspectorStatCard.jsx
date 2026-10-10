@@ -1,4 +1,4 @@
-export default function InspectorStatCard({ icon, label, value, sub, accent = 'var(--gold)', color }) {
+export default function InspectorStatCard({ icon, label, value, sub, accent = 'var(--brand)', color }) {
   return (
     <div style={{
       background: 'var(--card)', border: '1px solid var(--border)',

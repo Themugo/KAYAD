@@ -17,7 +17,7 @@ interface Props {
 }
 
 const fieldClass =
-  'w-full px-3.5 py-3 bg-slate-50 text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white';
+  'w-full px-3.5 py-3 bg-[#F6FAF9] text-[#0A3340] placeholder-[#91CEC5] border border-[#D7E7E4] rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white';
 
 /** Provider application: authenticated, reviewed by KAYAD, grants no access by itself. */
 export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, onClose, onOpenAuth, onOpenRegister }) => {
@@ -88,7 +88,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
 
   const text = (key: keyof typeof form, label: string, extra: Partial<React.InputHTMLAttributes<HTMLInputElement>> = {}) => (
     <div className="space-y-1.5">
-      <label htmlFor={`${uid}-${key}`} className="text-xs font-bold text-slate-600 block">{label}</label>
+      <label htmlFor={`${uid}-${key}`} className="text-xs font-bold text-[#64748B] block">{label}</label>
       <input id={`${uid}-${key}`} className={fieldClass} value={form[key]} onChange={set(key)} disabled={submitting} {...extra} />
     </div>
   );
@@ -98,7 +98,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
       {!signedIn ? (
         <div className="py-4 text-center space-y-4">
           <BriefcaseBusiness className="w-8 h-8 mx-auto text-[#176B87]" aria-hidden="true" />
-          <p className="text-sm text-slate-600 max-w-md mx-auto">Provider applications are tied to a KAYAD account and reviewed by KAYAD. Applying does not grant access automatically. You will confirm your email first, then return here to apply.</p>
+          <p className="text-sm text-[#64748B] max-w-md mx-auto">Provider applications are tied to a KAYAD account and reviewed by KAYAD. Applying does not grant access automatically. You will confirm your email first, then return here to apply.</p>
           <div className="flex flex-wrap justify-center gap-2">
             <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in to apply</Button>
             {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('provider', APPLY_PATH)}>Create a business account</Button>}
@@ -107,19 +107,19 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
       ) : done ? (
         <div role="status" className="py-4 text-center space-y-3">
           <CheckCircle2 className="w-10 h-10 mx-auto text-[#13B8A6]" aria-hidden="true" />
-          <p className="text-sm text-slate-700">{done}</p>
-          {chosen.length > 0 && !partial && <p className="text-xs text-slate-500">The services you chose are recorded as declared, not verified. KAYAD verifies each one separately.</p>}
-          {partial && <p role="alert" className="text-xs text-amber-800">{partial}</p>}
-          <p className="text-xs text-slate-500">Submitting an application does not grant provider access. KAYAD decides the outcome.</p>
+          <p className="text-sm text-[#12576D]">{done}</p>
+          {chosen.length > 0 && !partial && <p className="text-xs text-[#64748B]">The services you chose are recorded as declared, not verified. KAYAD verifies each one separately.</p>}
+          {partial && <p role="alert" className="text-xs text-[#0A3340]">{partial}</p>}
+          <p className="text-xs text-[#64748B]">Submitting an application does not grant provider access. KAYAD decides the outcome.</p>
           <Button variant="primary" onClick={onClose}>Close</Button>
         </div>
       ) : (
         <form onSubmit={submit} noValidate className="space-y-4" aria-busy={submitting}>
-          <p className="rounded-xl bg-[#F5F8F8] border border-slate-200 p-3.5 text-xs text-slate-600">Share the business details you are comfortable providing. Submitting an application does not grant provider access; KAYAD reviews it and decides.</p>
+          <p className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-3.5 text-xs text-[#64748B]">Share the business details you are comfortable providing. Submitting an application does not grant provider access; KAYAD reviews it and decides.</p>
           <div className="grid sm:grid-cols-2 gap-3">
             {text('companyName', 'Business / trading name', { autoComplete: 'organization' })}
             <div className="space-y-1.5">
-              <label htmlFor={`${uid}-phone`} className="text-xs font-bold text-slate-600 block">Contact phone</label>
+              <label htmlFor={`${uid}-phone`} className="text-xs font-bold text-[#64748B] block">Contact phone</label>
               <input
                 id={`${uid}-phone`} type="tel" inputMode="tel" autoComplete="tel" className={`${fieldClass} ${phoneInvalid ? 'border-rose-400' : ''}`}
                 value={form.phone} onChange={set('phone')} onBlur={() => setTouched(true)} disabled={submitting} aria-required="true"
@@ -132,8 +132,8 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
           </div>
           {text('address', 'Business / workshop address', { autoComplete: 'street-address' })}
           <fieldset className="space-y-2" disabled={submitting}>
-            <legend className="text-xs font-bold text-slate-600">Services you offer</legend>
-            <p className="text-xs text-slate-500">These are your claims. KAYAD verifies each service separately from evidence you provide; until then it is shown as “declared”.</p>
+            <legend className="text-xs font-bold text-[#64748B]">Services you offer</legend>
+            <p className="text-xs text-[#64748B]">These are your claims. KAYAD verifies each service separately from evidence you provide; until then it is shown as “declared”.</p>
             {taxonomyError && <p role="alert" className="text-xs text-rose-700">The service list could not be loaded. You can submit now and add services later.</p>}
             <div className="grid sm:grid-cols-2 gap-1">
               {(taxonomy?.categories || []).map((c) => (
@@ -145,13 +145,13 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
             </div>
           </fieldset>
           <fieldset className="space-y-1" disabled={submitting}>
-            <legend className="text-xs font-bold text-slate-600">How you work</legend>
+            <legend className="text-xs font-bold text-[#64748B]">How you work</legend>
             <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={hasWorkshop} onChange={(e) => setHasWorkshop(e.target.checked)} /> I have a workshop or premises customers can visit</label>
             <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={offersMobile} onChange={(e) => setOffersMobile(e.target.checked)} /> I travel to the vehicle</label>
-            {!hasWorkshop && <p className="text-xs text-slate-500">No premises? That is fine. KAYAD has an evidence-based route for legitimate businesses without customer-facing premises; you will be asked for a registration or tax number and supporting documents.</p>}
+            {!hasWorkshop && <p className="text-xs text-[#64748B]">No premises? That is fine. KAYAD has an evidence-based route for legitimate businesses without customer-facing premises; you will be asked for a registration or tax number and supporting documents.</p>}
           </fieldset>
           {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-slate-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-[#D7E7E4]">
             <Button type="button" variant="secondary" onClick={onClose} disabled={submitting}>Cancel</Button>
             <Button type="submit" variant="primary" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit application'}</Button>
           </div>

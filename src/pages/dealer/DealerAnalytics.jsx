@@ -4,9 +4,9 @@ import { dealerAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo, compactNumber } from '../../utils/helpers';
 
-const BAR_COLORS = ['var(--gold)', 'var(--gold-muted)', 'var(--blue)', 'var(--green)', 'var(--orange)'];
+const BAR_COLORS = ['var(--brand)', 'var(--brand-muted)', 'var(--blue)', 'var(--green)', 'var(--orange)'];
 
-function MiniBar({ value, max, color = 'var(--gold)', label, sub }) {
+function MiniBar({ value, max, color = 'var(--brand)', label, sub }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div style={{ marginBottom: 14 }}>
@@ -83,7 +83,7 @@ export default function DealerAnalytics() {
           {[
             { label: 'Total Listings',    val: summary?.totalCars || 0,                    icon: '🚗', color: 'var(--text)' },
             { label: 'Total Views',       val: compactNumber(analytics?.totalViews || 0),  icon: '👁', color: 'var(--blue)' },
-            { label: 'Total Bids',        val: analytics?.totalBids || 0,                  icon: '⚡', color: 'var(--gold-light)' },
+            { label: 'Total Bids',        val: analytics?.totalBids || 0,                  icon: '⚡', color: 'var(--brand-light)' },
             { label: `Revenue (${period}d)`, val: formatKES(earnings?.total || 0),         icon: '💰', color: 'var(--green)' },
           ].map(s => (
             <div key={s.label} className="stat-box">
@@ -121,7 +121,7 @@ export default function DealerAnalytics() {
                           width: '100%', borderRadius: '3px 3px 0 0',
                           height: `${Math.max(4, pct)}%`,
                           background: i === monthlyEarnings.slice(-12).length - 1
-                            ? 'var(--gold)' : 'var(--gold-muted)',
+                            ? 'var(--brand)' : 'var(--brand-muted)',
                           minHeight: 4, transition: 'height 0.4s ease',
                           cursor: 'default',
                         }} title={`${m.month || m.label || ''}: ${formatKES(val)}`} />
@@ -150,7 +150,7 @@ export default function DealerAnalytics() {
               {[
                 { label: 'Active Listings',  val: summary?.activeCars    || 0, color: 'var(--green)' },
                 { label: 'Live Auctions',    val: summary?.liveAuctions  || 0, color: 'var(--red)' },
-                { label: 'Sold',             val: summary?.soldCars      || 0, color: 'var(--gold)' },
+                { label: 'Sold',             val: summary?.soldCars      || 0, color: 'var(--brand)' },
                 { label: 'Pending Bids',     val: summary?.pendingBids   || 0, color: 'var(--blue)' },
                 { label: 'Draft',            val: summary?.draftCars     || 0, color: 'var(--text-muted)' },
               ].map((s, i) => {
@@ -163,7 +163,7 @@ export default function DealerAnalytics() {
             {summary?.totalCars > 0 && (
               <div style={{ marginTop: 20, background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 14 }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sell-Through Rate</div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--gold-light)', marginTop: 4 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--brand-light)', marginTop: 4 }}>
                   {Math.round(((summary?.soldCars || 0) / summary.totalCars) * 100)}%
                 </div>
               </div>
@@ -189,8 +189,8 @@ export default function DealerAnalytics() {
               <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{
                   width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                  background: i === 0 ? 'var(--gold)' : 'var(--surface)',
-                  border: `1px solid ${i === 0 ? 'var(--gold)' : 'var(--border)'}`,
+                  background: i === 0 ? 'var(--brand)' : 'var(--surface)',
+                  border: `1px solid ${i === 0 ? 'var(--brand)' : 'var(--border)'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 13, fontWeight: 700,
                   color: i === 0 ? '#0A3340' : 'var(--text-muted)',

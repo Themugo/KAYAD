@@ -6,7 +6,7 @@ const fmtKES = (n) => 'KES ' + Number(n || 0).toLocaleString('en-KE');
 
 const TREND_CONFIG = {
   undervalued: { icon: TrendingUp, color: '#22c55e', label: 'Undervalued', desc: 'Priced below market — good buying opportunity' },
-  stable: { icon: Minus, color: '#3b82f6', label: 'Fair Value', desc: 'Priced in line with market' },
+  stable: { icon: Minus, color: '#176B87', label: 'Fair Value', desc: 'Priced in line with market' },
   overvalued: { icon: TrendingDown, color: '#ef4444', label: 'Overvalued', desc: 'Priced above typical market range' },
 };
 
@@ -14,7 +14,7 @@ function ScoreRing({ score, size = 56 }) {
   const r = (size - 8) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (score / 100) * circ;
-  const color = score >= 75 ? '#22c55e' : score >= 50 ? 'var(--gold)' : '#ef4444';
+  const color = score >= 75 ? '#22c55e' : score >= 50 ? 'var(--brand)' : '#ef4444';
   return (
     <svg width={size} height={size} style={{ flexShrink: 0 }}>
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={4} />
@@ -48,7 +48,7 @@ export default function MarketPulse({ carId, carBrand, carYear }) {
   if (loading) return (
     <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', padding: 16, marginBottom: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <BarChart3 size={14} style={{ color: 'var(--gold)' }} />
+        <BarChart3 size={14} style={{ color: 'var(--brand)' }} />
         <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Market Pulse</span>
       </div>
       <div style={{ height: 14, borderRadius: 4, background: 'rgba(255,255,255,0.05)', width: '60%', marginBottom: 8 }} />
@@ -63,12 +63,12 @@ export default function MarketPulse({ carId, carBrand, carYear }) {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, var(--card) 0%, rgba(212,196,168,0.04) 100%)',
-      borderRadius: 'var(--radius-lg)', border: '1px solid rgba(212,196,168,0.15)',
+      background: 'linear-gradient(135deg, var(--card) 0%, rgba(19, 184, 166, 0.04) 100%)',
+      borderRadius: 'var(--radius-lg)', border: '1px solid rgba(19, 184, 166, 0.15)',
       padding: 16, marginBottom: 14,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-        <BarChart3 size={14} style={{ color: 'var(--gold)' }} />
+        <BarChart3 size={14} style={{ color: 'var(--brand)' }} />
         <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Market Pulse</span>
         <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{carBrand} · {carYear}</span>
       </div>
@@ -90,7 +90,7 @@ export default function MarketPulse({ carId, carBrand, carYear }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '10px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-            <Target size={11} style={{ color: 'var(--gold)' }} />
+            <Target size={11} style={{ color: 'var(--brand)' }} />
             <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fair Price</span>
           </div>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{fmtKES(pulse.fairPriceRange.avg)}</div>
@@ -113,7 +113,7 @@ export default function MarketPulse({ carId, carBrand, carYear }) {
       <div style={{ height: 4, borderRadius: 9999, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginBottom: 8 }}>
         <div style={{
           width: `${pulse.demandScore}%`, height: '100%', borderRadius: 9999,
-          background: `linear-gradient(90deg, #3b82f6, ${pulse.demandScore >= 80 ? '#22c55e' : pulse.demandScore >= 50 ? 'var(--gold)' : '#ef4444'})`,
+          background: `linear-gradient(90deg, #176B87, ${pulse.demandScore >= 80 ? '#22c55e' : pulse.demandScore >= 50 ? 'var(--brand)' : '#ef4444'})`,
           transition: 'width 1s ease',
         }} />
       </div>

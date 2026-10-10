@@ -40,19 +40,19 @@ export default function EscrowTimeline({ history }: EscrowTimelineProps) {
             <div className="flex flex-col items-center">
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                ${isDone ? 'bg-emerald-500' : 'bg-cream-200'}
+                ${isDone ? 'bg-emerald-500' : 'bg-[#DDF4F0]'}
               `}>
                 <Icon size={14} className={isDone ? 'text-white' : 'text-warm-400'} />
               </div>
               {idx < STEP_CONFIG.length - 1 && (
-                <div className={`w-0.5 flex-1 min-h-[40px] ${isDone ? 'bg-emerald-500' : 'bg-cream-200'}`} />
+                <div className={`w-0.5 flex-1 min-h-[40px] ${isDone ? 'bg-emerald-500' : 'bg-[#DDF4F0]'}`} />
               )}
             </div>
 
             {/* Event content */}
             <div className={`pb-6 flex-1 ${idx === STEP_CONFIG.length - 1 ? 'pb-0' : ''}`}>
               <div className="flex items-center justify-between">
-                <p className={`font-sans text-sm font-semibold ${isDone ? 'text-charcoal-900' : 'text-warm-400'}`}>
+                <p className={`font-sans text-sm font-semibold ${isDone ? 'text-[#0A3340]' : 'text-warm-400'}`}>
                   {step.label}
                 </p>
                 {event?.timestamp && (
@@ -92,8 +92,8 @@ export function EscrowStepper({ status }: EscrowStepperProps) {
           <div key={label} className="flex-1 flex flex-col items-center">
             <div className={`
               w-10 h-10 rounded-full flex items-center justify-center mb-2
-              ${isDone ? 'bg-emerald-500' : 'bg-cream-200'}
-              ${isCurrent && !isDisputed ? 'ring-2 ring-gold-500 ring-offset-2' : ''}
+              ${isDone ? 'bg-emerald-500' : 'bg-[#DDF4F0]'}
+              ${isCurrent && !isDisputed ? 'ring-2 ring-[#5AAFA4] ring-offset-2' : ''}
             `}>
               {isDone ? (
                 <CheckCircle size={18} className="text-white" />
@@ -101,7 +101,7 @@ export function EscrowStepper({ status }: EscrowStepperProps) {
                 <span className="text-warm-400 text-sm font-bold">{idx + 1}</span>
               )}
             </div>
-            <span className={`font-sans text-xs font-medium text-center ${isDone ? 'text-charcoal-900' : 'text-warm-400'}`}>
+            <span className={`font-sans text-xs font-medium text-center ${isDone ? 'text-[#0A3340]' : 'text-warm-400'}`}>
               {label}
             </span>
           </div>

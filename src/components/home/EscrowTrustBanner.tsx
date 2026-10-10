@@ -72,7 +72,7 @@ export const EscrowTrustBanner: FC = () => {
               6-Step Bank Escrow Workflow
             </h2>
 
-            <p className="text-xs sm:text-sm text-[#66808A] font-sans font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#64748b] font-sans font-medium leading-relaxed">
               Where escrow applies, KAYAD records your payment as held until you inspect and accept the vehicle or a dispute is decided.
             </p>
           </div>
@@ -109,7 +109,7 @@ export const EscrowTrustBanner: FC = () => {
                   {item.title}
                 </h3>
 
-                <p className="text-xs text-[#66808A] font-sans font-normal leading-relaxed">
+                <p className="text-xs text-[#64748b] font-sans font-normal leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -126,7 +126,7 @@ export const EscrowTrustBanner: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">Regulated Custody</p>
-              <p className="text-[10px] text-slate-300 font-sans">Funding verified by KAYAD</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Funding verified by KAYAD</p>
             </div>
           </div>
 
@@ -136,7 +136,7 @@ export const EscrowTrustBanner: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">OTP Signing</p>
-              <p className="text-[10px] text-slate-300 font-sans">M-Pesa Digital Contracts</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">M-Pesa Digital Contracts</p>
             </div>
           </div>
 
@@ -146,7 +146,7 @@ export const EscrowTrustBanner: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">KRA Verified</p>
-              <p className="text-[10px] text-slate-300 font-sans">Clean Logbook Transfer</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Clean Logbook Transfer</p>
             </div>
           </div>
 
@@ -156,7 +156,7 @@ export const EscrowTrustBanner: FC = () => {
             </div>
             <div>
               <p className="text-xs font-mono font-black text-white uppercase">Dispute process</p>
-              <p className="text-[10px] text-slate-300 font-sans">Refunds only if staff approve one</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Refunds only if staff approve one</p>
             </div>
           </div>
 

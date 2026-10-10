@@ -409,7 +409,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 state, unlike both branches it replaces. */}
             {authLoading ? (
               <div className="hidden sm:flex items-center gap-2" aria-hidden="true">
-                <div className="w-28 h-10 rounded-xl bg-slate-100 animate-pulse" />
+                <div className="w-28 h-10 rounded-xl bg-[#EEF7F5] animate-pulse" />
               </div>
             ) : user ? (
               <div className="relative" ref={userRef}>
@@ -417,7 +417,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   type="button"
                   ref={userButtonRef}
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="flex items-center gap-2 p-1.5 pr-2.5 min-h-10 rounded-xl hover:bg-[#F0FAF8] border border-slate-200 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]"
+                  className="flex items-center gap-2 p-1.5 pr-2.5 min-h-10 rounded-xl hover:bg-[#F0FAF8] border border-[#D7E7E4] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]"
                   id="user-profile-menu-button"
                   aria-expanded={showUserDropdown}
                   aria-controls="kayad-account-panel"
@@ -435,20 +435,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                   <div className="hidden sm:flex flex-col text-left">
                     <span className="text-xs font-bold text-[#0A3340] leading-none">{user.name}</span>
-                    <span className="text-[10px] text-slate-500 capitalize">{user.role}</span>
+                    <span className="text-[10px] text-[#64748B] capitalize">{user.role}</span>
                   </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} aria-hidden="true" />
+                  <ChevronDown className={`w-3.5 h-3.5 text-[#94A3B8] transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} aria-hidden="true" />
                 </button>
 
                 {/* Authenticated Dropdown Menu */}
                 {showUserDropdown && (
-                  <div id="kayad-account-panel" className="absolute right-0 mt-2 w-64 max-h-[calc(100svh-96px)] overflow-y-auto bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-fade-in text-xs">
+                  <div id="kayad-account-panel" className="absolute right-0 mt-2 w-64 max-h-[calc(100svh-96px)] overflow-y-auto bg-white rounded-2xl shadow-xl border border-[#D7E7E4] py-2 z-50 animate-fade-in text-xs">
                     {/* User Header Info */}
-                    <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3 bg-[#DDF4F0]/60 rounded-t-2xl">
+                    <div className="px-4 py-3 border-b border-[#D7E7E4] flex items-center gap-3 bg-[#DDF4F0]/60 rounded-t-2xl">
                       <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-[#0A3340]/30" />
                       <div className="overflow-hidden">
-                        <p className="font-bold text-slate-900 truncate">{user.name}</p>
-                        <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+                        <p className="font-bold text-[#0A3340] truncate">{user.name}</p>
+                        <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
                         <span className="inline-block mt-1 px-2 py-0.5 bg-[#0A3340] text-white font-semibold text-[9px] rounded uppercase">
                           {user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Private Seller / Buyer'}
                         </span>
@@ -459,9 +459,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="py-1">
                       <button
                         onClick={() => handleNavSelect('dashboard')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
-                        <LayoutDashboard className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <LayoutDashboard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>Buyer Command Center</span>
                       </button>
 
@@ -469,7 +469,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         onClick={() => handleNavSelect('seller-dashboard')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
                       >
-                        <Car className="w-4 h-4 text-amber-600 stroke-[1.75]" />
+                        <Car className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
                         <span>Private Seller Dashboard</span>
                       </button>
 
@@ -478,7 +478,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-bold text-[#0A3340]"
                       >
                         <div className="flex items-center gap-2.5">
-                          <MessageSquare className="w-4 h-4 text-blue-600 stroke-[1.75]" />
+                          <MessageSquare className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
                           <span>Communication Hub</span>
                         </div>
                         {effectiveUnread > 0 && (
@@ -490,70 +490,70 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => handleNavSelect('seller-platform')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
-                        <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <Car className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>Sell Vehicle</span>
                       </button>
 
                       <button
                         onClick={() => handleNavSelect('saved')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
                         <div className="flex items-center gap-2.5">
-                          <Heart className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                          <Heart className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                           <span>Saved Cars</span>
                         </div>
                         {savedCount > 0 && (
-                          <span className="text-slate-400 font-medium text-[11px]">{savedCount} items</span>
+                          <span className="text-[#94A3B8] font-medium text-[11px]">{savedCount} items</span>
                         )}
                       </button>
 
                       <button
                         onClick={() => handleNavSelect('kayadlive')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
-                        <Sparkles className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <Sparkles className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>KAYAD Live</span>
                       </button>
 
                       <button
                         onClick={() => handleNavSelect('buyer-platform')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
-                        <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <Car className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>My Garage</span>
                       </button>
 
                       <button
                         onClick={() => handleNavSelect('payments')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
-                        <CreditCard className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <CreditCard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>Payment History</span>
                       </button>
 
                       <button
                         onClick={() => handleNavSelect('finance')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
-                        <CreditCard className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <CreditCard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>Vehicle Financing</span>
                       </button>
 
                       <button
                         onClick={() => handleNavSelect('profile')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#0A3340]"
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
-                        <Settings className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <Settings className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>Account Settings</span>
                       </button>
                     </div>
 
                     {/* ROLE-SPECIFIC OPTIONS */}
                     {user.role === 'dealer' && (
-                      <div className="border-t border-slate-100 pt-1.5 mt-1.5 bg-[#DDF4F0]/50 pb-1">
-                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-[#DDF4F0]/50 pb-1">
+                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
                           Dealer Management
                         </div>
                         <button
@@ -581,7 +581,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     )}
 
                     {user.role === 'mechanic' && (
-                      <div className="border-t border-slate-100 pt-1.5 mt-1.5 bg-emerald-50/50 pb-1">
+                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-emerald-50/50 pb-1">
                         <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
                           Pre-Purchase Inspection Portal
                         </div>
@@ -610,29 +610,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                     )}
 
                     {user.role === 'admin' && (
-                      <div className="border-t border-slate-100 pt-1.5 mt-1.5 bg-slate-100/80 pb-1">
-                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-[#EEF7F5]/80 pb-1">
+                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#12576D]">
                           System Administration
                         </div>
                         <button
                           onClick={() => handleNavSelect('admin')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-slate-200 flex items-center gap-2.5 font-bold text-slate-900"
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#DDF4F0] flex items-center gap-2.5 font-bold text-[#0A3340]"
                         >
-                          <Lock className="w-4 h-4 text-slate-700" />
+                          <Lock className="w-4 h-4 text-[#12576D]" />
                           <span>Admin Panel</span>
                         </button>
                         <button
                           onClick={() => handleNavSelect('admin')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-slate-200 flex items-center gap-2.5 font-bold text-slate-900"
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#DDF4F0] flex items-center gap-2.5 font-bold text-[#0A3340]"
                         >
-                          <Sliders className="w-4 h-4 text-slate-700" />
+                          <Sliders className="w-4 h-4 text-[#12576D]" />
                           <span>System Management</span>
                         </button>
                       </div>
                     )}
 
                     {/* Logout Button */}
-                    <div className="border-t border-slate-100 pt-1 mt-1">
+                    <div className="border-t border-[#D7E7E4] pt-1 mt-1">
                       <button
                         onClick={() => {
                           if (onLogout) onLogout();

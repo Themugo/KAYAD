@@ -111,7 +111,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
           <button onClick={exportCSV} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Download size={13} /> CSV
           </button>
-          <Link to="/dealer/add-car" style={{ padding: '10px 20px', background: 'var(--gold)', color: '#000', borderRadius: 10, fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Link to="/dealer/add-car" style={{ padding: '10px 20px', background: 'var(--brand)', color: '#0a3340', borderRadius: 10, fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Plus size={13} /> Add Listing
           </Link>
         </div>
@@ -129,9 +129,9 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
             {STATUS_OPTS.map(s => (
               <button key={s} onClick={() => handleStatusFilter(s)}
                 style={{ padding: '5px 10px', borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: 'pointer',
-                  background: statusFilter === s ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${statusFilter === s ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
-                  color: statusFilter === s ? '#000' : 'rgba(255,255,255,0.5)', }}>
+                  background: statusFilter === s ? 'var(--brand)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${statusFilter === s ? 'var(--brand)' : 'rgba(255,255,255,0.08)'}`,
+                  color: statusFilter === s ? '#0a3340' : 'rgba(255,255,255,0.5)', }}>
                 {s || 'All'}
               </button>
             ))}
@@ -149,11 +149,11 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
         transition: 'max-height 0.3s ease, opacity 0.3s ease',
         marginBottom: selectedIds.length > 0 ? 12 : 0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 10 }}>
-          <span style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600 }}>{selectedIds.length} selected</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'rgba(23, 107, 135, 0.06)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 10 }}>
+          <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600 }}>{selectedIds.length} selected</span>
           <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'active' }).then(() => { toast('Marked active', 'success'); setSelectedIds([]); fetchListings(page, pageSize, search, statusFilter); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, cursor: 'pointer' }}>Mark Active</button>
-          <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'sold' }).then(() => { toast('Marked sold', 'success'); setSelectedIds([]); fetchListings(page, pageSize, search, statusFilter); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#3b82f6', fontSize: 11, cursor: 'pointer' }}>Mark Sold</button>
-            <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'pending' }).then(() => { toast('Marked pending', 'success'); setSelectedIds([]); fetchListings(page, pageSize, search, statusFilter); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', fontSize: 11, cursor: 'pointer' }}>Mark Pending</button>
+          <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'sold' }).then(() => { toast('Marked sold', 'success'); setSelectedIds([]); fetchListings(page, pageSize, search, statusFilter); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(23, 107, 135, 0.1)', border: '1px solid rgba(23, 107, 135, 0.2)', color: '#176B87', fontSize: 11, cursor: 'pointer' }}>Mark Sold</button>
+            <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'pending' }).then(() => { toast('Marked pending', 'success'); setSelectedIds([]); fetchListings(page, pageSize, search, statusFilter); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(19, 184, 166, 0.1)', border: '1px solid rgba(19, 184, 166, 0.2)', color: '#176b87', fontSize: 11, cursor: 'pointer' }}>Mark Pending</button>
             <button onClick={handleBulkDelete} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: 11, cursor: 'pointer' }}>Delete</button>
           <button onClick={() => setSelectedIds([])} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer', marginLeft: 'auto' }}>Clear</button>
         </div>
@@ -169,8 +169,8 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
             const isLiveAuction = car.auctionStatus === 'live';
             const displayStatus = isLiveAuction ? 'live' : (car.status || 'draft');
             return (
-              <div key={car._id} style={{ background: 'var(--card)', border: `1px solid ${isSelected ? 'rgba(37, 99, 235,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'grid', gridTemplateColumns: '20px 64px 1fr 120px 90px auto', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
-                <input type="checkbox" checked={isSelected} onChange={() => setSelectedIds(p => p.includes(car._id) ? p.filter(id => id !== car._id) : [...p, car._id])} style={{ accentColor: 'var(--gold)', width: 16, height: 16, flexShrink: 0 }} />
+              <div key={car._id} style={{ background: 'var(--card)', border: `1px solid ${isSelected ? 'rgba(23, 107, 135, 0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'grid', gridTemplateColumns: '20px 64px 1fr 120px 90px auto', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
+                <input type="checkbox" checked={isSelected} onChange={() => setSelectedIds(p => p.includes(car._id) ? p.filter(id => id !== car._id) : [...p, car._id])} style={{ accentColor: 'var(--brand)', width: 16, height: 16, flexShrink: 0 }} />
                 {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 10, aspectRatio: '4/3', flexShrink: 0 }} />
                   : <div style={{ width: 64, height: 48, borderRadius: 10, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -183,19 +183,19 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', marginRight: 8 }}>
-                  <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price||0).toLocaleString()}</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--brand)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price||0).toLocaleString()}</div>
                 </div>
                 <StatusBadge status={displayStatus} />
                 <div style={{ display: 'flex', gap: 6 }}>
                   <Link to={`/cars/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Preview</Link>
-                  <Link to={`/dealer/edit/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(37, 99, 235,0.1)', border: '1px solid rgba(37, 99, 235,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
+                  <Link to={`/dealer/edit/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(23, 107, 135, 0.1)', border: '1px solid rgba(23, 107, 135, 0.2)', color: 'var(--brand)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
                   <div style={{ position: 'relative', display: 'flex', gap: 2 }}>
                     <button
                       onClick={async () => {
                         try { await dealerAPI.markSold(car._id, { buyerName: prompt('Buyer name:') || 'Unknown', salePrice: Number(prompt('Sale price:') || car.price) }); toast('Marked as sold', 'success'); fetchListings(page, pageSize, search, statusFilter); } catch { toast('Failed', 'error'); }
                       }}
                       title="Mark Sold"
-                      style={{ padding: '6px 8px', borderRadius: 6, background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)', color: '#3b82f6', fontSize: 11, cursor: 'pointer' }}
+                      style={{ padding: '6px 8px', borderRadius: 6, background: 'rgba(23, 107, 135, 0.08)', border: '1px solid rgba(23, 107, 135, 0.15)', color: '#176B87', fontSize: 11, cursor: 'pointer' }}
                     >
                       <span role="img" aria-label="sold">💰</span>
                     </button>
@@ -204,7 +204,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
                         try { await dealerAPI.duplicate(car._id); toast('Duplicated', 'success'); fetchListings(page, pageSize, search, statusFilter); } catch { toast('Failed', 'error'); }
                       }}
                       title="Duplicate"
-                      style={{ padding: '6px 8px', borderRadius: 6, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)', color: '#8b5cf6', fontSize: 11, cursor: 'pointer' }}
+                      style={{ padding: '6px 8px', borderRadius: 6, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)', color: '#5aafa4', fontSize: 11, cursor: 'pointer' }}
                     >
                       <span role="img" aria-label="duplicate">📋</span>
                     </button>
@@ -222,7 +222,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
                       try { await dealerAPI.toggleWholesale(car._id, !car.wholesale); toast(car.wholesale ? 'Removed from trade' : 'Listed for dealer trade', 'success'); fetchListings(page, pageSize, search, statusFilter); } catch { toast('Failed', 'error'); }
                     }}
                     title={car.wholesale ? 'Dealer trade listing' : 'List for dealer trade'}
-                    style={{ padding: '6px 8px', borderRadius: 6, background: car.wholesale ? 'rgba(168,85,247,0.15)' : 'rgba(168,85,247,0.06)', border: `1px solid ${car.wholesale ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)'}`, color: car.wholesale ? '#a855f7' : 'rgba(168,85,247,0.5)', fontSize: 11, cursor: 'pointer' }}
+                    style={{ padding: '6px 8px', borderRadius: 6, background: car.wholesale ? 'rgba(168,85,247,0.15)' : 'rgba(168,85,247,0.06)', border: `1px solid ${car.wholesale ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)'}`, color: car.wholesale ? '#5aafa4' : 'rgba(168,85,247,0.5)', fontSize: 11, cursor: 'pointer' }}
                   >
                     <span role="img" aria-label="trade">{car.wholesale ? '🏪' : '📦'}</span>
                   </button>
@@ -254,9 +254,9 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
             return (
               <button key={p} onClick={() => setPage(p)}
                 style={{ width: 32, height: 32, borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  background: p === page ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${p === page ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
-                  color: p === page ? '#000' : 'rgba(255,255,255,0.5)' }}>
+                  background: p === page ? 'var(--brand)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${p === page ? 'var(--brand)' : 'rgba(255,255,255,0.08)'}`,
+                  color: p === page ? '#0a3340' : 'rgba(255,255,255,0.5)' }}>
                 {p}
               </button>
             );

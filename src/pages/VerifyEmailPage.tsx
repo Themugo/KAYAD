@@ -64,7 +64,7 @@ export default function VerifyEmailPage() {
       description={undefined}
     >
       <div className="kayad-auth-form" aria-live="polite">
-        <div className="flex items-start gap-3">{icon}<p className="m-0 text-sm leading-6 text-slate-600">{message}</p></div>
+        <div className="flex items-start gap-3">{icon}<p className="m-0 text-sm leading-6 text-[#64748B]">{message}</p></div>
         {state === 'success' && (
           <Link to={`${buildAuthPath('login', ctx)}${buildAuthPath('login', ctx).includes('?') ? '&' : '?'}verified=1`} className="kayad-auth-submit text-center">Continue to sign in</Link>
         )}

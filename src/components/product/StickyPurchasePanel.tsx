@@ -74,7 +74,7 @@ export function StickyPurchasePanel({
       <div className="space-y-2">
         <div className="flex items-baseline gap-3">
           {isOnSale && (
-            <span className="text-lg text-gray-500 line-through">
+            <span className="text-lg text-[#64748B] line-through">
               {formatKES(originalPrice)}
             </span>
           )}
@@ -82,7 +82,7 @@ export function StickyPurchasePanel({
             {formatKES(currentPrice)}
           </span>
           {product.unit && (
-            <span className="text-gray-500 text-sm">/ {product.unit}</span>
+            <span className="text-[#64748B] text-sm">/ {product.unit}</span>
           )}
         </div>
         
@@ -94,7 +94,7 @@ export function StickyPurchasePanel({
             </span>
           )}
           {product.is_best_seller && (
-            <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+            <span className="px-3 py-1 bg-[#DDF4F0] text-[#12576D] text-xs font-medium rounded-full">
               Best Seller
             </span>
           )}
@@ -114,7 +114,7 @@ export function StickyPurchasePanel({
       {/* Variant Selection */}
       {variants.length > 0 && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-gray-700">Select Option</p>
+          <p className="text-sm font-medium text-[#12576D]">Select Option</p>
           <div className="flex flex-wrap gap-2">
             {variants.map((variant) => (
               <button
@@ -124,7 +124,7 @@ export function StickyPurchasePanel({
                 className={`px-4 py-2 text-sm border rounded-lg transition-colors ${
                   selectedVariant?.id === variant.id
                     ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-300 hover:border-gray-400'
+                    : 'border-[#BDE5DE] hover:border-[#91CEC5]'
                 } ${!variant.is_active || variant.stock_quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {variant.variant_name}
@@ -146,17 +146,17 @@ export function StickyPurchasePanel({
           <span className="text-sm text-red-600 font-medium">Out of Stock</span>
         )}
         {selectedVariant?.stock_quantity !== undefined && selectedVariant.stock_quantity <= selectedVariant.low_stock_threshold && (
-          <span className="text-xs text-orange-600">Only {selectedVariant.stock_quantity} left</span>
+          <span className="text-xs text-[#176B87]">Only {selectedVariant.stock_quantity} left</span>
         )}
       </div>
 
       {/* Quantity */}
       {inStock && (
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Quantity</span>
-          <div className="flex items-center border border-gray-300 rounded-lg">
+          <span className="text-sm text-[#64748B]">Quantity</span>
+          <div className="flex items-center border border-[#BDE5DE] rounded-lg">
             <button
-              className="px-3 py-2 hover:bg-gray-50 transition-colors"
+              className="px-3 py-2 hover:bg-[#F6FAF9] transition-colors"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               aria-label="Decrease quantity"
             >
@@ -166,7 +166,7 @@ export function StickyPurchasePanel({
               {quantity}
             </span>
             <button
-              className="px-3 py-2 hover:bg-gray-50 transition-colors"
+              className="px-3 py-2 hover:bg-[#F6FAF9] transition-colors"
               onClick={() => setQuantity((q) => q + 1)}
               aria-label="Increase quantity"
             >
@@ -199,14 +199,14 @@ export function StickyPurchasePanel({
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={onAddToWishlist}
-            className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 border border-[#BDE5DE] rounded-lg hover:border-[#91CEC5] transition-colors"
           >
             <Heart className="w-5 h-5" />
             Wishlist
           </button>
           <button
             onClick={handleShare}
-            className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 border border-[#BDE5DE] rounded-lg hover:border-[#91CEC5] transition-colors"
           >
             <Share2 className="w-5 h-5" />
             Share
@@ -215,9 +215,9 @@ export function StickyPurchasePanel({
       </div>
 
       {/* Delivery Info */}
-      <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+      <div className="p-4 bg-[#F6FAF9] rounded-lg space-y-2">
         <p className="text-sm font-medium text-navy-900">Delivery Information</p>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-[#64748B]">
           Free delivery on orders over KES 50,000 within metropolitan zones. Estimated delivery: 3-5 business days.
         </p>
       </div>

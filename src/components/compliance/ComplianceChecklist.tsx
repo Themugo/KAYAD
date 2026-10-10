@@ -66,12 +66,12 @@ const ComplianceCheckItem: React.FC<{
         ? 'bg-emerald-50 border-emerald-200'
         : check.severity === 'required'
           ? 'bg-red-50 border-red-200'
-          : 'bg-slate-50 border-slate-200'
+          : 'bg-[#F6FAF9] border-[#D7E7E4]'
     }`}>
       <button
         onClick={() => editable && onToggle?.(check.id, !check.isComplete)}
         disabled={!editable}
-        className={`mt-0.5 ${check.isComplete ? 'text-emerald-600' : 'text-slate-400'} ${
+        className={`mt-0.5 ${check.isComplete ? 'text-emerald-600' : 'text-[#94A3B8]'} ${
           editable ? 'cursor-pointer hover:text-emerald-600' : 'cursor-default'
         }`}
       >
@@ -84,7 +84,7 @@ const ComplianceCheckItem: React.FC<{
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-sm font-medium ${
-            check.isComplete ? 'text-emerald-800' : 'text-slate-900'
+            check.isComplete ? 'text-emerald-800' : 'text-[#0A3340]'
           }`}>
             {check.label}
           </span>
@@ -94,7 +94,7 @@ const ComplianceCheckItem: React.FC<{
             </Badge>
           )}
           {check.severity === 'recommended' && !check.isComplete && (
-            <Badge variant="warning" size="sm" className="text-[10px] bg-amber-100 text-amber-700 border-amber-200">
+            <Badge variant="warning" size="sm" className="text-[10px] bg-[#DDF4F0] text-[#12576D] border-[#BDE5DE]">
               Recommended
             </Badge>
           )}
@@ -105,13 +105,13 @@ const ComplianceCheckItem: React.FC<{
             </Badge>
           )}
           {check.expiryDate && (
-            <Badge variant="neutral" size="sm" className="text-[10px] bg-slate-100 text-slate-600 border-slate-200">
+            <Badge variant="neutral" size="sm" className="text-[10px] bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]">
               <Clock className="w-3 h-3 mr-0.5" />
               Expires: {new Date(check.expiryDate).toLocaleDateString()}
             </Badge>
           )}
         </div>
-        <p className="text-xs text-slate-500 mt-0.5">{check.description}</p>
+        <p className="text-xs text-[#64748B] mt-0.5">{check.description}</p>
         {check.documentUrl && (
           <a
             href={check.documentUrl}
@@ -147,35 +147,35 @@ const ComplianceCategorySection: React.FC<{
 
   return (
     <div className={`border rounded-xl overflow-hidden ${
-      isComplete ? 'border-emerald-200' : hasIncompleteRequired ? 'border-red-200' : 'border-slate-200'
+      isComplete ? 'border-emerald-200' : hasIncompleteRequired ? 'border-red-200' : 'border-[#D7E7E4]'
     }`}>
       <button
         onClick={onToggle}
         className={`w-full flex items-center gap-4 p-4 text-left transition-colors ${
-          isComplete ? 'bg-emerald-50 hover:bg-emerald-100' : hasIncompleteRequired ? 'bg-red-50 hover:bg-red-100' : 'bg-slate-50 hover:bg-slate-100'
+          isComplete ? 'bg-emerald-50 hover:bg-emerald-100' : hasIncompleteRequired ? 'bg-red-50 hover:bg-red-100' : 'bg-[#F6FAF9] hover:bg-[#EEF7F5]'
         }`}
       >
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-          isComplete ? 'bg-emerald-100 text-emerald-600' : hasIncompleteRequired ? 'bg-red-100 text-red-600' : 'bg-white text-slate-600'
+          isComplete ? 'bg-emerald-100 text-emerald-600' : hasIncompleteRequired ? 'bg-red-100 text-red-600' : 'bg-white text-[#64748B]'
         }`} style={{ color: categoryInfo.color }}>
           {CATEGORY_ICONS[category]}
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-bold text-[#176B87]">{categoryInfo.label}</h4>
-          <p className="text-xs text-slate-500">{categoryInfo.description}</p>
+          <p className="text-xs text-[#64748B]">{categoryInfo.description}</p>
         </div>
         <div className="text-right">
           <div className="text-lg font-black text-[#176B87]">{completedCount}/{totalCount}</div>
           {requiredCount > 0 && (
-            <div className="text-[10px] text-slate-500">
+            <div className="text-[10px] text-[#64748B]">
               {requiredComplete}/{requiredCount} required
             </div>
           )}
         </div>
         {isExpanded ? (
-          <ChevronDown className="w-5 h-5 text-slate-400" />
+          <ChevronDown className="w-5 h-5 text-[#94A3B8]" />
         ) : (
-          <ChevronRight className="w-5 h-5 text-slate-400" />
+          <ChevronRight className="w-5 h-5 text-[#94A3B8]" />
         )}
       </button>
 
@@ -231,7 +231,7 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
   return (
     <div className="space-y-6">
       {/* Progress Header */}
-      <Card className="p-5 bg-gradient-to-r from-[#0A3340] to-[#1a2a4a] text-white border-none">
+      <Card className="p-5 bg-gradient-to-r from-[#0A3340] to-[#12576d] text-white border-none">
         <div className="flex flex-col md:flex-row items-center gap-6">
           {/* Progress Ring */}
           <div className="relative w-24 h-24">
@@ -249,7 +249,7 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
                 cy="48"
                 r="42"
                 fill="none"
-                stroke={summary.requiredCompleted === summary.required ? '#10B981' : '#F59E0B'}
+                stroke={summary.requiredCompleted === summary.required ? '#10B981' : '#176b87'}
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 42}`}
@@ -259,7 +259,7 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-2xl font-black">{summary.percentage}%</span>
-              <span className="text-[10px] text-slate-400">Complete</span>
+              <span className="text-[10px] text-[#94A3B8]">Complete</span>
             </div>
           </div>
 
@@ -268,7 +268,7 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
             <h3 className="text-xl font-black mb-2">
               Compliance Checklist
             </h3>
-            <p className="text-slate-300 text-sm mb-4">
+            <p className="text-[#BDE5DE] text-sm mb-4">
               {canSubmitForReview
                 ? 'All required items are complete. Ready to submit for review.'
                 : `${summary.required - summary.requiredCompleted} required items must be completed before submitting.`
@@ -278,13 +278,13 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${summary.requiredCompleted === summary.required ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                <span className="text-sm text-slate-300">
+                <span className="text-sm text-[#BDE5DE]">
                   {summary.requiredCompleted}/{summary.required} Required
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-amber-400" />
-                <span className="text-sm text-slate-300">
+                <div className="w-3 h-3 rounded-full bg-[#13B8A6]" />
+                <span className="text-sm text-[#BDE5DE]">
                   {summary.recommendedCompleted}/{summary.recommended} Recommended
                 </span>
               </div>
@@ -299,7 +299,7 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
             className={`px-6 font-bold ${
               canSubmitForReview
                 ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                : 'bg-slate-400 text-slate-600 cursor-not-allowed'
+                : 'bg-[#91CEC5] text-[#64748B] cursor-not-allowed'
             }`}
           >
             {canSubmitForReview ? (
@@ -318,11 +318,11 @@ export const ComplianceChecklist: React.FC<ComplianceChecklistProps> = ({
 
         {/* Not Ready Notice */}
         {!canSubmitForReview && (
-          <div className="mt-4 p-3 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="mt-4 p-3 bg-[#13B8A6]/20 border border-[#5AAFA4]/30 rounded-xl flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-[#13B8A6] flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-amber-400">Required Items Incomplete</p>
-              <p className="text-xs text-slate-300 mt-1">
+              <p className="text-sm font-bold text-[#13B8A6]">Required Items Incomplete</p>
+              <p className="text-xs text-[#BDE5DE] mt-1">
                 Please complete all required compliance items before submitting your auction for review.
               </p>
             </div>

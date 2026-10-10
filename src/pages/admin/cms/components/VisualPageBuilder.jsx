@@ -15,8 +15,8 @@ const colors = {
   beige: '#EEF7F5',
   white: '#FFFFFF',
   emerald: '#10B981',
-  terracotta: '#C77B58',
-  softBlue: '#60A5FA',
+  terracotta: '#5aafa4',
+  softBlue: '#5AAFA4',
 };
 
 // Block Types with Icons and Default Content
@@ -89,37 +89,37 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
           <div className="bg-gradient-to-r from-[#0A3340] to-[#2a3d6b] rounded-lg p-8 text-white">
             <h1 className="text-3xl font-bold mb-2">{block.props.title}</h1>
             <p className="text-lg opacity-90 mb-4">{block.props.subtitle}</p>
-            <button className="px-6 py-2 bg-[#C77B58] rounded-lg font-medium hover:bg-[#b06a48] transition-colors">
+            <button className="px-6 py-2 bg-[#5aafa4] rounded-lg font-medium hover:bg-[#5aafa4] transition-colors">
               {block.props.buttonText}
             </button>
           </div>
         );
       case 'heading': {
         const HeadingTag = block.props.level || 'h2';
-        return <HeadingTag className="text-2xl font-bold text-slate-800">{block.props.text}</HeadingTag>;
+        return <HeadingTag className="text-2xl font-bold text-[#0A3340]">{block.props.text}</HeadingTag>;
       }
       case 'paragraph':
-        return <p className="text-slate-600 leading-relaxed">{block.props.text}</p>;
+        return <p className="text-[#64748B] leading-relaxed">{block.props.text}</p>;
       case 'image':
         return (
           <div className="rounded-lg overflow-hidden">
             {block.props.src ? (
               <img src={block.props.src} alt={block.props.alt} className="w-full h-auto" />
             ) : (
-              <div className="bg-slate-100 h-48 flex items-center justify-center">
-                <ImageIcon className="text-slate-400" size={48} />
+              <div className="bg-[#EEF7F5] h-48 flex items-center justify-center">
+                <ImageIcon className="text-[#94A3B8]" size={48} />
               </div>
             )}
             {block.props.caption && (
-              <p className="text-sm text-slate-500 mt-2 text-center">{block.props.caption}</p>
+              <p className="text-sm text-[#64748B] mt-2 text-center">{block.props.caption}</p>
             )}
           </div>
         );
       case 'button': {
         const buttonStyles = {
           primary: 'bg-[#0A3340] text-white hover:bg-[#12576D]',
-          secondary: 'bg-white text-[#0A3340] border border-[#0A3340] hover:bg-slate-50',
-          accent: 'bg-[#C77B58] text-white hover:bg-[#b06a48]',
+          secondary: 'bg-white text-[#0A3340] border border-[#0A3340] hover:bg-[#F6FAF9]',
+          accent: 'bg-[#5aafa4] text-white hover:bg-[#5aafa4]',
         };
         return (
           <button className={`px-6 py-3 rounded-lg font-medium transition-colors ${buttonStyles[block.props.style] || buttonStyles.primary}`}>
@@ -129,17 +129,17 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
       }
       case 'vehicleCarousel':
         return (
-          <div className="bg-slate-50 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-slate-800 mb-4">{block.props.title}</h3>
+          <div className="bg-[#F6FAF9] rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-[#0A3340] mb-4">{block.props.title}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {(liveVehicles || []).map((vehicle) => (
                 <div key={vehicle.id} className="bg-white rounded-lg p-4 shadow-sm">
                   <img src={vehicle.image || vehicle.images?.[0] || '/placeholder.jpg'} alt={vehicle.title || `${vehicle.make || ''} ${vehicle.model || ''}`} className="w-full h-24 object-cover rounded mb-2" />
-                  <div className="text-sm font-medium text-slate-700">{vehicle.title || `${vehicle.make || ''} ${vehicle.model || ''}`.trim() || 'Vehicle'}</div>
-                  <div className="text-xs text-slate-500">{vehicle.price ? `KSh ${Number(vehicle.price).toLocaleString()}` : 'Price on request'}</div>
+                  <div className="text-sm font-medium text-[#12576D]">{vehicle.title || `${vehicle.make || ''} ${vehicle.model || ''}`.trim() || 'Vehicle'}</div>
+                  <div className="text-xs text-[#64748B]">{vehicle.price ? `KSh ${Number(vehicle.price).toLocaleString()}` : 'Price on request'}</div>
                 </div>
               ))}
-              {(!liveVehicles || liveVehicles.length === 0) && <div className="col-span-full text-sm text-slate-400">No live vehicles match this block yet.</div>}
+              {(!liveVehicles || liveVehicles.length === 0) && <div className="col-span-full text-sm text-[#94A3B8]">No live vehicles match this block yet.</div>}
             </div>
           </div>
         );
@@ -150,7 +150,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
               {(block.props.stats || []).map((stat, i) => (
                 <div key={i} className="text-center">
                   <div className="text-3xl font-bold text-[#0A3340]">{stat.value}</div>
-                  <div className="text-sm text-slate-500">{stat.label}</div>
+                  <div className="text-sm text-[#64748B]">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -160,9 +160,9 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
       case 'inspectionBanner':
       case 'financeBanner': {
         const bgColors = {
-          auctionBanner: 'from-purple-600 to-purple-800',
+          auctionBanner: 'from-[#176B87] to-[#0E4655]',
           inspectionBanner: 'from-emerald-600 to-emerald-800',
-          financeBanner: 'from-blue-600 to-blue-800',
+          financeBanner: 'from-[#176B87] to-[#0E4655]',
         };
         return (
           <div className={`bg-gradient-to-r ${bgColors[block.type]} rounded-lg p-6 text-white`}>
@@ -176,13 +176,13 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
       }
       case 'container':
         return (
-          <div className="rounded-lg border-2 border-dashed border-slate-300 p-8 text-center text-slate-400">
+          <div className="rounded-lg border-2 border-dashed border-[#BDE5DE] p-8 text-center text-[#94A3B8]">
             Container Block
           </div>
         );
       default:
         return (
-          <div className="bg-slate-50 rounded-lg p-4 text-slate-500 text-center">
+          <div className="bg-[#F6FAF9] rounded-lg p-4 text-[#64748B] text-center">
             {block.type} Block
           </div>
         );
@@ -190,7 +190,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
   };
 
   return (
-    <div onClick={onSelect} className={`group relative rounded-lg border-2 transition-all cursor-pointer ${isSelected ? 'border-[#C77B58] ring-2 ring-[#C77B58]/20' : isEditing ? 'border-[#0A3340] ring-2 ring-[#0A3340]/20' : 'border-transparent hover:border-slate-200'}`}>
+    <div onClick={onSelect} className={`group relative rounded-lg border-2 transition-all cursor-pointer ${isSelected ? 'border-[#5aafa4] ring-2 ring-[#5aafa4]/20' : isEditing ? 'border-[#0A3340] ring-2 ring-[#0A3340]/20' : 'border-transparent hover:border-[#D7E7E4]'}`}>
       {/* Block Controls */}
       {isEditing && (
         <div className="absolute -top-12 left-0 right-0 flex items-center justify-between bg-[#0A3340] rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -351,17 +351,17 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
   return (
     <div className="flex h-screen bg-[#EEF7F5]">
       {/* Block Library Panel */}
-      <aside className="w-72 bg-white border-r border-slate-200 flex flex-col">
-        <div className="p-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-800 mb-3">Block Library</h2>
+      <aside className="w-72 bg-white border-r border-[#D7E7E4] flex flex-col">
+        <div className="p-4 border-b border-[#D7E7E4]">
+          <h2 className="text-lg font-semibold text-[#0A3340] mb-3">Block Library</h2>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={16} />
             <input
               type="text"
               placeholder="Search blocks..."
               value={searchBlocks}
               onChange={(e) => setSearchBlocks(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
+              className="w-full pl-9 pr-3 py-2 rounded-lg border border-[#D7E7E4] text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
             />
           </div>
         </div>
@@ -369,7 +369,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {filteredBlocks.map((category) => (
             <div key={category.category}>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-2">
                 {category.category}
               </h3>
               <div className="space-y-2">
@@ -379,13 +379,13 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
                     <button
                       key={block.type}
                       onClick={() => addBlock(block.type)}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-[#D7E7E4] hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-left"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                        <Icon size={16} className="text-slate-600" />
+                      <div className="w-8 h-8 rounded-lg bg-[#EEF7F5] flex items-center justify-center">
+                        <Icon size={16} className="text-[#64748B]" />
                       </div>
-                      <span className="text-sm font-medium text-slate-700">{block.label}</span>
-                      <Plus size={14} className="ml-auto text-slate-400" />
+                      <span className="text-sm font-medium text-[#12576D]">{block.label}</span>
+                      <Plus size={14} className="ml-auto text-[#94A3B8]" />
                     </button>
                   );
                 })}
@@ -398,12 +398,12 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
       {/* Canvas */}
       <main className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+        <div className="bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               onClick={undo}
               disabled={historyIndex <= 0}
-              className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-[#EEF7F5] disabled:opacity-30 disabled:cursor-not-allowed"
               title="Undo"
             >
               <Undo size={18} />
@@ -411,22 +411,22 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
             <button
               onClick={redo}
               disabled={historyIndex >= history.length - 1}
-              className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-[#EEF7F5] disabled:opacity-30 disabled:cursor-not-allowed"
               title="Redo"
             >
               <Redo size={18} />
             </button>
-            <div className="w-px h-6 bg-slate-200 mx-2" />
+            <div className="w-px h-6 bg-[#DDF4F0] mx-2" />
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isEditing ? 'bg-[#0A3340] text-white' : 'bg-slate-100 text-slate-600'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isEditing ? 'bg-[#0A3340] text-white' : 'bg-[#EEF7F5] text-[#64748B]'}`}
             >
               {isEditing ? 'Editing' : 'Viewing'}
             </button>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-[#EEF7F5] rounded-lg p-1">
               <button
                 onClick={() => setPreviewMode('desktop')}
                 className={`p-2 rounded ${previewMode === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
@@ -452,7 +452,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-2 text-sm font-medium">
+            <button className="px-4 py-2 rounded-lg border border-[#D7E7E4] hover:bg-[#F6FAF9] flex items-center gap-2 text-sm font-medium">
               <Eye size={16} />
               Preview
             </button>
@@ -470,7 +470,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
           <div className={`mx-auto bg-white shadow-xl rounded-lg overflow-hidden transition-all duration-300 ${previewMode === 'desktop' ? 'w-full max-w-6xl' : previewMode === 'tablet' ? 'w-[768px]' : 'w-[375px]'}`}>
             <div className="min-h-[600px] p-6">
               {blocks.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-lg">
+                <div className="h-full flex flex-col items-center justify-center text-[#94A3B8] border-2 border-dashed border-[#D7E7E4] rounded-lg">
                   <Layout size={48} className="mb-4" />
                   <p className="text-lg font-medium mb-2">Start Building Your Page</p>
                   <p className="text-sm">Click on blocks from the left panel to add them</p>
@@ -502,21 +502,21 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
 
       {/* Properties Panel */}
       {selectedBlock !== null && blocks[selectedBlock] && (
-        <aside className="w-80 bg-white border-l border-slate-200 flex flex-col">
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-800">Block Properties</h2>
+        <aside className="w-80 bg-white border-l border-[#D7E7E4] flex flex-col">
+          <div className="p-4 border-b border-[#D7E7E4] flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[#0A3340]">Block Properties</h2>
             <button
               onClick={() => setSelectedBlock(null)}
-              className="p-1 rounded hover:bg-slate-100"
+              className="p-1 rounded hover:bg-[#EEF7F5]"
             >
-              <Trash2 size={16} className="text-slate-400" />
+              <Trash2 size={16} className="text-[#94A3B8]" />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {Object.entries(blocks[selectedBlock].props).map(([key, value]) => (
               <div key={key}>
-                <label className="block text-sm font-medium text-slate-600 mb-1 capitalize">
+                <label className="block text-sm font-medium text-[#64748B] mb-1 capitalize">
                   {key.replace(/([A-Z])/g, ' $1').trim()}
                 </label>
                 {typeof value === 'string' ? (
@@ -524,7 +524,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
                     <textarea
                       value={value}
                       onChange={(e) => updateBlock(selectedBlock, { [key]: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono"
+                      className="w-full px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm font-mono"
                       rows={4}
                     />
                   ) : (
@@ -532,7 +532,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
                       type="text"
                       value={value}
                       onChange={(e) => updateBlock(selectedBlock, { [key]: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
+                      className="w-full px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                     />
                   )
                 ) : typeof value === 'boolean' ? (
@@ -541,19 +541,19 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
                       type="checkbox"
                       checked={value}
                       onChange={(e) => updateBlock(selectedBlock, { [key]: e.target.checked })}
-                      className="rounded border-slate-300"
+                      className="rounded border-[#BDE5DE]"
                     />
-                    <span className="text-sm text-slate-500">{value ? 'Enabled' : 'Disabled'}</span>
+                    <span className="text-sm text-[#64748B]">{value ? 'Enabled' : 'Disabled'}</span>
                   </label>
                 ) : typeof value === 'number' ? (
                   <input
                     type="number"
                     value={value}
                     onChange={(e) => updateBlock(selectedBlock, { [key]: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-[#D7E7E4] text-sm focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none"
                   />
                 ) : (
-                  <pre className="text-xs bg-slate-50 p-2 rounded overflow-auto">
+                  <pre className="text-xs bg-[#F6FAF9] p-2 rounded overflow-auto">
                     {JSON.stringify(value, null, 2)}
                   </pre>
                 )}

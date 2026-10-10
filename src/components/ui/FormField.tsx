@@ -18,7 +18,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
       <div className={`form-field ${className}`}>
         <label
           htmlFor={inputId}
-          className="block font-sans text-sm font-semibold text-charcoal-800 mb-1.5"
+          className="block font-sans text-sm font-semibold text-[#0A3340] mb-1.5"
         >
           {label}
           {required && (
@@ -46,14 +46,14 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
               hint ? hintId : null,
             ].filter(Boolean).join(' ') || undefined
           }
-          className={`w-full px-4 py-3 bg-white border rounded-xl font-sans text-sm text-charcoal-900
+          className={`w-full px-4 py-3 bg-white border rounded-xl font-sans text-sm text-[#0A3340]
             placeholder:text-warm-300 transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500
+            focus:outline-none focus:ring-2 focus:ring-[#5AAFA4]/30 focus:border-[#5AAFA4]
             ${error && showError
               ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-              : 'border-cream-300 hover:border-cream-400'
+              : 'border-[#BDE5DE] hover:border-[#91CEC5]'
             }
-            disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-cream-50`}
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#F6FAF9]`}
           {...props}
         />
 
@@ -95,7 +95,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       <div className={`form-field ${className}`}>
         <label
           htmlFor={inputId}
-          className="block font-sans text-sm font-semibold text-charcoal-800 mb-1.5"
+          className="block font-sans text-sm font-semibold text-[#0A3340] mb-1.5"
         >
           {label}
           {required && (
@@ -123,14 +123,14 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
               hint ? hintId : null,
             ].filter(Boolean).join(' ') || undefined
           }
-          className={`w-full px-4 py-3 bg-white border rounded-xl font-sans text-sm text-charcoal-900
+          className={`w-full px-4 py-3 bg-white border rounded-xl font-sans text-sm text-[#0A3340]
             placeholder:text-warm-300 transition-colors duration-200 resize-none
-            focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500
+            focus:outline-none focus:ring-2 focus:ring-[#5AAFA4]/30 focus:border-[#5AAFA4]
             ${error && showError
               ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-              : 'border-cream-300 hover:border-cream-400'
+              : 'border-[#BDE5DE] hover:border-[#91CEC5]'
             }
-            disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-cream-50`}
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#F6FAF9]`}
           {...props}
         />
 
@@ -174,7 +174,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
       <div className={`form-field ${className}`}>
         <label
           htmlFor={inputId}
-          className="block font-sans text-sm font-semibold text-charcoal-800 mb-1.5"
+          className="block font-sans text-sm font-semibold text-[#0A3340] mb-1.5"
         >
           {label}
           {required && (
@@ -203,14 +203,14 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
                 hint ? hintId : null,
               ].filter(Boolean).join(' ') || undefined
             }
-            className={`w-full px-4 py-3 bg-white border rounded-xl font-sans text-sm text-charcoal-900
+            className={`w-full px-4 py-3 bg-white border rounded-xl font-sans text-sm text-[#0A3340]
               appearance-none cursor-pointer transition-colors duration-200
-              focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500
+              focus:outline-none focus:ring-2 focus:ring-[#5AAFA4]/30 focus:border-[#5AAFA4]
               ${error && showError
                 ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-                : 'border-cream-300 hover:border-cream-400'
+                : 'border-[#BDE5DE] hover:border-[#91CEC5]'
               }
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-cream-50`}
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#F6FAF9]`}
             {...props}
           >
             {placeholder && (

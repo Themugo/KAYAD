@@ -26,12 +26,12 @@ export const submitContact = async (req, res) => {
       category: "transactional",
       recipient: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM,
       subject: `Contact form: ${escapeHTML(subject)}`,
-      html: `<div style="font-family:sans-serif;background:#F8FAFC;color:#0F172A;padding:24px;max-width:500px;border:1px solid #E2E8F0;">
-        <h2 style="color:#2563EB;">New Contact Form Submission</h2>
+      html: `<div style="font-family:sans-serif;background:#F6FAF9;color:#1E293B;padding:24px;max-width:500px;border:1px solid #D7E7E4;">
+        <h2 style="color:#176B87;">New Contact Form Submission</h2>
         <p><strong>Name:</strong> ${escapeHTML(name)}</p>
         <p><strong>Email:</strong> ${escapeHTML(email)}</p>
         <p><strong>Subject:</strong> ${escapeHTML(subject)}</p>
-        <hr style="border-color:#252E3D;" />
+        <hr style="border-color:#D7E7E4;" />
         <p>${escapeHTML(message)}</p>
       </div>`,
       text: `New contact form submission from ${name} (${email}): ${subject} - ${message}`,

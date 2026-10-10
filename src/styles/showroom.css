@@ -41,7 +41,7 @@
 /* ---- Sticky command bar ---- */
 .command-bar {
   position: sticky; top: 0; z-index: 30;
-  background: rgba(5,5,5,0.85);
+  background: rgba(10, 51, 64, 0.85);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-top: 1px solid rgba(255,255,255,0.04);
@@ -147,7 +147,7 @@
 }
 .filter-btn-mobile-active {
   background: var(--color-brand-subtle);
-  border: 1px solid rgba(37, 99, 235,0.3);
+  border: 1px solid rgba(23, 107, 135, 0.3);
   color: var(--color-brand-light);
 }
 .filter-btn-mobile-inactive {
@@ -183,7 +183,7 @@
 }
 .filter-chip-remove {
   background: none; border: none; padding: 0;
-  color: rgba(37, 99, 235,0.7); cursor: pointer;
+  color: rgba(23, 107, 135, 0.7); cursor: pointer;
   display: flex; line-height: 1;
 }
 
@@ -213,7 +213,7 @@
 }
 .btn-saved-active {
   background: var(--color-brand-subtle);
-  border: 1px solid rgba(37, 99, 235,0.2);
+  border: 1px solid rgba(23, 107, 135, 0.2);
   color: var(--color-brand-light);
 }
 .btn-clear {
@@ -231,7 +231,7 @@
   background: var(--color-bg-elevated);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  box-shadow: 0 12px 40px rgba(10, 51, 64, 0.6);
   overflow: hidden; z-index: 40;
 }
 .saved-menu-item {
@@ -289,14 +289,14 @@
 /* Mobile filter overlay */
 .mobile-filter-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6); z-index: 99;
+  background: rgba(10, 51, 64, 0.6); z-index: 99;
 }
 .mobile-filter-drawer {
   position: fixed; top: 0; left: 0; bottom: 0;
   width: 85%; max-width: 320px;
   background: var(--bg-base); z-index: 100;
   overflow-y: auto;
-  box-shadow: 4px 0 40px rgba(0,0,0,0.6);
+  box-shadow: 4px 0 40px rgba(10, 51, 64, 0.6);
   animation: slideInLeft 0.25s ease;
 }
 
@@ -328,8 +328,8 @@
 /* Empty state icon box */
 .empty-state-icon-box {
   width: 72px; height: 72px; border-radius: 16px;
-  background: rgba(37, 99, 235,0.1);
-  border: 1px solid rgba(37, 99, 235,0.2);
+  background: rgba(23, 107, 135, 0.1);
+  border: 1px solid rgba(23, 107, 135, 0.2);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 20px;
 }

@@ -28,8 +28,8 @@ export default function DealerVerificationProgress({ user }) {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(249,115,22,0.08), rgba(212,196,168,0.04))',
-      border: '1px solid rgba(249,115,22,0.2)',
+      background: 'linear-gradient(135deg, rgba(19, 184, 166, 0.08), rgba(19, 184, 166, 0.04))',
+      border: '1px solid rgba(19, 184, 166, 0.2)',
       borderRadius: 12, padding: '16px 20px', marginBottom: 20,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -50,8 +50,8 @@ export default function DealerVerificationProgress({ user }) {
             <div key={step.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
               <div style={{
                 width: 32, height: 32, borderRadius: '50%',
-                background: completed ? '#22c55e' : active ? 'rgba(249,115,22,0.2)' : 'rgba(255,255,255,0.05)',
-                border: `2px solid ${completed ? '#22c55e' : active ? '#f97316' : 'rgba(255,255,255,0.1)'}`,
+                background: completed ? '#22c55e' : active ? 'rgba(19, 184, 166, 0.2)' : 'rgba(255,255,255,0.05)',
+                border: `2px solid ${completed ? '#22c55e' : active ? '#176b87' : 'rgba(255,255,255,0.1)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 12, marginBottom: 4,
               }}>
@@ -59,7 +59,7 @@ export default function DealerVerificationProgress({ user }) {
               </div>
               <span style={{
                 fontSize: 9, fontWeight: 600, textAlign: 'center', maxWidth: 80,
-                color: completed ? '#22c55e' : active ? '#f97316' : 'rgba(255,255,255,0.35)',
+                color: completed ? '#22c55e' : active ? '#176b87' : 'rgba(255,255,255,0.35)',
               }}>
                 {step.label}
               </span>
@@ -87,7 +87,7 @@ export default function DealerVerificationProgress({ user }) {
           {(!verification || !verification.documents || verification.documents.length === 0) && (
             <Link to="/dealer/onboarding" style={{
               padding: '7px 16px', borderRadius: 8,
-              background: 'var(--gold)', color: '#000',
+              background: 'var(--brand)', color: '#0a3340',
               fontSize: 11, fontWeight: 700, textDecoration: 'none',
             }}>
               Submit Documents

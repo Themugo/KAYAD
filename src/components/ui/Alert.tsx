@@ -26,10 +26,10 @@ const styles: Record<AlertVariant, { bg: string; border: string; icon: string; t
     text: 'text-emerald-800',
   },
   warning: {
-    bg: 'bg-amber-50',
-    border: 'border-amber-200',
-    icon: 'text-amber-600',
-    text: 'text-amber-800',
+    bg: 'bg-[#F3FAF9]',
+    border: 'border-[#BDE5DE]',
+    icon: 'text-[#176B87]',
+    text: 'text-[#0A3340]',
   },
   error: {
     bg: 'bg-red-50',
@@ -38,10 +38,10 @@ const styles: Record<AlertVariant, { bg: string; border: string; icon: string; t
     text: 'text-red-800',
   },
   info: {
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    icon: 'text-blue-600',
-    text: 'text-blue-800',
+    bg: 'bg-[#F3FAF9]',
+    border: 'border-[#D7E7E4]',
+    icon: 'text-[#176B87]',
+    text: 'text-[#0E4655]',
   },
 };
 
@@ -82,7 +82,7 @@ export function Alert({
       {dismissible && (
         <button
           onClick={onDismiss}
-          className={`flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors ${style.icon}`}
+          className={`flex-shrink-0 p-1 rounded hover:bg-[#0A3340]/5 transition-colors ${style.icon}`}
           aria-label="Dismiss alert"
         >
           <X size={16} />

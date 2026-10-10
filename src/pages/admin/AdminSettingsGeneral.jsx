@@ -49,7 +49,7 @@ export default function AdminSettingsGeneral({ config, setConfig, saveConfig, sa
           <label key={f.key} style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'8px 0' }}>
             <input type="checkbox" checked={config[f.key]}
               onChange={e => setConfig(p => ({...p, [f.key]: e.target.checked }))}
-              style={{ width:18, height:18, accentColor:'var(--gold)' }} />
+              style={{ width:18, height:18, accentColor:'var(--brand)' }} />
             <span style={{ fontSize:14 }}>{f.label}</span>
           </label>
         ))}

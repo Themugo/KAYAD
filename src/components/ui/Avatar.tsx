@@ -31,8 +31,8 @@ const statusSizes = {
 
 const statusColors = {
   online: 'bg-emerald-500',
-  offline: 'bg-gray-400',
-  away: 'bg-amber-500',
+  offline: 'bg-[#91CEC5]',
+  away: 'bg-[#13B8A6]',
   busy: 'bg-red-500',
 };
 
@@ -48,19 +48,19 @@ function getInitials(name: string): string {
 function getColorFromName(name: string): string {
   const colors = [
     'bg-rose-500',
-    'bg-pink-500',
-    'bg-fuchsia-500',
-    'bg-purple-500',
-    'bg-violet-500',
-    'bg-indigo-500',
-    'bg-blue-500',
-    'bg-cyan-500',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
     'bg-teal-500',
     'bg-emerald-500',
     'bg-green-500',
-    'bg-lime-500',
-    'bg-amber-500',
-    'bg-orange-500',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
+    'bg-[#13B8A6]',
   ];
 
   let hash = 0;

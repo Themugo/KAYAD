@@ -47,17 +47,17 @@ export default function ResolutionPanel({ dispute, escrow, onRefresh }) {
   const decisionMeta = DECISIONS.find(d => d.value === decision);
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 space-y-4">
-      <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wide flex items-center gap-2">
+    <div className="bg-[#0A3340] border border-[#12576D] rounded-lg p-4 space-y-4">
+      <h3 className="text-sm font-semibold text-[#DDF4F0] uppercase tracking-wide flex items-center gap-2">
         <Gavel size={16} className="text-gold" /> Resolution
       </h3>
 
       {resolution?.decidedAt && (
-        <div className="bg-gray-800 rounded-lg p-3 space-y-1 text-sm">
-          <p className="text-gray-400">Decision: <span className="text-gray-200 font-medium">{resolution.decision}</span></p>
-          <p className="text-gray-400">Amount: <span className="text-gray-200">KES {Number(resolution.amount || totalAmount).toLocaleString('en-KE')}</span></p>
-          {resolution.reason && <p className="text-gray-400 mt-1">{resolution.reason}</p>}
-          <p className="text-xs text-gray-500 mt-1">Resolved by {resolution.decidedBy?.name || 'Admin'} on {new Date(resolution.decidedAt).toLocaleDateString()}</p>
+        <div className="bg-[#12576D] rounded-lg p-3 space-y-1 text-sm">
+          <p className="text-[#94A3B8]">Decision: <span className="text-[#DDF4F0] font-medium">{resolution.decision}</span></p>
+          <p className="text-[#94A3B8]">Amount: <span className="text-[#DDF4F0]">KES {Number(resolution.amount || totalAmount).toLocaleString('en-KE')}</span></p>
+          {resolution.reason && <p className="text-[#94A3B8] mt-1">{resolution.reason}</p>}
+          <p className="text-xs text-[#64748B] mt-1">Resolved by {resolution.decidedBy?.name || 'Admin'} on {new Date(resolution.decidedAt).toLocaleDateString()}</p>
           {resolution.implemented && <span className="text-xs text-green-400">✓ Implemented</span>}
         </div>
       )}
@@ -68,45 +68,45 @@ export default function ResolutionPanel({ dispute, escrow, onRefresh }) {
             {DECISIONS.map(d => (
               <button key={d.value} type="button" onClick={() => setDecision(d.value)}
                 className={`text-left p-3 rounded-lg border text-sm transition
-                  ${decision === d.value ? 'border-gold bg-gold/10' : 'border-gray-700 bg-gray-800 hover:border-gray-600'}`}>
-                <span className="font-medium text-gray-200">{d.label}</span>
-                <p className="text-xs text-gray-500 mt-0.5">{d.desc}</p>
+                  ${decision === d.value ? 'border-gold bg-gold/10' : 'border-[#12576D] bg-[#12576D] hover:border-[#176B87]'}`}>
+                <span className="font-medium text-[#DDF4F0]">{d.label}</span>
+                <p className="text-xs text-[#64748B] mt-0.5">{d.desc}</p>
               </button>
             ))}
           </div>
 
           {decision === 'partial_refund' && (
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Refund Amount (KES)</label>
+              <label className="text-xs text-[#94A3B8] block mb-1">Refund Amount (KES)</label>
               <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-gold" />
-              <p className="text-xs text-gray-500 mt-1">Seller gets: KES {(totalAmount - Number(amount)).toLocaleString('en-KE')}</p>
+                className="w-full px-3 py-2 bg-[#12576D] border border-[#12576D] rounded-lg text-sm text-[#DDF4F0] focus:outline-none focus:border-gold" />
+              <p className="text-xs text-[#64748B] mt-1">Seller gets: KES {(totalAmount - Number(amount)).toLocaleString('en-KE')}</p>
             </div>
           )}
 
           {decision === 'split_settlement' && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Seller Amount (KES)</label>
+                <label className="text-xs text-[#94A3B8] block mb-1">Seller Amount (KES)</label>
                 <input type="number" value={sellerAmount} onChange={e => setSellerAmount(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-gold" />
+                  className="w-full px-3 py-2 bg-[#12576D] border border-[#12576D] rounded-lg text-sm text-[#DDF4F0] focus:outline-none focus:border-gold" />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Buyer Amount (KES)</label>
+                <label className="text-xs text-[#94A3B8] block mb-1">Buyer Amount (KES)</label>
                 <input type="number" value={buyerAmount} onChange={e => setBuyerAmount(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-gold" />
+                  className="w-full px-3 py-2 bg-[#12576D] border border-[#12576D] rounded-lg text-sm text-[#DDF4F0] focus:outline-none focus:border-gold" />
               </div>
             </div>
           )}
 
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Reason</label>
+            <label className="text-xs text-[#94A3B8] block mb-1">Reason</label>
             <textarea value={reason} onChange={e => setReason(e.target.value)} rows={2} placeholder="Explain the resolution decision..."
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-gold resize-none" />
+              className="w-full px-3 py-2 bg-[#12576D] border border-[#12576D] rounded-lg text-sm text-[#DDF4F0] focus:outline-none focus:border-gold resize-none" />
           </div>
 
           <button onClick={handleResolve} disabled={!decision || loading}
-            className="w-full py-2 bg-gold text-black font-semibold rounded-lg hover:bg-gold/90 disabled:opacity-50 text-sm">
+            className="w-full py-2 bg-gold text-[#0A3340] font-semibold rounded-lg hover:bg-gold/90 disabled:opacity-50 text-sm">
             {loading ? 'Processing...' : `Apply Resolution (KES ${totalAmount.toLocaleString('en-KE')})`}
           </button>
         </div>

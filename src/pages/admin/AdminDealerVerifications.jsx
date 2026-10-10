@@ -3,11 +3,11 @@ import { adminVerificationAPI } from '../../api/api';
 import { ShieldCheck, Search, CheckCircle, XCircle, Eye, FileText, X, AlertTriangle } from 'lucide-react';
 
 const STATUS_COLORS = {
-  pending: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b', label: 'Pending' },
-  under_review: { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6', label: 'Under Review' },
+  pending: { bg: 'rgba(19, 184, 166, 0.1)', color: '#176b87', label: 'Pending' },
+  under_review: { bg: 'rgba(23, 107, 135, 0.1)', color: '#176B87', label: 'Under Review' },
   approved: { bg: 'rgba(34,197,94,0.1)', color: '#22c55e', label: 'Approved' },
   rejected: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444', label: 'Rejected' },
-  suspended: { bg: 'rgba(107,114,128,0.1)', color: '#6b7280', label: 'Suspended' },
+  suspended: { bg: 'rgba(107,114,128,0.1)', color: '#64748b', label: 'Suspended' },
 };
 
 function Modal({ title, children, onClose }) {
@@ -15,10 +15,10 @@ function Modal({ title, children, onClose }) {
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+      background: 'rgba(10, 51, 64, 0.8)', backdropFilter: 'blur(8px)',
     }} onClick={onClose} role="presentation">
       <div onClick={e => e.stopPropagation()} role="presentation" style={{
-        background: '#111', border: '1px solid rgba(255,255,255,0.1)',
+        background: '#0a3340', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 16, padding: 28, width: 520, maxWidth: '90vw',
         position: 'relative', maxHeight: '80vh', overflow: 'auto',
       }}>
@@ -93,7 +93,7 @@ export default function AdminDealerVerifications() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ fontSize: '1.4rem', fontWeight: 900, fontFamily: 'var(--font-display)', fontStyle: 'italic', margin: 0 }}>
-            <ShieldCheck size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: -3, color: 'var(--gold)' }} />
+            <ShieldCheck size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: -3, color: 'var(--brand)' }} />
             Dealer Verifications
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: '4px 0 0' }}>
@@ -105,8 +105,8 @@ export default function AdminDealerVerifications() {
       {/* Stats */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
-          { label: 'Pending', count: countByStatus('pending'), color: '#f59e0b' },
-          { label: 'Under Review', count: countByStatus('under_review'), color: '#3b82f6' },
+          { label: 'Pending', count: countByStatus('pending'), color: '#176b87' },
+          { label: 'Under Review', count: countByStatus('under_review'), color: '#176B87' },
           { label: 'Approved', count: countByStatus('approved'), color: '#22c55e' },
           { label: 'Rejected', count: countByStatus('rejected'), color: '#ef4444' },
           { label: 'Total', count: items.length, color: '#fff' },
@@ -238,7 +238,7 @@ export default function AdminDealerVerifications() {
                   display: 'inline-block', padding: '3px 10px', borderRadius: 9999,
                   fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                   background: STATUS_COLORS[selected.verificationStatus]?.bg || 'rgba(255,255,255,0.05)',
-                  color: STATUS_COLORS[selected.verificationStatus]?.color || '#999',
+                  color: STATUS_COLORS[selected.verificationStatus]?.color || '#64748b',
                 }}>{STATUS_COLORS[selected.verificationStatus]?.label || selected.verificationStatus}</span>
               </p>
             </div>
@@ -256,8 +256,8 @@ export default function AdminDealerVerifications() {
                     <span style={{ color: '#fff' }}>{doc.type || doc.documentType || `Document ${i + 1}`}</span>
                     {doc.url && (
                       <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{
-                        color: 'var(--gold)', padding: '4px 10px', borderRadius: 6,
-                        background: 'rgba(37, 99, 235,0.1)', textDecoration: 'none', fontSize: 11, fontWeight: 600,
+                        color: 'var(--brand)', padding: '4px 10px', borderRadius: 6,
+                        background: 'rgba(23, 107, 135, 0.1)', textDecoration: 'none', fontSize: 11, fontWeight: 600,
                       }}><Eye size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} /> View</a>
                     )}
                   </div>
@@ -309,7 +309,7 @@ export default function AdminDealerVerifications() {
             <button onClick={handleAction} disabled={processing} style={{
               padding: '9px 18px', borderRadius: 8, border: 'none',
               background: actionModal.action === 'approve' ? '#22c55e' : '#ef4444',
-              color: '#000', fontSize: 12, fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer',
+              color: '#0a3340', fontSize: 12, fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer',
               opacity: processing ? 0.6 : 1,
             }}>
               {processing ? 'Processing...' : actionModal.action === 'approve' ? 'Approve & Publish' : 'Reject'}

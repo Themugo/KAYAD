@@ -200,7 +200,7 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
             <h2 className="text-lg font-bold" style={{ color: KAYAD_COLORS.lightNavy }}>
               Upcoming Bookings
             </h2>
-            <span className="text-xs font-semibold text-slate-400">Latest 5</span>
+            <span className="text-xs font-semibold text-[#94A3B8]">Latest 5</span>
           </div>
 
           {dashboard.upcomingBookings.length === 0 ? (
@@ -497,7 +497,7 @@ function BookingCard({ booking, showActions = false }: { booking: Booking; showA
         </span>
 
         {showActions && (
-          <span className="text-[10px] font-medium text-slate-400 mt-2 block">Actions are available in the provider workflow when returned by the backend.</span>
+          <span className="text-[10px] font-medium text-[#94A3B8] mt-2 block">Actions are available in the provider workflow when returned by the backend.</span>
         )}
       </div>
     </div>
@@ -527,7 +527,7 @@ function EarningsRow({ label, value, isBold = false, isNegative = false, highlig
 function QuickAction({ icon, label, badge }: { icon: React.ReactNode; label: string; badge?: number }) {
   return (
     <div
-      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50"
+      className="flex items-center justify-between p-3 rounded-lg border border-[#D7E7E4] bg-[#F6FAF9]"
       style={{ color: KAYAD_COLORS.lightNavy }}
     >
       <span className="flex items-center gap-2">

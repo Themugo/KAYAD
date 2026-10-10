@@ -10,9 +10,9 @@ import {
 } from 'lucide-react';
 
 const METRIC_CARDS = [
-  { key: 'totalUsers', label: 'Total Users', icon: Users, color: '#3b82f6' },
-  { key: 'totalDealers', label: 'Active Dealers', icon: Shield, color: '#8b5cf6' },
-  { key: 'totalCars', label: 'Total Listings', icon: Car, color: '#06b6d4' },
+  { key: 'totalUsers', label: 'Total Users', icon: Users, color: '#176B87' },
+  { key: 'totalDealers', label: 'Active Dealers', icon: Shield, color: '#5aafa4' },
+  { key: 'totalCars', label: 'Total Listings', icon: Car, color: '#13B8A6' },
   { key: 'activeEscrows', label: 'Active Escrows', icon: DollarSign, color: '#10b981' },
 ];
 
@@ -70,8 +70,8 @@ export default function OperationsControlRoom() {
   const getAlertColor = (severity) => {
     switch (severity) {
       case 'critical': return { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.3)', icon: XCircle, color: '#ef4444' };
-      case 'warning': return { bg: 'rgba(249, 115, 22, 0.1)', border: 'rgba(249, 115, 22, 0.3)', icon: AlertTriangle, color: '#f97316' };
-      case 'info': return { bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.3)', icon: AlertCircle, color: '#3b82f6' };
+      case 'warning': return { bg: 'rgba(19, 184, 166, 0.1)', border: 'rgba(19, 184, 166, 0.3)', icon: AlertTriangle, color: '#176b87' };
+      case 'info': return { bg: 'rgba(23, 107, 135, 0.1)', border: 'rgba(23, 107, 135, 0.3)', icon: AlertCircle, color: '#176B87' };
       default: return { bg: 'rgba(156, 163, 175, 0.1)', border: 'rgba(156, 163, 175, 0.3)', icon: AlertCircle, color: '#9ca3af' };
     }
   };
@@ -207,7 +207,7 @@ export default function OperationsControlRoom() {
               <div className="activity-list">
                 {activity.slice(0, 20).map((item) => (
                   <div key={item.id} className="activity-item">
-                    <div className="activity-icon" style={{ background: `${item.color || '#6b7280'}20` }}>
+                    <div className="activity-icon" style={{ background: `${item.color || '#64748b'}20` }}>
                       {item.icon || '📌'}
                     </div>
                     <div className="activity-content">

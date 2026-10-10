@@ -70,9 +70,9 @@ export function ProductSpecifications({ product, specifications = [], documents 
   }
 
   return (
-    <div className="border-t border-gray-200 pt-8">
+    <div className="border-t border-[#D7E7E4] pt-8">
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
+      <div className="flex gap-1 border-b border-[#D7E7E4] mb-6 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -80,7 +80,7 @@ export function ProductSpecifications({ product, specifications = [], documents 
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
               activeTab === tab.id
                 ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-[#64748B] hover:text-[#12576D]'
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -94,11 +94,11 @@ export function ProductSpecifications({ product, specifications = [], documents 
         {activeTab === 'description' && (
           <div className="prose prose-sm max-w-none">
             {product.description ? (
-              <div className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+              <div className="text-[#64748B] leading-relaxed whitespace-pre-wrap">
                 {product.description}
               </div>
             ) : (
-              <p className="text-gray-400">No description available.</p>
+              <p className="text-[#94A3B8]">No description available.</p>
             )}
           </div>
         )}
@@ -111,8 +111,8 @@ export function ProductSpecifications({ product, specifications = [], documents 
                   <h3 className="font-semibold text-navy-900 mb-3">{group.title}</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {group.specs.map((spec, idx) => (
-                      <div key={idx} className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-gray-600 text-sm flex items-center gap-2">
+                      <div key={idx} className="flex justify-between py-2 border-b border-[#D7E7E4]">
+                        <span className="text-[#64748B] text-sm flex items-center gap-2">
                           {spec.icon && <spec.icon className="w-4 h-4" />}
                           {spec.name}
                         </span>
@@ -123,7 +123,7 @@ export function ProductSpecifications({ product, specifications = [], documents 
                 </div>
               ))
             ) : (
-              <p className="text-gray-400">No specifications available.</p>
+              <p className="text-[#94A3B8]">No specifications available.</p>
             )}
           </div>
         )}
@@ -137,20 +137,20 @@ export function ProductSpecifications({ product, specifications = [], documents 
                   href={doc.document_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
+                  className="flex items-center justify-between p-4 bg-[#F6FAF9] hover:bg-[#EEF7F5] rounded-lg transition-colors group"
                 >
                   <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-gray-400" />
+                    <FileText className="w-5 h-5 text-[#94A3B8]" />
                     <div>
                       <p className="font-medium text-navy-900 text-sm">{doc.document_name}</p>
-                      <p className="text-xs text-gray-500 uppercase">{doc.document_type}</p>
+                      <p className="text-xs text-[#64748B] uppercase">{doc.document_type}</p>
                     </div>
                   </div>
-                  <Download className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" />
+                  <Download className="w-5 h-5 text-[#94A3B8] group-hover:text-primary-500 transition-colors" />
                 </a>
               ))
             ) : (
-              <p className="text-gray-400">No downloads available.</p>
+              <p className="text-[#94A3B8]">No downloads available.</p>
             )}
           </div>
         )}
@@ -162,12 +162,12 @@ export function ProductSpecifications({ product, specifications = [], documents 
                 <Shield className="w-6 h-6 text-primary-600" />
                 <div>
                   <p className="font-semibold text-navy-900">{product.warranty_years} Year Warranty</p>
-                  <p className="text-sm text-gray-600">Manufacturer warranty coverage</p>
+                  <p className="text-sm text-[#64748B]">Manufacturer warranty coverage</p>
                 </div>
               </div>
             )}
             {product.warranty_description && (
-              <div className="prose prose-sm max-w-none text-gray-600">
+              <div className="prose prose-sm max-w-none text-[#64748B]">
                 {product.warranty_description}
               </div>
             )}

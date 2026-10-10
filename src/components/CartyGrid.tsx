@@ -78,10 +78,10 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
     return (
       <Link to={detailTo} className="block group">
         <div
-          className="transition-colors duration-200 hover:bg-[#111]"
+          className="transition-colors duration-200 hover:bg-[#0a3340]"
           style={{
             display: 'flex', flexDirection: isMobile ? 'column' : 'row',
-            background: '#0C0C0C', borderRadius: 14,
+            background: '#0a3340', borderRadius: 14,
             border: '1px solid rgba(255,255,255,0.06)',
             overflow: 'hidden',
           }}
@@ -90,11 +90,11 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
         >
           <div style={{
             width: isMobile ? '100%' : 300, height: isMobile ? 200 : 200,
-            flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#0A0A0A',
+            flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#0a3340',
           }}>
             <LazyImage src={img} fallback={FALLBACK} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.5), transparent)', opacity: hovered ? 0 : 1 }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10, 51, 64, 0.5), transparent)', opacity: hovered ? 0 : 1 }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(transparent, rgba(10, 51, 64, 0.6))' }} />
             {isLiveNow && (
               <div style={{ position: 'absolute', top: 10, left: 10, padding: '3px 9px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: 'rgba(239,68,68,0.92)', color: '#fff', letterSpacing: '0.06em' }}>
                 <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite', marginRight: 4 }} />
@@ -119,7 +119,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
                 <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                   {isOnAuction ? (car.currentBid && car.currentBid > 0 ? 'Current Bid' : 'Starting Bid') : 'Price'}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--gold-light)', lineHeight: 1.2, fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--brand-light)', lineHeight: 1.2, fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                   KES {price.toLocaleString()}
                 </div>
               </div>
@@ -138,11 +138,11 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
     >
       <Link to={detailTo} className="block no-underline">
         <div className="overflow-hidden rounded-xl" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-          <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', background: '#0A0A0A' }}>
+          <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', background: '#0a3340' }}>
             <LazyImage src={img} fallback={FALLBACK} alt={car.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10, 51, 64, 0.4), transparent)' }} />
             {isSold && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(10, 51, 64, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
                 <span style={{ fontSize: 13, fontWeight: 900, color: '#fff', letterSpacing: '0.15em', textTransform: 'uppercase', background: 'rgba(239,68,68,0.85)', padding: '6px 18px', borderRadius: 6 }}>Sold</span>
               </div>
             )}
@@ -158,17 +158,17 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               </div>
             )}
             {isUpcomingAuction && !isSold && (
-              <div style={{ position: 'absolute', top: 10, right: 10, padding: '3px 10px', borderRadius: 9999, fontSize: 9, fontWeight: 700, background: 'rgba(245,158,11,0.92)', color: '#1a1200', letterSpacing: '0.06em', backdropFilter: 'blur(4px)' }}>
+              <div style={{ position: 'absolute', top: 10, right: 10, padding: '3px 10px', borderRadius: 9999, fontSize: 9, fontWeight: 700, background: 'rgba(23, 107, 135, 0.92)', color: '#1a1200', letterSpacing: '0.06em', backdropFilter: 'blur(4px)' }}>
                 Upcoming
               </div>
             )}
             {isNewListing && !isSold && (
-              <div style={{ position: 'absolute', top: isLiveNow || isUpcomingAuction ? 36 : 10, right: 10, padding: '2px 8px', borderRadius: 9999, fontSize: 8, fontWeight: 700, background: 'rgba(59,130,246,0.85)', color: '#fff', letterSpacing: '0.06em' }}>
+              <div style={{ position: 'absolute', top: isLiveNow || isUpcomingAuction ? 36 : 10, right: 10, padding: '2px 8px', borderRadius: 9999, fontSize: 8, fontWeight: 700, background: 'rgba(23, 107, 135, 0.85)', color: '#fff', letterSpacing: '0.06em' }}>
                 New
               </div>
             )}
             {car.isPromoted && !isSold && (
-              <div style={{ position: 'absolute', bottom: 10, left: 10, padding: '2px 8px', borderRadius: 9999, fontSize: 8, fontWeight: 700, background: 'rgba(37, 99, 235,0.9)', color: '#000', letterSpacing: '0.08em' }}>
+              <div style={{ position: 'absolute', bottom: 10, left: 10, padding: '2px 8px', borderRadius: 9999, fontSize: 8, fontWeight: 700, background: 'rgba(23, 107, 135, 0.9)', color: '#0a3340', letterSpacing: '0.08em' }}>
                 Featured
               </div>
             )}
@@ -185,7 +185,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
             <div style={{ marginBottom: 10 }}>
               <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Price</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--brand)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                 KES {price.toLocaleString()}
               </div>
             </div>
@@ -197,7 +197,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               <span style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 'auto' }}><MapPin size={11} /> {city}</span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--gold)', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--brand)', fontWeight: 600 }}>
               View Details <ArrowRight size={12} />
             </div>
           </div>

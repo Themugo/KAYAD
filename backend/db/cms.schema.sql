@@ -311,18 +311,18 @@ CREATE TABLE IF NOT EXISTS cms_theme_configs (
 
   -- Colors
   colors JSONB DEFAULT '{
-    "primary": "#1e3a5f",
-    "secondary": "#64748b",
-    "accent": "#c4a484",
+    "primary": "#176B87",
+    "secondary": "#12576D",
+    "accent": "#13B8A6",
     "success": "#10b981",
-    "warning": "#f59e0b",
+    "warning": "#176B87",
     "danger": "#ef4444",
-    "info": "#3b82f6",
-    "background": "#f5f0e8",
-    "surface": "#ffffff",
-    "text": "#1f2937",
+    "info": "#13B8A6",
+    "background": "#F6FAF9",
+    "surface": "#FFFFFF",
+    "text": "#1E293B",
     "textMuted": "#64748b",
-    "border": "#e5e7eb"
+    "border": "#D7E7E4"
   }',
 
   -- Typography
@@ -352,15 +352,15 @@ CREATE TABLE IF NOT EXISTS cms_theme_configs (
 
   -- Shadows
   shadows JSONB DEFAULT '{
-    "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-    "md": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-    "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+    "sm": "0 1px 2px 0 rgb(10 51 64 / 0.05)",
+    "md": "0 4px 6px -1px rgb(10 51 64 / 0.1)",
+    "lg": "0 10px 15px -3px rgb(10 51 64 / 0.1)"
   }',
 
   -- Buttons
   buttons JSONB DEFAULT '{
-    "primary": {"background": "#1e3a5f", "color": "#ffffff", "radius": "lg"},
-    "secondary": {"background": "#f5f0e8", "color": "#1e3a5f", "radius": "lg"}
+    "primary": {"background": "#176B87", "color": "#FFFFFF", "radius": "lg"},
+    "secondary": {"background": "#EEF7F5", "color": "#0A3340", "radius": "lg"}
   }',
 
   -- Status

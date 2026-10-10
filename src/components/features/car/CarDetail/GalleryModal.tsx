@@ -57,7 +57,7 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }: GalleryMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-[#0A3340]/95 flex items-center justify-center">
       {/* Close button */}
       <button
         onClick={onClose}
@@ -115,7 +115,7 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }: GalleryMo
       )}
 
       {/* Bottom toolbar */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2 z-10">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#0A3340]/60 backdrop-blur-sm rounded-full px-4 py-2 z-10">
         <button
           onClick={() => setZoom(z => Math.max(z - 0.5, 1))}
           className="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-colors"
@@ -154,7 +154,7 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }: GalleryMo
                 onClick={() => { setIdx(i); setZoom(1); }}
                 className={`w-12 h-8 rounded overflow-hidden transition-all ${
                   i === idx
-                    ? 'ring-2 ring-gold-500 opacity-100'
+                    ? 'ring-2 ring-[#5AAFA4] opacity-100'
                     : 'opacity-50 hover:opacity-80'
                 }`}
               >

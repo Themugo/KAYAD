@@ -53,12 +53,12 @@ export const MarketingCard: React.FC<MarketingCardProps> = React.memo(({ data })
       role={data.ctaUrl ? 'button' : undefined}
       tabIndex={data.ctaUrl ? 0 : undefined}
       aria-label={`${data.label}: ${data.name}`}
-      className="relative bg-gradient-to-br from-slate-50 to-white rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 hover:border-slate-300 transition-all flex flex-col justify-between p-4 h-full min-h-[220px] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2"
+      className="relative bg-gradient-to-br from-[#F6FAF9] to-white rounded-2xl overflow-hidden border-2 border-dashed border-[#D7E7E4] hover:border-[#BDE5DE] transition-all flex flex-col justify-between p-4 h-full min-h-[220px] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2"
     >
       {/* Always-visible disclosure label - top right, high contrast,
           never smaller or lower-contrast than any other badge on a real
           VehicleCard, since this needs to be at least as noticeable. */}
-      <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-800 text-white">
+      <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#12576D] text-white">
         {data.label}
       </span>
 
@@ -71,20 +71,20 @@ export const MarketingCard: React.FC<MarketingCardProps> = React.memo(({ data })
         </div>
 
         <div>
-          <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-0.5">
+          <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8] mb-0.5">
             {data.category}
           </p>
           <h3 className="text-sm font-black text-[#176B87] font-display leading-snug">
             {data.name}
           </h3>
-          <p className="text-xs text-slate-500 font-medium mt-1 leading-snug">
+          <p className="text-xs text-[#64748B] font-medium mt-1 leading-snug">
             {data.tagline}
           </p>
         </div>
       </div>
 
       <div
-        className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-200 text-xs font-extrabold group-hover:gap-3 transition-all"
+        className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-[#D7E7E4] text-xs font-extrabold group-hover:gap-3 transition-all"
         style={{ color: data.accentColor }}
       >
         <span>{data.ctaLabel}</span>

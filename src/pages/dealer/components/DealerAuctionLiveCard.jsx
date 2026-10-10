@@ -83,9 +83,9 @@ export default function DealerAuctionLiveCard({ car, isLoading, onEnd, onExtend,
             onChange={(e) => onExtendHoursChange(car._id, e.target.value)}
             disabled={extensionLocked || !!isLoading}
             style={{ ...currencyInputStyle, width: 142, padding: '10px 11px' }}>
-            <option value="" style={{ background: '#111' }}>Extend by</option>
+            <option value="" style={{ background: '#0a3340' }}>Extend by</option>
             {EXTEND_OPTIONS.map((hours) => (
-              <option key={hours} value={hours} style={{ background: '#111' }}>{hours} hour{hours === 1 ? '' : 's'}</option>
+              <option key={hours} value={hours} style={{ background: '#0a3340' }}>{hours} hour{hours === 1 ? '' : 's'}</option>
             ))}
           </select>
           <button onClick={() => onExtend(car._id, Number(car._extendHours || 0))}

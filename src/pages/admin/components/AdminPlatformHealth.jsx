@@ -15,7 +15,7 @@ export default function AdminPlatformHealth({ sysHealth }) {
       display: 'flex', flexDirection: 'column',
     }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Server size={14} style={{ color: 'var(--gold)' }} /> Platform Health
+        <Server size={14} style={{ color: 'var(--brand)' }} /> Platform Health
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
         {items.map(h => {

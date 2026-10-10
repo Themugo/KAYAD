@@ -9,13 +9,13 @@ export default function Footer({ setPage }: FooterProps) {
   };
 
   return (
-    <footer className="bg-charcoal-950 text-white/60 border-t-2 border-gold-700/50">
+    <footer className="bg-[#0A3340] text-white/60 border-t-2 border-[#12576D]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           {/* Brand */}
           <div className="md:col-span-1">
             <button onClick={() => nav('home')} className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-gold-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#176B87] rounded-lg flex items-center justify-center">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 13l2-6h14l2 6" />
                   <path d="M1 17h22" />
@@ -23,7 +23,7 @@ export default function Footer({ setPage }: FooterProps) {
                   <circle cx="17" cy="17" r="2" />
                 </svg>
               </div>
-              <span className="text-gold-400 font-sans font-bold tracking-[0.15em] uppercase">KAYAD</span>
+              <span className="text-[#13B8A6] font-sans font-bold tracking-[0.15em] uppercase">KAYAD</span>
             </button>
             <p className="font-sans text-sm text-white/40 leading-relaxed">
               Kenya's premium car marketplace. Buy, sell, and auction vehicles with clear transaction workflows and eligible escrow options.
@@ -32,7 +32,7 @@ export default function Footer({ setPage }: FooterProps) {
 
           {/* Marketplace */}
           <div>
-            <h4 className="text-gold-400 font-sans font-semibold text-sm mb-4 tracking-wide">Marketplace</h4>
+            <h4 className="text-[#13B8A6] font-sans font-semibold text-sm mb-4 tracking-wide">Marketplace</h4>
             <ul className="space-y-2.5">
               {[
                 { label: 'Browse Cars', page: 'gallery' },
@@ -41,7 +41,7 @@ export default function Footer({ setPage }: FooterProps) {
                 { label: 'Escrow Vault', page: 'escrow' },
               ].map(({ label, page }) => (
                 <li key={label}>
-                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-gold-400 transition-colors duration-200">
+                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-[#13B8A6] transition-colors duration-200">
                     {label}
                   </button>
                 </li>
@@ -51,7 +51,7 @@ export default function Footer({ setPage }: FooterProps) {
 
           {/* Services */}
           <div>
-            <h4 className="text-gold-400 font-sans font-semibold text-sm mb-4 tracking-wide">Services</h4>
+            <h4 className="text-[#13B8A6] font-sans font-semibold text-sm mb-4 tracking-wide">Services</h4>
             <ul className="space-y-2.5">
               {[
                 { label: 'Pre-Inspection', page: 'pre-inspection' },
@@ -60,7 +60,7 @@ export default function Footer({ setPage }: FooterProps) {
                 { label: 'Become a Dealer', page: 'support' },
               ].map(({ label, page }) => (
                 <li key={label}>
-                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-gold-400 transition-colors duration-200">
+                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-[#13B8A6] transition-colors duration-200">
                     {label}
                   </button>
                 </li>
@@ -70,7 +70,7 @@ export default function Footer({ setPage }: FooterProps) {
 
           {/* Company */}
           <div>
-            <h4 className="text-gold-400 font-sans font-semibold text-sm mb-4 tracking-wide">Company</h4>
+            <h4 className="text-[#13B8A6] font-sans font-semibold text-sm mb-4 tracking-wide">Company</h4>
             <ul className="space-y-2.5">
               {[
                 { label: 'About KAYAD', page: 'home' },
@@ -79,7 +79,7 @@ export default function Footer({ setPage }: FooterProps) {
                 { label: 'Contact', page: 'support' },
               ].map(({ label, page }) => (
                 <li key={label}>
-                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-gold-400 transition-colors duration-200">
+                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-[#13B8A6] transition-colors duration-200">
                     {label}
                   </button>
                 </li>
@@ -89,13 +89,13 @@ export default function Footer({ setPage }: FooterProps) {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gold-700/30 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="border-t border-[#12576D]/30 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="font-sans text-xs text-white/30">
             &copy; {new Date().getFullYear()} KAYAD Motors Kenya Ltd. All rights reserved.
           </p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms of Service', 'Support'].map(item => (
-              <button key={item} className="font-sans text-xs text-white/30 hover:text-gold-400 transition-colors duration-200">
+              <button key={item} className="font-sans text-xs text-white/30 hover:text-[#13B8A6] transition-colors duration-200">
                 {item}
               </button>
             ))}

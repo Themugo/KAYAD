@@ -76,7 +76,7 @@ export const EscrowOperationsDesk: React.FC = () => {
     try { await fn(); setNotice(`${label} started.`); await refresh(); } catch (e) { setNotice(msg(e)); } finally { setBusy(false); }
   };
 
-  if (load.status === 'loading') return <div className="h-32 rounded-xl bg-slate-100 motion-safe:animate-pulse" role="status" aria-label="Loading operations" />;
+  if (load.status === 'loading') return <div className="h-32 rounded-xl bg-[#EEF7F5] motion-safe:animate-pulse" role="status" aria-label="Loading operations" />;
   if (load.status === 'error') return (
     <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
       <p>{load.message}</p>
@@ -95,21 +95,21 @@ export const EscrowOperationsDesk: React.FC = () => {
   return (
     <section aria-labelledby="ops-heading" className="space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 id="ops-heading" className="text-lg font-semibold text-slate-900">Escrow operations</h2>
+        <h2 id="ops-heading" className="text-lg font-semibold text-[#0A3340]">Escrow operations</h2>
         <div className="flex gap-2">
           {can.reconcile && <>
-            <button type="button" disabled={busy} onClick={() => void runTool(runReconciliation, 'Reconciliation')} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50">Run reconciliation</button>
-            <button type="button" disabled={busy} onClick={() => void runTool(runAnomalyScan, 'Anomaly scan')} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50">Run anomaly scan</button>
+            <button type="button" disabled={busy} onClick={() => void runTool(runReconciliation, 'Reconciliation')} className="rounded-lg border border-[#BDE5DE] px-3 py-1.5 text-sm disabled:opacity-50">Run reconciliation</button>
+            <button type="button" disabled={busy} onClick={() => void runTool(runAnomalyScan, 'Anomaly scan')} className="rounded-lg border border-[#BDE5DE] px-3 py-1.5 text-sm disabled:opacity-50">Run anomaly scan</button>
           </>}
-          <button type="button" onClick={() => void refresh()} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm"><RefreshCw className="h-4 w-4" aria-hidden="true" />Refresh</button>
+          <button type="button" onClick={() => void refresh()} className="inline-flex items-center gap-1.5 rounded-lg border border-[#D7E7E4] px-3 py-1.5 text-sm"><RefreshCw className="h-4 w-4" aria-hidden="true" />Refresh</button>
         </div>
       </div>
-      {notice && !c && <p role="status" className="text-sm text-slate-700">{notice}</p>}
+      {notice && !c && <p role="status" className="text-sm text-[#12576D]">{notice}</p>}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4" data-testid="ops-totals">
-        <p className="text-xs uppercase tracking-wide text-slate-500">Platform-wide (staff view)</p>
-        <p className="text-xl font-semibold text-slate-900">{formatKes(dash.totals.heldAmount)} <span className="text-sm font-normal text-slate-600">recorded as held across {dash.totals.heldCount} escrow{dash.totals.heldCount === 1 ? '' : 's'}</span></p>
-        <p className="mt-1 text-xs text-slate-500">From KAYAD’s escrow records. Not a bank balance.</p>
+      <div className="rounded-xl border border-[#D7E7E4] bg-white p-4" data-testid="ops-totals">
+        <p className="text-xs uppercase tracking-wide text-[#64748B]">Platform-wide (staff view)</p>
+        <p className="text-xl font-semibold text-[#0A3340]">{formatKes(dash.totals.heldAmount)} <span className="text-sm font-normal text-[#64748B]">recorded as held across {dash.totals.heldCount} escrow{dash.totals.heldCount === 1 ? '' : 's'}</span></p>
+        <p className="mt-1 text-xs text-[#64748B]">From KAYAD’s escrow records. Not a bank balance.</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -118,31 +118,31 @@ export const EscrowOperationsDesk: React.FC = () => {
             <QueueBlock title="Awaiting funding verification" count={pending.length} items={pending} onOpen={openCase} />
           )}
           {QUEUES.map((q) => <QueueBlock key={q.key} title={q.label} count={dash.queues[q.key].count} items={dash.queues[q.key].items} onOpen={openCase} />)}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+          <div className="rounded-xl border border-[#D7E7E4] bg-white p-4 text-sm text-[#12576D]">
             <p>Refunds in progress: <b>{dash.queues.refunds.count}</b> · Open anomalies: <b>{dash.queues.anomalies.count}</b> · Reconciliation issues: <b>{dash.queues.reconciliation.count}</b></p>
           </div>
         </div>
 
         <div aria-live="polite">
-          {caseData?.status === 'loading' && <p className="text-sm text-slate-600">Loading case…</p>}
+          {caseData?.status === 'loading' && <p className="text-sm text-[#64748B]">Loading case…</p>}
           {caseData?.status === 'error' && <p role="alert" className="text-sm text-red-700">{caseData.message}</p>}
-          {!caseData && <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Select a case to review it.</p>}
+          {!caseData && <p className="rounded-xl border border-[#D7E7E4] bg-white p-4 text-sm text-[#64748B]">Select a case to review it.</p>}
           {c && (
-            <article className="space-y-3 rounded-xl border border-slate-200 bg-white p-4" aria-labelledby="case-title">
-              <h3 id="case-title" className="font-semibold text-slate-900">{c.escrow.car?.title || 'Vehicle'} — {STATUS_LABEL[c.escrow.status]}</h3>
-              <p className="text-sm text-slate-700">{formatKes(c.escrow.amount)} · commission {formatKes(c.escrow.commission)} · seller {formatKes(c.escrow.sellerAmount)}</p>
-              <p className="text-sm text-slate-600">{c.escrow.buyer?.name} → {c.escrow.seller?.name}</p>
+            <article className="space-y-3 rounded-xl border border-[#D7E7E4] bg-white p-4" aria-labelledby="case-title">
+              <h3 id="case-title" className="font-semibold text-[#0A3340]">{c.escrow.car?.title || 'Vehicle'} — {STATUS_LABEL[c.escrow.status]}</h3>
+              <p className="text-sm text-[#12576D]">{formatKes(c.escrow.amount)} · commission {formatKes(c.escrow.commission)} · seller {formatKes(c.escrow.sellerAmount)}</p>
+              <p className="text-sm text-[#64748B]">{c.escrow.buyer?.name} → {c.escrow.seller?.name}</p>
               {c.escrow.refund && <p className="text-sm">Refund: {c.escrow.refund.status} ({formatKes(c.escrow.refund.amount)})</p>}
               {c.escrow.payout && <p className="text-sm">Payout: {c.escrow.payout.status} ({formatKes(c.escrow.payout.netAmount)}){c.escrow.payout.failureReason ? ` — ${c.escrow.payout.failureReason}` : ''}</p>}
               {notice && <p role="status" className="text-sm text-emerald-800">{notice}</p>}
               {staffActions.length > 0 ? (
                 <div className="flex flex-wrap gap-2" role="group" aria-label="Staff actions">
                   {staffActions.map((a) => (
-                    <button key={a} type="button" onClick={() => { setErr(null); setText(''); setAction(a); }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">{ACTION_TEXT[a]}</button>
+                    <button key={a} type="button" onClick={() => { setErr(null); setText(''); setAction(a); }} className="rounded-lg bg-[#0A3340] px-3 py-1.5 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">{ACTION_TEXT[a]}</button>
                   ))}
                 </div>
-              ) : <p className="text-sm text-slate-600">No action available to you for this case in its current state.</p>}
-              <h4 className="text-sm font-medium text-slate-900">History</h4>
+              ) : <p className="text-sm text-[#64748B]">No action available to you for this case in its current state.</p>}
+              <h4 className="text-sm font-medium text-[#0A3340]">History</h4>
               <ol className="space-y-1 text-sm">
                 {c.timeline.map((t) => <li key={t.id}>{formatDate(t.timestamp)} — {t.action.replace(/_/g, ' ')}{t.reason ? `: ${t.reason}` : ''}</li>)}
               </ol>
@@ -160,16 +160,16 @@ export const EscrowOperationsDesk: React.FC = () => {
         onConfirm={() => void run()} onClose={() => { if (!busy) setAction(null); }}>
         {textNeeded && (
           <div className="mt-3">
-            <label htmlFor="ops-text" className="block text-sm font-medium text-slate-800">
+            <label htmlFor="ops-text" className="block text-sm font-medium text-[#0A3340]">
               {action === 'verify_funding' ? 'Bank funding reference' : action === 'complete_refund' ? 'Provider reference' : 'Reason (at least 10 characters)'}
             </label>
-            <input id="ops-text" value={text} onChange={(e) => setText(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" />
+            <input id="ops-text" value={text} onChange={(e) => setText(e.target.value)} className="mt-1 w-full rounded-lg border border-[#BDE5DE] p-2 text-sm" />
           </div>
         )}
         {action === 'complete_refund' && (
           <div className="mt-3">
-            <label htmlFor="ops-cash" className="block text-sm font-medium text-slate-800">Paid from</label>
-            <select id="ops-cash" value={cash} onChange={(e) => setCash(e.target.value as '1000' | '1200')} className="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm">
+            <label htmlFor="ops-cash" className="block text-sm font-medium text-[#0A3340]">Paid from</label>
+            <select id="ops-cash" value={cash} onChange={(e) => setCash(e.target.value as '1000' | '1200')} className="mt-1 w-full rounded-lg border border-[#BDE5DE] p-2 text-sm">
               <option value="1000">1000 — M-Pesa</option><option value="1200">1200 — Bank</option>
             </select>
           </div>
@@ -180,14 +180,14 @@ export const EscrowOperationsDesk: React.FC = () => {
 };
 
 const QueueBlock: React.FC<{ title: string; count: number; items: OpsEscrow[]; onOpen: (id: string) => void }> = ({ title, count, items, onOpen }) => (
-  <div className="rounded-xl border border-slate-200 bg-white p-4">
-    <h3 className="text-sm font-semibold text-slate-900">{title} <span className="font-normal text-slate-500">({count})</span></h3>
-    {items.length === 0 ? <p className="mt-1 text-sm text-slate-500">Nothing in this queue.</p> : (
-      <ul className="mt-2 divide-y divide-slate-100">
+  <div className="rounded-xl border border-[#D7E7E4] bg-white p-4">
+    <h3 className="text-sm font-semibold text-[#0A3340]">{title} <span className="font-normal text-[#64748B]">({count})</span></h3>
+    {items.length === 0 ? <p className="mt-1 text-sm text-[#64748B]">Nothing in this queue.</p> : (
+      <ul className="mt-2 divide-y divide-[#D7E7E4]">
         {items.map((e) => (
           <li key={e.id}>
-            <button type="button" onClick={() => onOpen(e.id)} className="flex w-full items-center justify-between gap-2 py-2 text-left text-sm hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
-              <span>{e.car?.title || 'Vehicle'} <span className="text-slate-500">· {e.buyer?.name} → {e.seller?.name}</span></span>
+            <button type="button" onClick={() => onOpen(e.id)} className="flex w-full items-center justify-between gap-2 py-2 text-left text-sm hover:bg-[#F6FAF9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">
+              <span>{e.car?.title || 'Vehicle'} <span className="text-[#64748B]">· {e.buyer?.name} → {e.seller?.name}</span></span>
               <span className="shrink-0 font-medium">{formatKes(e.amount)}</span>
             </button>
           </li>

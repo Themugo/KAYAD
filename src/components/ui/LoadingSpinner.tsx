@@ -13,7 +13,7 @@ export function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerPr
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div
-        className={`${sizeClasses[size]} border-2 border-gray-200 border-t-primary-600 rounded-full animate-spin`}
+        className={`${sizeClasses[size]} border-2 border-[#D7E7E4] border-t-primary-600 rounded-full animate-spin`}
       />
     </div>
   );
@@ -21,10 +21,10 @@ export function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerPr
 
 export function PageLoader() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
       <div className="text-center">
         <LoadingSpinner size="lg" />
-        <p className="mt-4 text-gray-500">Loading...</p>
+        <p className="mt-4 text-[#64748B]">Loading...</p>
       </div>
     </div>
   );
@@ -33,15 +33,15 @@ export function PageLoader() {
 export function SkeletonCard() {
   return (
     <div className="card animate-pulse">
-      <div className="aspect-[4/3] bg-gray-200" />
+      <div className="aspect-[4/3] bg-[#DDF4F0]" />
       <div className="p-5 space-y-3">
-        <div className="h-3 bg-gray-200 rounded w-1/4" />
-        <div className="h-5 bg-gray-200 rounded w-3/4" />
-        <div className="h-4 bg-gray-200 rounded w-full" />
-        <div className="h-4 bg-gray-200 rounded w-5/6" />
+        <div className="h-3 bg-[#DDF4F0] rounded w-1/4" />
+        <div className="h-5 bg-[#DDF4F0] rounded w-3/4" />
+        <div className="h-4 bg-[#DDF4F0] rounded w-full" />
+        <div className="h-4 bg-[#DDF4F0] rounded w-5/6" />
         <div className="flex justify-between pt-2">
-          <div className="h-6 bg-gray-200 rounded w-1/3" />
-          <div className="h-9 bg-gray-200 rounded w-1/4" />
+          <div className="h-6 bg-[#DDF4F0] rounded w-1/3" />
+          <div className="h-9 bg-[#DDF4F0] rounded w-1/4" />
         </div>
       </div>
     </div>

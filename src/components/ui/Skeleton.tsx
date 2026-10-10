@@ -15,7 +15,7 @@ export function Skeleton({
   variant = 'text',
   animation = 'pulse',
 }: SkeletonProps) {
-  const baseClasses = 'bg-cream-200';
+  const baseClasses = 'bg-[#DDF4F0]';
 
   const animationClasses = {
     pulse: 'animate-pulse',
@@ -49,7 +49,7 @@ export function CardSkeleton({ count = 1 }: { count?: number }) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="bg-white rounded-2xl border border-cream-200 overflow-hidden">
+        <div key={i} className="bg-white rounded-2xl border border-[#D7E7E4] overflow-hidden">
           {/* Image */}
           <Skeleton
             variant="rectangular"
@@ -80,7 +80,7 @@ export function ListItemSkeleton({ count = 3 }: { count?: number }) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-cream-200">
+        <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#D7E7E4]">
           <Skeleton variant="circular" width={48} height={48} />
           <div className="flex-1 space-y-2">
             <Skeleton variant="text" width="60%" height={16} />
@@ -102,9 +102,9 @@ export function TableSkeleton({
   columns?: number;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-cream-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#D7E7E4] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-4 p-4 bg-cream-50 border-b border-cream-200">
+      <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] border-b border-[#D7E7E4]">
         {Array.from({ length: columns }).map((_, i) => (
           <Skeleton key={i} variant="text" className="flex-1" height={14} />
         ))}
@@ -114,7 +114,7 @@ export function TableSkeleton({
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div
           key={rowIndex}
-          className="flex items-center gap-4 p-4 border-b border-cream-100 last:border-0"
+          className="flex items-center gap-4 p-4 border-b border-[#D7E7E4] last:border-0"
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
             <Skeleton
@@ -134,7 +134,7 @@ export function TableSkeleton({
 // Profile skeleton
 export function ProfileSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-cream-200 p-6">
+    <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
       <div className="flex items-center gap-4 mb-6">
         <Skeleton variant="circular" width={96} height={96} />
         <div className="space-y-2">
@@ -145,7 +145,7 @@ export function ProfileSkeleton() {
 
       <div className="space-y-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
+          <div key={i} className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
             <Skeleton variant="rectangular" width={40} height={40} className="rounded-lg" />
             <div className="flex-1 space-y-2">
               <Skeleton variant="text" width="30%" height={12} />
@@ -161,9 +161,9 @@ export function ProfileSkeleton() {
 // Page skeleton for full page loading
 export function PageSkeleton() {
   return (
-    <div className="min-h-screen bg-cream-50 pt-16">
+    <div className="min-h-screen bg-[#F6FAF9] pt-16">
       {/* Header skeleton */}
-      <div className="bg-charcoal-900 py-12">
+      <div className="bg-[#0A3340] py-12">
         <div className="max-w-6xl mx-auto px-4">
           <Skeleton variant="text" width={200} height={32} className="mb-4" />
           <Skeleton variant="text" width={300} height={16} />
@@ -175,7 +175,7 @@ export function PageSkeleton() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-cream-200 p-4">
+            <div key={i} className="bg-white rounded-xl border border-[#D7E7E4] p-4">
               <Skeleton variant="text" width="50%" height={12} className="mb-2" />
               <Skeleton variant="text" width="80%" height={28} />
             </div>
@@ -196,7 +196,7 @@ export function ChatSkeleton() {
   return (
     <div className="flex h-[calc(100vh-4rem)]">
       {/* Sidebar */}
-      <div className="w-80 border-r border-cream-200 bg-white p-4">
+      <div className="w-80 border-r border-[#D7E7E4] bg-white p-4">
         <Skeleton variant="text" width="60%" height={24} className="mb-4" />
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -213,7 +213,7 @@ export function ChatSkeleton() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col">
-        <div className="p-4 border-b border-cream-200 bg-white">
+        <div className="p-4 border-b border-[#D7E7E4] bg-white">
           <Skeleton variant="text" width="40%" height={20} />
         </div>
         <div className="flex-1 p-4 space-y-4">
@@ -258,12 +258,12 @@ export function EmptyState({
   return (
     <div className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}>
       {icon && (
-        <div className="w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mb-4">
+        <div className="w-16 h-16 bg-[#EEF7F5] rounded-full flex items-center justify-center mb-4">
           {icon}
         </div>
       )}
 
-      <h3 className="font-serif text-xl text-charcoal-900 font-bold mb-2">
+      <h3 className="font-serif text-xl text-[#0A3340] font-bold mb-2">
         {title}
       </h3>
 

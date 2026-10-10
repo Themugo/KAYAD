@@ -90,7 +90,7 @@ export const SellPage: FC = () => {
             Sell Your Vehicle with Confidence
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-[#DDF4F0] font-medium leading-relaxed max-w-2xl mx-auto">
             Connect directly with thousands of pre-verified buyers across Kenya. Benefit from Escrow payment protection on approved listings, access to independent pre-purchase inspection, and nationwide marketplace exposure.
           </p>
 
@@ -100,7 +100,7 @@ export const SellPage: FC = () => {
               <ShieldCheck className="w-4 h-4 text-[#13B8A6] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">Escrow Vault</span>
-                <span className="text-[9px] text-slate-300 block">Guaranteed funds</span>
+                <span className="text-[9px] text-[#BDE5DE] block">Guaranteed funds</span>
               </div>
             </div>
 
@@ -108,7 +108,7 @@ export const SellPage: FC = () => {
               <User className="w-4 h-4 text-[#13B8A6] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">Verified Buyers</span>
-                <span className="text-[9px] text-slate-300 block">Pre-qualified leads</span>
+                <span className="text-[9px] text-[#BDE5DE] block">Pre-qualified leads</span>
               </div>
             </div>
 
@@ -116,7 +116,7 @@ export const SellPage: FC = () => {
               <FileCheck2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">Inspections</span>
-                <span className="text-[9px] text-slate-300 block">Certified reports</span>
+                <span className="text-[9px] text-[#BDE5DE] block">Certified reports</span>
               </div>
             </div>
 
@@ -124,7 +124,7 @@ export const SellPage: FC = () => {
               <Globe2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">Nationwide Reach</span>
-                <span className="text-[9px] text-slate-300 block">All 47 counties</span>
+                <span className="text-[9px] text-[#BDE5DE] block">All 47 counties</span>
               </div>
             </div>
           </div>
@@ -155,7 +155,7 @@ export const SellPage: FC = () => {
             </div>
             <div className="text-left hidden sm:block">
               <span className="text-[10px] font-black uppercase text-[#13B8A6] tracking-wider block">Step 01</span>
-              <span className={`text-xs font-bold font-serif ${currentStep === 1 ? 'text-[#176B87]' : 'text-[#66808A]'}`}>
+              <span className={`text-xs font-bold font-serif ${currentStep === 1 ? 'text-[#176B87]' : 'text-[#64748b]'}`}>
                 Select Seller Type
               </span>
             </div>
@@ -169,13 +169,13 @@ export const SellPage: FC = () => {
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-mono font-black text-sm transition-all ${
               currentStep === 2
                 ? 'bg-[#176B87] text-[#13B8A6] ring-4 ring-[#13B8A6]/30 shadow-md'
-                : 'bg-[#D7E7E4] text-[#66808A]'
+                : 'bg-[#D7E7E4] text-[#64748b]'
             }`}>
               2
             </div>
             <div className="text-left hidden sm:block">
-              <span className="text-[10px] font-black uppercase text-[#66808A] tracking-wider block">Step 02</span>
-              <span className={`text-xs font-bold font-serif ${currentStep === 2 ? 'text-[#176B87]' : 'text-[#66808A]'}`}>
+              <span className="text-[10px] font-black uppercase text-[#64748b] tracking-wider block">Step 02</span>
+              <span className={`text-xs font-bold font-serif ${currentStep === 2 ? 'text-[#176B87]' : 'text-[#64748b]'}`}>
                 Seller Onboarding Profile
               </span>
             </div>
@@ -191,7 +191,7 @@ export const SellPage: FC = () => {
             <h2 className="text-2xl sm:text-3xl font-black text-[#176B87] font-serif tracking-tight">
               Select Your Seller Onboarding Path
             </h2>
-            <p className="text-xs sm:text-sm text-[#66808A] font-medium">
+            <p className="text-xs sm:text-sm text-[#64748b] font-medium">
               Position your sales channel according to your scale — individual owner or professional dealer.
             </p>
           </div>
@@ -227,7 +227,7 @@ export const SellPage: FC = () => {
                     </h3>
                     <span className="px-2 py-0.5 rounded bg-[#176B87]/10 text-[#176B87] text-[9px] font-extrabold uppercase">Individual Owner</span>
                   </div>
-                  <p className="text-xs text-[#365563] font-medium leading-relaxed mt-1">
+                  <p className="text-xs text-[#176b87] font-medium leading-relaxed mt-1">
                     Ideal for individual vehicle owners seeking a safe, professional sales process with full escrow protection. No business registration required.
                   </p>
                 </div>
@@ -298,30 +298,30 @@ export const SellPage: FC = () => {
                     </h3>
                     <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${selectedType === 'dealer' ? 'bg-[#13B8A6]/20 text-[#13B8A6]' : 'bg-[#176B87]/10 text-[#176B87]'}`}>Pro Inventory</span>
                   </div>
-                  <p className={`text-xs font-medium leading-relaxed mt-1 ${selectedType === 'dealer' ? 'text-slate-300' : 'text-[#365563]'}`}>
+                  <p className={`text-xs font-medium leading-relaxed mt-1 ${selectedType === 'dealer' ? 'text-[#BDE5DE]' : 'text-[#176b87]'}`}>
                     Designed for commercial dealerships & showroom managers requiring full inventory scaling, auction marketplace listing, and priority search placement.
                   </p>
                 </div>
 
                 {/* Features List */}
                 <ul className={`space-y-2.5 pt-2 border-t ${selectedType === 'dealer' ? 'border-white/10' : 'border-[#D7E7E4]'}`}>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#176B87]'}`}>
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-[#DDF4F0]' : 'text-[#176B87]'}`}>
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
                     <span>Unlimited vehicle inventory listings</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#176B87]'}`}>
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-[#DDF4F0]' : 'text-[#176B87]'}`}>
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
                     <span>KAYAD Auction & Marketplace channel access</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#176B87]'}`}>
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-[#DDF4F0]' : 'text-[#176B87]'}`}>
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
                     <span>Priority placement in buyer search results</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#176B87]'}`}>
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-[#DDF4F0]' : 'text-[#176B87]'}`}>
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
                     <span>Verified Dealership Trust Badge & Showroom Page</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#176B87]'}`}>
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-[#DDF4F0]' : 'text-[#176B87]'}`}>
                     <CheckCircle2 className="w-4 h-4 text-[#13B8A6] shrink-0" />
                     <span>Dedicated KAYAD Account Manager & Bulk Upload tools</span>
                   </li>
@@ -395,7 +395,7 @@ export const SellPage: FC = () => {
                     {selectedType === 'dealer' ? 'Registered Business / Showroom Name *' : 'Full Legal Name *'}
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-[#66808A] absolute left-3.5 top-3.5" />
+                    <User className="w-4 h-4 text-[#64748b] absolute left-3.5 top-3.5" />
                     <input
                       type="text"
                       required
@@ -412,7 +412,7 @@ export const SellPage: FC = () => {
                     Phone Number (M-Pesa Registered) *
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-[#66808A] absolute left-3.5 top-3.5" />
+                    <Phone className="w-4 h-4 text-[#64748b] absolute left-3.5 top-3.5" />
                     <input
                       type="tel"
                       required
@@ -429,7 +429,7 @@ export const SellPage: FC = () => {
                     Official Email Address *
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-[#66808A] absolute left-3.5 top-3.5" />
+                    <Mail className="w-4 h-4 text-[#64748b] absolute left-3.5 top-3.5" />
                     <input
                       type="email"
                       required
@@ -446,7 +446,7 @@ export const SellPage: FC = () => {
                     Primary Region / County
                   </label>
                   <div className="relative">
-                    <MapPin className="w-4 h-4 text-[#66808A] absolute left-3.5 top-3.5" />
+                    <MapPin className="w-4 h-4 text-[#64748b] absolute left-3.5 top-3.5" />
                     <select
                       value={formData.city}
                       onChange={e => setFormData({ ...formData, city: e.target.value })}
@@ -471,14 +471,14 @@ export const SellPage: FC = () => {
                       First Vehicle Preview (Optional)
                     </h4>
                   </div>
-                  <span className="text-[10px] font-bold text-[#66808A] uppercase bg-white px-2 py-0.5 rounded border border-[#D7E7E4]">
+                  <span className="text-[10px] font-bold text-[#64748b] uppercase bg-white px-2 py-0.5 rounded border border-[#D7E7E4]">
                     Fast-Track Verification
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[11px] font-bold text-[#66808A] uppercase mb-1">Make & Model</label>
+                    <label className="block text-[11px] font-bold text-[#64748b] uppercase mb-1">Make & Model</label>
                     <input
                       type="text"
                       value={formData.carTitle}
@@ -489,7 +489,7 @@ export const SellPage: FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-[#66808A] uppercase mb-1">Asking Price (KES)</label>
+                    <label className="block text-[11px] font-bold text-[#64748b] uppercase mb-1">Asking Price (KES)</label>
                     <input
                       type="number"
                       value={formData.price}
@@ -500,7 +500,7 @@ export const SellPage: FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-[#66808A] uppercase mb-1">Year of Manufacture</label>
+                    <label className="block text-[11px] font-bold text-[#64748b] uppercase mb-1">Year of Manufacture</label>
                     <input
                       type="text"
                       value={formData.year}
@@ -513,7 +513,7 @@ export const SellPage: FC = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                <p className="text-xs text-[#66808A] font-semibold flex items-center gap-1.5">
+                <p className="text-xs text-[#64748b] font-semibold flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-[#13B8A6]" />
                   Escrow is offered only to approved sellers and vehicles
                 </p>

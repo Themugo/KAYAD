@@ -8,7 +8,7 @@
    ============================================================ */
 
 :root {
-  /* Dealer accent — previously a literal gold (#2563EB) on a fully
+  /* Dealer accent — previously a literal gold (#176B87) on a fully
      dark theme, completely disconnected from the light blue/white
      premium theme used everywhere else in the app (landing, gallery,
      vehicle details). Aligned here so the Dealer dashboard — the
@@ -18,30 +18,30 @@
   --dealer-gold: #176B87;
   --dealer-gold-light: #2DD9BE;
   --dealer-gold-dark: #12576D;
-  --dealer-gold-glow: rgba(22, 196, 164, 0.12);
+  --dealer-gold-glow: rgba(19, 184, 166, 0.12);
 
   /* Dealer backgrounds */
-  --dealer-bg: #F8FAFC;
+  --dealer-bg: #f6faf9;
   --dealer-surface: #FFFFFF;
-  --dealer-elevated: #F1F5F9;
+  --dealer-elevated: #f6faf9;
   --dealer-card: #FFFFFF;
 
   /* Dealer text */
-  --dealer-text: #0F172A;
-  --dealer-text-secondary: #475569;
+  --dealer-text: #0a3340;
+  --dealer-text-secondary: #64748b;
   --dealer-text-muted: #94A3B8;
-  --dealer-text-dim: #CBD5E1;
+  --dealer-text-dim: #d7e7e4;
 
   /* Dealer borders */
-  --dealer-border: rgba(15, 23, 42, 0.08);
-  --dealer-border-light: rgba(15, 23, 42, 0.14);
-  --dealer-border-gold: rgba(37, 99, 235, 0.25);
+  --dealer-border: rgba(10, 51, 64, 0.08);
+  --dealer-border-light: rgba(10, 51, 64, 0.14);
+  --dealer-border-gold: rgba(23, 107, 135, 0.25);
 
   /* Dealer shadows */
-  --dealer-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
-  --dealer-shadow-md: 0 4px 20px rgba(15, 23, 42, 0.08);
-  --dealer-shadow-lg: 0 8px 40px rgba(15, 23, 42, 0.12);
-  --dealer-shadow-glow: 0 0 30px rgba(37, 99, 235, 0.15);
+  --dealer-shadow-sm: 0 2px 8px rgba(10, 51, 64, 0.06);
+  --dealer-shadow-md: 0 4px 20px rgba(10, 51, 64, 0.08);
+  --dealer-shadow-lg: 0 8px 40px rgba(10, 51, 64, 0.12);
+  --dealer-shadow-glow: 0 0 30px rgba(23, 107, 135, 0.15);
 
   /* Dealer spacing */
   --dealer-space-1: 4px;
@@ -228,12 +228,12 @@
   font-size: 20px;
 }
 
-.dealer-metric__icon--views { background: rgba(59, 130, 246, 0.15); }
+.dealer-metric__icon--views { background: rgba(23, 107, 135, 0.15); }
 .dealer-metric__icon--leads { background: rgba(168, 85, 247, 0.15); }
 .dealer-metric__icon--sales { background: rgba(34, 197, 94, 0.15); }
-.dealer-metric__icon--revenue { background: rgba(37, 99, 235, 0.15); }
+.dealer-metric__icon--revenue { background: rgba(23, 107, 135, 0.15); }
 .dealer-metric__icon--inventory { background: rgba(251, 146, 60, 0.15); }
-.dealer-metric__icon--rating { background: rgba(236, 72, 153, 0.15); }
+.dealer-metric__icon--rating { background: rgba(19, 184, 166, 0.15); }
 
 .dealer-metric__trend {
   display: flex;
@@ -396,7 +396,7 @@
 
 .dealer-inventory-card__badge--featured {
   background: linear-gradient(135deg, var(--dealer-gold), var(--dealer-gold-dark));
-  color: #000;
+  color: #0a3340;
 }
 
 .dealer-inventory-card__body {
@@ -478,9 +478,9 @@
   letter-spacing: 0.05em;
 }
 
-.dealer-funnel-stage--new .dealer-funnel-stage__count { color: #60A5FA; }
-.dealer-funnel-stage--contacted .dealer-funnel-stage__count { color: #C084FC; }
-.dealer-funnel-stage--negotiating .dealer-funnel-stage__count { color: #FB923C; }
+.dealer-funnel-stage--new .dealer-funnel-stage__count { color: #5AAFA4; }
+.dealer-funnel-stage--contacted .dealer-funnel-stage__count { color: #91cec5; }
+.dealer-funnel-stage--negotiating .dealer-funnel-stage__count { color: #13b8a6; }
 .dealer-funnel-stage--closed .dealer-funnel-stage__count { color: #22C55E; }
 
 /* ============================================================
@@ -611,18 +611,18 @@
 }
 
 .dealer-leads__status--new {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60A5FA;
+  background: rgba(23, 107, 135, 0.15);
+  color: #5AAFA4;
 }
 
 .dealer-leads__status--contacted {
   background: rgba(168, 85, 247, 0.15);
-  color: #C084FC;
+  color: #91cec5;
 }
 
 .dealer-leads__status--negotiating {
   background: rgba(251, 146, 60, 0.15);
-  color: #FB923C;
+  color: #13b8a6;
 }
 
 .dealer-leads__status--closed-won {
@@ -743,7 +743,7 @@
 
 .dealer-insight__icon--tip { background: rgba(34, 197, 94, 0.15); }
 .dealer-insight__icon--alert { background: rgba(251, 146, 60, 0.15); }
-.dealer-insight__icon--info { background: rgba(59, 130, 246, 0.15); }
+.dealer-insight__icon--info { background: rgba(23, 107, 135, 0.15); }
 
 .dealer-insight__title {
   font-size: var(--dealer-text-sm);
@@ -827,7 +827,7 @@
 .dealer-onboarding__step--complete .dealer-onboarding__step-dot {
   background: var(--dealer-gold);
   border-color: var(--dealer-gold);
-  color: #000;
+  color: #0a3340;
 }
 
 .dealer-onboarding__step-label {
@@ -1141,13 +1141,13 @@
 
 .dealer-btn--primary {
   background: linear-gradient(135deg, var(--dealer-gold), var(--dealer-gold-dark));
-  color: #000;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+  color: #0a3340;
+  box-shadow: 0 4px 16px rgba(23, 107, 135, 0.3);
 }
 
 .dealer-btn--primary:hover {
   filter: brightness(1.05);
-  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 6px 24px rgba(23, 107, 135, 0.4);
   transform: translateY(-1px);
 }
 
@@ -1220,7 +1220,7 @@
 .dealer-sidebar.collapsed { width: 52px; }
 .dealer-sidebar-backdrop {
   display: none;
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90;
+  position: fixed; inset: 0; background: rgba(10, 51, 64, 0.5); z-index: 90;
 }
 .dealer-sidebar-header {
   padding: 16px 12px;
@@ -1241,8 +1241,8 @@
 }
 .dealer-sidebar-link:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
 .dealer-sidebar-link.active {
-  color: var(--gold);
-  background: rgba(37, 99, 235,0.06);
+  color: var(--brand);
+  background: rgba(23, 107, 135, 0.06);
 }
 .dealer-sidebar-link svg { flex-shrink: 0; }
 .dealer-sidebar-bottom {
@@ -1276,7 +1276,7 @@
   font-family: var(--font-display); font-weight: 900; font-style: italic;
   font-size: clamp(1.8rem, 3vw, 2.6rem); color: #fff; margin: 0;
 }
-.dash-welcome-name { color: var(--gold); }
+.dash-welcome-name { color: var(--brand); }
 .dash-subtitle {
   color: rgba(255,255,255,0.3); font-size: 13px; margin-top: 6px;
 }
@@ -1308,7 +1308,7 @@
   text-decoration: none; transition: all 0.2s;
 }
 .dash-action-card:hover {
-  border-color: rgba(37, 99, 235,0.2);
+  border-color: rgba(23, 107, 135, 0.2);
   transform: translateY(-2px);
 }
 .dash-action-icon {

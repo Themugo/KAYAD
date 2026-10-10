@@ -38,11 +38,11 @@ export default function Showroom() {
         description="Browse our showroom of vehicles"
       />
 
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
+      <div className="min-h-screen bg-[#F6FAF9]">
+        <div className="bg-gradient-to-r from-[#176B87] to-[#0E4655] text-white py-12">
           <div className="max-w-6xl mx-auto px-4">
             <h1 className="text-4xl font-bold mb-2">Kenya's Premium Automotive Gallery</h1>
-            <p className="text-blue-100">Curated vehicles with escrow-backed transactions</p>
+            <p className="text-[#DDF4F0]">Curated vehicles with escrow-backed transactions</p>
           </div>
         </div>
 
@@ -52,14 +52,14 @@ export default function Showroom() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
                 <input
                   type="text"
                   placeholder="Search vehicles..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="pl-10 pr-4 py-2 border border-[#BDE5DE] rounded-lg focus:ring-2 focus:ring-[#5AAFA4]"
                 />
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center gap-2 px-4 py-2 border border-[#BDE5DE] rounded-lg hover:bg-[#F6FAF9]">
                 <Filter className="h-5 w-5" />
                 Filters
               </button>
@@ -67,13 +67,13 @@ export default function Showroom() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400'}`}
+                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-[#176B87]' : 'text-[#94A3B8]'}`}
               >
                 <Grid className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400'}`}
+                className={`p-2 rounded ${viewMode === 'list' ? 'bg-[#DDF4F0] text-[#176B87]' : 'text-[#94A3B8]'}`}
               >
                 <List className="h-5 w-5" />
               </button>
@@ -81,11 +81,11 @@ export default function Showroom() {
           </div>
 
           <div className="text-center py-12">
-            <Car className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600">No vehicles in the showroom yet.</p>
+            <Car className="h-16 w-16 text-[#BDE5DE] mx-auto mb-4" />
+            <p className="text-[#64748B]">No vehicles in the showroom yet.</p>
             <button
               onClick={() => navigate('/')}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="mt-4 px-6 py-2 bg-[#176B87] text-white rounded-lg hover:bg-[#12576D]"
             >
               Browse All Vehicles
             </button>

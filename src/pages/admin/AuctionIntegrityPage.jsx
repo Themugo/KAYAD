@@ -3,10 +3,10 @@ import { adminAPI } from "../../api/api";
 
 const CATEGORIES = [
   { key: "self_bidding", label: "Self-Bidding", color: "text-red-600", bg: "bg-red-50", icon: "👤" },
-  { key: "related_account", label: "Related Accounts", color: "text-orange-600", bg: "bg-orange-50", icon: "🔗" },
-  { key: "bid_inflation", label: "Bid Inflation", color: "text-yellow-600", bg: "bg-yellow-50", icon: "📈" },
-  { key: "bid_velocity", label: "Bid Velocity", color: "text-purple-600", bg: "bg-purple-50", icon: "⚡" },
-  { key: "last_second_manipulation", label: "Last-Second", color: "text-blue-600", bg: "bg-blue-50", icon: "⏰" },
+  { key: "related_account", label: "Related Accounts", color: "text-[#176B87]", bg: "bg-[#F3FAF9]", icon: "🔗" },
+  { key: "bid_inflation", label: "Bid Inflation", color: "text-[#176B87]", bg: "bg-[#F3FAF9]", icon: "📈" },
+  { key: "bid_velocity", label: "Bid Velocity", color: "text-[#176B87]", bg: "bg-[#F3FAF9]", icon: "⚡" },
+  { key: "last_second_manipulation", label: "Last-Second", color: "text-[#176B87]", bg: "bg-[#F3FAF9]", icon: "⏰" },
 ];
 
 const SEVERITIES = ["critical", "high", "medium", "low"];
@@ -14,7 +14,7 @@ const STATUSES = ["detected", "under_review", "confirmed", "dismissed", "action_
 const ACTIONS = ["none", "warning", "bid_removed", "auction_cancelled", "user_suspended", "user_banned", "referral_frozen"];
 
 const sevColor = (s) =>
-  ({ critical: "text-red-600 bg-red-100", high: "text-orange-600 bg-orange-100", medium: "text-yellow-600 bg-yellow-100", low: "text-green-600 bg-green-100" })[s] || "text-gray-600 bg-gray-100";
+  ({ critical: "text-red-600 bg-red-100", high: "text-[#176B87] bg-[#DDF4F0]", medium: "text-[#176B87] bg-[#DDF4F0]", low: "text-green-600 bg-green-100" })[s] || "text-[#64748B] bg-[#EEF7F5]";
 
 const statusBadge = (s) =>
   ({ detected: "badge badge-warning", under_review: "badge badge-info", confirmed: "badge badge-error", dismissed: "badge", action_taken: "badge badge-success" })[s] || "badge";
@@ -150,7 +150,7 @@ export default function AuctionIntegrityPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Auction Integrity Engine</h1>
-          <p className="text-gray-500 text-sm">Detect self-bidding, related accounts, bid inflation, velocity abuse, and last-second manipulation</p>
+          <p className="text-[#64748B] text-sm">Detect self-bidding, related accounts, bid inflation, velocity abuse, and last-second manipulation</p>
         </div>
         <button className="btn btn-primary" onClick={() => setScanModal(true)}>Run Integrity Scan</button>
       </div>
@@ -159,19 +159,19 @@ export default function AuctionIntegrityPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="stat-card">
           <div className="stat-value text-3xl font-bold">{dashboard.totalFlags}</div>
-          <div className="stat-label text-gray-500">Total Flags</div>
+          <div className="stat-label text-[#64748B]">Total Flags</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value text-3xl font-bold text-orange-600">{dashboard.openFlags}</div>
-          <div className="stat-label text-gray-500">Open (Detected / Review)</div>
+          <div className="stat-value text-3xl font-bold text-[#176B87]">{dashboard.openFlags}</div>
+          <div className="stat-label text-[#64748B]">Open (Detected / Review)</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value text-3xl font-bold text-blue-600">{dashboard.todayCount}</div>
-          <div className="stat-label text-gray-500">Flagged Today</div>
+          <div className="stat-value text-3xl font-bold text-[#176B87]">{dashboard.todayCount}</div>
+          <div className="stat-label text-[#64748B]">Flagged Today</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value text-3xl font-bold text-purple-600">{dashboard.topRiskProfiles?.length || 0}</div>
-          <div className="stat-label text-gray-500">High-Risk Users</div>
+          <div className="stat-value text-3xl font-bold text-[#176B87]">{dashboard.topRiskProfiles?.length || 0}</div>
+          <div className="stat-label text-[#64748B]">High-Risk Users</div>
         </div>
       </div>
 
@@ -189,7 +189,7 @@ export default function AuctionIntegrityPage() {
                 <div key={cat.key} className="flex items-center gap-2">
                   <span className="text-lg">{cat.icon}</span>
                   <span className="text-sm w-32">{cat.label}</span>
-                  <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-4 bg-[#EEF7F5] rounded-full overflow-hidden">
                     <div className={`h-full rounded-full transition-all ${cat.color.replace("text-", "bg-")}`} style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-sm font-mono w-10 text-right">{count}</span>
@@ -209,7 +209,7 @@ export default function AuctionIntegrityPage() {
               return (
                 <div key={sev} className="flex items-center gap-2">
                   <span className={`text-sm font-medium w-20 ${sevColor(sev).split(" ")[0]}`}>{sev}</span>
-                  <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-4 bg-[#EEF7F5] rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${sevColor(sev).split(" ")[1]}`} style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-sm font-mono w-10 text-right">{count}</span>
@@ -266,10 +266,10 @@ export default function AuctionIntegrityPage() {
                 {flagLoading ? (
                   <tr><td colSpan={9} className="text-center py-8"><div className="spinner" /></td></tr>
                 ) : flags.length === 0 ? (
-                  <tr><td colSpan={9} className="text-center py-8 text-gray-400">No integrity flags found</td></tr>
+                  <tr><td colSpan={9} className="text-center py-8 text-[#94A3B8]">No integrity flags found</td></tr>
                 ) : (
                   flags.map((f) => (
-                    <tr key={f._id} className="cursor-pointer hover:bg-gray-50" onClick={() => handleSelectFlag(f)}>
+                    <tr key={f._id} className="cursor-pointer hover:bg-[#F6FAF9]" onClick={() => handleSelectFlag(f)}>
                       <td className="font-mono text-xs">{f.flagId?.slice(0, 20)}</td>
                       <td>
                         <span className={`text-xs font-medium ${CATEGORIES.find((c) => c.key === f.category)?.color || ""}`}>
@@ -280,11 +280,11 @@ export default function AuctionIntegrityPage() {
                       <td className="font-mono">{f.riskScore}</td>
                       <td><span className={statusBadge(f.status)}>{f.status.replace("_", " ")}</span></td>
                       <td className="text-sm">{f.targetUser?.name || f.targetUser?.email || "—"}</td>
-                      <td className="text-xs text-gray-500 max-w-xs truncate">{f.summary}</td>
-                      <td className="text-xs text-gray-400">{new Date(f.createdAt).toLocaleDateString()}</td>
+                      <td className="text-xs text-[#64748B] max-w-xs truncate">{f.summary}</td>
+                      <td className="text-xs text-[#94A3B8]">{new Date(f.createdAt).toLocaleDateString()}</td>
                       <td>
                         {f.status === "detected" && (
-                          <button className="btn btn-xs btn-ghost text-blue-600" onClick={(e) => { e.stopPropagation(); handleSelectFlag(f); }}>Review</button>
+                          <button className="btn btn-xs btn-ghost text-[#176B87]" onClick={(e) => { e.stopPropagation(); handleSelectFlag(f); }}>Review</button>
                         )}
                       </td>
                     </tr>
@@ -298,7 +298,7 @@ export default function AuctionIntegrityPage() {
           {pagination.pages > 1 && (
             <div className="flex justify-center gap-2 mt-4">
               <button className="btn btn-sm" disabled={pagination.page <= 1} onClick={() => handlePageChange(pagination.page - 1)}>Prev</button>
-              <span className="flex items-center text-sm text-gray-500">Page {pagination.page} of {pagination.pages}</span>
+              <span className="flex items-center text-sm text-[#64748B]">Page {pagination.page} of {pagination.pages}</span>
               <button className="btn btn-sm" disabled={pagination.page >= pagination.pages} onClick={() => handlePageChange(pagination.page + 1)}>Next</button>
             </div>
           )}
@@ -312,53 +312,53 @@ export default function AuctionIntegrityPage() {
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="text-xs text-gray-400">Flag ID</label>
+                    <label className="text-xs text-[#94A3B8]">Flag ID</label>
                     <p className="font-mono text-sm">{selectedFlag.flag?.flagId}</p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400">Category</label>
+                    <label className="text-xs text-[#94A3B8]">Category</label>
                     <p className="font-medium">{CATEGORIES.find((c) => c.key === selectedFlag.flag?.category)?.label}</p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400">Severity</label>
+                    <label className="text-xs text-[#94A3B8]">Severity</label>
                     <p><span className={`text-sm font-semibold px-2 py-0.5 rounded ${sevColor(selectedFlag.flag?.severity)}`}>{selectedFlag.flag?.severity}</span></p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400">Risk Score</label>
+                    <label className="text-xs text-[#94A3B8]">Risk Score</label>
                     <p className="font-bold text-lg">{selectedFlag.flag?.riskScore}/100</p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400">Status</label>
+                    <label className="text-xs text-[#94A3B8]">Status</label>
                     <p><span className={statusBadge(selectedFlag.flag?.status)}>{selectedFlag.flag?.status?.replace("_", " ")}</span></p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400">Target User</label>
+                    <label className="text-xs text-[#94A3B8]">Target User</label>
                     <p>{selectedFlag.flag?.targetUser?.name || selectedFlag.flag?.targetUser?.email || "—"}</p>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <label className="text-xs text-gray-400">Summary</label>
+                  <label className="text-xs text-[#94A3B8]">Summary</label>
                   <p className="text-sm">{selectedFlag.flag?.summary}</p>
                 </div>
 
                 {/* Evidence */}
                 {selectedFlag.flag?.evidence && Object.keys(selectedFlag.flag.evidence).length > 0 && (
                   <div className="mb-4">
-                    <label className="text-xs text-gray-400">Evidence</label>
-                    <pre className="bg-gray-50 p-3 rounded text-xs overflow-x-auto mt-1">{JSON.stringify(selectedFlag.flag.evidence, null, 2)}</pre>
+                    <label className="text-xs text-[#94A3B8]">Evidence</label>
+                    <pre className="bg-[#F6FAF9] p-3 rounded text-xs overflow-x-auto mt-1">{JSON.stringify(selectedFlag.flag.evidence, null, 2)}</pre>
                   </div>
                 )}
 
                 {/* Risk Factors */}
                 {selectedFlag.flag?.riskFactors?.length > 0 && (
                   <div className="mb-4">
-                    <label className="text-xs text-gray-400">Risk Factors</label>
+                    <label className="text-xs text-[#94A3B8]">Risk Factors</label>
                     <div className="space-y-1 mt-1">
                       {selectedFlag.flag.riskFactors.map((rf, i) => (
-                        <div key={i} className="flex justify-between text-sm bg-gray-50 p-2 rounded">
+                        <div key={i} className="flex justify-between text-sm bg-[#F6FAF9] p-2 rounded">
                           <span className="font-medium">{rf.factor}</span>
-                          <span className="text-gray-500">{rf.detail}</span>
+                          <span className="text-[#64748B]">{rf.detail}</span>
                           <span className="font-mono text-xs">{rf.score}</span>
                         </div>
                       ))}
@@ -369,7 +369,7 @@ export default function AuctionIntegrityPage() {
                 {/* Risk Profile */}
                 {selectedFlag.riskProfile && (
                   <div className="mb-4">
-                    <label className="text-xs text-gray-400">User Risk Profile</label>
+                    <label className="text-xs text-[#94A3B8]">User Risk Profile</label>
                     <div className="grid grid-cols-4 gap-2 mt-1 text-sm">
                       <div>Score: <strong>{selectedFlag.riskProfile.riskScore}</strong></div>
                       <div>Tier: <span className={`font-semibold ${sevColor(selectedFlag.riskProfile.riskTier).split(" ")[0]}`}>{selectedFlag.riskProfile.riskTier}</span></div>
@@ -382,7 +382,7 @@ export default function AuctionIntegrityPage() {
                 {/* Detection Rules */}
                 {selectedFlag.flag?.detectionRules?.length > 0 && (
                   <div className="mb-4">
-                    <label className="text-xs text-gray-400">Detection Rules Triggered</label>
+                    <label className="text-xs text-[#94A3B8]">Detection Rules Triggered</label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {selectedFlag.flag.detectionRules.map((r, i) => (
                         <span key={i} className="badge badge-outline badge-sm">{r}</span>
@@ -393,7 +393,7 @@ export default function AuctionIntegrityPage() {
 
                 {/* Action */}
                 <div className="border-t pt-4 mt-2">
-                  <label className="text-xs text-gray-400 mb-2 block">Admin Action</label>
+                  <label className="text-xs text-[#94A3B8] mb-2 block">Admin Action</label>
                   <div className="flex flex-wrap gap-2">
                     <button className="btn btn-xs btn-warning" onClick={() => handleUpdateStatus(selectedFlag.flag._id, "under_review")}>Mark Under Review</button>
                     <button className="btn btn-xs btn-error" onClick={() => handleUpdateStatus(selectedFlag.flag._id, "confirmed")}>Confirm</button>
@@ -445,7 +445,7 @@ export default function AuctionIntegrityPage() {
               </thead>
               <tbody>
                 {profiles.length === 0 ? (
-                  <tr><td colSpan={10} className="text-center py-8 text-gray-400">No risk profiles found</td></tr>
+                  <tr><td colSpan={10} className="text-center py-8 text-[#94A3B8]">No risk profiles found</td></tr>
                 ) : (
                   profiles.map((p) => (
                     <tr key={p._id}>
@@ -455,10 +455,10 @@ export default function AuctionIntegrityPage() {
                       <td><span className={`text-xs font-semibold px-2 py-0.5 rounded ${sevColor(p.riskTier)}`}>{p.riskTier}</span></td>
                       <td>{p.totalBids}</td>
                       <td className={p.selfBidCount > 0 ? "text-red-600 font-medium" : ""}>{p.selfBidCount}</td>
-                      <td className={p.relatedAccountCount > 0 ? "text-orange-600 font-medium" : ""}>{p.relatedAccountCount}</td>
-                      <td className={p.inflationPatternCount > 0 ? "text-yellow-600 font-medium" : ""}>{p.inflationPatternCount}</td>
-                      <td className={p.velocityAbuseCount > 0 ? "text-purple-600 font-medium" : ""}>{p.velocityAbuseCount}</td>
-                      <td className={p.lastSecondCount > 0 ? "text-blue-600 font-medium" : ""}>{p.lastSecondCount}</td>
+                      <td className={p.relatedAccountCount > 0 ? "text-[#176B87] font-medium" : ""}>{p.relatedAccountCount}</td>
+                      <td className={p.inflationPatternCount > 0 ? "text-[#176B87] font-medium" : ""}>{p.inflationPatternCount}</td>
+                      <td className={p.velocityAbuseCount > 0 ? "text-[#176B87] font-medium" : ""}>{p.velocityAbuseCount}</td>
+                      <td className={p.lastSecondCount > 0 ? "text-[#176B87] font-medium" : ""}>{p.lastSecondCount}</td>
                     </tr>
                   ))
                 )}
@@ -479,8 +479,8 @@ export default function AuctionIntegrityPage() {
                 return (
                   <div key={day._id} className="flex items-center gap-3">
                     <span className="text-sm w-24">{new Date(day._id).toLocaleDateString("en-KE", { weekday: "short", month: "short", day: "numeric" })}</span>
-                    <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-blue-400 to-purple-500 rounded-full transition-all" style={{ width: `${(day.count / maxCount) * 100}%` }} />
+                    <div className="flex-1 h-5 bg-[#EEF7F5] rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#13B8A6] to-[#13B8A6] rounded-full transition-all" style={{ width: `${(day.count / maxCount) * 100}%` }} />
                     </div>
                     <span className="text-sm font-mono w-8 text-right">{day.count}</span>
                   </div>
@@ -488,7 +488,7 @@ export default function AuctionIntegrityPage() {
               })}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm">No data for the past 7 days</p>
+            <p className="text-[#94A3B8] text-sm">No data for the past 7 days</p>
           )}
         </div>
       )}
@@ -502,8 +502,8 @@ export default function AuctionIntegrityPage() {
 
             {!scanResult ? (
               <div className="space-y-4">
-                <p className="text-sm text-gray-500">This will scan all auction activity from the past 24 hours for integrity violations. Results are saved as integrity flags for review.</p>
-                <ul className="text-sm space-y-1 text-gray-600">
+                <p className="text-sm text-[#64748B]">This will scan all auction activity from the past 24 hours for integrity violations. Results are saved as integrity flags for review.</p>
+                <ul className="text-sm space-y-1 text-[#64748B]">
                   <li>• Self-bidding detection</li>
                   <li>• Related-account bidding</li>
                   <li>• Bid inflation patterns</li>
@@ -520,7 +520,7 @@ export default function AuctionIntegrityPage() {
                 {scanResult.categories && (
                   <div className="grid grid-cols-2 gap-2">
                     {Object.entries(scanResult.categories).map(([cat, count]) => (
-                      <div key={cat} className="bg-gray-50 p-2 rounded text-sm flex justify-between">
+                      <div key={cat} className="bg-[#F6FAF9] p-2 rounded text-sm flex justify-between">
                         <span>{CATEGORIES.find((c) => c.key === cat)?.label || cat}</span>
                         <span className="font-bold">{count}</span>
                       </div>

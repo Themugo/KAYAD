@@ -16,9 +16,9 @@
   /* Card specific tokens */
   --vc-card-radius: var(--radius-xl, 16px);
   --vc-card-radius-sm: var(--radius-lg, 12px);
-  --vc-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --vc-card-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.12);
-  --vc-card-shadow-lift: 0 6px 24px rgba(0, 0, 0, 0.1);
+  --vc-card-shadow: 0 2px 8px rgba(10, 51, 64, 0.08);
+  --vc-card-shadow-hover: 0 12px 32px rgba(10, 51, 64, 0.12);
+  --vc-card-shadow-lift: 0 6px 24px rgba(10, 51, 64, 0.1);
 
   /* Typography */
   --vc-card-title-size: 15px;
@@ -30,13 +30,13 @@
 
   /* Colors */
   --vc-card-bg: var(--color-bg-elevated, #ffffff);
-  --vc-card-border: var(--color-border, rgba(0, 0, 0, 0.08));
-  --vc-card-text: var(--color-text-primary, #1a1a1a);
+  --vc-card-border: var(--color-border, rgba(10, 51, 64, 0.08));
+  --vc-card-text: var(--color-text-primary, #0a3340);
   --vc-card-text-secondary: var(--color-text-secondary, #666666);
   --vc-card-text-muted: var(--color-text-muted, #999999);
   --vc-card-brand: var(--color-brand, #176B87);
   --vc-card-brand-light: var(--color-brand-light, #80EDD8);
-  --vc-card-brand-subtle: var(--color-brand-subtle, rgba(22, 196, 164, 0.1));
+  --vc-card-brand-subtle: var(--color-brand-subtle, rgba(19, 184, 166, 0.1));
 
   /* Spacing */
   --vc-card-padding: 16px;
@@ -78,7 +78,7 @@
   position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: var(--color-bg-secondary, #f5f5f5);
+  background: var(--color-bg-secondary, #f6faf9);
 }
 
 .vc-card__image {
@@ -103,9 +103,9 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    var(--color-bg-secondary, #f0f0f0) 0%,
+    var(--color-bg-secondary, #eef7f5) 0%,
     var(--color-bg-elevated, #ffffff) 50%,
-    var(--color-bg-secondary, #f0f0f0) 100%
+    var(--color-bg-secondary, #eef7f5) 100%
   );
   background-size: 200% 100%;
   animation: vc-skeleton-shimmer 1.5s infinite;
@@ -195,7 +195,7 @@
   position: absolute;
   bottom: var(--space-3, 12px);
   right: var(--space-3, 12px);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(10, 51, 64, 0.6);
   backdrop-filter: blur(4px);
   color: white;
   font-size: 11px;
@@ -213,7 +213,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(10, 51, 64, 0.75);
   backdrop-filter: blur(8px);
   color: white;
   font-size: 11px;
@@ -246,7 +246,7 @@
 }
 
 .vc-badge--default {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(10, 51, 64, 0.6);
   color: white;
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -273,7 +273,7 @@
 }
 
 .vc-badge--warning {
-  background: #f59e0b;
+  background: #176b87;
   color: white;
 }
 
@@ -283,7 +283,7 @@
 }
 
 .vc-badge--info {
-  background: #3b82f6;
+  background: #176B87;
   color: white;
 }
 
@@ -293,12 +293,12 @@
 }
 
 .vc-badge--hybrid {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #176B87, #176B87);
   color: white;
 }
 
 .vc-badge--price-drop {
-  background: #f59e0b;
+  background: #176b87;
   color: white;
 }
 
@@ -450,13 +450,13 @@
 }
 
 .vc-card__trust-level--info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: rgba(23, 107, 135, 0.1);
+  color: #176B87;
 }
 
 .vc-card__trust-level--warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: rgba(23, 107, 135, 0.1);
+  color: #176b87;
 }
 
 .vc-card__trust-signals {
@@ -481,11 +481,11 @@
 }
 
 .vc-trust-signal--info {
-  color: #3b82f6;
+  color: #176B87;
 }
 
 .vc-trust-signal--warning {
-  color: #f59e0b;
+  color: #176b87;
 }
 
 /* ============================================================================
@@ -505,7 +505,7 @@
   height: 32px;
   border-radius: var(--radius-sm, 8px);
   object-fit: cover;
-  background: var(--color-bg-secondary, #f0f0f0);
+  background: var(--color-bg-secondary, #eef7f5);
 }
 
 .vc-card__dealer-info {
@@ -538,7 +538,7 @@
   align-items: center;
   gap: 3px;
   font-size: 11px;
-  color: #f59e0b;
+  color: #176b87;
   font-weight: 600;
 }
 
@@ -576,16 +576,16 @@
 .vc-card__btn--primary {
   background: linear-gradient(135deg, var(--vc-card-brand) 0%, var(--color-brand-dark, #12576D) 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(22, 196, 164, 0.3);
+  box-shadow: 0 2px 8px rgba(19, 184, 166, 0.3);
 }
 
 .vc-card__btn--primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(22, 196, 164, 0.4);
+  box-shadow: 0 4px 12px rgba(19, 184, 166, 0.4);
 }
 
 .vc-card__btn--secondary {
-  background: var(--color-bg-secondary, #f5f5f5);
+  background: var(--color-bg-secondary, #f6faf9);
   color: var(--vc-card-text);
   border: 1px solid var(--vc-card-border);
 }
@@ -611,9 +611,9 @@
   height: 14px;
   background: linear-gradient(
     90deg,
-    var(--color-bg-secondary, #f0f0f0) 0%,
+    var(--color-bg-secondary, #eef7f5) 0%,
     var(--color-bg-elevated, #ffffff) 50%,
-    var(--color-bg-secondary, #f0f0f0) 100%
+    var(--color-bg-secondary, #eef7f5) 100%
   );
   background-size: 200% 100%;
   animation: vc-skeleton-shimmer 1.5s infinite;
@@ -647,9 +647,9 @@
   height: 24px;
   background: linear-gradient(
     90deg,
-    var(--color-bg-secondary, #f0f0f0) 0%,
+    var(--color-bg-secondary, #eef7f5) 0%,
     var(--color-bg-elevated, #ffffff) 50%,
-    var(--color-bg-secondary, #f0f0f0) 100%
+    var(--color-bg-secondary, #eef7f5) 100%
   );
   background-size: 200% 100%;
   animation: vc-skeleton-shimmer 1.5s infinite;
@@ -661,9 +661,9 @@
   height: 12px;
   background: linear-gradient(
     90deg,
-    var(--color-bg-secondary, #f0f0f0) 0%,
+    var(--color-bg-secondary, #eef7f5) 0%,
     var(--color-bg-elevated, #ffffff) 50%,
-    var(--color-bg-secondary, #f0f0f0) 100%
+    var(--color-bg-secondary, #eef7f5) 100%
   );
   background-size: 200% 100%;
   animation: vc-skeleton-shimmer 1.5s infinite;
@@ -763,7 +763,7 @@
 }
 
 .vc-card[data-status="reserved"] {
-  border-color: #f59e0b;
+  border-color: #176b87;
 }
 
 .vc-card[data-status="live"] {

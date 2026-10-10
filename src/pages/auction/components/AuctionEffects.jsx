@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-export const AVATAR_COLORS = ['#f59e0b','#3b82f6','#22c55e','#ef4444','#a855f7','#ec4899','#14b8a6','#f97316'];
+export const AVATAR_COLORS = ['#176B87', '#13B8A6', '#5AAFA4', '#12576D', '#0A3340', '#2F8F87', '#91CEC5', '#176B87'];
 
 export function hashColor(str) {
   let h = 0;

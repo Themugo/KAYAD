@@ -53,12 +53,12 @@ const conversionRateStyle = {
 };
 
 const STAGES = [
-  { key: 'views', label: 'Views', icon: Users, color: '#3b82f6' },
-  { key: 'favorited', label: 'Favorites', icon: Filter, color: '#a855f7' },
+  { key: 'views', label: 'Views', icon: Users, color: '#176B87' },
+  { key: 'favorited', label: 'Favorites', icon: Filter, color: '#5aafa4' },
   { key: 'chatted', label: 'Chats', icon: Users, color: '#22c55e' },
-  { key: 'offered', label: 'Offers', icon: DollarSign, color: '#f97316' },
+  { key: 'offered', label: 'Offers', icon: DollarSign, color: '#176b87' },
   { key: 'escrowInitiated', label: 'Escrow', icon: Shield, color: '#ef4444' },
-  { key: 'sold', label: 'Sales', icon: TrendingUp, color: 'var(--gold)' },
+  { key: 'sold', label: 'Sales', icon: TrendingUp, color: 'var(--brand)' },
 ];
 
 export default function ConversionFunnelDashboard({ dealerId }) {
@@ -88,7 +88,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
     return (
       <div style={widgetStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <Filter size={16} style={{ color: 'var(--gold)' }} />
+          <Filter size={16} style={{ color: 'var(--brand)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Loading analytics...</div>
@@ -100,7 +100,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
     return (
       <div style={widgetStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <Filter size={16} style={{ color: 'var(--gold)' }} />
+          <Filter size={16} style={{ color: 'var(--brand)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No analytics data available</div>
@@ -117,7 +117,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
   return (
     <div style={widgetStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <Filter size={16} style={{ color: 'var(--gold)' }} />
+        <Filter size={16} style={{ color: 'var(--brand)' }} />
         <span style={widgetHeader}>Conversion Funnel</span>
       </div>
 
@@ -158,17 +158,17 @@ export default function ConversionFunnelDashboard({ dealerId }) {
         })}
       </div>
 
-      <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(37, 99, 235,0.06)', borderRadius: 8, border: '1px solid rgba(37, 99, 235,0.15)' }}>
+      <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(23, 107, 135, 0.06)', borderRadius: 8, border: '1px solid rgba(23, 107, 135, 0.15)' }}>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Business Insights</div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
           {total.views > 0 && total.chatted === 0 && (
             <div style={{ color: '#ef4444', fontWeight: 600 }}>Low engagement: Consider improving listing quality or pricing</div>
           )}
           {total.views > 0 && total.chatted > 0 && total.offered === 0 && (
-            <div style={{ color: '#f97316', fontWeight: 600 }}>High interest, no offers: Pricing may be too high</div>
+            <div style={{ color: '#176b87', fontWeight: 600 }}>High interest, no offers: Pricing may be too high</div>
           )}
           {total.offered > 0 && total.escrowInitiated === 0 && (
-            <div style={{ color: '#a855f7', fontWeight: 600 }}>Offers received but no escrow: Follow up with buyers</div>
+            <div style={{ color: '#5aafa4', fontWeight: 600 }}>Offers received but no escrow: Follow up with buyers</div>
           )}
           {total.sold > 0 && (
             <div style={{ color: '#22c55e', fontWeight: 600 }}>Sales active: Keep momentum going!</div>

@@ -147,22 +147,37 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const gridAuctions = spotlightId ? filtered.filter((auction) => String(auction.carId || auction.id) !== spotlightId) : filtered;
 
   const marketHeadline = useMemo(() => {
+    // Reflect the selected section first: healthy live data must not hide a
+    // scheduled/completed-list failure when the customer opens that section.
+    if (tab === 'live' && failed.live) return 'Live auctions are temporarily unavailable';
+    if (tab === 'scheduled' && failed.scheduled) return 'Starting-soon auctions are temporarily unavailable';
+    if (tab === 'ended' && failed.ended) return 'Completed auctions are temporarily unavailable';
+    if (tab === 'saved' && failed.live && failed.scheduled && failed.ended) return 'Saved auction data is temporarily unavailable';
+    if (tab === 'live' && live.length > 0) return `${live.length} vehicle${live.length === 1 ? '' : 's'} up for bid right now`;
+    if (tab === 'scheduled' && scheduled.length > 0) return `${scheduled.length} auction${scheduled.length === 1 ? '' : 's'} starting soon`;
+    if (tab === 'ended' && ended.length > 0) return `${ended.length} completed auction${ended.length === 1 ? '' : 's'}`;
+    if (failed.live && failed.scheduled && failed.ended) return 'Auction data is temporarily unavailable';
     if (failed.live) return 'Live auctions are temporarily unavailable';
+    if (failed.scheduled && live.length === 0) return 'Starting-soon auctions are temporarily unavailable';
     if (live.length > 0) return `${live.length} vehicle${live.length === 1 ? '' : 's'} up for bid right now`;
     if (failed.scheduled) return 'Starting-soon auctions are temporarily unavailable';
     if (scheduled.length > 0) return `No auctions live right now — ${scheduled.length} starting soon`;
     return 'The auction floor is quiet right now';
-  }, [live.length, scheduled.length, failed.live, failed.scheduled]);
+  }, [tab, live.length, scheduled.length, ended.length, failed.live, failed.scheduled, failed.ended]);
 
   const marketSubcopy = useMemo(() => {
     if (failed.live && failed.scheduled && failed.ended) return 'The auction service did not return any of its lists. No auction records have been fabricated — use Refresh to try again.';
+    if (tab === 'live' && failed.live) return 'Live auctions could not be loaded. Other sections may still be available; use Refresh to retry the live list.';
+    if (tab === 'scheduled' && failed.scheduled) return 'The Starting soon list could not be loaded, but the other auction sections responded. This is not confirmation that there are no scheduled auctions — use Refresh to retry.';
+    if (tab === 'ended' && failed.ended) return 'Completed auctions could not be loaded. Other sections may still be available; use Refresh to retry the completed list.';
+    if (tab === 'saved' && (failed.live || failed.scheduled || failed.ended)) return 'Some auction lists could not be loaded, so this view may be incomplete. Use Refresh to retry before relying on these results.';
     if (failed.live) return 'Live auctions could not be loaded. Other sections may still be available; use Refresh to retry the live list.';
     if (failed.scheduled && live.length === 0) return 'The Starting soon list could not be loaded, but the other auction sections responded. This is not confirmation that there are no scheduled auctions — use Refresh to retry.';
     if (live.length > 0) return 'Follow live bidding, save what you want to return to, and move from registration to fulfilment in one connected room.';
     if (failed.scheduled) return 'The Starting soon list is temporarily unavailable. Live and completed sections remain available; use Refresh to retry.';
     if (scheduled.length > 0) return 'New auctions are queued and will open automatically — save a listing or check back to be first in the room.';
     return 'KAYAD opens auctions as verified vehicles clear registration. Browse the marketplace in the meantime, or save a search to be notified the moment one goes live.';
-  }, [live.length, scheduled.length, failed.live, failed.scheduled, failed.ended]);
+  }, [tab, live.length, scheduled.length, failed.live, failed.scheduled, failed.ended]);
 
   const openAuction = (auction: DisplayAuction) => {
     navigate(`/auction/${encodeURIComponent(String(auction.carId || auction.id))}`);
@@ -195,17 +210,17 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
         <Card className="auction-spotlight overflow-hidden auction-interaction-glow">
           <div className="auction-spotlight-grid">
             <button onClick={() => openAuction(auction)} className="auction-spotlight-media relative block text-left overflow-hidden" aria-label={`Open ${title(auction)}`}>
-              {image ? <LazyImage src={image} alt={title(auction)} className="w-full h-full object-cover" /> : <div className="h-full flex items-center justify-center text-slate-400">No image supplied</div>}
+              {image ? <LazyImage src={image} alt={title(auction)} className="w-full h-full object-cover" /> : <div className="h-full flex items-center justify-center text-[#94A3B8]">No image supplied</div>}
               <div className="auction-card-badge absolute top-4 left-4"><Badge variant="live">LIVE NOW</Badge></div>
             </button>
             <div className="auction-spotlight-body">
               <p className="auction-spotlight-eyebrow">Closing soonest</p>
               <h2 className="auction-spotlight-title">{title(auction)}</h2>
-              <p className="auction-card-meta text-sm text-slate-500">{[auction.car?.year, auction.car?.brand, auction.car?.model, auction.car?.location || auction.car?.location_city].filter(Boolean).join(' • ')}</p>
+              <p className="auction-card-meta text-sm text-[#64748B]">{[auction.car?.year, auction.car?.brand, auction.car?.model, auction.car?.location || auction.car?.location_city].filter(Boolean).join(' • ')}</p>
               <div className="auction-spotlight-stats">
-                <div><p className="text-xs text-slate-500">Current bid</p><p className="auction-spotlight-price">{money(auction.highestBid)}</p></div>
-                <div><p className="text-xs text-slate-500">Time left</p><p className="auction-spotlight-time"><Clock3 className="w-4 h-4 inline -mt-1 mr-1" />{remaining(auction.endTime)}</p></div>
-                <div><p className="text-xs text-slate-500">Bids placed</p><p className="auction-spotlight-time">{auction.bidCount || 0}</p></div>
+                <div><p className="text-xs text-[#64748B]">Current bid</p><p className="auction-spotlight-price">{money(auction.highestBid)}</p></div>
+                <div><p className="text-xs text-[#64748B]">Time left</p><p className="auction-spotlight-time"><Clock3 className="w-4 h-4 inline -mt-1 mr-1" />{remaining(auction.endTime)}</p></div>
+                <div><p className="text-xs text-[#64748B]">Bids placed</p><p className="auction-spotlight-time">{auction.bidCount || 0}</p></div>
               </div>
               <div className="flex items-center gap-4 mt-5">
                 <Button onClick={() => openAuction(auction)}>Enter the live room</Button>
@@ -220,23 +235,23 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
     return (
       <Card key={auction.id} className="auction-card overflow-hidden group auction-touch-card auction-interaction-glow">
         <button onClick={() => openAuction(auction)} className="block w-full text-left">
-          <div className="auction-card-media relative h-52 bg-slate-100 overflow-hidden">
-            {image ? <LazyImage src={image} alt={title(auction)} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform" /> : <div className="h-full flex items-center justify-center text-slate-400">No image supplied</div>}
+          <div className="auction-card-media relative h-52 bg-[#EEF7F5] overflow-hidden">
+            {image ? <LazyImage src={image} alt={title(auction)} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform" /> : <div className="h-full flex items-center justify-center text-[#94A3B8]">No image supplied</div>}
             <div className="auction-card-badge absolute top-3 left-3"><Badge variant={isLive ? 'live' : 'neutral'}>{isLive ? 'LIVE NOW' : isScheduled ? 'STARTING SOON' : 'COMPLETED'}</Badge></div>
             <div className="auction-card-overlay" aria-hidden="true" />
           </div>
         </button>
         <div className="auction-card-body p-5 space-y-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0"><h3 className="auction-card-title font-bold text-[#176B87] truncate">{title(auction)}</h3><p className="auction-card-meta text-xs text-slate-500 mt-1">{[auction.car?.year, auction.car?.brand, auction.car?.model, auction.car?.location || auction.car?.location_city].filter(Boolean).join(' • ')}</p></div>
+            <div className="min-w-0"><h3 className="auction-card-title font-bold text-[#176B87] truncate">{title(auction)}</h3><p className="auction-card-meta text-xs text-[#64748B] mt-1">{[auction.car?.year, auction.car?.brand, auction.car?.model, auction.car?.location || auction.car?.location_city].filter(Boolean).join(' • ')}</p></div>
             <AuctionSavedPulse active={favorites.has(id)} onToggle={() => void watch(auction)} label="Watch" />
           </div>
-          <div className="flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center justify-between text-xs text-[#64748B]">
             <span className="flex items-center gap-1"><Clock3 className="w-3 h-3" /> {isLive ? `${remaining(auction.endTime)} remaining` : isScheduled ? `Starts in ${remaining(auction.startTime)}` : 'Auction ended'}</span>
             <span>{auction.bidCount || 0} bids</span>
           </div>
           <div className="flex items-end justify-between">
-            <div><p className="text-xs text-slate-500">{isLive ? 'Current bid' : isEnded ? 'Final bid' : 'Starting bid'}</p><p className="auction-card-price text-xl font-black text-slate-900">{money(isLive || isEnded ? auction.highestBid : auction.startingBid)}</p></div>
+            <div><p className="text-xs text-[#64748B]">{isLive ? 'Current bid' : isEnded ? 'Final bid' : 'Starting bid'}</p><p className="auction-card-price text-xl font-black text-[#0A3340]">{money(isLive || isEnded ? auction.highestBid : auction.startingBid)}</p></div>
             <div className="text-right">{verified && <span className="text-xs text-emerald-700 flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Verified organizer</span>}<Button onClick={() => openAuction(auction)} className="mt-2">{isLive ? 'Open auction' : 'View auction'}</Button></div>
           </div>
         </div>
@@ -290,7 +305,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
 
           <div className="auction-searchbar">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-3 w-4 h-4 text-[#94A3B8]" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search vehicle, make, model or location..." className="pl-9" />
             </div>
             <Button variant="secondary" onClick={() => void load()} disabled={loading} className="auction-refresh-btn"><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button>
@@ -298,7 +313,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
         </div>
       </section>
 
-      {message && <div className="p-3 rounded-xl bg-slate-100 text-slate-700 text-sm">{message}</div>}
+      {message && <div className="p-3 rounded-xl bg-[#EEF7F5] text-[#12576D] text-sm">{message}</div>}
       {error && <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm">{error}</div>}
 
       {/* The vehicle stays visually dominant, but the auction — urgency,
@@ -307,9 +322,9 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
 
       {!loading && !tabFailed && filtered.length === 0 && (
         <Card className="p-10 text-center auction-interaction-glow">
-          <Gavel className="w-8 h-8 mx-auto text-slate-400 mb-3" />
-          <p className="font-bold text-slate-800">{emptyStateCopy.title}</p>
-          <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">{emptyStateCopy.body}</p>
+          <Gavel className="w-8 h-8 mx-auto text-[#94A3B8] mb-3" />
+          <p className="font-bold text-[#0A3340]">{emptyStateCopy.title}</p>
+          <p className="text-sm text-[#64748B] mt-1 max-w-md mx-auto">{emptyStateCopy.body}</p>
           {tab === 'saved' && <div className="mt-5"><AuctionHistoryEmptyAction onExplore={() => setTab('live')} /></div>}
         </Card>
       )}

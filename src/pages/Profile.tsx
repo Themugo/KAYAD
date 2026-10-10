@@ -73,24 +73,24 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear();
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-16 auction-profile-experience">
+    <div className="min-h-screen bg-[#F6FAF9] pt-16 auction-profile-experience">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6"><AuctionExperienceRail current="profile" /><AuctionPremiumHeader kicker="BIDDER IDENTITY" title="Your auction profile, ready for the next room." description="Keep your identity, preferences and auction activity in one calm place so every return feels immediate." /><AuctionPremiumStats items={[{ label: 'Listings', value: user.listingsCount || 0 }, { label: 'Purchases', value: user.purchasesCount || 0 }, { label: 'Saved auctions', value: user.savedCount || 0 }, { label: 'Member since', value: memberYear }]} /><BidderIdentityCard user={user} auctionCount={user.auctionsCount || 0} savedCount={user.savedCount || 0} onPayments={() => navigate('/?nav=payments')} /></div>
       {/* Header */}
-      <div className="bg-charcoal-900 py-12">
+      <div className="bg-[#0A3340] py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-24 h-24 bg-gold-500/20 rounded-full flex items-center justify-center">
+              <div className="w-24 h-24 bg-[#13B8A6]/20 rounded-full flex items-center justify-center">
                 {user.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
                 ) : (
-                  <span className="text-4xl font-bold text-gold-400">
+                  <span className="text-4xl font-bold text-[#13B8A6]">
                     {user.name?.charAt(0) || 'U'}
                   </span>
                 )}
               </div>
-              <button className="absolute bottom-0 right-0 w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center text-charcoal-900 hover:bg-gold-600 transition-colors">
+              <button className="absolute bottom-0 right-0 w-8 h-8 bg-[#13B8A6] rounded-full flex items-center justify-center text-[#0A3340] hover:bg-[#176B87] transition-colors">
                 <Camera size={14} />
               </button>
             </div>
@@ -105,7 +105,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
               {user.rating && (
                 <div className="flex items-center gap-1 mt-2">
                   {[1, 2, 3, 4, 5].map(i => (
-                    <Star key={i} size={14} className={i <= (user.rating || 0) ? 'text-gold-400 fill-current' : 'text-white/30'} />
+                    <Star key={i} size={14} className={i <= (user.rating || 0) ? 'text-[#13B8A6] fill-current' : 'text-white/30'} />
                   ))}
                   <span className="text-white/50 text-xs ml-1">({user.reviewsCount || 0} reviews)</span>
                 </div>
@@ -117,7 +117,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
           <div className="grid grid-cols-3 gap-4 mt-8">
             {stats.map(({ label, value }) => (
               <div key={label} className="bg-white/5 rounded-xl p-4 text-center">
-                <p className="font-serif text-2xl text-gold-400 font-bold">{value}</p>
+                <p className="font-serif text-2xl text-[#13B8A6] font-bold">{value}</p>
                 <p className="text-white/50 text-xs mt-1">{label}</p>
               </div>
             ))}
@@ -130,22 +130,22 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="md:col-span-1">
-            <div className="bg-white rounded-2xl border border-cream-200 p-4 sticky top-24">
+            <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sticky top-24">
               {menuItems.map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors ${
                     activeTab === key
-                      ? 'bg-gold-500 text-charcoal-900'
-                      : 'text-charcoal-800 hover:bg-cream-50'
+                      ? 'bg-[#13B8A6] text-[#0A3340]'
+                      : 'text-[#0A3340] hover:bg-[#F6FAF9]'
                   }`}
                 >
                   <Icon size={18} />
                   <span className="font-sans text-sm font-semibold">{label}</span>
                 </button>
               ))}
-              <div className="mt-4 pt-4 border-t border-cream-200">
+              <div className="mt-4 pt-4 border-t border-[#D7E7E4]">
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-red-500 hover:bg-red-50 transition-colors"
@@ -160,13 +160,13 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
           {/* Main content */}
           <div className="md:col-span-3">
             {activeTab === 'info' && (
-              <div className="bg-white rounded-2xl border border-cream-200 p-6">
-                <h2 className="font-serif text-xl text-charcoal-900 font-bold mb-6">Personal Information</h2>
+              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
+                <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Personal Information</h2>
 
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
-                    <div className="w-10 h-10 bg-gold-500/10 rounded-lg flex items-center justify-center">
-                      <User size={18} className="text-gold-600" />
+                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
+                      <User size={18} className="text-[#176B87]" />
                     </div>
                     <div className="flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
@@ -178,36 +178,36 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                             type="text"
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="font-sans text-sm text-charcoal-900 border border-cream-300 rounded px-2 py-1"
+                            className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1"
                           />
-                          <button onClick={handleSaveEdit} disabled={loading} className="text-gold-600 text-sm font-semibold">
+                          <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
                             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
                           </button>
                         </div>
                       ) : (
-                        <p className="font-sans text-sm text-charcoal-900">{user.name}</p>
+                        <p className="font-sans text-sm text-[#0A3340]">{user.name}</p>
                       )}
                     </div>
                     {!editingField && (
-                      <button onClick={() => handleEdit('name', user.name || '')} className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                      <button onClick={() => handleEdit('name', user.name || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
-                    <div className="w-10 h-10 bg-gold-500/10 rounded-lg flex items-center justify-center">
-                      <Mail size={18} className="text-gold-600" />
+                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
+                      <Mail size={18} className="text-[#176B87]" />
                     </div>
                     <div className="flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Email Address
                       </label>
-                      <p className="font-sans text-sm text-charcoal-900">{user.email}</p>
+                      <p className="font-sans text-sm text-[#0A3340]">{user.email}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
-                    <div className="w-10 h-10 bg-gold-500/10 rounded-lg flex items-center justify-center">
-                      <Phone size={18} className="text-gold-600" />
+                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
+                      <Phone size={18} className="text-[#176B87]" />
                     </div>
                     <div className="flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
@@ -219,24 +219,24 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                             type="tel"
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="font-sans text-sm text-charcoal-900 border border-cream-300 rounded px-2 py-1"
+                            className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1"
                           />
-                          <button onClick={handleSaveEdit} disabled={loading} className="text-gold-600 text-sm font-semibold">
+                          <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
                             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
                           </button>
                         </div>
                       ) : (
-                        <p className="font-sans text-sm text-charcoal-900">{user.phone || 'Not set'}</p>
+                        <p className="font-sans text-sm text-[#0A3340]">{user.phone || 'Not set'}</p>
                       )}
                     </div>
                     {!editingField && (
-                      <button onClick={() => handleEdit('phone', user.phone || '')} className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                      <button onClick={() => handleEdit('phone', user.phone || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
-                    <div className="w-10 h-10 bg-gold-500/10 rounded-lg flex items-center justify-center">
-                      <MapPin size={18} className="text-gold-600" />
+                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
+                      <MapPin size={18} className="text-[#176B87]" />
                     </div>
                     <div className="flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
@@ -248,18 +248,18 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                             type="text"
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="font-sans text-sm text-charcoal-900 border border-cream-300 rounded px-2 py-1"
+                            className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1"
                           />
-                          <button onClick={handleSaveEdit} disabled={loading} className="text-gold-600 text-sm font-semibold">
+                          <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
                             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
                           </button>
                         </div>
                       ) : (
-                        <p className="font-sans text-sm text-charcoal-900">{user.location || 'Not set'}</p>
+                        <p className="font-sans text-sm text-[#0A3340]">{user.location || 'Not set'}</p>
                       )}
                     </div>
                     {!editingField && (
-                      <button onClick={() => handleEdit('location', user.location || '')} className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                      <button onClick={() => handleEdit('location', user.location || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
                     )}
                   </div>
                 </div>
@@ -267,8 +267,8 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
             )}
 
             {activeTab === 'notifications' && (
-              <div className="bg-white rounded-2xl border border-cream-200 p-6">
-                <h2 className="font-serif text-xl text-charcoal-900 font-bold mb-6">Notification Preferences</h2>
+              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
+                <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Notification Preferences</h2>
 
                 <div className="space-y-4">
                   {[
@@ -278,14 +278,14 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                     { label: 'Price alerts', desc: 'Vehicles you saved dropped in price', key: 'price_alerts', enabled: user.notifications?.priceAlerts ?? false },
                     { label: 'Newsletter', desc: 'Weekly market updates and new listings', key: 'newsletter', enabled: user.notifications?.newsletter ?? false },
                   ].map(({ label, desc, key, enabled }) => (
-                    <div key={key} className="flex items-center justify-between p-4 bg-cream-50 rounded-xl">
+                    <div key={key} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
                       <div>
-                        <p className="font-sans text-sm font-semibold text-charcoal-900">{label}</p>
+                        <p className="font-sans text-sm font-semibold text-[#0A3340]">{label}</p>
                         <p className="font-sans text-xs text-warm-400 mt-0.5">{desc}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" defaultChecked={enabled} className="sr-only peer" />
-                        <div className="w-11 h-6 bg-cream-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gold-500/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
+                        <div className="w-11 h-6 bg-[#BDE5DE] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#5AAFA4]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13B8A6]"></div>
                       </label>
                     </div>
                   ))}
@@ -294,22 +294,22 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
             )}
 
             {activeTab === 'security' && (
-              <div className="bg-white rounded-2xl border border-cream-200 p-6">
-                <h2 className="font-serif text-xl text-charcoal-900 font-bold mb-6">Security</h2>
+              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
+                <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Security</h2>
 
                 <div className="space-y-4">
-                  <button className="w-full flex items-center justify-between p-4 bg-cream-50 rounded-xl hover:bg-cream-100 transition-colors">
+                  <button className="w-full flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl hover:bg-[#EEF7F5] transition-colors">
                     <div className="flex items-center gap-3">
-                      <Lock size={18} className="text-gold-600" />
-                      <span className="font-sans text-sm font-semibold text-charcoal-900">Change Password</span>
+                      <Lock size={18} className="text-[#176B87]" />
+                      <span className="font-sans text-sm font-semibold text-[#0A3340]">Change Password</span>
                     </div>
                     <ChevronRight size={16} className="text-warm-400" />
                   </button>
 
-                  <button className="w-full flex items-center justify-between p-4 bg-cream-50 rounded-xl hover:bg-cream-100 transition-colors">
+                  <button className="w-full flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl hover:bg-[#EEF7F5] transition-colors">
                     <div className="flex items-center gap-3">
-                      <Shield size={18} className="text-gold-600" />
-                      <span className="font-sans text-sm font-semibold text-charcoal-900">Two-Factor Authentication</span>
+                      <Shield size={18} className="text-[#176B87]" />
+                      <span className="font-sans text-sm font-semibold text-[#0A3340]">Two-Factor Authentication</span>
                     </div>
                     <span className="text-xs text-warm-400">{user.twoFactorEnabled ? 'Enabled' : 'Disabled'}</span>
                   </button>

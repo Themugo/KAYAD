@@ -18,7 +18,7 @@ const sizeStyles = {
 const variantStyles = {
   default: 'bg-brand',
   success: 'bg-emerald-500',
-  warning: 'bg-amber-500',
+  warning: 'bg-[#13B8A6]',
   error: 'bg-red-500',
 };
 
@@ -132,7 +132,7 @@ export function CircularProgress({
   const colors = {
     default: 'stroke-[var(--brand)]',
     success: 'stroke-emerald-500',
-    warning: 'stroke-amber-500',
+    warning: 'stroke-[#176B87]',
     error: 'stroke-red-500',
   };
 

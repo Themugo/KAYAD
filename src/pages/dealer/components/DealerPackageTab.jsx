@@ -3,7 +3,7 @@ import { useToast } from '../../../context/ToastContext';
 import { dealerAPI } from '../../../api/api';
 import { Loader, RefreshCw } from 'lucide-react';
 
-const planColor = (id) => id === 'elite' ? 'var(--gold)' : id === 'growth' ? '#3b82f6' : id === 'enterprise' ? '#a855f7' : 'rgba(255,255,255,0.6)';
+const planColor = (id) => id === 'elite' ? 'var(--brand)' : id === 'growth' ? '#176B87' : id === 'enterprise' ? '#5aafa4' : 'rgba(255,255,255,0.6)';
 
 export default function DealerPackageTab({ user, listingsCount }) {
   const { toast } = useToast();
@@ -66,12 +66,12 @@ export default function DealerPackageTab({ user, listingsCount }) {
         </button>
       </div>
 
-      <div style={{ background: 'var(--card)', border: '1px solid rgba(37, 99, 235,0.18)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: 28 }}>
+      <div style={{ background: 'var(--card)', border: '1px solid rgba(23, 107, 135, 0.18)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: 28 }}>
         {loading ? <Loader size={18} className="spinner" /> : (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
             <div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 6 }}>Current Plan</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: '1.6rem', color: 'var(--gold)', textTransform: 'capitalize' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: '1.6rem', color: 'var(--brand)', textTransform: 'capitalize' }}>
                 {entitlement?.planName || currentPlan || 'No Active Plan'}
               </div>
               {entitlement?.expiresAt && (
@@ -105,7 +105,7 @@ export default function DealerPackageTab({ user, listingsCount }) {
             const contactSales = pkg.contactSales || pkg.price <= 0;
             return (
               <div key={pkg.id} style={{ background: 'var(--card)', border: `1px solid ${isCurrent ? color + '40' : 'rgba(255,255,255,0.07)'}`, borderRadius: 'var(--radius-lg)', padding: '20px', position: 'relative', overflow: 'hidden' }}>
-                {isCurrent && <div style={{ position: 'absolute', top: 12, left: 12, background: '#22c55e', color: '#000', fontSize: 8, fontWeight: 900, borderRadius: 4, padding: '2px 7px', letterSpacing: '0.06em' }}>ACTIVE</div>}
+                {isCurrent && <div style={{ position: 'absolute', top: 12, left: 12, background: '#22c55e', color: '#0a3340', fontSize: 8, fontWeight: 900, borderRadius: 4, padding: '2px 7px', letterSpacing: '0.06em' }}>ACTIVE</div>}
                 <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color, marginBottom: 8, marginTop: isCurrent ? 22 : 0 }}>{pkg.name}</div>
                 <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: '1.2rem', color: '#fff', marginBottom: 4 }}>
                   {contactSales ? 'Custom' : `KES ${Number(pkg.price).toLocaleString()}/mo`}
@@ -123,7 +123,7 @@ export default function DealerPackageTab({ user, listingsCount }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       <input className="input" placeholder="2547XXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} style={{ fontSize: 12, height: 34, textAlign: 'center' }} autoFocus />
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => handleUpgrade(pkg.id)} disabled={upgrading === pkg.id} style={{ flex: 1, padding: '9px', borderRadius: 9, background: 'var(--gold)', border: 'none', color: '#000', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                        <button onClick={() => handleUpgrade(pkg.id)} disabled={upgrading === pkg.id} style={{ flex: 1, padding: '9px', borderRadius: 9, background: 'var(--brand)', border: 'none', color: '#0a3340', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
                           {upgrading === pkg.id ? 'Processing...' : `Pay KES ${Number(pkg.price).toLocaleString()}`}
                         </button>
                         <button onClick={() => { setShowPhoneInput(null); setPhone(''); }} style={{ padding: '9px 12px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer' }}>Cancel</button>

@@ -198,14 +198,14 @@ export default function EscrowPage() {
                     left: '50%',
                     width: '100%',
                     height: 2,
-                    background: 'linear-gradient(90deg, var(--gold-glow) 0%, var(--border) 100%)',
+                    background: 'linear-gradient(90deg, var(--brand-glow) 0%, var(--border) 100%)',
                     zIndex: 0,
                   }} />
                 )}
                 <div style={{
                   width: 40, height: 40, borderRadius: '50%',
-                  background: '#EFF6FF', border: '1px solid rgba(37, 99, 235,0.3)',
-                  color: 'var(--gold)', fontWeight: 700, fontSize: 14,
+                  background: '#EFF6FF', border: '1px solid rgba(23, 107, 135, 0.3)',
+                  color: 'var(--brand)', fontWeight: 700, fontSize: 14,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   margin: '0 auto 10px', position: 'relative', zIndex: 1,
                 }}>
@@ -306,7 +306,7 @@ export default function EscrowPage() {
                       className="card"
                       style={{
                         padding: 20, cursor: 'pointer',
-                        border: e.status === 'funded' ? '1px solid rgba(59,130,246,0.3)' : '1px solid var(--border)',
+                        border: e.status === 'funded' ? '1px solid rgba(23, 107, 135, 0.3)' : '1px solid var(--border)',
                         transition: 'border-color 0.2s, background 0.2s',
                       }}
                       onClick={() => setSelected(e)}
@@ -351,7 +351,7 @@ export default function EscrowPage() {
           <div className="modal-box" style={{ maxWidth: 480 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Escrow Record</div>
+                <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Escrow Record</div>
                 <h3 style={{ marginTop: 4 }}>{selected.car?.title || 'Car Purchase'}</h3>
               </div>
               <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)', fontSize: 16 }}>✕</button>
@@ -383,8 +383,8 @@ export default function EscrowPage() {
               ))}
             </div>
 
-            <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-              Need help with this escrow? Contact <a href="mailto:support@kayad.co.ke" style={{ color: 'var(--gold)' }}>support@kayad.co.ke</a>
+            <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(23, 107, 135, 0.06)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              Need help with this escrow? Contact <a href="mailto:support@kayad.co.ke" style={{ color: 'var(--brand)' }}>support@kayad.co.ke</a>
             </div>
           </div>
         </div>

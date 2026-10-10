@@ -42,13 +42,13 @@ interface SupportViewProps {
 }
 
 const STATUS_META: Record<string, { label: string; tone: string }> = {
-  open: { label: 'Open', tone: 'bg-sky-50 text-sky-700 border-sky-100' },
+  open: { label: 'Open', tone: 'bg-[#F3FAF9] text-[#12576D] border-[#D7E7E4]' },
   in_progress: { label: 'In progress', tone: 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4]' },
-  waiting_on_user: { label: 'Waiting for you', tone: 'bg-amber-50 text-amber-700 border-amber-100' },
+  waiting_on_user: { label: 'Waiting for you', tone: 'bg-[#F3FAF9] text-[#12576D] border-[#D7E7E4]' },
   waiting_on_internal: { label: 'With KAYAD', tone: 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4]' },
   escalated: { label: 'Escalated', tone: 'bg-rose-50 text-rose-700 border-rose-100' },
   resolved: { label: 'Resolved', tone: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  closed: { label: 'Closed', tone: 'bg-slate-100 text-slate-600 border-slate-200' },
+  closed: { label: 'Closed', tone: 'bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]' },
 };
 
 const HELP_PATHS = [
@@ -259,7 +259,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <LifeBuoy className="w-4 h-4" /> KAYAD Resolution Center
             </div>
             <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.02]">Help that follows the whole transaction.</h1>
-            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-slate-300">Find an answer, open a traceable support case, or continue an existing case. One support surface for vehicles, auctions, inspections, escrow, financing, transfers and account access.</p>
+            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-[#BDE5DE]">Find an answer, open a traceable support case, or continue an existing case. One support surface for vehicles, auctions, inspections, escrow, financing, transfers and account access.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={scrollToForm} className="inline-flex items-center gap-2 rounded-xl bg-white text-[#0A3340] px-4 py-3 text-xs font-extrabold hover:bg-[#EEF7F5] transition-colors">
                 Open a support case <ArrowRight className="w-4 h-4" />
@@ -271,7 +271,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-slate-100">
+        <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#D7E7E4]">
           {[
             { icon: Search, title: 'Find an answer', text: 'Search verified help' },
             { icon: Ticket, title: 'Open a case', text: 'Create a traceable request' },
@@ -281,7 +281,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
             <div key={item.title} className="px-4 py-4 sm:px-5">
               <item.icon className="w-4 h-4 text-[#176B87]" />
               <p className="mt-2 text-xs font-extrabold text-[#0A3340]">{item.title}</p>
-              <p className="mt-0.5 text-[11px] text-slate-500">{item.text}</p>
+              <p className="mt-0.5 text-[11px] text-[#64748B]">{item.text}</p>
             </div>
           ))}
         </div>
@@ -297,14 +297,14 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {HELP_PATHS.map(path => (
-            <button key={path.id} type="button" onClick={() => openPath(path.nav)} className="group text-left rounded-2xl border border-slate-200 bg-white p-4 hover:border-[#176B87]/30 hover:shadow-sm transition-all">
+            <button key={path.id} type="button" onClick={() => openPath(path.nav)} className="group text-left rounded-2xl border border-[#D7E7E4] bg-white p-4 hover:border-[#176B87]/30 hover:shadow-sm transition-all">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#EEF7F5] text-[#176B87] flex items-center justify-center shrink-0"><path.icon className="w-5 h-5" /></div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-extrabold text-[#0A3340]">{path.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{path.text}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#64748B]">{path.text}</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#176B87] mt-1" />
+                <ChevronRight className="w-4 h-4 text-[#BDE5DE] group-hover:text-[#176B87] mt-1" />
               </div>
             </button>
           ))}
@@ -315,21 +315,21 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
 
       {/* Case creation + current cases */}
       <section id="support-cases" ref={formRef} className="grid grid-cols-1 xl:grid-cols-[1.05fr_.95fr] gap-5 scroll-mt-24">
-        <Card className="p-5 sm:p-6 bg-white border-slate-200">
+        <Card className="p-5 sm:p-6 bg-white border-[#D7E7E4]">
           <div className="flex items-start justify-between gap-4 mb-5">
             <div>
               <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#176B87]"><Ticket className="w-3.5 h-3.5" /> Resolution desk</div>
               <h2 className="mt-1 text-xl font-black text-[#0A3340]">Open a support case</h2>
-              <p className="mt-1 text-xs leading-5 text-slate-500">Tell us what happened and include the vehicle, auction, inspection or escrow reference when you have one.</p>
+              <p className="mt-1 text-xs leading-5 text-[#64748B]">Tell us what happened and include the vehicle, auction, inspection or escrow reference when you have one.</p>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><Clock3 className="w-3.5 h-3.5 text-[#176B87]" /> Replies appear in your case</div>
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold text-[#64748B]"><Clock3 className="w-3.5 h-3.5 text-[#176B87]" /> Replies appear in your case</div>
           </div>
 
           {!user ? (
             <div className="rounded-2xl border border-[#D7E7E4] bg-[#F6FAF9] p-5">
               <UserRound className="w-6 h-6 text-[#176B87]" />
               <h3 className="mt-3 text-sm font-extrabold text-[#0A3340]">Sign in to create and track a case</h3>
-              <p className="mt-1 text-xs leading-5 text-slate-500">Support cases are tied to your authenticated account so replies and transaction references stay with the right customer.</p>
+              <p className="mt-1 text-xs leading-5 text-[#64748B]">Support cases are tied to your authenticated account so replies and transaction references stay with the right customer.</p>
               <Button variant="primary" size="md" className="mt-4" onClick={() => onOpenAuth?.()}>Sign in</Button>
             </div>
           ) : submittedTicket ? (
@@ -338,7 +338,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <p className="mt-3 text-sm font-extrabold text-emerald-900">Case created</p>
               <p className="mt-1 text-xs text-emerald-800">Reference: <strong>{ticketReference(submittedTicket)}</strong></p>
               <p className="mt-2 text-xs leading-5 text-emerald-800">Your case is now with KAYAD support. Replies and status changes appear in this page and in your notifications.{minutesLabel(submittedTicket.expectations?.firstResponseMinutes) ? ` We aim to reply within ${minutesLabel(submittedTicket.expectations.firstResponseMinutes)}.` : ''}</p>
-              {notice && <p className="mt-2 text-xs font-semibold text-amber-800">{notice}</p>}
+              {notice && <p className="mt-2 text-xs font-semibold text-[#0A3340]">{notice}</p>}
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button variant="primary" size="sm" onClick={() => loadTicket(submittedTicket.id)}>View case</Button>
                 <Button variant="outline" size="sm" onClick={() => setSubmittedTicket(null)}>Open another case</Button>
@@ -349,61 +349,61 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               {submitError && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">{submitError}</div>}
               <Select label="What is the issue about?" value={category} onChange={e => { setCategory(e.target.value); setReference(''); }} options={CATEGORY_OPTIONS.map(o => ({ value: o.value, label: o.label }))} />
               <div>
-                <label htmlFor="support-subject" className="block text-xs font-bold text-slate-700 mb-1.5">Short summary</label>
-                <input id="support-subject" value={subject} maxLength={200} onChange={e => setSubject(e.target.value)} placeholder="e.g. Escrow payment not showing" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
+                <label htmlFor="support-subject" className="block text-xs font-bold text-[#12576D] mb-1.5">Short summary</label>
+                <input id="support-subject" value={subject} maxLength={200} onChange={e => setSubject(e.target.value)} placeholder="e.g. Escrow payment not showing" className="w-full rounded-xl border border-[#D7E7E4] px-3.5 py-3 text-sm text-[#0A3340] outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
               </div>
               {referenceKind && (
                 <div>
-                  <label htmlFor="support-reference" className="block text-xs font-bold text-slate-700 mb-1.5">{REFERENCE_LABEL[referenceKind]} (optional)</label>
-                  <input id="support-reference" value={reference} onChange={e => setReference(e.target.value)} placeholder="Paste the ID from the page or email" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
-                  {reference.trim() && !UUID_RE.test(reference.trim()) && <p className="mt-1 text-[11px] text-amber-700">That does not look like a valid ID, so it will not be linked.</p>}
+                  <label htmlFor="support-reference" className="block text-xs font-bold text-[#12576D] mb-1.5">{REFERENCE_LABEL[referenceKind]} (optional)</label>
+                  <input id="support-reference" value={reference} onChange={e => setReference(e.target.value)} placeholder="Paste the ID from the page or email" className="w-full rounded-xl border border-[#D7E7E4] px-3.5 py-3 text-sm text-[#0A3340] outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
+                  {reference.trim() && !UUID_RE.test(reference.trim()) && <p className="mt-1 text-[11px] text-[#12576D]">That does not look like a valid ID, so it will not be linked.</p>}
                 </div>
               )}
               <Textarea label="What happened?" rows={6} value={issue} onChange={e => setIssue(e.target.value)} placeholder="Explain the problem, what you expected, and what you need resolved…" />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                <p className="text-[11px] text-slate-500">Do not send passwords, OTPs or unnecessary financial credentials in a support description.</p>
+                <p className="text-[11px] text-[#64748B]">Do not send passwords, OTPs or unnecessary financial credentials in a support description.</p>
                 <Button type="submit" variant="primary" size="md" disabled={submitting || subject.trim().length < 3 || issue.trim().length < 10}>{submitting ? <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Creating case…</span> : 'Create support case'}</Button>
               </div>
             </form>
           )}
         </Card>
 
-        <Card className="p-5 sm:p-6 bg-white border-slate-200" id="my-cases">
+        <Card className="p-5 sm:p-6 bg-white border-[#D7E7E4]" id="my-cases">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#176B87]"><MessageSquare className="w-3.5 h-3.5" /> Your cases</div>
               <h2 className="mt-1 text-xl font-black text-[#0A3340]">Track support to resolution</h2>
             </div>
-            {user && <button type="button" onClick={() => void loadTickets()} className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#176B87] hover:border-[#176B87]/30" aria-label="Refresh support cases"><RefreshCw className={`w-4 h-4 ${ticketsLoading ? 'animate-spin' : ''}`} /></button>}
+            {user && <button type="button" onClick={() => void loadTickets()} className="w-9 h-9 rounded-xl border border-[#D7E7E4] flex items-center justify-center text-[#64748B] hover:text-[#176B87] hover:border-[#176B87]/30" aria-label="Refresh support cases"><RefreshCw className={`w-4 h-4 ${ticketsLoading ? 'animate-spin' : ''}`} /></button>}
           </div>
 
           {!user ? (
-            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-center">
-              <Ticket className="w-7 h-7 mx-auto text-slate-300" />
-              <p className="mt-2 text-xs font-bold text-slate-600">Your cases appear here after sign in.</p>
+            <div className="rounded-2xl bg-[#F6FAF9] border border-[#D7E7E4] p-5 text-center">
+              <Ticket className="w-7 h-7 mx-auto text-[#BDE5DE]" />
+              <p className="mt-2 text-xs font-bold text-[#64748B]">Your cases appear here after sign in.</p>
             </div>
           ) : ticketsLoading && tickets.length === 0 ? (
-            <div className="py-10 text-center text-xs text-slate-500"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading your cases…</div>
+            <div className="py-10 text-center text-xs text-[#64748B]"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading your cases…</div>
           ) : ticketsError ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800">{ticketsError}</div>
           ) : tickets.length === 0 ? (
             <div className="rounded-2xl bg-[#F6FAF9] border border-[#D7E7E4] p-6 text-center">
               <LifeBuoy className="w-7 h-7 mx-auto text-[#176B87]" />
               <p className="mt-2 text-sm font-extrabold text-[#0A3340]">No support cases yet</p>
-              <p className="mt-1 text-xs text-slate-500">When you open one, its status, messages and resolution history will appear here.</p>
+              <p className="mt-1 text-xs text-[#64748B]">When you open one, its status, messages and resolution history will appear here.</p>
             </div>
           ) : (
             <div className="space-y-2.5">
-              {activeCases.length > 0 && <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Active</p>}
+              {activeCases.length > 0 && <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Active</p>}
               {tickets.map(ticket => {
-                const status = STATUS_META[ticket.status] || { label: ticket.status, tone: 'bg-slate-100 text-slate-600 border-slate-200' };
+                const status = STATUS_META[ticket.status] || { label: ticket.status, tone: 'bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]' };
                 return (
-                  <button key={ticket.id} type="button" onClick={() => void loadTicket(ticket.id)} className={`w-full text-left rounded-2xl border p-4 hover:border-[#176B87]/30 hover:shadow-sm transition-all ${selectedTicketId === ticket.id ? 'border-[#176B87]/40 bg-[#F6FAF9]' : 'border-slate-200 bg-white'}`}>
+                  <button key={ticket.id} type="button" onClick={() => void loadTicket(ticket.id)} className={`w-full text-left rounded-2xl border p-4 hover:border-[#176B87]/30 hover:shadow-sm transition-all ${selectedTicketId === ticket.id ? 'border-[#176B87]/40 bg-[#F6FAF9]' : 'border-[#D7E7E4] bg-white'}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{ticketReference(ticket)}</p>
                         <p className="mt-1 text-sm font-extrabold text-[#0A3340] truncate">{ticket.subject}</p>
-                        <p className="mt-1 text-[11px] text-slate-500">{CATEGORY_OPTIONS.find(o => o.value === ticket.category)?.label || 'Support'} · {formatDate(ticket.createdAt)}</p>
+                        <p className="mt-1 text-[11px] text-[#64748B]">{CATEGORY_OPTIONS.find(o => o.value === ticket.category)?.label || 'Support'} · {formatDate(ticket.createdAt)}</p>
                       </div>
                       <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${status.tone}`}>{status.label}</span>
                     </div>
@@ -427,64 +427,64 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
           </div>
 
           {ticketLoading || !selectedTicket ? (
-            <div className="py-12 text-center text-xs text-slate-500"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading case history…</div>
+            <div className="py-12 text-center text-xs text-[#64748B]"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading case history…</div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px]">
-              <div className="p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-slate-100">
-                <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Original request</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-700 whitespace-pre-wrap">{selectedTicket.description}</p>
+              <div className="p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-[#D7E7E4]">
+                <div className="rounded-2xl bg-[#F6FAF9] border border-[#D7E7E4] p-4">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Original request</p>
+                  <p className="mt-2 text-sm leading-6 text-[#12576D] whitespace-pre-wrap">{selectedTicket.description}</p>
                 </div>
 
                 <div className="mt-5 space-y-3">
                   {(selectedTicket.messages || []).map((message, index) => (
-                    <div key={message.id || `${message.createdAt || 'message'}-${index}`} className="rounded-2xl border border-slate-200 p-4">
-                      <div className="flex items-center justify-between gap-3 mb-2"><span className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{message.from === 'you' ? 'You' : 'KAYAD Support'}</span><span className="text-[10px] text-slate-400">{formatDate(message.createdAt)}</span></div>
-                      <p className="text-sm leading-6 text-slate-700 whitespace-pre-wrap">{message.content}</p>
+                    <div key={message.id || `${message.createdAt || 'message'}-${index}`} className="rounded-2xl border border-[#D7E7E4] p-4">
+                      <div className="flex items-center justify-between gap-3 mb-2"><span className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{message.from === 'you' ? 'You' : 'KAYAD Support'}</span><span className="text-[10px] text-[#94A3B8]">{formatDate(message.createdAt)}</span></div>
+                      <p className="text-sm leading-6 text-[#12576D] whitespace-pre-wrap">{message.content}</p>
                     </div>
                   ))}
                 </div>
 
                 {selectedTicket.canReply ? (
                   <div className="mt-5">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{selectedTicket.status === 'resolved' ? 'Not fixed? Reply to reopen this case' : 'Reply to this case'}</label>
-                    <textarea value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} rows={4} placeholder="Add information or reply to the support team…" className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
+                    <label className="block text-xs font-bold text-[#12576D] mb-1.5">{selectedTicket.status === 'resolved' ? 'Not fixed? Reply to reopen this case' : 'Reply to this case'}</label>
+                    <textarea value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} rows={4} placeholder="Add information or reply to the support team…" className="w-full rounded-2xl border border-[#D7E7E4] px-4 py-3 text-sm outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
                     {messageError && <p className="mt-2 text-xs font-semibold text-rose-700">{messageError}</p>}
                     <div className="mt-2 flex justify-end"><Button variant="primary" size="sm" disabled={messageSending || !ticketMessage.trim()} onClick={() => void sendMessage()}>{messageSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-3.5 h-3.5" /> Send reply</>}</Button></div>
                   </div>
                 ) : (
-                  <p className="mt-5 rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600">This case is closed. If you still need help, open a new case.</p>
+                  <p className="mt-5 rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3 text-xs text-[#64748B]">This case is closed. If you still need help, open a new case.</p>
                 )}
               </div>
 
               <aside className="p-5 sm:p-6 space-y-5">
                 <div>
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Case timing</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Case timing</p>
                   <div className="mt-3 space-y-2 text-xs">
-                    <div className="flex justify-between gap-3"><span className="text-slate-500">Created</span><strong className="text-slate-700">{formatDate(selectedTicket.createdAt)}</strong></div>
-                    <div className="flex justify-between gap-3"><span className="text-slate-500">Last update</span><strong className="text-slate-700">{formatDate(selectedTicket.updatedAt)}</strong></div>
-                    {minutesLabel(selectedTicket.expectations.firstResponseMinutes) && <div className="flex justify-between gap-3"><span className="text-slate-500">We aim to reply within</span><strong className="text-slate-700">{minutesLabel(selectedTicket.expectations.firstResponseMinutes)}</strong></div>}
-                    {selectedTicket.resolvedAt && <div className="flex justify-between gap-3"><span className="text-slate-500">Resolved</span><strong className="text-slate-700">{formatDate(selectedTicket.resolvedAt)}</strong></div>}
+                    <div className="flex justify-between gap-3"><span className="text-[#64748B]">Created</span><strong className="text-[#12576D]">{formatDate(selectedTicket.createdAt)}</strong></div>
+                    <div className="flex justify-between gap-3"><span className="text-[#64748B]">Last update</span><strong className="text-[#12576D]">{formatDate(selectedTicket.updatedAt)}</strong></div>
+                    {minutesLabel(selectedTicket.expectations.firstResponseMinutes) && <div className="flex justify-between gap-3"><span className="text-[#64748B]">We aim to reply within</span><strong className="text-[#12576D]">{minutesLabel(selectedTicket.expectations.firstResponseMinutes)}</strong></div>}
+                    {selectedTicket.resolvedAt && <div className="flex justify-between gap-3"><span className="text-[#64748B]">Resolved</span><strong className="text-[#12576D]">{formatDate(selectedTicket.resolvedAt)}</strong></div>}
                   </div>
                 </div>
 
                 {selectedTicket.canRate && (
-                  <div className="pt-4 border-t border-slate-100">
-                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">How was the resolution?</p>
+                  <div className="pt-4 border-t border-[#D7E7E4]">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">How was the resolution?</p>
                     <div className="mt-3 flex gap-2">
-                      {[1, 2, 3, 4, 5].map(value => <button key={value} type="button" onClick={() => setRating(value)} className={`w-9 h-9 rounded-xl text-xs font-extrabold ${rating === value ? 'bg-[#176B87] text-white' : 'bg-slate-100 text-slate-500 hover:bg-[#EEF7F5] hover:text-[#176B87]'}`}>{value}</button>)}
+                      {[1, 2, 3, 4, 5].map(value => <button key={value} type="button" onClick={() => setRating(value)} className={`w-9 h-9 rounded-xl text-xs font-extrabold ${rating === value ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#64748B] hover:bg-[#EEF7F5] hover:text-[#176B87]'}`}>{value}</button>)}
                     </div>
-                    <textarea value={ratingNote} onChange={e => setRatingNote(e.target.value)} rows={3} placeholder="Optional feedback" className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none focus:border-[#176B87]" />
+                    <textarea value={ratingNote} onChange={e => setRatingNote(e.target.value)} rows={3} placeholder="Optional feedback" className="mt-3 w-full rounded-xl border border-[#D7E7E4] px-3 py-2.5 text-xs outline-none focus:border-[#176B87]" />
                     <Button variant="outline" size="sm" className="mt-2 w-full" disabled={!rating || ratingSending} onClick={() => void submitRating()}>{ratingSending ? 'Saving…' : 'Save feedback'}</Button>
                   </div>
                 )}
 
                 {selectedTicket.rating != null && (
-                  <div className="pt-4 border-t border-slate-100 text-xs text-slate-600">You rated this case <strong>{selectedTicket.rating}/5</strong>. Thank you.</div>
+                  <div className="pt-4 border-t border-[#D7E7E4] text-xs text-[#64748B]">You rated this case <strong>{selectedTicket.rating}/5</strong>. Thank you.</div>
                 )}
 
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Need another service?</p>
+                <div className="pt-4 border-t border-[#D7E7E4]">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Need another service?</p>
                   <button type="button" onClick={scrollToForm} className="mt-2 inline-flex items-center gap-2 text-xs font-extrabold text-[#176B87] hover:underline">Open another case <ArrowRight className="w-3.5 h-3.5" /></button>
                 </div>
               </aside>

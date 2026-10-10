@@ -23,7 +23,7 @@ export const VehicleCollectionsSection: FC = () => {
       title: 'Luxury Collection',
       subtitle: 'Porsche, Range Rover, Lexus & Flagship German Engineering',
       image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
-      icon: <Crown className="w-5 h-5 text-amber-400" />,
+      icon: <Crown className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
         resetFilters();
         setFilters(prev => ({
@@ -112,13 +112,13 @@ export const VehicleCollectionsSection: FC = () => {
   ];
 
   return (
-    <section className="py-14 sm:py-20 bg-[#EEF7F5] dark:bg-[#080E1A] text-[#176B87] dark:text-slate-100 border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
+    <section className="py-14 sm:py-20 bg-[#EEF7F5] dark:bg-[#0a3340] text-[#176B87] dark:text-[#EEF7F5] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
         {/* Section Header */}
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 pb-6 border-b border-[#D7E7E4] dark:border-white/10">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-slate-100 font-mono font-black text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#176B87]/10 dark:bg-white/10 border border-[#176B87]/20 dark:border-white/20 text-[#176B87] dark:text-[#EEF7F5] font-mono font-black text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-[#13B8A6]" />
               <span>CURATED COLLECTIONS</span>
             </div>
@@ -127,7 +127,7 @@ export const VehicleCollectionsSection: FC = () => {
               Explore Vehicle Categories
             </h2>
 
-            <p className="text-xs sm:text-sm text-[#66808A] dark:text-slate-300 font-sans font-medium">
+            <p className="text-xs sm:text-sm text-[#64748b] dark:text-[#BDE5DE] font-sans font-medium">
               Find exactly what you need with our hand-curated vehicle categories across Kenya.
             </p>
           </div>
@@ -179,7 +179,7 @@ export const VehicleCollectionsSection: FC = () => {
                   {item.title}
                 </h3>
 
-                <p className="text-xs text-slate-300 font-sans font-medium line-clamp-2">
+                <p className="text-xs text-[#BDE5DE] font-sans font-medium line-clamp-2">
                   {item.subtitle}
                 </p>
               </div>

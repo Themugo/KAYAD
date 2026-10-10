@@ -65,7 +65,7 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
 
   if (!isLive) {
     return (
-      <div className="bg-cream-100 rounded-xl p-5 border border-cream-200">
+      <div className="bg-[#EEF7F5] rounded-xl p-5 border border-[#D7E7E4]">
         <div className="flex items-center gap-3 text-warm-500">
           <Gavel size={20} />
           <div>
@@ -83,7 +83,7 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
   }
 
   return (
-    <div className="bg-white rounded-xl p-5 border border-cream-200 shadow-sm">
+    <div className="bg-white rounded-xl p-5 border border-[#D7E7E4] shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -101,7 +101,7 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
         <p className="text-[10px] text-warm-400 uppercase tracking-wider font-bold mb-1">
           {bidsCount > 0 ? 'Current Bid' : 'Starting Bid'}
         </p>
-        <p className="font-serif text-3xl text-charcoal-900 font-bold">
+        <p className="font-serif text-3xl text-[#0A3340] font-bold">
           {formatKES(currentBid || startingBid)}
         </p>
         <p className="text-xs text-warm-400 mt-1">
@@ -117,8 +117,8 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
             onClick={() => handleQuickBid(amount)}
             className={`flex-1 py-2 px-2 rounded-lg font-sans text-xs font-semibold transition-all ${
               parseInt(bidAmount) === amount
-                ? 'bg-gold-500 text-white'
-                : 'bg-cream-100 text-charcoal-800 hover:bg-cream-200'
+                ? 'bg-[#13B8A6] text-white'
+                : 'bg-[#EEF7F5] text-[#0A3340] hover:bg-[#DDF4F0]'
             }`}
           >
             {formatKES(amount)}
@@ -139,7 +139,7 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
             }}
             placeholder={minBid.toLocaleString()}
             min={minBid}
-            className="w-full pl-12 pr-3 py-3 bg-cream-50 border border-cream-200 rounded-xl font-sans text-sm text-charcoal-800 outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30"
+            className="w-full pl-12 pr-3 py-3 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl font-sans text-sm text-[#0A3340] outline-none focus:border-[#5AAFA4] focus:ring-1 focus:ring-[#5AAFA4]/30"
           />
         </div>
       </div>
@@ -171,8 +171,8 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
         disabled={submitting || !bidAmount}
         className={`w-full py-3 px-4 rounded-xl font-sans text-sm font-bold flex items-center justify-center gap-2 transition-all ${
           submitting || !bidAmount
-            ? 'bg-cream-200 text-warm-400 cursor-not-allowed'
-            : 'bg-gold-500 text-white hover:bg-gold-600'
+            ? 'bg-[#DDF4F0] text-warm-400 cursor-not-allowed'
+            : 'bg-[#13B8A6] text-white hover:bg-[#176B87]'
         }`}
       >
         {submitting ? (

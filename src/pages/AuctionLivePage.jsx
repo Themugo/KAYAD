@@ -323,8 +323,8 @@ export default function AuctionLivePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{
                         width: 32, height: 32, borderRadius: '50%',
-                        background: i === 0 ? 'var(--gold)' : 'var(--surface)',
-                        border: `1px solid ${i === 0 ? 'var(--gold)' : 'var(--border)'}`,
+                        background: i === 0 ? 'var(--brand)' : 'var(--surface)',
+                        border: `1px solid ${i === 0 ? 'var(--brand)' : 'var(--border)'}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 12, fontWeight: 700,
                         color: i === 0 ? 'var(--color-navy-900)' : 'var(--text-muted)',
@@ -339,7 +339,7 @@ export default function AuctionLivePage() {
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem', color: i === 0 ? 'var(--gold-light)' : 'var(--text)' }}>
+                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem', color: i === 0 ? 'var(--brand-light)' : 'var(--text)' }}>
                         {formatKES(bid.amount)}
                       </div>
                       {bid.mpesaPaid && (
@@ -357,12 +357,12 @@ export default function AuctionLivePage() {
             <div style={{ position: 'sticky', top: 88 }}>
 
               {/* Current Bid Display */}
-              <div className="card" style={{ padding: 24, marginBottom: 16, border: '1px solid rgba(37, 99, 235,0.3)' }}>
+              <div className="card" style={{ padding: 24, marginBottom: 16, border: '1px solid rgba(23, 107, 135, 0.3)' }}>
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
                     {bidCount > 0 ? 'Current Leading Bid' : 'Starting Price'}
                   </div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700, color: 'var(--gold-light)', lineHeight: 1 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700, color: 'var(--brand-light)', lineHeight: 1 }}>
                     {formatKES(currentBid || car.price)}
                   </div>
                   <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
@@ -389,9 +389,9 @@ export default function AuctionLivePage() {
                         key={amt}
                         onClick={() => setBidAmount(String(amt))}
                         style={{
-                          background: bidAmount === String(amt) ? 'var(--gold)' : 'var(--surface)',
+                          background: bidAmount === String(amt) ? 'var(--brand)' : 'var(--surface)',
                           color: bidAmount === String(amt) ? 'var(--color-navy-900)' : 'var(--text-muted)',
-                          border: `1px solid ${bidAmount === String(amt) ? 'var(--gold)' : 'var(--border)'}`,
+                          border: `1px solid ${bidAmount === String(amt) ? 'var(--brand)' : 'var(--border)'}`,
                           borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer',
                           fontWeight: bidAmount === String(amt) ? 700 : 400,
                         }}
@@ -511,13 +511,13 @@ export default function AuctionLivePage() {
                 <div className="card" style={{ padding: 16, marginTop: 12 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Auction Organizer</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-navy-900)', fontWeight: 700 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-navy-900)', fontWeight: 700 }}>
                       {(car.dealer?.name || 'A')[0].toUpperCase()}
                     </div>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: 14 }}>{car.dealer?.name}</div>
                       {car.dealer?.dealerRating && (
-                        <div style={{ color: 'var(--gold)', fontSize: 12 }}>★ {car.dealer.dealerRating}/5</div>
+                        <div style={{ color: 'var(--brand)', fontSize: 12 }}>★ {car.dealer.dealerRating}/5</div>
                       )}
                     </div>
                   </div>

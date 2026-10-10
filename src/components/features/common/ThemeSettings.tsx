@@ -26,8 +26,8 @@ export const ThemeSettings: FC<ThemeSettingsProps> = ({ className = '' }) => {
   };
 
   return (
-    <div className={`bg-white dark:bg-charcoal-800 rounded-xl p-4 shadow-sm ${className}`}>
-      <h3 className="text-lg font-semibold text-charcoal-800 dark:text-cream-100 mb-4">
+    <div className={`bg-white dark:bg-[#12576D] rounded-xl p-4 shadow-sm ${className}`}>
+      <h3 className="text-lg font-semibold text-[#0A3340] dark:text-[#64748B] mb-4">
         Appearance
       </h3>
 
@@ -42,7 +42,7 @@ export const ThemeSettings: FC<ThemeSettingsProps> = ({ className = '' }) => {
               ${
                 theme === value
                   ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                  : 'border-cream-200 dark:border-charcoal-700 hover:border-brand-300'
+                  : 'border-[#D7E7E4] dark:border-[#12576D] hover:border-brand-300'
               }
               ${saving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
@@ -52,7 +52,7 @@ export const ThemeSettings: FC<ThemeSettingsProps> = ({ className = '' }) => {
               className={`text-sm font-medium ${
                 theme === value
                   ? 'text-brand-600 dark:text-brand-400'
-                  : 'text-charcoal-600 dark:text-cream-200'
+                  : 'text-[#176B87] dark:text-[#64748B]'
               }`}
             >
               {label}
@@ -61,7 +61,7 @@ export const ThemeSettings: FC<ThemeSettingsProps> = ({ className = '' }) => {
         ))}
       </div>
 
-      <p className="mt-4 text-sm text-charcoal-500 dark:text-cream-300">
+      <p className="mt-4 text-sm text-[#64748B] dark:text-[#5AAFA4]">
         {theme === 'system'
           ? 'Theme follows your system settings'
           : theme === 'dark'

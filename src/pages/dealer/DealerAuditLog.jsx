@@ -60,7 +60,7 @@ export default function DealerAuditLog() {
               ) : logs.map(log => (
                 <div key={log._id} className="card" style={{ padding: '10px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <code style={{ fontSize: 12, color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 600 }}>
+                    <code style={{ fontSize: 12, color: 'var(--brand)', fontFamily: 'monospace', fontWeight: 600 }}>
                       {log.action}
                     </code>
                     {log.targetModel && (

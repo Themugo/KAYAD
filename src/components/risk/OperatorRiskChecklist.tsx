@@ -40,20 +40,20 @@ const OperatorRiskItem: React.FC<{
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm text-slate-900">{risk.title}</span>
+            <span className="font-bold text-sm text-[#0A3340]">{risk.title}</span>
             {risk.severity === 'critical' && (
               <Badge size="sm" className="bg-red-100 text-red-700 border-red-200 text-[10px]">
                 Action Required
               </Badge>
             )}
           </div>
-          <p className="text-xs text-slate-600 mt-1">{risk.description}</p>
+          <p className="text-xs text-[#64748B] mt-1">{risk.description}</p>
 
           {/* Solution hint */}
-          <div className="mt-3 p-3 bg-white rounded-lg border border-slate-200">
-            <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mb-1">How to Fix</p>
-            <p className="text-sm text-slate-800">{risk.recommendation.solution}</p>
-            <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+          <div className="mt-3 p-3 bg-white rounded-lg border border-[#D7E7E4]">
+            <p className="text-[10px] text-[#64748B] font-semibold uppercase tracking-wider mb-1">How to Fix</p>
+            <p className="text-sm text-[#0A3340]">{risk.recommendation.solution}</p>
+            <div className="flex items-center gap-3 mt-2 text-xs text-[#64748B]">
               {risk.recommendation.responsibleParty === 'organizer' && (
                 <span className="flex items-center gap-1">
                   <User className="w-3 h-3" />
@@ -69,7 +69,7 @@ const OperatorRiskItem: React.FC<{
             </div>
           </div>
         </div>
-        <ChevronRight className="w-4 h-4 text-slate-400 mt-2 flex-shrink-0" />
+        <ChevronRight className="w-4 h-4 text-[#94A3B8] mt-2 flex-shrink-0" />
       </div>
     </div>
   );
@@ -107,8 +107,8 @@ export const OperatorRiskChecklist: React.FC<OperatorRiskChecklistProps> = ({
     return (
       <Card className="p-8 text-center">
         <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-        <h3 className="text-lg font-bold text-slate-800 mb-2">All Clear!</h3>
-        <p className="text-sm text-slate-500">
+        <h3 className="text-lg font-bold text-[#0A3340] mb-2">All Clear!</h3>
+        <p className="text-sm text-[#64748B]">
           Your auctions have no outstanding issues. Keep up the great work!
         </p>
       </Card>
@@ -123,9 +123,9 @@ export const OperatorRiskChecklist: React.FC<OperatorRiskChecklistProps> = ({
           <div className="text-2xl font-black text-red-600">{blockingRisks.length}</div>
           <div className="text-xs text-red-600 font-medium">Must Fix</div>
         </Card>
-        <Card className="p-4 text-center bg-amber-50 border-amber-200">
-          <div className="text-2xl font-black text-amber-600">{improvementRisks.length}</div>
-          <div className="text-xs text-amber-600 font-medium">Improvements</div>
+        <Card className="p-4 text-center bg-[#F3FAF9] border-[#BDE5DE]">
+          <div className="text-2xl font-black text-[#176B87]">{improvementRisks.length}</div>
+          <div className="text-xs text-[#176B87] font-medium">Improvements</div>
         </Card>
         <Card className="p-4 text-center bg-emerald-50 border-emerald-200">
           <div className="text-2xl font-black text-emerald-600">{organizerRisks.length}</div>
@@ -142,7 +142,7 @@ export const OperatorRiskChecklist: React.FC<OperatorRiskChecklistProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-red-800 mb-1">Auction Publication Blocked</h3>
-              <p className="text-sm text-slate-600 mb-3">
+              <p className="text-sm text-[#64748B] mb-3">
                 {blockingRisks.length} issue{blockingRisks.length > 1 ? 's' : ''} must be resolved before your auction can go live.
               </p>
               <Button
@@ -163,7 +163,7 @@ export const OperatorRiskChecklist: React.FC<OperatorRiskChecklistProps> = ({
         <div>
           <div className="flex items-center gap-2 mb-3">
             <AlertOctagon className="w-5 h-5 text-red-600" />
-            <h3 className="font-bold text-slate-800">Issues Requiring Action</h3>
+            <h3 className="font-bold text-[#0A3340]">Issues Requiring Action</h3>
             <Badge variant="danger" size="sm">{blockingRisks.length}</Badge>
           </div>
           <div className="space-y-3">
@@ -182,8 +182,8 @@ export const OperatorRiskChecklist: React.FC<OperatorRiskChecklistProps> = ({
       {improvementRisks.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
-            <h3 className="font-bold text-slate-800">Suggested Improvements</h3>
+            <AlertTriangle className="w-5 h-5 text-[#176B87]" />
+            <h3 className="font-bold text-[#0A3340]">Suggested Improvements</h3>
             <Badge variant="warning" size="sm">{improvementRisks.length}</Badge>
           </div>
           <div className="space-y-3">

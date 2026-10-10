@@ -82,13 +82,13 @@ const TrustIndicatorItem: React.FC<{
 }> = ({ icon, label, value, positive = true }) => (
   <div className="flex items-center gap-2">
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-      positive ? 'bg-emerald-50' : 'bg-slate-100'
+      positive ? 'bg-emerald-50' : 'bg-[#EEF7F5]'
     }`}>
       {icon}
     </div>
     <div>
       <p className="text-xs font-bold text-[#176B87]">{value || 'Yes'}</p>
-      <p className="text-[10px] text-slate-500">{label}</p>
+      <p className="text-[10px] text-[#64748B]">{label}</p>
     </div>
   </div>
 );
@@ -103,20 +103,20 @@ const TrustMetricsGrid: React.FC<{ metrics: TrustMetrics; compact?: boolean }> =
       <div className="flex items-center gap-4">
         {metrics.totalAuctions !== undefined && (
           <div className="flex items-center gap-1.5">
-            <GavelIcon className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-xs font-bold text-slate-700">{metrics.totalAuctions} auctions</span>
+            <GavelIcon className="w-3.5 h-3.5 text-[#94A3B8]" />
+            <span className="text-xs font-bold text-[#12576D]">{metrics.totalAuctions} auctions</span>
           </div>
         )}
         {metrics.vehiclesSold !== undefined && (
           <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span className="text-xs font-bold text-slate-700">{metrics.vehiclesSold} sold</span>
+            <span className="text-xs font-bold text-[#12576D]">{metrics.vehiclesSold} sold</span>
           </div>
         )}
         {metrics.averageRating !== undefined && (
           <div className="flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-            <span className="text-xs font-bold text-slate-700">{metrics.averageRating.toFixed(1)}</span>
+            <Star className="w-3.5 h-3.5 text-[#176B87] fill-[#176B87]" />
+            <span className="text-xs font-bold text-[#12576D]">{metrics.averageRating.toFixed(1)}</span>
           </div>
         )}
       </div>
@@ -126,10 +126,10 @@ const TrustMetricsGrid: React.FC<{ metrics: TrustMetrics; compact?: boolean }> =
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {metrics.totalAuctions !== undefined && (
-        <div className="text-center p-3 bg-slate-50 rounded-xl">
+        <div className="text-center p-3 bg-[#F6FAF9] rounded-xl">
           <GavelIcon className="w-5 h-5 text-[#176B87] mx-auto mb-1" />
           <div className="text-lg font-black text-[#176B87]">{metrics.totalAuctions}</div>
-          <div className="text-[10px] text-slate-500">Auctions</div>
+          <div className="text-[10px] text-[#64748B]">Auctions</div>
         </div>
       )}
       {metrics.vehiclesSold !== undefined && (
@@ -140,17 +140,17 @@ const TrustMetricsGrid: React.FC<{ metrics: TrustMetrics; compact?: boolean }> =
         </div>
       )}
       {metrics.averageRating !== undefined && (
-        <div className="text-center p-3 bg-amber-50 rounded-xl">
-          <Star className="w-5 h-5 text-amber-500 fill-amber-500 mx-auto mb-1" />
-          <div className="text-lg font-black text-amber-700">{metrics.averageRating.toFixed(1)}</div>
-          <div className="text-[10px] text-amber-600">Rating</div>
+        <div className="text-center p-3 bg-[#F3FAF9] rounded-xl">
+          <Star className="w-5 h-5 text-[#176B87] fill-[#176B87] mx-auto mb-1" />
+          <div className="text-lg font-black text-[#12576D]">{metrics.averageRating.toFixed(1)}</div>
+          <div className="text-[10px] text-[#176B87]">Rating</div>
         </div>
       )}
       {metrics.repeatBuyers !== undefined && (
-        <div className="text-center p-3 bg-blue-50 rounded-xl">
-          <Users className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-          <div className="text-lg font-black text-blue-700">{metrics.repeatBuyers}%</div>
-          <div className="text-[10px] text-blue-600">Repeat</div>
+        <div className="text-center p-3 bg-[#F3FAF9] rounded-xl">
+          <Users className="w-5 h-5 text-[#176B87] mx-auto mb-1" />
+          <div className="text-lg font-black text-[#12576D]">{metrics.repeatBuyers}%</div>
+          <div className="text-[10px] text-[#176B87]">Repeat</div>
         </div>
       )}
     </div>
@@ -200,8 +200,8 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
           <div className="flex items-center gap-2">
             <OrganizerTypeBadge type={organizer.type} />
             {trustMetrics?.averageRating && (
-              <span className="flex items-center gap-0.5 text-xs text-slate-500">
-                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span className="flex items-center gap-0.5 text-xs text-[#64748B]">
+                <Star className="w-3 h-3 text-[#176B87] fill-[#176B87]" />
                 {trustMetrics.averageRating.toFixed(1)}
               </span>
             )}
@@ -214,7 +214,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
   // Sidebar variant - for auction detail pages
   if (variant === 'sidebar') {
     return (
-      <Card className="p-4 bg-white border-slate-200 space-y-4">
+      <Card className="p-4 bg-white border-[#D7E7E4] space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 rounded-2xl bg-[#176B87] flex items-center justify-center text-white font-bold text-xl overflow-hidden shadow-md">
@@ -251,21 +251,21 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
 
         {/* Contact */}
         {organizer.contact && (
-          <div className="space-y-2 pt-3 border-t border-slate-100">
+          <div className="space-y-2 pt-3 border-t border-[#D7E7E4]">
             {organizer.contact.phone && (
-              <a href={`tel:${organizer.contact.phone}`} className="flex items-center gap-2 text-xs text-slate-600 hover:text-[#176B87]">
+              <a href={`tel:${organizer.contact.phone}`} className="flex items-center gap-2 text-xs text-[#64748B] hover:text-[#176B87]">
                 <Phone className="w-3.5 h-3.5 text-[#176B87]" />
                 {organizer.contact.phone}
               </a>
             )}
             {organizer.contact.email && (
-              <a href={`mailto:${organizer.contact.email}`} className="flex items-center gap-2 text-xs text-slate-600 hover:text-[#176B87]">
+              <a href={`mailto:${organizer.contact.email}`} className="flex items-center gap-2 text-xs text-[#64748B] hover:text-[#176B87]">
                 <Mail className="w-3.5 h-3.5 text-[#176B87]" />
                 {organizer.contact.email}
               </a>
             )}
             {organizer.contact.address && (
-              <div className="flex items-start gap-2 text-xs text-slate-600">
+              <div className="flex items-start gap-2 text-xs text-[#64748B]">
                 <MapPin className="w-3.5 h-3.5 text-[#176B87] flex-shrink-0 mt-0.5" />
                 {organizer.contact.address}
               </div>
@@ -275,7 +275,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
 
         {/* Payment Details */}
         {showPaymentDetails && organizer.paymentDetails && (
-          <div className="pt-3 border-t border-slate-100">
+          <div className="pt-3 border-t border-[#D7E7E4]">
             <PaymentTransparency
               organizerName={organizer.name}
               organizerType={organizer.type}
@@ -310,7 +310,7 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
   // Standard variant - default
   return (
     <div className="space-y-4">
-      <Card className="p-5 bg-white border-slate-200 space-y-5">
+      <Card className="p-5 bg-white border-[#D7E7E4] space-y-5">
         {/* Header */}
         <div className="flex items-start gap-4">
           <div className="w-16 h-16 rounded-2xl bg-[#176B87] flex items-center justify-center text-white font-bold text-2xl overflow-hidden shadow-md flex-shrink-0">
@@ -352,31 +352,31 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
         {organizer.contact && (
           <div className="grid grid-cols-2 gap-3">
             {organizer.contact.phone && (
-              <a href={`tel:${organizer.contact.phone}`} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+              <a href={`tel:${organizer.contact.phone}`} className="flex items-center gap-2 p-3 bg-[#F6FAF9] rounded-xl hover:bg-[#EEF7F5] transition-colors">
                 <Phone className="w-4 h-4 text-[#176B87]" />
                 <span className="text-xs font-medium text-[#176B87]">{organizer.contact.phone}</span>
               </a>
             )}
             {organizer.contact.email && (
-              <a href={`mailto:${organizer.contact.email}`} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+              <a href={`mailto:${organizer.contact.email}`} className="flex items-center gap-2 p-3 bg-[#F6FAF9] rounded-xl hover:bg-[#EEF7F5] transition-colors">
                 <Mail className="w-4 h-4 text-[#176B87]" />
                 <span className="text-xs font-medium text-[#176B87] truncate">{organizer.contact.email}</span>
               </a>
             )}
             {organizer.contact.address && (
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl col-span-2">
+              <div className="flex items-center gap-2 p-3 bg-[#F6FAF9] rounded-xl col-span-2">
                 <MapPin className="w-4 h-4 text-[#176B87]" />
                 <span className="text-xs font-medium text-[#176B87]">{organizer.contact.address}</span>
               </div>
             )}
             {organizer.contact.operatingRegion && (
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl col-span-2">
+              <div className="flex items-center gap-2 p-3 bg-[#F6FAF9] rounded-xl col-span-2">
                 <Landmark className="w-4 h-4 text-[#176B87]" />
                 <span className="text-xs font-medium text-[#176B87]">Operating: {organizer.contact.operatingRegion}</span>
               </div>
             )}
             {organizer.contact.businessHours && (
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl col-span-2">
+              <div className="flex items-center gap-2 p-3 bg-[#F6FAF9] rounded-xl col-span-2">
                 <Clock className="w-4 h-4 text-[#176B87]" />
                 <span className="text-xs font-medium text-[#176B87]">{organizer.contact.businessHours}</span>
               </div>
@@ -386,12 +386,12 @@ export const OrganizerTrustCenter: React.FC<OrganizerTrustCenterProps> = ({
 
         {/* Regulatory Info */}
         {trustMetrics?.licenseNumber && (
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+          <div className="p-4 bg-[#F3FAF9] border border-[#D7E7E4] rounded-xl">
             <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-bold text-blue-800">Regulatory Information</span>
+              <FileText className="w-4 h-4 text-[#176B87]" />
+              <span className="text-xs font-bold text-[#0E4655]">Regulatory Information</span>
             </div>
-            <div className="space-y-1 text-xs text-blue-700">
+            <div className="space-y-1 text-xs text-[#12576D]">
               {trustMetrics.licenseNumber && (
                 <p><strong>License:</strong> {trustMetrics.licenseNumber}</p>
               )}

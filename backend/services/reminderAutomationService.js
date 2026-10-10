@@ -368,15 +368,15 @@ const sendReminderNotification = async (reminder, userId) => {
 const generateReminderEmailHtml = (reminder) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-      <div style="background: ${reminder.urgency === 'high' ? '#fef2f2' : '#fef9c3'};
-                  border: 1px solid ${reminder.urgency === 'high' ? '#ef4444' : '#f59e0b'};
+      <div style="background: ${reminder.urgency === 'high' ? '#FEF2F2' : '#DDF4F0'};
+                  border: 1px solid ${reminder.urgency === 'high' ? '#EF4444' : '#13B8A6'};
                   border-radius: 8px; padding: 20px;">
-        <h2 style="color: ${reminder.urgency === 'high' ? '#dc2626' : '#d97706'}; margin-top: 0;">
+        <h2 style="color: ${reminder.urgency === 'high' ? '#DC2626' : '#0A3340'}; margin-top: 0;">
           ${REMINDER_TYPES[reminder.type]?.name || reminder.type}
         </h2>
         <p style="font-size: 16px; color: #374151;">${reminder.message}</p>
         <a href="https://www.kayad.space/dashboard"
-           style="display: inline-block; background: #0A1628; color: #fff; padding: 12px 24px;
+           style="display: inline-block; background: #176B87; color: #fff; padding: 12px 24px;
                   border-radius: 6px; text-decoration: none; margin-top: 16px;">
           Take Action
         </a>

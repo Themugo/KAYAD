@@ -61,9 +61,9 @@ export const Badge: React.FC<BadgeProps> = ({
       border: outline ? '1px solid var(--color-warning)' : '1px solid transparent',
     },
     amber: {
-      background: outline ? 'transparent' : '#fef3c7',
-      color: outline ? '#d97706' : '#b45309',
-      border: outline ? '1px solid #d97706' : '1px solid transparent',
+      background: outline ? 'transparent' : '#eef7f5',
+      color: outline ? '#12576d' : '#12576d',
+      border: outline ? '1px solid #12576d' : '1px solid transparent',
     },
     info: {
       background: outline ? 'transparent' : 'var(--color-info-subtle)',
@@ -71,9 +71,9 @@ export const Badge: React.FC<BadgeProps> = ({
       border: outline ? '1px solid var(--color-info)' : '1px solid transparent',
     },
     blue: {
-      background: outline ? 'transparent' : '#dbeafe',
-      color: outline ? '#2563eb' : '#1d4ed8',
-      border: outline ? '1px solid #2563eb' : '1px solid transparent',
+      background: outline ? 'transparent' : '#DDF4F0',
+      color: outline ? '#176B87' : '#1d4ed8',
+      border: outline ? '1px solid #176B87' : '1px solid transparent',
     },
     neutral: {
       background: outline ? 'transparent' : 'var(--color-bg-secondary)',

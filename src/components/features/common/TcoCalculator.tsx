@@ -55,13 +55,13 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
   }, [price, downPct, loanYears, estimateRate, isUsed]);
 
   return (
-    <div className="bg-charcoal-900 border border-white/10 rounded-xl overflow-hidden mt-4">
+    <div className="bg-[#0A3340] border border-white/10 rounded-xl overflow-hidden mt-4">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-4 py-3.5 bg-transparent border-none text-white font-sans text-sm font-bold cursor-pointer"
       >
         <span className="flex items-center gap-2">
-          <Calculator size={14} className="text-gold-400" />
+          <Calculator size={14} className="text-[#13B8A6]" />
           Total Cost of Ownership
         </span>
         {open ? (
@@ -86,8 +86,8 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
               </div>
             )}
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-              <span className="text-gold-400 font-sans text-xs font-semibold">Total with Import</span>
-              <span className="text-gold-400 font-sans font-bold">{formatKES(price + tco.importDuty)}</span>
+              <span className="text-[#13B8A6] font-sans text-xs font-semibold">Total with Import</span>
+              <span className="text-[#13B8A6] font-sans font-bold">{formatKES(price + tco.importDuty)}</span>
             </div>
           </div>
 
@@ -122,7 +122,7 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
                 step={5}
                 value={downPct}
                 onChange={(e) => setDownPct(parseInt(e.target.value))}
-                className="w-full accent-gold-500"
+                className="w-full accent-[#13B8A6]"
               />
             </div>
 
@@ -134,7 +134,7 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
                   onClick={() => setLoanYears(year)}
                   className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
                     loanYears === year
-                      ? 'bg-gold-500 text-charcoal-900'
+                      ? 'bg-[#13B8A6] text-[#0A3340]'
                       : 'bg-white/5 text-white/60 hover:bg-white/10'
                   }`}
                 >
@@ -156,7 +156,7 @@ export default function TcoCalculator({ vehicle }: TcoCalculatorProps) {
               <div className="h-px bg-white/10 my-2" />
               <div className="flex items-center justify-between">
                 <span className="text-white/50 font-sans text-xs">Monthly Payment</span>
-                <span className="text-gold-400 font-sans font-bold">{formatKES(tco.monthlyPmt)}/mo</span>
+                <span className="text-[#13B8A6] font-sans font-bold">{formatKES(tco.monthlyPmt)}/mo</span>
               </div>
             </div>
           </div>

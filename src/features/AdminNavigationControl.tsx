@@ -85,19 +85,19 @@ export const AdminNavigationControl: React.FC = () => {
     <Card className="p-5 space-y-4" data-testid="admin-navigation-control">
       <div>
         <h3 className="font-bold text-[#176B87]">Public navigation</h3>
-        <p className="text-sm text-slate-600 mt-1">
+        <p className="text-sm text-[#64748B] mt-1">
           Show, hide and reorder the existing destinations. The design, labels and destinations are fixed by KAYAD.
           Marketplace and Support are always shown. Hiding a menu item only removes the link — access to the page itself is still enforced by the platform.
           Changes reach visitors on their next page load.
         </p>
       </div>
-      {message && <div role="status" className={`text-sm rounded-lg px-3 py-2 ${message.kind === 'ok' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}`}>{message.text}</div>}
+      {message && <div role="status" className={`text-sm rounded-lg px-3 py-2 ${message.kind === 'ok' ? 'bg-emerald-50 text-emerald-800' : 'bg-[#F3FAF9] text-[#0A3340]'}`}>{message.text}</div>}
       <ol className="space-y-3" aria-busy={loading}>
         {model.map((item, i) => {
           const canon = NAV_PRIMARY.find((n) => n.id === item.id)!;
           const locked = NAV_LOCKED_VISIBLE.includes(item.id);
           return (
-            <li key={item.id} className="rounded-xl border border-slate-200 p-3" data-nav-admin-item={item.id}>
+            <li key={item.id} className="rounded-xl border border-[#D7E7E4] p-3" data-nav-admin-item={item.id}>
               <div className="flex flex-wrap items-center gap-3">
                 <strong className="flex-1 min-w-[140px]">{canon.label}</strong>
                 <label className="text-sm flex items-center gap-1.5"><input type="checkbox" checked={item.visible} disabled={locked || loading} onChange={(e) => patchItem(i, { visible: e.target.checked })} />Shown{locked ? ' (always)' : ''}</label>

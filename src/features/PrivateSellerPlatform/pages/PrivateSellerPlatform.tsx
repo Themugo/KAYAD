@@ -176,25 +176,25 @@ interface ListingDraft {
 const KAYAD_THEME = {
   navy: '#0A3340',
   navyLight: '#12576D',
-  gold: '#D4AF37',
-  goldLight: '#F5E6B3',
+  gold: '#176B87',
+  goldLight: '#DDF4F0',
   emerald: '#10B981',
-  amber: '#F59E0B',
+  amber: '#176b87',
   red: '#EF4444',
-  orange: '#F97316',
+  orange: '#176b87',
   slate: {
-    50: '#f8fafc',
-    100: '#f1f5f9',
-    200: '#e2e8f0',
-    300: '#cbd5e1',
+    50: '#f6faf9',
+    100: '#f6faf9',
+    200: '#d7e7e4',
+    300: '#d7e7e4',
     400: '#94a3b8',
     500: '#64748b',
-    600: '#475569',
-    700: '#334155',
+    600: '#64748b',
+    700: '#12576d',
     800: '#1e293b',
-    900: '#0f172a',
+    900: '#0a3340',
   },
-  warmBeige: '#F5F0E8',
+  warmBeige: '#F6FAF9',
 };
 
 // ============================================================
@@ -247,7 +247,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSelle
   if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-sm text-slate-500 mb-4">Sign in to list and manage your own vehicles.</p>
+        <p className="text-sm text-[#64748B] mb-4">Sign in to list and manage your own vehicles.</p>
         <button onClick={onOpenAuth} className="bg-[#176B87] text-white text-xs font-bold rounded-lg px-5 py-2.5">
           Sign In
         </button>
@@ -269,7 +269,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSelle
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: KAYAD_THEME.navy }}>
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#13B8A6] flex items-center justify-center">
               <Car size={18} style={{ color: 'white' }} />
             </div>
             <span className="text-white font-bold">Sell</span>
@@ -292,7 +292,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSelle
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="lg:hidden fixed inset-0 z-40 pt-16"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            style={{ backgroundColor: 'rgba(10, 51, 64, 0.5)' }}
             onClick={() => setMobileMenuOpen(false)}
           >
             <motion.div
@@ -362,7 +362,7 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       <div className="p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-[#13B8A6] flex items-center justify-center flex-shrink-0">
             <Car size={24} color="white" />
           </div>
           <div>
@@ -380,7 +380,7 @@ function SidebarContent({
               onClick={() => onSectionChange(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative ${
                 activeSection === item.id
-                  ? 'bg-orange-500/20 text-orange-400'
+                  ? 'bg-[#13B8A6]/20 text-[#5AAFA4]'
                   : 'text-white/70 hover:bg-white/5 hover:text-white'
               }`}
             >
@@ -464,9 +464,9 @@ function SellerHomeSection({ listings, loading, userName, onNavigate }: {
           </button>
         </div>
         {loading ? (
-          <p className="text-sm text-slate-400">Loading your listings…</p>
+          <p className="text-sm text-[#94A3B8]">Loading your listings…</p>
         ) : listings.length === 0 ? (
-          <p className="text-sm text-slate-400">You haven't listed any vehicles yet.</p>
+          <p className="text-sm text-[#94A3B8]">You haven't listed any vehicles yet.</p>
         ) : (
           <div className="space-y-4">
             {listings.slice(0, 5).map((listing, i) => (
@@ -497,9 +497,9 @@ function ListingCard({ listing, delay }: { listing: BackendCar; delay: number })
   const statusColors: Record<string, { bg: string; text: string }> = {
     available: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
     active: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    draft: { bg: 'bg-slate-100', text: 'text-slate-600' },
-    sold: { bg: 'bg-blue-100', text: 'text-blue-700' },
-    pending: { bg: 'bg-amber-100', text: 'text-amber-700' },
+    draft: { bg: 'bg-[#EEF7F5]', text: 'text-[#64748B]' },
+    sold: { bg: 'bg-[#DDF4F0]', text: 'text-[#12576D]' },
+    pending: { bg: 'bg-[#DDF4F0]', text: 'text-[#12576D]' },
   };
   const statusClass = statusColors[listing.status || 'draft'] || statusColors.draft;
   const image = listing.images?.[0]?.thumb || listing.images?.[0]?.url;
@@ -646,10 +646,10 @@ function ListingWizardSection({ draft, setDraft, onNavigate }: {
               key={step.id}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 step.id === currentStep
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-[#13B8A6] text-white'
                   : step.id < currentStep
                     ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-slate-100 text-slate-500'
+                    : 'bg-[#EEF7F5] text-[#64748B]'
               }`}
             >
               {step.id < currentStep ? <CheckCircle size={14} /> : null}
@@ -725,9 +725,9 @@ function TrustCenterSection() {
       <PhoneVerification />
       <div className="grid md:grid-cols-3 gap-4">
         {['National ID', 'Email', 'NTSA TIMS Logbook'].map((label) => (
-          <div key={label} className="p-4 rounded-xl bg-white border border-slate-200 flex items-center justify-between">
+          <div key={label} className="p-4 rounded-xl bg-white border border-[#D7E7E4] flex items-center justify-between">
             <span style={{ color: KAYAD_THEME.navy }} className="text-sm font-semibold">{label}</span>
-            <span className="text-[10px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-1 rounded-full">Not Yet Available</span>
+            <span className="text-[10px] font-bold uppercase text-[#94A3B8] bg-[#EEF7F5] px-2 py-1 rounded-full">Not Yet Available</span>
           </div>
         ))}
       </div>
@@ -736,12 +736,12 @@ function TrustCenterSection() {
 }
 
 function ListingQualitySection({ listings, loading }: { listings: BackendCar[]; loading: boolean }) {
-  if (loading) return <p className="text-sm text-slate-400">Loading your listings…</p>;
+  if (loading) return <p className="text-sm text-[#94A3B8]">Loading your listings…</p>;
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>My Listings</h1>
       {listings.length === 0 ? (
-        <p className="text-sm text-slate-400">You haven't listed any vehicles yet.</p>
+        <p className="text-sm text-[#94A3B8]">You haven't listed any vehicles yet.</p>
       ) : listings.map((l) => {
         const { score } = calculateListingQualityScore({
           hasTitle: !!l.title,
@@ -793,7 +793,7 @@ function EscrowCenterSection({ transactions, loading }: { transactions: BackendE
       </div>
       <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Escrow Transactions</h1>
       {loading ? (
-        <p className="text-sm text-slate-400">Loading…</p>
+        <p className="text-sm text-[#94A3B8]">Loading…</p>
       ) : transactions.length === 0 ? (
         <div className="rounded-xl p-8 text-center bg-white">
           <Shield size={48} style={{ color: KAYAD_THEME.slate[300] }} className="mx-auto mb-4" />
