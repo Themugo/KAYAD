@@ -1,4 +1,4 @@
-﻿# KAYAD Notifications Routing Fix
+# KAYAD Notifications Routing Fix
 
 **Date:** 10 October 2026
 **Foundation:** `KAYAD-PROJECT-WIDE-SLATE-TEAL-ONE-SWEEP-FIXES-20261010.zip`
@@ -12,7 +12,7 @@ The notification UI linked to `/notifications`, but the application's `AuthRoute
 - Added a canonical `/notifications` route in `AuthRouteSurface`, protected by the existing `RequireAuth` guard.
 - Added a full-page notifications view using the existing `NotificationContext` and its authoritative notification records.
 - The page supports opening a notification's existing internal link, marking one/all as read, and deleting a notification using existing context methods.
-- Changed the notification panel's â€œView All Activity in Dashboardâ€ action to open `/notifications` and relabeled it â€œView All Notifications.â€
+- Changed the notification panel's “View All Activity in Dashboard” action to open `/notifications` and relabeled it “View All Notifications.”
 - Existing notification links in the common notification centers and dealer layout now resolve to the canonical route.
 
 ## Security and scope
@@ -20,3 +20,8 @@ The notification UI linked to `/notifications`, but the application's `AuthRoute
 - Notification data remains account-specific and requires the existing authenticated session. The fix does not bypass `RequireAuth` or backend authorization.
 - No API contracts, notification persistence, payment/auction behavior, role rules, or database migrations were changed.
 - This patch was source-reviewed and structurally validated in the packaging environment. Full Vitest, TypeScript, build, and browser execution must be run in the project's Node 22.22.2+ Windows environment before deployment.
+
+
+## Follow-up correction — 10 October 2026
+
+The full-page notification list also had to normalize destinations; otherwise a persisted legacy chat notification could still follow a stale login/dashboard link even though the dropdown was fixed. Both the dropdown and full page now use `src/utils/notificationDestination.ts`, which forces `chat` and `message` notifications to `/?nav=chat` and only accepts in-app absolute links for other notification types.

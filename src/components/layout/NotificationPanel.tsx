@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, ExternalLink, ShieldCheck, Gavel, MessageSquare, X, TrendingDown, Tag, BellRing } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
+import { notificationDestination } from '../../utils/notificationDestination';
 
 const timeAgo = (date: string) => {
   const timestamp = new Date(date).getTime();
@@ -35,6 +36,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
       case 'escrow':
         return <ShieldCheck className="w-4 h-4 text-[#2ECC71]" />;
       case 'message':
+      case 'chat':
         return <MessageSquare className="w-4 h-4 text-[#13B8A6]" />;
       case 'price_drop':
         return <TrendingDown className="w-4 h-4 text-[#13B8A6]" />;
@@ -81,13 +83,8 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
                 key={notif._id}
                 onClick={() => {
                   markAsRead(notif._id);
-                  if (notif.link) {
-                    navigate(notif.link);
-                  } else if (notif.type === 'escrow') {
-                    navigate('/escrow');
-                  } else if (notif.type === 'bid' || notif.type === 'auction') {
-                    navigate('/auction');
-                  }
+                  const destination = notificationDestination(notif);
+                  if (destination) navigate(destination);
                   onClose();
                 }}
                 className={`p-3 rounded-xl cursor-pointer transition-colors ${

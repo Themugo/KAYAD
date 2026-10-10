@@ -3,6 +3,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { Link } from 'react-router-dom';
 import { Bell, Check, X, Clock, MessageCircle, Shield, DollarSign, Gavel } from 'lucide-react';
 import { timeAgo } from '../utils/helpers';
+import { notificationDestination } from '../utils/notificationDestination';
 
 interface Notification {
   id: string;
@@ -121,11 +122,12 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
               </div>
             );
 
-            if (n.link) {
+            const destination = notificationDestination(n);
+            if (destination) {
               return (
                 <Link
                   key={n._id}
-                  to={n.link}
+                  to={destination}
                   onClick={onClose}
                   className="block no-underline"
                 >

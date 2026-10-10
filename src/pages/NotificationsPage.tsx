@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck, Clock3, ExternalLink, Trash2 } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import { timeAgo } from '../utils/helpers';
+import { notificationDestination } from '../utils/notificationDestination';
 
 /** Full-page destination for notification links across the marketplace and dealer shells. */
 export default function NotificationsPage() {
@@ -10,7 +11,8 @@ export default function NotificationsPage() {
 
   const openNotification = async (notification: (typeof notifications)[number]) => {
     if (!notification.read) await markAsRead(notification._id);
-    if (notification.link) navigate(notification.link);
+    const destination = notificationDestination(notification);
+    if (destination) navigate(destination);
   };
 
   return (

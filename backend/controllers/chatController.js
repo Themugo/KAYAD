@@ -179,7 +179,7 @@ export const sendMessage = async (req, res) => {
       const lead = await findOrCreateLeadFromChat(chatId);
       await addLeadActivity(lead.id, "message_sent", req.user.id, {
         description: "Message sent",
-        metadata: { messageId },
+        metadata: { messageId: messageData.id },
       });
 
       if (lead.stage === "new") {
@@ -196,7 +196,7 @@ export const sendMessage = async (req, res) => {
       getIO()
         .to(`chat_${chatId}`)
         .emit("newMessage", {
-          id: messageId,
+          id: messageData.id,
           chatId,
           sender: req.user.id,
           text: msgText,
@@ -211,7 +211,14 @@ export const sendMessage = async (req, res) => {
     try {
       const { sendNotification } = await import("../services/notification.service.js");
       const otherUserId = chat.participants.find((p) => String(p) !== String(req.user.id));
-      if (otherUserId) await sendNotification({ userId: otherUserId, title: "New message", message: msgText, type: "chat", data: { chatId, messageId } });
+      if (otherUserId) await sendNotification({
+        userId: otherUserId,
+        title: "New message",
+        message: msgText,
+        type: "chat",
+        link: "/?nav=chat",
+        data: { chatId, messageId: messageData.id },
+      });
     } catch (notificationError) {
       console.warn("New message in-app notification failed:", notificationError.message);
     }
