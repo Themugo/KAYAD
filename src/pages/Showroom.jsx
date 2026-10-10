@@ -46,7 +46,7 @@ import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 import useDebouncedValue from '../hooks/useDebouncedValue';
-import { ItemListStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
+import { ItemListStructuredData, BreadcrumbStructuredData } from '../components/features/common/SeoStructuredData';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import ShowroomEmptyState from './showroom/components/ShowroomEmptyState';

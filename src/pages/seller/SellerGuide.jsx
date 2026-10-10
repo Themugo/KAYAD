@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, CheckCircle, AlertCircle, Camera, FileText, Shield, Clock, MessageCircle, DollarSign } from 'lucide-react';
-import BackButton from '../../components/BackButton';
+import BackButton from '../../components/features/common/BackButton';
 
 const GUIDE_SECTIONS = [
   {

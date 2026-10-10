@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { carsAPI } from '../../api/api';
 import { TrendingUp, Eye, MessageCircle, DollarSign, Calendar, BarChart3 } from 'lucide-react';
-import BackButton from '../../components/BackButton';
+import BackButton from '../../components/features/common/BackButton';
 
 export default function SellerAnalytics() {
   const { user } = useAuth();

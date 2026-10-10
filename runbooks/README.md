@@ -17,41 +17,41 @@ This directory contains operational runbooks for managing the KAYAD platform. Th
 
 | Runbook | Severity | RTO | Description |
 |---------|----------|-----|-------------|
-| [Security Incident](./security-incident.md) | P0-P3 | Varies | Security breach response |
-| [Database Failure](./database-failure.md) | P1-P2 | 30 min | Database outage handling |
-| [Cache Failure](./cache-failure.md) | P2 | 5 min | Redis/cache issues |
-| [Third-Party Outage](./third-party-outage.md) | P1-P2 | Varies | External service failures |
+| [Security Incident](../docs/runbooks/security-incident.md) | P0-P3 | Varies | Security breach response |
+| [Database Failure](../docs/DATABASE.md) | P1-P2 | 30 min | Database outage handling |
+| [Cache Failure](../docs/OBSERVABILITY.md) | P2 | 5 min | Redis/cache issues |
+| [Third-Party Outage](../docs/runbooks/infrastructure-outage.md) | P1-P2 | Varies | External service failures |
 
 ### Deployment & Release
 
 | Runbook | Severity | RTO | Description |
 |---------|----------|-----|-------------|
-| [Deployment Rollback](./deployment-rollback.md) | P1 | 15 min | Revert problematic deployment |
+| [Deployment Rollback](../docs/runbooks/deployment-failure.md) | P1 | 15 min | Revert problematic deployment |
 
 ### Maintenance
 
 | Runbook | Description |
 |---------|-------------|
-| [Database Backup](./database-backup.md) | Backup procedures |
-| [Service Health Check](./health-check.md) | System health verification |
+| [Database Backup](../docs/production/DISASTER_RECOVERY.md) | Backup procedures |
+| [Service Health Check](../docs/OBSERVABILITY.md) | System health verification |
 
 ## Critical Contacts
 
 | Role | Name | Contact |
 |------|------|---------|
-| On-Call Engineer | (PagerDuty) | +254... |
-| Engineering Manager | (Slack: @eng-manager) | @eng-manager |
-| CTO | (Slack: @cto) | @cto |
-| Security Lead | (Slack: @security) | @security |
+| On-Call Engineer | To be confirmed by receiving team | Not configured in this archive |
+| Engineering Manager | To be confirmed by receiving team | Not configured in this archive |
+| CTO | To be confirmed by receiving team | Not configured in this archive |
+| Security Lead | To be confirmed by receiving team | Not configured in this archive |
 
 ## Monitoring Dashboards
 
 | Dashboard | URL | Purpose |
 |----------|-----|---------|
-| Grafana | https://grafana.kayad.space | Metrics & alerting |
-| Sentry | https://sentry.io/kayad | Error tracking |
-| Supabase | https://supabase.com/dashboard | Database monitoring |
-| Cloudinary | https://cloudinary.com/console | Media storage |
+| Grafana | Verify endpoint and access with operations owner | Metrics & alerting |
+| Sentry | Verify project and access with operations owner | Error tracking |
+| Supabase | Use the authorized project dashboard | Database monitoring |
+| Cloudinary | Use the authorized account console | Media storage |
 
 ## Alert Severity Levels
 
@@ -127,8 +127,9 @@ psql $DATABASE_URL
 # Check connections
 SELECT * FROM pg_stat_activity WHERE datname = 'kayad';
 
-# Kill idle connections
-SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle';
+-- Do not terminate database sessions as a routine troubleshooting step.
+-- Review session ownership, transaction state and service impact with the
+-- database owner before using pg_terminate_backend.
 ```
 
 ### Cache Operations
@@ -138,11 +139,12 @@ SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle';
 redis-cli ping
 redis-cli info
 
-# Clear cache
-redis-cli FLUSHALL
-
 # Check cache size
 redis-cli DBSIZE
+
+# Do not run FLUSHALL in production as a routine cache-clear command:
+# it deletes every key in the selected Redis database. Use an approved,
+# scoped invalidation procedure after confirming the impact with the owner.
 ```
 
 ## Escalation Policy
@@ -180,6 +182,6 @@ All team members must complete:
 ## Additional Resources
 
 - [API Documentation](../docs/API.md)
-- [Deployment Guide](../DEPLOY.md)
+- [Deployment Guide](../docs/production/DEPLOY.md)
 - [Security Policy](../SECURITY.md)
-- [Monitoring Setup](../MONITORING.md)
+- [Monitoring Setup](../docs/production/MONITORING.md)

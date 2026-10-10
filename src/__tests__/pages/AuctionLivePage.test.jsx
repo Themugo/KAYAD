@@ -63,8 +63,6 @@ vi.mock('../../context/ToastContext', () => ({
   useToast: () => ({ toast: toastSpy }),
 }));
 vi.mock('../../components/CountdownDisplay', () => ({ CountdownDisplay: () => null }));
-vi.mock('../../components/BackButton', () => ({ default: () => null }));
-vi.mock('../../components/WinnerModal', () => ({ default: () => null }));
 vi.mock('../../components/MarketValuationMatrix', () => ({ default: () => null }));
 vi.mock('../../components/features/car/GalleryModal', () => ({ default: () => null }));
 vi.mock('../../pages/auction/components/AuctionEffects', () => ({

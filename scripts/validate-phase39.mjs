@@ -12,7 +12,7 @@ check("Socket chat room requires participant membership", /from\("chats"\)[\s\S]
 check("Socket typing requires an authorized chat room", /socket\.rooms\.has\(room\)/.test(server));
 check("Socket typing does not trust client identity fields", !/socket\.on\("typing", \(\{ chatId, userId, name \}/.test(server));
 check("Socket room identifiers remain UUID validated", /isValidId\(chatId\)/.test(server));
-check("Phase 39 completion document exists", fs.existsSync(path.join(root, "PHASE_39_COMPLETE.md")));
+check("Phase 39 completion document exists", (fs.existsSync(path.join(root, "PHASE_39_COMPLETE.md")) || fs.existsSync(path.join(root, "docs", "history", "PHASE_39_COMPLETE.md"))));
 
 const failed = phase.filter(x => x.startsWith("FAIL"));
 console.log("PHASE 39 SOCKET AUTHORIZATION VALIDATION");

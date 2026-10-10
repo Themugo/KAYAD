@@ -323,7 +323,7 @@ After Supabase is configured:
 4. **Deploy Backend**: Deploy to Render, Railway, or similar
 5. **Deploy Frontend**: Deploy to Vercel or Netlify
 
-See [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md) for all service configurations.
+See [INTEGRATION_GUIDE.md](../domains/INTEGRATION_GUIDE.md) for all service configurations.
 
 ---
 

@@ -24,11 +24,6 @@ vi.mock('socket.io-client', () => ({
   }),
 }));
 
-// Mock SWUpdateBanner to avoid PWA virtual module import issues
-vi.mock('../components/SWUpdateBanner', () => ({
-  default: () => null,
-}));
-
 // Mock BrandingContext to avoid async state updates after test teardown
 vi.mock('../context/BrandingContext', () => ({
   BrandingProvider: ({ children }) => children,

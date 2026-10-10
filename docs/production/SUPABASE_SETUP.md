@@ -1,6 +1,6 @@
 # Supabase Setup Guide for KAYAD
 
-> ⚠️ **This is part of a larger integration guide.** For all services, see: [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)
+> ⚠️ **This is part of a larger integration guide.** For all services, see: [INTEGRATION_GUIDE.md](../domains/INTEGRATION_GUIDE.md)
 
 ## Quick Reference
 

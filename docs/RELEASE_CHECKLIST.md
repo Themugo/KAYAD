@@ -320,5 +320,5 @@ Brief description of the release
 
 - [Deployment Guide](./DEPLOYMENT.md)
 - [Observability Guide](./OBSERVABILITY.md)
-- [API Documentation](../backend/docs/API.md)
-- [Troubleshooting Guide](../backend/docs/TROUBLESHOOTING.md)
+- [API Documentation](../backend/openapi.yaml)
+- [Troubleshooting Guide](runbooks/backend-troubleshooting.md)

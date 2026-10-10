@@ -1,0 +1,184 @@
+{
+  "audit_date": "2026-10-10",
+  "foundation_archive": "KAYAD-ORGANIZED-FOUNDATION-20261010 (1).zip",
+  "foundation_archive_sha256": "bcd50bd109b713363f0ac9e97e1b13a87234dc3c02e055d3e82fee00d884da66",
+  "scope": "Static source/dependency/documentation audit and narrow exact-duplicate consolidation. No application architecture or business flow redesign.",
+  "inventory": {
+    "files_in_working_tree": 2995,
+    "exact_duplicate_hash_groups_remaining": 10,
+    "supabase_migration_files": 165,
+    "markdown_catalog": "docs/DOCUMENT_CATALOG_20261010.md",
+    "markdown_local_links_checked": 695,
+    "broken_local_markdown_links": 0,
+    "migration_timestamp_collisions": {}
+  },
+  "changes": {
+    "canonicalized_components": [
+      {
+        "removed": "src/components/BackButton.tsx",
+        "canonical": "src/components/features/common/BackButton.tsx"
+      },
+      {
+        "removed": "src/components/SeoStructuredData.tsx",
+        "canonical": "src/components/features/common/SeoStructuredData.tsx"
+      },
+      {
+        "removed": "src/components/CompareDrawer.tsx",
+        "canonical": "src/components/features/common/CompareDrawer.tsx"
+      },
+      {
+        "removed": "src/components/features/car/CompareDrawer.tsx",
+        "canonical": "src/components/features/common/CompareDrawer.tsx"
+      },
+      {
+        "removed": "src/components/SWUpdateBanner.tsx",
+        "canonical": "src/components/features/common/SWUpdateBanner.tsx"
+      },
+      {
+        "removed": "src/components/WinnerModal.tsx",
+        "canonical": "src/components/features/auction/WinnerModal.tsx"
+      },
+      {
+        "removed": "src/components/dealer/DealerSidebar.tsx",
+        "canonical": "src/components/layout/DealerSidebar.tsx"
+      }
+    ],
+    "documentation_added_or_reorganized": [
+      "docs/README.md",
+      "docs/architecture/SYSTEM_AND_MODULE_BOUNDARIES.md",
+      "docs/architecture/DEPENDENCY_AND_DUPLICATION_AUDIT_20261010.md",
+      "docs/architecture/TECHNICAL_AUDIT_MANIFEST_20261010.json",
+      "docs/runbooks/TECHNICAL_TEAM_HANDOVER.md",
+      "docs/runbooks/backend-troubleshooting.md",
+      "docs/DOCUMENT_CATALOG_20261010.md"
+    ],
+    "historical_evidence_preserved": true,
+    "database_migrations_modified": false,
+    "deployment_configuration_modified": false,
+    "source_files_removed": 7
+  },
+  "runtime_and_test_status": {
+    "required_node": "22.22.2 or >=22.22.2",
+    "audit_node": "22.16.0",
+    "dependencies_installed": false,
+    "typecheck": "BLOCKED: dependencies and type declarations unavailable; missing React/Vitest/Node types reported",
+    "build": "BLOCKED: vite not found",
+    "tests": "BLOCKED: vitest not found",
+    "production_certification": "NOT RUN",
+    "markdown_links": "PASS: 695 local links checked, 0 broken"
+  },
+  "open_operational_findings": {
+    "backend_package_script_targets_missing": [
+      {
+        "script": "seed-depts",
+        "target": "backend/scripts/seed-departments.js"
+      },
+      {
+        "script": "monitor",
+        "target": "backend/scripts/deploymentMonitor.js"
+      },
+      {
+        "script": "health-check",
+        "target": "backend/scripts/deploymentMonitor.js"
+      },
+      {
+        "script": "notify-deployment",
+        "target": "backend/scripts/deploymentMonitor.js"
+      }
+    ],
+    "package_manager_policy": "npm is used by README and CI; bun.lock also exists; policy decision pending",
+    "legacy_dealer_layout": "src/components/dealer/DealerLayout.tsx has no static import found; retained pending route/product owner confirmation",
+    "production_validation_required": [
+      "staging migrations and RLS",
+      "registration and authorization",
+      "auction eligibility/bidding/concurrency",
+      "payment callbacks/idempotency",
+      "ledger and escrow reconciliation",
+      "ownership/fulfilment/disputes",
+      "provider/webhook certification",
+      "deployed commit and health endpoints"
+    ]
+  },
+  "remaining_exact_duplicate_groups": [
+    {
+      "sha256": "4c42fb8d6334c5cdcac68b93f96c581fb83b1f58cda898cff115e5e941ef717d",
+      "paths": [
+        ".node-version",
+        ".nvmrc"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "634a5769c663ea198ff1cf3d3dc76c47a16f60936f4d72949ddcd5da60b02f8b",
+      "paths": [
+        "backend/package.json",
+        "evidence/identity/backend-package.json.before"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "51e08d03c23115d15fd730f8a22a12e158624b84098e42b993835ad47e9f7af5",
+      "paths": [
+        "evidence/automotive-services/inspection_journey_results.txt",
+        "e2e/inspection-journey/LAST_RUN_20261009.txt"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "a5b82e67f18508ed0e7468c0e73023d5ce360e5e16f09c4b47d533e1ef80e346",
+      "paths": [
+        "evidence/release-gate/journey_auto.tmp.cjs.txt",
+        "evidence/ux-convergence/automotive_journey_results.txt"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "ed157e35d28739d24cfba56be938fcf1aa9499f7d9ccf5f7e31697c522b692bf",
+      "paths": [
+        "evidence/release-gate/journey_insp.tmp.cjs.txt",
+        "evidence/ux-convergence/inspection_journey_results.txt"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "c6804a6b411c8b57b6707713950baac571dd88cbb85e13fd59d3e9369d4f89e9",
+      "paths": [
+        "evidence/support/playwright_support_journey_output.txt",
+        "evidence/release-gate/journey_support_journey.cjs.txt"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "ef8fdc888bfc36c69ad57d61cccc8d2efbe8a50a167eef4d7cbe8890a667f87a",
+      "paths": [
+        "evidence/support/support_hardening_proof_output_final.txt",
+        "evidence/support/support_hardening_proof_output_post_integration.txt"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "8501500529101bb73029f7302598904f9d509bef91bd3d1a173e5e7705c90eb1",
+      "paths": [
+        "kayad-land-cruiser-clean-preview.jpg",
+        "kayad-land-cruiser-clean-preview2.jpg"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "a48b049b74116716d37a5e162ee71cbb70e9f3ca13bfce20a485da6ca4736752",
+      "paths": [
+        "package.json",
+        "evidence/identity/root-package.json.before"
+      ],
+      "count": 2
+    },
+    {
+      "sha256": "59039cff6d702b974dfd9fed5c286ccafe3e06a3e58bcc3eeb5918f973f0b0b3",
+      "paths": [
+        "public/security.txt",
+        "public/.well-known/security.txt"
+      ],
+      "count": 2
+    }
+  ]
+}

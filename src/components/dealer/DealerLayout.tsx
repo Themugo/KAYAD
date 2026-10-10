@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode } from 'react';
-import DealerSidebar from './DealerSidebar';
+import DealerSidebar from '../layout/DealerSidebar';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, Link } from 'react-router-dom';
 import { Bell, ChevronRight, Home, Menu } from 'lucide-react';

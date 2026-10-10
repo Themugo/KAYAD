@@ -78,6 +78,9 @@ const serializeUser = (user, authState = null) => {
   for (const field of SAFE_USER_FIELDS) {
     if (raw[field] !== undefined) safe[field] = raw[field];
   }
+  if (safe._id === undefined && raw.id !== undefined) {
+    safe._id = String(raw.id);
+  }
   safe.role = role;
   if (authState && authState.mustChangePassword !== undefined) {
     safe.mustChangePassword = Boolean(authState.mustChangePassword);

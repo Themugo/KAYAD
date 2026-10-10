@@ -195,5 +195,5 @@ All critical production quality issues have been addressed.
 
 ## 🔗 Related Documentation
 
-- [INTEGRATION_AUDIT.md](./INTEGRATION_AUDIT.md) - API integration status
-- [PAGE_AUDIT.md](./PAGE_AUDIT.md) - Page audit report
+- [INTEGRATION_AUDIT.md](../domains/INTEGRATION_AUDIT.md) - API integration status
+- [PAGE_AUDIT.md](../domains/PAGE_AUDIT.md) - Page audit report

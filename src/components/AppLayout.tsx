@@ -2,7 +2,7 @@ import { useState, useEffect, ReactNode, useCallback } from 'react';
 import { adminAPI } from '../api/api';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import CompareDrawer from './CompareDrawer';
+import CompareDrawer from './features/common/CompareDrawer';
 
 interface SiteConfig {
   fontDisplay?: string;

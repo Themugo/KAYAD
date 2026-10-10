@@ -54,3 +54,8 @@ The authoritative frontend deployment path is the pinned Vercel workflow in `.gi
 
 Do not use legacy `vercel --prod` shortcuts or manually mix preview and production project targets. Custom-domain DNS is a separate gate from the application deployment; verify it with `vercel domains verify`.
 
+
+
+## Documentation index
+
+Start with [`docs/README.md`](docs/README.md), the [technical team handover](docs/runbooks/TECHNICAL_TEAM_HANDOVER.md), the [system boundaries map](docs/architecture/SYSTEM_AND_MODULE_BOUNDARIES.md), and the [dependency/duplication audit](docs/architecture/DEPENDENCY_AND_DUPLICATION_AUDIT_20261010.md).

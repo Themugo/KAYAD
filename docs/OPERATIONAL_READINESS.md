@@ -23,10 +23,10 @@ This document outlines the operational readiness program for the KAYAD platform,
 ## Runbooks
 
 ### Available Runbooks
-- [Security Incident](./security-incident.md)
-- [Payment Outage](./payment-outage.md)
-- [Deployment Failure](./deployment-failure.md)
-- [Infrastructure Outage](./infrastructure-outage.md)
+- [Security Incident](./runbooks/security-incident.md)
+- [Payment Outage](./runbooks/payment-outage.md)
+- [Deployment Failure](./runbooks/deployment-failure.md)
+- [Infrastructure Outage](./runbooks/infrastructure-outage.md)
 
 ### Runbook Maintenance
 - **Review Frequency**: Quarterly
@@ -44,7 +44,7 @@ This document outlines the operational readiness program for the KAYAD platform,
 - **Annual**: Full-Scale Exercise (December)
 
 ### Exercise Details
-- See [Tabletop Exercises](./tabletop-exercises.md)
+- See [Tabletop Exercises](./runbooks/tabletop-exercises.md)
 - Duration: 2 hours per exercise
 - Participants: Incident Response Team
 - Facilitator: Operations Manager
