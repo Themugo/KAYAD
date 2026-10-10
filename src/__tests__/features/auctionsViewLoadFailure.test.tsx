@@ -22,14 +22,16 @@ describe('AuctionsView load failure handling', () => {
       return { auctions: status === 'live' ? [live] : [ended] };
     });
     renderView();
-    await screen.findByText(/Starting soon could not be loaded \(Internal server error\)/);
+    await screen.findByText(/Starting soon: Internal server error/);
     expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);          // live data still shown
     const scheduledTab = screen.getByRole('tab', { name: /Starting soon/ });
     expect(scheduledTab.textContent).toContain('—');                                 // unavailable, not 0
     expect(scheduledTab.textContent).not.toMatch(/\b0\b/);
     fireEvent.click(scheduledTab);
     expect(screen.queryByText('No auctions are scheduled yet.')).toBeNull();          // no false "empty" claim
-    expect(screen.getByText(/could not be loaded/)).toBeTruthy();
+    expect(screen.getByText(/Other sections remain available — use Refresh to try again/)).toBeTruthy();
+    expect(screen.getByText('Starting-soon auctions are temporarily unavailable')).toBeTruthy();
+    expect(screen.getByText(/Starting soon list could not be loaded, but the other auction sections responded/)).toBeTruthy();
   });
 
   it('when everything fails the error is shown and nothing claims the floor is empty', async () => {
@@ -39,6 +41,18 @@ describe('AuctionsView load failure handling', () => {
     expect(screen.queryByText(/The auction floor is quiet right now/)).toBeNull();
     expect(screen.queryByText('Nothing live this moment.')).toBeNull();
     expect(screen.getByText(/Live auctions are temporarily unavailable/)).toBeTruthy();
+  });
+
+  it('reports the error beside each failed section instead of attributing one error to every section', async () => {
+    svc.fetchList.mockImplementation(async ({ status }: { status: string }) => {
+      if (status === 'draft') throw Object.assign(new Error('setup table unavailable'), { status: 503 });
+      if (status === 'ended') throw Object.assign(new Error('database timeout'), { status: 504 });
+      return { auctions: [live] };
+    });
+    renderView();
+    await screen.findByText(/Starting soon: setup table unavailable/);
+    expect(screen.getByText(/Completed: database timeout/)).toBeTruthy();
+    expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);
   });
 
   it('a genuinely empty, healthy backend still says the floor is quiet', async () => {

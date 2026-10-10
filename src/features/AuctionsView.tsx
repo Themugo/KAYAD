@@ -93,13 +93,18 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
       setLive(rows(results[0])); setScheduled(rows(results[1])); setEnded(rows(results[2]));
       const next = { live: results[0].status === 'rejected', scheduled: results[1].status === 'rejected', ended: results[2].status === 'rejected' };
       setFailed(next);
-      const rejected = results.map((r, i) => ({ r, section: sections[i] })).filter((x) => x.r.status === 'rejected') as Array<{ r: PromiseRejectedResult; section: typeof sections[number] }>;
+      const rejected = results
+        .map((r, i) => ({ r, section: sections[i] }))
+        .filter((x) => x.r.status === 'rejected') as Array<{ r: PromiseRejectedResult; section: typeof sections[number] }>;
       if (rejected.length) {
-        const reason = rejected[0].r.reason as any;
-        const detail = reason?.response?.data?.message || reason?.message || 'Unable to load auctions from KAYAD.';
+        const details = rejected.map(({ r, section }) => {
+          const reason = r.reason as any;
+          const detail = reason?.response?.data?.message || reason?.message || 'Request failed.';
+          return `${section.label}: ${detail}`;
+        });
         setError(rejected.length === sections.length
-          ? detail
-          : `${rejected.map((x) => x.section.label).join(' and ')} could not be loaded (${detail}). The rest of the auction floor is shown below — use Refresh to try again.`);
+          ? `Auction data is temporarily unavailable. ${details.join(' · ')}`
+          : `${details.join(' · ')}. Other sections remain available — use Refresh to try again.`);
       }
     } catch (err: any) {
       setFailed({ live: true, scheduled: true, ended: true });
@@ -144,17 +149,20 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const marketHeadline = useMemo(() => {
     if (failed.live) return 'Live auctions are temporarily unavailable';
     if (live.length > 0) return `${live.length} vehicle${live.length === 1 ? '' : 's'} up for bid right now`;
-    if (failed.scheduled) return 'Some of the auction floor could not be loaded';
+    if (failed.scheduled) return 'Starting-soon auctions are temporarily unavailable';
     if (scheduled.length > 0) return `No auctions live right now — ${scheduled.length} starting soon`;
     return 'The auction floor is quiet right now';
   }, [live.length, scheduled.length, failed.live, failed.scheduled]);
 
   const marketSubcopy = useMemo(() => {
-    if (failed.live || (live.length === 0 && failed.scheduled)) return 'We could not reach the auction service just now. Nothing has been lost — use Refresh to try again.';
+    if (failed.live && failed.scheduled && failed.ended) return 'The auction service did not return any of its lists. No auction records have been fabricated — use Refresh to try again.';
+    if (failed.live) return 'Live auctions could not be loaded. Other sections may still be available; use Refresh to retry the live list.';
+    if (failed.scheduled && live.length === 0) return 'The Starting soon list could not be loaded, but the other auction sections responded. This is not confirmation that there are no scheduled auctions — use Refresh to retry.';
     if (live.length > 0) return 'Follow live bidding, save what you want to return to, and move from registration to fulfilment in one connected room.';
+    if (failed.scheduled) return 'The Starting soon list is temporarily unavailable. Live and completed sections remain available; use Refresh to retry.';
     if (scheduled.length > 0) return 'New auctions are queued and will open automatically — save a listing or check back to be first in the room.';
     return 'KAYAD opens auctions as verified vehicles clear registration. Browse the marketplace in the meantime, or save a search to be notified the moment one goes live.';
-  }, [live.length, scheduled.length, failed.live, failed.scheduled]);
+  }, [live.length, scheduled.length, failed.live, failed.scheduled, failed.ended]);
 
   const openAuction = (auction: DisplayAuction) => {
     navigate(`/auction/${encodeURIComponent(String(auction.carId || auction.id))}`);
