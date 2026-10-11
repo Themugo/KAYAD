@@ -71,6 +71,17 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // AppInner().
 // Workspaces that require a verified session (backend authorization stays authoritative).
 const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard']);
+// Of the workspaces above, these render their own "Sign in to ..." prompt
+// (with a button into the real auth flow) when `user` is null, instead of
+// an empty screen - ChatView/UnifiedCommunicationHub, BuyerPlatform and
+// DealerDashboard all already handle a signed-out visitor inline. Bouncing
+// those straight to the /login portal before that prompt ever gets to
+// render skips it entirely: that was the reported bug - clicking the
+// Messages icon while signed out landed on the login portal instead of
+// the Messages panel's own "Sign in to see your conversations" message.
+// Redirect only the navs with no such fallback, which would otherwise
+// render blank for a signed-out visitor.
+const navsWithOwnSignedOutPrompt = new Set(['chat', 'buyer-platform', 'dealer-dashboard']);
 
 function AppInner() {
   const [activeNav, setActiveNavState] = useState<string>('marketplace');
@@ -117,6 +128,7 @@ function AppInner() {
     // "signed out". Do not redirect; the recovery UI is rendered instead.
     if (!isAuth && sessionStatus === 'error') return;
     if (!isAuth) {
+      if (navsWithOwnSignedOutPrompt.has(activeNav)) return;
       navigate(loginPathFor(location), { replace: true });
       return;
     }
@@ -675,7 +687,15 @@ function AppInner() {
           )}
 
           {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard' || activeNav === 'seller-platform') && (
-            <PrivateSellerPlatform user={user} onOpenAuth={handleOpenAuth} />
+            // A signed-out visitor who clicks "Sell Vehicle" has no seller
+            // account yet in the common case, so send them into the seller
+            // onboarding/registration flow (role preselected via ?intent=seller)
+            // rather than a plain sign-in page that assumes an account already
+            // exists. Someone who does already have an account still reaches
+            // sign-in from there (its "Already have an account?" link, or the
+            // "this email already has an account" outcome if they try to
+            // register with one that exists).
+            <PrivateSellerPlatform user={user} onOpenAuth={() => handleOpenRegister('seller', '/?nav=seller-platform')} />
           )}
         </AuctionSurfaceReveal>
         )}
