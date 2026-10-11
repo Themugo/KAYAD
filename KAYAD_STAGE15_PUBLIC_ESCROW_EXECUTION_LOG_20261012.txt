@@ -1,0 +1,38 @@
+KAYAD Stage 15 — Public Escrow Services Audit
+Execution date: 2026-10-12
+Input: KAYAD-STAGE14-PUBLIC-SUPPORT-CONVERGENCE-20261012.zip
+Input SHA-256: 440f74d8807a30df0cd4f790d4cd0ce0be5ceda182c22dd38dc04b8bbcfc8b36
+
+Scope:
+- Public escrow explanation page and navigation.
+- Legacy duplicate escrow page.
+- Minimal relocation of participant escrow desk to buyer/dealer portals.
+- Separate role-gated staff escrow operations surface.
+- Public copy accuracy around programme pause and automatic release.
+
+Executed:
+- New public escrow boundary validator: 14/14 PASS.
+- Existing CMS schema validator: PASS.
+- Escrow admin control-plane validator: 15/15 PASS.
+- Escrow business integrity validator: 20/20 PASS.
+- Escrow custody-domain validator: 14/14 PASS.
+- Escrow Operations Center validator: 16/16 PASS.
+- Payment/Escrow domain validator: 9/9 PASS.
+- Changed TS/TSX/JSX syntax transpilation: 13/13 PASS.
+- JavaScript/MJS syntax: 1,227/1,227 PASS.
+- package.json parses successfully.
+
+Environment:
+- Node v22.16.0; project requirement >=22.22.2.
+- npm 10.9.2.
+- node_modules absent.
+- Full typecheck/build/Vitest/Jest/Playwright not executed.
+
+Important findings:
+- Public EscrowView now fetches only public program status and contains no participant/staff data tabs.
+- Buyer/dealer dashboards host the participant escrow desk.
+- Staff escrow operations use a distinct `escrow-operations` nav surface and an `isStaffRole` gate; backend permission checks remain authoritative.
+- Legacy EscrowPage now redirects to the canonical public page.
+- Public copy no longer promises automatic-release timing because escrow configuration releaseDays and escrow cron timing are not currently the same source of truth.
+
+No commit, push, deployment, database mutation, migration, ledger rebuild, payment, refund, payout, provider call or customer message occurred.

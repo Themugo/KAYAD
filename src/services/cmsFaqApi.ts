@@ -36,7 +36,15 @@ interface CMSFaqResponse {
 export async function getCMSFaqs(): Promise<CMSFaqItem[]> {
   try {
     const body = await request<CMSFaqResponse>('/api/cms/faqs?limit=100');
-    return body.data || [];
+    if (!Array.isArray(body?.data)) return [];
+    // Ignore malformed CMS rows rather than letting one bad record break the
+    // whole public help page or its search/filter controls.
+    return body.data.filter((item) => Boolean(
+      item && typeof item.id === 'string' && item.id.trim() &&
+      typeof item.question === 'string' && item.question.trim() &&
+      typeof item.answer === 'string' && item.answer.trim() &&
+      typeof item.category === 'string' && item.category.trim()
+    ));
   } catch {
     return [];
   }

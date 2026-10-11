@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { EscrowView } from '../../features/EscrowView';
+import { ParticipantEscrowDesk } from '../../features/escrow/ParticipantEscrowDesk';
+import EscrowOperationsDesk from '../../features/escrow/EscrowOperationsDesk';
 import * as api from '../../services/escrowApi';
 
 vi.mock('../../components/EvidenceUpload', () => ({ default: ({ disputeId }: any) => <div data-testid="evidence-upload">{disputeId}</div> }));
@@ -27,52 +29,58 @@ const program = { enabled: true, fundingMethods: ['bank_transfer'], releaseDays:
 
 beforeEach(() => { window.history.replaceState(null, '', '/'); vi.clearAllMocks(); m.getEscrowProgram.mockResolvedValue(program); });
 
-describe('EscrowView — visitor', () => {
-  it('shows the public explainer and never requests deal data', async () => {
+describe('Public EscrowView — visitor and signed-in user', () => {
+  it('shows public programme information only and never requests deal or operations data', async () => {
     render(<EscrowView />);
-    expect(await screen.findByText(/escrow/i, { selector: 'h1' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Escrow' })).toBeTruthy();
+    expect(await screen.findByText(/how a deal enters escrow/i)).toBeTruthy();
+    expect(screen.queryByRole('tab')).toBeNull();
+    expect(screen.queryByText(/my escrow deals/i)).toBeNull();
+    expect(screen.queryByText(/operations/i)).toBeNull();
     expect(m.getMyEscrowOverview).not.toHaveBeenCalled();
     expect(m.getOperationsDashboard).not.toHaveBeenCalled();
-    expect(screen.queryByRole('tab', { name: 'Operations' })).toBeNull();
   });
-  it('asks a visitor to sign in on the deals tab', async () => {
-    const onOpenAuth = vi.fn();
-    render(<EscrowView initialTab="deals" onOpenAuth={onOpenAuth} />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Sign in' }));
-    expect(onOpenAuth).toHaveBeenCalled();
+
+  it('sends a signed-in buyer to the buyer portal instead of exposing deals publicly', async () => {
+    const onNavigate = vi.fn();
+    render(<EscrowView user={buyer} onNavigate={onNavigate} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Open your dashboard' }));
+    expect(onNavigate).toHaveBeenCalledWith('buyer-platform');
     expect(m.getMyEscrowOverview).not.toHaveBeenCalled();
   });
-  it('degrades honestly when the program endpoint fails', async () => {
+
+  it('never exposes staff operations on the public page, even for an admin session', async () => {
+    render(<EscrowView user={staffUser} onNavigate={vi.fn()} />);
+    expect(await screen.findByRole('heading', { name: 'Escrow' })).toBeTruthy();
+    expect(screen.queryByRole('tab', { name: /operations/i })).toBeNull();
+    expect(screen.queryByText(/platform-wide/i)).toBeNull();
+    expect(m.getOperationsDashboard).not.toHaveBeenCalled();
+  });
+
+  it('degrades honestly when the public programme endpoint fails', async () => {
     m.getEscrowProgram.mockRejectedValue(new Error('x'));
     render(<EscrowView />);
     await waitFor(() => expect(screen.getByText(/couldn.t check/i)).toBeTruthy());
   });
-  it('supports arrow-key navigation between tabs', async () => {
-    render(<EscrowView />);
-    const tabs = await screen.findAllByRole('tab');
-    tabs[0].focus();
-    fireEvent.keyDown(tabs[0], { key: 'ArrowRight' });
-    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-  });
 });
 
-describe('EscrowView — buyer', () => {
+describe('ParticipantEscrowDesk — buyer', () => {
   it('shows a skeleton, not "KES 0", while loading', async () => {
     m.getMyEscrowOverview.mockReturnValue(new Promise(() => {}));
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     expect(await screen.findByTestId('escrow-summary-skeleton')).toBeTruthy();
     expect(screen.queryByText(/KES 0/)).toBeNull();
   });
   it('shows an error with retry, not zeros, when loading fails', async () => {
     m.getMyEscrowOverview.mockRejectedValue(new api.EscrowApiError('boom', 'server', 500));
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     expect(await screen.findByRole('alert')).toBeTruthy();
     expect(screen.queryByTestId('escrow-summary')).toBeNull();
     expect(screen.queryByText(/KES 0/)).toBeNull();
   });
   it('shows an empty state with no summary numbers when there are no deals', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [], summary: summary({ totalDeals: 0, heldAmount: 0, heldCount: 0 }) });
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     expect(await screen.findByTestId('escrow-empty')).toBeTruthy();
     expect(screen.queryByTestId('escrow-summary')).toBeNull();
     expect(screen.getByText(/team members/i)).toBeTruthy();
@@ -81,7 +89,7 @@ describe('EscrowView — buyer', () => {
     m.getMyEscrowOverview.mockResolvedValueOnce({ escrows: [mk()], summary: summary() })
       .mockResolvedValue({ escrows: [mk({ status: 'vehicle_confirmed', availableActions: ['request_release', 'open_dispute'] })], summary: summary() });
     m.confirmVehicle.mockResolvedValue(undefined);
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(screen.queryByRole('button', { name: /confirm delivery/i })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /inspected and accept/i }));
@@ -94,7 +102,7 @@ describe('EscrowView — buyer', () => {
   it('requires 10+ characters for a dispute', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk()], summary: summary() });
     m.disputeEscrow.mockResolvedValue(undefined);
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     fireEvent.click(screen.getByRole('button', { name: /dispute/i }));
     const dlg = await screen.findByRole('dialog');
@@ -108,7 +116,7 @@ describe('EscrowView — buyer', () => {
   it('fetches funding instructions only on demand, for a pending buyer deal', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk({ status: 'pending', fundedAt: null, availableActions: ['view_funding_instructions'] })], summary: summary({ heldAmount: 0, heldCount: 0 }) });
     m.getFundingInstructions.mockResolvedValue({ fundingMethod: 'bank_transfer', rules: { releaseDays: 3, minimumAmount: 0 }, account: { accountName: 'KAYAD Escrow', bankName: 'Bank', accountNumber: '123' }, amount: 2500000, reference: 'ESC-E1' });
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(m.getFundingInstructions).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: /payment instructions/i }));
@@ -116,45 +124,45 @@ describe('EscrowView — buyer', () => {
   });
   it('never uses vault/locked/guarantee language', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk()], summary: summary() });
-    const { container } = render(<EscrowView user={buyer} initialTab="deals" />);
+    const { container } = render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(container.textContent).not.toMatch(/vault|locked|guarantee|insured|CBK|100%/i);
   });
 });
 
-describe('EscrowView — dispute evidence', () => {
+describe('ParticipantEscrowDesk — dispute evidence', () => {
   it('wires evidence upload to the escrow id (the dispute is stored on the escrow row) only while disputed', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk({ status: 'disputed', availableActions: [], disputedAt: now, disputeReason: 'Engine fault', disputeWorkflowStatus: 'open', disputeEvidence: [{ fileName: 'photo.jpg', verified: true }] })], summary: summary() });
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect((await screen.findByTestId('evidence-upload')).textContent).toBe('e1');
     expect(screen.getByText(/photo.jpg/)).toBeTruthy();
   });
   it('offers no evidence upload when the deal is not disputed', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk()], summary: summary() });
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(screen.queryByTestId('evidence-upload')).toBeNull();
   });
 });
 
-describe('EscrowView — seller', () => {
+describe('ParticipantEscrowDesk — seller', () => {
   it('shows commission and net to the seller only', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk({ viewerRole: 'seller', availableActions: [], commission: 125000, sellerAmount: 2375000 })], summary: summary() });
-    render(<EscrowView user={{ ...buyer, id: 's' }} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(screen.getByText(/KAYAD commission/)).toBeTruthy();
     expect(screen.getByText(/KES 2,375,000/)).toBeTruthy();
   });
   it('hides commission from the buyer even if a payload carried it', async () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk({ commission: 125000, sellerAmount: 2375000 })], summary: summary() });
-    render(<EscrowView user={buyer} initialTab="deals" />);
+    render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(screen.queryByText(/commission/i)).toBeNull();
   });
 });
 
-describe('EscrowView — staff', () => {
+describe('EscrowOperationsDesk — staff', () => {
   const dash = (can: any) => ({
     queues: { funded: { count: 1, items: [{ id: 'e1', status: 'funded', amount: 100, commission: 5, sellerAmount: 95, buyer: { id: 'b', name: 'B' }, seller: { id: 's', name: 'S' }, car: { id: 'c', title: 'Car A' } }] },
       vehicleConfirmed: { count: 0, items: [] }, delivered: { count: 0, items: [] }, released: { count: 0, items: [] }, disputed: { count: 0, items: [] },
@@ -167,7 +175,7 @@ describe('EscrowView — staff', () => {
     m.getOperationsDashboard.mockResolvedValue(dash({ view: true, operate: true, reconcile: false, release: false, refund: false, settle: false, completeRefund: false, close: false }));
     m.getOperationsPending.mockResolvedValue([]);
     m.getOperationsCase.mockResolvedValue(caseOf(['release']));
-    render(<EscrowView user={staffUser} initialTab="operations" />);
+    render(<EscrowOperationsDesk />);
     expect(await screen.findByTestId('ops-totals')).toBeTruthy();
     expect(screen.getByText(/Platform-wide/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /reconciliation/i })).toBeNull();
@@ -180,7 +188,7 @@ describe('EscrowView — staff', () => {
     m.getOperationsPending.mockResolvedValue([]);
     m.getOperationsCase.mockResolvedValue(caseOf(['refund']));
     m.refundEscrow.mockResolvedValue({});
-    render(<EscrowView user={staffUser} initialTab="operations" />);
+    render(<EscrowOperationsDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Car A/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Approve refund' }));
     const dlg = await screen.findByRole('dialog');
@@ -189,11 +197,5 @@ describe('EscrowView — staff', () => {
     fireEvent.change(within(dlg).getByLabelText(/Reason/), { target: { value: 'buyer disputed condition' } });
     fireEvent.click(ok);
     await waitFor(() => expect(m.refundEscrow).toHaveBeenCalledWith('e1', 'buyer disputed condition'));
-  });
-  it('is not rendered for a non-staff user even if asked for', async () => {
-    m.getMyEscrowOverview.mockResolvedValue({ escrows: [], summary: summary({ totalDeals: 0 }) });
-    render(<EscrowView user={buyer} initialTab="operations" />);
-    expect(m.getOperationsDashboard).not.toHaveBeenCalled();
-    expect(screen.queryByRole('tab', { name: 'Operations' })).toBeNull();
   });
 });

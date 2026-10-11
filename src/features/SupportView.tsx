@@ -99,6 +99,22 @@ function ticketReference(ticket: Pick<SupportCaseSummary, 'id' | 'ticketNumber'>
   return ticket.ticketNumber || `Case ${ticket.id.slice(0, 8).toUpperCase()}`;
 }
 
+/** Never expose raw 5xx/database messages in a public customer surface. */
+function customerSupportError(error: unknown, fallback: string): string {
+  if (!(error instanceof SupportApiError)) return fallback;
+  switch (error.kind) {
+    case 'network': return 'We could not reach KAYAD. Check your connection and try again; this same attempt can be retried without creating a duplicate case.';
+    case 'unauthenticated': return 'Your session may have expired. Sign in again to continue.';
+    case 'forbidden': return 'You do not have permission to access this support case.';
+    case 'not_found': return 'This support case could not be found or is no longer available to this account.';
+    case 'conflict': return error.message || 'This case changed before your update was saved. Refresh and try again.';
+    case 'validation': return error.message || fallback;
+    case 'rate_limited': return 'Too many attempts. Please wait a moment and try again.';
+    case 'server': return 'Support is temporarily unavailable. Please try again shortly.';
+    default: return fallback;
+  }
+}
+
 export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNavigate }) => {
   const formRef = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState('general');
@@ -112,11 +128,15 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submittedTicket, setSubmittedTicket] = useState<SupportCase | null>(null);
   const [tickets, setTickets] = useState<SupportCaseSummary[]>([]);
+  const [ticketsOwnerId, setTicketsOwnerId] = useState<string | null>(null);
   const [ticketsLoading, setTicketsLoading] = useState(false);
   const [ticketsError, setTicketsError] = useState<string | null>(null);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<SupportCase | null>(null);
+  const [selectedTicketOwnerId, setSelectedTicketOwnerId] = useState<string | null>(null);
+  const [submittedTicketOwnerId, setSubmittedTicketOwnerId] = useState<string | null>(null);
   const [ticketLoading, setTicketLoading] = useState(false);
+  const [ticketLoadError, setTicketLoadError] = useState<string | null>(null);
   const [ticketMessage, setTicketMessage] = useState('');
   const [messageSending, setMessageSending] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
@@ -124,41 +144,103 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
   const [ratingNote, setRatingNote] = useState('');
   const [ratingSending, setRatingSending] = useState(false);
   const userId = user?.id;
+  // Support data is account-scoped. These refs prevent late responses from a
+  // previous account (or a previously selected case) from repopulating state.
+  const identityRef = useRef<string | undefined>(userId);
+  identityRef.current = userId;
+  const accountGeneration = useRef(0);
+  const ticketsRequestId = useRef(0);
+  const ticketRequestId = useRef(0);
 
   const loadTickets = async () => {
-    if (!user) return;
+    const requestedUserId = userId;
+    const generation = accountGeneration.current;
+    if (!requestedUserId) {
+      setTickets([]);
+      setTicketsOwnerId(null);
+      setTicketsError(null);
+      setTicketsLoading(false);
+      return;
+    }
+    const requestId = ++ticketsRequestId.current;
+    setTicketsOwnerId(requestedUserId);
     setTicketsLoading(true);
     setTicketsError(null);
     try {
       const result = await getMySupportCases();
+      if (identityRef.current !== requestedUserId || accountGeneration.current !== generation || ticketsRequestId.current !== requestId) return;
       setTickets(result.cases || []);
+      setTicketsOwnerId(requestedUserId);
     } catch (error) {
-      if (error instanceof SupportApiError && error.kind === 'unauthenticated') {
-        onOpenAuth?.();
-      } else {
-        setTicketsError(error instanceof SupportApiError ? error.message : 'Unable to load your support cases.');
-      }
+      if (identityRef.current !== requestedUserId || accountGeneration.current !== generation || ticketsRequestId.current !== requestId) return;
+      if (error instanceof SupportApiError && error.kind === 'unauthenticated') onOpenAuth?.();
+      setTicketsError(customerSupportError(error, 'Unable to load your support cases.'));
     } finally {
-      setTicketsLoading(false);
+      if (identityRef.current === requestedUserId && accountGeneration.current === generation && ticketsRequestId.current === requestId) {
+        setTicketsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    void loadTickets();
+    accountGeneration.current += 1;
+    ticketsRequestId.current += 1;
+    ticketRequestId.current += 1;
+    // Clear all customer-specific state on logout/account switch. The render
+    // guards below also hide old state immediately, before this effect runs.
+    setTickets([]);
+    setTicketsOwnerId(null);
+    setTicketsError(null);
+    setTicketsLoading(false);
+    setSelectedTicketId(null);
+    setSelectedTicket(null);
+    setSelectedTicketOwnerId(null);
+    setTicketLoading(false);
+    setTicketLoadError(null);
+    setTicketMessage('');
+    setMessageError(null);
+    setRating(null);
+    setRatingNote('');
+    setSubmittedTicket(null);
+    setSubmittedTicketOwnerId(null);
+    setNotice(null);
+    setSubmitError(null);
+    setSubject('');
+    setIssue('');
+    setReference('');
+    setSubmitting(false);
+    setMessageSending(false);
+    setRatingSending(false);
+    idempotencyKey.current = newIdempotencyKey();
+    if (userId) void loadTickets();
   }, [userId]);
 
   const loadTicket = async (ticketId: string) => {
+    const requestedUserId = userId;
+    if (!requestedUserId) {
+      onOpenAuth?.();
+      return;
+    }
+    const generation = accountGeneration.current;
+    const requestId = ++ticketRequestId.current;
     setSelectedTicketId(ticketId);
+    setSelectedTicketOwnerId(requestedUserId);
+    setSelectedTicket(null);
     setTicketLoading(true);
+    setTicketLoadError(null);
     setMessageError(null);
     try {
       const result = await getSupportCase(ticketId);
+      if (identityRef.current !== requestedUserId || accountGeneration.current !== generation || ticketRequestId.current !== requestId) return;
       setSelectedTicket(result.case);
+      setSelectedTicketOwnerId(requestedUserId);
       setRating(result.case.rating || null);
     } catch (error) {
-      setMessageError(error instanceof SupportApiError ? error.message : 'Unable to load this support case.');
+      if (identityRef.current !== requestedUserId || accountGeneration.current !== generation || ticketRequestId.current !== requestId) return;
+      if (error instanceof SupportApiError && error.kind === 'unauthenticated') onOpenAuth?.();
+      setTicketLoadError(customerSupportError(error, 'Unable to load this support case.'));
     } finally {
-      setTicketLoading(false);
+      if (identityRef.current === requestedUserId && accountGeneration.current === generation && ticketRequestId.current === requestId) setTicketLoading(false);
     }
   };
 
@@ -169,6 +251,8 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
       onOpenAuth?.();
       return;
     }
+    const requestedUserId = userId;
+    const generation = accountGeneration.current;
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -181,7 +265,9 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
         reference: refKind && refId ? { kind: refKind, id: refId } : undefined,
         idempotencyKey: idempotencyKey.current,
       });
+      if (!requestedUserId || identityRef.current !== requestedUserId || accountGeneration.current !== generation) return;
       setSubmittedTicket(result.case);
+      setSubmittedTicketOwnerId(requestedUserId);
       setNotice(refId && result.referenceLinked === false
         ? 'Your case was created, but we could not link that reference to your account, so it was left off. Support can still help from your description.'
         : null);
@@ -191,46 +277,61 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
       setReference('');
       await loadTickets();
     } catch (error) {
+      if (!requestedUserId || identityRef.current !== requestedUserId || accountGeneration.current !== generation) return;
       if (error instanceof SupportApiError && error.kind === 'unauthenticated') {
         onOpenAuth?.();
       } else {
-        setSubmitError(error instanceof SupportApiError
-          ? (error.kind === 'network' ? 'We could not reach KAYAD. Check your connection and try again; your case will not be duplicated.' : error.message)
-          : 'Could not submit your case. Please try again.');
+        setSubmitError(customerSupportError(error, 'Could not submit your case. Please try again.'));
       }
     } finally {
-      setSubmitting(false);
+      if (requestedUserId && identityRef.current === requestedUserId && accountGeneration.current === generation) setSubmitting(false);
     }
   };
 
   const sendMessage = async () => {
-    if (!selectedTicket || !ticketMessage.trim()) return;
+    if (!selectedTicket || !ticketMessage.trim() || !userId || selectedTicketOwnerId !== userId) return;
+    const requestedUserId = userId;
+    const generation = accountGeneration.current;
+    const requestedTicketId = selectedTicket.id;
+    const detailRequestAtStart = ticketRequestId.current;
     setMessageSending(true);
     setMessageError(null);
     try {
-      const result = await replyToSupportCase(selectedTicket.id, ticketMessage.trim());
+      const result = await replyToSupportCase(requestedTicketId, ticketMessage.trim());
+      if (identityRef.current !== requestedUserId || accountGeneration.current !== generation || ticketRequestId.current !== detailRequestAtStart || selectedTicketOwnerId !== requestedUserId) return;
       setSelectedTicket(result.case);
       setTicketMessage('');
       await loadTickets();
     } catch (error) {
-      setMessageError(error instanceof SupportApiError ? error.message : 'Could not send your message.');
+      if (identityRef.current === requestedUserId && accountGeneration.current === generation && ticketRequestId.current === detailRequestAtStart) {
+        if (error instanceof SupportApiError && error.kind === 'unauthenticated') onOpenAuth?.();
+        else setMessageError(customerSupportError(error, 'Could not send your message.'));
+      }
     } finally {
-      setMessageSending(false);
+      if (identityRef.current === requestedUserId && accountGeneration.current === generation && ticketRequestId.current === detailRequestAtStart) setMessageSending(false);
     }
   };
 
   const submitRating = async () => {
-    if (!selectedTicket || !rating) return;
+    if (!selectedTicket || !rating || !userId || selectedTicketOwnerId !== userId) return;
+    const requestedUserId = userId;
+    const generation = accountGeneration.current;
+    const requestedTicketId = selectedTicket.id;
+    const detailRequestAtStart = ticketRequestId.current;
     setRatingSending(true);
     setMessageError(null);
     try {
-      const result = await rateSupportCase(selectedTicket.id, rating, ratingNote.trim() || undefined);
+      const result = await rateSupportCase(requestedTicketId, rating, ratingNote.trim() || undefined);
+      if (identityRef.current !== requestedUserId || accountGeneration.current !== generation || ticketRequestId.current !== detailRequestAtStart || selectedTicketOwnerId !== requestedUserId) return;
       setSelectedTicket(result.case);
       await loadTickets();
     } catch (error) {
-      setMessageError(error instanceof SupportApiError ? error.message : 'Could not save your feedback.');
+      if (identityRef.current === requestedUserId && accountGeneration.current === generation && ticketRequestId.current === detailRequestAtStart) {
+        if (error instanceof SupportApiError && error.kind === 'unauthenticated') onOpenAuth?.();
+        else setMessageError(customerSupportError(error, 'Could not save your feedback.'));
+      }
     } finally {
-      setRatingSending(false);
+      if (identityRef.current === requestedUserId && accountGeneration.current === generation && ticketRequestId.current === detailRequestAtStart) setRatingSending(false);
     }
   };
 
@@ -245,7 +346,26 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
   };
 
   const referenceKind = CATEGORY_OPTIONS.find(o => o.value === category)?.reference || null;
-  const activeCases = useMemo(() => tickets.filter(ticket => !['resolved', 'closed'].includes(ticket.status)), [tickets]);
+  const visibleTickets = userId && ticketsOwnerId === userId ? tickets : [];
+  const visibleTicketsError = userId && ticketsOwnerId === userId ? ticketsError : null;
+  const visibleSubmittedTicket = userId && submittedTicketOwnerId === userId ? submittedTicket : null;
+  const activeCases = useMemo(() => visibleTickets.filter(ticket => !['resolved', 'closed'].includes(ticket.status)), [visibleTickets]);
+  const pastCases = useMemo(() => visibleTickets.filter(ticket => ['resolved', 'closed'].includes(ticket.status)), [visibleTickets]);
+  const renderTicket = (ticket: SupportCaseSummary) => {
+    const status = STATUS_META[ticket.status] || { label: ticket.status, tone: 'bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]' };
+    return (
+      <button key={ticket.id} type="button" onClick={() => void loadTicket(ticket.id)} className={`w-full text-left rounded-2xl border p-4 hover:border-[#176B87]/30 hover:shadow-sm transition-all ${selectedTicketId === ticket.id && selectedTicketOwnerId === userId ? 'border-[#176B87]/40 bg-[#F6FAF9]' : 'border-[#D7E7E4] bg-white'}`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{ticketReference(ticket)}</p>
+            <p className="mt-1 text-sm font-extrabold text-[#0A3340] truncate">{ticket.subject}</p>
+            <p className="mt-1 text-[11px] text-[#64748B]">{CATEGORY_OPTIONS.find(o => o.value === ticket.category)?.label || 'Support'} · {formatDate(ticket.createdAt)}</p>
+          </div>
+          <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${status.tone}`}>{status.label}</span>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -259,7 +379,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <LifeBuoy className="w-4 h-4" /> KAYAD Resolution Center
             </div>
             <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.02]">One case number, the whole transaction.</h1>
-            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-[#BDE5DE]">A KAYAD case can carry a vehicle, auction, inspection, escrow or financing reference, so one thread and one visible status follow the problem from report to resolution — instead of messages scattered across listings, bids and chat.</p>
+            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-[#BDE5DE]">A KAYAD case can link a vehicle, auction, inspection or escrow reference when the backend can verify the relationship. For payment or financing questions, describe the issue and use only a reference field shown for that case type. One case keeps the follow-up together instead of scattering it across listings, bids and chat.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={scrollToForm} className="inline-flex items-center gap-2 rounded-xl bg-white text-[#0A3340] px-4 py-3 text-xs font-extrabold hover:bg-[#EEF7F5] transition-colors">
                 Open a support case <ArrowRight className="w-4 h-4" />
@@ -320,7 +440,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
             <div>
               <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#176B87]"><Ticket className="w-3.5 h-3.5" /> Resolution desk</div>
               <h2 className="mt-1 text-xl font-black text-[#0A3340]">Open a support case</h2>
-              <p className="mt-1 text-xs leading-5 text-[#64748B]">Tell us what happened and include the vehicle, auction, inspection or escrow reference when you have one.</p>
+              <p className="mt-1 text-xs leading-5 text-[#64748B]">Tell us what happened and include the vehicle, auction, inspection or escrow reference when one is available.</p>
             </div>
             <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold text-[#64748B]"><Clock3 className="w-3.5 h-3.5 text-[#176B87]" /> Replies appear in your case</div>
           </div>
@@ -332,21 +452,21 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <p className="mt-1 text-xs leading-5 text-[#64748B]">Support cases are tied to your authenticated account so replies and transaction references stay with the right customer.</p>
               <Button variant="primary" size="md" className="mt-4" onClick={() => onOpenAuth?.()}>Sign in</Button>
             </div>
-          ) : submittedTicket ? (
+          ) : visibleSubmittedTicket ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
               <p className="mt-3 text-sm font-extrabold text-emerald-900">Case created</p>
-              <p className="mt-1 text-xs text-emerald-800">Reference: <strong>{ticketReference(submittedTicket)}</strong></p>
-              <p className="mt-2 text-xs leading-5 text-emerald-800">Your case is now with KAYAD support. Replies and status changes appear in this page and in your notifications.{minutesLabel(submittedTicket.expectations?.firstResponseMinutes) ? ` We aim to reply within ${minutesLabel(submittedTicket.expectations.firstResponseMinutes)}.` : ''}</p>
+              <p className="mt-1 text-xs text-emerald-800">Reference: <strong>{ticketReference(visibleSubmittedTicket)}</strong></p>
+              <p className="mt-2 text-xs leading-5 text-emerald-800">Your case is now with KAYAD support. Replies and status changes appear in this page and in your notifications.{minutesLabel(visibleSubmittedTicket.expectations?.firstResponseMinutes) ? ` We aim to reply within ${minutesLabel(visibleSubmittedTicket.expectations.firstResponseMinutes)}.` : ''}</p>
               {notice && <p className="mt-2 text-xs font-semibold text-[#0A3340]">{notice}</p>}
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button variant="primary" size="sm" onClick={() => loadTicket(submittedTicket.id)}>View case</Button>
-                <Button variant="outline" size="sm" onClick={() => setSubmittedTicket(null)}>Open another case</Button>
+                <Button variant="primary" size="sm" onClick={() => loadTicket(visibleSubmittedTicket.id)}>View case</Button>
+                <Button variant="outline" size="sm" onClick={() => { setSubmittedTicket(null); setSubmittedTicketOwnerId(null); }}>Open another case</Button>
               </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {submitError && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">{submitError}</div>}
+              {submitError && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">{submitError}</div>}
               <Select label="What is the issue about?" value={category} onChange={e => { setCategory(e.target.value); setReference(''); }} options={CATEGORY_OPTIONS.map(o => ({ value: o.value, label: o.label }))} />
               <div>
                 <label htmlFor="support-subject" className="block text-xs font-bold text-[#12576D] mb-1.5">Short summary</label>
@@ -382,41 +502,28 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <Ticket className="w-7 h-7 mx-auto text-[#BDE5DE]" />
               <p className="mt-2 text-xs font-bold text-[#64748B]">Your cases appear here after sign in.</p>
             </div>
-          ) : ticketsLoading && tickets.length === 0 ? (
+          ) : ticketsLoading && visibleTickets.length === 0 ? (
             <div className="py-10 text-center text-xs text-[#64748B]"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading your cases…</div>
-          ) : ticketsError ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800">{ticketsError}</div>
-          ) : tickets.length === 0 ? (
+          ) : visibleTickets.length === 0 && visibleTicketsError ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800">{visibleTicketsError}</div>
+          ) : visibleTickets.length === 0 ? (
             <div className="rounded-2xl bg-[#F6FAF9] border border-[#D7E7E4] p-6 text-center">
               <LifeBuoy className="w-7 h-7 mx-auto text-[#176B87]" />
               <p className="mt-2 text-sm font-extrabold text-[#0A3340]">No support cases yet</p>
               <p className="mt-1 text-xs text-[#64748B]">When you open one, its status, messages and resolution history will appear here.</p>
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {activeCases.length > 0 && <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Active</p>}
-              {tickets.map(ticket => {
-                const status = STATUS_META[ticket.status] || { label: ticket.status, tone: 'bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]' };
-                return (
-                  <button key={ticket.id} type="button" onClick={() => void loadTicket(ticket.id)} className={`w-full text-left rounded-2xl border p-4 hover:border-[#176B87]/30 hover:shadow-sm transition-all ${selectedTicketId === ticket.id ? 'border-[#176B87]/40 bg-[#F6FAF9]' : 'border-[#D7E7E4] bg-white'}`}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{ticketReference(ticket)}</p>
-                        <p className="mt-1 text-sm font-extrabold text-[#0A3340] truncate">{ticket.subject}</p>
-                        <p className="mt-1 text-[11px] text-[#64748B]">{CATEGORY_OPTIONS.find(o => o.value === ticket.category)?.label || 'Support'} · {formatDate(ticket.createdAt)}</p>
-                      </div>
-                      <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${status.tone}`}>{status.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="space-y-4">
+              {visibleTicketsError && <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">{visibleTicketsError} Your previously loaded cases are still shown below.</div>}
+              {activeCases.length > 0 && <div className="space-y-2.5"><p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Active</p>{activeCases.map(renderTicket)}</div>}
+              {pastCases.length > 0 && <div className="space-y-2.5"><p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Resolved &amp; closed</p>{pastCases.map(renderTicket)}</div>}
             </div>
           )}
         </Card>
       </section>
 
       {/* Selected case detail */}
-      {selectedTicketId && (
+      {selectedTicketId && userId && selectedTicketOwnerId === userId && (
         <section className="rounded-[26px] border border-[#D7E7E4] bg-white shadow-sm overflow-hidden scroll-mt-24">
           <div className="px-5 sm:px-6 py-5 bg-[#F6FAF9] border-b border-[#D7E7E4] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -426,11 +533,22 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
             {selectedTicket && <span className={`self-start sm:self-auto rounded-full border px-3 py-1 text-[10px] font-bold ${(STATUS_META[selectedTicket.status] || STATUS_META.open).tone}`}>{(STATUS_META[selectedTicket.status] || { label: selectedTicket.status }).label}</span>}
           </div>
 
-          {ticketLoading || !selectedTicket ? (
+          {ticketLoading ? (
             <div className="py-12 text-center text-xs text-[#64748B]"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading case history…</div>
+          ) : ticketLoadError ? (
+            <div className="p-5 sm:p-6">
+              <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{ticketLoadError}</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button variant="primary" size="sm" onClick={() => void loadTicket(selectedTicketId!)}>Try again</Button>
+                <Button variant="outline" size="sm" onClick={() => { setSelectedTicketId(null); setSelectedTicket(null); setSelectedTicketOwnerId(null); setTicketLoadError(null); }}>Back to your cases</Button>
+              </div>
+            </div>
+          ) : !selectedTicket ? (
+            <div className="py-10 text-center text-xs text-[#64748B]">This case is not available. Refresh your cases and try again.</div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px]">
               <div className="p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-[#D7E7E4]">
+                {messageError && <div role="alert" className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">{messageError}</div>}
                 <div className="rounded-2xl bg-[#F6FAF9] border border-[#D7E7E4] p-4">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Original request</p>
                   <p className="mt-2 text-sm leading-6 text-[#12576D] whitespace-pre-wrap">{selectedTicket.description}</p>
@@ -447,9 +565,8 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
 
                 {selectedTicket.canReply ? (
                   <div className="mt-5">
-                    <label className="block text-xs font-bold text-[#12576D] mb-1.5">{selectedTicket.status === 'resolved' ? 'Not fixed? Reply to reopen this case' : 'Reply to this case'}</label>
-                    <textarea value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} rows={4} placeholder="Add information or reply to the support team…" className="w-full rounded-2xl border border-[#D7E7E4] px-4 py-3 text-sm outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
-                    {messageError && <p className="mt-2 text-xs font-semibold text-rose-700">{messageError}</p>}
+                    <label htmlFor="support-case-reply" className="block text-xs font-bold text-[#12576D] mb-1.5">{selectedTicket.status === 'resolved' ? 'Not fixed? Reply to reopen this case' : 'Reply to this case'}</label>
+                    <textarea id="support-case-reply" aria-label="Reply to support case" value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} rows={4} placeholder="Add information or reply to the support team…" className="w-full rounded-2xl border border-[#D7E7E4] px-4 py-3 text-sm outline-none focus:border-[#176B87] focus:ring-2 focus:ring-[#176B87]/10" />
                     <div className="mt-2 flex justify-end"><Button variant="primary" size="sm" disabled={messageSending || !ticketMessage.trim()} onClick={() => void sendMessage()}>{messageSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-3.5 h-3.5" /> Send reply</>}</Button></div>
                   </div>
                 ) : (
@@ -472,9 +589,9 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
                   <div className="pt-4 border-t border-[#D7E7E4]">
                     <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">How was the resolution?</p>
                     <div className="mt-3 flex gap-2">
-                      {[1, 2, 3, 4, 5].map(value => <button key={value} type="button" onClick={() => setRating(value)} className={`w-9 h-9 rounded-xl text-xs font-extrabold ${rating === value ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#64748B] hover:bg-[#EEF7F5] hover:text-[#176B87]'}`}>{value}</button>)}
+                      {[1, 2, 3, 4, 5].map(value => <button key={value} type="button" aria-label={`Rate support resolution ${value} out of 5`} aria-pressed={rating === value} onClick={() => setRating(value)} className={`w-9 h-9 rounded-xl text-xs font-extrabold ${rating === value ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#64748B] hover:bg-[#EEF7F5] hover:text-[#176B87]'}`}>{value}</button>)}
                     </div>
-                    <textarea value={ratingNote} onChange={e => setRatingNote(e.target.value)} rows={3} placeholder="Optional feedback" className="mt-3 w-full rounded-xl border border-[#D7E7E4] px-3 py-2.5 text-xs outline-none focus:border-[#176B87]" />
+                    <textarea aria-label="Additional feedback about the resolution (optional)" value={ratingNote} onChange={e => setRatingNote(e.target.value)} rows={3} placeholder="Optional feedback" className="mt-3 w-full rounded-xl border border-[#D7E7E4] px-3 py-2.5 text-xs outline-none focus:border-[#176B87]" />
                     <Button variant="outline" size="sm" className="mt-2 w-full" disabled={!rating || ratingSending} onClick={() => void submitRating()}>{ratingSending ? 'Saving…' : 'Save feedback'}</Button>
                   </div>
                 )}

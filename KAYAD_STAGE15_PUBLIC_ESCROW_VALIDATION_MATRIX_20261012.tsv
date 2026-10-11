@@ -1,0 +1,19 @@
+Gate	Status	Evidence	Limitations
+Public escrow boundary validator	PASS	14/14 assertions	Static source assertions only
+CMS schema validator	PASS	Existing validator completed	No live CMS call
+Escrow admin control-plane validator	PASS	15/15 assertions	Static source assertions only
+Escrow business integrity validator	PASS	20/20 assertions	No live ledger transaction
+Escrow custody-domain validator	PASS	14/14 assertions	No live provider transaction
+Escrow Operations Center validator	PASS	16/16 assertions	No live staff session
+Payment/Escrow domain validator	PASS	9/9 assertions	No payment/refund/payout executed
+Changed TS/TSX/JSX syntax transpilation	PASS	13/13 files	Not semantic typecheck
+JavaScript/MJS syntax	PASS	1227/1227 files	Syntax only
+package.json parse	PASS	JSON.parse succeeds	No dependency install
+Vitest/Jest suites	BLOCKED	node_modules absent	Run after clean install on Node >=22.22.2
+TypeScript semantic typecheck	BLOCKED	node_modules absent; Node v22.16.0	Run on required Node version
+Vite production build	BLOCKED	node_modules absent; Node v22.16.0	Run on required Node version
+Playwright/browser accessibility	NOT RUN	No browser execution performed	Must execute against staging deployment
+Live role authorization checks	NOT RUN	No authenticated live requests	Backend authorization remains authoritative
+Database migrations/financial actions	NOT RUN	No database or money mutation performed	No migration needed for this stage
+Production deployment verification	NOT RUN	No deployment performed	Source push/deployment not part of this task
+ZIP integrity	PASS	Archive integrity test after packaging	Does not certify runtime

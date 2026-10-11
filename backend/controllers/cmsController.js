@@ -398,15 +398,35 @@ export async function deleteContent(req, res) {
 // FAQS
 // ============================================
 
+// Public FAQ payload is an explicit allow-list. CMS rows also contain editor
+// audit fields (createdBy/updatedBy); those belong to the protected CMS surface
+// and must never be returned by public help endpoints.
+function publicFaqProjection(faq) {
+  if (!faq) return null;
+  return {
+    id: faq.id,
+    question: faq.question,
+    answer: faq.answer,
+    category: faq.category,
+    order: faq.order,
+    popularity: faq.popularity,
+    relatedQuestions: Array.isArray(faq.relatedQuestions) ? faq.relatedQuestions : [],
+    nextStep: faq.nextStep ?? null,
+    createdAt: faq.createdAt ?? null,
+    updatedAt: faq.updatedAt ?? null,
+  };
+}
+
 export async function getFaqs(req, res) {
   const { category, search, page = 1, limit = 50 } = req.query;
   const filter = {};
 
   if (category) filter.category = category;
   if (search) {
-    filter.$or = [
-      { question: { $ilike: `%${search}%` } },
-      { answer: { $ilike: `%${search}%` } }
+    const term = String(search).trim().slice(0, 120);
+    if (term) filter.$or = [
+      { question: { $ilike: `%${term}%` } },
+      { answer: { $ilike: `%${term}%` } }
     ];
   }
 
@@ -417,7 +437,7 @@ export async function getFaqs(req, res) {
     .skip((pageNum - 1) * limitNum)
     .limit(limitNum);
 
-  res.json({ data: faqs });
+  res.json({ data: faqs.map(publicFaqProjection) });
 }
 
 export async function getFaqById(req, res) {
@@ -426,7 +446,7 @@ export async function getFaqById(req, res) {
   if (!faq) {
     return res.status(404).json({ error: "FAQ not found" });
   }
-  res.json(faq);
+  res.json(publicFaqProjection(faq));
 }
 
 export async function createFaq(req, res) {

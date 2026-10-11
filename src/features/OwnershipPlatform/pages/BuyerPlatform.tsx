@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Heart, ShoppingBag, ClipboardCheck, Loader2 } from 'lucide-react';
+import { Heart, ClipboardCheck, Loader2 } from 'lucide-react';
 import { getFavorites, BackendFavoriteCar } from '../../../services/favoriteApi';
-import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
+import { ParticipantEscrowDesk } from '../../escrow/ParticipantEscrowDesk';
 import { getMyInspections, BackendInspectionOrder } from '../../../services/inspectionApi';
 import { kayadStatusView } from '../../InspectionsView/inspectionJourney';
 import { getOwnershipDashboard, OwnershipVehicle } from '../../../services/ownershipApi';
@@ -18,9 +18,8 @@ import type { UserProfile } from '../../../types';
  * rebuilding, rather than keep any of them as-is:
  * - watchlist: genuinely real - this project's own real favorites
  *   system (services/favoriteApi.ts).
- * - purchase history/ownership: genuinely real - the buyer's own real
- *   completed escrow deals (services/escrowApi.ts's getMyEscrows,
- *   filtered to this real user as buyer).
+ * - escrow actions/history: genuinely real - the participant-scoped escrow
+ *   desk, which reads only the authenticated user's deals from the backend.
  * - inspection records: genuinely real - the buyer's own real
  *   inspection orders (services/inspectionApi.ts's getMyInspections).
  * - finance accounts, documents, service reminders, expenses, resale
@@ -40,7 +39,6 @@ interface BuyerPlatformProps {
 
 export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPlatformProps) {
   const [favorites, setFavorites] = useState<BackendFavoriteCar[]>([]);
-  const [escrows, setEscrows] = useState<BackendEscrow[]>([]);
   const [inspections, setInspections] = useState<BackendInspectionOrder[]>([]);
   const [ownedVehicles, setOwnedVehicles] = useState<OwnershipVehicle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,13 +49,11 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
     let cancelled = false;
     Promise.all([
       getFavorites().catch(() => ({ favorites: [] as BackendFavoriteCar[] })),
-      getMyEscrows().catch(() => [] as BackendEscrow[]),
       getMyInspections().catch(() => ({ orders: [] as BackendInspectionOrder[] })),
       getOwnershipDashboard().catch(() => ({ currentVehicles: [] as OwnershipVehicle[] })),
-    ]).then(([favRes, escrowRes, inspRes, ownershipRes]) => {
+    ]).then(([favRes, inspRes, ownershipRes]) => {
       if (cancelled) return;
       setFavorites(favRes.favorites || []);
-      setEscrows(escrowRes || []);
       setInspections((inspRes as { orders?: BackendInspectionOrder[] }).orders || []);
       setOwnedVehicles((ownershipRes as { currentVehicles?: OwnershipVehicle[] }).currentVehicles || []);
     }).catch(() => { if (!cancelled) setError('Could not load your garage.'); })
@@ -124,31 +120,9 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth }: BuyerPla
             )}
           </section>
 
-          {/* PURCHASES - real, from the real escrow system */}
+          {/* PRIVATE ESCROW WORKSPACE — participant-scoped, never rendered on the public page. */}
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <ShoppingBag className="w-4 h-4 text-[#176B87]" />
-              <h2 className="text-base font-bold text-[#176B87]">My Purchases</h2>
-            </div>
-            {escrows.length === 0 ? (
-              <p className="text-xs text-[#94A3B8]">No purchases yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {escrows.map((e) => (
-                  <button
-                    key={e.id}
-                    onClick={() => onNavigate?.('escrow')}
-                    className="w-full text-left bg-white border border-[#D7E7E4] rounded-xl p-3.5 flex items-center justify-between hover:shadow-md transition-shadow"
-                  >
-                    <div>
-                      <p className="text-xs font-semibold text-[#176B87]">{e.car?.title || 'Vehicle'}</p>
-                      <p className="text-[11px] text-[#64748B] capitalize">{e.status.replace('_', ' ')}</p>
-                    </div>
-                    <p className="text-xs font-bold text-[#176B87]">Ksh {(e.amount / 1000000).toFixed(2)}M</p>
-                  </button>
-                ))}
-              </div>
-            )}
+            <ParticipantEscrowDesk key={user.id} initialEscrowId={new URLSearchParams(window.location.search).get('escrowId')} onNavigate={onNavigate} />
           </section>
 
           {/* INSPECTION REPORTS - real, from the real inspection system */}

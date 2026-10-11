@@ -11,7 +11,6 @@ import {
   LifeBuoy,
   Lock,
   MapPin,
-  PlusCircle,
   Radio,
   ShieldCheck,
   type LucideIcon,
@@ -110,11 +109,6 @@ export const NAV_PRIMARY: NavPrimary[] = [
     navId: 'escrow:journey',
     href: '/?nav=escrow',
     match: ['escrow'],
-    children: [
-      { id: 'journey', label: 'Transaction journey', description: 'How a protected transaction moves to settlement', icon: Lock, navId: 'escrow:journey', href: '/?nav=escrow' },
-      { id: 'deals', label: 'Protected deals', description: 'Follow your escrow transactions', icon: FileText, navId: 'escrow:deals', href: '/?nav=escrow', requiresAuth: true },
-      { id: 'create', label: 'How escrow starts', description: 'How a deal enters escrow', icon: PlusCircle, navId: 'escrow:create', href: '/?nav=escrow' },
-    ],
   },
   {
     id: 'support',

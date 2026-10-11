@@ -41,6 +41,7 @@ import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 import { navLocationFor } from './utils/navLocation';
+import { isStaffRole as isEscrowStaffRole } from './features/escrow/escrowModel';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 // Views
@@ -49,6 +50,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 // component contracts.
 const AuctionsView = React.lazy(() => import('./features/AuctionsView'));
 const EscrowView = React.lazy(() => import('./features/EscrowView'));
+const EscrowOperationsDesk = React.lazy(() => import('./features/escrow/EscrowOperationsDesk'));
 const InspectionsView = React.lazy(() => import('./features/InspectionsView'));
 const DealersView = React.lazy(() => import('./features/DealersView'));
 const ChatView = React.lazy(() => import('./features/ChatView'));
@@ -70,7 +72,7 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // App() is now a thin wrapper providing that, with the real logic in
 // AppInner().
 // Workspaces that require a verified session (backend authorization stays authoritative).
-const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard']);
+const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'escrow-operations']);
 // Of the workspaces above, these render their own "Sign in to ..." prompt
 // (with a button into the real auth flow) when `user` is null, instead of
 // an empty screen - ChatView/UnifiedCommunicationHub, BuyerPlatform and
@@ -133,6 +135,10 @@ function AppInner() {
       navigate(loginPathFor(location), { replace: true });
       return;
     }
+    if (activeNav === 'escrow-operations' && !isEscrowStaffRole(authUser?.role)) {
+      setActiveNav('marketplace');
+      return;
+    }
     if (activeNav === 'admin' && !isAdmin) {
       setActiveNav('marketplace');
       return;
@@ -140,12 +146,10 @@ function AppInner() {
     if (activeNav === 'dealer-dashboard' && !isDealer && !isAdmin) {
       setActiveNav('marketplace');
     }
-  }, [activeNav, authLoading, sessionStatus, isAuth, isAdmin, isDealer, location, navigate]);
+  }, [activeNav, authLoading, sessionStatus, isAuth, isAdmin, isDealer, authUser?.role, location, navigate]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
-  const [escrowLaunchTab, setEscrowLaunchTab] = useState<'journey' | 'deals' | 'create' | 'operations'>('journey');
-  const [escrowLaunchNonce, setEscrowLaunchNonce] = useState(0);
   const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | 'manage-business' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -392,7 +396,6 @@ function AppInner() {
   const handleStartEscrow = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
-    setEscrowLaunchTab('create');
     setActiveNav('escrow');
   }, []);
 
@@ -420,8 +423,9 @@ function AppInner() {
   }, []);
 
   const handleNavClick = useCallback((nav: string) => {
-    // `scope:value` ids from the global navigation select an EXISTING tab of an
-    // existing destination (Auction tabs, Escrow tabs). They create no route.
+    // `scope:value` ids from global navigation select existing sections of a
+    // destination. Auction filters remain in-page; escrow sublinks resolve to
+    // the public information page because private deals belong in user portals.
     if (nav.startsWith('auctions:')) {
       const tab = nav.slice('auctions:'.length);
       const params = new URLSearchParams({ nav: 'auctions' });
@@ -441,13 +445,11 @@ function AppInner() {
       return;
     }
     if (nav.startsWith('escrow:')) {
-      const tab = nav.slice('escrow:'.length);
-      setEscrowLaunchTab(tab === 'create' || tab === 'deals' || tab === 'operations' ? tab : 'journey');
-      setEscrowLaunchNonce((n) => n + 1);
+      // Legacy escrow sub-navigation now resolves to the public information page.
+      // Private deal and staff operations views belong in their authenticated portals.
       setActiveNav('escrow');
       return;
     }
-    if (nav === 'escrow') setEscrowLaunchTab('journey');
     setActiveNav(nav);
   }, [launchInspections]);
 
@@ -461,6 +463,7 @@ function AppInner() {
     'sell',
     'seller',
     'seller-dashboard',
+    'escrow-operations',
   ]);
   const showPublicMobileDock = !privateWorkspaceNavs.has(activeNav) && !['auctions', 'payments', 'profile'].includes(activeNav);
 
@@ -553,12 +556,17 @@ function AppInner() {
             <Profile setPage={(page) => setActiveNav(page)} authUser={authUser} />
           )}
 
+          {activeNav === 'escrow-operations' && isEscrowStaffRole(authUser?.role) && (
+            <section className="mx-auto max-w-7xl space-y-4 p-4 md:p-6">
+              <header><h1 className="text-2xl font-semibold text-[#0A3340]">Escrow Operations</h1><p className="mt-1 text-sm text-[#64748B]">Restricted staff workspace. Actions and record access remain enforced by the backend.</p></header>
+              <EscrowOperationsDesk />
+            </section>
+          )}
+
           {activeNav === 'escrow' && (
             <EscrowView
-              key={escrowLaunchNonce}
               user={user}
               onOpenAuth={handleOpenAuth}
-              initialTab={escrowLaunchTab}
               onNavigate={handleNavClick}
             />
           )}
@@ -733,7 +741,7 @@ function AppInner() {
 
           <div className="flex items-center gap-6 text-[#BDE5DE]">
             <button onClick={() => setActiveNav('marketplace')} className="hover:text-[#5AAFA4]">Marketplace</button>
-            <button onClick={() => setActiveNav('escrow')} className="hover:text-[#5AAFA4]">Escrow Vault</button>
+            <button onClick={() => setActiveNav('escrow')} className="hover:text-[#5AAFA4]">Escrow Services</button>
             <button onClick={() => setActiveNav('financing')} className="hover:text-[#5AAFA4]">Financing</button>
             <button onClick={() => setActiveNav('support')} className="hover:text-[#5AAFA4]">Support & Disputes</button>
           </div>

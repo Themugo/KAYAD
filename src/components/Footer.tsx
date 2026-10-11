@@ -38,7 +38,7 @@ export default function Footer({ setPage }: FooterProps) {
                 { label: 'Browse Cars', page: 'gallery' },
                 { label: 'Live Auctions', page: 'auction' },
                 { label: 'Sell Your Car', page: 'gallery' },
-                { label: 'Escrow Vault', page: 'escrow' },
+                { label: 'Escrow Services', page: 'escrow' },
               ].map(({ label, page }) => (
                 <li key={label}>
                   <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-[#13B8A6] transition-colors duration-200">

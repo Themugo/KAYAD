@@ -1,0 +1,23 @@
+Gate	Status	Evidence	Notes
+Public FAQ route ordering	PASS	scripts/validate-public-support-surface.mjs	FAQ list/detail routes before auth middleware
+Public FAQ response privacy	PASS	scripts/validate-public-support-surface.mjs	Explicit allow-list projection omits createdBy/updatedBy
+FAQ popularity abuse limit	PASS	scripts/validate-public-support-surface.mjs	30 requests/minute per IP
+Customer support owner isolation	PASS_SOURCE	SupportView.tsx + regression tests	Runtime test not executed
+Stale request suppression	PASS_SOURCE	SupportView.tsx + regression tests	Runtime test not executed
+Customer-safe error messages	PASS_SOURCE	SupportView.tsx + regression tests	No raw server error in 5xx branch
+Case detail retry state	PASS_SOURCE	SupportView.tsx	Runtime browser check not executed
+FAQ account category/count	PASS_SOURCE	SupportFAQ.tsx + tests	CMS seed state still needs hosted verification
+CMS malformed-row handling	PASS_SOURCE	cmsFaqApi.ts	No live malformed payload test
+Ticker screen-reader duplicate suppression	PASS_SOURCE	TopNoticeStrip.tsx	Browser/screen-reader verification not run
+Focused source validator	PASS	21/21 checks	Executed locally
+CMS schema validator	PASS	validate-cms-schema.mjs	Executed locally
+TS/TSX syntax transpilation	PASS	6/6 files	Syntax only, not typecheck
+Backend JavaScript syntax	PASS	4/4 files	node --check
+Frontend unit tests	BLOCKED	Dependencies absent	Jest/Vitest not run
+Backend unit tests	BLOCKED	Dependencies absent	Jest/Vitest not run
+Full TypeScript typecheck	BLOCKED	Dependencies absent; Node v22.16.0 < required >=22.22.2	Not represented as PASS
+Production build	BLOCKED	Dependencies absent; Node version below project requirement	Not run
+Playwright / browser accessibility	NOT RUN	No browser runtime in this workspace	Requires local/staging run
+Live public FAQ HTTP verification	NOT RUN	No live backend call performed	Verify after deployment, signed out
+Live Supabase verification	NOT RUN	No database access used	No migrations or database changes
+Deployment certification	NOT RUN	No deployment performed	Source ZIP only

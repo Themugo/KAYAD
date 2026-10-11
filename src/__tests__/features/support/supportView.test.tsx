@@ -109,6 +109,40 @@ describe('SupportView', () => {
     await screen.findByText(/You rated this case/);
   });
 
+  it('hides the previous account case list and selected conversation immediately on account switch', async () => {
+    const { rerender } = render(<SupportView user={user} />);
+    fireEvent.click(await screen.findByText('Escrow stuck'));
+    await screen.findByText('We are checking');
+
+    api.getMySupportCases.mockReturnValueOnce(new Promise(() => {}));
+    rerender(<SupportView user={{ id: 'u2', name: 'Bob' } as never} />);
+
+    expect(screen.queryByText('Escrow stuck')).toBeNull();
+    expect(screen.queryByText('We are checking')).toBeNull();
+    expect(screen.queryByText('My escrow has not moved')).toBeNull();
+  });
+
+  it('does not expose raw backend/database errors on the public support page', async () => {
+    const { SupportApiError } = await import('../../../services/supportApi');
+    api.getMySupportCases.mockRejectedValueOnce(new (SupportApiError as never as new (m: string, k: string) => Error)('relation support_tickets does not exist', 'server'));
+    render(<SupportView user={user} />);
+    await screen.findByText('Support is temporarily unavailable. Please try again shortly.');
+    expect(screen.queryByText(/relation support_tickets does not exist/i)).toBeNull();
+  });
+
+  it('ignores a delayed case-list response from the previous account', async () => {
+    let resolveOldRequest: ((value: unknown) => void) | undefined;
+    api.getMySupportCases
+      .mockImplementationOnce(() => new Promise(resolve => { resolveOldRequest = resolve; }))
+      .mockResolvedValueOnce({ cases: [{ ...base, id: '22222222-2222-4222-8222-222222222222', subject: 'Bob private case' }], total: 1 });
+    const { rerender } = render(<SupportView user={user} />);
+    rerender(<SupportView user={{ id: 'u2', name: 'Bob' } as never} />);
+    await screen.findByText('Bob private case');
+    resolveOldRequest?.({ cases: [{ ...base, subject: 'Alice private case' }], total: 1 });
+    await waitFor(() => expect(screen.queryByText('Alice private case')).toBeNull());
+    expect(screen.getByText('Bob private case')).toBeTruthy();
+  });
+
   it('surfaces a network failure without losing the draft, and reuses the same idempotency key on retry', async () => {
     const { SupportApiError } = await import('../../../services/supportApi');
     api.createSupportCase.mockRejectedValueOnce(new (SupportApiError as never as new (m: string, k: string) => Error)('x', 'network'));
@@ -117,7 +151,7 @@ describe('SupportView', () => {
     fireEvent.change(screen.getByLabelText('Short summary'), { target: { value: 'Escrow stuck' } });
     fireEvent.change(screen.getByLabelText('What happened?'), { target: { value: 'My escrow has not moved' } });
     fireEvent.click(screen.getByRole('button', { name: /create support case/i }));
-    await screen.findByText(/will not be duplicated/);
+    await screen.findByText(/same attempt can be retried without creating a duplicate case/i);
     expect((screen.getByLabelText('What happened?') as HTMLTextAreaElement).value).toBe('My escrow has not moved');
     fireEvent.click(screen.getByRole('button', { name: /create support case/i }));
     await waitFor(() => expect(api.createSupportCase).toHaveBeenCalledTimes(2));

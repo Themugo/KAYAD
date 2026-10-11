@@ -36,7 +36,7 @@ export default function Footer({ setPage }: FooterProps) {
         { label: 'Browse Cars', page: 'gallery' },
         { label: 'Live Auctions', page: 'auction' },
         { label: 'Sell Your Vehicle', page: 'register' },
-        { label: 'Escrow Vault', page: 'escrow' },
+        { label: 'Escrow Services', page: 'escrow' },
       ],
     },
     {

@@ -10,16 +10,16 @@ interface Props {
   signedIn: boolean;
   onRetryProgram: () => void;
   onOpenAuth?: () => void;
-  onOpenDeals: () => void;
+  onOpenDashboard: () => void;
   onNavigate?: (nav: string) => void;
 }
 
 const STEPS: Array<{ title: string; body: string }> = [
-  { title: 'Check that escrow applies', body: 'Escrow is offered only on vehicles and sellers KAYAD has approved for it. Look for the Escrow badge on the listing; if it is not there, the purchase is not escrow-protected.' },
+  { title: 'Check that escrow applies', body: 'Check both the current programme status and the individual listing. Escrow applies only to approved vehicles and sellers; if the programme is paused, no new purchase is escrow-protected even if an older listing still shows an Escrow badge.' },
   { title: 'Fund the escrow', body: 'The buyer pays using the funding method shown for that deal. A payment you have started is not a payment KAYAD has confirmed — the escrow is marked funded only after KAYAD’s records show the money received.' },
   { title: 'Inspect and accept', body: 'Before accepting, check the vehicle against the listing. You can arrange an independent inspection through KAYAD. Accepting tells KAYAD you are satisfied; it does not pay the seller on its own.' },
   { title: 'Seller confirms delivery', body: 'After the buyer has accepted the vehicle, the seller confirms the handover.' },
-  { title: 'Release', body: 'KAYAD staff release the funds after the buyer asks for release, or the escrow becomes eligible for automatic release once its release window has passed with no dispute. A dispute stops release until staff decide.' },
+  { title: 'Release', body: 'Release follows the rules published for that deal and the authorized transaction process. If a dispute is recorded, the release path is paused while the case is reviewed. Check the current status and terms in your authenticated deal view.' },
   { title: 'Payout and closing', body: 'Releasing an escrow and paying the seller are separate steps. Closing is KAYAD’s administrative record that the escrow is finished.' },
 ];
 
@@ -27,10 +27,10 @@ const NOT_PROMISED: string[] = [
   'Escrow is not insurance, and it is not an automatic refund promise. A refund happens only when KAYAD staff approve one through the dispute process.',
   'KAYAD does not inspect a vehicle for you unless you book an inspection, and an escrow badge says nothing about the vehicle’s condition.',
   'Escrow does not transfer ownership. Collection and ownership transfer are separate steps recorded by the seller.',
-  'KAYAD does not claim a banking or trust-account licence on this page. Do not rely on any other page for such a claim.',
+  'This page does not represent KAYAD as a bank, insurer or licensed trust-account provider. Contact Support before paying if you need clarification about the custody arrangement for a specific transaction.',
 ];
 
-export const PublicEscrowExplainer: React.FC<Props> = ({ program, signedIn, onRetryProgram, onOpenAuth, onOpenDeals, onNavigate }) => (
+export const PublicEscrowExplainer: React.FC<Props> = ({ program, signedIn, onRetryProgram, onOpenAuth, onOpenDashboard, onNavigate }) => (
   <div className="space-y-8">
     <section aria-labelledby="escrow-status-heading" className="rounded-2xl border border-[#D7E7E4] bg-white p-5">
       <h2 id="escrow-status-heading" className="text-sm font-extrabold uppercase tracking-wide text-[#176B87]">Is escrow available right now?</h2>
@@ -48,7 +48,7 @@ export const PublicEscrowExplainer: React.FC<Props> = ({ program, signedIn, onRe
           <div className="space-y-2">
             <p className="flex items-start gap-2 text-sm text-[#0A3340]"><CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-600 shrink-0" aria-hidden="true" /> <span><strong>Escrow is switched on.</strong> It still applies only to vehicles and sellers approved for it.</span></p>
             <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-              <div className="rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3"><dt className="text-xs font-bold uppercase text-[#64748B]">Automatic release window</dt><dd className="mt-1 font-bold text-[#0A3340]">{program.program.releaseDays} day{program.program.releaseDays === 1 ? '' : 's'} after funding</dd></div>
+              <div className="rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3"><dt className="text-xs font-bold uppercase text-[#64748B]">Funding method</dt><dd className="mt-1 font-bold text-[#0A3340]">{program.program.fundingMethods.map((method) => method.replaceAll('_', ' ')).join(', ') || 'Shown for the deal'}</dd></div>
               <div className="rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3"><dt className="text-xs font-bold uppercase text-[#64748B]">Minimum</dt><dd className="mt-1 font-bold text-[#0A3340]">{program.program.minimumAmount > 0 ? formatKes(program.program.minimumAmount) : 'No minimum set'}</dd></div>
               <div className="rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3"><dt className="text-xs font-bold uppercase text-[#64748B]">Maximum</dt><dd className="mt-1 font-bold text-[#0A3340]">{program.program.maximumAmount != null ? formatKes(program.program.maximumAmount) : 'No maximum set'}</dd></div>
             </dl>
@@ -83,24 +83,24 @@ export const PublicEscrowExplainer: React.FC<Props> = ({ program, signedIn, onRe
         <button type="button" onClick={() => onNavigate?.('marketplace')} className="min-h-[44px] px-4 rounded-xl bg-[#176B87] text-white text-sm font-bold hover:bg-[#12556b]">Browse vehicles</button>
         <button type="button" onClick={() => onNavigate?.('auctions')} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">See auctions</button>
         {signedIn
-          ? <button type="button" onClick={onOpenDeals} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">Go to my protected deals</button>
+          ? <button type="button" onClick={onOpenDashboard} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">Open your dashboard</button>
           : <button type="button" onClick={onOpenAuth} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">Sign in to follow your deals</button>}
       </div>
     </section>
   </div>
 );
 
-export const HowDealsStart: React.FC<{ signedIn: boolean; onOpenDeals: () => void; onOpenAuth?: () => void }> = ({ signedIn, onOpenDeals, onOpenAuth }) => (
+export const HowDealsStart: React.FC<{ signedIn: boolean; onOpenDashboard: () => void; onOpenAuth?: () => void }> = ({ signedIn, onOpenDashboard, onOpenAuth }) => (
   <section aria-labelledby="escrow-start-heading" className="rounded-2xl border border-[#D7E7E4] bg-white p-5 space-y-3">
     <h2 id="escrow-start-heading" className="text-lg font-extrabold text-[#0A3340]">How a deal enters escrow</h2>
-    <p className="text-sm text-[#12576D] leading-relaxed">You can’t open an escrow from this page. A deal is opened by KAYAD’s purchase and auction-settlement workflows for a vehicle that is approved for escrow, and it then appears under <strong>My protected deals</strong> for both the buyer and the seller.</p>
+    <p className="text-sm text-[#12576D] leading-relaxed">You can’t open an escrow manually from this page. When the programme is enabled, a deal is created by an approved purchase or auction-settlement workflow for an eligible vehicle, then appears in each party’s authenticated escrow area. If the programme is paused, do not assume a new purchase is escrow-protected.</p>
     <ul className="list-disc pl-5 text-sm text-[#12576D] space-y-1">
       <li>Check the listing for the Escrow badge before you pay anyone.</li>
       <li>Agree the price and handover details with the seller in KAYAD messages, so the conversation is on the record.</li>
       <li>If you have paid for an escrow vehicle and no deal appears, contact KAYAD support with your payment reference; do not pay a second time.</li>
     </ul>
     {signedIn
-      ? <button type="button" onClick={onOpenDeals} className="min-h-[44px] px-4 rounded-xl bg-[#176B87] text-white text-sm font-bold hover:bg-[#12556b]">Open my protected deals</button>
+      ? <button type="button" onClick={onOpenDashboard} className="min-h-[44px] px-4 rounded-xl bg-[#176B87] text-white text-sm font-bold hover:bg-[#12556b]">Open your dashboard</button>
       : <button type="button" onClick={onOpenAuth} className="min-h-[44px] px-4 rounded-xl bg-[#176B87] text-white text-sm font-bold hover:bg-[#12556b]">Sign in</button>}
   </section>
 );

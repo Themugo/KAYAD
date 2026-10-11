@@ -1,97 +1,69 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { UserProfile } from '../types';
 import { getEscrowProgram } from '../services/escrowApi';
 import { PublicEscrowExplainer, HowDealsStart, type ProgramState } from './escrow/PublicEscrowExplainer';
-import { ParticipantEscrowDesk } from './escrow/ParticipantEscrowDesk';
-import { EscrowOperationsDesk } from './escrow/EscrowOperationsDesk';
-import { isStaffRole } from './escrow/escrowModel';
-
-export type EscrowTab = 'journey' | 'deals' | 'create' | 'operations';
 
 interface EscrowViewProps {
   user?: UserProfile | null;
   onOpenAuth?: () => void;
-  initialTab?: EscrowTab;
   onNavigate?: (nav: string) => void;
 }
 
-const readDeepLink = (): string | null => {
-  try { return new URLSearchParams(window.location.search).get('escrowId'); } catch { return null; }
-};
-
 /**
- * Escrow area. Three audiences, three surfaces:
- *  - everyone: what escrow is and whether it is currently offered (public /program)
- *  - signed-in participants: only their own deals (server-projected per viewer)
- *  - staff: operations desk (server enforces every capability)
- * The server is the authority for who may do what; the UI only decides what to offer.
+ * Canonical public escrow information page.
+ * Never fetch or render participant escrow records or staff operations here.
+ * Those belong in authenticated user/staff portals, with backend authorization
+ * remaining the actual security boundary.
  */
-export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth, initialTab = 'journey', onNavigate }) => {
-  const deepLink = readDeepLink();
-  const signedIn = Boolean(user);
-  const staff = isStaffRole(user?.role as string | undefined);
-  const [tab, setTab] = useState<EscrowTab>(deepLink && signedIn ? 'deals' : initialTab);
+export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth, onNavigate }) => {
   const [program, setProgram] = useState<ProgramState>({ status: 'loading' });
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const loadProgram = useCallback(async () => {
     setProgram({ status: 'loading' });
-    try { setProgram({ status: 'ready', program: await getEscrowProgram() }); }
-    catch { setProgram({ status: 'unavailable' }); }
+    try {
+      setProgram({ status: 'ready', program: await getEscrowProgram() });
+    } catch {
+      setProgram({ status: 'unavailable' });
+    }
   }, []);
+
   useEffect(() => { void loadProgram(); }, [loadProgram]);
 
-  const tabs: Array<{ id: EscrowTab; label: string }> = [
-    { id: 'journey', label: 'How escrow works' },
-    { id: 'create', label: 'How a deal starts' },
-    { id: 'deals', label: 'My escrow deals' },
-    ...(staff ? [{ id: 'operations' as const, label: 'Operations' }] : []),
-  ];
-  const active = tabs.some((t) => t.id === tab) ? tab : 'journey';
-
-  const onKey = (e: React.KeyboardEvent, i: number) => {
-    let next = -1;
-    if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
-    else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
-    else if (e.key === 'Home') next = 0;
-    else if (e.key === 'End') next = tabs.length - 1;
-    if (next >= 0) { e.preventDefault(); setTab(tabs[next].id); tabRefs.current[tabs[next].id]?.focus(); }
-  };
+  const openCorrectDashboard = useCallback(() => {
+    if (!user) {
+      onOpenAuth?.();
+      return;
+    }
+    const role = String(user.role || '').toLowerCase();
+    const destination = ['admin', 'superadmin', 'escrow_officer', 'accounts'].includes(role)
+      ? 'escrow-operations'
+      : role === 'dealer'
+        ? 'dealer-dashboard'
+        : 'buyer-platform';
+    onNavigate?.(destination);
+  }, [user, onOpenAuth, onNavigate]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
       <header>
         <h1 className="text-2xl font-semibold text-[#0A3340]">Escrow</h1>
-        <p className="mt-1 text-sm text-[#64748B]">Where a purchase made through KAYAD stands, and what happens next.</p>
+        <p className="mt-1 text-sm text-[#64748B]">Understand when KAYAD escrow applies, how the transaction is handled, and where to follow your own deal.</p>
       </header>
 
-      <div role="tablist" aria-label="Escrow sections" className="flex gap-1 overflow-x-auto border-b border-[#D7E7E4]">
-        {tabs.map((t, i) => (
-          <button key={t.id} ref={(el) => { tabRefs.current[t.id] = el; }} role="tab" id={`escrow-tab-${t.id}`} aria-selected={active === t.id}
-            aria-controls={`escrow-panel-${t.id}`} tabIndex={active === t.id ? 0 : -1} type="button" onClick={() => setTab(t.id)} onKeyDown={(e) => onKey(e, i)}
-            className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4] ${active === t.id ? 'border-[#0A3340] text-[#0A3340]' : 'border-transparent text-[#64748B] hover:text-[#0A3340]'}`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <PublicEscrowExplainer
+        program={program}
+        signedIn={Boolean(user)}
+        onRetryProgram={() => void loadProgram()}
+        onOpenAuth={onOpenAuth}
+        onOpenDashboard={openCorrectDashboard}
+        onNavigate={onNavigate}
+      />
 
-      <div role="tabpanel" id={`escrow-panel-${active}`} aria-labelledby={`escrow-tab-${active}`}>
-        {active === 'journey' && (
-          <PublicEscrowExplainer program={program} signedIn={signedIn} onRetryProgram={() => void loadProgram()} onOpenAuth={onOpenAuth}
-            onOpenDeals={() => setTab('deals')} onNavigate={onNavigate} />
-        )}
-        {active === 'create' && <HowDealsStart signedIn={signedIn} onOpenDeals={() => setTab('deals')} onOpenAuth={onOpenAuth} />}
-        {active === 'deals' && (signedIn
-          ? <ParticipantEscrowDesk initialEscrowId={deepLink} onNavigate={onNavigate} />
-          : (
-            <div className="rounded-xl border border-[#D7E7E4] bg-white p-6 text-center">
-              <p className="font-medium text-[#0A3340]">Sign in to see your escrow deals.</p>
-              <p className="mt-1 text-sm text-[#64748B]">Deals are private to the buyer and seller.</p>
-              {onOpenAuth && <button type="button" onClick={onOpenAuth} className="mt-4 rounded-lg bg-[#0A3340] px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">Sign in</button>}
-            </div>
-          ))}
-        {active === 'operations' && staff && <EscrowOperationsDesk />}
-      </div>
+      <HowDealsStart
+        signedIn={Boolean(user)}
+        onOpenDashboard={openCorrectDashboard}
+        onOpenAuth={onOpenAuth}
+      />
     </div>
   );
 };

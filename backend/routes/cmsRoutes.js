@@ -2,6 +2,7 @@ import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
+import { faqPopularityLimiter } from "../middleware/rateLimiter.js";
 import {
   // Pages
   getPages,
@@ -79,6 +80,10 @@ router.get("/content/:id", asyncHandler(getContentById));
 router.get("/content", asyncHandler(getContents));
 router.get("/search", asyncHandler(searchContent));
 router.post("/analytics/track", asyncHandler(trackAnalytics));
+// Help content is intentionally public and returns a restricted public projection.
+router.get("/faqs", asyncHandler(getFaqs));
+router.get("/faqs/:id", validateObjectId, asyncHandler(getFaqById));
+router.post("/faqs/:id/popularity", faqPopularityLimiter, validateObjectId, asyncHandler(incrementFaqPopularity));
 
 // Protected routes (require authentication)
 router.use(protect);
@@ -102,13 +107,10 @@ router.post("/content", allowRoles("admin", "superadmin", "editor", "publisher")
 router.put("/content/:id", validateObjectId, allowRoles("admin", "superadmin", "editor", "publisher"), asyncHandler(updateContent));
 router.delete("/content/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteContent));
 
-// FAQs
-router.get("/faqs", asyncHandler(getFaqs));
-router.get("/faqs/:id", validateObjectId, asyncHandler(getFaqById));
+// FAQs: public reads above the auth boundary; content mutations remain protected.
 router.post("/faqs", allowRoles("admin", "superadmin", "editor"), asyncHandler(createFaq));
 router.put("/faqs/:id", validateObjectId, allowRoles("admin", "superadmin", "editor"), asyncHandler(updateFaq));
 router.delete("/faqs/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteFaq));
-router.post("/faqs/:id/popularity", validateObjectId, asyncHandler(incrementFaqPopularity));
 
 // Campaigns
 router.get("/campaigns", asyncHandler(getCampaigns));

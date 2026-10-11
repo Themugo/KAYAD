@@ -1,0 +1,17 @@
+KAYAD PUBLIC SUPPORT SWEEP — 2026-10-12
+
+Foundation: KAYAD-STAGE13-PUBLIC-AUCTION-CONVERGENCE-20261012.zip
+Foundation SHA-256: 310ad3be0bfe400d9a1079b750f4dabcabe75311e4729f672eae07476cb0fb78
+
+Confirmed defect: /api/cms/faqs list/detail routes and public popularity route were registered after router.use(protect). Public visitors therefore fell back to the 14-row bundled FAQ array. The fallback Account & Access row was categorized as Transfer, and case-reopen guidance was missing.
+
+Changes: moved public FAQ reads before the auth boundary; added explicit public response projection; kept FAQ create/update/delete behind existing role guards; added IP rate limit to anonymous popularity tracking; fixed fallback FAQ category and content; normalized legacy categories; filtered malformed CMS responses; isolated Support case state by account and request generation; suppressed raw 5xx details; added retry UI for failed case detail; separated active cases from resolved/closed history; retained stale list data after refresh errors; improved accessible labels and ticker duplicate handling.
+
+Validation:
+- Focused public support source validator: 21/21 PASS.
+- Existing CMS schema validator: PASS.
+- TS/TSX syntax transpilation: 6/6 PASS (syntax only).
+- Backend JS node --check: 4/4 PASS.
+- Frontend/backend test suites, full typecheck, build, Playwright and live HTTP verification: BLOCKED/NOT RUN because dependencies are absent; available Node v22.16.0 is below >=22.22.2.
+
+Safety: no production database mutation, migration execution, deployment, Git commit/push, customer case creation, email or payment transaction was performed.

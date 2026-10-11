@@ -17,4 +17,9 @@ describe('canonical navigation URL', () => {
   it('canonicalizes legacy aliases without losing unrelated context', () => {
     expect(navLocationFor('home', 'https://kayad.space/?vehicleId=car-1&nav=discovery').href).toBe('/?vehicleId=car-1');
   });
+  it('normalizes legacy escrow sub-navigation to the public information page', () => {
+    expect(navLocationFor('escrow:deals', 'https://kayad.space/?nav=escrow:deals&escrowId=e1').nav).toBe('escrow');
+    expect(navLocationFor('escrow:operations', 'https://kayad.space/?nav=escrow:operations').href).toBe('/?nav=escrow');
+  });
+
 });

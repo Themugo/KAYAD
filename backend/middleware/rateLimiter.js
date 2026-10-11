@@ -195,6 +195,21 @@ export const createLimiter = rateLimit({
   },
 });
 
+
+// Public FAQ popularity is an anonymous read-signal endpoint. Bound it by IP
+// so automated clients cannot cheaply distort the help-centre ranking.
+export const faqPopularityLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logWarn("RATE LIMIT (FAQ POPULARITY)", { ip: req.ip });
+    res.status(429).json(rateLimitMessage("Too many help-centre interactions. Try again shortly."));
+  },
+});
+
 // =============================
 // 📸 UPLOAD LIMITER
 // =============================

@@ -55,11 +55,24 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; nav:
  * back to the same popularity column the backend already sorts by. */
 const POPULAR_THRESHOLD = 50;
 
+function normalizeCategory(value: string): FAQCategory {
+  const key = String(value || '').trim().toLowerCase().replace(/[\s&-]+/g, '_');
+  if (['marketplace', 'auctions', 'auction', 'inspections', 'inspection', 'escrow', 'financing', 'transfer', 'transfer_ownership', 'account', 'account_access'].includes(key)) {
+    if (key === 'auction') return 'auctions';
+    if (key === 'inspection') return 'inspections';
+    if (key === 'transfer_ownership') return 'transfer';
+    if (key === 'account_access') return 'account';
+    return key as FAQCategory;
+  }
+  return 'all';
+}
+
 function fromCMS(item: CMSFaqItem): FAQItem {
-  const meta = CATEGORY_META[item.category] || { label: item.category || 'General', icon: <HelpCircle className={iconClass} />, nav: null };
+  const category = normalizeCategory(item.category);
+  const meta = CATEGORY_META[category] || { label: 'General help', icon: <HelpCircle className={iconClass} />, nav: null };
   return {
     id: item.id,
-    category: (item.category as FAQCategory) || 'all',
+    category,
     categoryLabel: meta.label,
     categoryIcon: meta.icon,
     question: item.question,
@@ -194,12 +207,20 @@ export const FAQ_DATA: FAQItem[] = [
   },
   {
     id: 'faq-account-1',
-    category: 'transfer',
+    category: 'account',
     categoryLabel: 'Account & Access',
     categoryIcon: <UserRound className={iconClass} />,
     question: 'I cannot access my account or a transaction.',
     answer: 'Use the sign-in flow first. If you can sign in but cannot see a transaction, inspection, escrow case or support case that should belong to you, open a Support case and provide the relevant reference. Support access is owner-scoped by the authenticated account.',
     nextStep: 'Sign in',
+  },
+  {
+    id: 'faq-account-2',
+    category: 'account',
+    categoryLabel: 'Account & Access',
+    categoryIcon: <UserRound className={iconClass} />,
+    question: 'Can I reopen a case after it is marked resolved?',
+    answer: 'If the case is resolved and its reply window is still open, reply to the existing case to request that it be reopened. If the case is closed or the reply window has passed, open a new case and mention the earlier case number. If a submission times out, retry the same form attempt rather than starting a second one.',
   },
 ];
 
@@ -340,7 +361,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
             const expanded = expandedIds.includes(faq.id);
             return (
               <div key={faq.id} className={`rounded-2xl border bg-white overflow-hidden transition-shadow ${expanded ? 'border-[#176B87]/25 shadow-sm' : 'border-[#D7E7E4]'}`}>
-                <button type="button" onClick={() => toggleItem(faq)} className="w-full text-left px-4 sm:px-5 py-4 flex items-start gap-4">
+                <button type="button" aria-expanded={expanded} onClick={() => toggleItem(faq)} className="w-full text-left px-4 sm:px-5 py-4 flex items-start gap-4">
                   <div className="mt-0.5 w-8 h-8 rounded-xl bg-[#EEF7F5] text-[#176B87] flex items-center justify-center shrink-0">{faq.categoryIcon}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">

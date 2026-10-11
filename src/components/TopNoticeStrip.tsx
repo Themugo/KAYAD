@@ -71,7 +71,7 @@ export const TopNoticeStrip: React.FC = () => {
       <div className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }} role="region" aria-label="KAYAD notices">
         <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s` }}>
           {items.map((item, index) => (
-            <span key={`${item}-${index}`} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em]" style={{ color: heroTickerConfig.textColor }}>
+            <span key={`${item}-${index}`} aria-hidden={index >= fallback.length ? true : undefined} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em]" style={{ color: heroTickerConfig.textColor }}>
               <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" aria-hidden="true" />
               {item}
               <span className="text-white/25" aria-hidden="true">|</span>
@@ -135,6 +135,7 @@ export const TopNoticeStrip: React.FC = () => {
         {loopItems.map((slot, index) => (
           <span
             key={`${slot.id}-${index}`}
+            aria-hidden={index >= slots.length ? true : undefined}
             style={{
               backgroundColor: slot.backgroundColor || '#0A3340',
               color: slot.textColor || '#FFFFFF',

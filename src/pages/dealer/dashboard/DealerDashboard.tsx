@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
 import { getMyListings } from '../../../services/vehicleApi';
+import { ParticipantEscrowDesk } from '../../../features/escrow/ParticipantEscrowDesk';
 
 // ============================================================
 // DESIGN TOKENS
@@ -384,6 +385,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     { id: 'leads', label: 'Leads', icon: Users, badge: dashboard?.overview?.leads?.new },
     { id: 'pipeline', label: 'Pipeline', icon: ArrowRight },
     { id: 'customers', label: 'Customers', icon: ShoppingBag },
+    { id: 'escrow', label: 'Escrow', icon: Shield },
     { id: 'marketing', label: 'Marketing', icon: Zap },
     { id: 'auctions', label: 'Auctions', icon: Gavel },
     { id: 'finance', label: 'Finance', icon: CreditCard },
@@ -765,6 +767,16 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {activeSection === 'escrow' && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-bold text-[#0A3340]">Escrow transactions</h2>
+                <p className="mt-1 text-sm text-[#64748B]">View and manage only the deals associated with your authenticated account. Available actions are supplied by KAYAD’s backend.</p>
+              </div>
+              <ParticipantEscrowDesk key={user?.id ?? 'signed-out'} initialEscrowId={new URLSearchParams(window.location.search).get('escrowId')} onNavigate={onNavigate} />
             </div>
           )}
 

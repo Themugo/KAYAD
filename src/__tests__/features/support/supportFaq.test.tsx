@@ -43,6 +43,25 @@ describe('SupportFAQ - backend-sourced content', () => {
     expect(screen.queryByText(FAQ_DATA[0].question)).toBeNull();
   });
 
+  it('puts bundled account-access help in the Account & access filter and includes the reopen guidance', async () => {
+    cmsFaqApi.getCMSFaqs.mockResolvedValue([]);
+    render(<SupportFAQ />);
+    fireEvent.click(screen.getByRole('button', { name: /Account & access/i }));
+    expect(await screen.findByText('I cannot access my account or a transaction.')).toBeTruthy();
+    expect(screen.getByText('Can I reopen a case after it is marked resolved?')).toBeTruthy();
+  });
+
+  it('normalizes legacy CMS category spellings so account help does not disappear from its filter', async () => {
+    cmsFaqApi.getCMSFaqs.mockResolvedValue([{
+      id: 'legacy-account', question: 'Legacy account access question', answer: 'Answer.',
+      category: 'account_access', order: 1, popularity: 0, relatedQuestions: [], nextStep: null,
+      createdAt: '', updatedAt: '',
+    }]);
+    render(<SupportFAQ />);
+    fireEvent.click(screen.getByRole('button', { name: /Account & access/i }));
+    expect(await screen.findByText('Legacy account access question')).toBeTruthy();
+  });
+
   it('reports a live FAQ as opened (feeds the real popularity ranking), but never a bundled fallback one', async () => {
     cmsFaqApi.getCMSFaqs.mockResolvedValue([
       {
