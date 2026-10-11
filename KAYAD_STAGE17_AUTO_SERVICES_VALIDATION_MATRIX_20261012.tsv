@@ -1,0 +1,20 @@
+Gate	Status	Evidence	Notes
+Public Auto Services boundary validator	PASS	17/17	Source-level checks only
+Inspection marketplace validator	PASS	37/37	Existing source contract validator
+Inspection marketplace activation validator	PASS	16/16	Existing source contract validator
+Inspection QA contract validator	PASS	10/10	Existing source contract validator
+Inspection domain RLS enablement validator	PASS	8/8	Static migration/source check, not live RLS execution
+Public Support boundary validator	PASS	21/21	Regression check
+Public Escrow boundary validator	PASS	14/14	Regression check
+Public Auction error-state validator	PASS	14/14	Regression check
+Messages/Notifications surface validator	PASS	30/30	Regression check
+JavaScript/MJS syntax	PASS	1232/1232	Node --check across project JS/MJS files
+TypeScript/TSX/JSX syntax parse	PASS	691/691	TypeScript parser syntax diagnostics; not semantic typecheck
+package.json JSON parse	PASS	Node JSON.parse	Package script registration checked
+Vitest/Jest suites	BLOCKED	vitest not installed; node_modules absent	Not run, not a pass
+Semantic TypeScript typecheck	BLOCKED	dependencies absent; Node below engine requirement	Not run, not a pass
+Vite production build	BLOCKED	dependencies absent; Node below engine requirement	Not run, not a pass
+Playwright/browser E2E	NOT RUN	No browser runtime executed	Requires clean install and browser environment
+Two-account IDOR tests	NOT RUN	No live staging accounts exercised	Requires authorized staging environment
+Live Supabase/RLS verification	NOT RUN	No live database tests run in this sweep	Existing static checks do not prove live policy behavior
+Production deploy verification	NOT RUN	No deployment performed	User-controlled deployment required

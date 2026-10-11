@@ -267,7 +267,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const effectiveUnread = user?.unreadMessagesCount ?? unreadCount;
+  const effectiveUnread = Math.max(0, Math.floor(unreadCount));
   const hasNotifications = notificationUnreadCount > 0 || effectiveUnread > 0;
 
   return (

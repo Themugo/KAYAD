@@ -1,0 +1,191 @@
+===== Stage16 focused messaging/notification validator =====
+PASS signed-out Messages renders a dedicated private-inbox state
+PASS sign-in returns to the canonical Messages surface
+PASS signed-out Messages does not render private inbox counts
+PASS account identity changes clear composer and selection state
+PASS inbox polling discards stale identity responses
+PASS prior-account conversations are masked synchronously during identity change
+PASS send completion is guarded against account changes
+PASS conversation counts do not imply zero while loading or failing
+PASS message loading errors use customer-safe text and retry
+PASS network failures are classified as network failures
+PASS navbar message badge uses the canonical authenticated unread endpoint
+PASS unread endpoint is protected and queries only participant chats
+PASS navbar unread count is masked to the active account and does not zero on fetch failure
+PASS navbar badge regression test covers authoritative unread count
+PASS notification DTO uses an explicit field allow-list
+PASS notification DTO excludes recipient contacts and internal action data
+PASS notification links are local-path-only
+PASS notification mutations verify owner before update/delete
+PASS notification routes remain authenticated
+PASS notification client normalization is allow-listed
+PASS notification fetch errors are distinguishable from an empty inbox
+PASS notification mutations reject stale account responses
+PASS prior-account notifications are masked synchronously during identity change
+PASS fetch and action errors remain distinct
+PASS notification counts refresh if realtime subscription missed bootstrap
+PASS notification history exposes safe load-more pagination
+PASS notification mutations invalidate stale fetches and reconcile counts
+PASS notification full page provides retry and does not fake an empty success
+PASS notification popover has keyboard-operable notification buttons
+PASS protected notification route remains behind RequireAuth
+Messaging/notification surface validation: 30/30 PASS
+RESULT: PASS
+===== Public inbox validator =====
+Public inbox and chat-routing contract: PASS
+Customer-facing copy, honest categories, persisted unread counts, listing-recipient checks and private socket membership verified at source level.
+RESULT: PASS
+===== Chat/notification routing validator =====
+Chat / notification / navbar route convergence: PASS
+Auth guards and owner-scoped backend route mounting: PASS
+Message send/socket/notification ID contract: PASS
+RESULT: PASS
+===== Messaging hardening validator =====
+PASS messaging hardening: recipient compatibility, participant authorization, payload normalization, route guard, notification destination
+RESULT: PASS
+===== Messaging idempotency source validator =====
+PASS: additive migration, transaction lock, scoped unique idempotency, stable client retry key, duplicate side-effect suppression, and opt-in PostgreSQL integration coverage.
+LIMIT: this source validator does not prove a live PostgreSQL run, authenticated two-account API behavior, unread endpoint behavior, or Socket.IO event delivery.
+RESULT: PASS
+===== Messaging delivery safety validator =====
+PASS messaging delivery safety: draft retention, no blind retry, serialized writes, user-specific unread checks
+RESULT: PASS
+===== Messaging persistence validator =====
+PASS messaging persistence confirmation contract
+RESULT: PASS
+===== Messaging reliability validator =====
+PASS: authenticated sender binding, retry side-effect guard, unread-query failure handling, stable client key, transaction lock, scoped uniqueness, and changed-payload rejection.
+LIMIT: static source assertions only; not a substitute for API, PostgreSQL, two-account realtime, or browser integration tests.
+RESULT: PASS
+===== Messaging RPC error validator =====
+PASS messaging RPC error contract: stable HTTP mapping for not-found, forbidden, blocked and empty-message outcomes
+RESULT: PASS
+===== Private upload cache validator =====
+PASS private uploads use non-cacheable response headers
+PASS private upload access is authorization checked before content delivery
+PASS public uploads retain long-lived immutable caching
+Private upload cache validation: PASS
+RESULT: PASS
+===== Public support validator =====
+PASS public FAQ list route precedes auth middleware
+PASS public FAQ detail route precedes auth middleware
+PASS FAQ write routes remain behind auth middleware
+PASS public FAQ reads use explicit allow-list projection
+PASS public FAQ projection excludes editor identity fields
+PASS anonymous popularity tracking is rate-limited by client IP
+PASS customer message projection strips internal notes
+PASS support list is scoped to current account
+PASS stale list and detail responses are discarded
+PASS account switch clears customer case and draft state
+PASS server failures are presented without raw backend detail
+PASS failed case detail has retry and return actions
+PASS active and closed cases have separate headings
+PASS FAQ account fallback is categorized correctly
+PASS FAQ fallback includes case reopen guidance
+PASS CMS category aliases normalize to supported filters
+PASS FAQ disclosure controls expose expanded state
+PASS malformed CMS FAQ rows cannot break public help rendering
+PASS marquee duplicate loop is hidden from assistive technology
+PASS account-switch regression test exists
+PASS public FAQ category regression tests exist
+Public support surface validation: 21/21 PASS
+RESULT: PASS
+===== Public escrow boundary validator =====
+PASS public view never imports participant or operations desks
+PASS public view has no private tabs
+PASS public view requests only the public program endpoint
+PASS participant desk is mounted in buyer and dealer portals
+PASS staff operations have a dedicated protected portal
+PASS signed-in CTA routes to role-appropriate dashboard
+PASS public copy does not promise automatic release timing
+PASS public explainer describes funding method from published rules
+PASS public navigation exposes only the public escrow information destination
+PASS legacy escrow tab URLs normalize to the public page
+PASS legacy escrow page redirects to canonical public page
+PASS shared public footer uses Escrow Services label
+PASS global app footer uses Escrow Services label
+PASS regression tests assert public/private separation
+
+14/14 public escrow boundary checks passed.
+RESULT: PASS
+===== Public auction error-state validator =====
+PASS discovery does not expose raw server exception text
+PASS a failed refresh preserves the last successful list snapshot
+PASS headline state follows the selected auction tab and avoids a false empty flash during load
+PASS auction tabs are connected to an accessible results panel
+PASS signed-out saved tab does not show a false zero count
+PASS detail page distinguishes HTTP 404 from service/network failure
+PASS detail page offers retry and a route back to auction discovery
+PASS initial detail load uses the canonical sanitized bid list once
+PASS discovery regression tests cover sanitized failures and refresh preservation
+PASS canonical public live list excludes rejected listings and expired/not-yet-started auctions
+PASS scheduled listing, detail and public bid history hide rejected or deleted vehicles
+PASS published future setup remains openable before car lifecycle mirroring
+PASS backend regression tests cover rejected/deleted visibility, live time boundaries and scheduled detail parity
+PASS detail regression tests cover 404, outage and retry recovery
+Auction public error-state validation: 14/14 PASS
+RESULT: PASS
+===== Navigation convergence validator =====
+PASS: nav destination "marketplace" resolves to an existing App.tsx surface/tab
+PASS: nav destination "saved" resolves to an existing App.tsx surface/tab
+PASS: nav destination "financing" resolves to an existing App.tsx surface/tab
+PASS: nav destination "discovery" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:live" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:scheduled" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:ended" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:saved" resolves to an existing App.tsx surface/tab
+PASS: nav destination "inspections" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:inspect" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:find" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:roadside" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:mine" resolves to an existing App.tsx surface/tab
+PASS: nav destination "escrow:journey" resolves to an existing App.tsx surface/tab
+PASS: nav destination "support" resolves to an existing App.tsx surface/tab
+PASS: primary nav is exactly Marketplace, Auction, Auto Services, Escrow, Support
+PASS: Support stays a direct link (no invented submenu)
+FAIL: auth-gated entries are presentation only (App protectedNavs + backend remain authority)
+PASS: ticker is still rendered above the navigation
+PASS: navigation adds no network call
+PASS: dropdowns are disclosure buttons with aria-expanded/aria-controls, not ARIA menus
+PASS: Escape closes dropdowns, account menu and drawer
+PASS: mobile drawer is a labelled modal dialog with focus handling
+PASS: primary nav is a labelled landmark of real links
+PASS: single mobile navigation system retained (bottom dock + one drawer)
+PASS: deleted MobileCarCard architecture not resurrected
+PASS: reduced-motion rules cover the new header
+PASS: sign-in/sign-up routes keep canonical /login entry
+FAIL: 14A backend registry mirrors frontend navConfig ids exactly (no drift)
+PASS: 14A locked-visible set matches frontend and covers marketplace + support
+PASS: 14A authority lives in the existing platform_config via the existing PUT /config (no second config system / route)
+PASS: 14A navigation mutation is validated before persistence and audited through the existing AuditLog
+PASS: 14A public projection exposes navigation only through the existing whitelist, normalised
+PASS: 14A public projection does not whitelist secrets/admin fields
+PASS: 14A the public-config GET is defined before the global admin guard; mutation is after it
+PASS: 14A frontend consumes navigation via the existing BrandingContext fetch (no new request)
+PASS: 14A Navbar renders from applyNavigationConfig, never directly from raw config
+PASS: 14A resolver is total and falls back to canonical NAV_PRIMARY
+PASS: 14A admin editor is mounted in the reachable admin console (AdminView), not the orphaned legacy settings page
+PASS: 14A admin editor lives in the reachable admin console (AdminView) and saves through the existing adminAPI.updateConfig only
+PASS: 14A migration is the smallest possible: one JSONB column with a default, no policy changes
+Navigation convergence: 39/41 PASS
+RESULT: BASELINE GAP / BLOCKED (exit 1)
+
+===== VALIDATOR SUMMARY =====
+
+===== SYNTAX VALIDATION =====
+PASS syntax parse src/App.tsx
+PASS syntax parse src/features/UnifiedCommunicationHub.tsx
+PASS syntax parse src/context/NotificationContext.tsx
+PASS syntax parse src/pages/NotificationsPage.tsx
+PASS syntax parse src/components/layout/NotificationPanel.tsx
+PASS syntax parse src/services/chatApi.ts
+PASS syntax parse src/__tests__/pages/ChatPage.test.jsx
+PASS syntax parse src/__tests__/pages/NotificationsPage.test.tsx
+PASS syntax parse src/__tests__/components/Navbar.test.jsx
+TypeScript/TSX/JSX syntax parse result: 0 (9 files)
+JavaScript/MJS syntax result: 0 (1228 files)
+package.json JSON parse: PASS
+
+===== Focused frontend test attempt =====
+Command: npm test -- --run src/__tests__/pages/ChatPage.test.jsx src/__tests__/pages/NotificationsPage.test.tsx
+RESULT: BLOCKED (exit 127): `vitest: not found`; dependency installation was not performed because node_modules is absent and runtime is below the project engine requirement.

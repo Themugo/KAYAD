@@ -1,0 +1,14 @@
+Gate	Status	Evidence	Notes
+Input foundation checksum	PASS	SHA-256 verified	Stage 17 ZIP
+Public/private source boundary	PASS	23/23 source validator	Static assertions, not runtime rendering
+JavaScript/MJS syntax	PASS	1230/1230	Node --check
+TypeScript/TSX/JSX syntax	PASS	708/708	TypeScript transpileModule syntax pass
+Loan applicant endpoint DTO	PASS	Source inspection + validator	Live API not called
+Authenticated loan routes	PASS	Source inspection + validator	Runtime authorization not exercised
+Full semantic typecheck	NOT RUN	Dependencies absent	Must run with required Node/dependencies
+Vite production build	NOT RUN	Dependencies absent	Must run with required Node/dependencies
+Vitest/Jest suites	NOT RUN	Dependencies absent	Must run with required Node/dependencies
+Playwright/browser accessibility	NOT RUN	No browser runtime executed	Stage environment required
+Two-account IDOR tests	NEEDS STAGING	No staging credentials/runtime used	Must verify actual identity switching and API ownership
+Live lender/provider certification	NOT RUN	No connected lender offers asserted	Not implied by public calculator
+Production deploy/database mutation	NOT RUN	No production changes authorized or made	No commit/push/deploy/migration

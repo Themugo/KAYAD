@@ -61,7 +61,29 @@ export const getMyLoanApplications = async (req, res) => {
     const applications = await LoanApplication.find({ applicant: req.user.id })
       .populate("car")
       .sort({ createdAt: -1 });
-    res.json({ success: true, data: applications });
+    // Applicant-facing response is an explicit DTO. Internal reviewer notes,
+    // reviewer identity, and raw persistence fields are never serialized here.
+    const data = applications.map((application) => {
+      const record = typeof application?.toObject === "function" ? application.toObject() : application;
+      const car = record?.car && typeof record.car === "object" ? record.car : null;
+      return {
+        id: String(record?._id ?? record?.id ?? ""),
+        car: car ? {
+          id: String(car._id ?? car.id ?? ""),
+          title: String(car.title || [car.make, car.model, car.year].filter(Boolean).join(" ") || "Vehicle"),
+        } : null,
+        vehiclePrice: Number(record?.vehiclePrice ?? 0),
+        depositAmount: Number(record?.depositAmount ?? 0),
+        loanAmount: Number(record?.loanAmount ?? record?.requestedAmount ?? 0),
+        termMonths: Number(record?.termMonths ?? 0),
+        monthlyIncome: record?.monthlyIncome == null ? null : Number(record.monthlyIncome),
+        employmentStatus: record?.employmentStatus ?? null,
+        status: record?.status ?? "submitted",
+        createdAt: record?.createdAt ?? null,
+        updatedAt: record?.updatedAt ?? null,
+      };
+    });
+    res.json({ success: true, data });
   } catch (error) {
     logError("Error fetching loan applications:", error);
     res.status(500).json({ success: false, message: "Failed to load your applications" });

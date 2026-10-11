@@ -1,0 +1,29 @@
+KAYAD STAGE 19 BUYER PORTAL CONVERGENCE
+Date: 2026-10-12
+Foundation ZIP: KAYAD-STAGE18-PUBLIC-FINANCING-CONVERGENCE-20261012.zip
+Foundation SHA-256: a0b50f9643c08697ebe9de731e99554434a5f08fa7bce9701791571bb02d565b
+Working directory: /mnt/data/kayad_stage17_work
+
+Changes:
+- BuyerPlatform: identity-keyed request lifecycle, stale request cancellation, synchronous masking, independent request failure reporting/retry, display real ownership dashboard records, saved-only route correction.
+- DashboardHub: buyer escrow shortcut now opens private buyer workspace; added Messages shortcut to chat.
+- package.json: added validate:buyer-portal-boundaries.
+- Added buyer portal source-boundary validator and audit artifacts.
+
+Validation:
+- npm run validate:buyer-portal-boundaries: 29/29 PASS.
+- npm run validate:public-financing-boundary: 23/23 PASS.
+- npm run validate:public-auto-services-boundary: 17/17 PASS.
+- npm run validate:messaging-notification-surface: 30/30 PASS.
+- node --check across JavaScript/MJS/CJS files: 1,234/1,234 PASS.
+- TypeScript transpile syntax across TS/TSX/JSX source (excluding declaration files): 658/658 PASS.
+- node --check scripts/validate-buyer-portal-boundaries-20261012.mjs: PASS.
+
+Environment limitations:
+- Node v22.16.0; project requirement is >=22.22.2.
+- No node_modules; dependency install/full semantic typecheck/build/test execution not available.
+- No browser, authenticated two-account test, staging Supabase/RLS test, live provider test, or deployment verification performed.
+
+Safety:
+- No commit, push, deployment, migration, payment, or production mutation.
+- Source-level assertions are not a substitute for live IDOR/RLS certification.

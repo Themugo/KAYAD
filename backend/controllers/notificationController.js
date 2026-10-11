@@ -3,11 +3,23 @@ import { findAll, count, create, updateMany, removeMany, findById } from "../db/
 import { getIO } from "../utils/io.js";
 import { logError, logInfo } from "../utils/logger.js";
 
+const safeLocalLink = (value) => {
+  if (typeof value !== "string") return undefined;
+  const link = value.trim();
+  if (!link.startsWith("/") || link.startsWith("//") || link.startsWith("/\\") || link.includes("\\") || /[\u0000-\u001f\u007f]/.test(link)) return undefined;
+  return link;
+};
+
+// Explicit public DTO: never serialize recipient email/phone, user identifiers,
+// internal action data, delivery metadata or arbitrary ORM fields to the client.
 const mapNotification = (n) => ({
-  ...n,
-  _id: n.id,
-  createdAt: n.createdAt || n.created_at,
+  _id: String(n.id || n._id || ""),
+  title: typeof n.title === "string" ? n.title : "KAYAD update",
+  message: typeof n.message === "string" ? n.message : "",
+  type: typeof n.type === "string" ? n.type : "info",
   read: Boolean(n.read),
+  createdAt: n.createdAt || n.created_at || null,
+  ...(safeLocalLink(n.link) ? { link: safeLocalLink(n.link) } : {}),
 });
 
 export const getNotifications = async (req, res) => {

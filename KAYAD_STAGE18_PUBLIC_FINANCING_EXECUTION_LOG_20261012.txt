@@ -1,0 +1,23 @@
+KAYAD STAGE 18 — PUBLIC FINANCING CONVERGENCE
+Execution date: 2026-10-12
+Foundation: KAYAD-STAGE17-AUTO-SERVICES-CONVERGENCE-20261012.zip
+Foundation SHA-256: 82bd1ec4148f6eafcc2efe22556924dd5d848594495907cf7526f8c69394280b
+
+Changes:
+- Split FinanceMarketplace into public and account modes; public is the default.
+- Moved application form and personal application tracker into authenticated My Garage.
+- Added buyer dashboard shortcut to the existing buyer workspace.
+- Clarified illustrative rate disclaimer and bounded calculator inputs.
+- Projected applicant loan records through an explicit DTO omitting internal reviewer fields.
+- Added repeatable source boundary validator and npm script.
+
+Executed:
+- npm run validate:public-financing-boundary — 23/23 PASS.
+- JavaScript/MJS syntax — 1230/1230 PASS.
+- TS/TSX/JSX syntax transpilation — 708/708 PASS.
+- node --check backend/controllers/loanApplicationController.js — PASS.
+- Foundation checksum verification — PASS.
+
+Not executed: semantic typecheck, production build, full unit suites, browser E2E, live API/RLS/IDOR tests, lender certification. node_modules is absent; available Node is 22.16.0 vs required >=22.22.2.
+
+No commit, push, deployment, database migration, payment, or lender transaction was performed.

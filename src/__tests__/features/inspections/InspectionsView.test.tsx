@@ -36,8 +36,9 @@ describe('InspectionsView', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeTruthy();
     fireEvent.click(screen.getAllByRole('button', { name: /Inspect a car before you buy/ })[0]);
     expect(onOpenAuth).toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('tab', { name: 'My inspections' }));
-    expect(screen.getByText(/Sign in to see your inspection requests/)).toBeTruthy();
+    expect(screen.queryByRole('tab', { name: 'My inspections' })).toBeNull();
+    expect(screen.queryByRole('tab', { name: 'Reports' })).toBeNull();
+    expect(screen.queryByText(/Sign in to see your inspection requests/)).toBeNull();
     expect(getMy).not.toHaveBeenCalled();
     expect(getBookings).not.toHaveBeenCalled();
   });
@@ -45,14 +46,14 @@ describe('InspectionsView', () => {
   it('shows an honest empty state', async () => {
     getMy.mockResolvedValue({ success: true, orders: [] });
     getBookings.mockResolvedValue({ bookings: [] });
-    renderView({ initialTab: 'mine' });
+    renderView({ viewMode: 'account', initialTab: 'mine' });
     expect(await screen.findByText('No inspections yet')).toBeTruthy();
   });
 
   it('merges both sources, newest first, with real statuses and actions', async () => {
     getMy.mockResolvedValue({ success: true, orders: [kayadDone] });
     getBookings.mockResolvedValue({ bookings: [booking] });
-    renderView({ initialTab: 'mine' });
+    renderView({ viewMode: 'account', initialTab: 'mine' });
     const items = await screen.findAllByRole('listitem').then((l) => l.filter((x) => x.querySelector('h3')));
     expect(items).toHaveLength(2);
     expect(within(items[0]).getByText('2019 Subaru Outback')).toBeTruthy();
@@ -65,7 +66,7 @@ describe('InspectionsView', () => {
   it('one failing source does not hide the other, and says so', async () => {
     getMy.mockRejectedValue(new Error('boom'));
     getBookings.mockResolvedValue({ bookings: [booking] });
-    renderView({ initialTab: 'mine' });
+    renderView({ viewMode: 'account', initialTab: 'mine' });
     expect((await screen.findByRole('alert')).textContent).toMatch(/could not be loaded/);
     expect(screen.getByText('2019 Subaru Outback')).toBeTruthy();
     expect(screen.queryByText('No inspections yet')).toBeNull();
@@ -74,7 +75,7 @@ describe('InspectionsView', () => {
   it('both sources failing is an error with retry, never an empty state', async () => {
     getMy.mockRejectedValue(new Error('x'));
     getBookings.mockRejectedValue(new Error('y'));
-    renderView({ initialTab: 'mine' });
+    renderView({ viewMode: 'account', initialTab: 'mine' });
     await screen.findByRole('alert');
     expect(screen.queryByText('No inspections yet')).toBeNull();
     getMy.mockResolvedValue({ success: true, orders: [] });
@@ -86,7 +87,7 @@ describe('InspectionsView', () => {
   it('opens a KAYAD report with only stored facts', async () => {
     getMy.mockResolvedValue({ success: true, orders: [kayadDone] });
     getBookings.mockResolvedValue({ bookings: [] });
-    renderView({ initialTab: 'reports' });
+    renderView({ viewMode: 'account', initialTab: 'reports' });
     fireEvent.click(await screen.findByRole('button', { name: /View report/ }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('82/100')).toBeTruthy();
@@ -97,15 +98,48 @@ describe('InspectionsView', () => {
   it('tabs follow the roving-tabindex keyboard pattern', async () => {
     getMy.mockResolvedValue({ success: true, orders: [] });
     getBookings.mockResolvedValue({ bookings: [] });
-    renderView();
-    const first = screen.getByRole('tab', { name: 'Services' });
+    renderView({ viewMode: 'account' });
+    const first = screen.getByRole('tab', { name: 'My inspections' });
     expect(first.getAttribute('tabindex')).toBe('0');
     fireEvent.keyDown(first, { key: 'ArrowRight' });
-    const second = screen.getByRole('tab', { name: 'My inspections' });
+    const second = screen.getByRole('tab', { name: 'Reports' });
     expect(second.getAttribute('aria-selected')).toBe('true');
     expect(second.getAttribute('tabindex')).toBe('0');
     expect(first.getAttribute('tabindex')).toBe('-1');
-    await screen.findByText('No inspections yet');
+    await screen.findByText('No reports yet');
+  });
+
+  it('does not expose private record tabs on the public service page', () => {
+    renderView({ viewMode: 'public' });
+    expect(screen.getByRole('heading', { name: /Find the right independent expert/ })).toBeTruthy();
+    expect(screen.queryByRole('tab', { name: 'My inspections' })).toBeNull();
+    expect(screen.queryByRole('tab', { name: 'Reports' })).toBeNull();
+  });
+
+  it('routes private inspection history to the account workspace from the public page', () => {
+    const open = vi.fn();
+    renderView({ viewMode: 'public', onOpenMyInspections: open });
+    fireEvent.click(screen.getByRole('button', { name: /View my inspections and reports/ }));
+    expect(open).toHaveBeenCalledWith('mine');
+  });
+
+  it('masks the previous account records immediately when the signed-in identity changes', async () => {
+    getMy.mockResolvedValueOnce({ success: true, orders: [kayadDone] }).mockImplementation(() => new Promise(() => {}));
+    getBookings.mockResolvedValueOnce({ bookings: [] }).mockImplementation(() => new Promise(() => {}));
+    const view = renderView({ viewMode: 'account', initialTab: 'mine' });
+    expect(await screen.findByText('Prado')).toBeTruthy();
+    view.rerender(<InspectionsView vehicles={[]} user={{ id: 'u2', name: 'Other user' } as never} viewMode="account" initialTab="mine" onOpenInspectionMarketplace={vi.fn()} />);
+    expect(screen.queryByText('Prado')).toBeNull();
+    expect(await screen.findByText(/Loading your inspections/)).toBeTruthy();
+  });
+
+  it('does not expose raw server error details in private inspection errors', async () => {
+    getMy.mockRejectedValue(new Error('SQL relation private_customer_table missing'));
+    getBookings.mockResolvedValue({ bookings: [] });
+    renderView({ viewMode: 'account', initialTab: 'mine' });
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toMatch(/could not be loaded/i);
+    expect(alert.textContent).not.toMatch(/SQL relation|private_customer_table/);
   });
 
   it('launchAction=request opens the form with the launch vehicle preselected', () => {

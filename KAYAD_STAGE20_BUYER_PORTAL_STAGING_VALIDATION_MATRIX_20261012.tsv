@@ -1,0 +1,13 @@
+Area	Probe	Expected result	Status
+Saved vehicles	Account A/B favorites collection markers	Own marker present; opposite marker absent	BLOCKED: staging fixtures unavailable
+Ownership	GET own and foreign vehicle IDs	Own 2xx; foreign 401/403/404/410	BLOCKED: staging fixtures unavailable
+Financing	A/B /api/loans/my markers	Own application present; opposite application absent	BLOCKED: staging fixtures unavailable
+Inspection bookings	Own and foreign booking IDs + list isolation	Own 2xx; foreign denied; lists isolated	BLOCKED: staging fixtures unavailable
+Inspection reports	Own and foreign report IDs	Own 2xx; foreign denied	BLOCKED: staging fixtures unavailable
+Legacy inspection orders	Own and foreign order IDs + list isolation	Own 2xx; foreign denied; lists isolated	BLOCKED: staging fixtures unavailable
+Escrow	Own and foreign escrow IDs + /my isolation	Own 2xx; foreign denied; lists isolated	BLOCKED: staging fixtures unavailable
+Messages	A/B chat collection and message endpoint	Own chat present; foreign chat denied	BLOCKED: staging fixtures unavailable
+Attachments	Own and foreign chat upload IDs	Own 2xx; foreign denied	BLOCKED: staging fixtures unavailable
+Notifications	A/B notification collection markers	Own marker present; opposite marker absent	BLOCKED: staging fixtures unavailable
+Supabase RLS	User JWT selects opposite-account rows by exact ID	Zero foreign rows for each account/table	BLOCKED: staging Supabase config unavailable
+Account switching	Delay A requests; sign out/in as B; release A responses	No A marker flash or stale overwrite	BLOCKED: authenticated browser session unavailable

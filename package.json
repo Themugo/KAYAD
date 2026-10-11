@@ -132,7 +132,12 @@
     "validate:navigation-convergence": "node scripts/validate-navigation-convergence.mjs",
     "validate:auction-public-error-states": "node scripts/validate-auction-public-error-states.mjs",
     "validate:public-support-surface": "node scripts/validate-public-support-surface.mjs",
-    "validate:public-escrow-boundary": "node scripts/validate-public-escrow-boundary.mjs"
+    "validate:public-escrow-boundary": "node scripts/validate-public-escrow-boundary.mjs",
+    "validate:messaging-notification-surface": "node scripts/validate-messaging-notification-surface-20261012.mjs",
+    "validate:public-auto-services-boundary": "node scripts/validate-public-auto-services-boundary-20261012.mjs",
+    "validate:public-financing-boundary": "node scripts/validate-public-financing-boundary-20261012.mjs",
+    "validate:buyer-portal-boundaries": "node scripts/validate-buyer-portal-boundaries-20261012.mjs",
+    "certify:buyer-portal:staging": "node scripts/certify-buyer-portal-staging-isolation-20261012.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

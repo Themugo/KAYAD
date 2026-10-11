@@ -1,0 +1,31 @@
+Area	Check	Status	Evidence / limitation
+Buyer portal account key	Uses authenticated user ID	PASS	Validator check 1
+Buyer portal account switching	Cancel stale reads and synchronously mask prior account data	PASS	Validator checks 2-3
+Buyer portal failure behavior	Do not silently convert failed requests into empty lists	PASS	Validator check 4; independent failure states also inspected
+Owned vehicles	Existing ownership dashboard data rendered	PASS	Validator check 5
+Saved vehicles navigation	Card routes to canonical saved inventory	PASS	Validator check 6
+Child workspaces	Escrow, financing, inspections keyed by user ID	PASS	Validator check 7
+Buyer portal protected state	Authenticated navigation and signed-out prompt retained	PASS	Validator check 8
+Buyer dashboard actions	Escrow action goes to private buyer workspace; Messages opens chat	PASS	Validator check 9
+Chat account switching	Thread list masked by owner ID; stale reads ignored	PASS	Validator check 10
+Notifications account switching	Rows/counts masked by session key	PASS	Validator check 11
+Favorites API ownership	Auth + caller-scoped list/mutations	PASS	Validator checks 12-14
+Ownership API ownership	Auth + owner ID passed to service	PASS	Validator checks 15-16
+Financing API ownership	Authenticated applicant list; admin-only review/listing	PASS	Validator checks 17-18
+Escrow API ownership	Participant-scoped list and detail/state access checks	PASS	Validator checks 19-20
+Inspection API ownership	Authenticated order list and customer booking ownership	PASS	Validator checks 21-23
+Notifications API ownership	Authenticated and recipient-scoped list/mutations	PASS	Validator checks 24-25
+Chat API ownership	Auth, membership checks, private attachment boundary	PASS	Validator checks 26-28
+Canonical notifications route	RequireAuth wrapper present	PASS	Validator check 29
+Buyer portal boundary validator	29 source assertions	PASS	`npm run validate:buyer-portal-boundaries` — 29/29
+Financing regression gate	23 source assertions	PASS	`npm run validate:public-financing-boundary` — 23/23
+Auto-services regression gate	17 source assertions	PASS	`npm run validate:public-auto-services-boundary` — 17/17
+Messaging/notifications regression gate	30 source assertions	PASS	`npm run validate:messaging-notification-surface` — 30/30
+JavaScript/MJS/CJS syntax	All files in archive source tree checked	PASS	`node --check` — 1,234/1,234
+TS/TSX/JSX syntax transpile	Non-declaration frontend source checked	PASS	TypeScript `transpileModule` — 658/658; declaration files excluded
+Full TypeScript semantic check	Project typecheck	NOT RUN	No node_modules; Node v22.16.0 below required >=22.22.2
+Production build	Vite build	NOT RUN	No node_modules
+Unit/integration suites	Vitest/Jest runtime	NOT RUN	No node_modules
+Browser account-switch journey	Two authenticated users; delayed requests/logout races	NOT RUN	Requires browser runtime and test accounts
+Staging IDOR/RLS matrix	Cross-account APIs, database policy and deployed route parity	NOT RUN	Requires staging credentials and real identities
+Live deployment certification	Production URL/API route parity	NOT RUN	No production changes or claims made

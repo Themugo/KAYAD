@@ -33,20 +33,27 @@ import type { UserProfile } from '../../../types';
 interface FinanceMarketplaceProps {
   user?: UserProfile | null;
   onOpenAuth?: () => void;
+  onNavigate?: (section: string) => void;
+  mode?: 'public' | 'account';
 }
 
-export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, onOpenAuth }) => {
+export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, onOpenAuth, onNavigate, mode = 'public' }) => {
+  const userId = String(user?.id || (user as UserProfile & { _id?: string } | null | undefined)?._id || '');
   const [vehiclePrice, setVehiclePrice] = useState(2500000);
   const [deposit, setDeposit] = useState(500000);
   const [termMonths, setTermMonths] = useState(48);
   const [rate, setRate] = useState(13);
 
-  const loanAmount = Math.max(0, vehiclePrice - deposit);
-  const monthlyRate = rate / 100 / 12;
+  const safeVehiclePrice = Math.max(1, Number(vehiclePrice) || 1);
+  const safeDeposit = Math.min(Math.max(0, Number(deposit) || 0), safeVehiclePrice - 1);
+  const safeTermMonths = Math.max(1, Number(termMonths) || 1);
+  const safeRate = Math.min(100, Math.max(0, Number(rate) || 0));
+  const loanAmount = Math.max(1, safeVehiclePrice - safeDeposit);
+  const monthlyRate = safeRate / 100 / 12;
   const monthlyPayment = monthlyRate > 0
-    ? (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -termMonths))
-    : loanAmount / termMonths;
-  const totalCost = monthlyPayment * termMonths + deposit;
+    ? (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -safeTermMonths))
+    : loanAmount / safeTermMonths;
+  const totalCost = monthlyPayment * safeTermMonths + safeDeposit;
 
   const [monthlyIncome, setMonthlyIncome] = useState('');
   const [employmentStatus, setEmploymentStatus] = useState('employed');
@@ -55,17 +62,27 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
   const [submitted, setSubmitted] = useState(false);
 
   const [myApplications, setMyApplications] = useState<LoanApplication[]>([]);
-  const [loadingApps, setLoadingApps] = useState(true);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [appsError, setAppsError] = useState<string | null>(null);
+  const [reloadApps, setReloadApps] = useState(0);
 
   useEffect(() => {
-    if (!user) { setLoadingApps(false); return; }
+    if (mode !== 'account' || !userId) {
+      setMyApplications([]);
+      setAppsError(null);
+      setLoadingApps(false);
+      return;
+    }
     let cancelled = false;
+    setLoadingApps(true);
+    setAppsError(null);
+    setMyApplications([]);
     getMyLoanApplications()
       .then((apps) => { if (!cancelled) setMyApplications(apps); })
-      .catch(() => { /* a failed load shouldn't block the rest of the page */ })
+      .catch(() => { if (!cancelled) setAppsError('Your financing applications could not be loaded. Try again.'); })
       .finally(() => { if (!cancelled) setLoadingApps(false); });
     return () => { cancelled = true; };
-  }, [user, submitted]);
+  }, [mode, userId, submitted, reloadApps]);
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +110,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       <div className="text-center py-6">
         <h1 className="text-2xl font-bold text-[#176B87] font-display">Vehicle Financing</h1>
-        <p className="text-sm text-[#64748B] mt-1">Estimate your monthly payment and apply for financing</p>
+        <p className="text-sm text-[#64748B] mt-1">{mode === 'account' ? 'Manage your private financing request and review its recorded status.' : 'Explore affordability estimates and understand the financing request process.'}</p>
       </div>
 
       {/* CALCULATOR - honest, local arithmetic, no named lenders */}
@@ -105,11 +122,11 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <label className="text-xs text-[#64748B]">
             Vehicle price (Ksh)
-            <input type="number" value={vehiclePrice} onChange={(e) => setVehiclePrice(Number(e.target.value) || 0)} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
+            <input type="number" min={1} value={vehiclePrice} onChange={(e) => { const next = Math.max(1, Number(e.target.value) || 1); setVehiclePrice(next); if (deposit >= next) setDeposit(Math.max(0, next - 1)); }} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
           </label>
           <label className="text-xs text-[#64748B]">
             Deposit (Ksh)
-            <input type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value) || 0)} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
+            <input type="number" min={0} max={Math.max(0, vehiclePrice - 1)} value={deposit} onChange={(e) => setDeposit(Math.min(Math.max(0, Number(e.target.value) || 0), Math.max(0, vehiclePrice - 1)))} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
           </label>
           <label className="text-xs text-[#64748B]">
             Term (months)
@@ -121,8 +138,8 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
             </select>
           </label>
           <label className="text-xs text-[#64748B]">
-            Estimated interest rate (% p.a.)
-            <input type="number" value={rate} onChange={(e) => setRate(Number(e.target.value) || 0)} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
+            Illustrative annual rate assumption (% p.a.)
+            <input type="number" min={0} max={100} value={rate} onChange={(e) => setRate(Math.min(100, Math.max(0, Number(e.target.value) || 0)))} className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
           </label>
         </div>
         <div className="bg-[#F5F2EB] rounded-xl p-4 flex flex-wrap gap-6">
@@ -139,10 +156,29 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
             <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(totalCost).toLocaleString()}</p>
           </div>
         </div>
-        <p className="text-[10px] text-[#94A3B8] mt-2">Estimate only - actual rates and terms depend on the lender's own assessment.</p>
+        <p className="text-[10px] text-[#64748B] mt-2">Illustration only. The rate is an editable assumption, not a KAYAD offer or a quote from a lender. Actual rates, fees, eligibility and terms must be confirmed with the lender.</p>
       </section>
 
-      {/* REAL APPLICATION FORM */}
+      {mode === 'public' && (
+        <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5 space-y-4">
+          <div>
+            <h2 className="text-sm font-bold text-[#176B87]">How vehicle financing works through KAYAD</h2>
+            <p className="mt-2 text-sm leading-6 text-[#64748B]">KAYAD can record a financing request and show the status recorded by its backend. KAYAD is not a lender, and a submitted request is not an approval or a lender offer.</p>
+          </div>
+          <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[#64748B]">
+            <li>Verified lender offers, rates and fees are not currently displayed on this page.</li>
+            <li>Eligibility, document requirements, final terms and lending decisions belong to the lender handling an application.</li>
+            <li>Do not send identity or financial documents through informal messages. Follow only the authenticated process and instructions presented for your request.</li>
+          </ul>
+          <div className="flex flex-wrap items-center gap-3 border-t border-[#D7E7E4] pt-4">
+            <button type="button" onClick={() => user ? onNavigate?.('buyer-platform') : onOpenAuth?.()} className="rounded-lg bg-[#176B87] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#0A3340]">{user ? 'Manage financing in My Garage' : 'Sign in to manage financing'}</button>
+            <span className="text-xs text-[#64748B]">Applications and their recorded status are available in your private account workspace.</span>
+          </div>
+        </section>
+      )}
+
+      {/* APPLICATION FORM IS ONLY RENDERED INSIDE THE AUTHENTICATED ACCOUNT WORKSPACE. */}
+      {mode === 'account' && (
       <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="w-4 h-4 text-[#176B87]" />
@@ -162,7 +198,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="text-xs text-[#64748B]">
                 Monthly income (Ksh)
-                <input type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} required className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
+                <input type="number" min={0} value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} required className="w-full mt-1 border border-[#D7E7E4] rounded-lg px-3 py-2 text-sm" />
               </label>
               <label className="text-xs text-[#64748B]">
                 Employment status
@@ -180,17 +216,24 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
           </form>
         )}
       </section>
+      )}
 
-      {/* REAL TRACKER - the user's own real applications */}
-      {user && (
+      {/* REAL TRACKER - the user's own real applications, inside My Garage only */}
+      {mode === 'account' && user && (
         <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <ClipboardList className="w-4 h-4 text-[#176B87]" />
             <h2 className="text-sm font-bold text-[#176B87]">My Applications</h2>
           </div>
           {loadingApps ? (
-            <div className="flex items-center justify-center py-8">
+            <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
               <Loader2 className="w-5 h-5 text-[#94A3B8] animate-spin" />
+              <span className="ml-2 text-xs text-[#64748B]">Loading your applications…</span>
+            </div>
+          ) : appsError ? (
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800" role="alert">
+              <p>{appsError}</p>
+              <button type="button" onClick={() => setReloadApps((value) => value + 1)} className="mt-2 font-bold underline">Retry</button>
             </div>
           ) : myApplications.length === 0 ? (
             <p className="text-xs text-[#94A3B8]">No applications yet.</p>

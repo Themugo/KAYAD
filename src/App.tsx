@@ -90,7 +90,38 @@ function AppInner() {
   const location = useLocation();
   const { user: authUser, logout: authLogout, isAdmin, isDealer, isAuth, loading: authLoading, sessionStatus } = useAuth();
   const { unreadCount: unreadNotificationCount } = useNotifications();
+  const currentAuthUserId = authUser?.id ? String(authUser.id) : null;
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [unreadMessageOwnerId, setUnreadMessageOwnerId] = useState<string | null>(null);
+  const visibleUnreadMessageCount = isAuth && currentAuthUserId && unreadMessageOwnerId === currentAuthUserId ? unreadMessageCount : 0;
   const navigate = useNavigate();
+
+  // The Messages badge comes from the canonical participant-scoped endpoint.
+  // Mask it synchronously on account changes and keep it fresh if realtime
+  // bootstrap misses an event; a failed request never fabricates a new zero.
+  useEffect(() => {
+    if (!isAuth || !currentAuthUserId) {
+      setUnreadMessageCount(0);
+      setUnreadMessageOwnerId(null);
+      return;
+    }
+    let cancelled = false;
+    const refreshUnread = async () => {
+      try {
+        const { getUnreadChatCount } = await import('./services/chatApi');
+        const count = await getUnreadChatCount();
+        if (cancelled) return;
+        setUnreadMessageCount(count);
+        setUnreadMessageOwnerId(currentAuthUserId);
+      } catch {
+        // Keep this account's last confirmed count. Never convert an API failure
+        // into a false zero unread count.
+      }
+    };
+    void refreshUnread();
+    const timer = window.setInterval(() => { void refreshUnread(); }, 30000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [isAuth, currentAuthUserId]);
   const normalizeNav = useCallback((requested: string | null): string => {
     return navLocationFor(requested || '', window.location.href).nav;
   }, []);
@@ -151,6 +182,7 @@ function AppInner() {
   // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
   const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | 'manage-business' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
+  const [buyerInspectionTab, setBuyerInspectionTab] = useState<'mine' | 'reports'>('mine');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fixed (Final Integration - real data integration): this was
@@ -401,9 +433,14 @@ function AppInner() {
 
   // Inspection launch: keep the vehicle the customer was looking at (it used to be discarded).
   const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | 'manage-business' | null }) => {
+    if (next.tab === 'mine' || next.tab === 'reports') {
+      setBuyerInspectionTab(next.tab);
+      setActiveNav('buyer-platform');
+      return;
+    }
     setInspectionLaunch((prev) => ({ vehicle: next.vehicle ?? null, tab: next.tab ?? 'service', action: next.action ?? null, nonce: prev.nonce + 1 }));
     setActiveNav('inspections');
-  }, []);
+  }, [setActiveNav]);
   const handleRequestInspection = useCallback((vehicle: Vehicle) => {
     handleCloseVehicleDetails();
     launchInspections({ vehicle, action: 'request' });
@@ -479,6 +516,7 @@ function AppInner() {
 
       <Navbar
         user={user}
+        unreadCount={visibleUnreadMessageCount}
         notificationUnreadCount={unreadNotificationCount}
         authLoading={authLoading}
         savedCount={savedVehicles.length}
@@ -583,6 +621,7 @@ function AppInner() {
               onOpenRegister={handleOpenRegister}
               onViewVehicleDetails={handleOpenVehicleDetails}
               onOpenInspectionMarketplace={(category) => { setFinderLaunch((p) => ({ category, nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); }}
+              onOpenMyInspections={(tab) => launchInspections({ tab })}
             />
           )}
 
@@ -596,7 +635,7 @@ function AppInner() {
           )}
 
           {(activeNav === 'financing' || activeNav === 'finance') && (
-            <FinanceMarketplace user={user} onOpenAuth={handleOpenAuth} />
+            <FinanceMarketplace user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} mode="public" />
           )}
 
           {activeNav === 'dealers' && (
@@ -666,7 +705,7 @@ function AppInner() {
           )}
 
           {activeNav === 'buyer-platform' && (
-            <BuyerPlatform user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={handleOpenAuth} />
+            <BuyerPlatform key={`${user?.id || 'guest'}-${buyerInspectionTab}`} user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={handleOpenAuth} initialInspectionTab={buyerInspectionTab} />
           )}
 
 

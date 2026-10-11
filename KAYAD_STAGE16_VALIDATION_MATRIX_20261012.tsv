@@ -1,0 +1,27 @@
+Gate	Status	Evidence	Limit
+Stage16 messaging/notification contract	PASS	30/30 checks in validate-messaging-notification-surface-20261012.mjs	Source assertions only
+Public inbox contract	PASS	validate-messaging-public-inbox.mjs	Source assertions only
+Chat/notification routing	PASS	validate-chat-notification-routing.mjs	Source assertions only
+Messaging hardening	PASS	validate-messaging-hardening-20261010.mjs	Source assertions only
+Messaging idempotency	PASS	validate-messaging-idempotency-20261010.mjs	Does not execute PostgreSQL integration test
+Messaging delivery safety	PASS	validate-messaging-delivery-safety-20261010.mjs	Source assertions only
+Messaging persistence confirmation	PASS	validate-messaging-persistence-confirmation-20261010.mjs	Source assertions only
+Messaging reliability	PASS	validate-messaging-reliability-followup-20261010.mjs	Source assertions only
+Messaging RPC error contract	PASS	validate-messaging-rpc-error-contract-20261010.mjs	Source assertions only
+Private upload cache	PASS	validate-private-upload-cache.mjs	No live storage-provider test
+Public Support regression	PASS	21/21 source checks	No live CMS request
+Public Escrow regression	PASS	14/14 source checks	No live escrow authorization test
+Public Auction regression	PASS	14/14 source checks	No live auction browser test
+JavaScript/MJS syntax	PASS	1228/1228 files passed node --check	Syntax only
+TS/TSX/JSX syntax	PASS	9/9 changed source/test files transpile-parsed with global TypeScript	Not semantic typecheck
+package.json	PASS	JSON parse successful	No dependency install
+Navigation convergence	PARTIAL	39/41; same two failures reproduced on Stage 15 baseline	Unrelated baseline gap; not modified in Stage 16
+Dependency installation	BLOCKED	No node_modules in archive; not installed in this environment	Node 22.16.0 is below required >=22.22.2
+Frontend Vitest/Jest	NOT RUN	Dependencies absent	Run on supported Node with clean install
+Semantic TypeScript typecheck	NOT RUN	Dependencies absent	Run on supported Node with clean install
+Vite production build	NOT RUN	Dependencies absent	Run on supported Node with clean install
+Playwright/browser accessibility	BLOCKED	No browser runtime/test installation in this environment	Staging browser pass required
+Two-account chat IDOR tests	BLOCKED	No authenticated staging sessions	Required before release certification
+Notification read/delete cross-account tests	BLOCKED	No authenticated staging sessions	Required before release certification
+PostgreSQL/RLS/socket/Redis live tests	BLOCKED	No live staging credentials/services supplied to this run	Required before release certification
+Production verification	NOT RUN	No deployment or production access performed	No production certification claim

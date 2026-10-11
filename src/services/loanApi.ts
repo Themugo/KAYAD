@@ -11,7 +11,7 @@ export type LoanStatus = 'submitted' | 'under_review' | 'approved' | 'declined' 
 
 export interface LoanApplication {
   id: string;
-  applicant: string;
+  applicant?: string;
   car?: { id: string; title: string } | null;
   vehiclePrice: number;
   depositAmount?: number;
@@ -20,7 +20,6 @@ export interface LoanApplication {
   monthlyIncome?: number;
   employmentStatus?: string;
   status: LoanStatus;
-  reviewerNotes?: string;
   createdAt: string;
   updatedAt: string;
 }

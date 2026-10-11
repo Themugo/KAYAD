@@ -6,7 +6,7 @@ import { notificationDestination } from '../utils/notificationDestination';
 
 /** Full-page destination for notification links across the marketplace and dealer shells. */
 export default function NotificationsPage() {
-  const { notifications, unreadCount, loading, markAsRead, markAllRead, deleteNotif } = useNotifications();
+  const { notifications, unreadCount, loading, loadingMore, hasMore, loadMoreError, error, errorKind, fetchNotifications, loadMoreNotifications, markAsRead, markAllRead, deleteNotif } = useNotifications();
   const navigate = useNavigate();
 
   const openNotification = async (notification: (typeof notifications)[number]) => {
@@ -33,9 +33,23 @@ export default function NotificationsPage() {
           )}
         </div>
 
+        {error && (
+          <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <span>{error}</span>
+            {errorKind === 'fetch' && <button type="button" onClick={() => void fetchNotifications()} disabled={loading} className="min-h-9 rounded-lg border border-amber-300 bg-white px-3 py-2 font-semibold disabled:opacity-60">{loading ? 'Retrying…' : 'Refresh notifications'}</button>}
+          </div>
+        )}
+
         <section aria-label="Notification list" className="overflow-hidden rounded-2xl border border-[#D7E7E4] bg-white shadow-sm">
           {loading && notifications.length === 0 ? (
             <div role="status" className="p-10 text-center text-sm text-[#64748B]">Loading notifications…</div>
+          ) : error && errorKind === 'fetch' && notifications.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-amber-50 text-amber-700"><Bell size={21} /></span>
+              <h2 className="font-semibold text-[#0A3340]">Notifications are temporarily unavailable</h2>
+              <p className="mt-1 text-sm text-[#64748B]">We could not confirm whether you have new alerts. Your notifications have not been treated as empty.</p>
+              <button type="button" onClick={() => void fetchNotifications()} disabled={loading} className="mt-4 min-h-10 rounded-xl bg-[#176B87] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Try again</button>
+            </div>
           ) : notifications.length === 0 ? (
             <div className="px-6 py-16 text-center">
               <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[#EEF7F5] text-[#176B87]"><Bell size={21} /></span>
@@ -62,6 +76,14 @@ export default function NotificationsPage() {
                 </li>
               ))}
             </ul>
+          )}
+          {hasMore && (
+            <div className="border-t border-[#D7E7E4] bg-[#F8FBFA] p-4 text-center">
+              {loadMoreError && <p role="alert" className="mb-3 text-sm text-amber-900">{loadMoreError}</p>}
+              <button type="button" onClick={() => void loadMoreNotifications()} disabled={loadingMore} className="min-h-10 rounded-xl border border-[#D7E7E4] bg-white px-4 py-2 text-sm font-semibold text-[#176B87] hover:bg-[#EEF7F5] disabled:opacity-60">
+                {loadingMore ? 'Loading older notifications…' : loadMoreError ? 'Try loading again' : 'Load older notifications'}
+              </button>
+            </div>
           )}
         </section>
       </div>

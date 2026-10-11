@@ -1,0 +1,20 @@
+KAYAD Stage 20 — Staging isolation certification preparation
+Date: 2026-10-12
+Base: KAYAD Stage 19 buyer-portal convergence archive
+
+Completed in this workspace:
+- Added a dependency-free, read-only two-account staging API isolation runner.
+- Added optional direct Supabase REST RLS probes using anon key + each account's JWT (never service role).
+- Added a staging runbook covering credentials, seeded fixtures, expected denial, and delayed-request browser tests.
+- Added package script certify:buyer-portal:staging.
+- Syntax validation: PASS (node --check).
+
+Not executed here:
+- No staging API URL, user A/B access tokens, account IDs, or seeded resource IDs were available in the workspace.
+- No staging Supabase URL/anon key/RLS probe schema was supplied.
+- No browser session or staging Playwright credentials were available.
+- No network calls to staging were attempted; no credentials were guessed.
+
+Therefore this is a prepared executable certification harness, NOT a live staging pass. API ownership, deployed route parity, Supabase RLS, storage authorization, and in-flight account-switch behavior remain UNVERIFIED until run against the user's actual staging deployment.
+
+Safety: GET-only API probes; no data mutations, payment calls, migrations, production access, commits, pushes, or deployments.

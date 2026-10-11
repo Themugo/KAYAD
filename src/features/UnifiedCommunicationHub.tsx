@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { buildAuthPath } from '../utils/authIntent';
 import {
   UnifiedChatThread,
   UnifiedMessageItem,
@@ -82,58 +84,82 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   // concepts (escrow/inspection/finance) the real backend has no
   // equivalent for.
   const [threads, setThreads] = useState<UnifiedChatThread[]>([]);
+  const [threadsOwnerId, setThreadsOwnerId] = useState<string | null>(null);
   const [threadsLoading, setThreadsLoading] = useState<boolean>(true);
   const [threadsError, setThreadsError] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string>('');
+  const [threadsReloadKey, setThreadsReloadKey] = useState(0);
+  const currentUserId = user?.id ? String(user.id) : null;
+  const currentUserIdRef = useRef<string | null>(currentUserId);
+  currentUserIdRef.current = currentUserId;
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!currentUserId) {
       setThreads([]);
+      setThreadsOwnerId(null);
       setSelectedThreadId('');
+      setThreadsError(null);
       setThreadsLoading(false);
+      setInputText('');
+      setToast(null);
+      setPreviewMediaModal(null);
+      setSearchQuery('');
+      setActiveCategory('all');
+      setMobileView('list');
       return;
     }
     let cancelled = false;
     // Clear the previous identity's inbox immediately. Never leave another
     // account's conversations visible while the next account is loading.
     setThreads([]);
+    setThreadsOwnerId(null);
     setSelectedThreadId('');
     setThreadsLoading(true);
     setThreadsError(null);
     getMyChats()
       .then((chats) => {
-        if (cancelled) return;
-        const mapped = chats.map((c) => mapBackendChatToThread(c, user.id));
+        if (cancelled || currentUserIdRef.current !== currentUserId) return;
+        const mapped = chats.map((c) => mapBackendChatToThread(c, currentUserId));
         setThreads(mapped);
+        setThreadsOwnerId(currentUserId);
         setSelectedThreadId(mapped[0]?.id || '');
       })
       .catch((err) => {
-        if (cancelled) return;
-        setThreadsError(err instanceof ChatApiError ? err.message : 'Could not load conversations.');
+        if (cancelled || currentUserIdRef.current !== currentUserId) return;
+        setThreadsError(err instanceof ChatApiError && err.kind === 'unauthenticated'
+          ? 'Your session could not be verified. Sign in again to view your conversations.'
+          : err instanceof ChatApiError && err.kind === 'network'
+            ? 'KAYAD could not be reached. Check your connection and try again.'
+            : 'Conversations could not be loaded right now. Please try again.');
       })
       .finally(() => {
         if (!cancelled) setThreadsLoading(false);
       });
     return () => { cancelled = true; };
-  }, [user]);
+  }, [currentUserId, threadsReloadKey]);
 
   // Keep inbox and active conversation synchronized with the authoritative API.
   // This is deliberately polling rather than a second local event store because
   // the current custom-auth stack does not expose Supabase Auth-scoped realtime.
   useEffect(() => {
-    if (!user) return;
+    if (!currentUserId) return;
+    let cancelled = false;
     const timer = window.setInterval(async () => {
       try {
         const chats = await getMyChats();
-        const mapped = chats.map((c) => mapBackendChatToThread(c, user.id));
+        if (cancelled || currentUserIdRef.current !== currentUserId) return;
+        const mapped = chats.map((c) => mapBackendChatToThread(c, currentUserId));
+        setThreadsOwnerId(currentUserId);
+        setThreadsError(null);
         setThreads(prev => mapped.map(next => {
           const existing = prev.find(t => t.id === next.id);
           return existing && existing.id === selectedThreadId ? { ...next, messages: existing.messages } : next;
         }));
       } catch { /* keep the last authoritative snapshot on transient failures */ }
     }, 10000);
-    return () => window.clearInterval(timer);
-  }, [user, selectedThreadId]);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [currentUserId, selectedThreadId]);
 
   // Filter & Search State
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -160,16 +186,21 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   // Auto-scroll anchor
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Mask account-owned rows during the render where identity changes, before
+  // effects run. This prevents even a one-frame flash of the prior inbox.
+  const visibleThreads = currentUserId && threadsOwnerId === currentUserId ? threads : [];
+  const inboxLoading = Boolean(currentUserId && threadsOwnerId !== currentUserId && !threadsError) || threadsLoading;
+
   // Active Selected Thread
   const activeThread = useMemo(() => {
-    return threads.find((t) => t.id === selectedThreadId) || threads[0];
-  }, [threads, selectedThreadId]);
+    return visibleThreads.find((t) => t.id === selectedThreadId) || visibleThreads[0];
+  }, [visibleThreads, selectedThreadId]);
 
 
 
   // Filtered Threads List
   const filteredThreads = useMemo(() => {
-    return threads.filter((t) => {
+    return visibleThreads.filter((t) => {
       // Category / Filter Tab logic
       if (activeCategory === 'unread' && t.unreadCount === 0) return false;
       if (activeCategory === 'archived' && !t.isArchived) return false;
@@ -195,12 +226,12 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
       return true;
     });
-  }, [threads, activeCategory, searchQuery]);
+  }, [visibleThreads, activeCategory, searchQuery]);
 
   // Total Unread Counter
   const totalUnreadCount = useMemo(() => {
-    return threads.reduce((sum, t) => sum + t.unreadCount, 0);
-  }, [threads]);
+    return visibleThreads.reduce((sum, t) => sum + t.unreadCount, 0);
+  }, [visibleThreads]);
 
   // Scroll to bottom when messages update
   useEffect(() => {
@@ -215,8 +246,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   // Load the selected thread and acknowledge read state through the server.
   // Unread counts are only cleared after the persisted read receipt succeeds.
   useEffect(() => {
-    if (!user || !selectedThreadId) return;
-    const current = threads.find((thread) => thread.id === selectedThreadId);
+    if (!currentUserId || !selectedThreadId) return;
+    const current = visibleThreads.find((thread) => thread.id === selectedThreadId);
     if (!current) return;
     let cancelled = false;
 
@@ -224,7 +255,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       getChatMessages(selectedThreadId)
         .then((realMessages) => {
           if (cancelled) return;
-          const mapped = mapBackendMessagesToUnified(realMessages, selectedThreadId, user.id);
+          const mapped = mapBackendMessagesToUnified(realMessages, selectedThreadId, currentUserId);
           setThreads((prev) => prev.map((thread) => thread.id === selectedThreadId ? { ...thread, messages: mapped } : thread));
         })
         .catch(() => {
@@ -241,7 +272,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       });
 
     return () => { cancelled = true; };
-  }, [selectedThreadId, user]);
+  }, [selectedThreadId, currentUserId]);
 
 
   // Fixed: this previously never called the real backend at all -
@@ -253,13 +284,15 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const text = inputText.trim();
-    if (!text || !activeThread || !user) return;
+    if (!text || !activeThread || !currentUserId) return;
+    const sendingUserId = currentUserId;
 
     // Keep the draft until the server confirms the write. A timeout can mean
     // the server committed the message but the response was lost; clearing the
     // composer before confirmation encourages an accidental duplicate retry.
     try {
       const persistedMessage = await sendChatMessage(activeThread.id, text);
+      if (currentUserIdRef.current !== sendingUserId) return;
       setInputText(current => current === text ? '' : current);
       let realMessages;
       try {
@@ -269,7 +302,8 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         // visible if the subsequent history refresh fails; do not invite a resend.
         realMessages = [persistedMessage];
       }
-      const mapped = mapBackendMessagesToUnified(realMessages, activeThread.id, user.id);
+      if (currentUserIdRef.current !== sendingUserId) return;
+      const mapped = mapBackendMessagesToUnified(realMessages, activeThread.id, sendingUserId);
       const lastReal = realMessages[realMessages.length - 1] || persistedMessage;
       setThreads(prev => prev.map(t => {
         if (t.id === activeThread.id) {
@@ -283,7 +317,12 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         return t;
       }));
     } catch (err) {
-      showToast(err instanceof ChatApiError ? err.message : 'Failed to send message. Please try again.');
+      if (currentUserIdRef.current !== sendingUserId) return;
+      showToast(err instanceof ChatApiError && err.kind === 'unauthenticated'
+        ? 'Your session has expired. Sign in again before sending.'
+        : err instanceof ChatApiError && err.kind === 'network'
+          ? 'KAYAD could not be reached. Your draft is still here; try again when connected.'
+          : 'The message could not be confirmed. Your draft is still here; refresh before retrying to avoid a duplicate.');
     }
   };
 
@@ -324,12 +363,29 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     { id: 'unread', label: 'Unread', icon: <Bell className="w-3.5 h-3.5" /> },
   ];
 
+  if (!user || !currentUserId) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        <section className="rounded-3xl border border-[#D7E7E4] bg-white p-7 text-center shadow-sm sm:p-10" aria-labelledby="messages-heading">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-[#DDF4F0] text-[#176B87]"><MessageSquare className="h-7 w-7" aria-hidden="true" /></div>
+          <p className="text-xs font-bold tracking-wide text-[#176B87]">KAYAD MESSAGES</p>
+          <h1 id="messages-heading" className="mt-2 text-2xl font-black text-[#0A3340] sm:text-3xl">Your conversations, kept private</h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">Sign in to view and reply to conversations connected to your KAYAD account. Your private messages are not shown on this public page.</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <button type="button" onClick={() => navigate(buildAuthPath('login', { next: '/?nav=chat' }))} className="min-h-11 rounded-xl bg-[#176B87] px-5 py-3 text-sm font-bold text-white hover:bg-[#12576D] focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2">Sign in to Messages</button>
+            <button type="button" onClick={() => navigate(buildAuthPath('register', { next: '/?nav=chat', intent: 'buyer' }))} className="min-h-11 rounded-xl border border-[#D7E7E4] bg-white px-5 py-3 text-sm font-bold text-[#176B87] hover:bg-[#F3FAF9] focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2">Create an account</button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 relative pb-16">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-20 right-4 z-50 bg-[#176B87] text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#176b87] flex items-center gap-3 animate-fade-in">
-          <Sparkles className="w-5 h-5 text-[#176b87] shrink-0" />
+        <div role="status" aria-live="polite" className="fixed top-20 right-4 z-50 bg-[#176B87] text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#176b87] flex items-center gap-3 animate-fade-in">
+          <Sparkles className="w-5 h-5 text-[#79D8CF] shrink-0" />
           <span className="text-xs font-extrabold">{toast}</span>
         </div>
       )}
@@ -353,11 +409,11 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
           <div className="flex items-center gap-3 shrink-0" aria-live="polite">
             <div className="rounded-2xl bg-[#F3FAF9] border border-[#D7E7E4] px-4 py-3 min-w-[104px]">
               <div className="text-[11px] font-semibold text-slate-500">Conversations</div>
-              <div className="text-xl font-black text-[#0A3340]">{user ? threads.length : '—'}</div>
+              <div className="text-xl font-black text-[#0A3340]">{inboxLoading || threadsError ? '—' : visibleThreads.length}</div>
             </div>
             <div className="rounded-2xl bg-[#F3FAF9] border border-[#D7E7E4] px-4 py-3 min-w-[88px]">
               <div className="text-[11px] font-semibold text-slate-500">Unread</div>
-              <div className="text-xl font-black text-[#0A3340]">{user ? totalUnreadCount : '—'}</div>
+              <div className="text-xl font-black text-[#0A3340]">{inboxLoading || threadsError ? '—' : totalUnreadCount}</div>
             </div>
           </div>
         </div>
@@ -370,13 +426,15 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         <div className="flex items-center gap-1.5 min-w-max">
           {filterTabs.map((tab) => {
             let count = 0;
-            if (tab.id === 'all') count = threads.length;
-            else if (tab.id === 'unread') count = threads.filter(t => t.unreadCount > 0).length;
+            if (tab.id === 'all') count = visibleThreads.length;
+            else if (tab.id === 'unread') count = visibleThreads.filter(t => t.unreadCount > 0).length;
 
             const isActive = activeCategory === tab.id;
             return (
               <button
                 key={tab.id}
+                type="button"
+                aria-pressed={isActive}
                 onClick={() => setActiveCategory(tab.id)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isActive
@@ -389,7 +447,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
                   isActive ? 'bg-[#176b87] text-white' : 'bg-[#DDF4F0] text-[#12576D]'
                 }`}>
-                  {count}
+                  {inboxLoading || threadsError ? '—' : count}
                 </span>
               </button>
             );
@@ -426,22 +484,18 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 a real fetch failure, and genuinely zero real
                 conversations, rather than collapsing all three into
                 one generic message. */}
-            {threadsLoading ? (
+            {inboxLoading ? (
               <div className="p-8 text-center text-[#94A3B8] text-xs space-y-2">
                 <MessageSquare className="w-8 h-8 mx-auto text-[#BDE5DE] animate-pulse" />
                 <p>Loading your conversations…</p>
               </div>
             ) : threadsError ? (
-              <div className="p-8 text-center text-rose-500 text-xs space-y-2">
-                <MessageSquare className="w-8 h-8 mx-auto text-rose-300" />
+              <div className="p-8 text-center text-slate-600 text-xs space-y-3" role="alert">
+                <MessageSquare className="w-8 h-8 mx-auto text-[#94A3B8]" aria-hidden="true" />
                 <p>{threadsError}</p>
+                <button type="button" onClick={() => setThreadsReloadKey((key) => key + 1)} className="min-h-9 rounded-lg border border-[#D7E7E4] px-3 py-2 font-bold text-[#176B87] hover:bg-[#F3FAF9]">Try again</button>
               </div>
-            ) : !user ? (
-              <div className="p-8 text-center text-[#94A3B8] text-xs space-y-2">
-                <MessageSquare className="w-8 h-8 mx-auto text-[#BDE5DE]" />
-                <p>Sign in to see your conversations.</p>
-              </div>
-            ) : filteredThreads.length === 0 && threads.length === 0 ? (
+            ) : filteredThreads.length === 0 && visibleThreads.length === 0 ? (
               <div className="p-8 text-center text-[#94A3B8] text-xs space-y-2">
                 <MessageSquare className="w-8 h-8 mx-auto text-[#BDE5DE]" />
                 <p>No conversations yet.</p>

@@ -3,7 +3,7 @@ import {
   ArrowRight, BriefcaseBusiness, ClipboardCheck, FileCheck, Loader2, MapPin, RefreshCw, ShieldCheck, UserCheck, Wrench,
 } from 'lucide-react';
 import type { UserProfile, Vehicle } from '../types';
-import { getMyInspections, InspectionApiError } from '../services/inspectionApi';
+import { getMyInspections } from '../services/inspectionApi';
 import { inspectionApi } from './InspectionMarketplace/services/api';
 import { useSocket } from '../context/SocketContext';
 import { Button } from '../components/ui';
@@ -17,6 +17,7 @@ import { ProviderApplicationModal } from './InspectionsView/ProviderApplicationM
 import { ProviderServicesModal } from './InspectionsView/ProviderServicesModal';
 
 export type InspectionsTab = 'service' | 'mine' | 'reports';
+export type InspectionsViewMode = 'public' | 'account';
 export type InspectionLaunchAction = 'request' | 'apply-provider' | 'manage-business' | null;
 
 interface InspectionsViewProps {
@@ -34,6 +35,10 @@ interface InspectionsViewProps {
   onViewVehicleDetails?: (vehicleId: string) => void;
   /** Opens the provider finder, optionally on a canonical service category. */
   onOpenInspectionMarketplace?: (category?: string) => void;
+  /** Public pages send private inspection history to the authenticated account workspace. */
+  onOpenMyInspections?: (tab: 'mine' | 'reports') => void;
+  /** Render public service discovery or the private account-only inspection workspace. */
+  viewMode?: InspectionsViewMode;
 }
 
 const TONE: Record<string, string> = {
@@ -43,32 +48,37 @@ const TONE: Record<string, string> = {
   danger: 'bg-rose-50 text-rose-700 border-rose-200',
 };
 
-const TABS: Array<{ id: InspectionsTab; label: string }> = [
-  { id: 'service', label: 'Services' },
+const PUBLIC_TABS: Array<{ id: InspectionsTab; label: string }> = [{ id: 'service', label: 'Services' }];
+const ACCOUNT_TABS: Array<{ id: InspectionsTab; label: string }> = [
   { id: 'mine', label: 'My inspections' },
   { id: 'reports', label: 'Reports' },
 ];
 
 interface Loaded {
+  ownerKey: string | null;
   records: InspectionRecord[];
   kayadError: string | null;
   providerError: string | null;
 }
 
 /** Loads both canonical sources independently: one failing must not hide the other. */
-function useInspectionRecords(signedIn: boolean) {
-  const [state, setState] = useState<Loaded>({ records: [], kayadError: null, providerError: null });
+function useInspectionRecords(ownerKey: string | null) {
+  const signedIn = Boolean(ownerKey);
+  const [state, setState] = useState<Loaded>({ ownerKey: null, records: [], kayadError: null, providerError: null });
   const [loading, setLoading] = useState(signedIn);
   const alive = useRef(true);
   const seq = useRef(0);
 
   const load = useCallback(async (quiet = false) => {
-    if (!signedIn) {
-      setState({ records: [], kayadError: null, providerError: null });
+    if (!ownerKey) {
+      seq.current += 1;
+      setState({ ownerKey: null, records: [], kayadError: null, providerError: null });
       setLoading(false);
       return;
     }
     const mine = ++seq.current;
+    // Immediately bind the visible state to this account; records from a prior account must never linger.
+    setState((previous) => previous.ownerKey === ownerKey ? previous : { ownerKey, records: [], kayadError: null, providerError: null });
     if (!quiet) setLoading(true);
     const [kayad, provider] = await Promise.allSettled([getMyInspections(), inspectionApi.getCustomerBookings()]);
     if (!alive.current || mine !== seq.current) return;
@@ -76,12 +86,12 @@ function useInspectionRecords(signedIn: boolean) {
     let kayadError: string | null = null;
     let providerError: string | null = null;
     if (kayad.status === 'fulfilled') records.push(...(kayad.value.orders || []).map(kayadOrderToRecord));
-    else kayadError = kayad.reason instanceof InspectionApiError && kayad.reason.message ? kayad.reason.message : 'Your KAYAD inspection requests could not be loaded.';
+    else kayadError = 'Your KAYAD inspection requests could not be loaded.';
     if (provider.status === 'fulfilled') records.push(...(provider.value?.bookings || []).map(providerBookingToRecord));
-    else providerError = provider.reason instanceof Error && provider.reason.message ? provider.reason.message : 'Your provider bookings could not be loaded.';
-    setState({ records: sortRecords(records), kayadError, providerError });
+    else providerError = 'Your provider bookings could not be loaded.';
+    setState({ ownerKey, records: sortRecords(records), kayadError, providerError });
     setLoading(false);
-  }, [signedIn]);
+  }, [ownerKey]);
 
   useEffect(() => {
     alive.current = true;
@@ -89,7 +99,8 @@ function useInspectionRecords(signedIn: boolean) {
     return () => { alive.current = false; };
   }, [load]);
 
-  return { ...state, loading, reload: () => load(false), refresh: () => load(true) };
+  const visible = state.ownerKey === ownerKey ? state : { ownerKey, records: [] as InspectionRecord[], kayadError: null, providerError: null };
+  return { ...visible, loading: ownerKey && state.ownerKey !== ownerKey ? true : loading, reload: () => load(false), refresh: () => load(true) };
 }
 
 const StageTrack: React.FC<{ record: InspectionRecord }> = ({ record }) => {
@@ -119,17 +130,21 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   launchAction,
   onViewVehicleDetails,
   onOpenInspectionMarketplace,
+  onOpenMyInspections,
+  viewMode = 'public',
 }) => {
   const socket = useSocket();
-  const signedIn = Boolean(user);
-  const [tab, setTab] = useState<InspectionsTab>(initialTab || 'service');
+  const signedIn = Boolean(user?.id);
+  const ownerKey = user?.id ? String(user.id) : null;
+  const tabs = viewMode === 'account' ? ACCOUNT_TABS : PUBLIC_TABS;
+  const [tab, setTab] = useState<InspectionsTab>(viewMode === 'account' ? (initialTab === 'reports' ? 'reports' : 'mine') : 'service');
   const [requestOpen, setRequestOpen] = useState(launchAction === 'request');
   const [providerOpen, setProviderOpen] = useState(launchAction === 'apply-provider');
   const [manageOpen, setManageOpen] = useState(launchAction === 'manage-business' && signedIn);
   const [reportRecord, setReportRecord] = useState<InspectionRecord | null>(null);
   const [payRecord, setPayRecord] = useState<InspectionRecord | null>(null);
   const [cancelRecord, setCancelRecord] = useState<InspectionRecord | null>(null);
-  const { records, kayadError, providerError, loading, reload, refresh } = useInspectionRecords(signedIn);
+  const { records, kayadError, providerError, loading, reload, refresh } = useInspectionRecords(ownerKey);
 
   const reportRecords = useMemo(() => records.filter((r) => r.hasReport), [records]);
   const shown = tab === 'reports' ? reportRecords : records;
@@ -159,15 +174,19 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
     const move = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
     if (e.key === 'Home' || e.key === 'End' || move) {
       e.preventDefault();
-      const next = e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : (index + move + TABS.length) % TABS.length;
-      setTab(TABS[next].id);
-      document.getElementById(`insp-tab-${TABS[next].id}`)?.focus();
+      const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (index + move + tabs.length) % tabs.length;
+      setTab(tabs[next].id);
+      document.getElementById(`insp-tab-${tabs[next].id}`)?.focus();
     }
+  };
+
+  const openMyInspections = (nextTab: 'mine' | 'reports') => {
+    if (onOpenMyInspections) onOpenMyInspections(nextTab);
   };
 
   return (
     <div className="space-y-8 pb-16">
-      <section className="rounded-3xl bg-[#12576d] text-white p-6 sm:p-10" aria-labelledby="insp-title">
+      {viewMode === 'public' ? <section className="rounded-3xl bg-[#12576d] text-white p-6 sm:p-10" aria-labelledby="insp-title">
         <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">Automotive services</p>
         <h1 id="insp-title" className="mt-2 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
         <p className="mt-3 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYAD is the platform that connects you with independent, verified inspection businesses, garages and specialists. They carry out the work, not KAYAD, and you see who they are before you act.</p>
@@ -175,10 +194,17 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           <Button variant="accent" size="lg" className="font-bold" onClick={startRequest}>Inspect a car before you buy</Button>
           <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
         </div>
-      </section>
+      </section> : (
+        <section className="rounded-3xl bg-[#12576d] text-white p-6 sm:p-8" aria-labelledby="insp-account-title">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">My account</p>
+          <h1 id="insp-account-title" className="mt-2 text-2xl sm:text-3xl font-black font-display">My inspections and reports</h1>
+          <p className="mt-2 text-sm text-[#EEF7F5] max-w-2xl">Private requests, bookings, payment status and reports linked to your account.</p>
+          <Button variant="accent" className="mt-4 min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.()}>Browse automotive services</Button>
+        </section>
+      )}
 
-      <div role="tablist" aria-label="Inspection sections" className="flex gap-1 border-b border-[#D7E7E4] overflow-x-auto">
-        {TABS.map((t, i) => (
+      {viewMode === 'account' && signedIn && <div role="tablist" aria-label="Your inspection records" className="flex gap-1 border-b border-[#D7E7E4] overflow-x-auto">
+        {tabs.map((t, i) => (
           <button
             key={t.id}
             id={`insp-tab-${t.id}`}
@@ -194,10 +220,10 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             {t.label}
           </button>
         ))}
-      </div>
+      </div>}
 
-      <div id="insp-panel" role="tabpanel" aria-labelledby={`insp-tab-${tab}`} tabIndex={-1}>
-        {tab === 'service' ? (
+      <div id="insp-panel" role="tabpanel" aria-labelledby={viewMode === 'public' ? 'insp-title' : `insp-tab-${tab}`} tabIndex={-1}>
+        {viewMode === 'public' ? (
           <div className="space-y-8">
             <div className="grid md:grid-cols-2 gap-5">
               <article className="rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-inspect">
@@ -260,16 +286,19 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="secondary" size="sm" className="min-h-[44px]" onClick={() => setProviderOpen(true)}>Apply as a provider</Button>
-                {signedIn && <Button variant="outline" size="sm" className="min-h-[44px]" onClick={() => setManageOpen(true)}>My business and affiliations</Button>}
               </div>
             </section>
+            {signedIn && <section className="rounded-2xl border border-[#D7E7E4] bg-white p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" aria-label="Private inspection records">
+              <div><h2 className="text-sm font-black text-[#12576d]">Already requested or booked an inspection?</h2><p className="text-xs text-[#64748B] mt-1">Your references, booking status and private reports are available in your account workspace.</p></div>
+              <Button variant="primary" className="min-h-[44px]" onClick={() => openMyInspections('mine')}>View my inspections and reports</Button>
+            </section>}
           </div>
         ) : !signedIn ? (
           <div className="rounded-2xl border border-[#D7E7E4] bg-white p-8 text-center space-y-3">
             <p className="text-sm text-[#12576D]">Sign in to see your inspection requests, bookings and reports.</p>
             <div className="flex flex-wrap justify-center gap-2">
               <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in</Button>
-              {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('buyer', '/?nav=inspections')}>Create an account</Button>}
+              {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('buyer', '/?nav=buyer-platform')}>Create an account</Button>}
             </div>
           </div>
         ) : (
@@ -289,7 +318,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 <div className="rounded-2xl border border-[#D7E7E4] bg-white p-10 text-center space-y-3">
                   <p className="text-base font-bold text-[#0A3340]">{tab === 'reports' ? 'No reports yet' : 'No inspections yet'}</p>
                   <p className="text-sm text-[#64748B]">{tab === 'reports' ? 'A report appears here once an inspection you requested or booked is complete.' : 'Requests and bookings you make appear here with their progress.'}</p>
-                  <Button variant="primary" onClick={() => setTab('service')}>Get an inspection</Button>
+                  <Button variant="primary" onClick={() => viewMode === 'account' ? onOpenInspectionMarketplace?.() : setTab('service')}>Browse automotive services</Button>
                 </div>
               )
             ) : (
@@ -334,15 +363,15 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           vehicles={vehicles}
           initialVehicle={initialSelectedVehicle}
           onSubmitted={() => { void refresh(); }}
-          onViewMyInspections={() => setTab('mine')}
+          onViewMyInspections={() => { setRequestOpen(false); openMyInspections('mine'); }}
           onSessionExpired={() => { setRequestOpen(false); onOpenAuth?.(); }}
         />
       )}
       <InspectionReportModal record={reportRecord} onClose={() => setReportRecord(null)} />
       <PayBookingModal record={payRecord} onClose={() => setPayRecord(null)} onPaid={() => { void refresh(); }} />
       <CancelBookingModal record={cancelRecord} onClose={() => setCancelRecord(null)} onCancelled={() => { void refresh(); }} />
-      {signedIn && <ProviderServicesModal isOpen={manageOpen} onClose={() => setManageOpen(false)} />}
-      <ProviderApplicationModal isOpen={providerOpen} signedIn={signedIn} onClose={() => setProviderOpen(false)} onOpenAuth={onOpenAuth} onOpenRegister={onOpenRegister} />
+      {viewMode === 'public' && signedIn && <ProviderServicesModal isOpen={manageOpen} onClose={() => setManageOpen(false)} />}
+      {viewMode === 'public' && <ProviderApplicationModal isOpen={providerOpen} signedIn={signedIn} onClose={() => setProviderOpen(false)} onOpenAuth={onOpenAuth} onOpenRegister={onOpenRegister} />}
     </div>
   );
 };

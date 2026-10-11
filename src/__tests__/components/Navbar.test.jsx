@@ -50,6 +50,11 @@ describe('Navbar', () => {
     expect(screen.getAllByText('KAYAD').length).toBeGreaterThan(0);
   });
 
+  it('uses the supplied authoritative unread count for the Messages badge', () => {
+    render(<MemoryRouter><Navbar {...guestProps} user={{ id: 'u1', name: 'Test User', role: 'buyer' }} unreadCount={4} /></MemoryRouter>);
+    expect(screen.getByRole('button', { name: 'Messages, 4 unread' })).toBeInTheDocument();
+  });
+
   // Approved product contract (Stage 4 -> present): the signed-out header exposes ONE combined
   // "Sign In / Sign Up" entry that routes to the standalone /login surface, and /login itself carries
   // the "Create your KAYAD account" link to /register (asserted in pages/LoginPage.test.jsx and

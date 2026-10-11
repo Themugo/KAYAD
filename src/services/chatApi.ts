@@ -82,9 +82,18 @@ async function chatFetch<T>(path: string, options: RequestInit = {}): Promise<T>
     return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
-    const kind: ChatApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 404 ? 'not_found' : 'server';
+    const kind: ChatApiErrorKind = !error.status ? 'network' : error.status === 401 ? 'unauthenticated' : error.status === 404 ? 'not_found' : 'server';
     throw new ChatApiError(error.message, kind, error.status);
   }
+}
+
+/** GET /api/chat/unread - server-authoritative unread message total for this account. */
+export async function getUnreadChatCount(): Promise<number> {
+  const body = await chatFetch<{ unread?: unknown }>('/api/chat/unread');
+  if (typeof body.unread !== 'number' || !Number.isFinite(body.unread) || body.unread < 0) {
+    throw new ChatApiError('Unread message count could not be confirmed.', 'server', 502);
+  }
+  return Math.floor(body.unread);
 }
 
 /** GET /api/chat - the user's own real conversations. */
