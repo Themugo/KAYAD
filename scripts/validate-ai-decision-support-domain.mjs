@@ -7,7 +7,7 @@ const checks = [
   ['decision routes exist', 'backend/routes/aiDecisionRoutes.js'],
   ['server mounts decision routes', 'backend/server.js'],
   ['governance migration exists', 'supabase/migrations/20260907235000_ai_decision_governance.sql'],
-  ['domain documentation exists', 'AI_DECISION_SUPPORT_DOMAIN_END_TO_END.md'],
+  ['domain documentation exists', 'docs/domains/AI_DECISION_SUPPORT_DOMAIN_END_TO_END.md'],
 ];
 let passed = 0;
 for (const [name, rel] of checks) {

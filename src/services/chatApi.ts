@@ -46,12 +46,13 @@ interface BackendChatUser {
   id: string;
   name: string;
   avatar?: string;
+  publicRole?: string;
 }
 
 interface BackendChatCar {
   id: string;
   title: string;
-  images?: string[];
+  images?: Array<string | { url?: string; thumb?: string }>;
   price?: number;
 }
 
@@ -63,6 +64,7 @@ interface BackendChat {
   lastMessageAt?: string;
   createdAt: string;
   updatedAt: string;
+  unreadCount?: number;
 }
 
 interface BackendMessage {
@@ -140,31 +142,33 @@ export async function markChatSeen(chatId: string): Promise<void> {
  * exactly which fields are real vs. generic-but-true placeholders. */
 export function mapBackendChatToThread(chat: BackendChat, currentUserId: string): UnifiedChatThread {
   const other = chat.participants.find((p) => p.id !== currentUserId) || chat.participants[0];
+  const firstImage = chat.car?.images?.[0];
+  const vehicleImage = typeof firstImage === 'string' ? firstImage : firstImage?.thumb || firstImage?.url;
   return {
     id: chat.id,
     category: 'inquiry',
     referenceNumber: chat.id,
-    transactionType: 'Vehicle Inquiry',
+    transactionType: chat.car?.title ? 'Vehicle conversation' : 'Marketplace conversation',
     currentStatus: 'Active Conversation',
     currentStage: '',
 
     participantName: other?.name || 'KAYAD User',
-    participantRole: 'KAYAD User',
+    participantRole: other?.publicRole || 'Marketplace member',
     participantAvatar: other?.avatar || '',
     participantVerified: false,
 
-    unreadCount: 0,
+    unreadCount: Number.isFinite(chat.unreadCount) ? Math.max(0, Number(chat.unreadCount)) : 0,
     lastMessage: chat.lastMessage || '',
     lastTimestamp: chat.lastMessageAt || chat.updatedAt,
 
     vehicleId: chat.car?.id,
     vehicleTitle: chat.car?.title,
-    vehicleImage: chat.car?.images?.[0],
+    vehicleImage,
     vehiclePrice: chat.car?.price,
 
     counterpartyInfo: {
       name: other?.name || 'KAYAD User',
-      role: 'KAYAD User',
+      role: other?.publicRole || 'Marketplace member',
       avatar: other?.avatar,
       location: '',
     },

@@ -1,0 +1,11 @@
+KAYAD Full Audit Convergence — SHA-256 Manifest
+
+Original foundation archive:
+  File: kayad-support-faq-update(3).zip
+  SHA-256: f9963272ce24d5a6be56873cfab27fc1650fd299eb347fa0f8d16aeaa1d4a3e3
+
+Final project ZIP checksum:
+  Supplied as companion file KAYAD-FULL-AUDIT-CONVERGENCE-20261011.zip.sha256 after packaging.
+
+Source-tree integrity note:
+  The final ZIP contains this manifest and the complete audit/verification reports. Because an archive cannot contain its own final SHA-256 without changing that hash, the final ZIP digest is provided as a companion checksum file outside the archive.

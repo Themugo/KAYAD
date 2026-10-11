@@ -16,8 +16,8 @@ check('Alert object/positional compatibility', /structured = titleOrAlert/.test(
 check('Queue retries and DLQ', /attempts: 3/.test(read('backend/config/queue.js')) && /getDeadLetterQueue/.test(read('backend/config/queue.js')));
 check('Worker lifecycle', exists('backend/infrastructure/queues/workerManager.js') && /startAllWorkers/.test(read('backend/infrastructure/queues/workerManager.js')) && /stopAllWorkers/.test(read('backend/infrastructure/queues/workerManager.js')));
 check('Backup helpers', exists('scripts/backup-database.sh') && exists('scripts/backup-database.bat') && exists('scripts/verify-backup-artifact.mjs'));
-check('Recovery runbooks', exists('runbooks/database-failure.md') && exists('runbooks/deployment-rollback.md') && exists('runbooks/third-party-outage.md') && exists('DISASTER_RECOVERY.md'));
-check('Current email provider in DR docs', !/SendGrid|sendgrid/i.test(read('DISASTER_RECOVERY.md')+read('runbooks/third-party-outage.md')));
+check('Recovery runbooks', exists('runbooks/database-failure.md') && exists('runbooks/deployment-rollback.md') && exists('runbooks/third-party-outage.md') && exists('docs/production/DISASTER_RECOVERY.md'));
+check('Current email provider in DR docs', !/SendGrid|sendgrid/i.test(read('docs/production/DISASTER_RECOVERY.md')+read('runbooks/third-party-outage.md')));
 check('Production rollback endpoints are configurable', /BACKEND_URL/.test(read('runbooks/deployment-rollback.md')) && /FRONTEND_URL/.test(read('runbooks/deployment-rollback.md')));
 check('Recovery tooling retained', exists('scripts/validate-recovery-repair.mjs') && exists('APPLY_RECOVERY_TO_REPO.cmd'));
 check('Production security gate retained', exists('scripts/validate-phase7-security-release.mjs'));

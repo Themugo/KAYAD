@@ -5,6 +5,7 @@ import { getSupabase } from "../utils/supabase.js";
 import { getIO } from "../utils/io.js";
 import { findOrCreateLeadFromChat, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logError } from '../infrastructure/logging/index.js';
+import { STAFF_ROLES } from "../config/roles.js";
 import {
   AttachmentError, normalizeIncomingAttachments, presentAttachments, presentMessage,
   findChatAttachment, bareFolder, parseMetadata, CHAT_UPLOAD_FOLDER, CHAT_ATTACHMENT_MIME, ATTACHMENT_URL_TTL_SECONDS,
@@ -26,6 +27,23 @@ import { buildNewMessageEvent, markChatOutboxResult } from "../services/chatOutb
 // H-2 FIX (pre-existing comment, kept): select specific fields
 // instead of "*" to avoid leaking internal chat data.
 const CHAT_FIELDS = "id, participants, car, lastMessage, lastMessageAt, isBlocked, createdAt, updatedAt";
+const CHAT_INBOX_FIELDS = `${CHAT_FIELDS}, messages`;
+
+const publicChatRole = (role) => {
+  if (role === "dealer") return "Dealer";
+  if (role === "individual_seller") return "Private seller";
+  if (["technical_support"].includes(role)) return "KAYAD Support";
+  if (role === "escrow_officer") return "KAYAD Escrow Team";
+  if (["admin", "superadmin", "hr", "accounts", "marketing", "ad_manager", "moderator", "ghost_checker"].includes(role)) return "KAYAD Team";
+  return "Marketplace member";
+};
+
+const toPublicChatParticipant = (user) => ({
+  id: user.id,
+  name: user.name,
+  avatar: user.avatar,
+  publicRole: publicChatRole(user.role),
+});
 
 // Translate known chat RPC guard failures into stable HTTP responses. The SQL
 // functions remain the concurrency-safe authority; this mapping prevents a
@@ -68,14 +86,52 @@ export const startChat = async (req, res) => {
       return res.status(400).json({ success: false, message: "recipientId required" });
     }
 
-    const participants = [req.user.id, participantId].sort();
     if (String(participantId) === String(req.user.id)) return res.status(400).json({ success: false, message: "Cannot start a chat with yourself" });
 
     const sb = getSupabase();
+    const { data: recipient, error: recipientError } = await sb
+      .from("users")
+      .select("id, role")
+      .eq("id", participantId)
+      .maybeSingle();
+    if (recipientError) throw recipientError;
+    if (!recipient) return res.status(404).json({ success: false, message: "Recipient not found" });
+    // Staff and operational providers must be reached through their assigned
+    // case/transaction workflows, not an arbitrary public direct message.
+    // Existing authorized conversations remain readable through normal chat
+    // membership; this gate prevents creating new bypass conversations.
+    if (STAFF_ROLES.includes(String(recipient.role))) {
+      return res.status(403).json({
+        success: false,
+        code: "CHAT_RECIPIENT_REQUIRES_CASE_ROUTE",
+        message: "Use the relevant KAYAD support or transaction workflow to contact this team",
+      });
+    }
+
+    // A vehicle-linked conversation is only valid when the selected recipient
+    // owns/manages that listing. Do not trust a client-provided recipientId to
+    // route an inquiry to an unrelated user or dealer.
+    if (carId) {
+      const { data: car, error: carError } = await sb
+        .from("cars")
+        .select("id, dealer_id, status, approved, deleted_at")
+        .eq("id", carId)
+        .maybeSingle();
+      if (carError) throw carError;
+      if (!car || car.deleted_at || !car.dealer_id || String(car.dealer_id) !== String(participantId)) {
+        return res.status(403).json({ success: false, code: "CHAT_LISTING_RECIPIENT_MISMATCH", message: "This recipient is not authorized for the selected listing" });
+      }
+      if (car.status === "hidden" || car.status === "draft" || car.approved === false) {
+        return res.status(404).json({ success: false, message: "Listing is not available for a new inquiry" });
+      }
+    }
+
+    const participants = [req.user.id, participantId].sort();
     let query = sb.from("chats").select(CHAT_FIELDS).contains("participants", participants);
     if (carId) query = query.eq("car", carId);
 
-    const { data: existing } = await query;
+    const { data: existing, error: existingError } = await query;
+    if (existingError) throw existingError;
     if (existing?.some((c) => c.isBlocked)) return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
     let chat = existing?.find((c) => c.participants?.length === participants.length) || null;
 
@@ -108,8 +164,9 @@ export const startChat = async (req, res) => {
     }
 
     if (chat?.participants?.length) {
-      const { data: users } = await sb.from("users").select("id, name, avatar").in("id", chat.participants);
-      chat.participants = users || [];
+      const { data: users, error: usersError } = await sb.from("users").select("id, name, avatar, role").in("id", chat.participants);
+      if (usersError) throw usersError;
+      chat.participants = (users || []).map(toPublicChatParticipant);
     }
 
     res.status(201).json({ success: true, chat });
@@ -130,20 +187,33 @@ export const getUserChats = async (req, res) => {
 
     const sb = getSupabase();
 
-    const { data: chats, count: total } = await sb
+    const { data: chats, count: total, error: chatsError } = await sb
       .from("chats")
-      .select(CHAT_FIELDS, { count: "exact" })
+      .select(CHAT_INBOX_FIELDS, { count: "exact" })
       .contains("participants", [req.user.id])
       .order("updatedAt", { ascending: false })
       .range(skip, skip + limit - 1);
+    if (chatsError) throw chatsError;
+    if (!Array.isArray(chats)) throw new Error("Chat inbox query returned no chat data");
 
-    for (const chat of chats || []) {
+    for (const chat of chats) {
+      const messages = Array.isArray(chat.messages) ? chat.messages : [];
+      chat.unreadCount = messages.reduce((count, message) => {
+        const senderId = typeof message?.sender === "object" ? message.sender?.id : message?.sender;
+        const seenBy = Array.isArray(message?.seenBy) ? message.seenBy.map(String) : [];
+        return count + (String(senderId) !== String(req.user.id) && message?.seen !== true && !seenBy.includes(String(req.user.id)) ? 1 : 0);
+      }, 0);
+      // Keep the inbox response to summaries; raw message history is only
+      // returned by the separately authorized history endpoint.
+      delete chat.messages;
       if (chat.participants?.length) {
-        const { data: users } = await sb.from("users").select("id, name, avatar").in("id", chat.participants);
-        chat.participants = users || [];
+        const { data: users, error: usersError } = await sb.from("users").select("id, name, avatar, role").in("id", chat.participants);
+        if (usersError) throw usersError;
+        chat.participants = (users || []).map(toPublicChatParticipant);
       }
       if (chat.car) {
-        const { data: car } = await sb.from("cars").select("id, title, images, price").eq("id", chat.car).single();
+        const { data: car, error: carError } = await sb.from("cars").select("id, title, images, price").eq("id", chat.car).maybeSingle();
+        if (carError) throw carError;
         chat.car = car || null;
       }
     }
@@ -174,7 +244,9 @@ export const getUnreadCount = async (req, res) => {
     let unread = 0;
     for (const chat of chats || []) {
       for (const msg of chat.messages || []) {
-        if (msg.sender !== req.user.id && (!msg.seenBy || !msg.seenBy.includes(req.user.id))) {
+        const senderId = typeof msg?.sender === "object" ? msg.sender?.id : msg?.sender;
+        const seenBy = Array.isArray(msg?.seenBy) ? msg.seenBy.map(String) : [];
+        if (String(senderId) !== String(req.user.id) && msg?.seen !== true && !seenBy.includes(String(req.user.id))) {
           unread++;
         }
       }
@@ -210,7 +282,7 @@ export const sendMessage = async (req, res) => {
       return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
     }
 
-    if (!chat.participants.some((p) => p.toString() === req.user.id)) {
+    if (!chat.participants.some((p) => String(p) === String(req.user.id))) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
@@ -346,7 +418,7 @@ export const getMessages = async (req, res) => {
 
     if (chat.isBlocked) return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
 
-    if (!chat.participants.some((p) => p.toString() === req.user.id)) {
+    if (!chat.participants.some((p) => String(p) === String(req.user.id))) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
@@ -379,15 +451,15 @@ export const getAttachment = async (req, res) => {
     if (!UUID_RE.test(String(uploadId || ""))) return res.status(404).json({ success: false, message: "Attachment not found" });
     // Fresh read on every request: membership loss, blocking or detaching the file ends access immediately.
     const chat = await findById("chats", chatId);
-    const role = req.user?.role;
-    const isStaff = role === "admin" || role === "superadmin";
     const isParticipant = Array.isArray(chat?.participants) && chat.participants.some((p) => String(p) === String(req.user.id));
-    // Same 404 for "no such chat", "not a participant" and "not in this chat": no existence oracle.
+    // Private chat files are participant-scoped. Administrative status alone
+    // is not a reason to bypass the conversation boundary; support staff must
+    // use the separately permissioned support-case workflow.
     const att = chat ? findChatAttachment(chat, uploadId) : undefined;
-    if (!chat || !(isParticipant || isStaff) || !att) {
+    if (!chat || !isParticipant || !att) {
       return res.status(404).json({ success: false, message: "Attachment not found" });
     }
-    if (chat.isBlocked && !isStaff) return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
+    if (chat.isBlocked) return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
     // The local upload record is a cache of the bytes; it can be gone (ephemeral disk). The message holds the coordinates.
     const record = getUploadRecord(uploadId);
     const mime = String(att.mimeType || record?.mimeType || "").toLowerCase();

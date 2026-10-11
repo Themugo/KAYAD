@@ -106,6 +106,7 @@
     "validate:payment-escrow-domain": "node scripts/validate-payment-escrow-domain.mjs",
     "validate:transactions-money-initiative": "node scripts/validate-transactions-money-initiative.mjs",
     "validate:financial-ledger-reconciliation-domain": "node scripts/validate-financial-ledger-reconciliation-domain.mjs",
+    "validate:financial-ledger-sign-convergence": "node scripts/validate-financial-ledger-sign-convergence.mjs",
     "validate:high-risk-boundaries": "node scripts/validate-high-risk-boundaries.mjs",
     "validate:runtime-convergence": "node scripts/validate-runtime-convergence.mjs",
     "validate:escrow-live-operations-scenarios": "node scripts/validate-escrow-live-operations-scenarios.mjs",
