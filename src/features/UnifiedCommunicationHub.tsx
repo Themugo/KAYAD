@@ -3,7 +3,6 @@ import {
   UnifiedChatThread,
   UnifiedMessageItem,
   UnifiedCommCategory,
-  MessageAttachment,
   Vehicle,
   SharedTransactionFile,
   UserProfile
@@ -90,10 +89,15 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   useEffect(() => {
     if (!user) {
       setThreads([]);
+      setSelectedThreadId('');
       setThreadsLoading(false);
       return;
     }
     let cancelled = false;
+    // Clear the previous identity's inbox immediately. Never leave another
+    // account's conversations visible while the next account is loading.
+    setThreads([]);
+    setSelectedThreadId('');
     setThreadsLoading(true);
     setThreadsError(null);
     getMyChats()
@@ -101,7 +105,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         if (cancelled) return;
         const mapped = chats.map((c) => mapBackendChatToThread(c, user.id));
         setThreads(mapped);
-        setSelectedThreadId((prev) => prev || mapped[0]?.id || '');
+        setSelectedThreadId(mapped[0]?.id || '');
       })
       .catch((err) => {
         if (cancelled) return;
@@ -140,14 +144,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
   // Input & Attachment Drawer States
   const [inputText, setInputText] = useState<string>('');
-  const [showAttachMenu, setShowAttachMenu] = useState<boolean>(false);
   const [previewMediaModal, setPreviewMediaModal] = useState<{ title: string; type: string; url?: string } | null>(null);
-  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
-  const [newFileName, setNewFileName] = useState<string>('');
-  const [newFileType, setNewFileType] = useState<'pdf' | 'logbook' | 'invoice' | 'receipt' | 'image'>('pdf');
-
-  // PII Unmask Audit Log state
-  const [unmaskedPii, setUnmaskedPii] = useState<Record<string, boolean>>({});
 
   // Toast Notification
   const [toast, setToast] = useState<string | null>(null);
@@ -168,18 +165,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     return threads.find((t) => t.id === selectedThreadId) || threads[0];
   }, [threads, selectedThreadId]);
 
-  // Fixed: this was a separate, still-hardcoded array of fake
-  // "actionable alerts" (specific fake inspection scores, finance
-  // approvals, auction status, escrow amounts, referencing mock
-  // thread ids that no longer exist now that threads loads real
-  // data) - exactly the fake content shown in the navbar's
-  // "Actionable Alerts" panel. No real alerts system exists on the
-  // backend for any of these concepts, so this is honestly empty
-  // rather than continuing to show fake alerts unrelated to a real
-  // user's real conversations.
-  const actionableNotifications = useMemo(() => {
-    return [] as { id: string; title: string; text: string; time: string; threadId: string; type: string }[];
-  }, []);
+
 
   // Filtered Threads List
   const filteredThreads = useMemo(() => {
@@ -221,57 +207,42 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeThread?.messages.length, selectedThreadId]);
 
-  // Fixed: the initially auto-selected thread (set once real
-  // conversations load, above) never had its own real messages
-  // fetched - only a thread opened by an explicit click did (via
-  // handleSelectThread). Loads real message history for whichever
-  // thread is current whenever it changes and is still empty.
-  useEffect(() => {
-    if (!user || !selectedThreadId) return;
-    const current = threads.find((t) => t.id === selectedThreadId);
-    if (!current || current.messages.length > 0) return;
-    getChatMessages(selectedThreadId)
-      .then((realMessages) => {
-        const mapped = mapBackendMessagesToUnified(realMessages, selectedThreadId, user.id);
-        setThreads(prev => prev.map(t => t.id === selectedThreadId ? { ...t, messages: mapped } : t));
-      })
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedThreadId, user]);
-
-  // Fixed: this only reset the local unreadCount - it never actually
-  // loaded a thread's real messages (which now start empty, since
-  // mapBackendChatToThread honestly has no message history to
-  // include upfront). Now fetches the real message history and marks
-  // it seen on the real backend when a thread is opened.
   const handleSelectThread = (threadId: string) => {
     setSelectedThreadId(threadId);
     setMobileView('chat');
-    setThreads(prev => prev.map(t => t.id === threadId ? { ...t, unreadCount: 0 } : t));
+  };
 
-    if (!user) return;
-    getChatMessages(threadId)
-      .then((realMessages) => {
-        const mapped = mapBackendMessagesToUnified(realMessages, threadId, user.id);
-        setThreads(prev => prev.map(t => t.id === threadId ? { ...t, messages: mapped } : t));
+  // Load the selected thread and acknowledge read state through the server.
+  // Unread counts are only cleared after the persisted read receipt succeeds.
+  useEffect(() => {
+    if (!user || !selectedThreadId) return;
+    const current = threads.find((thread) => thread.id === selectedThreadId);
+    if (!current) return;
+    let cancelled = false;
+
+    if (current.messages.length === 0) {
+      getChatMessages(selectedThreadId)
+        .then((realMessages) => {
+          if (cancelled) return;
+          const mapped = mapBackendMessagesToUnified(realMessages, selectedThreadId, user.id);
+          setThreads((prev) => prev.map((thread) => thread.id === selectedThreadId ? { ...thread, messages: mapped } : thread));
+        })
+        .catch(() => {
+          // Keep the thread summary visible; send failures remain explicit.
+        });
+    }
+
+    markChatSeen(selectedThreadId)
+      .then(() => {
+        if (!cancelled) setThreads((prev) => prev.map((thread) => thread.id === selectedThreadId ? { ...thread, unreadCount: 0 } : thread));
       })
       .catch(() => {
-        // Best-effort - the thread still opens with its already-known
-        // summary (participant, last message preview) even if the
-        // full history fails to load; the input box itself will
-        // surface any real send failure separately.
+        // Preserve the unread indicator when the server did not confirm the read receipt.
       });
-    markChatSeen(threadId).catch(() => {});
-  };
 
-  // Toggle PII Unmask with Audit Log
-  const toggleUnmaskPhone = (threadId: string, name: string) => {
-    const isUnmasked = !!unmaskedPii[threadId];
-    setUnmaskedPii(prev => ({ ...prev, [threadId]: !isUnmasked }));
-    if (!isUnmasked) {
-      showToast(`Audit log recorded: PII contact accessed for ${name}.`);
-    }
-  };
+    return () => { cancelled = true; };
+  }, [selectedThreadId, user]);
+
 
   // Fixed: this previously never called the real backend at all -
   // purely local state, with the sender hardcoded to "James Mwangi
@@ -316,20 +287,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     }
   };
 
-  // Attachment and transaction-vault writes are not backed by a real
-  // frontend/backend contract yet. Never manufacture a message, URL,
-  // document identity, GPS point, appointment, file size, or upload success.
-  const handleSendAttachment = (type: MessageAttachment['type']) => {
-    setShowAttachMenu(false);
-    showToast(`${type === 'image' ? 'Image' : type === 'document' ? 'Document' : type === 'location' ? 'Location' : 'Appointment'} sharing is not available until the secure attachment service is connected.`);
-  };
 
-  const handleUploadFileToVault = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowUploadModal(false);
-    setNewFileName('');
-    showToast('Transaction file uploads are not available until the secure file-vault service is connected.');
-  };
 
   // Category Icon & Badge Colors Mapping
   const getCategoryTheme = (category: string) => {
@@ -358,16 +316,12 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     }
   };
 
-  // Conversation Filter Tabs definitions
+  // The current canonical chat API returns vehicle-linked conversations, not
+  // separate escrow/auction/inspection/financing/support inboxes. Keep filters
+  // limited to states the persisted chat contract can truthfully support.
   const filterTabs: { id: string; label: string; icon: React.ReactNode }[] = [
-    { id: 'all', label: 'All Activity', icon: <Layers className="w-3.5 h-3.5" /> },
-    { id: 'unread', label: 'Unread Alerts', icon: <Bell className="w-3.5 h-3.5 text-rose-500" /> },
-    { id: 'purchase', label: 'Vehicle Purchases', icon: <Car className="w-3.5 h-3.5 text-emerald-600" /> },
-    { id: 'escrow', label: 'Escrow Deals', icon: <Lock className="w-3.5 h-3.5 text-[#176b87]" /> },
-    { id: 'auctions', label: 'Live Auctions', icon: <Gavel className="w-3.5 h-3.5 text-[#176B87]" /> },
-    { id: 'inspections', label: 'Inspections', icon: <ClipboardCheck className="w-3.5 h-3.5 text-emerald-500" /> },
-    { id: 'finance', label: 'Bank Financing', icon: <Landmark className="w-3.5 h-3.5 text-[#2F8F87]" /> },
-    { id: 'support', label: 'Support Tickets', icon: <Ticket className="w-3.5 h-3.5 text-rose-500" /> }
+    { id: 'all', label: 'All conversations', icon: <MessageSquare className="w-3.5 h-3.5" /> },
+    { id: 'unread', label: 'Unread', icon: <Bell className="w-3.5 h-3.5" /> },
   ];
 
   return (
@@ -380,56 +334,34 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         </div>
       )}
 
-      {/* ==========================================
-          HEADER BANNER & ACTIONABLE NOTIFICATIONS TICKER
-          ========================================== */}
-      <div className="bg-[#0A3340] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-white/10 relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="accent" size="md" className="bg-[#176b87] text-white font-black border-none">
-                <MessageSquare className="w-3.5 h-3.5 text-white" /> Unified Operations Communication Center
-              </Badge>
-              <Badge variant="verified" size="md" className="bg-emerald-500/20 text-emerald-300 border-emerald-400/40">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> E2E Encrypted & Audit Logged
-              </Badge>
-              {totalUnreadCount > 0 && (
-                <span className="text-xs font-black bg-rose-500 text-white px-2.5 py-0.5 rounded-full animate-pulse">
-                  {totalUnreadCount} Actionable Alert{totalUnreadCount > 1 ? 's' : ''}
-                </span>
-              )}
+      {/* Public-facing inbox header: keep operational controls and unimplemented
+          transaction alerts out of the customer communications surface. */}
+      <section className="bg-white text-[#0A3340] rounded-3xl p-5 sm:p-7 shadow-sm border border-[#D7E7E4]" aria-labelledby="messages-heading">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-2 min-w-0">
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#176B87]">
+              <MessageSquare className="w-4 h-4" aria-hidden="true" />
+              KAYAD MESSAGES
             </div>
-
-            <h1 className="text-2xl sm:text-3xl font-black font-display text-white">
-              Marketplace Transaction Communications Hub
+            <h1 id="messages-heading" className="text-2xl sm:text-3xl font-black font-display text-[#0A3340]">
+              Your conversations
             </h1>
-            <p className="text-xs text-[#BDE5DE] max-w-2xl leading-relaxed">
-              Every conversation remains strictly attached to its active vehicle transaction context — linking escrow records, NTSA TIMS logbook verification, inspection records, and bank financing under one command console.
+            <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
+              Keep your vehicle and marketplace conversations in one place. You’ll only see conversations your account is authorized to access.
             </p>
           </div>
-        </div>
-
-        {/* Actionable Notifications Ticker */}
-        <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3 overflow-x-auto scrollbar-none">
-          <span className="text-[10px] uppercase font-black tracking-wider text-[#176b87] shrink-0 flex items-center gap-1">
-            <Bell className="w-3 h-3 text-[#176b87]" /> Actionable Alerts:
-          </span>
-          <div className="flex items-center gap-3">
-            {actionableNotifications.map((n) => (
-              <button
-                key={n.id}
-                onClick={() => handleSelectThread(n.threadId)}
-                className="bg-white/10 hover:bg-white/20 text-white text-[11px] px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-2 border border-white/10 cursor-pointer"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="font-extrabold">{n.title}:</span>
-                <span className="opacity-90 max-w-xs truncate">{n.text}</span>
-                <span className="text-[9px] text-[#94A3B8] font-bold ml-1">{n.time}</span>
-              </button>
-            ))}
+          <div className="flex items-center gap-3 shrink-0" aria-live="polite">
+            <div className="rounded-2xl bg-[#F3FAF9] border border-[#D7E7E4] px-4 py-3 min-w-[104px]">
+              <div className="text-[11px] font-semibold text-slate-500">Conversations</div>
+              <div className="text-xl font-black text-[#0A3340]">{user ? threads.length : '—'}</div>
+            </div>
+            <div className="rounded-2xl bg-[#F3FAF9] border border-[#D7E7E4] px-4 py-3 min-w-[88px]">
+              <div className="text-[11px] font-semibold text-slate-500">Unread</div>
+              <div className="text-xl font-black text-[#0A3340]">{user ? totalUnreadCount : '—'}</div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ==========================================
           FILTER TABS BAR
@@ -440,8 +372,6 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
             let count = 0;
             if (tab.id === 'all') count = threads.length;
             else if (tab.id === 'unread') count = threads.filter(t => t.unreadCount > 0).length;
-            else if (tab.id === 'purchase') count = threads.filter(t => ['purchase', 'dealer', 'seller', 'inquiry'].includes(t.category)).length;
-            else count = threads.filter(t => t.category === tab.id).length;
 
             const isActive = activeCategory === tab.id;
             return (
@@ -538,11 +468,17 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                   >
                     {/* Participant Avatar */}
                     <div className="relative shrink-0">
-                      <img
-                        src={thread.participantAvatar}
-                        alt={thread.participantName}
-                        className="w-10 h-10 rounded-full object-cover border border-[#D7E7E4]"
-                      />
+                      {thread.participantAvatar ? (
+                        <img
+                          src={thread.participantAvatar}
+                          alt=""
+                          className="w-10 h-10 rounded-full object-cover border border-[#D7E7E4]"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-[#DDF4F0] border border-[#D7E7E4] flex items-center justify-center text-sm font-black text-[#176B87]" aria-label={thread.participantName}>
+                          {thread.participantName.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
                       {thread.participantStatus === 'online' && (
                         <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" title="Online" />
                       )}
@@ -656,30 +592,14 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                     <Info className="w-3.5 h-3.5" /> Details
                   </button>
                   <Badge variant="accent" size="sm" className="hidden sm:inline-flex bg-emerald-500/20 text-emerald-300 border-emerald-400/30 font-bold">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Active Stage
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Conversation
                   </Badge>
                 </div>
               </div>
 
-              {/* STAGE & PARTICIPANTS SUB-HEADER BAR */}
-              <div className="bg-[#EEF7F5] border-b border-[#D7E7E4] px-4 py-2 flex items-center justify-between text-xs text-[#12576D] font-medium shrink-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase font-black text-[#64748B]">Participants:</span>
-                  <div className="flex items-center gap-1.5">
-                    {activeThread.participants.map(p => (
-                      <span key={p.id} className="text-[10px] font-bold bg-white px-2 py-0.5 rounded border border-[#D7E7E4] text-[#176B87]">
-                        {p.name} ({p.role})
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {activeThread.participantStatus && (
-                  <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    {activeThread.isTyping ? 'Typing message...' : 'Counterparty Online'}
-                  </span>
-                )}
+              <div className="bg-[#EEF7F5] border-b border-[#D7E7E4] px-4 py-2 text-xs text-[#12576D]">
+                Messaging with <span className="font-bold">{activeThread.participantName}</span>
+                <span className="text-slate-500"> · {activeThread.participantRole}</span>
               </div>
 
               {/* SMART ACTIONS DOCK */}
@@ -741,108 +661,26 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                         {/* Text Content */}
                         <p className="leading-relaxed font-medium whitespace-pre-wrap text-xs sm:text-sm">{m.text}</p>
 
-                        {/* ATTACHMENT PAYLOAD RENDERER */}
+                        {/* Only render attachments that the current API presents as images with a URL.
+                            Other legacy types remain in history but are not represented as verified receipts,
+                            appointments, GPS pins or downloadable official documents. */}
                         {m.attachments && m.attachments.length > 0 && (
-                          <div className="space-y-2 pt-2 border-t border-white/20">
+                          <div className="space-y-2 pt-2">
                             {m.attachments.map((att, idx) => (
-                              <div key={idx}>
-                                {/* IMAGE */}
-                                {att.type === 'image' && (
-                                  <div className="relative group rounded-xl overflow-hidden border border-[#D7E7E4]">
+                              <div key={`${m.id}-attachment-${idx}`}>
+                                {att.type === 'image' && att.url ? (
+                                  <div className="rounded-xl overflow-hidden border border-[#D7E7E4]">
                                     <img
                                       src={att.url}
-                                      alt={att.fileName || 'Photo'}
-                                      className="w-full h-44 object-cover cursor-pointer hover:scale-105 transition-all"
-                                      onClick={() => setPreviewMediaModal({ title: att.fileName || 'Image Photo', type: 'image', url: att.url })}
+                                      alt={att.fileName || 'Shared image'}
+                                      className="w-full max-h-64 object-contain bg-white cursor-pointer"
+                                      onClick={() => setPreviewMediaModal({ title: att.fileName || 'Shared image', type: 'image', url: att.url })}
                                     />
-                                    <span className="absolute bottom-2 left-2 bg-[#0A3340]/70 text-white text-[10px] px-2 py-0.5 rounded font-bold">
-                                      📷 {att.fileName}
-                                    </span>
+                                    {att.fileName && <p className="px-2 py-1 text-[10px] text-slate-500">{att.fileName}</p>}
                                   </div>
-                                )}
-
-                                {/* DOCUMENT / INSPECTION PDF */}
-                                {(att.type === 'document' || att.type === 'inspection_pdf') && (
-                                  <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
-                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-emerald-50/80 border-emerald-200 text-[#176B87]'
-                                  }`}>
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                      <FileText className="w-5 h-5 text-[#176b87] shrink-0" />
-                                      <div className="min-w-0">
-                                        <p className="font-extrabold truncate">{att.fileName}</p>
-                                        <p className="text-[10px] opacity-80">
-                                          {att.inspectionScore ? `Passed Score ${att.inspectionScore}/100 PDF` : att.fileSize || 'PDF Document'}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <Button
-                                      variant="accent"
-                                      size="sm"
-                                      onClick={() => setPreviewMediaModal({ title: att.fileName || 'PDF Vault File', type: 'pdf' })}
-                                      className="bg-[#176b87] text-white font-extrabold shrink-0 border-none text-[11px] py-1"
-                                    >
-                                      <Download className="w-3.5 h-3.5" /> Open PDF
-                                    </Button>
-                                  </div>
-                                )}
-
-                                {/* PAYMENT DEPOSIT RECEIPT */}
-                                {att.type === 'payment_receipt' && (
-                                  <div className={`p-3.5 rounded-xl border space-y-1 text-xs ${
-                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-emerald-50 border-emerald-300 text-emerald-950'
-                                  }`}>
-                                    <div className="flex justify-between items-center">
-                                      <span className="font-black text-emerald-700 flex items-center gap-1.5">
-                                        <ShieldCheck className="w-4 h-4 text-emerald-600" /> Receipt confirmed
-                                      </span>
-                                      <Badge variant="success" size="sm">Locked</Badge>
-                                    </div>
-                                    <p className="text-sm font-black text-emerald-800">Ksh {att.paymentAmount?.toLocaleString()}</p>
-                                    <p className="text-[10px] opacity-80">Ref: {att.paymentReference} • {att.paymentMethod}</p>
-                                  </div>
-                                )}
-
-                                {/* GPS LOCATION PIN */}
-                                {att.type === 'location' && (
-                                  <div className={`p-3 rounded-xl border space-y-1 text-xs ${
-                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-[#EEF7F5] border-[#D7E7E4] text-[#0A3340]'
-                                  }`}>
-                                    <div className="flex items-center gap-1.5 font-extrabold text-[#176b87]">
-                                      <MapPin className="w-4 h-4" />
-                                      <span>{att.locationName}</span>
-                                    </div>
-                                    <p className="text-[11px] opacity-90">{att.locationAddress}</p>
-                                    <button
-                                      onClick={() => showToast(`Opening GPS navigation to ${att.locationName}`)}
-                                      className="text-[10px] font-black underline flex items-center gap-1 cursor-pointer text-[#176b87]"
-                                    >
-                                      Launch Google Maps <ArrowUpRight className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                )}
-
-                                {/* APPOINTMENT */}
-                                {att.type === 'appointment' && (
-                                  <div className={`p-3 rounded-xl border space-y-2 text-xs ${
-                                    isUser ? 'bg-white/10 border-white/20 text-white' : 'bg-[#F3FAF9] border-[#BDE5DE] text-[#176B87]'
-                                  }`}>
-                                    <div className="flex justify-between items-center">
-                                      <span className="font-extrabold flex items-center gap-1.5 text-[#176B87]">
-                                        <Calendar className="w-4 h-4 text-[#176b87]" /> {att.appointmentTitle}
-                                      </span>
-                                      <Badge variant="accent" size="sm">{att.appointmentStatus}</Badge>
-                                    </div>
-                                    <p className="text-[11px] font-bold">
-                                      {att.appointmentDate} at {att.appointmentTime} @ {att.appointmentLocation}
-                                    </p>
-                                    <Button
-                                      variant="primary"
-                                      size="sm"
-                                      onClick={() => showToast('Appointment confirmed and added to calendar!')}
-                                      className="bg-[#176B87] text-white text-[10px] py-1"
-                                    >
-                                      Confirm Appointment
-                                    </Button>
+                                ) : (
+                                  <div className="rounded-lg border border-[#D7E7E4] bg-[#F6FAF9] px-3 py-2 text-[11px] text-slate-600">
+                                    This attachment type cannot be previewed securely in this inbox yet.
                                   </div>
                                 )}
                               </div>
@@ -874,50 +712,14 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
               {/* INPUT BAR & ATTACHMENT MENU */}
               <div className="p-3 bg-white border-t border-[#D7E7E4] relative shrink-0">
-                {showAttachMenu && (
-                  <div className="absolute bottom-16 left-4 z-30 bg-white border border-[#D7E7E4] rounded-2xl shadow-xl p-2 flex flex-col gap-1 w-60 text-xs animate-fade-in">
-                    <button
-                      onClick={() => handleSendAttachment('image')}
-                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
-                    >
-                      <ImageIcon className="w-4 h-4 text-[#176B87]" /> Share Vehicle Photo
-                    </button>
-                    <button
-                      onClick={() => handleSendAttachment('document')}
-                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
-                    >
-                      <FileText className="w-4 h-4 text-[#176b87]" /> Attach TIMS Document (PDF)
-                    </button>
-                    <button
-                      onClick={() => handleSendAttachment('location')}
-                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
-                    >
-                      <MapPin className="w-4 h-4 text-rose-600" /> Share Showroom Location
-                    </button>
-                    <button
-                      onClick={() => handleSendAttachment('appointment')}
-                      className="p-2.5 hover:bg-[#EEF7F5] rounded-xl flex items-center gap-2 text-[#0A3340] font-bold cursor-pointer"
-                    >
-                      <Calendar className="w-4 h-4 text-emerald-600" /> Schedule Test Drive / Handover
-                    </button>
-                  </div>
-                )}
+
 
                 <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowAttachMenu(!showAttachMenu)}
-                    className="p-2.5 text-[#64748B] hover:text-[#176B87] hover:bg-[#EEF7F5] rounded-xl transition-all cursor-pointer"
-                    title="Attach File or Location"
-                  >
-                    <Paperclip className="w-5 h-5 text-[#176b87]" />
-                  </button>
-
                   <input
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Type transaction message or status update inquiry..."
+                    placeholder="Write a message..."
                     className="flex-1 px-4 py-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#176B87] font-medium text-[#0A3340]"
                   />
 
@@ -930,252 +732,71 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
           ) : (
             <div className="p-12 text-center text-[#94A3B8] flex flex-col items-center justify-center h-full space-y-3">
               <MessageSquare className="w-12 h-12 text-[#BDE5DE]" />
-              <p className="font-bold text-sm">Select a transaction conversation thread.</p>
+              <p className="font-bold text-sm">Select a conversation to read and reply.</p>
             </div>
           )}
         </Card>
 
-        {/* ------------------------------------------
-            COLUMN 3: CONTEXT INFORMATION PANEL (4/3 Cols)
-            ------------------------------------------ */}
+        {/* Public conversation details: render only listing and participant data
+            supplied by the canonical chat API. Do not imply escrow, inspection,
+            finance, verification, audit-log or file-vault integrations exist here. */}
         <Card className={`lg:col-span-4 xl:col-span-3 flex flex-col h-full overflow-hidden bg-white border-[#D7E7E4] shadow-card ${
           mobileView !== 'context' ? 'hidden lg:flex' : 'flex'
         }`}>
           {activeThread ? (
-            <div className="flex-1 overflow-y-auto divide-y divide-[#D7E7E4] text-xs">
-
-              {/* Mobile Back Header */}
-              <div className="lg:hidden p-3 bg-[#0A3340] text-white flex items-center justify-between">
-                <span className="font-extrabold">Transaction Context</span>
-                <button onClick={() => setMobileView('chat')} className="text-xs text-[#BDE5DE] underline">
-                  Back to Chat
-                </button>
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 text-sm">
+              <div className="lg:hidden flex items-center justify-between border-b border-[#D7E7E4] pb-3">
+                <span className="font-bold text-[#0A3340]">Conversation details</span>
+                <button onClick={() => setMobileView('chat')} className="text-xs text-[#176B87] underline">Back to messages</button>
               </div>
 
-              {/* 1. VEHICLE SUMMARY CARD */}
-              <div className="p-4 space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center justify-between">
-                  <span className="flex items-center gap-1.5"><Car className="w-4 h-4 text-[#176b87]" /> Vehicle Summary</span>
-                  {activeThread.vehicleId && onQuickViewVehicle && (
-                    <button
-                      onClick={() => onQuickViewVehicle(activeThread.vehicleId!)}
-                      className="text-[10px] text-[#176B87] font-bold hover:underline cursor-pointer flex items-center gap-0.5"
-                    >
-                      Specs <ArrowUpRight className="w-3 h-3" />
-                    </button>
-                  )}
-                </h4>
-
+              <section className="space-y-3">
+                <h3 className="font-extrabold text-[#0A3340] flex items-center gap-2"><Car className="w-4 h-4 text-[#176B87]" /> Vehicle listing</h3>
                 {activeThread.vehicleImage ? (
-                  <div className="relative rounded-xl overflow-hidden border border-[#D7E7E4]">
-                    <LazyImage src={activeThread.vehicleImage} alt={activeThread.vehicleTitle || 'Vehicle'} wrapperClassName="w-full h-32" className="w-full h-full object-cover" />
-                    {activeThread.vehiclePrice && (
-                      <span className="absolute bottom-2 right-2 bg-[#0A3340] text-[#176b87] font-black text-xs px-2.5 py-1 rounded-lg">
-                        Ksh {activeThread.vehiclePrice.toLocaleString()}
-                      </span>
-                    )}
-                  </div>
+                  <LazyImage src={activeThread.vehicleImage} alt={activeThread.vehicleTitle || 'Vehicle listing'} wrapperClassName="w-full h-36 rounded-xl overflow-hidden" className="w-full h-full object-cover" />
                 ) : null}
-
-                <div className="space-y-1 font-medium text-[#12576D]">
-                  <p className="font-black text-sm text-[#176B87]">{activeThread.vehicleTitle}</p>
-                  <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
-                    <div>
-                      <span className="text-[#94A3B8] block text-[9px]">VIN Number</span>
-                      <span className="font-mono font-bold text-[#0A3340]">{activeThread.vehicleVin || 'NTSA Verified'}</span>
-                    </div>
-                    <div>
-                      <span className="text-[#94A3B8] block text-[9px]">Location</span>
-                      <span className="font-bold text-[#0A3340]">{activeThread.vehicleLocation || 'Nairobi'}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. COUNTERPARTY PROFILE (PROTECTED PII) */}
-              <div className="p-4 space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                  <UserCheck className="w-4 h-4 text-emerald-600" /> Counterparty Clearance
-                </h4>
-
-                <div className="p-3 bg-[#F6FAF9] rounded-xl border border-[#D7E7E4] space-y-2">
-                  <div className="flex items-center gap-3">
-                    <img src={activeThread.counterpartyInfo.avatar || activeThread.participantAvatar} alt={activeThread.counterpartyInfo.name} className="w-10 h-10 rounded-full object-cover border border-[#BDE5DE]" />
-                    <div>
-                      <p className="font-extrabold text-[#176B87]">{activeThread.counterpartyInfo.name}</p>
-                      <p className="text-[10px] text-[#64748B] font-bold">{activeThread.counterpartyInfo.role}</p>
-                    </div>
-                  </div>
-
-                  {/* Fixed: previously always rendered, showing
-                      "undefined" for real conversations, which have
-                      no real masked phone on record. Only shown when
-                      real data exists. */}
-                  {(activeThread.counterpartyInfo.maskedPhone || activeThread.counterpartyInfo.unmaskedPhone) && (
-                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[#D7E7E4]/80">
-                      <span className="text-[#64748B] font-medium">Contact Phone:</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-bold text-[#0A3340]">
-                          {unmaskedPii[activeThread.id] ? (activeThread.counterpartyInfo.unmaskedPhone || activeThread.counterpartyInfo.maskedPhone) : activeThread.counterpartyInfo.maskedPhone}
-                        </span>
-                        <button
-                          onClick={() => toggleUnmaskPhone(activeThread.id, activeThread.counterpartyInfo.name)}
-                          className="text-[10px] font-bold text-[#176B87] hover:underline flex items-center gap-0.5 cursor-pointer"
-                          title="Audit logged unmask"
-                        >
-                          {unmaskedPii[activeThread.id] ? <Lock className="w-3 h-3 text-[#94A3B8]" /> : <Unlock className="w-3 h-3 text-[#176b87]" />}
-                          {unmaskedPii[activeThread.id] ? 'Mask' : 'Unmask'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Fixed: previously always rendered "undefined%
-                      Verified" for real conversations, which have no
-                      real trust score anywhere in this system. Only
-                      shown when real data exists. */}
-                  {activeThread.counterpartyInfo.trustScore !== undefined && (
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#64748B] font-medium">Trust Score:</span>
-                      <span className="font-black text-emerald-700">{activeThread.counterpartyInfo.trustScore}% Verified</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 3. LIVE SUB-SUMMARIES (Escrow, Inspection, Finance, Auction) */}
-              {activeThread.escrowSummary && (
-                <div className="p-4 space-y-2">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#176b87]" /> Escrow record
-                  </h4>
-                  <div className="p-3 bg-[#176b87]/10 border border-[#176b87]/30 rounded-xl space-y-1.5">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-bold text-[#176B87]">Locked Amount</span>
-                      <span className="font-black text-emerald-700">Ksh {activeThread.escrowSummary.amountLocked.toLocaleString()}</span>
-                    </div>
-                    <p className="text-[11px] text-[#64748B] font-medium">{activeThread.escrowSummary.bankVault} • Vault #{activeThread.escrowSummary.vaultId}</p>
-                    {onNavigateToEscrow && (
-                      <Button variant="accent" size="sm" onClick={onNavigateToEscrow} className="w-full bg-[#176B87] text-white text-[10px] py-1 mt-1">
-                        Open Escrow Vault Dashboard
-                      </Button>
+                {activeThread.vehicleTitle ? (
+                  <div className="rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3 space-y-2">
+                    <p className="font-bold text-[#0A3340]">{activeThread.vehicleTitle}</p>
+                    {typeof activeThread.vehiclePrice === 'number' && (
+                      <p className="text-base font-black text-[#176B87]">KES {activeThread.vehiclePrice.toLocaleString()}</p>
+                    )}
+                    {activeThread.vehicleId && onQuickViewVehicle && (
+                      <button onClick={() => onQuickViewVehicle(activeThread.vehicleId!)} className="inline-flex items-center gap-1 text-xs font-bold text-[#176B87] hover:underline">
+                        View listing details <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
                     )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3 text-xs text-slate-600">This conversation is not linked to a vehicle listing.</p>
+                )}
+              </section>
 
-              {activeThread.inspectionSummary && (
-                <div className="p-4 space-y-2">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <ClipboardCheck className="w-4 h-4 text-emerald-600" /> Inspection status
-                  </h4>
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1.5">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-bold text-[#176B87]">Inspection score</span>
-                      <span className="font-black text-emerald-700 text-sm">{activeThread.inspectionSummary.score}/100 Passed</span>
-                    </div>
-                    <p className="text-[10px] text-[#64748B] font-medium">Chassis: {activeThread.inspectionSummary.chassisStatus}</p>
-                    {onNavigateToInspections && (
-                      <Button variant="outline" size="sm" onClick={onNavigateToInspections} className="w-full text-[10px] py-1 bg-white">
-                        View inspection
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeThread.financeSummary && (
-                <div className="p-4 space-y-2">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <Landmark className="w-4 h-4 text-[#176B87]" /> Bank Finance Pre-Approval
-                  </h4>
-                  <div className="p-3 bg-[#F3FAF9] border border-[#D7E7E4] rounded-xl space-y-1.5">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-bold text-[#176B87]">{activeThread.financeSummary.partnerBank}</span>
-                      <span className="font-black text-[#12576D]">Pre-Approved</span>
-                    </div>
-                    <p className="text-xs font-black text-emerald-800">Ksh {activeThread.financeSummary.approvedLimit.toLocaleString()} Facility</p>
-                    <p className="text-[10px] text-[#64748B] font-medium">Est. Repayment: Ksh {activeThread.financeSummary.monthlyInstallment.toLocaleString()} / mo</p>
-                  </div>
-                </div>
-              )}
-
-              {/* 4. TRANSACTION TIMELINE HISTORY */}
-              <div className="p-4 space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-[#176b87]" /> Permanent Audit Timeline
-                </h4>
-
-                <div className="relative border-l-2 border-[#D7E7E4] ml-2 space-y-4 pl-4 pt-1">
-                  {activeThread.timeline.map((t) => (
-                    <div key={t.id} className="relative">
-                      {/* Node Bullet */}
-                      <span className={`absolute -left-[21px] top-0 w-3.5 h-3.5 rounded-full border-2 border-white ${
-                        t.status === 'completed'
-                          ? 'bg-emerald-500'
-                          : t.status === 'current'
-                          ? 'bg-[#176b87] animate-pulse'
-                          : 'bg-[#BDE5DE]'
-                      }`} />
-
-                      <div>
-                        <p className={`font-extrabold text-xs ${t.status === 'current' ? 'text-[#176b87]' : 'text-[#176B87]'}`}>
-                          {t.title}
-                        </p>
-                        <p className="text-[11px] text-[#64748B] font-medium">{t.description}</p>
-                        <span className="text-[9px] text-[#94A3B8] font-bold block mt-0.5">{t.timestamp} • {t.actor}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 5. SHARED TRANSACTION FILES VAULT */}
-              <div className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-[#176B87] flex items-center gap-1.5">
-                    <FileCheck className="w-4 h-4 text-[#176b87]" /> Shared Transaction Vault
-                  </h4>
-                  <button
-                    onClick={() => setShowUploadModal(true)}
-                    className="text-[10px] font-bold text-[#176B87] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Upload className="w-3 h-3 text-[#176b87]" /> Upload File
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  {activeThread.sharedFiles.length === 0 ? (
-                    <p className="text-[11px] text-[#94A3B8] font-medium italic text-center py-2">No files shared yet in this transaction.</p>
+              <section className="space-y-3 border-t border-[#D7E7E4] pt-4">
+                <h3 className="font-extrabold text-[#0A3340] flex items-center gap-2"><Users className="w-4 h-4 text-[#176B87]" /> Conversation with</h3>
+                <div className="flex items-center gap-3 rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3">
+                  {activeThread.counterpartyInfo.avatar || activeThread.participantAvatar ? (
+                    <img src={activeThread.counterpartyInfo.avatar || activeThread.participantAvatar} alt="" className="w-11 h-11 rounded-full object-cover border border-[#D7E7E4]" />
                   ) : (
-                    activeThread.sharedFiles.map((f) => (
-                      <div key={f.id} className="p-2.5 bg-[#F6FAF9] rounded-xl border border-[#D7E7E4] flex items-center justify-between gap-2 text-xs">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <FileText className="w-4 h-4 text-[#176b87] shrink-0" />
-                          <div className="min-w-0">
-                            <p className="font-extrabold text-[#176B87] truncate">{f.fileName}</p>
-                            <p className="text-[9px] text-[#94A3B8]">{f.fileSize || 'Doc'} • {f.uploadedAt}</p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setPreviewMediaModal({ title: f.fileName, type: 'pdf' })}
-                          className="bg-white text-[10px] py-0.5 px-2 shrink-0 font-bold"
-                        >
-                          <Eye className="w-3 h-3 text-[#64748B]" />
-                        </Button>
-                      </div>
-                    ))
+                    <div className="w-11 h-11 rounded-full bg-[#DDF4F0] flex items-center justify-center text-[#176B87] font-black" aria-hidden="true">{activeThread.participantName.slice(0, 1).toUpperCase()}</div>
                   )}
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#0A3340] truncate">{activeThread.participantName}</p>
+                    <p className="text-xs text-slate-600">{activeThread.participantRole}</p>
+                  </div>
                 </div>
-              </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-start justify-between gap-3"><span className="text-slate-500">Conversation ID</span><span className="font-mono text-right text-[#0A3340] break-all">{activeThread.referenceNumber}</span></div>
+                  <div className="flex items-start justify-between gap-3"><span className="text-slate-500">Last activity</span><span className="text-right text-[#0A3340]">{activeThread.lastTimestamp ? new Date(activeThread.lastTimestamp).toLocaleString() : 'No message activity yet'}</span></div>
+                </div>
+              </section>
 
+              <p className="border-t border-[#D7E7E4] pt-4 text-xs leading-relaxed text-slate-500">For escrow, inspections, financing or support cases, use the corresponding KAYAD service. This inbox displays only the conversation and listing information currently available to your account.</p>
             </div>
           ) : (
-            <div className="p-8 text-center text-[#94A3B8]">
-              <Info className="w-8 h-8 mx-auto text-[#BDE5DE]" />
-              <p className="text-xs mt-2 font-bold">Select a thread to view live transaction context.</p>
+            <div className="p-8 text-center text-slate-500">
+              <Info className="w-8 h-8 mx-auto text-[#176B87]" />
+              <p className="text-sm mt-2 font-bold">Choose a conversation to see its details.</p>
             </div>
           )}
         </Card>
@@ -1192,73 +813,11 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               <img src={previewMediaModal.url} alt={previewMediaModal.title} className="w-full max-h-[450px] object-contain rounded-xl border border-[#D7E7E4]" />
             )}
 
-            {previewMediaModal.type === 'pdf' && (
-              <div className="p-8 bg-[#F6FAF9] rounded-2xl border border-[#D7E7E4] text-center space-y-4">
-                <FileText className="w-16 h-16 text-[#176b87] mx-auto" />
-                <div>
-                  <h4 className="font-black text-sm text-[#176B87]">{previewMediaModal.title}</h4>
-                  <p className="text-[#64748B] text-xs mt-1">Official NTSA / KAYAD Verified Encrypted PDF Vault File</p>
-                </div>
-                <Button variant="accent" size="md" onClick={() => { setPreviewMediaModal(null); showToast(`Downloaded ${previewMediaModal.title}`); }} className="bg-[#176b87] text-white">
-                  <Download className="w-4 h-4" /> Download PDF File
-                </Button>
-              </div>
-            )}
           </div>
         </Modal>
       )}
 
-      {/* ==========================================
-          UPLOAD FILE TO TRANSACTION VAULT MODAL
-          ========================================== */}
-      {showUploadModal && (
-        <Modal isOpen={true} onClose={() => setShowUploadModal(false)} title="Upload Document to Transaction Vault">
-          <form onSubmit={handleUploadFileToVault} className="space-y-4 text-xs p-2">
-            <div>
-              <label className="block text-[#12576D] font-extrabold mb-1">Document Title / File Name</label>
-              <input
-                type="text"
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-                placeholder="e.g. National_ID_Copy.pdf or Bank_Statement.pdf"
-                className="w-full px-3 py-2 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87]"
-                required
-              />
-            </div>
 
-            <div>
-              <label className="block text-[#12576D] font-extrabold mb-1">Document Category</label>
-              <select
-                value={newFileType}
-                onChange={(e: any) => setNewFileType(e.target.value)}
-                className="w-full px-3 py-2 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87]"
-              >
-                <option value="pdf">Official PDF Certificate</option>
-                <option value="logbook">Logbook / Title Copy</option>
-                <option value="invoice">Invoice / Quote</option>
-                <option value="receipt">Escrow Payment Receipt</option>
-                <option value="image">Vehicle Photo / Scan</option>
-              </select>
-            </div>
-
-            <div className="p-4 bg-[#F3FAF9] rounded-xl border border-[#BDE5DE] text-[11px] text-[#176B87] font-medium space-y-1">
-              <p className="font-bold flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#176b87]" /> Encrypted Transaction Storage
-              </p>
-              <p>Uploaded files are permanently attached to transaction reference #{activeThread.referenceNumber} and shared only with verified counterparties.</p>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => setShowUploadModal(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary" size="sm" className="bg-[#176B87] text-white">
-                <Upload className="w-3.5 h-3.5" /> Confirm Upload
-              </Button>
-            </div>
-          </form>
-        </Modal>
-      )}
     </div>
   );
 };

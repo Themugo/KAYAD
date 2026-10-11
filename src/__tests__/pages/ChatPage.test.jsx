@@ -16,6 +16,11 @@ describe('Canonical ChatView', () => {
   afterEach(() => cleanup());
   it('renders the unified communication surface', async () => {
     render(<ChatView user={{ id: 'u1', name: 'Test User', role: 'buyer' }} />);
-    expect(await screen.findByText(/Unified Operations Communication Center/i)).toBeInTheDocument();
+    // "Unified Operations Communication Center" never existed in the actual
+    // component (UnifiedCommunicationHub renders a "KAYAD MESSAGES" eyebrow
+    // and a "Your conversations" <h1 id="messages-heading">) - this
+    // assertion was stale from an earlier draft and always failed. Assert
+    // the real, current heading instead.
+    expect(await screen.findByText(/Your conversations/i)).toBeInTheDocument();
   });
 });

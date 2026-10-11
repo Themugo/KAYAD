@@ -35,7 +35,7 @@ import SkipLink from './components/ui/SkipLink';
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
 import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireAdmin, SessionRecovery } from './context/AuthContext';
-import { NotificationProvider } from './context/NotificationContext';
+import { NotificationProvider, useNotifications } from './context/NotificationContext';
 import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
 import { Vehicle, UserProfile } from './types';
@@ -87,6 +87,7 @@ function AppInner() {
   const [activeNav, setActiveNavState] = useState<string>('marketplace');
   const location = useLocation();
   const { user: authUser, logout: authLogout, isAdmin, isDealer, isAuth, loading: authLoading, sessionStatus } = useAuth();
+  const { unreadCount: unreadNotificationCount } = useNotifications();
   const navigate = useNavigate();
   const normalizeNav = useCallback((requested: string | null): string => {
     return navLocationFor(requested || '', window.location.href).nav;
@@ -475,6 +476,7 @@ function AppInner() {
 
       <Navbar
         user={user}
+        notificationUnreadCount={unreadNotificationCount}
         authLoading={authLoading}
         savedCount={savedVehicles.length}
         activeNav={activeNav}

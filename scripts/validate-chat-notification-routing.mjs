@@ -37,7 +37,9 @@ assert.match(server, /app\.use\("\/api\/chat", chatRoutes\)/, 'canonical unversi
 assert.match(notificationRoutes, /router\.use\(protect\)/, 'notification endpoints must retain authentication');
 assert.match(notificationService, /link, data/, 'notification service must persist canonical link and data');
 assert.match(chatController, /metadata: \{ messageId: messageData\.id \}/, 'lead activity must reference the persisted message ID');
-assert.match(chatController, /id: messageData\.id,\s*chatId,/, 'socket event must use persisted message ID');
+assert.match(chatController, /buildNewMessageEvent\(chatId, messageData\)/, 'socket event must be built from the persisted message');
+const chatOutbox = read('backend/services/chatOutbox.service.js');
+assert.match(chatOutbox, /id: m\.id, chatId,/, 'canonical socket event must expose the persisted message ID');
 assert.match(chatController, /link: "\/?\?nav=chat"/, 'new chat notifications must link to canonical chat nav');
 assert.doesNotMatch(chatController, /\bmessageId\b(?!\s*:)/, 'no undefined messageId variable references should remain');
 console.log('Chat / notification / navbar route convergence: PASS');

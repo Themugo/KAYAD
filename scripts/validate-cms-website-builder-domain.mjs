@@ -24,7 +24,7 @@ pass('CMS page listing uses query chaining', controller.includes('CMSPage.find(f
 pass('FAQ listing uses query chaining', controller.includes('CMSFaq.find(filter)') && controller.includes('.sort({ popularity: -1 })'));
 pass('Campaign listing uses query chaining', controller.includes('CMSCampaign.find(filter)') && controller.includes('.sort({ startDate: -1 })'));
 pass('Banner listing uses query chaining', controller.includes('CMSBanner.find(filter)') && controller.includes('.sort({ order: 1 })'));
-pass('Media listing uses query chaining', controller.includes('CMSMedia.find(filter)') && controller.includes('.sort({ uploadedAt: -1 })'));
+pass('Media listing uses query chaining', controller.includes('CMSMedia.find(filter)') && controller.includes('.sort({ createdAt: -1 })'));
 pass('Public content-by-id does not expose drafts', controller.includes('CMSContent.findOne({ id, status: "published" })'));
 pass('No legacy _sort filter syntax remains in CMS controller', !controller.includes('_sort:') && !controller.includes('_order:'));
 

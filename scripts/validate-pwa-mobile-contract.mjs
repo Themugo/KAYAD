@@ -23,7 +23,7 @@ check('manifest shortcuts target App state navigation',
   manifest.shortcuts?.some(s => s.url.includes('nav=auctions')) &&
   manifest.shortcuts?.some(s => s.url.includes('nav=sell'))
 );
-check('PWA theme matches Slate Teal chrome', manifest.theme_color === '#0B716F');
+check('PWA theme matches Slate Teal chrome', manifest.theme_color === '#0A3340' && read('index.html').includes('content="#0A3340"'));
 check('notification panel is viewport-safe', ['src/components/NotificationCenter.tsx','src/components/features/common/NotificationCenter.tsx'].every(p => read(p).includes('w-[min(370px,calc(100vw-1.5rem))]')));
 check('service worker does not cache API responses', !sw.includes('API_CACHE') && !sw.includes("cache.put(request, networkResponse.clone())") || !/isApiRequest\(request\)[\s\S]*handleApiRequest/.test(sw));
 check('service worker skips auth endpoints', sw.includes('auth/'));

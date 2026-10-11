@@ -1,0 +1,188 @@
+validator	status	summary
+validate-admin-control-plane-e2e.mjs	PASS	 | Admin/control-plane E2E validation: 11/11 passed.
+validate-advanced-auth-sweep.mjs	PASS	 | Advanced auth sweep source gate: 19/19 PASS
+validate-advertising-domain.mjs	PASS	Advertising domain validator: 12/12 PASS
+validate-ai-decision-support-domain.mjs	PASS	PASS no fabricated percentage claims in decision service | AI decision-support validation: 11/11 PASS
+validate-analytics-domain.mjs	PASS	 | Analytics domain validation: 7/7 PASS
+validate-api-availability.mjs	PASS	 | API availability validation: 8/8 PASS
+validate-auction-360-hardening-20261007.mjs	PASS	 | Auction 360 hardening: 28/28 checks passed.
+validate-auction-bid-surface.mjs	PASS	PASS legacy audit report does not claim canonical auction UI has no real bid call | 6/6 checks passed
+validate-auction-domain-integrity.mjs	PASS	 | Auction domain integrity: 24/24 checks passed.
+validate-auction-phase-a-financial-integrity.mjs	PASS	PASS no client direct security-hold writes | AUCTION PHASE A FINANCIAL INTEGRITY: 24/24 PASS
+validate-auction-phase10.mjs	PASS	PASS: auction transport convergence is green | PHASE10_PASS=32/32
+validate-auction-phase4.mjs	PASS	PHASE 4 AUCTION SETUP/PUBLICATION: PASS | Checks: config validation, readiness gate, schema contract, immutable publication trigger, routes, wizard
+validate-auction-phase5.mjs	PASS	PASS payment convergence | PASS v1 mount
+validate-auction-phase7.mjs	PASS	PASS canonical bid API remains unchanged | PHASE7_PASS=8
+validate-auction-phase8.mjs	PASS	PASS escrow is created only for escrow-selected auctions | PHASE8_PASS=14
+validate-auction-phase9.mjs	PASS	PASS: late bidding lock remains outside phase9 | PHASE9_PASS=21
+validate-auction-transport-convergence.mjs	PASS	PASS: auction service supports active/list/my/get contracts | Auction transport convergence: 5/5 PASS
+validate-automation-domain-v12.mjs	PASS	PASS business-rule execution fields | Automation domain V12: 13/13 PASS
+validate-backend-boot.mjs	BLOCKED	 | Node.js v22.16.0
+validate-backend-runtime-contracts.mjs	PASS	 | Backend runtime contract validation: 14/14 passed.
+validate-brand-palette-convergence.mjs	PASS	Canonical palette: deep teal #0A3340 · slate teal #176B87 · accent #13B8A6 · mint surfaces #F6FAF9 / #DDF4F0 | Legacy warm/dark visual palettes and unrelated blue/purple/pink accents are converged; legacy branding data and vehicle paint swatches are preserved as data.
+validate-c1-c5-convergence.mjs	PASS	 | C1-C5 convergence validation: 9/9 PASS
+validate-canonical-architecture.mjs	PASS	 | KAYAD canonical architecture validation: PASS
+validate-canonical-csrf-route.mjs	PASS	STATIC CSRF ROUTE CONTRACT: PASS | RUNTIME CSRF ROUTE CONTRACT: BLOCKED (set KAYAD_API_BASE_URL or VITE_API_URL to probe a live server)
+validate-chat-notification-routing.mjs	PASS	Auth guards and owner-scoped backend route mounting: PASS | Message send/socket/notification ID contract: PASS
+validate-chat-persisted-response.mjs	PASS	 | 7/7 chat persisted-response checks passed
+validate-chat-surface-convergence.mjs	PASS	Chat surface convergence: PASS | UnifiedCommunicationHub is the sole mounted chat UI; canonical chatApi owns transport.
+validate-cms-schema.mjs	PASS	PASS CMS controller has no retired navigation table reference | CMS schema validation: PASS
+validate-cms-website-builder-domain.mjs	PASS	 | CMS/Website Builder validator: 33/33 PASS
+validate-code-splitting.mjs	PASS	 | Code splitting validation: PASS
+validate-command-center-domain.mjs	PASS	PASS - frontend has no synthetic KPI fallback | Command Center domain validation: 8/8 PASS
+validate-common-component-convergence.mjs	PASS	 | 8/8 checks passed
+validate-communication-event-convergence.mjs	PASS	PASS backend/controllers/authController.js | Communication event convergence: 12/12 PASS
+validate-communications-cleanup-provider-certification.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-communications-initiative.mjs	PASS	PASS communications polling is API-backed | Communications initiative static gate complete.
+validate-communications-otp-e2e.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-communications-provider-certification.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-communications-support-lifecycle.mjs	PASS	PASS Legacy append RPC is inert | Communications/support lifecycle validation: 11/11 PASS
+validate-continuous-improvement-domain.mjs	PASS	PASS - audit trail on mutations | PASS - no hardcoded KPI claims
+validate-database-contract-alignment.mjs	PASS	 | DATABASE CONTRACT ALIGNMENT: 8/8 PASS
+validate-dealer-commercial-controls.mjs	PASS	 | Dealer commercial controls: 9/9 PASS
+validate-dealer-modal-convergence.mjs	PASS	Dealer modal convergence: PASS | 1 canonical implementation + 1 compatibility re-export; no duplicate implementation.
+validate-dealer-operations-initiative.mjs	PASS	 | Dealer Operations Initiative: 15/15 PASS
+validate-dealer-platform-domain.mjs	PASS	PASS - frontend dealer API convergence | Dealer Platform validation: 10/10 PASS
+validate-dealer-subscription-initiative.mjs	PASS	PASS dealer inventory ownership | Dealer / Subscription initiative validation: 10/10 PASS
+validate-dealer-verification-onboarding.mjs	PASS	Dealer verification/onboarding gate: 12/11 PASS
+validate-dealer-workforce-access.mjs	PASS	 | 12/12 PASS
+validate-dependency-security.mjs	PASS	PASS vulnerable dependency floors are enforced in package.json and package-lock.json | Dependency security validation: PASS
+validate-deployment-readiness.mjs	PASS	PASS canonical Supabase service-role env | Deployment readiness validation: PASS
+validate-deployment-runtime-drift.mjs	PASS	PASS Vercel uses npm ci | Deployment/runtime drift validation passed: 17/17
+validate-dispute-canonical-lifecycle.mjs	PASS	Legacy dispute/evidence models: removed | Atomic resolution path: PASS
+validate-dispute-integrity.mjs	PASS	 | Dispute integrity: 11/11 checks passed
+validate-domain-lifecycle-integrity.mjs	PASS	 | DOMAIN LIFECYCLE INTEGRITY: PASS
+validate-ecp-domain.mjs	PASS	PASS - frontend consumes ECP API | ECP domain validation: 12/12 PASS
+validate-email-only-launch.mjs	PASS	 | EMAIL-ONLY LAUNCH CONTRACT: 11/11 PASS
+validate-email-reliability.mjs	PASS	 | EMAIL RELIABILITY CONTRACT: 8/8 PASS
+validate-escrow-admin-control-plane.mjs	PASS	PASS custody portal gates configuration | Escrow admin control-plane validation: 15/15 PASS
+validate-escrow-business-integrity.mjs	PASS	PASS refund provider references are unique | Escrow business integrity: 20/20 PASS
+validate-escrow-custody-domain.mjs	PASS	 | Escrow custody domain gate: 14/14 PASS
+validate-escrow-live-operations-scenarios.mjs	PASS	Escrow live-operations scenario contract: 21/21 PASS | Staging execution: BLOCKED — requires staging Supabase credentials
+validate-escrow-next-hardening.mjs	PASS	 | Escrow next hardening: 14/14 PASS
+validate-escrow-operations-center.mjs	PASS	Escrow Operations Center: 16/16 PASS
+validate-explicit-auth-flows.mjs	PASS	PASS backend normalizes registration email | PASS backend preserves duplicate-email 409
+validate-final-system-surface-guard.mjs	PASS	PASS: Global horizontal overflow is clipped at document level | FINAL SYSTEM SURFACE GUARD: 13/13 PASS
+validate-finance-domain-end-to-end.mjs	PASS	 | Finance domain gate: 8/8 PASS
+validate-financial-audit-rls-hardening.mjs	PASS	- webhook_events client privileges revoked | - canonical service-role backend path preserved
+validate-financial-ledger-reconciliation-domain.mjs	PASS	 | 13/13 PASS
+validate-financial-ledger-sign-convergence.mjs	PASS	Signed convention is consistent across posting, reversal and rebuild; dry-run is read-only; migration preserves service-role-only execution and does not auto-rebuild. | LIMIT: no PostgreSQL execution or target-environment balance diff was run in this environment.
+validate-foundation-integrity.mjs	PASS	PASS not-found handler guards committed responses | FOUNDATION INTEGRITY: PASS
+validate-frontend-runtime-contracts.mjs	PASS	PASS socket server room contract | Frontend runtime contract validation: PASS
+validate-governance-domain.mjs	PASS	PASS controller export getComplianceDashboard | Governance validator: 19/19 PASS
+validate-governance-lifecycle.mjs	PASS	 | Governance lifecycle validation: 53/53 checks passed.
+validate-hero-admin-control.mjs	PASS	 | Hero admin-control contract: PASS
+validate-hero-mobile-assets.mjs	PASS	 | Hero mobile asset contract: PASS
+validate-high-risk-boundaries.mjs	PASS	PASS database hardening covers ownership, webhooks, communications, documents and ledger | High-risk boundary sweep: PASS
+validate-home-hero-premium.mjs	PASS	 | Premium homepage hero validation: 12/12 PASS
+validate-homepage-convergence.mjs	PASS	 | Homepage convergence validation: PASS
+validate-inspection-chat-realtime-e2e.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-inspection-domain-rls-enablement.mjs	PASS	- inspection_staff: RLS enabled | - inspection_status_history: RLS enabled
+validate-inspection-marketplace-activation.mjs	PASS	PASS inspection settlement service delegates to atomic RPC | Inspection marketplace activation validation passed: 16/16
+validate-inspection-marketplace.mjs	PASS	 | Inspection marketplace validation: 37/37 PASS
+validate-inspection-qa-contract.mjs	PASS	PASS delivery does not falsely mark buyer review complete | Inspection QA contract: PASS
+validate-inspection-settlement-ledger.mjs	PASS	 | 10/10 PASS
+validate-integration-domain.mjs	PASS	PASS - frontend integration studio consumes live API | Integration domain validation: 9/9 PASS
+validate-integration-partner-webhook-domain.mjs	PASS	PASS Integration Studio uses canonical request transport | Integration Partner & Webhook Domain: 15/15 PASS
+validate-intelligence-domain.mjs	PASS	PASS - no hardcoded external benchmark claims | Intelligence domain validation: 10/10 PASS
+validate-lead-crm-domain-end-to-end.mjs	PASS	PASS - canonical frontend lead API exists | PASS - dealer leads UI uses canonical lead API
+validate-listing-lifecycle-integrity.mjs	PASS	 | 5/5 checks passed
+validate-live-runtime.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-local-runtime.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-local-supabase.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-marketplace-auction-escrow-db-integration.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-marketplace-convergence.mjs	PASS	 | Marketplace convergence: 17/17 PASS
+validate-marketplace-initiative.mjs	PASS	 | Marketplace Core Initiative validation: 12/12 checks passed.
+validate-marketplace-phase10.mjs	PASS	 | MARKETPLACE PHASE-10 GATE: PASS (14/14 validators passed)
+validate-marketplace-service-boundary.mjs	PASS	PASS auctionService owns auction transport | Marketplace service boundary: 5/5 PASS
+validate-marketplace-ui-convergence.mjs	PASS	 | Marketplace UI convergence: 7/7 PASS
+validate-messaging-delivery-safety-20261010.mjs	PASS	PASS messaging delivery safety: draft retention, no blind retry, serialized writes, user-specific unread checks
+validate-messaging-hardening-20261010.mjs	PASS	PASS messaging hardening: recipient compatibility, participant authorization, payload normalization, route guard, notification destination
+validate-messaging-idempotency-20261010.mjs	PASS	PASS: additive migration, transaction lock, scoped unique idempotency, stable client retry key, duplicate side-effect suppression, and opt-in PostgreSQL integration coverage. | LIMIT: this source validator does not prove a live PostgreSQL run, authenticated two-account API behavior, unread endpoint behavior, or Socket.IO event delivery.
+validate-messaging-next-priorities-20261010.mjs	PASS	PASS: atomic chat append/read-seen RPCs, persisted-response gate, stable idempotency key, and auth redirect path are present. | NOTE: live PostgreSQL/two-account API and Socket.IO tests remain outstanding; this validator does not certify them.
+validate-messaging-persistence-confirmation-20261010.mjs	PASS	PASS messaging persistence confirmation contract
+validate-messaging-public-inbox.mjs	PASS	Public inbox and chat-routing contract: PASS | Customer-facing copy, honest categories, persisted unread counts, listing-recipient checks and private socket membership verified at source level.
+validate-messaging-reliability-followup-20261010.mjs	PASS	PASS: authenticated sender binding, retry side-effect guard, unread-query failure handling, stable client key, transaction lock, scoped uniqueness, and changed-payload rejection. | LIMIT: static source assertions only; not a substitute for API, PostgreSQL, two-account realtime, or browser integration tests.
+validate-messaging-rpc-error-contract-20261010.mjs	PASS	PASS messaging RPC error contract: stable HTTP mapping for not-found, forbidden, blocked and empty-message outcomes
+validate-migration-hygiene.mjs	PASS	PASS duplicate table creators: none | Migration hygiene gate: PASS
+validate-mobile-menu-viewport.mjs	PASS	PASS: drawer height is explicitly constrained to the visible viewport | Mobile menu viewport validation: 10/10 PASS
+validate-navigation-convergence.mjs	PASS	PASS: 14A migration is the smallest possible: one JSONB column with a default, no policy changes | Navigation convergence: 43/43 PASS
+validate-next6-polish.mjs	PASS	 | NEXT6 polish contract: 6/6 PASS
+validate-next7-polish.mjs	PASS	 | NEXT7 polish contract: 4/4 PASS
+validate-optional-provider-routing.mjs	PASS	PASS Brevo remains explicitly configuration-gated | OPTIONAL PROVIDER ROUTING VALIDATION: 3/3 PASS
+validate-ownership-passport-domain.mjs	PASS	 | Ownership + passport domain gate: 16/16 PASS
+validate-passport-authorization.mjs	PASS	 | Passport authorization gate: 7/7 PASS
+validate-payment-escrow-domain.mjs	PASS	PASS secure escrow hub uses canonical services | Payment/Escrow domain gate: 9/9 PASS
+validate-payment-gateway-lifecycle.mjs	PASS	 | Payment gateway lifecycle: 13/13 PASS
+validate-phase14.mjs	PASS	 | Transaction integrity validation: 14/14 PASS
+validate-phase19.mjs	PASS	- Separate auctions-table dependency: removed | - Legacy in-memory auction engine: removed
+validate-phase21.mjs	PASS	Active private-seller mutations: fail-closed | Active auction browser: backend-driven
+validate-phase22-application-reconciliation.mjs	PASS	PHASE22_APPLICATION_RECONCILIATION_PASS
+validate-phase23.mjs	PASS	Payment/SMS mock-success paths: removed | Database deployment: versioned Supabase migrations only
+validate-phase25.mjs	PASS	Dependency installation: npm ci lockfile enforced | Backend container: Node 22 + non-root runtime
+validate-phase3-infrastructure.mjs	PASS	 | PHASE 3 INFRASTRUCTURE VALIDATION COMPLETE.
+validate-phase34.mjs	PASS	PASS: API governance checker has no stale ad route mapping | PHASE 34 API ROUTE VERSIONING VALIDATION: PASS
+validate-phase35.mjs	PASS	Production 5xx/stack disclosure guard: PASS | Backend syntax: PASS
+validate-phase36.mjs	PASS	JWT Authorization compatibility: ENABLED | Machine callback exemptions: EXPLICIT / AUTHENTICATED SEPARATELY
+validate-phase37.mjs	PASS	- Session cookie is SameSite strict: PASS | - Session cookie path is root: PASS
+validate-phase38.mjs	PASS	Canonical escrow source: public.escrows | Canonical bid atomicity: PostgreSQL RPC + distributed lock
+validate-phase39.mjs	PASS	PASS Phase 39 completion document exists | PHASE 39 SOCKET AUTHORIZATION VALIDATION: PASS
+validate-phase4-transaction-certification.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-phase40.mjs	PASS	 | Phase 40 validation: 23/23 passed
+validate-phase5-e2e.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-phase50.mjs	PASS	 | Phase 50 validation: 11/11 passed
+validate-phase51.mjs	PASS	 | Phase 51 validation: 10/10 passed
+validate-phase58.mjs	PASS	 | Phase 58 validation: 13/13 checks passed.
+validate-phase59.mjs	PASS	 | Phase 59 validation: 11/11 checks passed.
+validate-phase6-release.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-phase60.mjs	PASS	 | Phase 60 validation: 12/12 checks passed.
+validate-phase7-security-release.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-phase8-operations.mjs	PASS	 | RESULT: 15/15 PASS
+validate-platform-integration-ux.mjs	PASS	PASS backend stores seller onboarding fields | Platform integration UX validation: PASS
+validate-polish-contract.mjs	PASS	 | Polish contract: 6/6 PASS
+validate-polish-regressions.mjs	PASS	PASS service worker has no console logging | Polish regressions: 4/4 PASS
+validate-premium-auth-surfaces.mjs	PASS	PASS reduced motion support exists | Premium auth surface validation: 10/10 PASS
+validate-premium-presentation-pass.mjs	PASS	PASS — Reduced-motion preserved | PASS — Login test contract matches current presentation
+validate-private-upload-cache.mjs	PASS	PASS public uploads retain long-lived immutable caching | Private upload cache validation: PASS
+validate-production-backend.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-production-host-contract.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-production-optional-integrations.mjs	PASS	PASS REQUIRE_WHATSAPP=true fails closed without credentials | PRODUCTION OPTIONAL-INTEGRATION VALIDATION: 4/4 PASS
+validate-production-runtime-corrections.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-production-verifier-contract.mjs	PASS	PASS SPA fallback remains after API rewrite and excludes /api and /assets | Production verifier contract validation: PASS
+validate-pwa-mobile-contract.mjs	PASS	 | PWA/mobile contract: 13/13 PASS
+validate-recovery-repair.mjs	PASS	PASS No active runtime source references retired transaction shim | PASS — 19 checks
+validate-refresh-reuse-integrity.mjs	PASS	 | Refresh-token reuse integrity: 6/6 PASS
+validate-regional-configuration-domain.mjs	PASS	PASS: FX table has uniqueness boundary | Regional configuration validator: 15/15 PASS
+validate-registration-onboarding-e2e-contract.mjs	PASS	 | Registration/onboarding end-to-end contract: 14/14 PASS
+validate-registration-onboarding.mjs	PASS	 | Registration/onboarding source gate: 47/47 PASS
+validate-registration-role-matrix.mjs	PASS	 | Registration role matrix: 33/33 PASS
+validate-release.mjs	BLOCKED	 | Node.js v22.16.0
+validate-response-lifecycle.mjs	PASS	PASS response lifecycle centralization, synchronous response boundary, duplicate-send guard and route coverage
+validate-review-domain-end-to-end.mjs	PASS	PASS 10/10: admin UI supports moderation | Review domain validator: 10/10 PASS
+validate-runtime-convergence.mjs	PASS	PASS production never silently falls back to process-local locks | Runtime convergence static gate: 7/7 PASS
+validate-runtime-deep-v11.mjs	PASS	 | Runtime deep V11 validation: 10/10 PASS
+validate-runtime-hotspots.mjs	PASS	PASS Socket typing regression test exists | Runtime hotspot validation: 8/8 PASS
+validate-runtime-integrity.mjs	PASS	PASS src/api/httpRequest.ts exists | Runtime integrity validation passed: 7/7
+validate-search-discovery-domain.mjs	PASS	Search & Discovery validator: 12/12 PASS
+validate-service-export-surface.mjs	PASS	Scanned 118 service modules. | Named exports are intentionally treated as public service surface; reference-count heuristics are not used as correctness gates.
+validate-session-availability.mjs	PASS	 | Session availability validation: 7/7 PASS
+validate-socket-contract.mjs	PASS	PASS browser Socket.IO | Socket contract validation: PASS
+validate-startup-convergence.mjs	PASS	PASS bootstrap dynamically loads server after environment setup | Startup convergence validation: PASS
+validate-subscription-domain-e2e.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-supabase-migrations.mjs	PASS	PASS: migration filenames, versions, required production DDL, and forbidden-content checks passed. | Next required validation is a real PostgreSQL/Supabase migration reset.
+validate-support-case-management-domain.mjs	PASS	PASS orphan support pages removed | Support case management gate: 19/19 PASS
+validate-support-user-surface.mjs	PASS	PASS reference is a real linked field, not text prepended to the description | Support user-surface validation: PASS
+validate-transaction-integrity.mjs	PASS	 | Transaction integrity validation: 14/14 PASS
+validate-transactions-money-initiative.mjs	PASS	PASS validation: escrow | Transactions & Money initiative static checks: 23 PASS
+validate-ui-surface-convergence.mjs	PASS	 | UI surface convergence: 9/9 checks passed
+validate-v14-holistic.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-v14-live-certification-contract.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-v14-next-phase.mjs	PASS	 | V14.3 controlled certification gate: PASS WITH LIVE GATES EXPLICITLY IDENTIFIED
+validate-v14-production-activation.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-v14-release-candidate.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-v14-runtime-preflight.mjs	BLOCKED	Intentionally not run: requires live services, database, credentials or deployment
+validate-vehicle-valuation-domain.mjs	PASS	PASS does not use legacy hardcoded market_data endpoint | Vehicle valuation domain validation: 10/10 PASS
+validate-vercel-ci-contract.mjs	PASS	PASS SPA fallback still handles application routes | Vercel CI contract validation: PASS
+validate-wave2-invariants.mjs	PASS	 | KAYAD Wave 2 invariant gate: PASS
+validate-wave3-convergence.mjs	PASS	 | KAYAD Wave 3 convergence: PASS
+validate-worker-runtime.mjs	PASS	 | Worker runtime validation: 9/9 PASS

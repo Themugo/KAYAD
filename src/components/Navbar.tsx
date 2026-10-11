@@ -46,6 +46,7 @@ interface NavbarProps {
   onOpenCompare?: () => void;
   onLogout?: () => void;
   unreadCount?: number;
+  notificationUnreadCount?: number;
   /** STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: whether the
    * authoritative session check (AuthContext's mount-time getMe()) is
    * still in flight. `user` is always null during this window regardless
@@ -70,6 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCompare,
   onLogout,
   unreadCount = 0,
+  notificationUnreadCount = 0,
   authLoading = false,
 }) => {
   const { branding, navigation } = useBranding();
@@ -266,7 +268,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const effectiveUnread = user?.unreadMessagesCount ?? unreadCount;
-  const hasNotifications = (user?.unreadNotificationsCount ?? 0) > 0 || effectiveUnread > 0;
+  const hasNotifications = notificationUnreadCount > 0 || effectiveUnread > 0;
 
   return (
     <header ref={headerRef} className="kayad-header">
@@ -512,12 +514,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
 
                       <button
+                        onClick={() => { navigate('/notifications'); setShowUserDropdown(false); }}
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-medium text-[#12576D] hover:text-[#0A3340]"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <Bell className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
+                          <span>Notifications</span>
+                        </span>
+                        {notificationUnreadCount > 0 && (
+                          <span className="px-2 py-0.5 bg-rose-500 text-white rounded-full text-[10px] font-bold">{notificationUnreadCount}</span>
+                        )}
+                      </button>
+
+                      <button
                         onClick={() => handleNavSelect('chat')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-bold text-[#0A3340]"
                       >
                         <div className="flex items-center gap-2.5">
                           <MessageSquare className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
-                          <span>Communication Hub</span>
+                          <span>Messages</span>
                         </div>
                         {effectiveUnread > 0 && (
                           <span className="px-2 py-0.5 bg-rose-500 text-white rounded-full text-[10px] font-bold">
@@ -779,6 +794,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {user && <>
                       <button type="button" onClick={() => handleNavSelect('dashboard')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><LayoutDashboard className="h-4 w-4 text-[#79D8CF]" />Dashboard</button>
                       <button type="button" onClick={() => handleNavSelect('chat')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-[#79D8CF]" />Messages</span>{effectiveUnread > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[9px] font-black text-[#062E3A]">{effectiveUnread}</span>}</button>
+                      <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#79D8CF]" />Notifications</span>{notificationUnreadCount > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[9px] font-black text-white">{notificationUnreadCount}</span>}</button>
                       <button type="button" onClick={() => handleNavSelect('payments')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><CreditCard className="h-4 w-4 text-[#79D8CF]" />Payment History</button>
                       <button type="button" onClick={() => handleNavSelect('saved')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Heart className="h-4 w-4 text-[#79D8CF]" />Saved Vehicles</span>{savedCount > 0 && <span className="rounded-full bg-[#176B87] px-1.5 text-[9px] font-black text-white">{savedCount}</span>}</button>
                       {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><Sliders className="h-4 w-4 text-[#79D8CF]" />Compare</button>}

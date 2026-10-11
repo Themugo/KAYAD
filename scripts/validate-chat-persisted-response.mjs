@@ -6,10 +6,10 @@ const controller = fs.readFileSync('backend/controllers/chatController.js', 'utf
 const checks = [
   ['send API returns canonical persisted message', /sendChatMessage\(chatId: string, text: string\): Promise<BackendMessage>/.test(api)],
   ['send response validates canonical ID and timestamp', /persisted\.id !== 'string'/.test(api) && /persisted\.createdAt !== 'string'/.test(api)],
-  ['POST does not auto-retry uncertain writes', /Deliberately do not auto-retry message POSTs/.test(api)],
+  ['POST does not auto-retry uncertain writes', /pendingMessageKeys/.test(api) && !/for\s*\(|while\s*\(/.test(api.slice(api.indexOf('export async function sendChatMessage'), api.indexOf('/** POST \/api\/chat\/:chatId\/seen')))],
   ['composer uses server-confirmed message', /const persistedMessage = await sendChatMessage/.test(hub)],
   ['history refresh failure retains confirmed send', /realMessages = \[persistedMessage\]/.test(hub)],
-  ['backend returns persisted message ID', /id: messageData\.id/.test(controller)],
+  ['backend emits the canonical persisted message ID', /buildNewMessageEvent\(chatId, messageData\)/.test(controller) && /id: m\.id, chatId/.test(fs.readFileSync('backend/services/chatOutbox.service.js', 'utf8'))],
   ['backend validates persistence before realtime emit', /CHAT_MESSAGE_PERSISTENCE_UNCONFIRMED/.test(controller)],
 ];
 let failed = false;
