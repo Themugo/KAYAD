@@ -1,0 +1,30 @@
+PASS scheduled auction discovery is backed by published setup
+PASS scheduled auction response exposes configured start time
+PASS public bid activity excludes pending bids and bidder PII
+PASS public auction response does not expose highest bidder identity
+PASS public auction response does not expose exact reserve price
+PASS public auction bid activity endpoint exists
+PASS auction outcome is participant/admin protected
+PASS scheduled auctions auto-start through canonical lifecycle
+PASS scheduled start preserves the published end time
+PASS published schedule mirrors onto canonical car lifecycle
+PASS backend bid validation uses published configured increment
+PASS DB atomic bid/auto-bid/extension rules use published setup
+PASS confirmed bids and anti-snipe extensions emit canonical realtime events
+PASS live room uses canonical auction transport
+PASS public live room uses sanitized auction bid transport
+PASS bidder registration requires explicit terms acceptance
+PASS winner CTA converges on actual settlement path
+PASS socket client handles canonical auction lifecycle events
+PASS public auction realtime is available to signed-out viewers
+PASS auction discovery cards use actual auction status and final bid
+PASS verified organizer presentation uses canonical dealer trust field
+PASS auction discovery four-tab layout is aligned on desktop
+PASS syntax: backend/controllers/auctionController.js
+PASS syntax: backend/routes/auctionRoutes.js
+PASS syntax: backend/routes/auctionSettlementRoutes.js
+PASS syntax: backend/utils/auctionTimer.js
+PASS syntax: backend/services/auctionSetup.service.js
+PASS syntax: backend/controllers/bidController.js
+
+Auction 360 hardening: 28/28 checks passed.

@@ -34,7 +34,7 @@ import SkipLink from './components/ui/SkipLink';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
-import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireAdmin } from './context/AuthContext';
+import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireAdmin, SessionRecovery } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
@@ -69,10 +69,13 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // on this branch: useAuth() requires an AuthProvider ancestor, so
 // App() is now a thin wrapper providing that, with the real logic in
 // AppInner().
+// Workspaces that require a verified session (backend authorization stays authoritative).
+const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard']);
+
 function AppInner() {
   const [activeNav, setActiveNavState] = useState<string>('marketplace');
   const location = useLocation();
-  const { user: authUser, logout: authLogout, isAdmin, isDealer, isAuth, loading: authLoading } = useAuth();
+  const { user: authUser, logout: authLogout, isAdmin, isDealer, isAuth, loading: authLoading, sessionStatus } = useAuth();
   const navigate = useNavigate();
   const normalizeNav = useCallback((requested: string | null): string => {
     return navLocationFor(requested || '', window.location.href).nav;
@@ -109,8 +112,10 @@ function AppInner() {
   // rendering and stale deep links from landing on the wrong workspace.
   useEffect(() => {
     if (authLoading) return;
-    const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard']);
     if (!protectedNavs.has(activeNav)) return;
+    // The session could not be VERIFIED (network/timeout/5xx): that is not
+    // "signed out". Do not redirect; the recovery UI is rendered instead.
+    if (!isAuth && sessionStatus === 'error') return;
     if (!isAuth) {
       navigate(loginPathFor(location), { replace: true });
       return;
@@ -122,7 +127,7 @@ function AppInner() {
     if (activeNav === 'dealer-dashboard' && !isDealer && !isAdmin) {
       setActiveNav('marketplace');
     }
-  }, [activeNav, authLoading, isAuth, isAdmin, isDealer, location, navigate]);
+  }, [activeNav, authLoading, sessionStatus, isAuth, isAdmin, isDealer, location, navigate]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
@@ -490,6 +495,9 @@ function AppInner() {
         }>
 
         {/* Module Switcher Rendering */}
+        {!isAuth && sessionStatus === 'error' && protectedNavs.has(activeNav) ? (
+          <SessionRecovery />
+        ) : (
         <AuctionSurfaceReveal surface={activeNav}>
         {activeNav === 'marketplace' && (
             <VehicleMarketplace
@@ -670,6 +678,7 @@ function AppInner() {
             <PrivateSellerPlatform user={user} onOpenAuth={handleOpenAuth} />
           )}
         </AuctionSurfaceReveal>
+        )}
         </Suspense>
         </main>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { loginPathFor } from '../../utils/authIntent';
 import AdminSidebar from './AdminSidebar';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, SessionRecovery } from '../../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
 import { ChevronRight, Menu } from 'lucide-react';
 
@@ -17,7 +17,7 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { user, isAuth, loading } = useAuth();
+  const { user, isAuth, loading, sessionStatus } = useAuth();
   const loc = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -27,6 +27,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [sidebarOpen]);
 
   if (loading) return null;
+
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
 
   if (!isAuth) {
     return <Navigate to={loginPathFor(loc)} replace />;

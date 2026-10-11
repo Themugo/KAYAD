@@ -176,11 +176,20 @@ export const protect = async (req, res, next) => {
 
     next();
   } catch (err) {
+    // Every *authentication* failure (missing/invalid/expired token, unknown user,
+    // revoked session, token-version mismatch) returns its own explicit 401 above.
+    // Reaching this catch means the server could not DECIDE (database/PostgREST/
+    // network error, unexpected exception). That is not "the user is logged out":
+    // answering 401 made the SPA discard a valid session. Stay fail-closed (no
+    // req.user, request rejected) but say so honestly with a retryable 503.
     logError("AUTH ERROR", err);
 
-    return res.status(401).json({
+    res.set("Retry-After", "2");
+    return res.status(503).json({
       success: false,
-      message: "Not authorized",
+      code: "AUTH_TEMPORARILY_UNAVAILABLE",
+      retryable: true,
+      message: "Authentication is temporarily unavailable. Please try again.",
     });
   }
 };

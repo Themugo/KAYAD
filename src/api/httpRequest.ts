@@ -16,13 +16,15 @@ export interface HttpRequestOptions {
   body?: unknown;
   headers?: Record<string, string>;
   params?: Record<string, unknown>;
+  /** Per-request timeout override in ms (defaults to the shared client's 30s). */
+  timeout?: number;
 }
 
 /** Fetch-shaped adapter over KAYAD's single Axios transport. Service modules
  * use this only to preserve their existing request/response contracts while
  * inheriting the canonical credentials, timeout, CSRF and auth-expiry rules. */
 export async function request<T>(path: string, options: HttpRequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, headers, params } = options;
+  const { method = 'GET', body, headers, params, timeout } = options;
   // httpClient always carries the canonical /api prefix in baseURL.
   // Strip an optional /api prefix from service paths so legacy /api/v1/...
   // auth callers and newer /v1/... callers both resolve exactly once.
@@ -37,6 +39,7 @@ export async function request<T>(path: string, options: HttpRequestOptions = {})
       data: body,
       headers,
       params,
+      ...(timeout ? { timeout } : {}),
     });
     return response.data;
   } catch (error) {

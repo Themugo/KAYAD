@@ -1,0 +1,364 @@
+$ node --test --test-concurrency=1 tests/m2-foundation-chat-integrity.test.mjs tests/m2-idempotency.test.mjs tests/m3-receipts-realtime.test.mjs tests/m4-login-session-flow.test.mjs tests/m5-authz-sweep.test.mjs tests/m5-financial-webhooks.test.mjs tests/m5-ownership.test.mjs tests/m5-rls-privileges.test.mjs tests/p0-auth-infra-failure.test.mjs
+TAP version 13
+# \# tests 1 | \# pass 1 | \# fail 0 | \# skipped 0
+# Subtest: foundation chat-message-integrity test executes (not skipped) and passes
+ok 1 - foundation chat-message-integrity test executes (not skipped) and passes
+  ---
+  duration_ms: 446.488372
+  type: 'test'
+  ...
+# Subtest: concurrent identical key (N=20) -> exactly one canonical message, one non-replay, one notification
+ok 2 - concurrent identical key (N=20) -> exactly one canonical message, one non-replay, one notification
+  ---
+  duration_ms: 3526.556529
+  type: 'test'
+  ...
+# Subtest: retry after lost response replays same message, no duplicate
+ok 3 - retry after lost response replays same message, no duplicate
+  ---
+  duration_ms: 77.117927
+  type: 'test'
+  ...
+# Subtest: reused key with changed payload -> rejected, original untouched
+ok 4 - reused key with changed payload -> rejected, original untouched
+  ---
+  duration_ms: 52.593071
+  type: 'test'
+  ...
+# Subtest: key scope: same key from the other participant or another chat is independent
+ok 5 - key scope: same key from the other participant or another chat is independent
+  ---
+  duration_ms: 104.197304
+  type: 'test'
+  ...
+# Subtest: distinct keys, two senders concurrently -> no lost updates, persisted order = createdAt order
+ok 6 - distinct keys, two senders concurrently -> no lost updates, persisted order = createdAt order
+  ---
+  duration_ms: 723.710444
+  type: 'test'
+  ...
+# Subtest: non-participant cannot send; missing/invalid key rejected; nothing persisted
+ok 7 - non-participant cannot send; missing/invalid key rejected; nothing persisted
+  ---
+  duration_ms: 68.558256
+  type: 'test'
+  ...
+# Subtest: SQL rollback atomicity: failing statement in same tx leaves neither message nor idempotency row
+ok 8 - SQL rollback atomicity: failing statement in same tx leaves neither message nor idempotency row
+  ---
+  duration_ms: 21.858307
+  type: 'test'
+  ...
+# \# persisted.seenBy= ["e7c9e9cf-9375-49f4-bbd3-05fe60defd7a"]  replay.seenBy= ["e7c9e9cf-9375-49f4-bbd3-05fe60defd7a"]
+# Subtest: replay after recipient read returns stale seenBy snapshot (DEFECT D-MSG-2 characterization)
+ok 9 - replay after recipient read returns stale seenBy snapshot (DEFECT D-MSG-2 characterization)
+  ---
+  duration_ms: 85.35051
+  type: 'test'
+  ...
+# Subtest: delete chat cascades idempotency rows
+ok 10 - delete chat cascades idempotency rows
+  ---
+  duration_ms: 43.773679
+  type: 'test'
+  ...
+# Subtest: concurrent startChat for the same pair converges on ONE chat, no 5xx (D-MSG-3)
+ok 11 - concurrent startChat for the same pair converges on ONE chat, no 5xx (D-MSG-3)
+  ---
+  duration_ms: 130.579143
+  type: 'test'
+  ...
+# Subtest: both participants starting the chat simultaneously converge on ONE chat
+ok 12 - both participants starting the chat simultaneously converge on ONE chat
+  ---
+  duration_ms: 100.596042
+  type: 'test'
+  ...
+# Subtest: crash between commit and side effects: retry still notifies recipient exactly once
+not ok 13 - crash between commit and side effects: retry still notifies recipient exactly once # TODO D-MSG-4: no outbox; replay skips side effects
+  ---
+  duration_ms: 29.182457
+  type: 'test'
+  location: '/home/claude/msg/v4/KAYAD-main/docs/messaging-consistency-audit/harness/tests/m2-idempotency.test.mjs:124:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/msg/v4/KAYAD-main/docs/messaging-consistency-audit/harness/tests/m2-idempotency.test.mjs:129:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: realtime: participant sockets receive newMessage exactly once; outsider and anonymous receive nothing
+ok 14 - realtime: participant sockets receive newMessage exactly once; outsider and anonymous receive nothing
+  ---
+  duration_ms: 5246.402985
+  type: 'test'
+  ...
+# Subtest: persisted vs API vs event agree: identity, text, createdAt, unread counts per user
+ok 15 - persisted vs API vs event agree: identity, text, createdAt, unread counts per user
+  ---
+  duration_ms: 64.109963
+  type: 'test'
+  ...
+# Subtest: outsider cannot read, mark seen, or count another chat
+ok 16 - outsider cannot read, mark seen, or count another chat
+  ---
+  duration_ms: 58.045764
+  type: 'test'
+  ...
+# Subtest: read receipt: B marks seen -> per-user seenBy, A gets messagesSeen, unread 0, sender's own message never self-marked; idempotent
+ok 17 - read receipt: B marks seen -> per-user seenBy, A gets messagesSeen, unread 0, sender's own message never self-marked; idempotent
+  ---
+  duration_ms: 903.38163
+  type: 'test'
+  ...
+# Subtest: concurrent sends and seen calls do not lose receipts or messages
+ok 18 - concurrent sends and seen calls do not lose receipts or messages
+  ---
+  duration_ms: 377.153079
+  type: 'test'
+  ...
+# Subtest: reconnect: a reconnected socket does NOT receive events until it re-emits joinChat (D-RT-1 characterization of client behavior)
+ok 19 - reconnect: a reconnected socket does NOT receive events until it re-emits joinChat (D-RT-1 characterization of client behavior)
+  ---
+  duration_ms: 1889.466619
+  type: 'test'
+  ...
+# Subtest: socket auth: bearer-in-handshake works; cookie-less (host-only cookie not sent) socket is anonymous and never joins
+ok 20 - socket auth: bearer-in-handshake works; cookie-less (host-only cookie not sent) socket is anonymous and never joins
+  ---
+  duration_ms: 1666.531419
+  type: 'test'
+  ...
+# Subtest: failure recovery: server restart keeps persisted state; REST resync returns every message; no duplicate on retry with same key
+ok 21 - failure recovery: server restart keeps persisted state; REST resync returns every message; no duplicate on retry with same key
+  ---
+  duration_ms: 3656.689875
+  type: 'test'
+  ...
+# Subtest: failure recovery: database outage during send returns 5xx, persists nothing, retry with same key succeeds once
+ok 22 - failure recovery: database outage during send returns 5xx, persists nothing, retry with same key succeeds once
+  ---
+  duration_ms: 51.101012
+  type: 'test'
+  ...
+# Subtest: anonymous /auth/me is a clean 401 (not a 5xx)
+ok 23 - anonymous /auth/me is a clean 401 (not a 5xx)
+  ---
+  duration_ms: 2974.10084
+  type: 'test'
+  ...
+# Subtest: login without CSRF token is refused; with bootstrap it succeeds and sets session cookies
+ok 24 - login without CSRF token is refused; with bootstrap it succeeds and sets session cookies
+  ---
+  duration_ms: 173.884326
+  type: 'test'
+  ...
+# Subtest: wrong password is a generic 401 and does not set a session
+ok 25 - wrong password is a generic 401 and does not set a session
+  ---
+  duration_ms: 115.421692
+  type: 'test'
+  ...
+# Subtest: restored session: /auth/me and protected chat API return 200 with the cookie jar only
+ok 26 - restored session: /auth/me and protected chat API return 200 with the cookie jar only
+  ---
+  duration_ms: 72.176351
+  type: 'test'
+  ...
+# \# access token rotated: false
+# Subtest: refresh rotates the session and the new access token works
+ok 27 - refresh rotates the session and the new access token works
+  ---
+  duration_ms: 49.562309
+  type: 'test'
+  ...
+# Subtest: logout revokes the session: the old cookie is rejected afterwards
+ok 28 - logout revokes the session: the old cookie is rejected afterwards
+  ---
+  duration_ms: 30.251667
+  type: 'test'
+  ...
+# \# routers=18 endpoints=308
+# Subtest: discovery found privileged endpoints
+ok 29 - discovery found privileged endpoints
+  ---
+  duration_ms: 2853.245776
+  type: 'test'
+  ...
+# Subtest: anonymous: no privileged endpoint answers 2xx or 5xx
+ok 30 - anonymous: no privileged endpoint answers 2xx or 5xx
+  ---
+  duration_ms: 931.383241
+  type: 'test'
+  ...
+# Subtest: plain authenticated user: no privileged endpoint answers 2xx or 5xx
+ok 31 - plain authenticated user: no privileged endpoint answers 2xx or 5xx
+  ---
+  duration_ms: 2656.241533
+  type: 'test'
+  ...
+# Subtest: governance and config audit/export are denied to a plain user with 403
+ok 32 - governance and config audit/export are denied to a plain user with 403
+  ---
+  duration_ms: 66.843617
+  type: 'test'
+  ...
+# Subtest: CSRF exemption reaches provider callbacks on /api and /api/v1 (D-FIN-1)
+ok 33 - CSRF exemption reaches provider callbacks on /api and /api/v1 (D-FIN-1)
+  ---
+  duration_ms: 2930.324651
+  type: 'test'
+  ...
+# Subtest: success callback replayed concurrently (N=12): payment settles once, one webhook receipt
+ok 34 - success callback replayed concurrently (N=12): payment settles once, one webhook receipt
+  ---
+  duration_ms: 299.783738
+  type: 'test'
+  ...
+# Subtest: sequential replay after success is a no-op and does not change the receipt
+ok 35 - sequential replay after success is a no-op and does not change the receipt
+  ---
+  duration_ms: 167.584809
+  type: 'test'
+  ...
+# Subtest: amount mismatch is never settled as success
+ok 36 - amount mismatch is never settled as success
+  ---
+  duration_ms: 68.558224
+  type: 'test'
+  ...
+# Subtest: failed callback replayed 8x: one failure notification, status failed
+ok 37 - failed callback replayed 8x: one failure notification, status failed
+  ---
+  duration_ms: 127.882269
+  type: 'test'
+  ...
+# Subtest: unknown checkout id and malformed bodies create nothing and never settle
+ok 38 - unknown checkout id and malformed bodies create nothing and never settle
+  ---
+  duration_ms: 20.660807
+  type: 'test'
+  ...
+# Subtest: communication webhooks: no/incorrect secret rejected; correct secret accepted
+ok 39 - communication webhooks: no/incorrect secret rejected; correct secret accepted
+  ---
+  duration_ms: 28.456375
+  type: 'test'
+  ...
+# Subtest: rival dealer cannot update or delete another dealer's listing
+ok 40 - rival dealer cannot update or delete another dealer's listing
+  ---
+  duration_ms: 3056.114503
+  type: 'test'
+  ...
+# Subtest: plain buyer cannot create, update or delete listings
+ok 41 - plain buyer cannot create, update or delete listings
+  ---
+  duration_ms: 50.555974
+  type: 'test'
+  ...
+# Subtest: anonymous cannot mutate listings or place/end bids
+ok 42 - anonymous cannot mutate listings or place/end bids
+  ---
+  duration_ms: 68.464493
+  type: 'test'
+  ...
+# Subtest: non-admin cannot end an auction (even the listing owner)
+ok 43 - non-admin cannot end an auction (even the listing owner)
+  ---
+  duration_ms: 55.958612
+  type: 'test'
+  ...
+# \# owner PUT -> 200 {"success":true,"data":{"id":"feae6fad-c3f6-4d4e-beb7-3cdcdee9162a","dealer_id":"4f0ebebd-18c0-4900-aeef-fc42eec9b215","title":"Owner Car v2
+# Subtest: owner can still update their own listing (control: ownership gate is not over-blocking)
+ok 44 - owner can still update their own listing (control: ownership gate is not over-blocking)
+  ---
+  duration_ms: 49.110618
+  type: 'test'
+  ...
+# Subtest: bid gates: owner cannot bid on own car; unverified phone blocked; unpublished auction blocked (no bid row written)
+ok 45 - bid gates: owner cannot bid on own car; unverified phone blocked; unpublished auction blocked (no bid row written)
+  ---
+  duration_ms: 171.468113
+  type: 'test'
+  ...
+# Subtest: every public table has RLS enabled (catalog)
+ok 46 - every public table has RLS enabled (catalog)
+  ---
+  duration_ms: 28.176218
+  type: 'test'
+  ...
+# Subtest: no non-trigger kayad_* function is executable by anon/authenticated/PUBLIC (catalog)
+ok 47 - no non-trigger kayad_* function is executable by anon/authenticated/PUBLIC (catalog)
+  ---
+  duration_ms: 3.864229
+  type: 'test'
+  ...
+# Subtest: authenticated/anon cannot call money-moving and chat RPCs through the API
+ok 48 - authenticated/anon cannot call money-moving and chat RPCs through the API
+  ---
+  duration_ms: 81.161727
+  type: 'test'
+  ...
+# Subtest: authenticated/anon see no rows and cannot write sensitive tables
+ok 49 - authenticated/anon see no rows and cannot write sensitive tables
+  ---
+  duration_ms: 120.417877
+  type: 'test'
+  ...
+# Subtest: service_role retains access (control)
+ok 50 - service_role retains access (control)
+  ---
+  duration_ms: 12.440687
+  type: 'test'
+  ...
+# Subtest: baseline: valid session -> /auth/me 200 and Messages API 200
+ok 51 - baseline: valid session -> /auth/me 200 and Messages API 200
+  ---
+  duration_ms: 2877.363208
+  type: 'test'
+  ...
+# Subtest: auth store unavailable -> 503 AUTH_TEMPORARILY_UNAVAILABLE (retryable), fail-closed, no data, never 401
+ok 52 - auth store unavailable -> 503 AUTH_TEMPORARILY_UNAVAILABLE (retryable), fail-closed, no data, never 401
+  ---
+  duration_ms: 37.56943
+  type: 'test'
+  ...
+# Subtest: after the store recovers the SAME cookie works again (session was never revoked)
+ok 53 - after the store recovers the SAME cookie works again (session was never revoked)
+  ---
+  duration_ms: 35.832034
+  type: 'test'
+  ...
+# Subtest: genuine failures stay 401: no cookie, garbage cookie, revoked session
+ok 54 - genuine failures stay 401: no cookie, garbage cookie, revoked session
+  ---
+  duration_ms: 29.056893
+  type: 'test'
+  ...
+# Subtest: authenticated non-participant is still denied (403/404), not 503
+ok 55 - authenticated non-participant is still denied (403/404), not 503
+  ---
+  duration_ms: 25.501757
+  type: 'test'
+  ...
+1..55
+# tests 55
+# suites 0
+# pass 54
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 1
+# duration_ms 43960.506725
+exit=0

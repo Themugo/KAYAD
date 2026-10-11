@@ -1,0 +1,26 @@
+PASS admin start uses canonical lifecycle service
+PASS admin extend uses canonical lifecycle service
+PASS dealer start uses canonical lifecycle service
+PASS dealer extend uses canonical lifecycle service
+PASS dealer extend endpoint is unique
+PASS bid payment uses verified profile phone
+PASS legacy winner route converges on canonical settlement
+PASS admin bid filters use canonical bid status
+PASS duplicate carController bid engine removed
+PASS bid confirmation migration has no duplicate variable declaration
+PASS lifecycle delegates to DB-atomic transitions
+PASS atomic transaction wrappers exist
+PASS frontend auction transport is domain-complete
+PASS frontend bid transport covers admin reads/actions
+PASS marketplace context uses canonical bid service
+PASS lifecycle RPC migration present
+PASS hard reserve settlement is enforced atomically
+PASS syntax: backend/routes/auctionAdminRoutes.js
+PASS syntax: backend/routes/dealerRoutes.js
+PASS syntax: backend/routes/bidRoutes.js
+PASS syntax: backend/services/auctionLifecycle.service.js
+PASS syntax: backend/controllers/bidController.js
+PASS syntax: backend/controllers/carController.js
+PASS syntax: backend/utils/atomicTransactions.js
+
+Auction domain integrity: 24/24 checks passed.

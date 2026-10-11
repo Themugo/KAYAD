@@ -1,0 +1,57 @@
+TAP version 13
+# Subtest: baseline: valid session -> /auth/me 200 and Messages API 200
+ok 1 - baseline: valid session -> /auth/me 200 and Messages API 200
+  ---
+  duration_ms: 3095.878217
+  type: 'test'
+  ...
+# Subtest: auth store unavailable -> 503 AUTH_TEMPORARILY_UNAVAILABLE (retryable), fail-closed, no data, never 401
+not ok 2 - auth store unavailable -> 503 AUTH_TEMPORARILY_UNAVAILABLE (retryable), fail-closed, no data, never 401
+  ---
+  duration_ms: 24.394836
+  type: 'test'
+  location: '/home/claude/msg/w2/KAYAD-main/docs/messaging-consistency-audit/harness/tests/p0-auth-infra-failure.test.mjs:17:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /api/v1/auth/me -> 401 {"success":false,"message":"Not authorized"}
+    
+    401 !== 503
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 503
+  actual: 401
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/msg/w2/KAYAD-main/docs/messaging-consistency-audit/harness/tests/p0-auth-infra-failure.test.mjs:22:14)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: after the store recovers the SAME cookie works again (session was never revoked)
+ok 3 - after the store recovers the SAME cookie works again (session was never revoked)
+  ---
+  duration_ms: 46.495704
+  type: 'test'
+  ...
+# Subtest: genuine failures stay 401: no cookie, garbage cookie, revoked session
+ok 4 - genuine failures stay 401: no cookie, garbage cookie, revoked session
+  ---
+  duration_ms: 13.570107
+  type: 'test'
+  ...
+# Subtest: authenticated non-participant is still denied (403/404), not 503
+ok 5 - authenticated non-participant is still denied (403/404), not 503
+  ---
+  duration_ms: 22.37373
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 4
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3737.672771

@@ -1,0 +1,11 @@
+npm_ci_root exit=0
+npm_ci_backend exit=0
+npm_ci_harness exit=0
+tsc exit=0
+vite_build exit=0
+fe_vitest exit=0
+be_jest exit=0
+be_vitest exit=0
+be_node exit=0
+be_chat_integrity exit=0
+harness exit=0

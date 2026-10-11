@@ -1,0 +1,13 @@
+PASS: canonical dispute UI has real API-backed evidence upload
+PASS: canonical dispute UI has real mediation API
+PASS: canonical dispute UI has real resolution API
+PASS: canonical dispute UI has real appeal API
+PASS: dispute details enforce party/staff access
+PASS: evidence item remains scoped to requested escrow dispute
+PASS: evidence mutations remain scoped to requested escrow
+PASS: successful mediation transitions to resolved
+PASS: common duplicate TS dispute panels removed
+PASS: legacy Mongoose dispute implementation is absent from active controller
+PASS: dispute routes expose canonical escrow-centric workflow
+
+Dispute integrity: 11/11 checks passed

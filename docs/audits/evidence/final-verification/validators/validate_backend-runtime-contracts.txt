@@ -1,0 +1,16 @@
+PASS response facade export exists
+PASS response facade includes created
+PASS response facade preserves existing named helpers
+PASS requireAuth compatibility alias exists
+PASS requireRole compatibility middleware exists
+PASS requireRole normalizes array role declarations
+PASS email compatibility sender export exists
+PASS atomic auction start adapter exists
+PASS atomic auction extend adapter exists
+PASS auction start RPC exists
+PASS auction extend RPC exists
+PASS subscription admin query schema is re-exported
+PASS no backend HTTP 501 placeholder responses remain
+PASS obsolete Supabase JS duplicate remains absent
+
+Backend runtime contract validation: 14/14 passed.

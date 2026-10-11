@@ -2,6 +2,8 @@
 
 Release candidate built from the supplied `223f2cf0-KAYAD-MESSAGING-RELIABILITY-FOLLOWUP-20261010.zip` (SHA-256 `027869a4…e189ba`, see `01`). Mode: inspect → reproduce → minimally patch → test → certify. Nothing was pushed or deployed; no migration was applied outside disposable local databases; no provider was contacted.
 
+> **Follow-up (2026-10-11):** the Messages → login redirect had two further causes beyond D-AUTH-1 (backend `401` for infrastructure errors; frontend treating any session-check failure as signed-out). They are fixed and documented in `docs/audits/` (start with `00-AUDIT-REPORT-…`). This directory describes the release candidate that preceded that fix and is kept unchanged otherwise.
+
 ## Release decision
 
 **NOT CERTIFIED for production. Conditional GO to a disposable/approved staging environment** after the read-only pre-flight in `10`. Production certification is **BLOCKED**: no staging or production access, no `.git` to prove commit parity, no real PostgREST/Supabase, no sandbox provider callbacks.

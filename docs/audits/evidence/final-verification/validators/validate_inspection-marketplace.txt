@@ -1,0 +1,39 @@
+PASS inspection services use the real DB adapter
+PASS canonical singular inspection API is mounted
+PASS plural inspection API remains backward compatible
+PASS provider routes enforce ownership
+PASS private report lookup requires authentication
+PASS customer booking lookup is access checked
+PASS customer cancellation passes the correct argument order
+PASS provider booking mutations verify provider ownership
+PASS report mutations verify provider/customer/admin access
+PASS booking slots are provider-aware
+PASS booking race is backed by a DB unique active-slot index
+PASS payment double-processing is backed by a DB unique index
+PASS settlement writes have matching payment columns
+PASS inspection API unwraps the shared response envelope
+PASS provider search returns the shape consumed by the marketplace UI
+PASS provider starting price is real and null-safe (never invented)
+PASS provider starting price stays synchronized with active packages
+PASS provider search does not query a nonexistent deleted_at column
+PASS marketplace is reachable from the main inspection view
+PASS provider card uses an in-app selection callback instead of a dead href
+PASS fake marketplace headline stats were removed
+PASS public provider search defaults to verified profiles
+PASS public provider profile rejects inactive or unverified providers
+PASS marketplace selection opens provider profile before booking
+PASS booking request has no client discount authority
+PASS booking total is derived only from canonical package price plus server mobile fee
+PASS stored booking discount is server-controlled
+PASS payment initiation derives amount from stored booking
+PASS booking route validates customer input before service execution
+PASS booking schema excludes client-controlled monetary fields
+PASS booking requires active verified provider
+PASS mobile booking respects provider mobile capability
+PASS workshop booking respects provider workshop capability
+PASS booking rejects invalid canonical package price
+PASS booking UI surfaces payment or booking errors
+PASS booking UI treats displayed total as a pre-booking estimate
+PASS booking date generation avoids UTC rollover
+
+Inspection marketplace validation: 37/37 PASS

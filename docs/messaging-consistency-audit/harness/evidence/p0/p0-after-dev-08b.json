@@ -1,0 +1,26 @@
+{
+  "results": [
+    {
+      "id": "08b-bootstrap-true-timeout-axios-8s-per-attempt",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me FAILED(net::ERR_ABORTED)",
+        "GET /api/v1/auth/me FAILED(net::ERR_ABORTED)",
+        "GET /api/v1/auth/me FAILED(net::ERR_ABORTED)",
+        "GET /api/v1/auth/me FAILED(net::ERR_ABORTED)"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+      ],
+      "recoveryUi": true,
+      "secondsToRecoveryUi": 28,
+      "meCalls": 4,
+      "final": "/?nav=chat",
+      "pass": true
+    }
+  ]
+}

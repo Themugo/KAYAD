@@ -1,0 +1,94 @@
+
+=== production activation ===
+PASS notification worker exposes testable canonical processor
+PASS notification worker has no undefined notification return path
+PASS notification worker returns canonical communication deliveries
+PASS push delivery reports an explicit success boolean
+PASS notification worker regression coverage exists
+PASS V14 finance migration is versioned in source
+PASS finance field mapping uses the canonical data access layer
+PASS finance API validates application amounts server-side
+PASS finance API enforces lifecycle transitions server-side
+PASS finance client exposes admin review transport
+PASS finance domain validator is current
+PASS dispute validator targets the current canonical surface
+PASS obsolete Dispute model removed
+PASS obsolete Evidence model removed
+PASS obsolete resolution service removed
+PASS single canonical notification worker remains
+
+V14 production activation validation: 16/16 PASS
+PASS gate: production activation
+
+=== finance domain ===
+PASS canonical buyer financing surface
+PASS legacy FinancingView is truthful compatibility surface
+PASS real loan transport
+PASS admin review transport
+PASS server-side application validation
+PASS server-side lifecycle transitions
+PASS admin-only review route
+PASS admin-only status route
+
+Finance domain gate: 8/8 PASS
+PASS gate: finance domain
+
+=== subscription domain ===
+PASS authoritative plan catalogue
+PASS subscription history table
+PASS atomic activation retires previous active entitlement
+PASS RLS blocks dealer direct mutation
+PASS single active entitlement invariant
+PASS atomic cancel/reactivate
+PASS atomic admin grant/revoke
+PASS payment uses verified subscription activation
+PASS payment cannot activate from client success response
+PASS dealer listing gate uses subscription entitlement
+PASS admin package route uses atomic contract
+PASS zero-cost onboarding uses subscription contract
+PASS dealer route has no local plan catalogue
+PASS frontend loads server plans
+PASS admin query parameters are validated
+PASS subscription admin routes use subscription schema
+
+Subscription domain E2E: 16/16 PASS
+PASS gate: subscription domain
+
+=== inspection/chat realtime ===
+PASS inspection order bridges to canonical execution record
+PASS inspection order establishes persistent inspection chat
+PASS assignment adds inspector to inspection chat
+PASS inspection submission persists checklist and evidence
+PASS inspection completion emits realtime update
+PASS chat writes use atomic database RPC
+PASS chat seen uses atomic database RPC
+PASS inspection socket room is participant-authorized
+PASS frontend has canonical inspection socket channel
+PASS database bridge stores chat linkage and inspection evidence/results fields
+
+Inspection → Chat/Realtime E2E validation: 10/10 PASS
+PASS gate: inspection/chat realtime
+
+=== admin control plane ===
+PASS - canonical control-plane snapshot exists
+PASS - snapshot reads authoritative Supabase tables
+PASS - command-center mutations emit realtime updates
+PASS - Socket.IO has authenticated control-plane room
+PASS - frontend subscribes to control-plane realtime
+PASS - frontend uses canonical snapshot API
+PASS - governance reads/writes canonical Supabase tables
+PASS - governance approval state is enforced
+PASS - admin mutations broadcast control-plane changes
+PASS - operations routes delegate to command center
+PASS - legacy dispute model is absent from control-plane paths
+
+Admin/control-plane E2E validation: 11/11 passed.
+PASS gate: admin control plane
+
+=== live API ===
+BLOCKED live API certification: KAYAD_CERT_EMAIL/KAYAD_CERT_PASSWORD are not configured.
+
+=== provider certification ===
+BLOCKED provider certification: missing email, sms credentials/recipients.
+
+V14.3 controlled certification gate: PASS WITH LIVE GATES EXPLICITLY IDENTIFIED

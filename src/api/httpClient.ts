@@ -103,6 +103,18 @@ const shouldAttemptRefresh = (kind: AuthEndpointKind) =>
 const shouldDispatchAuthExpired = (kind: AuthEndpointKind) =>
   kind === 'other' || kind === 'refresh';
 
+/** True only when the server explicitly rejected the credential: 401, or a 403
+ * that is an authorization/session verdict rather than a CSRF-token mismatch.
+ * Network errors (no response), timeouts, 5xx, 429 and CSRF failures are
+ * "unknown", never "logged out". */
+export const isDefinitiveSessionRejection = (err: unknown): boolean => {
+  const response = (err as { response?: { status?: number; data?: { message?: unknown } } } | undefined)?.response;
+  const status = response?.status;
+  if (status === 401) return true;
+  if (status === 403) return !/csrf/i.test(String(response?.data?.message ?? ''));
+  return false;
+};
+
 const refreshSession = async (): Promise<void> => {
   if (!refreshSessionPromise) {
     refreshSessionPromise = api
@@ -146,7 +158,15 @@ api.interceptors.response.use(
       try {
         await refreshSession();
         return api.request(original);
-      } catch {
+      } catch (refreshError) {
+        // Only a DEFINITIVE rejection of the refresh credential (401, or a 403
+        // that is not a CSRF problem) proves the session is over. A refresh that
+        // failed for any other reason (network error, timeout, 5xx, CORS, a CSRF
+        // mismatch) tells us nothing about the session: surface THAT error so
+        // callers can show a recoverable state, and never broadcast expiry.
+        if (!isDefinitiveSessionRejection(refreshError)) {
+          return Promise.reject(refreshError);
+        }
         // A normal login/registration/session-probe failure must not be
         // converted into a global redirect signal. A refresh failure is the
         // explicit session-expiry boundary.

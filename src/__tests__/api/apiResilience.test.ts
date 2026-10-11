@@ -51,14 +51,49 @@ describe('api client resilience', () => {
     expect(createConfig.timeout).toBeGreaterThan(0);
   });
 
-  it('401 on a protected data endpoint dispatches kayad:auth-expired after refresh fails', async () => {
+  it('401 on a protected data endpoint dispatches kayad:auth-expired when the refresh credential is DEFINITIVELY rejected', async () => {
+    // Updated for the Messages-redirect fix: this test used to reject the refresh call with a bare
+    // network Error and expect "expired". A refresh that fails for unknown reasons is not proof the
+    // session ended (see the next test); only an explicit 401/403 verdict is.
     const listener = vi.fn();
     window.addEventListener('kayad:auth-expired', listener);
-
-    const error = { response: { status: 401 }, config: { url: '/cars' } };
-    await expect(handlers.responseErr(error)).rejects.toBe(error);
-    expect(listener).toHaveBeenCalledTimes(1);
+    for (const refreshFailure of [
+      { response: { status: 401 } },
+      { response: { status: 403, data: { message: 'Refresh token expired — please login again' } } },
+    ]) {
+      axiosInstance.post.mockRejectedValueOnce(refreshFailure);
+      const error = { response: { status: 401 }, config: { url: '/cars' } };
+      await expect(handlers.responseErr(error)).rejects.toBe(error);
+    }
+    expect(listener).toHaveBeenCalledTimes(2);
     window.removeEventListener('kayad:auth-expired', listener);
+  });
+
+  it('401 then a refresh that fails for UNKNOWN reasons (network / timeout / 5xx / 429 / CSRF) is NOT session expiry', async () => {
+    const listener = vi.fn();
+    window.addEventListener('kayad:auth-expired', listener);
+    const failures = [
+      new Error('refresh unavailable'), // no response: network error / timeout / CORS
+      { response: { status: 500 } },
+      { response: { status: 503 } },
+      { response: { status: 429 } },
+      { response: { status: 403, data: { message: 'CSRF token validation failed' } } },
+    ];
+    for (const refreshFailure of failures) {
+      axiosInstance.post.mockRejectedValueOnce(refreshFailure);
+      const error = { response: { status: 401 }, config: { url: '/auth/me' } };
+      // the caller receives the refresh failure (so it can tell "unknown" from "401"), not the stale 401
+      await expect(handlers.responseErr(error)).rejects.toBe(refreshFailure);
+    }
+    expect(listener).not.toHaveBeenCalled();
+    expect(axiosInstance.post).toHaveBeenCalledTimes(failures.length); // one refresh per probe: no loop
+    window.removeEventListener('kayad:auth-expired', listener);
+  });
+
+  it('session probe: a refresh that definitively fails still surfaces the original 401 (confirmed signed out)', async () => {
+    axiosInstance.post.mockRejectedValueOnce({ response: { status: 403, data: { message: 'Refresh token not found or revoked' } } });
+    const error = { response: { status: 401 }, config: { url: '/v1/auth/me' } };
+    await expect(handlers.responseErr(error)).rejects.toBe(error);
   });
 
   it('login/register/session-probe 401s do NOT dispatch the expiry event', async () => {

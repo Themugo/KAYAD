@@ -1,0 +1,8 @@
+KAYAD production deployment verification
+Deployment URL: (not supplied)
+Public URL: https://www.kayad.space
+API URL: https://api.kayad.space
+
+Production verification FAILED:
+FAIL Deployment URL: invalid URL (Invalid URL)
+FAIL Deployment URL: deployment command returned no URL

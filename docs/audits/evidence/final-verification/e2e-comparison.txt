@@ -1,0 +1,66 @@
+# Repo e2e (e2e/playwright.local.config.ts wrapper, chromium only, default grep set) — per-test outcome
+## pre-fix RC tree, no backend
+  ✘   1 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer
+  ✘   2 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding › deale
+  ✘   3 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding › priva
+  ✘   4 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboarding › insp
+  ✘   5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls —
+  ✘   6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls —
+  ✓   7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls �
+  ✓   8 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls �
+  ✘   9 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls �
+  ✓  10 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace controls �
+  ✘  11 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls �
+  ✘  12 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification —
+  ✘  13 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification —
+  ✘  14 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification —
+  ✓  15 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:66:3 › Workflow certification —
+  ✓  16 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:73:3 › Workflow certification —
+  ✘  17 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification —
+  ✘  18 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification —
+  ✘  19 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certification �
+
+## fixed tree, no backend
+  ✘   1 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer
+  ✘   2 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding › deale
+  ✘   3 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding › priva
+  ✘   4 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboarding › insp
+  ✘   5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls —
+  ✘   6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls —
+  ✓   7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls �
+  ✓   8 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls �
+  ✘   9 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls �
+  ✓  10 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace controls �
+  ✘  11 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls �
+  ✘  12 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification —
+  ✘  13 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification —
+  ✘  14 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification —
+  ✓  15 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:66:3 › Workflow certification —
+  ✓  16 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:73:3 › Workflow certification —
+  ✘  17 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification —
+  ✘  18 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification —
+  ✘  19 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certification �
+
+## fixed tree, real backend on :5000
+  ✘   1 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer
+  ✘   2 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding › deale
+  ✘   3 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding › priva
+  ✘   4 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboarding › insp
+  ✘   5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls —
+  ✘   6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls —
+  ✓   7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls �
+  ✓   8 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls �
+  ✘   9 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls �
+  ✓  10 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace controls �
+  ✘  11 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls �
+  ✘  12 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification —
+  ✘  13 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification —
+  ✘  14 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification —
+  ✓  15 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:66:3 › Workflow certification —
+  ✓  16 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:73:3 › Workflow certification —
+  ✘  17 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification —
+  ✘  18 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification —
+  ✘  19 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certification �
+
+diff(RC vs fixed, no backend): IDENTICAL
+diff(RC vs fixed+backend): IDENTICAL

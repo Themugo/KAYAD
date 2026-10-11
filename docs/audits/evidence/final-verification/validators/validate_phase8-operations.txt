@@ -1,0 +1,18 @@
+node:fs:440
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '/home/claude/msg/v4/KAYAD-main/DISASTER_RECOVERY.md'
+    at Object.readFileSync (node:fs:440:20)
+    at read (file:///home/claude/msg/v4/KAYAD-main/scripts/validate-phase8-operations.mjs:8:18)
+    at file:///home/claude/msg/v4/KAYAD-main/scripts/validate-phase8-operations.mjs:20:71
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/claude/msg/v4/KAYAD-main/DISASTER_RECOVERY.md'
+}
+
+Node.js v22.22.2

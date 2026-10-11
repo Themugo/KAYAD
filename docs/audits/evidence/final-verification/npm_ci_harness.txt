@@ -1,0 +1,6 @@
+$ npm ci
+
+added 24 packages, and audited 25 packages in 616ms
+
+found 0 vulnerabilities
+exit=0

@@ -20,9 +20,31 @@ import {
   type Permission,
 } from '../utils/permissions';
 
+/**
+ * The four honest answers to "who is signed in?":
+ *  - loading:         the session check has not finished (guards wait, never redirect)
+ *  - authenticated:   the server confirmed a valid session
+ *  - unauthenticated: the server explicitly said there is none (401) - guards send to login
+ *  - error:           we could NOT find out (network/timeout/5xx/CORS/malformed reply).
+ *                     No access is granted, but it is NOT "logged out": guards show a
+ *                     retryable state instead of redirecting a possibly-valid user.
+ */
+export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'error';
+
+export interface SessionError {
+  /** Coarse, non-sensitive category for display/diagnosis. */
+  kind: 'network' | 'server' | 'rate_limited' | 'csrf' | 'forbidden' | 'unexpected';
+  status?: number;
+}
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  /** See SessionStatus. `loading` is exactly `sessionStatus === 'loading'`. */
+  sessionStatus: SessionStatus;
+  sessionError: SessionError | null;
+  /** Re-run the (bounded) session check, e.g. from the recovery UI. */
+  retrySession: () => void;
   isAuth: boolean;
   isEmailVerified: boolean;
   isAdmin: boolean;
@@ -74,13 +96,37 @@ const normalizeUser = (u: any): User | null => {
   return { ...u, _id: id, id: id };
 };
 
+/** Bounded bootstrap policy: 1 try + 2 retries, then settle in `error`. */
+export const SESSION_PROBE_RETRY_DELAYS_MS = [600, 1800] as const;
+/** Per-attempt cap for the session probe (shorter than the shared 30s client timeout). */
+export const SESSION_PROBE_TIMEOUT_MS = 8000;
+
+/** Maps a failed session probe to either a confirmed rejection (the server
+ * said no) or an unknown/retryable failure. Duck-typed on purpose. */
+export function classifySessionProbeFailure(err: unknown): { confirmed: boolean; error: SessionError } {
+  const e = err as { kind?: string; status?: number } | null | undefined;
+  const status = typeof e?.status === 'number' ? e.status : undefined;
+  if (e?.kind === 'invalid_credentials' || status === 401) return { confirmed: true, error: { kind: 'unexpected', status } };
+  if (e?.kind === 'csrf') return { confirmed: false, error: { kind: 'csrf', status } }; // before the generic 403 rule
+  // 403 on the probe = the account itself is refused (suspended / unverified): not transient, no access.
+  if (e?.kind === 'forbidden' || status === 403) return { confirmed: true, error: { kind: 'forbidden', status } };
+  if (e?.kind === 'rate_limited' || status === 429) return { confirmed: false, error: { kind: 'rate_limited', status } };
+  if (e?.kind === 'network') return { confirmed: false, error: { kind: 'network' } };
+  if (typeof status === 'number' && status >= 500) return { confirmed: false, error: { kind: 'server', status } };
+  return { confirmed: false, error: { kind: 'unexpected', status } };
+}
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUserState] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus>('loading');
+  const [sessionError, setSessionError] = useState<SessionError | null>(null);
+  const loading = sessionStatus === 'loading';
 
   // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: every auth action that
   // can set `user` (the mount-time getMe() bootstrap, login(), logout(), the
@@ -100,41 +146,87 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const setUser = (u: User | null) => {
     setUserState(u);
-    if (u) setPostHogUser(u);
+    if (u) { setPostHogUser(u); setSessionStatus('authenticated'); setSessionError(null); }
     else   clearPostHogUser();
   };
 
-  // On mount: fetch user via cookie-based auth (HttpOnly token cookie)
-  useEffect(() => {
-    const handleAuthExpired = () => {
-      authActionSeq.current += 1;
-      clearCSRFToken(); setUser(null); setLoading(false);
-    };
-    window.addEventListener('kayad:auth-expired', handleAuthExpired);
+  /** Settle the session as confirmed-signed-out (never used for transient failures). */
+  const settleUnauthenticated = () => { setUserState(null); clearPostHogUser(); setSessionStatus('unauthenticated'); setSessionError(null); };
 
-    const mySeq = ++authActionSeq.current;
-    getMe().then(user => ({ user }))
-      .then(data => {
+  // Session bootstrap: ask the server (cookie-based, HttpOnly token) who is signed in.
+  // Transient failures are retried a bounded number of times and then settle in
+  // `error` - they are never turned into "unauthenticated" and never grant access.
+  const probeSession = useCallback(async (mySeq: number) => {
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        const me = await getMe({ timeoutMs: SESSION_PROBE_TIMEOUT_MS });
         // A newer auth action (login/logout/another bootstrap) has already
         // run since this request started - its result is stale, discard it.
         if (authActionSeq.current !== mySeq) return;
-        setUser(normalizeUser(data.user));
-      })
-      .catch(() => { /* not authenticated — user stays null */ })
-      .finally(() => { if (authActionSeq.current === mySeq) setLoading(false); });
-
-    return () => window.removeEventListener('kayad:auth-expired', handleAuthExpired);
+        const normalized = normalizeUser(me);
+        if (normalized) setUser(normalized); else settleUnauthenticated();
+        return;
+      } catch (err) {
+        if (authActionSeq.current !== mySeq) return;
+        const { confirmed, error } = classifySessionProbeFailure(err);
+        if (confirmed) { settleUnauthenticated(); return; }
+        const delay = SESSION_PROBE_RETRY_DELAYS_MS[attempt];
+        if (delay === undefined) {
+          // Out of retries: remain signed-out-for-access but report "could not verify".
+          setUserState(null);
+          setSessionError(error);
+          setSessionStatus('error');
+          return;
+        }
+        await sleep(delay);
+        if (authActionSeq.current !== mySeq) return;
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const retrySession = useCallback(() => {
+    const mySeq = ++authActionSeq.current;
+    setSessionStatus('loading');
+    setSessionError(null);
+    void probeSession(mySeq);
+  }, [probeSession]);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      authActionSeq.current += 1;
+      clearCSRFToken(); settleUnauthenticated();
+    };
+    window.addEventListener('kayad:auth-expired', handleAuthExpired);
+    void probeSession(++authActionSeq.current);
+    return () => window.removeEventListener('kayad:auth-expired', handleAuthExpired);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // When connectivity returns while we are stuck in `error`, check again once.
+  useEffect(() => {
+    if (sessionStatus !== 'error') return undefined;
+    const onOnline = () => retrySession();
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [sessionStatus, retrySession]);
 
   const login = useCallback(async (credentialsOrEmail: { email: string; password: string } | string, passwordArg?: string) => {
     const email = typeof credentialsOrEmail === 'string' ? credentialsOrEmail : credentialsOrEmail.email;
     const password = typeof credentialsOrEmail === 'string' ? (passwordArg || '') : credentialsOrEmail.password;
     const mySeq = ++authActionSeq.current;
-    const user = await authLogin(email, password);
+    let user;
+    try {
+      user = await authLogin(email, password);
+    } catch (err) {
+      // Bumping the sequence discarded any in-flight bootstrap probe; do not
+      // leave the app stuck in `loading` when the sign-in attempt itself fails.
+      if (authActionSeq.current === mySeq) setSessionStatus((s) => (s === 'loading' ? 'unauthenticated' : s));
+      throw err;
+    }
     const data = { success: true, user };
     if (authActionSeq.current === mySeq) {
       setUser(normalizeUser(data.user));
-      setLoading(false);
     }
     return data;
   }, []);
@@ -153,9 +245,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try { await authLogout(); } catch (error) { console.error('Logout failed:', error); }
     clearCSRFToken();
     if (authActionSeq.current === mySeq) {
-      setUser(null);
-      setLoading(false);
+      settleUnauthenticated();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateProfile = useCallback(async (body: any) => {
@@ -184,13 +276,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const can = useCallback((perm: Permission) => userHasPermission(user, perm), [user]);
 
   const value = useMemo(() => ({
-    user, loading,
+    user, loading, sessionStatus, sessionError, retrySession,
     isAuth, isEmailVerified,
     isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
     login, register, logout, setUser, updateProfile,
-  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser, updateProfile]);
+  }), [user, loading, sessionStatus, sessionError, retrySession, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser, updateProfile]);
 
   return (
     <AuthCtx.Provider value={value}>
@@ -216,40 +308,74 @@ interface RequireAuthProps {
   children: ReactNode;
 }
 
+/**
+ * Shown by a guard when the session could not be VERIFIED (network/timeout/5xx).
+ * It grants nothing and does not redirect: the person may still hold a valid
+ * session, so they get an explicit retry (and, as their own choice, sign-in).
+ */
+export function SessionRecovery() {
+  const { sessionError, retrySession } = useAuth();
+  const loc = useLocation();
+  const detail = sessionError?.kind === 'network'
+    ? 'We could not reach the KAYAD servers. Check your connection.'
+    : sessionError?.kind === 'server'
+      ? `The service is temporarily unavailable${sessionError.status ? ` (error ${sessionError.status})` : ''}.`
+      : sessionError?.kind === 'rate_limited'
+        ? 'Too many requests right now. Please wait a moment.'
+        : sessionError?.kind === 'csrf'
+          ? 'Your browser could not complete the security handshake.'
+          : 'We received an unexpected reply from the server.';
+  return (
+    <div data-testid="session-recovery" role="alert" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '0.75rem', textAlign: 'center', padding: '2rem' }}>
+      <h1 style={{ fontSize: '1.25rem', fontWeight: 700 }}>We couldn&apos;t verify your session</h1>
+      <p style={{ maxWidth: 420, color: '#64748b', fontSize: 14 }}>{detail} You have not been signed out.</p>
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button type="button" data-testid="session-retry" onClick={retrySession} style={{ padding: '0.6rem 1.1rem', borderRadius: 10, fontWeight: 700, background: '#0A3340', color: '#fff' }}>Try again</button>
+        <a href={loginPathFor(loc)} style={{ padding: '0.6rem 1.1rem', borderRadius: 10, fontWeight: 700, border: '1px solid #BDE5DE' }}>Sign in</a>
+      </div>
+    </div>
+  );
+}
+
 export function RequireAuth({ children }: RequireAuthProps) {
-  const { isAuth, loading } = useAuth();
+  const { isAuth, loading, sessionStatus } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
   if (!isAuth) return <Navigate to={loginPathFor(loc)} replace />;
   return children;
 }
 
 export function RequireDealer({ children }: RequireAuthProps) {
-  const { isDealer, isAdmin, user, loading } = useAuth();
+  const { isDealer, isAdmin, user, loading, isAuth, sessionStatus } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
   if (!isDealer && !isAdmin) return <Navigate to="/" replace />;
   return children;
 }
 
 export function RequireSeller({ children }: RequireAuthProps) {
-  const { isSeller, user, loading } = useAuth();
+  const { isSeller, user, loading, isAuth, sessionStatus } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
   if (!isSeller) return <Navigate to="/" replace />;
   return children;
 }
 
 export function RequireEmailVerified({ children }: RequireAuthProps) {
-  const { isEmailVerified, loading } = useAuth();
+  const { isEmailVerified, loading, isAuth, sessionStatus } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
   if (!isEmailVerified) return <Navigate to={`${loginPathFor(loc)}${loginPathFor(loc).includes("?") ? "&" : "?"}verify=required`} replace />;
   return children;
 }
 
 export function RequireAdmin({ children }: RequireAuthProps) {
-  const { isAdmin, isAuth, loading } = useAuth();
+  const { isAdmin, isAuth, loading, sessionStatus } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
   if (!isAuth) return <Navigate to={loginPathFor(loc)} replace />;
   if (!isAdmin) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
@@ -291,9 +417,10 @@ interface RequireAdminPageProps extends RequireAuthProps {
 }
 
 export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
-  const { user, isAdmin, isAuth, loading, can } = useAuth();
+  const { user, isAdmin, isAuth, loading, can, sessionStatus } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
   if (!isAuth) return <Navigate to={loginPathFor(loc)} replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 

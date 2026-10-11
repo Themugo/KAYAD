@@ -74,9 +74,9 @@ export class AuthApiError extends Error {
   }
 }
 
-async function authFetch(path: string, options: RequestInit = {}): Promise<AuthResponse> {
+async function authFetch(path: string, options: RequestInit & { timeout?: number } = {}): Promise<AuthResponse> {
   try {
-    return await request<AuthResponse>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+    return await request<AuthResponse>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string>, timeout: options.timeout });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     const kind: AuthErrorKind = error.status === 403 && /csrf/i.test(error.message)
@@ -103,20 +103,34 @@ async function authFetch(path: string, options: RequestInit = {}): Promise<AuthR
 /** Session restoration - called on app mount. Relies entirely on the
  * httpOnly refresh/access token cookies already being present in the
  * browser from a prior login; there is nothing else for the frontend
- * to check. A 401 here is the normal, expected "not logged in" case,
- * not an error to alarm the user about - the caller is expected to
- * treat a thrown AuthApiError here as "render the logged-out UI",
- * not surface it as a visible error message. */
-export async function getMe(): Promise<BackendUser | null> {
+ * to check.
+ *
+ * Returns the user (signed in) or null (the server answered 401: confirmed
+ * signed out). ANYTHING ELSE - network failure, timeout, 5xx, 429, CSRF, a
+ * 403, or a malformed 200 - is thrown as an AuthApiError: the caller must
+ * treat that as "session state unknown", never as "logged out". */
+export async function getMe(opts: { timeoutMs?: number } = {}): Promise<BackendUser | null> {
+  let res: AuthResponse;
   try {
-    const res = await authFetch('/api/v1/auth/me', { method: 'GET' });
-    return res.user ?? null;
+    res = await authFetch('/api/v1/auth/me', { method: 'GET', timeout: opts.timeoutMs });
   } catch (err) {
+    // ONLY an explicit 401 means "there is no valid session". Network errors,
+    // timeouts, 5xx, 429, CSRF and 403 are rethrown as typed AuthApiErrors so
+    // the caller can tell "confirmed signed out" from "could not find out".
     if (err instanceof AuthApiError && (err.kind === 'invalid_credentials' || err.status === 401)) {
       return null;
     }
     throw err;
   }
+  // Response contract: { success: true, user: { id|_id, ... } }. A 200 that
+  // does not match (an HTML SPA fallback from a wrong API host, a proxy error
+  // page, a truncated body) is neither "signed in" nor "signed out" - fail
+  // safely as an unknown, retryable error rather than guessing.
+  const user = (res as { user?: unknown } | null | undefined)?.user;
+  if (res && typeof res === 'object' && user && typeof user === 'object' && ((user as BackendUser).id || (user as BackendUser)._id)) {
+    return user as BackendUser;
+  }
+  throw new AuthApiError('Unexpected response while checking your session.', 'unknown', 200);
 }
 
 export async function logout(): Promise<void> {

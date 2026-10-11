@@ -1,0 +1,49 @@
+PASS canonical registration schema contains dealer fields
+PASS onboarding maps buyer to backend user role
+PASS dealer onboarding enforces business name
+PASS dealer onboarding enforces location
+PASS backend enforces dealer business name
+PASS backend enforces dealer location
+PASS verification URL targets frontend verification page
+PASS frontend verification page exists
+PASS verification page calls backend token endpoint
+PASS login handles email verification gate
+PASS registration is account-creation only and does not issue a session
+PASS registration duplicate email returns conflict
+PASS verification delivery is non-blocking after atomic registration
+PASS welcome email is non-blocking
+PASS password reset email is non-blocking
+PASS forgot-password page exists
+PASS reset-password page exists
+PASS public auth routes are wired into the application shell
+PASS force-password-change route is wired into the application shell
+PASS inspector onboarding validates required application fields client-side
+PASS API transport keeps one canonical /api base across env forms
+PASS production /api env does not create an empty Axios base URL
+PASS inspector application uses canonical shared API transport
+PASS CSRF bootstrap token is retained for cross-subdomain requests
+PASS session expiry retries once through refresh before clearing auth state
+PASS force-password-change state is returned safely from auth responses
+PASS backend mounts the canonical versioned auth router
+PASS backend exposes the CSRF route on the auth router
+PASS production verifier probes the canonical CSRF endpoint
+PASS registration duplicate email returns 409
+PASS registration referral side effect is non-blocking
+PASS buyer onboarding uses canonical user role
+PASS private seller onboarding uses individual_seller role
+PASS dealer onboarding uses dealer role and required business fields
+PASS inspector onboarding uses dedicated application endpoint
+PASS inspector application validates specialties before submit
+PASS inspector backend validates the canonical application contract
+PASS inspector admin approve/reject payloads are validated
+PASS registration remains a standalone canonical route
+PASS auth modal does not embed a second registration or sign-in flow
+PASS legacy auth modal re-exports canonical surface
+PASS frontend registration uses canonical auth API service
+PASS verification page uses canonical verification endpoint
+PASS resend verification route exists
+PASS resend verification delivery is non-blocking
+PASS protected API enforces email verification when configured
+PASS dealer approval remains server-controlled
+
+Registration/onboarding source gate: 47/47 PASS
