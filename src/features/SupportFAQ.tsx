@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   Car,
@@ -15,8 +15,9 @@ import {
   UserRound,
 } from 'lucide-react';
 import { Card, Button, Input } from '../components/ui';
+import { getCMSFaqs, trackFaqOpened, CMSFaqItem } from '../services/cmsFaqApi';
 
-export type FAQCategory = 'all' | 'marketplace' | 'auctions' | 'inspections' | 'escrow' | 'financing' | 'transfer';
+export type FAQCategory = 'all' | 'marketplace' | 'auctions' | 'inspections' | 'escrow' | 'financing' | 'transfer' | 'account';
 
 export interface FAQItem {
   id: string;
@@ -30,6 +31,43 @@ export interface FAQItem {
 }
 
 const iconClass = 'w-3.5 h-3.5';
+
+// Presentation (icon, filter-chip label, where "nextStep" sends a
+// visitor who isn't routed to a support case) for a backend FAQ row,
+// keyed by the same category values the rows are seeded with
+// (supabase/migrations/20261011210000_support_faq_content_and_seed.sql).
+// The backend owns the question/answer/nextStep *content*; this map
+// only owns how a category looks and navigates, so it stays small and
+// never needs a migration of its own to change an icon or a label.
+const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; nav: string | null }> = {
+  marketplace: { label: 'Marketplace', icon: <Car className={iconClass} />, nav: 'marketplace' },
+  auctions: { label: 'Auctions', icon: <Gavel className={iconClass} />, nav: 'discovery' },
+  inspections: { label: 'Pre-Purchase Inspection', icon: <ClipboardCheck className={iconClass} />, nav: 'inspections' },
+  escrow: { label: 'Escrow', icon: <LockKeyhole className={iconClass} />, nav: 'escrow' },
+  financing: { label: 'Financing', icon: <Landmark className={iconClass} />, nav: 'financing' },
+  transfer: { label: 'Transfer & Ownership', icon: <FileText className={iconClass} />, nav: null },
+  account: { label: 'Account & Access', icon: <UserRound className={iconClass} />, nav: 'profile' },
+};
+
+/** A row fetched live is treated as "popular" past the same threshold the
+ * seed used to mark the originally-curated highlights (100) - and, unlike
+ * the old static boolean, this one genuinely moves: every expand reports
+ * back to the same popularity column the backend already sorts by. */
+const POPULAR_THRESHOLD = 50;
+
+function fromCMS(item: CMSFaqItem): FAQItem {
+  const meta = CATEGORY_META[item.category] || { label: item.category || 'General', icon: <HelpCircle className={iconClass} />, nav: null };
+  return {
+    id: item.id,
+    category: (item.category as FAQCategory) || 'all',
+    categoryLabel: meta.label,
+    categoryIcon: meta.icon,
+    question: item.question,
+    answer: item.answer,
+    nextStep: item.nextStep || undefined,
+    popular: item.popularity >= POPULAR_THRESHOLD,
+  };
+}
 
 export const FAQ_DATA: FAQItem[] = [
   {
@@ -175,15 +213,31 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
   const [selectedCategory, setSelectedCategory] = useState<FAQCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedIds, setExpandedIds] = useState<string[]>(['faq-market-1', 'faq-esc-1']);
+  // Render the bundled, already-reviewed copy immediately (no blank/loading
+  // state on a public help page), then swap in the live backend list if
+  // /api/cms/faqs answers with rows - that source is what stays current
+  // when staff edit or add a question, without a frontend deploy.
+  const [items, setItems] = useState<FAQItem[]>(FAQ_DATA);
+  const [isLive, setIsLive] = useState(false);
 
-  const filteredFaqs = useMemo(() => FAQ_DATA.filter(item => {
+  useEffect(() => {
+    let cancelled = false;
+    void getCMSFaqs().then(rows => {
+      if (cancelled || rows.length === 0) return;
+      setItems(rows.map(fromCMS));
+      setIsLive(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const filteredFaqs = useMemo(() => items.filter(item => {
     if (selectedCategory !== 'all' && item.category !== selectedCategory) return false;
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
     return [item.question, item.answer, item.categoryLabel, item.nextStep]
       .filter(Boolean)
       .some(value => value!.toLowerCase().includes(q));
-  }), [selectedCategory, searchQuery]);
+  }), [items, selectedCategory, searchQuery]);
 
   const categories: { id: FAQCategory; label: string; icon: React.ReactNode }[] = [
     { id: 'all', label: 'All help', icon: <HelpCircle className={iconClass} /> },
@@ -192,11 +246,16 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
     { id: 'inspections', label: 'Inspection', icon: <ClipboardCheck className={iconClass} /> },
     { id: 'escrow', label: 'Escrow', icon: <LockKeyhole className={iconClass} /> },
     { id: 'financing', label: 'Financing', icon: <Landmark className={iconClass} /> },
-    { id: 'transfer', label: 'Account & transfer', icon: <FileText className={iconClass} /> },
+    { id: 'transfer', label: 'Transfer', icon: <FileText className={iconClass} /> },
+    { id: 'account', label: 'Account & access', icon: <UserRound className={iconClass} /> },
   ];
 
-  const toggleItem = (id: string) => {
-    setExpandedIds(prev => prev.includes(id) ? prev.filter(value => value !== id) : [...prev, id]);
+  const toggleItem = (faq: FAQItem) => {
+    setExpandedIds(prev => {
+      const expanding = !prev.includes(faq.id);
+      if (expanding && isLive) trackFaqOpened(faq.id);
+      return expanding ? [...prev, faq.id] : prev.filter(value => value !== faq.id);
+    });
   };
 
   const handleNextStep = (faq: FAQItem) => {
@@ -212,7 +271,13 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
       onContactSupport?.();
       return;
     }
-    onNavigate(faq.nextStep === 'Open Marketplace' ? 'marketplace' : faq.nextStep === 'Open Auction' ? 'discovery' : faq.nextStep === 'Open Inspection' ? 'inspections' : faq.nextStep === 'Open Escrow' ? 'escrow' : faq.nextStep === 'Open Financing' ? 'financing' : 'support');
+    const nav = faq.nextStep === 'Open Marketplace' ? 'marketplace'
+      : faq.nextStep === 'Open Auction' ? 'discovery'
+      : faq.nextStep === 'Open Inspection' ? 'inspections'
+      : faq.nextStep === 'Open Escrow' ? 'escrow'
+      : faq.nextStep === 'Open Financing' ? 'financing'
+      : CATEGORY_META[faq.category]?.nav;
+    onNavigate(nav || 'support');
   };
 
   return (
@@ -222,10 +287,10 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
             <div className="max-w-2xl space-y-2">
               <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#9BE5D9]">
-                <ShieldCheck className="w-3.5 h-3.5" /> Verified help for the KAYAD journey
+                <ShieldCheck className="w-3.5 h-3.5" /> Checked against how KAYAD actually works
               </div>
               <h2 id="support-knowledge-heading" className="text-2xl sm:text-3xl font-black tracking-tight">Find the answer before you open a case.</h2>
-              <p className="text-sm leading-6 text-[#BDE5DE]">Search the same language used across Marketplace, Auctions, Inspection, Escrow, Financing and transaction fulfilment.</p>
+              <p className="text-sm leading-6 text-[#BDE5DE]">Every answer here is written against the real Marketplace, Auction, Inspection, Escrow and Financing workflows, not drafted separately from them. Still stuck after reading? Open a traceable case below.</p>
             </div>
             <div className="w-full lg:w-[380px]">
               <Input
@@ -243,7 +308,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
         <div className="px-4 sm:px-5 py-3 border-b border-[#D7E7E4] overflow-x-auto">
           <div className="flex items-center gap-1.5 min-w-max">
             {categories.map(category => {
-              const count = category.id === 'all' ? FAQ_DATA.length : FAQ_DATA.filter(item => item.category === category.id).length;
+              const count = category.id === 'all' ? items.length : items.filter(item => item.category === category.id).length;
               const active = selectedCategory === category.id;
               return (
                 <button
@@ -275,7 +340,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
             const expanded = expandedIds.includes(faq.id);
             return (
               <div key={faq.id} className={`rounded-2xl border bg-white overflow-hidden transition-shadow ${expanded ? 'border-[#176B87]/25 shadow-sm' : 'border-[#D7E7E4]'}`}>
-                <button type="button" onClick={() => toggleItem(faq.id)} className="w-full text-left px-4 sm:px-5 py-4 flex items-start gap-4">
+                <button type="button" onClick={() => toggleItem(faq)} className="w-full text-left px-4 sm:px-5 py-4 flex items-start gap-4">
                   <div className="mt-0.5 w-8 h-8 rounded-xl bg-[#EEF7F5] text-[#176B87] flex items-center justify-center shrink-0">{faq.categoryIcon}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -297,7 +362,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                           {faq.nextStep} <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       )}
-                      {onContactSupport && faq.nextStep !== 'Open support case' && (
+                      {onContactSupport && faq.nextStep !== 'Open a support case' && (
                         <button type="button" onClick={onContactSupport} className="inline-flex items-center gap-2 rounded-xl border border-[#D7E7E4] text-[#176B87] px-3.5 py-2.5 text-xs font-extrabold hover:bg-[#F6FAF9]">
                           Still need help
                         </button>

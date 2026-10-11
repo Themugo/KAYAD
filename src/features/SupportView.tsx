@@ -258,8 +258,8 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
             <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#9BE5D9]">
               <LifeBuoy className="w-4 h-4" /> KAYAD Resolution Center
             </div>
-            <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.02]">Help that follows the whole transaction.</h1>
-            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-[#BDE5DE]">Find an answer, open a traceable support case, or continue an existing case. One support surface for vehicles, auctions, inspections, escrow, financing, transfers and account access.</p>
+            <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.02]">One case number, the whole transaction.</h1>
+            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-[#BDE5DE]">A KAYAD case can carry a vehicle, auction, inspection, escrow or financing reference, so one thread and one visible status follow the problem from report to resolution — instead of messages scattered across listings, bids and chat.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={scrollToForm} className="inline-flex items-center gap-2 rounded-xl bg-white text-[#0A3340] px-4 py-3 text-xs font-extrabold hover:bg-[#EEF7F5] transition-colors">
                 Open a support case <ArrowRight className="w-4 h-4" />
@@ -273,10 +273,10 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
 
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#D7E7E4]">
           {[
-            { icon: Search, title: 'Find an answer', text: 'Search verified help' },
-            { icon: Ticket, title: 'Open a case', text: 'Create a traceable request' },
-            { icon: MessageSquare, title: 'Continue the case', text: 'Reply from your account' },
-            { icon: ShieldCheck, title: 'Reach resolution', text: 'Status stays visible' },
+            { icon: Search, title: 'Find an answer', text: 'Checked against how KAYAD works' },
+            { icon: Ticket, title: 'Open a case', text: 'A case number the moment you submit' },
+            { icon: MessageSquare, title: 'Continue the case', text: 'Reply from your account — nothing restarts' },
+            { icon: ShieldCheck, title: 'Reach resolution', text: 'Status stays visible until it is closed' },
           ].map(item => (
             <div key={item.title} className="px-4 py-4 sm:px-5">
               <item.icon className="w-4 h-4 text-[#176B87]" />
