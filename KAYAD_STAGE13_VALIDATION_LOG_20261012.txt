@@ -1,0 +1,40 @@
+PASS discovery does not expose raw server exception text
+PASS a failed refresh preserves the last successful list snapshot
+PASS headline state follows the selected auction tab and avoids a false empty flash during load
+PASS auction tabs are connected to an accessible results panel
+PASS signed-out saved tab does not show a false zero count
+PASS detail page distinguishes HTTP 404 from service/network failure
+PASS detail page offers retry and a route back to auction discovery
+PASS initial detail load uses the canonical sanitized bid list once
+PASS discovery regression tests cover sanitized failures and refresh preservation
+PASS canonical public live list excludes rejected listings and expired/not-yet-started auctions
+PASS scheduled listing, detail and public bid history hide rejected or deleted vehicles
+PASS published future setup remains openable before car lifecycle mirroring
+PASS backend regression tests cover rejected/deleted visibility, live time boundaries and scheduled detail parity
+PASS detail regression tests cover 404, outage and retry recovery
+Auction public error-state validation: 14/14 PASS
+PASS canonical auction discovery uses real auction transport
+PASS canonical live auction page uses canonical bid transport
+PASS bid request sends the real car-scoped endpoint
+PASS successful bid response triggers pending payment confirmation UI
+PASS live auction page consumes sanitized bids from the canonical auction detail response without a duplicate initial request
+PASS legacy audit report does not claim canonical auction UI has no real bid call
+6/6 checks passed
+
+Auction 360 hardening: 28/28 checks passed.
+
+Auction domain integrity: 24/24 checks passed.
+PASS canonical bid API remains unchanged
+PHASE7_PASS=8
+PASS escrow is created only for escrow-selected auctions
+PHASE8_PASS=14
+PASS: late bidding lock remains outside phase9
+PHASE9_PASS=21
+PASS: auction transport convergence is green
+PHASE10_PASS=32/32
+PASS socket server room contract
+Frontend runtime contract validation: PASS
+PASS src/api/httpRequest.ts exists
+Runtime integrity validation passed: 7/7
+PASS: 14A migration is the smallest possible: one JSONB column with a default, no policy changes
+Navigation convergence: 43/43 PASS

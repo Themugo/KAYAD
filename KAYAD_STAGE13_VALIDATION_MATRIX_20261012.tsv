@@ -1,0 +1,25 @@
+Gate	Status	Evidence	Limitations
+JavaScript/MJS syntax	PASS	1225/1225 node --check	Syntax only
+Frontend TS/TSX/JSX parse	PASS	657/657 TypeScript transpileModule files parsed	Not a typecheck
+Auction public error-state validator	PASS	14/14	Static source contracts
+Auction bid surface validator	PASS	6/6	Static source contracts
+Auction 360 hardening validator	PASS	28/28	Static source contracts
+Auction domain integrity validator	PASS	24/24	Static source contracts
+Auction phase 7 validator	PASS	8/8	Static source contracts
+Auction phase 8 validator	PASS	14/14	Static source contracts
+Auction phase 9 validator	PASS	21/21	Static source contracts
+Auction phase 10 validator	PASS	32/32	Static source contracts
+Frontend runtime contract validator	PASS	PASS	Static source contracts
+Runtime integrity validator	PASS	7/7	Static source contracts
+Navigation convergence validator	PASS	43/43	Static source contracts
+npm clean install	BLOCKED	npm ci failed with EAI_AGAIN registry DNS errors	Dependencies unavailable
+Required Node runtime	BLOCKED	Current v22.16.0; project requires >=22.22.2	Node upgrade unavailable here
+Frontend Vitest	NOT RUN	Dependency install unavailable	New tests authored
+Backend Jest	NOT RUN	Dependency install unavailable	New tests authored
+Full TypeScript typecheck	NOT RUN	Dependency install unavailable	Syntax parse is not typecheck
+Vite production build	NOT RUN	Dependency install unavailable	No build claim
+Playwright/browser E2E	NOT RUN	No browser E2E run in this pass	Responsive behavior unverified
+Hosted Starting soon API	BLOCKED	No live endpoint/log verification	Migration version 20261002190000 is local-only in Stage 12 evidence
+Supabase relation existence	BLOCKED	No live SQL query in this pass	Use runbook read-only checks
+Production mutation	NOT RUN	Explicitly prohibited for this task	No deploy/migration/payment/message
+Source validation log	PASS	KAYAD_STAGE13_VALIDATION_LOG_20261012.txt	Selected static validators only

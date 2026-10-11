@@ -4,7 +4,7 @@
 
 The customer auction floor requests three independent lists:
 
-- `GET /api/auctions?page=1&limit=100&status=live` — live auctions from `cars`.
+- `GET /api/auctions?page=1&limit=100&status=live` — live auctions from `cars`, excluding rejected listings and enforcing start/end time bounds.
 - `GET /api/auctions?page=1&limit=100&status=draft` — scheduled auctions from published rows in `auction_setups`.
 - `GET /api/auctions?page=1&limit=100&status=ended` — completed auctions from `cars`.
 
@@ -57,3 +57,20 @@ Regression coverage is in `src/__tests__/features/auctionsViewLoadFailure.test.t
 ## Release boundary
 
 A source patch cannot repair a missing table in the hosted database by itself. No production migration, deployment, live payment, or financial operation is performed by this runbook. After the deployed schema/configuration issue is resolved, rerun the auction-page tests and verify all three endpoints against the actual deployment.
+
+## Stage 13 source audit note — 2026-10-12
+
+The Stage 12 live migration-diff evidence packaged with this source includes migration version `20261002190000` in `evidence/stage12/local_not_hosted.txt`. That version corresponds to `20261002190000_auction_setup_publication_contract.sql`, which creates `public.auction_setups`.
+
+This is a concrete migration-parity warning and a plausible explanation for the scheduled-list failure, but it is **not proof that the relation is absent**: the hosted project could have received equivalent schema through another approved path. Verify against the exact Supabase project used by the deployed backend before changing schema:
+
+```sql
+select to_regclass('public.auction_setups') as auction_setups_relation;
+select count(*) as published_setup_count
+from public.auction_setups
+where publication_status = 'published';
+```
+
+If the relation is missing, stop and reconcile the ordered migration history with the owner-approved staging workflow. Do not manually create a second table or push all local-only migrations. If the relation exists, capture the sanitized API response and request ID, correlate backend logs, and verify the deployed backend points to that same project. The UI now hides raw generic server-error text, but this source-side improvement does not repair a hosted schema/configuration mismatch.
+
+Stage 13 also hardens the public live list against rejected listings and stale start/end boundaries, allows a valid published future setup to open before the car lifecycle mirror catches up, and blocks deleted/rejected listings from the public bid-history endpoint. These are source changes; the Jest/Vitest suites and hosted endpoints still need runtime verification.

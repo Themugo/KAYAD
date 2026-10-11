@@ -22,22 +22,21 @@ describe('AuctionsView load failure handling', () => {
       return { auctions: status === 'live' ? [live] : [ended] };
     });
     renderView();
-    await screen.findByText(/Starting soon: Internal server error/);
+    await screen.findByText(/Live now responded, but Starting soon could not be loaded/);
     expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);          // live data still shown
     const scheduledTab = screen.getByRole('tab', { name: /Starting soon/ });
     expect(scheduledTab.textContent).toContain('—');                                 // unavailable, not 0
     expect(scheduledTab.textContent).not.toMatch(/\b0\b/);
     fireEvent.click(scheduledTab);
     expect(screen.queryByText('No auctions are scheduled yet.')).toBeNull();          // no false "empty" claim
-    expect(screen.getByText(/Other sections remain available — use Refresh to try again/)).toBeTruthy();
-    expect(screen.getByText('Starting-soon auctions are temporarily unavailable')).toBeTruthy();
-    expect(screen.getByText(/Starting soon list could not be loaded, but the other auction sections responded/)).toBeTruthy();
+    expect(screen.getByText(/Scheduled auctions could not be loaded/)).toBeTruthy();
+    expect(screen.queryByText(/Internal server error/)).toBeNull();
   });
 
   it('when everything fails the error is shown and nothing claims the floor is empty', async () => {
     svc.fetchList.mockRejectedValue(boom());
     renderView();
-    await screen.findByText(/Internal server error/);
+    await screen.findByText('Live auctions are temporarily unavailable');
     expect(screen.queryByText(/The auction floor is quiet right now/)).toBeNull();
     expect(screen.queryByText('Nothing live this moment.')).toBeNull();
     expect(screen.getByText(/Live auctions are temporarily unavailable/)).toBeTruthy();
@@ -50,9 +49,27 @@ describe('AuctionsView load failure handling', () => {
       return { auctions: [live] };
     });
     renderView();
-    await screen.findByText(/Starting soon: setup table unavailable/);
-    expect(screen.getByText(/Completed: database timeout/)).toBeTruthy();
+    await screen.findByText(/Live now responded, but Starting soon and Completed could not be loaded/);
+    expect(screen.queryByText(/setup table unavailable|database timeout/)).toBeNull();
     expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);
+  });
+
+  it('keeps the last successful rows visible if a later refresh fails', async () => {
+    let scheduledCalls = 0;
+    svc.fetchList.mockImplementation(async ({ status }: { status: string }) => {
+      if (status === 'draft') {
+        scheduledCalls += 1;
+        if (scheduledCalls > 1) throw boom();
+        return { auctions: [] };
+      }
+      return { auctions: status === 'live' ? [live] : [ended] };
+    });
+    renderView();
+    expect((await screen.findAllByText('Toyota Prado')).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+    await screen.findByText(/Live now responded, but Starting soon could not be loaded/);
+    expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Internal server error/)).toBeNull();
   });
 
   it('a genuinely empty, healthy backend still says the floor is quiet', async () => {

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import AuctionLivePage from '../../pages/AuctionLivePage';
+import { fetchAuction } from '../../services/auctionService';
 import { auctionRegistrationAPI } from '../../api/api';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
@@ -116,6 +117,33 @@ describe('AuctionLivePage', () => {
 // message is now surfaced via toast for a 403, and that an ordinary
 // "no registration yet" rejection (no response/any other status) still
 // does NOT spam a toast.
+describe('AuctionLivePage initial-load failure handling', () => {
+  afterEach(() => { cleanup(); });
+
+  it('does not label a server failure as an auction that does not exist', async () => {
+    fetchAuction.mockRejectedValueOnce({ status: 503 });
+    renderAuctionPage();
+    expect(await screen.findByText('We could not load this auction')).toBeInTheDocument();
+    expect(screen.queryByText('Auction not found')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('offers a retry that recovers when the detail endpoint becomes available', async () => {
+    fetchAuction.mockRejectedValueOnce({ status: 503 });
+    renderAuctionPage();
+    fireEvent.click(await screen.findByRole('button', { name: 'Try again' }));
+    expect((await screen.findAllByText('Test Car')).length).toBeGreaterThan(0);
+  });
+
+  it('uses a distinct unavailable state for a real 404', async () => {
+    fetchAuction.mockRejectedValueOnce({ status: 404 });
+    renderAuctionPage();
+    expect(await screen.findByText('This auction is unavailable')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Back to auctions' })).toBeInTheDocument();
+  });
+});
+
 describe('AuctionLivePage registration-status error surfacing', () => {
   afterEach(() => { cleanup(); authState.isAuth = false; toastSpy.mockClear(); auctionRegistrationAPI.get.mockReset(); });
 

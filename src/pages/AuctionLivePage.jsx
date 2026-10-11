@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getIdFromPathPrefix } from '../utils/navigation';
 import { auctionRegistrationAPI, formatKES } from '../api/api';
-import { fetchAuction, fetchAuctionBids, fetchAuctionOutcome, initiateAuctionWinnerPayment } from '../services/auctionService';
+import { fetchAuction, fetchAuctionOutcome, initiateAuctionWinnerPayment } from '../services/auctionService';
 import { placeBid, BidApiError } from '../services/bidApi';
 import { useAuth } from '../context/AuthContext';
 import { loginPathFor } from '../utils/authIntent';
@@ -34,6 +34,8 @@ export default function AuctionLivePage() {
   const [car, setCar]             = useState(null);
   const [bids, setBids]           = useState([]);
   const [loading, setLoading]     = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [bidAmount, setBidAmount] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [settling, setSettling] = useState(false);
@@ -57,25 +59,48 @@ export default function AuctionLivePage() {
   const auctionLive = car?.auctionStatus === 'live';
   const ended = !auctionLive && (car?.auctionStatus === 'ended' || car?.auctionStatus === 'sold');
 
-  // Load car + bid history
+  // The canonical auction detail response already includes the public bid
+  // history. Fetch it once, and distinguish a genuine 404 from a server or
+  // network failure so a transient outage is never mislabeled "not found".
   useEffect(() => {
-    Promise.all([
-      fetchAuction(id),
-      fetchAuctionBids(id).catch(() => ({ bids: [] })),
-    ]).then(([auctionData, bidData]) => {
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(null);
+    if (!id) {
+      setCar(null);
+      setLoadError({ kind: 'invalid-link' });
+      setLoading(false);
+      return () => { cancelled = true; };
+    }
+
+    fetchAuction(id).then((auctionData) => {
+      if (cancelled) return;
+      if (!auctionData?.auction) {
+        const missing = new Error('Auction record missing from response');
+        missing.status = 404;
+        throw missing;
+      }
       const a = auctionData.auction || {};
       const c = a.car || {};
       const normalized = { ...c, _id: c._id || a.carId || a.id, auctionStatus: (a.status === 'active' ? 'live' : (a.status || c.auctionStatus)), auctionEnd: a.endTime || c.auctionEnd, auctionStartTime: a.startTime || c.auctionStartTime, currentBid: Number(a.highestBid ?? c.currentBid ?? c.price ?? a.startingBid ?? 0), bidsCount: Number(a.bidCount ?? c.bidsCount ?? 0), price: Number(c.price ?? a.startingBid ?? 0), bidIncrement: Number(a.bidIncrement || c.bidIncrement || 0) };
       setCar(normalized);
       setCurrentBid(normalized.currentBid || normalized.price || 0);
       setBidCount(normalized.bidsCount || 0);
-      const bs = bidData.bids || bidData.data || [];
+      const bs = Array.isArray(auctionData.bids) ? auctionData.bids : [];
       setBids(bs.slice(0, 30));
       const configuredIncrement = Number(a.bidIncrement || c.bidIncrement || 0);
       const minNext = (normalized.currentBid || normalized.price || 0) + (configuredIncrement || 1000);
       setBidAmount(String(minNext));
-    }).catch(() => setCar(null)).finally(() => setLoading(false));
-  }, [id]);
+    }).catch((err) => {
+      if (cancelled) return;
+      setCar(null);
+      const status = Number(err?.status ?? err?.response?.status ?? 0);
+      setLoadError({ kind: status === 404 ? 'not-found' : 'unavailable' });
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [id, loadAttempt]);
 
   useEffect(() => {
     if (!id) return;
@@ -262,8 +287,32 @@ export default function AuctionLivePage() {
   const topBid = bids.reduce((best, bid) => Number(bid.amount || 0) > Number(best?.amount || 0) ? bid : best, null);
   const userWon = ended && Boolean(user?.id && outcome?.winner_user_id && String(user.id) === String(outcome.winner_user_id));
 
-  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
-  if (!car) return <div className="page loading-center"><h3>Auction not found</h3></div>;
+  if (loading) return <div className="page loading-center" role="status" aria-live="polite" aria-label="Loading auction details"><div className="spinner" /></div>;
+  if (!car && loadError) {
+    const isNotFound = loadError.kind === 'not-found' || loadError.kind === 'invalid-link';
+    return (
+      <div className="page auction-live-premium" style={{ background: 'var(--bg)' }}>
+        <div className="container" style={{ maxWidth: 760, margin: '0 auto', paddingTop: 48, paddingBottom: 64 }}>
+          <section className="card" role="alert" aria-live="assertive" style={{ padding: 28, borderRadius: 20, background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 800, letterSpacing: '.14em', color: 'var(--text-muted)' }}>KAYAD AUCTION ROOM</p>
+            <h1 style={{ margin: '10px 0 8px', fontSize: 26, lineHeight: 1.2, fontWeight: 800, color: 'var(--text)' }}>
+              {isNotFound ? 'This auction is unavailable' : 'We could not load this auction'}
+            </h1>
+            <p style={{ margin: 0, maxWidth: 560, lineHeight: 1.65, color: 'var(--text-muted)' }}>
+              {isNotFound
+                ? 'This auction may have been withdrawn, is no longer published, or the link may be incorrect.'
+                : 'KAYAD could not retrieve the auction details right now. Please retry, or return to the auction list and open the listing again.'}
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 22 }}>
+              {!isNotFound && <button type="button" className="btn btn-primary btn-sm" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button>}
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => navigate('/?nav=discovery')}>Back to auctions</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+  if (!car) return <div className="page loading-center" role="status">Auction details are unavailable.</div>;
 
   return (
     <div className="page auction-live-premium" style={{ background: 'var(--bg)' }}>

@@ -62,7 +62,6 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const [scheduled, setScheduled] = useState<DisplayAuction[]>([]);
   const [ended, setEnded] = useState<DisplayAuction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   // Each list loads independently: one failing request must not blank the others, and a failed list is
   // reported as unavailable — never as zero auctions.
   const [failed, setFailed] = useState<{ live: boolean; scheduled: boolean; ended: boolean }>({ live: false, scheduled: false, ended: false });
@@ -81,7 +80,6 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
 
   const load = useCallback(async () => {
     setLoading(true);
-    setError(null);
     const sections = [
       { key: 'live' as const, label: 'Live now', run: () => fetchList({ page: 1, limit: 100, status: 'live' }) },
       { key: 'scheduled' as const, label: 'Starting soon', run: () => fetchList({ page: 1, limit: 100, status: 'draft' }) },
@@ -89,26 +87,19 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
     ];
     try {
       const results = await Promise.allSettled(sections.map((section) => section.run()));
-      const rows = (r: PromiseSettledResult<{ auctions: unknown[] }>) => (r.status === 'fulfilled' ? ((r.value.auctions || []) as DisplayAuction[]) : []);
-      setLive(rows(results[0])); setScheduled(rows(results[1])); setEnded(rows(results[2]));
-      const next = { live: results[0].status === 'rejected', scheduled: results[1].status === 'rejected', ended: results[2].status === 'rejected' };
-      setFailed(next);
-      const rejected = results
-        .map((r, i) => ({ r, section: sections[i] }))
-        .filter((x) => x.r.status === 'rejected') as Array<{ r: PromiseRejectedResult; section: typeof sections[number] }>;
-      if (rejected.length) {
-        const details = rejected.map(({ r, section }) => {
-          const reason = r.reason as any;
-          const detail = reason?.response?.data?.message || reason?.message || 'Request failed.';
-          return `${section.label}: ${detail}`;
-        });
-        setError(rejected.length === sections.length
-          ? `Auction data is temporarily unavailable. ${details.join(' · ')}`
-          : `${details.join(' · ')}. Other sections remain available — use Refresh to try again.`);
-      }
-    } catch (err: any) {
+      // Preserve the last successful snapshot when a manual refresh fails. A failed
+      // refresh must not erase known records and then present an empty state as truth.
+      const applyIfFulfilled = (result: PromiseSettledResult<{ auctions: unknown[] }>, setter: (rows: DisplayAuction[]) => void) => {
+        if (result.status === 'fulfilled') setter((result.value.auctions || []) as DisplayAuction[]);
+      };
+      applyIfFulfilled(results[0], setLive);
+      applyIfFulfilled(results[1], setScheduled);
+      applyIfFulfilled(results[2], setEnded);
+      setFailed({ live: results[0].status === 'rejected', scheduled: results[1].status === 'rejected', ended: results[2].status === 'rejected' });
+    } catch {
+      // Promise.allSettled normally contains individual failures. This guard is
+      // for unexpected synchronous transport/setup errors; keep the page honest.
       setFailed({ live: true, scheduled: true, ended: true });
-      setError(err?.response?.data?.message || err?.message || 'Unable to load auctions from KAYAD.');
     } finally {
       setLoading(false);
     }
@@ -117,11 +108,16 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   useEffect(() => { void load(); }, [load]);
 
   useEffect(() => {
-    if (!user) { setFavorites(new Set()); return; }
+    let cancelled = false;
+    setFavorites(new Set());
+    if (!user) return () => { cancelled = true; };
     getFavorites({ page: 1, limit: 100 })
-      .then((result) => setFavorites(new Set((result.favorites || []).map((v: any) => String(v.id || v._id)))))
-      .catch(() => setFavorites(new Set()));
-  }, [user]);
+      .then((result) => {
+        if (!cancelled) setFavorites(new Set((result.favorites || []).map((v: any) => String(v.id || v._id))));
+      })
+      .catch(() => { if (!cancelled) setFavorites(new Set()); });
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   const all = useMemo(() => [...live, ...scheduled, ...ended], [live, scheduled, ended]);
   const current = tab === 'live' ? live : tab === 'scheduled' ? scheduled : tab === 'ended' ? ended : all.filter((auction) => favorites.has(String(auction.carId || auction.id)));
@@ -147,8 +143,10 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const gridAuctions = spotlightId ? filtered.filter((auction) => String(auction.carId || auction.id) !== spotlightId) : filtered;
 
   const marketHeadline = useMemo(() => {
-    // Reflect the selected section first: healthy live data must not hide a
-    // scheduled/completed-list failure when the customer opens that section.
+    if (loading && live.length === 0 && scheduled.length === 0 && ended.length === 0) return 'Loading auction activity…';
+    // The headline describes the selected tab only. Failures in other tabs are
+    // disclosed in the supporting copy and must not mislabel a healthy empty
+    // live list as a failed Starting soon list.
     if (tab === 'live' && failed.live) return 'Live auctions are temporarily unavailable';
     if (tab === 'scheduled' && failed.scheduled) return 'Starting-soon auctions are temporarily unavailable';
     if (tab === 'ended' && failed.ended) return 'Completed auctions are temporarily unavailable';
@@ -156,28 +154,38 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
     if (tab === 'live' && live.length > 0) return `${live.length} vehicle${live.length === 1 ? '' : 's'} up for bid right now`;
     if (tab === 'scheduled' && scheduled.length > 0) return `${scheduled.length} auction${scheduled.length === 1 ? '' : 's'} starting soon`;
     if (tab === 'ended' && ended.length > 0) return `${ended.length} completed auction${ended.length === 1 ? '' : 's'}`;
-    if (failed.live && failed.scheduled && failed.ended) return 'Auction data is temporarily unavailable';
-    if (failed.live) return 'Live auctions are temporarily unavailable';
-    if (failed.scheduled && live.length === 0) return 'Starting-soon auctions are temporarily unavailable';
-    if (live.length > 0) return `${live.length} vehicle${live.length === 1 ? '' : 's'} up for bid right now`;
-    if (failed.scheduled) return 'Starting-soon auctions are temporarily unavailable';
-    if (scheduled.length > 0) return `No auctions live right now — ${scheduled.length} starting soon`;
+    if (tab === 'saved') return 'Your saved auctions';
+    if (tab === 'scheduled') return 'No auctions are scheduled yet';
+    if (tab === 'ended') return 'No completed auctions yet';
     return 'The auction floor is quiet right now';
-  }, [tab, live.length, scheduled.length, ended.length, failed.live, failed.scheduled, failed.ended]);
+  }, [loading, tab, live.length, scheduled.length, ended.length, failed.live, failed.scheduled, failed.ended]);
 
   const marketSubcopy = useMemo(() => {
-    if (failed.live && failed.scheduled && failed.ended) return 'The auction service did not return any of its lists. No auction records have been fabricated — use Refresh to try again.';
-    if (tab === 'live' && failed.live) return 'Live auctions could not be loaded. Other sections may still be available; use Refresh to retry the live list.';
-    if (tab === 'scheduled' && failed.scheduled) return 'The Starting soon list could not be loaded, but the other auction sections responded. This is not confirmation that there are no scheduled auctions — use Refresh to retry.';
-    if (tab === 'ended' && failed.ended) return 'Completed auctions could not be loaded. Other sections may still be available; use Refresh to retry the completed list.';
-    if (tab === 'saved' && (failed.live || failed.scheduled || failed.ended)) return 'Some auction lists could not be loaded, so this view may be incomplete. Use Refresh to retry before relying on these results.';
-    if (failed.live) return 'Live auctions could not be loaded. Other sections may still be available; use Refresh to retry the live list.';
-    if (failed.scheduled && live.length === 0) return 'The Starting soon list could not be loaded, but the other auction sections responded. This is not confirmation that there are no scheduled auctions — use Refresh to retry.';
-    if (live.length > 0) return 'Follow live bidding, save what you want to return to, and move from registration to fulfilment in one connected room.';
-    if (failed.scheduled) return 'The Starting soon list is temporarily unavailable. Live and completed sections remain available; use Refresh to retry.';
-    if (scheduled.length > 0) return 'New auctions are queued and will open automatically — save a listing or check back to be first in the room.';
-    return 'KAYAD opens auctions as verified vehicles clear registration. Browse the marketplace in the meantime, or save a search to be notified the moment one goes live.';
-  }, [tab, live.length, scheduled.length, failed.live, failed.scheduled, failed.ended]);
+    if (loading && live.length === 0 && scheduled.length === 0 && ended.length === 0) return 'Checking the latest live, upcoming and completed auction lists from KAYAD.';
+    const unavailable = [
+      failed.live ? 'Live now' : null,
+      failed.scheduled ? 'Starting soon' : null,
+      failed.ended ? 'Completed' : null,
+    ].filter(Boolean) as string[];
+    const selectedFailed = (tab === 'live' && failed.live)
+      || (tab === 'scheduled' && failed.scheduled)
+      || (tab === 'ended' && failed.ended);
+
+    if (failed.live && failed.scheduled && failed.ended) return 'We could not retrieve the auction lists. This does not mean there are no auctions. Please try Refresh.';
+    if (selectedFailed && tab === 'scheduled') return 'Scheduled auctions could not be loaded. This is not confirmation that there are no upcoming auctions. Please try Refresh.';
+    if (selectedFailed && tab === 'live') return 'Live auction data could not be loaded. Please try Refresh; no auction records are being invented.';
+    if (selectedFailed && tab === 'ended') return 'Completed auction results could not be loaded. Please try Refresh.';
+    if (tab === 'saved' && unavailable.length) return `Your saved view may be incomplete because ${unavailable.join(', ')} could not be refreshed. Please try Refresh.`;
+    if (unavailable.length) {
+      const selectedLabel = tab === 'live' ? 'Live now' : tab === 'scheduled' ? 'Starting soon' : 'Completed';
+      return `${selectedLabel} responded, but ${unavailable.join(' and ')} ${unavailable.length === 1 ? 'could not' : 'could not'} be loaded. A failed section is not an empty result; use Refresh to retry.`;
+    }
+    if (tab === 'live' && live.length > 0) return 'Follow live bidding, save auctions to revisit, and continue from registration to fulfilment in the connected auction journey.';
+    if (tab === 'scheduled' && scheduled.length > 0) return 'Published upcoming auctions appear here with their scheduled start times and opening bids.';
+    if (tab === 'ended' && ended.length > 0) return 'Review completed auction listings and the results returned by KAYAD.';
+    if (scheduled.length > 0) return 'No auctions are live right now. Published upcoming auctions are available in Starting soon.';
+    return 'KAYAD lists only auctions returned by the backend. Browse the marketplace and check back as verified vehicles become eligible for auction.';
+  }, [loading, tab, live.length, scheduled.length, ended.length, failed.live, failed.scheduled, failed.ended]);
 
   const openAuction = (auction: DisplayAuction) => {
     navigate(`/auction/${encodeURIComponent(String(auction.carId || auction.id))}`);
@@ -261,7 +269,9 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
 
   const tabFailed = (tab === 'live' && failed.live) || (tab === 'scheduled' && failed.scheduled) || (tab === 'ended' && failed.ended) || (tab === 'saved' && (failed.live || failed.scheduled || failed.ended));
   const emptyStateCopy = tab === 'saved'
-    ? { title: 'Your watchlist is ready for its first favourite.', body: 'Save a vehicle from any room and it will return here with the same live data.' }
+    ? !user
+      ? { title: 'Sign in to view your saved auctions.', body: 'Save auctions to build a watchlist you can return to whenever you come back to KAYAD.' }
+      : { title: 'Your watchlist is ready for its first favourite.', body: 'Save a vehicle from any room and it will return here with the same live data.' }
     : tab === 'live'
       ? { title: scheduled.length > 0 ? 'Nothing live this moment.' : 'The auction floor is quiet right now.', body: scheduled.length > 0 ? `${scheduled.length} auction${scheduled.length === 1 ? ' is' : 's are'} scheduled to open soon — check Starting soon or save a search to be notified.` : 'KAYAD shows only auctions returned by the backend; it never manufactures local auction records. New auctions open as verified vehicles clear registration.' }
       : tab === 'scheduled'
@@ -289,17 +299,17 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
 
         <div className="auction-market-controls">
           <div className="auction-segment-grid" role="tablist" aria-label="Auction sections">
-            <button role="tab" aria-selected={tab === 'live'} onClick={() => setTab('live')} className={`auction-segment ${tab === 'live' ? 'is-active' : ''}`}>
+            <button id="auction-tab-live" role="tab" aria-selected={tab === 'live'} aria-controls="auction-results-panel" onClick={() => setTab('live')} className={`auction-segment ${tab === 'live' ? 'is-active' : ''}`}>
               <div className="auction-segment-icon"><Radio size={16} /></div><div><div className="auction-segment-label">Live now</div><div className="auction-segment-value">{failed.live ? '—' : live.length}</div></div>
             </button>
-            <button role="tab" aria-selected={tab === 'scheduled'} onClick={() => setTab('scheduled')} className={`auction-segment ${tab === 'scheduled' ? 'is-active' : ''}`}>
+            <button id="auction-tab-scheduled" role="tab" aria-selected={tab === 'scheduled'} aria-controls="auction-results-panel" onClick={() => setTab('scheduled')} className={`auction-segment ${tab === 'scheduled' ? 'is-active' : ''}`}>
               <div className="auction-segment-icon"><TimerReset size={16} /></div><div><div className="auction-segment-label">Starting soon</div><div className="auction-segment-value">{failed.scheduled ? '—' : scheduled.length}</div></div>
             </button>
-            <button role="tab" aria-selected={tab === 'ended'} onClick={() => setTab('ended')} className={`auction-segment ${tab === 'ended' ? 'is-active' : ''}`}>
+            <button id="auction-tab-ended" role="tab" aria-selected={tab === 'ended'} aria-controls="auction-results-panel" onClick={() => setTab('ended')} className={`auction-segment ${tab === 'ended' ? 'is-active' : ''}`}>
               <div className="auction-segment-icon"><CheckCircle2 size={16} /></div><div><div className="auction-segment-label">Completed</div><div className="auction-segment-value">{failed.ended ? '—' : ended.length}</div></div>
             </button>
-            <button role="tab" aria-selected={tab === 'saved'} onClick={() => setTab('saved')} className={`auction-segment ${tab === 'saved' ? 'is-active' : ''}`}>
-              <div className="auction-segment-icon"><Heart size={16} /></div><div><div className="auction-segment-label">Saved for you</div><div className="auction-segment-value">{favorites.size}</div></div>
+            <button id="auction-tab-saved" role="tab" aria-selected={tab === 'saved'} aria-controls="auction-results-panel" onClick={() => setTab('saved')} className={`auction-segment ${tab === 'saved' ? 'is-active' : ''}`}>
+              <div className="auction-segment-icon"><Heart size={16} /></div><div><div className="auction-segment-label">Saved for you</div><div className="auction-segment-value">{user ? favorites.size : '—'}</div></div>
             </button>
           </div>
 
@@ -314,24 +324,27 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
       </section>
 
       {message && <div className="p-3 rounded-xl bg-[#EEF7F5] text-[#12576D] text-sm">{message}</div>}
-      {error && <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm">{error}</div>}
 
       {/* The vehicle stays visually dominant, but the auction — urgency,
           current bid, bid count — is what frames it, not a marketing banner. */}
-      {spotlight && renderAuctionCard(spotlight, 'spotlight')}
+      <section id="auction-results-panel" role="tabpanel" aria-labelledby={`auction-tab-${tab}`} tabIndex={0} aria-busy={loading}>
+        {spotlight && renderAuctionCard(spotlight, 'spotlight')}
 
-      {!loading && !tabFailed && filtered.length === 0 && (
-        <Card className="p-10 text-center auction-interaction-glow">
-          <Gavel className="w-8 h-8 mx-auto text-[#94A3B8] mb-3" />
-          <p className="font-bold text-[#0A3340]">{emptyStateCopy.title}</p>
-          <p className="text-sm text-[#64748B] mt-1 max-w-md mx-auto">{emptyStateCopy.body}</p>
-          {tab === 'saved' && <div className="mt-5"><AuctionHistoryEmptyAction onExplore={() => setTab('live')} /></div>}
-        </Card>
-      )}
+        {!loading && !tabFailed && filtered.length === 0 && (
+          <Card className="p-10 text-center auction-interaction-glow">
+            <Gavel className="w-8 h-8 mx-auto text-[#94A3B8] mb-3" />
+            <p className="font-bold text-[#0A3340]">{emptyStateCopy.title}</p>
+            <p className="text-sm text-[#64748B] mt-1 max-w-md mx-auto">{emptyStateCopy.body}</p>
+            {tab === 'saved' && (!user
+              ? <div className="mt-5 flex flex-wrap justify-center gap-3"><Button onClick={() => onOpenAuth?.()}>Sign in to continue</Button><Button variant="secondary" onClick={() => setTab('live')}>Explore live auctions</Button></div>
+              : <div className="mt-5"><AuctionHistoryEmptyAction onExplore={() => setTab('live')} /></div>)}
+          </Card>
+        )}
 
-      <div className="auction-card-grid">
-        {gridAuctions.map((auction) => renderAuctionCard(auction, 'grid'))}
-      </div>
+        <div className="auction-card-grid">
+          {gridAuctions.map((auction) => renderAuctionCard(auction, 'grid'))}
+        </div>
+      </section>
     </div>
   );
 };

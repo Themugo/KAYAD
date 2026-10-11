@@ -81,12 +81,22 @@ const toAuctionResponse = (car) => ({
 });
 
 const buildAuctionFilter = ({ status, search } = {}) => {
+  const now = new Date().toISOString();
   const filter = {
     deletedAt: { $exists: false }, // soft-deleted vehicles are never public auctions (bare null is ignored by the adapter)
     auctionStatus: { $in: ["live", "ended"] },
+    // Admin rejection must be respected by the canonical discovery endpoint
+    // too; guarding only /active left the public /api/auctions feed inconsistent.
+    status: { $ne: "rejected" },
   };
 
-  if (status === "active" || status === "live") filter.auctionStatus = "live";
+  if (status === "active" || status === "live") {
+    filter.auctionStatus = "live";
+    // A stale lifecycle row must not be advertised as live after its start/end
+    // boundary. The dedicated /active endpoint applies the same time contract.
+    filter.auctionStartTime = { $lte: now };
+    filter.auctionEnd = { $gt: now };
+  }
   if (status === "ended") filter.auctionStatus = "ended";
 
   if (search) filter.$text = { $search: String(search).trim() };
@@ -113,7 +123,7 @@ export const listAuctions = async (req, res) => {
       .sort((a, b) => Date.parse(a.config.startsAt) - Date.parse(b.config.startsAt));
     const pageRows = scheduled.slice(skip, skip + limit);
     const ids = pageRows.map((setup) => setup.car_id).filter(Boolean);
-    const cars = ids.length ? await Car.find({ deletedAt: { $exists: false }, id: { $in: ids } }).lean() : [];
+    const cars = ids.length ? await Car.find({ deletedAt: { $exists: false }, status: { $ne: "rejected" }, id: { $in: ids } }).lean() : [];
     const byId = new Map(cars.map((car) => [String(car.id), car]));
     const auctions = pageRows.map((setup) => {
       const car = byId.get(String(setup.car_id));
@@ -156,7 +166,7 @@ export const listAuctions = async (req, res) => {
 
 export const getAuction = async (req, res) => {
   const car = await Car.findById(req.params.id).populate("dealer", "name businessName avatar dealerApprovedAt dealerRating").lean();
-  if (!car || car.deletedAt || !["draft", "live", "ended"].includes(car.auctionStatus)) {
+  if (!car || car.deletedAt || car.status === "rejected") {
     return res.status(404).json({ success: false, message: "Auction not found" });
   }
 
@@ -170,9 +180,18 @@ export const getAuction = async (req, res) => {
   }
 
   const config = setup.config || {};
-  const startsAt = car.auctionStartTime || config.startsAt || null;
+  const startsAt = car.auctionStatus === "live" || car.auctionStatus === "ended"
+    ? (car.auctionStartTime || config.startsAt || null)
+    : (config.startsAt || car.auctionStartTime || null);
+  const hasFuturePublishedStart = Boolean(startsAt && Number.isFinite(Date.parse(startsAt)) && Date.parse(startsAt) > Date.now());
+  // A published setup is the scheduled-auction authority before the lifecycle
+  // row is mirrored onto cars. Permit that canonical pre-start state, but do
+  // not use it to bypass the published-setup requirement above.
+  const scheduled = (car.auctionStatus === "draft" || !car.auctionStatus) && hasFuturePublishedStart;
+  if (!["draft", "live", "ended"].includes(car.auctionStatus) && !scheduled) {
+    return res.status(404).json({ success: false, message: "Auction not published" });
+  }
   const endsAt = car.auctionStatus === "live" || car.auctionStatus === "ended" ? (car.auctionEnd || config.endsAt || null) : (config.endsAt || car.auctionEnd || null);
-  const scheduled = car.auctionStatus === "draft" && startsAt && new Date(startsAt).getTime() > Date.now();
 
   // STAGE 9: same live re-check as carController.js::getCar — the auction
   // detail view is the single-vehicle authoritative read for an auction
@@ -220,7 +239,7 @@ export const getAuction = async (req, res) => {
 
 export const getPublicAuctionBids = async (req, res) => {
   const car = await Car.findById(req.params.id).populate("dealer", "name businessName avatar dealerApprovedAt dealerRating").lean();
-  if (!car || !["draft", "live", "ended"].includes(car.auctionStatus)) {
+  if (!car || car.deletedAt || car.status === "rejected") {
     return res.status(404).json({ success: false, message: "Auction not found" });
   }
   const setup = await findAll("auction_setups", {
@@ -228,6 +247,14 @@ export const getPublicAuctionBids = async (req, res) => {
     limit: 1,
   }).then((rows) => rows[0] || null);
   if (!setup) return res.status(404).json({ success: false, message: "Auction not published" });
+  const configuredStart = car.auctionStatus === "live" || car.auctionStatus === "ended"
+    ? (car.auctionStartTime || setup.config?.startsAt || null)
+    : (setup.config?.startsAt || car.auctionStartTime || null);
+  const scheduled = (car.auctionStatus === "draft" || !car.auctionStatus)
+    && Boolean(configuredStart && Number.isFinite(Date.parse(configuredStart)) && Date.parse(configuredStart) > Date.now());
+  if (!["draft", "live", "ended"].includes(car.auctionStatus) && !scheduled) {
+    return res.status(404).json({ success: false, message: "Auction not published" });
+  }
 
   const bids = await Bid.find({
     carId: car.id,

@@ -129,7 +129,8 @@
     "validate:auction-phase8": "node scripts/validate-auction-phase8.mjs",
     "validate:auction-phase9": "node scripts/validate-auction-phase9.mjs",
     "validate:auction-phase10": "node scripts/validate-auction-phase10.mjs",
-    "validate:navigation-convergence": "node scripts/validate-navigation-convergence.mjs"
+    "validate:navigation-convergence": "node scripts/validate-navigation-convergence.mjs",
+    "validate:auction-public-error-states": "node scripts/validate-auction-public-error-states.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
