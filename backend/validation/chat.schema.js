@@ -16,5 +16,12 @@ export const sendMessageSchema = z.object({
   content: z.string().trim().min(1).max(5000).optional(),
   text: z.string().trim().min(1).max(5000).optional(),
   message: z.string().trim().min(1).max(5000).optional(),
-  attachments: z.array(z.union([z.string(), z.object({ url: z.string().url(), type: z.string().max(50).optional() })])).max(10).optional(),
+  // Attachments are references to the sender's own chat uploads; arbitrary URLs/strings are rejected here and
+  // re-verified against the upload store (ownership/folder/mime) by services/chatAttachments.js.
+  attachments: z.array(z.object({
+    uploadId: z.string().uuid().optional(),
+    storageId: z.string().uuid().optional(),
+    type: z.string().max(50).optional(),
+    fileName: z.string().max(200).optional(),
+  }).refine((a) => a.uploadId || a.storageId, "uploadId required")).max(10).optional(),
 }).refine(v => Boolean(v.content || v.text || v.message), { message: "Message content is required" });

@@ -15,56 +15,50 @@ const router = express.Router();
  * Prometheus expects metrics in the format:
  * metric_name{label1="value1",label2="value2"} value timestamp
  */
+// Metric keys are `${name}:${JSON.stringify(tags)}` (config/metrics.js). The JSON itself contains ":", so splitting on
+// every ":" truncated the tags and JSON.parse threw — the endpoint answered 500 as soon as any tagged metric existed.
+const splitKey = (key) => {
+  const i = key.indexOf(":");
+  if (i < 0) return [key, {}];
+  try { return [key.slice(0, i), JSON.parse(key.slice(i + 1)) || {}]; } catch { return [key.slice(0, i), {}]; }
+};
+const esc = (v) => String(v).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+
 const convertToPrometheusFormat = (metrics) => {
   let prometheusOutput = "";
 
   // Process counters
   for (const [key, value] of Object.entries(metrics.counters)) {
-    const [name, tagsStr] = key.split(":");
-    const tags = tagsStr ? JSON.parse(tagsStr) : {};
+    const [name, tags] = splitKey(key);
     const labelString = Object.entries(tags)
-      .map(([k, v]) => `${k}="${v}"`)
+      .map(([k, v]) => `${k}="${esc(v)}"`)
       .join(",");
     prometheusOutput += `${name}{${labelString}} ${value}\n`;
   }
 
   // Process gauges
   for (const [key, value] of Object.entries(metrics.gauges)) {
-    const [name, tagsStr] = key.split(":");
-    const tags = tagsStr ? JSON.parse(tagsStr) : {};
+    const [name, tags] = splitKey(key);
     const labelString = Object.entries(tags)
-      .map(([k, v]) => `${k}="${v}"`)
+      .map(([k, v]) => `${k}="${esc(v)}"`)
       .join(",");
     prometheusOutput += `${name}{${labelString}} ${value}\n`;
   }
 
-  // Process histograms
-  for (const [key, histogram] of Object.entries(metrics.histograms)) {
-    const [name, tagsStr] = key.split(":");
-    const tags = tagsStr ? JSON.parse(tagsStr) : {};
-    const labelString = Object.entries(tags)
-      .map(([k, v]) => `${k}="${v}"`)
-      .join(",");
-
-    const sortedValues = [...histogram].sort((a, b) => a - b);
-    const count = sortedValues.length;
-    const sum = sortedValues.reduce((a, b) => a + b, 0);
-
-    if (count === 0) continue;
-
-    // Add count metric
-    prometheusOutput += `${name}_count{${labelString}} ${count}\n`;
-    // Add sum metric
-    prometheusOutput += `${name}_sum{${labelString}} ${sum}\n`;
-
-    // Add bucket metrics (standard Prometheus histogram buckets)
-    const buckets = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
-    for (const bucket of buckets) {
-      const bucketCount = sortedValues.filter((v) => v <= bucket * 1000).length; // Convert to ms
-      prometheusOutput += `${name}_bucket{${labelString},le="${bucket}"} ${bucketCount}\n`;
-    }
-    // Add +Inf bucket
-    prometheusOutput += `${name}_bucket{${labelString},le="+Inf"} ${count}\n`;
+  // Process histograms. getAllMetrics() returns per-series SUMMARIES ({count,sum,p50,p95,p99,...}) — not raw sample
+  // arrays — so they are exported as a Prometheus summary (quantiles + _sum + _count). Spreading the summary object as
+  // if it were an array threw and turned the whole endpoint into a 500.
+  for (const [key, h] of Object.entries(metrics.histograms)) {
+    const [name, tags] = splitKey(key);
+    if (!h || !Number(h.count)) continue;
+    const labels = Object.entries(tags).map(([k, v]) => `${k}="${esc(v)}"`);
+    const withQ = (q) => `{${[...labels, `quantile="${q}"`].join(",")}}`;
+    const plain = `{${labels.join(",")}}`;
+    prometheusOutput += `${name}${withQ("0.5")} ${h.p50}\n`;
+    prometheusOutput += `${name}${withQ("0.95")} ${h.p95}\n`;
+    prometheusOutput += `${name}${withQ("0.99")} ${h.p99}\n`;
+    prometheusOutput += `${name}_sum${plain} ${h.sum}\n`;
+    prometheusOutput += `${name}_count${plain} ${h.count}\n`;
   }
 
   return prometheusOutput;

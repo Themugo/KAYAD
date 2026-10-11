@@ -1,0 +1,11 @@
+
+> kayad@0.0.0 validate:auction-bid-surface
+> node scripts/validate-auction-bid-surface.mjs
+
+PASS canonical auction discovery uses real auction transport
+PASS canonical live auction page uses canonical bid transport
+PASS bid request sends the real car-scoped endpoint
+PASS successful bid response triggers pending payment confirmation UI
+PASS live auction page refreshes authoritative bid state through the auction bid transport
+PASS legacy audit report does not claim canonical auction UI has no real bid call
+6/6 checks passed

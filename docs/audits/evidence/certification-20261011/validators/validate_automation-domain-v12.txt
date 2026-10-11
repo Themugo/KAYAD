@@ -1,0 +1,18 @@
+
+> kayad@0.0.0 validate:automation-domain-v12
+> node scripts/validate-automation-domain-v12.mjs
+
+PASS model compatibility: findAll
+PASS model compatibility: update
+PASS model compatibility: delete
+PASS business-rule surface present
+PASS business-rule surface present
+PASS business-rule surface present
+PASS business-rule surface present
+PASS business-rule surface present
+PASS controller update compatibility
+PASS controller delete compatibility
+PASS admin UI CRUD wired
+PASS business-rule RLS isolation
+PASS business-rule execution fields
+Automation domain V12: 13/13 PASS

@@ -1,0 +1,12 @@
+
+> kayad@0.0.0 validate:refresh-reuse-integrity
+> node scripts/validate-refresh-reuse-integrity.mjs
+
+PASS controller passes historical token to rotation
+PASS controller does not pre-reject stored revoked tokens
+PASS rotation RPC detects revoked or expired token
+PASS rotation RPC revokes entire family on reuse
+PASS controller increments token version after reuse
+PASS refresh model uses canonical rotation RPC
+
+Refresh-token reuse integrity: 6/6 PASS

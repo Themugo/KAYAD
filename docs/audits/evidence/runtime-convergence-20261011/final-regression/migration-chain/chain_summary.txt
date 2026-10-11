@@ -1,0 +1,3 @@
+k9_main: applied=176 failed=0 supabase default privileges: ON
+k9_crawl: applied=176 failed=0 supabase default privileges: ON
+k9_plain: applied=176 failed=0 

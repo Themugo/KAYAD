@@ -58,7 +58,7 @@ export async function getDealerEntitlement(dealerId) {
     getDealerSubscription(dealerId),
     findById("users", dealerId, "id role listingsLocked"),
   ]);
-  if (!user || user.role !== "dealer") throw new Error("Dealer not found");
+  if (!user || user.role !== "dealer") throw Object.assign(new Error("Dealer not found"), { statusCode: 404 });
 
   const usable = Boolean(subscription && ["active", "cancelled"].includes(subscription.effective_status));
   const sb = getSupabase();
@@ -90,7 +90,7 @@ export async function getDealerEntitlement(dealerId) {
 
 export async function initiateDealerUpgrade({ dealerId, planId, phone, initiatePayment }) {
   const user = await findById("users", dealerId, "id role");
-  if (!user || user.role !== "dealer") throw new Error("Dealer not found");
+  if (!user || user.role !== "dealer") throw Object.assign(new Error("Dealer not found"), { statusCode: 404 });
   const plans = await getDealerPlans();
   const plan = plans.find((p) => p.id === planId);
   if (!plan) throw new Error("Invalid plan");

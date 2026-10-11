@@ -1,0 +1,21 @@
+
+> kayad@0.0.0 validate:vercel-ci
+> node scripts/validate-vercel-ci-contract.mjs
+
+PASS Package Node engine matches repository/Vercel 22.x baseline
+PASS Vercel CLI pinned to 60.1.3
+PASS Vercel CLI version verification
+PASS Vercel credentials and target IDs required
+PASS Deployment step receives Vercel secrets
+PASS Non-interactive project linking
+PASS Production settings pull
+PASS Production Vercel build
+PASS Prebuilt production deployment
+PASS Post-deployment verification
+PASS Deployment verification job installs repository dependencies
+PASS Deployment URL extraction requires an HTTPS URL
+PASS Auction WOW gallery shade CSS syntax
+PASS API rewrite precedes SPA fallback
+PASS SPA fallback does not capture /api/* or /assets/*
+PASS SPA fallback still handles application routes
+Vercel CI contract validation: PASS

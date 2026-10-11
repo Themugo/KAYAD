@@ -60,8 +60,50 @@ export const memoryStorage = multer.memoryStorage();
 // Map of allowed MIME types → magic byte signatures
 const MAGIC_BYTES = {
   "image/jpeg": [Buffer.from([0xff, 0xd8, 0xff])],
-  "image/png": [Buffer.from([0x89, 0x50, 0x4e, 0x47])],
-  "image/webp": [Buffer.from([0x52, 0x49, 0x46, 0x46])], // RIFF header
+  "image/png": [Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+  "image/webp": [Buffer.from([0x52, 0x49, 0x46, 0x46])], // RIFF header (+ "WEBP" at byte 8, checked below)
+};
+
+const headOf = (file) => {
+  if (file?.buffer) return Buffer.from(file.buffer.subarray(0, 12));
+  if (file?.path) {
+    try {
+      const fd = fs.openSync(file.path, "r");
+      try { const b = Buffer.alloc(12); fs.readSync(fd, b, 0, 12, 0); return b; } finally { fs.closeSync(fd); }
+    } catch { return Buffer.alloc(0); }
+  }
+  return Buffer.alloc(0);
+};
+
+export const fileMatchesDeclaredType = (file) => {
+  const head = headOf(file);
+  const signatures = MAGIC_BYTES[file?.mimetype] || [];
+  if (!signatures.some((sig) => head.subarray(0, sig.length).equals(sig))) return false;
+  if (file.mimetype === "image/webp") return head.subarray(8, 12).toString("latin1") === "WEBP";
+  return true;
+};
+
+// Wrap a multer instance so every handler verifies content against the declared MIME after parsing; mismatches are
+// deleted (disk) and rejected with 400 through the normal error path (handleUploadError).
+const guardUploads = (instance) => {
+  const guard = (mw) => (req, res, next) => mw(req, res, (err) => {
+    if (err) return next(err);
+    const files = [req.file, ...(Array.isArray(req.files) ? req.files : Object.values(req.files || {}).flat())].filter(Boolean);
+    const bad = files.find((f) => !fileMatchesDeclaredType(f));
+    if (bad) {
+      logWarn("FILE REJECTED (magic bytes)", { name: bad.originalname, type: bad.mimetype, user: req.user?.id || "guest" });
+      cleanupFiles(files);
+      return next(new Error("File content does not match its declared type"));
+    }
+    return next();
+  });
+  return {
+    single: (n) => guard(instance.single(n)),
+    array: (n, max) => guard(instance.array(n, max)),
+    fields: (f) => guard(instance.fields(f)),
+    any: () => guard(instance.any()),
+    none: () => instance.none(),
+  };
 };
 
 const fileFilter = (req, file, cb) => {
@@ -78,32 +120,9 @@ const fileFilter = (req, file, cb) => {
     return cb(new Error("Only JPG, PNG, WEBP images allowed"), false);
   }
 
-  // 🔐 Validate magic bytes from the stream (prevents MIME spoofing)
-  const chunks = [];
-  let checked = false;
-
-  file.stream.on("data", (chunk) => {
-    if (checked) return;
-    chunks.push(chunk);
-    const combined = Buffer.concat(chunks);
-    if (combined.length < 4) return; // wait for enough bytes
-    checked = true;
-
-    const signatures = MAGIC_BYTES[file.mimetype] || [];
-    const valid = signatures.some((sig) => combined.slice(0, sig.length).equals(sig));
-
-    if (!valid) {
-      logWarn("FILE REJECTED (magic bytes)", {
-        name: file.originalname,
-        type: file.mimetype,
-        user: req.user?.id || "guest",
-      });
-      // Destroy the stream to abort the upload
-      file.stream.destroy(new Error("File content does not match its declared type"));
-    }
-  });
-
-  cb(null, true); // multer proceeds; stream destroy will abort if magic bytes fail
+  // Magic bytes are verified AFTER multer has the file (see guardUploads below). multer's fileFilter never receives a
+  // stream, so the previous `file.stream.on(...)` threw a TypeError inside busboy -> uncaughtException on EVERY upload.
+  cb(null, true);
 };
 
 // =============================
@@ -117,20 +136,20 @@ const limits = {
 // =============================
 // 🚀 MAIN UPLOAD (DISK)
 // =============================
-const upload = multer({
+const upload = guardUploads(multer({
   storage: diskStorage,
   fileFilter,
   limits,
-});
+}));
 
 // =============================
 // 🚀 CLOUDINARY-READY UPLOAD
 // =============================
-export const uploadMemory = multer({
+export const uploadMemory = guardUploads(multer({
   storage: memoryStorage,
   fileFilter,
   limits,
-});
+}));
 
 // =============================
 // 🎯 PRESETS

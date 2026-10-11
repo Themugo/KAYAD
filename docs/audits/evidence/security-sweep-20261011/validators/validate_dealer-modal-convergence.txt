@@ -1,0 +1,6 @@
+
+> kayad@0.0.0 validate:dealer-modal-convergence
+> node scripts/validate-dealer-modal-convergence.mjs
+
+Dealer modal convergence: PASS
+1 canonical implementation + 1 compatibility re-export; no duplicate implementation.

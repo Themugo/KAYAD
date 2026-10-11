@@ -145,7 +145,7 @@ const classifyError = (error) => {
 export const retryFailedJob = async (dlqJobId) => {
   try {
     if (!deadLetterQueue) {
-      throw new Error("Dead letter queue not initialized");
+      throw Object.assign(new Error("Dead letter queue not initialized"), { statusCode: 503, code: "DEPENDENCY_UNAVAILABLE" });
     }
 
     const dlqJob = await deadLetterQueue.getJob(dlqJobId);
@@ -186,7 +186,7 @@ export const retryFailedJob = async (dlqJobId) => {
 export const deleteFailedJob = async (dlqJobId, resolvedBy, notes) => {
   try {
     if (!deadLetterQueue) {
-      throw new Error("Dead letter queue not initialized");
+      throw Object.assign(new Error("Dead letter queue not initialized"), { statusCode: 503, code: "DEPENDENCY_UNAVAILABLE" });
     }
 
     const dlqJob = await deadLetterQueue.getJob(dlqJobId);
@@ -226,7 +226,7 @@ export const deleteFailedJob = async (dlqJobId, resolvedBy, notes) => {
 export const getDLQStatistics = async () => {
   try {
     if (!deadLetterQueue) {
-      throw new Error("Dead letter queue not initialized");
+      throw Object.assign(new Error("Dead letter queue not initialized"), { statusCode: 503, code: "DEPENDENCY_UNAVAILABLE" });
     }
 
     const counts = await deadLetterQueue.getJobCounts();
@@ -263,7 +263,7 @@ export const getDLQStatistics = async () => {
 export const getDLQJobs = async (options = {}) => {
   try {
     if (!deadLetterQueue) {
-      throw new Error("Dead letter queue not initialized");
+      throw Object.assign(new Error("Dead letter queue not initialized"), { statusCode: 503, code: "DEPENDENCY_UNAVAILABLE" });
     }
 
     const { limit = 50, skip = 0, state = "waiting" } = options;

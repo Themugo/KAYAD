@@ -2,6 +2,7 @@ import { stkPush } from "./mpesaService.js";
 import { sendNotification } from "./notification.service.js";
 import { findById, findOne, create, update } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
+import { createSecurityPayment, findSecurityPaymentByCheckout, updateSecurityPayment } from "./securityPaymentStore.js";
 
 export async function initiateBidSecurity({ auctionId, userId, phone, amount, registrationId, holdId = null, holdType = "commitment" }) {
   if (holdId) {
@@ -40,20 +41,22 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
     };
   }
 
-  // Create a pending transaction. It may become successful only after a verified M-Pesa callback for this checkout request.
-  const transaction = await create("transactions", {
-    user: userId,
-    car: auction.id,
+  // Create the pending security payment. It may become successful only after a verified M-Pesa callback for this checkout
+  // request. Stored in `payments` - the table the auction FKs reference (see securityPaymentStore.js).
+  const { row: transaction } = await createSecurityPayment({
+    userId,
+    carId: auction.id,
     amount: securityAmount,
     type: holdType === "high_value_deposit" ? "bid_security" : "bid_commitment",
-    status: "pending",
     phone,
     checkoutRequestId: checkoutID,
-    description: recipient === "platform"
-      ? `Bid commitment for auction ${auctionId} — KAYAD platform recipient`
-      : `Bid commitment for auction ${auctionId} — organizer recipient`,
-    reference: `SEC-${auctionId}-${Date.now()}`,
-    metadata: { auctionRegistrationId: registrationId || null, auctionId, recipient, auctionSecurityHoldId: holdId || null, auctionSecurityHoldType: holdType },
+    metadata: {
+      description: recipient === "platform"
+        ? `Bid commitment for auction ${auctionId} — KAYAD platform recipient`
+        : `Bid commitment for auction ${auctionId} — organizer recipient`,
+      reference: `SEC-${auctionId}-${Date.now()}`,
+      auctionRegistrationId: registrationId || null, auctionId, recipient, auctionSecurityHoldId: holdId || null, auctionSecurityHoldType: holdType,
+    },
   });
 
   if (holdId) {
@@ -68,11 +71,12 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
 }
 
 export async function handleBidSecurityCallback({ checkoutRequestID, resultCode, mpesaReceipt, providerAmount = null }) {
-  const transaction = await findOne("transactions", { checkoutRequestId: checkoutRequestID });
-  if (!transaction) return { success: false, message: "Transaction not found" };
+  const ref = await findSecurityPaymentByCheckout(checkoutRequestID);
+  if (!ref) return { success: false, message: "Transaction not found" };
+  const transaction = ref.row;
 
   if (providerAmount !== null && providerAmount !== undefined && Number(providerAmount) !== Number(transaction.amount)) {
-    await update("transactions", transaction.id, { status: "failed", metadata: { ...(transaction.metadata || {}), amountMismatch: { expected: Number(transaction.amount), received: Number(providerAmount) } } });
+    await updateSecurityPayment(ref, { status: "failed", metadata: { ...(transaction.metadata || {}), amountMismatch: { expected: Number(transaction.amount), received: Number(providerAmount) } } });
     return { success: false, message: "Payment amount mismatch" };
   }
 
@@ -99,12 +103,12 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
       p_receipt: mpesaReceipt || null,
     });
     if (holdError) throw holdError;
-    await update("transactions", transaction.id, { status: resultCode === 0 ? "success" : "failed", mpesaReceipt: mpesaReceipt || null });
-    return { success: resultCode === 0, transaction: await findById("transactions", transaction.id), hold: settledHold, duplicate: false };
+    await updateSecurityPayment(ref, { status: resultCode === 0 ? "success" : "failed", mpesaReceipt: mpesaReceipt || null });
+    return { success: resultCode === 0, transaction: await findById(ref.table, transaction.id), hold: settledHold, duplicate: false };
   }
 
   if (resultCode !== 0) {
-    await update("transactions", transaction.id, { status: "failed" });
+    await updateSecurityPayment(ref, { status: "failed" });
     try {
       const { finalizeCommitmentRegistration } = await import("./auctionRegistration.service.js");
       await finalizeCommitmentRegistration({ checkoutRequestID, success: false, receipt: null });
@@ -112,7 +116,7 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
     return { success: false, message: "Payment failed" };
   }
 
-  await update("transactions", transaction.id, { status: "success", mpesaReceipt });
+  await updateSecurityPayment(ref, { status: "success", mpesaReceipt });
 
   try {
     const { finalizeCommitmentRegistration } = await import("./auctionRegistration.service.js");

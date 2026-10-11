@@ -1,0 +1,106 @@
+deployed-code files reachable from backend/server.js: 532
+tables referenced: 248  (missing from inventory: 101)
+  MISSING TABLE  admin_alerts                       <- backend/models/AdminAlert.js, backend/services/reconciliationService.js
+  MISSING TABLE  ads                                <- backend/models/Ad.js
+  MISSING TABLE  ai_commands                        <- backend/models/AICommand.js
+  MISSING TABLE  ai_conversations                   <- backend/models/AIConversation.js
+  MISSING TABLE  ai_knowledge                       <- backend/models/AIKnowledge.js
+  MISSING TABLE  ai_prompts                         <- backend/models/AIPrompt.js
+  MISSING TABLE  ai_workspaces                      <- backend/models/AIWorkspace.js
+  MISSING TABLE  announcements                      <- backend/models/Announcement.js
+  MISSING TABLE  approval_chains                    <- backend/models/ApprovalChain.js
+  MISSING TABLE  auction_integrity_flags            <- backend/models/AuctionIntegrityFlag.js, backend/services/auctionIntegrityService.js
+  MISSING TABLE  auction_risk_profiles              <- backend/models/AuctionRiskProfile.js, backend/services/auctionIntegrityService.js
+  MISSING TABLE  audiences                          <- backend/models/Audience.js
+  MISSING TABLE  automation_tasks                   <- backend/models/AutomationTask.js
+  MISSING TABLE  bid_logs                           <- backend/models/BidLog.js
+  MISSING TABLE  branches                           <- backend/services/organizationService.js
+  MISSING TABLE  business_objects                   <- backend/models/BusinessObject.js
+  MISSING TABLE  campaigns                          <- backend/models/Campaign.js
+  MISSING TABLE  certifications                     <- backend/governance/services/governanceService.js
+  MISSING TABLE  compliance_alerts                  <- backend/governance/services/governanceService.js
+  MISSING TABLE  config_audit_logs                  <- backend/models/ConfigAuditLog.js
+  MISSING TABLE  config_entries                     <- backend/models/ConfigEntry.js
+  MISSING TABLE  contacts                           <- backend/models/Contact.js
+  MISSING TABLE  conversion_funnels                 <- backend/models/ConversionFunnel.js
+  MISSING TABLE  country_configs                    <- backend/models/CountryConfig.js
+  MISSING TABLE  custom_dashboards                  <- backend/models/CustomDashboard.js
+  MISSING TABLE  dealer_analytics                   <- backend/models/DealerAnalytics.js
+  MISSING TABLE  dealer_health_scores               <- backend/models/DealerHealthScore.js, backend/routes/dealerRoutes.js, backend/services/dealerHealthScoreScheduler.js, backend/services/dealerHealthScoreService.js
+  MISSING TABLE  departments                        <- backend/services/organizationService.js
+  MISSING TABLE  dispute_cases                      <- backend/governance/services/governanceService.js
+  MISSING TABLE  dispute_evidence                   <- backend/governance/services/governanceService.js
+  MISSING TABLE  dispute_timeline                   <- backend/governance/services/governanceService.js
+  MISSING TABLE  disputes                           <- backend/services/disputeCron.js, backend/services/escrowAnomalyDetectionService.js, backend/services/fraudDetectionService.js
+  MISSING TABLE  duplicate_vehicle_logs             <- backend/models/DuplicateVehicleLog.js, backend/services/duplicateVehicleService.js
+  MISSING TABLE  entity_registry                    <- backend/governance/services/governanceService.js
+  MISSING TABLE  error_budgets                      <- backend/models/ErrorBudget.js, backend/services/sliTrackingService.js
+  MISSING TABLE  escrow_anomalies                   <- backend/models/EscrowAnomaly.js, backend/services/escrowAnomalyDetectionService.js
+  MISSING TABLE  escrow_risk_scores                 <- backend/services/escrowAnomalyDetectionService.js
+  MISSING TABLE  experience_analytics               <- backend/models/ExperienceAnalytics.js
+  MISSING TABLE  experiences                        <- backend/models/Experience.js
+  MISSING TABLE  feature_flags                      <- backend/models/FeatureFlag.js, backend/services/featureFlagService.js
+  MISSING TABLE  feedback                           <- backend/models/Feedback.js
+  MISSING TABLE  form_definitions                   <- backend/models/FormDefinition.js
+  MISSING TABLE  fraud_detection                    <- backend/models/FraudDetection.js
+  MISSING TABLE  fraud_detections                   <- backend/services/dealerHealthScoreService.js, backend/services/fraudDetectionService.js, backend/services/marketplaceHealthService.js
+  MISSING TABLE  fraud_reports                      <- backend/governance/services/governanceService.js
+  MISSING TABLE  governance_audit_log               <- backend/governance/services/governanceService.js
+  MISSING TABLE  homepage_variants                  <- backend/models/HomepageVariant.js
+  MISSING TABLE  inspections                        <- backend/services/intelligenceService.js
+  MISSING TABLE  job_failures                       <- backend/models/JobFailure.js, backend/services/ecpService.js
+  MISSING TABLE  journeys                           <- backend/models/Journey.js
+  MISSING TABLE  listing_quality                    <- backend/services/listingQualityService.js
+  MISSING TABLE  location_master_data               <- backend/models/LocationMasterData.js
+  MISSING TABLE  market_data                        <- backend/models/MarketData.js
+  MISSING TABLE  marketplace_health                 <- backend/models/MarketplaceHealth.js
+  MISSING TABLE  marketplace_healths                <- backend/services/marketplaceHealthService.js
+  MISSING TABLE  navigation_rules                   <- backend/models/NavigationRule.js
+  MISSING TABLE  notification_audits                <- backend/services/notificationAnalyticsService.js, backend/services/notificationRetryService.js
+  MISSING TABLE  notification_templates             <- backend/models/NotificationTemplate.js
+  MISSING TABLE  ntsa_verification_requests         <- backend/models/NtsaVerificationRequest.js
+  MISSING TABLE  object_fields                      <- backend/models/ObjectField.js
+  MISSING TABLE  object_indexes                     <- backend/models/ObjectIndex.js
+  MISSING TABLE  object_permissions                 <- backend/models/ObjectPermission.js
+  MISSING TABLE  object_relationships               <- backend/models/ObjectRelationship.js
+  MISSING TABLE  object_versions                    <- backend/models/ObjectVersion.js
+  MISSING TABLE  organizations                      <- backend/services/organizationService.js
+  MISSING TABLE  platform_brands                    <- backend/models/PlatformBrand.js
+  MISSING TABLE  platform_components                <- backend/models/PlatformComponent.js
+  MISSING TABLE  platform_products                  <- backend/models/PlatformProduct.js
+  MISSING TABLE  platform_templates                 <- backend/models/PlatformTemplate.js
+  MISSING TABLE  predictions                        <- backend/models/Prediction.js
+  MISSING TABLE  reference_data                     <- backend/models/ReferenceData.js
+  MISSING TABLE  reports                            <- backend/models/Report.js
+  MISSING TABLE  roles                              <- backend/services/organizationService.js
+  MISSING TABLE  scenarios                          <- backend/models/Scenario.js
+  MISSING TABLE  scheduled_jobs                     <- backend/models/ScheduledJob.js
+  MISSING TABLE  seasonal_themes                    <- backend/models/SeasonalTheme.js
+  MISSING TABLE  security_logs                      <- backend/models/SecurityLog.js, backend/services/ecpService.js
+  MISSING TABLE  simulation_results                 <- backend/models/SimulationResult.js
+  MISSING TABLE  simulations                        <- backend/models/Simulation.js
+  MISSING TABLE  sms_bidders                        <- backend/models/SmsBidder.js
+  MISSING TABLE  subscriptions                      <- backend/services/reconciliationService.js
+  MISSING TABLE  teams                              <- backend/services/organizationService.js
+  MISSING TABLE  transactions                       <- backend/models/Transaction.js, backend/services/dealerHealthScoreService.js, backend/services/marketplaceHealthService.js, backend/services/reconciliationService.js (+1)
+  MISSING TABLE  trust_score_history                <- backend/governance/services/governanceService.js
+  MISSING TABLE  vehicle_master_data                <- backend/models/VehicleMasterData.js
+  MISSING TABLE  verification_applications          <- backend/governance/services/governanceService.js
+  MISSING TABLE  view_definitions                   <- backend/models/ViewDefinition.js
+  MISSING TABLE  vx_advertisements                  <- backend/models/VXAdvertisement.js
+  MISSING TABLE  vx_cards                           <- backend/models/VXCard.js
+  MISSING TABLE  vx_components                      <- backend/models/VXComponent.js
+  MISSING TABLE  vx_layouts                         <- backend/models/VXLayout.js
+  MISSING TABLE  vx_pages                           <- backend/models/VXPage.js
+  MISSING TABLE  vx_sections                        <- backend/models/VXSection.js
+  MISSING TABLE  vx_styles                          <- backend/models/VXStyle.js
+  MISSING TABLE  vx_themes                          <- backend/models/VXTheme.js
+  MISSING TABLE  vx_versions                        <- backend/models/VXVersion.js
+  MISSING TABLE  vx_widgets                         <- backend/models/VXWidget.js
+  MISSING TABLE  workflow_actions                   <- backend/models/WorkflowAction.js
+  MISSING TABLE  workflow_logs                      <- backend/models/WorkflowLog.js
+  MISSING TABLE  workflow_triggers                  <- backend/models/WorkflowTrigger.js
+  MISSING TABLE  workflows                          <- backend/models/Workflow.js
+rpc functions referenced: 54  (missing: 0)
+dynamic .from(<variable>) call sites (not resolved): 40
+exit=1

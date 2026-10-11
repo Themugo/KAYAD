@@ -1,0 +1,17 @@
+
+> kayad@0.0.0 validate:dependency-security
+> node scripts/validate-dependency-security.mjs
+
+PASS undici 8.10.2 >= 8.10.2
+PASS esbuild 0.28.1 >= 0.28.1
+PASS follow-redirects 1.16.0 >= 1.16.0
+PASS js-yaml 4.3.2 >= 4.3.1
+PASS nanoid 3.3.18 >= 3.3.18
+PASS axios 1.20.0 >= 1.19.0
+PASS vitest 4.1.11 >= 4.1.11
+PASS @vitest/coverage-v8 4.1.11 >= 4.1.11
+PASS @vitest/mocker 4.1.11 >= 4.1.11
+PASS package.json override undici=8.10.2
+PASS package-lock resolves undici=8.10.2
+PASS vulnerable dependency floors are enforced in package.json and package-lock.json
+Dependency security validation: PASS

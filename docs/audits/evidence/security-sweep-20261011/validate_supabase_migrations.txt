@@ -1,0 +1,5 @@
+KAYAD Supabase migration preflight: 173 migration files, 173 unique versions
+
+PASS: migration filenames, versions, required production DDL, and forbidden-content checks passed.
+Next required validation is a real PostgreSQL/Supabase migration reset.
+exit=0

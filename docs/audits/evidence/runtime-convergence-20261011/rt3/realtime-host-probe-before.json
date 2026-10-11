@@ -1,0 +1,65 @@
+[
+  {
+    "variant": "CROSS-HOST (app.kayad.test -> api.kayad.test)",
+    "socketConnected": true,
+    "sendStatus": 201,
+    "receivedNotification": false,
+    "receivedNewMessage": false,
+    "serverSaidAuthenticated": false,
+    "socketTicketRequests": [],
+    "ticketEverInAUrl": false,
+    "cookiesTheBrowserWouldSendToSocketHost": [],
+    "socketRequests": [
+      {
+        "url": "http://api.kayad.test:5070/socket.io/socket.io.js",
+        "cookieSent": false
+      },
+      {
+        "url": "ws://api.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true,
+        "closed": true
+      },
+      {
+        "url": "ws://api.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true
+      }
+    ],
+    "serverSocketLog": [
+      "    \u001b[35mcors\u001b[39m: \"http://app.kayad.test:3000\"",
+      "    \u001b[35msocket\u001b[39m: \"ready\""
+    ]
+  },
+  {
+    "variant": "SAME-HOST (app.kayad.test -> app.kayad.test:5070)",
+    "socketConnected": true,
+    "sendStatus": 201,
+    "receivedNotification": true,
+    "receivedNewMessage": true,
+    "serverSaidAuthenticated": false,
+    "socketTicketRequests": [],
+    "ticketEverInAUrl": false,
+    "cookiesTheBrowserWouldSendToSocketHost": [
+      "token",
+      "XSRF-TOKEN"
+    ],
+    "socketRequests": [
+      {
+        "url": "http://app.kayad.test:5070/socket.io/socket.io.js",
+        "cookieSent": false
+      },
+      {
+        "url": "ws://app.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true,
+        "closed": true
+      },
+      {
+        "url": "ws://app.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true
+      }
+    ],
+    "serverSocketLog": [
+      "    \u001b[35mcors\u001b[39m: \"http://app.kayad.test:3000\"",
+      "    \u001b[35msocket\u001b[39m: \"ready\""
+    ]
+  }
+]

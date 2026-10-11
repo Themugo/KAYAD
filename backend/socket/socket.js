@@ -62,21 +62,21 @@ const emit = async (room, event, data) => {
         key: `socket_${event}`,
         onRetry: (err, attempt) => {
           logWarn(`Socket emit retry ${attempt}`, { room, event, error: err.message });
-          incrementCounter("socket_emit_retry", { event, attempt });
+          incrementCounter("socket_emit_retry", 1, { event, attempt });
         },
       },
     );
 
     const duration = Date.now() - startTime;
     recordMetric("socket_emit_duration", duration, { event });
-    incrementCounter("socket_emit_success", { event });
+    incrementCounter("socket_emit_success", 1, { event });
 
     logInfo("Socket emit successful", { room, event });
     return true;
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("socket_emit_duration", duration, { event, status: "error" });
-    incrementCounter("socket_emit_failure", { event, error_type: err.code || "unknown" });
+    incrementCounter("socket_emit_failure", 1, { event, error_type: err.code || "unknown" });
 
     logError("Socket emit failed", err, { room, event, error: err.message });
 
@@ -201,7 +201,7 @@ export const emitListingUpdate = async (carId, data) => {
         key: "socket_listing_update",
         onRetry: (err, attempt) => {
           logWarn(`Listing update retry ${attempt}`, { carId, error: err.message });
-          incrementCounter("socket_listing_update_retry", { attempt });
+          incrementCounter("socket_listing_update_retry", 1, { attempt });
         },
       },
     );

@@ -1,0 +1,22 @@
+
+> kayad@0.0.0 validate:phase4-transaction-certification
+> node scripts/validate-phase4-transaction-certification.mjs
+
+PASS M-Pesa callback validates provider metadata
+PASS M-Pesa callback claims payment atomically
+PASS M-Pesa escrow funding is explicitly rejected
+PASS M-Pesa purchase/bid settlement remains canonical
+PASS Payment initiation creates authoritative intent before provider call
+PASS Escrow custody remains bank-transfer only
+PASS Canonical escrow funding RPC exists
+PASS Backend wrapper for canonical funding RPC exists
+PASS Funding RPC requires active custodian account
+PASS Funding RPC transitions pending → funded atomically
+PASS Funding RPC marks linked payment successful
+PASS Escrow funded event is canonical
+PASS Escrow funding emits canonical communication
+PASS Escrow state machine supports controlled funding
+PASS Existing payment safety suite covers escrow STK rejection
+PASS Existing browser escrow suite remains present
+
+Phase 4 transaction certification: 16/16 PASS

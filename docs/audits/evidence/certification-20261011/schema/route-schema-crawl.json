@@ -1,0 +1,5331 @@
+{
+  "summary": {
+    "database": "k5_crawl",
+    "routesCalled": 626,
+    "status": {
+      "200": 330,
+      "400": 22,
+      "403": 3,
+      "404": 64,
+      "408": 2,
+      "500": 205
+    },
+    "routesWithDbErrors": 247,
+    "bootBackgroundDbErrors": 14,
+    "objects": {
+      "22007: invalid input syntax for type timestamp with time zone: \"[object Object]\"": [
+        "GET /api/cms/calendar"
+      ],
+      "22P02: invalid input syntax for type uuid: \"my-tasks\"": [
+        "GET /api/inspections/my-tasks"
+      ],
+      "23502: null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-nul": [
+        "GET /api/disputes",
+        "GET /api/disputes/my",
+        "GET /api/disputes/stats",
+        "GET /api/disputes/{id}",
+        "GET /api/disputes/{id}/evidence",
+        "GET /api/disputes/{id}/evidence/{evidenceId}",
+        "GET /api/escrow",
+        "GET /api/escrow/my",
+        "GET /api/escrow/operations/case/{id}",
+        "GET /api/escrow/operations/dashboard",
+        "GET /api/escrow/program",
+        "GET /api/escrow/{id}",
+        "GET /api/escrow/{id}/funding-instructions",
+        "GET /api/escrow/{id}/state"
+      ],
+      "42703: column \"uploaded_at\" does not exist": [
+        "GET /api/cms/media"
+      ],
+      "42703: column bid_count does not exist": [
+        "BOOT/BACKGROUND JOB"
+      ],
+      "42703: column business_address does not exist": [
+        "GET /api/dealer/profile"
+      ],
+      "42703: column car does not exist": [
+        "GET /api/executive-analytics/dashboard",
+        "GET /api/executive-analytics/revenue",
+        "GET /api/executive-analytics/user-growth",
+        "GET /api/fraud/check/dealer/{dealerId}",
+        "GET /api/intelligence/auctions",
+        "GET /api/intelligence/dashboard",
+        "GET /api/intelligence/forecasts",
+        "GET /api/intelligence/insights",
+        "GET /api/intelligence/marketplace",
+        "GET /api/intelligence/revenue"
+      ],
+      "42703: column carId does not exist": [
+        "GET /api/dealer/bids"
+      ],
+      "42703: column clicks does not exist": [
+        "GET /api/cars/dealer/analytics",
+        "GET /api/cars/dealer/my-cars",
+        "GET /api/intelligence/benchmarks",
+        "GET /api/intelligence/dealers",
+        "GET /api/v1/analytics/sales",
+        "GET /api/v1/analytics/sales/dealers",
+        "GET /api/v1/analytics/sales/dealers/{dealerId}",
+        "GET /api/v1/analytics/sales/revenue"
+      ],
+      "42703: column country does not exist": [
+        "GET /api/intelligence/countries"
+      ],
+      "42703: column dealer does not exist": [
+        "GET /api/dealer/analytics",
+        "GET /api/dealer/bids",
+        "GET /api/dealer/cars",
+        "GET /api/dealer/milestones",
+        "GET /api/dealer/quick-stats",
+        "GET /api/dealer/summary"
+      ],
+      "42703: column is_active does not exist": [
+        "GET /api/ledger/balance-sheet",
+        "GET /api/ledger/trial-balance"
+      ],
+      "42703: column issue_details.resolved does not exist": [
+        "GET /api/escrow/operations/case/{id}",
+        "GET /api/finance/issues"
+      ],
+      "42703: column kyc_verified does not exist": [
+        "GET /api/command-center/dealers",
+        "GET /api/operations/dealer-queue",
+        "GET /api/v1/analytics/operations/dealer-onboarding"
+      ],
+      "42703: column location does not exist": [
+        "GET /api/analytics/market/county-trends"
+      ],
+      "42703: column mpesa_business does not exist": [
+        "GET /api/dealer/settlement"
+      ],
+      "42703: column receiver does not exist": [
+        "GET /api/dealer/summary"
+      ],
+      "42703: column scheduled_date does not exist": [
+        "GET /api/command-center/inspections",
+        "GET /api/operations/inspection-queue"
+      ],
+      "42703: column status does not exist": [
+        "GET /api/ai/suggestions"
+      ],
+      "42703: column type does not exist": [
+        "GET /api/command-center/mission-control",
+        "GET /api/ecp/deployments"
+      ],
+      "42703: column user does not exist": [
+        "GET /api/dealer/analytics",
+        "GET /api/dealer/earnings",
+        "GET /api/dealer/summary"
+      ],
+      "42703: column user_id does not exist": [
+        "GET /api/v1/preferences"
+      ],
+      "42703: column verified does not exist": [
+        "GET /api/command-center/dealers",
+        "GET /api/operations/dealer-queue",
+        "GET /api/v1/analytics/operations/dealer-onboarding"
+      ],
+      "42703: column warning_sent does not exist": [
+        "BOOT/BACKGROUND JOB"
+      ],
+      "42703: column wholesale does not exist": [
+        "GET /api/dealer/trade-listings"
+      ],
+      "PGRST116: JSON object requested, multiple (or no) rows returned": [
+        "GET /api/ai/decision/vehicles/{vehicleId}/explain",
+        "GET /api/cars/admin/{id}/fraud",
+        "GET /api/cars/{id}/insights",
+        "GET /api/cars/{id}/price-history",
+        "GET /api/cars/{id}/valuation",
+        "GET /api/chat/{chatId}/attachments/{uploadId}",
+        "GET /api/chat/{chatId}/messages",
+        "GET /api/command-center/widgets",
+        "GET /api/dealer-platform/leads/{leadId}/activities",
+        "GET /api/disputes/{id}",
+        "GET /api/disputes/{id}/evidence",
+        "GET /api/disputes/{id}/evidence/{evidenceId}",
+        "GET /api/ecp/analysis/{incidentId}",
+        "GET /api/ecp/incidents/{id}",
+        "GET /api/escrow/{id}/funding-instructions",
+        "GET /api/fraud/check/account-farms/{dealerId}",
+        "GET /api/fraud/check/dealer/{dealerId}",
+        "GET /api/fraud/check/duplicate-photos/{carId}",
+        "GET /api/fraud/check/escrow/{escrowId}",
+        "GET /api/fraud/check/price-manipulation/{carId}",
+        "GET /api/funnel/cars/{carId}/analytics",
+        "GET /api/governance/changes/{id}",
+        "GET /api/governance/policies/{id}",
+        "GET /api/integration/apis/{apiId}",
+        "GET /api/integration/partners/{id}",
+        "GET /api/integration/plugins/{id}",
+        "GET /api/integration/templates/{id}",
+        "GET /api/integration/webhooks/{id}",
+        "GET /api/ledger/{id}",
+        "GET /api/listing-assistant/analyze/{carId}",
+        "GET /api/ownership/passports/{passportId}",
+        "GET /api/ownership/passports/{passportId}/public",
+        "GET /api/transactions/{id}",
+        "GET /api/valuation/{vehicleId}",
+        "GET /api/verification/admin/{id}"
+      ],
+      "PGRST200: embedded resource select not supported by emulator: car:cars(title,price,images)": [
+        "GET /api/dealer/escrows"
+      ],
+      "PGRST200: embedded resource select not supported by emulator: member:users(name,email,phon": [
+        "GET /api/dealer/team"
+      ],
+      "admin_alerts": [
+        "GET /api/reconciliation/alerts"
+      ],
+      "ai_commands": [
+        "GET /api/ai/analytics",
+        "GET /api/ai/dashboard",
+        "GET /api/ai/history"
+      ],
+      "ai_conversations": [
+        "GET /api/ai/conversations",
+        "GET /api/ai/conversations/{id}",
+        "GET /api/ai/decision/market-signals"
+      ],
+      "ai_knowledge": [
+        "GET /api/ai/decision/market-signals",
+        "GET /api/ai/knowledge"
+      ],
+      "ai_prompts": [
+        "GET /api/ai/decision/market-signals",
+        "GET /api/ai/prompts"
+      ],
+      "ai_workspaces": [
+        "GET /api/ai/workspaces"
+      ],
+      "announcements": [
+        "GET /api/announcements",
+        "GET /api/announcements/{id}"
+      ],
+      "approval_chains": [
+        "GET /api/automation/approvals",
+        "GET /api/automation/approvals/{id}"
+      ],
+      "auction_integrity_flags": [
+        "GET /api/new-admin/auction-integrity",
+        "GET /api/new-admin/auction-integrity/dashboard",
+        "GET /api/new-admin/auction-integrity/risk-profiles",
+        "GET /api/new-admin/auction-integrity/{id}"
+      ],
+      "auction_risk_profiles": [
+        "GET /api/new-admin/auction-integrity/risk-profiles"
+      ],
+      "audiences": [
+        "GET /api/xos/audiences"
+      ],
+      "automation_tasks": [
+        "GET /api/automation/stats",
+        "GET /api/automation/tasks",
+        "GET /api/automation/tasks/{id}"
+      ],
+      "bid_logs": [
+        "GET /api/v1/bid-logs/admin/all",
+        "GET /api/v1/bid-logs/admin/stats",
+        "GET /api/v1/bid-logs/car/{carId}",
+        "GET /api/v1/bid-logs/car/{carId}/stats",
+        "GET /api/v1/bid-logs/car/{carId}/winning",
+        "GET /api/v1/bid-logs/my",
+        "GET /api/v1/bid-logs/{logId}"
+      ],
+      "branches": [
+        "GET /api/organizations/{id}/branches"
+      ],
+      "business_objects": [
+        "GET /api/lowcode/objects",
+        "GET /api/lowcode/objects/{id}",
+        "GET /api/lowcode/objects/{id}/api",
+        "GET /api/lowcode/stats"
+      ],
+      "campaigns": [
+        "GET /api/xos/campaigns",
+        "GET /api/xos/campaigns/{id}",
+        "GET /api/xos/dashboard"
+      ],
+      "config_audit_logs": [
+        "GET /api/config/audit"
+      ],
+      "config_entries": [
+        "GET /api/config/entries",
+        "GET /api/config/entries/{id}",
+        "GET /api/config/export",
+        "GET /api/config/vehicle"
+      ],
+      "contacts": [
+        "GET /api/contact"
+      ],
+      "conversion_funnels": [
+        "GET /api/funnel/cars/{carId}/analytics",
+        "GET /api/funnel/dealer/analytics"
+      ],
+      "country_configs": [
+        "GET /api/config/countries",
+        "GET /api/config/countries/{id}",
+        "GET /api/config/vehicle"
+      ],
+      "custom_dashboards": [
+        "GET /api/lowcode/dashboards"
+      ],
+      "dealer_health_scores": [
+        "GET /api/dealer-health-score/admin/alerts",
+        "GET /api/dealer-health-score/{dealerId}",
+        "GET /api/dealer-health-score/{dealerId}/details",
+        "GET /api/dealer-health-score/{dealerId}/trends",
+        "GET /api/dealer/milestones"
+      ],
+      "disputes": [
+        "BOOT/BACKGROUND JOB"
+      ],
+      "duplicate_vehicle_logs": [
+        "GET /api/duplicates/all",
+        "GET /api/duplicates/{id}"
+      ],
+      "error_budgets": [
+        "BOOT/BACKGROUND JOB",
+        "GET /api/admin/queue/metrics",
+        "GET /api/reliability/error-budgets",
+        "GET /api/reliability/error-budgets/{sloId}",
+        "GET /api/reliability/health",
+        "GET /api/reliability/report"
+      ],
+      "escrow_anomalies": [
+        "GET /api/escrow/operations/dashboard"
+      ],
+      "experience_analytics": [
+        "GET /api/xos/analytics"
+      ],
+      "experiences": [
+        "GET /api/xos/dashboard",
+        "GET /api/xos/experiences",
+        "GET /api/xos/experiences/{id}",
+        "GET /api/xos/resolve"
+      ],
+      "feature_flags": [
+        "GET /api/config/features",
+        "GET /api/config/features/check/{key}",
+        "GET /api/config/features/{id}",
+        "GET /api/config/stats"
+      ],
+      "feedback": [
+        "GET /api/feedback/admin/all",
+        "GET /api/finance/cron-status"
+      ],
+      "form_definitions": [
+        "GET /api/lowcode/objects/{objectId}/forms",
+        "GET /api/lowcode/stats"
+      ],
+      "fraud_detection": [
+        "GET /api/fraud/all",
+        "GET /api/fraud/analytics",
+        "GET /api/fraud/check/account-farms/{dealerId}"
+      ],
+      "governance_decisions": [
+        "GET /api/command-center/decisions"
+      ],
+      "homepage_variants": [
+        "GET /api/xos/variants"
+      ],
+      "inspections": [
+        "GET /api/intelligence/inspections"
+      ],
+      "job_failures": [
+        "GET /api/admin/queue/failures",
+        "GET /api/admin/queue/failures/{failureId}",
+        "GET /api/command-center/briefing",
+        "GET /api/command-center/infrastructure",
+        "GET /api/command-center/mission-control",
+        "GET /api/command-center/operations",
+        "GET /api/ecp/dashboard",
+        "GET /api/ecp/executive",
+        "GET /api/ecp/performance",
+        "GET /api/operations/escrow-queue",
+        "GET /api/v1/analytics/operations/escrow-disputes",
+        "GET /api/v1/analytics/operations/overview",
+        "GET /api/v1/analytics/operations/queue-health",
+        "GET /api/v1/analytics/operations/system-health"
+      ],
+      "journeys": [
+        "GET /api/xos/dashboard",
+        "GET /api/xos/journeys",
+        "GET /api/xos/journeys/{id}"
+      ],
+      "listing_quality": [
+        "GET /api/listing-quality/platform/trends"
+      ],
+      "location_master_data": [
+        "GET /api/config/location",
+        "GET /api/config/location/cities",
+        "GET /api/config/location/countries",
+        "GET /api/config/location/regions",
+        "GET /api/config/vehicle"
+      ],
+      "marketplace_health": [
+        "GET /api/marketplace-health/admin/all",
+        "GET /api/marketplace-health/metrics",
+        "GET /api/marketplace-health/summary"
+      ],
+      "navigation_rules": [
+        "GET /api/xos/navigation-rules"
+      ],
+      "notification_audits": [
+        "GET /api/notification-analytics/delivery-stats",
+        "GET /api/notification-analytics/platform-stats",
+        "GET /api/notification-analytics/retry-queue",
+        "GET /api/notification-analytics/trends",
+        "GET /api/notification-analytics/user/{userId}/stats"
+      ],
+      "notification_templates": [
+        "GET /api/automation/templates/notifications",
+        "GET /api/automation/templates/notifications/{id}"
+      ],
+      "ntsa_verification_requests": [
+        "GET /api/ntsa-verification/car/{carId}/status"
+      ],
+      "object_fields": [
+        "GET /api/lowcode/objects/{objectId}/fields",
+        "GET /api/market/dealer/insights"
+      ],
+      "object_permissions": [
+        "GET /api/lowcode/objects/{objectId}/permissions"
+      ],
+      "object_relationships": [
+        "GET /api/lowcode/objects/{objectId}/relationships"
+      ],
+      "object_versions": [
+        "GET /api/lowcode/objects/{objectId}/versions"
+      ],
+      "organizations": [
+        "GET /api/organizations/platform-stats",
+        "GET /api/organizations/{id}",
+        "GET /api/organizations/{id}/stats",
+        "GET /api/organizations/{id}/users"
+      ],
+      "predictions": [
+        "GET /api/digital-twin/dashboard",
+        "GET /api/digital-twin/predictions"
+      ],
+      "reference_data": [
+        "GET /api/config/reference",
+        "GET /api/config/reference/{id}",
+        "GET /api/config/vehicle"
+      ],
+      "regional_metrics": [
+        "GET /api/command-center/map"
+      ],
+      "reports": [
+        "GET /api/reports/admin/all",
+        "GET /api/reports/admin/{id}",
+        "GET /api/reports/my"
+      ],
+      "scenarios": [
+        "GET /api/digital-twin/predictions",
+        "GET /api/digital-twin/scenarios",
+        "GET /api/digital-twin/scenarios/{id}"
+      ],
+      "scheduled_jobs": [
+        "GET /api/automation/scheduled"
+      ],
+      "seasonal_themes": [
+        "GET /api/xos/dashboard",
+        "GET /api/xos/themes"
+      ],
+      "security_logs": [
+        "GET /api/audit/logs",
+        "GET /api/command-center/briefing",
+        "GET /api/command-center/mission-control",
+        "GET /api/command-center/operations",
+        "GET /api/command-center/security",
+        "GET /api/ecp/dashboard",
+        "GET /api/ecp/executive",
+        "GET /api/ecp/security",
+        "GET /api/operations/escrow-queue",
+        "GET /api/security-logs",
+        "GET /api/security-logs/my",
+        "GET /api/security-logs/summary",
+        "GET /api/sms-bidding/my",
+        "GET /api/v1/analytics/operations/escrow-disputes",
+        "GET /api/v1/analytics/operations/fraud-alerts",
+        "GET /api/v1/analytics/operations/overview",
+        "GET /api/v1/analytics/operations/queue-health"
+      ],
+      "simulations": [
+        "GET /api/digital-twin/dashboard",
+        "GET /api/digital-twin/simulations",
+        "GET /api/digital-twin/simulations/{id}"
+      ],
+      "sms_bidders": [
+        "GET /api/sms-bidding/my"
+      ],
+      "transactions": [
+        "GET /api/referral/stats"
+      ],
+      "vehicle_master_data": [
+        "GET /api/config/vehicle",
+        "GET /api/config/vehicle/makes",
+        "GET /api/config/vehicle/models",
+        "GET /api/config/vehicle/{id}"
+      ],
+      "view_definitions": [
+        "GET /api/lowcode/objects/{objectId}/views",
+        "GET /api/market/dealer/insights"
+      ],
+      "vx_advertisements": [
+        "GET /api/vxp/advertisements",
+        "GET /api/vxp/themes"
+      ],
+      "vx_cards": [
+        "GET /api/vxp/cards",
+        "GET /api/vxp/themes"
+      ],
+      "vx_components": [
+        "GET /api/vxp/components"
+      ],
+      "vx_pages": [
+        "GET /api/vxp/pages",
+        "GET /api/vxp/pages/{id}",
+        "GET /api/vxp/stats"
+      ],
+      "vx_sections": [
+        "GET /api/vxp/sections",
+        "GET /api/vxp/stats"
+      ],
+      "vx_themes": [
+        "GET /api/vxp/stats",
+        "GET /api/vxp/themes",
+        "GET /api/vxp/themes/default",
+        "GET /api/vxp/themes/{id}"
+      ],
+      "vx_versions": [
+        "GET /api/vxp/versions"
+      ],
+      "workflow_logs": [
+        "GET /api/automation/logs"
+      ],
+      "workflows": [
+        "GET /api/automation/stats",
+        "GET /api/automation/workflows",
+        "GET /api/automation/workflows/{id}"
+      ]
+    }
+  },
+  "results": [
+    {
+      "route": "GET /api/v1/auth/csrf",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/auth/csrf",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/bulk/export/cars",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/bulk/export/users",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/queue/aggregated",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/queue/circuit-breakers",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/queue/dlq/jobs",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/queue/dlq/statistics",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/queue/failures",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/admin/queue/failures/{failureId}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/admin/queue/health",
+      "status": 408,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/queue/metrics",
+      "status": 408,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/admin/queue/statistics",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/support-tickets",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/support-tickets/stats",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/admin/support-tickets/{id}",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ads",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ads/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ads/stats",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ai/analytics",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_commands\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/conversations",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_conversations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/conversations/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_conversations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/dashboard",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_commands\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/decision/market-signals",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_conversations\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_knowledge\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_prompts\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/decision/recommendations",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ai/decision/vehicles/{vehicleId}/explain",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/health",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ai/history",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_commands\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/knowledge",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_knowledge\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/prompts",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_prompts\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/suggestions",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column status does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ai/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ai/workspaces",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ai_workspaces\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/analytics/market/admin/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/brand-trends",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/county-trends",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column location does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/analytics/market/dealer/{dealerId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/fastest-selling",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/model-trends",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/most-searched",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/most-viewed",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/price-trends",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/spec-trends",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/summary",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/analytics/market/volume-trends",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/announcements",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.announcements\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.announcements\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/announcements/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.announcements\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/auction-admin/{carId}/bids",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/action/{action}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/date-range",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/escrow/{id}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/export/{escrowId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/logs",
+      "status": 400,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/audit/logs/action/{action}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/logs/actor/{actorId}",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/logs/export",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/logs/statistics",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/logs/target/{targetId}/{targetModel}",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/logs/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/statistics",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/user/{userId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/audit/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/auth/me",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/auth/phone-status",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/auth/profile",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/auth/sessions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/auth/verify-email/{token}",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/automation/action-types",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/automation/ai-suggestions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/automation/approvals",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.approval_chains\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/approvals/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.approval_chains\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/logs",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.workflow_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/rules",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/automation/rules/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/automation/scheduled",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.scheduled_jobs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.workflows\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.automation_tasks\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/tasks",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.automation_tasks\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/tasks/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.automation_tasks\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/automation/templates/notifications",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.notification_templates\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/templates/notifications/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.notification_templates\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/trigger-types",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/automation/workflows",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.workflows\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/automation/workflows/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.workflows\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cars",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cars/admin/{id}/fraud",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cars/dealer/analytics",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cars/dealer/my-cars",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cars/my-listings",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cars/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cars/{id}/insights",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cars/{id}/price-history",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cars/{id}/valuation",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/chat",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/chat/unread",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/chat/{chatId}/attachments/{uploadId}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/chat/{chatId}/messages",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cms/ab-tests",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/analytics/content/{contentId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/banners",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/banners/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/calendar",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "22007",
+          "message": "invalid input syntax for type timestamp with time zone: \"[object Object]\""
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cms/campaigns",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/campaigns/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/content",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/content/s/{slug}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/content/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/dashboard/stats",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/faqs",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/faqs/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/media",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column \"uploaded_at\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/cms/media/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/pages",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/pages/s/{slug}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/pages/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/revisions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/revisions/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/search",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/cms/taxonomies",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/actions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/ai",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/auctions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/briefing",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/commands",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/dealers",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column verified does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column kyc_verified does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/decisions",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.governance_decisions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/finance",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/infrastructure",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/inspections",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column scheduled_date does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/live-activity",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/map",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.regional_metrics\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/marketplace",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/mission-control",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column type does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/notifications",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/operations",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/search",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/security",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/command-center/snapshot",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/support",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/timeline",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/war-room",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/command-center/widgets",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/communications/admin/analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/communications/admin/history",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/communications/admin/provider-health",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/communications/admin/rollout",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/communications/admin/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/communications/history",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/communications/preferences",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/config/audit",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.config_audit_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/countries",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.country_configs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/countries/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.country_configs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/entries",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.config_entries\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/entries/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.config_entries\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/export",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.config_entries\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/features",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.feature_flags\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/features/check/{key}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.feature_flags\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/features/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.feature_flags\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/location",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.location_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/location/cities",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.location_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/location/countries",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.location_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/location/regions",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.location_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/location/types",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/config/reference",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.reference_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/reference/types",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/config/reference/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.reference_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.feature_flags\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/vehicle",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vehicle_master_data\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.location_master_data\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.reference_data\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.config_entries\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.country_configs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.vehicle_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/vehicle/makes",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vehicle_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/vehicle/models",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vehicle_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/config/vehicle/types",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/config/vehicle/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vehicle_master_data\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/contact",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.contacts\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/countries",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/countries/currency-rate",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/countries/currency-rates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/countries/{countryCode}",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-health-score/admin/alerts",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.dealer_health_scores\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer-health-score/admin/distribution",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-health-score/ranking/list",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-health-score/top/{category}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-health-score/{dealerId}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.dealer_health_scores\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer-health-score/{dealerId}/details",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.dealer_health_scores\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer-health-score/{dealerId}/trends",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.dealer_health_scores\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer-platform/analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/analytics/recommendations",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/auctions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/customers",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/customers/{customerId}/timeline",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/dashboard",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/finance",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/inspections",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/inventory",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/leads",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/leads/{leadId}/activities",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer-platform/marketing",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/pipeline",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/profile/{dealerId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/reputation",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/subscription",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer-platform/team",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer/onboarding",
+      "status": 403,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/dealer/analytics",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column user does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/bids",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column carId does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column carId does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/cars",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/earnings",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column user does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column user does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/escrows",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "PGRST200",
+          "message": "embedded resource select not supported by emulator: car:cars(title,price,images)"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/milestones",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.dealer_health_scores\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/profile",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column business_address does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/quick-stats",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/settlement",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column mpesa_business does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/summary",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column receiver does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column dealer does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column user does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/team",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "PGRST200",
+          "message": "embedded resource select not supported by emulator: member:users(name,email,phone,role,avatar)"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/dealer/trade-listings",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column wholesale does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/digital-twin/dashboard",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.predictions\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.simulations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/digital-twin/predictions",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.scenarios\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.predictions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/digital-twin/scenarios",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.scenarios\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/digital-twin/scenarios/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/digital-twin/scenarios/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.scenarios\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/digital-twin/simulations",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.simulations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/digital-twin/simulations/history",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/digital-twin/simulations/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.simulations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/disputes",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/disputes/my",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/disputes/stats",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/disputes/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        },
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/disputes/{id}/evidence",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        },
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/disputes/{id}/evidence/{evidenceId}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        },
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/duplicates/all",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.duplicate_vehicle_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.duplicate_vehicle_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/duplicates/search",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/duplicates/statistics",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/duplicates/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.duplicate_vehicle_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/alerts",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/analysis/{incidentId}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/audit",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/business",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/capacity",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/compliance",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/dashboard",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/deployments",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column type does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/disaster-recovery",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/executive",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/health",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/health/{serviceId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/incidents",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/incidents/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/performance",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/security",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ecp/self-healing",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ecp/self-healing/rules",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/escrow",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/escrow/operations/dashboard",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.escrow_anomalies\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/escrow/operations/case/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column issue_details.resolved does not exist"
+        },
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/escrow/my",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/escrow/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/escrow/program",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/escrow/{id}/funding-instructions",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        },
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/escrow/{id}/state",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "23502",
+          "message": "null value in column \"key\" of relation \"idempotency_audit_logs\" violates not-null constraint"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/events/analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/events/my-events",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/executive-analytics/dashboard",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/executive-analytics/revenue",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/executive-analytics/user-growth",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/favorites",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/category/{category}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/environment/{environment}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/evaluate/{key}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/meta/categories",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/role/{role}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/user",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/{key}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feature-flags/{key}/stats",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/feedback/admin/all",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.feedback\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/finance/cron-status",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.feedback\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/finance/export/{reportId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/finance/issues",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column issue_details.resolved does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/finance/reports",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/finance/reports/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/finance/statistics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/fraud/all",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.fraud_detection\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/fraud/analytics",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.fraud_detection\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.fraud_detection\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.fraud_detection\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/fraud/check/account-farms/{dealerId}",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.fraud_detection\" does not exist"
+        },
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/fraud/check/auction/{carId}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/fraud/check/dealer/{dealerId}",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        },
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/fraud/check/duplicate-photos/{carId}",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/fraud/check/escrow/{escrowId}",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/fraud/check/price-manipulation/{carId}",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/fraud/check/user/{userId}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/funnel/cars/{carId}/analytics",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.conversion_funnels\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/funnel/dealer/analytics",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.conversion_funnels\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/governance/approvals",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/audit",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/changes",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/changes/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/governance/compliance",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/countries",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/dashboard",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/decisions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/features",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/partners",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/policies",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/policies/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/governance/releases",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/reports",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/risks",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/governance/standards",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/hero",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/hero/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/customer-experience",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/dashboard",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/experiments",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/health",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/ideas",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/opportunities",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/optimization/marketplace",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/optimization/revenue",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/optimization/search",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/performance",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/recommendations",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/report",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/roadmap",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/technical-debt",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/improvement/ux-analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspections",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspections/available-inspectors",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspections/car/{carId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspections/my",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspections/my-tasks",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "22P02",
+          "message": "invalid input syntax for type uuid: \"my-tasks\""
+        }
+      ]
+    },
+    {
+      "route": "GET /api/inspections/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspector-applications",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspector-applications/active",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspector-applications/my",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/inspector-applications/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/api-keys",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/apis",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/apis/{apiId}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/integration/certification",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/dashboard",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/events",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/gateway",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/oauth/config",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/partners",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/partners/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/integration/plugins",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/plugins/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/integration/sandbox",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/sdks",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/templates/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/integration/webhooks",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/integration/webhooks/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/integration/webhooks/{webhookId}/logs",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/intelligence/auctions",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/benchmarks",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/countries",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column country does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/customers",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/intelligence/dashboard",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/dealers",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/finance",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/intelligence/forecasts",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/insights",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/inspections",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.inspections\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/marketing",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/intelligence/marketplace",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/reports",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/intelligence/reports/download/{reportId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/intelligence/revenue",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column car does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/intelligence/scheduled",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/leads",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/leads/analytics/summary",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/leads/conversion/report",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/leads/pipeline/view",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/leads/{leadId}",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/leads/{leadId}/timeline",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ledger",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ledger/balance-sheet",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column is_active does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ledger/reconciliation",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ledger/seed",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ledger/trial-balance",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column is_active does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ledger/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/listing-assistant/analyze/{carId}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/listing-assistant/dealer-stats",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/listing-quality/car/{carId}",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/listing-quality/dealer/{dealerId}/report",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/listing-quality/dealer/{dealerId}/stats",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/listing-quality/platform/benchmarks",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/listing-quality/platform/low-quality",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/listing-quality/platform/stats",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/listing-quality/platform/trends",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.listing_quality\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/loans/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/loans/my",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/lowcode/dashboards",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.custom_dashboards\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/field-types",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/lowcode/objects",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.business_objects\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.business_objects\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{id}/api",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.business_objects\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{objectId}/fields",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.object_fields\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{objectId}/forms",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.form_definitions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{objectId}/permissions",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.object_permissions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{objectId}/relationships",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.object_relationships\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{objectId}/versions",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.object_versions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/objects/{objectId}/views",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.view_definitions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/lowcode/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.business_objects\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.form_definitions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/market/dealer/insights",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.view_definitions\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.object_fields\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/market/pulse/{carId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/market/trends",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/marketplace-health/admin/all",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.marketplace_health\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/marketplace-health/alerts",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/marketplace-health/metrics",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.marketplace_health\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/marketplace-health/summary",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.marketplace_health\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/marketplace-health/trends",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/new-admin/auction-integrity",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/new-admin/auction-integrity/dashboard",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/new-admin/auction-integrity/risk-profiles",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_risk_profiles\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_risk_profiles\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_risk_profiles\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/new-admin/auction-integrity/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.auction_integrity_flags\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/notification-analytics/channel-stats",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/notification-analytics/delivery-report",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/notification-analytics/delivery-stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.notification_audits\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/notification-analytics/engagement-metrics",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/notification-analytics/failure-analysis",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/notification-analytics/platform-stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.notification_audits\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/notification-analytics/retry-queue",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.notification_audits\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/notification-analytics/retry-stats",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/notification-analytics/trends",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.notification_audits\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/notification-analytics/user/{userId}/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.notification_audits\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/notifications",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ntsa-verification",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ntsa-verification/car/{carId}/status",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.ntsa_verification_requests\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/operations/dashboard",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/operations/dealer-queue",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column verified does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column kyc_verified does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/operations/escrow-queue",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/operations/inspection-queue",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column scheduled_date does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/operations/payment-queue",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/operations/support-queue",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/organizations",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/organizations/platform-stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.organizations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/organizations/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.organizations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/organizations/{id}/branches",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.branches\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/organizations/{id}/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.organizations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/organizations/{id}/users",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.organizations\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ownership/dashboard",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ownership/passports/vin/{vin}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/ownership/passports/{passportId}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ownership/passports/{passportId}/public",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/ownership/vehicles/{vehicleId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/payments/checkout/{checkoutRequestId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/payments/my",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/payments/status/{id}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/brands",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/brands/{brandId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/components",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/dashboard",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/deployments",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/design/{designId}/status",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/domain-models",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/generate/{productId}/status",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/health",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/monetization",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/products",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/products/{productId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/services",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/store",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/templates/{templateId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/platform-factory/workflows",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/recommendations",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/alerts",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.admin_alerts\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reconciliation/dashboard",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/directional-breakdown",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/export/{reportId}/{format}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/integrity-score",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/negative-balances",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/reports",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/reports/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/reports/{reportId}/records",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reconciliation/unreleased-escrows",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/referral/code",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/referral/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.transactions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reliability/error-budgets",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reliability/error-budgets/{sloId}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reliability/health",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reliability/report",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.error_budgets\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reliability/slis",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reliability/slis/{sliId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reliability/slos",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reliability/slos/{sloId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reports/admin/all",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.reports\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.reports\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reports/admin/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.reports\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reports/my",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.reports\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.reports\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/reviews/dealer/{dealerId}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/reviews/my",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/saved-searches",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search/facets",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/brands",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/counties",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/dealer/demand",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/demand-report",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/filters",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/insights",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/missing-inventory",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/no-results",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/price-ranges",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/summary",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search-analytics/trending",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/search/autocomplete",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/security-logs",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/security-logs/my",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/security-logs/summary",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/sms-bidding/my",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.sms_bidders\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/subscriptions/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/subscriptions/analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/subscriptions/my-subscription",
+      "status": 403,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/subscriptions/plans",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/subscriptions/usage-limits",
+      "status": 403,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/config",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/staff/queue",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/staff/metrics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/staff/team",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/staff/{id}",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/analytics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/my-tickets",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/support/{ticketId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/transactions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/transactions/summary",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/transactions/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/users/me",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/users/search",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/users/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/dealer-onboarding",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column verified does not exist"
+        },
+        {
+          "code": "42703",
+          "message": "column kyc_verified does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/escrow-disputes",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/fraud-alerts",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/listing-moderation",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/notifications",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/overview",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/payment-failures",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/queue-health",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.security_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/operations/system-health",
+      "status": 200,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.job_failures\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/sales",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/sales/dealers",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/sales/dealers/{dealerId}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/sales/revenue",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column clicks does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/analytics/support",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/analytics/support/agents",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/analytics/support/agents/{agentId}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/analytics/support/tickets",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/auctions",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/auctions/active",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/auctions/my",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/auctions/{id}",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/auctions/{id}/bids",
+      "status": 404,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/bid-logs/admin/all",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/bid-logs/admin/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/bid-logs/car/{carId}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/bid-logs/car/{carId}/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/bid-logs/car/{carId}/winning",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/bid-logs/my",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/bid-logs/{logId}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.bid_logs\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/localization",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/localization/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/localization/export",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/localization/key/{key}",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/localization/namespaces",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/localization/search",
+      "status": 400,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/localization/stats",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v1/preferences",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42703",
+          "message": "column user_id does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/v1/preferences/stats",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/v2",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/valuation/matrix",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/valuation/{vehicleId}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/verification/admin/all",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/verification/admin/{id}",
+      "status": 404,
+      "dbErrors": [
+        {
+          "code": "PGRST116",
+          "message": "JSON object requested, multiple (or no) rows returned"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/verification/status",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/vxp/advertisements",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_advertisements\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/advertisements/zones",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/vxp/cards",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_cards\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/cards/fields",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/vxp/components",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_components\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/components/library",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/vxp/pages",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_pages\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/pages/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_pages\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/sections",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_sections\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/sections/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/vxp/stats",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_sections\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_pages\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_themes\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/themes",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_advertisements\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_cards\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_themes\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/themes/default",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_themes\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/themes/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_themes\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/vxp/versions",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.vx_versions\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/ai/recommendations",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/xos/analytics",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.experience_analytics\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/audiences",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.audiences\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/audiences/segments",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/xos/campaigns",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.campaigns\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/campaigns/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.campaigns\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/dashboard",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.campaigns\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.experiences\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.journeys\" does not exist"
+        },
+        {
+          "code": "42P01",
+          "message": "relation \"public.seasonal_themes\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/experiences",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.experiences\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/experiences/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.experiences\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/journeys",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.journeys\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/journeys/{id}",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.journeys\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/metrics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/xos/navigation-rules",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.navigation_rules\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/resolve",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.experiences\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/themes",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.seasonal_themes\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/themes/templates",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /api/xos/variants",
+      "status": 500,
+      "dbErrors": [
+        {
+          "code": "42P01",
+          "message": "relation \"public.homepage_variants\" does not exist"
+        }
+      ]
+    },
+    {
+      "route": "GET /api/xos/variants/types",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /health",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /health/cache",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /health/detailed",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /metrics",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /metrics/cache",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /metrics/database",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /metrics/errors",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /metrics/http",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /metrics/replica-set",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /metrics/system",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /prometheus",
+      "status": 500,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /sitemap-auctions.xml",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /sitemap-cars.xml",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /sitemap-dealers.xml",
+      "status": 200,
+      "dbErrors": []
+    },
+    {
+      "route": "GET /sitemap.xml",
+      "status": 200,
+      "dbErrors": []
+    }
+  ],
+  "bootErrors": [
+    {
+      "path": "/rest/v1/bids?select=*&created_at=gte.2026-10-11T07%3A30%3A22.060Z&status=in.%28paid%2Cpending%29&bid_count=gte.2",
+      "code": "42703",
+      "message": "column bid_count does not exist"
+    },
+    {
+      "path": "/rest/v1/disputes?select=*&status=eq.open&created_at=lte.2026-10-09T11%3A30%3A22.028Z",
+      "code": "42P01",
+      "message": "relation \"public.disputes\" does not exist"
+    },
+    {
+      "path": "/rest/v1/escrows?select=*&status=eq.funded%2Cvehicle_confirmed&createdAt=lte.2026-10-06T11%3A30%3A22.027Z&warning_sent=neq.true",
+      "code": "42703",
+      "message": "column warning_sent does not exist"
+    },
+    {
+      "path": "/rest/v1/bids?select=*&created_at=gte.2026-10-11T07%3A30%3A22.060Z&status=in.%28paid%2Cpending%29&bid_count=gte.5",
+      "code": "42703",
+      "message": "column bid_count does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_availability",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_latency_p95",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_error_rate",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_queue_success_rate",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_payment_success_rate",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_availability",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_availability",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_latency_p95",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*&limit=1&slo_id=eq.slo_latency_p95",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/rest/v1/error_budgets?select=*",
+      "code": "42P01",
+      "message": "relation \"public.error_budgets\" does not exist"
+    }
+  ]
+}

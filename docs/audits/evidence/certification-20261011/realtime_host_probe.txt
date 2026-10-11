@@ -1,0 +1,3 @@
+CROSS-HOST (app.kayad.test -> api.kayad.test): connected=true authenticatedDelivery(notification)=false newMessage=false cookiesToSocketHost=[]
+SAME-HOST (app.kayad.test -> app.kayad.test:5070): connected=true authenticatedDelivery(notification)=true newMessage=true cookiesToSocketHost=[token,XSRF-TOKEN]
+exit=0

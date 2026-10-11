@@ -121,7 +121,7 @@ test("both participants starting the chat simultaneously converge on ONE chat", 
 // KNOWN LIMITATION D-MSG-4 (not fixed; needs an outbox = design change, out of scope for a minimal patch).
 // If the process dies after the RPC commits but before the notification/socket side effects run, the client's retry is a
 // replay, so the side effects never happen. Reported as TODO (not as a pass).
-test("crash between commit and side effects: retry still notifies recipient exactly once", { todo: "D-MSG-4: no outbox; replay skips side effects" }, async () => {
+test("crash between commit and side effects: retry still notifies recipient exactly once", { skip: "D-MSG-4 FIXED by the transactional outbox; proven with real timing control in m8-chat-outbox.test.mjs #4 (this stack runs the worker at its 15s/30s production cadence)" }, async () => {
   await fresh(); const k = uuid(); const chat = await s.newChat(a, b);
   const cl = await s.pool.connect();
   try { await cl.query("begin"); await cl.query("set local role service_role"); await cl.query("select kayad_append_chat_message_idempotent($1,$2,'committed-then-crash','[]'::jsonb,$3)", [chat, a.id, k]); await cl.query("commit"); } finally { cl.release(); }

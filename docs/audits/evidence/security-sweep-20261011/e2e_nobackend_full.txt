@@ -1,0 +1,1622 @@
+
+Running 19 tests using 1 worker
+
+[WebServer] 1:05:25 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:05:25 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:25 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:25 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:25 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:27 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘   1 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer registration uses the canonical auth contract (11.8s)
+[WebServer] 1:05:38 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:38 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:38 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:38 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:05:39 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:40 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘   2 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding › dealer registration requires and sends business fields (11.9s)
+[WebServer] 1:05:51 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:05:51 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:51 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:51 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:51 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:05:53 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘   3 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding › private seller registration uses individual_seller (11.7s)
+[WebServer] 1:06:03 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:06:04 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:04 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:04 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:04 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:06 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘   4 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboarding › inspector application uses the dedicated application endpoint (11.6s)
+[WebServer] 1:06:16 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:16 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:16 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:16 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:17 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:19 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘   5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid (12.3s)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:30 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:06:30 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:31 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:32 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘   6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls — browser interaction certification › grid responds honestly across mobile, tablet and desktop breakpoints (12.2s)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:44 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✓   7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls — browser interaction certification › desktop sidebar dropdowns remain populated and send their real backend query parameters (3.5s)
+[WebServer] 1:06:46 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:46 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:46 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:46 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:46 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:46 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:47 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✓   8 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls — browser interaction certification › show/page-size and grid/list controls update the live inventory state (2.8s)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:49 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+  ✘   9 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls — browser interaction certification › mobile filter drawer exposes working selectors and closes cleanly (1.6s)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:52 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:06:52 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:53 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✓  10 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace controls — browser interaction certification › hero search dropdowns remain functional and drive the real filter state (2.3s)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:54 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:55 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:06:57 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘  11 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls — browser interaction certification › admin escrow dropdowns have stable accessible controls (12.1s)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:08 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:10 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘  12 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification — environment evidence › frontend build serves and renders the marketplace shell (buyer browsing) (7.1s)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:16 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:07:16 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:17 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:18 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘  13 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification — environment evidence › auth surface renders (registration/login entry points) (7.1s)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:24 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:25 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:26 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘  14 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification — environment evidence › marketplace navigation switches views without errors (browsing ↔ auctions) (12.1s)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/auctions?page=1&limit=100&status=live
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/auctions?page=1&limit=100&status=draft
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/auctions?page=1&limit=100&status=ended
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/auctions?page=1&limit=100&status=live
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/auctions?page=1&limit=100&status=draft
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:37 PM [vite] http proxy error: /api/auctions?page=1&limit=100&status=ended
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✓  15 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:66:3 › Workflow certification — environment evidence › SPA deep link does not 404 and renders the shell (session/bookmark restoration surface) (1.8s)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:39 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:40 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✓  16 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:73:3 › Workflow certification — environment evidence › unknown deep link does not crash the app (invalid input at routing level) (3.3s)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:42 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:07:42 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:43 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:44 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:07:46 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘  17 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification — environment evidence › refresh preserves the shell (browser refresh recovery) (8.1s)
+  ✘  18 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification — environment evidence › network failure: API unreachable does not crash the app or fabricate data (32.3s)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=top_ticker
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=left_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=right_rail
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/cars?page=1&limit=24&minPrice=50000&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/cars?page=1&limit=100&featured=true&sort=newest
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/hero
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] (client) [console.warn] [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js
+[WebServer]     at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=mid_grid
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/ads?placement=sidebar
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/cars?limit=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/admin/public/config
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:25 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[WebServer] 1:08:27 PM [vite] http proxy error: /api/v1/auth/me
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:5000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  ✘  19 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certification — environment evidence › mobile viewport renders the shell without breaking (responsive build) (6.9s)
+
+
+  1) [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer registration uses the canonical auth contract 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Buyer', exact: true })
+
+
+      39 |
+      40 |     await page.goto('/register');
+    > 41 |     await page.getByRole('button', { name: 'Buyer', exact: true }).click();
+         |                                                                    ^
+      42 |     await page.getByRole('button', { name: /Continue/ }).click();
+      43 |     await page.getByLabel('Full name').fill('Jane Wanjiru');
+      44 |     await page.getByLabel('Email').fill('jane@example.co.ke');
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/dealer-onboarding/dealer-onboarding.spec.ts:41:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-e18d0-the-canonical-auth-contract-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-e18d0-the-canonical-auth-contract-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/dealer-onboarding-dealer-o-e18d0-the-canonical-auth-contract-chromium/error-context.md
+
+  2) [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding › dealer registration requires and sends business fields 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Dealer', exact: true })
+
+
+      64 |
+      65 |     await page.goto('/register');
+    > 66 |     await page.getByRole('button', { name: 'Dealer', exact: true }).click();
+         |                                                                     ^
+      67 |     await page.getByRole('button', { name: /Continue/ }).click();
+      68 |     await page.getByLabel('Full name').fill('John Dealer');
+      69 |     await page.getByLabel('Email').fill('dealer@example.co.ke');
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/dealer-onboarding/dealer-onboarding.spec.ts:66:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-9626b-s-and-sends-business-fields-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-9626b-s-and-sends-business-fields-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/dealer-onboarding-dealer-o-9626b-s-and-sends-business-fields-chromium/error-context.md
+
+  3) [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding › private seller registration uses individual_seller 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Private Seller', exact: true })
+
+
+      89 |
+      90 |     await page.goto('/register');
+    > 91 |     await page.getByRole('button', { name: 'Private Seller', exact: true }).click();
+         |                                                                             ^
+      92 |     await page.getByRole('button', { name: /Continue/ }).click();
+      93 |     await page.getByLabel('Full name').fill('Private Seller');
+      94 |     await page.getByLabel('Email').fill('seller@example.co.ke');
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/dealer-onboarding/dealer-onboarding.spec.ts:91:77
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-61d4c-tion-uses-individual-seller-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-61d4c-tion-uses-individual-seller-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/dealer-onboarding-dealer-o-61d4c-tion-uses-individual-seller-chromium/error-context.md
+
+  4) [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboarding › inspector application uses the dedicated application endpoint 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Inspector', exact: true })
+
+
+      113 |
+      114 |     await page.goto('/register');
+    > 115 |     await page.getByRole('button', { name: 'Inspector', exact: true }).click();
+          |                                                                        ^
+      116 |     await page.getByRole('button', { name: /Continue/ }).click();
+      117 |     await page.getByLabel('Full name').fill('Jane Inspector');
+      118 |     await page.getByLabel('Email').fill('inspector@example.co.ke');
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/dealer-onboarding/dealer-onboarding.spec.ts:115:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-bf33a-icated-application-endpoint-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dealer-onboarding-dealer-o-bf33a-icated-application-endpoint-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/dealer-onboarding-dealer-o-bf33a-icated-application-endpoint-chromium/error-context.md
+
+  5) [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[aria-label="Grid columns"]').getByRole('button', { name: '3×' })
+
+
+      82 |
+      83 |     for (const count of [3, 4, 5]) {
+    > 84 |       await columns.getByRole('button', { name: `${count}×` }).click();
+         |                                                                ^
+      85 |       await expect(columns.getByRole('button', { name: `${count}×` })).toHaveAttribute('aria-pressed', 'true');
+      86 |       await expect.poll(async () => {
+      87 |         return await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/marketplace-controls/marketplace-controls.spec.ts:84:64
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/error-context.md
+
+  6) [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls — browser interaction certification › grid responds honestly across mobile, tablet and desktop breakpoints 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[aria-label="Grid columns"]').getByRole('button', { name: '4×' })
+
+
+      105 |
+      106 |     await page.setViewportSize({ width: 900, height: 900 });
+    > 107 |     await page.locator('[aria-label="Grid columns"]').getByRole('button', { name: '4×' }).click();
+          |                                                                                           ^
+      108 |     await expect.poll(async () => {
+      109 |       return await page.getByTestId('inventory-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
+      110 |     }).toBe(4);
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/marketplace-controls/marketplace-controls.spec.ts:107:91
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-eaefc-let-and-desktop-breakpoints-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-eaefc-let-and-desktop-breakpoints-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/marketplace-controls-marke-eaefc-let-and-desktop-breakpoints-chromium/error-context.md
+
+  7) [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls — browser interaction certification › mobile filter drawer exposes working selectors and closes cleanly 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Refine inventory')
+    Expected: visible
+    Error: strict mode violation: getByText('Refine inventory') resolved to 2 elements:
+        1) <h3 class="text-sm font-extrabold text-navy-900">Refine inventory</h3> aka locator('#market-results').getByText('Refine inventory')
+        2) <h3 class="text-sm font-extrabold text-navy-900">Refine inventory</h3> aka getByRole('heading', { name: 'Refine inventory' })
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByText('Refine inventory')
+
+
+      160 |
+      161 |     await page.getByRole('button', { name: /Filters/i }).click();
+    > 162 |     await expect(page.getByText('Refine inventory')).toBeVisible();
+          |                                                      ^
+      163 |
+      164 |     const make = page.getByLabel('Mobile make filter');
+      165 |     const model = page.getByLabel('Mobile model filter');
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/marketplace-controls/marketplace-controls.spec.ts:162:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-ecf1d-electors-and-closes-cleanly-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-ecf1d-electors-and-closes-cleanly-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/marketplace-controls-marke-ecf1d-electors-and-closes-cleanly-chromium/error-context.md
+
+  8) [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls — browser interaction certification › admin escrow dropdowns have stable accessible controls 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByTitle('Customize Home Page')
+
+
+      205 |     await waitForInventory(page);
+      206 |
+    > 207 |     await page.getByTitle('Customize Home Page').click();
+          |                                                  ^
+      208 |     const dealer = page.getByLabel('Verified dealer escrow requirement');
+      209 |     const seller = page.getByLabel('Private seller escrow requirement');
+      210 |     await expect(dealer).toBeVisible();
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/marketplace-controls/marketplace-controls.spec.ts:207:50
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-80f32--stable-accessible-controls-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-80f32--stable-accessible-controls-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/marketplace-controls-marke-80f32--stable-accessible-controls-chromium/error-context.md
+
+  9) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification — environment evidence › frontend build serves and renders the marketplace shell (buyer browsing) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('text=KAYAD EA').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('text=KAYAD EA').first()
+
+
+      33 |     await page.goto('/');
+      34 |     await waitForAppShell(page);
+    > 35 |     await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+         |                                                         ^
+      36 |     // Navigation surface for the buyer workflows (exact match: the brand
+      37 |     // logo button also contains the word "Marketplace")
+      38 |     await expect(page.getByRole('button', { name: 'Marketplace', exact: true }).first()).toBeVisible();
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:35:57
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-cd051-place-shell-buyer-browsing--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-cd051-place-shell-buyer-browsing--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-cd051-place-shell-buyer-browsing--chromium/error-context.md
+
+  10) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification — environment evidence › auth surface renders (registration/login entry points) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Sign In', exact: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Sign In', exact: true }).first()
+
+
+      45 |     await page.goto('/');
+      46 |     await waitForAppShell(page);
+    > 47 |     await expect(page.getByRole('button', { name: 'Sign In', exact: true }).first()).toBeVisible();
+         |                                                                                      ^
+      48 |     await expect(page.getByRole('button', { name: 'Sell Vehicle', exact: true }).first()).toBeVisible();
+      49 |   });
+      50 |
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:47:86
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-d6afb-tration-login-entry-points--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-d6afb-tration-login-entry-points--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-d6afb-tration-login-entry-points--chromium/error-context.md
+
+  11) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification — environment evidence › marketplace navigation switches views without errors (browsing ↔ auctions) 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Auctions', exact: true }).first()
+
+
+      54 |     await page.goto('/');
+      55 |     await waitForAppShell(page);
+    > 56 |     await page.getByRole('button', { name: 'Auctions', exact: true }).first().click();
+         |                                                                               ^
+      57 |     await page.waitForTimeout(1000);
+      58 |     await expect(page.locator('body')).not.toBeEmpty();
+      59 |     await page.getByRole('button', { name: 'Marketplace', exact: true }).first().click();
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:56:79
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-38c59-errors-browsing-↔-auctions--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-38c59-errors-browsing-↔-auctions--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-38c59-errors-browsing-↔-auctions--chromium/error-context.md
+
+  12) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification — environment evidence › refresh preserves the shell (browser refresh recovery) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('text=KAYAD EA').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('text=KAYAD EA').first()
+
+
+      84 |     await page.reload();
+      85 |     await waitForAppShell(page);
+    > 86 |     await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+         |                                                         ^
+      87 |   });
+      88 |
+      89 |   test('network failure: API unreachable does not crash the app or fabricate data', async ({ page }) => {
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:86:57
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-7a44d-l-browser-refresh-recovery--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-7a44d-l-browser-refresh-recovery--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-7a44d-l-browser-refresh-recovery--chromium/error-context.md
+
+  13) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification — environment evidence › network failure: API unreachable does not crash the app or fabricate data 
+
+    Test timeout of 30000ms exceeded.
+
+    TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('text=KAYAD') to be visible
+
+
+      26 | const waitForAppShell = async (page: any) => {
+      27 |   // The KAYAD shell renders a banner with the brand name.
+    > 28 |   await page.waitForSelector('text=KAYAD', { timeout: 30000 });
+         |              ^
+      29 | };
+      30 |
+      31 | test.describe('Workflow certification — environment evidence', () => {
+        at waitForAppShell (/home/claude/msg/f3/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:28:14)
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:95:11
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-b2512-h-the-app-or-fabricate-data-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-b2512-h-the-app-or-fabricate-data-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-b2512-h-the-app-or-fabricate-data-chromium/error-context.md
+
+  14) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certification — environment evidence › mobile viewport renders the shell without breaking (responsive build) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('text=KAYAD EA').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('text=KAYAD EA').first()
+
+
+      105 |     await page.goto('/');
+      106 |     await waitForAppShell(page);
+    > 107 |     await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+          |                                                         ^
+      108 |   });
+      109 | });
+      110 |
+        at /home/claude/msg/f3/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:107:57
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-d937c--breaking-responsive-build--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-d937c--breaking-responsive-build--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-d937c--breaking-responsive-build--chromium/error-context.md
+
+  14 failed
+    [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer registration uses the canonical auth contract 
+    [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding › dealer registration requires and sends business fields 
+    [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding › private seller registration uses individual_seller 
+    [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboarding › inspector application uses the dedicated application endpoint 
+    [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid 
+    [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls — browser interaction certification › grid responds honestly across mobile, tablet and desktop breakpoints 
+    [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls — browser interaction certification › mobile filter drawer exposes working selectors and closes cleanly 
+    [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls — browser interaction certification › admin escrow dropdowns have stable accessible controls 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification — environment evidence › frontend build serves and renders the marketplace shell (buyer browsing) 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification — environment evidence › auth surface renders (registration/login entry points) 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification — environment evidence › marketplace navigation switches views without errors (browsing ↔ auctions) 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification — environment evidence › refresh preserves the shell (browser refresh recovery) 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification — environment evidence › network failure: API unreachable does not crash the app or fabricate data 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certification — environment evidence › mobile viewport renders the shell without breaking (responsive build) 
+  5 passed (3.2m)
+exit=1

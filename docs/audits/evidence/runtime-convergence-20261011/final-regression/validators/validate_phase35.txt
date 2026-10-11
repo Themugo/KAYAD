@@ -1,0 +1,11 @@
+
+> kayad@0.0.0 validate:phase35
+> node scripts/validate-phase35.mjs
+
+PHASE 35 ENVIRONMENT SECURITY VALIDATION: PASS
+Production-safe default mode: PASS
+Core production secret requirements: PASS
+Secret length and HTTPS URL guards: PASS
+CORS unknown-mode fail-closed behavior: PASS
+Production 5xx/stack disclosure guard: PASS
+Backend syntax: PASS

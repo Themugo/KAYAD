@@ -141,7 +141,7 @@ if (redis) {
     logError("Redis error", err, { message: err.message });
     redisHealthStatus = "error";
     setGauge("redis_connection_status", 0);
-    incrementCounter("redis_error", { error_type: err.code || "unknown" });
+    incrementCounter("redis_error", 1, { error_type: err.code || "unknown" });
 
     // Open circuit breaker on repeated errors
     if (!redisCircuitBreakerOpen) {

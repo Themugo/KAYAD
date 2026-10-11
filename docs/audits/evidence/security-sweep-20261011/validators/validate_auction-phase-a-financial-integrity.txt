@@ -1,0 +1,29 @@
+
+> kayad@0.0.0 validate:auction-phase-a-financial-integrity
+> node scripts/validate-auction-phase-a-financial-integrity.mjs
+
+PASS security-hold table exists
+PASS security-hold settlement is atomic
+PASS security-hold reconciliation is atomic
+PASS commitment application moves liability to settlement payable
+PASS security-hold forfeiture is atomic
+PASS bid confirmation fee is policy-owned
+PASS high-value threshold is policy-owned
+PASS high-value deposit is policy-owned
+PASS bid payment validates the server fee
+PASS bid payment has ledger authority
+PASS bid payment ledger is idempotent
+PASS high-value bid checks canonical hold
+PASS high-value deposit endpoint exists
+PASS commitment creates canonical hold
+PASS commitment callback uses atomic hold settlement
+PASS generic M-Pesa callback recognizes auction security transactions
+PASS security callback verifies provider amount
+PASS security hold can recover missing checkout binding
+PASS legacy bid callback converges to canonical payment callback
+PASS auction outcome records net payment due
+PASS winner default can forfeit security
+PASS direct winner payment uses authoritative payment_due_amount
+PASS escrow is not created before winner payment
+PASS no client direct security-hold writes
+AUCTION PHASE A FINANCIAL INTEGRITY: 24/24 PASS

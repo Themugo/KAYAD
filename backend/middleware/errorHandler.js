@@ -10,6 +10,17 @@ const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || err.status || res.statusCode || 500;
   if (statusCode === 200) statusCode = 500;
 
+  // Error classification (route-schema triage, docs/audits/21): two database errors are caused by the request, not by the
+  // server, when nothing upstream assigned a status. They used to surface as 500 and hide real server faults in the crawl.
+  //   22P02 invalid_text_representation — a malformed id (e.g. "my-tasks" where a UUID is expected) → 400
+  //   PGRST116 — `.single()` matched no row for the requested id → 404
+  // Missing tables/columns (42P01/42703/PGRST205) deliberately stay 500: they are deployment/schema defects.
+  const dbCode = err?.code || err?.cause?.code;
+  if (statusCode === 500 && !err.statusCode && !err.status) {
+    if (dbCode === "22P02") { err = Object.assign(new Error("Invalid identifier"), { details: undefined }); statusCode = 400; }
+    else if (dbCode === "PGRST116") { err = Object.assign(new Error("Not found"), { details: undefined }); statusCode = 404; }
+  }
+
   const requestId = req.requestId || req.headers["x-request-id"] || undefined;
   const logData = {
     requestId,

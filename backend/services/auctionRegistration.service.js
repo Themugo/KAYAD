@@ -99,7 +99,8 @@ export async function initiateRegistrationCommitment({ auctionId, userId, req })
 }
 
 export async function finalizeCommitmentRegistration({ checkoutRequestID, success, receipt }) {
-  const tx = await findOne("transactions", { checkoutRequestId: checkoutRequestID });
+  const { findSecurityPaymentByCheckout } = await import("./securityPaymentStore.js");
+  const tx = (await findSecurityPaymentByCheckout(checkoutRequestID))?.row;
   const registrationId = tx?.metadata?.auctionRegistrationId;
   if (!registrationId) return null;
   const registration = await findById("auction_registrations", registrationId);

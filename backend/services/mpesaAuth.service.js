@@ -50,7 +50,7 @@ export const getMpesaAccessToken = async (baseUrl, consumerKey, consumerSecret) 
     return _token;
   } catch (err) {
     recordMetric("mpesa_token_fetch_duration", Date.now() - startTime, { status: "error" });
-    incrementCounter("mpesa_token_fetch_failure", { error_type: err.code || "unknown" });
+    incrementCounter("mpesa_token_fetch_failure", 1, { error_type: err.code || "unknown" });
     logError("M-Pesa token fetch failed", err, { baseUrl });
     throw err;
   }

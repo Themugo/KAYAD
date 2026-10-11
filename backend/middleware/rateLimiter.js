@@ -131,6 +131,18 @@ export const chatLimiter = rateLimit({
   },
 });
 
+// Socket tickets (RT-3): one per (re)connection. Generous enough for reconnect storms on flaky mobile networks, keyed
+// by the authenticated user (protect runs first), so one account cannot mint tickets without bound.
+export const socketTicketLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: Number(process.env.SOCKET_TICKET_RATE_LIMIT_MAX || 60),
+  keyGenerator,
+  handler: (req, res) => {
+    logWarn("RATE LIMIT (SOCKET TICKET)", { user: req.user?.id });
+    res.status(429).json(rateLimitMessage("Too many realtime connection attempts"));
+  },
+});
+
 // =============================
 // ⭐ REVIEW LIMITER
 // =============================

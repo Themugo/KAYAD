@@ -1,0 +1,6 @@
+
+> kayad@0.0.0 validate:chat-convergence
+> node scripts/validate-chat-surface-convergence.mjs
+
+Chat surface convergence: PASS
+UnifiedCommunicationHub is the sole mounted chat UI; canonical chatApi owns transport.

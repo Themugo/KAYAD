@@ -1,0 +1,18 @@
+
+> kayad@0.0.0 validate:marketplace-core
+> node scripts/validate-marketplace-initiative.mjs
+
+PASS: central marketplace read service exists
+PASS: marketplace vehicle reads use canonical GET /api/cars
+PASS: marketplace mapper is the canonical vehicle mapper
+PASS: live auctions use canonical auction API
+PASS: my bids use canonical backend API
+PASS: authenticated bid history is loaded from server
+PASS: logout clears prior user bid read model
+PASS: bid placement does not synthesize a bid ID
+PASS: bid placement does not locally increment current bid
+PASS: bid API remains server-authoritative
+PASS: core service contains no mock/demo data source
+PASS: initiative does not introduce a second auction data store
+
+Marketplace Core Initiative validation: 12/12 checks passed.

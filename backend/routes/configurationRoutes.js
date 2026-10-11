@@ -63,15 +63,19 @@ const router = express.Router();
 // All routes require authentication
 router.use(protect);
 
-// Dashboard & Stats
-router.get("/stats", asyncHandler(getConfigStats));
+// Dashboard & Stats - operational inventory of the platform configuration (flag counts, master-data sizes). No product
+// surface consumes it (verified: no caller in src/), so it is limited to the roles that already administer this router's
+// writes. "Signed in" is not a business reason to read internal configuration inventory. Other staff roles (support,
+// manager, ...) are deliberately NOT included.
+router.get("/stats", allowRoles("admin", "superadmin"), asyncHandler(getConfigStats));
 
 // ============================================
 // CONFIG ENTRIES
 // ============================================
 
-router.get("/entries", asyncHandler(getConfigEntries));
-router.get("/entries/:id", validateObjectId, asyncHandler(getConfigEntry));
+// Raw key/value configuration (may hold operational settings): administrators only, like every write below.
+router.get("/entries", allowRoles("admin", "superadmin"), asyncHandler(getConfigEntries));
+router.get("/entries/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(getConfigEntry));
 router.post("/entries", allowRoles("admin", "superadmin"), asyncHandler(createConfigEntry));
 router.put("/entries/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(updateConfigEntry));
 router.delete("/entries/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteConfigEntry));
@@ -81,8 +85,9 @@ router.post("/entries/bulk", allowRoles("admin", "superadmin"), asyncHandler(bul
 // FEATURE FLAGS
 // ============================================
 
-router.get("/features", asyncHandler(getFeatureFlags));
-router.get("/features/:id", validateObjectId, asyncHandler(getFeatureFlag));
+// The flag inventory (rollout rules, targeting) is administrative; end users evaluate a single flag via /features/check/:key.
+router.get("/features", allowRoles("admin", "superadmin"), asyncHandler(getFeatureFlags));
+router.get("/features/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(getFeatureFlag));
 router.post("/features", allowRoles("admin", "superadmin"), asyncHandler(createFeatureFlag));
 router.put("/features/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(updateFeatureFlag));
 router.delete("/features/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteFeatureFlag));

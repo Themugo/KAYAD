@@ -1,0 +1,7 @@
+
+> kayad@0.0.0 validate:backend-boot
+> node scripts/validate-backend-boot.mjs
+
+(node:8888) ESLintIgnoreWarning: The ".eslintignore" file is no longer supported. Switch to using the "ignores" property in "eslint.config.js": https://eslint.org/docs/latest/use/configure/migration-guide#ignoring-files
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS backend boot guard: no undefined identifiers in 8 boot-critical files

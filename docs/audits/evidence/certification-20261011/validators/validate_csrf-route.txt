@@ -1,0 +1,6 @@
+
+> kayad@0.0.0 validate:csrf-route
+> node scripts/validate-canonical-csrf-route.mjs
+
+STATIC CSRF ROUTE CONTRACT: PASS
+RUNTIME CSRF ROUTE CONTRACT: BLOCKED (set KAYAD_API_BASE_URL or VITE_API_URL to probe a live server)

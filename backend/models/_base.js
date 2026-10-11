@@ -527,16 +527,33 @@ export function createModel(name) {
       }
 
       if (k === "$or") {
-        const orExpr = v.map((cond) =>
-          Object.entries(cond).map(([fk, fv]) => {
+        // Each $or branch may hold several fields and range operators. Previously only equality/$regex were supported
+        // and an operator object was serialised as "[object Object]" (e.g. CMS calendar: PostgreSQL 22007 -> 500).
+        // Fields inside one branch are AND-ed (PostgREST `and(...)`), branches are OR-ed. Values that contain PostgREST
+        // reserved characters are double-quoted.
+        const lit = (val) => {
+          const out = val instanceof Date ? val.toISOString() : String(val);
+          return /[,()"]/.test(out) ? `"${out.replace(/"/g, '\\"')}"` : out;
+        };
+        const OPS = { $gte: "gte", $lte: "lte", $gt: "gt", $lt: "lt", $ne: "neq" };
+        const orExpr = v.map((cond) => {
+          const parts = Object.entries(cond).flatMap(([fk, fv]) => {
             const col = mapKeyOut(table, fk);
-            if (fv && typeof fv === "object" && fv.$regex) {
-              const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, "");
-              return `${col}.ilike.*${term}*`;
+            if (fv && typeof fv === "object" && !(fv instanceof Date) && !Array.isArray(fv)) {
+              if (fv.$regex) {
+                const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, "");
+                return [`${col}.ilike.*${term}*`];
+              }
+              const ops = [];
+              for (const [op, pg] of Object.entries(OPS)) if (fv[op] !== undefined) ops.push(`${col}.${pg}.${lit(fv[op])}`);
+              if (Array.isArray(fv.$in)) ops.push(`${col}.in.(${fv.$in.map(lit).join(",")})`);
+              if (fv.$ilike !== undefined) ops.push(`${col}.ilike.${lit(String(fv.$ilike).replace(/%/g, "*"))}`);
+              return ops;
             }
-            return `${col}.eq.${fv}`;
-          }).join(",")
-        ).join(",");
+            return [`${col}.eq.${lit(fv)}`];
+          });
+          return parts.length > 1 ? `and(${parts.join(",")})` : parts[0];
+        }).filter(Boolean).join(",");
         q = q.or(orExpr);
         continue;
       }

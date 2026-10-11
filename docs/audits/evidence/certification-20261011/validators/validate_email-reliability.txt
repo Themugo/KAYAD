@@ -1,0 +1,14 @@
+
+> kayad@0.0.0 validate:email-reliability
+> node scripts/validate-email-reliability.mjs
+
+PASS registration commits users/user_auth atomically before non-blocking verification delivery
+PASS registration does not delete a committed identity when verification delivery fails
+PASS registration leaves verification retryable when delivery is unavailable
+PASS resend generates replacement token without persisting it first
+PASS resend commits replacement token only after provider acceptance
+PASS resend leaves persisted token untouched on delivery failure
+PASS optional SMS/WhatsApp cannot block generic email communication
+PASS optional providers are not production startup requirements unless explicitly enabled
+
+EMAIL RELIABILITY CONTRACT: 8/8 PASS

@@ -1,0 +1,47 @@
+vite v8.2.0 building client environment for production...
+transforming...
+✓ 2391 modules transformed.
+
+(!) outDir /home/claude/msg/f5/dist-samehost is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../dist-samehost/release.json                                    0.12 kB │ gzip:   0.12 kB
+../dist-samehost/index.html                                      1.63 kB │ gzip:   0.77 kB
+../dist-samehost/assets/index-DO6_BWuo.css                     265.84 kB │ gzip:  43.47 kB
+../dist-samehost/assets/info-CP8ws-CK.js                         0.19 kB │ gzip:   0.17 kB
+../dist-samehost/assets/send-DKwYrI96.js                         0.28 kB │ gzip:   0.22 kB
+../dist-samehost/assets/ticket-epObqyaR.js                       0.31 kB │ gzip:   0.20 kB
+../dist-samehost/assets/paymentApi-lm1a3Iae.js                   0.75 kB │ gzip:   0.47 kB
+../dist-samehost/assets/auctionService-CVq8RHeP.js               0.90 kB │ gzip:   0.40 kB
+../dist-samehost/assets/inspectionPayment-UiErV4F1.js            1.25 kB │ gzip:   0.69 kB
+../dist-samehost/assets/supportApi-B8rZHrkP.js                   1.66 kB │ gzip:   0.81 kB
+../dist-samehost/assets/escrowApi-D5_AZQrl.js                    2.26 kB │ gzip:   0.84 kB
+../dist-samehost/assets/KAYADLive-Be1ke_Cp.js                    4.35 kB │ gzip:   1.56 kB
+../dist-samehost/assets/OwnershipPlatform-wiluQ6qv.js            4.88 kB │ gzip:   1.46 kB
+../dist-samehost/assets/api-DCBhdNPX.js                          5.63 kB │ gzip:   1.45 kB
+../dist-samehost/assets/inspectionJourney-Di2qnql1.js            5.71 kB │ gzip:   2.15 kB
+../dist-samehost/assets/FinancePlatform-CJO9nPUE.js              8.20 kB │ gzip:   2.52 kB
+../dist-samehost/assets/PaymentHistoryView-8wXomQ7b.js           9.48 kB │ gzip:   2.91 kB
+../dist-samehost/assets/jsx-runtime-Cl86B321.js                 10.06 kB │ gzip:   3.98 kB
+../dist-samehost/assets/AuctionsView-lOFhaQ7d.js                16.70 kB │ gzip:   5.02 kB
+../dist-samehost/assets/PrivateSellerPlatform-Bp1gxv_K.js       24.07 kB │ gzip:   6.74 kB
+../dist-samehost/assets/DealerDashboard-DA6Nom8Q.js             29.86 kB │ gzip:   6.28 kB
+../dist-samehost/assets/AuctionLivePage-C9jYB9LF.js             34.16 kB │ gzip:  10.36 kB
+../dist-samehost/assets/SupportView-oraIf-Zt.js                 36.18 kB │ gzip:   9.64 kB
+../dist-samehost/assets/ChatView-CJmnGXR0.js                    41.45 kB │ gzip:   9.92 kB
+../dist-samehost/assets/EscrowView-QGPMa28I.js                  48.70 kB │ gzip:  13.14 kB
+../dist-samehost/assets/AdminView-Bbn_NTGD.js                   49.15 kB │ gzip:  12.15 kB
+../dist-samehost/assets/httpRequest-R9v3Lusf.js                 53.08 kB │ gzip:  19.83 kB
+../dist-samehost/assets/InspectionMarketplacePage-D7IQx0pG.js   55.36 kB │ gzip:  14.27 kB
+../dist-samehost/assets/DealersView-BF0RJSeW.js                 59.95 kB │ gzip:  12.67 kB
+../dist-samehost/assets/InspectionsView-BlMAg7BO.js             63.79 kB │ gzip:  16.19 kB
+../dist-samehost/assets/index-D2twdxlS.js                      778.77 kB │ gzip: 214.52 kB
+
+✓ built in 1.41s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

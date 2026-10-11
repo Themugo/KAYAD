@@ -41,6 +41,7 @@ import { setSellerEscrowCapability, getSellerEscrowCapabilityStatus } from "../s
 import { setEscrowCapabilitySchema } from "../validation/escrow.schema.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
 import { normalizeNavigation, validateNavigationInput } from "../utils/navigationConfig.js";
+import { presentMessage } from "../services/chatAttachments.js";
 
 
 // Routes that only admin/superadmin can access
@@ -1827,7 +1828,7 @@ router.get(
         participants: chat.participants,
         isBlocked: chat.isBlocked,
         car: chat.car,
-        messages: chat.messages || [],
+        messages: (chat.messages || []).map((m) => presentMessage(String(chat._id), m)),
       },
     });
   }),

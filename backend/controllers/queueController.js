@@ -45,7 +45,8 @@ export const getQueueMetricsHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get queue metrics", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get queue metrics",
     });
@@ -68,7 +69,8 @@ export const getQueueStatisticsHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get queue statistics", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get queue statistics",
     });
@@ -108,7 +110,8 @@ export const getQueueHealthHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get queue health", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get queue health",
     });
@@ -137,7 +140,8 @@ export const getAggregatedMetricsHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get aggregated metrics", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get aggregated metrics",
     });
@@ -158,7 +162,8 @@ export const getCircuitBreakerStatesHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get circuit breaker states", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get circuit breaker states",
     });
@@ -179,7 +184,8 @@ export const getDLQStatisticsHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get DLQ statistics", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get DLQ statistics",
     });
@@ -212,7 +218,8 @@ export const getDLQJobsHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get DLQ jobs", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get DLQ jobs",
     });
@@ -247,7 +254,8 @@ export const retryDLQJobHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to retry DLQ job", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to retry DLQ job",
     });
@@ -273,7 +281,8 @@ export const deleteDLQJobHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to delete DLQ job", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to delete DLQ job",
     });
@@ -311,7 +320,8 @@ export const getJobFailuresHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get job failures", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get job failures",
     });
@@ -341,7 +351,8 @@ export const getJobFailureDetailsHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to get job failure details", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to get job failure details",
     });
@@ -377,7 +388,8 @@ export const resolveJobFailureHandler = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     logError("Failed to resolve job failure", error);
-    res.status(500).json({
+    res.status(error?.statusCode === 503 ? 503 : 500).json({ // 503: queue dependency unavailable, not a server bug
+     
       success: false,
       message: "Failed to resolve job failure",
     });

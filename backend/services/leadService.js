@@ -64,7 +64,7 @@ export const addLeadActivity = async (leadId, type, actorId, details) => {
   try {
     const lead = await findById("leads", leadId);
     if (!lead) {
-      throw new Error("Lead not found");
+      throw Object.assign(new Error("Lead not found"), { statusCode: 404 });
     }
 
     const activity = await create("lead_activities", { lead: leadId, type, actor: actorId ? "dealer" : "system", actorId, description: details.description, metadata: details.metadata || {} });
@@ -105,7 +105,7 @@ export const getLeadById = async (leadId) => {
        /* .populate("vehicle", "title brand model year price images") - TODO: use separate query */;
 
     if (!lead) {
-      throw new Error("Lead not found");
+      throw Object.assign(new Error("Lead not found"), { statusCode: 404 });
     }
 
     return lead;
@@ -123,7 +123,7 @@ export const archiveLead = async (leadId, actorId) => {
   try {
     const lead = await findById("leads", leadId);
     if (!lead) {
-      throw new Error("Lead not found");
+      throw Object.assign(new Error("Lead not found"), { statusCode: 404 });
     }
 
     const updated = await update("leads", leadId, { archived: true, lastActivityAt: new Date() });
@@ -144,7 +144,7 @@ export const markLeadAsHot = async (leadId, actorId) => {
   try {
     const lead = await findById("leads", leadId);
     if (!lead) {
-      throw new Error("Lead not found");
+      throw Object.assign(new Error("Lead not found"), { statusCode: 404 });
     }
 
     const updated = await update("leads", leadId, { isHot: true, lastActivityAt: new Date() });

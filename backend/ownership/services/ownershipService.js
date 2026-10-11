@@ -50,15 +50,20 @@ class OwnershipService {
   async getOwnerDashboard(userId) {
     const profile = await this.getOrCreateOwnerProfile(userId);
 
-    const [currentVehicles, soldVehicles, favouriteVehicles, recentViews, upcomingReminders, alerts, expenses] = await Promise.all([
+    const [currentVehicles, soldVehicles, favouriteVehicles, recentViews, upcomingReminders, expenses] = await Promise.all([
       db.find('owner_vehicles', { owner_id: userId, ownership_type: 'current', status: 'active' }),
       db.find('owner_vehicles', { owner_id: userId, ownership_type: 'sold' }),
       db.find('owner_vehicles', { owner_id: userId, ownership_type: 'favourite' }),
       db.find('owner_vehicles', { owner_id: userId, ownership_type: 'recently_viewed' }, { limit: 10 }),
       this.getUpcomingReminders(userId),
-      db.find('ownership_alerts', { owner_vehicle_id: { $in: currentVehicles.map(v => v.id) }, status: 'unread' }, { limit: 10 }),
       this.getExpenseSummary(userId),
     ]);
+    // Alerts depend on the current vehicles, so they are read after them (previously read inside the same Promise.all,
+    // which threw "Cannot access 'currentVehicles' before initialization" on every dashboard request).
+    const currentIds = (currentVehicles || []).map((v) => v.id);
+    const alerts = currentIds.length
+      ? await db.find('ownership_alerts', { owner_vehicle_id: { $in: currentIds }, status: 'unread' }, { limit: 10 })
+      : [];
 
     // Enrich vehicles with service data
     const enrichedVehicles = await Promise.all(

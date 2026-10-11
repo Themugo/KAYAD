@@ -1,0 +1,47 @@
+vite v8.2.0 building client environment for production...
+transforming...
+✓ 2391 modules transformed.
+
+(!) outDir /home/claude/msg/p2/battery/dist-samehost is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../../battery/dist-samehost/release.json                                    0.12 kB │ gzip:   0.12 kB
+../../battery/dist-samehost/index.html                                      1.63 kB │ gzip:   0.77 kB
+../../battery/dist-samehost/assets/index-DO6_BWuo.css                     265.84 kB │ gzip:  43.47 kB
+../../battery/dist-samehost/assets/info-CP8ws-CK.js                         0.19 kB │ gzip:   0.17 kB
+../../battery/dist-samehost/assets/send-DKwYrI96.js                         0.28 kB │ gzip:   0.22 kB
+../../battery/dist-samehost/assets/ticket-epObqyaR.js                       0.31 kB │ gzip:   0.20 kB
+../../battery/dist-samehost/assets/paymentApi-lm1a3Iae.js                   0.75 kB │ gzip:   0.47 kB
+../../battery/dist-samehost/assets/auctionService-CVq8RHeP.js               0.90 kB │ gzip:   0.40 kB
+../../battery/dist-samehost/assets/inspectionPayment-Cad7jqK2.js            1.25 kB │ gzip:   0.69 kB
+../../battery/dist-samehost/assets/supportApi-B8rZHrkP.js                   1.66 kB │ gzip:   0.81 kB
+../../battery/dist-samehost/assets/escrowApi-D5_AZQrl.js                    2.26 kB │ gzip:   0.84 kB
+../../battery/dist-samehost/assets/KAYADLive-CHtTHNBM.js                    4.35 kB │ gzip:   1.56 kB
+../../battery/dist-samehost/assets/OwnershipPlatform-U7hVpgnP.js            4.88 kB │ gzip:   1.46 kB
+../../battery/dist-samehost/assets/api-D7Ck1BW2.js                          5.63 kB │ gzip:   1.46 kB
+../../battery/dist-samehost/assets/inspectionJourney-Di2qnql1.js            5.71 kB │ gzip:   2.15 kB
+../../battery/dist-samehost/assets/FinancePlatform-U3lrtGye.js              8.20 kB │ gzip:   2.53 kB
+../../battery/dist-samehost/assets/PaymentHistoryView-TDp9Fuqb.js           9.48 kB │ gzip:   2.92 kB
+../../battery/dist-samehost/assets/jsx-runtime-Cl86B321.js                 10.06 kB │ gzip:   3.98 kB
+../../battery/dist-samehost/assets/AuctionsView-DoR43pS_.js                16.70 kB │ gzip:   5.02 kB
+../../battery/dist-samehost/assets/PrivateSellerPlatform-Cldu6_2G.js       24.07 kB │ gzip:   6.74 kB
+../../battery/dist-samehost/assets/DealerDashboard-CTVkbM53.js             29.86 kB │ gzip:   6.29 kB
+../../battery/dist-samehost/assets/AuctionLivePage-d_5O_9x5.js             34.16 kB │ gzip:  10.36 kB
+../../battery/dist-samehost/assets/SupportView-BsksXnb_.js                 36.18 kB │ gzip:   9.64 kB
+../../battery/dist-samehost/assets/ChatView-Bd_sXDqn.js                    41.45 kB │ gzip:   9.92 kB
+../../battery/dist-samehost/assets/EscrowView-KQ0GoMDM.js                  48.70 kB │ gzip:  13.14 kB
+../../battery/dist-samehost/assets/AdminView-CjBrKWLF.js                   49.15 kB │ gzip:  12.15 kB
+../../battery/dist-samehost/assets/httpRequest-R9v3Lusf.js                 53.08 kB │ gzip:  19.83 kB
+../../battery/dist-samehost/assets/InspectionMarketplacePage-BfCI2Lcz.js   55.36 kB │ gzip:  14.27 kB
+../../battery/dist-samehost/assets/DealersView-6AOiTAqD.js                 59.95 kB │ gzip:  12.67 kB
+../../battery/dist-samehost/assets/InspectionsView-B_jSKJuc.js             63.79 kB │ gzip:  16.19 kB
+../../battery/dist-samehost/assets/index-UXS8bRDC.js                      779.30 kB │ gzip: 214.78 kB
+
+✓ built in 1.40s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

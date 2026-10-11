@@ -1,0 +1,487 @@
+{
+  "label": "after",
+  "results": [
+    {
+      "id": "01-click-messages-authenticated",
+      "urls": [
+        "/?nav=marketplace",
+        "/?nav=marketplace",
+        "/",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "02-refresh-on-messages",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200",
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "03-new-tab",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "04-navigate-from-another-protected-page",
+      "urls": [
+        "/?nav=profile",
+        "/?nav=profile",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "05-delayed-bootstrap-no-premature-redirect",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "midUrl": "/?nav=chat",
+      "final": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "06-bootstrap-500-persistent",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 500",
+        "GET /api/v1/auth/me 500",
+        "GET /api/v1/auth/me 500",
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+      ],
+      "final": "/?nav=chat",
+      "meCalls": 3,
+      "recoveryUi": true,
+      "noAccess": true,
+      "afterRetry": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "07-bootstrap-500-then-recovers-automatically",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 503",
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/?nav=chat",
+      "meCalls": 2,
+      "pass": true
+    },
+    {
+      "id": "08-bootstrap-network-failure-or-timeout",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me FAILED(net::ERR_TIMED_OUT)",
+        "GET /api/v1/auth/me FAILED(net::ERR_TIMED_OUT)",
+        "GET /api/v1/auth/me FAILED(net::ERR_TIMED_OUT)"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TIMED_OUT",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TIMED_OUT",
+        "Failed to load resource: net::ERR_TIMED_OUT"
+      ],
+      "final": "/?nav=chat",
+      "meCalls": 3,
+      "recoveryUi": true,
+      "pass": true
+    },
+    {
+      "id": "08b-bootstrap-true-timeout-axios-8s-per-attempt",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me FAILED(net::ERR_ABORTED)",
+        "GET /api/v1/auth/me FAILED(net::ERR_ABORTED)",
+        "GET /api/v1/auth/me FAILED(net::ERR_ABORTED)"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "recoveryUi": true,
+      "secondsToRecoveryUi": 27,
+      "meCalls": 3,
+      "final": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "09-malformed-bootstrap-response-fails-safely",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200",
+        "GET /api/v1/auth/me 200",
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/?nav=chat",
+      "recoveryUi": true,
+      "pass": true
+    },
+    {
+      "id": "10-expired-session-requires-login",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat",
+        "/login?next=%2F%3Fnav%3Dchat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 401"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/login?next=%2F%3Fnav%3Dchat",
+      "pass": true
+    },
+    {
+      "id": "11-no-session-redirects-and-private-data-inaccessible",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat",
+        "/login?next=%2F%3Fnav%3Dchat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 401"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/login?next=%2F%3Fnav%3Dchat",
+      "anonApiStatus": 401,
+      "pass": true
+    },
+    {
+      "id": "12-sign-in-from-messages-redirect-returns-to-messages",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat",
+        "/login?next=%2F%3Fnav%3Dchat",
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 403",
+        "POST /api/v1/auth/refresh 401",
+        "POST /api/v1/auth/login 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/?nav=chat",
+      "pass": true
+    },
+    {
+      "id": "13-sign-out-then-messages-requires-login",
+      "urls": [
+        "/?nav=chat",
+        "/login"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200",
+        "POST /api/v1/auth/logout 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "final": "/login",
+      "pass": true
+    },
+    {
+      "id": "14-authenticated-non-participant-denied-by-backend",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 200"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "status": {
+        "read": 403,
+        "send": 404
+      },
+      "leak": false,
+      "pass": true,
+      "final": "/?nav=chat",
+      "seesOthersChat": false
+    },
+    {
+      "id": "15-refresh-csrf-failure-is-explicit-and-bounded",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 403",
+        "POST /api/v1/auth/refresh 403",
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 403",
+        "POST /api/v1/auth/refresh 403",
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 403",
+        "POST /api/v1/auth/refresh 403"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+      ],
+      "final": "/?nav=chat",
+      "refreshCalls": 6,
+      "recoveryUi": true,
+      "pass": true
+    },
+    {
+      "id": "16-wrong-api-hostname-diagnosable-no-false-auth",
+      "urls": [
+        "/?nav=chat",
+        "/?nav=chat"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me FAILED(net::ERR_CONNECTION_REFUSED)",
+        "GET /api/v1/auth/me FAILED(net::ERR_CONNECTION_REFUSED)",
+        "GET /api/v1/auth/me FAILED(net::ERR_CONNECTION_REFUSED)"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+      ],
+      "final": "/?nav=chat",
+      "recoveryUi": true,
+      "diagnostic": "We couldn't verify your session\n\nWe could not reach the KAYAD servers. Check your connection. You have not been signed out.\n\nTry again\nSign in",
+      "pass": true
+    },
+    {
+      "id": "17-marketplace-and-auction-navigation-intact",
+      "urls": [
+        "/?nav=marketplace",
+        "/?nav=marketplace",
+        "/",
+        "/?nav=auctions",
+        "/?nav=auctions",
+        "/?nav=auctions",
+        "/?nav=inspections",
+        "/?nav=inspections",
+        "/?nav=escrow",
+        "/?nav=escrow"
+      ],
+      "auth": [
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 401",
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 401",
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 401",
+        "GET /api/v1/auth/me 401",
+        "POST /api/v1/auth/refresh 401"
+      ],
+      "console": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+      ],
+      "steps": [
+        {
+          "nav": "marketplace",
+          "url": "/",
+          "login": false
+        },
+        {
+          "nav": "auctions",
+          "url": "/?nav=auctions",
+          "login": false
+        },
+        {
+          "nav": "inspections",
+          "url": "/?nav=inspections",
+          "login": false
+        },
+        {
+          "nav": "escrow",
+          "url": "/?nav=escrow",
+          "login": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "18-mobile-widths-messages-reachable",
+      "urls": [],
+      "auth": [],
+      "console": [],
+      "widths": [
+        {
+          "w": 320,
+          "final": "/?nav=chat",
+          "login": false,
+          "hOverflowPx": 0
+        },
+        {
+          "w": 360,
+          "final": "/?nav=chat",
+          "login": false,
+          "hOverflowPx": 0
+        },
+        {
+          "w": 375,
+          "final": "/?nav=chat",
+          "login": false,
+          "hOverflowPx": 0
+        },
+        {
+          "w": 390,
+          "final": "/?nav=chat",
+          "login": false,
+          "hOverflowPx": 0
+        },
+        {
+          "w": 412,
+          "final": "/?nav=chat",
+          "login": false,
+          "hOverflowPx": 0
+        },
+        {
+          "w": 430,
+          "final": "/?nav=chat",
+          "login": false,
+          "hOverflowPx": 0
+        }
+      ],
+      "pass": true
+    }
+  ]
+}

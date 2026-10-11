@@ -1,0 +1,14 @@
+
+> kayad@0.0.0 validate:phase37
+> node scripts/validate-phase37.mjs
+
+PHASE 37 SESSION/CSRF VALIDATION: PASS
+- CSRF token is stateless: PASS
+- CSRF cookie path is root: PASS
+- CSRF cookie is SameSite strict: PASS
+- CSRF cookie is not HTTP-only: PASS
+- CSRF validation binds request token to cookie token: PASS
+- CSRF responses are not cacheable: PASS
+- Session uses explicit KAYAD cookie name: PASS
+- Session cookie is SameSite strict: PASS
+- Session cookie path is root: PASS

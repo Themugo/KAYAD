@@ -1,0 +1,20 @@
+
+> kayad@0.0.0 validate:wave2-invariants
+> node scripts/validate-wave2-invariants.mjs
+
+PASS Wave 2 migration exists
+PASS listing entitlement reservation table
+PASS atomic dealer listing RPC
+PASS dealer listing controller uses atomic RPC
+PASS media recovery job table
+PASS media retry/dead-letter RPCs
+PASS media recovery service integrated
+PASS auction payment posts canonical ledger event
+PASS inspection payout requires report
+PASS dispute resolution posts financial consequences
+PASS structural escrow invariants
+PASS structural inspection settlement invariant
+PASS wave 2 invariant audit RPC
+PASS atomic listing helper exposed in backend
+
+KAYAD Wave 2 invariant gate: PASS

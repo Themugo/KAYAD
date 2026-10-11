@@ -1,0 +1,20 @@
+PASS  01-click-messages-authenticated  final=/?nav=chat
+PASS  02-refresh-on-messages  final=/?nav=chat
+PASS  03-new-tab  final=/?nav=chat
+PASS  04-navigate-from-another-protected-page  final=/?nav=chat
+PASS  05-delayed-bootstrap-no-premature-redirect  final=/?nav=chat
+PASS  06-bootstrap-500-persistent  final=/?nav=chat
+PASS  07-bootstrap-500-then-recovers-automatically  final=/?nav=chat
+PASS  08-bootstrap-network-failure-or-timeout  final=/?nav=chat
+PASS  08b-bootstrap-true-timeout-axios-8s-per-attempt  final=/?nav=chat
+PASS  09-malformed-bootstrap-response-fails-safely  final=/?nav=chat
+PASS  10-expired-session-requires-login  final=/login?next=%2F%3Fnav%3Dchat
+PASS  11-no-session-redirects-and-private-data-inaccessible  final=/login?next=%2F%3Fnav%3Dchat
+PASS  12-sign-in-from-messages-redirect-returns-to-messages  final=/?nav=chat
+PASS  13-sign-out-then-messages-requires-login  final=/login
+PASS  14-authenticated-non-participant-denied-by-backend  final=/?nav=chat
+PASS  15-refresh-csrf-failure-is-explicit-and-bounded  final=/?nav=chat
+PASS  16-wrong-api-hostname-diagnosable-no-false-auth  final=/?nav=chat
+PASS  17-marketplace-and-auction-navigation-intact  final=
+PASS  18-mobile-widths-messages-reachable  final=
+exit=0

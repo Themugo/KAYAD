@@ -1,0 +1,48 @@
+vite v8.2.0 building client environment for production...
+transforming...
+✓ 2391 modules transformed.
+
+(!) outDir /home/claude/msg/p2/battery/dist2 is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../../battery/dist2/release.json                                    0.12 kB │ gzip:   0.12 kB
+../../battery/dist2/index.html                                      1.63 kB │ gzip:   0.77 kB
+../../battery/dist2/assets/index-DO6_BWuo.css                     265.84 kB │ gzip:  43.47 kB
+../../battery/dist2/assets/info-CP8ws-CK.js                         0.19 kB │ gzip:   0.17 kB
+../../battery/dist2/assets/send-DKwYrI96.js                         0.28 kB │ gzip:   0.22 kB
+../../battery/dist2/assets/ticket-epObqyaR.js                       0.31 kB │ gzip:   0.20 kB
+../../battery/dist2/assets/paymentApi-DzVuR18s.js                   0.75 kB │ gzip:   0.47 kB
+../../battery/dist2/assets/auctionService-DnYy6-d6.js               0.90 kB │ gzip:   0.40 kB
+../../battery/dist2/assets/inspectionPayment-ConSw0oZ.js            1.25 kB │ gzip:   0.69 kB
+../../battery/dist2/assets/supportApi-kH1Po8r6.js                   1.66 kB │ gzip:   0.81 kB
+../../battery/dist2/assets/escrowApi-Celf4oRV.js                    2.26 kB │ gzip:   0.84 kB
+../../battery/dist2/assets/KAYADLive-CwpffVKD.js                    4.35 kB │ gzip:   1.56 kB
+../../battery/dist2/assets/OwnershipPlatform-BmGXOgbT.js            4.88 kB │ gzip:   1.46 kB
+../../battery/dist2/assets/api-DnyJCWIB.js                          5.63 kB │ gzip:   1.45 kB
+../../battery/dist2/assets/inspectionJourney-BY8pdC8p.js            5.71 kB │ gzip:   2.15 kB
+../../battery/dist2/assets/FinancePlatform-Bm0YB56Z.js              8.20 kB │ gzip:   2.52 kB
+../../battery/dist2/assets/PaymentHistoryView-D-NiB_X6.js           9.48 kB │ gzip:   2.92 kB
+../../battery/dist2/assets/jsx-runtime-Cl86B321.js                 10.06 kB │ gzip:   3.98 kB
+../../battery/dist2/assets/AuctionsView-B5LwSJrr.js                16.70 kB │ gzip:   5.02 kB
+../../battery/dist2/assets/PrivateSellerPlatform-D05trQkk.js       24.07 kB │ gzip:   6.74 kB
+../../battery/dist2/assets/DealerDashboard-DE3G_X2K.js             29.86 kB │ gzip:   6.28 kB
+../../battery/dist2/assets/AuctionLivePage-BUvRFFG7.js             34.16 kB │ gzip:  10.36 kB
+../../battery/dist2/assets/SupportView-Dk25-bHv.js                 36.18 kB │ gzip:   9.63 kB
+../../battery/dist2/assets/ChatView-D9xs2W-K.js                    41.45 kB │ gzip:   9.92 kB
+../../battery/dist2/assets/EscrowView-CzyE16bI.js                  48.70 kB │ gzip:  13.14 kB
+../../battery/dist2/assets/AdminView-Ds-KTBLJ.js                   49.15 kB │ gzip:  12.15 kB
+../../battery/dist2/assets/httpRequest-Dqmi_SOe.js                 53.08 kB │ gzip:  19.83 kB
+../../battery/dist2/assets/InspectionMarketplacePage-BwXiMAgx.js   55.36 kB │ gzip:  14.27 kB
+../../battery/dist2/assets/DealersView--VitsKqQ.js                 59.95 kB │ gzip:  12.67 kB
+../../battery/dist2/assets/InspectionsView-ChU5JqlN.js             63.79 kB │ gzip:  16.19 kB
+../../battery/dist2/assets/index-DsD4yBx3.js                      779.30 kB │ gzip: 214.77 kB
+
+✓ built in 1.76s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+exit=0

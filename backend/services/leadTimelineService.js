@@ -29,7 +29,7 @@ export const addTimelineEvent = async (leadId, type, actorId, actorType, descrip
 
 export const getLeadHistory = async (leadId) => {
   const lead = await findById("leads", leadId);
-  if (!lead) throw new Error("Lead not found");
+  if (!lead) throw Object.assign(new Error("Lead not found"), { statusCode: 404 });
   const timeline = await getLeadTimeline(leadId);
   return {
     currentStage: lead.stage,

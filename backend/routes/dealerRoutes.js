@@ -418,19 +418,28 @@ router.get(
     const dealerId = req.user.id;
 
     const sb = getSupabase();
-    const { data: dealerCarIdRows } = await sb.from("cars").select("id").eq("dealer", dealerId);
+    // Raw PostgREST calls bypass utils/fieldMap, so they must use the real column names (cars.dealer_id,
+    // cars.auction_status). The camelCase names made every call fail with 42703 (route answered 500).
+    const must = ({ data, count, error }) => { if (error) throw error; return { data, count }; };
+    const { data: dealerCarIdRows } = must(await sb.from("cars").select("id").eq("dealer_id", dealerId));
     const dealerCarIds = (dealerCarIdRows || []).map((r) => r.id);
+    // dealer_health_scores is an optional, display-only score; the table exists in production but no repository
+    // migration creates it (docs/audits/08 SCH-101). A missing relation means "unscored", any other error surfaces.
+    const optionalHealthScore = findOne("dealer_health_scores", { dealer: dealerId }).catch((e) => {
+      if (/42P01|PGRST205|does not exist|schema cache/i.test(`${e?.code || ""} ${e?.message || ""}`)) return null;
+      throw e;
+    });
 
     const [totalCars, dealerProfile, verification, healthScore, totalInquiries, liveAuctions, soldAuctions] = await Promise.all([
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).then(({ count }) => count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).then((r) => must(r).count || 0),
       findOne("dealers", { user: dealerId }),
       findOne("dealer_verifications", { user: dealerId }),
-      findOne("dealer_health_scores", { dealer: dealerId }),
+      optionalHealthScore,
       dealerCarIds.length > 0
-        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(({ count }) => count || 0)
+        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then((r) => must(r).count || 0)
         : 0,
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "live").then(({ count }) => count || 0),
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "sold").then(({ count }) => count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "live").then((r) => must(r).count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "sold").then((r) => must(r).count || 0),
     ]);
 
     const milestones = [
@@ -476,25 +485,39 @@ router.get(
     const { page, limit, skip } = getPagination(req);
 
     const sb = getSupabase();
-    const { data: carRows } = await sb.from("cars").select("id").eq("dealer", req.user.id);
-    const dealerCars = (carRows || []).map((r) => r.id);
+    // Real column names (cars.dealer_id, bids.car_id/created_at); errors surface instead of becoming `null.map`.
+    // Car and bidder details are read with two explicit lookups (no PostgREST embeds) so the response shape is unchanged.
+    const must = ({ data, count, error }) => { if (error) throw error; return { data, count }; };
+    const { data: carRows } = must(await sb.from("cars").select("id,title,price,images").eq("dealer_id", req.user.id));
+    const carsById = new Map((carRows || []).map((r) => [r.id, r]));
+    const dealerCars = [...carsById.keys()];
+    if (!dealerCars.length) return res.json({ success: true, bids: [], pagination: { page, limit, total: 0, pages: 0 } });
 
-    let bidQuery = sb.from("bids").select("*, user:users(name, email), carId:cars(title, price, images)").in("carId", dealerCars).order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
+    let bidQuery = sb.from("bids").select("*").in("car_id", dealerCars).order("created_at", { ascending: false }).range(skip, skip + limit - 1);
     if (req.query.status) bidQuery = bidQuery.eq("status", req.query.status);
-    const { data: bids } = await bidQuery;
+    const { data: bids } = must(await bidQuery);
 
-    let countQuery = sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCars);
+    let countQuery = sb.from("bids").select("id", { count: 'exact', head: true }).in("car_id", dealerCars);
     if (req.query.status) countQuery = countQuery.eq("status", req.query.status);
-    const { count: total } = await countQuery;
+    const { count: total } = must(await countQuery);
 
-    const formatted = bids.map((b) => ({
-      ...b,
-      carTitle: b.carId?.title || "Unknown",
-      carPrice: b.carId?.price || 0,
-      carImage: b.carId?.images?.[0]?.url || null,
-      bidderName: b.user?.name || "Anonymous",
-      bidderEmail: b.user?.email || "",
-    }));
+    const bidderIds = [...new Set((bids || []).map((b) => b.user_id).filter(Boolean))];
+    const { data: bidders } = bidderIds.length ? must(await sb.from("users").select("id,name,email").in("id", bidderIds)) : { data: [] };
+    const usersById = new Map((bidders || []).map((u) => [u.id, u]));
+
+    const formatted = (bids || []).map((b) => {
+      const car = carsById.get(b.car_id); const user = usersById.get(b.user_id);
+      return {
+        ...b,
+        carId: car ? { title: car.title, price: car.price, images: car.images } : b.car_id,
+        user: user ? { name: user.name, email: user.email } : b.user_id,
+        carTitle: car?.title || "Unknown",
+        carPrice: car?.price || 0,
+        carImage: car?.images?.[0]?.url || null,
+        bidderName: user?.name || "Anonymous",
+        bidderEmail: user?.email || "",
+      };
+    });
 
     res.json({
       success: true,

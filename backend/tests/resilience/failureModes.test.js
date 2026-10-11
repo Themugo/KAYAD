@@ -211,8 +211,18 @@ describe("bid security failure modes", () => {
     expect(dbMock.create).not.toHaveBeenCalled();
   }, 60000);
 
-  test("callback: failed resultCode marks transaction failed via update (no .save crash)", async () => {
-    dbMock.findOne.mockResolvedValue({ id: "tx-1", status: "pending", amount: 5000, user: "u1" });
+  // Security payments are stored in `payments` (the table the auction FKs reference; securityPaymentStore.js). The legacy
+  // `transactions` store is still honoured for in-flight rows when that table exists (second test below).
+  test("callback: failed resultCode marks the security payment failed via update (no .save crash)", async () => {
+    dbMock.findOne.mockImplementation(async (table) => (table === "payments" ? { id: "tx-1", type: "bid_commitment", status: "pending", amount: 5000, user: "u1" } : null));
+    dbMock.update.mockResolvedValue({});
+    const result = await handleBidSecurityCallback({ checkoutRequestID: "ws_1", resultCode: 1032, mpesaReceipt: null });
+    expect(result.success).toBe(false);
+    expect(dbMock.update).toHaveBeenCalledWith("payments", "tx-1", expect.objectContaining({ status: "failed" }));
+  });
+
+  test("callback: legacy in-flight row in `transactions` is still marked failed there", async () => {
+    dbMock.findOne.mockImplementation(async (table) => (table === "transactions" ? { id: "tx-1", type: "bid_commitment", status: "pending", amount: 5000, user: "u1" } : null));
     dbMock.update.mockResolvedValue({});
     const result = await handleBidSecurityCallback({ checkoutRequestID: "ws_1", resultCode: 1032, mpesaReceipt: null });
     expect(result.success).toBe(false);
@@ -220,7 +230,7 @@ describe("bid security failure modes", () => {
   });
 
   test("callback: duplicate success callback is acknowledged idempotently (no re-processing)", async () => {
-    dbMock.findOne.mockResolvedValue({ id: "tx-1", status: "success", amount: 5000, user: "u1" });
+    dbMock.findOne.mockImplementation(async (table) => (table === "payments" ? { id: "tx-1", type: "bid_commitment", status: "success", amount: 5000, user: "u1" } : null));
     const result = await handleBidSecurityCallback({ checkoutRequestID: "ws_1", resultCode: 0, mpesaReceipt: "QGH1" });
     expect(result.duplicate).toBe(true);
     expect(dbMock.update).not.toHaveBeenCalled();

@@ -1,0 +1,15 @@
+
+> kayad@0.0.0 validate:production-runtime-corrections
+> node scripts/validate-production-runtime-corrections.mjs
+
+PASS canonical service-role table grants exist
+PASS future service-role table privileges exist
+PASS favorites price-alert column is reconciled
+PASS cars readiness/runtime grant is explicit
+PASS saved-search runtime grant is explicit
+PASS nested timestamp filters normalize Date values
+PASS price alert cron uses canonical notify field
+PASS auction reminder uses canonical Date filters
+PASS Render Redis policy is noeviction
+
+Production runtime correction validation: 9/9 PASS

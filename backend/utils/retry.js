@@ -118,7 +118,7 @@ export async function withRetry(fn, opts = {}) {
       }
 
       if (enableMetrics) {
-        incrementCounter("circuit_breaker_rejected", { service: serviceName || key });
+        incrementCounter("circuit_breaker_rejected", 1, { service: serviceName || key });
       }
 
       // Try fallback if available
@@ -127,7 +127,7 @@ export async function withRetry(fn, opts = {}) {
           logInfo(`Attempting fallback for ${key}`, { key });
         }
         if (enableMetrics) {
-          incrementCounter("fallback_attempted", { service: serviceName || key });
+          incrementCounter("fallback_attempted", 1, { service: serviceName || key });
         }
         if (onFallback) onFallback(key);
         return await fallback();
@@ -156,7 +156,7 @@ export async function withRetry(fn, opts = {}) {
         state.wasOpen = false;
         if (onCircuitClose) onCircuitClose(key);
         if (enableMetrics) {
-          incrementCounter("circuit_breaker_closed", { service: serviceName || key });
+          incrementCounter("circuit_breaker_closed", 1, { service: serviceName || key });
         }
       }
 
@@ -167,7 +167,7 @@ export async function withRetry(fn, opts = {}) {
       if (enableMetrics) {
         const duration = Date.now() - startTime;
         recordMetric("external_service_duration", duration, { service: serviceName || key, status: "success" });
-        incrementCounter("external_service_success", { service: serviceName || key });
+        incrementCounter("external_service_success", 1, { service: serviceName || key });
       }
 
       return result;
@@ -189,7 +189,7 @@ export async function withRetry(fn, opts = {}) {
         if (onCircuitOpen) onCircuitOpen(key, state.failures, circuitResetMs);
 
         if (enableMetrics) {
-          incrementCounter("circuit_breaker_opened", { service: serviceName || key });
+          incrementCounter("circuit_breaker_opened", 1, { service: serviceName || key });
           setGauge("circuit_breaker_failures", state.failures, { service: serviceName || key });
         }
       }
@@ -200,7 +200,7 @@ export async function withRetry(fn, opts = {}) {
       if (enableMetrics) {
         const duration = Date.now() - startTime;
         recordMetric("external_service_duration", duration, { service: serviceName || key, status: "error" });
-        incrementCounter("external_service_failure", {
+        incrementCounter("external_service_failure", 1, {
           service: serviceName || key,
           error_type: err.code || "unknown",
         });
@@ -212,7 +212,7 @@ export async function withRetry(fn, opts = {}) {
           logInfo(`Attempting fallback for ${key} after failure`, { key, error: err.message });
         }
         if (enableMetrics) {
-          incrementCounter("fallback_attempted", { service: serviceName || key });
+          incrementCounter("fallback_attempted", 1, { service: serviceName || key });
         }
         if (onFallback) onFallback(key, err);
         return await fallback();
@@ -234,7 +234,7 @@ export async function withRetry(fn, opts = {}) {
     if (enableMetrics) {
       const duration = Date.now() - startTime;
       recordMetric("external_service_duration", duration, { service: serviceName || key, status: "success" });
-      incrementCounter("external_service_success", { service: serviceName || key });
+      incrementCounter("external_service_success", 1, { service: serviceName || key });
     }
 
     return result;
@@ -242,7 +242,7 @@ export async function withRetry(fn, opts = {}) {
     if (enableMetrics) {
       const duration = Date.now() - startTime;
       recordMetric("external_service_duration", duration, { service: serviceName || key, status: "error" });
-      incrementCounter("external_service_failure", { service: serviceName || key, error_type: err.code || "unknown" });
+      incrementCounter("external_service_failure", 1, { service: serviceName || key, error_type: err.code || "unknown" });
     }
 
     // Try fallback if available
@@ -251,7 +251,7 @@ export async function withRetry(fn, opts = {}) {
         logInfo(`Attempting fallback for ${key} after failure`, { key, error: err.message });
       }
       if (enableMetrics) {
-        incrementCounter("fallback_attempted", { service: serviceName || key });
+        incrementCounter("fallback_attempted", 1, { service: serviceName || key });
       }
       if (onFallback) onFallback(key, err);
       return await fallback();
@@ -295,7 +295,7 @@ async function attemptWithTimeout(fn, retries, baseDelayMs, maxDelayMs, timeoutM
         }
 
         if (enableMetrics) {
-          incrementCounter("external_service_timeout", { service: serviceName || key });
+          incrementCounter("external_service_timeout", 1, { service: serviceName || key });
         }
 
         if (onTimeout) onTimeout(key, i + 1, timeoutMs);
@@ -316,7 +316,7 @@ async function attemptWithTimeout(fn, retries, baseDelayMs, maxDelayMs, timeoutM
         }
 
         if (enableMetrics) {
-          incrementCounter("external_service_retry", { service: serviceName || key });
+          incrementCounter("external_service_retry", 1, { service: serviceName || key });
         }
 
         if (onRetry) onRetry(err, i + 1, retries, delay);
@@ -348,7 +348,7 @@ async function attempt(fn, retries, baseDelayMs, maxDelayMs, onRetry) {
 export function resetCircuit(key) {
   circuitStore.delete(key);
   logInfo(`Circuit breaker reset for ${key}`, { key });
-  incrementCounter("circuit_breaker_reset", { service: key });
+  incrementCounter("circuit_breaker_reset", 1, { service: key });
 }
 
 export function getCircuitState(key) {

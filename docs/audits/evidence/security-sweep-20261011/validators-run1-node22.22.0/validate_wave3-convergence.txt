@@ -1,0 +1,64 @@
+
+> kayad@0.0.0 validate:wave3-convergence
+> node scripts/validate-wave3-convergence.mjs
+
+PASS obsolete implementation absent: src/features/DashboardView
+PASS obsolete implementation absent: src/features/PrivateSellerDashboardView
+PASS obsolete implementation absent: src/pages/car
+PASS obsolete implementation absent: src/pages/CarDetail.tsx
+PASS obsolete implementation absent: src/pages/CarDetailPage.jsx
+PASS obsolete implementation absent: src/pages/DealerProfile.tsx
+PASS obsolete implementation absent: src/pages/DealerProfilePage.jsx
+PASS obsolete implementation absent: src/pages/EscrowPage.tsx
+PASS obsolete implementation absent: src/pages/ProfilePage.jsx
+PASS obsolete implementation absent: src/pages/Home.tsx
+PASS obsolete implementation absent: src/pages/BrowsePage.jsx
+PASS obsolete implementation absent: src/pages/mobile/MobileBrowsePage.jsx
+PASS obsolete implementation absent: src/pages/SignIn.tsx
+PASS obsolete implementation absent: src/pages/Payments.tsx
+PASS obsolete implementation absent: src/pages/Notifications.tsx
+PASS obsolete implementation absent: src/pages/Favorites.tsx
+PASS obsolete implementation absent: src/components/CarCard.jsx
+PASS obsolete implementation absent: src/components/AdminTableRow.jsx
+PASS obsolete implementation absent: src/components/Skeleton.jsx
+PASS obsolete implementation absent: lib/api-spec/openapi.yaml
+PASS App has no legacy DashboardView surface
+PASS App uses canonical escrow surface
+PASS App uses canonical inspection surface
+PASS App uses canonical support surface
+PASS App uses canonical payment-history surface
+PASS private seller navigation converges on seller-platform
+PASS obsolete phase validator 17 removed
+PASS obsolete phase validator 18 removed
+PASS obsolete phase validator 20 removed
+PASS obsolete phase validator 22 removed
+PASS obsolete phase validator 24 removed
+PASS obsolete phase validator 26 removed
+PASS obsolete phase validator 27 removed
+PASS obsolete phase validator 28 removed
+PASS obsolete phase validator 29 removed
+PASS obsolete phase validator 30 removed
+PASS obsolete phase validator 31 removed
+PASS obsolete phase validator 32 removed
+PASS obsolete phase validator 33 removed
+PASS obsolete phase validator 41 removed
+PASS obsolete phase validator 42 removed
+PASS obsolete phase validator 43 removed
+PASS obsolete phase validator 44 removed
+PASS obsolete phase validator 45 removed
+PASS obsolete phase validator 46 removed
+PASS obsolete phase validator 47 removed
+PASS obsolete phase validator 48 removed
+PASS obsolete phase validator 49 removed
+PASS obsolete phase validator 52 removed
+PASS obsolete phase validator 53 removed
+PASS obsolete phase validator 54 removed
+PASS obsolete phase validator 55 removed
+PASS obsolete phase validator 56 removed
+PASS obsolete phase validator 57 removed
+PASS single maintained OpenAPI source
+PASS OpenAPI uses current KAYAD domain
+PASS OpenAPI exposes full Express paths
+FAIL OpenAPI documents all mapped routes (1120/1121)
+
+KAYAD Wave 3 convergence: FAIL (1)

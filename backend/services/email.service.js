@@ -94,7 +94,7 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
     return { success: true, id: info.id, provider: "brevo" };
   } catch (err) {
     recordMetric("email_send_duration", Date.now() - startTime, { status: "error" });
-    incrementCounter("email_send_failure", { error_type: err.code || "unknown" });
+    incrementCounter("email_send_failure", 1, { error_type: err.code || "unknown" });
     logError("Email failed after retries", err, { to: redactEmail(to), subject, error: err.message });
     // Queue/retry ownership lives above the provider adapter. Do not enqueue
     // from this function: registration-critical verification could otherwise

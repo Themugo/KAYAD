@@ -1,0 +1,12 @@
+ok backend/server.js
+ok backend/utils/fieldMap.js
+ok backend/controllers/commandCenterController.js
+ok backend/services/securityPaymentStore.js
+ok backend/services/bidSecurityService.js
+ok backend/services/auctionRegistration.service.js
+ok backend/services/paymentCallback.service.js
+ok backend/services/chatAttachmentInventory.js
+ok backend/scripts/chat-attachment-inventory.mjs
+ok backend/scripts/migrate-chat-attachments-private.mjs
+ok scripts/supabase-reconcile.mjs
+ok scripts/supabase-code-references.mjs

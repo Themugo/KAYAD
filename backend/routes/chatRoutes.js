@@ -7,6 +7,7 @@ import { createChatSchema, sendMessageSchema } from "../validation/chat.schema.j
 import {
   sendMessage,
   getMessages,
+  getAttachment,
   startChat,
   getUserChats,
   getUnreadCount,
@@ -23,6 +24,8 @@ router.get("/", protect, validateQuery(chatListQuerySchema), asyncHandler(getUse
 router.get("/unread", protect, asyncHandler(getUnreadCount));
 
 router.get("/:chatId/messages", protect, validateObjectId, validateQuery(messageListQuerySchema), asyncHandler(getMessages));
+
+router.get("/:chatId/attachments/:uploadId", protect, validateObjectId, asyncHandler(getAttachment));
 
 router.post(
   "/:chatId/message",

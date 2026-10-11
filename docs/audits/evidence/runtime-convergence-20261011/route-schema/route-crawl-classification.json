@@ -1,0 +1,1267 @@
+{
+ "before": {
+  "200": 329,
+  "500": 206,
+  "408": 2,
+  "400": 22,
+  "404": 64,
+  "403": 3
+ },
+ "after": {
+  "200": 358,
+  "500": 170,
+  "503": 2,
+  "408": 2,
+  "400": 23,
+  "404": 68,
+  "403": 3
+ },
+ "remaining500ByGroup": {
+  "A Missing table \u2014 exists only in production (export hosted DDL)": 27,
+  "B Missing table \u2014 exists nowhere (unimplemented subsystem)": 110,
+  "C Missing column \u2014 absent in repository and production (contract unresolved)": 6,
+  "D Genuine application defect \u2014 incomplete Mongo\u2192Supabase port": 27,
+  "E Dependency unavailable": 2
+ },
+ "newFailures": [],
+ "fixed": [
+  {
+   "route": "GET /api/audit/statistics",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to fetch audit statistics"
+  },
+  {
+   "route": "GET /api/cars/admin/{id}/fraud",
+   "before": 500,
+   "after": 404,
+   "beforeCause": "Cannot read properties of null (reading 'price')"
+  },
+  {
+   "route": "GET /api/cars/dealer/analytics",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column clicks does not exist"
+  },
+  {
+   "route": "GET /api/cars/dealer/my-cars",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column clicks does not exist"
+  },
+  {
+   "route": "GET /api/cms/calendar",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "invalid input syntax for type timestamp with time zone: \"[object Object]\""
+  },
+  {
+   "route": "GET /api/cms/media",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column \"uploaded_at\" does not exist"
+  },
+  {
+   "route": "GET /api/dealer-platform/analytics/recommendations",
+   "before": 500,
+   "after": 404,
+   "beforeCause": "Dealer not found"
+  },
+  {
+   "route": "GET /api/dealer-platform/leads/{leadId}/activities",
+   "before": 500,
+   "after": 404,
+   "beforeCause": "Lead not found"
+  },
+  {
+   "route": "GET /api/dealer-platform/subscription",
+   "before": 500,
+   "after": 404,
+   "beforeCause": "Dealer not found"
+  },
+  {
+   "route": "GET /api/dealer/bids",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Cannot read properties of null (reading 'map')"
+  },
+  {
+   "route": "GET /api/dealer/milestones",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "relation \"public.dealer_health_scores\" does not exist"
+  },
+  {
+   "route": "GET /api/executive-analytics/dashboard",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to get executive dashboard"
+  },
+  {
+   "route": "GET /api/executive-analytics/revenue",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to get revenue breakdown"
+  },
+  {
+   "route": "GET /api/executive-analytics/user-growth",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to get user growth"
+  },
+  {
+   "route": "GET /api/fraud/check/dealer/{dealerId}",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to check dealer fraud"
+  },
+  {
+   "route": "GET /api/inspections/my-tasks",
+   "before": 500,
+   "after": 400,
+   "beforeCause": "invalid input syntax for type uuid: \"my-tasks\""
+  },
+  {
+   "route": "GET /api/intelligence/auctions",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column car does not exist"
+  },
+  {
+   "route": "GET /api/intelligence/benchmarks",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column clicks does not exist"
+  },
+  {
+   "route": "GET /api/intelligence/dashboard",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column car does not exist"
+  },
+  {
+   "route": "GET /api/intelligence/dealers",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column clicks does not exist"
+  },
+  {
+   "route": "GET /api/intelligence/forecasts",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column car does not exist"
+  },
+  {
+   "route": "GET /api/intelligence/insights",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column car does not exist"
+  },
+  {
+   "route": "GET /api/intelligence/marketplace",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column car does not exist"
+  },
+  {
+   "route": "GET /api/intelligence/revenue",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column car does not exist"
+  },
+  {
+   "route": "GET /api/ledger/balance-sheet",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column is_active does not exist"
+  },
+  {
+   "route": "GET /api/ledger/trial-balance",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column is_active does not exist"
+  },
+  {
+   "route": "GET /api/ownership/dashboard",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Cannot access 'currentVehicles' before initialization"
+  },
+  {
+   "route": "GET /api/reconciliation/integrity-score",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to calculate financial integrity score"
+  },
+  {
+   "route": "GET /api/v1/analytics/sales",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to get sales dashboard"
+  },
+  {
+   "route": "GET /api/v1/analytics/sales/dealers",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to get dealer performance"
+  },
+  {
+   "route": "GET /api/v1/analytics/sales/dealers/{dealerId}",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to get dealer performance"
+  },
+  {
+   "route": "GET /api/v1/analytics/sales/revenue",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "Failed to get revenue metrics"
+  },
+  {
+   "route": "GET /api/v1/preferences",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "column user_id does not exist"
+  },
+  {
+   "route": "GET /prometheus",
+   "before": 500,
+   "after": 200,
+   "beforeCause": "# Error generating metrics\n"
+  }
+ ],
+ "remaining": [
+  {
+   "route": "GET /api/admin/queue/aggregated",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: JobFailure is not defined"
+  },
+  {
+   "route": "GET /api/admin/queue/dlq/jobs",
+   "status": 503,
+   "group": "E",
+   "cause": "dependency unavailable"
+  },
+  {
+   "route": "GET /api/admin/queue/dlq/statistics",
+   "status": 503,
+   "group": "E",
+   "cause": "dependency unavailable"
+  },
+  {
+   "route": "GET /api/admin/queue/failures",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): job_failures"
+  },
+  {
+   "route": "GET /api/admin/queue/failures/{failureId}",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): job_failures"
+  },
+  {
+   "route": "GET /api/admin/queue/statistics",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: JobFailure is not defined"
+  },
+  {
+   "route": "GET /api/ai/analytics",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_commands"
+  },
+  {
+   "route": "GET /api/ai/conversations",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_conversations"
+  },
+  {
+   "route": "GET /api/ai/conversations/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_conversations"
+  },
+  {
+   "route": "GET /api/ai/dashboard",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_commands, ai_conversations, ai_knowledge, ai_prompts"
+  },
+  {
+   "route": "GET /api/ai/history",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_commands"
+  },
+  {
+   "route": "GET /api/ai/knowledge",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_knowledge"
+  },
+  {
+   "route": "GET /api/ai/prompts",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_prompts"
+  },
+  {
+   "route": "GET /api/ai/workspaces",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: ai_workspaces"
+  },
+  {
+   "route": "GET /api/analytics/market/county-trends",
+   "status": 500,
+   "group": "C",
+   "cause": "column(s) absent in repository and production: location"
+  },
+  {
+   "route": "GET /api/announcements",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: announcements"
+  },
+  {
+   "route": "GET /api/announcements/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: announcements"
+  },
+  {
+   "route": "GET /api/automation/approvals",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: approval_chains"
+  },
+  {
+   "route": "GET /api/automation/approvals/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: approval_chains"
+  },
+  {
+   "route": "GET /api/automation/logs",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: workflow_logs"
+  },
+  {
+   "route": "GET /api/automation/scheduled",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: scheduled_jobs"
+  },
+  {
+   "route": "GET /api/automation/stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: automation_tasks, workflows"
+  },
+  {
+   "route": "GET /api/automation/tasks",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: automation_tasks"
+  },
+  {
+   "route": "GET /api/automation/tasks/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: automation_tasks"
+  },
+  {
+   "route": "GET /api/automation/templates/notifications",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: notification_templates"
+  },
+  {
+   "route": "GET /api/automation/templates/notifications/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: notification_templates"
+  },
+  {
+   "route": "GET /api/automation/workflows",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: workflows"
+  },
+  {
+   "route": "GET /api/automation/workflows/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: workflows"
+  },
+  {
+   "route": "GET /api/config/audit",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: config_audit_logs"
+  },
+  {
+   "route": "GET /api/config/countries",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: country_configs"
+  },
+  {
+   "route": "GET /api/config/countries/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: country_configs"
+  },
+  {
+   "route": "GET /api/config/entries",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: config_entries"
+  },
+  {
+   "route": "GET /api/config/entries/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: config_entries"
+  },
+  {
+   "route": "GET /api/config/export",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: config_entries"
+  },
+  {
+   "route": "GET /api/config/features",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: feature_flags"
+  },
+  {
+   "route": "GET /api/config/features/check/{key}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: feature_flags"
+  },
+  {
+   "route": "GET /api/config/features/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: feature_flags"
+  },
+  {
+   "route": "GET /api/config/location",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: location_master_data"
+  },
+  {
+   "route": "GET /api/config/location/cities",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: location_master_data"
+  },
+  {
+   "route": "GET /api/config/location/countries",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: location_master_data"
+  },
+  {
+   "route": "GET /api/config/location/regions",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: location_master_data"
+  },
+  {
+   "route": "GET /api/config/reference",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: reference_data"
+  },
+  {
+   "route": "GET /api/config/reference/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: reference_data"
+  },
+  {
+   "route": "GET /api/config/stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: config_entries, country_configs, feature_flags, location_master_data, reference_data, vehicle_master_data"
+  },
+  {
+   "route": "GET /api/config/vehicle",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vehicle_master_data"
+  },
+  {
+   "route": "GET /api/config/vehicle/makes",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vehicle_master_data"
+  },
+  {
+   "route": "GET /api/config/vehicle/models",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vehicle_master_data"
+  },
+  {
+   "route": "GET /api/config/vehicle/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vehicle_master_data"
+  },
+  {
+   "route": "GET /api/contact",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): contacts"
+  },
+  {
+   "route": "GET /api/dealer-health-score/admin/alerts",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): dealer_health_scores"
+  },
+  {
+   "route": "GET /api/dealer-health-score/admin/distribution",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: DealerHealthScore.getScoreDistribution is not a function"
+  },
+  {
+   "route": "GET /api/dealer-health-score/ranking/list",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: DealerHealthScore.getTopDealers is not a function"
+  },
+  {
+   "route": "GET /api/dealer-health-score/top/{category}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: DealerHealthScore.getTopDealers is not a function"
+  },
+  {
+   "route": "GET /api/dealer-health-score/{dealerId}",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): dealer_health_scores"
+  },
+  {
+   "route": "GET /api/dealer-health-score/{dealerId}/details",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): dealer_health_scores"
+  },
+  {
+   "route": "GET /api/dealer-health-score/{dealerId}/trends",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): dealer_health_scores"
+  },
+  {
+   "route": "GET /api/dealer/earnings",
+   "status": 500,
+   "group": "C",
+   "cause": "column(s) absent in repository and production: user"
+  },
+  {
+   "route": "GET /api/dealer/profile",
+   "status": 500,
+   "group": "C",
+   "cause": "column(s) absent in repository and production: business_address"
+  },
+  {
+   "route": "GET /api/dealer/settlement",
+   "status": 500,
+   "group": "C",
+   "cause": "column(s) absent in repository and production: mpesa_business"
+  },
+  {
+   "route": "GET /api/digital-twin/dashboard",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: predictions, scenarios, simulations"
+  },
+  {
+   "route": "GET /api/digital-twin/predictions",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: predictions"
+  },
+  {
+   "route": "GET /api/digital-twin/scenarios",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: scenarios"
+  },
+  {
+   "route": "GET /api/digital-twin/scenarios/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: scenarios"
+  },
+  {
+   "route": "GET /api/digital-twin/simulations",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: simulations"
+  },
+  {
+   "route": "GET /api/digital-twin/simulations/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: simulations"
+  },
+  {
+   "route": "GET /api/duplicates/all",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: duplicate_vehicle_logs"
+  },
+  {
+   "route": "GET /api/duplicates/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: duplicate_vehicle_logs"
+  },
+  {
+   "route": "GET /api/escrow/operations/dashboard",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): escrow_anomalies"
+  },
+  {
+   "route": "GET /api/feature-flags",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: s.replace is not a function"
+  },
+  {
+   "route": "GET /api/feature-flags/category/{category}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: FeatureFlag is not defined"
+  },
+  {
+   "route": "GET /api/feature-flags/environment/{environment}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: FeatureFlag is not defined"
+  },
+  {
+   "route": "GET /api/feature-flags/meta/categories",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: FeatureFlag is not defined"
+  },
+  {
+   "route": "GET /api/feature-flags/role/{role}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: FeatureFlag is not defined"
+  },
+  {
+   "route": "GET /api/feature-flags/user",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: FeatureFlag is not defined"
+  },
+  {
+   "route": "GET /api/feature-flags/{key}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: FeatureFlag is not defined"
+  },
+  {
+   "route": "GET /api/feature-flags/{key}/stats",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: FeatureFlag is not defined"
+  },
+  {
+   "route": "GET /api/feedback/admin/all",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: feedback"
+  },
+  {
+   "route": "GET /api/finance/issues",
+   "status": 500,
+   "group": "C",
+   "cause": "column(s) absent in repository and production: issue_details.resolved"
+  },
+  {
+   "route": "GET /api/fraud/all",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: fraud_detection"
+  },
+  {
+   "route": "GET /api/fraud/analytics",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: fraud_detection"
+  },
+  {
+   "route": "GET /api/fraud/check/auction/{carId}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: s.replace is not a function"
+  },
+  {
+   "route": "GET /api/fraud/check/user/{userId}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: s.replace is not a function"
+  },
+  {
+   "route": "GET /api/funnel/cars/{carId}/analytics",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): conversion_funnels"
+  },
+  {
+   "route": "GET /api/funnel/dealer/analytics",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): conversion_funnels"
+  },
+  {
+   "route": "GET /api/intelligence/countries",
+   "status": 500,
+   "group": "C",
+   "cause": "column(s) absent in repository and production: country"
+  },
+  {
+   "route": "GET /api/intelligence/inspections",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: inspections"
+  },
+  {
+   "route": "GET /api/listing-quality/car/{carId}",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: ListingQuality is not defined"
+  },
+  {
+   "route": "GET /api/listing-quality/dealer/{dealerId}/report",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: ListingQuality is not defined"
+  },
+  {
+   "route": "GET /api/listing-quality/dealer/{dealerId}/stats",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: ListingQuality is not defined"
+  },
+  {
+   "route": "GET /api/listing-quality/platform/benchmarks",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: ListingQuality is not defined"
+  },
+  {
+   "route": "GET /api/listing-quality/platform/low-quality",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: ListingQuality is not defined"
+  },
+  {
+   "route": "GET /api/listing-quality/platform/stats",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: ListingQuality is not defined"
+  },
+  {
+   "route": "GET /api/listing-quality/platform/trends",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: listing_quality"
+  },
+  {
+   "route": "GET /api/lowcode/dashboards",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: custom_dashboards"
+  },
+  {
+   "route": "GET /api/lowcode/objects",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: business_objects"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: business_objects"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{id}/api",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: business_objects"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{objectId}/fields",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: object_fields"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{objectId}/forms",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: form_definitions"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{objectId}/permissions",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: object_permissions"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{objectId}/relationships",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: object_relationships"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{objectId}/versions",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: object_versions"
+  },
+  {
+   "route": "GET /api/lowcode/objects/{objectId}/views",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: view_definitions"
+  },
+  {
+   "route": "GET /api/lowcode/stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: business_objects, form_definitions, object_fields, view_definitions"
+  },
+  {
+   "route": "GET /api/marketplace-health/admin/all",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): marketplace_health"
+  },
+  {
+   "route": "GET /api/marketplace-health/alerts",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: MarketplaceHealth is not defined"
+  },
+  {
+   "route": "GET /api/marketplace-health/metrics",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): marketplace_health"
+  },
+  {
+   "route": "GET /api/marketplace-health/summary",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): marketplace_health"
+  },
+  {
+   "route": "GET /api/new-admin/auction-integrity",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): auction_integrity_flags"
+  },
+  {
+   "route": "GET /api/new-admin/auction-integrity/dashboard",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): auction_integrity_flags, auction_risk_profiles"
+  },
+  {
+   "route": "GET /api/new-admin/auction-integrity/risk-profiles",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): auction_risk_profiles"
+  },
+  {
+   "route": "GET /api/new-admin/auction-integrity/{id}",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): auction_integrity_flags"
+  },
+  {
+   "route": "GET /api/notification-analytics/channel-stats",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: NotificationAudit is not defined"
+  },
+  {
+   "route": "GET /api/notification-analytics/delivery-report",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: notification_audits"
+  },
+  {
+   "route": "GET /api/notification-analytics/delivery-stats",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: NotificationAudit is not defined"
+  },
+  {
+   "route": "GET /api/notification-analytics/engagement-metrics",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: NotificationAudit is not defined"
+  },
+  {
+   "route": "GET /api/notification-analytics/failure-analysis",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: NotificationAudit is not defined"
+  },
+  {
+   "route": "GET /api/notification-analytics/platform-stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: notification_audits"
+  },
+  {
+   "route": "GET /api/notification-analytics/retry-queue",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: notification_audits"
+  },
+  {
+   "route": "GET /api/notification-analytics/retry-stats",
+   "status": 500,
+   "group": "D",
+   "cause": "incomplete Mongo->Supabase port: NotificationAudit is not defined"
+  },
+  {
+   "route": "GET /api/notification-analytics/trends",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: notification_audits"
+  },
+  {
+   "route": "GET /api/notification-analytics/user/{userId}/stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: notification_audits"
+  },
+  {
+   "route": "GET /api/ntsa-verification/car/{carId}/status",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): ntsa_verification_requests"
+  },
+  {
+   "route": "GET /api/organizations/platform-stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: organizations"
+  },
+  {
+   "route": "GET /api/organizations/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: organizations"
+  },
+  {
+   "route": "GET /api/organizations/{id}/branches",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: branches"
+  },
+  {
+   "route": "GET /api/organizations/{id}/stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: organizations"
+  },
+  {
+   "route": "GET /api/organizations/{id}/users",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: organizations"
+  },
+  {
+   "route": "GET /api/reconciliation/alerts",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: admin_alerts"
+  },
+  {
+   "route": "GET /api/referral/stats",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): transactions"
+  },
+  {
+   "route": "GET /api/reliability/error-budgets",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: error_budgets"
+  },
+  {
+   "route": "GET /api/reliability/error-budgets/{sloId}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: error_budgets"
+  },
+  {
+   "route": "GET /api/reliability/health",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: error_budgets"
+  },
+  {
+   "route": "GET /api/reliability/report",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: error_budgets"
+  },
+  {
+   "route": "GET /api/reports/admin/all",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: reports"
+  },
+  {
+   "route": "GET /api/reports/admin/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: reports"
+  },
+  {
+   "route": "GET /api/reports/my",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: reports"
+  },
+  {
+   "route": "GET /api/security-logs",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: security_logs"
+  },
+  {
+   "route": "GET /api/security-logs/my",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: security_logs"
+  },
+  {
+   "route": "GET /api/security-logs/summary",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: security_logs"
+  },
+  {
+   "route": "GET /api/sms-bidding/my",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): sms_bidders"
+  },
+  {
+   "route": "GET /api/v1/bid-logs/admin/all",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): bid_logs"
+  },
+  {
+   "route": "GET /api/v1/bid-logs/admin/stats",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): bid_logs"
+  },
+  {
+   "route": "GET /api/v1/bid-logs/car/{carId}",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): bid_logs"
+  },
+  {
+   "route": "GET /api/v1/bid-logs/car/{carId}/stats",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): bid_logs"
+  },
+  {
+   "route": "GET /api/v1/bid-logs/car/{carId}/winning",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): bid_logs"
+  },
+  {
+   "route": "GET /api/v1/bid-logs/my",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): bid_logs"
+  },
+  {
+   "route": "GET /api/v1/bid-logs/{logId}",
+   "status": 500,
+   "group": "A",
+   "cause": "table(s) only in production (DDL in hosted-only migrations): bid_logs"
+  },
+  {
+   "route": "GET /api/vxp/advertisements",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_advertisements"
+  },
+  {
+   "route": "GET /api/vxp/cards",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_cards"
+  },
+  {
+   "route": "GET /api/vxp/components",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_components"
+  },
+  {
+   "route": "GET /api/vxp/pages",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_pages"
+  },
+  {
+   "route": "GET /api/vxp/pages/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_pages"
+  },
+  {
+   "route": "GET /api/vxp/sections",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_sections"
+  },
+  {
+   "route": "GET /api/vxp/stats",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_advertisements, vx_cards, vx_pages, vx_sections, vx_themes"
+  },
+  {
+   "route": "GET /api/vxp/themes",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_themes"
+  },
+  {
+   "route": "GET /api/vxp/themes/default",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_themes"
+  },
+  {
+   "route": "GET /api/vxp/themes/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_themes"
+  },
+  {
+   "route": "GET /api/vxp/versions",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: vx_versions"
+  },
+  {
+   "route": "GET /api/xos/analytics",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: experience_analytics"
+  },
+  {
+   "route": "GET /api/xos/audiences",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: audiences"
+  },
+  {
+   "route": "GET /api/xos/campaigns",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: campaigns"
+  },
+  {
+   "route": "GET /api/xos/campaigns/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: campaigns"
+  },
+  {
+   "route": "GET /api/xos/dashboard",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: campaigns, experiences, journeys, seasonal_themes"
+  },
+  {
+   "route": "GET /api/xos/experiences",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: experiences"
+  },
+  {
+   "route": "GET /api/xos/experiences/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: experiences"
+  },
+  {
+   "route": "GET /api/xos/journeys",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: journeys"
+  },
+  {
+   "route": "GET /api/xos/journeys/{id}",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: journeys"
+  },
+  {
+   "route": "GET /api/xos/navigation-rules",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: navigation_rules"
+  },
+  {
+   "route": "GET /api/xos/resolve",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: experiences"
+  },
+  {
+   "route": "GET /api/xos/themes",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: seasonal_themes"
+  },
+  {
+   "route": "GET /api/xos/variants",
+   "status": 500,
+   "group": "B",
+   "cause": "table(s) in no migration and not in production: homepage_variants"
+  }
+ ]
+}

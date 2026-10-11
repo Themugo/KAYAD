@@ -58,7 +58,10 @@ export const handleMpesaCallback = async (callbackData) => {
     // transaction + bid-security rail rather than creating a second payment
     // engine. Route those provider callbacks through their canonical atomic
     // hold settlement before the generic payments claim path.
-    const securityTransaction = await findOne("transactions", { checkoutRequestId: checkoutId });
+    // Security payments live in `payments` (FK contract); legacy rows in an optional `transactions` table are still found
+    // during the transition (securityPaymentStore.js). A missing legacy table no longer aborts every callback.
+    const { findSecurityPaymentByCheckout } = await import("./securityPaymentStore.js");
+    const securityTransaction = (await findSecurityPaymentByCheckout(checkoutId))?.row;
     if (securityTransaction && ["bid_commitment", "bid_security"].includes(securityTransaction.type)) {
       const { handleBidSecurityCallback } = await import("./bidSecurityService.js");
       const securityResult = await handleBidSecurityCallback({
@@ -67,7 +70,9 @@ export const handleMpesaCallback = async (callbackData) => {
         mpesaReceipt: callbackReceipt,
         providerAmount: callbackAmount,
       });
-      await markWebhookProcessed(webhookEventId, securityResult.success ? null : { error: securityResult.message || "Auction security payment failed" });
+      // NB: pass undefined (not null) on success: markWebhookProcessed destructures its 2nd argument, and `null` threw a
+      // TypeError AFTER the hold had settled -> 500 to the provider, webhook never marked processed (defect FIN-CB-1).
+      await markWebhookProcessed(webhookEventId, securityResult.success ? undefined : { error: securityResult.message || "Auction security payment failed" });
       return securityResult;
     }
 

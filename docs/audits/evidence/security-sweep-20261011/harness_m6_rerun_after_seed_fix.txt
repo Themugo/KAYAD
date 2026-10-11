@@ -1,0 +1,84 @@
+TAP version 13
+# (node:16424) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: sender cannot attach arbitrary URLs, strings, foreign uploads, non-chat uploads or unknown ids
+ok 1 - sender cannot attach arbitrary URLs, strings, foreign uploads, non-chat uploads or unknown ids
+  ---
+  duration_ms: 3148.870273
+  type: 'test'
+  ...
+# Subtest: authorized participant: reference stored (no CDN url), response/list expose only the authenticated path
+ok 2 - authorized participant: reference stored (no CDN url), response/list expose only the authenticated path
+  ---
+  duration_ms: 81.896248
+  type: 'test'
+  ...
+# Subtest: access: unauthenticated 401; sender and recipient 200 with safe headers; outsider 404; random upload id 404
+ok 3 - access: unauthenticated 401; sender and recipient 200 with safe headers; outsider 404; random upload id 404
+  ---
+  duration_ms: 64.004267
+  type: 'test'
+  ...
+# Subtest: binding: the upload is only readable through the chat that references it (other chat, even as a participant of it)
+ok 4 - binding: the upload is only readable through the chat that references it (other chat, even as a participant of it)
+  ---
+  duration_ms: 33.59576
+  type: 'test'
+  ...
+# Subtest: revoked access: recipient who leaves the conversation, and a blocked chat, lose access immediately
+ok 5 - revoked access: recipient who leaves the conversation, and a blocked chat, lose access immediately
+  ---
+  duration_ms: 87.984018
+  type: 'test'
+  ...
+# Subtest: Cloudinary-backed record with no local bytes -> 302 to an authenticated, expiring, signed download (not a permanent URL)
+ok 6 - Cloudinary-backed record with no local bytes -> 302 to an authenticated, expiring, signed download (not a permanent URL)
+  ---
+  duration_ms: 86.205014
+  type: 'test'
+  ...
+# Subtest: local upload record lost (ephemeral disk / redeploy): participants still get an expiring authenticated redirect; outsiders still 404
+ok 7 - local upload record lost (ephemeral disk / redeploy): participants still get an expiring authenticated redirect; outsiders still 404
+  ---
+  duration_ms: 91.586149
+  type: 'test'
+  ...
+# Subtest: legacy attachments (pre-fix {url} entries) are never rewritten; http/javascript legacy values are neutralised on output
+ok 8 - legacy attachments (pre-fix {url} entries) are never rewritten; http/javascript legacy values are neutralised on output
+  ---
+  duration_ms: 19.333179
+  type: 'test'
+  ...
+# Subtest: realtime newMessage carries the authenticated path, never a CDN url
+ok 9 - realtime newMessage carries the authenticated path, never a CDN url
+  ---
+  duration_ms: 1017.014918
+  type: 'test'
+  ...
+# Subtest: upload route: GET /api/upload/:id of a chat file is owner/admin only (was readable by any signed-in user with the id, cached public+immutable)
+ok 10 - upload route: GET /api/upload/:id of a chat file is owner/admin only (was readable by any signed-in user with the id, cached public+immutable)
+  ---
+  duration_ms: 52.666572
+  type: 'test'
+  ...
+# Subtest: public vehicle media is unchanged: vehicles-folder upload remains publicly cacheable for any signed-in user
+ok 11 - public vehicle media is unchanged: vehicles-folder upload remains publicly cacheable for any signed-in user
+  ---
+  duration_ms: 11.804638
+  type: 'test'
+  ...
+# Subtest: POST /api/upload folder=chat: content must match its declared type (RIFF/AVI declared as webp passes the legacy header check but is rejected 400); no CDN url ever returned
+ok 12 - POST /api/upload folder=chat: content must match its declared type (RIFF/AVI declared as webp passes the legacy header check but is rejected 400); no CDN url ever returned
+  ---
+  duration_ms: 104.086515
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5305.796065

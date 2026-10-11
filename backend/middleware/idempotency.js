@@ -138,6 +138,11 @@ async function detectDuplicateReceipt(receipt) {
 export const idempotencyCheck = async (req, res, next) => {
   const startTime = Date.now();
 
+  // FIN-3: safe methods never need replay protection. This middleware is mounted before protect() on /api/bids and
+  // /api/escrow, so every GET used to fall through with no key, write an audit row whose NOT NULL `key` was null
+  // (23502) and take a distributed lock named "idempotency:undefined" shared by every such request.
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return next();
+
   // ── Auto-generate key for Safaricom callbacks ──────────────
   let idempotencyKey = req.headers["x-idempotency-key"];
   let operationType = extractOperationType(req.path);
@@ -241,6 +246,10 @@ export const idempotencyCheck = async (req, res, next) => {
       idempotencyKey = generateIdempotencyKey("auto");
     }
   }
+  // Nothing to deduplicate against (no client key, no deterministic key, no identity yet): continue without a lock
+  // or an audit row instead of serialising unrelated requests on one undefined key. Authentication, CSRF and the
+  // route's own atomic database guards still apply downstream.
+  if (!idempotencyKey) return next();
 
   try {
     logInfo("Idempotency check", { key: idempotencyKey, operationType, path: req.path });

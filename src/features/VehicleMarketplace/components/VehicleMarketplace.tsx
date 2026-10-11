@@ -1355,7 +1355,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </label>
 
               {viewMode === 'grid' && (
-                <div className="kayad-toolbar-control hidden h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1 md:flex" aria-label="Desktop grid columns">
+                <div className="kayad-toolbar-control hidden h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1 md:flex" role="group" aria-label="Desktop grid columns">
                   {[3, 4, 5].map((n) => (
                     <button
                       key={n}
@@ -1827,9 +1827,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
-        <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden">
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
           <div className="sticky top-0 bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
-            <div><h3 className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#94A3B8] mt-0.5">Adjust any filter, then return to the results.</p></div>
+            <div><h3 id="kayad-mobile-filter-title" className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#94A3B8] mt-0.5">Adjust any filter, then return to the results.</p></div>
             <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5" aria-label="Close filters">
               <X className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
             </button>
