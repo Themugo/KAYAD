@@ -1,0 +1,7 @@
+{
+  "name": "kayad-messaging-audit-harness",
+  "private": true,
+  "type": "module",
+  "description": "Offline evidence harness (NOT part of the application build). Runs the real chat controllers/routes against a real local PostgreSQL through a test-only PostgREST emulator.",
+  "dependencies": { "pg": "8.13.1", "socket.io-client": "4.8.1" }
+}

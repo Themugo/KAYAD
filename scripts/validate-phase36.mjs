@@ -22,8 +22,14 @@ for (const p of [
   "/api/sms-bidding/webhook/",
   "/api/webhooks/",
 ]) assert(csrf.includes(`"${p}"`), `Missing explicit CSRF callback exemption: ${p}`);
-assert(csrf.includes('if (isCsrfExemptPath(req.path)) return next();'),
+// D-FIN-1: csrfProtection is mounted with app.use("/api", ...), so req.path has the mount point stripped. The exemption
+// must therefore be matched against the FULL path (baseUrl + path), or no provider callback is ever exempt.
+assert(csrf.includes('if (isCsrfExemptPath(fullRequestPath(req))) return next();'),
   "CSRF callback exemption must be explicit and path-based");
+assert(/const fullRequestPath = \(req\) => `\$\{req\.baseUrl \|\| ""\}\$\{req\.path \|\| ""\}`/.test(csrf),
+  "CSRF exemption path must be rebuilt from req.baseUrl + req.path (mounted under /api)");
+assert(!csrf.includes('isCsrfExemptPath(req.path)'),
+  "CSRF exemption must not match the mount-relative req.path");
 assert(csrf.includes('if (req.kayadMachineAuthenticated === true) return next();'),
   "Machine-authenticated requests must be explicitly compatible with CSRF middleware");
 

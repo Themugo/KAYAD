@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/msg/verify3/ex/KAYAD-main
+
+
+ Test Files  76 passed (76)
+      Tests  580 passed | 1 skipped (581)
+   Start at  09:18:56
+   Duration  116.25s (transform 3.88s, setup 8.04s, import 11.08s, tests 33.60s, environment 51.51s)
+

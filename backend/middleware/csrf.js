@@ -21,10 +21,17 @@ const CSRF_EXEMPT_PATHS = [
   "/api/escrow-vault/webhook/",
   "/api/sms-bidding/webhook/",
   "/api/webhooks/",
+  // Provider delivery-status webhooks; each handler authenticates by shared secret / provider signature.
+  "/api/communications/webhooks/",
 ];
 
 const isCsrfExemptPath = (path = "") =>
   CSRF_EXEMPT_PATHS.some((prefix) => path === prefix || path.startsWith(prefix));
+
+// csrfProtection is mounted with app.use("/api", ...), where Express strips the mount point from req.path
+// ("/payments/callback"), so the allowlist above never matched and every provider callback received 403
+// (D-FIN-1). Rebuild the full path from baseUrl and fold the versioned alias (/api/v1/...) onto /api/....
+const fullRequestPath = (req) => `${req.baseUrl || ""}${req.path || ""}`.replace(/^\/api\/v\d+(?=\/)/, "/api");
 
 // Validate CSRF token using the stateless double-submit-cookie contract.
 // Browser state-changing requests must present the same unpredictable token in
@@ -35,7 +42,7 @@ export const csrfProtection = (req, res, next) => {
   if (!sensitiveMethods.includes(req.method)) return next();
 
   // External machine-to-machine callbacks use their own authentication.
-  if (isCsrfExemptPath(req.path)) return next();
+  if (isCsrfExemptPath(fullRequestPath(req))) return next();
 
   // Bearer Authorization is NOT a CSRF bypass. A browser attacker can add an
   // Authorization header, so authentication scheme alone is insufficient.

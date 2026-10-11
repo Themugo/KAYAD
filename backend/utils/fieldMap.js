@@ -94,6 +94,18 @@ export const FIELD_ALIASES = {
     // being persisted (Car.prototype.save() writes every field,
     // including this one, on every real save).
     isPaid: "isPaid",
+    // D-DATA-1: snakeToCamel("reminder_sent_5min") -> "reminderSent5min", but camelToSnake() does not put an
+    // underscore before a digit that follows a letter -> "reminder_sent5min" (no such column). Car.save()/update writes
+    // every field, so EVERY listing edit failed with PGRST204 (500 "Failed to update car") for owners and staff.
+    reminderSent5min: "reminder_sent_5min",
+    reminderSent15min: "reminder_sent_15min",
+    reminderSent30min: "reminder_sent_30min",
+    reminderSent60min: "reminder_sent_60min",
+  },
+  vehicle_valuations: {
+    // Same digit round-trip defect as above (columns future_value_12m / future_value_24m).
+    futureValue12m: "future_value_12m",
+    futureValue24m: "future_value_24m",
   },
   users: {
     logo: "avatar",

@@ -1,0 +1,11 @@
+$ npx vitest run --config vitest.config.js
+
+ RUN  v4.1.11 /home/claude/msg/base/KAYAD-main/backend
+
+
+ Test Files  5 passed (5)
+      Tests  16 passed (16)
+   Start at  08:31:17
+   Duration  4.13s (transform 121ms, setup 0ms, import 235ms, tests 3.04s, environment 1ms)
+
+exit=0

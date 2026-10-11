@@ -140,14 +140,14 @@ router.delete("/countries/:id", validateObjectId, allowRoles("admin", "superadmi
 // AUDIT
 // ============================================
 
-router.get("/audit", asyncHandler(getConfigAuditLogs));
+router.get("/audit", allowRoles("admin", "superadmin"), asyncHandler(getConfigAuditLogs));
 router.post("/audit/:logId/rollback", allowRoles("admin", "superadmin"), asyncHandler(rollbackConfig));
 
 // ============================================
 // IMPORT / EXPORT
 // ============================================
 
-router.get("/export", asyncHandler(exportConfig));
+router.get("/export", allowRoles("admin", "superadmin"), asyncHandler(exportConfig));
 router.post("/import", allowRoles("admin", "superadmin"), asyncHandler(importConfig));
 
 export default router;

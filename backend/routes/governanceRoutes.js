@@ -57,8 +57,11 @@ import {
 
 const router = express.Router();
 
-// All routes require authentication
+// All routes require authentication AND a governance-capable role. Reads (audit log, risks,
+// compliance, decisions, reports) were previously open to any signed-in user (D-AUTHZ-1); the
+// controller only enforced roles on writes. Role set matches the controller's default `ensure`.
 router.use(protect);
+router.use(allowRoles("admin", "superadmin", "executive", "manager"));
 
 // Dashboard
 router.get("/dashboard", asyncHandler(getGovernanceDashboard));

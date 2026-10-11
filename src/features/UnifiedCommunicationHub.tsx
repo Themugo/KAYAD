@@ -284,12 +284,22 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     const text = inputText.trim();
     if (!text || !activeThread || !user) return;
 
-    setInputText('');
+    // Keep the draft until the server confirms the write. A timeout can mean
+    // the server committed the message but the response was lost; clearing the
+    // composer before confirmation encourages an accidental duplicate retry.
     try {
-      await sendChatMessage(activeThread.id, text);
-      const realMessages = await getChatMessages(activeThread.id);
+      const persistedMessage = await sendChatMessage(activeThread.id, text);
+      setInputText(current => current === text ? '' : current);
+      let realMessages;
+      try {
+        realMessages = await getChatMessages(activeThread.id);
+      } catch {
+        // The send was confirmed by the backend. Keep the canonical response
+        // visible if the subsequent history refresh fails; do not invite a resend.
+        realMessages = [persistedMessage];
+      }
       const mapped = mapBackendMessagesToUnified(realMessages, activeThread.id, user.id);
-      const lastReal = realMessages[realMessages.length - 1];
+      const lastReal = realMessages[realMessages.length - 1] || persistedMessage;
       setThreads(prev => prev.map(t => {
         if (t.id === activeThread.id) {
           return {

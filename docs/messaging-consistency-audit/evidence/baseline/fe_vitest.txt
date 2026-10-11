@@ -1,0 +1,11 @@
+$ npx vitest run
+
+ RUN  v4.1.11 /home/claude/msg/base/KAYAD-main
+
+
+ Test Files  75 passed (75)
+      Tests  579 passed | 1 skipped (580)
+   Start at  08:28:26
+   Duration  122.06s (transform 3.73s, setup 8.25s, import 11.55s, tests 36.91s, environment 52.85s)
+
+exit=0

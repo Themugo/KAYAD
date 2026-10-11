@@ -1,0 +1,240 @@
+{
+  "mode": "patched_final_candidate",
+  "network": [
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/api.ts",
+      "body": "// KAYAD API compatibility facade.\n// The shared HTTP transport lives in httpClient.ts; endpoint contracts live in api.exports.ts.\nexport { api, unwrap } from \""
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/httpClient.ts",
+      "body": "import.meta.env = {\"BASE_URL\": \"/\", \"DEV\": true, \"MODE\": \"development\", \"PROD\": false, \"SSR\": false, \"VITE_API_URL\": \"/api\", \"VITE_DEV_API_TARGET\": \"http://127."
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/api.exports.ts",
+      "body": "// src/api/api.exports.ts\n// All the per-route API objects.\nimport { api, unwrap } from \"/src/api/httpClient.ts\";\nimport { getTeamMembers, inviteTeamMember, upd"
+    },
+    {
+      "status": 304,
+      "method": "GET",
+      "url": "/src/api/api.ts",
+      "body": ""
+    },
+    {
+      "status": 304,
+      "method": "GET",
+      "url": "/src/api/httpClient.ts",
+      "body": ""
+    },
+    {
+      "status": 304,
+      "method": "GET",
+      "url": "/src/api/api.exports.ts",
+      "body": ""
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/httpRequest.ts",
+      "body": "import { api } from \"/src/api/httpClient.ts\";\nexport class HttpRequestError extends Error {\n\tconstructor(message, status, responseData) {\n\t\tsuper(message);\n\t\tth"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"da815550-6ad2-4192-991b-cf12ad7706d4\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":100,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/hero",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[{\"id\":\"6dbd025d-3dee-4329-95bb-ad85822b22c3\",\"title\":\"Owner Car v2\",\"price\":3400000,\"images\":[],\"cover_image\":0,\"brand\":\"Toyota\",\"year\":"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[{\"id\":\"6dbd025d-3dee-4329-95bb-ad85822b22c3\",\"title\":\"Owner Car v2\",\"price\":3400000,\"images\":[],\"cover_image\":0,\"brand\":\"Toyota\",\"year\":"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/v1/auth/me",
+      "body": "{\"success\":true,\"user\":{\"id\":\"e6d8ce33-0415-4d9a-88f1-4a18d0d9702d\",\"name\":\"Alice Buyer\",\"email\":\"alicebuyer.e6d8ce@example.test\",\"role\":\"user\",\"super_admin\":fa"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":100,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/hero",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"da815550-6ad2-4192-991b-cf12ad7706d4\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[{\"id\":\"6dbd025d-3dee-4329-95bb-ad85822b22c3\",\"title\":\"Owner Car v2\",\"price\":3400000,\"images\":[],\"cover_image\":0,\"brand\":\"Toyota\",\"year\":"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[{\"id\":\"6dbd025d-3dee-4329-95bb-ad85822b22c3\",\"title\":\"Owner Car v2\",\"price\":3400000,\"images\":[],\"cover_image\":0,\"brand\":\"Toyota\",\"year\":"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"da815550-6ad2-4192-991b-cf12ad7706d4\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/v1/auth/me",
+      "body": "{\"success\":true,\"user\":{\"id\":\"e6d8ce33-0415-4d9a-88f1-4a18d0d9702d\",\"name\":\"Alice Buyer\",\"email\":\"alicebuyer.e6d8ce@example.test\",\"role\":\"user\",\"super_admin\":fa"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"da815550-6ad2-4192-991b-cf12ad7706d4\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"da815550-6ad2-4192-991b-cf12ad7706d4\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/favorites",
+      "body": "{\"success\":true,\"favorites\":[],\"total\":0,\"pagination\":{\"page\":1,\"limit\":50,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/chat",
+      "body": "{\"success\":true,\"chats\":[{\"id\":\"1c10ee9e-5ce0-4e8c-b4d7-0f0f819906b2\",\"participants\":[{\"id\":\"e6d8ce33-0415-4d9a-88f1-4a18d0d9702d\",\"name\":\"Alice Buyer\",\"avatar\""
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/notifications",
+      "body": "{\"success\":true,\"notifications\":[],\"unreadCount\":0,\"pagination\":{\"total\":0,\"page\":1,\"limit\":50,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/chat/1c10ee9e-5ce0-4e8c-b4d7-0f0f819906b2/messages",
+      "body": "{\"success\":true,\"messages\":[]}"
+    }
+  ],
+  "console": [
+    "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+    "[KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js\n    at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)",
+    "An empty string (\"\") was passed to the %s attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to ",
+    "[KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js\n    at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)",
+    "An empty string (\"\") was passed to the %s attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to ",
+    "An empty string (\"\") was passed to the %s attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to "
+  ],
+  "steps": [
+    {
+      "step": "open /?nav=chat as signed-in user",
+      "finalUrl": "/?nav=chat"
+    }
+  ],
+  "finalUrl": "/?nav=chat",
+  "redirectedToLogin": false,
+  "serverAuthErrors": []
+}

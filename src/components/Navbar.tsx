@@ -84,7 +84,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   const userRef = useRef<HTMLDivElement>(null);
   const userButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const [mobileDrawerTop, setMobileDrawerTop] = useState(0);
+  const [mobileDrawerHeight, setMobileDrawerHeight] = useState(0);
+
+  const openMobileMenu = useCallback(() => {
+    const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? 0;
+    const top = Math.max(0, Math.round(headerBottom));
+    const viewport = window.visualViewport;
+    const viewportBottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+    setMobileDrawerTop(top);
+    setMobileDrawerHeight(Math.max(0, Math.round(viewportBottom - top)));
+    setMobileMenuOpen(true);
+  }, []);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const closeTimer = useRef<number | undefined>(undefined);
   // A menu opened by an explicit click/keypress is "pinned": pointer-leave must not
@@ -98,12 +111,37 @@ export const Navbar: React.FC<NavbarProps> = ({
   // The mobile dock's Menu tab opens this same drawer (no second menu implementation).
   useEffect(() => {
     const openMenu = () => {
-      setMobileMenuOpen(true);
+      openMobileMenu();
       window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
     };
     window.addEventListener('kayad:open-mobile-menu', openMenu);
     return () => window.removeEventListener('kayad:open-mobile-menu', openMenu);
-  }, [prefersReducedMotion]);
+  }, [openMobileMenu, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const syncDrawerViewport = () => {
+      const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? 0;
+      const top = Math.max(0, Math.round(headerBottom));
+      // Mobile browser chrome can shrink the visual viewport without a matching
+      // layout-viewport resize. Keep the drawer sized to the actually visible area.
+      const viewport = window.visualViewport;
+      const viewportBottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+      setMobileDrawerTop(top);
+      setMobileDrawerHeight(Math.max(0, Math.round(viewportBottom - top)));
+    };
+    syncDrawerViewport();
+    window.addEventListener('resize', syncDrawerViewport);
+    window.addEventListener('orientationchange', syncDrawerViewport);
+    window.visualViewport?.addEventListener('resize', syncDrawerViewport);
+    window.visualViewport?.addEventListener('scroll', syncDrawerViewport);
+    return () => {
+      window.removeEventListener('resize', syncDrawerViewport);
+      window.removeEventListener('orientationchange', syncDrawerViewport);
+      window.visualViewport?.removeEventListener('resize', syncDrawerViewport);
+      window.visualViewport?.removeEventListener('scroll', syncDrawerViewport);
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     document.body.classList.toggle('kayad-mobile-menu-is-open', mobileMenuOpen);
@@ -231,7 +269,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasNotifications = (user?.unreadNotificationsCount ?? 0) > 0 || effectiveUnread > 0;
 
   return (
-    <header className="kayad-header">
+    <header ref={headerRef} className="kayad-header">
       {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
       <div className="kayad-header__bar">
 
@@ -665,7 +703,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               ref={hamburgerRef}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => { if (mobileMenuOpen) setMobileMenuOpen(false); else openMobileMenu(); }}
               className="kayad-util kayad-hamburger"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
@@ -680,10 +718,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <>
           <button type="button" aria-label="Close navigation menu" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-[55] bg-[#031E27]/55 backdrop-blur-[2px] lg:hidden" />
-          <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu absolute left-0 right-0 top-full z-[60] lg:hidden focus:outline-none" role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
-            <div className="mx-auto flex max-h-[calc(100svh-78px)] w-full max-w-[760px] flex-col overflow-hidden rounded-b-[28px] border-x border-b border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
+          <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu fixed inset-x-0 bottom-0 z-[60] lg:hidden focus:outline-none" style={{ top: `${mobileDrawerTop}px`, height: `${mobileDrawerHeight}px` }} role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
+            <div className="mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-b-[28px] border-x border-b border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
               <div className="flex min-h-1.5 items-center justify-center bg-[#0A3340]"><span className="h-1 w-10 rounded-full bg-white/20" /></div>
-              <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {user ? (
                   <section className="mb-4 rounded-[22px] border border-white/10 bg-white/[0.07] p-3.5">
                     <div className="flex items-center justify-between gap-3">

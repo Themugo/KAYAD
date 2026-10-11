@@ -1,0 +1,212 @@
+{
+  "mode": "foundation_buggy",
+  "network": [
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/api.ts",
+      "body": "// KAYAD API compatibility facade.\n// The shared HTTP transport lives in httpClient.ts; endpoint contracts live in api.exports.ts.\nexport { api, unwrap } from \""
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/httpClient.ts",
+      "body": "import.meta.env = {\"BASE_URL\": \"/\", \"DEV\": true, \"MODE\": \"development\", \"PROD\": false, \"SSR\": false, \"VITE_API_URL\": \"/api\", \"VITE_DEV_API_TARGET\": \"http://127."
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/api.exports.ts",
+      "body": "// src/api/api.exports.ts\n// All the per-route API objects.\nimport { api, unwrap } from \"/src/api/httpClient.ts\";\nimport { getTeamMembers, inviteTeamMember, upd"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/src/api/httpRequest.ts",
+      "body": "import { api } from \"/src/api/httpClient.ts\";\nexport class HttpRequestError extends Error {\n\tconstructor(message, status, responseData) {\n\t\tsuper(message);\n\t\tth"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":24,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":100,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/hero",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"216559cc-3bc4-4d31-99ab-2f232ea77fa6\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":50,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":24,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":100,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/hero",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 401,
+      "method": "GET",
+      "url": "/api/v1/auth/me",
+      "body": "{\"success\":false,\"message\":\"Not authorized\"}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/ads",
+      "body": "{\"success\":true,\"data\":[]}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/cars",
+      "body": "{\"success\":true,\"data\":[],\"cars\":[],\"pagination\":{\"page\":1,\"limit\":50,\"total\":0,\"pages\":0}}"
+    },
+    {
+      "status": 401,
+      "method": "POST",
+      "url": "/api/v1/auth/refresh",
+      "body": "{\"success\":false,\"message\":\"No refresh token\",\"code\":\"AUTH_SESSION_EXPIRED\"}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"216559cc-3bc4-4d31-99ab-2f232ea77fa6\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 401,
+      "method": "GET",
+      "url": "/api/v1/auth/me",
+      "body": "{\"success\":false,\"message\":\"Not authorized\"}"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"216559cc-3bc4-4d31-99ab-2f232ea77fa6\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"216559cc-3bc4-4d31-99ab-2f232ea77fa6\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "/api/admin/public/config",
+      "body": "{\"success\":true,\"config\":{\"id\":\"216559cc-3bc4-4d31-99ab-2f232ea77fa6\",\"platform_name\":null,\"gallery_title\":null,\"gallery_subtitle\":null,\"font_display\":null,\"fon"
+    },
+    {
+      "status": 401,
+      "method": "POST",
+      "url": "/api/v1/auth/refresh",
+      "body": "{\"success\":false,\"message\":\"No refresh token\",\"code\":\"AUTH_SESSION_EXPIRED\"}"
+    }
+  ],
+  "console": [
+    "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+    "[KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from http://localhost:5000/socket.io/socket.io.js\n    at script.onerror (http://localhost:3000/src/context/SocketContext.tsx:25:33)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "steps": [
+    {
+      "step": "open /?nav=chat as signed-in user",
+      "finalUrl": "/login?next=%2F%3Fnav%3Dchat"
+    }
+  ],
+  "finalUrl": "/login?next=%2F%3Fnav%3Dchat",
+  "redirectedToLogin": true,
+  "serverAuthErrors": [
+    "AUTH ERROR\u001b[39m",
+    "AUTH ERROR\u001b[39m"
+  ]
+}

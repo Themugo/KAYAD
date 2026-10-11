@@ -1,0 +1,23 @@
+== npm_ci_root :: npm ci --no-audit --no-fund
+npm_ci_root rc=0
+== npm_ci_backend :: bash -c cd backend && npm ci --no-audit --no-fund
+npm_ci_backend rc=0
+== npm_ci_harness :: bash -c cd docs/messaging-consistency-audit/harness && npm ci --no-audit --no-fund
+npm_ci_harness rc=0
+== tsc :: npx tsc --noEmit
+tsc rc=0
+== vite_build :: npx vite build
+vite_build rc=0
+== fe_vitest :: npx vitest run
+fe_vitest rc=0
+== be_jest :: bash -c cd backend && npm run test:jest
+be_jest rc=0
+== be_vitest :: bash -c cd backend && npm run test:vitest
+be_vitest rc=0
+== be_node :: bash -c cd backend && npm run test:node
+be_node rc=0
+== be_chat_integrity :: bash -c cd backend && npm run test:chat-integrity
+be_chat_integrity rc=0
+== harness :: bash -c cd docs/messaging-consistency-audit/harness && KAYAD_TEST_DB=msg_chain_rc node --test --test-concurrency=1 tests/*.test.mjs
+harness rc=0
+DONE

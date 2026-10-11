@@ -62,6 +62,13 @@ export const logWarn = (message, meta = {}) => {
 // 🔴 ERROR
 // =============================
 export const logError = (message, error = null, meta = {}) => {
+  // Many call sites pass a plain object ({ error: err.message, ... }) in the `error` slot. pino's err serializer
+  // renders anything that is not an Error as `{}`, which hid the real cause of production failures (D-OBS-1).
+  // Treat a plain object as structured metadata instead of dropping it.
+  if (error && typeof error === "object" && !(error instanceof Error) && Object.getPrototypeOf(error) === Object.prototype) {
+    logger.error({ ...error, ...meta }, message);
+    return;
+  }
   logger.error({ ...meta, err: error }, message);
 };
 

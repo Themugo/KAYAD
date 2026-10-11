@@ -1,0 +1,4 @@
+NOTICE:  database "msg_chain_rc" does not exist, skipping
+WARNING:  wal_level is insufficient to publish logical changes
+HINT:  Set wal_level to "logical" before creating subscriptions.
+applied=172 failed=0

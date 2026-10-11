@@ -98,11 +98,36 @@ export async function getChatMessages(chatId: string): Promise<BackendMessage[]>
 }
 
 /** POST /api/chat/:chatId/message - send a real message. */
-export async function sendChatMessage(chatId: string, text: string): Promise<void> {
-  await chatFetch(`/api/chat/${chatId}/message`, {
-    method: 'POST',
-    body: JSON.stringify({ content: text }),
+const pendingMessageKeys = new Map<string, string>();
+
+function createMessageIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID();
+  // UUID format fallback for older supported browsers; the key is a dedupe token,
+  // not an authorization credential.
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    return (char === 'x' ? random : (random & 0x3) | 0x8).toString(16);
   });
+}
+
+export async function sendChatMessage(chatId: string, text: string): Promise<BackendMessage> {
+  // Reuse the same key while this exact draft is pending, including after a
+  // timeout where the server may have committed but the response was lost.
+  // Remove only after a canonical success so a later intentional identical
+  // message receives a fresh key.
+  const pendingKey = `${chatId}\u0000${text}`;
+  const idempotencyKey = pendingMessageKeys.get(pendingKey) || createMessageIdempotencyKey();
+  pendingMessageKeys.set(pendingKey, idempotencyKey);
+  const persisted = await chatFetch<BackendMessage>(`/api/chat/${chatId}/message`, {
+    method: 'POST',
+    headers: { 'Idempotency-Key': idempotencyKey },
+    body: JSON.stringify({ content: text, idempotencyKey }),
+  });
+  if (!persisted || typeof persisted.id !== 'string' || !persisted.id || typeof persisted.createdAt !== 'string' || !persisted.createdAt) {
+    throw new ChatApiError('The server did not confirm the saved message. Refresh the conversation before retrying.', 'server', 502);
+  }
+  pendingMessageKeys.delete(pendingKey);
+  return persisted;
 }
 
 /** POST /api/chat/:chatId/seen - mark a real conversation's messages as read. */

@@ -158,13 +158,13 @@ export const protect = async (req, res, next) => {
     // ✅ ATTACH USER (WITH OWNER BYPASS)
     // =============================
     // 🔄 Update lastActive (fire-and-forget)
-    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch((e) =>
+    User.findByIdAndUpdate(user._id ?? user.id, { lastActive: new Date() }).catch((e) =>
       logWarn("lastActive update failed", { error: e.message }),
     );
 
     const isOwner = isOwnerEmail(user.email);
     req.user = {
-      id: user._id.toString(),
+      id: String(user._id ?? user.id),
       role: isOwner ? "superadmin" : user.role,
       effectiveRole: isOwner ? "webhoist" : user.role,
       name: user.name,
@@ -176,7 +176,7 @@ export const protect = async (req, res, next) => {
 
     next();
   } catch (err) {
-    logError("AUTH ERROR", { error: err.message });
+    logError("AUTH ERROR", err);
 
     return res.status(401).json({
       success: false,
@@ -302,7 +302,7 @@ export const optionalAuth = async (req, res, next) => {
     if (user && !user.isBanned && !user.deactivatedAt) {
       const isOwner = isOwnerEmail(user.email);
       req.user = {
-        id: user._id.toString(),
+        id: String(user._id ?? user.id),
         role: isOwner ? "superadmin" : user.role,
       };
     }

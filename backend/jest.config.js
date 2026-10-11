@@ -19,6 +19,8 @@ export default {
     "tests/sessionStoreAvailability\\.test\\.js$",
     "tests/socketRuntimeSafety\\.test\\.js$",
     "tests/response-lifecycle\\.test\\.js$",
+    // node:test file (opt-in, needs a disposable database): run with `npm run test:chat-integrity`.
+    "tests/integration/chat-message-integrity\\.integration\\.test\\.js$",
   ],
   // Coverage instrumentation is not reliable with this native ESM/Jest setup.
   // Keep it opt-in via test:coverage instead of making npm test fail on bogus 0% data.
