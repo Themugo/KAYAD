@@ -247,9 +247,9 @@ export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSelle
   if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-sm text-[#64748B] mb-4">Sign in to list and manage your own vehicles.</p>
+        <p className="text-sm text-[#64748B] mb-4">Create a seller account to list and manage your own vehicles.</p>
         <button onClick={onOpenAuth} className="bg-[#176B87] text-white text-xs font-bold rounded-lg px-5 py-2.5">
-          Sign In
+          Get Started
         </button>
       </div>
     );
