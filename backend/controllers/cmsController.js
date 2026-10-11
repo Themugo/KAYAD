@@ -430,7 +430,7 @@ export async function getFaqById(req, res) {
 }
 
 export async function createFaq(req, res) {
-  const { question, answer, category, order, relatedQuestions } = req.body;
+  const { question, answer, category, order, relatedQuestions, nextStep } = req.body;
 
   const faq = await CMSFaq.create({
     question,
@@ -439,6 +439,7 @@ export async function createFaq(req, res) {
     order: order || 0,
     popularity: 0,
     relatedQuestions: relatedQuestions || [],
+    nextStep: nextStep || null,
     createdBy: req.user?.id,
     updatedBy: req.user?.id
   });
@@ -448,14 +449,22 @@ export async function createFaq(req, res) {
 
 export async function updateFaq(req, res) {
   const { id } = req.params;
-  const { question, answer, category, order, relatedQuestions } = req.body;
+  const existing = await CMSFaq.findById(id);
+  if (!existing) {
+    return res.status(404).json({ error: "FAQ not found" });
+  }
+  // Partial update: keep whatever the caller did not send, rather than
+  // nulling it out (the adapter's $set applies exactly the keys given).
+  const { question, answer, category, order, relatedQuestions, nextStep } = req.body;
+  const patch = { updatedBy: req.user?.id };
+  if (question !== undefined) patch.question = question;
+  if (answer !== undefined) patch.answer = answer;
+  if (category !== undefined) patch.category = category;
+  if (order !== undefined) patch.order = order;
+  if (relatedQuestions !== undefined) patch.relatedQuestions = relatedQuestions;
+  if (nextStep !== undefined) patch.nextStep = nextStep;
 
-  const faq = await CMSFaq.findByIdAndUpdate(id, {
-    $set: {
-      question, answer, category, order, relatedQuestions,
-      updatedBy: req.user?.id
-    }
-  });
+  const faq = await CMSFaq.findByIdAndUpdate(id, { $set: patch });
 
   res.json(faq);
 }
