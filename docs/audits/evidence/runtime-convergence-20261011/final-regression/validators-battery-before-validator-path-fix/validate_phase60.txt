@@ -1,0 +1,18 @@
+
+> kayad@0.0.0 validate:phase60
+> node scripts/validate-phase60.mjs
+
+PASS: package identity remains KAYAD
+PASS: package-lock identity remains synchronized
+PASS: Phase 60 validator is exposed as an npm script
+PASS: frontend contract uses actual Vite API variable
+PASS: frontend contract documents Socket.IO browser settings
+PASS: deployment validator does not require stale frontend scaffold variables
+PASS: deployment validator reads frontend contract from .env.example
+PASS: deployment validator treats relative browser API URL as non-probeable
+PASS: deployment validator uses real Git porcelain status
+PASS: deployment validator does not demand vercel env secrets in vercel.json
+PASS: pre-deploy script uses repository Node 22 contract
+PASS: Phase 59 validator remains present
+
+Phase 60 validation: 12/12 checks passed.

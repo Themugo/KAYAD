@@ -12,7 +12,7 @@ export const sendSMS = async (phone, message) => {
     return result;
   } catch (err) {
     recordMetric("sms_send_duration", Date.now() - startTime, { status: "error" });
-    incrementCounter("sms_send_failure", { error_type: err.code || "unknown" });
+    incrementCounter("sms_send_failure", 1, { error_type: err.code || "unknown" });
     logError("SMS FAILED", err, { phone, error: err.message });
     throw err;
   }

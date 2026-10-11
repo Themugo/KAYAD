@@ -1,0 +1,22 @@
+
+> kayad@0.0.0 validate:phase7-security-release
+> node scripts/validate-phase7-security-release.mjs
+
+===== KAYAD PHASE 7 SECURITY RELEASE CERTIFICATION =====
+PASS | Production environment contract hardening
+PASS | Managed Redis production fail-closed
+PASS | Public health error redaction
+PASS | Readiness detail redaction
+PASS | Security headers
+PASS | CORS allowlist
+PASS | CSRF protection
+PASS | Rate limiting
+PASS | Authorization middleware
+PASS | Live readiness endpoints
+PASS | Secrets excluded from source control
+PASS | No obvious private-key material
+PASS | Production owner contract
+PASS | Backup tooling present
+PASS | Phase 6 live certification retained
+
+RESULT: 15/15 PASS

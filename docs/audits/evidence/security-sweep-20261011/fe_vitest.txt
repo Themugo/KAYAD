@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /home/claude/msg/f3/KAYAD-main
+
+
+ Test Files  78 passed (78)
+      Tests  622 passed | 1 skipped (623)
+   Start at  12:45:38
+   Duration  122.44s (transform 4.06s, setup 8.43s, import 11.80s, tests 34.83s, environment 54.56s)
+
+exit=0

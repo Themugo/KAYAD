@@ -1,0 +1,12 @@
+
+> kayad@0.0.0 validate:socket-contract
+> node scripts/validate-socket-contract.mjs
+
+PASS auction join
+PASS auction leave
+PASS private chat authorization
+PASS showroom join
+PASS user room
+PASS auction emits
+PASS browser Socket.IO
+Socket contract validation: PASS

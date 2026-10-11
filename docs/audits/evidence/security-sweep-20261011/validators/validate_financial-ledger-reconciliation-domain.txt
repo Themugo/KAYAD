@@ -1,0 +1,19 @@
+
+> kayad@0.0.0 validate:financial-ledger-reconciliation-domain
+> node scripts/validate-financial-ledger-reconciliation-domain.mjs
+
+PASS canonical atomic ledger posting
+PASS canonical atomic reversal
+PASS ledger integrity verifier exists
+PASS reconciliation service uses canonical persistence adapter
+PASS report issue persistence is represented in service
+PASS report resolution endpoint is represented
+PASS reconciliation reports use canonical schema fields
+PASS reconciliation persistence migration exists
+PASS reconciliation records persistence exists
+PASS reconciliation RLS is enabled
+PASS anonymous/authenticated financial report access revoked
+PASS legacy transaction ledger route removed
+PASS legacy TransactionLedger model removed
+
+13/13 PASS

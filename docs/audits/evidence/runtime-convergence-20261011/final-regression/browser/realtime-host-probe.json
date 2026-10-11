@@ -1,0 +1,84 @@
+[
+  {
+    "variant": "CROSS-HOST (app.kayad.test -> api.kayad.test)",
+    "socketConnected": true,
+    "sendStatus": 201,
+    "receivedNotification": true,
+    "receivedNewMessage": true,
+    "serverSaidAuthenticated": true,
+    "socketTicketRequests": [
+      "POST",
+      "status 200"
+    ],
+    "ticketEverInAUrl": false,
+    "cookiesTheBrowserWouldSendToSocketHost": [],
+    "socketRequests": [
+      {
+        "url": "http://api.kayad.test:5070/socket.io/socket.io.js",
+        "cookieSent": false
+      },
+      {
+        "url": "ws://api.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true,
+        "closed": true
+      },
+      {
+        "url": "ws://api.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true
+      }
+    ],
+    "serverSocketLog": [
+      "    \u001b[35mcors\u001b[39m: \"http://app.kayad.test:3000\"",
+      "    \u001b[35msocket\u001b[39m: \"ready\"",
+      "    \u001b[35murl\u001b[39m: \"/api/realtime/socket-ticket\"",
+      "\u001b[0mPOST /api/realtime/socket-ticket \u001b[32m200\u001b[0m 36.585 ms - 376\u001b[0m",
+      "    \u001b[35murl\u001b[39m: \"/api/realtime/socket-ticket\""
+    ]
+  },
+  {
+    "variant": "SAME-HOST (app.kayad.test -> app.kayad.test:5070)",
+    "socketConnected": true,
+    "sendStatus": 201,
+    "receivedNotification": true,
+    "receivedNewMessage": true,
+    "serverSaidAuthenticated": true,
+    "socketTicketRequests": [
+      "POST",
+      "status 200"
+    ],
+    "ticketEverInAUrl": false,
+    "cookiesTheBrowserWouldSendToSocketHost": [
+      "token",
+      "XSRF-TOKEN"
+    ],
+    "socketRequests": [
+      {
+        "url": "http://app.kayad.test:5070/socket.io/socket.io.js",
+        "cookieSent": false
+      },
+      {
+        "url": "ws://app.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true,
+        "error": "WebSocket is closed before the connection is established.",
+        "closed": true
+      },
+      {
+        "console": "WebSocket connection to 'ws://app.kayad.test:5070/socket.io/?EIO=4&transport=websocket' failed: WebSocket is closed before the connection is established."
+      },
+      {
+        "url": "ws://app.kayad.test:5070/socket.io/?EIO=4&transport=websocket",
+        "websocket": true
+      }
+    ],
+    "serverSocketLog": [
+      "    \u001b[35mcors\u001b[39m: \"http://app.kayad.test:3000\"",
+      "    \u001b[35msocket\u001b[39m: \"ready\"",
+      "    \u001b[35murl\u001b[39m: \"/api/realtime/socket-ticket\"",
+      "\u001b[0mPOST /api/realtime/socket-ticket \u001b[32m200\u001b[0m 36.585 ms - 376\u001b[0m",
+      "    \u001b[35murl\u001b[39m: \"/api/realtime/socket-ticket\"",
+      "    \u001b[35murl\u001b[39m: \"/api/realtime/socket-ticket\"",
+      "\u001b[0mPOST /api/realtime/socket-ticket \u001b[32m200\u001b[0m 7.157 ms - 376\u001b[0m",
+      "    \u001b[35murl\u001b[39m: \"/api/realtime/socket-ticket\""
+    ]
+  }
+]

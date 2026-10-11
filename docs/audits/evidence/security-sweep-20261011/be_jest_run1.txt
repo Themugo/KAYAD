@@ -1,0 +1,77 @@
+
+> kayad-backend@2.0.0 test:jest
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --passWithNoTests
+
+(node:5445) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "⚠️ Welcome email dispatch failed: TypeError: fetch failed".
+
+      339 |       idempotencyKey: `registration-welcome:${user.id}`,
+      340 |     }).catch((e) => {
+    > 341 |       console.warn("⚠️ Welcome email dispatch failed:", e.message);
+          |               ^
+      342 |     });
+      343 |
+      344 |     return res.status(201).json({
+
+      at console.warn (node_modules/@jest/console/build/index.js:173:10)
+      at controllers/authController.js:341:15
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "⚠️ Verification email dispatch failed: TypeError: fetch failed".
+
+      300 |     // rate limited and generic by design.
+      301 |     void deliver(verificationPayload).catch((e) => {
+    > 302 |       console.warn("⚠️ Verification email dispatch failed:", e.message);
+          |               ^
+      303 |     });
+      304 |
+      305 |     if (role === "dealer" || role === "individual_seller") {
+
+      at console.warn (node_modules/@jest/console/build/index.js:173:10)
+      at controllers/authController.js:302:15
+
+
+Test Suites: 75 passed, 75 total
+Tests:       1090 passed, 1090 total
+Snapshots:   0 total
+Time:        49.6 s
+Ran all test suites.
+
+Jest has detected the following 2 open handles potentially keeping Jest from exiting:
+
+  ●  Timeout
+
+      272 |         fn(),
+      273 |         new Promise((_, reject) => {
+    > 274 |           setTimeout(() => {
+          |           ^
+      275 |             const timeoutError = new Error(`Operation timeout after ${timeoutMs}ms`);
+      276 |             timeoutError.code = "TIMEOUT";
+      277 |             timeoutError.service = serviceName || key;
+
+      at utils/retry.js:274:11
+      at attemptWithTimeout (utils/retry.js:273:9)
+      at withRetry (utils/retry.js:227:26)
+      at Object.<anonymous> (tests/resilience/failureModes.test.js:270:7)
+
+
+  ●  Timeout
+
+      272 |         fn(),
+      273 |         new Promise((_, reject) => {
+    > 274 |           setTimeout(() => {
+          |           ^
+      275 |             const timeoutError = new Error(`Operation timeout after ${timeoutMs}ms`);
+      276 |             timeoutError.code = "TIMEOUT";
+      277 |             timeoutError.service = serviceName || key;
+
+      at utils/retry.js:274:11
+      at attemptWithTimeout (utils/retry.js:273:9)
+      at withRetry (utils/retry.js:227:26)
+      at Object.<anonymous> (tests/resilience/failureModes.test.js:288:26)
+
+exit=0

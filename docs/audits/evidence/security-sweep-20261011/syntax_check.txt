@@ -1,0 +1,11 @@
+ok backend/server.js
+ok backend/controllers/chatController.js
+ok backend/services/chatAttachments.js
+ok backend/services/chatOutbox.service.js
+ok backend/routes/chatRoutes.js
+ok backend/routes/uploadRoutes.js
+ok backend/routes/adminRoutes.js
+ok backend/routes/configurationRoutes.js
+ok backend/middleware/upload.js
+ok backend/validation/chat.schema.js
+ok backend/scripts/migrate-chat-attachments-private.mjs

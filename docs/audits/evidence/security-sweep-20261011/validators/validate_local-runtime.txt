@@ -1,0 +1,6 @@
+
+> kayad@0.0.0 validate:local-runtime
+> node scripts/validate-local-runtime.mjs
+
+PASS local runtime startup/health/degraded API contract
+{"live":200,"health":200,"ready":503,"cars":503}

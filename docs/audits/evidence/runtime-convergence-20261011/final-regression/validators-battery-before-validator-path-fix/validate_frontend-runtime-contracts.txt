@@ -1,0 +1,21 @@
+
+> kayad@0.0.0 validate:frontend-runtime-contracts
+> node scripts/validate-frontend-runtime-contracts.mjs
+
+PASS Vercel routing
+PASS browser realtime transport
+PASS browser Supabase removed
+PASS Phase 22 frontend transport convergence
+PASS Phase 22 canonical API surface
+file:///home/claude/msg/p2/work/KAYAD-main/scripts/validate-frontend-runtime-contracts.mjs:1
+import fs from 'node:fs'; import path from 'node:path'; const root=process.cwd(); const read=p=>fs.readFileSync(path.join(root,p),'utf8'); const pass=m=>console.log(`PASS ${m}`); const fail=m=>{throw new Error(`FAIL ${m}`)}; const v=JSON.parse(read('vercel.json')); const s=read('src/context/SocketContext.tsx'); const p=JSON.parse(read('package.json')); if(v.rewrites?.[0]?.source!='/api/:path*'||v.rewrites?.[0]?.destination!=='https://api.kayad.space/api/:path*'||v.rewrites?.[1]?.destination!='/index.html')fail('Vercel routing'); pass('Vercel routing'); if(s.includes('supabaseClient')||s.includes('@supabase/supabase-js')||!s.includes('/socket.io/socket.io.js')||!s.includes('withCredentials:true'))fail('browser realtime transport'); pass('browser realtime transport'); if(fs.existsSync(path.join(root,'src/lib/supabaseClient.ts'))||fs.existsSync(path.join(root,'src/lib/supabaseClient.js'))||p.dependencies?.['@supabase/supabase-js'])fail('browser Supabase duplicate'); pass('browser Supabase removed'); const phase=read('src/features/InspectionMarketplace/services/api.ts'); if(phase.includes('/api/phase22')||phase.includes('phase22InspectionApi'))fail('Phase 22 frontend transport convergence'); pass('Phase 22 frontend transport convergence'); if(!phase.includes('/api/v1/phase22/providers/register')||!phase.includes('/api/v1/phase22/reports/')||!phase.includes('/api/inspection/bookings/${bookingId}/payment/initiate'))fail('Phase 22 canonical API surface'); pass('Phase 22 canonical API surface'); const srv=read('backend/server.js'); if(!srv.includes('handshake.headers?.cookie')||!srv.includes('joinAuction')||!srv.includes('joinChat')||!srv.includes('joinShowroom'))fail('socket server room contract'); pass('socket server room contract'); console.log('Frontend runtime contract validation: PASS');
+                                                                                                                                                                                                        ^
+
+Error: FAIL socket server room contract
+    at fail (file:///home/claude/msg/p2/work/KAYAD-main/scripts/validate-frontend-runtime-contracts.mjs:1:201)
+    at file:///home/claude/msg/p2/work/KAYAD-main/scripts/validate-frontend-runtime-contracts.mjs:1:1685
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.2

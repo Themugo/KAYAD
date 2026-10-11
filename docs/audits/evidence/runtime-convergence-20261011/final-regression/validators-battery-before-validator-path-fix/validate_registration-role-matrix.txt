@@ -1,0 +1,39 @@
+
+> kayad@0.0.0 validate:registration-role-matrix
+> node scripts/validate-registration-role-matrix.mjs
+
+PASS staff and broker roles are never offered on the public matrix
+PASS buyer UI role exists
+PASS private seller UI role exists
+PASS dealer UI role exists
+PASS buyer maps to canonical backend user role
+PASS private seller maps to canonical individual_seller role
+PASS dealer maps to canonical dealer role
+PASS backend schema accepts all three public roles
+PASS dealer requires business name client-side
+PASS dealer requires location client-side
+PASS dealer requires business name server-side
+PASS dealer requires location server-side
+PASS private seller business fields remain optional
+PASS backend preserves seller role instead of silently converting it
+PASS buyer registration creates approved user status
+PASS seller registration remains pending for platform verification
+PASS registration creates user record
+PASS registration creates credential record
+PASS registration identity writes are transactionally atomic
+PASS verification delivery is non-blocking after atomic registration
+PASS welcome delivery is non-blocking
+PASS registration returns 201
+PASS registration uses atomic database identity function
+PASS dealer registration provisions dealer domain record
+PASS inspector application table exists in migration chain
+PASS registration does not issue an authenticated session
+PASS registration route uses canonical auth endpoint
+PASS frontend uses canonical auth service
+PASS state-changing requests bootstrap CSRF
+PASS CSRF endpoint remains canonical
+PASS auth response contract accepts created user
+PASS private seller completion messaging is distinct
+PASS dealer completion messaging is distinct
+
+Registration role matrix: 33/33 PASS

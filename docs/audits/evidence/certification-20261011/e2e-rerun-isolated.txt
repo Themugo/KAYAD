@@ -1,0 +1,73 @@
+# Full repository e2e rerun on the final tree (alone, no concurrent jobs), Node 22.22.2, chromium, no backend
+  ✘   1 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer registration uses the canonical auth contract (11.8s)
+  ✘   2 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding › dealer registration requires and sends business fields (11.9s)
+  ✘   3 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding › private seller registration uses individual_seller (11.9s)
+  ✘   4 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboarding › inspector application uses the dedicated application endpoint (11.8s)
+  ✘   5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid (12.1s)
+  ✘   6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls — browser interaction certification › grid responds honestly across mobile, tablet and desktop breakpoints (12.3s)
+  ✓   7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls — browser interaction certification › desktop sidebar dropdowns remain populated and send their real backend query parameters (3.7s)
+  ✓   8 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls — browser interaction certification › show/page-size and grid/list controls update the live inventory state (2.9s)
+  ✘   9 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls — browser interaction certification › mobile filter drawer exposes working selectors and closes cleanly (1.8s)
+  ✓  10 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace controls — browser interaction certification › hero search dropdowns remain functional and drive the real filter state (2.3s)
+  ✘  11 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls — browser interaction certification › admin escrow dropdowns have stable accessible controls (12.4s)
+  ✘  12 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification — environment evidence › frontend build serves and renders the marketplace shell (buyer browsing) (7.0s)
+  ✘  13 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification — environment evidence › auth surface renders (registration/login entry points) (7.1s)
+  ✘  14 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification — environment evidence › marketplace navigation switches views without errors (browsing ↔ auctions) (12.2s)
+  ✓  15 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:66:3 › Workflow certification — environment evidence › SPA deep link does not 404 and renders the shell (session/bookmark restoration surface) (1.8s)
+  ✓  16 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:73:3 › Workflow certification — environment evidence › unknown deep link does not crash the app (invalid input at routing level) (3.2s)
+  ✘  17 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification — environment evidence › refresh preserves the shell (browser refresh recovery) (7.9s)
+  ✘  18 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification — environment evidence › network failure: API unreachable does not crash the app or fabricate data (32.3s)
+  ✘  19 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certification — environment evidence › mobile viewport renders the shell without breaking (responsive build) (7.0s)
+    test-results/dealer-onboarding-dealer-o-e18d0-the-canonical-auth-contract-chromium/test-failed-1.png
+    test-results/dealer-onboarding-dealer-o-9626b-s-and-sends-business-fields-chromium/test-failed-1.png
+    test-results/dealer-onboarding-dealer-o-61d4c-tion-uses-individual-seller-chromium/test-failed-1.png
+    test-results/dealer-onboarding-dealer-o-bf33a-icated-application-endpoint-chromium/test-failed-1.png
+    test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/test-failed-1.png
+    test-results/marketplace-controls-marke-eaefc-let-and-desktop-breakpoints-chromium/test-failed-1.png
+    Error: expect(locator).toBeVisible() failed
+    test-results/marketplace-controls-marke-ecf1d-electors-and-closes-cleanly-chromium/test-failed-1.png
+    test-results/marketplace-controls-marke-80f32--stable-accessible-controls-chromium/test-failed-1.png
+    Error: expect(locator).toBeVisible() failed
+    test-results/workflow-certification-wor-cd051-place-shell-buyer-browsing--chromium/test-failed-1.png
+    Error: expect(locator).toBeVisible() failed
+    test-results/workflow-certification-wor-d6afb-tration-login-entry-points--chromium/test-failed-1.png
+    test-results/workflow-certification-wor-38c59-errors-browsing-↔-auctions--chromium/test-failed-1.png
+    Error: expect(locator).toBeVisible() failed
+    test-results/workflow-certification-wor-7a44d-l-browser-refresh-recovery--chromium/test-failed-1.png
+    test-results/workflow-certification-wor-b2512-h-the-app-or-fabricate-data-chromium/test-failed-1.png
+    Error: expect(locator).toBeVisible() failed
+    test-results/workflow-certification-wor-d937c--breaking-responsive-build--chromium/test-failed-1.png
+  14 failed
+  5 passed (3.2m)
+
+# marketplace-controls spec, foundation tree vs final tree, back-to-back
+## foundation
+  ✘  1 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid (12.9s)
+  ✘  2 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls — browser interaction certification › grid responds honestly across mobile, tablet and desktop breakpoints (12.6s)
+  ✓  3 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls — browser interaction certification › desktop sidebar dropdowns remain populated and send their real backend query parameters (4.6s)
+  ✓  4 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls — browser interaction certification › show/page-size and grid/list controls update the live inventory state (3.0s)
+  ✘  5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls — browser interaction certification › mobile filter drawer exposes working selectors and closes cleanly (1.8s)
+  ✓  6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace controls — browser interaction certification › hero search dropdowns remain functional and drive the real filter state (2.5s)
+  ✘  7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls — browser interaction certification › admin escrow dropdowns have stable accessible controls (12.1s)
+    test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/test-failed-1.png
+    test-results/marketplace-controls-marke-eaefc-let-and-desktop-breakpoints-chromium/test-failed-1.png
+    Error: expect(locator).toBeVisible() failed
+    test-results/marketplace-controls-marke-ecf1d-electors-and-closes-cleanly-chromium/test-failed-1.png
+    test-results/marketplace-controls-marke-80f32--stable-accessible-controls-chromium/test-failed-1.png
+  4 failed
+  3 passed (57.9s)
+## final
+  ✘  1 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid (13.9s)
+  ✘  2 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls — browser interaction certification › grid responds honestly across mobile, tablet and desktop breakpoints (12.4s)
+  ✓  3 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls — browser interaction certification › desktop sidebar dropdowns remain populated and send their real backend query parameters (3.8s)
+  ✓  4 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls — browser interaction certification › show/page-size and grid/list controls update the live inventory state (3.3s)
+  ✘  5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls — browser interaction certification › mobile filter drawer exposes working selectors and closes cleanly (1.7s)
+  ✓  6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace controls — browser interaction certification › hero search dropdowns remain functional and drive the real filter state (2.5s)
+  ✘  7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace controls — browser interaction certification › admin escrow dropdowns have stable accessible controls (12.0s)
+    test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/test-failed-1.png
+    test-results/marketplace-controls-marke-eaefc-let-and-desktop-breakpoints-chromium/test-failed-1.png
+    Error: expect(locator).toBeVisible() failed
+    test-results/marketplace-controls-marke-ecf1d-electors-and-closes-cleanly-chromium/test-failed-1.png
+    test-results/marketplace-controls-marke-80f32--stable-accessible-controls-chromium/test-failed-1.png
+  4 failed
+  3 passed (59.7s)

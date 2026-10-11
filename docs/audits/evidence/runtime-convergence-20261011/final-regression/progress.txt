@@ -1,0 +1,31 @@
+== chains built 18:50:49
+== validate_supabase_migrations start 18:50:49 :: node scripts/validate-supabase-migrations.mjs
+== validate_supabase_migrations done exit=0
+== tsc start 18:50:49 :: npx tsc --noEmit
+== tsc done exit=0
+== vite_build start 18:51:24 :: npx vite build --outDir /home/claude/msg/p2/battery/dist
+== vite_build done exit=0
+== fe_vitest start 18:51:27 :: npx vitest run
+== fe_vitest done exit=0
+== be_jest start 18:53:48 :: npm run test:jest
+== be_jest done exit=0
+== be_vitest start 18:54:43 :: npm run test:vitest
+== be_vitest done exit=0
+== be_node start 18:54:49 :: npm run test:node
+== be_node done exit=0
+== be_chat_integrity start 18:54:50 :: npm run test:chat-integrity
+== be_chat_integrity done exit=0
+== harness start 18:54:52 :: env KAYAD_TEST_DB=k9_main KAYAD_RLS_DB=k9_main node --test --test-concurrency=1 tests/m10-rls-supabase-defaults.test.mjs tests/m11-schema-drift-fixes.test.mjs tests/m12-legacy-attachment-inventory.test.mjs tests/m13-auction-security-payments.test.mjs tests/m14-realtime-socket-ticket.test.mjs tests/m15-financial-operational-integrity.test.mjs tests/m2-foundation-chat-integrity.test.mjs tests/m2-idempotency.test.mjs tests/m3-receipts-realtime.test.mjs tests/m4-login-session-flow.test.mjs tests/m5-authz-sweep.test.mjs tests/m5-financial-webhooks.test.mjs tests/m5-ownership.test.mjs tests/m5-rls-privileges.test.mjs tests/m6-chat-attachments.test.mjs tests/m7-socket-authz.test.mjs tests/m8-chat-outbox.test.mjs tests/m8b-outbox-failure-modes.test.mjs tests/m9-config-authz.test.mjs tests/p0-auth-infra-failure.test.mjs
+== harness done exit=1
+== validators done 18:58:34
+== route_schema_crawl start 18:58:34 :: env KAYAD_TEST_DB=k9_crawl node tools/route-schema-crawl.mjs /home/claude/msg/p2/work/KAYAD-main/docs/audits/evidence/runtime-convergence-20261011/final-regression/schema/route-schema-crawl.json 45000
+== route_schema_crawl done exit=0
+== matrix_prod start 19:00:15 :: env PROD=1 DIST=/home/claude/msg/p2/battery/dist KAYAD_TEST_DB=k9_mx LABEL=after node browser/p0-matrix.mjs /home/claude/msg/p2/work/KAYAD-main/docs/audits/evidence/runtime-convergence-20261011/final-regression/browser/matrix-prod.json
+== matrix_prod done exit=0
+== matrix_dev start 19:02:46 :: env KAYAD_TEST_DB=k9_mx LABEL=after node browser/p0-matrix.mjs /home/claude/msg/p2/work/KAYAD-main/docs/audits/evidence/runtime-convergence-20261011/final-regression/browser/matrix-dev.json
+== matrix_dev done exit=0
+== realtime_host_probe start 19:05:36 :: env KAYAD_TEST_DB=k9_probe node browser/realtime-host-probe.mjs /home/claude/msg/p2/work/KAYAD-main/docs/audits/evidence/runtime-convergence-20261011/final-regression/browser/realtime-host-probe.json /home/claude/msg/p2/battery/dist-crosshost /home/claude/msg/p2/battery/dist-samehost
+== realtime_host_probe done exit=0
+== e2e start 19:05:46 :: timeout 900 npx playwright test --config playwright.local.config.ts --project chromium
+== e2e done exit=1
+== ALL DONE 19:09:43

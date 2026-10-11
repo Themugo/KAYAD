@@ -405,6 +405,7 @@ router.get(
   validateObjectId,
   asyncHandler(async (req, res) => {
     const car = await findById("cars", req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     let score = 0;
 

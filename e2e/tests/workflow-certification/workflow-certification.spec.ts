@@ -32,11 +32,11 @@ test.describe('Workflow certification — environment evidence', () => {
   test('frontend build serves and renders the marketplace shell (buyer browsing)', async ({ page }) => {
     await page.goto('/');
     await waitForAppShell(page);
-    await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+    await expect(page.getByLabel('KAYAD marketplace').first()).toBeVisible();
     // Navigation surface for the buyer workflows (exact match: the brand
     // logo button also contains the word "Marketplace")
-    await expect(page.getByRole('button', { name: 'Marketplace', exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Auctions', exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Marketplace', exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Auction', exact: true }).first()).toBeVisible();
     // Region selector is part of the browsing workflow
     await expect(page.locator('text=All East Africa').first()).toBeVisible();
   });
@@ -44,7 +44,7 @@ test.describe('Workflow certification — environment evidence', () => {
   test('auth surface renders (registration/login entry points)', async ({ page }) => {
     await page.goto('/');
     await waitForAppShell(page);
-    await expect(page.getByRole('button', { name: 'Sign In', exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign In / Sign Up', exact: true }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sell Vehicle', exact: true }).first()).toBeVisible();
   });
 
@@ -53,12 +53,12 @@ test.describe('Workflow certification — environment evidence', () => {
     page.on('pageerror', (e: Error) => errors.push(String(e)));
     await page.goto('/');
     await waitForAppShell(page);
-    await page.getByRole('button', { name: 'Auctions', exact: true }).first().click();
+    await page.getByRole('link', { name: 'Auction', exact: true }).first().click();
     await page.waitForTimeout(1000);
     await expect(page.locator('body')).not.toBeEmpty();
-    await page.getByRole('button', { name: 'Marketplace', exact: true }).first().click();
+    await page.getByRole('link', { name: 'Marketplace', exact: true }).first().click();
     await page.waitForTimeout(1000);
-    await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+    await expect(page.getByLabel('KAYAD marketplace').first()).toBeVisible();
     // No uncaught client errors from the navigation
     expect(errors.filter((e) => !e.includes('favicon'))).toEqual([]);
   });
@@ -83,12 +83,14 @@ test.describe('Workflow certification — environment evidence', () => {
     await waitForAppShell(page);
     await page.reload();
     await waitForAppShell(page);
-    await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+    await expect(page.getByLabel('KAYAD marketplace').first()).toBeVisible();
   });
 
   test('network failure: API unreachable does not crash the app or fabricate data', async ({ page }) => {
     // Block every API call — simulates backend/network down.
-    await page.route('**/api/**', (route) => route.abort());
+    // Only real API calls: under `vite dev` the glob '**/api/**' also matched the app's own modules (/src/api/*.ts),
+    // so the shell could never load and the test measured the harness, not the app.
+    await page.route((url) => url.pathname.startsWith('/api/'), (route) => route.abort());
     const errors: string[] = [];
     page.on('pageerror', (e: Error) => errors.push(String(e)));
     await page.goto('/');
@@ -96,7 +98,7 @@ test.describe('Workflow certification — environment evidence', () => {
     // Shell still renders; no crash. (Catalog data is served from the
     // frontend's bundled initial dataset, not a live API — no silent
     // mock-after-real-failure switch is possible here.)
-    await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+    await expect(page.getByLabel('KAYAD marketplace').first()).toBeVisible();
     expect(errors).toEqual([]);
   });
 
@@ -104,6 +106,6 @@ test.describe('Workflow certification — environment evidence', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
     await waitForAppShell(page);
-    await expect(page.locator('text=KAYAD EA').first()).toBeVisible();
+    await expect(page.getByLabel('KAYAD marketplace').first()).toBeVisible();
   });
 });

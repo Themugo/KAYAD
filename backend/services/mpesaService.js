@@ -141,7 +141,7 @@ const getAccessToken = async (baseUrl, consumerKey, consumerSecret) => {
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("mpesa_token_fetch_duration", duration, { status: "error" });
-    incrementCounter("mpesa_token_fetch_failure", { error_type: err.code || "unknown" });
+    incrementCounter("mpesa_token_fetch_failure", 1, { error_type: err.code || "unknown" });
 
     logError("M-Pesa token fetch failed", err, { baseUrl });
     throw err;
@@ -225,7 +225,7 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("mpesa_stk_push_duration", duration, { status: "error" });
-    incrementCounter("mpesa_stk_push_failure", { error_type: err.code || "unknown" });
+    incrementCounter("mpesa_stk_push_failure", 1, { error_type: err.code || "unknown" });
 
     logError("M-Pesa STK push failed", err, { phone, amount, error: err.message });
 

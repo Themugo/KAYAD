@@ -58,6 +58,8 @@ export const FIELD_ALIASES = {
   // placeBid() controller against a real database.
   bids: {
     user: "user_id",
+    // bids.car_id is the only car column (repository and production). Analytics selected "car" (42703).
+    car: "car_id",
   },
   saved_searches: {
     user: "user_id",
@@ -194,6 +196,30 @@ export const FIELD_ALIASES = {
     disputedBy: "disputedBy",
     refundedBy: "refundedBy",
     releasedBy: "releasedBy",
+    // Added (Supabase reconciliation 2026-10-11, defect SCH-ESCROW-2): remaining real camelCase columns of escrows
+    // (catalog of a full migration replay). Without them the operations dispute queues filtered on non-existent
+    // snake_case columns (dispute_workflow_status, dispute_priority) and failed. Identity aliases only.
+    //
+    // DELIBERATELY NOT ADDED: warningSent. services/escrowCron.js filters on it; today that query fails, which aborts
+    // the whole hourly cron run BEFORE runAutoRelease(). Aliasing it would silently switch on automatic release of every
+    // `delivered` escrow older than 3 days (and mass deadline notifications) on the next deploy. That is a financial
+    // behaviour change requiring an explicit owner decision and a dry-run - see docs/audits/14 (blocker FIN-1).
+    refundedAt: "refundedAt",
+    disputeAppeal: "disputeAppeal",
+    disputeAssignedTo: "disputeAssignedTo",
+    disputeCategory: "disputeCategory",
+    disputeChatId: "disputeChatId",
+    disputeDescription: "disputeDescription",
+    disputeEvidence: "disputeEvidence",
+    disputeInspectionId: "disputeInspectionId",
+    disputeInternalNotes: "disputeInternalNotes",
+    disputeLastActionKey: "disputeLastActionKey",
+    disputeMediation: "disputeMediation",
+    disputePriority: "disputePriority",
+    disputeResolution: "disputeResolution",
+    disputeTimeline: "disputeTimeline",
+    disputeTitle: "disputeTitle",
+    disputeWorkflowStatus: "disputeWorkflowStatus",
   },
   // Fixed (Support page real-data integration): reproduced directly
   // - the real support_tickets table's own owner column is user_id,
@@ -231,6 +257,9 @@ export const FIELD_ALIASES = {
   // a successful payment) tried to create one.
   notifications: {
     user: "user_id",
+    // Added (Supabase reconciliation 2026-10-11, defect SCH-NOTIF-1): the column is `read` (written by
+    // notification.service / notificationController); operations dashboards used `isRead` -> "is_read" (no such column).
+    isRead: "read",
   },
   command_center_widget_layouts: {
     userId: "user_id",
@@ -246,7 +275,9 @@ export const FIELD_ALIASES = {
     updatedAt: "updated_at",
   },
   user_preferences: {
-    user: "user_id",
+    // The column is "user" in every migration and in production (verified 2026-10-11); the former user -> user_id
+    // alias made GET /api/v1/preferences fail with 42703. Identity mapping kept explicit so it is not "fixed" back.
+    user: "user",
   },
   loan_applications: {
     car: "vehicle",

@@ -37,15 +37,17 @@ test.describe('KAYAD canonical onboarding', () => {
       });
     });
 
+    // Shipping OnboardingFlow (identity-onboarding convergence): role cards are radios, the details form follows
+    // directly, and a created account shows the email-verification outcome (no session until verified).
     await page.goto('/register');
-    await page.getByRole('button', { name: 'Buyer', exact: true }).click();
-    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByRole('radio', { name: /^Buyer\b/ }).click();
     await page.getByLabel('Full name').fill('Jane Wanjiru');
-    await page.getByLabel('Email').fill('jane@example.co.ke');
-    await page.getByLabel('Phone').fill('+254712345678');
-    await page.getByLabel('Password').fill('SecurePassword123!');
-    await page.getByRole('button', { name: 'Create Account' }).click();
-    await expect(page.getByText('Welcome to KAYAD')).toBeVisible();
+    await page.getByLabel('Email', { exact: true }).fill('jane@example.co.ke');
+    await page.getByLabel('Phone (optional)').fill('+254712345678');
+    await page.getByLabel('Password', { exact: true }).fill('SecurePassword123!');
+    await page.getByRole('button', { name: 'Create account', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Check your email.' })).toBeVisible();
+    await expect(page.getByText('After you sign in you can start browsing, saving and bidding.')).toBeVisible();
   });
 
   test('dealer registration requires and sends business fields', async ({ page }) => {
@@ -63,16 +65,16 @@ test.describe('KAYAD canonical onboarding', () => {
     });
 
     await page.goto('/register');
-    await page.getByRole('button', { name: 'Dealer', exact: true }).click();
-    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByRole('radio', { name: /^Dealer\b/ }).click();
     await page.getByLabel('Full name').fill('John Dealer');
-    await page.getByLabel('Email').fill('dealer@example.co.ke');
-    await page.getByLabel('Phone').fill('+254712345678');
-    await page.getByLabel('Password').fill('SecurePassword123!');
-    await page.getByLabel('Business name').fill('Auto Motors Ltd');
-    await page.getByLabel('Location / city').fill('Nairobi');
-    await page.getByRole('button', { name: 'Create Account' }).click();
-    await expect(page.getByText('Private seller account created')).toBeVisible();
+    await page.getByLabel('Email', { exact: true }).fill('dealer@example.co.ke');
+    await page.getByLabel('Phone', { exact: true }).fill('+254712345678');
+    await page.getByLabel('Dealership business name').fill('Auto Motors Ltd');
+    await page.getByLabel('City or location').fill('Nairobi');
+    await page.getByLabel('Password', { exact: true }).fill('SecurePassword123!');
+    await page.getByRole('button', { name: 'Create account', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Check your email.' })).toBeVisible();
+    await expect(page.getByText(/Dealer tools stay locked until KAYAD approves it/)).toBeVisible();
   });
 
   test('private seller registration uses individual_seller', async ({ page }) => {
@@ -88,14 +90,14 @@ test.describe('KAYAD canonical onboarding', () => {
     });
 
     await page.goto('/register');
-    await page.getByRole('button', { name: 'Private Seller', exact: true }).click();
-    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByRole('radio', { name: /^Private seller\b/ }).click();
     await page.getByLabel('Full name').fill('Private Seller');
-    await page.getByLabel('Email').fill('seller@example.co.ke');
-    await page.getByLabel('Phone').fill('+254712345678');
-    await page.getByLabel('Password').fill('SecurePassword123!');
-    await page.getByRole('button', { name: 'Create Account' }).click();
-    await expect(page.getByText('Dealer application submitted')).toBeVisible();
+    await page.getByLabel('Email', { exact: true }).fill('seller@example.co.ke');
+    await page.getByLabel('Phone', { exact: true }).fill('+254712345678');
+    await page.getByLabel('Password', { exact: true }).fill('SecurePassword123!');
+    await page.getByRole('button', { name: 'Create account', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Check your email.' })).toBeVisible();
+    await expect(page.getByText(/cannot list a vehicle until KAYAD approves your seller account/)).toBeVisible();
   });
 
   test('inspector application uses the dedicated application endpoint', async ({ page }) => {
@@ -112,17 +114,17 @@ test.describe('KAYAD canonical onboarding', () => {
     });
 
     await page.goto('/register');
-    await page.getByRole('button', { name: 'Inspector', exact: true }).click();
-    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByRole('radio', { name: /^Inspector or mechanic\b/ }).click();
+    await page.getByRole('radio', { name: /^On my own\b/ }).check();
     await page.getByLabel('Full name').fill('Jane Inspector');
-    await page.getByLabel('Email').fill('inspector@example.co.ke');
-    await page.getByLabel('Phone').fill('+254712345678');
-    await page.getByLabel('ID / Passport').fill('12345678');
-    await page.getByLabel('Location').fill('Nairobi');
+    await page.getByLabel('Email', { exact: true }).fill('inspector@example.co.ke');
+    await page.getByLabel('Phone', { exact: true }).fill('+254712345678');
+    await page.getByLabel('National ID or passport number').fill('12345678');
+    await page.getByLabel('City or town').fill('Nairobi');
     await page.getByLabel('Years of experience').fill('5');
-    await page.getByLabel('Specialties (comma separated)').fill('Engine, Brakes');
-    await page.getByRole('button', { name: 'Submit Inspector Application' }).click();
-    await expect(page.getByText('Inspector application received')).toBeVisible();
+    await page.getByLabel('Specialties', { exact: true }).fill('Engine, Brakes');
+    await page.getByRole('button', { name: 'Send application', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Your application is with KAYAD.' })).toBeVisible();
   });
 });
 

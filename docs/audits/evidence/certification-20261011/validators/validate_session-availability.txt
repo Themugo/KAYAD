@@ -1,0 +1,13 @@
+
+> kayad@0.0.0 validate:session-availability
+> node scripts/validate-session-availability.mjs
+
+PASS session store has bounded timeout
+PASS session get is bounded
+PASS session set is bounded
+PASS session destroy is bounded
+PASS health routes precede session middleware
+PASS global limiter remains before CORS
+PASS CSRF still bypasses safe methods
+
+Session availability validation: 7/7 PASS

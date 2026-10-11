@@ -1,0 +1,3 @@
+k5_main: applied=175 failed=0 supabase default privileges: ON
+k5_crawl: applied=175 failed=0 supabase default privileges: ON
+k5_plain: applied=175 failed=0 

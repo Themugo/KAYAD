@@ -10,7 +10,7 @@ import { declareCapabilitySchema, inviteStaffSchema, requestAffiliationSchema, a
 import { requireAuth, optionalAuth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/auth.js';
 import requireProviderOwnership from '../middleware/requireProviderOwnership.js';
-import { validate } from '../../middleware/validate.js';
+import { validate, validateObjectId } from '../../middleware/validate.js';
 import { inspectionPaymentSchema, inspectionPaymentInitiateSchema, inspectionBookingSchema } from '../../validation/phase22.schema.js';
 import { csrfProtection } from '../../middleware/csrf.js';
 import { idempotencyCheck } from '../../middleware/idempotency.js';
@@ -176,7 +176,8 @@ router.post('/order', requireAuth, legacy.createOrder);
 router.post('/confirm-payment', requireAuth, legacy.confirmPayment);
 router.get('/available-inspectors', requireAuth, requireRole(['admin', 'superadmin']), legacy.availableInspectors);
 router.get('/car/:carId', requireAuth, legacy.getByCar);
-router.get('/:id', requireAuth, legacy.getById);
+// Non-UUID ids (e.g. the stale OpenAPI path /my-tasks) are a client error (400), not a database 500.
+router.get('/:id', requireAuth, validateObjectId, legacy.getById);
 router.post('/:id/assign', requireAuth, requireRole(['admin', 'superadmin']), legacy.assign);
 router.post('/:id/start', requireAuth, legacy.start);
 router.post('/:id/submit', requireAuth, legacy.submit);

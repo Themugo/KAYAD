@@ -1,0 +1,8 @@
+200  /api/health
+200  /health
+200  /health/live
+200  /health/ready
+200  /api/v1/auth/csrf
+401  /health/deep
+401  /api/config/stats
+401  /api/chat/00000000-0000-4000-8000-000000000000/attachments/00000000-0000-4000-8000-000000000001

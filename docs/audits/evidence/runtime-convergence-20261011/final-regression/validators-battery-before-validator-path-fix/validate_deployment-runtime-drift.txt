@@ -1,0 +1,22 @@
+
+> kayad@0.0.0 validate:deployment-runtime-drift
+> node scripts/validate-deployment-runtime-drift.mjs
+
+PASS exact Node 22.22.2 contract is consistent
+PASS Render production leaves PORT to Render runtime
+PASS Render staging leaves PORT to Render runtime
+PASS backend binds 0.0.0.0 and reads PORT
+PASS backend Docker entrypoint is bootstrap
+PASS backend Docker advertises Render default HTTP port
+PASS local Compose keeps an explicit 5000 mapping
+PASS Compose healthcheck does not depend on curl being installed
+PASS Render Key Value wiring uses modern keyvalue type
+PASS staging email provider is Brevo-only
+PASS runtime build identity uses Render's documented commit variable
+PASS health exposes runtime build identity
+PASS runtime identity response headers are emitted
+PASS production verifier accepts the backend's real health status
+PASS production verifier checks runtime build identity
+PASS Vercel proxies /api before SPA fallback
+PASS Vercel uses npm ci
+Deployment/runtime drift validation passed: 17/17

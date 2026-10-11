@@ -3469,6 +3469,37 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/chat/{chatId}/attachments/{uploadId}:
+    get:
+      tags:
+      - Api
+      summary: GET /api/chat/{chatId}/attachments/{uploadId}
+      description: 'Route contract: GET /api/chat/{chatId}/attachments/{uploadId}'
+      operationId: getApiChatChatidAttachmentsUploadid
+      parameters:
+      - name: chatId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: uploadId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '302':
+          description: Redirect to a short-lived authenticated download
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found (or not a participant)
+        '423':
+          description: Conversation blocked
+        '500':
+          description: Internal server error
   /api/chat/{chatId}/message:
     post:
       tags:

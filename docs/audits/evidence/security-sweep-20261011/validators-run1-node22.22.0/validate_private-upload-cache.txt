@@ -1,0 +1,8 @@
+
+> kayad@0.0.0 validate:private-upload-cache
+> node scripts/validate-private-upload-cache.mjs
+
+PASS private uploads use non-cacheable response headers
+PASS private upload access is authorization checked before content delivery
+PASS public uploads retain long-lived immutable caching
+Private upload cache validation: PASS

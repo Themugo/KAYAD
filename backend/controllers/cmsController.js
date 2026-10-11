@@ -656,7 +656,7 @@ export async function getMedia(req, res) {
   const pageNum = Math.max(1, parseInt(page, 10) || 1);
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
   const media = await CMSMedia.find(filter)
-    .sort({ uploadedAt: -1 })
+    .sort({ createdAt: -1 }) // cms_media has no uploaded_at column (repository and production); created_at is the upload time
     .skip((pageNum - 1) * limitNum)
     .limit(limitNum);
 
@@ -887,7 +887,16 @@ export async function getContentAnalytics(req, res) {
 // ============================================
 
 export async function getPublishingCalendar(req, res) {
-  const { startDate, endDate } = req.query;
+  // startDate/endDate are optional ISO dates. Without them the range filters received `undefined`, which the query
+  // layer serialised as "[object Object]" (PostgreSQL 22007 -> 500). Default to the next 31 days; reject bad input.
+  const parse = (v) => (v === undefined || v === "" ? null : new Date(String(v)));
+  const from = parse(req.query.startDate) ?? new Date();
+  const to = parse(req.query.endDate) ?? new Date(from.getTime() + 31 * 86400000);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || to < from) {
+    return res.status(400).json({ success: false, message: "startDate/endDate must be valid ISO dates with startDate <= endDate" });
+  }
+  const startDate = from.toISOString();
+  const endDate = to.toISOString();
 
   const scheduledPages = await CMSPage.find({
     scheduleAt: { $gte: startDate, $lte: endDate }

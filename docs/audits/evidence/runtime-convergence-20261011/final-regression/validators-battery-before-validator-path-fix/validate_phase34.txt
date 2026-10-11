@@ -1,0 +1,21 @@
+
+> kayad@0.0.0 validate:phase34
+> node scripts/validate-phase34.mjs
+
+PASS: exactly one /api/v1 mount remains (1)
+PASS: canonical /api/v1 mount uses v1 router
+PASS: duplicate /api/v1 + checkSystemStatus mount removed
+PASS: legacy /api/ads Ad route mount removed
+PASS: v1 imports canonical ad-slot route
+PASS: v1 /ads uses canonical ad-slot route
+PASS: orphan legacy ad route removed
+PASS: OpenAPI no longer advertises legacy ad route
+PASS: OpenAPI documents canonical /api/ads endpoint
+PASS: OpenAPI documents canonical /api/ads/all endpoint
+PASS: OpenAPI documents canonical ad-slot mutation endpoint
+PASS: API governance check passes its configured threshold
+PASS: API documentation generator uses canonical ad-slot route
+PASS: API governance checker uses canonical ad-slot route
+PASS: API documentation generator has no stale ad route mapping
+PASS: API governance checker has no stale ad route mapping
+PHASE 34 API ROUTE VERSIONING VALIDATION: PASS

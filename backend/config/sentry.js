@@ -198,7 +198,7 @@ export const safeCaptureException = async (error, context = {}) => {
         timeoutMs: 10000,
         onRetry: (err, attempt) => {
           logWarn(`Sentry capture retry ${attempt}`, { error: err.message });
-          incrementCounter("sentry_capture_retry", { attempt });
+          incrementCounter("sentry_capture_retry", 1, { attempt });
         },
       },
     );
@@ -237,7 +237,7 @@ export const safeCaptureMessage = async (message, level = "info", context = {}) 
         timeoutMs: 10000,
         onRetry: (err, attempt) => {
           logWarn(`Sentry message capture retry ${attempt}`, { error: err.message });
-          incrementCounter("sentry_message_retry", { attempt });
+          incrementCounter("sentry_message_retry", 1, { attempt });
         },
       },
     );

@@ -1,0 +1,8 @@
+re-apply 20261011100000_chat_message_outbox on k9_plain: OK
+re-apply 20261011100000_chat_message_outbox on k9_main: OK
+re-apply 20261011120000_client_role_least_privilege on k9_plain: OK
+re-apply 20261011120000_client_role_least_privilege on k9_main: OK
+re-apply 20261011121000_profiles_role_sync_repair on k9_plain: OK
+re-apply 20261011121000_profiles_role_sync_repair on k9_main: OK
+re-apply 20261011130000_cars_click_counter on k9_plain: OK
+re-apply 20261011130000_cars_click_counter on k9_main: OK

@@ -1,0 +1,15 @@
+
+> kayad@0.0.0 validate:premium-auth-surfaces
+> node scripts/validate-premium-auth-surfaces.mjs
+
+PASS shared premium auth shell exists
+PASS login uses shared premium shell
+PASS registration uses shared premium shell
+PASS login remains canonical /login route
+PASS registration remains canonical /register route
+PASS no advertising panel on auth screens (one task per screen)
+PASS forgot, reset and verify pages use the shared shell
+PASS shell does not own form submission
+PASS responsive auth styling exists
+PASS reduced motion support exists
+Premium auth surface validation: 10/10 PASS

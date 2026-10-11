@@ -31,7 +31,10 @@ export default defineConfig(() => {
       // File watching can be disabled explicitly with DISABLE_HMR=true.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      // Dev-only: documentation, audit evidence and test-runner output are never part of the app. Without this, a
+      // log written under docs/ while `vite dev` serves the E2E suite (e.g. a test runner redirecting its output into
+      // docs/audits/evidence) triggered full page reloads mid-test (docs/audits/22 — E2E-ENV-1).
+      watch: process.env.DISABLE_HMR === 'true' ? null : { ignored: ['**/docs/**', '**/evidence/**', '**/test-results/**', '**/playwright-report/**'] },
       // Dev-only: forward /api to the local backend so the frontend's
       // relative API calls (and the e2e ApiHelper) reach it instead of
       // getting the SPA index.html. Production API URL comes from

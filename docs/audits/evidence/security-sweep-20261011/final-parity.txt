@@ -1,0 +1,11 @@
+# Parity: tested fresh extraction (f3) vs delivered ZIP contents. Excluded: node_modules, dist, runtime artefacts, e2e deps, evidence dirs.
+# Expected differences: only the audit documents written after the run and the defect register.
+Only in /home/claude/msg/fp/KAYAD-main/docs/audits: 03-SECURITY-BOUNDARY-AUDIT-REPORT-20261011.md
+Only in /home/claude/msg/fp/KAYAD-main/docs/audits: 04-FILE-CHANGE-LEDGER-20261011.md
+Only in /home/claude/msg/fp/KAYAD-main/docs/audits: 05-SECURITY-FINDINGS-REGISTER-20261011.md
+Only in /home/claude/msg/fp/KAYAD-main/docs/audits: 06-MIGRATION-AND-ROLLBACK-REVIEW-20261011.md
+Only in /home/claude/msg/fp/KAYAD-main/docs/audits: 07-REGRESSION-MATRIX-20261011.md
+Only in /home/claude/msg/fp/KAYAD-main/docs/audits: 08-STAGING-CERTIFICATION-CHECKLIST-20261011.md
+Files /home/claude/msg/f3/KAYAD-main/docs/messaging-consistency-audit/09-DEFECT-REGISTER.md and /home/claude/msg/fp/KAYAD-main/docs/messaging-consistency-audit/09-DEFECT-REGISTER.md differ
+# source parity (all non-docs files identical): 0 differences
+# (This file itself is the only addition made to the archive after the parity comparison.)

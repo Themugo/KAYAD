@@ -1,0 +1,10 @@
+
+> kayad@0.0.0 validate:auction-transport-convergence
+> node scripts/validate-auction-transport-convergence.mjs
+
+PASS: canonical auction service uses shared request transport
+PASS: AuctionsView uses canonical auction service transport
+PASS: marketplaceCore uses canonical auction service
+PASS: legacy public auction export removed
+PASS: auction service supports active/list/my/get contracts
+Auction transport convergence: 5/5 PASS

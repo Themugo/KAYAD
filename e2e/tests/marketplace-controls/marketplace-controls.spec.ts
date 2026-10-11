@@ -73,12 +73,15 @@ async function waitForInventory(page: import('@playwright/test').Page) {
 
 test.describe('KAYAD marketplace controls — browser interaction certification', () => {
   test('3/4/5 column controls change the real rendered desktop grid', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 1000 });
+    // The grid follows container queries on the RESULT AREA (src/index.css .kayad-inventory-grid): 5 columns need
+    // >= 1120px of result width, otherwise the 5-column choice is capped at 4 to keep cards readable. Measure at a
+    // width where the result area allows 5; the capped behaviour is asserted separately below.
+    await page.setViewportSize({ width: 1920, height: 1000 });
     await installVehicleApi(page);
     await waitForInventory(page);
 
     const grid = page.getByTestId('inventory-grid');
-    const columns = page.locator('[aria-label="Grid columns"]');
+    const columns = page.getByRole('group', { name: 'Desktop grid columns' });
 
     for (const count of [3, 4, 5]) {
       await columns.getByRole('button', { name: `${count}×` }).click();
@@ -87,6 +90,18 @@ test.describe('KAYAD marketplace controls — browser interaction certification'
         return await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
       }).toBe(count);
     }
+  });
+
+  test('5-column choice is capped at 4 when the result area is narrower than 1120px (documented container query)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await installVehicleApi(page);
+    await waitForInventory(page);
+    const grid = page.getByTestId('inventory-grid');
+    const resultWidth = await grid.evaluate((el) => el.getBoundingClientRect().width);
+    await page.getByRole('group', { name: 'Desktop grid columns' }).getByRole('button', { name: '5×' }).click();
+    await expect(grid).toHaveAttribute('data-columns', '5');
+    await expect.poll(async () => grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length))
+      .toBe(resultWidth >= 1120 ? 5 : 4);
   });
 
   test('grid responds honestly across mobile, tablet and desktop breakpoints', async ({ page }) => {
@@ -104,7 +119,7 @@ test.describe('KAYAD marketplace controls — browser interaction certification'
     }).toBe(2);
 
     await page.setViewportSize({ width: 900, height: 900 });
-    await page.locator('[aria-label="Grid columns"]').getByRole('button', { name: '4×' }).click();
+    await page.getByRole('group', { name: 'Desktop grid columns' }).getByRole('button', { name: '4×' }).click();
     await expect.poll(async () => {
       return await page.getByTestId('inventory-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
     }).toBe(4);
@@ -159,7 +174,9 @@ test.describe('KAYAD marketplace controls — browser interaction certification'
     await waitForInventory(page);
 
     await page.getByRole('button', { name: /Filters/i }).click();
-    await expect(page.getByText('Refine inventory')).toBeVisible();
+    // The drawer is a modal dialog; the desktop sidebar keeps its own (hidden on mobile) "Refine inventory" heading.
+    const drawer = page.getByRole('dialog', { name: 'Refine inventory' });
+    await expect(drawer).toBeVisible();
 
     const make = page.getByLabel('Mobile make filter');
     const model = page.getByLabel('Mobile model filter');
@@ -171,7 +188,7 @@ test.describe('KAYAD marketplace controls — browser interaction certification'
     await expect.poll(() => requests.at(-1)?.searchParams.get('brand')).toBe('Nissan');
 
     await page.getByRole('button', { name: 'Show results' }).click();
-    await expect(page.getByText('Refine inventory')).toBeHidden();
+    await expect(page.getByRole('dialog', { name: 'Refine inventory' })).toBeHidden();
   });
   test('hero search dropdowns remain functional and drive the real filter state', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -201,6 +218,12 @@ test.describe('KAYAD marketplace controls — browser interaction certification'
 
   test('admin escrow dropdowns have stable accessible controls', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
+    // "Customize Home Page" is rendered for administrators only (asserted by the VehicleMarketplace unit tests), so this
+    // browser check needs an administrator session. Fixture: the session bootstrap answers with an admin user.
+    await page.route('**/api/v1/auth/me', (route) => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ success: true, user: { id: 'e2e-admin', name: 'E2E Admin', email: 'admin@example.co.ke', role: 'admin', status: 'approved', emailVerified: true } }),
+    }));
     await installVehicleApi(page);
     await waitForInventory(page);
 

@@ -1,0 +1,22 @@
+
+> kayad@0.0.0 validate:subscription-domain
+> node scripts/validate-subscription-domain-e2e.mjs
+
+PASS authoritative plan catalogue
+PASS subscription history table
+PASS atomic activation retires previous active entitlement
+PASS RLS blocks dealer direct mutation
+PASS single active entitlement invariant
+PASS atomic cancel/reactivate
+PASS atomic admin grant/revoke
+PASS payment uses verified subscription activation
+PASS payment cannot activate from client success response
+PASS dealer listing gate uses subscription entitlement
+PASS admin package route uses atomic contract
+PASS zero-cost onboarding uses subscription contract
+PASS dealer route has no local plan catalogue
+PASS frontend loads server plans
+PASS admin query parameters are validated
+PASS subscription admin routes use subscription schema
+
+Subscription domain E2E: 16/16 PASS

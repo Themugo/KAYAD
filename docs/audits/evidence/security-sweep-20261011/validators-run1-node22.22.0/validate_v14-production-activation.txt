@@ -1,0 +1,22 @@
+
+> kayad@0.0.0 validate:v14-production-activation
+> node scripts/validate-v14-production-activation.mjs
+
+PASS notification worker exposes testable canonical processor
+PASS notification worker has no undefined notification return path
+PASS notification worker returns canonical communication deliveries
+PASS push delivery reports an explicit success boolean
+PASS notification worker regression coverage exists
+PASS V14 finance migration is versioned in source
+PASS finance field mapping uses the canonical data access layer
+PASS finance API validates application amounts server-side
+PASS finance API enforces lifecycle transitions server-side
+PASS finance client exposes admin review transport
+PASS finance domain validator is current
+PASS dispute validator targets the current canonical surface
+PASS obsolete Dispute model removed
+PASS obsolete Evidence model removed
+PASS obsolete resolution service removed
+PASS single canonical notification worker remains
+
+V14 production activation validation: 16/16 PASS

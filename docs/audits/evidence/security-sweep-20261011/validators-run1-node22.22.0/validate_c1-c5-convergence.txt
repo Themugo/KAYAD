@@ -1,0 +1,15 @@
+
+> kayad@0.0.0 validate:c1-c5-convergence
+> node scripts/validate-c1-c5-convergence.mjs
+
+PASS C1 registration role contract — schema matches controller-supported seller roles
+PASS C2 password special-character contract — change-password accepts the same special-character class as the canonical schema
+PASS C2 password reset token hashing — reset token is hashed at rest and expiry is enforced
+PASS C1 email verification token hashing — verification token is hashed at rest and expiry is enforced
+PASS C3 canonical Brevo adapter — email provider is Brevo-backed
+PASS C5 canonical preference control plane — gateway owns preference and rollout decisions
+PASS C5 notification service does not maintain a second preference store — notification service delegates channel policy to the gateway
+PASS C3 provider delivery audit — delivery state and provider status are persisted
+PASS C2 verification route is rate-limited — verification endpoints use auth rate limiting
+
+C1-C5 convergence validation: 9/9 PASS

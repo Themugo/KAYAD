@@ -5,6 +5,13 @@ import { getSupabase } from "../utils/supabase.js";
 import { getIO } from "../utils/io.js";
 import { findOrCreateLeadFromChat, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logError } from '../infrastructure/logging/index.js';
+import {
+  AttachmentError, normalizeIncomingAttachments, presentAttachments, presentMessage,
+  findChatAttachment, bareFolder, parseMetadata, CHAT_UPLOAD_FOLDER, CHAT_ATTACHMENT_MIME, ATTACHMENT_URL_TTL_SECONDS,
+} from "../services/chatAttachments.js";
+import { getUploadRecord } from "../services/sqlUploadStore.js";
+import { v2 as cloudinary } from "cloudinary";
+import { buildNewMessageEvent, markChatOutboxResult } from "../services/chatOutbox.service.js";
 
 // Fixed (Final Integration - real data integration): CHAT_FIELDS was
 // previously declared as a local const inside startChat only, but
@@ -215,14 +222,16 @@ export const sendMessage = async (req, res) => {
     }
 
     const sb = getSupabase();
-    // The schema accepts legacy URL strings and the newer object shape.
-    // Normalize both before persistence so string attachments never become
-    // { url: undefined } records.
-    const normalizedAttachments = Array.isArray(attachments)
-      ? attachments.map((attachment) => typeof attachment === "string"
-        ? { url: attachment, type: "image" }
-        : { url: attachment.url, type: attachment.type || "image" })
-      : [];
+    // Attachments are references to uploads the SENDER owns in the private chat folder (never client URLs).
+    let normalizedAttachments;
+    try {
+      normalizedAttachments = normalizeIncomingAttachments(attachments, req.user.id);
+    } catch (attErr) {
+      if (attErr instanceof AttachmentError) {
+        return res.status(attErr.status).json({ success: false, code: attErr.code, message: attErr.message });
+      }
+      throw attErr;
+    }
     const { data: rpcResult, error: rpcError } = await sb.rpc("kayad_append_chat_message_idempotent", {
       p_chat_id: chatId,
       p_sender_id: req.user.id,
@@ -285,40 +294,34 @@ export const sendMessage = async (req, res) => {
       console.warn("⚠️ Failed to add lead activity:", leadErr.message);
     }
 
+    // Inline (fast-path) delivery. The outbox row committed with the message is the durable record: it is marked done only
+    // when every step below succeeded; otherwise the reconciler (services/chatOutbox.service.js) retries it.
+    let delivered = true;
     if (getIO()) {
-      getIO()
-        .to(`chat_${chatId}`)
-        .emit("newMessage", {
-          id: messageData.id,
-          chatId,
-          sender: req.user.id,
-          text: msgText,
-          message: msgText,
-          createdAt: messageData.createdAt,
-          seen: false,
-          seenBy: [],
-          attachments: messageData.attachments || [],
-        });
+      getIO().to(`chat_${chatId}`).emit("newMessage", buildNewMessageEvent(chatId, messageData));
     }
 
     try {
       const { sendNotification } = await import("../services/notification.service.js");
       const otherUserId = chat.participants.find((p) => String(p) !== String(req.user.id));
-      if (otherUserId) await sendNotification({
+      if (otherUserId) delivered = Boolean(await sendNotification({
         userId: otherUserId,
         title: "New message",
         message: msgText,
         type: "chat",
         link: "/?nav=chat",
         data: { chatId, messageId: messageData.id },
-      });
+      }));
     } catch (notificationError) {
+      delivered = false;
       console.warn("New message in-app notification failed:", notificationError.message);
     }
+    if (delivered) await markChatOutboxResult(messageData.id, true);
     }
 
     res.status(isReplay ? 200 : 201).json({
       ...messageData,
+      attachments: presentAttachments(chatId, messageData.attachments),
       message: msgText,
       seen: Array.isArray(messageData.seenBy) && messageData.seenBy.length > 0,
       seenBy: messageData.seenBy,
@@ -353,7 +356,7 @@ export const getMessages = async (req, res) => {
     const userMap = Object.fromEntries((users || []).map((u) => [u.id, u]));
 
     const enriched = (chat.messages || []).map((m) => ({
-      ...m,
+      ...presentMessage(chatId, m),
       message: m.text,
       seen: m.seenBy && m.seenBy.length > 0,
       seenBy: m.seenBy || [],
@@ -363,6 +366,58 @@ export const getMessages = async (req, res) => {
   } catch (error) {
     logError("❌ GET MESSAGES ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to fetch messages" });
+  }
+};
+
+// =============================
+// 📎 GET ATTACHMENT (authorized, non-cacheable delivery of a chat file)
+// =============================
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const getAttachment = async (req, res) => {
+  try {
+    const { chatId, uploadId } = req.params;
+    if (!UUID_RE.test(String(uploadId || ""))) return res.status(404).json({ success: false, message: "Attachment not found" });
+    // Fresh read on every request: membership loss, blocking or detaching the file ends access immediately.
+    const chat = await findById("chats", chatId);
+    const role = req.user?.role;
+    const isStaff = role === "admin" || role === "superadmin";
+    const isParticipant = Array.isArray(chat?.participants) && chat.participants.some((p) => String(p) === String(req.user.id));
+    // Same 404 for "no such chat", "not a participant" and "not in this chat": no existence oracle.
+    const att = chat ? findChatAttachment(chat, uploadId) : undefined;
+    if (!chat || !(isParticipant || isStaff) || !att) {
+      return res.status(404).json({ success: false, message: "Attachment not found" });
+    }
+    if (chat.isBlocked && !isStaff) return res.status(423).json({ success: false, code: "CHAT_BLOCKED", message: "This conversation is blocked" });
+    // The local upload record is a cache of the bytes; it can be gone (ephemeral disk). The message holds the coordinates.
+    const record = getUploadRecord(uploadId);
+    const mime = String(att.mimeType || record?.mimeType || "").toLowerCase();
+    if (!CHAT_ATTACHMENT_MIME.has(mime) || (record && bareFolder(record.folder) !== CHAT_UPLOAD_FOLDER)) {
+      return res.status(404).json({ success: false, message: "Attachment not found" });
+    }
+    res.set({
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Cross-Origin-Resource-Policy": "same-site",
+      "Referrer-Policy": "no-referrer",
+    });
+    if (record?.content) {
+      res.set({ "Content-Type": mime, "Content-Disposition": "inline" });
+      return res.status(200).send(Buffer.from(record.content));
+    }
+    const publicId = att.publicId || record?.publicId || (record ? parseMetadata(record).publicId : null);
+    if ((att.provider || record?.provider) === "cloudinary" && publicId) {
+      const ext = mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg";
+      // Expiring, signed, authenticated-asset download: scoped to this one asset and valid for minutes.
+      const url = cloudinary.utils.private_download_url(String(publicId), ext, {
+        type: "authenticated", resource_type: "image",
+        expires_at: Math.floor(Date.now() / 1000) + ATTACHMENT_URL_TTL_SECONDS,
+      });
+      return res.redirect(302, url);
+    }
+    return res.status(404).json({ success: false, message: "Attachment not found" });
+  } catch (error) {
+    logError("❌ GET ATTACHMENT ERROR:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch attachment" });
   }
 };
 
@@ -426,6 +481,9 @@ export const deleteChat = async (req, res) => {
     } else {
       await update("chats", chat.id, { participants });
     }
+
+    // Leaving ends realtime access immediately: evict every live socket of this user from the chat room.
+    try { getIO()?.in(`user_${req.user.id}`).socketsLeave(`chat_${chat.id}`); } catch (e) { logError("socket eviction failed", e); }
 
     res.json({ success: true, message: "Left chat" });
   } catch (error) {

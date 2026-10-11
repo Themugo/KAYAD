@@ -1,0 +1,22 @@
+# Repo e2e (chromium, default grep set), fresh extraction, no backend
+  ✘   1 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding
+  ✘   2 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:51:3 › KAYAD canonical onboarding
+  ✘   3 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:78:3 › KAYAD canonical onboarding
+  ✘   4 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:101:3 › KAYAD canonical onboardin
+  ✘   5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace co
+  ✘   6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace co
+  ✓   7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace c
+  ✓   8 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace c
+  ✘   9 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace c
+  ✓  10 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:176:3 › KAYAD marketplace c
+  ✘  11 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:202:3 › KAYAD marketplace c
+  ✘  12 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certifi
+  ✘  13 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certifi
+  ✘  14 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certifi
+  ✓  15 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:66:3 › Workflow certifi
+  ✓  16 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:73:3 › Workflow certifi
+  ✘  17 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certifi
+  ✘  18 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certifi
+  ✘  19 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:103:3 › Workflow certif
+
+diff vs foundation 'fixed tree, no backend': IDENTICAL (per-test pass/fail)

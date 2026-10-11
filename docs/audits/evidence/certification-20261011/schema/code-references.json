@@ -1,0 +1,684 @@
+{
+  "inventory": {
+    "file": "/home/claude/msg/f5/KAYAD-main/docs/audits/evidence/certification-20261011/schema/repo-inventory-supabase-defaults.json",
+    "database": "k5_crawl",
+    "server_version": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "tables": 201,
+    "functions": 106
+  },
+  "reachableFiles": 532,
+  "referencedTables": 248,
+  "referencedRpcs": 54,
+  "missingTables": [
+    {
+      "table": "admin_alerts",
+      "consumers": [
+        "backend/models/AdminAlert.js",
+        "backend/services/reconciliationService.js"
+      ]
+    },
+    {
+      "table": "ads",
+      "consumers": [
+        "backend/models/Ad.js"
+      ]
+    },
+    {
+      "table": "ai_commands",
+      "consumers": [
+        "backend/models/AICommand.js"
+      ]
+    },
+    {
+      "table": "ai_conversations",
+      "consumers": [
+        "backend/models/AIConversation.js"
+      ]
+    },
+    {
+      "table": "ai_knowledge",
+      "consumers": [
+        "backend/models/AIKnowledge.js"
+      ]
+    },
+    {
+      "table": "ai_prompts",
+      "consumers": [
+        "backend/models/AIPrompt.js"
+      ]
+    },
+    {
+      "table": "ai_workspaces",
+      "consumers": [
+        "backend/models/AIWorkspace.js"
+      ]
+    },
+    {
+      "table": "announcements",
+      "consumers": [
+        "backend/models/Announcement.js"
+      ]
+    },
+    {
+      "table": "approval_chains",
+      "consumers": [
+        "backend/models/ApprovalChain.js"
+      ]
+    },
+    {
+      "table": "auction_integrity_flags",
+      "consumers": [
+        "backend/models/AuctionIntegrityFlag.js",
+        "backend/services/auctionIntegrityService.js"
+      ]
+    },
+    {
+      "table": "auction_risk_profiles",
+      "consumers": [
+        "backend/models/AuctionRiskProfile.js",
+        "backend/services/auctionIntegrityService.js"
+      ]
+    },
+    {
+      "table": "audiences",
+      "consumers": [
+        "backend/models/Audience.js"
+      ]
+    },
+    {
+      "table": "automation_tasks",
+      "consumers": [
+        "backend/models/AutomationTask.js"
+      ]
+    },
+    {
+      "table": "bid_logs",
+      "consumers": [
+        "backend/models/BidLog.js"
+      ]
+    },
+    {
+      "table": "branches",
+      "consumers": [
+        "backend/services/organizationService.js"
+      ]
+    },
+    {
+      "table": "business_objects",
+      "consumers": [
+        "backend/models/BusinessObject.js"
+      ]
+    },
+    {
+      "table": "campaigns",
+      "consumers": [
+        "backend/models/Campaign.js"
+      ]
+    },
+    {
+      "table": "certifications",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "compliance_alerts",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "config_audit_logs",
+      "consumers": [
+        "backend/models/ConfigAuditLog.js"
+      ]
+    },
+    {
+      "table": "config_entries",
+      "consumers": [
+        "backend/models/ConfigEntry.js"
+      ]
+    },
+    {
+      "table": "contacts",
+      "consumers": [
+        "backend/models/Contact.js"
+      ]
+    },
+    {
+      "table": "conversion_funnels",
+      "consumers": [
+        "backend/models/ConversionFunnel.js"
+      ]
+    },
+    {
+      "table": "country_configs",
+      "consumers": [
+        "backend/models/CountryConfig.js"
+      ]
+    },
+    {
+      "table": "custom_dashboards",
+      "consumers": [
+        "backend/models/CustomDashboard.js"
+      ]
+    },
+    {
+      "table": "dealer_analytics",
+      "consumers": [
+        "backend/models/DealerAnalytics.js"
+      ]
+    },
+    {
+      "table": "dealer_health_scores",
+      "consumers": [
+        "backend/models/DealerHealthScore.js",
+        "backend/routes/dealerRoutes.js",
+        "backend/services/dealerHealthScoreScheduler.js",
+        "backend/services/dealerHealthScoreService.js"
+      ]
+    },
+    {
+      "table": "departments",
+      "consumers": [
+        "backend/services/organizationService.js"
+      ]
+    },
+    {
+      "table": "dispute_cases",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "dispute_evidence",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "dispute_timeline",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "disputes",
+      "consumers": [
+        "backend/services/disputeCron.js",
+        "backend/services/escrowAnomalyDetectionService.js",
+        "backend/services/fraudDetectionService.js"
+      ]
+    },
+    {
+      "table": "duplicate_vehicle_logs",
+      "consumers": [
+        "backend/models/DuplicateVehicleLog.js",
+        "backend/services/duplicateVehicleService.js"
+      ]
+    },
+    {
+      "table": "entity_registry",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "error_budgets",
+      "consumers": [
+        "backend/models/ErrorBudget.js",
+        "backend/services/sliTrackingService.js"
+      ]
+    },
+    {
+      "table": "escrow_anomalies",
+      "consumers": [
+        "backend/models/EscrowAnomaly.js",
+        "backend/services/escrowAnomalyDetectionService.js"
+      ]
+    },
+    {
+      "table": "escrow_risk_scores",
+      "consumers": [
+        "backend/services/escrowAnomalyDetectionService.js"
+      ]
+    },
+    {
+      "table": "experience_analytics",
+      "consumers": [
+        "backend/models/ExperienceAnalytics.js"
+      ]
+    },
+    {
+      "table": "experiences",
+      "consumers": [
+        "backend/models/Experience.js"
+      ]
+    },
+    {
+      "table": "feature_flags",
+      "consumers": [
+        "backend/models/FeatureFlag.js",
+        "backend/services/featureFlagService.js"
+      ]
+    },
+    {
+      "table": "feedback",
+      "consumers": [
+        "backend/models/Feedback.js"
+      ]
+    },
+    {
+      "table": "form_definitions",
+      "consumers": [
+        "backend/models/FormDefinition.js"
+      ]
+    },
+    {
+      "table": "fraud_detection",
+      "consumers": [
+        "backend/models/FraudDetection.js"
+      ]
+    },
+    {
+      "table": "fraud_detections",
+      "consumers": [
+        "backend/services/dealerHealthScoreService.js",
+        "backend/services/fraudDetectionService.js",
+        "backend/services/marketplaceHealthService.js"
+      ]
+    },
+    {
+      "table": "fraud_reports",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "governance_audit_log",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "homepage_variants",
+      "consumers": [
+        "backend/models/HomepageVariant.js"
+      ]
+    },
+    {
+      "table": "inspections",
+      "consumers": [
+        "backend/services/intelligenceService.js"
+      ]
+    },
+    {
+      "table": "job_failures",
+      "consumers": [
+        "backend/models/JobFailure.js",
+        "backend/services/ecpService.js"
+      ]
+    },
+    {
+      "table": "journeys",
+      "consumers": [
+        "backend/models/Journey.js"
+      ]
+    },
+    {
+      "table": "listing_quality",
+      "consumers": [
+        "backend/services/listingQualityService.js"
+      ]
+    },
+    {
+      "table": "location_master_data",
+      "consumers": [
+        "backend/models/LocationMasterData.js"
+      ]
+    },
+    {
+      "table": "market_data",
+      "consumers": [
+        "backend/models/MarketData.js"
+      ]
+    },
+    {
+      "table": "marketplace_health",
+      "consumers": [
+        "backend/models/MarketplaceHealth.js"
+      ]
+    },
+    {
+      "table": "marketplace_healths",
+      "consumers": [
+        "backend/services/marketplaceHealthService.js"
+      ]
+    },
+    {
+      "table": "navigation_rules",
+      "consumers": [
+        "backend/models/NavigationRule.js"
+      ]
+    },
+    {
+      "table": "notification_audits",
+      "consumers": [
+        "backend/services/notificationAnalyticsService.js",
+        "backend/services/notificationRetryService.js"
+      ]
+    },
+    {
+      "table": "notification_templates",
+      "consumers": [
+        "backend/models/NotificationTemplate.js"
+      ]
+    },
+    {
+      "table": "ntsa_verification_requests",
+      "consumers": [
+        "backend/models/NtsaVerificationRequest.js"
+      ]
+    },
+    {
+      "table": "object_fields",
+      "consumers": [
+        "backend/models/ObjectField.js"
+      ]
+    },
+    {
+      "table": "object_indexes",
+      "consumers": [
+        "backend/models/ObjectIndex.js"
+      ]
+    },
+    {
+      "table": "object_permissions",
+      "consumers": [
+        "backend/models/ObjectPermission.js"
+      ]
+    },
+    {
+      "table": "object_relationships",
+      "consumers": [
+        "backend/models/ObjectRelationship.js"
+      ]
+    },
+    {
+      "table": "object_versions",
+      "consumers": [
+        "backend/models/ObjectVersion.js"
+      ]
+    },
+    {
+      "table": "organizations",
+      "consumers": [
+        "backend/services/organizationService.js"
+      ]
+    },
+    {
+      "table": "platform_brands",
+      "consumers": [
+        "backend/models/PlatformBrand.js"
+      ]
+    },
+    {
+      "table": "platform_components",
+      "consumers": [
+        "backend/models/PlatformComponent.js"
+      ]
+    },
+    {
+      "table": "platform_products",
+      "consumers": [
+        "backend/models/PlatformProduct.js"
+      ]
+    },
+    {
+      "table": "platform_templates",
+      "consumers": [
+        "backend/models/PlatformTemplate.js"
+      ]
+    },
+    {
+      "table": "predictions",
+      "consumers": [
+        "backend/models/Prediction.js"
+      ]
+    },
+    {
+      "table": "reference_data",
+      "consumers": [
+        "backend/models/ReferenceData.js"
+      ]
+    },
+    {
+      "table": "reports",
+      "consumers": [
+        "backend/models/Report.js"
+      ]
+    },
+    {
+      "table": "roles",
+      "consumers": [
+        "backend/services/organizationService.js"
+      ]
+    },
+    {
+      "table": "scenarios",
+      "consumers": [
+        "backend/models/Scenario.js"
+      ]
+    },
+    {
+      "table": "scheduled_jobs",
+      "consumers": [
+        "backend/models/ScheduledJob.js"
+      ]
+    },
+    {
+      "table": "seasonal_themes",
+      "consumers": [
+        "backend/models/SeasonalTheme.js"
+      ]
+    },
+    {
+      "table": "security_logs",
+      "consumers": [
+        "backend/models/SecurityLog.js",
+        "backend/services/ecpService.js"
+      ]
+    },
+    {
+      "table": "simulation_results",
+      "consumers": [
+        "backend/models/SimulationResult.js"
+      ]
+    },
+    {
+      "table": "simulations",
+      "consumers": [
+        "backend/models/Simulation.js"
+      ]
+    },
+    {
+      "table": "sms_bidders",
+      "consumers": [
+        "backend/models/SmsBidder.js"
+      ]
+    },
+    {
+      "table": "subscriptions",
+      "consumers": [
+        "backend/services/reconciliationService.js"
+      ]
+    },
+    {
+      "table": "teams",
+      "consumers": [
+        "backend/services/organizationService.js"
+      ]
+    },
+    {
+      "table": "transactions",
+      "consumers": [
+        "backend/models/Transaction.js",
+        "backend/services/dealerHealthScoreService.js",
+        "backend/services/marketplaceHealthService.js",
+        "backend/services/reconciliationService.js",
+        "backend/services/securityPaymentStore.js"
+      ]
+    },
+    {
+      "table": "trust_score_history",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "vehicle_master_data",
+      "consumers": [
+        "backend/models/VehicleMasterData.js"
+      ]
+    },
+    {
+      "table": "verification_applications",
+      "consumers": [
+        "backend/governance/services/governanceService.js"
+      ]
+    },
+    {
+      "table": "view_definitions",
+      "consumers": [
+        "backend/models/ViewDefinition.js"
+      ]
+    },
+    {
+      "table": "vx_advertisements",
+      "consumers": [
+        "backend/models/VXAdvertisement.js"
+      ]
+    },
+    {
+      "table": "vx_cards",
+      "consumers": [
+        "backend/models/VXCard.js"
+      ]
+    },
+    {
+      "table": "vx_components",
+      "consumers": [
+        "backend/models/VXComponent.js"
+      ]
+    },
+    {
+      "table": "vx_layouts",
+      "consumers": [
+        "backend/models/VXLayout.js"
+      ]
+    },
+    {
+      "table": "vx_pages",
+      "consumers": [
+        "backend/models/VXPage.js"
+      ]
+    },
+    {
+      "table": "vx_sections",
+      "consumers": [
+        "backend/models/VXSection.js"
+      ]
+    },
+    {
+      "table": "vx_styles",
+      "consumers": [
+        "backend/models/VXStyle.js"
+      ]
+    },
+    {
+      "table": "vx_themes",
+      "consumers": [
+        "backend/models/VXTheme.js"
+      ]
+    },
+    {
+      "table": "vx_versions",
+      "consumers": [
+        "backend/models/VXVersion.js"
+      ]
+    },
+    {
+      "table": "vx_widgets",
+      "consumers": [
+        "backend/models/VXWidget.js"
+      ]
+    },
+    {
+      "table": "workflow_actions",
+      "consumers": [
+        "backend/models/WorkflowAction.js"
+      ]
+    },
+    {
+      "table": "workflow_logs",
+      "consumers": [
+        "backend/models/WorkflowLog.js"
+      ]
+    },
+    {
+      "table": "workflow_triggers",
+      "consumers": [
+        "backend/models/WorkflowTrigger.js"
+      ]
+    },
+    {
+      "table": "workflows",
+      "consumers": [
+        "backend/models/Workflow.js"
+      ]
+    }
+  ],
+  "missingRpcs": [],
+  "dynamicFromCallSites": [
+    "backend/config/cloudinary.js: .from(file.buffer)",
+    "backend/controllers/chatController.js: .from(record.content)",
+    "backend/controllers/commandCenterController.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/db/index.js: .from(table)",
+    "backend/middleware/mpesaSecurity.js: .from(expectedSignature)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(table)",
+    "backend/models/_base.js: .from(tableName)",
+    "backend/models/_base.js: .from(tableName)",
+    "backend/models/_base.js: .from(targetTable)",
+    "backend/partnerPlatform/services/partnerPlatformService.js: .from(expectedSignature)",
+    "backend/partnerPlatform/services/partnerPlatformService.js: .from(signature)",
+    "backend/services/disputeStateMachine.js: .from(allowed)",
+    "backend/services/mpesaService.js: .from(passkey)",
+    "backend/services/support/supportReferences.js: .from(table)"
+  ]
+}

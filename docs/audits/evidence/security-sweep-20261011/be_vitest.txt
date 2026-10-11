@@ -1,0 +1,14 @@
+
+> kayad-backend@2.0.0 test:vitest
+> vitest run --config vitest.config.js
+
+
+ RUN  v4.1.11 /home/claude/msg/f3/KAYAD-main/backend
+
+
+ Test Files  5 passed (5)
+      Tests  16 passed (16)
+   Start at  12:48:32
+   Duration  4.05s (transform 104ms, setup 0ms, import 214ms, tests 3.04s, environment 1ms)
+
+exit=0

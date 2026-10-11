@@ -1,0 +1,775 @@
+TAP version 13
+# Subtest: catalog: every public table has RLS enabled
+ok 1 - catalog: every public table has RLS enabled
+  ---
+  duration_ms: 42.148515
+  type: 'test'
+  ...
+# Subtest: catalog: no non-trigger SECURITY DEFINER function is executable by anon/authenticated (is_admin() excepted: boolean helper used inside policies)
+ok 2 - catalog: no non-trigger SECURITY DEFINER function is executable by anon/authenticated (is_admin() excepted: boolean helper used inside policies)
+  ---
+  duration_ms: 3.147228
+  type: 'test'
+  ...
+# Subtest: catalog: client roles cannot EXECUTE any public function directly, except is_admin() for authenticated
+ok 3 - catalog: client roles cannot EXECUTE any public function directly, except is_admin() for authenticated
+  ---
+  duration_ms: 10.828312
+  type: 'test'
+  ...
+# Subtest: catalog: every policy reachable by anon (roles public/anon) is identity-bound, deny-all, or reviewed public content
+ok 4 - catalog: every policy reachable by anon (roles public/anon) is identity-bound, deny-all, or reviewed public content
+  ---
+  duration_ms: 6.456439
+  type: 'test'
+  ...
+# Subtest: catalog: no policy grants `authenticated` unconditional access (USING/CHECK true)
+ok 5 - catalog: no policy grants `authenticated` unconditional access (USING/CHECK true)
+  ---
+  duration_ms: 9.0026
+  type: 'test'
+  ...
+# Subtest: dynamic, anon: cannot read, insert, update or delete sensitive rows
+ok 6 - dynamic, anon: cannot read, insert, update or delete sensitive rows
+  ---
+  duration_ms: 51.211219
+  type: 'test'
+  ...
+# Subtest: dynamic, authenticated (foreign sub): cannot read, insert, update or delete sensitive rows
+ok 7 - dynamic, authenticated (foreign sub): cannot read, insert, update or delete sensitive rows
+  ---
+  duration_ms: 54.564161
+  type: 'test'
+  ...
+# Subtest: dynamic, authenticated as user A: cannot read, insert, update or delete sensitive rows
+ok 8 - dynamic, authenticated as user A: cannot read, insert, update or delete sensitive rows
+  ---
+  duration_ms: 60.398389
+  type: 'test'
+  ...
+# Subtest: dynamic: privileged RPCs cannot be invoked by client roles (send message as another user, claim outbox, place bid)
+ok 9 - dynamic: privileged RPCs cannot be invoked by client roles (send message as another user, claim outbox, place bid)
+  ---
+  duration_ms: 12.018177
+  type: 'test'
+  ...
+# Subtest: after the least-privilege revoke, triggers still fire for the service role (immutability + updated_at)
+ok 10 - after the least-privilege revoke, triggers still fire for the service role (immutability + updated_at)
+  ---
+  duration_ms: 28.476705
+  type: 'test'
+  ...
+# Subtest: Supabase-Auth administrators keep read access to governance tables (is_admin() gate), ordinary users do not
+ok 11 - Supabase-Auth administrators keep read access to governance tables (is_admin() gate), ordinary users do not
+  ---
+  duration_ms: 4.969648
+  type: 'test'
+  ...
+# Subtest: profiles.role follows users.role (promotion and demotion) and profiles rows are updatable
+ok 12 - profiles.role follows users.role (promotion and demotion) and profiles rows are updatable
+  ---
+  duration_ms: 8.743536
+  type: 'test'
+  ...
+# Subtest: client roles hold no TRUNCATE / REFERENCES / TRIGGER on any public table (TRUNCATE bypasses RLS)
+ok 13 - client roles hold no TRUNCATE / REFERENCES / TRIGGER on any public table (TRUNCATE bypasses RLS)
+  ---
+  duration_ms: 2.343406
+  type: 'test'
+  ...
+# ✅ Supabase client initialized
+# Subtest: operations dispute queue (Escrow model, disputeWorkflowStatus / disputePriority filters) reads the real camelCase columns
+ok 14 - operations dispute queue (Escrow model, disputeWorkflowStatus / disputePriority filters) reads the real camelCase columns
+  ---
+  duration_ms: 93.055503
+  type: 'test'
+  ...
+# Subtest: notification unread counts by `isRead` (operations dashboards) hit the real `read` column
+ok 15 - notification unread counts by `isRead` (operations dashboards) hit the real `read` column
+  ---
+  duration_ms: 10.823536
+  type: 'test'
+  ...
+# Subtest: inventory is read-only, classifies legacy entries, excludes shared vehicle assets and never copies message text
+ok 16 - inventory is read-only, classifies legacy entries, excludes shared vehicle assets and never copies message text
+  ---
+  duration_ms: 276.716011
+  type: 'test'
+  ...
+# Subtest: the migration script refuses to act without a reviewed manifest, refuses non-chat ids, and needs --confirm for --apply
+ok 17 - the migration script refuses to act without a reviewed manifest, refuses non-chat ids, and needs --confirm for --apply
+  ---
+  duration_ms: 424.785819
+  type: 'test'
+  ...
+# Subtest: commitment payment settles: payment success+processed, hold held, registration active/eligible; 10 concurrent replays settle once
+ok 18 - commitment payment settles: payment success+processed, hold held, registration active/eligible; 10 concurrent replays settle once
+  ---
+  duration_ms: 4741.718475
+  type: 'test'
+  ...
+# Subtest: amount mismatch is never settled: payment failed, hold not held, registration not activated
+ok 19 - amount mismatch is never settled: payment failed, hold not held, registration not activated
+  ---
+  duration_ms: 76.369547
+  type: 'test'
+  ...
+# Subtest: cancelled STK (ResultCode 1032): payment failed, hold failed, registration back to pending_commitment
+ok 20 - cancelled STK (ResultCode 1032): payment failed, hold failed, registration back to pending_commitment
+  ---
+  duration_ms: 72.127767
+  type: 'test'
+  ...
+# Subtest: a regular (non-security) payment is not captured by the security route and still settles through the generic path
+ok 21 - a regular (non-security) payment is not captured by the security route and still settles through the generic path
+  ---
+  duration_ms: 192.064917
+  type: 'test'
+  ...
+# Subtest: transition compatibility: an in-flight legacy row in an out-of-band `transactions` table is still settled (hold FK left null)
+ok 22 - transition compatibility: an in-flight legacy row in an out-of-band `transactions` table is still settled (hold FK left null)
+  ---
+  duration_ms: 82.678726
+  type: 'test'
+  ...
+# \# tests 1 | \# pass 1 | \# fail 0 | \# skipped 0
+# Subtest: foundation chat-message-integrity test executes (not skipped) and passes
+ok 23 - foundation chat-message-integrity test executes (not skipped) and passes
+  ---
+  duration_ms: 487.080592
+  type: 'test'
+  ...
+# Subtest: concurrent identical key (N=20) -> exactly one canonical message, one non-replay, one notification
+ok 24 - concurrent identical key (N=20) -> exactly one canonical message, one non-replay, one notification
+  ---
+  duration_ms: 3751.450343
+  type: 'test'
+  ...
+# Subtest: retry after lost response replays same message, no duplicate
+ok 25 - retry after lost response replays same message, no duplicate
+  ---
+  duration_ms: 80.976703
+  type: 'test'
+  ...
+# Subtest: reused key with changed payload -> rejected, original untouched
+ok 26 - reused key with changed payload -> rejected, original untouched
+  ---
+  duration_ms: 64.498869
+  type: 'test'
+  ...
+# Subtest: key scope: same key from the other participant or another chat is independent
+ok 27 - key scope: same key from the other participant or another chat is independent
+  ---
+  duration_ms: 136.106631
+  type: 'test'
+  ...
+# Subtest: distinct keys, two senders concurrently -> no lost updates, persisted order = createdAt order
+ok 28 - distinct keys, two senders concurrently -> no lost updates, persisted order = createdAt order
+  ---
+  duration_ms: 908.086964
+  type: 'test'
+  ...
+# Subtest: non-participant cannot send; missing/invalid key rejected; nothing persisted
+ok 29 - non-participant cannot send; missing/invalid key rejected; nothing persisted
+  ---
+  duration_ms: 111.485708
+  type: 'test'
+  ...
+# Subtest: SQL rollback atomicity: failing statement in same tx leaves neither message nor idempotency row
+ok 30 - SQL rollback atomicity: failing statement in same tx leaves neither message nor idempotency row
+  ---
+  duration_ms: 26.064675
+  type: 'test'
+  ...
+# \# persisted.seenBy= ["b574131c-8bc3-4b2e-b13b-fc3d7fd8d030"]  replay.seenBy= ["b574131c-8bc3-4b2e-b13b-fc3d7fd8d030"]
+# Subtest: replay after recipient read returns stale seenBy snapshot (DEFECT D-MSG-2 characterization)
+ok 31 - replay after recipient read returns stale seenBy snapshot (DEFECT D-MSG-2 characterization)
+  ---
+  duration_ms: 108.008044
+  type: 'test'
+  ...
+# Subtest: delete chat cascades idempotency rows
+ok 32 - delete chat cascades idempotency rows
+  ---
+  duration_ms: 51.413164
+  type: 'test'
+  ...
+# Subtest: concurrent startChat for the same pair converges on ONE chat, no 5xx (D-MSG-3)
+ok 33 - concurrent startChat for the same pair converges on ONE chat, no 5xx (D-MSG-3)
+  ---
+  duration_ms: 205.806177
+  type: 'test'
+  ...
+# Subtest: both participants starting the chat simultaneously converge on ONE chat
+ok 34 - both participants starting the chat simultaneously converge on ONE chat
+  ---
+  duration_ms: 99.567095
+  type: 'test'
+  ...
+# Subtest: crash between commit and side effects: retry still notifies recipient exactly once
+ok 35 - crash between commit and side effects: retry still notifies recipient exactly once # SKIP D-MSG-4 FIXED by the transactional outbox; proven with real timing control in m8-chat-outbox.test.mjs \#4 (this stack runs the worker at its 15s/30s production cadence)
+  ---
+  duration_ms: 0.225962
+  type: 'test'
+  ...
+# Subtest: realtime: participant sockets receive newMessage exactly once; outsider and anonymous receive nothing
+ok 36 - realtime: participant sockets receive newMessage exactly once; outsider and anonymous receive nothing
+  ---
+  duration_ms: 5653.040123
+  type: 'test'
+  ...
+# Subtest: persisted vs API vs event agree: identity, text, createdAt, unread counts per user
+ok 37 - persisted vs API vs event agree: identity, text, createdAt, unread counts per user
+  ---
+  duration_ms: 67.107994
+  type: 'test'
+  ...
+# Subtest: outsider cannot read, mark seen, or count another chat
+ok 38 - outsider cannot read, mark seen, or count another chat
+  ---
+  duration_ms: 63.292924
+  type: 'test'
+  ...
+# Subtest: read receipt: B marks seen -> per-user seenBy, A gets messagesSeen, unread 0, sender's own message never self-marked; idempotent
+ok 39 - read receipt: B marks seen -> per-user seenBy, A gets messagesSeen, unread 0, sender's own message never self-marked; idempotent
+  ---
+  duration_ms: 893.044589
+  type: 'test'
+  ...
+# Subtest: concurrent sends and seen calls do not lose receipts or messages
+ok 40 - concurrent sends and seen calls do not lose receipts or messages
+  ---
+  duration_ms: 482.553473
+  type: 'test'
+  ...
+# Subtest: reconnect: a reconnected socket does NOT receive events until it re-emits joinChat (D-RT-1 characterization of client behavior)
+ok 41 - reconnect: a reconnected socket does NOT receive events until it re-emits joinChat (D-RT-1 characterization of client behavior)
+  ---
+  duration_ms: 1910.348114
+  type: 'test'
+  ...
+# Subtest: socket auth: bearer-in-handshake works; cookie-less (host-only cookie not sent) socket is anonymous and never joins
+ok 42 - socket auth: bearer-in-handshake works; cookie-less (host-only cookie not sent) socket is anonymous and never joins
+  ---
+  duration_ms: 1692.31676
+  type: 'test'
+  ...
+# Subtest: failure recovery: server restart keeps persisted state; REST resync returns every message; no duplicate on retry with same key
+ok 43 - failure recovery: server restart keeps persisted state; REST resync returns every message; no duplicate on retry with same key
+  ---
+  duration_ms: 3419.335807
+  type: 'test'
+  ...
+# Subtest: failure recovery: database outage during send returns 5xx, persists nothing, retry with same key succeeds once
+ok 44 - failure recovery: database outage during send returns 5xx, persists nothing, retry with same key succeeds once
+  ---
+  duration_ms: 56.496981
+  type: 'test'
+  ...
+# Subtest: anonymous /auth/me is a clean 401 (not a 5xx)
+ok 45 - anonymous /auth/me is a clean 401 (not a 5xx)
+  ---
+  duration_ms: 3079.033305
+  type: 'test'
+  ...
+# Subtest: login without CSRF token is refused; with bootstrap it succeeds and sets session cookies
+ok 46 - login without CSRF token is refused; with bootstrap it succeeds and sets session cookies
+  ---
+  duration_ms: 198.162853
+  type: 'test'
+  ...
+# Subtest: wrong password is a generic 401 and does not set a session
+ok 47 - wrong password is a generic 401 and does not set a session
+  ---
+  duration_ms: 128.97181
+  type: 'test'
+  ...
+# Subtest: restored session: /auth/me and protected chat API return 200 with the cookie jar only
+ok 48 - restored session: /auth/me and protected chat API return 200 with the cookie jar only
+  ---
+  duration_ms: 77.40781
+  type: 'test'
+  ...
+# \# access token rotated: false
+# Subtest: refresh rotates the session and the new access token works
+ok 49 - refresh rotates the session and the new access token works
+  ---
+  duration_ms: 69.58933
+  type: 'test'
+  ...
+# Subtest: logout revokes the session: the old cookie is rejected afterwards
+ok 50 - logout revokes the session: the old cookie is rejected afterwards
+  ---
+  duration_ms: 48.24629
+  type: 'test'
+  ...
+# \# routers=18 endpoints=308
+# Subtest: discovery found privileged endpoints
+ok 51 - discovery found privileged endpoints
+  ---
+  duration_ms: 2833.056907
+  type: 'test'
+  ...
+# Subtest: anonymous: no privileged endpoint answers 2xx or 5xx
+ok 52 - anonymous: no privileged endpoint answers 2xx or 5xx
+  ---
+  duration_ms: 1027.568954
+  type: 'test'
+  ...
+# Subtest: plain authenticated user: no privileged endpoint answers 2xx or 5xx
+ok 53 - plain authenticated user: no privileged endpoint answers 2xx or 5xx
+  ---
+  duration_ms: 2993.674383
+  type: 'test'
+  ...
+# Subtest: governance and config audit/export are denied to a plain user with 403
+ok 54 - governance and config audit/export are denied to a plain user with 403
+  ---
+  duration_ms: 75.825645
+  type: 'test'
+  ...
+# Subtest: CSRF exemption reaches provider callbacks on /api and /api/v1 (D-FIN-1)
+ok 55 - CSRF exemption reaches provider callbacks on /api and /api/v1 (D-FIN-1)
+  ---
+  duration_ms: 3181.451549
+  type: 'test'
+  ...
+# Subtest: success callback replayed concurrently (N=12): payment settles once, one webhook receipt
+ok 56 - success callback replayed concurrently (N=12): payment settles once, one webhook receipt
+  ---
+  duration_ms: 253.549195
+  type: 'test'
+  ...
+# Subtest: sequential replay after success is a no-op and does not change the receipt
+ok 57 - sequential replay after success is a no-op and does not change the receipt
+  ---
+  duration_ms: 189.696093
+  type: 'test'
+  ...
+# Subtest: amount mismatch is never settled as success
+ok 58 - amount mismatch is never settled as success
+  ---
+  duration_ms: 68.693483
+  type: 'test'
+  ...
+# Subtest: failed callback replayed 8x: one failure notification, status failed
+ok 59 - failed callback replayed 8x: one failure notification, status failed
+  ---
+  duration_ms: 126.859155
+  type: 'test'
+  ...
+# Subtest: unknown checkout id and malformed bodies create nothing and never settle
+ok 60 - unknown checkout id and malformed bodies create nothing and never settle
+  ---
+  duration_ms: 42.861269
+  type: 'test'
+  ...
+# Subtest: communication webhooks: no/incorrect secret rejected; correct secret accepted
+ok 61 - communication webhooks: no/incorrect secret rejected; correct secret accepted
+  ---
+  duration_ms: 28.205213
+  type: 'test'
+  ...
+# Subtest: rival dealer cannot update or delete another dealer's listing
+ok 62 - rival dealer cannot update or delete another dealer's listing
+  ---
+  duration_ms: 2935.173626
+  type: 'test'
+  ...
+# Subtest: plain buyer cannot create, update or delete listings
+ok 63 - plain buyer cannot create, update or delete listings
+  ---
+  duration_ms: 41.75909
+  type: 'test'
+  ...
+# Subtest: anonymous cannot mutate listings or place/end bids
+ok 64 - anonymous cannot mutate listings or place/end bids
+  ---
+  duration_ms: 55.911726
+  type: 'test'
+  ...
+# Subtest: non-admin cannot end an auction (even the listing owner)
+ok 65 - non-admin cannot end an auction (even the listing owner)
+  ---
+  duration_ms: 73.589631
+  type: 'test'
+  ...
+# \# owner PUT -> 200 {"success":true,"data":{"id":"fdabd99c-6823-4c6a-830a-e061e97dc8cb","dealer_id":"8cb8713d-4310-4ef5-a1d4-e0dcadada6cc","title":"Owner Car v2
+# Subtest: owner can still update their own listing (control: ownership gate is not over-blocking)
+ok 66 - owner can still update their own listing (control: ownership gate is not over-blocking)
+  ---
+  duration_ms: 49.467203
+  type: 'test'
+  ...
+# Subtest: bid gates: owner cannot bid on own car; unverified phone blocked; unpublished auction blocked (no bid row written)
+ok 67 - bid gates: owner cannot bid on own car; unverified phone blocked; unpublished auction blocked (no bid row written)
+  ---
+  duration_ms: 192.403261
+  type: 'test'
+  ...
+# Subtest: every public table has RLS enabled (catalog)
+ok 68 - every public table has RLS enabled (catalog)
+  ---
+  duration_ms: 26.573473
+  type: 'test'
+  ...
+# Subtest: no non-trigger kayad_* function is executable by anon/authenticated/PUBLIC (catalog)
+ok 69 - no non-trigger kayad_* function is executable by anon/authenticated/PUBLIC (catalog)
+  ---
+  duration_ms: 3.45237
+  type: 'test'
+  ...
+# Subtest: authenticated/anon cannot call money-moving and chat RPCs through the API
+ok 70 - authenticated/anon cannot call money-moving and chat RPCs through the API
+  ---
+  duration_ms: 81.356238
+  type: 'test'
+  ...
+# Subtest: authenticated/anon see no rows and cannot write sensitive tables
+ok 71 - authenticated/anon see no rows and cannot write sensitive tables
+  ---
+  duration_ms: 113.55979
+  type: 'test'
+  ...
+# Subtest: service_role retains access (control)
+ok 72 - service_role retains access (control)
+  ---
+  duration_ms: 15.888509
+  type: 'test'
+  ...
+# (node:6554) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: sender cannot attach arbitrary URLs, strings, foreign uploads, non-chat uploads or unknown ids
+ok 73 - sender cannot attach arbitrary URLs, strings, foreign uploads, non-chat uploads or unknown ids
+  ---
+  duration_ms: 3076.457786
+  type: 'test'
+  ...
+# Subtest: authorized participant: reference stored (no CDN url), response/list expose only the authenticated path
+ok 74 - authorized participant: reference stored (no CDN url), response/list expose only the authenticated path
+  ---
+  duration_ms: 88.807557
+  type: 'test'
+  ...
+# Subtest: access: unauthenticated 401; sender and recipient 200 with safe headers; outsider 404; random upload id 404
+ok 75 - access: unauthenticated 401; sender and recipient 200 with safe headers; outsider 404; random upload id 404
+  ---
+  duration_ms: 66.33715
+  type: 'test'
+  ...
+# Subtest: binding: the upload is only readable through the chat that references it (other chat, even as a participant of it)
+ok 76 - binding: the upload is only readable through the chat that references it (other chat, even as a participant of it)
+  ---
+  duration_ms: 25.310074
+  type: 'test'
+  ...
+# Subtest: revoked access: recipient who leaves the conversation, and a blocked chat, lose access immediately
+ok 77 - revoked access: recipient who leaves the conversation, and a blocked chat, lose access immediately
+  ---
+  duration_ms: 68.12331
+  type: 'test'
+  ...
+# Subtest: Cloudinary-backed record with no local bytes -> 302 to an authenticated, expiring, signed download (not a permanent URL)
+ok 78 - Cloudinary-backed record with no local bytes -> 302 to an authenticated, expiring, signed download (not a permanent URL)
+  ---
+  duration_ms: 63.967572
+  type: 'test'
+  ...
+# Subtest: local upload record lost (ephemeral disk / redeploy): participants still get an expiring authenticated redirect; outsiders still 404
+ok 79 - local upload record lost (ephemeral disk / redeploy): participants still get an expiring authenticated redirect; outsiders still 404
+  ---
+  duration_ms: 93.704085
+  type: 'test'
+  ...
+# Subtest: legacy attachments (pre-fix {url} entries) are never rewritten; http/javascript legacy values are neutralised on output
+ok 80 - legacy attachments (pre-fix {url} entries) are never rewritten; http/javascript legacy values are neutralised on output
+  ---
+  duration_ms: 21.587366
+  type: 'test'
+  ...
+# Subtest: realtime newMessage carries the authenticated path, never a CDN url
+ok 81 - realtime newMessage carries the authenticated path, never a CDN url
+  ---
+  duration_ms: 996.949897
+  type: 'test'
+  ...
+# Subtest: upload route: GET /api/upload/:id of a chat file is owner/admin only (was readable by any signed-in user with the id, cached public+immutable)
+ok 82 - upload route: GET /api/upload/:id of a chat file is owner/admin only (was readable by any signed-in user with the id, cached public+immutable)
+  ---
+  duration_ms: 49.388665
+  type: 'test'
+  ...
+# Subtest: public vehicle media is unchanged: vehicles-folder upload remains publicly cacheable for any signed-in user
+ok 83 - public vehicle media is unchanged: vehicles-folder upload remains publicly cacheable for any signed-in user
+  ---
+  duration_ms: 10.8351
+  type: 'test'
+  ...
+# Subtest: POST /api/upload folder=chat: content must match its declared type (RIFF/AVI declared as webp passes the legacy header check but is rejected 400); no CDN url ever returned
+ok 84 - POST /api/upload folder=chat: content must match its declared type (RIFF/AVI declared as webp passes the legacy header check but is rejected 400); no CDN url ever returned
+  ---
+  duration_ms: 72.029321
+  type: 'test'
+  ...
+# Subtest: presence: no onlineUsers broadcast reaches anonymous or authenticated sockets, and user ids are not disclosed
+ok 85 - presence: no onlineUsers broadcast reaches anonymous or authenticated sockets, and user ids are not disclosed
+  ---
+  duration_ms: 3922.768466
+  type: 'test'
+  ...
+# Subtest: anonymous and forged-identity sockets cannot join private rooms or receive newMessage
+ok 86 - anonymous and forged-identity sockets cannot join private rooms or receive newMessage
+  ---
+  duration_ms: 2265.164092
+  type: 'test'
+  ...
+# Subtest: two accounts: participants receive newMessage once; nonparticipant (valid session) cannot subscribe and typing from outside is dropped
+ok 87 - two accounts: participants receive newMessage once; nonparticipant (valid session) cannot subscribe and typing from outside is dropped
+  ---
+  duration_ms: 1600.255963
+  type: 'test'
+  ...
+# Subtest: room-join input hardening: malformed/foreign/nonexistent ids and spoofed room names are rejected
+ok 88 - room-join input hardening: malformed/foreign/nonexistent ids and spoofed room names are rejected
+  ---
+  duration_ms: 961.425934
+  type: 'test'
+  ...
+# Subtest: expired token is anonymous at handshake; a token that expires mid-connection loses its private rooms and is told to reconnect
+ok 89 - expired token is anonymous at handshake; a token that expires mid-connection loses its private rooms and is told to reconnect
+  ---
+  duration_ms: 4477.033752
+  type: 'test'
+  ...
+# Subtest: reconnect: a fresh socket must be re-authorised (no inherited membership); a refreshed credential restores access
+ok 90 - reconnect: a fresh socket must be re-authorised (no inherited membership); a refreshed credential restores access
+  ---
+  duration_ms: 1881.622551
+  type: 'test'
+  ...
+# Subtest: membership loss: leaving the conversation evicts live sockets at once and joinChat is refused afterwards
+ok 91 - membership loss: leaving the conversation evicts live sockets at once and joinChat is refused afterwards
+  ---
+  duration_ms: 1955.491381
+  type: 'test'
+  ...
+# Subtest: blocked conversation: joinChat denied (parity with REST 423)
+ok 92 - blocked conversation: joinChat denied (parity with REST 423)
+  ---
+  duration_ms: 802.813105
+  type: 'test'
+  ...
+# Subtest: public rooms stay public: anonymous sockets can still watch an existing auction room (unchanged contract)
+ok 93 - public rooms stay public: anonymous sockets can still watch an existing auction room (unchanged contract)
+  ---
+  duration_ms: 306.070588
+  type: 'test'
+  ...
+# Subtest: atomic: message and outbox row commit together; a rolled-back append leaves neither
+ok 94 - atomic: message and outbox row commit together; a rolled-back append leaves neither
+  ---
+  duration_ms: 3141.070241
+  type: 'test'
+  ...
+# Subtest: happy path: inline delivery marks the event done; exactly one notification
+ok 95 - happy path: inline delivery marks the event done; exactly one notification
+  ---
+  duration_ms: 2556.499648
+  type: 'test'
+  ...
+# Subtest: FAILURE MODE + FIX: notification write fails after commit -> message saved, client replay does nothing, reconciler delivers once the fault clears
+ok 96 - FAILURE MODE + FIX: notification write fails after commit -> message saved, client replay does nothing, reconciler delivers once the fault clears
+  ---
+  duration_ms: 3690.657981
+  type: 'test'
+  ...
+# Subtest: worker crash/restart: process killed after commit (before any side effect) -> after restart the recipient is notified exactly once
+ok 97 - worker crash/restart: process killed after commit (before any side effect) -> after restart the recipient is notified exactly once
+  ---
+  duration_ms: 4222.685885
+  type: 'test'
+  ...
+# Subtest: duplicate processing: re-queueing a delivered event and concurrent claimers never create a second notification
+ok 98 - duplicate processing: re-queueing a delivered event and concurrent claimers never create a second notification
+  ---
+  duration_ms: 1279.084149
+  type: 'test'
+  ...
+# Subtest: concurrent sends: N messages -> N outbox rows -> N notifications, no loss, no duplicates
+ok 99 - concurrent sends: N messages -> N outbox rows -> N notifications, no loss, no duplicates
+  ---
+  duration_ms: 2944.27099
+  type: 'test'
+  ...
+# Subtest: retry policy: exponential backoff, dead-letter after 8 attempts (kept for reconciliation), stats expose it
+ok 100 - retry policy: exponential backoff, dead-letter after 8 attempts (kept for reconciliation), stats expose it
+  ---
+  duration_ms: 10.296727
+  type: 'test'
+  ...
+# Subtest: retention: only old done rows are purged; pending/dead are never deleted
+ok 101 - retention: only old done rows are purged; pending/dead are never deleted
+  ---
+  duration_ms: 6.016482
+  type: 'test'
+  ...
+# Subtest: authorization: outbox and its functions are not reachable by anon/authenticated
+ok 102 - authorization: outbox and its functions are not reachable by anon/authenticated
+  ---
+  duration_ms: 8.60177
+  type: 'test'
+  ...
+# ✅ Supabase client initialized
+# (node:6724) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: worker dies after claiming (lease held, nothing delivered) -> after the lease expires another worker delivers exactly once
+ok 103 - worker dies after claiming (lease held, nothing delivered) -> after the lease expires another worker delivers exactly once
+  ---
+  duration_ms: 6088.827567
+  type: 'test'
+  ...
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# [12:26:02] [33mWARN[39m: [36mchat outbox finish failed[39m
+#     [35meventId[39m: "7f0900c9-d739-4590-8254-30e1351174d7"
+#     error: "injected ack failure"
+# Subtest: delivery succeeds but the acknowledgement fails -> redelivery does not duplicate the notification
+ok 104 - delivery succeeds but the acknowledgement fails -> redelivery does not duplicate the notification
+  ---
+  duration_ms: 59.933737
+  type: 'test'
+  ...
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# Subtest: two workers race on the same events -> every event delivered once, no duplicate notifications
+ok 105 - two workers race on the same events -> every event delivered once, no duplicate notifications
+  ---
+  duration_ms: 107.98803
+  type: 'test'
+  ...
+# [12:26:02] [32mINFO[39m: [36mEmail channel skipped because Brevo is not configured[39m
+#     [35mchannel[39m: "email"
+# [12:26:02] [32mINFO[39m: [36mCommunication channel skipped because provider is not configured[39m
+#     [35mchannel[39m: "sms"
+# Subtest: dead-letter is observable and recoverable by an operator re-queue
+ok 106 - dead-letter is observable and recoverable by an operator re-queue
+  ---
+  duration_ms: 34.824518
+  type: 'test'
+  ...
+# Subtest: authorization at delivery time: a recipient removed from the conversation before delivery is not notified
+ok 107 - authorization at delivery time: a recipient removed from the conversation before delivery is not notified
+  ---
+  duration_ms: 17.545468
+  type: 'test'
+  ...
+# Subtest: ordering: concurrent distinct sends keep the persisted array ordered by createdAt, one outbox row per message
+ok 108 - ordering: concurrent distinct sends keep the persisted array ordered by createdAt, one outbox row per message
+  ---
+  duration_ms: 100.490391
+  type: 'test'
+  ...
+# Subtest: outbox rows carry no message text and no attachment data
+ok 109 - outbox rows carry no message text and no attachment data
+  ---
+  duration_ms: 6.408672
+  type: 'test'
+  ...
+# Subtest: /api/config/stats: anonymous 401; every non-administrator 403; admin/superadmin reach the handler
+ok 110 - /api/config/stats: anonymous 401; every non-administrator 403; admin/superadmin reach the handler
+  ---
+  duration_ms: 3089.31987
+  type: 'test'
+  ...
+# Subtest: /api/config/entries: anonymous 401; every non-administrator 403; admin/superadmin reach the handler
+ok 111 - /api/config/entries: anonymous 401; every non-administrator 403; admin/superadmin reach the handler
+  ---
+  duration_ms: 105.568871
+  type: 'test'
+  ...
+# Subtest: /api/config/features: anonymous 401; every non-administrator 403; admin/superadmin reach the handler
+ok 112 - /api/config/features: anonymous 401; every non-administrator 403; admin/superadmin reach the handler
+  ---
+  duration_ms: 95.52393
+  type: 'test'
+  ...
+# Subtest: a request cannot elevate itself with client-supplied role hints
+ok 113 - a request cannot elevate itself with client-supplied role hints
+  ---
+  duration_ms: 16.05006
+  type: 'test'
+  ...
+# Subtest: master data that the product reads stays available to ordinary signed-in users and still requires a session
+ok 114 - master data that the product reads stays available to ordinary signed-in users and still requires a session
+  ---
+  duration_ms: 24.736549
+  type: 'test'
+  ...
+# Subtest: baseline: valid session -> /auth/me 200 and Messages API 200
+ok 115 - baseline: valid session -> /auth/me 200 and Messages API 200
+  ---
+  duration_ms: 3140.57671
+  type: 'test'
+  ...
+# Subtest: auth store unavailable -> 503 AUTH_TEMPORARILY_UNAVAILABLE (retryable), fail-closed, no data, never 401
+ok 116 - auth store unavailable -> 503 AUTH_TEMPORARILY_UNAVAILABLE (retryable), fail-closed, no data, never 401
+  ---
+  duration_ms: 43.209561
+  type: 'test'
+  ...
+# Subtest: after the store recovers the SAME cookie works again (session was never revoked)
+ok 117 - after the store recovers the SAME cookie works again (session was never revoked)
+  ---
+  duration_ms: 49.062918
+  type: 'test'
+  ...
+# Subtest: genuine failures stay 401: no cookie, garbage cookie, revoked session
+ok 118 - genuine failures stay 401: no cookie, garbage cookie, revoked session
+  ---
+  duration_ms: 14.026321
+  type: 'test'
+  ...
+# Subtest: authenticated non-participant is still denied (403/404), not 503
+ok 119 - authenticated non-participant is still denied (403/404), not 503
+  ---
+  duration_ms: 18.881252
+  type: 'test'
+  ...
+1..119
+# tests 119
+# suites 0
+# pass 118
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 135828.57192
+exit=0

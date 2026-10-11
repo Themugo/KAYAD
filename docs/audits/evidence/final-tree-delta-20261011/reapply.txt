@@ -1,0 +1,6 @@
+re-apply 20261011100000_chat_message_outbox on k6_plain: OK
+re-apply 20261011100000_chat_message_outbox on k6_main: OK
+re-apply 20261011120000_client_role_least_privilege on k6_plain: OK
+re-apply 20261011120000_client_role_least_privilege on k6_main: OK
+re-apply 20261011121000_profiles_role_sync_repair on k6_plain: OK
+re-apply 20261011121000_profiles_role_sync_repair on k6_main: OK

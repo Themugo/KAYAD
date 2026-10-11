@@ -16,7 +16,6 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import { Server } from "socket.io";
-import jwt from "jsonwebtoken";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -52,6 +51,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import escrowRoutes from "./routes/escrowRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import realtimeRoutes from "./routes/realtimeRoutes.js";
+import { authenticateHandshake, revalidateSocketUser } from "./services/socketAuth.service.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import communicationWebhookRoutes from "./routes/communicationWebhookRoutes.js";
@@ -591,34 +592,81 @@ const io = new Server(server, {
 app.set("io", io);
 setIO(io);
 
-// Socket JWT auth — reject unauthenticated users for sensitive rooms
-io.use((socket, next) => {
+// Socket authentication (RT-3 / D-RT-2, services/socketAuth.service.js). Identity comes only from a short-lived socket
+// ticket minted by an authenticated same-origin REST call, from the access cookie (same-host deployments) or from an
+// access JWT in the CONNECT packet — never from a client-supplied user id — and the user's ban/deactivation/token-version/
+// session state is checked exactly as protect() checks it. Failures leave the socket anonymous (public rooms only);
+// tokens and tickets are never logged.
+io.use(async (socket, next) => {
   try {
-    const authToken = socket.handshake.auth?.token;
-    const cookieHeader = socket.handshake.headers?.cookie || "";
-    const cookieToken = cookieHeader.split(";").map((part) => part.trim()).find((part) => part.startsWith("token="))?.slice("token=".length);
-    const token = authToken || cookieToken;
-    if (token) {
-      socket.user = jwt.verify(decodeURIComponent(token), process.env.JWT_SECRET, { algorithms: ["HS256"] });
-      return next();
-    }
+    const { user, reason } = await authenticateHandshake(socket.handshake);
+    socket.user = user;
+    socket.data.authReason = reason;
+  } catch (error) {
+    // Could not decide (database unavailable): fail closed to anonymous; the client re-authenticates on reconnect.
     socket.user = null;
-    next();
-  } catch {
-    socket.user = null;
-    next();
+    socket.data.authReason = "auth_unavailable";
+    logWarn("Socket authentication unavailable", { error: error?.message });
   }
+  next();
 });
 
-// Online presence tracking
-const onlineUsers = new Map();
+// While connected, re-check the session periodically so logout, "revoke all sessions", ban or deactivation also end
+// realtime access before the access token expires (default every 5 minutes; private-room joins re-check immediately).
+const SOCKET_REVALIDATE_MS = Math.max(Number(process.env.SOCKET_REVALIDATE_MS || 5 * 60 * 1000), 1000);
+
+// Presence: the previous implementation did io.emit("onlineUsers", [every connected user id]) to EVERY socket,
+// anonymous ones included (user-id enumeration + online-status disclosure). No client consumes that event
+// (verified: no listener in src/), so it is removed rather than re-scoped. Do not reintroduce a global presence
+// broadcast; if presence is ever needed, emit it only to the `user_<id>` rooms of users who share a chat with the subject.
+
+// Rooms that carry private data. A socket holds them only while its authenticated session is valid.
+const PRIVATE_ROOM_RE = /^(user_|chat_|inspection_)/;
+const dropPrivateRooms = (socket) => {
+  for (const room of [...socket.rooms]) {
+    if (room === socket.id) continue;
+    if (PRIVATE_ROOM_RE.test(room) || room === "admins") socket.leave(room);
+  }
+};
 
 io.on("connection", (socket) => {
   const uid = socket.user?.id || socket.user?._id;
+  // Tell the client how the handshake was judged (no identity data), so an authenticated tab that was downgraded can
+  // fetch a fresh ticket instead of silently staying anonymous.
+  socket.emit("authState", { authenticated: Boolean(uid) });
+  const downgrade = () => {
+    if (!socket.user) return;
+    socket.user = null;
+    dropPrivateRooms(socket);
+    socket.emit("sessionExpired");
+  };
+  const ensureSession = async () => {
+    if (!socket.user) return false;
+    try {
+      const fresh = await revalidateSocketUser(socket);
+      if (!fresh) { downgrade(); return false; }
+      socket.user = { ...socket.user, role: fresh.role, name: fresh.name };
+      return true;
+    } catch (error) {
+      // Undecidable: refuse this join (fail closed) but keep the connection; the next check decides.
+      logWarn("Socket session revalidation unavailable", { error: error?.message });
+      return false;
+    }
+  };
   if (uid) {
+    const revalidateTimer = setInterval(() => { void ensureSession(); }, SOCKET_REVALIDATE_MS);
+    revalidateTimer.unref?.();
+    socket.once("disconnect", () => clearInterval(revalidateTimer));
     socket.join(`user_${uid}`);
-    onlineUsers.set(uid, socket.id);
-    io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+    // The token is verified once at the handshake; without this a socket would outlive its access token indefinitely.
+    // At expiry the socket is downgraded to anonymous (public auction/showroom rooms keep working), loses every
+    // private room, and the client is told to reconnect so the handshake is re-evaluated with its refreshed cookie.
+    const expMs = Number(socket.user?.exp) * 1000;
+    if (Number.isFinite(expMs)) {
+      const timer = setTimeout(downgrade, Math.min(Math.max(expMs - Date.now(), 0), 2 ** 31 - 1));
+      timer.unref?.();
+      socket.once("disconnect", () => clearTimeout(timer));
+    }
   }
 
   // Validate room IDs to prevent arbitrary room injection
@@ -673,6 +721,7 @@ io.on("connection", (socket) => {
 
   socket.on("joinChat", async (chatId) => {
     if (!socket.user || isRateLimited("joinChat") || !isValidId(chatId)) return;
+    if (!(await ensureSession())) return;
 
     const userId = socket.user.id || socket.user._id;
     if (!isValidId(String(userId))) return;
@@ -682,14 +731,16 @@ io.on("connection", (socket) => {
       const sb = getSupabase();
       const { data: chat } = await sb
         .from("chats")
-        .select("id")
+        .select("id, isBlocked")
         .eq("id", chatId)
         .contains("participants", [userId])
         .maybeSingle();
 
       // Chat rooms are private. Authentication alone is not sufficient; the
-      // authenticated user must actually be a participant in this chat.
-      if (!chat) return;
+      // authenticated user must actually be a participant in this chat, and a
+      // blocked conversation is closed for realtime exactly as REST answers 423.
+      // Re-check socket.user after the await: the session may have expired while the lookup ran.
+      if (!chat || chat.isBlocked || !socket.user) return;
       socket.join(`chat_${chatId}`);
     } catch (error) {
       logWarn("Socket chat room authorization failed", { chatId, userId, error: error?.message });
@@ -701,6 +752,7 @@ io.on("connection", (socket) => {
 
   socket.on("joinInspection", async (inspectionId) => {
     if (!socket.user || isRateLimited("joinInspection") || !isValidId(inspectionId)) return;
+    if (!(await ensureSession())) return;
     const userId = String(socket.user.id || socket.user._id);
     if (!isValidId(userId)) return;
     try {
@@ -733,12 +785,14 @@ io.on("connection", (socket) => {
     const name = socket.user.name || socket.user.fullName || socket.user.email || null;
     socket.to(room).emit("typing", { chatId, userId, name });
   });
-  socket.on("joinAdmin", () => {
-    if (["admin","superadmin","executive","manager","engineer","webhoist"].includes(socket.user?.role)) socket.join("admins");
-  });
-  socket.on("joinControlPlane", () => {
-    if (["admin","superadmin","executive","manager","engineer","webhoist"].includes(socket.user?.role)) socket.join("admins");
-  });
+  const ADMIN_ROOM_ROLES = ["admin","superadmin","executive","manager","engineer","webhoist"];
+  const joinAdmins = async () => {
+    if (!socket.user || isRateLimited("joinAdmin")) return;
+    if (!(await ensureSession())) return;
+    if (ADMIN_ROOM_ROLES.includes(socket.user?.role)) socket.join("admins");
+  };
+  socket.on("joinAdmin", joinAdmins);
+  socket.on("joinControlPlane", joinAdmins);
   socket.on("joinShowroom", () => {
     if (!isRateLimited("joinShowroom")) socket.join("showroom");
   });
@@ -747,10 +801,6 @@ io.on("connection", (socket) => {
   });
   socket.on("disconnect", () => {
     eventBuckets.clear();
-    if (uid) {
-      onlineUsers.delete(uid);
-      io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-    }
   });
 });
 
@@ -779,6 +829,7 @@ app.use("/api/payments", externalTimeout, paymentRoutes);
 
 app.use("/api/escrow", idempotencyCheck, csrfProtection, escrowRoutes); // Idempotency + CSRF for escrow operations
 app.use("/api/chat", chatRoutes);
+app.use("/api/realtime", realtimeRoutes);
 app.use("/api/favorites", csrfProtection, favoriteRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/communications/webhooks", communicationWebhookRoutes);
@@ -1078,6 +1129,17 @@ const bootstrap = async () => {
     }
 
     await startBackgroundServices(io);
+
+    // Durable chat delivery reconciler (transactional outbox, see services/chatOutbox.service.js).
+    try {
+      const { startChatOutboxWorker } = await import("./services/chatOutbox.service.js");
+      startChatOutboxWorker({
+        intervalMs: Number(process.env.CHAT_OUTBOX_INTERVAL_MS) || 15000,
+        minAgeSeconds: process.env.CHAT_OUTBOX_MIN_AGE_SECONDS !== undefined ? Number(process.env.CHAT_OUTBOX_MIN_AGE_SECONDS) : 30,
+      });
+    } catch (err) {
+      logWarn("Chat outbox worker not started", { error: err?.message });
+    }
   } catch (err) {
     logError("Bootstrap failed", err);
     process.exit(1);

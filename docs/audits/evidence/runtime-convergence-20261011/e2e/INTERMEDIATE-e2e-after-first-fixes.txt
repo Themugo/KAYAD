@@ -1,0 +1,117 @@
+
+Running 19 tests using 1 worker
+
+  ✓   1 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:27:3 › KAYAD canonical onboarding › buyer registration uses the canonical auth contract (2.0s)
+  ✓   2 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:53:3 › KAYAD canonical onboarding › dealer registration requires and sends business fields (1.8s)
+  ✓   3 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:80:3 › KAYAD canonical onboarding › private seller registration uses individual_seller (1.7s)
+  ✓   4 [chromium] › tests/dealer-onboarding/dealer-onboarding.spec.ts:103:3 › KAYAD canonical onboarding › inspector application uses the dedicated application endpoint (2.1s)
+  ✘   5 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid (7.9s)
+  ✓   6 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:92:3 › KAYAD marketplace controls — browser interaction certification › grid responds honestly across mobile, tablet and desktop breakpoints (2.2s)
+  ✓   7 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:113:3 › KAYAD marketplace controls — browser interaction certification › desktop sidebar dropdowns remain populated and send their real backend query parameters (3.6s)
+  ✓   8 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:140:3 › KAYAD marketplace controls — browser interaction certification › show/page-size and grid/list controls update the live inventory state (3.0s)
+  ✓   9 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:156:3 › KAYAD marketplace controls — browser interaction certification › mobile filter drawer exposes working selectors and closes cleanly (2.3s)
+  ✓  10 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:178:3 › KAYAD marketplace controls — browser interaction certification › hero search dropdowns remain functional and drive the real filter state (2.2s)
+  ✓  11 [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:204:3 › KAYAD marketplace controls — browser interaction certification › admin escrow dropdowns have stable accessible controls (2.4s)
+  ✘  12 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification — environment evidence › frontend build serves and renders the marketplace shell (buyer browsing) (6.9s)
+  ✓  13 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:44:3 › Workflow certification — environment evidence › auth surface renders (registration/login entry points) (4.8s)
+  ✘  14 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification — environment evidence › marketplace navigation switches views without errors (browsing ↔ auctions) (12.0s)
+  ✓  15 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:66:3 › Workflow certification — environment evidence › SPA deep link does not 404 and renders the shell (session/bookmark restoration surface) (2.0s)
+  ✓  16 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:73:3 › Workflow certification — environment evidence › unknown deep link does not crash the app (invalid input at routing level) (3.3s)
+  ✓  17 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:81:3 › Workflow certification — environment evidence › refresh preserves the shell (browser refresh recovery) (3.0s)
+  ✓  18 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:89:3 › Workflow certification — environment evidence › network failure: API unreachable does not crash the app or fabricate data (1.9s)
+  ✓  19 [chromium] › tests/workflow-certification/workflow-certification.spec.ts:105:3 › Workflow certification — environment evidence › mobile viewport renders the shell without breaking (responsive build) (1.5s)
+
+
+  1) [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 5
+    Received: 4
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      86 |       await expect.poll(async () => {
+      87 |         return await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
+    > 88 |       }).toBe(count);
+         |          ^
+      89 |     }
+      90 |   });
+      91 |
+        at /home/claude/msg/p2/work/KAYAD-main/e2e/tests/marketplace-controls/marketplace-controls.spec.ts:88:10
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/marketplace-controls-marke-99db8--real-rendered-desktop-grid-chromium/error-context.md
+
+  2) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification — environment evidence › frontend build serves and renders the marketplace shell (buyer browsing) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Auction', exact: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Auction', exact: true }).first()
+
+
+      37 |     // logo button also contains the word "Marketplace")
+      38 |     await expect(page.getByRole('button', { name: 'Marketplace', exact: true }).first()).toBeVisible();
+    > 39 |     await expect(page.getByRole('button', { name: 'Auction', exact: true }).first()).toBeVisible();
+         |                                                                                      ^
+      40 |     // Region selector is part of the browsing workflow
+      41 |     await expect(page.locator('text=All East Africa').first()).toBeVisible();
+      42 |   });
+        at /home/claude/msg/p2/work/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:39:86
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-cd051-place-shell-buyer-browsing--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-cd051-place-shell-buyer-browsing--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-cd051-place-shell-buyer-browsing--chromium/error-context.md
+
+  3) [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification — environment evidence › marketplace navigation switches views without errors (browsing ↔ auctions) 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Auction', exact: true }).first()
+
+
+      54 |     await page.goto('/');
+      55 |     await waitForAppShell(page);
+    > 56 |     await page.getByRole('button', { name: 'Auction', exact: true }).first().click();
+         |                                                                              ^
+      57 |     await page.waitForTimeout(1000);
+      58 |     await expect(page.locator('body')).not.toBeEmpty();
+      59 |     await page.getByRole('button', { name: 'Marketplace', exact: true }).first().click();
+        at /home/claude/msg/p2/work/KAYAD-main/e2e/tests/workflow-certification/workflow-certification.spec.ts:56:78
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-38c59-errors-browsing-↔-auctions--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-certification-wor-38c59-errors-browsing-↔-auctions--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-certification-wor-38c59-errors-browsing-↔-auctions--chromium/error-context.md
+
+  3 failed
+    [chromium] › tests/marketplace-controls/marketplace-controls.spec.ts:75:3 › KAYAD marketplace controls — browser interaction certification › 3/4/5 column controls change the real rendered desktop grid 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:32:3 › Workflow certification — environment evidence › frontend build serves and renders the marketplace shell (buyer browsing) 
+    [chromium] › tests/workflow-certification/workflow-certification.spec.ts:51:3 › Workflow certification — environment evidence › marketplace navigation switches views without errors (browsing ↔ auctions) 
+  16 passed (1.2m)

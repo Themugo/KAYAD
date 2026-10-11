@@ -1,0 +1,5 @@
+get_advisors(security) on ubvgixwhfybbyjuvxboj, 2026-10-11 (observed_at 2026-10-11T12:06:06Z)
+lint families returned: 1
+  rls_enabled_no_policy  level=INFO  count=127  (RLS on, no policies => deny-all for anon/authenticated; backend uses service_role)
+ERROR lints: 0
+WARN lints: 0

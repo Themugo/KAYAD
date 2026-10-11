@@ -75,7 +75,7 @@ class FailoverService {
         logInfo(`Circuit breaker testing: ${serviceName}`);
       } else {
         logWarn(`Circuit breaker open: ${serviceName}`);
-        incrementCounter('circuit_breaker_rejected', { service: serviceName });
+        incrementCounter('circuit_breaker_rejected', 1, { service: serviceName });
 
         // Execute fallback if provided
         if (fallback) {
@@ -114,7 +114,7 @@ class FailoverService {
       }
     }
 
-    incrementCounter('circuit_breaker_success', { service: serviceName });
+    incrementCounter('circuit_breaker_success', 1, { service: serviceName });
   }
 
   /**
@@ -135,7 +135,7 @@ class FailoverService {
       this.openCircuit(serviceName);
     }
 
-    incrementCounter('circuit_breaker_failure', { service: serviceName, error_type: error.code || 'unknown' });
+    incrementCounter('circuit_breaker_failure', 1, { service: serviceName, error_type: error.code || 'unknown' });
 
     // Log critical failures
     if (circuit.failures >= this.config.failureThreshold) {
@@ -180,7 +180,7 @@ class FailoverService {
     this.degradedServices.delete(serviceName);
 
     logInfo(`Circuit breaker closed: ${serviceName}`);
-    incrementCounter('circuit_breaker_recovered', { service: serviceName });
+    incrementCounter('circuit_breaker_recovered', 1, { service: serviceName });
   }
 
   /**
@@ -188,7 +188,7 @@ class FailoverService {
    */
   async executeFallback(serviceName, fallback) {
     logInfo(`Executing fallback for: ${serviceName}`);
-    incrementCounter('fallback_executed', { service: serviceName });
+    incrementCounter('fallback_executed', 1, { service: serviceName });
 
     try {
       if (typeof fallback === 'function') {

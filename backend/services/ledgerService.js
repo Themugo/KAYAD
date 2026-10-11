@@ -231,7 +231,7 @@ export async function recordAuctionPayment({ payment_id, user_id, amount, commis
 }
 
 export async function getBalanceSheet() {
-  const accounts = await findAll("ledger_accounts", { filters: { isActive: true } });
+  const accounts = await findAll("ledger_accounts", {}) /* ledger_accounts has no is_active column (repository and production): every account is active */;
   const totals = { asset: 0, liability: 0, equity: 0, revenue: 0, expense: 0 };
   for (const acc of accounts) {
     totals[acc.type] = (totals[acc.type] || 0) + (acc.balance || 0);
@@ -240,7 +240,7 @@ export async function getBalanceSheet() {
 }
 
 export async function getTrialBalance() {
-  const accounts = await findAll("ledger_accounts", { filters: { isActive: true } });
+  const accounts = await findAll("ledger_accounts", {}) /* ledger_accounts has no is_active column (repository and production): every account is active */;
   let totalDebit = 0;
   let totalCredit = 0;
   for (const acc of accounts) {

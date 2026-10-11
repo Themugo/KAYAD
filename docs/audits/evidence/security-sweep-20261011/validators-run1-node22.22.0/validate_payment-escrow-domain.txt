@@ -1,0 +1,14 @@
+
+> kayad@0.0.0 validate:payment-escrow-domain
+> node scripts/validate-payment-escrow-domain.mjs
+
+PASS canonical payment service exists
+PASS canonical escrow service exists
+PASS payment initiated after local record creation
+PASS payment checkout is unique
+PASS pending payment race is constrained
+PASS callback amount mismatch is finalized
+PASS payment status response has one payment field
+PASS active payment history uses canonical service
+PASS secure escrow hub uses canonical services
+Payment/Escrow domain gate: 9/9 PASS

@@ -1,0 +1,11 @@
+
+> kayad@0.0.0 validate:foundation-integrity
+> node scripts/validate-foundation-integrity.mjs
+
+PASS package.json scripts and encoding
+PASS required holistic certification files present
+PASS response wrapper has canonical early single registration
+PASS response hook keeps synchronous response boundary
+PASS error handler guards committed responses
+PASS not-found handler guards committed responses
+FOUNDATION INTEGRITY: PASS

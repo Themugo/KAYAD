@@ -18,6 +18,7 @@ import {
   compareEscrowBalances,
   reconcileExpectedVsReceived,
   reconcileReleases,
+  generateReportId,
 } from "../services/reconciliationService.js";
 import {
   triggerManualReconciliation,
@@ -306,12 +307,12 @@ export const getFinancialIntegrityScore = async (req, res) => {
     const endDate = new Date();
 
     const tempReport = await ReconciliationReport.create({
-      reportId: ReconciliationReport.generateReportId(),
+      reportId: generateReportId(), // was a Mongoose static that the Supabase model never had
       reportType: "integrity_score",
       startTime: startDate,
       endTime: endDate,
       status: "in_progress",
-      generatedBy: "system",
+      generatedBy: req.user?.id || null, // uuid column: the literal "system" raised 22P02
     });
 
     const score = await calculateFinancialIntegrityScore(startDate, endDate, tempReport);

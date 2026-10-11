@@ -1,0 +1,13 @@
+
+> kayad@0.0.0 validate:auction-phase7
+> node scripts/validate-auction-phase7.mjs
+
+PASS registration service hard-closes live auction
+PASS public room-state endpoint exists
+PASS room service distinguishes bidding-open and registration-open
+PASS database trigger blocks late registrations
+PASS live UI says bidding room closed/watch-only
+PASS live UI has no live-time register action
+PASS active bidder remains able to bid
+PASS canonical bid API remains unchanged
+PHASE7_PASS=8

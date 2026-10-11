@@ -40,7 +40,7 @@ class Semaphore {
     return new Promise((resolve) => {
       this.queue.push(resolve);
       this.metrics.rejectedRequests++;
-      incrementCounter("bulkhead_queued", { name: this.name });
+      incrementCounter("bulkhead_queued", 1, { name: this.name });
     });
   }
 
@@ -108,7 +108,7 @@ export const createBulkheadMiddleware = (name, maxConcurrent, timeoutMs = 30000)
         if (acquired) {
           bulkhead.release();
           logError(`Bulkhead timeout for ${name}`, { path: req.path, timeoutMs });
-          incrementCounter("bulkhead_timeout", { name });
+          incrementCounter("bulkhead_timeout", 1, { name });
           if (!res.headersSent) {
             res.status(504).json({
               success: false,
@@ -135,7 +135,7 @@ export const createBulkheadMiddleware = (name, maxConcurrent, timeoutMs = 30000)
         bulkhead.release();
       }
       logError(`Bulkhead error for ${name}`, error, { path: req.path });
-      incrementCounter("bulkhead_error", { name });
+      incrementCounter("bulkhead_error", 1, { name });
 
       if (!res.headersSent) {
         res.status(503).json({

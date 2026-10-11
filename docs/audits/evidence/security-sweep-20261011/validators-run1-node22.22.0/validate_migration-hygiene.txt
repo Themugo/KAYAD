@@ -1,0 +1,8 @@
+
+> kayad@0.0.0 validate:migration-hygiene
+> node scripts/validate-migration-hygiene.mjs
+
+Migration hygiene: 173 migration files scanned.
+PASS exact duplicate migration bodies: none
+PASS duplicate table creators: none
+Migration hygiene gate: PASS

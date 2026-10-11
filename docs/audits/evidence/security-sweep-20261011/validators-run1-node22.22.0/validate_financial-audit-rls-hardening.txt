@@ -1,0 +1,12 @@
+
+> kayad@0.0.0 validate:financial-audit-rls-hardening
+> node scripts/validate-financial-audit-rls-hardening.mjs
+
+FINANCIAL AUDIT RLS HARDENING: 7/7 PASS
+- payment_attempts RLS enabled
+- payment_attempts client privileges revoked
+- payment_events RLS enabled
+- payment_events client privileges revoked
+- webhook_events RLS enabled
+- webhook_events client privileges revoked
+- canonical service-role backend path preserved

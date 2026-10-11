@@ -1,0 +1,20 @@
+
+> kayad@0.0.0 validate:transaction-integrity
+> node scripts/validate-transaction-integrity.mjs
+
+PASS No stale Mongo session cleanup remains in bid controller
+PASS Auto-bid uses atomic RPC
+PASS Atomic auto-bid RPC wrapper exists
+PASS Atomic auction close RPC wrapper exists
+PASS Auction close service delegates settlement to DB
+PASS Auction close supports forced winner atomically
+PASS Canonical refund ledger migration exists
+PASS Refund duplicate protection exists
+PASS Auto-bid function locks car row
+PASS Close function locks car row
+PASS Close function marks winner and losers
+PASS Reconciliation uses refunds table
+PASS Refund endpoint is truthful
+PASS Favorite controller has no stale transaction session
+
+Transaction integrity validation: 14/14 PASS
