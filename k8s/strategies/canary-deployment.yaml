@@ -197,6 +197,6 @@ spec:
 # Canary Success Criteria:
 # - Error rate < 0.1%
 # - P95 latency < 200ms
-- # Conversion rate >= stable version
+# - Conversion rate >= stable version
 # - No critical bugs reported
 # - Resource utilization within limits

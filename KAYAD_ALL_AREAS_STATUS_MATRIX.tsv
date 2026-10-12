@@ -26,3 +26,30 @@ C/B database	Hosted vs source migration drift	FAIL	hosted last migration 2026092
 E auctions	auction_setups / auctions tables on hosted DB	FAIL	tables absent in production; root cause = unapplied 20261002190000 etc.
 B dealer	R12/R14 on production	NEEDS AUTHORIZATION	unapplied by design
 A,D,H,I,J,K	Deep per-domain audits this session	PARTIAL	covered by existing regression suites passing; no new defects sought beyond route sweep
+Continuation2	Foundation ZIP sha256 + internal manifest	PASS	0 mismatches
+Continuation2	Remote branch head d7c85a5b matches expectation; main=f7f1479 (PR #219)	PASS	read-only clone
+Continuation2	Stray file t proxy<U+F022>	PASS	ASCII git-grep output, no secrets, not packaged
+Continuation2	AA-S1 runtime authz (13 roles x 3 routes)	PASS after fix	32 fail -> 0; allAreasAuthzRuntime
+Continuation2	AA-S2 runtime authz (email + staff visibility)	PASS after fix	allAreasAuthzRuntime
+Continuation2	Gitleaks PR-range emulation (8aa6343..d7c85a5)	PASS	2 commits, no leaks
+Continuation2	Gitleaks GitHub Actions result	UNVERIFIED	API not reachable; log requested
+Continuation2	Gitleaks worktree scan	PASS (12 verified false positives)	evidence/test_logs/gitleaks_worktree.json
+Continuation2	Runtime route inventory	PASS	96 mounts/1596 routes/111 unguarded triaged
+Continuation2	Public dealer-health-score PII (email)	FIXED	allAreasDealerHealthPublicFields
+Continuation2	Public dealer-health-score field policy	GAP	owner decision
+Continuation2	adminOnly/STAFF_ROLES breadth (AA-A1)	GAP	262 routes (92 non-GET); listing edit/delete by any staff role
+Continuation2	Webhook authenticity (Brevo/Twilio/AT/SMS/M-Pesa)	PASS (source)	live NOT RUN
+Continuation2	Uploads validation + ownership	PASS (source)	magic bytes, owner/admin
+Continuation2	Auth/session controls	PARTIAL (source)	no live journey
+Continuation2	Migration replay on local PG16	PARTIAL	179/181 (2 platform-fn), re-run 166/181
+Continuation2	RLS on replayed schema	PASS (catalog)	201/201
+Continuation2	Hosted vs source schema (object level)	FAIL	16 source tables missing hosted; 24 hosted-only
+Continuation2	auctions table claim	CORRECTED	no code path uses it
+Continuation2	R12/R14 migrations replay	PASS (local substitute)	not applied to production
+Continuation2	kubeconform K8s 1.29 strict	PASS after fix	25/27 -> 26/26 valid
+Continuation2	Helm render / kubectl / docker daemon	BLOCKED	tools unavailable
+Continuation2	Package manager convention	PARTIAL	npm ci everywhere; bun.lock stale, decision pending
+Continuation2	Frontend tsc/build/vitest	PASS	0 err / ok / 643 pass 1 skip
+Continuation2	Backend Jest/Vitest/node:test	PASS	1251 / 16 / 1 ; 0 failed
+Continuation2	Validators (7) + npm audit x2	PASS	all exit 0; 0 vulns
+Continuation2	Browser journeys / jobs / realtime / live payments	NOT RUN	no staging environment
