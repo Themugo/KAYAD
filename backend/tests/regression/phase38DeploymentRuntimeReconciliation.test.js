@@ -133,14 +133,21 @@ describe("R25 — M-Pesa IP whitelist uses Express's trust-proxy-aware req.ip, n
     expect(src).not.toMatch(/x-forwarded-for["'\]]*\s*\|\|\s*["']["']\s*\)\.split\(/);
   });
 
-  it("getClientIp uses req.ip", () => {
-    const fnMatch = src.match(/const getClientIp = \(req\) => ([^;]+);/);
-    expect(fnMatch).not.toBeNull();
-    expect(fnMatch[1]).toMatch(/req\.ip/);
+  it("getClientIp uses req.ip only after the immediate peer passes the trusted-proxy gate", () => {
+    expect(src).toMatch(/return req\.ip \|\| ""/);
+    expect(src).toMatch(/if \(!isTrustedProxyPeer\(remoteAddress\)\) return remoteAddress/);
   });
 
-  it("server.js sets trust proxy, which req.ip in mpesaSecurity.js depends on to resist a spoofed header", () => {
-    const serverSrc = readIfExists(path.join(repoRoot, "backend/server.js"));
-    expect(serverSrc).toMatch(/app\.set\(\s*["']trust proxy["']/);
+  it("M-Pesa IP resolution requires an explicit trusted-proxy CIDR gate before using req.ip", () => {
+    expect(src).toMatch(/MPESA_TRUSTED_PROXY_CIDRS/);
+    expect(src).toMatch(/isTrustedProxyPeer\(remoteAddress\)/);
+    expect(src).toMatch(/if \(!isTrustedProxyPeer\(remoteAddress\)\) return remoteAddress/);
+  });
+
+  it("deployment config exposes the trusted-proxy CIDR setting with a fail-closed empty default", () => {
+    const configmapSrc = readIfExists(path.join(repoRoot, "k8s/backend/configmap.yaml"));
+    const helmValuesSrc = readIfExists(path.join(repoRoot, "helm/kayad-backend/values.yaml"));
+    expect(configmapSrc).toMatch(/MPESA_TRUSTED_PROXY_CIDRS:\s*["']{2}/);
+    expect(helmValuesSrc).toMatch(/MPESA_TRUSTED_PROXY_CIDRS:\s*["']{2}/);
   });
 });

@@ -22,7 +22,8 @@
     "test:dealer-schema-regression": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/regression/dealerOnboardingSuspendSchemaReconciliation.test.js",
     "test:vitest": "vitest run --config vitest.config.js",
     "test:node": "node --test tests/response-lifecycle.test.js",
-    "test:chat-integrity": "node --test tests/integration/chat-message-integrity.integration.test.js"
+    "test:chat-integrity": "node --test tests/integration/chat-message-integrity.integration.test.js",
+    "test:phase39-mpesa-proxy-regression": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/regression/phase39MpesaTrustedProxy.test.js tests/regression/phase38DeploymentRuntimeReconciliation.test.js"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
@@ -64,7 +65,8 @@
     "swagger-ui-express": "^5.0.1",
     "twilio": "^6.0.2",
     "uuid": "^14.0.1",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "proxy-addr": "^2.0.8"
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",

@@ -11,6 +11,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import crypto from "crypto";
+import proxyaddr from "proxy-addr";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // Official Safaricom IP ranges (documented in Daraja portal)
@@ -47,27 +48,52 @@ const ipInCidr = (ip, cidr) => {
   return (toInt(ip) & mask) === (toInt(range) & mask);
 };
 
-// R25 fix (KAYAD Phase 38 — CRITICAL): this previously read the LEFTMOST
-// entry of the raw X-Forwarded-For header directly. Both this app's own
-// standalone nginx load balancer (nginx/nginx.conf, which uses
-// `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` — APPENDS
-// to whatever XFF the client sent, never overwrites it) and many other
-// reverse-proxy setups preserve a client-supplied prefix. That means any
-// external caller could defeat this M-Pesa IP whitelist entirely by sending
-// its own forged header, e.g. `X-Forwarded-For: 196.201.214.200` (a real
-// whitelisted Safaricom production IP) — confirmed empirically in this
-// phase with a live Express server (trust proxy: 1, matching
-// backend/server.js:241): req.ip correctly resolved the real caller while
-// the old getClientIp() returned the attacker's forged value instead. A
-// forged M-Pesa callback that clears this check can mark a payment
-// "success" with no real money ever having moved — a direct financial-fraud
-// path. Fixed to use Express's own trust-proxy-aware req.ip, which already
-// correctly discards an untrusted client-supplied prefix given the existing
-// `app.set("trust proxy", 1)` configuration (one trusted proxy hop, matching
-// this deployment's architecture — a single nginx/ingress layer in front of
-// the backend). See KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md R25 for the full
-// evidence and reproduction.
-const getClientIp = (req) => req.ip || req.socket.remoteAddress || "";
+// R25 hardening (Phase 39): req.ip is only trustworthy when the immediate
+// socket peer is an explicitly configured trusted proxy. Express's global
+// `trust proxy: 1` setting alone is not sufficient: direct callers (including
+// other pods allowed by a NetworkPolicy) can supply X-Forwarded-For themselves
+// and be treated as if a proxy had appended the real source address.
+//
+// MPESA_TRUSTED_PROXY_CIDRS must contain the actual ingress/proxy peer CIDRs
+// for this deployment (comma-separated). If it is missing, malformed, or the
+// socket peer is outside those CIDRs, use the socket peer address itself. This
+// fails closed for proxied callbacks until the operator configures the correct
+// trusted range; it never falls back to an untrusted forwarded header.
+const trustedProxyMatcherCache = new Map();
+const isTrustedProxyPeer = (remoteAddress) => {
+  const cidrs = (process.env.MPESA_TRUSTED_PROXY_CIDRS || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (!cidrs.length || !remoteAddress) return false;
+
+  const cacheKey = cidrs.join(",");
+  let matcher = trustedProxyMatcherCache.get(cacheKey);
+  if (!matcher) {
+    try {
+      matcher = proxyaddr.compile(cidrs);
+      trustedProxyMatcherCache.set(cacheKey, matcher);
+    } catch {
+      // Invalid operator configuration must not turn forwarded headers into
+      // trusted identity. Return false and let the callback fail closed.
+      return false;
+    }
+  }
+
+  try {
+    return matcher(remoteAddress, 0);
+  } catch {
+    return false;
+  }
+};
+
+const getClientIp = (req) => {
+  const remoteAddress = req.socket?.remoteAddress || "";
+  if (!isTrustedProxyPeer(remoteAddress)) return remoteAddress;
+  // Only honor Express's resolved client IP after verifying the immediate
+  // peer belongs to the explicitly configured trusted-proxy CIDRs.
+  return req.ip || "";
+};
 
 export const mpesaIpWhitelist = (req, res, next) => {
   // Skip in dev/test mode only. In production the bypass flag is

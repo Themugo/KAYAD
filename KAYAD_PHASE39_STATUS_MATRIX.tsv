@@ -1,0 +1,14 @@
+Area	Status	Evidence / limitation
+Foundation integrity	PASS	ZIP integrity check and calculated SHA-256 recorded; no sidecar supplied
+R25 source hardening	PASS	Explicit trusted proxy CIDR peer gate; fail-closed default
+R25 runtime regression	BLOCKED	Jest dependencies unavailable; Node v22.16.0 below required v22.22.2
+M-Pesa production callback	BLOCKED	Actual ingress peer CIDRs need cluster-specific configuration and staging validation
+R23 Kubernetes env contract	PASS	Parsed ConfigMap/Deployment coverage and sanitized validateEnv positive/negative tests
+Helm rendering	BLOCKED	Helm binary unavailable
+R18/R19 ingress source contract	PASS	Static route/rewrite validator passed; prior standalone-nginx evidence preserved
+Live ingress-nginx	UNVERIFIED	No live ingress-nginx controller test in this phase
+Secret-scan CI wiring	PASS	Workflow source confirms gitleaks action and .gitleaks.toml
+Phase 39 gitleaks execution	BLOCKED	Gitleaks binary unavailable
+Full frontend/backend suites	BLOCKED	Dependency installation blocked and runtime below project requirement
+R12/R14 production migrations	UNAUTHORIZED / UNCHANGED	No production mutation performed
+Artifact integrity	PASS	Final ZIP integrity and external SHA-256 sidecar verified after packaging
