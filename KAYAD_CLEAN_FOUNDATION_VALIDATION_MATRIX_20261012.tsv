@@ -1,0 +1,30 @@
+Area	Status	Evidence / notes
+Registration/onboarding source gate	PASS	47/47
+Deployment readiness contract	PASS	Production env template and rewrite contract
+Production host contract	PASS	Canonical www host and same-origin /api contract
+Homepage convergence	PASS	9/9; validator aligned to current featured/showcase logic
+Canonical architecture	PASS	Static validator
+Dealer modal convergence	PASS	One canonical implementation plus compatibility re-export
+Database contract alignment	PASS	8/8
+Domain lifecycle integrity	PASS	Static validator
+Explicit auth flows	PASS	Static validator
+Registration role matrix	PASS	33/33
+High-risk boundaries	PASS	Static validator
+Runtime convergence	PASS	7/7
+Migration hygiene	PASS	181 files; no exact duplicate bodies or duplicate table creators
+Supabase migration preflight	PASS	181 unique migration versions; static only
+Backend runtime contracts	PASS	14/14
+Socket contract	PASS	Static validator
+Navigation convergence	PASS	43/43
+Stage 34 showroom icons	PASS	16/16
+Stage 35 home hero pair	PASS	12/12
+PWA/mobile contract	PASS	13/13
+Production verifier contract	PASS	Static validator
+Deployment/runtime drift	PASS	17/17
+Targeted R12/R14 Jest regression	BLOCKED	Must run with Node >=22.22.2 and installed backend dependencies
+Frontend typecheck/build/Vitest on this extracted archive	BLOCKED	Container Node v22.16.0 does not meet engine requirement
+Backend full Jest/Vitest/Node suite	BLOCKED	Required runtime/dependencies unavailable in this execution
+Backend boot ESLint gate	BLOCKED	eslint unavailable due incomplete dependency install
+Release gate	BLOCKED	TypeScript unavailable due incomplete dependency install
+Live PostgreSQL/Supabase/RLS	NOT RUN	No live migration or production database mutation authorized/performed
+Live providers/M-Pesa/browser E2E/deployment	NOT RUN	Requires credentials/staging/runtime and explicit controlled verification
