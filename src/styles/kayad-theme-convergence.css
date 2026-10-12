@@ -1,0 +1,61 @@
+/* Stage 24 — canonical theme layer derived from the Automotive Services page.
+   This layer standardizes reusable surface language without overriding domain
+   states, route layouts, role accents, or the homepage's full-bleed composition. */
+:root {
+  --kayad-theme-hero: var(--kayad-brand-dark, #12576D);
+  --kayad-theme-hero-end: var(--kayad-brand, #176B87);
+  --kayad-theme-hero-ink: #FFFFFF;
+  --kayad-theme-hero-muted: #EEF7F5;
+  --kayad-theme-hero-kicker: #BDE5DE;
+  --kayad-theme-page: var(--kayad-brand-surface, #F6FAF9);
+  --kayad-theme-card: #FFFFFF;
+  --kayad-theme-border: var(--kayad-brand-border, #D7E7E4);
+  --kayad-theme-ink: var(--kayad-brand-deep, #0A3340);
+  --kayad-theme-body: #334155;
+  --kayad-theme-muted: #64748B;
+  --kayad-theme-accent: var(--kayad-brand-accent, #13B8A6);
+  --kayad-theme-focus: rgba(19, 184, 166, .72);
+}
+
+/* The automotive-services hero is the reference treatment for branded page headers. */
+.kayad-brand-hero {
+  color: var(--kayad-theme-hero-ink);
+  background-color: var(--kayad-theme-hero);
+  background-image: linear-gradient(112deg, var(--kayad-theme-hero) 0%, var(--kayad-theme-hero-end) 100%);
+}
+.kayad-brand-hero :where(h1, h2, h3) { color: var(--kayad-theme-hero-ink); }
+.kayad-brand-hero :where(p) { color: var(--kayad-theme-hero-muted); }
+.kayad-brand-hero :where([data-kayad-eyebrow], .kayad-eyebrow) { color: var(--kayad-theme-hero-kicker); }
+
+/* Public page surfaces share readable ink, borders and focus without imposing a template. */
+.kayad-public-shell {
+  --public-ink: var(--kayad-theme-ink);
+  --public-brand: var(--kayad-brand, #176B87);
+  --public-accent: var(--kayad-theme-accent);
+  --public-surface: var(--kayad-theme-card);
+  --public-surface-soft: var(--kayad-theme-page);
+  --public-border: var(--kayad-theme-border);
+  --public-muted: var(--kayad-theme-muted);
+  color: var(--kayad-theme-ink);
+  background-color: var(--kayad-theme-page);
+}
+.kayad-public-shell :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--kayad-theme-focus);
+  outline-offset: 3px;
+}
+.kayad-public-shell :where(p, li, dd, dt, label) { text-wrap: pretty; }
+.kayad-public-shell :where(img, svg, video, canvas) { max-width: 100%; }
+.kayad-public-shell :where(button, a, input, select, textarea) { scroll-margin-block: 5rem; }
+
+/* Keep body copy comfortably readable while leaving status colors and role accents intact. */
+.kayad-public-shell :where(.text-\[\#64748B\], .text-\[\#64748b\]) { color: var(--kayad-theme-muted); }
+.kayad-public-shell :where(.border-\[\#D7E7E4\], .border-\[\#d7e7e4\]) { border-color: var(--kayad-theme-border); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kayad-public-shell *, .kayad-brand-hero * {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -304,7 +304,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
   return (
     <section className="space-y-5" aria-labelledby="support-knowledge-heading">
       <div className="rounded-[28px] border border-[#D7E7E4] bg-white shadow-sm overflow-hidden">
-        <div className="bg-[#0A3340] px-5 py-6 sm:px-7 sm:py-7 text-white">
+        <div className="kayad-brand-hero px-5 py-6 sm:px-7 sm:py-7 text-white">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
             <div className="max-w-2xl space-y-2">
               <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#9BE5D9]">

@@ -1,6 +1,7 @@
 @import "./styles/auction-experience-2.css";
 @import "./styles/auction-premium.css";
 @import "tailwindcss";
+@import "./styles/kayad-theme-convergence.css";
 
 :root {
   /* KAYAD Slate Teal — single shared brand contract */

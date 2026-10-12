@@ -186,7 +186,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
 
   return (
     <div className="space-y-8 pb-16">
-      {viewMode === 'public' ? <section className="rounded-3xl bg-[#12576d] text-white p-6 sm:p-10" aria-labelledby="insp-title">
+      {viewMode === 'public' ? <section className="kayad-brand-hero rounded-3xl text-white p-6 sm:p-10" aria-labelledby="insp-title">
         <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">Automotive services</p>
         <h1 id="insp-title" className="mt-2 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
         <p className="mt-3 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYAD is the platform that connects you with independent, verified inspection businesses, garages and specialists. They carry out the work, not KAYAD, and you see who they are before you act.</p>
@@ -195,7 +195,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
           <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
         </div>
       </section> : (
-        <section className="rounded-3xl bg-[#12576d] text-white p-6 sm:p-8" aria-labelledby="insp-account-title">
+        <section className="kayad-brand-hero rounded-3xl text-white p-6 sm:p-8" aria-labelledby="insp-account-title">
           <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">My account</p>
           <h1 id="insp-account-title" className="mt-2 text-2xl sm:text-3xl font-black font-display">My inspections and reports</h1>
           <p className="mt-2 text-sm text-[#EEF7F5] max-w-2xl">Private requests, bookings, payment status and reports linked to your account.</p>
