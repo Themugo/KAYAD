@@ -504,11 +504,18 @@
   transition: background 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 .kayad-mobile-bottom-nav__item--home { --mobile-icon-fg:#0B817A; --mobile-icon-bg:#DDF7F0; }
-.kayad-mobile-bottom-nav__item--search { --mobile-icon-fg:#176B87; --mobile-icon-bg:#E2F2F8; }
+.kayad-mobile-bottom-nav__item--showroom { --mobile-icon-fg:#176B87; --mobile-icon-bg:#E2F2F8; }
 .kayad-mobile-bottom-nav__item--auction { --mobile-icon-fg:#B66A32; --mobile-icon-bg:#FFF0DF; }
 .kayad-mobile-bottom-nav__item--services { --mobile-icon-fg:#138579; --mobile-icon-bg:#DDF5EF; }
-.kayad-mobile-bottom-nav__item--menu { --mobile-icon-fg:#526D7A; --mobile-icon-bg:#E9F0F3; }
-.kayad-mobile-bottom-nav__item.is-active .kayad-mobile-bottom-nav__icon { background:linear-gradient(145deg,#DDF7F1,#BDEBE1); color:#075C62; box-shadow:inset 0 0 0 1px #91D9CD,0 3px 8px rgba(11,113,111,.10); transform:translateY(-1px); }
+.kayad-mobile-bottom-nav__item--services { --mobile-icon-fg:#138579; --mobile-icon-bg:#DDF5EF; }
+.kayad-mobile-bottom-nav__item--auction { --mobile-icon-fg:#B66A32; --mobile-icon-bg:#FFF0DF; }
+.kayad-mobile-bottom-nav__item--saved { --mobile-icon-fg:#A52F52; --mobile-icon-bg:#FBE4EB; }
+.kayad-mobile-bottom-nav__item--home.is-active { color:#0B716F; }
+.kayad-mobile-bottom-nav__item--showroom.is-active { color:#176B87; background:#E2F2F8; box-shadow:inset 0 0 0 1px #B8DFEB; }
+.kayad-mobile-bottom-nav__item--auction.is-active { color:#9A5A18; background:#FFF0DF; box-shadow:inset 0 0 0 1px #F2D1AA; }
+.kayad-mobile-bottom-nav__item--services.is-active { color:#0F766E; background:#DDF5EF; box-shadow:inset 0 0 0 1px #B8E6D8; }
+.kayad-mobile-bottom-nav__item--saved.is-active { color:#A52F52; background:#FBE4EB; box-shadow:inset 0 0 0 1px #F1C3D0; }
+.kayad-mobile-bottom-nav__item.is-active .kayad-mobile-bottom-nav__icon { background:var(--mobile-icon-bg,#DDF7F1); color:var(--mobile-icon-fg,#075C62); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mobile-icon-fg,#075C62) 24%,transparent),0 3px 8px rgba(11,113,111,.08); transform:translateY(-1px); }
 
 @media (min-width: 1024px) {
   .kayad-mobile-bottom-nav {
@@ -904,7 +911,7 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   .kayad-mobile-bottom-nav { grid-template-columns:repeat(5,minmax(0,1fr)); gap:3px; padding:5px; border-radius:18px; }
   .kayad-mobile-bottom-nav__item { min-height:48px; gap:4px; font-size:10px; letter-spacing:0; }
   .kayad-mobile-bottom-nav__icon { width:24px;height:22px; }
-  .kayad-mobile-bottom-nav__icon svg { width:21px;height:21px; }
+  .kayad-mobile-bottom-nav__icon svg { width:23px;height:23px; }
   .kayad-mobile-bottom-nav__item.is-active { box-shadow:inset 0 0 0 1px #B9E4DC; }
   .kayad-header__bar { min-height:68px; }
   .kayad-brand { gap:6px; max-width:42%; }
