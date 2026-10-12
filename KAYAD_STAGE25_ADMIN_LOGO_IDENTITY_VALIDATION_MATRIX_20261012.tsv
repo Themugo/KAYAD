@@ -1,0 +1,13 @@
+check	result	evidence	limitation
+Navbar uses canonical BrandingContext	PASS	src/components/Navbar.tsx	Source contract only
+Navbar logo uses contain sizing	PASS	src/components/Navbar.tsx	Rendered viewport not inspected
+Footer uses canonical BrandingContext	PASS	src/components/layout/Footer.tsx	Requires app provider at runtime
+Centered and column footer image fit	PASS	src/components/layout/Footer.tsx	Rendered viewport not inspected
+Admin upload preview avoids crop	PASS	src/pages/admin/AdminSettingsBranding.jsx	Browser preview not inspected
+Supported image type guidance	PASS	src/pages/admin/AdminSettingsBranding.jsx	Actual upload not performed
+Client-side 5 MB guard	PASS	src/pages/admin/AdminSettingsBranding.jsx	Server upload middleware remains authoritative
+Upload endpoint remains admin-protected	PASS	backend/routes/adminRoutes.js	No live API request performed
+Saved config retains logo URL/type	PASS	backend/routes/adminRoutes.js	No staging persistence test performed
+Repeatable validator	PASS	12/12 checks	Does not replace build or browser test
+Production build	NOT RUN	Environment lacks node_modules; Node 22.16.0	Use Node >=22.22.2 and installed dependencies
+Visual browser QA	NOT RUN	No browser session executed here	Test desktop and mobile after applying ZIP

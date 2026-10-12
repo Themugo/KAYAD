@@ -1,0 +1,6 @@
+KAYAD Stage 25 — Admin Logo Identity
+Foundation: KAYAD-STAGE24-THEME-CONVERGENCE-20261012.zip
+Scope: shared admin-uploaded logo in navbar/footer; upload preview sizing and client input guard.
+Validation: node scripts/validate-stage25-admin-logo-identity-20261012.mjs — 12/12 PASS.
+No actual logo was uploaded. No commit, push, deployment, database migration or production mutation was performed.
+Build/browser limitation: not run in this workspace; installed Node 22.16.0 is below the project's >=22.22.2 requirement and node_modules is absent.

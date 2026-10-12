@@ -371,7 +371,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
     <div className="space-y-6 pb-12">
       {/* Premium support command header */}
       <section className="rounded-[30px] overflow-hidden border border-[#D7E7E4] bg-white shadow-sm">
-        <div className="bg-[#0A3340] px-5 py-7 sm:px-8 sm:py-8 text-white relative overflow-hidden">
+        <div className="kayad-brand-hero px-5 py-7 sm:px-8 sm:py-8 text-white relative overflow-hidden">
           <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full border border-white/5" />
           <div className="absolute right-8 bottom-[-100px] w-56 h-56 rounded-full bg-[#13B8A6]/10 blur-3xl" />
           <div className="relative z-10 max-w-4xl">

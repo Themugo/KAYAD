@@ -1,0 +1,8 @@
+check	command	result	evidence	limitations
+Global theme convergence	node scripts/validate-stage26-global-theme-convergence-20261012.mjs	PASS 15/15	Source contracts for tokens, support, marketplace, auction, focus and reduced motion	Not a rendered browser test
+Stage 24 regression	node scripts/validate-stage24-theme-convergence-20261012.mjs	PASS 14/14	Shared hero and homepage image-led guardrail	One obsolete assertion updated to test the actual invariant
+Stage 25 logo regression	node scripts/validate-stage25-admin-logo-identity-20261012.mjs	PASS 12/12	Navbar/footer/admin logo source contracts	No actual admin upload performed
+Vite build	npm run build	NOT RUN	No dependency installation in packaging workspace	Run in project environment with required Node version
+Typecheck	npm run typecheck	NOT RUN	No dependency installation in packaging workspace	Run in project environment with required Node version
+Playwright visual inspection	Project browser suite	NOT RUN	No screenshots from a browser in this pass	Check desktop and 320/360/375/390/412/430px viewports
+Staging / production	N/A	NOT RUN	No deployment or staging mutation performed	No live behavior claim

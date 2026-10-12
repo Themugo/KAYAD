@@ -1,0 +1,16 @@
+KAYAD Stage 26 — Global Theme Convergence
+Date: 2026-10-12
+Foundation: KAYAD-STAGE25-ADMIN-LOGO-IDENTITY-20261012.zip
+Foundation SHA-256: 09b1c0305eef409e60c4403b693b244ae17e45b1e1ac8a64449185aa5af57386
+
+Audit: inspected Stage 24 theme audit/change ledger, Stage 25 logo audit, shared theme CSS, index CSS import order, App public-shell route wrapper, SupportView, AuctionsView/Auction CSS and Marketplace component color usage.
+
+Changes: Support Resolution Center now uses the shared branded hero; Auction uses canonical theme tokens for its base palette, header gradient and active segment; Marketplace legacy navy text/control utilities are mapped through route-scoped canonical token rules; public inputs use the brand accent; obsolete Stage 24 regression assertion updated to check homepage hero preservation; new Stage 26 validator added.
+
+Commands:
+- node scripts/validate-stage26-global-theme-convergence-20261012.mjs — 15/15 PASS
+- node scripts/validate-stage24-theme-convergence-20261012.mjs — 14/14 PASS
+- node scripts/validate-stage25-admin-logo-identity-20261012.mjs — 12/12 PASS
+
+Not run: Vite build, semantic typecheck, browser screenshot review, Playwright, staging/live provider checks. This pass is source-validated, not browser-certified.
+No commit, push, deployment, database migration, payment or production mutation performed.

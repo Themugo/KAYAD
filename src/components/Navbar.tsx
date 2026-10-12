@@ -287,7 +287,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img
               src={branding.logoUrl}
               alt={branding.logoText || 'KAYAD'}
-              className="h-10 w-auto max-w-[180px] object-contain shrink-0"
+              className="h-10 w-auto max-w-[180px] max-h-10 object-contain object-left shrink-0"
+              decoding="async"
             />
           ) : (
             <span className="kayad-brand__mark"><Car className="w-5 h-5 stroke-[2]" aria-hidden="true" /></span>

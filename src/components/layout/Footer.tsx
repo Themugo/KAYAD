@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useDesignTheme } from '../../theme/DesignThemeProvider';
+import { useBranding } from '../../context/BrandingContext';
 
 interface FooterProps {
   setPage: (page: string) => void;
@@ -19,6 +20,7 @@ const ROUTES: Record<string, string> = {
 export default function Footer({ setPage }: FooterProps) {
   const navigate = useNavigate();
   const { theme } = useDesignTheme();
+  const { branding } = useBranding();
   const { colors, layouts } = theme;
   const layout = layouts.footer;
 
@@ -101,34 +103,25 @@ export default function Footer({ setPage }: FooterProps) {
                 padding: 0,
               }}
             >
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: colors.footerAccent,
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={colors.footerBg}
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              {branding.logoType === 'image' && branding.logoUrl ? (
+                <img
+                  src={branding.logoUrl}
+                  alt={branding.logoText || 'KAYAD'}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: 'min(240px, 60vw)', height: 56, objectFit: 'contain', objectPosition: 'center', display: 'block' }}
+                />
+              ) : (
+                <div
+                  aria-hidden="true"
+                  style={{ width: 36, height: 36, backgroundColor: colors.footerAccent, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <path d="M3 13l2-6h14l2 6" />
-                  <path d="M1 17h22" />
-                  <circle cx="7" cy="17" r="2" />
-                  <circle cx="17" cy="17" r="2" />
-                </svg>
-              </div>
-              <span
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.footerBg} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 13l2-6h14l2 6" /><path d="M1 17h22" /><circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" />
+                  </svg>
+                </div>
+              )}
+              {!(branding.logoType === 'image' && branding.logoUrl) && <span
                 style={{
                   color: colors.footerAccent,
                   fontFamily: 'var(--font-heading)',
@@ -138,8 +131,8 @@ export default function Footer({ setPage }: FooterProps) {
                   textTransform: 'uppercase' as const,
                 }}
               >
-                KAYAD
-              </span>
+                {branding.logoText || 'KAYAD'}
+              </span>}
             </button>
             <p style={{ fontSize: 13, opacity: 0.5, maxWidth: 400, margin: '0 auto 24px', lineHeight: 1.6 }}>
               Kenya's premium car marketplace. Buy, sell, and auction vehicles with clear transaction workflows and eligible escrow options.
@@ -208,34 +201,16 @@ export default function Footer({ setPage }: FooterProps) {
                     padding: 0,
                   }}
                 >
-                  <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      backgroundColor: colors.footerAccent,
-                      borderRadius: 8,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={colors.footerBg}
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 13l2-6h14l2 6" />
-                      <path d="M1 17h22" />
-                      <circle cx="7" cy="17" r="2" />
-                      <circle cx="17" cy="17" r="2" />
-                    </svg>
-                  </div>
-                  <span
+                  {branding.logoType === 'image' && branding.logoUrl ? (
+                    <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} loading="lazy" decoding="async" style={{ width: 'min(220px, 100%)', height: 48, objectFit: 'contain', objectPosition: 'left center', display: 'block' }} />
+                  ) : (
+                    <div aria-hidden="true" style={{ width: 32, height: 32, backgroundColor: colors.footerAccent, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.footerBg} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 13l2-6h14l2 6" /><path d="M1 17h22" /><circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" />
+                      </svg>
+                    </div>
+                  )}
+                  {!(branding.logoType === 'image' && branding.logoUrl) && <span
                     style={{
                       color: colors.footerAccent,
                       fontFamily: 'var(--font-heading)',
@@ -245,8 +220,8 @@ export default function Footer({ setPage }: FooterProps) {
                       textTransform: 'uppercase' as const,
                     }}
                   >
-                    KAYAD
-                  </span>
+                    {branding.logoText || 'KAYAD'}
+                  </span>}
                 </button>
                 <p style={{ fontSize: 13, opacity: 0.4, lineHeight: 1.6 }}>
                   Kenya's premium car marketplace. Buy, sell, and auction vehicles with clear transaction workflows and eligible escrow options.

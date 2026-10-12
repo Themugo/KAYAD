@@ -142,7 +142,8 @@
     "validate:premium-sell-auth-public-convergence": "node scripts/validate-premium-sell-auth-public-convergence-20261012.mjs",
     "validate:public-facing-convergence": "node scripts/validate-public-facing-convergence-20261012.mjs",
     "validate:master-polish-regression": "node scripts/validate-stage-master-polish-regression-20261012.mjs",
-    "validate:stage24-theme-convergence": "node scripts/validate-stage24-theme-convergence-20261012.mjs"
+    "validate:stage24-theme-convergence": "node scripts/validate-stage24-theme-convergence-20261012.mjs",
+    "validate:admin-logo-identity": "node scripts/validate-stage25-admin-logo-identity-20261012.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

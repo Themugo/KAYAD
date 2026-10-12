@@ -236,21 +236,31 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
             <div>
               <label className="input-label">Logo Image</label>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
-                {branding.logoUrl && (
-                  <img src={branding.logoUrl} alt="Logo preview" decoding="async"
-                    style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', border: '2px solid var(--border)' }} />
-                )}
-                <input type="file" accept="image/*" onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const form = new FormData();
-                  form.append('logo', file);
-                  try {
-                    const res = await adminAPI.uploadLogo(form);
-                    if (res?.url) setBranding(p => ({...p, logoUrl: res.url}));
-                    toast('Logo uploaded successfully', 'success');
-                  } catch { toast('Upload failed', 'error'); }
-                }} style={{ fontSize: 13, color: 'var(--text-muted)' }} />
+                <div style={{ width: 280, maxWidth: '100%', height: 96, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                  {branding.logoUrl ? (
+                    <img src={branding.logoUrl} alt={`${branding.logoText || 'KAYAD'} logo preview`} decoding="async"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
+                  ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Logo preview · transparent PNG or SVG recommended</span>}
+                </div>
+                <div style={{ display: 'grid', gap: 6, minWidth: 220, flex: 1 }}>
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" aria-label="Upload KAYAD logo" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+                    if (!allowed.includes(file.type)) { toast('Choose a PNG, JPEG, WebP or SVG logo.', 'error'); e.currentTarget.value = ''; return; }
+                    if (file.size > 5 * 1024 * 1024) { toast('Logo must be 5 MB or smaller.', 'error'); e.currentTarget.value = ''; return; }
+                    const form = new FormData();
+                    form.append('logo', file);
+                    try {
+                      const res = await adminAPI.uploadLogo(form);
+                      if (res?.url) setBranding(p => ({...p, logoType: 'image', logoUrl: res.url}));
+                      else throw new Error('Upload response did not include a logo URL');
+                      toast('Logo uploaded successfully. Save branding to apply the full configuration.', 'success');
+                    } catch { toast('Logo upload failed. Check the image and try again.', 'error'); }
+                    finally { e.currentTarget.value = ''; }
+                  }} style={{ fontSize: 13, color: 'var(--text-muted)' }} />
+                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Use a transparent PNG or SVG with a horizontal layout. The navbar constrains the logo to 180 × 40 px; the footer scales it to fit its brand column without cropping. Maximum upload size: 5 MB.</small>
+                </div>
               </div>
             </div>
           ) : (

@@ -59,3 +59,53 @@
     transition-duration: .01ms !important;
   }
 }
+
+/* Stage 26 — system-wide public theme convergence.
+   These rules align public surfaces to the Automotive Services reference while
+   preserving the homepage image-led composition, auction lifecycle semantics,
+   role accents and semantic success/warning/error states. */
+.kayad-public-shell[data-kayad-surface="support"] .kayad-brand-hero,
+.kayad-public-shell[data-kayad-surface="support"] > div > .kayad-brand-hero {
+  background-color: var(--kayad-theme-hero);
+  background-image: linear-gradient(112deg, var(--kayad-theme-hero) 0%, var(--kayad-theme-hero-end) 100%);
+}
+
+/* Marketplace inventory controls use the same teal/mint vocabulary as services. */
+.kayad-public-shell[data-kayad-surface="marketplace"] :where(.text-navy-900, .text-navy-800) { color: var(--kayad-theme-ink); }
+.kayad-public-shell[data-kayad-surface="marketplace"] :where(.text-navy-700, .text-navy-600, .text-navy-500) { color: var(--kayad-brand); }
+.kayad-public-shell[data-kayad-surface="marketplace"] :where(.bg-navy-900, .bg-navy-800, .bg-navy-700, .bg-navy-600) { background-color: var(--kayad-brand); }
+.kayad-public-shell[data-kayad-surface="marketplace"] :where(.border-navy-900, .border-navy-800, .border-navy-700, .border-navy-600) { border-color: var(--kayad-brand); }
+.kayad-public-shell[data-kayad-surface="marketplace"] :where(.kayad-toolbar-control, select, input) { border-color: var(--kayad-theme-border); }
+.kayad-public-shell[data-kayad-surface="marketplace"] :where(.kayad-toolbar-control, select, input):focus-visible { outline-color: var(--kayad-theme-focus); }
+
+/* Auction remains domain-specific, but its base surfaces now consume KAYAD tokens. */
+.kayad-public-shell[data-kayad-surface="auctions"] .auction-premium-page {
+  --ap-ink: var(--kayad-theme-ink);
+  --ap-deep: var(--kayad-theme-hero);
+  --ap-teal: var(--kayad-brand);
+  --ap-mint: var(--kayad-theme-accent);
+  --ap-surface: var(--kayad-theme-page);
+  --ap-line: var(--kayad-theme-border);
+  --ap-soft: var(--kayad-brand-soft);
+}
+.kayad-public-shell[data-kayad-surface="auctions"] .auction-market-header {
+  background-color: var(--kayad-theme-hero);
+  background-image: radial-gradient(circle at 85% 10%, rgba(19,184,166,.18), transparent 36%), linear-gradient(112deg, var(--kayad-theme-hero) 0%, var(--kayad-theme-hero-end) 100%);
+  border-color: rgba(19,184,166,.22);
+}
+.kayad-public-shell[data-kayad-surface="auctions"] .auction-segment.is-active {
+  background: var(--kayad-theme-accent);
+  border-color: var(--kayad-theme-accent);
+  color: var(--kayad-theme-ink);
+}
+.kayad-public-shell[data-kayad-surface="auctions"] .auction-segment-icon { color: var(--kayad-theme-accent); }
+.kayad-public-shell[data-kayad-surface="auctions"] .auction-segment.is-active .auction-segment-icon { color: var(--kayad-theme-ink); }
+.kayad-public-shell[data-kayad-surface="auctions"] .auction-spotlight,
+.kayad-public-shell[data-kayad-surface="auctions"] .auction-card { border-color: var(--kayad-theme-border); }
+
+/* Public page typography and controls inherit the same accessible brand rhythm. */
+.kayad-public-shell :where(input, select, textarea) {
+  accent-color: var(--kayad-brand);
+}
+.kayad-public-shell :where(button, [role="button"]) { -webkit-tap-highlight-color: rgba(19,184,166,.16); }
+.kayad-public-shell :where(a:not([class*="text-"]), .kayad-link) { text-decoration-color: rgba(23,107,135,.35); }
