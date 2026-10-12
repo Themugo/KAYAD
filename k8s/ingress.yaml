@@ -9,12 +9,30 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # R19 fix (KAYAD Phase 37): this ingress's path pattern "/?(.*)" below has
+    # exactly one capture group ($1). The previous rewrite-target of "/$2"
+    # referenced a second capture group that does not exist in this pattern,
+    # which ingress-nginx resolves to an empty string — every request would
+    # have been rewritten to "/", discarding the real request path for all
+    # three hosts this ingress serves (kayad.space, www.kayad.space,
+    # api.kayad.space). Corrected to reference the pattern's actual group.
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
     nginx.ingress.kubernetes.io/rate-limit: "100"
+    # R20 note (KAYAD Phase 37): the cors-allow-* annotations below are inert —
+    # ingress-nginx only applies them when nginx.ingress.kubernetes.io/enable-cors
+    # is also set to "true", and it was never set here, so these four lines have
+    # never had any runtime effect. Not activating them here: the backend
+    # (backend/server.js, the `cors` middleware's allowedOrigins/vercelPattern
+    # check) already enforces CORS correctly and more completely (it also allows
+    # specific Vercel preview-deployment origins that this static list omits).
+    # Turning this annotation on now would make the ingress layer stricter than
+    # the app layer and could 403 legitimate Vercel preview traffic without a
+    # live ingress-nginx environment to verify against. Left as a documented,
+    # known-inert block rather than silently removed or silently activated.
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://kayad.space,https://www.kayad.space"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, X-Idempotency-Key"
@@ -81,7 +99,14 @@ spec:
   - host: webhooks.kayad.space
     http:
       paths:
-      - path: /mpesa/callback
+      # R18 fix (KAYAD Phase 37): the application's real M-Pesa bid-deposit
+      # callback route is POST /api/bids/mpesa/callback (backend/routes/bidRoutes.js,
+      # mounted under app.use("/api/bids", ...) in backend/server.js), guarded by
+      # mpesaIpWhitelist + idempotencyCheck + validateMpesaCallback. This ingress
+      # previously forwarded the literal path "/mpesa/callback" with no
+      # rewrite-target, which does not match any backend route and would 404 any
+      # real M-Pesa callback sent to this host. Corrected to the real path.
+      - path: /api/bids/mpesa/callback
         pathType: Prefix
         backend:
           service:

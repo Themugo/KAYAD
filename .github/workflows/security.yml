@@ -37,3 +37,24 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:javascript"
+
+  # R21 fix (KAYAD Phase 37): the repository ships its own .gitleaks.toml at
+  # the project root, but no workflow or npm script ever invoked gitleaks, so
+  # that configuration had no effect — a secret committed to the repo would
+  # not have been caught by CI. This job actually runs it against that config.
+  secrets-scan:
+    name: Secret Scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks against project config
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_CONFIG: .gitleaks.toml

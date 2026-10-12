@@ -1,0 +1,117 @@
+[
+ {
+  "Description": "Twilio Account SID",
+  "StartLine": 245,
+  "EndLine": 245,
+  "StartColumn": 21,
+  "EndColumn": 54,
+  "Match": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "Secret": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "File": "docs/domains/INTEGRATION_GUIDE.md",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 0.3815805,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [
+   "key",
+   "Twilio"
+  ],
+  "RuleID": "twilio-account-sid",
+  "Fingerprint": "docs/domains/INTEGRATION_GUIDE.md:twilio-account-sid:245"
+ },
+ {
+  "Description": "Generic API Key",
+  "StartLine": 164,
+  "EndLine": 164,
+  "StartColumn": 5,
+  "EndColumn": 40,
+  "Match": "API_KEY=your_africas_talking_api_key",
+  "Secret": "API_KEY",
+  "File": "docs/domains/INTEGRATION_GUIDE.md",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 2.807355,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [
+   "key",
+   "Generic"
+  ],
+  "RuleID": "generic-api-key",
+  "Fingerprint": "docs/domains/INTEGRATION_GUIDE.md:generic-api-key:164"
+ },
+ {
+  "Description": "Generic API Key",
+  "StartLine": 322,
+  "EndLine": 322,
+  "StartColumn": 10,
+  "EndColumn": 51,
+  "Match": "API_KEY=phc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "Secret": "API_KEY",
+  "File": "docs/domains/INTEGRATION_GUIDE.md",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 2.807355,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [
+   "key",
+   "Generic"
+  ],
+  "RuleID": "generic-api-key",
+  "Fingerprint": "docs/domains/INTEGRATION_GUIDE.md:generic-api-key:322"
+ },
+ {
+  "Description": "Generic API Key",
+  "StartLine": 102,
+  "EndLine": 103,
+  "StartColumn": 14,
+  "EndColumn": 22,
+  "Match": "ApiKey: \"\"\n  cloudinaryApiSecret",
+  "Secret": "ApiKey",
+  "File": "helm/kayad-backend/values.yaml",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 2.5849626,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [
+   "key",
+   "Generic"
+  ],
+  "RuleID": "generic-api-key",
+  "Fingerprint": "helm/kayad-backend/values.yaml:generic-api-key:102"
+ },
+ {
+  "Description": "Generic API Key",
+  "StartLine": 43,
+  "EndLine": 43,
+  "StartColumn": 7,
+  "EndColumn": 35,
+  "Match": "apikey': SUPABASE_SERVICE_KEY",
+  "Secret": "apikey",
+  "File": "scripts/setup-supabase.js",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 2.5849626,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [
+   "key",
+   "Generic"
+  ],
+  "RuleID": "generic-api-key",
+  "Fingerprint": "scripts/setup-supabase.js:generic-api-key:43"
+ }
+]
