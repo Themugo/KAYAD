@@ -751,7 +751,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
 
                 <section className="mb-4" aria-labelledby="kayad-drawer-explore">
-                  <div className="mb-2 flex items-center justify-between px-1"><span id="kayad-drawer-explore" className="text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Explore KAYAD</span></div>
+                  <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-1"><span id="kayad-drawer-explore" className="text-[10px] font-black uppercase tracking-[.19em] text-[#A9DAD7]">Explore KAYAD</span><span className="text-[10px] font-semibold text-white/45">Your vehicle journey, all in one place</span></div>
                   <nav className="kayad-mobile-drawer-primary" aria-label="Primary">
                     {navItems.map((item) => {
                       const Icon = item.icon;

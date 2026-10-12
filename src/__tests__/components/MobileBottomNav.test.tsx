@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import MobileBottomNav, { OPEN_MOBILE_MENU_EVENT } from '../../components/MobileBottomNav';
+import MobileBottomNav from '../../components/MobileBottomNav';
 
 describe('MobileBottomNav (canonical KAYAD dock)', () => {
-  it('exposes exactly Home, Search, Auction, Services, Menu in order', () => {
+  it('exposes exactly Home, Search, Auction, Services, Saved in order', () => {
     render(<MobileBottomNav activeNav="marketplace" onNavigate={vi.fn()} />);
     const labels = screen.getAllByRole('button').map((b) => b.textContent?.trim());
-    expect(labels).toEqual(['Home', 'Search', 'Auction', 'Services', 'Menu']);
+    expect(labels).toEqual(['Home', 'Search', 'Auction', 'Services', 'Saved']);
   });
 
   it('routes Auction and Services to the canonical existing surfaces', () => {
@@ -25,12 +25,10 @@ describe('MobileBottomNav (canonical KAYAD dock)', () => {
     expect(current[0].textContent).toContain('Services');
   });
 
-  it('Menu opens the existing navigation drawer through the shared event', () => {
-    const listener = vi.fn();
-    window.addEventListener(OPEN_MOBILE_MENU_EVENT, listener);
-    render(<MobileBottomNav activeNav="marketplace" onNavigate={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: /Menu/i }));
-    expect(listener).toHaveBeenCalledTimes(1);
-    window.removeEventListener(OPEN_MOBILE_MENU_EVENT, listener);
+  it('routes Saved to the existing authenticated saved-vehicles surface', () => {
+    const onNavigate = vi.fn();
+    render(<MobileBottomNav activeNav="marketplace" onNavigate={onNavigate} />);
+    fireEvent.click(screen.getByRole('button', { name: /Saved/i }));
+    expect(onNavigate).toHaveBeenCalledWith('saved');
   });
 });

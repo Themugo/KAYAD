@@ -153,3 +153,66 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 .kayad-mobile-drawer-primary .kayad-drawer-chip__icon--marketplace { color:#55D9C8; }
 .kayad-mobile-drawer-primary .kayad-drawer-chip__icon--escrow { color:#8DCBFF; }
 .kayad-mobile-drawer-primary .kayad-drawer-chip__icon--support { color:#C5B6FF; }
+
+/* Stage 32 — compact premium mobile drawer and non-duplicated dock.
+   The top hamburger remains the single menu opener; the bottom dock uses Saved. */
+.kayad-mobile-drawer-primary {
+  align-items: start;
+  grid-auto-rows: auto;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group {
+  align-self: start;
+  height: auto;
+  min-height: 0;
+  border-radius: 16px;
+  background: linear-gradient(155deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group__head {
+  height: auto;
+  min-height: 58px;
+  padding: 9px 10px;
+  gap: 8px;
+  font-size: 12px;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group__head.is-active {
+  background: linear-gradient(135deg, rgba(23,107,135,.95), rgba(15,89,104,.95));
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group__links {
+  padding: 0 9px 9px;
+  gap: 5px;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-chip {
+  min-height: 38px;
+  border-radius: 11px;
+  background: rgba(4, 35, 44, .42);
+  border-color: rgba(189,229,222,.13);
+}
+.kayad-mobile-drawer-primary .kayad-drawer-chip:hover {
+  background: rgba(19,184,166,.12);
+  border-color: rgba(141,228,219,.35);
+}
+.kayad-mobile-menu__surface section[aria-labelledby="kayad-drawer-explore"] > div:first-child {
+  margin-bottom: 10px;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group:active { transform: scale(.99); }
+.kayad-mobile-bottom-nav__item--saved .kayad-mobile-bottom-nav__icon {
+  color: #E58AA0;
+  background: rgba(229,138,160,.11);
+}
+.kayad-mobile-bottom-nav__item--saved.is-active .kayad-mobile-bottom-nav__icon {
+  color: #A52F52;
+  background: #FBE4EB;
+  box-shadow: inset 0 0 0 1px rgba(165,47,82,.16);
+}
+@media(max-width:380px) {
+  .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height: 54px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .kayad-mobile-drawer-primary .kayad-drawer-group { transition: none; }
+}

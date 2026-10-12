@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Home, Search, Gavel, ShieldCheck, Menu } from 'lucide-react';
+import { Home, Search, Gavel, ShieldCheck, Heart } from 'lucide-react';
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 
 /** Event the Navbar listens for to open its existing mobile menu (single menu implementation). */
@@ -61,11 +61,11 @@ export default function MobileBottomNav({
     { key: 'auction', label: 'Auction', icon: Gavel, tone: 'auction', action: () => onNavigate('discovery') },
     { key: 'inspection', label: 'Services', icon: ShieldCheck, tone: 'services', action: () => onNavigate('inspections') },
     {
-      key: 'menu',
-      label: 'Menu',
-      icon: Menu,
-      tone: 'menu',
-      action: () => window.dispatchEvent(new CustomEvent(OPEN_MOBILE_MENU_EVENT)),
+      key: 'saved',
+      label: 'Saved',
+      icon: Heart,
+      tone: 'saved',
+      action: () => onNavigate('saved'),
     },
   ];
 
@@ -73,6 +73,7 @@ export default function MobileBottomNav({
     if (key === 'home') return activeNav === 'marketplace';
     if (key === 'auction') return activeNav === 'discovery' || activeNav === 'auctions';
     if (key === 'inspection') return activeNav === 'inspections' || activeNav === 'inspection-marketplace';
+    if (key === 'saved') return activeNav === 'saved';
     return false;
   };
 
@@ -85,7 +86,6 @@ export default function MobileBottomNav({
           onClick={action}
           className={`kayad-mobile-bottom-nav__item kayad-mobile-bottom-nav__item--${tone} ${isActive(key) ? 'is-active' : ''}`}
           aria-current={isActive(key) ? 'page' : undefined}
-          aria-haspopup={key === 'menu' ? 'dialog' : undefined}
         >
           <span className="kayad-mobile-bottom-nav__icon" aria-hidden="true">
             <Icon size={20} strokeWidth={isActive(key) ? 2.6 : 2.2} />
