@@ -47,12 +47,27 @@ const ipInCidr = (ip, cidr) => {
   return (toInt(ip) & mask) === (toInt(range) & mask);
 };
 
-// Extract real client IP (works behind nginx)
-const getClientIp = (req) =>
-  (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
-  req.headers["x-real-ip"] ||
-  req.socket.remoteAddress ||
-  "";
+// R25 fix (KAYAD Phase 38 — CRITICAL): this previously read the LEFTMOST
+// entry of the raw X-Forwarded-For header directly. Both this app's own
+// standalone nginx load balancer (nginx/nginx.conf, which uses
+// `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` — APPENDS
+// to whatever XFF the client sent, never overwrites it) and many other
+// reverse-proxy setups preserve a client-supplied prefix. That means any
+// external caller could defeat this M-Pesa IP whitelist entirely by sending
+// its own forged header, e.g. `X-Forwarded-For: 196.201.214.200` (a real
+// whitelisted Safaricom production IP) — confirmed empirically in this
+// phase with a live Express server (trust proxy: 1, matching
+// backend/server.js:241): req.ip correctly resolved the real caller while
+// the old getClientIp() returned the attacker's forged value instead. A
+// forged M-Pesa callback that clears this check can mark a payment
+// "success" with no real money ever having moved — a direct financial-fraud
+// path. Fixed to use Express's own trust-proxy-aware req.ip, which already
+// correctly discards an untrusted client-supplied prefix given the existing
+// `app.set("trust proxy", 1)` configuration (one trusted proxy hop, matching
+// this deployment's architecture — a single nginx/ingress layer in front of
+// the backend). See KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md R25 for the full
+// evidence and reproduction.
+const getClientIp = (req) => req.ip || req.socket.remoteAddress || "";
 
 export const mpesaIpWhitelist = (req, res, next) => {
   // Skip in dev/test mode only. In production the bypass flag is

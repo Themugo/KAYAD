@@ -67,6 +67,38 @@ spec:
               name: {{ include "kayad-backend.fullname" . }}-secrets
               key: jwt-secret
         {{- end }}
+        {{- /* R23 fix (KAYAD Phase 38): these three, plus FRONTEND_URL/BACKEND_URL/
+             BREVO_FROM_EMAIL under .Values.env above, were missing entirely.
+             backend/utils/env.js's validateEnv() hard-requires them in
+             production — see KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md R23. */}}
+        {{- if .Values.secrets.refreshTokenSecret }}
+        - name: REFRESH_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: refresh-token-secret
+        {{- end }}
+        {{- if .Values.secrets.sessionSecret }}
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: session-secret
+        {{- end }}
+        {{- if .Values.secrets.brevoApiKey }}
+        - name: BREVO_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: brevo-api-key
+        {{- end }}
+        {{- if .Values.secrets.mpesaShortcode }}
+        - name: MPESA_SHORTCODE
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: mpesa-shortcode
+        {{- end }}
         {{- if .Values.secrets.sentryDsn }}
         - name: SENTRY_DSN
           valueFrom:

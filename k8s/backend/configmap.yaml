@@ -1,3 +1,12 @@
+# R23 fix (KAYAD Phase 38): this ConfigMap previously existed but was never
+# actually consumed — backend/deployment.yaml had no `envFrom` referencing it,
+# so none of these values ever reached the container (NODE_ENV/PORT were
+# separately duplicated as literal values directly in the Deployment, masking
+# that this file was dead). It is now wired via `envFrom` in deployment.yaml.
+# FRONTEND_URL/BACKEND_URL/BREVO_FROM_EMAIL are added here (not in the
+# Secret) because they are public values, not credentials — kayad.space's own
+# DNS/TLS already advertises them, and `.env.production.example` at the repo
+# root documents the same URLs for the frontend build.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,3 +20,10 @@ data:
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger-collector:4317"
   ENABLE_METRICS: "true"
   METRICS_PORT: "9090"
+  # Required by backend/utils/env.js's validateEnv() in production — without
+  # these, every backend pod calls process.exit(1) before binding to its port
+  # (confirmed by running validateEnv() directly against this manifest's exact
+  # env set; see KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md R23 for the evidence).
+  FRONTEND_URL: "https://www.kayad.space"
+  BACKEND_URL: "https://api.kayad.space"
+  BREVO_FROM_EMAIL: "no-reply@kayad.space"

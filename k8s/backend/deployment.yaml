@@ -30,11 +30,48 @@ spec:
         - containerPort: 5000
           name: http
           protocol: TCP
+        # R23 fix (KAYAD Phase 38): previously this deployment never consumed
+        # k8s/backend/configmap.yaml at all. Wiring it here supplies
+        # FRONTEND_URL/BACKEND_URL/BREVO_FROM_EMAIL, which backend/utils/env.js's
+        # validateEnv() hard-requires in production — without them every pod
+        # called process.exit(1) before the HTTP server bound to its port.
+        # Explicit `env:` entries below still take precedence over same-named
+        # ConfigMap keys (NODE_ENV/PORT), so this is additive, not a behavior
+        # change to anything already working.
+        envFrom:
+        - configMapRef:
+            name: kayad-backend-config
         env:
         - name: NODE_ENV
           value: "production"
         - name: PORT
           value: "5000"
+        # R23 fix (KAYAD Phase 38): REFRESH_TOKEN_SECRET, SESSION_SECRET and
+        # BREVO_API_KEY are also hard-required by validateEnv() in production
+        # and were previously absent from this manifest entirely. Added as
+        # secretKeyRef entries alongside the other real secrets below — see
+        # k8s/backend/secret.yaml for the full set of keys this Secret object
+        # must be created with.
+        - name: REFRESH_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kayad-secrets
+              key: refresh-token-secret
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kayad-secrets
+              key: session-secret
+        - name: BREVO_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kayad-secrets
+              key: brevo-api-key
+        - name: MPESA_SHORTCODE
+          valueFrom:
+            secretKeyRef:
+              name: kayad-secrets
+              key: mpesa-shortcode
         - name: SUPABASE_URL
           valueFrom:
             secretKeyRef:

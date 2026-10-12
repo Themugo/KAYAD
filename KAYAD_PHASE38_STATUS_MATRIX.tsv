@@ -1,0 +1,31 @@
+Area	Check	Command	Result	Evidence
+Archive integrity	Phase 37 delivery ZIP matches its own checksum	sha256sum -c kayad-phase37-runtime-convergence.zip.sha256	PASS	OK
+Archive integrity	ZIP has no corrupted entries	unzip -t kayad-phase37-runtime-convergence.zip	PASS	No errors detected in compressed data
+Frontend typecheck	Zero TypeScript errors	npm run lint (tsc --noEmit)	PASS	0 errors
+Frontend build	Production build succeeds	npm run build	PASS	vite build succeeded
+Frontend tests	No regression across full suite	npx vitest run	PASS	81 files, 643 tests, 1 pre-existing skip (identical to Phase 37 baseline)
+Backend tests (Jest)	No regression plus new regression coverage	npm test (Jest portion)	PASS	81 suites / 1179 tests (was 80/1168 — +1 suite/+11 tests, this phase's new regression file)
+Backend tests (Vitest)	No regression	npm test (Vitest portion)	PASS	5 files / 16 tests
+Backend tests (node:test)	No regression	npm test (node:test portion)	PASS	1/1
+R23 — k8s env gap	validateEnv() passes against the corrected manifest's exact env set	node -e "validateEnv()" with the fixed Deployment/ConfigMap/Secret's exact variable set	PASS	"Env validated" — previously failed with 6 missing required vars against the unfixed set
+R23 — regression guard	New test fails pre-fix, passes post-fix	jest tests/regression/phase38DeploymentRuntimeReconciliation.test.js	PASS	Verified both directions: fails against original manifest, passes against fixed one
+R18/R19 — ingress routing	Real nginx replica of ingress-nginx's generated config, live HTTP requests	curl through a real nginx instance running the exact location/rewrite blocks	PASS	All main-ingress paths preserved exactly; webhook path routes correctly; old broken webhook path now 404s
+R25 — M-Pesa IP whitelist spoofing	req.ip vs manual X-Forwarded-For parsing, live Express server	curl with forged X-Forwarded-For prefix against a real Express app (trust proxy: 1)	FAIL pre-fix, PASS post-fix	Pre-fix: forged Safaricom IP accepted. Post-fix: req.ip correctly resolves the real caller
+R25 — regression	Payment/bid/M-Pesa suites unaffected by the fix	jest --testPathPatterns="mpesa|payment|bid"	PASS	14 suites / 98 tests, all passing, unchanged behavior for legitimate requests
+R25 — regression guard	New test fails pre-fix, passes post-fix	jest tests/regression/phase38DeploymentRuntimeReconciliation.test.js	PASS	Verified both directions
+Secrets scanning (Workstream C)	Project's own gitleaks config detects a controlled, non-real secret fixture	gitleaks detect --config .gitleaks.toml against a fixture with AWS's public documentation placeholder key	PASS	"leaks found: 1", rule aws-access-key, exit code 1 — proves the Phase 37 CI wiring is a real, working scanner, not a no-op
+CORS (R20) — app layer	Real preflight/request traffic against the live backend	curl OPTIONS/GET with various Origin headers against a running bootstrap.js in production mode	PASS	Allowed origin: correct ACAO/credentials/methods/headers. Disallowed origin: blocked, sanitized error, no header leak. M-Pesa routes: unaffected by CORS policy either way
+CORS (R20) — ingress layer	Left inactive per explicit instruction	k8s/ingress.yaml annotations unchanged	NOT ACTIVATED	Recommendation recorded in gap register; live ingress-nginx verification UNVERIFIED (sandbox limitation)
+Existing validator — deployment readiness	No regression	npm run validate:deployment-readiness	PASS	14/14
+Existing validator — deployment/runtime drift	No regression	npm run validate:deployment-runtime-drift	PASS	17/17
+Existing validator — security release gate	No regression	npm run validate:phase7-security-release	PASS	15/15
+Existing validator — dependency security floors	No regression	npm run validate:dependency-security	PASS	All floors enforced
+Existing validator — backend boot guard	No regression	npm run validate:backend-boot	PASS	No undefined identifiers in 8 boot-critical files
+Existing validator — Phase 3 infrastructure	No regression; pre-existing env-credential gaps disclosed, not hidden	npm run validate:phase3-infrastructure	PASS overall, several PENDING	PENDING items require live Redis/Supabase/Brevo/Twilio/Africa's Talking credentials unavailable in this sandbox — pre-existing, not introduced by this phase
+R12 — live production schema	dealers table still lacks onboarding columns (correctly unapplied)	Read-only Supabase query against live "KAYAD EA" project	BLOCKED (unchanged, by design)	Empty result set — no drift since Phase 37
+R14 — live production constraint	verification_status CHECK still only allows pending/approved/rejected (correctly unapplied)	Read-only Supabase query (pg_get_constraintdef) against live project	BLOCKED (unchanged, by design)	Constraint definition unchanged since Phase 37
+R12/R14 migration files	Byte-identical to the already staging-verified versions	diff against Phase 37's copies	PASS	Zero output, both files
+Helm chart template syntax	Go-template brace balance after edits	Manual brace-count check (open vs close)	PASS	deployment.yaml: 22/22, secret.yaml: 21/21
+Helm chart live rendering	helm template / install --dry-run	N/A — helm binary unreachable	BLOCKED (sandbox network allowlist)	get.helm.sh not on this sandbox's proxy allowlist; not performed, not claimed
+Live M-Pesa provider round-trip	Real Safaricom Daraja sandbox callback	N/A — no sandbox credentials available	UNVERIFIED	Disclosed per brief's own instruction rather than assumed covered by code trace
+Node.js version for certification	Brief requires >=22.22.2	node --version	BELOW REQUIRED (v22.22.0)	nodejs.org unreachable from this sandbox to obtain a newer version; disclosed, not silently substituted

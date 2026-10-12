@@ -88,19 +88,51 @@ env:
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger-collector:4317"
   ENABLE_METRICS: "true"
   METRICS_PORT: "9090"
+  # R23 fix (KAYAD Phase 38): backend/utils/env.js's validateEnv() hard-requires
+  # these in production (confirmed by running it directly — see
+  # KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md R23); they were entirely absent from
+  # this chart before, so every pod deployed with prior defaults would call
+  # process.exit(1) before binding to its port. Left empty here deliberately —
+  # an empty string is still "missing" to validateEnv(), so a deployer MUST
+  # override these (they are public values, not secrets, hence here rather
+  # than under `secrets:` below).
+  FRONTEND_URL: ""
+  BACKEND_URL: ""
+  BREVO_FROM_EMAIL: ""
 
 secrets:
   supabaseUrl: ""
   supabaseServiceKey: ""
   redisUrl: ""
   jwtSecret: ""
+  # R23 fix (KAYAD Phase 38): also hard-required by validateEnv() in
+  # production; previously absent from this chart entirely.
+  refreshTokenSecret: ""
+  sessionSecret: ""
+  brevoApiKey: ""
   sentryDsn: ""
   mpesaConsumerKey: ""
   mpesaConsumerSecret: ""
   mpesaPasskey: ""
+  # R23 fix (KAYAD Phase 38): MPESA_SHORTCODE is required alongside the three
+  # M-Pesa keys above for the M-Pesa integration to actually function
+  # end-to-end (the backend has no fallback); previously absent.
+  mpesaShortcode: ""
   cloudinaryCloudName: ""
   cloudinaryApiKey: ""
   cloudinaryApiSecret: ""
+  # R24 note (KAYAD Phase 38): emailSmtpHost/Port/User/Password and
+  # smsApiKey/smsApiSecret below are never read by any backend code under
+  # these names (grepped the full backend source — zero matches). They create
+  # a Kubernetes Secret key that nothing consumes: filling them in gives no
+  # functional email/SMS behavior. The backend's real env vars for these
+  # providers are BREVO_API_KEY/BREVO_FROM_EMAIL (email, now wired above) and
+  # TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN/TWILIO_WHATSAPP_NUMBER plus
+  # AT_API_KEY/AT_USERNAME (SMS/WhatsApp — not yet modeled in this chart at
+  # all). Left in place rather than silently deleted, since a deployer's
+  # existing values file may already set them — flagging for your decision on
+  # whether to rename them to match real env vars or add the Twilio/Africa's
+  # Talking fields this chart is currently missing.
   emailSmtpHost: ""
   emailSmtpPort: ""
   emailSmtpUser: ""
