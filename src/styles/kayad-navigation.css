@@ -216,3 +216,106 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 @media(prefers-reduced-motion:reduce) {
   .kayad-mobile-drawer-primary .kayad-drawer-group { transition: none; }
 }
+
+/* Stage 33 — master brand lockup. Logo art, business name and descriptor remain
+   independent/admin-editable controls, but share one responsive visual system. */
+.kayad-brand {
+  flex: 0 1 clamp(248px, 29vw, 380px);
+  width: clamp(248px, 29vw, 380px);
+  max-width: min(38vw, 380px);
+  min-width: 0;
+  gap: 12px;
+  padding: 5px 8px 5px 0;
+  border-radius: 14px;
+  align-items: center;
+}
+.kayad-brand__image {
+  display: block;
+  width: clamp(54px, 5vw, 72px);
+  height: clamp(46px, 4.5vw, 62px);
+  flex: 0 0 auto;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 3px 6px rgba(10,51,64,.12));
+}
+.kayad-brand__mark {
+  width: clamp(54px, 5vw, 72px);
+  height: clamp(46px, 4.5vw, 62px);
+  flex: 0 0 auto;
+  border-radius: 15px;
+  background: linear-gradient(145deg,#E9FAF7 0%,#D5F1EC 48%,#FFFFFF 100%);
+  color: #12576D;
+  border: 1px solid #CDE7E3;
+  box-shadow: 0 5px 14px rgba(10,51,64,.09), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.kayad-brand__text {
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 5px;
+  line-height: 1.05;
+}
+.kayad-brand__word {
+  display: block;
+  color: #0A3340;
+  font-family: var(--font-display, 'Montserrat', 'Poppins', sans-serif);
+  font-size: clamp(1.38rem, 1.85vw, 1.82rem);
+  font-weight: 950;
+  line-height: .98;
+  letter-spacing: -.055em;
+  white-space: nowrap;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+.kayad-brand__tag,
+.kayad-brand__tag--reserved {
+  display: block !important;
+  max-width: 100%;
+  margin-top: 0;
+  overflow: visible;
+  color: #176B87;
+  font-family: var(--font-sans, 'Inter', 'Montserrat', sans-serif);
+  font-size: clamp(8px, .72vw, 10.5px);
+  font-weight: 750;
+  line-height: 1.25;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+  white-space: normal;
+  text-overflow: clip;
+  text-wrap: balance;
+}
+@media (min-width: 1280px) {
+  .kayad-brand { flex-basis: 340px; width: 340px; max-width: 340px; gap: 13px; }
+  .kayad-brand__image,.kayad-brand__mark { width: 70px; height: 60px; }
+  .kayad-brand__word { font-size: 1.75rem; }
+  .kayad-brand__tag { font-size: 9px; letter-spacing: .075em; }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .kayad-brand { flex-basis: 250px; width: 250px; max-width: 27vw; gap: 9px; }
+  .kayad-brand__image,.kayad-brand__mark { width: 52px; height: 48px; }
+  .kayad-brand__word { font-size: 1.42rem; }
+  .kayad-brand__tag { font-size: 7.5px; letter-spacing: .045em; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kayad-brand { flex: 0 1 250px; width: 250px; max-width: 40vw; gap: 9px; }
+  .kayad-brand__image,.kayad-brand__mark { width: 48px; height: 46px; }
+  .kayad-brand__word { font-size: 1.34rem; }
+  .kayad-brand__tag { font-size: 7.5px; letter-spacing: .035em; }
+}
+@media (max-width: 639px) {
+  .kayad-header__bar { gap: 8px; }
+  .kayad-brand { flex: 0 1 44%; width: 44%; max-width: 44%; gap: 7px; padding-right: 2px; }
+  .kayad-brand__image,.kayad-brand__mark { width: 42px; height: 42px; border-radius: 11px; }
+  .kayad-brand__word { font-size: clamp(1.12rem, 5vw, 1.42rem); letter-spacing: -.05em; }
+  .kayad-brand__tag { max-width: 100%; font-size: clamp(6.5px, 1.85vw, 8px); letter-spacing: .025em; line-height: 1.18; }
+}
+@media (max-width: 380px) {
+  .kayad-header__bar { gap: 6px; padding-inline: 8px; }
+  .kayad-brand { flex-basis: 43%; width: 43%; max-width: 43%; gap: 6px; }
+  .kayad-brand__image,.kayad-brand__mark { width: 36px; height: 38px; }
+  .kayad-brand__word { font-size: 1.05rem; }
+  .kayad-brand__tag { font-size: 6.2px; letter-spacing: .01em; }
+  .kayad-cta { padding-inline: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-brand__image,.kayad-brand__mark { transition: none !important; }
+}

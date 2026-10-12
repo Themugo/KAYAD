@@ -259,7 +259,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
                     } catch { toast('Logo upload failed. Check the image and try again.', 'error'); }
                     finally { e.currentTarget.value = ''; }
                   }} style={{ fontSize: 13, color: 'var(--text-muted)' }} />
-                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Use a transparent PNG or SVG with a horizontal layout. The navbar and footer scale the logo proportionally without cropping. A horizontal, transparent PNG or SVG is recommended for the cleanest fit. Maximum upload size: 5 MB.</small>
+                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Upload the symbol/emblem only (without KAYAD lettering or tagline); the site renders the editable KAYAD wordmark and descriptor beside it. Use a transparent PNG or SVG with no built-in text for the cleanest responsive fit. Maximum upload size: 5 MB.</small>
                 </div>
               </div>
             </div>
@@ -276,7 +276,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
             <label className="input-label">Brand Tagline</label>
             <input className="input" type="text" value={branding.brandTagline}
               onChange={e => setBranding(p => ({...p, brandTagline: e.target.value}))}
-              placeholder="Premium Automotive Marketplace" style={{ height: 44 }} />
+              placeholder="Kenya’s Trusted Vehicle Marketplace" style={{ height: 44 }} />
           </div>
 
           <div className="input-group">

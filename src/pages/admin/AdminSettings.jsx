@@ -18,10 +18,10 @@ const DEFAULTS = {
 
 // Default branding with KAYAD navy/blue theme
 const DEFAULT_BRANDING = {
-  logoType: 'icon',
+  logoType: 'image',
   logoText: 'KAYAD',
-  logoUrl: '',
-  brandTagline: 'Premium Automotive Marketplace',
+  logoUrl: '/branding/kayad-road-mark.svg',
+  brandTagline: "Kenya's Trusted Vehicle Marketplace",
   primaryColor: '#176B87',
   primaryLight: '#13B8A6',
   primaryDark: '#0A3340',

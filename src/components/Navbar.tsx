@@ -286,15 +286,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           {branding.logoType === 'image' && branding.logoUrl ? (
             <img
               src={branding.logoUrl}
-              alt={branding.logoText || 'KAYAD'}
-              className="h-10 w-auto max-w-[142px] max-h-10 object-contain object-left shrink-0 drop-shadow-[0_2px_5px_rgba(10,51,64,0.12)]"
+              alt=""
+              aria-hidden="true"
+              className="kayad-brand__image"
               decoding="async"
             />
           ) : (
-            <span className="kayad-brand__mark"><Car className="w-5 h-5 stroke-[2]" aria-hidden="true" /></span>
+            <span className="kayad-brand__mark" aria-hidden="true"><Car className="w-5 h-5 stroke-[2]" /></span>
           )}
           <span className="kayad-brand__text">
-            {branding.logoType !== 'image' && <span className="kayad-brand__word">{branding.logoText || 'KAYAD'}</span>}
+            <span className="kayad-brand__word">{branding.logoText || 'KAYAD'}</span>
             <span className="kayad-brand__tag kayad-brand__tag--reserved">{branding.brandTagline || 'Automotive Marketplace'}</span>
           </span>
         </a>

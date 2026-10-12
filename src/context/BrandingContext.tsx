@@ -52,8 +52,8 @@ interface BrandingContextValue {
 const DEFAULT_BRANDING: Branding = {
   logoType: 'image',
   logoText: 'KAYAD',
-  logoUrl: '/branding/kayad-premium-master.png',
-  brandTagline: 'Premium Automotive Marketplace',
+  logoUrl: '/branding/kayad-road-mark.svg',
+  brandTagline: "Kenya's Trusted Vehicle Marketplace",
   footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.",
   footerCopyright: 'KAYAD Motors Kenya Ltd. All rights reserved.',
 
