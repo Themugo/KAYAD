@@ -10,6 +10,17 @@ import * as R from "../utils/response.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { sendNotification } from "../services/notification.service.js";
 import { deliver } from "../services/communicationGateway.service.js";
+// Email templates are loaded lazily so auth module load does not depend on the mail stack.
+const escHtml = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+// Building an email must NEVER fail registration/recovery: fall back to a minimal escaped body.
+const buildEmail = async (builder, args, fallback) => {
+  try {
+    return (await import("../services/email.service.js"))[builder](args);
+  } catch (e) {
+    console.warn("⚠️ Email template build failed, using plain fallback:", e.message);
+    return fallback;
+  }
+};
 import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { invalidateUserCache } from "../middleware/auth.js";
@@ -284,9 +295,11 @@ export const register = async (req, res) => {
       eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
       templateCode: "account_verification_email",
       recipient: user.email,
-      subject: "Verify Your Email — KAYAD",
-      text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
-      html: `<p>Hi ${user.name || "there"},</p><p>Verify your KAYAD email to unlock your account.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
+      ...(await buildEmail("buildVerificationEmail", { name: user.name, verifyUrl }, {
+        subject: "Verify Your Email — KAYAD",
+        text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
+        html: `<p>Hi ${escHtml(user.name || "there")},</p><p><a href="${escHtml(verifyUrl)}">Verify my email</a></p>`,
+      })),
       metadata: { verification: true },
       idempotencyKey: `registration-verification:${user.id}`,
     };
@@ -332,9 +345,11 @@ export const register = async (req, res) => {
       eventType: COMMUNICATION_EVENTS.REGISTRATION,
       templateCode: "account_welcome_email",
       recipient: user.email,
-      subject: "Welcome to KAYAD — Drive Your Dream Today",
-      text: `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
-      html: `<p>Welcome to KAYAD, ${user.name || "there"}.</p><p>Your account is ready. Browse vehicles, join auctions and use secure transaction workflows.</p>`,
+      ...(await buildEmail("buildWelcomeEmail", { name: user.name }, {
+        subject: "Welcome to KAYAD",
+        text: `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
+        html: `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
+      })),
       metadata: { welcome: true },
       idempotencyKey: `registration-welcome:${user.id}`,
     }).catch((e) => {
@@ -805,9 +820,11 @@ export const resendVerification = async (req, res) => {
           eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
           templateCode: "account_verification_email",
           recipient: user.email,
-          subject: "Verify Your Email — KAYAD",
-          text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
-          html: `<p>Hi ${user.name || "there"},</p><p>Your new KAYAD verification link is ready.</p><p><a href="${verifyUrl}">Verify my email</a></p>`,
+          ...(await buildEmail("buildVerificationEmail", { name: user.name, verifyUrl, resend: true }, {
+            subject: "Verify Your Email — KAYAD",
+            text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
+            html: `<p>Hi ${escHtml(user.name || "there")},</p><p><a href="${escHtml(verifyUrl)}">Verify my email</a></p>`,
+          })),
           metadata: { verification: true, resend: true },
           idempotencyKey: `verification-resend:${user.id}:${nextVerifyTokenHash.slice(0, 16)}`,
         });
@@ -854,15 +871,17 @@ export const forgotPassword = async (req, res) => {
     // request open. The reset token is already persisted before dispatch, so a
     // provider timeout cannot turn a successful reset request into a browser
     // timeout. Keep the response identical for account-enumeration safety.
-    const resetUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/reset-password?token=${token}`;
+    const resetUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/reset-password?token=${encodeURIComponent(token)}`;
     void deliver({
       userId: user.id || user._id,
       channel: "email",
       eventType: COMMUNICATION_EVENTS.PASSWORD_RESET,
       recipient: user.email,
-      subject: "Reset Your KAYAD Password",
-      text: `Reset your KAYAD password: ${resetUrl}. This link expires in 1 hour.`,
-      html: `<p>We received a request to reset your KAYAD password.</p><p><a href="${resetUrl}">Reset my password</a></p><p>This link expires in 1 hour.</p>`,
+      ...(await buildEmail("buildPasswordResetEmail", { resetUrl }, {
+        subject: "Reset Your KAYAD Password",
+        text: `Reset your KAYAD password: ${resetUrl}. This link expires in 1 hour.`,
+        html: `<p><a href="${escHtml(resetUrl)}">Reset my password</a></p><p>This link expires in 1 hour.</p>`,
+      })),
       metadata: { passwordReset: true },
       idempotencyKey: `password-reset:${user.id}:${hashToken(token).slice(0, 16)}`,
     }).catch((e) => console.warn("⚠️ Reset email failed:", e.message));
