@@ -7,3 +7,12 @@ Nothing here has been executed against production.
 5. Authz smoke: unauthenticated GET /api/marketplace-health/summary and /api/users/search → 401; admin → 200.
 6. Production: backup, apply migrations in a window, re-run smoke, then enable.
 Gates: source CERTIFIED (this ZIP); staging NOT RUN; provider NOT RUN; production NOT CERTIFIED.
+
+---
+# Continuation 2 - additional certification steps
+A. **Reproduce locally:** `scripts/audit/replay-migrations.sh <db> <label>` after loading `scripts/audit/supabase_stubs.sql` into a throwaway PG16 (outputs `evidence/db_replay/pass_<label>.tsv`). This is a substitute; certify on a real Supabase branch.
+B. **Schema capture (needs authorization):** `supabase link --project-ref <prod>` then `supabase db dump --schema public --schema-only -f captured_public.sql`; diff against `evidence/db_replay/hosted_tables.txt` / `replayed_tables.txt`; turn the 24 hosted-only tables into a baseline migration. Never `db push --include-all`.
+C. **Manifest validation (any machine with the tools):** `kubeconform -strict -kubernetes-version 1.29.0 -summary k8s/**/*.yaml`; `helm lint helm/kayad-backend && helm template kayad helm/kayad-backend -f <real-values.yaml> | kubeconform -strict -summary -`; `kubectl apply --dry-run=server -f k8s/`.
+D. **Authz smoke (staging):** for roles user, dealer, marketing, ghost_checker, admin: GET `/api/marketplace-health/summary` -> 401 / 403 / 403 / 403 / 200; GET `/api/users/search?q=a` -> 401 anon, no `email` field for non-admin, staff accounts absent.
+E. **CI evidence:** paste the gitleaks job log for the PR and for the push to `main`; the job must pass with `GITHUB_TOKEN` provided; consider adding `pull-requests: read` to that job's `permissions` (public repo works without).
+F. **Release gates status:** source = CERTIFIED for items listed PASS in the matrix; staging = NOT RUN; provider = NOT RUN; production = NOT CERTIFIED.

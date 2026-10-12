@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/cont/work/kayad-fresh
+
+
+ Test Files  81 passed (81)
+      Tests  643 passed | 1 skipped (644)
+   Start at  20:30:13
+   Duration  117.09s (transform 3.76s, setup 8.09s, import 11.10s, tests 34.32s, environment 51.57s)
+

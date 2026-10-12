@@ -29,7 +29,10 @@ router.get(
       filter.$text = { $search: q };
     }
     if (role) filter.role = role;
-    const isAdmin = STAFF_ROLES.includes(req.user?.role);
+    // AA-S2: STAFF_ROLES includes marketing, moderators and external inspection
+    // providers (ghost_checker); only platform administrators may see emails or
+    // privileged accounts here.
+    const isAdmin = req.user?.effectiveRole === "webhoist" || ["admin", "superadmin"].includes(req.user?.role);
     // AA-S2: non-admins never see admin accounts or any email address.
     if (!isAdmin) filter.role = role && !STAFF_ROLES.includes(role) ? role : { $nin: STAFF_ROLES };
 
