@@ -275,7 +275,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
       <div className="kayad-header__bar">
 
-        {/* BRAND FIELD — logo, EA marker and tagline keep their own visual authority. */}
+        {/* BRAND FIELD — the admin-managed master logo is shared across header and footer. */}
         <a
           href="/?nav=marketplace"
           onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); handleNavSelect('marketplace'); }}
@@ -287,7 +287,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img
               src={branding.logoUrl}
               alt={branding.logoText || 'KAYAD'}
-              className="h-10 w-auto max-w-[180px] max-h-10 object-contain object-left shrink-0"
+              className="h-11 w-auto max-w-[190px] max-h-11 object-contain object-left shrink-0 drop-shadow-[0_2px_5px_rgba(10,51,64,0.12)]"
               decoding="async"
             />
           ) : (
@@ -295,10 +295,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
           {branding.logoType !== 'image' && (
             <span className="kayad-brand__text">
-              <span className="kayad-brand__word">
-                {branding.logoText || 'KAYAD'}
-                <span className="kayad-brand__ea">EA</span>
-              </span>
+              <span className="kayad-brand__word">{branding.logoText || 'KAYAD'}</span>
               <span className="kayad-brand__tag">{branding.brandTagline || 'Automotive Marketplace'}</span>
             </span>
           )}

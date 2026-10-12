@@ -259,7 +259,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
                     } catch { toast('Logo upload failed. Check the image and try again.', 'error'); }
                     finally { e.currentTarget.value = ''; }
                   }} style={{ fontSize: 13, color: 'var(--text-muted)' }} />
-                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Use a transparent PNG or SVG with a horizontal layout. The navbar constrains the logo to 180 × 40 px; the footer scales it to fit its brand column without cropping. Maximum upload size: 5 MB.</small>
+                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Use a transparent PNG or SVG with a horizontal layout. The navbar and footer scale the logo proportionally without cropping. A horizontal, transparent PNG or SVG is recommended for the cleanest fit. Maximum upload size: 5 MB.</small>
                 </div>
               </div>
             </div>
@@ -277,6 +277,21 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
             <input className="input" type="text" value={branding.brandTagline}
               onChange={e => setBranding(p => ({...p, brandTagline: e.target.value}))}
               placeholder="Premium Automotive Marketplace" style={{ height: 44 }} />
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Footer Description</label>
+            <textarea className="input" value={branding.footerDescription || ''} rows={3}
+              onChange={e => setBranding(p => ({...p, footerDescription: e.target.value}))}
+              placeholder="Short description shown below the footer logo" style={{ minHeight: 76, padding: 12, resize: 'vertical' }} />
+            <small style={{ color: 'var(--text-muted)' }}>Editable footer brand copy, shared across the site.</small>
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Footer Copyright Text</label>
+            <input className="input" type="text" value={branding.footerCopyright || ''}
+              onChange={e => setBranding(p => ({...p, footerCopyright: e.target.value}))}
+              placeholder="KAYAD Motors Kenya Ltd. All rights reserved." style={{ height: 44 }} />
           </div>
         </div>
       </SectionCard>

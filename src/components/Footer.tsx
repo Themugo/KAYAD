@@ -26,7 +26,7 @@ export default function Footer({ setPage }: FooterProps) {
               <span className="text-[#13B8A6] font-sans font-bold tracking-[0.15em] uppercase">KAYAD</span>
             </button>
             <p className="font-sans text-sm text-white/40 leading-relaxed">
-              Kenya's premium car marketplace. Buy, sell, and auction vehicles with clear transaction workflows and eligible escrow options.
+              {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}
             </p>
           </div>
 
@@ -91,7 +91,7 @@ export default function Footer({ setPage }: FooterProps) {
         {/* Bottom bar */}
         <div className="border-t border-[#12576D]/30 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="font-sans text-xs text-white/30">
-            &copy; {new Date().getFullYear()} KAYAD Motors Kenya Ltd. All rights reserved.
+            &copy; {new Date().getFullYear()} {branding.footerCopyright || 'KAYAD Motors Kenya Ltd. All rights reserved.'}
           </p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms of Service', 'Support'].map(item => (

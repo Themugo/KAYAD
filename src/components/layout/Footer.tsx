@@ -109,7 +109,7 @@ export default function Footer({ setPage }: FooterProps) {
                   alt={branding.logoText || 'KAYAD'}
                   loading="lazy"
                   decoding="async"
-                  style={{ width: 'min(240px, 60vw)', height: 56, objectFit: 'contain', objectPosition: 'center', display: 'block' }}
+                  style={{ width: 'min(250px, 68vw)', height: 70, objectFit: 'contain', objectPosition: 'center', display: 'block' }}
                 />
               ) : (
                 <div
@@ -135,7 +135,7 @@ export default function Footer({ setPage }: FooterProps) {
               </span>}
             </button>
             <p style={{ fontSize: 13, opacity: 0.5, maxWidth: 400, margin: '0 auto 24px', lineHeight: 1.6 }}>
-              Kenya's premium car marketplace. Buy, sell, and auction vehicles with clear transaction workflows and eligible escrow options.
+              {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}
             </p>
             <div
               style={{
@@ -202,7 +202,7 @@ export default function Footer({ setPage }: FooterProps) {
                   }}
                 >
                   {branding.logoType === 'image' && branding.logoUrl ? (
-                    <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} loading="lazy" decoding="async" style={{ width: 'min(220px, 100%)', height: 48, objectFit: 'contain', objectPosition: 'left center', display: 'block' }} />
+                    <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} loading="lazy" decoding="async" style={{ width: 'min(220px, 100%)', height: 64, objectFit: 'contain', objectPosition: 'left center', display: 'block', filter: 'drop-shadow(0 2px 5px rgba(0,0,0,.12))' }} />
                   ) : (
                     <div aria-hidden="true" style={{ width: 32, height: 32, backgroundColor: colors.footerAccent, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.footerBg} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -224,7 +224,7 @@ export default function Footer({ setPage }: FooterProps) {
                   </span>}
                 </button>
                 <p style={{ fontSize: 13, opacity: 0.4, lineHeight: 1.6 }}>
-                  Kenya's premium car marketplace. Buy, sell, and auction vehicles with clear transaction workflows and eligible escrow options.
+                  {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}
                 </p>
               </div>
             )}
@@ -290,7 +290,7 @@ export default function Footer({ setPage }: FooterProps) {
           }}
         >
           <p style={{ fontSize: 12, opacity: 0.3, margin: 0 }}>
-            &copy; {new Date().getFullYear()} KAYAD Motors Kenya Ltd. All rights reserved.
+            &copy; {new Date().getFullYear()} {branding.footerCopyright || 'KAYAD Motors Kenya Ltd. All rights reserved.'}
           </p>
           <div style={{ display: 'flex', gap: 20 }}>
             {['Privacy Policy', 'Terms of Service', 'Support'].map(item => (

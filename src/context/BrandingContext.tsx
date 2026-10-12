@@ -8,6 +8,8 @@ interface Branding {
   logoText: string;
   logoUrl: string;
   brandTagline: string;
+  footerDescription: string;
+  footerCopyright: string;
 
   // Primary color palette (KAYAD Slate Teal theme)
   primaryColor: string;      // Main brand color
@@ -48,10 +50,12 @@ interface BrandingContextValue {
 
 // Default KAYAD Slate Teal scheme for the refined marketplace presentation
 const DEFAULT_BRANDING: Branding = {
-  logoType: 'icon',
+  logoType: 'image',
   logoText: 'KAYAD',
-  logoUrl: '',
+  logoUrl: '/branding/kayad-premium-master.png',
   brandTagline: 'Premium Automotive Marketplace',
+  footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.",
+  footerCopyright: 'KAYAD Motors Kenya Ltd. All rights reserved.',
 
   // Primary KAYAD navy/blue palette
   primaryColor: '#176B87',      // Slate teal primary
