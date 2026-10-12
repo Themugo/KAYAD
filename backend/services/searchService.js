@@ -118,10 +118,18 @@ export async function getSearchSuggestions(query, limit = MAX_AUTOCOMPLETE) {
   const cacheKey = `kayad:search:suggestions:${q.toLowerCase()}`;
   const cached = await cacheGet(cacheKey);
   if (cached) return cached;
-  const rows = await db.findAll('cars', { filters: { status: 'available' }, select: 'brand,model,locationCity,bodyType', limit: 500 });
+  // Use full-dataset distinct values instead of an arbitrary first 500 rows,
+  // so a dealer's newly listed make/model can become discoverable without an
+  // administrator maintaining a second, manually curated brand list.
+  const [brands, models, cities, bodyTypes] = await Promise.all([
+    db.distinct('cars', 'brand', { status: 'available' }),
+    db.distinct('cars', 'model', { status: 'available' }),
+    db.distinct('cars', 'locationCity', { status: 'available' }),
+    db.distinct('cars', 'bodyType', { status: 'available' }),
+  ]);
   const candidates = new Map();
-  for (const row of rows) {
-    for (const [type, value] of [['make', row.brand], ['model', row.model], ['city', row.locationCity || row.city], ['bodyType', row.bodyType]]) {
+  for (const [type, values] of [['make', brands], ['model', models], ['city', cities], ['bodyType', bodyTypes]]) {
+    for (const value of values || []) {
       if (!value) continue;
       const text = String(value).trim();
       const key = `${type}:${text.toLowerCase()}`;

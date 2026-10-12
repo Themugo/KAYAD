@@ -504,6 +504,9 @@ export const createCar = async (req, res) => {
     }
 
     await cacheDelPattern("cars:list:*");
+    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
+    await cacheDelPattern("kayad:search:facets:*");
+    await cacheDelPattern("kayad:search:suggestions:*");
 
     await logActionFromReq(req, "create_car", {
       target: car._id,
@@ -786,6 +789,9 @@ export const updateCar = async (req, res) => {
     await car.save();
 
     await cacheDelPattern("cars:list:*");
+    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
+    await cacheDelPattern("kayad:search:facets:*");
+    await cacheDelPattern("kayad:search:suggestions:*");
 
     await logActionFromReq(req, "update_car", {
       target: car._id,
@@ -832,6 +838,9 @@ export const deleteCar = async (req, res) => {
     }
 
     await cacheDelPattern("cars:list:*");
+    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
+    await cacheDelPattern("kayad:search:facets:*");
+    await cacheDelPattern("kayad:search:suggestions:*");
 
     await logActionFromReq(req, "delete_car", {
       target: req.params.id,
@@ -893,6 +902,9 @@ export const deleteCarImage = async (req, res) => {
 
     await car.save();
     await cacheDelPattern("cars:list:*");
+    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
+    await cacheDelPattern("kayad:search:facets:*");
+    await cacheDelPattern("kayad:search:suggestions:*");
 
     await logActionFromReq(req, "delete_car_image", {
       target: car._id,
@@ -953,6 +965,9 @@ export const addCarImages = async (req, res) => {
     car.images = [...(car.images || []), ...newImages];
     await car.save();
     await cacheDelPattern("cars:list:*");
+    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
+    await cacheDelPattern("kayad:search:facets:*");
+    await cacheDelPattern("kayad:search:suggestions:*");
 
     await logActionFromReq(req, "add_car_images", {
       target: car._id,

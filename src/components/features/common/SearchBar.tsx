@@ -5,10 +5,7 @@ import { autocompleteSearch } from '../../../services/searchApi';
 
 const MAX_RECENT = 8;
 
-const DEFAULT_BRANDS = [
-  'BMW', 'Mercedes', 'Toyota', 'Nissan', 'Subaru',
-  'Audi', 'Lexus', 'Range Rover', 'Volkswagen', 'Mazda',
-];
+
 
 interface SearchBarProps {
   value?: string;
@@ -24,7 +21,7 @@ export default function SearchBar({
   value = '',
   onChange,
   onSubmit,
-  suggestions = DEFAULT_BRANDS,
+  suggestions = [],
   placeholder = 'Search by make, model, or keyword…',
   autoFocus = false,
   size = 'md',

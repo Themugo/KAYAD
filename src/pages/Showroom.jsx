@@ -14,7 +14,7 @@
 //     by 300 ms, written to URL as `?keyword=…`, and the API request
 //     carries it through.
 //
-//   • ONE row of category pills (All / Auction / Buy Now / Sold).
+//   • ONE row of category pills (All / Auctions / Buy Now), all backed by the listing API.
 //     The old page had this same row inside SearchBar AND below it
 //     ("filter chips"), each driving a different state.
 //
@@ -50,6 +50,7 @@ import { ItemListStructuredData, BreadcrumbStructuredData } from '../components/
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import ShowroomEmptyState from './showroom/components/ShowroomEmptyState';
+import { getSearchFacets } from '../services/searchApi';
 import '../styles/showroom.css';
 
 // ─── Constants ───────────────────────────────────────────────────────────
@@ -57,11 +58,9 @@ const CATEGORY_PILLS = [
   { value: 'all',     label: 'All' },
   { value: 'auction', label: 'Auctions' },
   { value: 'fixed',   label: 'Buy Now' },
-  { value: 'sold',    label: 'Sold' },
 ];
 
 const SORT_OPTIONS = [
-  { value: 'default',       label: 'Curated' },
   { value: 'newest',        label: 'Newest first' },
   { value: 'ending_soon',   label: 'Ending soonest' },
   { value: 'price_asc',     label: 'Price ↑' },
@@ -71,6 +70,7 @@ const SORT_OPTIONS = [
 
 const FILTER_LABELS = {
   brand: 'Make',
+  model: 'Model',
   location: 'Location',
   priceMin: 'Min Price',
   priceMax: 'Max Price',
@@ -87,7 +87,7 @@ const FILTER_LABELS = {
 };
 
 const ALL_FILTER_KEYS = [
-  'filter', 'keyword', 'brand', 'location',
+  'filter', 'keyword', 'brand', 'model', 'location',
   'priceMin', 'priceMax', 'yearMin', 'yearMax',
   'body', 'fuel', 'transmission', 'color', 'condition',
   'mileageMin', 'mileageMax', 'dealerType',
@@ -111,9 +111,9 @@ export default function Showroom() {
   const [hasMore, setHasMore]           = useState(false);
   const [totalCount, setTotalCount]     = useState(0);
   const [viewMode, setViewMode]         = useState('grid');
-  const [sortBy, setSortBy]             = useState('default');
+  const [sortBy, setSortBy]             = useState('newest');
   const [sentinelRef, sentinelEntry]    = useIntersectionObserver();
-  const loadingRef                      = useRef(false);
+  const loadRequestRef                   = useRef(0);
 
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [savedSearches, setSavedSearches]       = useState([]);
@@ -152,6 +152,7 @@ export default function Showroom() {
     filter:        searchParams.get('filter')        || 'all',
     keyword:       searchParams.get('keyword')       || '',
     brand:         searchParams.get('brand')         || '',
+    model:         searchParams.get('model')         || '',
     location:      searchParams.get('location')      || '',
     priceMin:      searchParams.get('priceMin')      || '',
     priceMax:      searchParams.get('priceMax')      || '',
@@ -215,8 +216,32 @@ export default function Showroom() {
     const next = new URLSearchParams(searchParams);
     if (!brand || brand === 'All') next.delete('brand');
     else                            next.set('brand', brand);
+    next.delete('model'); // model belongs to its selected make; never leave an incompatible model behind.
     setSearchParams(next);
   }, [searchParams, setSearchParams]);
+
+  // Search options are derived from the canonical, full-inventory backend facets,
+  // never from a hard-coded brand list or only the current 12-card page.
+  useEffect(() => {
+    let dead = false;
+    setFacetsLoading(true);
+    getSearchFacets().then((facets) => {
+      if (!dead) setSearchFacets(facets);
+    }).catch(() => {
+      // Keep the showroom usable when the facet endpoint is temporarily unavailable.
+      if (!dead) setSearchFacets({ total: 0, brands: [], models: [], locations: [], bodyTypes: [], fuels: [], transmissions: [], colors: [], conditions: [] });
+    }).finally(() => { if (!dead) setFacetsLoading(false); });
+    return () => { dead = true; };
+  }, []);
+
+  useEffect(() => {
+    let dead = false;
+    const query = filters.brand ? { brand: filters.brand } : {};
+    getSearchFacets(query).then((facets) => {
+      if (!dead) setModelFacets(facets.models || []);
+    }).catch(() => { if (!dead) setModelFacets([]); });
+    return () => { dead = true; };
+  }, [filters.brand]);
 
   // ─── API call ─────────────────────────────────────────────────────────
   const getApiParams = useCallback(p => ({
@@ -224,6 +249,7 @@ export default function Showroom() {
     limit: 12,
     keyword:      filters.keyword     || undefined,
     brand:        brandFilter         || undefined,
+    model:        filters.model       || undefined,
     city:         filters.location    || undefined,
     minPrice:     filters.priceMin    || undefined,
     maxPrice:     filters.priceMax    || undefined,
@@ -238,15 +264,17 @@ export default function Showroom() {
     mileageMax:   filters.mileageMax  || undefined,
     dealerType:   filters.dealerType  || undefined,
     category:     activeFilter === 'all' ? undefined : activeFilter,
-    sort:         sortBy === 'default' ? undefined : sortBy,
+    sort:         sortBy || 'newest',
   }), [filters, brandFilter, activeFilter, sortBy]);
 
   const loadCars = useCallback(async (pageNum, replace) => {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
+    // Supersede stale in-flight searches when a filter or keyword changes.
+    // The previous lock could drop a newer query and leave stale results on screen.
+    const requestId = ++loadRequestRef.current;
     setLoading(true);
     try {
       const data = await carsAPI.list(getApiParams(pageNum));
+      if (requestId !== loadRequestRef.current) return;
       const newCars = data.data || data.cars || [];
       if (replace && (!newCars || newCars.length === 0)) {
         setCars([]);
@@ -260,6 +288,7 @@ export default function Showroom() {
         setShowroomError(null);
       }
     } catch (error) {
+      if (requestId !== loadRequestRef.current) return;
       console.error('Failed to load cars:', error);
 
       let errorMessage = 'Could not load vehicles. Please try again.';
@@ -285,8 +314,9 @@ export default function Showroom() {
         setShowroomError(errorMessage);
       }
     } finally {
-      setLoading(false);
-      loadingRef.current = false;
+      if (requestId === loadRequestRef.current) {
+        setLoading(false);
+      }
     }
   }, [getApiParams, toast]);
 
@@ -582,6 +612,9 @@ export default function Showroom() {
             <aside className="showroom-sidebar-desktop">
               <SearchSidebar
                 cars={cars}
+                facets={searchFacets}
+                modelFacets={modelFacets}
+                facetsLoading={facetsLoading}
                 filters={filters}
                 onFilterChange={onFilterChange}
                 onBrandChange={onBrandChange}
@@ -597,6 +630,9 @@ export default function Showroom() {
               <div className="mobile-filter-drawer">
                 <SearchSidebar
                   cars={cars}
+                  facets={searchFacets}
+                  modelFacets={modelFacets}
+                  facetsLoading={facetsLoading}
                   filters={filters}
                   onFilterChange={onFilterChange}
                   onBrandChange={onBrandChange}

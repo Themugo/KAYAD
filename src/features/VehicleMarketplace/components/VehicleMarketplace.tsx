@@ -9,6 +9,7 @@ import FloatingAdRail from '../../../components/FloatingAdRail';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { adminAPI } from '../../../api/api';
 import { getCars, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
+import { getSearchFacets, type SearchFacetsResponse } from '../../../services/searchApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
 import HomePageAdminPanel from './HomePageAdminPanel';
@@ -212,7 +213,24 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverLoading, setServerLoading] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [serverRetryKey, setServerRetryKey] = useState(0);
+  const [canonicalFacets, setCanonicalFacets] = useState<SearchFacetsResponse | null>(null);
+  const [canonicalModelFacets, setCanonicalModelFacets] = useState<SearchFacetsResponse['models']>([]);
   const isLoading = isLoadingReal || serverLoading;
+
+  // Search dropdowns use canonical full-inventory facets from the backend,
+  // not a hard-coded list or only the currently loaded page of vehicles.
+  useEffect(() => {
+    let cancelled = false;
+    getSearchFacets().then((facets) => { if (!cancelled) setCanonicalFacets(facets); }).catch(() => { /* current listing snapshot remains a graceful fallback */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const query = selectedMake !== 'All' ? { brand: selectedMake } : {};
+    getSearchFacets(query).then((facets) => { if (!cancelled) setCanonicalModelFacets(facets.models || []); }).catch(() => { if (!cancelled) setCanonicalModelFacets([]); });
+    return () => { cancelled = true; };
+  }, [selectedMake]);
 
   // Keep filter options stable while the paginated backend result changes.
   // The current page alone is not a valid source of all selector options;
@@ -332,36 +350,39 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // Dynamic Filter Options Extracted directly from backend dataset
   const makes = useMemo(() => {
-    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.make).filter(Boolean))).sort();
-    return ['All', ...list];
-  }, [filterSourceVehicles]);
+    const canonical = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.make).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
 
   const models = useMemo(() => {
-    const source = selectedMake === 'All'
-      ? filterSourceVehicles
-      : filterSourceVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
-    const list = Array.from(new Set(source.map((v) => v.model).filter(Boolean))).sort();
-    return ['All', ...list];
-  }, [filterSourceVehicles, selectedMake]);
+    const canonical = canonicalModelFacets.map((item) => item.value).filter(Boolean);
+    const source = selectedMake === 'All' ? filterSourceVehicles : filterSourceVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
+    const fallback = source.map((v) => v.model).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, selectedMake, canonicalModelFacets]);
 
   const bodyStyles = useMemo(() => {
-    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.bodyStyle).filter(Boolean))).sort();
-    return ['All', ...list];
-  }, [filterSourceVehicles]);
+    const canonical = (canonicalFacets?.bodyTypes || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.bodyStyle).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
 
   const fuelTypes = useMemo(() => {
-    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.fuelType).filter(Boolean))).sort();
-    return ['All', ...list];
-  }, [filterSourceVehicles]);
+    const canonical = (canonicalFacets?.fuels || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.fuelType).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
 
   const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
   const conditionOptions = ['All', 'Foreign Used', 'Locally Used', 'Brand New'];
   const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
 
   const locations = useMemo(() => {
-    const list = Array.from(new Set(filterSourceVehicles.map((v) => v.county || v.location).filter(Boolean))).sort();
-    return ['All East Africa', ...list];
-  }, [filterSourceVehicles]);
+    const canonical = (canonicalFacets?.locations || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.county || v.location).filter(Boolean);
+    return ['All East Africa', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
 
   const availableYears = useMemo(() => {
     const list = Array.from(new Set(filterSourceVehicles.map((v) => v.year).filter((y): y is number => Boolean(y)))).sort((a: number, b: number) => b - a);

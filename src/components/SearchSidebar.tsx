@@ -2,12 +2,9 @@ import { useState, useMemo, type ReactNode } from 'react';
 import { ChevronDown, X, SlidersHorizontal, Search } from 'lucide-react';
 import '../styles/layout.css';
 
-const BRANDS = ['BMW','Mercedes','Toyota','Nissan','Subaru','Mitsubishi','Volkswagen','Mazda','Audi','Range Rover','Lexus','Isuzu','Honda','Ford','Jeep','Kia','Hyundai'];
-const LOCATIONS = ['Nairobi','Mombasa','Kisumu','Nakuru','Eldoret','Thika','Malindi','Meru'];
-const BODIES = ['SUV','Sedan','Hatchback','Station Wagon','Pickup','Minivan','Coupe','Convertible','Crossover'];
-const FUELS = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','CNG'];
-const TRANSMISSIONS = ['Automatic','Manual','CVT','AMT'];
-const CONDITIONS = ['New','Used','Foreign Used','Locally Used','Reconditioned','Damaged'];
+const EMPTY_FACETS = { brands: [], models: [], locations: [], bodyTypes: [], fuels: [], transmissions: [], colors: [], conditions: [] };
+const values = (items = []) => items.map(item => typeof item === 'string' ? item : item?.value).filter(Boolean);
+const same = (a, b) => String(a || '').toLowerCase() === String(b || '').toLowerCase();
 const COLOR_MAP = {
   // These are vehicle paint swatches, not interface theme colors; keep them true to the vehicle color.
   Black:'#1A1A1A',White:'#FFFFFF',Silver:'#C0C0C0',Gray:'#808080',Blue:'#3B82F6',
@@ -67,30 +64,17 @@ function RangeInput({ placeholder, value, onChange }) {
   );
 }
 
-export default function SearchSidebar({ cars = [], filters, onFilterChange, onBrandChange, isMobile, onClose }) {
+export default function SearchSidebar({ facets = EMPTY_FACETS, modelFacets = [], facetsLoading = false, filters, onFilterChange, onBrandChange, isMobile, onClose }) {
   const [brandSearch, setBrandSearch] = useState('');
+  const [modelSearch, setModelSearch] = useState('');
   const [showAllBrands, setShowAllBrands] = useState(false);
-
-  const counts = useMemo(() => {
-    const brand={}, location={}, body={}, fuel={}, transmission={}, color={}, condition={};
-    cars.forEach(c => {
-      if (c.brand) brand[c.brand] = (brand[c.brand]||0)+1;
-      const l = c.location?.city; if (l) location[l] = (location[l]||0)+1;
-      if (c.bodyType) body[c.bodyType] = (body[c.bodyType]||0)+1;
-      if (c.fuel) fuel[c.fuel] = (fuel[c.fuel]||0)+1;
-      if (c.transmission) transmission[c.transmission] = (transmission[c.transmission]||0)+1;
-      if (c.color) color[c.color] = (color[c.color]||0)+1;
-      if (c.condition) condition[c.condition] = (condition[c.condition]||0)+1;
-    });
-    return { brand, location, body, fuel, transmission, color, condition };
-  }, [cars]);
 
   // Quick filters - popular combinations
   const quickFilters = [
-    { label: 'Under 1M KES', filters: { priceMax: '1000000' }, count: cars.filter(c => c.price <= 1000000).length },
-    { label: 'Toyota SUVs', filters: { brand: 'Toyota', body: 'suv' }, count: cars.filter(c => c.brand === 'Toyota' && c.bodyType?.toLowerCase() === 'suv').length },
-    { label: 'Recent Models', filters: { yearMin: '2020' }, count: cars.filter(c => c.year >= 2020).length },
-    { label: 'Low Mileage', filters: { mileageMax: '50000' }, count: cars.filter(c => c.mileage <= 50000).length },
+    { label: 'Under KES 1M', filters: { priceMax: '1000000' } },
+    { label: 'SUVs', filters: { body: values(facets?.bodyTypes).find(v => v.toLowerCase() === 'suv') || 'SUV' } },
+    { label: 'Recent models', filters: { yearMin: '2020' } },
+    { label: 'Low mileage', filters: { mileageMax: '50000' } },
   ];
 
   const activeFilter   = filters.filter   || 'all';
@@ -108,10 +92,19 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
   const mileageMin = filters.mileageMin || '';
   const mileageMax = filters.mileageMax || '';
 
-  const filteredBrands = BRANDS.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
+  const facetBrands = values(facets?.brands);
+  const filteredBrands = facetBrands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
+  const models = filters.brand ? values(modelFacets) : values(facets?.models);
+  const locations = values(facets?.locations);
+  const bodies = values(facets?.bodyTypes);
+  const fuels = values(facets?.fuels);
+  const transmissions = values(facets?.transmissions);
+  const conditions = values(facets?.conditions);
+  const colors = values(facets?.colors);
+  const modelFilter = filters.model || '';
   const visibleBrands  = showAllBrands ? filteredBrands : filteredBrands.slice(0, 8);
 
-  const activeCount = [brandFilter, locationFilter, priceMin||priceMax, yearMin||yearMax,
+  const activeCount = [brandFilter, modelFilter, locationFilter, priceMin||priceMax, yearMin||yearMax,
     bodyFilter, fuelFilter, transFilter, colorFilter, conditionFilter, mileageMin||mileageMax].filter(Boolean).length
     + (activeFilter !== 'all' ? 1 : 0);
 
@@ -144,13 +137,13 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </div>
 
       {/* ── CATEGORY ── */}
-      <Section title="Category" count={cars.length} active={activeFilter !== 'all'}>
+      <Section title="Category" active={activeFilter !== 'all'}>
         {[
-          { id: 'all',     label: 'All Vehicles',  count: cars.length,                                                               icon: '◈' },
-          { id: 'auction', label: 'Live Auctions',  count: cars.filter(c=>c.auctionStatus==='live'||c.allowBid).length,              icon: '⚡' },
-          { id: 'fixed',   label: 'Direct Buy',     count: cars.filter(c=>!c.allowBid&&c.auctionStatus!=='live').length,             icon: '🏷' },
-        ].map(({ id, label, count, icon }) => (
-          <Chip key={id} active={activeFilter===id} onClick={() => onFilterChange('category', id)} count={count}>
+          { id: 'all',     label: 'All Vehicles', icon: '◈' },
+          { id: 'auction', label: 'Live Auctions', icon: '⚡' },
+          { id: 'fixed',   label: 'Direct Buy', icon: '🏷' },
+        ].map(({ id, label, icon }) => (
+          <Chip key={id} active={activeFilter===id} onClick={() => onFilterChange('category', id)}>
             <span className="search-chip-inner">
               <span className="search-chip-icon">{icon}</span>{label}
             </span>
@@ -165,7 +158,6 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
             Object.entries(qf.filters).forEach(([k, v]) => onFilterChange(k, v));
           }} className="search-quick-filter-btn">
             <span>{qf.label}</span>
-            <span className="search-chip-count">{qf.count}</span>
           </button>
         ))}
       </Section>
@@ -181,17 +173,33 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
             />
           </div>
         </div>
-        <Chip active={!brandFilter} onClick={() => onBrandChange('All')} count={cars.length}>
+        <Chip active={!brandFilter} onClick={() => onBrandChange('All')}>
           <span className="search-chip-inner"><span className="search-chip-icon-all">◈</span>All Makes</span>
         </Chip>
         {visibleBrands.map(b => (
-          <Chip key={b} active={brandFilter===b} onClick={() => onBrandChange(b)} count={counts.brand[b]||0}>{b}</Chip>
+          <Chip key={b} active={same(brandFilter, b)} onClick={() => onBrandChange(b)}>{b}</Chip>
         ))}
         {filteredBrands.length > 8 && (
           <button onClick={() => setShowAllBrands(v => !v)} className="search-show-more-btn">
             {showAllBrands ? '▲ Show less' : `▼ +${filteredBrands.length - 8} more`}
           </button>
         )}
+      </Section>
+
+      {/* ── MODEL ── */}
+      <Section title="Model" count={modelFilter ? 1 : 0} active={!!modelFilter}>
+        <div className="search-brand-wrap">
+          <div className="search-brand-input-wrap">
+            <Search size={12} className="search-brand-icon" />
+            <input placeholder={filters.brand ? `Search ${filters.brand} models…` : 'Search all models…'} value={modelSearch}
+              onChange={e => setModelSearch(e.target.value)} className="search-brand-input" />
+          </div>
+        </div>
+        <Chip active={!modelFilter} onClick={() => onFilterChange('model', '')}>All Models</Chip>
+        {models.filter(m => m.toLowerCase().includes(modelSearch.toLowerCase())).map(m => (
+          <Chip key={m} active={same(modelFilter, m)} onClick={() => onFilterChange('model', m)}>{m}</Chip>
+        ))}
+        {!models.length && <p className="search-facet-note">{facetsLoading ? 'Loading models from current listings…' : 'Models appear automatically as approved vehicles are listed.'}</p>}
       </Section>
 
       {/* ── PRICE ── */}
@@ -208,9 +216,8 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
           ['3.6M – 10M',  3600000,  10000000],
           ['Over 10M',    10000000, 999999999],
         ] as [string, number, number][]).map(([label, min, max]) => {
-          const cnt = cars.filter(c => c.price >= min && c.price <= max).length;
           const active = Number(priceMin)===min && Number(priceMax)===max;
-          return <Chip key={label} active={active} onClick={() => onFilterChange('priceRange',`${min}-${max}`)} count={cnt}>{label}</Chip>;
+          return <Chip key={label} active={active} onClick={() => onFilterChange('priceRange',`${min}-${max}`)}>{label}</Chip>;
         })}
       </Section>
 
@@ -225,39 +232,41 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
 
       {/* ── LOCATION ── */}
       <Section title="Location" count={locationFilter?1:0} active={!!locationFilter}>
-        <Chip active={!locationFilter} onClick={() => onFilterChange('location','')} count={cars.length}>
+        <Chip active={!locationFilter} onClick={() => onFilterChange('location','')}>
           <span className="search-chip-inner"><span className="search-chip-icon-all">◈</span>All Kenya</span>
         </Chip>
-        {LOCATIONS.map(l => (
-          <Chip key={l} active={locationFilter===l.toLowerCase()} onClick={() => onFilterChange('location',l.toLowerCase())} count={counts.location[l]||0}>{l}</Chip>
+        {locations.map(l => (
+          <Chip key={l} active={same(locationFilter, l)} onClick={() => onFilterChange('location', l)}>{l}</Chip>
         ))}
+        {!locations.length && <p className="search-facet-note">{facetsLoading ? 'Loading locations…' : 'Locations will appear as approved listings are added.'}</p>}
       </Section>
 
       {/* ── BODY TYPE ── */}
       <Section title="Body Type" count={bodyFilter?1:0} active={!!bodyFilter}>
-        {BODIES.map(b => (
-          <Chip key={b} active={bodyFilter===b.toLowerCase()} onClick={() => onFilterChange('body',b.toLowerCase())} count={counts.body[b]||0}>{b}</Chip>
+        {bodies.map(b => (
+          <Chip key={b} active={same(bodyFilter, b)} onClick={() => onFilterChange('body', b)}>{b}</Chip>
         ))}
+        {!bodies.length && <p className="search-facet-note">{facetsLoading ? 'Loading body styles…' : 'Body styles will appear as approved listings are added.'}</p>}
       </Section>
 
       {/* ── CONDITION ── */}
       <Section title="Condition" count={conditionFilter?1:0} active={!!conditionFilter}>
-        {CONDITIONS.map(c => (
-          <Chip key={c} active={conditionFilter===c.toLowerCase()} onClick={() => onFilterChange('condition',c.toLowerCase())} count={counts.condition[c]||0}>{c}</Chip>
+        {conditions.map(c => (
+          <Chip key={c} active={same(conditionFilter, c)} onClick={() => onFilterChange('condition', c)}>{c}</Chip>
         ))}
       </Section>
 
       {/* ── FUEL ── */}
       <Section title="Fuel" count={fuelFilter?1:0} active={!!fuelFilter}>
-        {FUELS.map(f => (
-          <Chip key={f} active={fuelFilter===f.toLowerCase()} onClick={() => onFilterChange('fuel',f.toLowerCase())} count={counts.fuel[f]||0}>{f}</Chip>
+        {fuels.map(f => (
+          <Chip key={f} active={same(fuelFilter, f)} onClick={() => onFilterChange('fuel', f)}>{f}</Chip>
         ))}
       </Section>
 
       {/* ── TRANSMISSION ── */}
       <Section title="Transmission" count={transFilter?1:0} active={!!transFilter}>
-        {TRANSMISSIONS.map(t => (
-          <Chip key={t} active={transFilter===t.toLowerCase()} onClick={() => onFilterChange('transmission',t.toLowerCase())} count={counts.transmission[t]||0}>{t}</Chip>
+        {transmissions.map(t => (
+          <Chip key={t} active={same(transFilter, t)} onClick={() => onFilterChange('transmission', t)}>{t}</Chip>
         ))}
       </Section>
 
@@ -277,7 +286,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
           { id: 'dealer', label: 'Dealers', icon: '🏪' },
           { id: 'private', label: 'Private Sellers', icon: '👤' },
         ].map(({ id, label, icon }) => (
-          <Chip key={id} active={filters.dealerType===id} onClick={() => onFilterChange('dealerType', id)} count={id ? cars.filter(c => id==='dealer' ? c.dealer?.role?.includes('dealer') : !c.dealer || c.dealer?.role==='individual_seller'||c.dealer?.role==='user').length : cars.length}>
+          <Chip key={id} active={filters.dealerType===id} onClick={() => onFilterChange('dealerType', id)}>
             <span className="search-chip-inner"><span className="search-chip-icon">{icon}</span>{label}</span>
           </Chip>
         ))}
@@ -286,11 +295,12 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       {/* ── COLOR ── */}
       <Section title="Colour" count={colorFilter?1:0} active={!!colorFilter}>
         <div className="search-color-wrap">
-          {Object.entries(COLOR_MAP).map(([name, hex]) => {
-            const active = colorFilter === name.toLowerCase();
-            const isLight = ['White','Beige','Silver','Pearl','Yellow','Ivory'].includes(name);
+          {colors.map((name) => {
+            const hex = COLOR_MAP[name] || '#94A3B8';
+            const active = same(colorFilter, name);
+            const isLight = ['white','beige','silver','pearl','yellow','ivory'].includes(name.toLowerCase());
             return (
-              <button key={name} onClick={() => onFilterChange('color', name.toLowerCase())} title={name}
+              <button key={name} onClick={() => onFilterChange('color', name)} title={name}
                 className={`search-color-swatch ${active ? 'search-color-swatch-active' : ''}`}
                 style={{ background: hex }}>
                 {active && (
@@ -299,6 +309,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
               </button>
             );
           })}
+          {!colors.length && <p className="search-facet-note">{facetsLoading ? 'Loading colours…' : 'Vehicle colours appear as approved listings are added.'}</p>}
         </div>
       </Section>
 

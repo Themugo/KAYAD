@@ -378,3 +378,35 @@
 .showroom-error-banner .showroom-error-dismiss:last-child {
   margin-left: 0; padding: 6px; background: transparent;
 }
+
+
+/* Stage 36 — premium, phone-first showroom command surface. Keep desktop geometry intact. */
+.search-facet-note {
+  margin: 8px 2px 4px;
+  color: var(--color-text-muted, #64748b);
+  font-size: 11px;
+  line-height: 1.45;
+}
+@media (max-width: 768px) {
+  .showroom-hero-mobile { padding: 26px 0 20px; }
+  .showroom-hero-overline { font-size: 9px; letter-spacing: .16em; }
+  .showroom-hero-title { font-size: clamp(2rem, 9vw, 2.65rem); line-height: 1.02; margin-bottom: 10px; }
+  .showroom-hero-sub { max-width: 34rem; padding: 0 18px; font-size: 13px; line-height: 1.55; }
+  .command-bar-inner-mobile { gap: 10px; padding: 12px 14px; }
+  .command-bar-search-mobile { width: 100%; max-width: none; }
+  .category-pills-mobile { gap: 7px; padding: 1px 0 3px; }
+  .pill-btn-mobile { padding: 9px 14px; min-height: 42px; font-size: 12px; letter-spacing: 0; }
+  .command-rail-mobile { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; }
+  .sort-select-mobile { min-height: 42px; width: 100%; max-width: none; }
+  .filter-btn-mobile { min-height: 42px; justify-content: center; padding: 9px 12px; }
+  .view-btn-mobile { min-height: 42px; padding: 10px 11px; }
+  .filter-band-mobile { gap: 7px; }
+  .filter-band-result-count { font-size: 13px; }
+  .mobile-filter-drawer { width: min(92vw, 420px); max-width: 420px; }
+  .search-sidebar-mobile { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+  .search-sidebar-header { position: sticky; top: 0; z-index: 3; }
+  .search-sidebar-title { font-size: 15px; }
+  .search-section-btn { min-height: 46px; }
+  .search-chip { min-height: 40px; }
+  .search-range-input, .search-brand-input { min-height: 42px; font-size: 14px; }
+}
