@@ -202,7 +202,7 @@ export default function Footer({ setPage }: FooterProps) {
                   }}
                 >
                   {branding.logoType === 'image' && branding.logoUrl ? (
-                    <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} loading="lazy" decoding="async" style={{ width: 'min(220px, 100%)', height: 64, objectFit: 'contain', objectPosition: 'left center', display: 'block', filter: 'drop-shadow(0 2px 5px rgba(0,0,0,.12))' }} />
+                    <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} loading="lazy" decoding="async" style={{ width: 'min(220px, 100%)', height: 64, objectFit: 'contain', objectPosition: 'left center', display: 'block', filter: 'drop-shadow(0 2px 5px rgba(3,19,27,.12))' }} />
                   ) : (
                     <div aria-hidden="true" style={{ width: 32, height: 32, backgroundColor: colors.footerAccent, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.footerBg} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

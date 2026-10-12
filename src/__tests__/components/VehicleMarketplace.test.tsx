@@ -160,6 +160,14 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       expect(view.getByRole('img', { name: new RegExp(name(1)) })).toBeTruthy();
 
       if (INITIAL_VEHICLES.length > 2) {
+        // The hero's featured-vehicle pair is populated by its own fetch,
+        // separate from (and slightly behind) the main inventory grid whose
+        // "Vehicle Inventory" heading renderMarketplace() waits on. Wait for
+        // the hero itself to reach its real 3-pair state (confirming its own
+        // async data and the pair-reset effect tied to it have settled)
+        // before interacting - clicking during that transient window can
+        // race a still-pending effect that resets the pair index.
+        await waitFor(() => expect(view.getAllByRole('button', { name: /^Show featured pair/i }).length).toBe(3));
         fireEvent.click(view.getByRole('button', { name: 'Next featured vehicles' }));
         expect(view.getByText(name(2))).toBeTruthy();
       }
@@ -168,7 +176,10 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     it('keeps the pair images contained and places the navigation controls outside the image stage', async () => {
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      const stage = view.getByTestId('hero-pair-image-stage');
+      // The mobile hero renders one image stage per vehicle in the pair
+      // (left + right), both sharing this testid by design - take either one,
+      // since both share the same height formula.
+      const [stage] = view.getAllByTestId('hero-pair-image-stage');
       expect(stage.style.height).toContain('clamp(');
       expect(view.getAllByRole('img').every((img) => img.className.includes('object-contain'))).toBe(true);
       expect(within(stage).queryByRole('button', { name: /featured vehicles/i })).toBeNull();
@@ -229,8 +240,11 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 130, mobileStageMaxPx: 180, mobileTransitionMs: 0, rotationSeconds: 0 } } } as never);
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
-        const stage = view.getByTestId('hero-pair-image-stage');
-        await waitFor(() => expect(stage.style.height).toBe('clamp(130px, 40vw, 180px)'));
+        // See the identical note above: both pair slots share this testid.
+        await waitFor(() => {
+          const [stage] = view.getAllByTestId('hero-pair-image-stage');
+          expect(stage.style.height).toBe('clamp(130px, 40vw, 180px)');
+        });
       });
     });
   });

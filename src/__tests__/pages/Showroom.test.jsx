@@ -14,8 +14,18 @@ vi.mock('../../api/api', () => ({
 vi.mock('../../context/SocketContext', () => ({
   useSocket: () => ({ joinShowroom: vi.fn(), on: vi.fn(() => vi.fn()), leaveShowroom: vi.fn() }),
 }));
+// The real useToast() returns a useCallback-memoized `toast` inside a stable
+// object, so its identity does not change across renders. Returning a fresh
+// `{ toast: vi.fn() }` object (and a fresh vi.fn()) on every call breaks that
+// contract: Showroom's loadCars is memoized on [getApiParams, toast], so an
+// unstable toast reference gives loadCars a new identity every render, which
+// retriggers the effect that calls it (useEffect(..., [filters, sortBy,
+// loadCars])) in a tight loop - confirmed via instrumentation to fire 30+
+// times in 400ms - flickering `loading` and racing the empty-state assertion.
+// Hoisting one stable toast fn (as the real module provides) fixes it.
+const toastMocks = vi.hoisted(() => ({ toast: vi.fn() }));
 vi.mock('../../context/ToastContext', () => ({
-  useToast: () => ({ toast: vi.fn() }),
+  useToast: () => toastMocks,
 }));
 vi.mock('../../components/features/common/SearchSidebar', () => ({ default: () => null }));
 vi.mock('../../components/features/car/CartyGrid', () => ({ default: () => null }));

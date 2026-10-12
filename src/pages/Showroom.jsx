@@ -121,6 +121,12 @@ export default function Showroom() {
   const [showSavePrompt, setShowSavePrompt]     = useState(false);
   const [saveName, setSaveName]                 = useState('');
   const [showroomError, setShowroomError]       = useState(null);
+  // Canonical, full-inventory search facets (brands/models/locations/etc.),
+  // loaded below. These three were being set via useEffect but never
+  // declared with useState — a ReferenceError on every render.
+  const [searchFacets, setSearchFacets]         = useState({ total: 0, brands: [], models: [], locations: [], bodyTypes: [], fuels: [], transmissions: [], colors: [], conditions: [] });
+  const [modelFacets, setModelFacets]           = useState([]);
+  const [facetsLoading, setFacetsLoading]       = useState(true);
 
   // Local mirror of the keyword for snappy typing; debounced before going to URL.
   const [keywordInput, setKeywordInput] = useState(searchParams.get('keyword') || '');

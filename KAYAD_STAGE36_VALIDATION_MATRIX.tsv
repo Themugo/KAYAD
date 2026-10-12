@@ -1,0 +1,29 @@
+check	command	result	evidence	environment	blocker
+Root dependency install	npm install --engine-strict=false	PASS	812 packages added	sandbox, Node v22.22.0	engine-strict override used (not persisted)
+TypeScript typecheck	npx tsc --noEmit	PASS	0 diagnostics	sandbox	none
+Production build	npx vite build	PASS	build succeeds; one chunk-size advisory, not an error	sandbox	none
+Frontend unit/component tests	npx vitest run	PASS	81/81 files, 643/643 tests, 1 honest skip	sandbox	none
+Backend dependency install	npm install --engine-strict=false (backend/)	PASS	812 packages added; 22 dev-only advisories	sandbox	none
+Backend production audit	npm audit --omit=dev (backend/)	PASS	0 vulnerabilities	sandbox	none
+Backend Jest	npm run test:jest (backend/)	PASS	79/79 suites, 1159/1159 tests (incl. navigationAuthority.test.js 35/35)	sandbox	none
+Backend Vitest	npm run test:vitest (backend/)	PASS	5/5 files, 16/16 tests	sandbox	none
+Backend node:test	npm run test:node (backend/)	PASS	1/1	sandbox	none
+Backend boot	node bootstrap.js (NODE_ENV=development)	PASS	/health returns {"status":"degraded"} correctly; graceful SIGTERM shutdown clean	sandbox	none
+Full validator battery (209 scripts)	for f in scripts/validate-*.mjs; do node $f; done	195/209 PASS (186/209 before this pass's fixes)	see evidence/stage36/validator_battery.tsv	sandbox	14 remaining fails, all disclosed non-code gaps (see report §8)
+Brand palette convergence	node scripts/validate-brand-palette-convergence.mjs	PASS (after fix)	639 frontend files + 13 shared surfaces scanned	sandbox	none
+Final system surface guard	node scripts/validate-final-system-surface-guard.mjs	PASS (after fix)	13/13	sandbox	none
+Navigation convergence	node scripts/validate-navigation-convergence.mjs	PASS (after fix)	43/43	sandbox	none
+Stage 32 mobile menu polish	node scripts/validate-stage32-mobile-menu-polish.mjs	PASS (after fix)	12/12	sandbox	none
+Premium presentation pass	node scripts/validate-premium-presentation-pass.mjs	PASS (after fix)	16/16	sandbox	none
+Stage 24 theme convergence	node scripts/validate-stage24-theme-convergence-20261012.mjs	PASS (after fix)	14/14	sandbox	none
+Stage 25 admin logo identity	node scripts/validate-stage25-admin-logo-identity-20261012.mjs	PASS (after fix)	12/12	sandbox	none
+Stage 27 brand identity admin editability	node scripts/validate-stage27-brand-identity-admin-editability-20261012.mjs	PASS (after fix)	10/10	sandbox	none
+Stage 28 navbar/ticker convergence	node scripts/validate-stage28-navbar-ticker-convergence.mjs	PASS (after fix)	10/10	sandbox	none
+Communications provider certification	node scripts/validate-communications-provider-certification.mjs	FAIL (disclosed, non-code)	no live email/SMS provider credentials configured	sandbox	provider credentials not available here
+Live runtime validator	node scripts/validate-live-runtime.mjs	FAIL (disclosed, non-code)	missing SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY	sandbox	no live Supabase credentials
+Local Supabase validator	node scripts/validate-local-supabase.mjs	FAIL (disclosed, non-code)	no docker daemon available	sandbox	no Docker in this sandbox
+Phase 6 release validator	node scripts/validate-phase6-release.mjs	FAIL (disclosed, non-code)	Running v22.22.0; certification must run on Node 22.22.2+	sandbox	Node patch-version gap
+V14 runtime preflight	node scripts/validate-v14-runtime-preflight.mjs	FAIL (disclosed, non-code)	running 22.22.0, required >=22.22.2	sandbox	Node patch-version gap
+Deployment readiness / homepage convergence / phase40 / phase59 / phase60 / production host contract / registration onboarding / canonical architecture (1 check) / release gate	6 validator scripts + 2 aggregators	FAIL (disclosed, non-code)	.env.example / .env.production.example / backend/.env.example absent from this foundation zip though .gitignore negates them (meant to be tracked)	sandbox	missing deployment-template files, not recreated to avoid fabricating production values
+Browser/visual rendering at any viewport	not run	NOT RUN	no screenshot/Playwright/device evidence produced this pass	n/a	no browser automation invoked this pass
+Staging/live-provider certification	not run	BLOCKED	requires staging credentials and owner approval per the brief's own Stage 10	n/a	explicitly out of scope without authorization

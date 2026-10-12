@@ -5,8 +5,8 @@ import { adminAPI } from '../../api/api';
 import AdminSettingsBranding from './AdminSettingsBranding';
 
 const DEFAULTS = {
-  platformName: 'Giclan Motors',
-  supportEmail: 'support@giclanmotors.co.ke',
+  platformName: 'KAYAD',
+  supportEmail: 'support@kayad.co.ke',
   supportPhone: '254700100200',
   dealerCommission: 5,
   bidCommitmentPct: 5,
@@ -64,8 +64,14 @@ export default function AdminSettings() {
   // Audit log
   const [auditLog, setAuditLog] = useState([]);
 
+  // Distinguishes "no config saved yet, defaults are correct" from "the
+  // request to load config actually failed" — a failed fetch must never be
+  // visually indistinguishable from a legitimately empty/default config.
+  const [configLoadError, setConfigLoadError] = useState(null);
+
   const loadConfig = async () => {
     setLoading(true);
+    setConfigLoadError(null);
     try {
       const { config: c } = await adminAPI.getConfig();
       if (c) {
@@ -88,12 +94,17 @@ export default function AdminSettings() {
           setBranding({ ...DEFAULT_BRANDING, ...c.branding });
         }
       }
-    } catch { /* keep server-backed defaults when configuration is unavailable */ }
+    } catch {
+      // The request itself failed (network/auth/server error) — this is NOT
+      // the same thing as "no config exists yet". Surface it so an admin
+      // never mistakes an unreachable config for a confirmed, saved default.
+      setConfigLoadError('Could not load saved settings from the server. The values shown below may not reflect what is actually configured — fix the connection and reload before saving.');
+    }
 
     try {
       const { entries } = await adminAPI.getAuditLog({ limit: 100 });
       setAuditLog(entries || []);
-    } catch { /* ignore */ }
+    } catch { /* audit log is supplementary; its failure doesn't block settings */ }
 
     setLoading(false);
   };
@@ -194,6 +205,12 @@ export default function AdminSettings() {
           <h2>Settings</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Platform config, payment gateways, reconciliation, and sub-admin management</p>
         </div>
+
+        {configLoadError && (
+          <div role="alert" style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 8, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', fontSize: 13 }}>
+            {configLoadError}
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap', borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
           {tabs.map(t => (

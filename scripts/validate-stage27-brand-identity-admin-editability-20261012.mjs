@@ -4,7 +4,13 @@ const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const checks = [
   ['premium master logo asset is bundled', fs.existsSync(path.join(root, 'public/branding/kayad-premium-master.png'))],
-  ['default branding uses bundled master logo', /logoType:\s*'image'[\s\S]*?logoUrl:\s*'\/branding\/kayad-premium-master\.png'/.test(read('src/context/BrandingContext.tsx'))],
+  // Stage 33 (STAGE33_MASTER_BRAND_LOCKUP_NAVBAR_REPORT_20261012.md) replaced
+  // the bundled premium-master.png default with a new, documented
+  // 'kayad-road-mark.svg' scalable symbol-only emblem - a deliberate,
+  // later brand-lockup redesign, not a reversion. Both assets still exist
+  // under public/branding/; only the default BrandingContext value moved to
+  // the new one. Updated the literal to match rather than reverting Stage 33.
+  ['default branding uses bundled master logo', /logoType:\s*'image'[\s\S]*?logoUrl:\s*'\/branding\/kayad-road-mark\.svg'/.test(read('src/context/BrandingContext.tsx')) && fs.existsSync(path.join(root, 'public/branding/kayad-road-mark.svg'))],
   ['shared navbar uses admin-managed logo URL', /branding\.logoType === 'image' && branding\.logoUrl/.test(read('src/components/Navbar.tsx'))],
   ['legacy EA badge is removed from navbar wordmark', !/kayad-brand__ea/.test(read('src/components/Navbar.tsx'))],
   ['primary footer uses same admin-managed logo URL', /branding\.logoType === 'image' && branding\.logoUrl/.test(read('src/components/layout/Footer.tsx'))],

@@ -9,9 +9,16 @@ const route = read('backend/routes/adminRoutes.js');
 const context = read('src/context/BrandingContext.tsx');
 const checks = [
   ['navbar consumes admin branding context', navbar.includes("useBranding") && navbar.includes('branding.logoUrl')],
-  ['navbar renders uploaded image with contained sizing', navbar.includes('object-contain') && navbar.includes('branding.logoType === \'image\'')],
+  // Stage 33 (STAGE33_MASTER_BRAND_LOCKUP_NAVBAR_REPORT_20261012.md) moved the
+  // navbar logo's object-fit from an inline Tailwind 'object-contain' utility
+  // into the dedicated '.kayad-brand__image' class (kayad-navigation.css),
+  // which declares 'object-fit: contain' - same effect, different mechanism.
+  ['navbar renders uploaded image with contained sizing', navbar.includes('kayad-brand__image') && navbar.includes('branding.logoType === \'image\'') && fs.readFileSync(new URL('src/styles/kayad-navigation.css', `file://${process.cwd()}/`), 'utf8').includes('object-fit: contain')],
   ['footer consumes same canonical branding context', footer.includes("useBranding") && footer.includes('const { branding } = useBranding()')],
-  ['centered footer supports uploaded logo', footer.includes("width: 'min(240px, 60vw)'") && footer.includes('objectPosition: \'center\'' )],
+  // A later mobile-polish pass bumped the centered footer logo's max size
+  // from min(240px, 60vw) to min(250px, 68vw) - a size tweak, not a change in
+  // kind; still centered, contained and responsive.
+  ['centered footer supports uploaded logo', footer.includes("width: 'min(250px, 68vw)'") && footer.includes('objectPosition: \'center\'' )],
   ['column footer supports uploaded logo', footer.includes("width: 'min(220px, 100%)'") && footer.includes("objectPosition: 'left center'")],
   ['footer preserves text/icon fallback', footer.includes("branding.logoText || 'KAYAD'") && footer.includes('colors.footerAccent')],
   ['admin preview uses object-contain instead of cropping', admin.includes("objectFit: 'contain'") && admin.includes('Logo preview')],

@@ -34,7 +34,13 @@ add('dropdowns are disclosure buttons with aria-expanded/aria-controls, not ARIA
 add('Escape closes dropdowns, account menu and drawer', navbar.includes("e.key !== 'Escape'") && navbar.includes('hamburgerRef.current?.focus()') && navbar.includes('userButtonRef.current?.focus()'));
 add('mobile drawer is a labelled modal dialog with focus handling', navbar.includes('role="dialog"') && navbar.includes('aria-modal="true"') && navbar.includes("e.key !== 'Tab'"));
 add('primary nav is a labelled landmark of real links', navbar.includes('aria-label="Primary"') && navbar.includes('href={item.href}'));
-add('single mobile navigation system retained (bottom dock + one drawer)', (mobile.match(/key: 'menu'/g) || []).length === 1 && (navbar.match(/role="dialog"/g) || []).length === 1);
+// Stage 32 deliberately dropped the dock's duplicate 'menu' tab (replaced
+// with 'saved') since the Navbar header's own hamburger already opens the
+// one shared drawer - see the matching, updated note in
+// validate-final-system-surface-guard.mjs. "Single navigation system" now
+// means exactly one drawer and no duplicate opener in the dock, not that the
+// dock itself carries a 'menu' key.
+add('single mobile navigation system retained (bottom dock + one drawer)', !mobile.includes("key: 'menu'") && (navbar.match(/role="dialog"/g) || []).length === 1);
 add('deleted MobileCarCard architecture not resurrected', !fs.existsSync(path.join(root, 'src/components/MobileCarCard.jsx')) && !/MobileCarCard/.test(navbar));
 add('reduced-motion rules cover the new header', read('src/styles/kayad-navigation.css').includes('prefers-reduced-motion:reduce'));
 add('sign-in/sign-up routes keep canonical /login entry', navbar.includes("handleAuthNavigation('/login')") && /Sign In \/ Sign Up/.test(navbar));

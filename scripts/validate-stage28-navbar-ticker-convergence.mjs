@@ -3,7 +3,11 @@ import path from 'node:path';
 const root = process.cwd();
 const checks = [
   ['navbar retains admin tagline alongside image logo', ['src/components/Navbar.tsx','kayad-brand__tag--reserved'].every((x)=>fs.existsSync(path.join(root,x)) || fs.readFileSync(path.join(root,'src/components/Navbar.tsx'),'utf8').includes(x))],
-  ['navbar master logo has controlled responsive width', fs.readFileSync(path.join(root,'src/components/Navbar.tsx'),'utf8').includes('max-w-[142px]')],
+  // Stage 33 replaced the single inline max-w-[142px] Tailwind utility with
+  // a dedicated 'kayad-brand__image' class carrying explicit, per-breakpoint
+  // widths (70/52/48/42/36px) in kayad-navigation.css - a more granular,
+  // documented control, not a loss of it. Updated the check accordingly.
+  ['navbar master logo has controlled responsive width', fs.readFileSync(path.join(root,'src/components/Navbar.tsx'),'utf8').includes('kayad-brand__image') && fs.readFileSync(path.join(root,'src/styles/kayad-navigation.css'),'utf8').includes('.kayad-brand__image {')],
   ['footer reads shared BrandingContext', fs.readFileSync(path.join(root,'src/components/Footer.tsx'),'utf8').includes("useBranding")],
   ['footer uses admin-managed image logo', fs.readFileSync(path.join(root,'src/components/Footer.tsx'),'utf8').includes('branding.logoUrl')],
   ['admin can select ticker direction', fs.readFileSync(path.join(root,'src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx'),'utf8').includes('tickerDirection')],

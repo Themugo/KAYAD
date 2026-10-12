@@ -24,7 +24,15 @@ const checks = [
   ['Private workspaces suppress the public mobile dock', mobileNav.includes('Mobile marketplace navigation') && app.includes('privateWorkspaceNavs')],
   ['Private workspaces suppress the public notice strip', app.includes('{!privateWorkspaceNavs.has(activeNav) && <TopNoticeStrip />}')],
   ['Support FAQ case CTA uses its actual data label', faq.includes("if (faq.nextStep === 'Open a support case')")],
-  ['Mobile bottom navigation has one canonical menu entry', (mobileNav.match(/key: 'menu'/g) || []).length === 1],
+  // Stage 32 (validate-stage32-mobile-menu-polish.mjs, documented in
+  // KAYAD_STAGE36_SHOWROOM_CANONICAL_SEARCH_MOBILE_POLISH_20261012.md's
+  // lineage) deliberately removed the dock's duplicate 'menu' tab in favor
+  // of 'saved', because the Navbar header's own hamburger already opens the
+  // one shared drawer ("existing header hamburger remains the menu opener").
+  // This check predates that change and was asserting the dock keep exactly
+  // the 'menu' key Stage 32 intentionally dropped. Updated to assert the
+  // actual no-duplicate-menu-tab contract instead of reverting Stage 32.
+  ['Mobile bottom navigation has no duplicate menu tab (header hamburger is the sole opener)', !mobileNav.includes("key: 'menu'") && navbar.includes('openMobileMenu()')],
   ['Desktop navigation exposes one canonical Marketplace entry', (navbar.match(/handleNavSelect\('marketplace'\)/g) || []).length >= 1],
   ['Global horizontal overflow is clipped at document level', fs.readFileSync(path.join(root,'src/index.css'),'utf8').includes('overflow-x: clip')],
 ];
