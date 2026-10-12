@@ -185,8 +185,8 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   };
 
   return (
-    <div className="space-y-8 pb-16">
-      {viewMode === 'public' ? <section className="kayad-brand-hero rounded-3xl text-white p-6 sm:p-10" aria-labelledby="insp-title">
+    <div className={`space-y-8 pb-16 ${viewMode === 'public' ? 'kayad-auto-services-view' : 'kayad-inspection-account-view'}`} data-kayad-surface="auto-services">
+      {viewMode === 'public' ? <section className="kayad-brand-hero kayad-auto-services-hero rounded-3xl text-white p-6 sm:p-10" aria-labelledby="insp-title">
         <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">Automotive services</p>
         <h1 id="insp-title" className="mt-2 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
         <p className="mt-3 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYAD is the platform that connects you with independent, verified inspection businesses, garages and specialists. They carry out the work, not KAYAD, and you see who they are before you act.</p>
@@ -226,7 +226,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         {viewMode === 'public' ? (
           <div className="space-y-8">
             <div className="grid md:grid-cols-2 gap-5">
-              <article className="rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-inspect">
+              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-inspect">
                 <ShieldCheck className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
                 <h2 id="lane-inspect" className="mt-3 text-lg font-black text-[#12576d]">Inspect a car before you buy</h2>
                 <p className="mt-1.5 text-sm text-[#64748B]">An independent inspector checks the vehicle for you. Two ways to arrange it:</p>
@@ -239,7 +239,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('pre_purchase_inspection')}>Choose a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
                 </div>
               </article>
-              <article className="rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-fix">
+              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-fix">
                 <Wrench className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
                 <h2 id="lane-fix" className="mt-3 text-lg font-black text-[#12576d]">Repairs, diagnostics and roadside help</h2>
                 <p className="mt-1.5 text-sm text-[#64748B] flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYAD lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>
@@ -250,7 +250,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               </article>
             </div>
 
-            <section aria-labelledby="insp-trust" className="rounded-2xl border border-[#D7E7E4] bg-white p-6">
+            <section aria-labelledby="insp-trust" className="kayad-service-info rounded-2xl border border-[#D7E7E4] bg-white p-6">
               <h2 id="insp-trust" className="text-base font-black text-[#12576d]">What verified means here</h2>
               <ul className="mt-3 grid md:grid-cols-3 gap-4 text-sm text-[#64748B]">
                 <li><strong className="block text-[#0A3340]">The business is reviewed</strong>KAYAD reviews a business’s identity and evidence before it is listed. It is not verified just by registering.</li>
@@ -259,7 +259,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               </ul>
             </section>
 
-            <section aria-labelledby="insp-next" className="rounded-2xl border border-[#D7E7E4] bg-white p-6">
+            <section aria-labelledby="insp-next" className="kayad-service-info rounded-2xl border border-[#D7E7E4] bg-white p-6">
               <h2 id="insp-next" className="text-base font-black text-[#12576d]">After you request or book an inspection</h2>
               <ol className="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                 {[
@@ -279,7 +279,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               </ol>
             </section>
 
-            <section aria-labelledby="insp-providers" className="rounded-2xl border border-dashed border-[#BDE5DE] bg-[#F6FAF9] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <section aria-labelledby="insp-providers" className="kayad-provider-cta rounded-2xl border border-dashed border-[#BDE5DE] bg-[#F6FAF9] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 id="insp-providers" className="text-sm font-black text-[#12576d] flex items-center gap-2"><BriefcaseBusiness className="w-4 h-4" aria-hidden="true" />Run an inspection, garage or specialist business?</h2>
                 <p className="text-xs text-[#64748B] mt-1">Apply to be listed with the services you offer. Applications are reviewed by KAYAD and do not grant access automatically.</p>

@@ -39,3 +39,48 @@
 /* Gate 4: the live indicator uses the auction teal instead of the global alert rose; the pulse animation is unchanged. */
 .auction-premium-page .auction-card-badge [class*="bg-rose-600"]{background:var(--ap-teal);color:#fff}
 @media (prefers-reduced-motion:reduce){.auction-premium-page .auction-card-badge [class*="animate-pulse"]{animation:none}}
+
+/* Stage 30 — search and auction mobile refinement. Desktop rules above remain unchanged. */
+@media (max-width: 640px) {
+  .auction-premium-page { gap: 1rem; }
+  .auction-market-header { padding: 17px 14px 16px; border-radius: 20px; box-shadow: 0 12px 30px rgba(7,57,68,.12); }
+  .auction-market-header-top { align-items: flex-start; gap: 12px; }
+  .auction-eyebrow { flex-wrap: wrap; gap: 7px; font-size: 9px; line-height: 1.5; letter-spacing: .13em; }
+  .auction-eyebrow-divider { width: 14px; }
+  .auction-trust-row { display: flex; flex-wrap: wrap; gap: 7px; }
+  .auction-trust-row span { min-height: 34px; padding: 7px 10px; font-size: 10px; }
+  .auction-market-headline { margin-top: 15px; font-size: clamp(1.35rem, 6vw, 1.7rem); line-height: 1.15; }
+  .auction-market-subcopy { margin: 8px 0 15px; font-size: 12px; line-height: 1.55; }
+  .auction-market-controls { gap: 11px; }
+  .auction-segment-grid { display: flex; gap: 8px; margin-inline: -2px; padding: 2px 2px 8px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: rgba(142,231,218,.7) rgba(255,255,255,.08); }
+  .auction-segment { flex: 0 0 128px; min-height: 62px; gap: 8px; padding: 9px 10px; border-radius: 14px; scroll-snap-align: start; }
+  .auction-segment-icon { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 10px; }
+  .auction-segment-label { font-size: 9px; letter-spacing: .045em; line-height: 1.25; }
+  .auction-segment-value { font-size: 19px; }
+  .auction-searchbar { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 9px; border-radius: 15px; }
+  .auction-searchbar > .relative { min-width: 0; width: 100%; }
+  .auction-searchbar input { min-height: 44px; font-size: 14px; }
+  .auction-searchbar .auction-refresh-btn { width: 100%; min-height: 42px; justify-content: center; }
+  .auction-spotlight { border-radius: 18px !important; }
+  .auction-spotlight-grid { gap: 0; }
+  .auction-spotlight-media { min-height: 190px; max-height: 230px; }
+  .auction-spotlight-body { padding: 15px !important; }
+  .auction-spotlight-title { font-size: 1.25rem; line-height: 1.2; }
+  .auction-spotlight-stats { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .auction-spotlight-stats > div { min-width: 0; padding: 9px 7px; border-radius: 12px; }
+  .auction-spotlight-stats p { overflow-wrap: anywhere; }
+  .auction-card-grid { gap: 14px; }
+  .auction-card { border-radius: 18px !important; }
+  .auction-card-media { height: 205px !important; }
+  .auction-card-body { padding: 14px !important; gap: 12px !important; }
+  .auction-card-title { font-size: 16px !important; white-space: normal; }
+  .auction-card-body > .flex.items-end.justify-between { align-items: flex-start; gap: 10px; }
+  .auction-card-body > .flex.items-end.justify-between > div { min-width: 0; }
+  .auction-card-body > .flex.items-end.justify-between button { white-space: nowrap; }
+  #auction-results-panel { scroll-margin-top: 88px; }
+  #auction-results-panel > .card, #auction-results-panel > [class*="Card"] { padding: 22px 16px; border-radius: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auction-premium-page .auction-segment, .auction-premium-page .auction-card, .auction-premium-page .auction-card-media img { transition: none !important; animation: none !important; }
+  .auction-premium-page .auction-card:hover { transform: none !important; }
+}

@@ -109,3 +109,129 @@
 }
 .kayad-public-shell :where(button, [role="button"]) { -webkit-tap-highlight-color: rgba(19,184,166,.16); }
 .kayad-public-shell :where(a:not([class*="text-"]), .kayad-link) { text-decoration-color: rgba(23,107,135,.35); }
+
+
+/* Stage 30 — mobile marketplace controls: preserve the existing discovery
+   state and desktop toolbar while making every phone control explicit. */
+@media (max-width: 639px) {
+  .kayad-market-toolbar { border-radius: 20px !important; }
+  .kayad-market-toolbar > div { gap: 12px !important; padding: 14px !important; }
+  .kayad-market-toolbar .kayad-toolbar-control { min-width: 0; max-width: 100%; }
+  .kayad-market-toolbar .kayad-toolbar-control[aria-label="Results per page"] { width: 100%; justify-content: space-between; min-height: 46px; }
+  .kayad-market-toolbar .kayad-toolbar-control[aria-label="Results per page"] button { min-width: 44px; min-height: 36px; }
+  .kayad-market-toolbar label.kayad-toolbar-control { width: 100%; min-height: 48px; justify-content: space-between; gap: 10px; padding: 0 12px; }
+  .kayad-market-toolbar label.kayad-toolbar-control select { display: block; flex: 1 1 auto; width: 1%; min-width: 0; min-height: 42px; color: #0A3340; background-color: transparent; font-size: 13px; opacity: 1; }
+  .kayad-market-toolbar .kayad-toolbar-control[aria-label="Inventory view"] { width: 100%; min-height: 48px; }
+  .kayad-market-toolbar .kayad-toolbar-control[aria-label="Inventory view"] button { flex: 1 1 50%; justify-content: center; min-height: 38px; }
+  .kayad-market-toolbar button[aria-label="Filters"], .kayad-market-toolbar button:has(svg.lucide-sliders-horizontal) { min-height: 46px; }
+  .kayad-market-toolbar h2 { row-gap: 8px; }
+  .kayad-market-toolbar p { font-size: 13px; line-height: 1.6; }
+  .kayad-market-toolbar select:focus-visible, .kayad-market-toolbar button:focus-visible { outline: 3px solid rgba(19,184,166,.6); outline-offset: 2px; }
+  .kayad-market-toolbar + * { min-width: 0; }
+}
+
+
+/* Stage 31 — Auto Services mobile foundation. All overrides are phone-only;
+   desktop layout, provider APIs, booking contracts and account flows stay canonical. */
+.kayad-auto-services-view .kayad-auto-services-hero,
+.kayad-auto-services-marketplace .kayad-services-finder-hero {
+  background-image: radial-gradient(circle at 92% 8%, rgba(19,184,166,.18), transparent 32%), linear-gradient(118deg, #12576D 0%, #176B87 100%);
+}
+.kayad-auto-services-view .kayad-service-lane,
+.kayad-auto-services-view .kayad-service-info,
+.kayad-auto-services-view .kayad-provider-cta {
+  box-shadow: 0 8px 28px rgba(10,51,64,.045);
+}
+.kayad-auto-services-marketplace .kayad-provider-results article,
+.kayad-auto-services-marketplace .kayad-provider-results [class*="rounded-xl"] {
+  scroll-margin-top: 92px;
+}
+.kayad-onboarding-steps li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 7px;
+  row-gap: 2px;
+  padding: 10px 9px;
+  border: 1px solid #D7E7E4;
+  border-radius: 13px;
+  background: #F6FAF9;
+  color: #64748B;
+}
+.kayad-onboarding-steps li > span {
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #DDF4F0;
+  color: #12576D;
+  font-size: 12px;
+  font-weight: 800;
+}
+.kayad-onboarding-steps li strong { min-width: 0; font-size: 12px; line-height: 1.25; color: #12576D; }
+.kayad-onboarding-steps li small { min-width: 0; font-size: 10px; line-height: 1.3; }
+.kayad-onboarding-steps li.is-current { border-color: #13B8A6; background: #E8F5F3; }
+
+@media (max-width: 639px) {
+  .kayad-auto-services-view { gap: 20px !important; padding-bottom: 88px !important; }
+  .kayad-auto-services-view .kayad-auto-services-hero {
+    padding: 24px 21px !important;
+    border-radius: 26px !important;
+    box-shadow: 0 14px 32px rgba(10,51,64,.12);
+  }
+  .kayad-auto-services-view .kayad-auto-services-hero h1 { font-size: clamp(27px, 7vw, 34px) !important; line-height: 1.12 !important; letter-spacing: -.035em; }
+  .kayad-auto-services-view .kayad-auto-services-hero > p:not(:first-child) { font-size: 15px !important; line-height: 1.6 !important; }
+  .kayad-auto-services-view .kayad-auto-services-hero > div { margin-top: 20px !important; }
+  .kayad-auto-services-view .kayad-auto-services-hero button { width: 100%; min-height: 50px !important; justify-content: center; border-radius: 15px !important; }
+  .kayad-auto-services-view .kayad-service-lane,
+  .kayad-auto-services-view .kayad-service-info { padding: 20px !important; border-radius: 21px !important; }
+  .kayad-auto-services-view .kayad-service-lane h2,
+  .kayad-auto-services-view .kayad-service-info h2 { font-size: 19px !important; line-height: 1.3 !important; }
+  .kayad-auto-services-view .kayad-service-lane > div:last-child { display: grid; grid-template-columns: 1fr; }
+  .kayad-auto-services-view .kayad-service-lane button,
+  .kayad-auto-services-view .kayad-provider-cta button { width: 100%; justify-content: center; min-height: 48px !important; }
+  .kayad-auto-services-view .kayad-provider-cta { padding: 18px !important; border-radius: 20px !important; }
+  .kayad-auto-services-view ul,
+  .kayad-auto-services-view ol { overflow-wrap: anywhere; }
+
+  .kayad-auto-services-marketplace .kayad-services-finder-hero { padding: 28px 18px !important; }
+  .kayad-auto-services-marketplace .kayad-services-finder-hero h1 { font-size: clamp(26px, 7vw, 32px) !important; line-height: 1.13 !important; letter-spacing: -.03em; }
+  .kayad-auto-services-marketplace .kayad-services-finder-hero p { font-size: 14px !important; line-height: 1.55 !important; }
+  .kayad-auto-services-marketplace .kayad-services-need,
+  .kayad-auto-services-marketplace .kayad-services-refinements,
+  .kayad-auto-services-marketplace .kayad-provider-results { padding-left: 16px !important; padding-right: 16px !important; }
+  .kayad-auto-services-marketplace .kayad-services-need { padding-top: 24px !important; }
+  .kayad-auto-services-marketplace .kayad-services-need h2 { font-size: 21px !important; }
+  .kayad-auto-services-marketplace .kayad-services-need [role="group"][aria-label="Service categories"] { display: flex; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; padding: 2px 1px 8px; margin-right: -16px; padding-right: 16px; scrollbar-width: thin; }
+  .kayad-auto-services-marketplace .kayad-services-need [role="group"][aria-label="Service categories"] > button { flex: 0 0 auto; }
+  .kayad-auto-services-marketplace .kayad-services-refinements > button { width: 100%; justify-content: center; border-radius: 14px; background: #fff; box-shadow: 0 5px 16px rgba(10,51,64,.05); }
+  .kayad-auto-services-marketplace .kayad-services-refinements #refine-panel > div { padding: 17px !important; border-radius: 18px !important; box-shadow: none !important; }
+  .kayad-auto-services-marketplace .kayad-provider-results > div:first-child { align-items: flex-start; flex-direction: column; }
+  .kayad-auto-services-marketplace .kayad-provider-results > div:first-child p:last-child { font-size: 11px; line-height: 1.5; }
+  .kayad-auto-services-marketplace .kayad-provider-results > div[aria-busy="true"] > div { min-height: 240px; }
+  .kayad-auto-services-marketplace .kayad-provider-results > div.grid { gap: 16px !important; }
+  .kayad-auto-services-marketplace .kayad-provider-results .rounded-xl.shadow-md { border: 1px solid #D7E7E4; border-radius: 19px !important; box-shadow: 0 8px 24px rgba(10,51,64,.075) !important; }
+  .kayad-auto-services-marketplace .kayad-provider-results .rounded-xl.shadow-md > div:first-child { height: 92px !important; }
+  .kayad-auto-services-marketplace .kayad-provider-results .rounded-xl.shadow-md > div:last-child { padding: 16px !important; padding-top: 39px !important; }
+  .kayad-auto-services-marketplace .kayad-provider-results h3 { font-size: 17px !important; line-height: 1.3; overflow-wrap: anywhere; }
+  .kayad-auto-services-marketplace .kayad-provider-results button { min-height: 44px; }
+
+  .kayad-provider-application-form { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .kayad-provider-application-form .grid.sm\:grid-cols-2 { grid-template-columns: minmax(0, 1fr) !important; }
+  .kayad-provider-application-form input:not([type="checkbox"]),
+  .kayad-provider-application-form select,
+  .kayad-provider-application-form textarea { min-height: 48px; font-size: 16px !important; }
+  .kayad-provider-application-form .kayad-onboarding-steps li { padding: 8px 6px; grid-template-columns: 24px minmax(0, 1fr); column-gap: 5px; }
+  .kayad-provider-application-form .kayad-onboarding-steps li > span { width: 23px; height: 23px; }
+  .kayad-provider-application-form .kayad-onboarding-steps li strong { font-size: 11px; }
+  .kayad-provider-application-form .kayad-onboarding-steps li small { font-size: 9px; }
+  .kayad-provider-application-form > div:last-child { position: sticky; bottom: 0; padding: 12px 0 max(8px, env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); backdrop-filter: blur(12px); }
+  .kayad-provider-application-form > div:last-child button { width: 100%; min-height: 48px; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-auto-services-view *, .kayad-auto-services-marketplace * { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

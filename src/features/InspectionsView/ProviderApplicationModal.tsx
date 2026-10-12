@@ -79,7 +79,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
       const serverMessage = result && typeof result === 'object' ? (result as { message?: unknown }).message : undefined;
       setDone(typeof serverMessage === 'string' && serverMessage ? serverMessage : 'Your provider application was submitted to KAYAD for review.');
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : 'The application could not be submitted. Please try again.');
+      setError('The application could not be submitted. Check your connection and try again. If the problem continues, contact KAYAD support.');
     } finally {
       inFlight.current = false;
       setSubmitting(false);
@@ -96,9 +96,10 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
   return (
     <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Apply to list your automotive business" size="lg">
       {!signedIn ? (
-        <div className="py-4 text-center space-y-4">
+        <div className="kayad-provider-onboarding py-4 text-center space-y-4">
           <BriefcaseBusiness className="w-8 h-8 mx-auto text-[#176B87]" aria-hidden="true" />
-          <p className="text-sm text-[#64748B] max-w-md mx-auto">Provider applications are tied to a KAYAD account and reviewed by KAYAD. Applying does not grant access automatically. You will confirm your email first, then return here to apply.</p>
+          <p className="text-sm text-[#64748B] max-w-md mx-auto">Start with your KAYAD account, confirm your email, then return here to share your business details and services. KAYAD reviews your application before any provider access is granted.</p>
+          <ol className="kayad-onboarding-steps max-w-md mx-auto grid grid-cols-3 gap-2 text-left" aria-label="Provider onboarding steps"><li><span>1</span><strong>Account</strong><small>Sign in or register</small></li><li><span>2</span><strong>Business</strong><small>Contact and services</small></li><li><span>3</span><strong>Review</strong><small>KAYAD checks details</small></li></ol>
           <div className="flex flex-wrap justify-center gap-2">
             <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in to apply</Button>
             {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('provider', APPLY_PATH)}>Create a business account</Button>}
@@ -114,14 +115,15 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
           <Button variant="primary" onClick={onClose}>Close</Button>
         </div>
       ) : (
-        <form onSubmit={submit} noValidate className="space-y-4" aria-busy={submitting}>
+        <form onSubmit={submit} noValidate className="kayad-provider-application-form space-y-4" aria-busy={submitting}>
+          <ol className="kayad-onboarding-steps grid grid-cols-3 gap-2 text-left" aria-label="Application progress"><li className="is-current"><span>1</span><strong>Business details</strong><small>Contact and location</small></li><li><span>2</span><strong>Services</strong><small>What you offer</small></li><li><span>3</span><strong>Review</strong><small>Checked by KAYAD</small></li></ol>
           <p className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-3.5 text-xs text-[#64748B]">Share the business details you are comfortable providing. Submitting an application does not grant provider access; KAYAD reviews it and decides.</p>
           <div className="grid sm:grid-cols-2 gap-3">
             {text('companyName', 'Business / trading name', { autoComplete: 'organization' })}
             <div className="space-y-1.5">
               <label htmlFor={`${uid}-phone`} className="text-xs font-bold text-[#64748B] block">Contact phone</label>
               <input
-                id={`${uid}-phone`} type="tel" inputMode="tel" autoComplete="tel" className={`${fieldClass} ${phoneInvalid ? 'border-rose-400' : ''}`}
+                id={`${uid}-phone`} type="tel" inputMode="tel" autoComplete="tel" required className={`${fieldClass} ${phoneInvalid ? 'border-rose-400' : ''}`}
                 value={form.phone} onChange={set('phone')} onBlur={() => setTouched(true)} disabled={submitting} aria-required="true"
                 aria-invalid={phoneInvalid || undefined} aria-describedby={phoneInvalid ? `${uid}-phone-error` : undefined}
               />

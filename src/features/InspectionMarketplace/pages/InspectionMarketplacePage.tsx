@@ -155,8 +155,8 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
   const refinementsActive = Boolean(filters.make || filters.powertrain || filters.county || filters.town || filters.verifiedOnly || filters.mobileOnly || filters.workshopOnly || filters.sameDayAvailable || filters.weekendAvailable || filters.commercialVehicles || filters.luxuryVehicles || filters.withinServiceRadius || typeof filters.nearLat === 'number');
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: C.bg }}>
-      <header className="py-10 md:py-12 px-4" style={{ backgroundColor: C.navy }}>
+    <div className="kayad-auto-services-marketplace min-h-screen" data-kayad-surface="auto-services-marketplace" style={{ backgroundColor: C.bg }}>
+      <header className="kayad-services-finder-hero py-10 md:py-12 px-4" style={{ backgroundColor: C.navy }}>
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
             <h1 className="text-3xl md:text-5xl font-bold mb-3 text-white">Find a verified inspector, garage or specialist</h1>
@@ -194,7 +194,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
       )}
 
       {/* What do you need? */}
-      <section className="max-w-7xl mx-auto px-4 pt-8" aria-labelledby="need-heading">
+      <section className="kayad-services-need max-w-7xl mx-auto px-4 pt-8" aria-labelledby="need-heading">
         <h2 id="need-heading" className="text-xl md:text-2xl font-bold mb-1" style={{ color: C.navy }}>What do you need?</h2>
         <p className="text-sm mb-4" style={{ color: C.soft }}>Pick a service, or describe what is happening if you do not know the cause.</p>
 
@@ -249,7 +249,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
         )}
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 py-6">
+      <section className="kayad-services-refinements max-w-7xl mx-auto px-4 py-6">
         <button type="button" onClick={() => setShowRefine((v) => !v)} aria-expanded={showRefine} aria-controls="refine-panel" className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-lg border border-[#BDE5DE] bg-white font-medium" style={{ color: C.navy }}>
           <SlidersHorizontal size={16} aria-hidden /> Vehicle, location and other refinements{refinementsActive ? ' (active)' : ''}
         </button>
@@ -263,7 +263,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
       {selectedProviderLoading && <div className="max-w-7xl mx-auto px-4 pb-4 text-sm" role="status" style={{ color: C.soft }}>Loading business…</div>}
       {selectedProviderError && <div className="max-w-7xl mx-auto px-4 pb-4 text-sm text-red-700" role="alert">{selectedProviderError}</div>}
 
-      <section className="max-w-7xl mx-auto px-4 pb-12" aria-live="polite">
+      <section className="kayad-provider-results max-w-7xl mx-auto px-4 pb-12" aria-live="polite">
         <div className="flex flex-wrap justify-between items-center gap-2 mb-5">
           <p style={{ color: C.soft }}>
             {loading ? 'Searching…' : `${total} ${total === 1 ? 'business' : 'businesses'} found`}
