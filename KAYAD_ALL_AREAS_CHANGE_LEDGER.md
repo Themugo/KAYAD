@@ -9,3 +9,20 @@ Source: kayad-fresh.zip SHA-256 12d083ec1753799a1a61e1a5c0ed1c9e3623aa5da1b0d8cc
 | — | KAYAD_ALL_AREAS_*.md/tsv, evidence/allareas/ | Audit deliverables | — | — |
 
 Reviewed, no change: Phase 39 mpesaSecurity.js (correct, fail-closed).
+
+---
+# Continuation 2 changes (scratch baseline = last delivered ZIP)
+| ID | File | Change | Evidence |
+|---|---|---|---|
+| AA-S1r | backend/routes/marketplaceHealthRoutes.js | `/summary,/trends,/alerts`: `protect` + `allowRoles("admin","superadmin")` (was `adminOnly` = every staff role) | allAreasAuthzRuntime: 32 failed pre-fix -> 0 |
+| AA-S2r | backend/routes/userRoutes.js | email + privileged accounts visible only to admin/superadmin/webhoist; other callers get `role $nin STAFF_ROLES` | same suite |
+| AA-D2 | backend/controllers/dealerHealthScoreController.js | public populate no longer selects `email` | allAreasDealerHealthPublicFields: fail -> pass |
+| AA-K1 | k8s/backend/deployment.yaml | `optional: true` moved inside `secretKeyRef` | allAreasK8sManifestSchema fail -> pass; kubeconform 25/27 -> 26/26 valid |
+| AA-K2 | k8s/strategies/canary-deployment.yaml | `- # Conversion rate...` -> `# - Conversion rate...` | same |
+| T1 | backend/tests/regression/allAreasMarketplaceHealthAuthz.test.js | assertion updated from `adminOnly` to the new guard (strictly narrower policy); superseded in strength by runtime suite | pass |
+| T2 | backend/tests/regression/allAreasAuthzRuntime.test.js (new, 57) | real routes + real middleware over HTTP, 13 roles | pass |
+| T3 | allAreasDealerHealthPublicFields, allAreasK8sManifestSchema (new) | regression guards | pass |
+| H1 | .gitignore | ignore `backend/data/*.sqlite*` (test artifact) | n/a |
+| S1 | scripts/audit/{route-inventory.mjs,replay-migrations.sh,supabase_stubs.sql} | reproducible audit tooling | run, outputs in evidence/ |
+| E1 | evidence/{db_replay,test_logs}/, KAYAD_ALL_AREAS_ROUTE_ROLE_MATRIX.tsv (regenerated) | evidence | - |
+Not changed on purpose: dealer-health-score access policy, STAFF_ROLES/adminOnly breadth (AA-A1), bun.lock, gitleaks allowlist, Helm chart.

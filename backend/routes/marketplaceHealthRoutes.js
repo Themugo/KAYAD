@@ -14,24 +14,29 @@ import {
   regenerateHealth,
   getAllHealthRecords,
 } from "../controllers/marketplaceHealthController.js";
-import { protect, adminOnly } from "../middleware/auth.js";
+import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 
 const router = express.Router();
+
+// AA-S1: adminOnly admits every STAFF role (marketing, ghost_checker external
+// inspectors, moderators...). Fraud/dispute/financial metrics are restricted to
+// platform administrators only.
+const healthViewers = allowRoles("admin", "superadmin");
 
 // =============================
 // 📊 HEALTH ROUTES (AA-S1: admin-only — expose fraud/dispute/financial metrics)
 // =============================
 
 // Get health summary
-router.get("/summary", protect, adminOnly, asyncHandler(getHealthSummary));
+router.get("/summary", protect, healthViewers, asyncHandler(getHealthSummary));
 
 // Get health trends
-router.get("/trends", protect, adminOnly, asyncHandler(getHealthTrendsHandler));
+router.get("/trends", protect, healthViewers, asyncHandler(getHealthTrendsHandler));
 
 // Get active alerts
-router.get("/alerts", protect, adminOnly, asyncHandler(getAlertsHandler));
+router.get("/alerts", protect, healthViewers, asyncHandler(getAlertsHandler));
 
 // =============================
 // 🔐 ADMIN ROUTES

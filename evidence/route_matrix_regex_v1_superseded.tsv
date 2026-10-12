@@ -1,0 +1,1265 @@
+file	method	path	auth	role_guard	note
+adSlotRoutes.js	GET	/	PUBLIC		
+adSlotRoutes.js	GET	/all	auth	adminOnly	
+adSlotRoutes.js	GET	/stats	auth	adminOnly	
+adSlotRoutes.js	POST	/:id/events	PUBLIC		
+adSlotRoutes.js	POST	/	auth	adminOnly	
+adSlotRoutes.js	PUT	/:id	auth	adminOnly	
+adSlotRoutes.js	DELETE	/:id	auth	adminOnly	
+adminInspectionGovernanceRoutes.js	GET	/providers	PUBLIC		
+adminInspectionGovernanceRoutes.js	GET	/providers/:id	PUBLIC		
+adminInspectionGovernanceRoutes.js	POST	/providers/:id/decision	PUBLIC		
+adminInspectionGovernanceRoutes.js	POST	/credentials/:id/decision	PUBLIC		
+adminInspectionGovernanceRoutes.js	POST	/capabilities/:id/decision	PUBLIC		
+adminInspectionGovernanceRoutes.js	POST	/staff/:id/end	PUBLIC		
+adminRoutes.js	GET	/public/config	auth		file-level
+adminRoutes.js	GET	/stats	auth		file-level
+adminRoutes.js	GET	/users	auth		file-level
+adminRoutes.js	POST	/users/:id/toggle-ban	auth		file-level
+adminRoutes.js	POST	/users/:id/approve-dealer	auth		file-level
+adminRoutes.js	PUT	/users/:id/seller-settings	auth		file-level
+adminRoutes.js	GET	/cars	auth		file-level
+adminRoutes.js	DELETE	/cars/:id	auth		file-level
+adminRoutes.js	POST	/cars/:id/verify	auth		file-level
+adminRoutes.js	POST	/cars/:id/moderate	auth		file-level
+adminRoutes.js	GET	/config	auth		file-level
+adminRoutes.js	PUT	/config	auth		file-level
+adminRoutes.js	PUT	/config/packages	auth		file-level
+adminRoutes.js	GET	/audit-log	auth		file-level
+adminRoutes.js	POST	/audit-log	auth		file-level
+adminRoutes.js	POST	/system/kill-switch	auth	authorize("superadmin")	file-level
+adminRoutes.js	POST	/system/recover	auth	authorize("superadmin")	file-level
+adminRoutes.js	PUT	/dealers/:id/subdomain	auth		file-level
+adminRoutes.js	POST	/users/:id/verify-dealer	auth		file-level
+adminRoutes.js	POST	/daraja/test	auth	authorize("superadmin")	file-level
+adminRoutes.js	DELETE	/users/:id	auth	authorize("superadmin")	file-level
+adminRoutes.js	PUT	/users/:id/deactivate	auth	authorize("superadmin")	file-level
+adminRoutes.js	GET	/staff	auth	authorize("superadmin")	file-level
+adminRoutes.js	GET	/staff/permissions/catalog	auth	authorize("superadmin")	file-level
+adminRoutes.js	GET	/staff/:id/permissions	auth	authorize("superadmin")	file-level
+adminRoutes.js	PUT	/staff/:id/permissions	auth	authorize("superadmin")	file-level
+adminRoutes.js	POST	/staff	auth	authorize("superadmin")	file-level
+adminRoutes.js	PUT	/staff/:id	auth	authorize("superadmin")	file-level
+adminRoutes.js	DELETE	/staff/:id	auth	authorize("superadmin")	file-level
+adminRoutes.js	POST	/seed-departments	auth	authorize("superadmin")	file-level
+adminRoutes.js	GET	/ads	auth		file-level
+adminRoutes.js	POST	/ads	auth		file-level
+adminRoutes.js	PUT	/ads/:id	auth		file-level
+adminRoutes.js	DELETE	/ads/:id	auth		file-level
+adminRoutes.js	GET	/payments	auth		file-level
+adminRoutes.js	PATCH	/dealers/:id/package	auth	adminOnly	file-level
+adminRoutes.js	POST	/zero-cost-onboarding	auth	adminOnly	file-level
+adminRoutes.js	POST	/upload-logo	auth	adminOnly	file-level
+adminRoutes.js	GET	/reviews	auth		file-level
+adminRoutes.js	PATCH	/reviews/:id/status	auth		file-level
+adminRoutes.js	DELETE	/reviews/:id	auth		file-level
+adminRoutes.js	GET	/referrals/stats	auth		file-level
+adminRoutes.js	GET	/referrals	auth		file-level
+adminRoutes.js	GET	/referrals/:id	auth		file-level
+adminRoutes.js	POST	/referrals/:id/credit	auth		file-level
+adminRoutes.js	POST	/referrals/:id/expire	auth		file-level
+adminRoutes.js	GET	/users/:id/referrals	auth		file-level
+adminRoutes.js	GET	/chats	auth		file-level
+adminRoutes.js	GET	/chats/:chatId/messages	auth		file-level
+adminRoutes.js	DELETE	/chats/:chatId/messages/:messageId	auth		file-level
+adminRoutes.js	POST	/chats/:chatId/block	auth		file-level
+adminRoutes.js	POST	/chats/:chatId/unblock	auth		file-level
+adminRoutes.js	GET	/market-data	auth		file-level
+adminRoutes.js	GET	/market-data/:id	auth		file-level
+adminRoutes.js	POST	/market-data	auth		file-level
+adminRoutes.js	PUT	/market-data/:id	auth		file-level
+adminRoutes.js	DELETE	/market-data/:id	auth		file-level
+adminRoutes.js	POST	/market-data/bulk	auth		file-level
+adminRoutes.js	GET	/alerts	auth		file-level
+adminRoutes.js	POST	/alerts/:id/read	auth		file-level
+adminRoutes.js	POST	/alerts/read-all	auth		file-level
+adminRoutes.js	GET	/system/health	auth		file-level
+adminRoutes.js	GET	/escrow/config	auth	requirePermission(PERMISSIONS.VIEW_ESCROW)	file-level
+adminRoutes.js	GET	/escrow/accounts	auth	requirePermission(PERMISSIONS.CONFIGURE_ESCROW)	file-level
+adminRoutes.js	POST	/escrow/accounts	auth	requirePermission(PERMISSIONS.CONFIGURE_ESCROW)	file-level
+adminRoutes.js	PATCH	/escrow/accounts/:id	auth	requirePermission(PERMISSIONS.CONFIGURE_ESCROW)	file-level
+adminRoutes.js	DELETE	/escrow/accounts/:id	auth	requirePermission(PERMISSIONS.CONFIGURE_ESCROW)	file-level
+adminRoutes.js	GET	/escrow/sellers/:userId/capability	auth	requirePermission(PERMISSIONS.VIEW_ESCROW)	file-level
+adminRoutes.js	PATCH	/escrow/sellers/:userId/capability	auth	requirePermission(PERMISSIONS.CONFIGURE_ESCROW)	file-level
+aiDecisionRoutes.js	GET	/recommendations	auth		file-level
+aiDecisionRoutes.js	GET	/vehicles/:vehicleId/explain	auth		file-level
+aiDecisionRoutes.js	GET	/market-signals	auth		file-level
+aiPlatformRoutes.js	GET	/dashboard	auth		file-level
+aiPlatformRoutes.js	GET	/analytics	auth		file-level
+aiPlatformRoutes.js	GET	/suggestions	auth		file-level
+aiPlatformRoutes.js	GET	/health	auth		file-level
+aiPlatformRoutes.js	GET	/templates	auth		file-level
+aiPlatformRoutes.js	POST	/command	auth		file-level
+aiPlatformRoutes.js	POST	/command/:commandId/approve	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	POST	/command/:commandId/reject	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	GET	/history	auth		file-level
+aiPlatformRoutes.js	POST	/history/:commandId/rollback	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	GET	/conversations	auth		file-level
+aiPlatformRoutes.js	GET	/conversations/:id	auth		file-level
+aiPlatformRoutes.js	POST	/conversations/:conversationId/message	auth		file-level
+aiPlatformRoutes.js	GET	/prompts	auth		file-level
+aiPlatformRoutes.js	POST	/prompts	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	PUT	/prompts/:id	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	DELETE	/prompts/:id	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	POST	/prompts/execute	auth		file-level
+aiPlatformRoutes.js	GET	/knowledge	auth		file-level
+aiPlatformRoutes.js	POST	/knowledge	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	PUT	/knowledge/:id	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	DELETE	/knowledge/:id	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	GET	/workspaces	auth		file-level
+aiPlatformRoutes.js	POST	/workspaces	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	PUT	/workspaces/:id	auth	allowRoles("admin", "superadmin")	file-level
+aiPlatformRoutes.js	DELETE	/workspaces/:id	auth	allowRoles("admin", "superadmin")	file-level
+announcementRoutes.js	POST	/	auth		file-level
+announcementRoutes.js	POST	/:id/send	auth		file-level
+announcementRoutes.js	GET	/	auth		file-level
+announcementRoutes.js	GET	/:id	auth		file-level
+announcementRoutes.js	DELETE	/:id	auth		file-level
+auctionAdminRoutes.js	POST	/:carId/start	auth	requirePermission(PERM.MANAGE_AUCTIONS)	file-level
+auctionAdminRoutes.js	POST	/:carId/end	auth	requirePermission(PERM.MANAGE_AUCTIONS)	file-level
+auctionAdminRoutes.js	POST	/:carId/extend	auth	requirePermission(PERM.MANAGE_AUCTIONS)	file-level
+auctionAdminRoutes.js	GET	/:carId/bids	auth		file-level
+auctionAdminRoutes.js	POST	/:carId/set-winner	auth	requirePermission(PERM.MANAGE_AUCTIONS)	file-level
+auctionFulfilmentRoutes.js	GET	/operations	auth		
+auctionFulfilmentRoutes.js	GET	/:id/operations	auth		
+auctionFulfilmentRoutes.js	POST	/:id/collection	auth	requireDealerVerification	
+auctionFulfilmentRoutes.js	POST	/:id/transfer	auth		
+auctionFulfilmentRoutes.js	POST	/:id/escrow/release	auth	requireDealerVerification	
+auctionFulfilmentRoutes.js	POST	/:id/cancel	auth	requireDealerVerification	
+auctionFulfilmentRoutes.js	POST	/:id/dispute	auth		
+auctionFulfilmentRoutes.js	POST	/:id/reaward	auth	requireDealerVerification	
+auctionIntegrityRoutes.js	GET	/dashboard	auth		file-level
+auctionIntegrityRoutes.js	GET	/	auth		file-level
+auctionIntegrityRoutes.js	GET	/risk-profiles	auth		file-level
+auctionIntegrityRoutes.js	GET	/:id	auth		file-level
+auctionIntegrityRoutes.js	PATCH	/:id/status	auth		file-level
+auctionIntegrityRoutes.js	POST	/scan	auth		file-level
+auctionRegistrationRoutes.js	GET	/:id/room	PUBLIC		
+auctionRegistrationRoutes.js	GET	/:id/registration	auth		
+auctionRegistrationRoutes.js	POST	/:id/registration	auth		
+auctionRegistrationRoutes.js	POST	/:id/registration/commitment	auth		
+auctionRegistrationRoutes.js	GET	/:id/registration/security-policy	auth		
+auctionRegistrationRoutes.js	POST	/:id/registration/high-value-deposit	auth		
+auctionRegistrationRoutes.js	GET	/:id/registration/authorization	auth		
+auctionRoutes.js	GET	/	PUBLIC		
+auctionRoutes.js	GET	/active	PUBLIC		
+auctionRoutes.js	GET	/my	auth		
+auctionRoutes.js	GET	/:id/bids	PUBLIC		
+auctionRoutes.js	GET	/:id	PUBLIC		
+auctionSettlementRoutes.js	GET	/:id/outcome	auth		
+auctionSettlementRoutes.js	GET	/:id/settlement-capabilities	auth	requireDealerVerification	
+auctionSettlementRoutes.js	POST	/:id/outcome/payment	auth		
+auctionSettlementRoutes.js	POST	/:id/outcome/escrow	auth	requireDealerVerification	
+auctionSettlementRoutes.js	POST	/:id/outcome/default	auth	requireDealerVerification	
+auctionSettlementRoutes.js	GET	/platform/policy	auth	adminOnly	
+auctionSettlementRoutes.js	PUT	/platform/policy	auth	adminOnly	
+auctionSetupRoutes.js	GET	/cars/:id/auction/setup	PUBLIC		
+auctionSetupRoutes.js	PUT	/cars/:id/auction/setup	PUBLIC		
+auctionSetupRoutes.js	POST	/cars/:id/auction/publish	PUBLIC		
+auctionSetupRoutes.js	POST	/cars/:id/auction/amendments	PUBLIC		
+auditRoutes.js	GET	/all	auth		file-level
+auditRoutes.js	GET	/escrow/:id	auth		file-level
+auditRoutes.js	GET	/user/:userId	auth		file-level
+auditRoutes.js	GET	/action/:action	auth		file-level
+auditRoutes.js	GET	/date-range	auth		file-level
+auditRoutes.js	GET	/export/:escrowId	auth		file-level
+auditRoutes.js	GET	/statistics	auth		file-level
+auditRoutes.js	GET	/:id	auth		file-level
+auditRoutes.js	GET	/logs	auth		file-level
+auditRoutes.js	GET	/logs/:id	auth		file-level
+auditRoutes.js	GET	/logs/action/:action	auth		file-level
+auditRoutes.js	GET	/logs/actor/:actorId	auth		file-level
+auditRoutes.js	GET	/logs/target/:targetId/:targetModel	auth		file-level
+auditRoutes.js	GET	/logs/statistics	auth		file-level
+auditRoutes.js	GET	/logs/export	auth		file-level
+authRoutes.js	GET	/csrf	PUBLIC		
+authRoutes.js	POST	/register	auth		
+authRoutes.js	POST	/login	auth		
+authRoutes.js	POST	/refresh	PUBLIC		
+authRoutes.js	GET	/profile	auth		
+authRoutes.js	GET	/me	auth		
+authRoutes.js	POST	/logout	auth		
+authRoutes.js	PUT	/profile	auth		
+authRoutes.js	PUT	/change-password	auth		
+authRoutes.js	GET	/verify-email/:token	PUBLIC		
+authRoutes.js	POST	/resend-verification	PUBLIC		
+authRoutes.js	POST	/forgot-password	PUBLIC		
+authRoutes.js	POST	/reset-password	PUBLIC		
+authRoutes.js	GET	/sessions	auth		
+authRoutes.js	DELETE	/sessions/:tokenId	auth		
+authRoutes.js	POST	/sessions/revoke-all	auth		
+authRoutes.js	POST	/send-otp	auth		
+authRoutes.js	POST	/verify-phone	auth		
+authRoutes.js	GET	/phone-status	auth		
+automationRoutes.js	GET	/stats	auth		file-level
+automationRoutes.js	GET	/logs	auth		file-level
+automationRoutes.js	GET	/ai-suggestions	auth		file-level
+automationRoutes.js	GET	/templates	auth		file-level
+automationRoutes.js	GET	/trigger-types	auth		file-level
+automationRoutes.js	GET	/action-types	auth		file-level
+automationRoutes.js	GET	/workflows	auth		file-level
+automationRoutes.js	GET	/workflows/:id	auth		file-level
+automationRoutes.js	POST	/workflows	auth	allowRoles("admin", "superadmin", "editor")	file-level
+automationRoutes.js	PUT	/workflows/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+automationRoutes.js	DELETE	/workflows/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	POST	/workflows/:id/publish	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	POST	/workflows/:id/pause	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	POST	/workflows/:id/simulate	auth	allowRoles("admin", "superadmin", "editor")	file-level
+automationRoutes.js	GET	/rules	auth		file-level
+automationRoutes.js	GET	/rules/:id	auth		file-level
+automationRoutes.js	POST	/rules	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	PUT	/rules/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	DELETE	/rules/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	POST	/rules/evaluate	auth		file-level
+automationRoutes.js	GET	/approvals	auth		file-level
+automationRoutes.js	GET	/approvals/:id	auth		file-level
+automationRoutes.js	POST	/approvals	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	PUT	/approvals/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	DELETE	/approvals/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	POST	/approvals/initiate	auth		file-level
+automationRoutes.js	GET	/tasks	auth		file-level
+automationRoutes.js	GET	/tasks/:id	auth		file-level
+automationRoutes.js	POST	/tasks	auth		file-level
+automationRoutes.js	PUT	/tasks/:id	auth		file-level
+automationRoutes.js	POST	/tasks/:id/complete	auth		file-level
+automationRoutes.js	POST	/tasks/:id/escalate	auth		file-level
+automationRoutes.js	GET	/templates/notifications	auth		file-level
+automationRoutes.js	GET	/templates/notifications/:id	auth		file-level
+automationRoutes.js	POST	/templates/notifications	auth	allowRoles("admin", "superadmin", "editor")	file-level
+automationRoutes.js	PUT	/templates/notifications/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+automationRoutes.js	DELETE	/templates/notifications/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	POST	/templates/notifications/preview	auth		file-level
+automationRoutes.js	GET	/scheduled	auth		file-level
+automationRoutes.js	POST	/scheduled	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	PUT	/scheduled/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	DELETE	/scheduled/:id	auth	allowRoles("admin", "superadmin")	file-level
+automationRoutes.js	POST	/scheduled/:id/run	auth	allowRoles("admin", "superadmin")	file-level
+bidLogRoutes.js	GET	/my	auth		
+bidLogRoutes.js	GET	/:logId	auth		
+bidLogRoutes.js	GET	/car/:carId	PUBLIC		
+bidLogRoutes.js	GET	/car/:carId/winning	PUBLIC		
+bidLogRoutes.js	GET	/car/:carId/stats	PUBLIC		
+bidLogRoutes.js	GET	/admin/all	auth	adminOnly	
+bidLogRoutes.js	GET	/admin/stats	auth	adminOnly	
+bidRoutes.js	GET	/my	auth		
+bidRoutes.js	POST	/:id/bid	auth		
+bidRoutes.js	GET	/:id/bids	auth		
+bidRoutes.js	POST	/mpesa/callback	PUBLIC		
+bidRoutes.js	POST	/:id/end	auth	adminOnly	
+bidRoutes.js	GET	/admin/all	auth	adminOnly	
+bidRoutes.js	GET	/admin/suspicious	auth	adminOnly	
+bidRoutes.js	POST	/admin/:bidId/set-winner	auth	adminOnly	
+bulkAdminRoutes.js	POST	/cars/moderate	auth		file-level
+bulkAdminRoutes.js	POST	/cars/delete	auth		file-level
+bulkAdminRoutes.js	GET	/export/cars	auth		file-level
+bulkAdminRoutes.js	GET	/export/users	auth		file-level
+carRoutes.js	GET	/dealer/my-cars	auth		
+carRoutes.js	GET	/dealer/analytics	auth		
+carRoutes.js	GET	/my-listings	auth		
+carRoutes.js	GET	/	PUBLIC		
+carRoutes.js	GET	/:id	auth		
+carRoutes.js	POST	/:id/click	auth		
+carRoutes.js	POST	/:id/favorite	auth		
+carRoutes.js	POST	/	auth	requireDealerVerification	
+carRoutes.js	PUT	/:id	auth		
+carRoutes.js	DELETE	/:id	auth		
+carRoutes.js	DELETE	/:id/images/:imageIndex	auth		
+carRoutes.js	POST	/:id/images	auth		
+carRoutes.js	GET	/:id/price-history	PUBLIC		
+carRoutes.js	GET	/:id/insights	PUBLIC		
+carRoutes.js	GET	/:id/valuation	PUBLIC		
+carRoutes.js	GET	/admin/:id/fraud	auth	adminOnly	
+carRoutes.js	POST	/admin/:id/start	auth	adminOnly	
+carRoutes.js	POST	/admin/:id/end	auth	adminOnly	
+carRoutes.js	POST	/batch	auth		
+carRoutes.js	PATCH	/:id/promote	auth		
+chatRoutes.js	POST	/	auth		
+chatRoutes.js	GET	/	auth		
+chatRoutes.js	GET	/unread	auth		
+chatRoutes.js	GET	/:chatId/messages	auth		
+chatRoutes.js	GET	/:chatId/attachments/:uploadId	auth		
+chatRoutes.js	POST	/:chatId/message	auth		
+chatRoutes.js	POST	/:chatId/seen	auth		
+chatRoutes.js	DELETE	/:chatId	auth		
+cmsRoutes.js	GET	/pages/s/:slug	auth		file-level
+cmsRoutes.js	GET	/content/s/:slug	auth		file-level
+cmsRoutes.js	GET	/content/:id	auth		file-level
+cmsRoutes.js	GET	/content	auth		file-level
+cmsRoutes.js	GET	/search	auth		file-level
+cmsRoutes.js	POST	/analytics/track	auth		file-level
+cmsRoutes.js	GET	/faqs	auth		file-level
+cmsRoutes.js	GET	/faqs/:id	auth		file-level
+cmsRoutes.js	POST	/faqs/:id/popularity	auth		file-level
+cmsRoutes.js	GET	/dashboard/stats	auth		file-level
+cmsRoutes.js	GET	/pages	auth		file-level
+cmsRoutes.js	GET	/pages/:id	auth		file-level
+cmsRoutes.js	POST	/pages	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	PUT	/pages/:id	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	DELETE	/pages/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	POST	/pages/:id/publish	auth	allowRoles("admin", "superadmin", "publisher")	file-level
+cmsRoutes.js	POST	/pages/:id/unpublish	auth	allowRoles("admin", "superadmin", "publisher")	file-level
+cmsRoutes.js	POST	/pages/:id/schedule	auth	allowRoles("admin", "superadmin", "publisher")	file-level
+cmsRoutes.js	POST	/pages/:id/rollback	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	POST	/content	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	PUT	/content/:id	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	DELETE	/content/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	POST	/faqs	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	PUT	/faqs/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	DELETE	/faqs/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	GET	/campaigns	auth		file-level
+cmsRoutes.js	GET	/campaigns/:id	auth		file-level
+cmsRoutes.js	POST	/campaigns	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	PUT	/campaigns/:id	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	DELETE	/campaigns/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	GET	/banners	auth		file-level
+cmsRoutes.js	GET	/banners/:id	auth		file-level
+cmsRoutes.js	POST	/banners	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	PUT	/banners/:id	auth	allowRoles("admin", "superadmin", "editor", "publisher")	file-level
+cmsRoutes.js	DELETE	/banners/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	POST	/banners/reorder	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	GET	/media	auth		file-level
+cmsRoutes.js	GET	/media/:id	auth		file-level
+cmsRoutes.js	POST	/media	auth	allowRoles("admin", "superadmin", "editor", "publisher", "creator")	file-level
+cmsRoutes.js	PUT	/media/:id	auth	allowRoles("admin", "superadmin", "editor", "publisher", "creator")	file-level
+cmsRoutes.js	DELETE	/media/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	GET	/taxonomies	auth		file-level
+cmsRoutes.js	POST	/taxonomies	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	PUT	/taxonomies/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	DELETE	/taxonomies/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	GET	/revisions	auth		file-level
+cmsRoutes.js	GET	/revisions/:id	auth		file-level
+cmsRoutes.js	GET	/ab-tests	auth		file-level
+cmsRoutes.js	POST	/ab-tests	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	PUT	/ab-tests/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+cmsRoutes.js	DELETE	/ab-tests/:id	auth	allowRoles("admin", "superadmin")	file-level
+cmsRoutes.js	GET	/analytics	auth		file-level
+cmsRoutes.js	GET	/analytics/content/:contentId	auth		file-level
+cmsRoutes.js	GET	/calendar	auth		file-level
+commandCenterRoutes.js	GET	/snapshot	auth		file-level
+commandCenterRoutes.js	GET	/mission-control	auth		file-level
+commandCenterRoutes.js	GET	/live-activity	auth		file-level
+commandCenterRoutes.js	GET	/operations	auth		file-level
+commandCenterRoutes.js	GET	/marketplace	auth		file-level
+commandCenterRoutes.js	GET	/dealers	auth		file-level
+commandCenterRoutes.js	GET	/auctions	auth		file-level
+commandCenterRoutes.js	GET	/inspections	auth		file-level
+commandCenterRoutes.js	GET	/finance	auth		file-level
+commandCenterRoutes.js	GET	/support	auth		file-level
+commandCenterRoutes.js	GET	/security	auth		file-level
+commandCenterRoutes.js	GET	/infrastructure	auth		file-level
+commandCenterRoutes.js	GET	/ai	auth		file-level
+commandCenterRoutes.js	GET	/actions	auth		file-level
+commandCenterRoutes.js	POST	/actions/execute	auth	allowRoles("admin", "superadmin", "manager")	file-level
+commandCenterRoutes.js	GET	/notifications	auth		file-level
+commandCenterRoutes.js	PUT	/notifications/:notificationId/read	auth		file-level
+commandCenterRoutes.js	GET	/decisions	auth		file-level
+commandCenterRoutes.js	GET	/commands	auth		file-level
+commandCenterRoutes.js	POST	/commands/execute	auth	allowRoles("admin", "superadmin", "executive", "engineer", "manager")	file-level
+commandCenterRoutes.js	GET	/war-room	auth		file-level
+commandCenterRoutes.js	POST	/war-room/activate	auth	allowRoles("admin", "superadmin", "executive")	file-level
+commandCenterRoutes.js	POST	/war-room/deactivate	auth	allowRoles("admin", "superadmin", "executive")	file-level
+commandCenterRoutes.js	GET	/timeline	auth		file-level
+commandCenterRoutes.js	GET	/briefing	auth		file-level
+commandCenterRoutes.js	GET	/search	auth		file-level
+commandCenterRoutes.js	GET	/widgets	auth		file-level
+commandCenterRoutes.js	POST	/widgets/layout	auth	allowRoles("admin", "superadmin")	file-level
+commandCenterRoutes.js	GET	/map	auth		file-level
+communicationControlRoutes.js	GET	/history	auth		
+communicationControlRoutes.js	GET	/preferences	auth		
+communicationControlRoutes.js	PATCH	/preferences	auth		
+communicationControlRoutes.js	GET	/admin/rollout	auth	adminOnly	
+communicationControlRoutes.js	PATCH	/admin/rollout/channels/:channel	auth	adminOnly	
+communicationControlRoutes.js	PATCH	/admin/rollout/events/:eventType/:channel	auth	adminOnly	
+communicationControlRoutes.js	GET	/admin/templates	auth	adminOnly	
+communicationControlRoutes.js	POST	/admin/templates	auth	adminOnly	
+communicationControlRoutes.js	PATCH	/admin/templates/:id	auth	adminOnly	
+communicationControlRoutes.js	GET	/admin/analytics	auth	adminOnly	
+communicationControlRoutes.js	GET	/admin/provider-health	auth	adminOnly	
+communicationControlRoutes.js	GET	/admin/history	auth	adminOnly	
+communicationControlRoutes.js	POST	/admin/deliveries/:id/retry	auth	adminOnly	
+communicationWebhookRoutes.js	POST	/brevo/events	auth		
+communicationWebhookRoutes.js	POST	/status	PUBLIC		
+communicationWebhookRoutes.js	POST	/twilio/status	PUBLIC		
+communicationWebhookRoutes.js	POST	/africastalking/status	PUBLIC		
+configurationRoutes.js	GET	/stats	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/entries	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/entries/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	POST	/entries	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	PUT	/entries/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	DELETE	/entries/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	POST	/entries/bulk	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/features	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/features/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	POST	/features	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	PUT	/features/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	DELETE	/features/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	POST	/features/:id/toggle	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/features/check/:key	auth		file-level
+configurationRoutes.js	GET	/reference	auth		file-level
+configurationRoutes.js	GET	/reference/types	auth		file-level
+configurationRoutes.js	GET	/reference/:id	auth		file-level
+configurationRoutes.js	POST	/reference	auth	allowRoles("admin", "superadmin", "editor")	file-level
+configurationRoutes.js	PUT	/reference/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+configurationRoutes.js	DELETE	/reference/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/vehicle	auth		file-level
+configurationRoutes.js	GET	/vehicle/types	auth		file-level
+configurationRoutes.js	GET	/vehicle/makes	auth		file-level
+configurationRoutes.js	GET	/vehicle/models	auth		file-level
+configurationRoutes.js	GET	/vehicle/:id	auth		file-level
+configurationRoutes.js	POST	/vehicle	auth	allowRoles("admin", "superadmin", "editor")	file-level
+configurationRoutes.js	PUT	/vehicle/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+configurationRoutes.js	DELETE	/vehicle/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/location	auth		file-level
+configurationRoutes.js	GET	/location/types	auth		file-level
+configurationRoutes.js	GET	/location/countries	auth		file-level
+configurationRoutes.js	GET	/location/regions	auth		file-level
+configurationRoutes.js	GET	/location/cities	auth		file-level
+configurationRoutes.js	POST	/location	auth	allowRoles("admin", "superadmin", "editor")	file-level
+configurationRoutes.js	PUT	/location/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+configurationRoutes.js	DELETE	/location/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/countries	auth		file-level
+configurationRoutes.js	GET	/countries/:id	auth		file-level
+configurationRoutes.js	POST	/countries	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	PUT	/countries/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	DELETE	/countries/:id	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/audit	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	POST	/audit/:logId/rollback	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	GET	/export	auth	allowRoles("admin", "superadmin")	file-level
+configurationRoutes.js	POST	/import	auth	allowRoles("admin", "superadmin")	file-level
+contactRoutes.js	POST	/	PUBLIC		
+contactRoutes.js	GET	/	auth	adminOnly	
+contactRoutes.js	PATCH	/:id/read	auth	adminOnly	
+conversionFunnelRoutes.js	POST	/cars/:carId/view	PUBLIC		
+conversionFunnelRoutes.js	POST	/cars/:carId/favorite	auth		
+conversionFunnelRoutes.js	POST	/cars/:carId/chat	auth		
+conversionFunnelRoutes.js	POST	/cars/:carId/offer	auth		
+conversionFunnelRoutes.js	POST	/cars/:carId/escrow	auth		
+conversionFunnelRoutes.js	POST	/cars/:carId/sale	auth		
+conversionFunnelRoutes.js	GET	/cars/:carId/analytics	auth		
+conversionFunnelRoutes.js	GET	/dealer/analytics	auth		
+dealerHealthScoreRoutes.js	GET	/:dealerId	PUBLIC		
+dealerHealthScoreRoutes.js	GET	/:dealerId/details	PUBLIC		
+dealerHealthScoreRoutes.js	GET	/ranking/list	PUBLIC		
+dealerHealthScoreRoutes.js	GET	/top/:category	PUBLIC		
+dealerHealthScoreRoutes.js	GET	/:dealerId/trends	PUBLIC		
+dealerHealthScoreRoutes.js	POST	/admin/recalculate/:dealerId	auth	adminOnly	
+dealerHealthScoreRoutes.js	POST	/admin/recalculate-all	auth	adminOnly	
+dealerHealthScoreRoutes.js	PUT	/admin/override/:dealerId	auth	adminOnly	
+dealerHealthScoreRoutes.js	GET	/admin/distribution	auth	adminOnly	
+dealerHealthScoreRoutes.js	GET	/admin/alerts	auth	adminOnly	
+dealerPlatformRoutes.js	GET	/dashboard	auth		
+dealerPlatformRoutes.js	GET	/profile/:dealerId	PUBLIC		
+dealerPlatformRoutes.js	PUT	/profile/:dealerId	auth		
+dealerPlatformRoutes.js	GET	/inventory	auth		
+dealerPlatformRoutes.js	POST	/inventory	auth	requireDealerVerification	
+dealerPlatformRoutes.js	PUT	/inventory/:listingId	auth		
+dealerPlatformRoutes.js	DELETE	/inventory/:listingId	auth		
+dealerPlatformRoutes.js	POST	/inventory/bulk	auth		
+dealerPlatformRoutes.js	GET	/leads	auth		
+dealerPlatformRoutes.js	PUT	/leads/:leadId	auth		
+dealerPlatformRoutes.js	GET	/leads/:leadId/activities	auth		
+dealerPlatformRoutes.js	POST	/leads/:leadId/notes	auth		
+dealerPlatformRoutes.js	POST	/leads/:leadId/tasks	auth		
+dealerPlatformRoutes.js	GET	/pipeline	auth		
+dealerPlatformRoutes.js	GET	/marketing	auth		
+dealerPlatformRoutes.js	POST	/marketing	auth		
+dealerPlatformRoutes.js	PUT	/marketing/:campaignId	auth		
+dealerPlatformRoutes.js	GET	/analytics	auth		
+dealerPlatformRoutes.js	GET	/analytics/recommendations	auth		
+dealerPlatformRoutes.js	GET	/team	auth		
+dealerPlatformRoutes.js	POST	/team/invite	auth		
+dealerPlatformRoutes.js	PUT	/team/:memberId	auth		
+dealerPlatformRoutes.js	DELETE	/team/:memberId	auth		
+dealerPlatformRoutes.js	POST	/team/accept	auth		
+dealerPlatformRoutes.js	GET	/subscription	auth		
+dealerPlatformRoutes.js	POST	/copilot	auth		
+dealerPlatformRoutes.js	GET	/customers	auth		
+dealerPlatformRoutes.js	GET	/customers/:customerId/timeline	auth		
+dealerPlatformRoutes.js	GET	/auctions	auth		
+dealerPlatformRoutes.js	GET	/finance	auth		
+dealerPlatformRoutes.js	GET	/inspections	auth		
+dealerPlatformRoutes.js	GET	/reputation	auth		
+dealerRoutes.js	GET	/onboarding	auth	allowRoles("dealer")	file-level
+dealerRoutes.js	PUT	/onboarding	auth	allowRoles("dealer")	file-level
+dealerRoutes.js	GET	/earnings	auth		file-level
+dealerRoutes.js	GET	/cars	auth		file-level
+dealerRoutes.js	GET	/analytics	auth		file-level
+dealerRoutes.js	GET	/summary	auth		file-level
+dealerRoutes.js	GET	/quick-stats	auth		file-level
+dealerRoutes.js	GET	/milestones	auth		file-level
+dealerRoutes.js	GET	/bids	auth		file-level
+dealerRoutes.js	GET	/escrows	auth		file-level
+dealerRoutes.js	GET	/settlement	auth		file-level
+dealerRoutes.js	PUT	/settlement	auth		file-level
+dealerRoutes.js	GET	/profile	auth		file-level
+dealerRoutes.js	PUT	/profile	auth		file-level
+dealerRoutes.js	GET	/team	auth		file-level
+dealerRoutes.js	POST	/team/invite	auth		file-level
+dealerRoutes.js	PATCH	/team/:memberId	auth		file-level
+dealerRoutes.js	DELETE	/team/:memberId	auth		file-level
+dealerRoutes.js	POST	/cars/:id/duplicate	auth		file-level
+dealerRoutes.js	POST	/cars/bulk-delete	auth		file-level
+dealerRoutes.js	PATCH	/cars/:id/mark-sold	auth		file-level
+dealerRoutes.js	PATCH	/cars/bulk-status	auth		file-level
+dealerRoutes.js	POST	/cars/:id/accept-bid	auth		file-level
+dealerRoutes.js	POST	/cars/:id/reject-bid	auth		file-level
+dealerRoutes.js	POST	/cars/:id/auction/start	auth	requireDealerVerification	file-level
+dealerRoutes.js	POST	/cars/:id/auction/end	auth		file-level
+dealerRoutes.js	POST	/cars/:id/auction/extend	auth		file-level
+dealerRoutes.js	POST	/payouts/:escrowId/initiate	auth		file-level
+dealerRoutes.js	POST	/upgrade	auth		file-level
+dealerRoutes.js	PATCH	/cars/:id/wholesale	auth		file-level
+dealerRoutes.js	GET	/trade-listings	auth		file-level
+dealerRoutes.js	POST	/pricing-recommendations	auth		file-level
+digitalTwinRoutes.js	GET	/dashboard	auth		file-level
+digitalTwinRoutes.js	GET	/simulations	auth		file-level
+digitalTwinRoutes.js	GET	/simulations/:id	auth		file-level
+digitalTwinRoutes.js	POST	/simulations	auth	allowRoles("admin", "superadmin")	file-level
+digitalTwinRoutes.js	POST	/simulations/:id/run	auth	allowRoles("admin", "superadmin")	file-level
+digitalTwinRoutes.js	DELETE	/simulations/:id	auth	allowRoles("admin", "superadmin")	file-level
+digitalTwinRoutes.js	GET	/simulations/history	auth		file-level
+digitalTwinRoutes.js	POST	/simulations/compare	auth		file-level
+digitalTwinRoutes.js	GET	/scenarios	auth		file-level
+digitalTwinRoutes.js	GET	/scenarios/templates	auth		file-level
+digitalTwinRoutes.js	GET	/scenarios/:id	auth		file-level
+digitalTwinRoutes.js	POST	/scenarios	auth	allowRoles("admin", "superadmin")	file-level
+digitalTwinRoutes.js	PUT	/scenarios/:id	auth	allowRoles("admin", "superadmin")	file-level
+digitalTwinRoutes.js	DELETE	/scenarios/:id	auth	allowRoles("admin", "superadmin")	file-level
+digitalTwinRoutes.js	POST	/scenarios/:id/run	auth	allowRoles("admin", "superadmin")	file-level
+digitalTwinRoutes.js	GET	/predictions	auth		file-level
+digitalTwinRoutes.js	POST	/predictions	auth		file-level
+digitalTwinRoutes.js	POST	/what-if	auth		file-level
+disputeRoutes.js	GET	/stats	auth	adminOnly	
+disputeRoutes.js	GET	/my	auth		
+disputeRoutes.js	GET	/	auth	adminOnly	
+disputeRoutes.js	POST	/	auth		
+disputeRoutes.js	GET	/:id	auth		
+disputeRoutes.js	PATCH	/:id/status	auth	adminOnly	
+disputeRoutes.js	POST	/:id/assign	auth	adminOnly	
+disputeRoutes.js	GET	/:id/evidence	auth		
+disputeRoutes.js	POST	/:id/evidence	auth		
+disputeRoutes.js	GET	/:id/evidence/:evidenceId	auth		
+disputeRoutes.js	DELETE	/:id/evidence/:evidenceId	auth		
+disputeRoutes.js	POST	/:id/evidence/:evidenceId/verify	auth	adminOnly	
+disputeRoutes.js	POST	/:id/notes	auth	adminOnly	
+disputeRoutes.js	POST	/:id/mediation/start	auth	adminOnly	
+disputeRoutes.js	POST	/:id/mediation/complete	auth	adminOnly	
+disputeRoutes.js	POST	/:id/resolve	auth	adminOnly	
+disputeRoutes.js	POST	/:id/appeal	auth		
+disputeRoutes.js	POST	/:id/appeal/review	auth	adminOnly	
+duplicateRoutes.js	GET	/all	auth		file-level
+duplicateRoutes.js	GET	/:id	auth		file-level
+duplicateRoutes.js	POST	/:id/false-positive	auth		file-level
+duplicateRoutes.js	POST	/:id/confirm	auth		file-level
+duplicateRoutes.js	POST	/:id/under-review	auth		file-level
+duplicateRoutes.js	GET	/statistics	auth		file-level
+duplicateRoutes.js	GET	/search	auth		file-level
+ecpRoutes.js	GET	/dashboard	auth		file-level
+ecpRoutes.js	GET	/executive	auth		file-level
+ecpRoutes.js	GET	/health	auth		file-level
+ecpRoutes.js	GET	/health/:serviceId	auth		file-level
+ecpRoutes.js	GET	/business	auth		file-level
+ecpRoutes.js	GET	/incidents	auth		file-level
+ecpRoutes.js	GET	/incidents/:id	auth		file-level
+ecpRoutes.js	POST	/incidents	auth	allowRoles("admin", "superadmin", "engineer")	file-level
+ecpRoutes.js	PUT	/incidents/:id	auth	allowRoles("admin", "superadmin", "engineer")	file-level
+ecpRoutes.js	DELETE	/incidents/:id	auth	allowRoles("admin", "superadmin")	file-level
+ecpRoutes.js	GET	/alerts	auth		file-level
+ecpRoutes.js	POST	/alerts	auth	allowRoles("admin", "superadmin", "engineer")	file-level
+ecpRoutes.js	POST	/alerts/:id/acknowledge	auth	allowRoles("admin", "superadmin", "engineer")	file-level
+ecpRoutes.js	POST	/alerts/:id/resolve	auth	allowRoles("admin", "superadmin", "engineer")	file-level
+ecpRoutes.js	GET	/self-healing	auth		file-level
+ecpRoutes.js	GET	/self-healing/rules	auth		file-level
+ecpRoutes.js	POST	/self-healing/execute	auth	allowRoles("admin", "superadmin")	file-level
+ecpRoutes.js	GET	/analysis/:incidentId	auth		file-level
+ecpRoutes.js	POST	/ask	auth		file-level
+ecpRoutes.js	GET	/performance	auth		file-level
+ecpRoutes.js	GET	/security	auth		file-level
+ecpRoutes.js	GET	/capacity	auth		file-level
+ecpRoutes.js	GET	/compliance	auth		file-level
+ecpRoutes.js	GET	/audit	auth		file-level
+ecpRoutes.js	GET	/deployments	auth		file-level
+ecpRoutes.js	GET	/disaster-recovery	auth		file-level
+eipRoutes.js	GET	/dashboard	auth		file-level
+eipRoutes.js	GET	/apis	auth		file-level
+eipRoutes.js	GET	/apis/:apiId	auth		file-level
+eipRoutes.js	GET	/partners	auth		file-level
+eipRoutes.js	GET	/partners/:id	auth		file-level
+eipRoutes.js	POST	/partners	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	PUT	/partners/:id	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	DELETE	/partners/:id	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	GET	/api-keys	auth		file-level
+eipRoutes.js	POST	/api-keys	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	POST	/api-keys/:id/revoke	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	GET	/webhooks	auth		file-level
+eipRoutes.js	GET	/webhooks/:id	auth		file-level
+eipRoutes.js	POST	/webhooks	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	PUT	/webhooks/:id	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	DELETE	/webhooks/:id	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	POST	/webhooks/:id/test	auth		file-level
+eipRoutes.js	GET	/webhooks/:webhookId/logs	auth		file-level
+eipRoutes.js	GET	/plugins	auth		file-level
+eipRoutes.js	GET	/plugins/:id	auth		file-level
+eipRoutes.js	POST	/plugins	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	PUT	/plugins/:id	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	DELETE	/plugins/:id	auth	allowRoles("admin", "superadmin")	file-level
+eipRoutes.js	GET	/templates	auth		file-level
+eipRoutes.js	GET	/templates/:id	auth		file-level
+eipRoutes.js	GET	/analytics	auth		file-level
+eipRoutes.js	GET	/sdks	auth		file-level
+eipRoutes.js	GET	/oauth/config	auth		file-level
+eipRoutes.js	POST	/oauth/clients	auth		file-level
+eipRoutes.js	GET	/events	auth		file-level
+eipRoutes.js	GET	/gateway	auth		file-level
+eipRoutes.js	GET	/sandbox	auth		file-level
+eipRoutes.js	GET	/certification	auth		file-level
+eipRoutes.js	POST	/help	auth		file-level
+escrowRoutes.js	GET	/program	PUBLIC		
+escrowRoutes.js	GET	/operations/dashboard	auth		
+escrowRoutes.js	GET	/operations/case/:id	auth		
+escrowRoutes.js	POST	/operations/reconcile	auth		
+escrowRoutes.js	POST	/operations/anomaly-scan	auth		
+escrowRoutes.js	POST	/operations/case/:id/payout	auth		
+escrowRoutes.js	GET	/my	auth		
+escrowRoutes.js	GET	/	auth		
+escrowRoutes.js	GET	/:id	auth		
+escrowRoutes.js	GET	/:id/state	auth		
+escrowRoutes.js	POST	/:id/confirm-vehicle	auth		
+escrowRoutes.js	POST	/:id/confirm-delivery	auth		
+escrowRoutes.js	POST	/:id/request-release	auth		
+escrowRoutes.js	POST	/:id/dispute	auth		
+escrowRoutes.js	POST	/:id/release	auth		
+escrowRoutes.js	POST	/:id/refund	auth		
+escrowRoutes.js	POST	/:id/refund/:refundId/complete	auth		
+escrowRoutes.js	POST	/:id/close	auth		
+escrowRoutes.js	GET	/:id/funding-instructions	auth		
+escrowRoutes.js	POST	/:id/verify-funding	auth		
+eventRoutes.js	POST	/track	auth		
+eventRoutes.js	POST	/search	auth		
+eventRoutes.js	POST	/vehicle-view	auth		
+eventRoutes.js	POST	/offer	auth		
+eventRoutes.js	POST	/bid	auth		
+eventRoutes.js	POST	/escrow	auth		
+eventRoutes.js	GET	/analytics	auth		
+eventRoutes.js	GET	/my-events	auth		
+executiveAnalyticsRoutes.js	GET	/dashboard	auth	adminOnly	
+executiveAnalyticsRoutes.js	GET	/revenue	auth	adminOnly	
+executiveAnalyticsRoutes.js	GET	/user-growth	auth	adminOnly	
+favoriteRoutes.js	GET	/	auth		file-level
+favoriteRoutes.js	POST	/:carId	auth		file-level
+favoriteRoutes.js	DELETE	/:carId	auth		file-level
+favoriteRoutes.js	POST	/:carId/toggle	auth		file-level
+favoriteRoutes.js	PUT	/:carId/price-alert	auth		file-level
+featureFlagRoutes.js	GET	/user	auth		
+featureFlagRoutes.js	GET	/evaluate/:key	auth		
+featureFlagRoutes.js	GET	/	auth	adminOnly	
+featureFlagRoutes.js	GET	/:key	auth	adminOnly	
+featureFlagRoutes.js	POST	/	auth	adminOnly	
+featureFlagRoutes.js	PUT	/:key	auth	adminOnly	
+featureFlagRoutes.js	DELETE	/:key	auth	adminOnly	
+featureFlagRoutes.js	POST	/:key/toggle	auth	adminOnly	
+featureFlagRoutes.js	GET	/:key/stats	auth	adminOnly	
+featureFlagRoutes.js	GET	/category/:category	auth	adminOnly	
+featureFlagRoutes.js	GET	/environment/:environment	auth	adminOnly	
+featureFlagRoutes.js	GET	/role/:role	auth	adminOnly	
+featureFlagRoutes.js	GET	/meta/categories	auth	adminOnly	
+featureFlagRoutes.js	POST	/batch/evaluate	auth	adminOnly	
+feedbackRoutes.js	POST	/submit	auth		
+feedbackRoutes.js	GET	/admin/all	auth	allowRoles("admin", "superadmin")	
+feedbackRoutes.js	PATCH	/admin/:id/status	auth	allowRoles("admin", "superadmin")	
+financeRoutes.js	GET	/reports	auth		file-level
+financeRoutes.js	GET	/reports/:id	auth		file-level
+financeRoutes.js	GET	/issues	auth		file-level
+financeRoutes.js	POST	/reports/:reportId/issues/:issueIndex/resolve	auth		file-level
+financeRoutes.js	POST	/reconcile	auth		file-level
+financeRoutes.js	GET	/statistics	auth		file-level
+financeRoutes.js	GET	/cron-status	auth		file-level
+financeRoutes.js	GET	/export/:reportId	auth		file-level
+fraudRoutes.js	GET	/analytics	auth	adminOnly	
+fraudRoutes.js	GET	/all	auth	adminOnly	
+fraudRoutes.js	POST	/check	auth	adminOnly	
+fraudRoutes.js	GET	/check/user/:userId	auth	adminOnly	
+fraudRoutes.js	GET	/check/auction/:carId	auth	adminOnly	
+fraudRoutes.js	GET	/check/escrow/:escrowId	auth	adminOnly	
+fraudRoutes.js	GET	/check/dealer/:dealerId	auth	adminOnly	
+fraudRoutes.js	GET	/check/price-manipulation/:carId	auth	adminOnly	
+fraudRoutes.js	GET	/check/account-farms/:dealerId	auth	adminOnly	
+fraudRoutes.js	GET	/check/duplicate-photos/:carId	auth	adminOnly	
+fraudRoutes.js	PUT	/:fraudId/status	auth	adminOnly	
+governanceRoutes.js	GET	/dashboard	auth		file-level
+governanceRoutes.js	GET	/policies	auth		file-level
+governanceRoutes.js	GET	/policies/:id	auth		file-level
+governanceRoutes.js	POST	/policies	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	PUT	/policies/:id	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	GET	/changes	auth		file-level
+governanceRoutes.js	GET	/changes/:id	auth		file-level
+governanceRoutes.js	POST	/changes	auth	allowRoles("admin", "superadmin", "manager")	file-level
+governanceRoutes.js	POST	/changes/:id/submit	auth		file-level
+governanceRoutes.js	POST	/changes/:id/approve	auth	allowRoles("admin", "superadmin", "executive")	file-level
+governanceRoutes.js	POST	/changes/:id/reject	auth	allowRoles("admin", "superadmin", "executive")	file-level
+governanceRoutes.js	GET	/approvals	auth		file-level
+governanceRoutes.js	POST	/approvals	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	PUT	/approvals/:id	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	GET	/features	auth		file-level
+governanceRoutes.js	POST	/features	auth	allowRoles("admin", "superadmin", "manager")	file-level
+governanceRoutes.js	PUT	/features/:id/stage	auth	allowRoles("admin", "superadmin", "manager")	file-level
+governanceRoutes.js	GET	/risks	auth		file-level
+governanceRoutes.js	POST	/risks	auth	allowRoles("admin", "superadmin", "executive")	file-level
+governanceRoutes.js	PUT	/risks/:id	auth	allowRoles("admin", "superadmin", "executive")	file-level
+governanceRoutes.js	GET	/standards	auth		file-level
+governanceRoutes.js	POST	/standards	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	GET	/countries	auth		file-level
+governanceRoutes.js	POST	/countries	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	GET	/partners	auth		file-level
+governanceRoutes.js	POST	/partners	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	GET	/releases	auth		file-level
+governanceRoutes.js	POST	/releases	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	PUT	/releases/:id	auth	allowRoles("admin", "superadmin")	file-level
+governanceRoutes.js	GET	/decisions	auth		file-level
+governanceRoutes.js	POST	/decisions	auth	allowRoles("admin", "superadmin", "executive")	file-level
+governanceRoutes.js	GET	/audit	auth		file-level
+governanceRoutes.js	GET	/compliance	auth		file-level
+governanceRoutes.js	POST	/help	auth		file-level
+governanceRoutes.js	GET	/reports	auth		file-level
+healthRoutes.js	GET	/	PUBLIC		
+healthRoutes.js	GET	/detailed	auth	adminOnly	
+healthRoutes.js	GET	/cache	auth	adminOnly	
+healthRoutes.js	POST	/cache/flush	auth	adminOnly	
+heroPlacementRoutes.js	GET	/public-config	PUBLIC		
+heroPlacementRoutes.js	GET	/public-active	PUBLIC		
+heroPlacementRoutes.js	GET	/mine	auth		
+heroPlacementRoutes.js	POST	/	auth		
+heroPlacementRoutes.js	GET	/admin/all	auth	adminOnly	
+heroPlacementRoutes.js	PUT	/admin/:id/schedule	auth	adminOnly	
+heroSlideRoutes.js	GET	/	PUBLIC		
+heroSlideRoutes.js	GET	/all	auth	adminOnly	
+heroSlideRoutes.js	POST	/	auth	adminOnly	
+heroSlideRoutes.js	PUT	/:id	auth	adminOnly	
+heroSlideRoutes.js	DELETE	/:id	auth	adminOnly	
+improvementRoutes.js	GET	/dashboard	auth		file-level
+improvementRoutes.js	GET	/opportunities	auth		file-level
+improvementRoutes.js	POST	/improvements	auth	allowRoles("admin", "superadmin", "manager")	file-level
+improvementRoutes.js	PUT	/improvements/:improvementId	auth	allowRoles("admin", "superadmin")	file-level
+improvementRoutes.js	GET	/recommendations	auth		file-level
+improvementRoutes.js	GET	/customer-experience	auth		file-level
+improvementRoutes.js	GET	/ux-analytics	auth		file-level
+improvementRoutes.js	GET	/performance	auth		file-level
+improvementRoutes.js	GET	/experiments	auth		file-level
+improvementRoutes.js	POST	/experiments	auth	allowRoles("admin", "superadmin", "manager")	file-level
+improvementRoutes.js	PUT	/experiments/:experimentId	auth	allowRoles("admin", "superadmin")	file-level
+improvementRoutes.js	POST	/experiments/:experimentId/start	auth	allowRoles("admin", "superadmin")	file-level
+improvementRoutes.js	POST	/experiments/:experimentId/stop	auth	allowRoles("admin", "superadmin")	file-level
+improvementRoutes.js	GET	/health	auth		file-level
+improvementRoutes.js	GET	/ideas	auth		file-level
+improvementRoutes.js	POST	/ideas	auth		file-level
+improvementRoutes.js	POST	/ideas/:ideaId/vote	auth		file-level
+improvementRoutes.js	PUT	/ideas/:ideaId/status	auth	allowRoles("admin", "superadmin", "manager")	file-level
+improvementRoutes.js	GET	/roadmap	auth		file-level
+improvementRoutes.js	GET	/optimization/marketplace	auth		file-level
+improvementRoutes.js	GET	/optimization/search	auth		file-level
+improvementRoutes.js	GET	/optimization/revenue	auth		file-level
+improvementRoutes.js	GET	/report	auth		file-level
+improvementRoutes.js	GET	/technical-debt	auth		file-level
+improvementRoutes.js	POST	/assistant	auth		file-level
+inspectorApplicationRoutes.js	GET	/active	PUBLIC		
+inspectorApplicationRoutes.js	POST	/apply	auth		
+inspectorApplicationRoutes.js	GET	/my	auth		
+inspectorApplicationRoutes.js	GET	/	auth	adminOnly	
+inspectorApplicationRoutes.js	GET	/:id	auth	adminOnly	
+inspectorApplicationRoutes.js	POST	/:id/approve	auth	adminOnly	
+inspectorApplicationRoutes.js	POST	/:id/reject	auth	adminOnly	
+intelligenceRoutes.js	GET	/dashboard	auth		file-level
+intelligenceRoutes.js	GET	/marketplace	auth		file-level
+intelligenceRoutes.js	GET	/dealers	auth		file-level
+intelligenceRoutes.js	GET	/auctions	auth		file-level
+intelligenceRoutes.js	GET	/finance	auth		file-level
+intelligenceRoutes.js	GET	/inspections	auth		file-level
+intelligenceRoutes.js	GET	/marketing	auth		file-level
+intelligenceRoutes.js	GET	/customers	auth		file-level
+intelligenceRoutes.js	GET	/countries	auth		file-level
+intelligenceRoutes.js	GET	/revenue	auth		file-level
+intelligenceRoutes.js	GET	/forecasts	auth		file-level
+intelligenceRoutes.js	GET	/insights	auth		file-level
+intelligenceRoutes.js	GET	/benchmarks	auth		file-level
+intelligenceRoutes.js	GET	/reports	auth		file-level
+intelligenceRoutes.js	POST	/reports/generate	auth		file-level
+intelligenceRoutes.js	GET	/reports/download/:reportId	auth		file-level
+intelligenceRoutes.js	POST	/query	auth		file-level
+intelligenceRoutes.js	POST	/exports	auth		file-level
+intelligenceRoutes.js	GET	/scheduled	auth		file-level
+intelligenceRoutes.js	POST	/scheduled	auth	allowRoles("admin", "superadmin", "executive")	file-level
+leadRoutes.js	GET	/	auth		
+leadRoutes.js	GET	/:leadId	auth		
+leadRoutes.js	POST	/	auth		
+leadRoutes.js	PUT	/:leadId/stage	auth		
+leadRoutes.js	PUT	/:leadId/archive	auth		
+leadRoutes.js	PUT	/:leadId/hot	auth		
+leadRoutes.js	POST	/:leadId/notes	auth		
+leadRoutes.js	GET	/:leadId/timeline	auth		
+leadRoutes.js	GET	/analytics/summary	auth		
+leadRoutes.js	GET	/pipeline/view	auth		
+leadRoutes.js	GET	/conversion/report	auth		
+ledgerRoutes.js	GET	/balance-sheet	auth	adminOnly	
+ledgerRoutes.js	GET	/trial-balance	auth	adminOnly	
+ledgerRoutes.js	GET	/reconciliation	auth	adminOnly	
+ledgerRoutes.js	GET	/	auth	adminOnly	
+ledgerRoutes.js	POST	/	auth	adminOnly	
+ledgerRoutes.js	GET	/seed	auth	adminOnly	
+ledgerRoutes.js	GET	/:id	auth	adminOnly	
+ledgerRoutes.js	POST	/:id/reverse	auth	adminOnly	
+listingAssistantRoutes.js	GET	/analyze/:carId	auth		
+listingAssistantRoutes.js	POST	/batch-analyze	auth	adminOnly	
+listingAssistantRoutes.js	GET	/dealer-stats	auth		
+listingQualityRoutes.js	GET	/car/:carId	auth		
+listingQualityRoutes.js	GET	/dealer/:dealerId/stats	auth		
+listingQualityRoutes.js	GET	/dealer/:dealerId/report	auth		
+listingQualityRoutes.js	POST	/dealer/:dealerId/bulk-recalculate	auth		
+listingQualityRoutes.js	POST	/car/:carId/recalculate	auth	adminOnly	
+listingQualityRoutes.js	GET	/platform/stats	auth	adminOnly	
+listingQualityRoutes.js	GET	/platform/trends	auth	adminOnly	
+listingQualityRoutes.js	GET	/platform/low-quality	auth	adminOnly	
+listingQualityRoutes.js	GET	/platform/benchmarks	auth	adminOnly	
+loanApplicationRoutes.js	POST	/	auth		
+loanApplicationRoutes.js	GET	/my	auth		
+loanApplicationRoutes.js	GET	/all	auth	adminOnly	
+loanApplicationRoutes.js	PUT	/:id/status	auth	adminOnly	
+localizationRoutes.js	GET	/	PUBLIC		
+localizationRoutes.js	GET	/namespaces	PUBLIC		
+localizationRoutes.js	GET	/all	PUBLIC		
+localizationRoutes.js	GET	/search	PUBLIC		
+localizationRoutes.js	GET	/stats	auth	adminOnly	
+localizationRoutes.js	GET	/key/:key	PUBLIC		
+localizationRoutes.js	GET	/export	auth	adminOnly	
+localizationRoutes.js	POST	/	auth	adminOnly	
+localizationRoutes.js	PATCH	/:translationId	auth	adminOnly	
+localizationRoutes.js	DELETE	/:translationId	auth	adminOnly	
+localizationRoutes.js	POST	/import	auth	adminOnly	
+lowCodeRoutes.js	GET	/stats	auth		file-level
+lowCodeRoutes.js	GET	/field-types	auth		file-level
+lowCodeRoutes.js	GET	/objects	auth		file-level
+lowCodeRoutes.js	GET	/objects/:id	auth		file-level
+lowCodeRoutes.js	POST	/objects	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	PUT	/objects/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	DELETE	/objects/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	POST	/objects/:id/publish	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	POST	/objects/:id/clone	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	GET	/objects/:id/api	auth		file-level
+lowCodeRoutes.js	GET	/objects/:objectId/fields	auth		file-level
+lowCodeRoutes.js	POST	/objects/:objectId/fields	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	PUT	/fields/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	DELETE	/fields/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	POST	/objects/:objectId/fields/reorder	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	GET	/objects/:objectId/relationships	auth		file-level
+lowCodeRoutes.js	POST	/relationships	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	PUT	/relationships/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	DELETE	/relationships/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	GET	/objects/:objectId/forms	auth		file-level
+lowCodeRoutes.js	POST	/forms	auth	allowRoles("admin", "superadmin", "editor")	file-level
+lowCodeRoutes.js	PUT	/forms/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+lowCodeRoutes.js	DELETE	/forms/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	GET	/objects/:objectId/views	auth		file-level
+lowCodeRoutes.js	POST	/views	auth	allowRoles("admin", "superadmin", "editor")	file-level
+lowCodeRoutes.js	PUT	/views/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+lowCodeRoutes.js	DELETE	/views/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	GET	/objects/:objectId/permissions	auth		file-level
+lowCodeRoutes.js	PUT	/objects/:objectId/permissions	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	GET	/dashboards	auth		file-level
+lowCodeRoutes.js	POST	/dashboards	auth	allowRoles("admin", "superadmin", "editor")	file-level
+lowCodeRoutes.js	PUT	/dashboards/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+lowCodeRoutes.js	DELETE	/dashboards/:id	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	GET	/objects/:objectId/versions	auth		file-level
+lowCodeRoutes.js	POST	/versions/:versionId/rollback	auth	allowRoles("admin", "superadmin")	file-level
+lowCodeRoutes.js	POST	/ai/suggest	auth		file-level
+marketRoutes.js	GET	/pulse/:carId	PUBLIC		
+marketRoutes.js	GET	/trends	PUBLIC		
+marketRoutes.js	GET	/dealer/insights	auth	requireRole("dealer", "admin", "superadmin")	
+marketplaceFulfilmentRoutes.js	GET	/operations	auth		
+marketplaceFulfilmentRoutes.js	GET	/:id/operations	auth		
+marketplaceFulfilmentRoutes.js	POST	/:id/collection	auth		
+marketplaceFulfilmentRoutes.js	POST	/:id/transfer	auth		
+marketplaceFulfilmentRoutes.js	POST	/:id/dispute	auth		
+marketplaceHealthRoutes.js	GET	/summary	PUBLIC		
+marketplaceHealthRoutes.js	GET	/trends	PUBLIC		
+marketplaceHealthRoutes.js	GET	/alerts	PUBLIC		
+marketplaceHealthRoutes.js	POST	/alerts/:alertId/resolve	auth	adminOnly	
+marketplaceHealthRoutes.js	GET	/metrics	auth	adminOnly	
+marketplaceHealthRoutes.js	POST	/regenerate	auth	adminOnly	
+marketplaceHealthRoutes.js	GET	/admin/all	auth	adminOnly	
+mediaEventRoutes.js	GET	/dashboard	PUBLIC		
+mediaEventRoutes.js	GET	/overview	PUBLIC		
+mediaEventRoutes.js	GET	/channels	PUBLIC		
+mediaEventRoutes.js	GET	/events	PUBLIC		
+mediaEventRoutes.js	GET	/replay	PUBLIC		
+mediaEventRoutes.js	GET	/commentary	PUBLIC		
+mediaEventRoutes.js	GET	/audit	PUBLIC		
+mediaEventRoutes.js	GET	/adapters	PUBLIC		
+mediaEventRoutes.js	GET	/failover	PUBLIC		
+mediaEventRoutes.js	GET	/health	PUBLIC		
+mediaEventRoutes.js	GET	/metrics	PUBLIC		
+mediaEventRoutes.js	GET	/supported-events	PUBLIC		
+mediaEventRoutes.js	GET	/auction/:auctionId/replay	PUBLIC		
+mediaEventRoutes.js	GET	/auction/:auctionId/commentary	PUBLIC		
+mediaEventRoutes.js	GET	/auction/:auctionId/audit	PUBLIC		
+mediaEventRoutes.js	POST	/publish	auth	requireRole(['organizer', 'admin'])	
+mediaEventRoutes.js	POST	/commentary	auth	requireRole(['announcer', 'organizer', 'admin'])	
+metricsRoutes.js	GET	/	auth		file-level
+metricsRoutes.js	GET	/http	auth		file-level
+metricsRoutes.js	GET	/database	auth		file-level
+metricsRoutes.js	GET	/cache	auth		file-level
+metricsRoutes.js	GET	/replica-set	auth		file-level
+metricsRoutes.js	GET	/system	auth		file-level
+metricsRoutes.js	GET	/errors	auth		file-level
+metricsRoutes.js	POST	/reset	auth	adminOnly	file-level
+notificationAnalyticsRoutes.js	GET	/delivery-stats	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/channel-stats	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/failure-analysis	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/engagement-metrics	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/retry-stats	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/user/:userId/stats	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/platform-stats	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/delivery-report	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/trends	auth	adminOnly	
+notificationAnalyticsRoutes.js	POST	/retry/:auditId	auth	adminOnly	
+notificationAnalyticsRoutes.js	POST	/bulk-retry	auth	adminOnly	
+notificationAnalyticsRoutes.js	GET	/retry-queue	auth	adminOnly	
+notificationAnalyticsRoutes.js	POST	/process-retry-queue	auth	adminOnly	
+notificationRoutes.js	GET	/	auth		file-level
+notificationRoutes.js	POST	/reminders	auth		file-level
+notificationRoutes.js	POST	/read-all	auth		file-level
+notificationRoutes.js	POST	/:id/read	auth		file-level
+notificationRoutes.js	DELETE	/:id	auth		file-level
+ntsaVerificationRoutes.js	GET	/	auth	adminOnly	file-level
+ntsaVerificationRoutes.js	GET	/car/:carId/status	auth		file-level
+ntsaVerificationRoutes.js	POST	/	auth		file-level
+ntsaVerificationRoutes.js	POST	/:id/process	auth	adminOnly	file-level
+ntsaVerificationRoutes.js	POST	/:id/documents	auth		file-level
+operationsDashboardRoutes.js	GET	/overview	auth		file-level
+operationsDashboardRoutes.js	GET	/system-health	auth		file-level
+operationsDashboardRoutes.js	GET	/payment-failures	auth		file-level
+operationsDashboardRoutes.js	GET	/escrow-disputes	auth		file-level
+operationsDashboardRoutes.js	GET	/dealer-onboarding	auth		file-level
+operationsDashboardRoutes.js	GET	/listing-moderation	auth		file-level
+operationsDashboardRoutes.js	GET	/queue-health	auth		file-level
+operationsDashboardRoutes.js	GET	/notifications	auth		file-level
+operationsDashboardRoutes.js	GET	/fraud-alerts	auth		file-level
+operationsRoutes.js	GET	/dashboard	auth	adminOnly	
+operationsRoutes.js	GET	/escrow-queue	auth	adminOnly	
+operationsRoutes.js	GET	/inspection-queue	auth	adminOnly	
+operationsRoutes.js	GET	/dealer-queue	auth	adminOnly	
+operationsRoutes.js	GET	/support-queue	auth	adminOnly	
+operationsRoutes.js	GET	/payment-queue	auth	adminOnly	
+organizationRoutes.js	GET	/platform-stats	auth	adminOnly	
+organizationRoutes.js	POST	/	auth	adminOnly	
+organizationRoutes.js	GET	/	auth	adminOnly	
+organizationRoutes.js	GET	/:id	auth		
+organizationRoutes.js	PUT	/:id	auth		
+organizationRoutes.js	DELETE	/:id	auth	adminOnly	
+organizationRoutes.js	GET	/:id/users	auth		
+organizationRoutes.js	POST	/:id/admins	auth		
+organizationRoutes.js	DELETE	/:id/admins/:userId	auth		
+organizationRoutes.js	POST	/:id/branches	auth		
+organizationRoutes.js	GET	/:id/branches	auth		
+organizationRoutes.js	GET	/:id/stats	auth		
+ownershipRoutes.js	GET	/dashboard	auth		
+ownershipRoutes.js	POST	/vehicles	auth		
+ownershipRoutes.js	GET	/vehicles/:vehicleId	auth		
+ownershipRoutes.js	POST	/vehicles/:vehicleId/services	auth		
+ownershipRoutes.js	POST	/vehicles/:vehicleId/expenses	auth		
+ownershipRoutes.js	POST	/vehicles/:vehicleId/documents	auth		
+ownershipRoutes.js	POST	/vehicles/:vehicleId/trips	auth		
+ownershipRoutes.js	PATCH	/reminders/:reminderId/complete	auth		
+ownershipRoutes.js	PATCH	/vehicles/:vehicleId/sold	auth		
+ownershipRoutes.js	POST	/passports	auth	allowRoles('admin', 'superadmin', 'dealer', 'individual_seller')	
+ownershipRoutes.js	GET	/passports/:passportId	auth		
+ownershipRoutes.js	GET	/passports/:passportId/public	PUBLIC		
+ownershipRoutes.js	GET	/passports/vin/:vin	PUBLIC		
+paymentRoutes.js	POST	/initiate	auth		
+paymentRoutes.js	GET	/status/:id	auth		
+paymentRoutes.js	GET	/my	auth		
+paymentRoutes.js	POST	/callback	PUBLIC		
+paymentRoutes.js	GET	/checkout/:checkoutRequestId	auth		
+paymentRoutes.js	POST	/b2c/callback	PUBLIC		
+paymentRoutes.js	POST	/b2c/timeout	PUBLIC		
+platformFactoryRoutes.js	GET	/dashboard	auth		file-level
+platformFactoryRoutes.js	GET	/templates	auth		file-level
+platformFactoryRoutes.js	GET	/templates/:templateId	auth		file-level
+platformFactoryRoutes.js	POST	/generate	auth	allowRoles("admin", "superadmin")	file-level
+platformFactoryRoutes.js	GET	/generate/:productId/status	auth		file-level
+platformFactoryRoutes.js	GET	/products	auth		file-level
+platformFactoryRoutes.js	GET	/products/:productId	auth		file-level
+platformFactoryRoutes.js	PUT	/products/:productId	auth	allowRoles("admin", "superadmin")	file-level
+platformFactoryRoutes.js	DELETE	/products/:productId	auth	allowRoles("superadmin")	file-level
+platformFactoryRoutes.js	GET	/components	auth		file-level
+platformFactoryRoutes.js	GET	/domain-models	auth		file-level
+platformFactoryRoutes.js	GET	/services	auth		file-level
+platformFactoryRoutes.js	GET	/brands	auth		file-level
+platformFactoryRoutes.js	GET	/brands/:brandId	auth		file-level
+platformFactoryRoutes.js	PUT	/brands/:brandId	auth	allowRoles("admin", "superadmin")	file-level
+platformFactoryRoutes.js	GET	/deployments	auth		file-level
+platformFactoryRoutes.js	POST	/deploy	auth	allowRoles("admin", "superadmin")	file-level
+platformFactoryRoutes.js	POST	/deployments/:deploymentId/rollback	auth	allowRoles("admin", "superadmin")	file-level
+platformFactoryRoutes.js	GET	/store	auth		file-level
+platformFactoryRoutes.js	POST	/store/install	auth	allowRoles("admin", "superadmin")	file-level
+platformFactoryRoutes.js	POST	/design	auth		file-level
+platformFactoryRoutes.js	GET	/design/:designId/status	auth		file-level
+platformFactoryRoutes.js	GET	/monetization	auth		file-level
+platformFactoryRoutes.js	POST	/monetization/configure	auth	allowRoles("admin", "superadmin")	file-level
+platformFactoryRoutes.js	GET	/health	auth		file-level
+platformFactoryRoutes.js	GET	/workflows	auth		file-level
+prometheusMetrics.js	GET	/	auth	adminOnly	
+queueRoutes.js	GET	/metrics	auth	adminOnly	
+queueRoutes.js	GET	/statistics	auth	adminOnly	
+queueRoutes.js	GET	/health	auth	adminOnly	
+queueRoutes.js	GET	/aggregated	auth	adminOnly	
+queueRoutes.js	GET	/circuit-breakers	auth	adminOnly	
+queueRoutes.js	GET	/dlq/statistics	auth	adminOnly	
+queueRoutes.js	GET	/dlq/jobs	auth	adminOnly	
+queueRoutes.js	POST	/dlq/retry/:jobId	auth	adminOnly	
+queueRoutes.js	DELETE	/dlq/delete/:jobId	auth	adminOnly	
+queueRoutes.js	GET	/failures	auth	adminOnly	
+queueRoutes.js	GET	/failures/:failureId	auth	adminOnly	
+queueRoutes.js	POST	/failures/:failureId/resolve	auth	adminOnly	
+realtimeRoutes.js	POST	/socket-ticket	auth		
+recommendationRoutes.js	GET	/	auth		
+reconciliationRoutes.js	GET	/dashboard	auth		file-level
+reconciliationRoutes.js	GET	/integrity-score	auth		file-level
+reconciliationRoutes.js	GET	/negative-balances	auth		file-level
+reconciliationRoutes.js	GET	/unreleased-escrows	auth		file-level
+reconciliationRoutes.js	GET	/directional-breakdown	auth		file-level
+reconciliationRoutes.js	POST	/run	auth		file-level
+reconciliationRoutes.js	GET	/reports	auth		file-level
+reconciliationRoutes.js	GET	/reports/:id	auth		file-level
+reconciliationRoutes.js	GET	/reports/:reportId/records	auth		file-level
+reconciliationRoutes.js	POST	/reports/:reportId/resolve	auth		file-level
+reconciliationRoutes.js	GET	/alerts	auth		file-level
+reconciliationRoutes.js	POST	/alerts/:id/read	auth		file-level
+reconciliationRoutes.js	POST	/alerts/read-all	auth		file-level
+reconciliationRoutes.js	GET	/export/:reportId/:format	auth		file-level
+referralRoutes.js	GET	/stats	auth		
+referralRoutes.js	GET	/code	auth		
+regionalConfigurationRoutes.js	GET	/	PUBLIC		
+regionalConfigurationRoutes.js	GET	/currency-rate	PUBLIC		
+regionalConfigurationRoutes.js	POST	/currency-convert	auth		
+regionalConfigurationRoutes.js	GET	/currency-rates	auth	adminOnly	
+regionalConfigurationRoutes.js	PUT	/currency-rates	auth	adminOnly	
+regionalConfigurationRoutes.js	GET	/:countryCode	PUBLIC		
+regionalConfigurationRoutes.js	PATCH	/:countryCode/status	auth	adminOnly	
+reliabilityRoutes.js	GET	/slis	auth	adminOnly	
+reliabilityRoutes.js	GET	/slis/:sliId	auth	adminOnly	
+reliabilityRoutes.js	GET	/slos	auth	adminOnly	
+reliabilityRoutes.js	GET	/slos/:sloId	auth	adminOnly	
+reliabilityRoutes.js	GET	/error-budgets	auth	adminOnly	
+reliabilityRoutes.js	GET	/error-budgets/:sloId	auth	adminOnly	
+reliabilityRoutes.js	POST	/error-budgets/refresh	auth	adminOnly	
+reliabilityRoutes.js	POST	/alerts/evaluate	auth	adminOnly	
+reliabilityRoutes.js	GET	/report	auth	adminOnly	
+reliabilityRoutes.js	GET	/health	auth	adminOnly	
+reportRoutes.js	POST	/submit	auth		file-level
+reportRoutes.js	GET	/my	auth		file-level
+reportRoutes.js	GET	/admin/all	auth	allowRoles("admin", "superadmin", "moderator")	file-level
+reportRoutes.js	GET	/admin/:id	auth	allowRoles("admin", "superadmin", "moderator")	file-level
+reportRoutes.js	PATCH	/admin/:id/status	auth	allowRoles("admin", "superadmin", "moderator")	file-level
+reviewRoutes.js	POST	/	auth		
+reviewRoutes.js	GET	/my	auth		
+reviewRoutes.js	GET	/dealer/:dealerId	PUBLIC		
+reviewRoutes.js	DELETE	/:id	auth		
+salesDashboardRoutes.js	GET	/	auth	adminOnly	
+salesDashboardRoutes.js	GET	/dealers/:dealerId	auth	adminOnly	
+salesDashboardRoutes.js	GET	/dealers	auth	adminOnly	
+salesDashboardRoutes.js	GET	/revenue	auth	adminOnly	
+savedSearchRoutes.js	GET	/	auth		file-level
+savedSearchRoutes.js	POST	/	auth		file-level
+savedSearchRoutes.js	PUT	/:id	auth		file-level
+savedSearchRoutes.js	DELETE	/:id	auth		file-level
+searchAnalyticsRoutes.js	GET	/trending	PUBLIC		
+searchAnalyticsRoutes.js	GET	/no-results	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/filters	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/counties	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/price-ranges	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/brands	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/missing-inventory	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/demand-report	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/insights	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/summary	auth	adminOnly	
+searchAnalyticsRoutes.js	GET	/dealer/demand	auth		
+searchRoutes.js	GET	/	auth		
+searchRoutes.js	GET	/facets	auth		
+searchRoutes.js	GET	/autocomplete	auth		
+securityLogRoutes.js	GET	/	auth	adminOnly	
+securityLogRoutes.js	GET	/summary	auth	adminOnly	
+securityLogRoutes.js	GET	/my	auth		
+seoRoutes.js	GET	/sitemap.xml	PUBLIC		
+seoRoutes.js	GET	/sitemap-cars.xml	PUBLIC		
+seoRoutes.js	GET	/sitemap-dealers.xml	PUBLIC		
+seoRoutes.js	GET	/sitemap-auctions.xml	PUBLIC		
+smsBiddingRoutes.js	POST	/webhook/inbound	PUBLIC		
+smsBiddingRoutes.js	POST	/register	auth		
+smsBiddingRoutes.js	GET	/my	auth		
+smsBiddingRoutes.js	POST	/subscribe	auth		
+smsBiddingRoutes.js	DELETE	/unsubscribe/:carId	auth		
+subscriptionRoutes.js	GET	/plans	PUBLIC		
+subscriptionRoutes.js	GET	/my-subscription	auth		
+subscriptionRoutes.js	POST	/upgrade	auth		
+subscriptionRoutes.js	POST	/cancel	auth		
+subscriptionRoutes.js	POST	/reactivate	auth		
+subscriptionRoutes.js	GET	/usage-limits	auth		
+subscriptionRoutes.js	GET	/all	auth	adminOnly	
+subscriptionRoutes.js	GET	/analytics	auth	adminOnly	
+supportDashboardRoutes.js	GET	/	auth		
+supportDashboardRoutes.js	GET	/tickets	auth		
+supportRoutes.js	GET	/config	auth		
+supportRoutes.js	POST	/	auth		
+supportRoutes.js	GET	/my-tickets	auth		
+supportRoutes.js	GET	/staff/queue	auth		
+supportRoutes.js	GET	/staff/metrics	auth		
+supportRoutes.js	GET	/staff/team	auth		
+supportRoutes.js	GET	/staff/:id	auth		
+supportRoutes.js	POST	/staff/:id/messages	auth		
+supportRoutes.js	PATCH	/staff/:id	auth		
+supportRoutes.js	GET	/all	auth		
+supportRoutes.js	GET	/analytics	auth		
+supportRoutes.js	GET	/:id	auth		
+supportRoutes.js	POST	/:id/messages	auth		
+supportRoutes.js	POST	/:id/rate	auth		
+supportRoutes.js	PUT	/:id/status	auth		
+supportTicketAdminRoutes.js	GET	/stats	auth		file-level
+supportTicketAdminRoutes.js	GET	/	auth		file-level
+supportTicketAdminRoutes.js	GET	/:id	auth		file-level
+supportTicketAdminRoutes.js	PATCH	/:id/status	auth		file-level
+supportTicketAdminRoutes.js	PATCH	/:id/assign	auth		file-level
+supportTicketAdminRoutes.js	POST	/:id/messages	auth		file-level
+transactionRoutes.js	GET	/	auth		file-level
+transactionRoutes.js	GET	/summary	auth		file-level
+transactionRoutes.js	GET	/:id	auth		file-level
+uploadRoutes.js	POST	/	auth		
+uploadRoutes.js	POST	/multiple	auth		
+uploadRoutes.js	GET	/:id	auth		
+uploadRoutes.js	DELETE	/:publicId	auth		
+userPreferenceRoutes.js	GET	/	auth		
+userPreferenceRoutes.js	PATCH	/	auth		
+userPreferenceRoutes.js	POST	/theme	auth		
+userPreferenceRoutes.js	POST	/theme/toggle	auth		
+userPreferenceRoutes.js	POST	/language	auth		
+userPreferenceRoutes.js	POST	/notifications	auth		
+userPreferenceRoutes.js	POST	/search/recent	auth		
+userPreferenceRoutes.js	DELETE	/search/recent	auth		
+userPreferenceRoutes.js	POST	/accessibility	auth		
+userPreferenceRoutes.js	POST	/last-seen	auth		
+userPreferenceRoutes.js	GET	/stats	auth	adminOnly	
+userRoutes.js	GET	/search	PUBLIC		
+userRoutes.js	GET	/me	auth		
+userRoutes.js	PUT	/settings	auth		
+userRoutes.js	GET	/:id	auth		
+userRoutes.js	POST	/bank-pre-approval	auth		
+userRoutes.js	DELETE	/bank-pre-approval	auth		
+v2.js	GET	/	PUBLIC		
+valuationRoutes.js	GET	/matrix	PUBLIC		
+valuationRoutes.js	GET	/:vehicleId	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/summary	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/price-trends	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/volume-trends	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/county-trends	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/brand-trends	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/model-trends	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/spec-trends	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/most-viewed	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/most-searched	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/fastest-selling	PUBLIC		
+vehicleAnalyticsRoutes.js	GET	/market/dealer/:dealerId	auth		
+vehicleAnalyticsRoutes.js	POST	/market/regenerate	auth	adminOnly	
+vehicleAnalyticsRoutes.js	GET	/market/admin/all	auth	adminOnly	
+verificationRoutes.js	POST	/submit	auth		file-level
+verificationRoutes.js	GET	/status	auth		file-level
+verificationRoutes.js	POST	/phone/request	auth		file-level
+verificationRoutes.js	POST	/phone/verify	auth		file-level
+verificationRoutes.js	GET	/admin/all	auth	allowRoles("admin", "superadmin")	file-level
+verificationRoutes.js	GET	/admin/:id	auth	allowRoles("admin", "superadmin")	file-level
+verificationRoutes.js	POST	/admin/:id/approve	auth	allowRoles("admin", "superadmin")	file-level
+verificationRoutes.js	POST	/admin/:id/reject	auth	allowRoles("admin", "superadmin")	file-level
+verificationRoutes.js	POST	/admin/:id/suspend	auth	allowRoles("admin", "superadmin")	file-level
+verificationRoutes.js	POST	/admin/:id/reinstate	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	GET	/stats	auth		file-level
+vxpRoutes.js	GET	/pages	auth		file-level
+vxpRoutes.js	GET	/pages/:id	auth		file-level
+vxpRoutes.js	POST	/pages	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	PUT	/pages/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	DELETE	/pages/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	POST	/pages/:id/publish	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	POST	/pages/:id/duplicate	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	GET	/sections	auth		file-level
+vxpRoutes.js	GET	/sections/templates	auth		file-level
+vxpRoutes.js	POST	/sections	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	PUT	/sections/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	DELETE	/sections/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	POST	/sections/reorder	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	GET	/components	auth		file-level
+vxpRoutes.js	GET	/components/library	auth		file-level
+vxpRoutes.js	POST	/components	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	PUT	/components/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	DELETE	/components/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	GET	/themes	auth		file-level
+vxpRoutes.js	GET	/themes/default	auth		file-level
+vxpRoutes.js	GET	/themes/:id	auth		file-level
+vxpRoutes.js	POST	/themes	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	PUT	/themes/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	DELETE	/themes/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	GET	/cards	auth		file-level
+vxpRoutes.js	GET	/cards/fields	auth		file-level
+vxpRoutes.js	POST	/cards	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	PUT	/cards/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	DELETE	/cards/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	GET	/advertisements	auth		file-level
+vxpRoutes.js	GET	/advertisements/zones	auth		file-level
+vxpRoutes.js	POST	/advertisements	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	PUT	/advertisements/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+vxpRoutes.js	DELETE	/advertisements/:id	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	GET	/versions	auth		file-level
+vxpRoutes.js	POST	/versions/:id/rollback	auth	allowRoles("admin", "superadmin")	file-level
+vxpRoutes.js	POST	/ai/design	auth		file-level
+webhookRoutes.js	POST	/inventory	PUBLIC		
+xosRoutes.js	GET	/dashboard	auth		file-level
+xosRoutes.js	GET	/metrics	auth		file-level
+xosRoutes.js	GET	/experiences	auth		file-level
+xosRoutes.js	GET	/experiences/:id	auth		file-level
+xosRoutes.js	POST	/experiences	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	PUT	/experiences/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	DELETE	/experiences/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	POST	/experiences/:id/activate	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	POST	/experiences/:id/deactivate	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	GET	/campaigns	auth		file-level
+xosRoutes.js	GET	/campaigns/:id	auth		file-level
+xosRoutes.js	POST	/campaigns	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	PUT	/campaigns/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	DELETE	/campaigns/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	POST	/campaigns/:id/launch	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	POST	/campaigns/:id/pause	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	POST	/campaigns/:id/end	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	GET	/audiences	auth		file-level
+xosRoutes.js	GET	/audiences/segments	auth		file-level
+xosRoutes.js	POST	/audiences	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	PUT	/audiences/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	DELETE	/audiences/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	GET	/journeys	auth		file-level
+xosRoutes.js	GET	/journeys/:id	auth		file-level
+xosRoutes.js	POST	/journeys	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	PUT	/journeys/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	DELETE	/journeys/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	POST	/journeys/:id/activate	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	GET	/themes	auth		file-level
+xosRoutes.js	GET	/themes/templates	auth		file-level
+xosRoutes.js	POST	/themes	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	PUT	/themes/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	DELETE	/themes/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	GET	/variants	auth		file-level
+xosRoutes.js	GET	/variants/types	auth		file-level
+xosRoutes.js	POST	/variants	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	PUT	/variants/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	DELETE	/variants/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	GET	/navigation-rules	auth		file-level
+xosRoutes.js	POST	/navigation-rules	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	PUT	/navigation-rules/:id	auth	allowRoles("admin", "superadmin", "editor")	file-level
+xosRoutes.js	DELETE	/navigation-rules/:id	auth	allowRoles("admin", "superadmin")	file-level
+xosRoutes.js	GET	/analytics	auth		file-level
+xosRoutes.js	POST	/analytics/track	auth		file-level
+xosRoutes.js	GET	/ai/recommendations	auth		file-level
+xosRoutes.js	GET	/resolve	auth		file-level

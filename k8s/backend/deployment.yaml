@@ -97,7 +97,7 @@ spec:
             secretKeyRef:
               name: kayad-secrets
               key: sentry-dsn
-          optional: true
+              optional: true
         - name: MPESA_CONSUMER_KEY
           valueFrom:
             secretKeyRef:

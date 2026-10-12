@@ -25,7 +25,7 @@ export const getDealerHealthScore = async (req, res) => {
 
     const healthScore = await DealerHealthScore.findOne({ dealer: dealerId }).populate(
       "dealer",
-      "name email businessName location logo",
+      "name businessName location logo",
     );
 
     if (!healthScore) {

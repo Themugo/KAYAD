@@ -8,11 +8,12 @@ const src = fs.readFileSync(path.resolve("routes/marketplaceHealthRoutes.js"), "
 
 describe("marketplace health routes authorization (AA-S1)", () => {
   for (const route of ["/summary", "/trends", "/alerts"]) {
-    it(`GET ${route} requires protect and adminOnly`, () => {
+    it(`GET ${route} requires protect and the admin/superadmin guard`, () => {
       const line = src.split("\n").find((l) => l.includes(`router.get("${route}"`));
       expect(line).toBeDefined();
       expect(line).toMatch(/protect/);
-      expect(line).toMatch(/adminOnly/);
+      expect(line).toMatch(/healthViewers/);
+      expect(src).toMatch(/healthViewers\s*=\s*allowRoles\("admin",\s*"superadmin"\)/);
     });
   }
   it("has no router.get without protect", () => {

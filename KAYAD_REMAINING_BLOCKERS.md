@@ -15,3 +15,19 @@
 ## Low
 9. Route matrix is heuristic (regex); false positives expected; deeper per-route IDOR review of dealer/finance/escrow domains not done this session.
 10. Domains A, D, H, I, J, K received no new deep audit beyond the passing regression suites.
+
+---
+# Continuation 2 - blockers (supersedes ordering above where different)
+## Critical / High
+1. **AA-D1 schema divergence (object-level)**: hosted lacks 16 source tables (all `auction_*`, chat outbox/idempotency, hero, purchase_outcomes, report_*), and has 24 tables with no CREATE in the repo. Do NOT `db push --include-all`. Required: (a) with authorized read access run `supabase db dump --schema public --schema-only` from production to capture the 24 hosted-only tables into a baseline migration; (b) replay on a real Supabase branch; (c) apply the 16 missing tables' migrations in order on staging then production with backup. NEEDS AUTHORIZATION.
+2. **AA-A1 role breadth**: decide the role matrix for ledger/fraud/disputes/communications/reliability and listing edit/delete; then introduce a `platformAdminOnly` guard and apply with tests. Interim exposure: any staff role (incl. external `ghost_checker`) can reach `adminOnly`-only routes and edit/delete any listing.
+3. R12/R14 not on production (NEEDS AUTHORIZATION) - both replay cleanly after the earlier chain.
+4. Live M-Pesa Daraja round trip NOT RUN; `MPESA_TRUSTED_PROXY_CIDRS` blank (fail-closed) until ingress peer CIDR verified.
+## Medium
+5. GitHub Actions result for the gitleaks job UNVERIFIED (not retrievable). If a push-to-main scan flags verified placeholders (`evidence/phase37_gitleaks_report.json`, `docs/domains/INTEGRATION_GUIDE.md`, the two PHASE37/38 registers), add a **path+rule scoped** allowlist; do not blanket-allowlist.
+6. Helm render / `kubectl --dry-run=server` / Docker build still BLOCKED (docker client without daemon; no helm/kubectl).
+7. Which path serves production (Render+Vercel vs k8s/Helm) unconfirmed.
+8. dealer-health-score public field policy; `bun.lock` removal decision; R20/R24 decisions.
+## Low
+9. 15 migrations are not idempotent on re-run (forward-only OK); add `IF NOT EXISTS`/`DROP ... IF EXISTS` when touching them.
+10. Frontend browser journeys, background-job runtime, chat realtime and auction concurrency were NOT RUN end to end (no staging/Supabase/Redis); covered only by existing automated suites.

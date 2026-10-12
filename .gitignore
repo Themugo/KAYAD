@@ -17,3 +17,7 @@ e2e/test-results/
 
 # Supabase local CLI state
 supabase/.temp/
+
+# test-run artifact (AA-continuation)
+backend/data/*.sqlite
+backend/data/*.sqlite-*
