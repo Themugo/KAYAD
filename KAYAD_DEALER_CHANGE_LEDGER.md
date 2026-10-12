@@ -18,10 +18,20 @@ Every code change made during this mission, in the order it was made. "Verified 
 
 | Finding | Why it's not applied here | What's ready to apply |
 |---|---|---|
-| R12 — `dealers` table missing `bio`, `payment_details`, `onboarding_complete`, `onboarding_completed_at` columns that onboarding-completion code tries to write | Live-database schema change against the connected production Supabase project ("KAYAD EA"). This mission's standing rule is never to touch production without explicit authorization — reported via `SendUserMessage` with proposed SQL during Phase 3; no response received as of this delivery (checked repeatedly via `ReadNotifications`). | Additive migration SQL already drafted in `KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md` §4. |
-| R14 — `dealer_verifications.verification_status` CHECK constraint missing `'suspended'`, breaking the dealer-suspend admin action | Same reason — live-database constraint change, reported via `SendUserMessage` during Phase 4-5; no response received. | Additive migration SQL already drafted in the security report and gap register R14 entry. |
+| R12 — `dealers` table missing `bio`, `payment_details`, `onboarding_complete`, `onboarding_completed_at` columns that onboarding-completion code tries to write | Live-database schema change against the connected production Supabase project ("KAYAD EA"). This mission's standing rule is never to touch production without explicit authorization. | `supabase/migrations/20261012140000_dealer_onboarding_columns_r12.sql` — drafted, confirmed against application code, verified against an isolated staging database (see `KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md`). **Not applied to production.** |
+| R14 — `dealer_verifications.verification_status` CHECK constraint missing `'suspended'`, breaking the dealer-suspend admin action | Same reason — live-database constraint change. | `supabase/migrations/20261012140100_dealer_verification_suspended_status_r14.sql` — drafted, confirmed against application code, verified against an isolated staging database (see `KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md`). **Not applied to production.** |
 
-**If the user wants these applied:** say so explicitly (or reply to either `SendUserMessage`), and they can be run as a normal additive Supabase migration — nothing else in this delivery depends on them being applied first.
+**If the user wants these applied:** say so explicitly, and I will apply them to production following the preflight checklist and backup plan in `KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md` §5-6 — nothing else in this delivery depends on them being applied first.
+
+## Added after initial delivery (staging verification pass, same mission)
+
+| # | File | Change | Reason |
+|---|---|---|---|
+| 10 | `supabase/migrations/20261012140000_dealer_onboarding_columns_r12.sql` | New migration file: the R12 fix, made explicitly rerun-safe and transaction-wrapped. Not yet applied to production. | Formalizes the previously-prose-only R12 fix as a real, versioned migration file; required to actually apply it anywhere. |
+| 11 | `supabase/migrations/20261012140100_dealer_verification_suspended_status_r14.sql` | New migration file: the R14 fix, made explicitly rerun-safe (`DROP CONSTRAINT IF EXISTS`) and transaction-wrapped. Not yet applied to production. | Formalizes the previously-prose-only R14 fix as a real, versioned migration file. |
+| 12 | `backend/tests/regression/dealerOnboardingSuspendSchemaReconciliation.test.js` | New regression test (9 assertions): cross-checks the two migration files' content against `VERIFICATION_STATUSES` and the onboarding field list, so future drift between code and schema fails CI instead of failing silently in production. | Closes the exact test-coverage gap the gap register noted ("not currently covered by any existing regression test"). |
+
+Verified: both migrations applied to and reverted-from an isolated local Postgres instance built as an exact replica of the live pre-fix schema; the two previously-failing writes reproduced and then succeeded after the fix; both migrations re-applied a second time with no error and no data loss; a negative case (invalid status) still correctly rejected; full backend (80 suites/1168 tests) and frontend (81 files/643 tests) batteries re-run with zero regressions; `validate:supabase-migrations` and `validate:migration-hygiene` both PASS against the full 181-file migration set.
 
 ## Deliberately NOT changed (scoped out / informational, not defects)
 

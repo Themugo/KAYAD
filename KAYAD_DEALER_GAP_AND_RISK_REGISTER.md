@@ -38,7 +38,9 @@ Finding: `information_schema.table_privileges` shows the `authenticated` and `an
 
 ## R12 (new, Phase 3) — Onboarding completion broken (live-DB-confirmed, release-blocking)
 
-`PUT /api/dealer/onboarding` writes `bio`, `paymentDetails`, `onboardingComplete`, `onboardingCompletedAt` to the `dealers` table, but the live table has no such columns (confirmed via `information_schema.columns` against the connected Supabase project). Every real onboarding submission will fail with a Postgres column-not-found error. Full detail, live schema, and a proposed additive/reversible migration are in `KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md` §4. **Severity: CRITICAL / release-blocking** — this is the single most severe finding of the audit so far, because it breaks the core golden path (no dealer can ever complete onboarding) rather than a security edge case. **Not yet fixed — awaiting the user's explicit go-ahead before running any migration against their live database**, per this engagement's standing rule never to touch production without authorization.
+`PUT /api/dealer/onboarding` writes `bio`, `paymentDetails`, `onboardingComplete`, `onboardingCompletedAt` to the `dealers` table, but the live table has no such columns (confirmed via `information_schema.columns` against the connected Supabase project). Every real onboarding submission will fail with a Postgres column-not-found error. Full detail, live schema, and a proposed additive/reversible migration are in `KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md` §4. **Severity: CRITICAL / release-blocking** — this is the single most severe finding of the audit so far, because it breaks the core golden path (no dealer can ever complete onboarding) rather than a security edge case.
+
+**Migration drafted, column types/names confirmed against the actual app code, and verified against an isolated staging database — still NOT applied to production, awaiting explicit authorization.** See `KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md` for the full staging run (reproduced the exact failure, applied `supabase/migrations/20261012140000_dealer_onboarding_columns_r12.sql`, confirmed the identical write then succeeds, confirmed the migration reruns cleanly with no data loss). **Production remains unfixed until the user authorizes this migration and it is applied and verified there — this entry is not closed.**
 
 ## R13 — SUPERSEDED, corrected in Phase 4 (see R14). Left here for the honest record.
 
@@ -52,13 +54,17 @@ There are **two independent admin-verification write paths** to `dealer_verifica
 
 **Effect: every call to the dealer-suspend admin action, and the `suspended→approved` reinstate transition on top of it, will fail with a live Postgres constraint-violation error.** This is a second, independently-confirmed release-blocking defect (alongside R12's onboarding-column gap), specifically breaking the brief's own Phase 8 requirement to "manage suspension/reinstatement properly." My Phase 3 analysis (R13, now struck through) initially concluded this class of concern didn't hold, based on the RPC path alone — that conclusion was incomplete because it missed this second write path; corrected here rather than left standing, per this engagement's self-correction discipline.
 
-**Proposed fix (additive, matches the brief's migration rules), not yet applied — same authorization question as R12:**
+**Fix drafted as `supabase/migrations/20261012140100_dealer_verification_suspended_status_r14.sql`** (made rerun-safe with `DROP CONSTRAINT IF EXISTS`, confirmed the allowed-value list matches `VERIFICATION_STATUSES` exactly, confirmed against an isolated staging database — see below), **still NOT applied to production, same authorization question as R12:**
 ```sql
-ALTER TABLE dealer_verifications DROP CONSTRAINT dealer_verifications_verification_status_check;
-ALTER TABLE dealer_verifications ADD CONSTRAINT dealer_verifications_verification_status_check
+ALTER TABLE dealer_verifications
+  DROP CONSTRAINT IF EXISTS dealer_verifications_verification_status_check;
+ALTER TABLE dealer_verifications
+  ADD CONSTRAINT dealer_verifications_verification_status_check
   CHECK (verification_status IN ('pending','approved','rejected','suspended'));
 ```
 Purely additive to the allowed value set; does not alter existing data, column type, or any other constraint.
+
+**Verified against an isolated staging database**, including the negative case (an arbitrary invalid status is still correctly rejected) and the full `suspended → approved` reinstate transition. See `KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md`. **Production remains unfixed until the user authorizes this migration and it is applied and verified there — this entry is not closed.**
 
 ## R15 (Phase 6, resolved Phase 12) — Dealer could freeze bidding on their own live auction via an unvalidated `status` field
 

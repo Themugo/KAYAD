@@ -7,7 +7,7 @@ Mission: the 13-phase (0-12) dealer-platform convergence brief, executed in phas
 **17 findings logged** (`KAYAD_DEALER_GAP_AND_RISK_REGISTER.md`), of which:
 - **2 retracted/superseded on self-correction** (R1, R13) — both caught and corrected before being reported to you, with the original wrong claim struck through rather than deleted, per this engagement's standing honesty discipline.
 - **9 fixed in this mission** (R3, R4, R5, R6, R7, R15, R17 — code; verified by real tooling, see §2) and **0 security/authorization/tenant-isolation defects remain unresolved** at CRITICAL/HIGH severity among those reachable by live code paths.
-- **2 confirmed CRITICAL, live-database defects found and reported, not yet applied — awaiting your authorization** (R12, R14). These are schema/constraint fixes against your real, connected production Supabase project, and this mission's standing rule is never to touch production without your explicit go-ahead. I sent two `SendUserMessage` requests during Phases 3 and 4-5 with the exact proposed migration SQL; as of this delivery, I have not received a reply (checked repeatedly via notifications). **Per the brief's own absolute rule, these two gates are reported as BLOCKED, not converted to PASS.**
+- **2 confirmed CRITICAL, live-database defects — migrations drafted, confirmed against the application code, and verified end-to-end against an isolated staging database; still NOT applied to production** (R12, R14). Full staging run, exact SQL, preflight checklist, backup/recovery plan, and residual risks are in `KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md`. This mission's standing rule is never to touch production without your explicit go-ahead, and that has not been given. **Per the brief's own absolute rule, these two gates are reported as BLOCKED, not converted to PASS — production is not fixed until you authorize it and it is applied and verified there.**
 - **1 found not to be a live defect after empirical testing** (R11 — the brief's own named "critical RLS investigation": the row/column gap in the `dealer_verifications` policy text is real on paper but unreachable, since no client-side role holds any base GRANT on that table at all).
 - **5 remain genuinely open, disclosed, and explicitly scoped for future work, not silently dropped**: R1-NEW/R2 (route-authorization architecture, needs a migration plan, not a quick patch), R8 (Settings — a real unbuilt capability, not a wiring fix), R9 (orphaned dead code, your cleanup decision), R10 (Stage 36 footer bypass, explicitly out of this brief's scope), R16 (admin-visible delivery-failure view — a new feature, not a repair).
 
@@ -41,7 +41,8 @@ Full detail: `KAYAD_DEALER_VALIDATION_MATRIX.tsv`.
 | `KAYAD_DEALER_CHANGE_LEDGER.md` | Delivered (this package) |
 | `KAYAD_DEALER_VALIDATION_MATRIX.tsv` | Delivered (this package) |
 | `KAYAD_DEALER_EXECUTION_REPORT.md` | This document |
-| Updated validators/tests | No new validator script was added — all fixes verified against the existing, already-comprehensive test battery (see §2); none of the 17 findings required a new validator to detect (each was caught by direct code/schema reading or the existing suite) |
+| Updated validators/tests | `backend/tests/regression/dealerOnboardingSuspendSchemaReconciliation.test.js` added (9 assertions) — cross-checks the R12/R14 migration files against the application code's own field/status lists, so future drift fails CI instead of failing silently in production |
+| `KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md` | Delivered — exact SQL, staging results, production preflight checklist, backup/recovery plan, residual risks |
 | Full project ZIP + SHA-256 | Delivered alongside this report (see chat) |
 
 Supplementary phase reports also delivered: `KAYAD_DEALER_BASELINE_VALIDATION_REPORT.md`, `KAYAD_DEALER_REGISTRATION_GATE_REPORT.md`, `KAYAD_DEALER_INVENTORY_AND_OPERATIONS_REPORT.md`, `KAYAD_DEALER_ADMIN_AND_NOTIFICATIONS_REPORT.md`.
@@ -55,9 +56,9 @@ The brief names twelve lettered acceptance gates. I do not have the original 863
 | A — Foundation Integrity | 0 | **PASS** — route/API ownership map complete, R1 self-correction documented |
 | Dealer Authorization | 0-2 | **PASS, with one disclosed open item** (R1-NEW, MEDIUM — not CRITICAL/HIGH, does not cross tenant boundaries or bypass listing-creation's own quota gate) |
 | Registration & Auth Convergence | 2 | **PASS** — full 14-step trace, no blocking defect |
-| Database-Backed Onboarding | 3 | **PASS, with one BLOCKED live-DB item** (R12 — critical, reported, awaiting your authorization) |
+| Database-Backed Onboarding | 3 | **PASS, with one BLOCKED live-DB item** (R12 — critical, migration drafted and staging-verified, awaiting your authorization to apply to production) |
 | Verification/Documents Security | 4 | **PASS** — self-approval impossible, masking confirmed, no cross-dealer leak found |
-| RLS / Tenant Isolation | 5 | **PASS** — the brief's named "critical RLS investigation" (R11) empirically tested, not currently exploitable; one BLOCKED live-DB item (R14 — critical, reported, awaiting your authorization) |
+| RLS / Tenant Isolation | 5 | **PASS** — the brief's named "critical RLS investigation" (R11) empirically tested, not currently exploitable; one BLOCKED live-DB item (R14 — critical, migration drafted and staging-verified, awaiting your authorization to apply to production) |
 | F — Dashboard Wiring | 1, 7, 12 | **PASS** — Finance/Team/Reputation now WIRED-VERIFIED; only Settings remains open as a genuine unbuilt-capability gap (R8), not a wiring defect |
 | Inventory & Listing Lifecycle | 6 | **PASS** — ownership/quota/escrow-eligibility all server-computed and verified; one finding (R15) investigated to a confirmed root cause and fixed in this phase |
 | Admin Review & Control-Plane | 8 | **PASS** — no second admin portal needed; existing admin review flow confirmed real and audited |
@@ -69,5 +70,5 @@ The brief names twelve lettered acceptance gates. I do not have the original 863
 
 ## 5. What I need from you
 
-1. **Authorize or decline the two pending live-database migrations** (R12 — missing `dealers` columns breaking onboarding completion; R14 — missing `'suspended'` CHECK value breaking dealer suspend/reinstate). Both fix SQL statements are already drafted (see the Change Ledger and the respective phase reports) — I will not run them without your go-ahead.
+1. **Authorize or decline the two pending live-database migrations** (R12 — missing `dealers` columns breaking onboarding completion; R14 — missing `'suspended'` CHECK value breaking dealer suspend/reinstate). Both are drafted as real migration files (`supabase/migrations/20261012140000_dealer_onboarding_columns_r12.sql`, `supabase/migrations/20261012140100_dealer_verification_suspended_status_r14.sql`), confirmed correct against your application code, and verified end-to-end against an isolated staging database (`KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md`) — I will not run them against production without your go-ahead, and that report's §5-6 is the preflight checklist and backup plan for when you give it.
 2. Everything else in this delivery is already applied to the working tree and verified; no further action is needed to use it.
