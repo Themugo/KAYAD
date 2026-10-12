@@ -20,16 +20,15 @@ const interfaceKeys = (name) => {
 };
 
 // 1. Every active public/admin config key has an admin control.
-// HeroShowcaseVehicle remains in the persisted schema only for backward compatibility;
-// its identity/image fields are deliberately no longer an active public hero control.
+// HeroShowcaseVehicle is an active, presentation-only admin control stored in the existing platform_config JSONB.
 for (const name of ['HeroPresentationConfig', 'HeroFloatingCard']) {
   const missing = interfaceKeys(name).filter((k) => !new RegExp(`\\b${k}\\b`).test(panel));
   if (missing.length === 0) pass(`${name}: every field has an admin control`);
   else fail(`${name}: no admin control for ${missing.join(', ')}`);
 }
 
-if (!/Marketing Showcase Cars/.test(panel) && !/updateShowcaseVehicle\(/.test(panel)) pass('legacy showcase vehicle identity controls are removed from the active admin surface');
-else fail('legacy showcase vehicle identity controls must not remain an active admin surface');
+if (/Curated Showcase Pair/.test(panel) && /updateShowcaseVehicle\(/.test(panel) && /showcaseFallbackEnabled/.test(panel)) pass('curated showcase pair and fallback are admin-editable');
+else fail('curated showcase pair and fallback must be admin-editable');
 
 // 2. Persistence: the existing platform-config endpoint accepts every hero config object.
 for (const key of ['heroPresentation', 'heroCardContent', 'heroFeaturedMode', 'heroCarIds']) {
@@ -52,7 +51,7 @@ const checks = [
   ['no literal 6500ms rotation timer', !/\b6500\b/.test(hero)],
   ['rotation timers use admin rotationSeconds', (hero.match(/heroRotationMs/g) || []).length >= 6],
   ['mobile stage height uses admin min/max', /mobileStageMinPx/.test(hero) && /mobileStageMaxPx/.test(hero) && !/clamp\(168px,52vw,260px\)/.test(hero)],
-  ['mobile transition duration uses admin value', /--kayad-hero-slide-ms/.test(hero) && /var\(--kayad-hero-slide-ms, 320ms\)/.test(css)],
+  ['mobile pair image stage uses admin min/max bounds', /hero-pair-image-stage/.test(hero) && /mobileStageMinPx/.test(hero) && /mobileStageMaxPx/.test(hero)],
   ['hero colors come from admin config', /heroPresentation\.primaryButtonColor/.test(hero) && /heroPresentation\.secondaryButtonBorderColor/.test(hero) && /heroPresentation\.cardTextColor/.test(hero)],
 ];
 for (const [name, ok] of checks) (ok ? pass : fail)(name);

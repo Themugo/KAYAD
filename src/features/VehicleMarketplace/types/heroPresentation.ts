@@ -77,6 +77,8 @@ export interface HeroPresentationConfig {
   /** Seconds between automatic hero rotations (0 = no automatic rotation). Applies to the existing hero timers. */
   rotationSeconds: number;
   vehicleSource: 'showcase' | 'featured' | 'selected';
+  /** Use admin-saved marketing showcase cars until at least two real featured listings are available. */
+  showcaseFallbackEnabled: boolean;
   showcaseVehicles: HeroShowcaseVehicle[];
   floatingCards: HeroFloatingCard[];
 }

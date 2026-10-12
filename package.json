@@ -144,7 +144,8 @@
     "validate:master-polish-regression": "node scripts/validate-stage-master-polish-regression-20261012.mjs",
     "validate:stage24-theme-convergence": "node scripts/validate-stage24-theme-convergence-20261012.mjs",
     "validate:admin-logo-identity": "node scripts/validate-stage25-admin-logo-identity-20261012.mjs",
-    "validate:stage34-showroom-icons": "node scripts/validate-stage34-showroom-icons.mjs"
+    "validate:stage34-showroom-icons": "node scripts/validate-stage34-showroom-icons.mjs",
+    "validate:stage35-home-hero-pair": "node scripts/validate-stage35-home-hero-pair.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

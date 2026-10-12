@@ -1,0 +1,24 @@
+import fs from 'node:fs';
+const checks = [];
+const pass = (name, ok) => checks.push({ name, ok });
+const hero = fs.readFileSync('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx', 'utf8');
+const admin = fs.readFileSync('src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx', 'utf8');
+const types = fs.readFileSync('src/features/VehicleMarketplace/types/heroPresentation.ts', 'utf8');
+const migration = fs.readFileSync('supabase/migrations/20261012103000_home_hero_showcase_pair_and_mobile_composition.sql', 'utf8');
+const tests = fs.readFileSync('src/__tests__/components/VehicleMarketplace.test.tsx', 'utf8');
+pass('mobile hero renders a two-vehicle pair, not a single-car carousel', hero.includes('Featured vehicle pair') && hero.includes('[heroLeftVehicle, heroRightVehicle].map'));
+pass('vehicle images use contain semantics and no crop utility', hero.includes('object-contain object-bottom') && !hero.includes('object-cover drop-shadow-[0_12px_18px_rgba(3,19,27,.42)]'));
+pass('both car images have independent accessible labels', hero.includes('KAYAD visual showcase: ${vehicle.make} ${vehicle.model}') && hero.includes('aria-label={isShowcaseHeroVehicle(vehicle)'));
+pass('desktop hero markup remains a separate lg-only composition', hero.includes('absolute inset-0 hidden lg:block') && hero.includes('lg:h-[var(--hero-stage-h)]'));
+pass('showcase art is not priced or opened as a listing', hero.includes('Visual showcase · not a listing') && hero.includes('if (isShowcaseHeroVehicle(vehicle))'));
+pass('real featured inventory takes precedence when two or more records exist', hero.includes('if (selectedRealVehicles.length >= 2) return selectedRealVehicles'));
+pass('showcase fallback is admin-configurable', admin.includes('showcaseFallbackEnabled') && types.includes('showcaseFallbackEnabled: boolean'));
+pass('showcase vehicle identity and image paths are editable by admin', admin.includes('Curated Showcase Pair') && admin.includes('updateShowcaseVehicle(index') && admin.includes('mobileImage'));
+pass('showcase configuration is persisted via existing platform config endpoint', hero.includes('adminAPI.updateConfig({ ...current, heroPresentation: nextPresentation, heroCardContent: nextCardContent })'));
+pass('database migration seeds/repairs existing JSONB showcase config without creating fake cars', migration.includes('platform_config') && migration.includes('hero_presentation') && migration.includes('showcaseFallbackEnabled') && !/INSERT\s+INTO\s+public\.cars/i.test(migration));
+pass('approved Land Cruiser and Mercedes mobile transparent assets are referenced', migration.includes('/hero/kayad-land-cruiser-mobile.webp') && migration.includes('/hero/kayad-mercedes-gle-mobile.webp'));
+pass('tests cover paired cars and explicit visual-showcase semantics', tests.includes('shows both featured vehicles together') && tests.includes('without presenting it as inventory'));
+let failed = 0;
+for (const c of checks) { console.log(`${c.ok ? 'PASS' : 'FAIL'} ${c.name}`); if (!c.ok) failed++; }
+console.log(`\nStage 35 Home Hero Pair: ${checks.length - failed}/${checks.length} ${failed ? 'FAIL' : 'PASS'}`);
+process.exitCode = failed ? 1 : 0;
