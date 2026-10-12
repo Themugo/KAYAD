@@ -1,0 +1,28 @@
+Domain	Check	Result	Evidence
+Baseline	Source ZIP SHA-256 12d083ec…0b74, unzip -t	PASS	316,437,766 bytes, no errors
+Baseline	Node >=22.22.2 certification runtime	PASS	v22.22.2 via npm registry package (nodejs.org blocked)
+Baseline	Frontend tsc --noEmit	PASS	0 errors
+Baseline	Frontend build	PASS	vite build ok (chunk-size warning only)
+Baseline	Frontend vitest	PASS	81 files, 643 passed, 1 skipped (pre-existing)
+Baseline	Backend npm test (Jest/Vitest/node:test)	PASS	Jest 84 suites/1191 tests; Vitest 5/16; node:test 1 pass; 0 fail
+Baseline	Lockfiles	PARTIAL	root has package-lock.json AND bun.lock; CI/Vercel use npm ci; bun.lock not reconciled
+Baseline	npm audit --omit=dev (root, backend)	PASS	0 vulnerabilities each
+F payments	Phase 39 trusted-proxy CIDR gate review	PASS	live probe: unset/invalid CIDR fail closed; forged XFF ignored; trusted peer honored
+F payments	Phase 39 regression tests (never run before)	PASS	phase39MpesaTrustedProxy + phase38 = 16 tests pass
+F payments	validate:phase39-deployment-security	PASS	15/15
+F payments	Callback idempotency/amount/claim logic	PASS (code review, prior phase)	paymentCallback.service.js single handler
+F payments	Live Daraja round trip	NOT RUN	no provider credentials
+F payments	DB-backed locks / ledger invariants re-audit this session	PARTIAL	covered by existing tests; no new deep audit this session
+G authz	Route-to-role matrix generated	PASS	KAYAD_ALL_AREAS_ROUTE_ROLE_MATRIX.tsv (1264 routes; heuristic)
+G authz	AA-S1 marketplace-health public fraud/financial metrics	FIXED	routes now protect+adminOnly; test allAreasMarketplaceHealthAuthz
+G authz	AA-S2 /api/users/search unauthenticated PII enumeration	FIXED	protect, email admin-only, staff hidden; test allAreasUserSearchAuthz
+G authz	mediaEventRoutes unmounted dead code	INFO	no mount in server.js/v1/v2; not exposed
+G authz	dealer-health-score public by design?	NEEDS DECISION	no frontend consumer; left unchanged
+L deploy	validate:deployment-readiness / drift / phase7 / dependency / backend-boot	PASS	14/14, 17/17, 15/15, PASS, PASS
+L deploy	Secrets scan (gitleaks, project config)	PASS	12 hits all placeholders/docs/variable-name false positives; none real
+L deploy	Helm template render / kubectl / docker	BLOCKED	binaries unreachable
+L deploy	MPESA_TRUSTED_PROXY_CIDRS	BLOCKED (by design)	left blank until topology known
+C/B database	Hosted vs source migration drift	FAIL	hosted last migration 20260922; 58 newer source migrations unapplied (evidence/allareas/unapplied_source_migrations.txt)
+E auctions	auction_setups / auctions tables on hosted DB	FAIL	tables absent in production; root cause = unapplied 20261002190000 etc.
+B dealer	R12/R14 on production	NEEDS AUTHORIZATION	unapplied by design
+A,D,H,I,J,K	Deep per-domain audits this session	PARTIAL	covered by existing regression suites passing; no new defects sought beyond route sweep

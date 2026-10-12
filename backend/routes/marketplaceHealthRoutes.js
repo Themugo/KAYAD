@@ -21,17 +21,17 @@ import { validateObjectId } from "../middleware/validate.js";
 const router = express.Router();
 
 // =============================
-// 📊 PUBLIC ROUTES
+// 📊 HEALTH ROUTES (AA-S1: admin-only — expose fraud/dispute/financial metrics)
 // =============================
 
 // Get health summary
-router.get("/summary", asyncHandler(getHealthSummary));
+router.get("/summary", protect, adminOnly, asyncHandler(getHealthSummary));
 
 // Get health trends
-router.get("/trends", asyncHandler(getHealthTrendsHandler));
+router.get("/trends", protect, adminOnly, asyncHandler(getHealthTrendsHandler));
 
 // Get active alerts
-router.get("/alerts", asyncHandler(getAlertsHandler));
+router.get("/alerts", protect, adminOnly, asyncHandler(getAlertsHandler));
 
 // =============================
 // 🔐 ADMIN ROUTES
