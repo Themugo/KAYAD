@@ -1,8 +1,10 @@
+import { useBranding } from '../context/BrandingContext';
 interface FooterProps {
   setPage?: (page: string) => void;
 }
 
 export default function Footer({ setPage }: FooterProps) {
+  const { branding } = useBranding();
   const nav = (page: string) => {
     setPage?.(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -14,16 +16,12 @@ export default function Footer({ setPage }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           {/* Brand */}
           <div className="md:col-span-1">
-            <button onClick={() => nav('home')} className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-[#176B87] rounded-lg flex items-center justify-center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 13l2-6h14l2 6" />
-                  <path d="M1 17h22" />
-                  <circle cx="7" cy="17" r="2" />
-                  <circle cx="17" cy="17" r="2" />
-                </svg>
-              </div>
-              <span className="text-[#13B8A6] font-sans font-bold tracking-[0.15em] uppercase">KAYAD</span>
+            <button onClick={() => nav('home')} className="flex items-center gap-2 mb-3 min-w-0" aria-label={`${branding.logoText || 'KAYAD'} home`}>
+              {branding.logoType === 'image' && branding.logoUrl ? (
+                <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} className="h-12 w-auto max-w-[190px] object-contain object-left" loading="lazy" />
+              ) : (
+                <span className="text-[#13B8A6] font-sans font-bold tracking-[0.15em] uppercase">{branding.logoText || 'KAYAD'}</span>
+              )}
             </button>
             <p className="font-sans text-sm text-white/40 leading-relaxed">
               {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}

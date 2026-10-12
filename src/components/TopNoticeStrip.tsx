@@ -11,7 +11,7 @@ export const TopNoticeStrip: React.FC = () => {
   const [loaded, setLoaded] = useState(false);
   const [fadeIndex, setFadeIndex] = useState(0);
   const [fadeVisible, setFadeVisible] = useState(true);
-  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34 });
+  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34, direction: 'left' as 'left' | 'right', transition: 'scroll' as 'scroll' | 'fade' | 'pop' | 'slide' });
 
   useEffect(() => {
     let cancelled = false;
@@ -30,6 +30,8 @@ export const TopNoticeStrip: React.FC = () => {
             textColor: hp.tickerTextColor || prev.textColor,
             heightPx: Math.max(28, Math.min(60, Number(hp.tickerHeightPx) || prev.heightPx)),
             scrollSeconds: Math.max(10, Math.min(90, Number(hp.tickerScrollSeconds) || prev.scrollSeconds)),
+            direction: hp.tickerDirection === 'right' ? 'right' : 'left',
+            transition: ['scroll', 'fade', 'pop', 'slide'].includes(hp.tickerTransition) ? hp.tickerTransition : 'scroll',
           }));
         }
       })
@@ -38,7 +40,7 @@ export const TopNoticeStrip: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const mode: AdDisplayMode = useMemo(() => slots[0]?.displayMode || 'scroll', [slots]);
+  const mode: AdDisplayMode = useMemo(() => heroTickerConfig.transition === 'fade' || heroTickerConfig.transition === 'pop' || heroTickerConfig.transition === 'slide' ? 'fade' : (slots[0]?.displayMode || 'scroll'), [slots, heroTickerConfig.transition]);
   const activeFadeDuration = Math.max(1200, slots[0]?.fadeDurationMs || 4500);
   const scrollDuration = Math.max(10, slots[0]?.scrollDurationSeconds || 28);
 
@@ -69,7 +71,7 @@ export const TopNoticeStrip: React.FC = () => {
     const items = [...fallback, ...fallback];
     return (
       <div className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }} role="region" aria-label="KAYAD notices">
-        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s` }}>
+        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s`, animationDirection: heroTickerConfig.direction === 'right' ? 'reverse' : 'normal' }}>
           {items.map((item, index) => (
             <span key={`${item}-${index}`} aria-hidden={index >= fallback.length ? true : undefined} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em]" style={{ color: heroTickerConfig.textColor }}>
               <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" aria-hidden="true" />
@@ -107,7 +109,7 @@ export const TopNoticeStrip: React.FC = () => {
         aria-live="polite"
       >
         <div
-          className="h-full flex items-center justify-center transition-opacity duration-700 ease-in-out"
+          className={`h-full flex items-center justify-center transition-all duration-700 ease-in-out ${heroTickerConfig.transition === 'pop' ? (fadeVisible ? 'scale-100' : 'scale-95') : ''} ${heroTickerConfig.transition === 'slide' ? (fadeVisible ? 'translate-y-0' : 'translate-y-2') : ''}`}
           key={slot.id}
           style={{
             opacity: (fadeVisible ? 1 : 0) * (slot.opacity / 100),
@@ -130,7 +132,7 @@ export const TopNoticeStrip: React.FC = () => {
     >
       <div
         className="flex min-w-max h-full animate-marquee hover:[animation-play-state:paused] whitespace-nowrap"
-        style={{ animationDuration: `${scrollDuration}s` }}
+        style={{ animationDuration: `${Math.max(10, heroTickerConfig.scrollSeconds || scrollDuration)}s`, animationDirection: heroTickerConfig.direction === 'right' ? 'reverse' : 'normal', transform: heroTickerConfig.transition === 'slide' ? 'translateZ(0)' : undefined }}
       >
         {loopItems.map((slot, index) => (
           <span

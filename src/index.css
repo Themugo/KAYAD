@@ -492,10 +492,23 @@
 }
 
 .kayad-mobile-bottom-nav__icon {
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   line-height: 1;
+  border-radius: 10px;
+  background: var(--mobile-icon-bg, #EAF4F3);
+  color: var(--mobile-icon-fg, #176B87);
+  box-shadow: inset 0 0 0 1px rgba(18,87,109,.07);
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
+.kayad-mobile-bottom-nav__item--home { --mobile-icon-fg:#0B817A; --mobile-icon-bg:#DDF7F0; }
+.kayad-mobile-bottom-nav__item--search { --mobile-icon-fg:#176B87; --mobile-icon-bg:#E2F2F8; }
+.kayad-mobile-bottom-nav__item--auction { --mobile-icon-fg:#B66A32; --mobile-icon-bg:#FFF0DF; }
+.kayad-mobile-bottom-nav__item--services { --mobile-icon-fg:#138579; --mobile-icon-bg:#DDF5EF; }
+.kayad-mobile-bottom-nav__item--menu { --mobile-icon-fg:#526D7A; --mobile-icon-bg:#E9F0F3; }
+.kayad-mobile-bottom-nav__item.is-active .kayad-mobile-bottom-nav__icon { background:linear-gradient(145deg,#DDF7F1,#BDEBE1); color:#075C62; box-shadow:inset 0 0 0 1px #91D9CD,0 3px 8px rgba(11,113,111,.10); transform:translateY(-1px); }
 
 @media (min-width: 1024px) {
   .kayad-mobile-bottom-nav {
@@ -893,11 +906,15 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   .kayad-mobile-bottom-nav__icon { width:24px;height:22px; }
   .kayad-mobile-bottom-nav__icon svg { width:21px;height:21px; }
   .kayad-mobile-bottom-nav__item.is-active { box-shadow:inset 0 0 0 1px #B9E4DC; }
-  .kayad-header__bar { min-height:64px; }
-  .kayad-brand__tag { display:none!important; }
+  .kayad-header__bar { min-height:68px; }
+  .kayad-brand { gap:6px; max-width:42%; }
+  .kayad-brand > img { width:clamp(72px,22vw,104px); height:auto; max-height:48px; object-fit:contain; object-position:left center; }
+  .kayad-brand__text { max-width:108px; }
+  .kayad-brand__tag--reserved { display:block!important; max-width:108px; white-space:normal; font-size:7px; line-height:1.15; letter-spacing:.035em; margin-top:3px; }
 }
 @media(max-width:360px) {
   .kayad-mobile-bottom-nav { left:6px;right:6px;bottom:max(6px,env(safe-area-inset-bottom)); }
   .kayad-mobile-bottom-nav__item { font-size:9px;min-height:46px; }
-  .kayad-mobile-bottom-nav__icon svg { width:20px;height:20px; }
+  .kayad-mobile-bottom-nav__icon { width:26px;height:26px;border-radius:9px; }
+  .kayad-mobile-bottom-nav__icon svg { width:19px;height:19px; }
 }

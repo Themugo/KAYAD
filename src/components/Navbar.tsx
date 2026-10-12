@@ -287,18 +287,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img
               src={branding.logoUrl}
               alt={branding.logoText || 'KAYAD'}
-              className="h-11 w-auto max-w-[190px] max-h-11 object-contain object-left shrink-0 drop-shadow-[0_2px_5px_rgba(10,51,64,0.12)]"
+              className="h-10 w-auto max-w-[142px] max-h-10 object-contain object-left shrink-0 drop-shadow-[0_2px_5px_rgba(10,51,64,0.12)]"
               decoding="async"
             />
           ) : (
             <span className="kayad-brand__mark"><Car className="w-5 h-5 stroke-[2]" aria-hidden="true" /></span>
           )}
-          {branding.logoType !== 'image' && (
-            <span className="kayad-brand__text">
-              <span className="kayad-brand__word">{branding.logoText || 'KAYAD'}</span>
-              <span className="kayad-brand__tag">{branding.brandTagline || 'Automotive Marketplace'}</span>
-            </span>
-          )}
+          <span className="kayad-brand__text">
+            {branding.logoType !== 'image' && <span className="kayad-brand__word">{branding.logoText || 'KAYAD'}</span>}
+            <span className="kayad-brand__tag kayad-brand__tag--reserved">{branding.brandTagline || 'Automotive Marketplace'}</span>
+          </span>
         </a>
 
         {/* NAVIGATION FIELD — primary destinations; dropdowns expose existing
@@ -767,7 +765,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             className={`kayad-drawer-group__head ${active ? 'is-active' : ''}`}
                             aria-current={active ? 'page' : undefined}
                           >
-                            <span className="kayad-drawer-group__icon"><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+                            <span className={`kayad-drawer-group__icon kayad-drawer-group__icon--${item.id}`}><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
                             <span className="flex-1">{item.id === 'support' ? 'Support & Disputes' : item.label}</span>
                             <ChevronDown className="h-4 w-4 -rotate-90 text-[#8DE4DB]" aria-hidden="true" />
                           </a>
@@ -777,7 +775,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                                 const ChildIcon = child.icon;
                                 return (
                                   <a key={child.id} href={child.href} onClick={(e) => handleLinkClick(e, child.navId)} className="kayad-drawer-chip" aria-current={activeNav === child.navId ? 'page' : undefined}>
-                                    <ChildIcon className="kayad-drawer-chip__icon" aria-hidden="true" />
+                                    <ChildIcon className={`kayad-drawer-chip__icon kayad-drawer-chip__icon--${item.id}`} aria-hidden="true" />
                                     <span>{child.label}</span>
                                   </a>
                                 );

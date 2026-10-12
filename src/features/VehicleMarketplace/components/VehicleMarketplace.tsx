@@ -110,7 +110,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: 'var(--kayad-cyan)', secondaryButtonBorderColor: '#C7DAD8',
     arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
-    tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Clear transaction workflows', tickerBackgroundColor: 'var(--color-navy-900)', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34,
+    tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Clear transaction workflows', tickerBackgroundColor: 'var(--color-navy-900)', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34, tickerDirection: 'left', tickerTransition: 'scroll',
     // Real promoted/featured inventory is the canonical public hero source.
     // Legacy 'showcase' configs are normalized to this source below.
     vehicleSource: 'featured',

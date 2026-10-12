@@ -40,11 +40,12 @@ export default function MobileBottomNav({
   }, []);
 
   const items = [
-    { key: 'home', label: 'Home', icon: Home, action: () => onNavigate('marketplace') },
+    { key: 'home', label: 'Home', icon: Home, tone: 'home', action: () => onNavigate('marketplace') },
     {
       key: 'search',
       label: 'Search',
       icon: Search,
+      tone: 'search',
       action: () => {
         onNavigate('marketplace');
         window.requestAnimationFrame(() => {
@@ -57,12 +58,13 @@ export default function MobileBottomNav({
     },
     // Same destinations as the desktop navigation: 'discovery' is the canonical
     // Auction surface and 'inspections' is the Auto Services hub ("Services").
-    { key: 'auction', label: 'Auction', icon: Gavel, action: () => onNavigate('discovery') },
-    { key: 'inspection', label: 'Services', icon: ShieldCheck, action: () => onNavigate('inspections') },
+    { key: 'auction', label: 'Auction', icon: Gavel, tone: 'auction', action: () => onNavigate('discovery') },
+    { key: 'inspection', label: 'Services', icon: ShieldCheck, tone: 'services', action: () => onNavigate('inspections') },
     {
       key: 'menu',
       label: 'Menu',
       icon: Menu,
+      tone: 'menu',
       action: () => window.dispatchEvent(new CustomEvent(OPEN_MOBILE_MENU_EVENT)),
     },
   ];
@@ -76,17 +78,17 @@ export default function MobileBottomNav({
 
   return (
     <nav className="kayad-mobile-bottom-nav lg:hidden" aria-label="Mobile marketplace navigation">
-      {items.map(({ key, label, icon: Icon, action }) => (
+      {items.map(({ key, label, icon: Icon, tone, action }) => (
         <button
           key={key}
           type="button"
           onClick={action}
-          className={`kayad-mobile-bottom-nav__item ${isActive(key) ? 'is-active' : ''}`}
+          className={`kayad-mobile-bottom-nav__item kayad-mobile-bottom-nav__item--${tone} ${isActive(key) ? 'is-active' : ''}`}
           aria-current={isActive(key) ? 'page' : undefined}
           aria-haspopup={key === 'menu' ? 'dialog' : undefined}
         >
           <span className="kayad-mobile-bottom-nav__icon" aria-hidden="true">
-            <Icon size={19} strokeWidth={isActive(key) ? 2.5 : 2} />
+            <Icon size={20} strokeWidth={isActive(key) ? 2.6 : 2.2} />
           </span>
           <span>{label}</span>
         </button>

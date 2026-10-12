@@ -67,6 +67,8 @@ export interface HeroPresentationConfig {
   tickerTextColor: string;
   tickerHeightPx: number;
   tickerScrollSeconds: number;
+  tickerDirection?: 'left' | 'right';
+  tickerTransition?: 'scroll' | 'fade' | 'pop' | 'slide';
   /** Mobile hero carousel stage height is clamp(min, 52vw, max) in px. */
   mobileStageMinPx: number;
   mobileStageMaxPx: number;
