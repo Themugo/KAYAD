@@ -27,7 +27,7 @@ for (const id of new Set(navIds)) {
 }
 add('primary nav is exactly Marketplace, Auction, Auto Services, Escrow, Support', ['Marketplace', 'Auction', 'Auto Services', 'Escrow', 'Support'].every((l) => cfg.includes(`label: '${l}'`)) && (cfg.match(/^    id: '/gm) || []).length === 5);
 add('Support stays a direct link (no invented submenu)', !/id: 'support'[\s\S]*?children:/.test(cfg.split("id: 'support'")[1] || ''));
-add('auth-gated entries are presentation only (App protectedNavs + backend remain authority)', /not a\s+\*?\s*security boundary/.test(cfg) && app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard'])"));
+add('auth-gated entries are presentation only (App protectedNavs + backend remain authority)', /not a\s+\*?\s*security boundary/.test(cfg) && app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'escrow-operations'])"));
 add('ticker is still rendered above the navigation', app.indexOf('<TopNoticeStrip />') > -1 && app.indexOf('<TopNoticeStrip />') < app.indexOf('<Navbar'));
 add('navigation adds no network call', !/adminAPI|fetch\(|axios|getPublicConfig/.test(navbar) && !/fetch\(|axios/.test(cfg));
 add('dropdowns are disclosure buttons with aria-expanded/aria-controls, not ARIA menus', navbar.includes('aria-expanded={isOpen}') && navbar.includes('aria-controls={panelId}') && !/role="menu"|role="menuitem"/.test(navbar));

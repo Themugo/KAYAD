@@ -1,0 +1,35 @@
+KAYAD STAGE 21 — SELL / AUTH / PUBLIC DESIGN SWEEP
+Date: 2026-10-12
+Foundation ZIP: KAYAD-STAGE20-BUYER-PORTAL-STAGING-CERTIFICATION-20261012.zip
+Foundation SHA-256: e36b417e153ea445f0fd0547714cae1a202ab281d826956efdd1a08719ad74a0
+Working directory: /mnt/data/kayad_stage21_work
+
+Completed:
+- Audited actual App routing, Sell Studio entry, legacy SellPage, login, registration role matrix, portal shells, dashboard accents, top notice strip and admin homepage controls.
+- Removed simulated seller onboarding success and routed legacy SellPage to canonical Seller Studio.
+- Added responsive Private Seller / Dealership selection and role-intent-aware registration entry.
+- Prevented signed-in non-seller users from being shown seller-management controls; directs them to existing Support workflow for role access.
+- Routed dealer users to the existing Dealer Dashboard from the Sell Vehicle entry.
+- Removed hardcoded seller trust score and ungrounded verified/approval state.
+- Added public shell and portal role tokens; converged dashboard accents and dealer header away from near-black.
+- Restored the existing Escrow dropdown options and routed participant deals to authenticated My Garage.
+- Replaced residual amber notification/support states with canonical KAYAD surface colors.
+- Added repeatable Stage 21 validator and npm script.
+- Ran focused and regression source validators; all listed validators passed, including 351 explicit assertions/checks across numeric suites and additional PASS-only validators.
+- Parsed 621 frontend TS/TSX/JS/JSX files with zero syntax diagnostics.
+- Ran node --check on 1,140 backend/scripts JS/MJS/CJS files including the Stage 21 validator.
+
+Environment/limitations:
+- Node v22.16.0; project requires >=22.22.2.
+- No node_modules in this workspace.
+- npm run typecheck failed because package/type declarations (React, React Router, Vitest, Node and others) are absent. This is an environment limitation, not a completed semantic typecheck.
+- npm run build could not start: vite is not installed.
+- Browser visual QA and full unit/e2e suite were not run.
+
+Release posture:
+- Foundation integrity: 4,087 Stage 20 files preserved; Stage 21 contains 4,093 files (16 existing files modified, six added).
+
+- No commit or push.
+- No deployment.
+- No database migration or production configuration change.
+- No live account, payment, lender, escrow or provider operation.

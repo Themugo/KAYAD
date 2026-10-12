@@ -388,7 +388,7 @@ export default function DealerHub({ children, user }) {
   };
 
   return (
-    <div className="dealer-hub">
+    <div className="dealer-hub kayad-portal kayad-portal--dealer" data-kayad-portal="dealer">
       {/* Header */}
       <header className="dealer-hub__header">
         <div className="dealer-hub__header-inner">

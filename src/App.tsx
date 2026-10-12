@@ -482,9 +482,10 @@ function AppInner() {
       return;
     }
     if (nav.startsWith('escrow:')) {
-      // Legacy escrow sub-navigation now resolves to the public information page.
-      // Private deal and staff operations views belong in their authenticated portals.
-      setActiveNav('escrow');
+      const destination = nav.slice('escrow:'.length);
+      // Public journey/create entries stay on the explainer; participant deal
+      // records always open the existing authenticated buyer workspace.
+      setActiveNav(destination === 'deals' ? 'buyer-platform' : 'escrow');
       return;
     }
     setActiveNav(nav);
@@ -503,9 +504,10 @@ function AppInner() {
     'escrow-operations',
   ]);
   const showPublicMobileDock = !privateWorkspaceNavs.has(activeNav) && !['auctions', 'payments', 'profile'].includes(activeNav);
+  const publicShellClass = privateWorkspaceNavs.has(activeNav) ? '' : 'kayad-public-shell ';
 
   return (
-    <div className="min-h-screen bg-[#EEF7F5] text-[#0A3340] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F6FAF9] text-[#0A3340] flex flex-col font-sans">
       {/* 0. Top notice/advertisement strip - real, backend-driven,
           admin-managed entirely through the Ad Manager panel, no code
           changes needed to add/edit/recolor/remove an entry. */}
@@ -534,16 +536,17 @@ function AppInner() {
       <main
         id="main-content"
         tabIndex={-1}
+        data-kayad-surface={activeNav}
         className={
           isMarketplaceSurface
-            ? `flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : ''} lg:pb-0 space-y-0 overflow-x-clip`
-            : `flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : 'pb-6'} lg:pb-6 space-y-6`
+            ? `${publicShellClass}flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : ''} lg:pb-0 space-y-0 overflow-x-clip`
+            : `${publicShellClass}flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : 'pb-6'} lg:pb-6 space-y-6`
         }
       >
         <Suspense fallback={
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">
-              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#BDE5DE] border-t-amber-400" aria-hidden="true" />
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#BDE5DE] border-t-[#13B8A6]" aria-hidden="true" />
               <p className="text-sm font-medium text-[#64748B]">Loading KAYAD workspace…</p>
             </div>
           </div>
@@ -736,15 +739,19 @@ function AppInner() {
           )}
 
           {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard' || activeNav === 'seller-platform') && (
-            // A signed-out visitor who clicks "Sell Vehicle" has no seller
-            // account yet in the common case, so send them into the seller
-            // onboarding/registration flow (role preselected via ?intent=seller)
-            // rather than a plain sign-in page that assumes an account already
-            // exists. Someone who does already have an account still reaches
-            // sign-in from there (its "Already have an account?" link, or the
-            // "this email already has an account" outcome if they try to
-            // register with one that exists).
-            <PrivateSellerPlatform user={user} onOpenAuth={() => handleOpenRegister('seller', '/?nav=seller-platform')} />
+            // Keep the Sell Vehicle entry role-aware: dealers stay in the dealer
+            // workspace, approved private-seller accounts use Seller Studio, and
+            // signed-in buyers are directed to support for role access rather than
+            // being shown controls their current account cannot use.
+            String(authUser?.role || '').toLowerCase() === 'dealer' ? (
+              <DealerDashboard user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
+            ) : (
+              <PrivateSellerPlatform
+                user={user}
+                onOpenAuth={(intent = 'seller') => handleOpenRegister(intent, '/?nav=seller-platform')}
+                onNavigate={(nav) => setActiveNav(nav)}
+              />
+            )
           )}
         </AuctionSurfaceReveal>
         )}
@@ -863,6 +870,7 @@ function AuthRouteSurface() {
   if (path === '/support') return <Navigate to="/?nav=support" replace />;
   if (path === '/inspections') return <Navigate to="/?nav=inspections" replace />;
   if (path === '/financing') return <Navigate to="/?nav=financing" replace />;
+  if (path === '/sell' || path === '/sell-car' || path === '/sell-vehicle') return <Navigate to="/?nav=seller-platform" replace />;
   if (path === '/saved') return <RequireAuth><Navigate to="/?nav=saved" replace /></RequireAuth>;
   if (path === '/profile') return <RequireAuth><Navigate to="/?nav=profile" replace /></RequireAuth>;
   if (path === '/payments') return <RequireAuth><Navigate to="/?nav=payments" replace /></RequireAuth>;

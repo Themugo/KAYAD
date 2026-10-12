@@ -1,0 +1,27 @@
+Area	Validator/check	Result	Scope/qualification
+Sell/Auth/Public	validate:premium-sell-auth-public-convergence	PASS 23/23	Source contracts; not browser rendering
+Authentication UI	validate-premium-auth-surfaces.mjs	PASS 10/10	Canonical routes and shared shell
+Premium presentation	validate-premium-presentation-pass.mjs	PASS 16/16	Existing visual/route contract
+Brand palette	validate-brand-palette-convergence.mjs	PASS	638 frontend files + 13 shared surfaces/assets
+Navigation	validate-navigation-convergence.mjs	PASS 43/43	Frontend/backend registry and admin authority contract
+Public Support	validate-public-support-surface.mjs	PASS 21/21	Public FAQ and customer case boundaries
+Public Escrow	validate-public-escrow-boundary.mjs	PASS 14/14	Public/private separation and participant portal navigation
+Messaging/notifications	validate-messaging-notification-surface-20261012.mjs	PASS 30/30	Account isolation and DTO/source contracts
+Auto Services	validate-public-auto-services-boundary-20261012.mjs	PASS 17/17	Public discovery and private customer data
+Financing	validate-public-financing-boundary-20261012.mjs	PASS 23/23	Public/account separation and application DTO
+Buyer portal	validate-buyer-portal-boundaries-20261012.mjs	PASS 29/29	Source ownership contracts
+Registration/onboarding	validate-registration-onboarding.mjs	PASS 47/47	Registration and verification source gate
+Explicit auth flow	validate-explicit-auth-flows.mjs	PASS 19/19	Canonical login/register return flow
+Registration roles	validate-registration-role-matrix.mjs	PASS 33/33	Public roles and server approval constraints
+PWA/mobile	validate-pwa-mobile-contract.mjs	PASS 13/13	Existing PWA contract
+Polish regressions	validate-polish-regressions.mjs	PASS 4/4	Existing UI regression checks
+Homepage	validate-homepage-convergence.mjs	PASS	Real inventory and admin context contract
+Hero commercial controls	validate-hero-admin-control.mjs	PASS	Hero fields and ticker settings remain admin-controlled
+Code splitting	validate-code-splitting.mjs	PASS	Canonical lazy-loaded surfaces retained
+Canonical architecture	validate-canonical-architecture.mjs	PASS	Canonical routes/migrations/controllers
+Frontend runtime contracts	validate-frontend-runtime-contracts.mjs	PASS	Existing runtime contracts
+Frontend syntax	TypeScript transpileModule	PASS 621/621	Syntax only; excludes tests and .d.ts
+Backend/scripts syntax	node --check JS/MJS/CJS	PASS 1,140/1,140	Includes Stage 21 validator; all checked files passed
+Typecheck	npm run typecheck	BLOCKED	No node_modules; missing React/Vitest/Node typings and other packages
+Production build	npm run build	BLOCKED	Vite not installed in workspace
+Browser visual QA	Desktop/mobile browser pass	NOT RUN	Requires dependency install and browser

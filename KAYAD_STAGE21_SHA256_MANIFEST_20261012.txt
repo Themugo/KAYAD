@@ -1,0 +1,26 @@
+KAYAD STAGE 21 SHA-256 MANIFEST
+Foundation ZIP: KAYAD-STAGE20-BUYER-PORTAL-STAGING-CERTIFICATION-20261012.zip
+Foundation SHA-256: e36b417e153ea445f0fd0547714cae1a202ab281d826956efdd1a08719ad74a0
+Entries below include changed project files and Stage 21 audit artifacts; this manifest does not hash itself.
+
+e182c35dc2b552f67a53d46dc47a592f5384e9bf422736cc503b88862179a82c        9104  KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_AUDIT_20261012.md
+0bf3ecb94575806bd5e5ec6c6855186b21c844d630cc06927b8fc9f82c01ba33        3224  KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_CHANGE_LEDGER_20261012.md
+9645fa7f242b1dff2271bcb7f18161500fe5afda8d01adc70915c7a900c77636        2409  KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_EXECUTION_LOG_20261012.txt
+067e53aa24861c41f710f7cf465a1061b39cd339314583fad298ebba0d1c21b1        2742  KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_VALIDATION_MATRIX_20261012.tsv
+48bc4cf09e26a81894ecbb258ca41017529fc41dce2e1248503c438c647a55d6       12632  package.json
+227592ed7b9a60162b49bf421e1343c8c836126fc23aff9451955dd7d74465fe        8425  scripts/validate-navigation-convergence.mjs
+8afcb94248aa8cbb7d4ddb747b4890c3d7121033aff2fcec99f4c932f37c9b4d        5925  scripts/validate-premium-sell-auth-public-convergence-20261012.mjs
+86c8261f42ab9990d82123e484dfbca66c3acf5fab0a13a640089b713440eb19        3457  scripts/validate-public-escrow-boundary.mjs
+dd5e13bc4785b8219ecb51c27d3d5b401931c68cd2170aa2cc6d728ebcae9ba2       43573  src/App.tsx
+d672eb60d6e6efa0cfbaa8fc34f73032caa9840347db09ee91c4260e44239d85       10610  src/components/DashboardHub.tsx
+bdb475070d37653c5aeb7ac6b6f8250a6932cdf35ce9fae8c16b17ecd7470398        5259  src/components/auction/AuctionExperienceRail.tsx
+e3bc09bb46006dccb68fa60a4fd290ed4e518f13eff20d1f91f89a72e0285cda       14748  src/components/features/dealer/DealerHub.tsx
+e302a1b449fd47d842db89788c8631ea44a7cc876cf95c2ffd601c24adb76928        6635  src/components/layout/NotificationPanel.tsx
+141775c8117383ffa6fae82797c2a2e8de77e1be4767bc1724e206efb63b13f9        9001  src/components/navigation/navConfig.ts
+02be4baefda04830605a0cee15ab7b3aea16c8d9290447969bee4749970e7597         456  src/components/sell/SellPage.tsx
+5e670ee99e2bf4e6f009d3c0d30209a0ff8f1f710ad9e8b744e469d8dad5e97d        9908  src/features/OwnershipPlatform/pages/BuyerPlatform.tsx
+7901152b4fd2c08bd8bd4ea7b6cdb5b720d637a9b05d815b9dec92c8ddfb7a07       37515  src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx
+0960309da1e7d450ef004ae6187ca2da07350e24017fbfe79ec587687b6925aa       39215  src/features/SupportView.tsx
+7e7df90704630601de9b21ca14945a4fb6e32d616614266c3426c56d52e12da0       46091  src/index.css
+2635dc1bb727557f423a704fb0f8fd38096f5b278202fbb71cfdb49e5bcfba96        6811  src/pages/NotificationsPage.tsx
+f3e755b2b2d3bbfde89d26c78b30a16edb470c8201a24df0e5c955349ad21f71       35449  src/styles/dealer.css

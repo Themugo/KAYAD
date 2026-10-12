@@ -109,6 +109,11 @@ export const NAV_PRIMARY: NavPrimary[] = [
     navId: 'escrow:journey',
     href: '/?nav=escrow',
     match: ['escrow'],
+    children: [
+      { id: 'journey', label: 'How escrow works', description: 'Understand the protected transaction journey', icon: ShieldCheck, navId: 'escrow:journey', href: '/?nav=escrow' },
+      { id: 'deals', label: 'My escrow deals', description: 'Open your private participant-scoped escrow workspace', icon: Lock, navId: 'escrow:deals', href: '/?nav=buyer-platform', requiresAuth: true },
+      { id: 'create', label: 'Start a protected transaction', description: 'Learn how eligible vehicle deals can use KAYAD escrow', icon: CheckCircle2, navId: 'escrow:create', href: '/?nav=escrow' },
+    ],
   },
   {
     id: 'support',

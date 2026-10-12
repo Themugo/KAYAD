@@ -52,7 +52,7 @@ export function AuctionExperienceRail({ current = 'detail', compact = false, onN
 }
 
 export function BidderIdentityCard({ user, registrationStatus, auctionCount, savedCount = 0, onProfile, onPayments }: {
-  user?: any; registrationStatus?: string | null; auctionCount?: number; savedCount?: number; onProfile?: () => void; onPayments?: () => void;
+  user?: any; registrationStatus?: string | null; auctionCount?: number; savedCount?: number | null; onProfile?: () => void; onPayments?: () => void;
 }) {
   const name = user?.name || user?.fullName || 'Your bidder profile';
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part: string) => part[0]).join('').toUpperCase() || 'K';
@@ -66,7 +66,7 @@ export function BidderIdentityCard({ user, registrationStatus, auctionCount, sav
         <p>{active ? 'Your bidder pass is active for this auction.' : 'Keep your profile ready so the next auction is one tap away.'}</p>
         <div className="auction-bidder-stats">
           {typeof auctionCount === 'number' && <span><strong>{auctionCount}</strong> auctions</span>}
-          <span><strong>{savedCount}</strong> saved</span>
+          {typeof savedCount === 'number' && <span><strong>{savedCount}</strong> saved</span>}
           <span className={active ? 'is-ready' : ''}><i /> {active ? 'Ready to bid' : 'Profile ready'}</span>
         </div>
       </div>

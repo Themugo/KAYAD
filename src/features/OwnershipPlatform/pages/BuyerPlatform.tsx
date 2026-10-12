@@ -110,7 +110,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth, initialIns
   }
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12 kayad-portal kayad-portal--buyer" data-kayad-portal="buyer">
       <div className="text-center py-6">
         <h1 className="text-2xl font-bold text-[#176B87] font-display">My Garage</h1>
         <p className="text-sm text-[#64748B] mt-1">Your saved vehicles, purchases, financing requests and inspection reports</p>

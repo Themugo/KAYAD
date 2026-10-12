@@ -23,7 +23,7 @@ const checks = [
   ['signed-in CTA routes to role-appropriate dashboard', /dealer-dashboard/.test(publicView) && /buyer-platform/.test(publicView) && /escrow-operations/.test(publicView)],
   ['public copy does not promise automatic release timing', !/automatic release window|eligible for automatic release/i.test(explainer)],
   ['public explainer describes funding method from published rules', /Funding method/.test(explainer) && /fundingMethods/.test(explainer)],
-  ['public navigation exposes only the public escrow information destination', !/Protected deals|escrow:deals|escrow:create/.test(nav) && !/children:\s*\[/.test(nav.slice(nav.indexOf("id: 'escrow'"), nav.indexOf("id: 'support'")))],
+  ['Escrow navigation keeps public journey actions public and gates participant deals to My Garage', nav.includes("id: 'journey'") && nav.includes("navId: 'escrow:journey', href: '/?nav=escrow'") && nav.includes("id: 'deals'") && nav.includes("href: '/?nav=buyer-platform', requiresAuth: true") && app.includes("destination === 'deals' ? 'buyer-platform' : 'escrow'")],
   ['legacy escrow tab URLs normalize to the public page', /'escrow:deals': 'escrow'/.test(navLocation) && /'escrow:operations': 'escrow'/.test(navLocation)],
   ['legacy escrow page redirects to canonical public page', /Navigate to="\/?\?nav=escrow"/.test(legacy) && !/escrowAPI\.mine|Every purchase.*protected/.test(legacy)],
   ['shared public footer uses Escrow Services label', /Escrow Services/.test(footer) && /Escrow Services/.test(layoutFooter)],

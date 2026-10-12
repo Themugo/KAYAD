@@ -74,7 +74,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
           </button>
         </div>
 
-        {error && notifications.length > 0 && <div role="alert" className="px-4 py-2 text-xs text-amber-900 bg-amber-50">{error}{errorKind === 'fetch' && <button type="button" onClick={() => void fetchNotifications()} disabled={loading} className="ml-2 underline font-semibold">Refresh</button>}</div>}
+        {error && notifications.length > 0 && <div role="alert" className="px-4 py-2 text-xs text-[#12576D] bg-[#F6FAF9]">{error}{errorKind === 'fetch' && <button type="button" onClick={() => void fetchNotifications()} disabled={loading} className="ml-2 underline font-semibold">Refresh</button>}</div>}
         <div className="max-h-80 overflow-y-auto p-2 divide-y divide-[#D7E7E4] dark:divide-[#0A3340]/60">
           {loading && notifications.length === 0 ? (
             <div role="status" className="p-8 text-center text-[#64748b] text-xs">Loading notifications…</div>

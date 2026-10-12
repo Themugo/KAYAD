@@ -13,17 +13,17 @@ type RoleConfig = { title: string; subtitle: string; accent: string; actions: Ar
 const configs: Record<string, RoleConfig> = {
   user: { title: 'Buyer Dashboard', subtitle: 'Your saved vehicles, active transactions and next actions.', accent: '#176B87', actions: [{label:'Browse vehicles',nav:'marketplace',icon:Car},{label:'Saved vehicles',nav:'saved',icon:ShoppingBag},{label:'Vehicle financing',nav:'buyer-platform',icon:CreditCard},{label:'Auctions',nav:'auctions',icon:Activity},{label:'My escrow deals',nav:'buyer-platform',icon:ShieldCheck},{label:'Messages',nav:'chat',icon:Bell}] },
   buyer: { title: 'Buyer Dashboard', subtitle: 'Your saved vehicles, active transactions and next actions.', accent: '#176B87', actions: [{label:'Browse vehicles',nav:'marketplace',icon:Car},{label:'Saved vehicles',nav:'saved',icon:ShoppingBag},{label:'Vehicle financing',nav:'buyer-platform',icon:CreditCard},{label:'Auctions',nav:'auctions',icon:Activity},{label:'My escrow deals',nav:'buyer-platform',icon:ShieldCheck},{label:'Messages',nav:'chat',icon:Bell}] },
-  individual_seller: { title: 'Private Seller Dashboard', subtitle: 'Manage your listings, buyer interest and verification status.', accent: '#059669', actions: [{label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard},{label:'Add / manage cars',nav:'seller-platform',icon:Car},{label:'Inspections',nav:'inspections',icon:ClipboardCheck},{label:'Messages',nav:'chat',icon:Bell}] },
+  individual_seller: { title: 'Private Seller Dashboard', subtitle: 'Manage your listings, buyer interest and verification status.', accent: '#13B8A6', actions: [{label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard},{label:'Add / manage cars',nav:'seller-platform',icon:Car},{label:'Inspections',nav:'inspections',icon:ClipboardCheck},{label:'Messages',nav:'chat',icon:Bell}] },
   broker: { title: 'Seller Dashboard', subtitle: 'Manage seller inventory and marketplace activity.', accent: '#12576d', actions: [{label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard},{label:'Marketplace',nav:'marketplace',icon:Car},{label:'Messages',nav:'chat',icon:Bell}] },
   dealer: { title: 'Dealer Dashboard', subtitle: 'Commercial inventory, leads, auctions, subscriptions and payouts.', accent: '#12576d', actions: [{label:'Dealer workspace',nav:'dealer-dashboard',icon:LayoutDashboard},{label:'Inventory',nav:'dealer-dashboard',icon:Car},{label:'Auctions',nav:'auctions',icon:Activity},{label:'Finance',nav:'finance',icon:BarChart3}] },
-  ghost_checker: { title: 'Inspector Dashboard', subtitle: 'Assigned inspections, evidence and execution status.', accent: '#176b87', actions: [{label:'Inspection work',nav:'inspections',icon:ClipboardCheck},{label:'Messages',nav:'chat',icon:Bell}] },
+  ghost_checker: { title: 'Inspector Dashboard', subtitle: 'Assigned inspections, evidence and execution status.', accent: '#5AAFA4', actions: [{label:'Inspection work',nav:'inspections',icon:ClipboardCheck},{label:'Messages',nav:'chat',icon:Bell}] },
 };
 
 const staffActions = [{label:'Control plane',nav:'admin',icon:LayoutDashboard},{label:'Vehicle moderation',nav:'admin',icon:Car},{label:'Inspections',nav:'inspections',icon:ClipboardCheck},{label:'Support',nav:'support',icon:Users}];
 
 export default function DashboardHub({ user, vehicles = [], onNavigate }: Props) {
   const role = user?.role || 'user';
-  const config = configs[role] || (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role) ? { title: 'Platform Operations Dashboard', subtitle: 'Role-scoped control, queues and platform health.', accent: '#4F46E5', actions: staffActions } : configs.user);
+  const config = configs[role] || (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role) ? { title: 'Platform Operations Dashboard', subtitle: 'Role-scoped control, queues and platform health.', accent: '#5AAFA4', actions: staffActions } : configs.user);
   const [density, setDensity] = useState<'comfortable'|'compact'>('comfortable');
   const [hidden, setHidden] = useState<string[]>([]);
   const [snapshot, setSnapshot] = useState<any>(null);
@@ -35,7 +35,7 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
     if (role === 'dealer' || role === 'individual_seller' || role === 'broker') return [{id:'inventory',label:'Your inventory',value:owned.length,icon:Car},{id:'saved',label:'Saved vehicles',value:0,icon:ShoppingBag},{id:'activity',label:'Marketplace activity',value:vehicles.length,icon:Activity}];
     if (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role)) return [{id:'users',label:'Users',value:snapshot?.counts?.users ?? '—',icon:Users},{id:'cars',label:'Vehicles',value:snapshot?.counts?.cars ?? '—',icon:Car},{id:'incidents',label:'Incidents',value:snapshot?.counts?.incidents ?? '—',icon:Activity},{id:'alerts',label:'Alerts',value:snapshot?.counts?.alerts ?? '—',icon:Bell}];
     if (role === 'ghost_checker') return [{id:'assigned',label:'Assigned inspections',value:'—',icon:ClipboardCheck},{id:'messages',label:'Messages',value:'—',icon:Bell},{id:'market',label:'Marketplace',value:vehicles.length,icon:Car}];
-    return [{id:'saved',label:'Saved vehicles',value:0,icon:ShoppingBag},{id:'vehicles',label:'Marketplace inventory',value:vehicles.length,icon:Car},{id:'alerts',label:'Action alerts',value:'—',icon:Bell}];
+    return [{id:'saved',label:'Saved vehicles',value:'—',icon:ShoppingBag},{id:'vehicles',label:'Marketplace inventory',value:vehicles.length,icon:Car},{id:'alerts',label:'Action alerts',value:'—',icon:Bell}];
   }, [vehicles, user, role, snapshot]);
 
   const refresh = async () => {
@@ -58,9 +58,9 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
 
   const toggle = (id: string) => setHidden((prev) => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev,id]);
 
-  return <section className="space-y-6 pb-10 auction-dashboard-experience" data-dashboard-role={role}>
+  return <section className={`space-y-6 pb-10 auction-dashboard-experience kayad-portal kayad-portal--${role}`} data-kayad-portal={role} data-dashboard-role={role}>
     <AuctionExperienceRail current="wallet" />
-    <BidderIdentityCard user={user} savedCount={0} onPayments={() => onNavigate('payments')} />
+    <BidderIdentityCard user={user} savedCount={null} onPayments={() => onNavigate('payments')} />
     <div className="rounded-3xl p-6 text-white shadow-lg" style={{background:`linear-gradient(135deg, ${config.accent}, #0A3340)`}}>
       <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">KAYAD workspace</p><h1 className="mt-1 text-2xl font-black">{config.title}</h1><p className="mt-1 max-w-2xl text-sm text-white/70">{config.subtitle}</p></div>

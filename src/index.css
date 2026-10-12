@@ -808,3 +808,74 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
 @media (prefers-reduced-motion: reduce) {
   .kayad-role-card { transition: none; }
 }
+
+
+/* 2026-10-12 Stage 21 — unified public surfaces and role-specific portal identity.
+   Accent variants are intentionally derived from KAYAD's existing teal/mint family;
+   they distinguish workflows without introducing unrelated brand palettes. */
+:root {
+  --kayad-public-bg: var(--kayad-brand-surface, #F6FAF9);
+  --kayad-public-card: #FFFFFF;
+  --kayad-public-border: var(--kayad-brand-border, #D7E7E4);
+  --kayad-public-ink: var(--kayad-brand-deep, #0A3340);
+  --kayad-public-muted: #64748B;
+  --kayad-role-buyer: #176B87;
+  --kayad-role-seller: #13B8A6;
+  --kayad-role-dealer: #12576D;
+  --kayad-role-professional: #5AAFA4;
+  --kayad-role-operations: #0A3340;
+}
+.kayad-portal { --kayad-portal-accent: var(--kayad-role-buyer); --kayad-portal-accent-soft: rgba(23,107,135,.10); }
+.kayad-portal--buyer, .kayad-portal[data-kayad-portal="buyer"], .kayad-portal[data-kayad-portal="user"] { --kayad-portal-accent: var(--kayad-role-buyer); --kayad-portal-accent-soft: rgba(23,107,135,.10); }
+.kayad-portal--seller, .kayad-portal[data-kayad-portal="individual_seller"], .kayad-portal[data-kayad-portal="seller"] { --kayad-portal-accent: var(--kayad-role-seller); --kayad-portal-accent-soft: rgba(19,184,166,.13); }
+.kayad-portal--dealer, .kayad-portal[data-kayad-portal="dealer"] { --kayad-portal-accent: var(--kayad-role-dealer); --kayad-portal-accent-soft: rgba(18,87,109,.11); }
+.kayad-portal--ghost_checker, .kayad-portal[data-kayad-portal="ghost_checker"] { --kayad-portal-accent: var(--kayad-role-professional); --kayad-portal-accent-soft: rgba(90,175,164,.14); }
+.kayad-portal--admin, .kayad-portal--superadmin, .kayad-portal--marketing, .kayad-portal--technical_support, .kayad-portal--hr, .kayad-portal--accounts, .kayad-portal--escrow_officer, .kayad-portal--ad_manager, .kayad-portal--moderator { --kayad-portal-accent: var(--kayad-role-operations); --kayad-portal-accent-soft: rgba(10,51,64,.08); }
+.auction-dashboard-experience .group > div > svg { color: var(--kayad-portal-accent) !important; }
+.auction-dashboard-experience .group:hover { border-color: color-mix(in srgb, var(--kayad-portal-accent) 24%, #D7E7E4); }
+
+.kayad-sell-entry { width: 100%; max-width: 1160px; margin: 0 auto; padding: clamp(16px, 3vw, 32px) 0 44px; color: var(--kayad-public-ink); }
+.kayad-sell-entry__hero { position: relative; overflow: hidden; isolation: isolate; padding: clamp(28px, 5vw, 58px); border: 1px solid rgba(255,255,255,.14); border-radius: 30px; color: #fff; background: radial-gradient(circle at 88% 4%, rgba(19,184,166,.28), transparent 34%), linear-gradient(125deg, #0A3340 0%, #12576D 60%, #176B87 100%); box-shadow: 0 22px 55px rgba(10,51,64,.16); }
+.kayad-sell-entry__hero::after { content: ''; position: absolute; z-index: -1; right: -80px; bottom: -180px; width: 360px; height: 360px; border: 1px solid rgba(221,244,240,.18); border-radius: 50%; box-shadow: 0 0 0 38px rgba(221,244,240,.035), 0 0 0 76px rgba(221,244,240,.025); }
+.kayad-sell-entry__eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border: 1px solid rgba(221,244,240,.24); border-radius: 999px; color: #BDE5DE; background: rgba(255,255,255,.07); font-size: 10px; font-weight: 900; letter-spacing: .15em; }
+.kayad-sell-entry__hero h1 { max-width: 760px; margin: 22px 0 12px; color: #fff; font-size: clamp(2rem, 5.3vw, 4.25rem); line-height: .99; letter-spacing: -.055em; font-weight: 900; }
+.kayad-sell-entry__hero > p { max-width: 690px; margin: 0; color: #DDF4F0; font-size: clamp(13px, 1.4vw, 16px); line-height: 1.8; }
+.kayad-sell-entry__trust-row { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 26px; }
+.kayad-sell-entry__trust-row span { display: inline-flex; align-items: center; gap: 7px; color: #EAF8F5; font-size: 12px; font-weight: 700; }
+.kayad-sell-entry__trust-row svg { color: #64D9C8; }
+.kayad-sell-entry__content { margin-top: 24px; padding: clamp(20px, 3.4vw, 36px); border: 1px solid var(--kayad-public-border); border-radius: 26px; background: var(--kayad-public-card); box-shadow: 0 12px 35px rgba(10,51,64,.055); }
+.kayad-sell-entry__intro > span { color: #176B87; font-size: 10px; font-weight: 900; letter-spacing: .16em; }
+.kayad-sell-entry__intro h2 { margin: 8px 0 7px; color: var(--kayad-public-ink); font-size: clamp(1.45rem, 3vw, 2rem); font-weight: 900; letter-spacing: -.04em; }
+.kayad-sell-entry__intro p { max-width: 680px; margin: 0; color: var(--kayad-public-muted); font-size: 13px; line-height: 1.7; }
+.kayad-sell-entry__choices { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin-top: 24px; }
+.kayad-sell-choice { display: grid; grid-template-columns: 46px minmax(0,1fr) 24px; align-items: start; gap: 14px; min-height: 150px; padding: 20px; border: 1px solid var(--kayad-public-border); border-radius: 20px; background: #FAFDFC; color: var(--kayad-public-ink); text-align: left; cursor: pointer; transition: border-color .18s, background .18s, box-shadow .18s, transform .18s; }
+.kayad-sell-choice:hover { transform: translateY(-2px); border-color: #9CCBC3; box-shadow: 0 14px 28px rgba(10,51,64,.07); }
+.kayad-sell-choice.is-selected { border-color: #13B8A6; background: #F0FBF8; box-shadow: 0 0 0 2px rgba(19,184,166,.16); }
+.kayad-sell-choice--dealer.is-selected { border-color: #176B87; background: #F1F8FA; box-shadow: 0 0 0 2px rgba(23,107,135,.12); }
+.kayad-sell-choice__icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 15px; color: #13B8A6; background: #0A3340; }
+.kayad-sell-choice--dealer .kayad-sell-choice__icon { color: #fff; background: #176B87; }
+.kayad-sell-choice__copy { display: grid; gap: 7px; }
+.kayad-sell-choice__copy strong { color: var(--kayad-public-ink); font-size: 16px; font-weight: 900; }
+.kayad-sell-choice__copy small { color: #526A73; font-size: 12px; line-height: 1.6; }
+.kayad-sell-choice__copy em { color: #176B87; font-size: 10px; line-height: 1.5; font-style: normal; font-weight: 800; }
+.kayad-sell-choice__check { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #B7D7D1; border-radius: 50%; color: #fff; font-size: 13px; font-weight: 900; }
+.kayad-sell-choice.is-selected .kayad-sell-choice__check { border-color: #13B8A6; background: #13B8A6; color: #0A3340; }
+.kayad-sell-entry__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 24px; }
+.kayad-sell-entry__primary { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 50px; padding: 0 22px; border: 0; border-radius: 14px; color: #fff; background: linear-gradient(120deg, #0A3340, #176B87); box-shadow: 0 10px 24px rgba(10,51,64,.16); font-size: 12px; font-weight: 900; cursor: pointer; transition: transform .18s, box-shadow .18s; }
+.kayad-sell-entry__primary:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(10,51,64,.2); }
+.kayad-sell-entry__signin { color: #176B87; font-size: 12px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.kayad-sell-entry__disclaimer { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid #E4EFEC; color: #64748B; font-size: 11px; line-height: 1.65; }
+.kayad-sell-entry button:focus-visible, .kayad-sell-entry a:focus-visible { outline: 3px solid rgba(19,184,166,.6); outline-offset: 3px; }
+@media (max-width: 680px) { .kayad-sell-entry__hero { border-radius: 22px; } .kayad-sell-entry__content { border-radius: 20px; } .kayad-sell-entry__choices { grid-template-columns: 1fr; } .kayad-sell-choice { min-height: 0; padding: 16px; } .kayad-sell-entry__actions { align-items: stretch; flex-direction: column; } .kayad-sell-entry__primary { width: 100%; } .kayad-sell-entry__signin { text-align: center; } }
+@media (prefers-reduced-motion: reduce) { .kayad-sell-choice, .kayad-sell-entry__primary { transition: none; } .kayad-sell-choice:hover, .kayad-sell-entry__primary:hover { transform: none; } }
+
+/* Shared public-page shell: the marketplace keeps its full-bleed layout, while
+   all other public modules inherit the same calm surface and brand tokens. */
+.kayad-public-shell { --public-ink: #0A3340; --public-brand: #176B87; --public-accent: #13B8A6; --public-surface: #FFFFFF; --public-surface-soft: #F6FAF9; --public-border: #D7E7E4; --public-muted: #64748B; color: var(--public-ink); }
+.kayad-public-shell :where(button, a, input, select, textarea):focus-visible { outline-color: rgba(19,184,166,.68); outline-offset: 3px; }
+.kayad-public-shell :where(img) { max-width: 100%; }
+.kayad-public-shell[data-kayad-surface="marketplace"], .kayad-public-shell[data-kayad-surface="saved"] { background: #F6FAF9; }
+.kayad-portal[data-dashboard-role="dealer"] { --kayad-portal-accent: #12576D; --kayad-portal-accent-soft: rgba(18,87,109,.11); }
+.kayad-portal[data-dashboard-role="individual_seller"] { --kayad-portal-accent: #13B8A6; --kayad-portal-accent-soft: rgba(19,184,166,.13); }
+.kayad-portal[data-dashboard-role="ghost_checker"] { --kayad-portal-accent: #5AAFA4; --kayad-portal-accent-soft: rgba(90,175,164,.14); }
+.kayad-portal[data-dashboard-role="admin"], .kayad-portal[data-dashboard-role="superadmin"], .kayad-portal[data-dashboard-role="marketing"], .kayad-portal[data-dashboard-role="technical_support"], .kayad-portal[data-dashboard-role="hr"], .kayad-portal[data-dashboard-role="accounts"], .kayad-portal[data-dashboard-role="escrow_officer"], .kayad-portal[data-dashboard-role="ad_manager"], .kayad-portal[data-dashboard-role="moderator"] { --kayad-portal-accent: #5AAFA4; --kayad-portal-accent-soft: rgba(90,175,164,.14); }

@@ -4,6 +4,8 @@
 // ============================================================
 
 import { useState, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { buildAuthPath } from '../../../utils/authIntent';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createCar, getMyListings, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
@@ -178,7 +180,7 @@ const KAYAD_THEME = {
   navyLight: '#12576D',
   gold: '#176B87',
   goldLight: '#DDF4F0',
-  emerald: '#10B981',
+  emerald: '#13B8A6',
   amber: '#176b87',
   red: '#EF4444',
   orange: '#176b87',
@@ -211,11 +213,13 @@ type PlatformSection =
 
 interface PrivateSellerPlatformProps {
   user?: UserProfile | null;
-  onOpenAuth?: () => void;
+  onOpenAuth?: (intent?: 'seller' | 'dealer') => void;
+  onNavigate?: (nav: string) => void;
 }
 
-export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSellerPlatformProps) {
+export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: PrivateSellerPlatformProps) {
   const [activeSection, setActiveSection] = useState<PlatformSection>('home');
+  const [sellerAccountType, setSellerAccountType] = useState<'seller' | 'dealer'>('seller');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [listingDraft, setListingDraft] = useState<ListingDraft | null>(null);
 
@@ -244,19 +248,57 @@ export default function PrivateSellerPlatform({ user, onOpenAuth }: PrivateSelle
     setMobileMenuOpen(false);
   }, []);
 
-  if (!user) {
+  const normalizedRole = String(user?.role || '').toLowerCase();
+  const sellerWorkspaceAllowed = normalizedRole === 'individual_seller';
+
+  if (!user || !sellerWorkspaceAllowed) {
+    const isDealer = sellerAccountType === 'dealer';
+    const signedInWithoutSellerAccess = Boolean(user);
     return (
-      <div className="text-center py-20">
-        <p className="text-sm text-[#64748B] mb-4">Create a seller account to list and manage your own vehicles.</p>
-        <button onClick={onOpenAuth} className="bg-[#176B87] text-white text-xs font-bold rounded-lg px-5 py-2.5">
-          Get Started
-        </button>
-      </div>
+      <section className="kayad-sell-entry" aria-labelledby="kayad-sell-entry-title">
+        <div className="kayad-sell-entry__hero">
+          <span className="kayad-sell-entry__eyebrow"><Car size={14} aria-hidden="true" /> KAYAD SELLER STUDIO</span>
+          <h1 id="kayad-sell-entry-title">Your next sale should feel simpler.</h1>
+          <p>Present your vehicle clearly, manage genuine buyer conversations and follow the approval steps from one dedicated workspace.</p>
+          <div className="kayad-sell-entry__trust-row" aria-label="Seller workflow benefits">
+            <span><ShieldCheck size={16} aria-hidden="true" /> Approval-led listings</span>
+            <span><MessageSquare size={16} aria-hidden="true" /> Buyer conversations</span>
+            <span><FileCheck size={16} aria-hidden="true" /> Inspection options</span>
+          </div>
+        </div>
+
+        <div className="kayad-sell-entry__content">
+          <div className="kayad-sell-entry__intro">
+            <span>CHOOSE YOUR SELLING WORKSPACE</span>
+            <h2>Built for how you sell.</h2>
+            <p>{signedInWithoutSellerAccess ? 'Your current account is signed in, but seller tools are not enabled for this role. Request the correct access instead of creating a duplicate account.' : 'Start with the right account type. You can sign in with an existing KAYAD account instead of creating another one.'}</p>
+          </div>
+          <div className="kayad-sell-entry__choices">
+            <button type="button" aria-pressed={!isDealer} onClick={() => setSellerAccountType('seller')} className={`kayad-sell-choice ${!isDealer ? 'is-selected' : ''}`}>
+              <span className="kayad-sell-choice__icon"><User size={22} aria-hidden="true" /></span>
+              <span className="kayad-sell-choice__copy"><strong>Private seller</strong><small>For an individual selling their own vehicle.</small><em>Personal listing workspace · KAYAD approval required</em></span>
+              <span className="kayad-sell-choice__check" aria-hidden="true">{!isDealer ? '✓' : ''}</span>
+            </button>
+            <button type="button" aria-pressed={isDealer} onClick={() => setSellerAccountType('dealer')} className={`kayad-sell-choice kayad-sell-choice--dealer ${isDealer ? 'is-selected' : ''}`}>
+              <span className="kayad-sell-choice__icon"><Warehouse size={22} aria-hidden="true" /></span>
+              <span className="kayad-sell-choice__copy"><strong>Dealership</strong><small>For a showroom or business managing multiple vehicles.</small><em>Commercial inventory tools · Business review required</em></span>
+              <span className="kayad-sell-choice__check" aria-hidden="true">{isDealer ? '✓' : ''}</span>
+            </button>
+          </div>
+          <div className="kayad-sell-entry__actions">
+            <button type="button" className="kayad-sell-entry__primary" onClick={() => signedInWithoutSellerAccess ? onNavigate?.('support') : onOpenAuth?.(sellerAccountType)}>
+              {signedInWithoutSellerAccess ? 'Contact Support about seller access' : `Continue as ${isDealer ? 'a dealership' : 'a private seller'}`} <ArrowRight size={17} aria-hidden="true" />
+            </button>
+            {!signedInWithoutSellerAccess && <Link className="kayad-sell-entry__signin" to={buildAuthPath('login', { intent: sellerAccountType, next: '/?nav=seller-platform' })}>Already have an account? Sign in</Link>}
+          </div>
+          <p className="kayad-sell-entry__disclaimer">{signedInWithoutSellerAccess ? 'Seller access is role-controlled. Support can direct your request to the existing KAYAD review process; this screen does not change permissions.' : 'Creating an account does not automatically approve a seller or publish a listing. KAYAD reviews eligibility before seller tools are activated.'}</p>
+        </div>
+      </section>
     );
   }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: KAYAD_THEME.warmBeige }}>
+    <div className="min-h-screen flex kayad-portal kayad-portal--seller" data-kayad-portal="seller" style={{ backgroundColor: KAYAD_THEME.warmBeige }}>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 sticky top-0 h-screen" style={{ backgroundColor: KAYAD_THEME.navy }}>
         <SidebarContent
@@ -397,15 +439,13 @@ function SidebarContent({
       </nav>
 
       <div className="p-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-        <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+        <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-2 mb-2">
             <ShieldCheckVerified size={16} style={{ color: KAYAD_THEME.emerald }} />
-            <span className="text-white/70 text-xs">Trust Score</span>
+            <span className="text-white/70 text-xs">Seller account status</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-white font-bold">85%</span>
-            <span className="text-white/50 text-xs">Verified Seller</span>
-          </div>
+          <p className="text-white text-sm font-bold">Access &amp; verification</p>
+          <p className="mt-1 text-white/60 text-[11px] leading-4">Review your seller approval and any required next steps in Trust Center.</p>
         </div>
       </div>
     </div>

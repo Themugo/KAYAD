@@ -514,7 +514,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
             </div>
           ) : (
             <div className="space-y-4">
-              {visibleTicketsError && <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">{visibleTicketsError} Your previously loaded cases are still shown below.</div>}
+              {visibleTicketsError && <div role="status" className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-3 text-xs text-[#12576D]">{visibleTicketsError} Your previously loaded cases are still shown below.</div>}
               {activeCases.length > 0 && <div className="space-y-2.5"><p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Active</p>{activeCases.map(renderTicket)}</div>}
               {pastCases.length > 0 && <div className="space-y-2.5"><p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Resolved &amp; closed</p>{pastCases.map(renderTicket)}</div>}
             </div>
