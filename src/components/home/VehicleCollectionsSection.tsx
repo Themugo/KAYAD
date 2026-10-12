@@ -66,8 +66,8 @@ export const VehicleCollectionsSection: FC = () => {
     },
     {
       id: 'certified',
-      title: 'Dealer Certified',
-      subtitle: 'Official Franchise Dealership Listings with Warranty',
+      title: 'Inspected Listings',
+      subtitle: 'Listings with recorded inspection scores of 80 or higher',
       image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
       icon: <ShieldCheck className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
@@ -82,7 +82,7 @@ export const VehicleCollectionsSection: FC = () => {
     {
       id: 'under_2m',
       title: 'Under KES 2M',
-      subtitle: 'High-Value Verified Everyday Drivers & First Cars',
+      subtitle: 'Everyday drivers and first cars listed under KES 2M',
       image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=800&q=80',
       icon: <Banknote className="w-5 h-5 text-emerald-400" />,
       action: () => {

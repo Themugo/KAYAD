@@ -138,7 +138,7 @@ export const GalleryPage: FC = () => {
           </h1>
 
           <p className="text-xs sm:text-sm text-[#DDF4F0] font-sans font-medium max-w-xl leading-relaxed">
-            Curated luxury stock, transparent pricing, M-Pesa escrow protected transactions.
+            Browse available vehicles, compare listed prices and review the transaction options shown for each listing.
           </p>
         </div>
 
@@ -147,16 +147,16 @@ export const GalleryPage: FC = () => {
           <div className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-2.5 text-xs text-white">
             <ShieldCheck className="w-4 h-4 text-[#13B8A6] shrink-0" />
             <div>
-              <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">M-Pesa Escrow</p>
-              <p className="text-[11px] font-medium text-[#DDF4F0]">100% Guaranteed</p>
+              <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">Escrow options</p>
+              <p className="text-[11px] font-medium text-[#DDF4F0]">Check availability</p>
             </div>
           </div>
 
           <div className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-2.5 text-xs text-white">
             <Car className="w-4 h-4 text-[#13B8A6] shrink-0" />
             <div>
-              <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">150-Pt Audited</p>
-              <p className="text-[11px] font-medium text-[#DDF4F0]">Verified Condition</p>
+              <p className="font-mono font-black text-[9px] uppercase text-[#13B8A6] leading-none">Inspection status</p>
+              <p className="text-[11px] font-medium text-[#DDF4F0]">See listing details</p>
             </div>
           </div>
         </div>
@@ -227,7 +227,7 @@ export const GalleryPage: FC = () => {
             <div className="flex items-center gap-2 text-xs text-[#64748b] font-bold">
               <span className="flex items-center gap-1.5 text-[#176B87] bg-white px-3 py-1 rounded-full border border-[#D7E7E4] shadow-2xs">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
-                100% Escrow Protected
+                Escrow availability varies by listing
               </span>
             </div>
           </div>
@@ -239,10 +239,10 @@ export const GalleryPage: FC = () => {
                 <Car className="w-8 h-8 text-[#13B8A6]" />
               </div>
               <h3 className="text-xl font-black text-[#176B87] font-serif">
-                No matching vehicles were found. Adjust your filters or explore our latest certified arrivals.
+                No matching vehicles were found. Adjust your filters or clear them to view more listings.
               </h3>
               <p className="text-sm text-[#64748B] max-w-md mx-auto">
-                Try clearing active filters or adjusting your budget slider to view all verified stock in our vault.
+                Try clearing active filters or adjusting your budget to view more available listings.
               </p>
               <button
                 onClick={resetFilters}

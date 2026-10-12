@@ -1,62 +1,30 @@
-import { useEffect, useState } from 'react';
 import { ShieldCheck, Users, Car, CheckCircle2, Award } from 'lucide-react';
 import type { FC } from 'react';
 
 export const TrustMetricsBar: FC = () => {
-  const [escrowAmount, setEscrowAmount] = useState(0);
-  const [members, setMembers] = useState(0);
-  const [vehicles, setVehicles] = useState(0);
-  const [satisfaction, setSatisfaction] = useState(0);
-
-  useEffect(() => {
-    // Animate counter values smoothly on mount
-    const duration = 1500;
-    const steps = 30;
-    const stepTime = duration / steps;
-    let step = 0;
-
-    const timer = setInterval(() => {
-      step++;
-      const progress = Math.min(step / steps, 1);
-      // Ease out quad formula
-      const easeProgress = 1 - (1 - progress) * (1 - progress);
-
-      setEscrowAmount(Math.round(easeProgress * 3.4 * 10) / 10);
-      setMembers(Math.round(easeProgress * 12842));
-      setVehicles(Math.round(easeProgress * 2700));
-      setSatisfaction(Math.round(easeProgress * 98.9 * 10) / 10);
-
-      if (step >= steps) {
-        clearInterval(timer);
-      }
-    }, stepTime);
-
-    return () => clearInterval(timer);
-  }, []);
-
   const metrics = [
     {
-      label: 'Protected in Escrow',
-      value: `KES ${escrowAmount.toFixed(1)}B+`,
-      subtitle: 'Held in KAYAD escrow records',
+      label: 'Escrow availability',
+      value: 'Listing-level',
+      subtitle: 'Only when the programme and listing allow it',
       icon: <ShieldCheck className="w-5 h-5 text-[#13B8A6]" />,
     },
     {
-      label: 'Verified Members',
-      value: `${members.toLocaleString()}+`,
-      subtitle: 'KRA & ID Verified Buyers/Sellers',
+      label: 'Seller information',
+      value: 'Profile-based',
+      subtitle: 'Review the details shown for each seller',
       icon: <Users className="w-5 h-5 text-[#13B8A6]" />,
     },
     {
-      label: 'Audited Vehicles',
-      value: `${vehicles.toLocaleString()}+`,
-      subtitle: 'Independent inspections available',
+      label: 'Inspection options',
+      value: 'Independent',
+      subtitle: 'Provider, scope and pricing vary',
       icon: <Car className="w-5 h-5 text-[#13B8A6]" />,
     },
     {
-      label: 'Successful Releases',
-      value: `${satisfaction.toFixed(1)}%`,
-      subtitle: 'Seamless Disbursal Rate',
+      label: 'Transaction steps',
+      value: 'Deal-specific',
+      subtitle: 'Confirm the terms before payment',
       icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
     },
   ];
@@ -69,7 +37,7 @@ export const TrustMetricsBar: FC = () => {
         <div className="text-center mb-6">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#BDE5DE] text-[11px] font-mono font-bold uppercase tracking-widest">
             <Award className="w-3.5 h-3.5 text-[#13B8A6]" />
-            PROVEN MARKETPLACE TRUST AT SCALE
+            MARKETPLACE DETAILS TO REVIEW
           </span>
         </div>
 

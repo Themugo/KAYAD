@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EscrowView } from '../../features/EscrowView';
+import * as escrowApiMock from '../../services/escrowApi';
 
 const user = { id: 'user-1', name: 'Test Buyer', email: 'b@test.com', role: 'buyer' as const, avatar: '', phone: '' };
 const deal = (id: string, title: string) => ({
@@ -20,24 +21,41 @@ vi.mock('../../services/escrowApi', async () => {
   };
 });
 
-describe('EscrowView deep-linking', () => {
+// NOTE: this file previously asserted that the public EscrowView page itself
+// opened a "deals" tab and rendered a specific participant deal inline when
+// visited with ?escrowId=<id>. That inline-rendering behavior was removed as
+// part of the Stage 22 public-facing convergence pass: the public escrow page
+// (src/features/EscrowView.tsx) now never loads participant deal data for
+// any user, signed in or not (verified by grep: EscrowView.tsx contains no
+// reference to getMyEscrowOverview or escrowId). Deep-linking to a specific
+// deal by id now lives in the authenticated src/features/escrow/
+// ParticipantEscrowDesk.tsx, reached via the buyer/seller portal, not on this
+// public page. The assertions below were rewritten to guard the current,
+// intentional behavior (no participant data leak on the public page, deep
+// link is simply ignored there) instead of testing a capability that no
+// longer exists on this component. Deep-linking coverage for
+// ParticipantEscrowDesk itself is not yet written — flagged as a gap in
+// KAYAD_MASTER_POLISH_AUDIT.md rather than silently dropped.
+describe('EscrowView deep-linking (public page no longer renders participant deals)', () => {
   afterEach(() => { window.history.pushState({}, '', '/'); });
 
-  it('opens the deals tab and selects the deal named by ?escrowId=', async () => {
+  it('does not render any participant deal inline when ?escrowId= is present, even for a signed-in buyer', async () => {
     window.history.pushState({}, '', '/?escrowId=deal-2');
     render(<EscrowView user={user} />);
-    expect(await screen.findByRole('heading', { name: 'Second Deal Vehicle' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Escrow' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Second Deal Vehicle' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'First Deal Vehicle' })).toBeNull();
+    expect(screen.queryByRole('tab')).toBeNull();
   });
 
-  it('does NOT silently fall back to another deal when the id is unknown', async () => {
+  it('never calls getMyEscrowOverview from the public page regardless of the escrowId query param', async () => {
     window.history.pushState({}, '', '/?escrowId=does-not-exist');
     render(<EscrowView user={user} />);
-    expect(await screen.findByTestId('escrow-unknown-link')).toBeTruthy();
-    expect(screen.queryByRole('heading', { name: 'First Deal Vehicle' })).toBeNull();
+    await screen.findByRole('heading', { name: 'Escrow' });
+    expect(escrowApiMock.getMyEscrowOverview).not.toHaveBeenCalled();
   });
 
-  it('keeps the selected id in the URL', async () => {
+  it('leaves the escrowId query param untouched rather than stripping or redirecting on it', async () => {
     window.history.pushState({}, '', '/?escrowId=deal-2');
     render(<EscrowView user={user} />);
     await waitFor(() => expect(new URLSearchParams(window.location.search).get('escrowId')).toBe('deal-2'));

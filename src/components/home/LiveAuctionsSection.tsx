@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Gavel, Clock, Flame, ShieldCheck, MapPin, ArrowRight } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { LiveAuctionsSkeleton } from '../ui/Skeleton';
@@ -16,28 +15,11 @@ export const LiveAuctionsSection: FC<LiveAuctionsSectionProps> = ({ isLoading: p
     return <LiveAuctionsSkeleton />;
   }
 
-  // Filter for auction or both
-  const auctionVehicles = vehicles.filter(v => v.listingType === 'auction' || v.listingType === 'both');
-
-  const featuredAuction = auctionVehicles[0] || vehicles[0];
-  const additionalAuctions = auctionVehicles.slice(1, 4).length === 3
-    ? auctionVehicles.slice(1, 4)
-    : vehicles.slice(1, 4);
-
-  // Timer simulation
-  const [timeLeft, setTimeLeft] = useState({ hours: 1, minutes: 42, seconds: 18 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Only show auctions the backend currently marks live. Do not promote ordinary,
+  // scheduled or ended inventory into a fabricated live auction.
+  const auctionVehicles = vehicles.filter(v => v.auctionLifecycle === 'live');
+  const featuredAuction = auctionVehicles[0];
+  const additionalAuctions = auctionVehicles.slice(1, 4);
 
   return (
     <section className="py-14 sm:py-20 bg-[#F6FAF9] text-[#176B87] border-b border-[#D7E7E4] transition-colors">
@@ -54,7 +36,7 @@ export const LiveAuctionsSection: FC<LiveAuctionsSectionProps> = ({ isLoading: p
               Live Auctions
             </h2>
             <p className="text-xs sm:text-sm text-[#64748b] font-sans font-medium">
-              Real-time competitive bidding backed by verified escrow protection.
+              Review live auction status, current bid information and the rules shown for each auction.
             </p>
           </div>
 
@@ -67,8 +49,15 @@ export const LiveAuctionsSection: FC<LiveAuctionsSectionProps> = ({ isLoading: p
           </button>
         </div>
 
-        {/* Featured + 3 Additional Auctions Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {auctionVehicles.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-[#BDE5DE] bg-white p-8 text-center" role="status">
+            <h3 className="text-lg font-bold text-[#0A3340]">No live auctions right now</h3>
+            <p className="mt-2 text-sm text-[#64748B]">Check scheduled auctions or return when a listing is marked live.</p>
+          </div>
+        )}
+
+        {/* Featured + additional backend-confirmed live auctions */}
+        {auctionVehicles.length > 0 && <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
           {/* Highlighted Featured Auction (Left - 5 Cols) */}
           {featuredAuction && (
@@ -96,7 +85,7 @@ export const LiveAuctionsSection: FC<LiveAuctionsSectionProps> = ({ isLoading: p
                 <div className="absolute bottom-3 right-3 z-10">
                   <span className="px-2.5 py-1 rounded-xl bg-[#0A3340]/75 backdrop-blur-md text-white font-mono font-bold text-xs border border-white/20 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-[#13B8A6]" />
-                    {String(timeLeft.hours).padStart(2, '0')}h : {String(timeLeft.minutes).padStart(2, '0')}m : {String(timeLeft.seconds).padStart(2, '0')}s
+                    {featuredAuction.auctionEndsAt ? `Ends ${new Date(featuredAuction.auctionEndsAt).toLocaleString()}` : 'Live now'}
                   </span>
                 </div>
               </div>
@@ -124,7 +113,7 @@ export const LiveAuctionsSection: FC<LiveAuctionsSectionProps> = ({ isLoading: p
                     </span>
                   </div>
                   <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                    {featuredAuction.bidsCount || 12} Bids
+                    {typeof featuredAuction.bidsCount === 'number' ? `${featuredAuction.bidsCount} Bids` : 'Bid count unavailable'}
                   </span>
                 </div>
 
@@ -227,7 +216,7 @@ export const LiveAuctionsSection: FC<LiveAuctionsSectionProps> = ({ isLoading: p
             ))}
           </div>
 
-        </div>
+        </div>}
 
       </div>
     </section>

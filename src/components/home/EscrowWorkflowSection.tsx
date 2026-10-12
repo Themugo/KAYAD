@@ -26,49 +26,49 @@ export const EscrowWorkflowSection: FC = () => {
       step: '01',
       title: 'Agreement & Terms',
       actor: 'Buyer & Seller',
-      desc: 'Price and terms locked with digital OTP signatures. Contract terms stored immutably.',
+      desc: 'Review the agreed price, handover steps and the terms recorded for the specific deal.',
       icon: <FileCheck2 className="w-5 h-5 text-[#13B8A6]" />,
-      badge: 'OTP SIGNED'
+      badge: 'TERMS REVIEW'
     },
     {
       step: '02',
-      title: 'Segregated Bank Deposit',
-      actor: 'Buyer → Escrow Vault',
+      title: 'Funding confirmation',
+      actor: 'Buyer → Deal funding method',
       desc: 'Buyer pays using the funding method shown for the deal; KAYAD marks it funded once it verifies receipt.',
       icon: <Lock className="w-5 h-5 text-[#13B8A6]" />,
-      badge: 'FUNDING VERIFIED'
+      badge: 'STATUS CONFIRMED'
     },
     {
       step: '03',
-      title: '150-Pt Physical Audit',
-      actor: 'Certified Inspector',
-      desc: 'Physical KRA TIMS logbook verification, lien check, and mechanical diagnostic audit.',
+      title: 'Independent inspection',
+      actor: 'Independent provider',
+      desc: 'Choose an inspection provider and review the scope, credentials and report included in the booking.',
       icon: <ShieldCheck className="w-5 h-5 text-[#13B8A6]" />,
-      badge: 'AUDIT PASSED'
+      badge: 'SCOPE AGREED'
     },
     {
       step: '04',
-      title: 'Insured Carrier Shipping',
-      actor: 'KAYAD Transport',
-      desc: 'Enclosed vehicle carrier dispatched with real-time GPS tracking to buyer.',
+      title: 'Handover and collection',
+      actor: 'Buyer & seller',
+      desc: 'Agree collection or delivery arrangements directly and confirm any provider details before proceeding.',
       icon: <Truck className="w-5 h-5 text-[#13B8A6]" />,
-      badge: 'GPS DISPATCHED'
+      badge: 'HANDOVER PLAN'
     },
     {
       step: '05',
-      title: '48h Inspection Window',
+      title: 'Buyer review',
       actor: 'Buyer Verification',
-      desc: 'Buyer conducts physical vehicle check before authorizing payment release.',
+      desc: 'Follow the acceptance and dispute steps recorded in the terms for the specific deal.',
       icon: <CheckCircle2 className="w-5 h-5 text-[#13B8A6]" />,
-      badge: 'BUYER APPROVAL'
+      badge: 'TERMS APPLY'
     },
     {
       step: '06',
-      title: 'Instant Wired Payout',
-      actor: 'Escrow → Seller Bank',
-      desc: 'Seller receives instant wired disbursal immediately upon final buyer sign-off.',
+      title: 'Release and settlement',
+      actor: 'Authorized deal workflow',
+      desc: 'Release and payout follow the authorized deal process and applicable settlement timing.',
       icon: <DollarSign className="w-5 h-5 text-emerald-400" />,
-      badge: 'PAYOUT COMPLETE'
+      badge: 'SETTLEMENT STATUS'
     }
   ];
 
@@ -85,11 +85,11 @@ export const EscrowWorkflowSection: FC = () => {
             </div>
 
             <h2 className="text-3xl sm:text-4xl font-black text-[#176B87] dark:text-white font-serif tracking-tight leading-tight">
-              The 6-Step Protected Escrow Flow
+              How an eligible escrow deal may progress
             </h2>
 
             <p className="text-xs sm:text-sm text-[#64748b] dark:text-[#BDE5DE] font-sans font-medium leading-relaxed">
-              Your money is never sent directly to a stranger. Where escrow applies, KAYAD records your payment as held until you inspect and accept the vehicle or a dispute is decided.
+              Escrow is available only when the current programme and the individual listing allow it. Review the deal terms and confirmed funding status in the authenticated workspace before making any payment.
             </p>
           </div>
 
@@ -97,7 +97,7 @@ export const EscrowWorkflowSection: FC = () => {
             onClick={() => navigateTo('escrow')}
             className="shrink-0 bg-[#176B87] dark:bg-[#1E293B] hover:bg-[#12576D] text-white font-mono font-black text-xs uppercase tracking-wider rounded-2xl px-7 py-3.5 shadow-lg border border-[#176B87] dark:border-white/20 hover:scale-[1.02] transition-all cursor-pointer inline-flex items-center gap-2"
           >
-            <span>Launch Escrow Vault</span>
+            <span>Review escrow options</span>
             <ArrowRight className="w-4 h-4 text-[#13B8A6]" />
           </button>
         </div>
@@ -168,7 +168,7 @@ export const EscrowWorkflowSection: FC = () => {
           })}
         </div>
 
-        {/* Security Guarantees Bar */}
+        {/* Deal-readiness reminders */}
         <div className="p-6 rounded-3xl bg-[#176B87] text-white border border-[#176B87] shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4 divide-y-0 sm:divide-x divide-white/15">
 
           <div className="flex items-center gap-3 sm:px-2">
@@ -176,8 +176,8 @@ export const EscrowWorkflowSection: FC = () => {
               <Shield className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">Regulated Custody</p>
-              <p className="text-[10px] text-[#BDE5DE] font-sans">Funding verified by KAYAD</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Deal-specific terms</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Check programme and payment status</p>
             </div>
           </div>
 
@@ -186,8 +186,8 @@ export const EscrowWorkflowSection: FC = () => {
               <KeyRound className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">OTP Signing</p>
-              <p className="text-[10px] text-[#BDE5DE] font-sans">M-Pesa Digital Contracts</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Agreement review</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Check the terms for each deal</p>
             </div>
           </div>
 
@@ -196,8 +196,8 @@ export const EscrowWorkflowSection: FC = () => {
               <BadgeCheck className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">KRA Verified</p>
-              <p className="text-[10px] text-[#BDE5DE] font-sans">Clean Logbook Transfer</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Ownership checks</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Use the official transfer process</p>
             </div>
           </div>
 

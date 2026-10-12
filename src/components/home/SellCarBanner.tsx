@@ -12,7 +12,7 @@ export const SellCarBanner: FC = () => {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#13B8A6]/20 text-[#13B8A6] border border-[#13B8A6]/30 font-mono text-xs font-black tracking-wider uppercase">
           <Sparkles className="w-3.5 h-3.5 text-[#13B8A6]" />
-          <span>KENYA'S MOST TRUSTED VEHICLE VAULT</span>
+          <span>KAYAD VEHICLE MARKETPLACE</span>
         </div>
 
         {/* Title */}
@@ -22,7 +22,7 @@ export const SellCarBanner: FC = () => {
 
         {/* Subtitle */}
         <p className="text-[#DDF4F0] text-xs sm:text-sm max-w-2xl mx-auto font-sans font-medium leading-relaxed">
-          Join thousands of Kenyan car buyers and sellers who trust KAYAD for secure M-Pesa & bank escrow transactions.
+          Browse available vehicle listings or start the existing seller onboarding process. Escrow is available only when the programme and a specific listing explicitly allow it.
         </p>
 
         {/* Buttons */}

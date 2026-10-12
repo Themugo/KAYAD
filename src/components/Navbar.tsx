@@ -734,7 +734,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <>
           <button type="button" aria-label="Close navigation menu" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-[55] bg-[#031E27]/55 backdrop-blur-[2px] lg:hidden" />
           <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu fixed inset-x-0 bottom-0 z-[60] lg:hidden focus:outline-none" style={{ top: `${mobileDrawerTop}px`, height: `${mobileDrawerHeight}px` }} role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
-            <div className="mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-b-[28px] border-x border-b border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
+            <div className="kayad-mobile-menu__surface mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-b-[28px] border-x border-b border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
               <div className="flex min-h-1.5 items-center justify-center bg-[#0A3340]"><span className="h-1 w-10 rounded-full bg-white/20" /></div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {user ? (
@@ -756,7 +756,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 <section className="mb-4" aria-labelledby="kayad-drawer-explore">
                   <div className="mb-2 flex items-center justify-between px-1"><span id="kayad-drawer-explore" className="text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Explore KAYAD</span></div>
-                  <nav aria-label="Primary">
+                  <nav className="kayad-mobile-drawer-primary" aria-label="Primary">
                     {navItems.map((item) => {
                       const Icon = item.icon;
                       const active = isSectionActive(item);
@@ -775,11 +775,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                           </a>
                           {children.length > 0 && (
                             <div className="kayad-drawer-group__links">
-                              {children.map((child) => (
-                                <a key={child.id} href={child.href} onClick={(e) => handleLinkClick(e, child.navId)} className="kayad-drawer-chip">
-                                  {child.label}
-                                </a>
-                              ))}
+                              {children.map((child) => {
+                                const ChildIcon = child.icon;
+                                return (
+                                  <a key={child.id} href={child.href} onClick={(e) => handleLinkClick(e, child.navId)} className="kayad-drawer-chip" aria-current={activeNav === child.navId ? 'page' : undefined}>
+                                    <ChildIcon className="kayad-drawer-chip__icon" aria-hidden="true" />
+                                    <span>{child.label}</span>
+                                  </a>
+                                );
+                              })}
                             </div>
                           )}
                         </div>

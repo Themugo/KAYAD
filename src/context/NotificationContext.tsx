@@ -247,7 +247,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   const visibleNotifications = visibleSession ? notifications : [];
   const visibleUnreadCount = visibleSession ? unreadCount : 0;
   const visibleError = sessionKey && errorSessionKey === sessionKey ? actionError || fetchError : null;
-  const visibleErrorKind = visibleError ? (actionError ? 'action' : 'fetch') : null;
+  const visibleErrorKind: 'fetch' | 'action' | null = visibleError ? (actionError ? 'action' : 'fetch') : null;
 
   const value = useMemo(() => ({
     notifications: visibleNotifications, unreadCount: visibleUnreadCount, loading, loadingMore, hasMore: visibleSession && hasMore, loadMoreError: visibleSession ? loadMoreError : null, error: visibleError, errorKind: visibleErrorKind,

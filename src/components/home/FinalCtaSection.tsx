@@ -14,7 +14,7 @@ export const FinalCtaSection: FC = () => {
         </h2>
 
         <p className="text-sm sm:text-base text-[#64748b] font-sans font-medium max-w-xl mx-auto">
-          Explore thousands of verified listings across Kenya or list your vehicle for sale or live auction today.
+          Browse available vehicle listings or start the existing seller onboarding process.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">

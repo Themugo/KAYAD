@@ -39,7 +39,12 @@ const checks = [
   ['notification fetch errors are distinguishable from an empty inbox', /error: string \| null/.test(notificationContext) && /Notifications could not be loaded/.test(notificationContext) && /Notifications are temporarily unavailable/.test(notificationPage)],
   ['notification mutations reject stale account responses', /sessionKeyRef\.current = sessionKey/.test(notificationContext) && /requestUserId !== sessionKeyRef\.current/.test(notificationContext)],
   ['prior-account notifications are masked synchronously during identity change', /visibleSession = Boolean\(sessionKey && dataSessionKey === sessionKey\)/.test(notificationContext)],
-  ['fetch and action errors remain distinct', /errorKind: 'fetch' \| 'action' \| null/.test(notificationContext) && /visibleErrorKind = visibleError \? \(actionError \? 'action' : 'fetch'\) : null/.test(notificationContext)],
+  // Regex tolerates the optional explicit `: 'fetch' | 'action' | null` type
+  // annotation on `visibleErrorKind`, added to fix a real `tsc --noEmit`
+  // error (TS2322: inferred type widened to `string`) that this source-only
+  // validator could never have caught without node_modules installed. The
+  // annotation changes nothing about runtime values or control flow.
+  ['fetch and action errors remain distinct', /errorKind: 'fetch' \| 'action' \| null/.test(notificationContext) && /visibleErrorKind(?::\s*'fetch' \| 'action' \| null)? = visibleError \? \(actionError \? 'action' : 'fetch'\) : null/.test(notificationContext)],
   ['notification counts refresh if realtime subscription missed bootstrap', /setInterval\(\(\) => \{ void fetchNotifications\(\); \}, 30000\)/.test(notificationContext)],
   ['notification history exposes safe load-more pagination', /loadMoreNotifications = useCallback/.test(notificationContext) && /existingIds = new Set/.test(notificationContext) && /Load older notifications/.test(notificationPage)],
   ['notification mutations invalidate stale fetches and reconcile counts', /invalidate reads started before this mutation/.test(notificationContext) && /reconcile with the server's authoritative count/.test(notificationContext)],

@@ -21,19 +21,19 @@ export const EscrowTrustBanner: FC = () => {
     {
       step: '01',
       title: 'Agreement & Terms',
-      desc: 'Buyer & seller lock price and terms with automated M-Pesa digital signatures.',
+      desc: 'Review the agreed price, handover steps and terms recorded for the specific deal.',
       icon: <FileCheck2 className="w-5 h-5 text-[#176B87] group-hover:text-white transition-colors" />
     },
     {
       step: '02',
-      title: 'Segregated Deposit',
+      title: 'Funding confirmation',
       desc: 'Buyer pays using the funding method shown for the deal; KAYAD marks it funded once it verifies receipt.',
       icon: <Lock className="w-5 h-5 text-[#176B87] group-hover:text-white transition-colors" />
     },
     {
       step: '03',
-      title: '150-Pt Legal Audit',
-      desc: 'Physical KRA logbook verification, lien check, and vehicle inspection.',
+      title: 'Independent inspection and document checks',
+      desc: 'Review the available documents and arrange an independent inspection where appropriate.',
       icon: <ShieldCheck className="w-5 h-5 text-[#176B87] group-hover:text-white transition-colors" />
     },
     {
@@ -44,14 +44,14 @@ export const EscrowTrustBanner: FC = () => {
     },
     {
       step: '05',
-      title: '48h Inspection Window',
-      desc: 'Buyer conducts physical vehicle check before authorizing payout release.',
+      title: 'Buyer review',
+      desc: 'Follow the acceptance and dispute steps recorded in the specific deal terms.',
       icon: <CheckCircle2 className="w-5 h-5 text-[#176B87] group-hover:text-white transition-colors" />
     },
     {
       step: '06',
-      title: 'Instant Disbursal',
-      desc: 'Seller receives full wired payout immediately upon final buyer approval.',
+      title: 'Release and settlement',
+      desc: 'Release and payout follow the authorized deal process and applicable settlement timing.',
       icon: <DollarSign className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors" />
     }
   ];
@@ -69,11 +69,11 @@ export const EscrowTrustBanner: FC = () => {
             </div>
 
             <h2 className="text-2xl sm:text-4xl font-black text-[#176B87] font-serif tracking-tight leading-tight">
-              6-Step Bank Escrow Workflow
+              How an eligible escrow deal may progress
             </h2>
 
             <p className="text-xs sm:text-sm text-[#64748b] font-sans font-medium leading-relaxed">
-              Where escrow applies, KAYAD records your payment as held until you inspect and accept the vehicle or a dispute is decided.
+              Escrow is available only when the current programme and individual listing allow it. Review the deal terms and confirmed funding status before making a payment.
             </p>
           </div>
 
@@ -81,7 +81,7 @@ export const EscrowTrustBanner: FC = () => {
             onClick={() => navigateTo('escrow')}
             className="shrink-0 bg-[#176B87] hover:bg-[#0A3340] text-white font-mono font-black text-xs uppercase tracking-wider rounded-2xl px-7 py-3.5 shadow-lg hover:scale-[1.02] transition-all cursor-pointer inline-flex items-center gap-2"
           >
-            <span>Launch Escrow Vault</span>
+            <span>Review escrow options</span>
             <ArrowRight className="w-4 h-4 text-[#13B8A6]" />
           </button>
         </div>
@@ -117,7 +117,7 @@ export const EscrowTrustBanner: FC = () => {
           ))}
         </div>
 
-        {/* Trust Seal Footer Bar */}
+        {/* Deal-readiness reminders */}
         <div className="p-5 sm:p-6 rounded-3xl bg-[#176B87] text-white border border-[#176B87] shadow-lg grid grid-cols-2 md:grid-cols-4 gap-4 divide-y-0 sm:divide-x divide-white/15">
 
           <div className="flex items-center gap-3 sm:px-2">
@@ -125,8 +125,8 @@ export const EscrowTrustBanner: FC = () => {
               <Shield className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">Regulated Custody</p>
-              <p className="text-[10px] text-[#BDE5DE] font-sans">Funding verified by KAYAD</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Deal-specific terms</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Check the confirmed funding status</p>
             </div>
           </div>
 
@@ -135,8 +135,8 @@ export const EscrowTrustBanner: FC = () => {
               <KeyRound className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">OTP Signing</p>
-              <p className="text-[10px] text-[#BDE5DE] font-sans">M-Pesa Digital Contracts</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Agreement review</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Review the terms for each deal</p>
             </div>
           </div>
 
@@ -145,8 +145,8 @@ export const EscrowTrustBanner: FC = () => {
               <BadgeCheck className="w-5 h-5 text-[#13B8A6]" />
             </div>
             <div>
-              <p className="text-xs font-mono font-black text-white uppercase">KRA Verified</p>
-              <p className="text-[10px] text-[#BDE5DE] font-sans">Clean Logbook Transfer</p>
+              <p className="text-xs font-mono font-black text-white uppercase">Ownership checks</p>
+              <p className="text-[10px] text-[#BDE5DE] font-sans">Use the applicable official process</p>
             </div>
           </div>
 

@@ -28,6 +28,7 @@ interface DealersViewProps {
   onQuickViewVehicle?: (v: Vehicle) => void;
   onStartEscrow?: (v: Vehicle) => void;
   onAddVehicle?: (v: Vehicle) => void;
+  user?: { role?: string } | null;
 }
 
 export const DealersView: React.FC<DealersViewProps> = ({
@@ -36,9 +37,11 @@ export const DealersView: React.FC<DealersViewProps> = ({
   onSelectDealerVehicles,
   onQuickViewVehicle = () => {},
   onStartEscrow = () => {},
-  onAddVehicle
+  onAddVehicle,
+  user = null
 }) => {
-  const [viewMode, setViewMode] = useState<'platform' | 'directory'>('platform');
+  const canAccessBusinessPlatform = ['dealer', 'admin'].includes(String(user?.role || '').toLowerCase());
+  const [viewMode, setViewMode] = useState<'platform' | 'directory'>('directory');
   const [dealerSearch, setDealerSearch] = useState<string>('');
   const [selectedCounty, setSelectedCounty] = useState<string>('All');
   const [sellerTypeFilter, setSellerTypeFilter] = useState<'All' | 'Enterprise Dealer' | 'Private Seller'>('All');
@@ -68,8 +71,8 @@ export const DealersView: React.FC<DealersViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top View Toggle */}
-      <div className="bg-white p-2 rounded-2xl shadow-card border border-[#D7E7E4] flex items-center justify-between gap-4 overflow-x-auto">
+      {/* The public Dealers destination defaults to the directory. The business console is shown only to authenticated dealer/admin roles; the backend remains authoritative. */}
+      {canAccessBusinessPlatform && <div className="bg-white p-2 rounded-2xl shadow-card border border-[#D7E7E4] flex items-center justify-between gap-4 overflow-x-auto">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setViewMode('platform')}
@@ -92,13 +95,13 @@ export const DealersView: React.FC<DealersViewProps> = ({
                 : 'text-[#64748B] hover:bg-[#EEF7F5]'
             }`}
           >
-            <Building2 className="w-4 h-4 text-emerald-500" />
+            <Building2 className="w-4 h-4 text-[#13B8A6]" />
             <span>Public Dealer Directory & Showrooms</span>
           </button>
         </div>
-      </div>
+      </div>}
 
-      {viewMode === 'platform' ? (
+      {viewMode === 'platform' && canAccessBusinessPlatform ? (
         <DealerBusinessView
           vehicles={vehicles}
           onAddVehicle={onAddVehicle}
@@ -110,12 +113,12 @@ export const DealersView: React.FC<DealersViewProps> = ({
           {/* Header Banner */}
           <PageHeader
             badgeIcon={<Building2 className="w-4 h-4 text-[#176B87]" />}
-            badgeText="Verified Seller & Dealership Directory"
-            title="Trusted Showrooms & Verified Private Sellers"
-            description="Every enterprise dealership and private individual seller on KAYAD is verified by KAYAD, with escrow available on approved listings."
+            badgeText="Seller & Dealership Directory"
+            title="Explore Showrooms & Private Sellers"
+            description="Explore seller profiles and dealership listings. Verification and escrow status are shown only where the relevant account or vehicle has an applicable status."
             rightElement={
               <Badge variant="success" size="md">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" /> 100% Audited Sellers
+                <ShieldCheck className="w-4 h-4 text-[#176B87]" /> Seller information
               </Badge>
             }
           />
@@ -123,9 +126,9 @@ export const DealersView: React.FC<DealersViewProps> = ({
       {/* Seller Type Tabs */}
       <div className="flex items-center gap-2 border-b border-[#D7E7E4] overflow-x-auto pb-2 scrollbar-none">
         {[
-          { id: 'All', label: 'All Verified Sellers', icon: <Sparkles className="w-4 h-4 text-[#176B87]" /> },
-          { id: 'Enterprise Dealer', label: 'Verified Enterprise Dealerships', icon: <Building2 className="w-4 h-4 text-[#176B87]" /> },
-          { id: 'Private Seller', label: 'Verified Private Individual Owners', icon: <UserCheck className="w-4 h-4 text-emerald-600" /> }
+          { id: 'All', label: 'All Sellers', icon: <Sparkles className="w-4 h-4 text-[#176B87]" /> },
+          { id: 'Enterprise Dealer', label: 'Dealerships', icon: <Building2 className="w-4 h-4 text-[#176B87]" /> },
+          { id: 'Private Seller', label: 'Private Sellers', icon: <UserCheck className="w-4 h-4 text-emerald-600" /> }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -174,8 +177,8 @@ export const DealersView: React.FC<DealersViewProps> = ({
       {filteredDealers.length === 0 ? (
         <Card className="p-8 text-center space-y-3">
           <Building2 className="w-10 h-10 text-[#BDE5DE] mx-auto" />
-          <p className="font-bold text-[#12576D]">No verified sellers match your selected criteria</p>
-          <p className="text-xs text-[#64748B]">Try broadening your search or resetting county filters.</p>
+          <p className="font-bold text-[#12576D]">{dealers.length === 0 ? 'No public seller profiles are available here yet' : 'No sellers match your selected criteria'}</p>
+          <p className="text-xs text-[#64748B]">{dealers.length === 0 ? 'Browse available vehicle listings while the public seller directory is populated.' : 'Try broadening your search or resetting county filters.'}</p>
           <Button
             variant="outline"
             size="sm"
@@ -200,7 +203,7 @@ export const DealersView: React.FC<DealersViewProps> = ({
                       src={d.logo}
                       alt={d.name}
                       wrapperClassName={`w-14 h-14 rounded-2xl border-2 shadow-sm ${
-                        isPrivate ? 'border-emerald-300' : 'border-[#BDE5DE]'
+                        isPrivate ? 'border-[#91CEC5]' : 'border-[#BDE5DE]'
                       }`}
                       className="w-full h-full object-cover"
                     />

@@ -327,7 +327,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
         </div>
 
         <div className="px-4 sm:px-5 py-3 border-b border-[#D7E7E4] overflow-x-auto">
-          <div className="flex items-center gap-1.5 min-w-max">
+          <div className="flex items-center gap-1.5 min-w-max" role="tablist" aria-label="Filter FAQs by category">
             {categories.map(category => {
               const count = category.id === 'all' ? items.length : items.filter(item => item.category === category.id).length;
               const active = selectedCategory === category.id;
@@ -335,6 +335,8 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                 <button
                   key={category.id}
                   type="button"
+                  role="tab"
+                  aria-selected={active}
                   onClick={() => setSelectedCategory(category.id)}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${active ? 'bg-[#176B87] text-white' : 'text-[#64748B] hover:bg-[#EEF7F5]'}`}
                 >

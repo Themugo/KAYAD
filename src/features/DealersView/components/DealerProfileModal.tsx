@@ -27,8 +27,6 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
   // State
   const [activeTab, setActiveTab] = useState<'inventory' | 'about' | 'trust' | 'reviews' | 'gallery' | 'location'>('inventory');
-  const [isFollowing, setIsFollowing] = useState<boolean>(false);
-  const [followersCount, setFollowersCount] = useState<number>(dealer?.followersCount || 1420);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sub-modal States
@@ -38,13 +36,6 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
   const [activeGalleryImage, setActiveGalleryImage] = useState<string | null>(null);
 
   // Test Drive Form State
-  const [testDriveVehicleId, setTestDriveVehicleId] = useState<string>('');
-  const [testDriveDate, setTestDriveDate] = useState<string>('');
-  const [testDriveTime, setTestDriveTime] = useState<string>('10:00 AM');
-  const [testDriveLocation, setTestDriveLocation] = useState<'showroom' | 'home'>('showroom');
-  const [testDrivePhone, setTestDrivePhone] = useState<string>('');
-  const [testDriveName, setTestDriveName] = useState<string>('');
-  const [testDriveSubmitted, setTestDriveSubmitted] = useState<boolean>(false);
 
   // Reviews Sorting State
   const [reviewsSortBy, setReviewsSortBy] = useState<'recent' | 'highest' | 'lowest'>('recent');
@@ -112,9 +103,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
   // Years on KAYAD calculation
   const yearsOnKayad = useMemo(() => {
     if (!dealer) return '';
-    const startYear = parseInt(dealer.verifiedSince) || 2019;
-    const currentYear = new Date().getFullYear();
-    const diff = Math.max(1, currentYear - startYear);
+    const startYear = Number.parseInt(dealer.verifiedSince, 10);
+    if (!Number.isFinite(startYear) || startYear < 2000 || startYear > new Date().getFullYear()) return '';
+    const diff = new Date().getFullYear() - startYear;
     return `${diff} ${diff === 1 ? 'Year' : 'Years'} on KAYAD`;
   }, [dealer?.verifiedSince]);
 
@@ -153,18 +144,6 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
   if (!dealer) return null;
 
   // Handlers
-  const handleToggleFollow = () => {
-    if (isFollowing) {
-      setIsFollowing(false);
-      setFollowersCount((prev) => prev - 1);
-      triggerToast(`Unfollowed ${dealer.name}`);
-    } else {
-      setIsFollowing(true);
-      setFollowersCount((prev) => prev + 1);
-      triggerToast(`Following ${dealer.name}! You will receive new listing alerts.`);
-    }
-  };
-
   const handleShareDealer = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -172,20 +151,6 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
     } else {
       triggerToast(`Digital Showroom: ${dealer.name}`);
     }
-  };
-
-  const handleBookTestDriveSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!testDriveDate || !testDrivePhone || !testDriveName) {
-      alert('Please fill in your name, contact phone, and preferred date.');
-      return;
-    }
-    setTestDriveSubmitted(true);
-    setTimeout(() => {
-      setShowTestDriveModal(false);
-      setTestDriveSubmitted(false);
-      triggerToast(`Test drive request submitted to ${dealer.name}! A sales executive will confirm via call.`);
-    }, 1200);
   };
 
   return (
@@ -229,13 +194,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     wrapperClassName="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-xl bg-white overflow-hidden"
                     className="w-full h-full object-cover"
                   />
-                  {isPrivateSeller ? (
-                    <span className="absolute -top-2 -right-2 bg-emerald-600 text-white p-1 rounded-full shadow-md" title="Identity Verified Private Seller">
+                  {dealer.badges?.some((badge) => badge.toLowerCase().includes('verified')) ? (
+                    <span className="absolute -top-2 -right-2 bg-[#176B87] text-white p-1 rounded-full shadow-md" title="Verification badge displayed on this profile">
                       <ShieldCheck className="w-4 h-4" />
-                    </span>
-                  ) : dealer.badges.some(b => b.toLowerCase().includes('gold') || b.toLowerCase().includes('enterprise')) ? (
-                    <span className="absolute -top-2 -right-2 bg-emerald-600 text-white p-1 rounded-full shadow-md" title="Gold Verified Showroom">
-                      <Award className="w-4 h-4" />
                     </span>
                   ) : null}
                 </div>
@@ -248,17 +209,17 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                       ) : (
                         <Building2 className="w-3.5 h-3.5 text-[#5AAFA4] shrink-0" />
                       )}
-                      {isPrivateSeller ? 'Verified Private Seller' : (dealer.type || 'Verified Enterprise Dealer')}
+                      {isPrivateSeller ? 'Private Seller' : (dealer.type || 'Dealership')}
                     </Badge>
 
                     <span className="bg-white/15 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[11px] font-bold text-[#5AAFA4] flex items-center gap-1">
                       <Star className="w-3.5 h-3.5 fill-[#5AAFA4] text-[#5AAFA4]" />
-                      {dealer.rating} ({dealer.reviewsCount} Verified Ratings)
+                      {dealer.reviewsCount > 0 ? `${dealer.rating} (${dealer.reviewsCount} ratings)` : 'No public ratings yet'}
                     </span>
 
                     <span className="bg-emerald-900/70 border border-emerald-400/40 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold text-emerald-300 flex items-center gap-1">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      {isPrivateSeller ? 'National ID & TIMS Verified' : `KRA PIN Verified (${dealer.kraPin || 'P051290381Z'})`}
+                      {dealer.badges?.length ? dealer.badges.join(' · ') : 'No verification details provided'}
                     </span>
                   </div>
 
@@ -274,12 +235,12 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
                     <span className="flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      Response Rate: <strong className="text-white">98% ({dealer.responseTime || '< 15 mins'})</strong>
+                      {dealer.responseTime ? <>Response time: <strong className="text-white">{dealer.responseTime}</strong></> : 'Response time not provided'}
                     </span>
 
                     <span className="flex items-center gap-1 text-[#5AAFA4] font-bold">
                       <Calendar className="w-3.5 h-3.5" />
-                      Member Since {dealer.verifiedSince}
+                      {dealer.verifiedSince ? `Member since ${dealer.verifiedSince}` : 'Membership date not provided'}
                     </span>
                   </div>
                 </div>
@@ -287,16 +248,6 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
               {/* Action Buttons Header Strip */}
               <div className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleToggleFollow}
-                  className={`text-xs font-bold ${isFollowing ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : ''}`}
-                >
-                  <Heart className={`w-3.5 h-3.5 ${isFollowing ? 'fill-emerald-600 text-emerald-600' : ''}`} />
-                  <span>{isFollowing ? 'Saved Seller' : 'Save Seller'}</span>
-                  <span className="opacity-75 text-[10px]">({followersCount})</span>
-                </Button>
 
                 <Button
                   variant="secondary"
@@ -323,7 +274,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     className="bg-[#176B87] hover:bg-[#12576d] text-white text-xs font-bold shadow-sm"
                   >
                     <Lock className="w-3.5 h-3.5 text-[#5AAFA4]" />
-                    <span>Start Secure Purchase</span>
+                    <span>Review purchase options</span>
                   </Button>
                 ) : (
                   <Button
@@ -346,11 +297,11 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-[#5AAFA4] shrink-0" />
                   <span className="text-[11px] sm:text-xs">
-                    <strong>KAYAD Private Seller Security:</strong> Personal phone numbers are protected. Purchase transactions, inspection bookings, and messaging are protected by Bank Escrow.
+                    <strong>KAYAD Private Seller Security:</strong> Use the available contact options and confirm the transaction terms. Escrow applies only when the programme and the specific listing explicitly allow it.
                   </span>
                 </div>
                 <Badge variant="escrow" size="sm" className="shrink-0 font-bold">
-                  Escrow Protected
+                  Check escrow eligibility
                 </Badge>
               </div>
             )}
@@ -371,13 +322,13 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     if (dealerVehicles.length > 0) {
                       onStartEscrow(dealerVehicles[0]);
                     } else {
-                      setToastMessage('Escrow initiated! Select vehicle below to proceed.');
+                      setToastMessage('No vehicle is attached to this profile. Open an eligible listing to review escrow options.');
                     }
                   }}
                   className="bg-[#176B87] hover:bg-[#12576d] text-white font-bold shrink-0 shadow-sm"
                 >
                   <Lock className="w-4 h-4 text-[#5AAFA4]" />
-                  <span>Start Secure Purchase (Escrow Vault)</span>
+                  <span>Review escrow options</span>
                 </Button>
 
                 <Button
@@ -403,7 +354,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   className="text-[#12576D] hover:bg-[#F6FAF9] font-bold shrink-0"
                 >
                   <MessageSquare className="w-4 h-4 text-[#176B87]" />
-                  <span>Chat with Seller (Secure Platform)</span>
+                  <span>Message seller</span>
                 </Button>
               </>
             ) : (
@@ -447,7 +398,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
           <div className="hidden lg:flex items-center gap-3 text-[#64748B] font-semibold px-2">
             <span className="flex items-center gap-1 text-emerald-700">
-              <Lock className="w-3.5 h-3.5" /> Escrow available (approved listings)
+              <Lock className="w-3.5 h-3.5" /> Escrow availability varies by listing
             </span>
           </div>
         </div>
@@ -458,38 +409,38 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] shadow-xs space-y-1">
             <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">
-              {isPrivateSeller ? 'Escrow Deals' : 'Vehicles Sold'}
+              Recorded escrow deals
             </p>
             <p className="text-2xl font-black text-[#176B87] font-display">
-              {dealer.completedEscrowDeals || 7} <span className="text-xs text-emerald-600 font-bold">Closed</span>
+              {dealer.completedEscrowDeals ?? '—'} <span className="text-xs text-[#64748B] font-bold">recorded</span>
             </p>
-            <p className="text-[10px] text-[#64748B] font-medium">Escrow where the listing shows it</p>
+            <p className="text-[10px] text-[#64748B] font-medium">Review listing and deal status</p>
           </div>
 
           <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] shadow-xs space-y-1">
-            <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Seller Trust Score</p>
+            <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Published seller rating</p>
             <p className="text-2xl font-black text-[#176B87] font-display flex items-center gap-1">
               <Star className="w-5 h-5 fill-[#13B8A6] text-[#13B8A6]" />
-              {dealer.rating} <span className="text-xs text-[#94A3B8] font-normal">/ 5.0</span>
+              {dealer.reviewsCount > 0 ? dealer.rating : '—'} <span className="text-xs text-[#94A3B8] font-normal">{dealer.reviewsCount > 0 ? '/ 5.0' : 'No ratings'}</span>
             </p>
-            <p className="text-[10px] text-[#64748B] font-medium">{dealer.reviewsCount} Verified Buyer Reviews</p>
+            <p className="text-[10px] text-[#64748B] font-medium">{dealer.reviewsCount} Buyer Reviews</p>
           </div>
 
           <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] shadow-xs space-y-1">
-            <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Verification Status</p>
+            <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Profile verification details</p>
             <p className="text-2xl font-black text-emerald-700 font-display flex items-center gap-1">
               <ShieldCheck className="w-6 h-6 text-emerald-600" />
-              Verified
+              {dealer.badges?.length ? 'See profile badges' : 'Not provided'}
             </p>
-            <p className="text-[10px] text-[#64748B] font-medium">Identity & Logbook Audited</p>
+            <p className="text-[10px] text-[#64748B] font-medium">Check ownership details independently</p>
           </div>
 
           <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] shadow-xs space-y-1">
-            <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Buyer Protection</p>
+            <p className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Buyer guidance</p>
             <p className="text-2xl font-black text-[#176B87] font-display">
-              {dealer.buyerSatisfaction || 100}%
+              {typeof dealer.buyerSatisfaction === 'number' ? `${dealer.buyerSatisfaction}%` : '—'}
             </p>
-            <p className="text-[10px] text-[#64748B] font-medium">Zero-fraud guarantee</p>
+            <p className="text-[10px] text-[#64748B] font-medium">Published score if available; not a guarantee</p>
           </div>
         </div>
 
@@ -672,7 +623,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 Dealership Overview & Business Identity
               </h3>
               <p className="text-[#12576D] leading-relaxed text-sm">
-                {dealer.description || `${dealer.name} is a premier verified enterprise dealership operating from ${dealer.location}. Specializing in foreign direct imports, luxury SUVs, commercial fleets, and clean local trade-ins.`}
+                {dealer.description || 'No business description has been provided for this profile.'}
               </p>
             </div>
 
@@ -683,7 +634,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <Sparkles className="w-4 h-4 text-[#176B87]" /> Business Specializations
                 </h4>
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {(dealer.specializations || ['Luxury SUVs', 'Japanese Direct Imports', 'German Sedans', 'Verified Commercial Fleets']).map((spec, i) => (
+                  {(dealer.specializations?.length ? dealer.specializations : ['No specializations listed']).map((spec, i) => (
                     <span key={i} className="bg-[#EEF7F5] text-[#176B87] font-bold px-3 py-1 rounded-xl border border-[#D7E7E4]">
                       • {spec}
                     </span>
@@ -696,7 +647,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <Globe className="w-4 h-4 text-[#176B87]" /> Languages Spoken by Sales Team
                 </h4>
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {(dealer.languages || ['English', 'Swahili']).map((lang, i) => (
+                  {(dealer.languages?.length ? dealer.languages : ['Languages not provided']).map((lang, i) => (
                     <span key={i} className="bg-[#F3FAF9] text-[#0A3340] font-bold px-3 py-1 rounded-xl border border-[#D7E7E4]">
                       🗣️ {lang}
                     </span>
@@ -712,7 +663,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <Clock className="w-4 h-4 text-emerald-600" /> Showroom Operating Hours
                 </h4>
                 <p className="text-[#12576D] font-bold text-sm bg-[#F6FAF9] p-3 rounded-xl border border-[#D7E7E4]">
-                  {dealer.operatingHours || 'Mon - Sat: 8:00 AM - 6:30 PM | Sun: By Appointment'}
+                  {dealer.operatingHours || 'Operating hours not provided'}
                 </p>
               </div>
 
@@ -721,7 +672,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <CreditCard className="w-4 h-4 text-[#176B87]" /> Accepted Payment Channels
                 </h4>
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {(dealer.paymentMethods || ['KAYAD Escrow Vault', 'M-Pesa Business Till', 'Bank Wire (RTGS)', 'Bank Asset Finance']).map((pm, i) => (
+                  {(dealer.paymentMethods?.length ? dealer.paymentMethods : ['Confirm payment methods with the seller']).map((pm, i) => (
                     <span key={i} className="bg-emerald-50 text-emerald-900 font-bold px-3 py-1 rounded-xl border border-emerald-200">
                       ✓ {pm}
                     </span>
@@ -773,17 +724,17 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   </div>
                   <div>
                     <h3 className="text-base font-extrabold font-display">
-                      {isPrivateSeller ? 'Verified Private Seller Trust & Protection Matrix' : '100% KAYAD Verified Business Compliance'}
+                      {isPrivateSeller ? 'Private Seller Profile & Transaction Checks' : 'Dealership Profile & Transaction Checks'}
                     </h3>
                     <p className={`text-xs ${isPrivateSeller ? 'text-[#DDF4F0]' : 'text-emerald-800'}`}>
-                      {isPrivateSeller ? 'Transaction security & buyer protection active for all private deals' : 'Verified by KAYAD Legal Compliance & Physical Yard Auditors'}
+                      Review the details shown for this profile and confirm any verification or transaction status before proceeding.
                     </p>
                   </div>
                 </div>
 
                 <Badge variant={isPrivateSeller ? 'escrow' : 'success'} size="md">
                   <Lock className="w-3.5 h-3.5 text-[#5AAFA4]" />
-                  {isPrivateSeller ? 'Escrow Vault Protected' : 'KRA & TIMS Audited'}
+                  {isPrivateSeller ? 'Check listing-level escrow status' : 'Review available profile status'}
                 </Badge>
               </div>
 
@@ -793,7 +744,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <strong className="text-white font-extrabold flex items-center gap-1 mb-0.5">
                     <Lock className="w-4 h-4 text-[#13B8A6]" /> Concise KAYAD Escrow Notice:
                   </strong>
-                  "This private sale is protected through KAYAD Escrow. Where escrow applies, KAYAD records the payment as held until the buyer accepts the vehicle or a dispute is decided."
+                  Escrow applies only when the current programme and this specific listing explicitly allow it. Check the current status and deal terms before paying.
                 </div>
               )}
             </div>
@@ -802,30 +753,30 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             <div className="space-y-3">
               <h4 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                {isPrivateSeller ? '5 Core Private Transaction Trust Indicators' : 'Verification Compliance Standards'}
+                {isPrivateSeller ? 'Before-you-buy checks' : 'Profile and transaction checks'}
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] space-y-2 shadow-xs">
                   <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <UserCheck className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
-                    <span>1. Identity Verified</span>
+                    <span>1. Review seller identity</span>
                   </div>
                   <p className="text-[#64748B] leading-relaxed text-[11px]">
-                    Government National ID, KRA PIN, and verified phone cross-checked by KAYAD Trust & Safety team.
+                    Review the identity or verification status explicitly shown on this profile. Do not treat a listing badge as a substitute for your own checks.
                   </p>
-                  <Badge variant="success" size="sm">✓ Govt ID Audit Passed</Badge>
+                  <Badge variant="neutral" size="sm">Check displayed status</Badge>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] space-y-2 shadow-xs">
                   <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <Lock className="w-4.5 h-4.5 text-[#176B87] shrink-0" />
-                    <span>2. Escrow Protected</span>
+                    <span>2. Confirm escrow eligibility</span>
                   </div>
                   <p className="text-[#64748B] leading-relaxed text-[11px]">
-                    Where escrow applies, KAYAD records the deposit as held until release. Escrow does not remove all risk.
+                    Use escrow only when the current programme and this listing are explicitly eligible. Review the terms for the specific deal.
                   </p>
-                  <Badge variant="escrow" size="sm">Held in KAYAD escrow records</Badge>
+                  <Badge variant="neutral" size="sm">Check programme status</Badge>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] space-y-2 shadow-xs">
@@ -834,31 +785,31 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <span>3. Independent Inspection</span>
                   </div>
                   <p className="text-[#64748B] leading-relaxed text-[11px]">
-                    Ask an independent, verified inspection provider to inspect the vehicle before you commit. KAYAD connects you; the provider carries out the inspection.
+                    Consider an independent inspection and review the provider credentials, scope and price before booking.
                   </p>
-                  <Badge variant="neutral" size="sm">Independent inspection available</Badge>
+                  <Badge variant="neutral" size="sm">Review provider options</Badge>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] space-y-2 shadow-xs">
                   <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
-                    <span>4. Ownership Verification</span>
+                    <span>4. Check ownership documents</span>
                   </div>
                   <p className="text-[#64748B] leading-relaxed text-[11px]">
-                    Vehicle logbook matched against NTSA TIMS direct records to ensure clean title & zero encumbrance.
+                    Verify the logbook and ownership details through the applicable official process before payment.
                   </p>
-                  <Badge variant="verified" size="sm">✓ TIMS Logbook Checked</Badge>
+                  <Badge variant="neutral" size="sm">Verify before payment</Badge>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-[#D7E7E4] space-y-2 shadow-xs sm:col-span-2 md:col-span-2">
                   <div className="flex items-center gap-2 font-extrabold text-[#176B87]">
                     <Sparkles className="w-4.5 h-4.5 text-[#176B87] shrink-0" />
-                    <span>5. TIMS Transfer Guarantee & Fraud Protection</span>
+                    <span>5. Ownership transfer considerations</span>
                   </div>
                   <p className="text-[#64748B] leading-relaxed text-[11px]">
-                    Funds are released to the private seller ONLY after buyer confirms physical receipt of vehicle and NTSA TIMS electronic logbook transfer approval in buyer portal.
+                    Before releasing funds, review the terms and documented milestones for this specific deal. Verify the ownership-transfer process through the applicable NTSA TIMS workflow.
                   </p>
-                  <Badge variant="success" size="sm">✓ Guaranteed Safe Transfer</Badge>
+                  <Badge variant="success" size="sm">Review transfer requirements</Badge>
                 </div>
               </div>
             </div>
@@ -868,7 +819,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               <h4 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <ArrowRight className="w-4 h-4 text-[#176B87]" />
-                  Secure 6-Step Private Purchase Workflow
+                  Purchase and handover considerations
                 </span>
                 <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold">
                   Step-by-Step Security
@@ -877,12 +828,12 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
-                  { step: '1', title: 'Contact Seller', desc: 'Initiate encrypted in-platform chat to discuss vehicle details & schedule meet-up.', icon: <MessageSquare className="w-4 h-4 text-[#176B87]" /> },
-                  { step: '2', title: 'Book Pre-Purchase Inspection', desc: 'Request an independent inspection by a verified provider before you commit.', icon: <FileCheck className="w-4 h-4 text-emerald-600" /> },
-                  { step: '3', title: 'Escrow Deposit', desc: 'Pay into escrow where it applies; KAYAD marks it funded once verified.', icon: <Lock className="w-4 h-4 text-[#176B87]" /> },
-                  { step: '4', title: 'Physical Inspection & Test Drive', desc: 'Meet seller at verified public hub, inspect car, test drive, and verify engine numbers.', icon: <Car className="w-4 h-4 text-[#176B87]" /> },
-                  { step: '5', title: 'Logbook Transfer', desc: 'Execute instant electronic logbook transfer via NTSA TIMS portal.', icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" /> },
-                  { step: '6', title: 'Seller Paid', desc: 'Click "Release Funds" in buyer portal. Escrow releases money to seller instantly.', icon: <Sparkles className="w-4 h-4 text-[#176B87]" /> }
+                  { step: '1', title: 'Contact Seller', desc: 'Use KAYAD messages where available and agree the next steps with the seller.', icon: <MessageSquare className="w-4 h-4 text-[#176B87]" /> },
+                  { step: '2', title: 'Book Pre-Purchase Inspection', desc: 'Arrange an independent inspection and confirm the provider scope and credentials.', icon: <FileCheck className="w-4 h-4 text-emerald-600" /> },
+                  { step: '3', title: 'Escrow Deposit', desc: 'Only fund escrow if the current programme and listing are eligible and the deal terms are clear.', icon: <Lock className="w-4 h-4 text-[#176B87]" /> },
+                  { step: '4', title: 'Physical Inspection & Test Drive', desc: 'Arrange a safe viewing or test drive and independently check the vehicle identifiers.', icon: <Car className="w-4 h-4 text-[#176B87]" /> },
+                  { step: '5', title: 'Logbook Transfer', desc: 'Complete ownership transfer through the applicable NTSA TIMS process.', icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" /> },
+                  { step: '6', title: 'Seller Paid', desc: 'Payout follows the authorized deal-release process and applicable settlement timing.', icon: <Sparkles className="w-4 h-4 text-[#176B87]" /> }
                 ].map((s) => (
                   <div key={s.step} className="p-3.5 bg-[#F6FAF9] rounded-xl border border-[#D7E7E4] space-y-1 relative group hover:border-[#176B87] transition-colors">
                     <div className="flex items-center justify-between">
@@ -902,17 +853,17 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             <div className="bg-[#F3FAF9]/70 border border-[#BDE5DE] p-5 rounded-2xl space-y-3">
               <h4 className="text-xs font-extrabold text-[#0A3340] uppercase tracking-wider font-display flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-[#176B87]" />
-                KAYAD Buyer Protection Highlights
+                Before-you-buy reminders
               </h4>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
                 <div className="p-2.5 bg-white rounded-xl border border-[#BDE5DE] space-y-1">
-                  <p className="font-extrabold text-[#176B87] text-xs">Verified Ownership</p>
-                  <p className="text-[10px] text-[#64748B]">TIMS Registry cross-checked</p>
+                  <p className="font-extrabold text-[#176B87] text-xs">Ownership checks</p>
+                  <p className="text-[10px] text-[#64748B]">Verify through the applicable official process</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-[#BDE5DE] space-y-1">
                   <p className="font-extrabold text-[#176B87] text-xs">Inspection Marketplace</p>
-                  <p className="text-[10px] text-[#64748B]">Independent verified providers</p>
+                  <p className="text-[10px] text-[#64748B]">Review provider credentials and scope</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-[#BDE5DE] space-y-1">
                   <p className="font-extrabold text-[#176B87] text-xs">Escrow Protection</p>
@@ -920,11 +871,11 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-[#BDE5DE] space-y-1">
                   <p className="font-extrabold text-[#176B87] text-xs">Fraud Prevention</p>
-                  <p className="text-[10px] text-[#64748B]">Verified seller ID</p>
+                  <p className="text-[10px] text-[#64748B]">Review the identity status shown on the profile</p>
                 </div>
                 <div className="p-2.5 bg-white rounded-xl border border-[#BDE5DE] space-y-1">
                   <p className="font-extrabold text-[#176B87] text-xs">Secure Payment</p>
-                  <p className="text-[10px] text-[#64748B]">M-Pesa & RTGS Wire</p>
+                  <p className="text-[10px] text-[#64748B]">Confirm payment methods with the seller</p>
                 </div>
               </div>
             </div>
@@ -940,9 +891,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               <div>
                 <h3 className="text-base font-extrabold text-[#176B87] font-display flex items-center gap-2">
                   <Star className="w-5 h-5 fill-[#13B8A6] text-[#13B8A6]" />
-                  Verified Buyer Reviews ({reviewsList.length})
+                  Buyer Reviews ({reviewsList.length})
                 </h3>
-                <p className="text-[#64748B] text-xs">Overall Score: <strong className="text-[#176B87]">{dealer.rating} / 5.0</strong> based on {dealer.reviewsCount} closed escrow deals</p>
+                <p className="text-[#64748B] text-xs">Published rating: <strong className="text-[#176B87]">{dealer.reviewsCount > 0 ? `${dealer.rating} / 5.0` : 'not available'}</strong> from {dealer.reviewsCount} reviews</p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1052,7 +1003,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   onClick={() => setShowDirectionsModal(true)}
                   className="bg-[#176B87] text-white font-bold"
                 >
-                  <Navigation className="w-4 h-4 text-[#5AAFA4]" /> Get GPS Directions
+                  <Navigation className="w-4 h-4 text-[#5AAFA4]" /> Open map directions
                 </Button>
               </div>
 
@@ -1070,7 +1021,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                   <p className="font-extrabold text-sm">{dealer.name}</p>
                   <p className="text-[11px] text-[#DDF4F0]">{dealer.landmark || dealer.address}</p>
                   <span className="inline-block bg-emerald-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">
-                    Verified Physical Yard
+                    Location information
                   </span>
                 </div>
               </div>
@@ -1094,7 +1045,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
           <div className="pt-6 border-t border-[#D7E7E4] space-y-3">
             <h4 className="text-xs font-extrabold text-[#176B87] uppercase tracking-wider font-display flex items-center gap-2">
               <Building2 className="w-4 h-4 text-emerald-600" />
-              Similar Verified Enterprise Showrooms in Kenya
+              Related dealership profiles
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1138,7 +1089,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               }}
               className="flex-1 py-2.5 bg-[#176B87] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <Lock className="w-3.5 h-3.5 text-[#5AAFA4]" /> Start Escrow
+              <Lock className="w-3.5 h-3.5 text-[#5AAFA4]" /> Review escrow options
             </button>
 
             <button
@@ -1158,7 +1109,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               onClick={() => setShowContactModal(true)}
               className="flex-1 py-2.5 bg-[#176B87] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <MessageSquare className="w-3.5 h-3.5 text-[#5AAFA4]" /> Secure Chat
+              <MessageSquare className="w-3.5 h-3.5 text-[#5AAFA4]" /> Message seller
             </button>
           </>
         ) : (
@@ -1201,7 +1152,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <span>Private Seller Privacy & Protection Policy</span>
                   </div>
                   <p className="text-[11px] text-[#64748B] leading-normal">
-                    Personal phone numbers are protected to prevent scamming and off-market fraud. All interactions, inspection scheduling, and escrow deposits are conducted securely within the KAYAD platform.
+                    Use the available contact options and confirm the seller and transaction terms before proceeding. Do not send money until the payment method and deal terms are clear.
                   </p>
                 </div>
 
@@ -1212,7 +1163,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                       if (dealerVehicles.length > 0 && onContactSeller) {
                         onContactSeller(dealerVehicles[0]);
                       } else {
-                        setToastMessage('Opened secure encrypted chat with seller.');
+                        setToastMessage('Open the existing KAYAD messaging workflow to contact the seller.');
                       }
                     }}
                     className="w-full p-3.5 bg-[#176B87] hover:bg-[#0A3340] text-white rounded-xl font-bold flex items-center justify-between transition-colors shadow-sm text-left"
@@ -1220,8 +1171,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <div className="flex items-center gap-3">
                       <MessageSquare className="w-5 h-5 text-[#5AAFA4]" />
                       <div>
-                        <p className="font-extrabold">Encrypted In-Platform Secure Chat</p>
-                        <p className="text-[11px] text-[#BDE5DE]">Fastest response (&lt; 15 mins) • End-to-end encrypted</p>
+                        <p className="font-extrabold">Message seller through KAYAD</p>
+                        <p className="text-[11px] text-[#BDE5DE]">Response times and message security depend on the available service and account settings.</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-[#5AAFA4]" />
@@ -1241,8 +1192,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <div className="flex items-center gap-3">
                       <Lock className="w-5 h-5 text-[#5AAFA4]" />
                       <div>
-                        <p className="font-extrabold">Start KAYAD Bank Escrow Purchase</p>
-                        <p className="text-[11px] text-[#91CEC5]">Deposit is recorded as held until you accept the vehicle</p>
+                        <p className="font-extrabold">Review escrow options</p>
+                        <p className="text-[11px] text-[#91CEC5]">Check the current programme status and the terms for the specific eligible listing.</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-[#5AAFA4]" />
@@ -1261,7 +1212,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                       <FileCheck className="w-5 h-5 text-emerald-600" />
                       <div>
                         <p className="font-extrabold">Book an independent inspection</p>
-                        <p className="text-[11px] text-emerald-800">Carried out by an independent verified provider</p>
+                        <p className="text-[11px] text-emerald-800">Confirm provider status, scope and pricing before booking</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-emerald-600" />
@@ -1270,7 +1221,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               </>
             ) : (
               <>
-                <p className="text-[#64748B]">Connect directly with certified sales representatives at {dealer.name}:</p>
+                <p className="text-[#64748B]">Contact the sales team at {dealer.name}:</p>
 
                 <div className="space-y-2.5">
                   <a
@@ -1296,8 +1247,8 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <div className="flex items-center gap-3">
                       <MessageSquare className="w-5 h-5" />
                       <div>
-                        <p className="font-extrabold">Instant WhatsApp Inquiry</p>
-                        <p className="text-[11px] text-emerald-100">Fastest response (&lt; 5 mins)</p>
+                        <p className="font-extrabold">WhatsApp inquiry</p>
+                        <p className="text-[11px] text-emerald-100">Response time depends on the seller.</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4" />
@@ -1328,86 +1279,14 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
       {/* ========================================================================= */}
       {showTestDriveModal && (
         <Modal isOpen={true} onClose={() => setShowTestDriveModal(false)} title={`Book Test Drive with ${dealer.name}`} maxWidth="md">
-          <form onSubmit={handleBookTestDriveSubmit} className="space-y-4 p-2 text-xs">
-            {testDriveSubmitted ? (
-              <div className="p-6 text-center space-y-3 bg-emerald-50 rounded-2xl border border-emerald-200">
-                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                <p className="font-extrabold text-emerald-950 text-base font-display">Test Drive Request Confirmed!</p>
-                <p className="text-[#64748B]">The team at {dealer.name} will call you shortly to verify your schedule.</p>
-              </div>
-            ) : (
-              <>
-                <div>
-                  <label className="font-bold text-[#12576D] block mb-1">Select Vehicle for Test Drive:</label>
-                  <select
-                    value={testDriveVehicleId}
-                    onChange={(e) => setTestDriveVehicleId(e.target.value)}
-                    className="w-full p-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl font-bold text-[#176B87]"
-                  >
-                    <option value="">Any Vehicle / Showroom Visit</option>
-                    {dealerVehicles.map((v) => (
-                      <option key={v.id} value={v.id}>{v.title} (Ksh {v.price.toLocaleString()})</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-bold text-[#12576D] block mb-1">Preferred Date:</label>
-                    <input
-                      type="date"
-                      required
-                      value={testDriveDate}
-                      onChange={(e) => setTestDriveDate(e.target.value)}
-                      className="w-full p-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl font-bold text-[#0A3340]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-[#12576D] block mb-1">Preferred Time:</label>
-                    <select
-                      value={testDriveTime}
-                      onChange={(e) => setTestDriveTime(e.target.value)}
-                      className="w-full p-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl font-bold text-[#0A3340]"
-                    >
-                      <option value="09:00 AM">09:00 AM</option>
-                      <option value="11:00 AM">11:00 AM</option>
-                      <option value="02:00 PM">02:00 PM</option>
-                      <option value="04:00 PM">04:00 PM</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="font-bold text-[#12576D] block">Your Contact Name:</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Samuel Mwaura"
-                    value={testDriveName}
-                    onChange={(e) => setTestDriveName(e.target.value)}
-                    className="w-full p-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl font-bold text-[#0A3340]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="font-bold text-[#12576D] block">Your Phone Number:</label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+254 7XX XXX XXX"
-                    value={testDrivePhone}
-                    onChange={(e) => setTestDrivePhone(e.target.value)}
-                    className="w-full p-2.5 bg-[#F6FAF9] border border-[#D7E7E4] rounded-xl font-bold text-[#0A3340]"
-                  />
-                </div>
-
-                <Button variant="primary" size="lg" fullWidth type="submit" className="bg-[#176B87] text-white">
-                  Confirm Test Drive Booking
-                </Button>
-              </>
-            )}
-          </form>
+          <div className="space-y-4 p-4 text-sm text-[#12576D]">
+            <p className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4 leading-relaxed">
+              Test-drive scheduling is not connected to a booking service here. No request has been sent and no appointment is reserved. Contact the seller to agree availability, location and terms directly.
+            </p>
+            <Button variant="primary" size="lg" fullWidth onClick={() => { setShowTestDriveModal(false); setShowContactModal(true); }} className="bg-[#176B87] text-white">
+              Contact seller to arrange a test drive
+            </Button>
+          </div>
         </Modal>
       )}
 
@@ -1435,7 +1314,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               rel="noreferrer"
               className="p-3.5 bg-emerald-600 text-white rounded-xl font-extrabold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
             >
-              <Navigation className="w-4 h-4" /> Open in Google Maps GPS Navigation
+              <Navigation className="w-4 h-4" /> Open in Google Maps
             </a>
           </div>
         </Modal>

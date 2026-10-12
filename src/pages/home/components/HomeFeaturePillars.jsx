@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const PILLARS = [
   {
     title: 'Live Auctions',
-    desc: 'Real-time bidding with automatic time extensions and snipe protection. Every bid, every second counts.',
+    desc: 'Review scheduled and live auction listings, then follow the bid rules shown for each auction.',
     cta: 'Bid Now',
     href: '/auctions/calendar',
     icon: (
@@ -14,7 +14,7 @@ const PILLARS = [
   },
   {
     title: 'Escrow Protection',
-    desc: 'M-Pesa secured transactions held safely until delivery is confirmed. Your money stays protected.',
+    desc: 'Escrow may be available for eligible listings when the programme is active. Review the current terms before paying.',
     cta: 'Learn More',
     href: '/escrow',
     icon: (
@@ -25,7 +25,7 @@ const PILLARS = [
   },
   {
     title: 'Verified Dealers',
-    desc: 'Every dealer is KRA-vetted, licensed, and rated by real buyers. Transparency you can trust.',
+    desc: 'Explore dealer profiles and review the business details and any verification status displayed on each profile.',
     cta: 'Explore',
     href: '/showroom',
     icon: (

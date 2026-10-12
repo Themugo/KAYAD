@@ -95,7 +95,7 @@ export const BrowseByCategory: FC = () => {
     {
       id: 'Electric',
       title: 'Electric',
-      desc: '100% zero-emission next-generation EVs',
+      desc: 'Battery-electric vehicles; review each listing’s powertrain details',
       image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80',
       icon: <Zap className="w-5 h-5 text-[#13B8A6]" />,
       action: () => {
@@ -121,7 +121,7 @@ export const BrowseByCategory: FC = () => {
               Browse by Category
             </h2>
             <p className="text-xs sm:text-sm text-[#64748b] font-sans font-medium">
-              Filter Kenya's verified inventory by body style and drive type.
+              Filter available vehicle listings by body style and drive type.
             </p>
           </div>
 

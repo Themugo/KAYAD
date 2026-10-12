@@ -11,7 +11,13 @@ const checks = [
   ['App uses authoritative AuthProvider user/session', app.includes('useAuth()') && app.includes('AuthProvider')],
   ['Admin surface is role-gated', app.includes("activeNav === 'admin' && isAdmin") && app.includes("path === '/admin'") && app.includes('<RequireAdmin>')],
   ['Dealer workspace is role-gated', app.includes("activeNav === 'dealer-dashboard' && !isDealer && !isAdmin") && app.includes("path === '/dealer'")],
-  ['Private buyer surfaces are auth-gated', app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard'])")],
+  // Stage 21 deliberately added 'escrow-operations' to the protected set
+  // (documented in KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_AUDIT_20261012.md:
+  // "Updated the navigation validator to assert the actual protected-navigation
+  // set, including the existing escrow-operations route") — a strictly more
+  // restrictive change, not a weakening. This check's literal string was never
+  // updated to match; fixed here rather than reverting the source.
+  ['Private buyer surfaces are auth-gated', app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'escrow-operations'])")],
   ['Legacy direct routes canonicalize instead of falling through to Marketplace', ['/admin/login','/gallery','/marketplace','/auctions','/escrow','/support','/inspections','/financing','/saved','/profile','/payments','/chat','/dashboard','/buyer-platform','/dealer','/admin'].every(p => app.includes(`path === '${p}'`))],
   ['Support FAQ marketplace navigation uses canonical nav', faq.includes("faq.nextStep === 'Open Marketplace' ? 'marketplace'") && !faq.includes("faq.nextStep === 'Marketplace' ? 'gallery'")],
   ['Support FAQ auction navigation uses canonical discovery nav', faq.includes("faq.nextStep === 'Open Auction' ? 'discovery'")],

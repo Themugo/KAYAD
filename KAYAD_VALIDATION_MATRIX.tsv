@@ -1,0 +1,21 @@
+check	command	result	evidence	environment	blocker
+Root dependency install	npm install --engine-strict=false	PASS	0 vulnerabilities, 470 packages	sandbox, Node v22.22.0	engine-strict override used (not persisted to .npmrc)
+TypeScript typecheck	npx tsc --noEmit	PASS (after F1 fix)	0 diagnostics; 1 TS2322 error before fix	sandbox	none
+Production build	npx vite build	PASS	build succeeds; one chunk-size advisory, not an error	sandbox	none
+Frontend unit/component tests	npx vitest run	PASS (after F2-F5 fixes)	81/81 files, 645/645 tests, 1 honest skip; 3 files/5 tests failed before fixes	sandbox	none
+Backend dependency install	npm install --engine-strict=false (backend/)	PASS	added packages; 22 dev-only advisories	sandbox	none
+Backend production audit	npm audit --omit=dev (backend/)	PASS	0 vulnerabilities	sandbox	none
+Backend Jest	npm run test:jest (backend/)	PASS (after F6 fix)	79/79 suites, 1159/1159 tests; 1 suite/1 test failed before fix	sandbox	none
+Backend Vitest	npm run test:vitest (backend/)	PASS	5/5 files, 16/16 tests	sandbox	none
+Backend node:test	npm run test:node (backend/)	PASS	1/1	sandbox	none
+Backend boot	node bootstrap.js	PASS	/health returns {"status":"degraded"} correctly, no live Supabase credentials	sandbox	none
+Mobile navigation polish validator	node scripts/validate-mobile-navigation-polish-20261012.mjs	PASS	32/32	sandbox	none
+Master polish regression guard (new)	node scripts/validate-stage-master-polish-regression-20261012.mjs	PASS	8/8, all fixes from this pass	sandbox	none
+Full validator battery (197 scripts)	for f in scripts/validate-*.mjs; do node $f; done	192/197 PASS (after F7 fixes; 190/197 before)	see evidence/stage23/validator_battery.tsv	sandbox	5 remaining fails traced to 3 disclosed gaps below
+Communications provider certification	node scripts/validate-communications-provider-certification.mjs	FAIL (disclosed, non-code)	"email certification requires its provider credential set"	sandbox	no live Brevo/provider credentials configured; by design, prevents sending a real message in this sandbox
+Live runtime validator	node scripts/validate-live-runtime.mjs	FAIL (disclosed, non-code)	"missing SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY"	sandbox	no live Supabase credentials configured
+Local Supabase validator	node scripts/validate-local-supabase.mjs	FAIL (disclosed, non-code)	DockerLifecycleInspectError: no docker daemon	sandbox	no Docker daemon available
+Phase 6 release validator	node scripts/validate-phase6-release.mjs	38/39 PASS (disclosed, non-code)	"Running v22.22.0; certification must run on Node 22.22.2+"	sandbox	Node patch-version gap, same as every prior pass
+V14 runtime preflight	node scripts/validate-v14-runtime-preflight.mjs	FAIL (disclosed, non-code)	"running 22.22.0, required >=22.22.2"	sandbox	Node patch-version gap
+Browser/visual rendering at any viewport	not run	NOT RUN	no screenshot/Playwright/device evidence produced	n/a	no browser automation invoked this pass; single largest honest gap in this delivery
+Staging/live-provider certification	not run	BLOCKED	requires staging credentials and owner approval per brief Section 16	n/a	explicitly out of scope without authorization

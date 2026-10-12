@@ -645,6 +645,7 @@ function AppInner() {
             <DealersView
               dealers={[]}
               vehicles={vehicles}
+              user={authUser}
               onSelectDealerVehicles={handleSelectDealerVehicles}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onStartEscrow={handleStartEscrow}

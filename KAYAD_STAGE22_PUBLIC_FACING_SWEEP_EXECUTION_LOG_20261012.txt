@@ -1,0 +1,24 @@
+KAYAD STAGE 22 — PUBLIC-FACING SWEEP EXECUTION LOG
+Date: 2026-10-12
+Foundation: KAYAD Stage 21 full project ZIP
+
+Completed:
+- Public-facing source audit across marketplace, vehicle detail, seller/dealer profile, escrow marketing, auction teaser, home hero/CTA, category/collections, search, breadcrumbs and shared public styles.
+- Removed the client-only escrow creation call from the vehicle detail purchase CTA.
+- Removed fake trust metrics and fabricated live auction countdown / fallback / bid-count behavior.
+- Removed unsupported guarantee, direct registry integration, universal verification, zero-encumbrance, instant payout, invented seller profile metric, and false test-drive success copy.
+- Changed public Dealers entry to default to directory and show management switch only to dealer/admin roles.
+- Kept admin-managed ticker, homepage hero controls, sponsor placements and current information architecture.
+- Added source contract validator and audit artifacts.
+
+Validation:
+- `node scripts/validate-public-facing-convergence-20261012.mjs`: 49/49 PASS.
+- Regression validators passed individually: Stage 21 sell/auth/public 23/23; navigation 43/43; escrow boundary 14/14; messaging/notifications 30/30; auto services 17/17; financing 23/23; buyer portal 29/29; registration/onboarding 47/47; auth surfaces 10/10; role matrix 33/33; PWA/mobile 13/13; polish regressions 4/4; homepage, hero-admin, architecture, code-splitting and brand-palette checks PASS.
+- TS/TSX/JSX transpilation: 691 files, zero syntax diagnostics.
+- `npm run build` attempted and blocked: `vite: not found`; no `node_modules` present.
+- Runtime/build requirement remains Node >=22.22.2; current workspace Node is 22.16.0.
+
+Known gap:
+- Public dealer directory receives `dealers={[]}` in App and has no connected public directory-list endpoint. The page deliberately shows an honest empty state; no mock seller profiles were created.
+
+No commit, push, deployment, database migration, payment, provider certification or production mutation performed.

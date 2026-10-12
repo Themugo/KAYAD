@@ -85,7 +85,7 @@ function useInspectionRecords(ownerKey: string | null) {
     const records: InspectionRecord[] = [];
     let kayadError: string | null = null;
     let providerError: string | null = null;
-    if (kayad.status === 'fulfilled') records.push(...(kayad.value.orders || []).map(kayadOrderToRecord));
+    if (kayad.status === 'fulfilled') records.push(...(kayad.value?.orders || []).map(kayadOrderToRecord));
     else kayadError = 'Your KAYAD inspection requests could not be loaded.';
     if (provider.status === 'fulfilled') records.push(...(provider.value?.bookings || []).map(providerBookingToRecord));
     else providerError = 'Your provider bookings could not be loaded.';

@@ -1,0 +1,13 @@
+area	check	result	evidence
+Mobile drawer	Canonical drawer and event retained	PASS	validate-mobile-navigation-polish: 1
+Mobile drawer	Accessible dialog and visual viewport sizing retained	PASS	validate-mobile-navigation-polish: 2-4
+Navigation layout	Grouped responsive grid and support full-width placement	PASS	validate-mobile-navigation-polish: 5,9-10
+Navigation icons	Primary and child icons sourced from canonical nav config	PASS	validate-mobile-navigation-polish: 6-8
+Overlay	Bottom navigation hidden and non-interactive when drawer opens	PASS	validate-mobile-navigation-polish: 12-14
+Accessibility	Keyboard focus and reduced-motion behavior	PASS	validate-mobile-navigation-polish: 15-16
+Bottom dock	Five canonical destinations and touch/icon sizing	PASS	validate-mobile-navigation-polish: 17-21
+Phone header	Tagline suppression and compact actions	PASS	validate-mobile-navigation-polish: 22-23
+Architecture	Admin config, role gating and existing routes preserved	PASS	validate-mobile-navigation-polish: 25-31
+Regression	Stage 22 public-facing validator	PASS	49/49
+Syntax	TS/TSX/JSX transpile excluding declaration files	PASS	691/691
+Build/runtime	Vite build, unit suite, Playwright, real-device visual QA	NOT RUN	Dependencies absent; Node 22.16.0 below project requirement 22.22.2

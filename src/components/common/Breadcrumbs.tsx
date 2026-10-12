@@ -40,7 +40,7 @@ export const Breadcrumbs: FC = () => {
         break;
 
       case 'escrow':
-        items.push({ label: 'Bank Escrow Vault', isCurrent: true });
+        items.push({ label: 'Escrow options', isCurrent: true });
         break;
 
       case 'dashboard':

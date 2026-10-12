@@ -93,3 +93,49 @@
 .kayad-top-ticker{border-bottom:1px solid rgba(19,184,166,.4)!important}
 
 @media(prefers-reduced-motion:reduce){.kayad-menu{animation:none}.kayad-brand__mark,.kayad-nav__toggle svg,.kayad-nav__link,.kayad-menu__item,.kayad-cta,.kayad-util,.kayad-signin{transition:none}.kayad-brand:hover .kayad-brand__mark{transform:none}}
+
+
+/* Stage 23 — mobile navigation cohesion and icon legibility. One drawer surface,
+   consistent destination cards, and no floating dock over an open menu. */
+.kayad-mobile-menu { z-index: 120 !important; }
+.kayad-mobile-menu__surface { border-radius: 0 0 24px 24px; }
+.kayad-mobile-drawer-primary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; align-items:stretch; }
+.kayad-mobile-drawer-primary .kayad-drawer-group { min-width:0; margin:0; border:1px solid rgba(189,229,222,.15); border-radius:17px; background:linear-gradient(155deg,rgba(255,255,255,.075),rgba(255,255,255,.035)); box-shadow:inset 0 1px 0 rgba(255,255,255,.035); }
+.kayad-mobile-drawer-primary .kayad-drawer-group:has(.kayad-drawer-group__head[href*="support"]) { grid-column:1/-1; }
+.kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height:68px; height:100%; gap:9px; padding:10px; align-items:center; font-size:12px; line-height:1.25; }
+.kayad-mobile-drawer-primary .kayad-drawer-group__head > span:nth-child(2) { overflow-wrap:anywhere; }
+.kayad-mobile-drawer-primary .kayad-drawer-group__icon { width:36px;height:36px;border:1px solid rgba(123,217,207,.12);border-radius:12px;background:#0A4150;color:#8DE4DB; }
+.kayad-mobile-drawer-primary .kayad-drawer-group__head.is-active { background:linear-gradient(135deg,#176B87,#0F5968); }
+.kayad-mobile-drawer-primary .kayad-drawer-group__head > svg:last-child { width:14px;height:14px;flex:0 0 auto; }
+.kayad-mobile-drawer-primary .kayad-drawer-group__links { padding:0 9px 10px; display:grid;grid-template-columns:1fr;gap:6px; }
+.kayad-drawer-chip { min-width:0; min-height:38px; gap:8px; border-radius:11px; padding:7px 9px; line-height:1.25; overflow-wrap:anywhere; }
+.kayad-drawer-chip__icon { width:15px;height:15px;flex:0 0 auto;color:#8DE4DB; }
+.kayad-drawer-chip[aria-current="page"] .kayad-drawer-chip__icon { color:#063b46; }
+.kayad-mobile-menu__surface section { scroll-margin-block:12px; }
+.kayad-mobile-menu__surface button:focus-visible,.kayad-mobile-menu__surface a:focus-visible { outline:2px solid #8DE4DB;outline-offset:2px; }
+body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav,
+body.kayad-mobile-menu-is-open .mobile-bottom-nav,
+body.kayad-mobile-menu-is-open .bottom-nav,
+body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] { opacity:0!important;visibility:hidden!important;pointer-events:none!important; }
+@media(max-width:380px) {
+  .kayad-header__bar { gap:7px; padding-inline:9px; }
+  .kayad-brand { gap:7px; }
+  .kayad-brand__mark { width:35px;height:35px; }
+  .kayad-brand__word { font-size:1.18rem; }
+  .kayad-brand__ea { font-size:8px;padding:2px 5px; }
+  .kayad-cta { min-height:38px;padding-inline:9px;gap:5px;font-size:11px; }
+  .kayad-hamburger { width:38px;height:40px; }
+  .kayad-mobile-drawer-primary { gap:7px; }
+  .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height:64px;padding:8px;gap:7px;font-size:11px; }
+  .kayad-mobile-drawer-primary .kayad-drawer-group__icon { width:32px;height:32px; }
+}
+@media(max-width:340px) {
+  .kayad-mobile-drawer-primary { grid-template-columns:minmax(0,1fr); }
+  .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height:52px; }
+}
+@media(min-width:640px) and (max-width:1023px) {
+  .kayad-mobile-drawer-primary { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .kayad-mobile-menu,.kayad-drawer-group,.kayad-drawer-chip { animation:none!important;transition:none!important; }
+}

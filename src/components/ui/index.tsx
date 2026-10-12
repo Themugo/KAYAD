@@ -492,7 +492,7 @@ export const Image: React.FC<LazyImageProps> = ({
     <div ref={containerRef} className={`relative overflow-hidden ${wrapperClassName}`}>
       {(!isLoaded || !isInView) && !hasError && (
         <div className="absolute inset-0 bg-[#DDF4F0]/80 animate-pulse flex items-center justify-center z-0">
-          <div className="w-6 h-6 border-2 border-[#BDE5DE] border-t-amber-500 rounded-full animate-spin opacity-50" />
+          <div className="w-6 h-6 border-2 border-[#BDE5DE] border-t-[#13B8A6] rounded-full animate-spin opacity-50" />
         </div>
       )}
 

@@ -871,11 +871,32 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
 
 /* Shared public-page shell: the marketplace keeps its full-bleed layout, while
    all other public modules inherit the same calm surface and brand tokens. */
-.kayad-public-shell { --public-ink: #0A3340; --public-brand: #176B87; --public-accent: #13B8A6; --public-surface: #FFFFFF; --public-surface-soft: #F6FAF9; --public-border: #D7E7E4; --public-muted: #64748B; color: var(--public-ink); }
+.kayad-public-shell { --public-ink: #0A3340; --public-brand: #176B87; --public-accent: #13B8A6; --public-surface: #FFFFFF; --public-surface-soft: #F6FAF9; --public-border: #D7E7E4; --public-muted: #64748B; min-width: 0; color: var(--public-ink); background-color: var(--public-surface-soft); }
 .kayad-public-shell :where(button, a, input, select, textarea):focus-visible { outline-color: rgba(19,184,166,.68); outline-offset: 3px; }
-.kayad-public-shell :where(img) { max-width: 100%; }
+.kayad-public-shell :where(img, video, canvas) { max-width: 100%; }
+.kayad-public-shell :where(button, a, input, select, textarea) { scroll-margin-block: 5rem; }
+.kayad-public-shell :where(p, li) { overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .kayad-public-shell :where(.transition-all, .transition-colors, .transition-transform, .animate-pulse, .animate-spin) { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 .kayad-public-shell[data-kayad-surface="marketplace"], .kayad-public-shell[data-kayad-surface="saved"] { background: #F6FAF9; }
 .kayad-portal[data-dashboard-role="dealer"] { --kayad-portal-accent: #12576D; --kayad-portal-accent-soft: rgba(18,87,109,.11); }
 .kayad-portal[data-dashboard-role="individual_seller"] { --kayad-portal-accent: #13B8A6; --kayad-portal-accent-soft: rgba(19,184,166,.13); }
 .kayad-portal[data-dashboard-role="ghost_checker"] { --kayad-portal-accent: #5AAFA4; --kayad-portal-accent-soft: rgba(90,175,164,.14); }
 .kayad-portal[data-dashboard-role="admin"], .kayad-portal[data-dashboard-role="superadmin"], .kayad-portal[data-dashboard-role="marketing"], .kayad-portal[data-dashboard-role="technical_support"], .kayad-portal[data-dashboard-role="hr"], .kayad-portal[data-dashboard-role="accounts"], .kayad-portal[data-dashboard-role="escrow_officer"], .kayad-portal[data-dashboard-role="ad_manager"], .kayad-portal[data-dashboard-role="moderator"] { --kayad-portal-accent: #5AAFA4; --kayad-portal-accent-soft: rgba(90,175,164,.14); }
+
+
+/* Stage 23 phone polish: keep the bottom dock out of modal/menu layering and
+   give every tab a readable, stable hit area at 320–430px widths. */
+@media(max-width:639px) {
+  .kayad-mobile-bottom-nav { grid-template-columns:repeat(5,minmax(0,1fr)); gap:3px; padding:5px; border-radius:18px; }
+  .kayad-mobile-bottom-nav__item { min-height:48px; gap:4px; font-size:10px; letter-spacing:0; }
+  .kayad-mobile-bottom-nav__icon { width:24px;height:22px; }
+  .kayad-mobile-bottom-nav__icon svg { width:21px;height:21px; }
+  .kayad-mobile-bottom-nav__item.is-active { box-shadow:inset 0 0 0 1px #B9E4DC; }
+  .kayad-header__bar { min-height:64px; }
+  .kayad-brand__tag { display:none!important; }
+}
+@media(max-width:360px) {
+  .kayad-mobile-bottom-nav { left:6px;right:6px;bottom:max(6px,env(safe-area-inset-bottom)); }
+  .kayad-mobile-bottom-nav__item { font-size:9px;min-height:46px; }
+  .kayad-mobile-bottom-nav__icon svg { width:20px;height:20px; }
+}

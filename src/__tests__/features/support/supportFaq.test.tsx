@@ -46,7 +46,12 @@ describe('SupportFAQ - backend-sourced content', () => {
   it('puts bundled account-access help in the Account & access filter and includes the reopen guidance', async () => {
     cmsFaqApi.getCMSFaqs.mockResolvedValue([]);
     render(<SupportFAQ />);
-    fireEvent.click(screen.getByRole('button', { name: /Account & access/i }));
+    // The category filter bar exposes role="tab" (see SupportFAQ.tsx); querying
+    // by role="button" is ambiguous because each FAQ accordion row's own
+    // accessible name also contains its category label text ("Account &
+    // Access"), so a loose button-name query matches both the filter and an
+    // FAQ row. Scoping to role="tab" selects only the filter control.
+    fireEvent.click(screen.getByRole('tab', { name: /Account & access/i }));
     expect(await screen.findByText('I cannot access my account or a transaction.')).toBeTruthy();
     expect(screen.getByText('Can I reopen a case after it is marked resolved?')).toBeTruthy();
   });
@@ -58,7 +63,7 @@ describe('SupportFAQ - backend-sourced content', () => {
       createdAt: '', updatedAt: '',
     }]);
     render(<SupportFAQ />);
-    fireEvent.click(screen.getByRole('button', { name: /Account & access/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Account & access/i }));
     expect(await screen.findByText('Legacy account access question')).toBeTruthy();
   });
 

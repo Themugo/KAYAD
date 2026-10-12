@@ -69,7 +69,7 @@ export const Hero: FC = () => {
             </h1>
 
             <p className="mt-1.5 sm:mt-2.5 text-[11px] sm:text-xs md:text-sm font-sans font-medium text-[#DDF4F0]/95 leading-relaxed drop-shadow-md max-w-sm sm:max-w-lg">
-              Kenya's trusted automotive hub — independent pre-purchase inspections, verified logbooks, and secure direct deals.
+              Explore vehicle listings, compare available details and arrange independent inspections before you commit.
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export const Hero: FC = () => {
                     {activeVehicle.location}
                   </span>
                   <span>•</span>
-                  <span className="text-emerald-400 font-bold">Independent inspection available</span>
+                  <span className="text-emerald-400 font-bold">Inspection options</span>
                 </div>
 
                 {/* Vehicle Title */}

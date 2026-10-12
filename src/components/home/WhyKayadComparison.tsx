@@ -8,33 +8,33 @@ export const WhyKayadComparison: FC = () => {
   const comparisonRows = [
     {
       feature: 'Seller Identity',
-      traditional: 'Anonymous profiles & untraceable accounts',
-      kayad: 'National ID & KRA Biometric Verification',
+      traditional: 'Seller details may be limited or hard to compare',
+      kayad: 'Review the seller profile and any displayed verification status',
     },
     {
       feature: 'Payment Security',
-      traditional: 'Risky cash meetups or unsecured bank wires',
-      kayad: 'Escrow on approved listings, with a dispute process',
+      traditional: 'Payment terms vary by seller and transaction',
+      kayad: 'Escrow only where the programme and listing are eligible; review deal terms',
     },
     {
       feature: 'Vehicle History',
-      traditional: 'Unverified verbal seller claims & reset odometers',
-      kayad: 'KRA TIMS Logbook + VIN Audit + 150-Pt Report',
+      traditional: 'Vehicle history may require independent verification',
+      kayad: 'Review available vehicle details, documents and inspection reports',
     },
     {
       feature: 'Physical Condition',
-      traditional: 'As-is purchase with hidden mechanical defects',
-      kayad: 'On-site engineer pre-inspection & diagnostic scan',
+      traditional: 'Condition may be difficult to assess from a listing alone',
+      kayad: 'Arrange an independent inspection and confirm the selected scope',
     },
     {
       feature: 'Auctions & Bidding',
-      traditional: 'Ghost bids, unvetted buyers & fake reserves',
-      kayad: 'Escrow-backed verified bidders with real-time timers',
+      traditional: 'Auction rules and bidder requirements can differ',
+      kayad: 'Auction status and bid activity shown for each eligible auction',
     },
     {
       feature: 'Outstanding Debt / Liens',
-      traditional: 'Risk of buying a vehicle with unpaid bank loans',
-      kayad: 'Automated charge register check for 100% clean title',
+      traditional: 'Ownership and encumbrance checks require care',
+      kayad: 'Check ownership and encumbrance details through the appropriate official process',
     },
   ];
 
@@ -54,7 +54,7 @@ export const WhyKayadComparison: FC = () => {
           </h2>
 
           <p className="text-xs sm:text-sm text-[#BDE5DE] font-sans font-medium leading-relaxed max-w-2xl mx-auto">
-            See how KAYAD transforms vehicle buying and selling compared to traditional classifieds and unverified peer-to-peer social groups.
+            See how KAYAD brings vehicle listings, seller conversations, inspection options and deal information together in one marketplace.
           </p>
         </div>
 
@@ -70,7 +70,7 @@ export const WhyKayadComparison: FC = () => {
             </div>
             <div className="text-[#13B8A6] flex items-center gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
               <Shield className="w-4 h-4 text-[#13B8A6]" />
-              <span>KAYAD Regulated Marketplace</span>
+              <span>KAYAD Marketplace</span>
             </div>
           </div>
 

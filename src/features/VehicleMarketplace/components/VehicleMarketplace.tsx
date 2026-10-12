@@ -1317,7 +1317,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 )}
               </h2>
               <p className="mt-1 max-w-2xl text-xs sm:text-[13px] leading-relaxed text-[#64748B]">
-                {savedOnly ? 'The vehicles you have saved, with their inspection status, pricing and auction availability.' : 'Compare verified marketplace listings, inspection status, pricing and auction availability in one clear view.'}
+                {savedOnly ? 'The vehicles you have saved, with their inspection status, pricing and auction availability.' : 'Compare vehicle listings, available inspection status, pricing and auction availability in one clear view.'}
               </p>
             </div>
 
@@ -1598,7 +1598,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         fix only, not a lifecycle-accuracy fix. */}
                     <span className="self-start inline-flex items-center gap-1 bg-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3"><Gavel className="w-3 h-3" aria-hidden="true" /> LIVE AUCTIONS</span>
                     <h3 className="text-lg font-bold mb-2">Live Vehicle Auctions</h3>
-                    <p className="text-xs text-[#BDE5DE] mb-4">Bid on quality vehicles from trusted, verified sellers across East Africa.</p>
+                    <p className="text-xs text-[#BDE5DE] mb-4">Explore vehicles listed for auction across East Africa. Review each listing and seller details before bidding.</p>
                     <button onClick={() => onNavigate('discovery')} className="self-start bg-navy-600 hover:bg-navy-700 text-white text-xs font-bold px-4 py-2 rounded-lg mt-auto">
                       View Auctions →
                     </button>
@@ -1793,12 +1793,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 mt-12 rounded-2xl overflow-hidden">
           <div className="bg-gradient-to-br from-navy-700 to-navy-900 text-white p-8 sm:p-10 flex flex-col justify-center gap-4">
             <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--kayad-cyan)]">Buy with more confidence</span>
-            <h3 className="text-xl sm:text-2xl font-bold font-display max-w-md">A registered local mechanic inspects it. The report stays on file — for you and every buyer after you.</h3>
+            <h3 className="text-xl sm:text-2xl font-bold font-display max-w-md">Request an independent inspection before you commit to a vehicle.</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs text-[#BDE5DE]">
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Registered mechanic near the vehicle</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Pay the mechanic directly</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Report uploaded to the listing</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Later buyers can unlock it</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Choose an independent provider</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Review provider pricing and terms</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Review how the report will be shared</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />Report access depends on the booking and sharing terms</div>
             </div>
             <button onClick={() => onNavigate('inspections')} className="self-start bg-navy-600 hover:bg-navy-700 text-white text-sm font-bold px-5 py-2.5 rounded-full mt-1">
               Request an Inspection →
@@ -1806,7 +1806,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
           <div className="bg-[#F4F8FC] p-8 sm:p-9 flex flex-col justify-center">
             <h4 className="text-lg font-bold text-navy-900 mb-2 max-w-xs">Ready to sell your vehicle?</h4>
-            <p className="text-xs text-[#64748B] mb-4 max-w-xs">Reach verified buyers across East Africa through the KAYAD marketplace and escrow network.</p>
+            <p className="text-xs text-[#64748B] mb-4 max-w-xs">Reach interested buyers through the KAYAD marketplace and manage your listing through the existing Seller Studio.</p>
             <button onClick={() => onNavigate('seller-platform')} className="self-start bg-navy-900 hover:bg-navy-700 text-white text-sm font-bold px-5 py-2.5 rounded-full">
               Sell Your Vehicle →
             </button>

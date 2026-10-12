@@ -83,7 +83,7 @@ export const PublicEscrowExplainer: React.FC<Props> = ({ program, signedIn, onRe
         <button type="button" onClick={() => onNavigate?.('marketplace')} className="min-h-[44px] px-4 rounded-xl bg-[#176B87] text-white text-sm font-bold hover:bg-[#12556b]">Browse vehicles</button>
         <button type="button" onClick={() => onNavigate?.('auctions')} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">See auctions</button>
         {signedIn
-          ? <button type="button" onClick={onOpenDashboard} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">Open your dashboard</button>
+          ? <button type="button" onClick={onOpenDashboard} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">Go to your account</button>
           : <button type="button" onClick={onOpenAuth} className="min-h-[44px] px-4 rounded-xl border border-[#BDE5DE] text-sm font-bold text-[#12576D] hover:bg-[#F6FAF9]">Sign in to follow your deals</button>}
       </div>
     </section>

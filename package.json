@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "validate:mobile-navigation-polish": "node scripts/validate-mobile-navigation-polish-20261012.mjs",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
@@ -138,7 +139,9 @@
     "validate:public-financing-boundary": "node scripts/validate-public-financing-boundary-20261012.mjs",
     "validate:buyer-portal-boundaries": "node scripts/validate-buyer-portal-boundaries-20261012.mjs",
     "certify:buyer-portal:staging": "node scripts/certify-buyer-portal-staging-isolation-20261012.mjs",
-    "validate:premium-sell-auth-public-convergence": "node scripts/validate-premium-sell-auth-public-convergence-20261012.mjs"
+    "validate:premium-sell-auth-public-convergence": "node scripts/validate-premium-sell-auth-public-convergence-20261012.mjs",
+    "validate:public-facing-convergence": "node scripts/validate-public-facing-convergence-20261012.mjs",
+    "validate:master-polish-regression": "node scripts/validate-stage-master-polish-regression-20261012.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

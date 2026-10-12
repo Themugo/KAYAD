@@ -34,7 +34,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
-import { isEscrowApplicable } from '../../utils/escrow';
+import { getEscrowBadgeLabel, isEscrowApplicable } from '../../utils/escrow';
 import { usePrefersReducedMotion } from '../../hooks/useMediaQuery';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
@@ -50,7 +50,6 @@ export const VehicleDetailPage: FC = () => {
   const {
     selectedVehicle,
     placeBid,
-    initiateEscrow,
     navigateTo,
     openChat,
     savedVehicleIds,
@@ -279,13 +278,16 @@ export const VehicleDetailPage: FC = () => {
     }
   };
 
-  const handleBuyNowEscrow = () => {
-    if (!user) {
-      navigateTo('dashboard');
+  // Public vehicle CTAs must not create a client-only escrow record or imply that
+  // payment has started. Route eligible listings to the live programme explainer;
+  // otherwise route buyers to the seller conversation. The backend remains the
+  // only authority for any real deal, funding, or release.
+  const handlePurchaseAction = () => {
+    if (isEscrowApplicable(vehicle)) {
+      navigateTo('escrow');
       return;
     }
-    initiateEscrow(vehicle, user.id, user.name);
-    navigateTo('escrow');
+    openChat(vehicle.id);
   };
 
   return (
@@ -342,10 +344,10 @@ export const VehicleDetailPage: FC = () => {
               <button
                 onClick={() => navigateTo('escrow')}
                 className="px-3 py-1.5 rounded-xl bg-[var(--kayad-cyan)]/15 hover:bg-[var(--kayad-cyan)]/25 text-navy-600 border border-[var(--kayad-cyan)]/40 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
-                title="Click to view M-Pesa Escrow Guarantee"
+                title="Review current escrow availability and terms"
               >
                 <Lock className="w-3.5 h-3.5 text-[var(--kayad-cyan)] group-hover:scale-110 transition-transform" />
-                <span>M-Pesa Escrow Protected</span>
+                <span>{getEscrowBadgeLabel(vehicle)}</span>
                 <ChevronRight className="w-3 h-3 text-navy-600/60" />
               </button>
             )}
@@ -547,7 +549,7 @@ export const VehicleDetailPage: FC = () => {
                     <ShieldCheck className="w-8 h-8" />
                   </div>
                   <h2 className="text-lg font-serif font-black">{formattedFullTitle}</h2>
-                  <p className="text-xs text-[#BDE5DE] max-w-sm">Verified Showroom Vehicle • High Resolution Photography Loading</p>
+                  <p className="text-xs text-[#BDE5DE] max-w-sm">Vehicle listing • loading photography</p>
                 </div>
               )}
 
@@ -568,7 +570,7 @@ export const VehicleDetailPage: FC = () => {
               <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10 pointer-events-none">
                 {vehicle.inspection && (
                   <Badge variant="amber">
-                    150-Pt Score: {vehicle.inspection.score}/100
+                    Inspection score: {vehicle.inspection.score}/100
                   </Badge>
                 )}
                 {activeImgIndex === 0 && (
@@ -725,7 +727,7 @@ export const VehicleDetailPage: FC = () => {
             </div>
           </div>
 
-          {/* 150-Point Inspection Section */}
+          {/* Inspection Details Section */}
           {vehicle.inspection && (
             <div className="p-6 rounded-3xl bg-navy-600 text-white border border-navy-600 space-y-4 shadow-md relative overflow-hidden">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
@@ -736,14 +738,14 @@ export const VehicleDetailPage: FC = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-base sm:text-lg font-bold text-white font-serif">
-                        150-Point Ghost Check Certification
+                        Inspection Details
                       </h2>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[var(--kayad-cyan)] text-navy-600">
-                        Verified
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-white/10 text-[#DDF4F0] border border-white/15">
+                        Report details
                       </span>
                     </div>
                     <p className="text-xs text-[#BDE5DE]">
-                      Inspected on {vehicle.inspection.inspectedAt} by Senior Inspector {vehicle.inspection.inspectorName}
+                      Inspection date: {vehicle.inspection.inspectedAt || 'Not provided'} · Provider: {vehicle.inspection.inspectorName || 'Not provided'}
                     </p>
                   </div>
                 </div>
@@ -752,7 +754,7 @@ export const VehicleDetailPage: FC = () => {
                     {vehicle.inspection.score}/100
                   </span>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold block">
-                    Grade A Pass Certificate
+                    Reported inspection score
                   </span>
                 </div>
               </div>
@@ -781,10 +783,10 @@ export const VehicleDetailPage: FC = () => {
             <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3.5 relative z-10">
               <h2 className="text-base font-bold text-white font-serif flex items-center gap-2.5">
                 <ShieldCheck className="w-5 h-5 text-[var(--kayad-cyan)]" />
-                <span>Buyer Protection & Trust Guarantees</span>
+                <span>Before You Buy</span>
               </h2>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--kayad-cyan)]/20 text-[var(--kayad-cyan)] border border-[var(--kayad-cyan)]/40">
-                100% KAYAD Verified
+                Check each claim
               </span>
             </div>
 
@@ -792,32 +794,32 @@ export const VehicleDetailPage: FC = () => {
               <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[var(--kayad-cyan)]/40 transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-[var(--kayad-cyan)] shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-white block">Official Title & Logbook Cleared</span>
-                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">NTSA logbook ownership verified with zero outstanding encumbrances.</span>
+                  <span className="font-extrabold text-white block">Verify ownership documents</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Check the logbook and ownership details through the appropriate official process before payment.</span>
                 </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[var(--kayad-cyan)]/40 transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-white block">Accident & Chassis Inspection Passed</span>
-                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Structural chassis integrity and body alignment scan passed without defect.</span>
+                  <span className="font-extrabold text-white block">Review inspection findings</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Use any available inspection report as one input; consider an independent inspection before committing.</span>
                 </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[var(--kayad-cyan)]/40 transition-colors">
                 <Lock className="w-4 h-4 text-[var(--kayad-cyan)] shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-white block">Secure M-Pesa Buyer Protection</span>
-                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Direct M-Pesa or bank transfer backed by 48-hour physical inspection.</span>
+                  <span className="font-extrabold text-white block">Confirm payment arrangements</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Use escrow only when the current programme and this listing explicitly allow it. Never assume a payment is protected.</span>
                 </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[var(--kayad-cyan)]/40 transition-colors">
                 <FileText className="w-4 h-4 text-[var(--kayad-cyan)] shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-white block">Complete Service History</span>
-                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Verified franchise maintenance logbook and authentic odometer check.</span>
+                  <span className="font-extrabold text-white block">Ask for service history</span>
+                  <span className="text-[#BDE5DE] text-[11px] leading-relaxed">Request supporting records and verify mileage, maintenance and vehicle history independently.</span>
                 </div>
               </div>
             </div>
@@ -841,12 +843,12 @@ export const VehicleDetailPage: FC = () => {
               </div>
 
               <span className="px-3 py-1 rounded-full bg-[var(--kayad-cyan)]/20 text-[var(--kayad-cyan)] text-xs font-mono font-bold border border-[var(--kayad-cyan)]/30 w-fit">
-                From KSh 4,500
+                Pricing shown before booking
               </span>
             </div>
 
             <p className="text-xs text-[#BDE5DE] leading-relaxed font-medium">
-              Want independent peace of mind before buying this <strong className="text-white">{vehicle.title.startsWith(String(vehicle.year)) ? vehicle.title : `${vehicle.year} ${vehicle.title}`}</strong>? Book an on-demand physical and mechanical scan. Our certified master engineers check 150 points, scan OBD-II fault codes, verify paint depth & test drive the vehicle.
+              Want independent peace of mind before buying this <strong className="text-white">{vehicle.title.startsWith(String(vehicle.year)) ? vehicle.title : `${vehicle.year} ${vehicle.title}`}</strong>? Book an on-demand physical and mechanical scan. Inspection scope, tests, provider credentials and pricing depend on the selected independent provider and package. Review the service details before booking.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
@@ -863,7 +865,7 @@ export const VehicleDetailPage: FC = () => {
                 className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center gap-2 border border-white/20 transition-all cursor-pointer"
               >
                 <FileText className="w-4 h-4 text-[var(--kayad-cyan)]" />
-                <span>See Sample Reports</span>
+                <span>Explore inspection options</span>
               </button>
             </div>
           </div>
@@ -898,15 +900,15 @@ export const VehicleDetailPage: FC = () => {
 
               {/* Buy Now Direct Protection CTA Button (Primary Action) */}
               <button
-                onClick={handleBuyNowEscrow}
+                onClick={handlePurchaseAction}
                 className="w-full py-3.5 px-4 rounded-xl bg-navy-600 hover:bg-navy-900 text-white font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md border border-navy-600 cursor-pointer mt-2"
               >
                 <Lock className="w-4 h-4 text-[var(--kayad-cyan)]" />
-                <span>Buy Now via M-Pesa Protection</span>
+                <span>{isEscrowApplicable(vehicle) ? 'Review escrow availability' : 'Contact seller to arrange purchase'}</span>
               </button>
 
               <p className="text-[11px] text-[#64748b] text-center leading-normal font-medium pt-1">
-                Protected by M-Pesa Direct Payment. Backup guaranteed by 48-hr physical vehicle inspection.
+                No payment is initiated here. Escrow availability and deal terms must be confirmed before paying; otherwise contact the seller to agree the next step.
               </p>
 
               {/* Set Price Alert Callout */}
@@ -1038,14 +1040,14 @@ export const VehicleDetailPage: FC = () => {
                   </span>
                 </div>
                 <button
-                  onClick={handleBuyNowEscrow}
+                  onClick={handlePurchaseAction}
                   className="w-full py-3.5 rounded-xl bg-navy-600 hover:bg-navy-900 text-white font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md border border-navy-600 cursor-pointer"
                 >
                   <Lock className="w-4 h-4 text-[var(--kayad-cyan)]" />
-                  <span>Buy Now via M-Pesa Escrow</span>
+                  <span>{isEscrowApplicable(vehicle) ? 'Review escrow availability' : 'Contact seller to arrange purchase'}</span>
                 </button>
                 <p className="text-[11px] text-[#64748b] text-center leading-normal font-medium">
-                  Escrow applies only where this listing shows the Escrow badge. Release timing is set per deal.
+                  This button does not start a payment. Where escrow is available, review the current programme status and the terms for your specific deal first.
                 </p>
               </div>
             )}
@@ -1177,11 +1179,11 @@ export const VehicleDetailPage: FC = () => {
           </button>
 
           <button
-            onClick={handleBuyNowEscrow}
+            onClick={handlePurchaseAction}
             className="py-3 px-4 rounded-xl bg-[var(--kayad-cyan)] hover:bg-[var(--kayad-cyan)] text-navy-600 font-black text-xs flex items-center gap-1.5 shadow-md uppercase tracking-wider cursor-pointer"
           >
             <Lock className="w-3.5 h-3.5" />
-            <span>Buy via Escrow</span>
+            <span>{isEscrowApplicable(vehicle) ? 'Review escrow availability' : 'Contact seller'}</span>
           </button>
         </div>
       </div>

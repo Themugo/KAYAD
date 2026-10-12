@@ -32,7 +32,14 @@ describe("auction endpoints never expose soft-deleted vehicles", () => {
     expect(filter.status).toEqual({ $ne: "rejected" });
     expect(filter.auctionStatus).toBe("live");
     expect(Date.parse(filter.auctionStartTime.$lte)).toBeLessThanOrEqual(Date.now());
-    expect(Date.parse(filter.auctionEnd.$gt)).toBeGreaterThan(Date.now());
+    // auctionStartTime.$lte and auctionEnd.$gt are both set from the exact
+    // same `now` snapshot inside listAuctions (controllers/auctionController.js),
+    // captured strictly before this assertion runs. A later Date.now() call in
+    // this test is therefore always >= that snapshot, so asserting
+    // toBeGreaterThan(Date.now()) here was an inverted/impossible comparison
+    // (confirmed: fails consistently across repeated runs, not intermittently).
+    // The correct assertion mirrors the sibling check above it.
+    expect(Date.parse(filter.auctionEnd.$gt)).toBeLessThanOrEqual(Date.now());
     expect(carCount.mock.calls[0][0]).toEqual(filter);
   });
 

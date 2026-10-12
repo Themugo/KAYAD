@@ -245,7 +245,7 @@ export const GlobalSearchSection: FC = () => {
             <span className="font-mono font-bold">Escrow available on approved listings</span>
           </div>
           <span className="hidden sm:inline text-[#94A3B8] font-mono">
-            Directly linked to KRA & NTSA verification systems
+            Verify vehicle and ownership details through the appropriate official channels
           </span>
         </div>
 

@@ -1,0 +1,19 @@
+Area	Result	Evidence	Limit
+Public design tokens	PASS	Shared KAYAD palette, focus, reduced-motion and overflow contracts	Visual rendering not browser-certified
+Public dealer entry	PASS	Defaults to directory; dealer/admin-only console switch	Directory list source not wired; empty state remains honest
+Vehicle purchase CTA	PASS	No client-only escrow creation; escrow explainer or seller chat routing	Live purchase/escrow runtime not tested
+Vehicle inspection copy	PASS	Score uses /100; no unsupported certificate/pass claims	Source syntax only
+Seller/dealer profile	PASS	Fabricated defaults and fake booking/follow confirmations removed	Live seller profile records not exercised
+Home marketing claims	PASS	Hard-coded metrics, universal verification and guaranteed payout copy removed	Legacy components may not be mounted in current route
+Live auctions promo	PASS	Only `auctionLifecycle === live`; no timer/fallback/fake bids	No browser runtime data verification
+Commercial controls	PASS	Existing admin-managed ticker, hero config and sponsor placements retained	No admin UI browser QA
+Auth/registration regression	PASS	Existing validators passed	No live auth session created
+Navigation regression	PASS	Existing validator 43/43	No browser navigation run
+Escrow boundary regression	PASS	Existing validator 14/14	No staging transaction executed
+Messaging/notification regression	PASS	Existing validator 30/30	No live provider check
+Auto services regression	PASS	Existing validator 17/17	No live provider check
+Financing regression	PASS	Existing validator 23/23	No lender/provider certification
+Buyer portal regression	PASS	Existing validator 29/29	No real two-account staging test
+Syntax transpilation	PASS	691 TS/TSX/JSX files; zero syntax diagnostics	Not semantic typechecking
+Production build	BLOCKED	`npm run build`: `vite: not found`; no node_modules	Install deps under Node >=22.22.2 and rerun
+Browser visual QA	NOT RUN	Browser/Playwright not available in this workspace	Must be performed before visual acceptance
