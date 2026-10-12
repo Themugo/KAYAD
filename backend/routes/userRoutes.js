@@ -14,6 +14,7 @@ const router = express.Router();
 
 router.get(
   "/search",
+  protect, // AA-S2: was unauthenticated and enumerated every user's name/email
   validateQuery(userListQuerySchema),
   cacheDealerSearch,
   trackDealerSearchLatency,
@@ -28,10 +29,13 @@ router.get(
       filter.$text = { $search: q };
     }
     if (role) filter.role = role;
+    const isAdmin = STAFF_ROLES.includes(req.user?.role);
+    // AA-S2: non-admins never see admin accounts or any email address.
+    if (!isAdmin) filter.role = role && !STAFF_ROLES.includes(role) ? role : { $nin: STAFF_ROLES };
 
     const [users, total] = await Promise.all([
       User.find(filter)
-        .select("name email avatar businessName role location dealerRating")
+        .select(isAdmin ? "name email avatar businessName role location dealerRating" : "name avatar businessName role location dealerRating")
         .sort({ name: 1 })
         .skip(skip)
         .limit(safeLimit)
