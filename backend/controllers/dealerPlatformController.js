@@ -711,7 +711,23 @@ export async function getFinanceApplications(req, res) {
   const applications = await findAll("loan_applications", { filters: { dealer: req.user.id }, orderBy: "createdAt", ascending: false, limit: 100 });
   const stats = { total: applications.length, submitted: 0, under_review: 0, approved: 0, declined: 0, disbursed: 0 };
   for (const application of applications) if (stats[application.status] !== undefined) stats[application.status] += 1;
-  return res.json({ success: true, data: { items: applications, stats, source: "loan_applications" } });
+  // Phase 12 fix: `loan_applications` rows only carry raw `vehicle`/`applicant`
+  // UUIDs (see supabase/migrations/20260908043000_dealer_platform_domain_end_to_end.sql),
+  // no join. The dashboard's Finance tab needs a human-readable vehicle title
+  // and applicant name, not a bare UUID, so resolve both the same way
+  // getInspectionOrders already resolves vehicle titles for this dealer.
+  const vehicleIds = [...new Set(applications.map((a) => a.vehicle).filter(Boolean))];
+  const applicantIds = [...new Set(applications.map((a) => a.applicant).filter(Boolean))];
+  const [cars, applicants] = await Promise.all([
+    vehicleIds.length ? Car.find({ id: { $in: vehicleIds } }) : [],
+    applicantIds.length ? User.find({ id: { $in: applicantIds } }) : [],
+  ]);
+  const items = applications.map((application) => ({
+    ...application,
+    vehicle: cars.find((car) => car.id === application.vehicle)?.title || "Vehicle",
+    applicantName: applicants.find((person) => person.id === application.applicant)?.name || "Buyer",
+  }));
+  return res.json({ success: true, data: { items, stats, source: "loan_applications" } });
 }
 
 // ============================================================

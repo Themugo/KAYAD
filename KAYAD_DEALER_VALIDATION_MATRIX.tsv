@@ -1,0 +1,29 @@
+Area	Check	Command	Result	Evidence
+Frontend typecheck	Zero TypeScript errors after all dealer-dashboard edits	npm run lint (tsc --noEmit)	PASS	0 errors
+Frontend build	Production build succeeds, DealerDashboard chunk emitted	npm run build	PASS	vite build succeeded; dist/assets/DealerDashboard-*.js present
+Frontend tests (full suite)	No regression across entire frontend test suite	npx vitest run	PASS	81 test files, 643 tests passed, 1 pre-existing skip
+Frontend tests (dealer-area, verbose)	Dealer-specific test files pass individually	npx vitest run --reporter=verbose (grep dealer)	PASS	DealerDashboard.test.jsx, DealerAuctionSetup.test.jsx, dealerOnboardingTruth.test.jsx, dealerProfileTruth.test.jsx, roles.test.ts, roleMapping.test.ts, escrowRulesConfig.test.ts, escrowOverride.test.ts — all pass
+Backend syntax	Modified controllers parse without syntax errors	node --check backend/controllers/dealerPlatformController.js; node --check backend/controllers/carController.js	PASS	SYNTAX_OK on both
+Backend tests (Jest)	No regression across backend Jest suite	npm test (backend, Jest portion)	PASS	79 suites / 1159 tests passed
+Backend tests (Vitest)	No regression across backend Vitest suite	npm test (backend, Vitest portion)	PASS	5 files / 16 tests passed
+Backend tests (node:test)	Response-lifecycle test passes	npm test (backend, node:test portion)	PASS	1/1 test passed
+Backend boot guard	No undefined identifiers in boot-critical files	npm run validate:backend-boot	PASS	"no undefined identifiers in 8 boot-critical files"
+Dealer modal convergence	No duplicate dealer modal implementation	npm run validate:dealer-modal-convergence	PASS	1 canonical implementation + 1 compatibility re-export
+Database contract alignment	Migration-backed tables/constraints align with code contracts	npm run validate:database-contract-alignment	PASS	8/8 checks passed
+Domain lifecycle integrity	Dealer onboarding/inspection lifecycle invariants hold	npm run validate:domain-lifecycle-integrity	PASS	9/9 checks passed
+Explicit auth flows	No duplicate/legacy auth modal paths reintroduced	npm run validate:explicit-auth-flows	PASS	15/15 checks passed
+Registration role matrix	Registration/role contract unaffected by this mission's changes	npm run validate:registration-role-matrix	PASS	33/33 checks passed
+Registration onboarding	Env-file-dependent check	npm run validate:registration-onboarding	BLOCKED (pre-existing, unrelated)	ENOENT: .env.production.example absent from this checkout; script untouched by this mission — not a regression
+Live RLS / grant posture (R11)	authenticated/anon roles hold no base GRANT on dealer_verifications/dealers/dealer_teams/leads/marketing_campaigns	Read-only Supabase queries (information_schema.table_privileges) against live "KAYAD EA" project	PASS (hardening recommendation only, not a live defect)	See KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md
+Live schema — onboarding columns (R12)	dealers table has bio/payment_details/onboarding_complete/onboarding_completed_at columns	Read-only Supabase query (information_schema.columns) against live "KAYAD EA" project	FAIL — confirmed live defect, BLOCKED pending user authorization to migrate	See KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md §4; fix SQL drafted, not applied
+Live schema — suspend constraint (R14)	dealer_verifications.verification_status CHECK constraint allows 'suspended'	Read-only Supabase query (pg_get_constraintdef) against live "KAYAD EA" project	FAIL — confirmed live defect, BLOCKED pending user authorization to migrate	See KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md / gap register R14; fix SQL drafted, not applied
+Dashboard wiring — Finance (R3)	Finance tab renders real loan_applications data, not a stub	Manual JSX/controller trace + full test battery above	PASS	KAYAD_DEALER_CAPABILITY_WIRING_MATRIX.md Finance row
+Dashboard wiring — Finance names (R17)	Finance tab shows a vehicle title and applicant name, not raw UUIDs	Manual controller-shape trace (enrichment added) + full test battery above	PASS	dealerPlatformController.js getFinanceApplications; gap register R17
+Dashboard wiring — Team (R4)	Team tab renders real team-member data, not a stub	Manual JSX/controller trace + full test battery above	PASS	KAYAD_DEALER_CAPABILITY_WIRING_MATRIX.md Team row
+Dashboard wiring — Reputation (R5)	Reputation tab exists in nav and renders real review data	Manual JSX/controller trace + full test battery above	PASS	KAYAD_DEALER_CAPABILITY_WIRING_MATRIX.md Reputation row
+Dead buttons (R6/R7)	Header Add Listing, View All, View Inventory navigate somewhere real	Manual source read of onClick handlers	PASS	Bell intentionally left unwired — no notification center exists to point it to
+Auction bid-freeze guard (R15)	Non-staff caller cannot set car.status="rejected" via updateCar	Manual source read of new guard + full backend test battery above	PASS	carController.js updateCar; gap register R15
+Cross-tenant isolation (app layer)	Every dealer-platform controller filters by req.user.id / dealer ownership	Direct controller reads, Phases 0-7	PASS	KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md
+Cross-tenant isolation (DB layer)	cars/escrows/users carry zero authenticated/anon grants	Read-only Supabase queries against live project	PASS	KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md
+Self-approval prevention	No dealer-facing endpoint can write verification_status	Direct controller/route reads, Phase 4	PASS	KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md
+dealerOrgAccess membership resolution	Team permission checks resolve membership server-side, never from a client-supplied org id	Direct middleware read, Phase 5	PASS	KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md carry-forward #1

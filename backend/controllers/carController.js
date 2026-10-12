@@ -688,6 +688,29 @@ export const updateCar = async (req, res) => {
       }
     }
 
+    // ── "REJECTED" STATUS IS ADMIN-MODERATION-ONLY ───────
+    // Phase 12 fix (dealer-platform convergence mission, gap register R15):
+    // `status` was in `allowedFields` below with no enum validation and no
+    // entry in AUCTION_LOCKED_FIELDS above, so a dealer editing their own
+    // listing through this generic endpoint could set status:"rejected" -
+    // the one value bidController.js's placeBid (and auctionController.js's
+    // detail/bid-list routes) specifically checks to stop all further
+    // bidding on a listing (added for admin moderation, see
+    // CUSTOMER_AUCTION_EXPERIENCE_AUDIT_20261008.md). That gave any dealer
+    // a way to silently freeze bidding on their own live auction without
+    // going through the amendment/lock workflow the AUCTION_LOCKED_FIELDS
+    // guard above exists to enforce - "rejected" is only ever meant to be
+    // written by admin moderation (adminRoutes.js, duplicateController.js),
+    // never by the listing's own owner. Block it here regardless of
+    // auction state, for anyone but staff.
+    if (!isStaff && req.body.status === "rejected" && car.status !== "rejected") {
+      return res.status(403).json({
+        success: false,
+        code: "STATUS_ADMIN_ONLY",
+        message: "This status can only be set by admin moderation.",
+      });
+    }
+
     // Preserve existing coverImage if caller didn't explicitly send one
     const incomingCover = req.body.coverImage;
     const hadExplicitCover = incomingCover !== undefined && incomingCover !== null && incomingCover !== "";

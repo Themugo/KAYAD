@@ -38,6 +38,7 @@ const colors = {
 type DealerOperationResponse = {
   auctions?: { items?: Array<{ id: string; title: string; bidsCount?: number; views?: number; currentBid?: number; startingBid?: number; status?: string }> };
   inspections?: { items?: Array<{ id: string; vehicle?: string; status?: string }> };
+  finance?: { items?: Array<{ id: string; applicantName?: string; vehicle?: string; status?: string }> };
   analytics?: {
     overview?: { totalRevenue?: number; totalSales?: number; totalViews?: number };
     performance?: { avgDealSize?: number };
@@ -281,6 +282,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       auctions: dealerApi.getAuctionInventory,
       inspections: dealerApi.getInspectionOrders,
       analytics: dealerApi.getDealerAnalytics,
+      // Phase 12 fix (dealer-platform convergence mission): this endpoint
+      // already existed and was already dealer-scoped and safe
+      // (backend/controllers/dealerPlatformController.js:getFinanceApplications,
+      // reads loan_applications filtered by dealer: req.user.id) - the
+      // dashboard's Finance tab just never called it, showing a stale
+      // "not backed by a canonical dealer-scoped data contract yet"
+      // placeholder instead. See KAYAD_DEALER_CAPABILITY_WIRING_MATRIX.md.
+      finance: dealerApi.getFinanceApplications,
     };
     const loader = loaders[activeSection];
     if (!loader || !user || operations[activeSection]) return;
@@ -291,6 +300,42 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       .catch(() => setOperationsError(`Could not load ${activeSection}. Please try again.`))
       .finally(() => setOperationsLoading(false));
   }, [activeSection, user, operations]);
+
+  // Phase 12 fix (R4/R5): Team and Reputation both had real, safe,
+  // dealer-scoped backend endpoints with zero dashboard entry point.
+  // Loaded the same way as customers/leads above - lazily, once per
+  // section visit, re-fetchable via the loaded-flag being reset.
+  const [team, setTeam] = useState([]);
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [teamError, setTeamError] = useState(null);
+  const [teamLoaded, setTeamLoaded] = useState(false);
+
+  useEffect(() => {
+    if (activeSection === 'team' && user && !teamLoaded) {
+      setTeamLoading(true);
+      setTeamError(null);
+      dealerApi.getTeamMembers()
+        .then((response) => { setTeam(response.members || []); setTeamLoaded(true); })
+        .catch(() => setTeamError('Could not load your team. Please try again.'))
+        .finally(() => setTeamLoading(false));
+    }
+  }, [activeSection, user, teamLoaded]);
+
+  const [reputation, setReputation] = useState(null);
+  const [reputationLoading, setReputationLoading] = useState(false);
+  const [reputationError, setReputationError] = useState(null);
+  const [reputationLoaded, setReputationLoaded] = useState(false);
+
+  useEffect(() => {
+    if (activeSection === 'reputation' && user && !reputationLoaded) {
+      setReputationLoading(true);
+      setReputationError(null);
+      dealerApi.getReputation()
+        .then((response) => { setReputation(response.data); setReputationLoaded(true); })
+        .catch(() => setReputationError('Could not load your reputation. Please try again.'))
+        .finally(() => setReputationLoading(false));
+    }
+  }, [activeSection, user, reputationLoaded]);
 
   const [campaigns, setCampaigns] = useState([]);
   const [campaignsLoading, setCampaignsLoading] = useState(false);
@@ -391,6 +436,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     { id: 'finance', label: 'Finance', icon: CreditCard },
     { id: 'inspections', label: 'Inspections', icon: ClipboardCheck },
     { id: 'team', label: 'Team', icon: TeamIcon },
+    { id: 'reputation', label: 'Reputation', icon: Star },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -451,7 +497,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               <button className="p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9]">
                 <Bell className="w-5 h-5 text-[#64748B]" />
               </button>
-              <button className="px-4 py-2 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2">
+              <button onClick={() => onNavigate?.('seller-platform')} className="px-4 py-2 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2">
                 <Plus className="w-5 h-5" />
                 Add Listing
               </button>
@@ -493,7 +539,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 <div className="col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-[#0A3340]">Lead Pipeline</h3>
-                    <button className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View All</button>
+                    <button onClick={() => setActiveSection('leads')} className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View All</button>
                   </div>
                   <div className="grid grid-cols-4 gap-3">
                     <PipelineStage stage="New" count={dashboard?.overview?.leads?.new ?? 0} color={colors.softBlue} />
@@ -542,7 +588,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 <div className="col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-[#0A3340]">Top Performing Vehicles</h3>
-                    <button className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View Inventory</button>
+                    <button onClick={() => setActiveSection('inventory')} className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View Inventory</button>
                   </div>
                   <div className="space-y-3">
                     {dashboard?.topPerformers?.vehicles?.map((vehicle, i) => (
@@ -873,10 +919,18 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             </div>
           )}
 
-          {['auctions', 'finance', 'inspections', 'team', 'settings'].includes(activeSection) && (
+          {['auctions', 'finance', 'inspections', 'settings'].includes(activeSection) && (
             <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
               <h3 className="text-xl font-bold text-[#0A3340] capitalize mb-2">{activeSection}</h3>
-              {['finance', 'team', 'settings'].includes(activeSection) ? (
+              {/* Phase 12 fix: "finance" used to be grouped with "team"/"settings"
+                  as a hardcoded "not backed yet" stub, but a real, dealer-scoped,
+                  already-safe backend contract for finance already existed
+                  (getFinanceApplications) - only the UI binding was missing.
+                  "team" was moved to its own section below once it was wired to
+                  the real, already-authorized dealer-platform team endpoints.
+                  "settings" has no backend contract found in this audit, so it
+                  honestly keeps the disclosed-gap placeholder. */}
+              {activeSection === 'settings' ? (
                 <div className="py-12 text-center">
                   <p className="text-sm text-[#64748B]">This dealer capability is not backed by a canonical dealer-scoped data contract yet.</p>
                   <p className="text-xs text-[#94A3B8] mt-2">KAYAD will not display simulated records here.</p>
@@ -894,6 +948,15 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     </div>
                   ))}
                 </div>
+              ) : activeSection === 'finance' ? (
+                <div className="space-y-3">
+                  {(operations.finance?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-[#94A3B8]">No finance applications found for this dealership.</p> : (operations.finance.items || []).map((application) => (
+                    <div key={application.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
+                      <div><p className="font-medium text-[#0A3340]">{application.vehicle || 'Vehicle'}</p><p className="text-xs text-[#64748B]">Applicant: {application.applicantName || 'Buyer'}</p></div>
+                      <span className="px-3 py-1 rounded-full bg-[#EEF7F5] text-[#64748B] text-xs capitalize">{application.status}</span>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="space-y-3">
                   <p className="text-xs text-[#64748B]">Inspections of your vehicles, requested by buyers and carried out by independent providers. You see that an inspection exists and its stage. The buyer’s details and the report stay with the buyer who requested it.</p>
@@ -901,6 +964,73 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     <div key={inspection.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl"><div><p className="font-medium text-[#0A3340]">{inspection.vehicle}</p><p className="text-xs text-[#64748B]">{inspection.id}</p></div><span className="px-3 py-1 rounded-full bg-[#EEF7F5] text-[#64748B] text-xs capitalize">{inspection.status}</span></div>
                   ))}
                 </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'team' && (
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+              <h3 className="text-xl font-bold text-[#0A3340] mb-6">Team</h3>
+              {/* Phase 12 fix: this tab was a hardcoded "not backed yet" stub
+                  even though a real, authorized, already-live backend contract
+                  existed (dealer-platform's /team endpoints, protected by
+                  dealerOrgAccess("canManageTeam") - see
+                  KAYAD_DEALER_GAP_AND_RISK_REGISTER.md R4). Bound to the safe
+                  dealer-platform team endpoint only - never the separate,
+                  legacy dealerRoutes.js duplicate flagged in that same register. */}
+              {teamLoading ? (
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div>
+              ) : teamError ? (
+                <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{teamError}</p><button onClick={() => setTeamLoaded(false)} className="text-xs font-bold text-[#176B87]">Try Again</button></div>
+              ) : team.length === 0 ? (
+                <p className="text-sm text-[#94A3B8] text-center py-12">No team members yet. Invite staff from your account settings to share dealership access.</p>
+              ) : (
+                <div className="space-y-3">
+                  {team.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
+                      <div><p className="font-medium text-[#0A3340]">{member.inviteEmail || member.member?.name || 'Team member'}</p><p className="text-xs text-[#64748B] capitalize">{member.role}</p></div>
+                      <span className="px-3 py-1 rounded-full bg-[#EEF7F5] text-[#64748B] text-xs capitalize">{member.status}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'reputation' && (
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+              <h3 className="text-xl font-bold text-[#0A3340] mb-6">Reputation</h3>
+              {/* Phase 12 fix: getReputation already existed, live and
+                  dealer-scoped, with no dashboard entry point anywhere (see
+                  KAYAD_DEALER_GAP_AND_RISK_REGISTER.md R5). Added as its own
+                  section rather than folding it into Settings/Analytics,
+                  since neither of those has a UI built for it either. */}
+              {reputationLoading ? (
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div>
+              ) : reputationError ? (
+                <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{reputationError}</p><button onClick={() => setReputationLoaded(false)} className="text-xs font-bold text-[#176B87]">Try Again</button></div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-4 mb-6">
+                    <p className="text-3xl font-bold text-[#0A3340]">{reputation?.overall?.rating ?? '—'}</p>
+                    <p className="text-sm text-[#64748B]">{reputation?.overall?.totalReviews ?? 0} review{(reputation?.overall?.totalReviews ?? 0) === 1 ? '' : 's'}</p>
+                  </div>
+                  {(reputation?.recentReviews || []).length === 0 ? (
+                    <p className="text-sm text-[#94A3B8] text-center py-8">No reviews yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {reputation.recentReviews.map((review) => (
+                        <div key={review.id} className="p-4 bg-[#F6FAF9] rounded-xl">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-medium text-[#0A3340]">{review.name}</p>
+                            <span className="text-sm font-bold text-[#176B87]">{review.rating}★</span>
+                          </div>
+                          {review.text && <p className="text-sm text-[#64748B]">{review.text}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
