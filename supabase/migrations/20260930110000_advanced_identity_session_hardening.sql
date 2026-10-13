@@ -9,9 +9,18 @@ ALTER TABLE public.refresh_tokens ADD COLUMN IF NOT EXISTS revoked_at timestampt
 ALTER TABLE public.refresh_tokens ADD COLUMN IF NOT EXISTS revoke_reason text;
 ALTER TABLE public.refresh_tokens ADD COLUMN IF NOT EXISTS reuse_detected_at timestamptz;
 
-UPDATE public.refresh_tokens
-SET token_hash = encode(digest(token, 'sha256'), 'hex')
-WHERE token_hash IS NULL AND token IS NOT NULL;
+-- Rerun-safe: the legacy plaintext `token` column is dropped further down, so on a second execution it no longer
+-- exists and a plain UPDATE referencing it would abort the whole file. Backfill only while the column still exists.
+DO $backfill$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'refresh_tokens' AND column_name = 'token'
+  ) THEN
+    EXECUTE 'UPDATE public.refresh_tokens SET token_hash = encode(digest(token, ''sha256''), ''hex'') WHERE token_hash IS NULL AND token IS NOT NULL';
+  END IF;
+END
+$backfill$;
 
 UPDATE public.refresh_tokens SET family_id = gen_random_uuid() WHERE family_id IS NULL;
 UPDATE public.refresh_tokens SET session_id = gen_random_uuid() WHERE session_id IS NULL;

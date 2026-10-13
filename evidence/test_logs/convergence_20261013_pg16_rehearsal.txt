@@ -1,0 +1,22 @@
+pass 1 apply 20260930111500 OK
+pass 1 apply 20260930113000 OK
+pass 1 apply 20260930112000 OK
+pass 1 apply 20261001090000 OK
+pass 1 apply 20261001220000 OK
+pass 1 apply 20260930110000 OK
+pass 1 apply 20261011090000 OK
+pass 1 apply 20261011121000 OK
+pass 2 apply 20260930111500 OK
+pass 2 apply 20260930113000 OK
+pass 2 apply 20260930112000 OK
+pass 2 apply 20261001090000 OK
+pass 2 apply 20261001220000 OK
+pass 2 apply 20260930110000 OK
+pass 2 apply 20261011090000 OK
+pass 2 apply 20261011121000 OK
+ anon_reg | auth_reg | svc_reg | anon_rot | svc_rot 
+----------+----------+---------+----------+---------
+ f        | f        | t       | f        | t
+(1 row)
+
+REHEARSAL PASSED (applied twice, assertions green)

@@ -51,7 +51,8 @@ vi.doMock("../../services/communicationReadiness.service.js", () => ({
 const realCache = await import("../../utils/cache.js");
 vi.doMock("../../utils/cache.js", () => ({ ...realCache, isRedisConnected: () => true }));
 const realSupabase = await import("../../utils/supabase.js");
-vi.doMock("../../utils/supabase.js", () => ({ ...realSupabase, isSupabaseConnected: () => true }));
+let supabaseReadiness = { ready: true };
+vi.doMock("../../utils/supabase.js", () => ({ ...realSupabase, isSupabaseConnected: () => true, checkSupabaseReadiness: async () => supabaseReadiness }));
 const realQueue = await import("../../config/queue.js");
 vi.doMock("../../config/queue.js", () => ({
   ...realQueue,
@@ -75,6 +76,7 @@ beforeAll(async () => {
 afterAll(() => new Promise((r) => server.close(r)));
 beforeEach(() => {
   readinessMock.mockClear();
+  supabaseReadiness = { ready: true };
   readiness = { schema: "schema_ready", missingColumns: [], providerConfig: "env_present", providerAcceptance: "none_observed", mailboxDelivery: "none_observed" };
 });
 
@@ -177,6 +179,38 @@ describe("status aggregation", () => {
     const body = await (await call("/health/deep", "admin")).json();
     expect(body.checks.communications.providerAcceptance).toBe("observed");
     expect(body.checks.communications.mailboxDelivery).toBe("none_observed");
+  });
+});
+
+describe("every health path is answered by the registerHealthRoutes handlers (not the later router)", () => {
+  test("/health/live and /api/health/live: public, minimal, readiness never invoked", async () => {
+    for (const path of ["/health/live", "/api/health/live"]) {
+      const res = await call(path);
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ status: "ok" });
+    }
+    expect(readinessMock).not.toHaveBeenCalled();
+  });
+  test("/health/ready and /api/health/ready: public, 200 {status:ready} with the mocked connected backend", async () => {
+    for (const path of ["/health/ready", "/api/health/ready"]) {
+      const res = await call(path);
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ status: "ready" });
+    }
+    expect(readinessMock).not.toHaveBeenCalled();
+  });
+  test("/health/ready fails closed (503) and does not leak the database error text", async () => {
+    supabaseReadiness = { ready: false, reason: "database_error", error: "connection string postgres://secret@host exploded" };
+    const res = await call("/health/ready");
+    const text = await res.text();
+    expect(res.status).toBe(503);
+    expect(text).not.toMatch(/postgres:\/\/|secret|exploded/i);
+    expect(JSON.parse(text).status).toBe("not ready");
+  });
+  test("/api/health mirrors /health (minimal, no diagnostics)", async () => {
+    const body = await (await call("/api/health")).json();
+    expect(body.checks).toEqual({ database: "ok" });
+    expect(JSON.stringify(body)).not.toMatch(/communications|schema|missingColumns|provider|mailbox/i);
   });
 });
 

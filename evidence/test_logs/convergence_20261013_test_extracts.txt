@@ -1,0 +1,50 @@
+# Convergence stage 2026-10-13 — test log extracts (Linux Node 22 copy; not the Windows working tree)
+
+## jest_full2
+(node:1034) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 91 passed, 91 total
+Tests:       1275 passed, 1275 total
+Snapshots:   0 total
+Time:        67.725 s
+Ran all test suites.
+JEST_EXIT=0
+
+## vitest_full2
+    196|       const res = await call(path);
+    197|       expect(res.status).toBe(200);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 34 passed (35)
+   Start at  09:53:06
+   Duration  12.00s (transform 3.52s, setup 0ms, import 7.66s, tests 3.18s, environment 1ms)
+
+VITEST_EXIT=1
+
+## node_full2
+#     [35muser[39m: "guest"
+#     [35mstatusCode[39m: 500
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1399.729109
+NODE_EXIT=0
+## j_loginTimingEnumeration: Tests:       2 passed, 2 total
+## j_registrationFlow: Tests:       7 passed, 7 total
+## j_registrationContract: Tests:       12 passed, 12 total
+## j_protectLeanRow: Tests:       3 passed, 3 total
+## j_protectInfraError: Tests:       7 passed, 7 total
+## j_allAreasAuthzRuntime: Tests:       57 passed, 57 total
+## j_securityCertification: Tests:       58 passed, 58 total
+## j_communicationsLaunchReadiness: Tests:       8 passed, 8 total
+## j_onboardingEmailWorkflow: Tests:       6 passed, 6 total
+## j_recordDelivery: Tests:       3 passed, 3 total

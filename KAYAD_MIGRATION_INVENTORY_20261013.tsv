@@ -1,0 +1,182 @@
+file	prod_status	lines	creates_tables	creates_functions	alters_tables	idx	trg	policies	grant_revoke	drop_column	drop_table	drop_constraint	update_stmts	insert_stmts	set_not_null	classification	rerun_idioms	uses_txn
+20260710043200_20260710005000_foundational_tables.sql	APPLIED(version)	290	bids,car_views,cars,favorites,profiles,users		bids,car_views,cars,favorites,profiles,users	17	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710043210_20260710005500_sync_profiles_trigger.sql	APPLIED(version)	56		sync_profile_from_user		0	1	0	0	0	0	0	0	2	0	DATA	yes	no
+20260710043238_20260710010000_gari_motors_full_schema.sql	APPLIED(version)	764	activity_logs,audit_logs,conversations,escrow_transactions,messages,notifications,payments,reviews,saved_searches,system_settings,vehicle_inspections	handle_new_user,update_updated_at	activity_logs,audit_logs,cars,conversations,escrow_transactions,messages,notifications,payments,profiles,reviews,saved_searches,system_settings,vehicle_inspections	38	9	102	0	0	0	1	0	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260710043248_20260710020000_seed_system_settings.sql	APPLIED(version)	17				0	0	0	0	0	0	0	0	1	0	DATA	NO	no
+20260710043558_20260710030000_update_car_bid_stats.sql	APPLIED(version)	17		update_car_bid_stats		0	0	0	0	0	0	0	1	0	0	DATA	yes	no
+20260710044329_20260710050000_seed_demo_vehicles.sql	APPLIED(version)	114				0	0	0	0	0	0	0	0	1	0	DATA	NO	no
+20260710044400_20260710060000_missing_fk_indexes.sql	APPLIED(version)	13				2	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710044600_20260710080000_chats_escrows_userauth_real_tables.sql	APPLIED(version)	157	chats,escrows,user_auth		cars,chats,escrows,user_auth	10	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710044700_20260710090000_audited_missing_columns.sql	APPLIED(version)	112			audit_logs,bids,cars,favorites,notifications,payments,users	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710044800_20260710100000_platform_config.sql	APPLIED(version)	32	platform_config		platform_config	0	0	0	0	0	0	0	0	1	0	DATA	yes	no
+20260710044900_20260710110000_leads_and_escrow_columns.sql	APPLIED(version)	85	leads		escrows,leads	4	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710045000_20260710120000_refresh_tokens.sql	APPLIED(version)	56	refresh_tokens		refresh_tokens	3	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710045100_20260710130000_car_listing_flow.sql	APPLIED(version)	138		update_updated_at_camel,update_updated_at_snake	cars,platform_config,users	3	6	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710045200_20260710140000_dealer_verification_referrals.sql	APPLIED(version)	119	dealer_verifications,dealers,referrals		dealer_verifications,dealers,referrals	7	2	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710045300_20260710150000_platform_config_admin_fields.sql	APPLIED(version)	58			platform_config	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710045400_20260710160000_idempotency_softdelete.sql	APPLIED(version)	58	idempotency_keys		cars,idempotency_keys,users	3	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260710045500_20260710170000_user_preferences.sql	APPLIED(version)	48	user_preferences		user_preferences	1	1	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260815060000_payment_architecture_extension.sql	APPLIED(version)	215	mpesa_transactions,payment_attempts,payment_events,payment_providers,refunds,webhook_events			12	0	0	0	0	0	0	0	1	0	DATA	yes	no
+20260815070000_duplicate_vin_prevention.sql	APPLIED(version)	38				1	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260815080000_vehicle_inspections_complete_columns.sql	APPLIED(version)	66			vehicle_inspections	1	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260816180000_inspection_marketplace_activation.sql	APPLIED(version)	364	inspection_bookings,inspection_branches,inspection_checklist_items,inspection_packages,inspection_providers,inspection_quality_audits,inspection_reports,inspection_reviews,inspection_settlements,inspection_staff,inspection_status_history,inspection_transactions,provider_credentials		inspection_transactions	22	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260816200000_inspection_domain_model_corrections.sql	APPLIED(version)	202	inspection_disputes,inspection_refunds,inspection_report_amendments		inspection_bookings,inspection_reports,inspection_status_history,inspection_transactions	7	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260817050000_provider_lifecycle_state_machine.sql	APPLIED(version)	113		sync_provider_status_from_lifecycle	inspection_providers,provider_credentials	1	1	0	0	0	0	0	1	0	0	DATA	yes	no
+20260817130000_support_tickets_table.sql	APPLIED(version)	56	support_tickets			3	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260824070000_fix_profiles_role_check_constraint.sql	APPLIED(version)	60			profiles	0	0	0	0	0	0	1	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260824100000_phase8_bids_status_alignment.sql	APPLIED(version)	29			bids	0	0	0	0	0	0	1	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260827090000_add_payments_processed_column.sql	APPLIED(version)	41			payments	1	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260828030000_add_payments_metadata_column.sql	APPLIED(version)	32			payments	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260901210000_phase8_transaction_atomicity.sql	APPLIED(version)	681	distributed_locks,ledger_accounts,ledger_entries	kayad_confirm_bid_payment_atomic,kayad_ledger_entries_immutable,kayad_place_bid_atomic,kayad_post_ledger_entry_atomic,kayad_release_lock,kayad_reverse_ledger_entry_atomic,kayad_transition_escrow_atomic,kayad_try_acquire_lock	cars,ledger_accounts,ledger_entries,payments	4	1	0	14	0	0	0	11	4	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260901220000_remove_historical_demo_vehicles.sql	APPLIED(version)	20				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260902090000_phase10_operational_data_contract.sql	APPLIED(version)	331	events,search_analytics,vehicle_market_analytics	kayad_post_ledger_entry_atomic,kayad_rebuild_ledger_balances,kayad_settle_bid_payment_atomic,kayad_settle_purchase_payment_atomic	cars,events,search_analytics,vehicle_market_analytics	7	0	0	8	0	0	0	8	3	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260902110000_phase11_production_demo_cleanup.sql	APPLIED(version)	34				0	0	0	0	0	0	0	3	0	0	DATA	NO	no
+20260902130000_phase29_auth_boundary_reconciliation.sql	APPLIED(version)	58				0	0	1	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260905050000_phase14_refund_reconciliation_integrity.sql	APPLIED(version)	193		kayad_transition_escrow_atomic	refunds	1	0	0	4	0	0	0	5	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260905060000_transaction_lifecycle_integrity.sql	APPLIED(version)	199		kayad_auto_bid_atomic,kayad_close_auction_atomic		0	0	0	4	0	0	0	7	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907070000_inspection_marketplace_integrity.sql	APPLIED(version)	114		refresh_inspection_provider_starting_price,trg_refresh_inspection_provider_starting_price	inspection_bookings,inspection_providers,inspection_refunds,inspection_transactions	4	1	0	0	0	0	3	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907120000_payment_escrow_domain_integrity.sql	APPLIED(version)	12				2	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260907140000_auction_lifecycle_atomicity.sql	APPLIED(version)	115		kayad_extend_auction_atomic,kayad_start_auction_atomic		0	0	0	4	0	0	0	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907143000_auction_settlement_reserve_rules.sql	APPLIED(version)	91		kayad_close_auction_atomic		0	0	0	2	0	0	0	6	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907150000_escrow_custody_admin_configuration.sql	APPLIED(version)	99	escrow_accounts	kayad_verify_escrow_funding_atomic	escrow_accounts,escrows,platform_config	4	0	0	2	0	0	0	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907173000_chat_concurrency_integrity.sql	APPLIED(version)	86		kayad_append_chat_message,kayad_mark_chat_seen		1	0	0	4	0	0	0	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907190000_dealer_verification_onboarding_integrity.sql	APPLIED(version)	29			dealer_verifications,dealers	3	0	8	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907190100_dispute_escrow_consolidation.sql	APPLIED(version)	173		kayad_resolve_dispute_atomic	escrows	3	0	0	2	0	0	3	3	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907190200_inspection_settlement_ledger_integrity.sql	APPLIED(version)	169		kayad_mark_inspection_settlement_paid_atomic,kayad_process_inspection_payment_atomic,kayad_process_inspection_refund_atomic	inspection_refunds,inspection_settlements,inspection_transactions	2	0	0	9	0	0	0	5	6	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907190300_ownership_passport_domain.sql	APPLIED(version)	232	accident_history,auction_history,finance_history,inspection_history,marketplace_history,owner_profiles,owner_vehicles,ownership_alerts,ownership_documents,ownership_expenses,ownership_history,ownership_reminders,ownership_service_records,passport_audit_log,service_history,travel_logs,value_tracking,vehicle_documents,vehicle_passports,vehicle_timeline,verification_badges			20	0	0	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907190400_payment_gateway_lifecycle_integrity.sql	APPLIED(version)	49			payments	7	0	0	4	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907190500_vehicle_valuation_domain.sql	APPLIED(version)	48	vehicle_valuations		vehicle_valuations	2	0	2	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907200000_cms_website_builder_domain.sql	APPLIED(version)	997	cms_ab_tests,cms_analytics,cms_announcements,cms_banners,cms_campaigns,cms_car_card_configs,cms_content_blocks,cms_content_versions,cms_contents,cms_faqs,cms_footer_configs,cms_forms,cms_hero_sections,cms_media,cms_nav_items,cms_navigation,cms_page_sections,cms_pages,cms_popups,cms_revisions,cms_seo_configs,cms_taxonomies,cms_theme_configs,cms_website_settings,website_settings	kayad_sync_cms_page_name	,cms_ab_tests,cms_analytics,cms_banners,cms_campaigns,cms_content_versions,cms_contents,cms_faqs,cms_pages,cms_revisions,cms_taxonomies	19	1	38	0	0	0	0	1	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907200100_lead_crm_domain_end_to_end.sql	APPLIED(version)	132	lead_activities	kayad_create_lead_atomic,kayad_transition_lead_atomic	lead_activities,leads	5	0	4	0	0	0	1	1	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907213000_support_case_management_domain.sql	APPLIED(version)	32			support_tickets	5	0	4	0	0	0	0	2	0	1	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907220000_dealer_workforce_access_control.sql	APPLIED(version)	43	dealer_teams	kayad_touch_dealer_team_updated_at	dealer_teams	5	1	8	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907230000_dealer_subscription_commercial_controls.sql	APPLIED(version)	92	dealer_subscriptions	kayad_activate_dealer_subscription_atomic	dealer_subscriptions,users	3	0	6	1	0	0	0	3	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907233000_financial_ledger_reconciliation_domain.sql	APPLIED(version)	98	reconciliation_records,reconciliation_reports	kayad_touch_reconciliation_report	reconciliation_records,reconciliation_reports	5	1	4	4	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907233100_subscription_entitlement_lifecycle.sql	APPLIED(version)	249		kayad_cancel_dealer_subscription_atomic,kayad_grant_dealer_subscription_atomic,kayad_reactivate_dealer_subscription_atomic,kayad_revoke_dealer_subscription_atomic		1	0	2	4	0	0	0	7	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260907234500_review_domain_end_to_end.sql	APPLIED(version)	39			reviews	3	0	8	0	0	0	1	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907235000_ai_decision_governance.sql	APPLIED(version)	30	ai_decision_runs		ai_decision_runs	2	0	4	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907240000_governance_domain.sql	APPLIED(version)	15	approval_rules,change_requests,country_rules,decision_registers,enterprise_standards,feature_lifecycles,governance_policies,partner_requirements,releases,risk_assessments		approval_rules,change_requests,country_rules,decision_registers,enterprise_standards,feature_lifecycles,governance_policies,partner_requirements,releases,risk_assessments	5	0	10	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260907240100_integration_partner_webhook_domain.sql	APPLIED(version)	25	api_credentials,api_endpoints,api_usage_logs,integration_certifications,integration_events,integration_plugins,integration_sdks,integration_templates,oauth_clients,partner_analytics,partner_applications,partner_documents,partner_organizations,partner_permissions,partner_tickets,sandbox_environments,webhook_configs,webhook_deliveries		api_credentials,api_endpoints,api_usage_logs,integration_certifications,integration_events,integration_plugins,integration_sdks,integration_templates,oauth_clients,partner_analytics,partner_applications,partner_documents,partner_organizations,partner_permissions,partner_tickets,sandbox_environments,webhook_configs,webhook_deliveries	8	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260907240500_canonical_authorization_helpers.sql	APPLIED(version)	22		is_admin		0	0	0	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908000000_advertising_domain_end_to_end.sql	APPLIED(version)	35	ad_slots		ad_slots	2	0	4	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908000100_search_discovery_domain.sql	APPLIED(version)	6			saved_searches	3	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260908003000_continuous_improvement_domain.sql	APPLIED(version)	127	experiments,improvement_events,improvements,innovation_idea_votes,innovation_ideas	kayad_change_improvement_status_atomic,kayad_vote_innovation_idea_atomic	experiments,improvement_events,improvements,innovation_idea_votes,innovation_ideas	6	0	8	2	0	0	0	2	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260908010000_enterprise_control_plane_domain.sql	APPLIED(version)	50	alerts,health_checks,incidents,self_healing_actions		alerts,health_checks,incidents,self_healing_actions	4	0	12	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908010100_regional_configuration_localization_domain.sql	APPLIED(version)	188	countries,country_configurations,country_payment_providers,country_tax_configurations,cross_border_configurations,currency_exchange_rates,localization_strings		countries,country_configurations,country_payment_providers,country_tax_configurations,cross_border_configurations,currency_exchange_rates,localization_strings	6	0	14	0	0	0	0	0	7	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260908020000_executive_intelligence_domain.sql	APPLIED(version)	36	intelligence_reports,intelligence_scheduled_reports		intelligence_reports,intelligence_scheduled_reports	2	0	8	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908033000_command_center_domain_end_to_end.sql	APPLIED(version)	66	command_center_war_rooms,command_center_widget_layouts		command_center_war_rooms,command_center_widget_layouts	1	0	14	0	0	0	0	0	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260908043000_dealer_platform_domain_end_to_end.sql	APPLIED(version)	56	loan_applications,marketing_campaigns		loan_applications,marketing_campaigns	3	0	10	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908050000_integration_domain_hardening.sql	APPLIED(version)	15			api_credentials,partner_applications,partner_organizations,webhook_configs,webhook_deliveries	3	0	0	0	0	0	5	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908060000_dealer_commercial_entitlement_hardening.sql	APPLIED(version)	118		kayad_grant_dealer_subscription_atomic,kayad_revoke_dealer_subscription_atomic		1	0	0	3	0	0	0	4	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260908070000_inspection_workforce_digital_lifecycle_hardening.sql	NOT APPLIED	165		kayad_validate_inspection_booking_transition	inspection_bookings,inspection_staff	2	1	0	0	0	0	3	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908080000_governance_lifecycle_hardening.sql	NOT APPLIED	93		governance_touch_updated_at	approval_rules,change_requests,decision_registers,enterprise_standards,feature_lifecycles,governance_policies,releases,risk_assessments	10	10	0	0	0	0	10	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260908113000_communications_support_lifecycle_hardening.sql	NOT APPLIED	89		kayad_append_support_message	support_tickets	5	0	0	2	0	0	2	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909070742_runtime_integration_hardening.sql	APPLIED(version)	30		increment_car_views		0	0	0	5	0	0	0	1	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909071751_security_function_search_path_hardening.sql	APPLIED(version)	12				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909072046_security_function_execute_privilege_hardening.sql	APPLIED(version)	5				0	0	0	3	0	0	0	0	0	0	RESTRICTIVE/SECURITY	NO	no
+20260909073141_production_advisor_hardening.sql	APPLIED(version)	77				0	0	2	1	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260909074048_vehicle_identity_registry.sql	APPLIED(version)	48	vehicle_identities	normalize_vehicle_identity,register_vehicle_identity	vehicle_identities	4	1	0	6	0	0	0	1	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909074124_vehicle_identity_trigger_correctness.sql	APPLIED(version)	14		register_vehicle_identity		0	0	0	0	0	0	0	0	1	0	DATA	yes	no
+20260909080000_production_advisor_hardening.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909080841_auction_payment_escrow_e2e.sql	APPLIED(version)	51		kayad_verify_escrow_funding_atomic		0	0	0	2	0	0	0	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909083431_inspection_chat_realtime_bridge.sql	APPLIED(version)	59		kayad_bridge_inspection_execution,kayad_get_or_create_inspection_chat	vehicle_inspections	1	0	0	4	0	0	0	3	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909084443_dispute_canonical_escrow_lifecycle.sql	APPLIED(version)	99		kayad_append_dispute_evidence_atomic,kayad_open_dispute_atomic,kayad_resolve_dispute_atomic,kayad_transition_dispute_atomic	escrows	2	0	0	8	0	0	0	4	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909084559_dispute_chat_inspection_linkage.sql	APPLIED(version)	25		kayad_open_dispute_atomic		0	0	0	2	0	0	0	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909084842_dispute_link_column_naming.sql	APPLIED(version)	5			escrows	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260909084850_dispute_link_function_case_fix.sql	APPLIED(version)	23		kayad_open_dispute_atomic		0	0	0	2	0	0	0	1	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909090001_vehicle_identity_registry.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909090002_vehicle_identity_trigger_correctness.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909091000_auction_payment_escrow_e2e.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909091703_dealer_commercial_payout_lifecycle.sql	APPLIED(version)	104	dealer_payouts	kayad_apply_dealer_verification_atomic,kayad_expire_dealer_subscriptions_atomic,kayad_mark_dealer_payout_atomic,kayad_prepare_dealer_payout_atomic	dealer_payouts	3	0	4	8	0	0	0	6	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909092000_inspection_chat_realtime_bridge.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909100000_dispute_canonical_escrow_lifecycle.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909100500_dispute_chat_inspection_linkage.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909101000_dispute_link_column_naming.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909101100_dispute_link_function_case_fix.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909102000_dealer_commercial_payout_lifecycle.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909110809_communications_otp_delivery_control.sql	APPLIED(version)	69	communication_deliveries,otp_challenges		communication_deliveries,otp_challenges	5	0	2	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260909113015_communications_control_plane.sql	APPLIED(version)	73	communication_preferences,communication_templates		communication_deliveries,communication_preferences,communication_templates,otp_challenges	6	0	6	2	0	0	0	0	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909123918_communications_provider_rollout_controls.sql	APPLIED(version)	75	communication_channel_controls,communication_event_controls		communication_channel_controls,communication_event_controls	2	0	4	2	0	0	0	0	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260909124238_communications_password_reset_control.sql	APPLIED(version)	7				0	0	0	0	0	0	0	0	1	0	DATA	NO	no
+20260909143000_communications_otp_delivery_control.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909150000_communications_control_plane.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909170000_communications_provider_rollout_controls.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260909173000_communications_password_reset_control.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260918100000_wave2_transaction_invariants.sql	APPLIED(name)	514	financial_workflow_events,listing_entitlement_reservations,media_upload_jobs	kayad_complete_media_upload_atomic,kayad_create_dealer_listing_atomic,kayad_mark_inspection_settlement_paid_atomic,kayad_record_financial_workflow_event_atomic,kayad_register_media_upload_failure_atomic,kayad_register_media_upload_job_atomic,kayad_resolve_dispute_atomic,kayad_settle_bid_payment_atomic,kayad_validate_wave2_invariants	escrows,financial_workflow_events,inspection_reports,inspection_settlements,listing_entitlement_reservations,media_upload_jobs,payments	4	0	0	21	0	0	5	9	6	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260918120000_canonical_inspection_lifecycle_hardening.sql	APPLIED(name)	76			vehicle_inspections	3	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	yes
+20260918130000_inspection_domain_rls_hardening.sql	APPLIED(name)	451				0	0	26	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	NO	yes
+20260918143944_wave2_transaction_invariants.sql	APPLIED(version)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260918143950_canonical_inspection_lifecycle_hardening.sql	APPLIED(version)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260918144000_inspection_domain_rls_hardening.sql	APPLIED(version)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260918144230_inspection_financial_workflow_completion.sql	APPLIED(version)	360		kayad_generate_inspection_settlement_atomic,kayad_mark_inspection_settlement_paid_atomic,kayad_process_inspection_payment_atomic		1	0	0	6	0	0	0	4	4	0	DATA+RESTRICTIVE/SECURITY	yes	yes
+20260918150000_inspection_financial_workflow_completion.sql	APPLIED(name)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260920203000_canonical_system_status_control_plane.sql	NOT APPLIED	11				0	0	0	0	0	0	0	0	1	0	DATA	NO	no
+20260920220000_phase22_reconciliation.sql	NOT APPLIED	91	inspection_dispute_evidence,inspection_risk_flags,roadside_service_requests,service_job_dispute_evidence,service_job_disputes,service_job_events,service_jobs,vehicle_service_offerings	kayad_create_inspection_provider_application,kayad_inspection_report_immutability_guard,kayad_mark_inspection_settlement_paid_atomic,kayad_submit_inspection_review_atomic	inspection_dispute_evidence,inspection_reviews,inspection_risk_flags,service_job_dispute_evidence,service_job_disputes,service_job_events,service_jobs	2	1	0	8	0	0	0	0	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260921061339_automation_business_rules_domain.sql	APPLIED(version)	28	business_rules		business_rules	2	0	0	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260921061403_harden_inspection_report_immutability_guard.sql	APPLIED(version)	26		kayad_inspection_report_immutability_guard		0	0	0	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260921093540_harden_loan_application_contract_v14.sql	APPLIED(version)	35			loan_applications	1	0	0	0	0	0	2	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260921134954_v14_holistic_financial_corrections.sql	APPLIED(version)	81		kayad_mark_inspection_settlement_paid_atomic		0	0	0	2	0	0	0	2	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20260921230000_reconcile_system_status_control_plane.sql	APPLIED(name)	10				0	0	0	0	0	0	0	0	1	0	DATA	NO	no
+20260921231000_reconcile_governance_lifecycle_hardening.sql	APPLIED(name)	86		governance_touch_updated_at		10	10	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260921232000_canonical_inspection_booking_execution_link.sql	APPLIED(name)	23			inspection_bookings,vehicle_inspections	2	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260922045554_reconcile_system_status_control_plane.sql	APPLIED(version)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260922045606_reconcile_governance_lifecycle_hardening.sql	APPLIED(version)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260922045609_canonical_inspection_booking_execution_link.sql	APPLIED(version)	6				0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	no
+20260926100000_top_notice_board_animation.sql	NOT APPLIED	22			ad_slots	0	0	0	0	0	0	3	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260926110000_hero_premium_media_layout.sql	NOT APPLIED	44	hero_slides		hero_slides	1	0	0	2	0	0	1	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260926123000_platform_config_hero_vehicle_selection.sql	NOT APPLIED	13			platform_config	0	0	0	0	0	0	1	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260928123600_live_communications_activation_alignment.sql	NOT APPLIED	37				0	0	0	0	0	0	0	2	2	0	DATA	NO	no
+20260929100000_production_service_role_runtime_integrity.sql	NOT APPLIED	39			favorites	0	0	0	13	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20260930110000_advanced_identity_session_hardening.sql	NOT APPLIED	88		kayad_rotate_refresh_token	refresh_tokens	4	0	0	4	1	0	1	5	1	1	DESTRUCTIVE+DATA+RESTRICTIVE/SECURITY	yes	no
+20260930111500_advanced_communication_idempotency.sql	NOT APPLIED	16			communication_deliveries	3	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260930112000_identity_email_normalization.sql	NOT APPLIED	5				1	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20260930113000_communication_state_machine_hardening.sql	NOT APPLIED	7			communication_deliveries	0	0	0	0	0	0	1	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261001090000_registration_onboarding_integrity.sql	NOT APPLIED	153	inspector_applications	kayad_register_identity_atomic,sync_dealer_profile_from_user	dealers,inspector_applications	3	2	0	4	0	0	0	0	4	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261001220000_database_contract_alignment.sql	NOT APPLIED	49			communication_deliveries	4	1	0	8	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261001223000_inspection_provider_identity_integrity.sql	NOT APPLIED	12				2	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20261002090000_financial_audit_routing_rls_hardening.sql	NOT APPLIED	18			payment_attempts,payment_events,webhook_events	0	0	0	3	0	0	0	0	0	0	RESTRICTIVE/SECURITY	NO	no
+20261002120000_high_risk_boundary_hardening.sql	NOT APPLIED	85		kayad_validate_owner_vehicle_passport	communication_deliveries,ledger_accounts,ledger_entries,owner_vehicles,ownership_documents,vehicle_documents,vehicle_passports	1	1	0	4	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261002130000_runtime_convergence_financial_locks.sql	NOT APPLIED	108		kayad_post_ledger_entry_atomic		0	0	0	2	0	0	0	2	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261002150000_escrow_business_integrity_sweep.sql	NOT APPLIED	413		kayad_complete_escrow_refund_atomic,kayad_mark_dealer_payout_atomic,kayad_resolve_dispute_atomic,kayad_transition_escrow_atomic,kayad_verify_escrow_funding_atomic		2	0	0	10	0	0	0	12	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261002180000_escrow_live_operations_hardening.sql	NOT APPLIED	235	escrow_audits	kayad_escrow_audit_immutable,kayad_resolve_dispute_atomic,kayad_transition_escrow_atomic	escrow_audits	4	1	2	5	0	0	0	5	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261002190000_auction_setup_publication_contract.sql	NOT APPLIED	104	auction_setup_amendments,auction_setups	kayad_lock_published_auction_setup,update_auction_setup_updated_at	auction_setup_amendments,auction_setups	3	2	10	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261002193000_auction_bidder_registration_eligibility.sql	NOT APPLIED	57	auction_registration_events,auction_registrations	update_auction_registration_updated_at	auction_registration_events,auction_registrations	4	1	6	1	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261002210000_auction_bidding_room_lock.sql	NOT APPLIED	42		prevent_late_auction_registration		0	1	0	1	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261002220000_auction_settlement_platform_policy.sql	NOT APPLIED	83	auction_outcomes,auction_platform_policies	update_auction_outcome_updated_at	auction_outcomes,auction_platform_policies	3	1	6	1	0	0	0	0	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261002230000_auction_post_fulfilment_exception_engine.sql	NOT APPLIED	58	auction_fulfilment_events		auction_fulfilment_events,auction_outcomes	5	0	2	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261002240000_marketplace_purchase_fulfilment_convergence.sql	NOT APPLIED	212	purchase_outcomes	kayad_settle_purchase_payment_atomic,kayad_transition_purchase_outcome_atomic	purchase_outcomes	6	0	2	2	0	0	0	4	7	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261002240100_marketplace_purchase_settlement_mode_correction.sql	NOT APPLIED	116		kayad_settle_purchase_payment_atomic		0	0	0	2	0	0	0	3	7	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261003090000_hero_commercial_placement.sql	NOT APPLIED	40	hero_placements		hero_placements,platform_config	2	0	6	0	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261003100000_platform_config_hero_presentation_and_card_content.sql	NOT APPLIED	29			platform_config	0	0	0	0	0	0	0	2	0	0	DATA	yes	no
+20261003113000_hero_visual_marketing_controls.sql	NOT APPLIED	52			platform_config	0	0	0	0	0	0	0	1	0	0	DATA	yes	no
+20261003120000_hero_visual_balance_cleanup.sql	NOT APPLIED	21				0	0	0	0	0	0	0	1	0	0	DATA	NO	no
+20261004110000_hero_clean_assets_and_mobile_balance.sql	NOT APPLIED	25				0	0	0	0	0	0	0	1	0	0	DATA	NO	no
+20261006150000_inspection_qa_report_versions.sql	NOT APPLIED	56	report_corrections,report_versions		report_corrections,report_versions	3	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	yes
+20261006230000_escrow_live_settlement_completion_hardening.sql	NOT APPLIED	36		kayad_ensure_escrow_refund_payable		0	1	0	0	0	0	0	0	1	0	DATA	yes	no
+20261006240000_escrow_marketplace_reconciliation_hardening.sql	NOT APPLIED	171		kayad_ensure_dispute_refund_settlement_record,kayad_sync_purchase_outcome_from_escrow		0	2	0	4	0	0	0	3	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261007120000_auction_rule_authority_convergence.sql	NOT APPLIED	365		kayad_auto_bid_atomic,kayad_confirm_bid_payment_atomic,kayad_extend_auction_atomic,kayad_place_bid_atomic,kayad_start_scheduled_auction_atomic		0	0	0	10	0	0	0	6	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261007170000_auction_bid_mutation_boundary.sql	NOT APPLIED	15				0	0	0	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	NO	no
+20261007180000_auction_financial_integrity_phase_a.sql	NOT APPLIED	469	auction_security_holds	kayad_confirm_bid_payment_atomic,kayad_forfeit_auction_winner_security_holds_atomic,kayad_reconcile_auction_security_holds_atomic,kayad_settle_auction_security_hold_atomic,kayad_settle_bid_payment_atomic,update_auction_security_hold_updated_at	auction_outcomes,auction_security_holds	4	1	4	11	0	0	0	11	4	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261007190000_auction_winner_payment_deadline_lock.sql	NOT APPLIED	140		kayad_default_auction_winner_atomic,kayad_settle_auction_winner_payment_atomic		0	0	0	4	0	0	0	2	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261007200000_inspection_domain_rls_enable.sql	NOT APPLIED	46			inspection_bookings,inspection_disputes,inspection_quality_audits,inspection_report_amendments,inspection_reports,inspection_reviews,inspection_staff,inspection_status_history	0	0	0	0	0	0	0	0	0	0	ADDITIVE	NO	yes
+20261008120000_escrow_seller_capability_authority.sql	NOT APPLIED	59			users	1	0	0	0	0	0	1	1	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261008150000_platform_config_navigation.sql	NOT APPLIED	8			platform_config	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20261009120000_automotive_services_governance.sql	NOT APPLIED	117	provider_service_capabilities		inspection_providers,inspection_staff,provider_credentials,provider_service_capabilities	4	0	0	2	0	0	0	1	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261009130000_escrow_custody_binding_and_purchase_eligibility.sql	NOT APPLIED	182		kayad_settle_purchase_payment_atomic,kayad_verify_escrow_funding_atomic		0	0	0	0	0	0	0	6	7	0	DATA	yes	no
+20261009150000_support_resolution_hardening.sql	NOT APPLIED	327		kayad_append_support_message,kayad_support_append_message,kayad_support_assign_ticket_number,kayad_support_create_case,kayad_support_is_staff_user,kayad_support_metrics,kayad_support_rate_case,kayad_support_transition_allowed,kayad_support_update_case	support_tickets	1	1	1	6	0	0	2	4	3	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261010130000_kayad_slate_teal_theme_convergence.sql	NOT APPLIED	60				0	0	0	0	0	0	0	3	0	0	DATA	NO	no
+20261010193000_chat_message_idempotency.sql	NOT APPLIED	99	chat_message_idempotency	kayad_append_chat_message_idempotent	chat_message_idempotency	1	0	0	4	0	0	0	1	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261011090000_users_security_state_columns.sql	NOT APPLIED	22			users	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20261011091000_chat_idempotent_append_ordering_and_replay.sql	NOT APPLIED	87		kayad_append_chat_message_idempotent		0	0	0	2	0	0	0	1	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261011092000_idempotency_audit_logs.sql	NOT APPLIED	27	idempotency_audit_logs		idempotency_audit_logs	2	0	0	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261011093000_revoke_client_execute_on_kayad_rpcs.sql	NOT APPLIED	24				0	0	0	2	0	0	0	0	0	0	RESTRICTIVE/SECURITY	NO	no
+20261011093100_enable_rls_remaining_public_tables.sql	NOT APPLIED	22				0	0	0	1	0	0	0	0	0	0	RESTRICTIVE/SECURITY	NO	no
+20261011100000_chat_message_outbox.sql	NOT APPLIED	215	chat_message_outbox	kayad_append_chat_message_idempotent,kayad_chat_notification_exists,kayad_chat_outbox_stats,kayad_claim_chat_outbox,kayad_finish_chat_outbox,kayad_purge_chat_outbox	chat_message_outbox	2	0	0	14	0	0	0	4	2	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261011120000_client_role_least_privilege.sql	NOT APPLIED	80				0	0	0	3	0	0	0	0	0	0	RESTRICTIVE/SECURITY	yes	no
+20261011121000_profiles_role_sync_repair.sql	NOT APPLIED	51		sync_profile_role_from_user	profiles	0	1	0	1	0	0	0	1	1	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261011130000_cars_click_counter.sql	NOT APPLIED	28			cars	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	no
+20261011210000_support_faq_content_and_seed.sql	NOT APPLIED	77			cms_faqs	0	0	0	0	0	0	0	0	1	0	DATA	yes	no
+20261011220000_ledger_signed_balance_rebuild.sql	NOT APPLIED	43		kayad_rebuild_ledger_balances		0	0	0	2	0	0	0	1	0	0	DATA+RESTRICTIVE/SECURITY	yes	no
+20261012103000_home_hero_showcase_pair_and_mobile_composition.sql	NOT APPLIED	55				0	0	0	0	0	0	0	1	0	0	DATA	NO	no
+20261012140000_dealer_onboarding_columns_r12.sql	NOT APPLIED	22			dealers	0	0	0	0	0	0	0	0	0	0	ADDITIVE	yes	yes
+20261012140100_dealer_verification_suspended_status_r14.sql	NOT APPLIED	31			dealer_verifications	0	0	0	0	0	0	1	0	0	0	RESTRICTIVE/SECURITY	yes	yes
