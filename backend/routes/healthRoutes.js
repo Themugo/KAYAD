@@ -67,6 +67,17 @@ router.get("/", async (req, res) => {
     status: process.env.BREVO_API_KEY && process.env.BREVO_FROM_EMAIL ? "configured" : "not_configured",
   };
 
+  // Email delivery ledger schema must match the code, otherwise every
+  // verification/reset email fails before reaching Brevo.
+  try {
+    const { checkCommunicationReadiness } = await import("../services/communicationReadiness.service.js");
+    const readiness = await checkCommunicationReadiness();
+    health.checks.communications = { status: readiness.status, missingColumns: readiness.missingColumns };
+    if (readiness.status === "schema_mismatch") health.status = "degraded";
+  } catch {
+    health.checks.communications = { status: "unknown" };
+  }
+
   // Memory health
   const memoryUsage = process.memoryUsage();
   health.checks.memory = {

@@ -6,7 +6,7 @@ import AdminSettingsBranding from './AdminSettingsBranding';
 
 const DEFAULTS = {
   platformName: 'KAYAD',
-  supportEmail: 'support@kayad.co.ke',
+  supportEmail: 'support@kayad.space',
   supportPhone: '254700100200',
   dealerCommission: 5,
   bidCommitmentPct: 5,

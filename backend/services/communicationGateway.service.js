@@ -119,6 +119,9 @@ const preferenceAllows = async (userId, channel, category) => {
   }
 };
 
+const escapeHtml = (value) =>
+  String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
 export const deliver = async ({
   userId = null,
   channel,
@@ -258,7 +261,7 @@ export const sendUserCommunication = async ({
     if (channel === "in_app") {
       results.push(await deliver({ userId, channel, eventType, category, templateCode, subject: title, message, metadata, idempotencyKey: eventIdentity ? `${eventType}:${eventIdentity}:${channel}` : null }));
     } else if (channel === "email" && user.email) {
-      results.push(await deliver({ userId, channel, eventType, category, templateCode, recipient: user.email, subject, html: html || `<p>${message}</p>`, text: message, metadata, idempotencyKey: eventIdentity ? `${eventType}:${eventIdentity}:${channel}` : null }));
+      results.push(await deliver({ userId, channel, eventType, category, templateCode, recipient: user.email, subject, html: html || `<p>${escapeHtml(message)}</p>`, text: message, metadata, idempotencyKey: eventIdentity ? `${eventType}:${eventIdentity}:${channel}` : null }));
     } else if ((channel === "sms" || channel === "whatsapp") && user.phone) {
       results.push(await deliver({ userId, channel, eventType, category, templateCode, recipient: user.phone, message, text: message, metadata, idempotencyKey: eventIdentity ? `${eventType}:${eventIdentity}:${channel}` : null }));
     }

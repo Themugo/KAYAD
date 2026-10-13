@@ -312,7 +312,7 @@ export const register = async (req, res) => {
     // If delivery fails the user simply uses "resend verification", which is
     // rate limited and generic by design.
     void deliver(verificationPayload).catch((e) => {
-      console.warn("⚠️ Verification email dispatch failed:", e.message);
+      logError("Verification email dispatch failed", e, { userId: user.id, event: "account.email_verification" });
     });
 
     if (role === "dealer" || role === "individual_seller") {
@@ -353,7 +353,7 @@ export const register = async (req, res) => {
       metadata: { welcome: true },
       idempotencyKey: `registration-welcome:${user.id}`,
     }).catch((e) => {
-      console.warn("⚠️ Welcome email dispatch failed:", e.message);
+      logError("Welcome email dispatch failed", e, { userId: user.id, event: "registration.completed" });
     });
 
     return res.status(201).json({
@@ -835,7 +835,7 @@ export const resendVerification = async (req, res) => {
         userAuth.emailVerifyExpire = nextVerifyExpire;
         await userAuth.save();
       } catch (e) {
-        console.warn("⚠️ Verification email failed:", e.message);
+        logError("Verification resend failed", e, { userId: user.id, event: "account.email_verification" });
         // The persisted token was never changed, so the previous verification link
         // remains valid. The response remains generic to prevent account enumeration.
       }
@@ -884,7 +884,7 @@ export const forgotPassword = async (req, res) => {
       })),
       metadata: { passwordReset: true },
       idempotencyKey: `password-reset:${user.id}:${hashToken(token).slice(0, 16)}`,
-    }).catch((e) => console.warn("⚠️ Reset email failed:", e.message));
+    }).catch((e) => logError("Password reset email dispatch failed", e, { userId: user.id, event: "account.password_reset" }));
 
     return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
   } catch (err) {

@@ -1,0 +1,76 @@
+
+> kayad-backend@2.0.0 test
+> npm run test:jest && npm run test:vitest && npm run test:node
+
+
+> kayad-backend@2.0.0 test:jest
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --passWithNoTests
+
+(node:503) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 89 passed, 89 total
+Tests:       1261 passed, 1261 total
+Snapshots:   0 total
+Time:        55.415 s
+Ran all test suites.
+
+> kayad-backend@2.0.0 test:vitest
+> vitest run --config vitest.config.js
+
+
+ RUN  v4.1.11 /home/claude/cont/work/kayad-fresh/backend
+
+
+ Test Files  5 passed (5)
+      Tests  16 passed (16)
+   Start at  07:39:26
+   Duration  4.54s (transform 578ms, setup 0ms, import 704ms, tests 3.05s, environment 1ms)
+
+
+> kayad-backend@2.0.0 test:node
+> node --test tests/response-lifecycle.test.js
+
+TAP version 13
+# Subtest: GET, HEAD, JSON, errors and SLI complete without double sending
+ok 1 - GET, HEAD, JSON, errors and SLI complete without double sending
+  ---
+  duration_ms: 171.487724
+  type: 'test'
+  ...
+# Error: late failure
+#     at file:///home/claude/cont/work/kayad-fresh/backend/tests/response-lifecycle.test.js:16:65
+#     at Layer.handleRequest (/home/claude/cont/work/kayad-fresh/backend/node_modules/router/lib/layer.js:152:17)
+#     at next (/home/claude/cont/work/kayad-fresh/backend/node_modules/router/lib/route.js:157:13)
+#     at Route.dispatch (/home/claude/cont/work/kayad-fresh/backend/node_modules/router/lib/route.js:117:3)
+#     at handle (/home/claude/cont/work/kayad-fresh/backend/node_modules/router/index.js:435:11)
+#     at Layer.handleRequest (/home/claude/cont/work/kayad-fresh/backend/node_modules/router/lib/layer.js:152:17)
+#     at /home/claude/cont/work/kayad-fresh/backend/node_modules/router/index.js:295:15
+#     at processParams (/home/claude/cont/work/kayad-fresh/backend/node_modules/router/index.js:582:12)
+#     at next (/home/claude/cont/work/kayad-fresh/backend/node_modules/router/index.js:291:5)
+#     at responseWrapper (file:///home/claude/cont/work/kayad-fresh/backend/middleware/responseWrapper.js:10:3)
+# [04:39:31] [33mWARN[39m: [36mRoute not found[39m
+#     [35mpath[39m: "/unknown"
+#     [35mmethod[39m: "GET"
+#     [35mrequestId[39m: "N/A"
+#     [35muser[39m: "guest"
+# [04:39:31] [33mWARN[39m: [36mRoute not found[39m
+#     [35mpath[39m: "/"
+#     [35mmethod[39m: "HEAD"
+#     [35mrequestId[39m: "N/A"
+#     [35muser[39m: "guest"
+# [04:39:31] [31mERROR[39m: [36mServer error[39m
+#     [35mmessage[39m: "test failure"
+#     [35mpath[39m: "/throw"
+#     [35mmethod[39m: "GET"
+#     [35muser[39m: "guest"
+#     [35mstatusCode[39m: 500
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 931.772477
