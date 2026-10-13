@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
   // optional provider outage does not masquerade as total application failure.
   health.checks.brevo = {
     configured: Boolean(process.env.BREVO_API_KEY && process.env.BREVO_FROM_EMAIL),
-    status: process.env.BREVO_API_KEY && process.env.BREVO_FROM_EMAIL ? "configured" : "not_configured",
+    status: process.env.BREVO_API_KEY && process.env.BREVO_FROM_EMAIL ? "env_present" : "not_configured",
   };
 
   // Email delivery ledger schema must match the code, otherwise every
@@ -72,10 +72,16 @@ router.get("/", async (req, res) => {
   try {
     const { checkCommunicationReadiness } = await import("../services/communicationReadiness.service.js");
     const readiness = await checkCommunicationReadiness();
-    health.checks.communications = { status: readiness.status, missingColumns: readiness.missingColumns };
-    if (readiness.status === "schema_mismatch") health.status = "degraded";
+    health.checks.communications = {
+      schema: readiness.schema,
+      missingColumns: readiness.missingColumns,
+      providerConfig: readiness.providerConfig,
+      providerAcceptance: readiness.providerAcceptance,
+      mailboxDelivery: readiness.mailboxDelivery,
+    };
+    if (readiness.schema === "schema_mismatch") health.status = "degraded";
   } catch {
-    health.checks.communications = { status: "unknown" };
+    health.checks.communications = { schema: "unknown" };
   }
 
   // Memory health

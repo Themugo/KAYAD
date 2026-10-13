@@ -33,9 +33,10 @@
 10. Frontend browser journeys, background-job runtime, chat realtime and auction concurrency were NOT RUN end to end (no staging/Supabase/Redis); covered only by existing automated suites.
 
 ## Communications launch blockers (2026-10-13)
-- COMMS-1 (BLOCKER, NEEDS AUTHORIZATION): production `communication_deliveries` lacks `idempotency_key`/`dead_letter` -> no email can be sent. Fix: `runbooks/COMMS_PRODUCTION_SCHEMA_FIX_NEEDS_AUTHORIZATION.sql`.
+- COMMS-1 (BLOCKER, NEEDS AUTHORIZATION): production `communication_deliveries` lacks `idempotency_key`/`dead_letter` -> no email can be sent. Fix path and ORDER: see audit report C-10 and `runbooks/COMMS_STEP1..4`. NOT sufficient alone if the deployed backend is current main (registration RPC, refresh-token and users security columns are also missing in production).
 - COMMS-2 (BLOCKER, operator): Brevo v3 API key, validated sender, `BREVO_FROM_EMAIL` spelling aligned (noreply@ vs no-reply@), domain authentication (SPF/DKIM/DMARC) — UNVERIFIED.
 - COMMS-3 (BLOCKER, operator): monitored support mailbox / `BREVO_REPLY_TO`.
 - COMMS-4: no marketing unsubscribe/suppression; do not send promotional email.
 - COMMS-5: dealer submitted/rejected/missing-info emails and team-invite page+ledger are missing.
 - COMMS-6: live end-to-end certification NOT RUN.
+- COMMS-7 (BLOCKER): deployed backend build is unidentified; current main cannot sign in against the production schema (missing 20260930110000, 20261001090000, 20261011090000 objects). No staging exists to prove the dependent set.
