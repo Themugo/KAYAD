@@ -1,0 +1,6 @@
+### root_lint_tsc :: npm run lint :: start 08:37:11
+
+> kayad@0.0.0 lint
+> tsc --noEmit
+
+### exit=0 end 08:37:41

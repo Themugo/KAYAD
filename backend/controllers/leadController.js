@@ -7,7 +7,8 @@
 import {
   getDealerLeads,
   getLeadById,
-  createLead,
+  resolveLead,
+  setLeadNotes,
   updateLeadStage,
   archiveLead,
   markLeadAsHot,
@@ -18,7 +19,7 @@ import {
   calculateResponseTime,
 } from "../services/leadService.js";
 import { getLeadTimeline } from "../services/leadTimelineService.js";
-import { protect } from "../middleware/auth.js";
+import { findById } from "../db/index.js";
 import { logInfo, logError } from "../utils/logger.js";
 
 // =============================
@@ -86,10 +87,15 @@ export const getLead = async (req, res) => {
 // ➕ CREATE LEAD MANUALLY
 // =============================
 
+// Route: POST /api/leads → protect → dealerOnly → validate(createLeadSchema) → here (backend/routes/leadRoutes.js).
+// Policy (Stage 3, 2026-10-13): a lead belongs to the dealer who owns it (every other lead handler checks
+// lead.dealer === req.user.id), so a manual lead is always created for the caller; the role boundary reuses dealerOnly,
+// the same guard as the canonical /api/dealer-platform/leads routes. Invariant shared with every automatic lead path
+// (chat/auction/escrow): lead.dealer === vehicle.dealer. All checks run before any write.
 export const createLeadManual = async (req, res) => {
   try {
     const { buyerId, vehicleId, source, notes } = req.body;
-    const dealerId = req.user.id;
+    const dealerId = String(req.user.id);
 
     if (!buyerId || !source) {
       return res.status(400).json({
@@ -98,22 +104,45 @@ export const createLeadManual = async (req, res) => {
       });
     }
 
-    const lead = await createLead(buyerId, dealerId, vehicleId, source, null);
-
-    if (notes) {
-      lead.notes = notes;
-      await lead.save();
+    if (String(buyerId) === dealerId) {
+      return res.status(400).json({ success: false, message: "A lead's buyer cannot be the dealer" });
     }
 
-    res.status(201).json({
+    const buyer = await findById("users", buyerId, "id");
+    if (!buyer) {
+      return res.status(400).json({ success: false, message: "Buyer not found" });
+    }
+
+    if (vehicleId) {
+      const vehicle = await findById("cars", vehicleId);
+      if (!vehicle) {
+        return res.status(400).json({ success: false, message: "Vehicle not found" });
+      }
+      if (String(vehicle.dealer?.id || vehicle.dealer?._id || vehicle.dealer) !== dealerId) {
+        return res.status(403).json({ success: false, message: "Not authorized to create a lead for this vehicle" });
+      }
+    }
+
+    // Create-or-find on the lead business key (buyer, dealer, vehicle, source, source_reference=null).
+    let { lead, created } = await resolveLead(buyerId, dealerId, vehicleId || null, source, null);
+
+    // Notes are written only on first creation, or to complete a creation whose notes write previously failed
+    // (existing lead with no notes). A repeated submission never overwrites notes the dealer has since edited.
+    if (notes && (created || !lead?.notes)) {
+      lead = await setLeadNotes(lead.id, notes);
+    }
+
+    res.status(created ? 201 : 200).json({
       success: true,
+      created,
       lead,
     });
   } catch (err) {
     logError("Failed to create lead", err);
-    res.status(500).json({
+    const status = err?.statusCode >= 400 && err?.statusCode < 500 ? err.statusCode : 500;
+    res.status(status).json({
       success: false,
-      message: "Failed to create lead",
+      message: status < 500 ? err.message : "Failed to create lead",
     });
   }
 };
@@ -251,17 +280,17 @@ export const addNote = async (req, res) => {
       });
     }
 
-    lead.notes = note;
-    await lead.save();
+    // Leads are plain rows (db/index.js); the previous `lead.save()` threw TypeError on every call.
+    const updatedLead = await setLeadNotes(leadId, note);
 
-    await addLeadActivity(leadId, "note_added", req.user.id, {
+    const afterActivity = await addLeadActivity(leadId, "note_added", req.user.id, {
       description: "Note added",
       metadata: { note },
     });
 
     res.json({
       success: true,
-      lead,
+      lead: afterActivity || updatedLead,
     });
   } catch (err) {
     logError("Failed to add note", err);

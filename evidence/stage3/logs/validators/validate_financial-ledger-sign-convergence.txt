@@ -1,0 +1,5 @@
+(node:27849) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Financial ledger sign-convergence source gate: 8/8 PASS
+Signed convention is consistent across posting, reversal and rebuild; dry-run is read-only; migration preserves service-role-only execution and does not auto-rebuild.
+LIMIT: no PostgreSQL execution or target-environment balance diff was run in this environment.

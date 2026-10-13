@@ -1,0 +1,8 @@
+(node:25482) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS: canonical auction service uses shared request transport
+PASS: AuctionsView uses canonical auction service transport
+PASS: marketplaceCore uses canonical auction service
+PASS: legacy public auction export removed
+PASS: auction service supports active/list/my/get contracts
+Auction transport convergence: 5/5 PASS

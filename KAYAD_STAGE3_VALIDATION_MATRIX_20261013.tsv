@@ -1,0 +1,18 @@
+area	status	evidence	environment	notes
+Foundation integrity	PASS	evidence/stage3/STAGE3_BASELINE_RECORD.txt	Linux clone of origin/main 194cc807	ZIP == HEAD (4281 files, 0 diffs)
+Lead authorization	PASS	backend/tests/regression/leadManualCreateAuthorization.test.js (30); mutation log	Node 22.22.2 Jest	protect→dealerOnly→zod; owner vehicle check; deployed state unverified
+Lead persistence	PASS	same test; addNote tests	Node 22.22.2 Jest	.save() removed from createLeadManual and addNote
+Lead idempotency	PARTIAL	scripts/rehearse-stage3-lead-privileges-local.sh L1–L3	PG 17.6 + 16.15	LEADS_V2 candidate proven; not applied; production still duplicates
+Refresh-token security	PARTIAL	logoutRevocationBehaviour (8); refreshRotationContract; Stage 2 harness 56/56 x2	Jest; PG 17.6/16.15	production lacks rotation objects (Stage 2 read)
+Function privileges	PARTIAL	harness P1–P5 matrix	PG 17.6 + 16.15	remediation verified locally; production unverified in Stage 3
+RLS	PARTIAL	harness L3/L4	PG 17.6 + 16.15	lead tables proven locally; production policy bodies unverified
+Migration provenance	BLOCKED	evidence/stage3/stage3_production_only_and_edited_findings.txt	Git + captured digests	35 records' SQL only in production; needs runbook A-1
+Duplicate migration remediation	PARTIAL	KAYAD_STAGE3_DUPLICATE_VERSION_MATRIX_20261013.tsv	Git + captured digests	2/6 proven equal, 1 differs, 3 no digest; db push now fail-closed
+Inspector table compatibility	PARTIAL	harness I1/I1b/I1c; INSPECTOR_V1 candidate	PG 17.6 + 16.15	integer years vs fractional API → 500 via PostgREST
+Registration/auth contracts	PASS	report §13; suites listed	Jest/Vitest	local only; production objects absent
+Communications	UNVERIFIED	validate:communications PASS; validate:communications:providers BLOCKED	static	no provider acceptance/delivery evidence; no sends
+Regression tests	PASS	evidence/stage3/logs/*	Linux, Node 22.22.2	Jest 96/1342, Vitest 36, node 1, root 643+1 skip, Playwright 20/20, validators 121 pass 0 regressions
+Build/lint	PASS	logs/root_lint_tsc.txt, root_build.txt	Linux	ESLint src: 4 pre-existing errors (not a project script)
+Schema-rehearsal readiness	PASS	runbooks/STAGE3_SCHEMA_ONLY_REHEARSAL_RUNBOOK_20261013.md	—	awaiting approval A-1
+Native Windows	NOT RUN	—	—	not reachable from this environment
+Hosted Supabase / staging	NOT RUN	—	—	not authorised

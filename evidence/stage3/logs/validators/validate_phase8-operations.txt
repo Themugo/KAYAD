@@ -1,0 +1,20 @@
+(node:27314) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+===== KAYAD PHASE 8 OPERATIONS & RECOVERY CERTIFICATION =====
+PASS | Structured logging
+PASS | Sentry integration
+PASS | Prometheus metrics
+PASS | Alert routing uses canonical providers
+PASS | Alert object/positional compatibility
+PASS | Queue retries and DLQ
+PASS | Worker lifecycle
+PASS | Backup helpers
+PASS | Recovery runbooks
+PASS | Current email provider in DR docs
+PASS | Production rollback endpoints are configurable
+PASS | Recovery tooling retained
+PASS | Production security gate retained
+PASS | Phase 6 release gate retained
+PASS | No private-key material in operational files
+
+RESULT: 15/15 PASS

@@ -1,0 +1,24 @@
+(node:28480) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS public FAQ list route precedes auth middleware
+PASS public FAQ detail route precedes auth middleware
+PASS FAQ write routes remain behind auth middleware
+PASS public FAQ reads use explicit allow-list projection
+PASS public FAQ projection excludes editor identity fields
+PASS anonymous popularity tracking is rate-limited by client IP
+PASS customer message projection strips internal notes
+PASS support list is scoped to current account
+PASS stale list and detail responses are discarded
+PASS account switch clears customer case and draft state
+PASS server failures are presented without raw backend detail
+PASS failed case detail has retry and return actions
+PASS active and closed cases have separate headings
+PASS FAQ account fallback is categorized correctly
+PASS FAQ fallback includes case reopen guidance
+PASS CMS category aliases normalize to supported filters
+PASS FAQ disclosure controls expose expanded state
+PASS malformed CMS FAQ rows cannot break public help rendering
+PASS marquee duplicate loop is hidden from assistive technology
+PASS account-switch regression test exists
+PASS public FAQ category regression tests exist
+Public support surface validation: 21/21 PASS

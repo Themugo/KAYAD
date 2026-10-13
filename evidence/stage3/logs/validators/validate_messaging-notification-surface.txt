@@ -1,0 +1,33 @@
+(node:28499) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS signed-out Messages renders a dedicated private-inbox state
+PASS sign-in returns to the canonical Messages surface
+PASS signed-out Messages does not render private inbox counts
+PASS account identity changes clear composer and selection state
+PASS inbox polling discards stale identity responses
+PASS prior-account conversations are masked synchronously during identity change
+PASS send completion is guarded against account changes
+PASS conversation counts do not imply zero while loading or failing
+PASS message loading errors use customer-safe text and retry
+PASS network failures are classified as network failures
+PASS navbar message badge uses the canonical authenticated unread endpoint
+PASS unread endpoint is protected and queries only participant chats
+PASS navbar unread count is masked to the active account and does not zero on fetch failure
+PASS navbar badge regression test covers authoritative unread count
+PASS notification DTO uses an explicit field allow-list
+PASS notification DTO excludes recipient contacts and internal action data
+PASS notification links are local-path-only
+PASS notification mutations verify owner before update/delete
+PASS notification routes remain authenticated
+PASS notification client normalization is allow-listed
+PASS notification fetch errors are distinguishable from an empty inbox
+PASS notification mutations reject stale account responses
+PASS prior-account notifications are masked synchronously during identity change
+PASS fetch and action errors remain distinct
+PASS notification counts refresh if realtime subscription missed bootstrap
+PASS notification history exposes safe load-more pagination
+PASS notification mutations invalidate stale fetches and reconcile counts
+PASS notification full page provides retry and does not fake an empty success
+PASS notification popover has keyboard-operable notification buttons
+PASS protected notification route remains behind RequireAuth
+Messaging/notification surface validation: 30/30 PASS

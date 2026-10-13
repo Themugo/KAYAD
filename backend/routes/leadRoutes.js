@@ -18,9 +18,10 @@ import {
   getPipeline,
   getConversionReport,
 } from "../controllers/leadController.js";
-import { protect, adminOnly } from "../middleware/auth.js";
+import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
+import { validate, validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
+import { createLeadSchema, leadNoteSchema } from "../validation/lead.schema.js";
 
 const router = express.Router();
 
@@ -34,8 +35,9 @@ router.get("/", protect, validateQuery(analyticsQuerySchema), asyncHandler(getLe
 // Get lead details
 router.get("/:leadId", protect, validateObjectId, asyncHandler(getLead));
 
-// Create lead manually
-router.post("/", protect, asyncHandler(createLeadManual));
+// Create lead manually — the caller becomes the lead's dealer, so only dealer/seller (and staff, per the existing
+// dealerOnly convention shared with /api/dealer-platform/leads) may create one. Authorization precedes validation.
+router.post("/", protect, dealerOnly, validate(createLeadSchema), asyncHandler(createLeadManual));
 
 // Update lead stage
 router.put("/:leadId/stage", protect, asyncHandler(updateStage));
@@ -47,7 +49,7 @@ router.put("/:leadId/archive", protect, asyncHandler(archiveLeadHandler));
 router.put("/:leadId/hot", protect, asyncHandler(markAsHot));
 
 // Add note
-router.post("/:leadId/notes", protect, asyncHandler(addNote));
+router.post("/:leadId/notes", protect, validate(leadNoteSchema), asyncHandler(addNote));
 
 // Get lead timeline
 router.get("/:leadId/timeline", protect, validateObjectId, asyncHandler(getTimeline));

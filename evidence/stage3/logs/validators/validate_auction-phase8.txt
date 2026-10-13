@@ -1,0 +1,17 @@
+(node:28435) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS dealer setup defaults to direct settlement
+PASS platform policy service exists
+PASS platform policy constrains settlement modes
+PASS auction close creates canonical outcome
+PASS auction outcome stores direct vs escrow mode
+PASS escrow creation is optional and explicit
+PASS winner payment updates outcome
+PASS auction winner payment type is supported
+PASS legacy payment no longer silently forces escrow
+PASS winner direct payment endpoint exists
+PASS admin platform policy endpoint exists
+PASS outcome migration exists
+PASS outcome is unique per auction
+PASS escrow is created only for escrow-selected auctions
+PHASE8_PASS=14

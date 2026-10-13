@@ -1,0 +1,86 @@
+SERVER: PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit
+== L1 defect reproduction: current kayad_create_lead_atomic (20260907200100) is not idempotent ==
+  PASS  L1 defect reproduced: identical repeat returned created=true and leads=2 (duplicate business record)
+== L2 LEADS_V2 candidate (find-before-insert under the same advisory lock) ==
+  PASS  L2 LEADS_V2 applies on a database that already holds a duplicate key group (non-destructive)
+  PASS  L2 no row was deleted or merged by the candidate
+  PASS  L2 repeat on a historical duplicate key returns the OLDEST lead, created=false, no new row
+  PASS  L2 new key: first create=true, identical repeat=false
+  PASS  L2 a different source_reference or source is a genuinely new lead
+  PASS  L2 30 concurrent identical creates WITHOUT a unique index: exactly 1 created, 29 returned it, 1 row
+  PASS  L2 candidate re-run is idempotent (no data effect)
+  PASS  L2 function remains SECURITY INVOKER
+  PASS  L2 LEADS_V1 (unique index) still fails loudly while a historical duplicate exists — V2 does not need it
+== L3 V1 + V2 together, and the lead RLS/table boundary under hosted-style client table grants ==
+  PASS  L3 V1 index then V2 body applied on an empty leads table
+  PASS  L3 with V1+V2: create=true, repeat=false, one row
+  INFO  L3 simulated hosted default: GRANT ALL ON leads, lead_activities TO anon, authenticated (production has none of SELECT/INSERT/UPDATE/DELETE per Stage 2 read-only check)
+  PASS  L3 anon SELECT on leads sees 0 of 1 rows (deny-all RLS policy leads_service_only)
+  PASS  L3 anon direct INSERT rejected by RLS
+  PASS  L3 anon RPC create (still EXECUTE-able, invoker rights) rejected: ERROR:  new row violates row-level security policy for table "leads"
+  PASS  L3 authenticated SELECT on leads sees 0 of 1 rows (deny-all RLS policy leads_service_only)
+  PASS  L3 authenticated direct INSERT rejected by RLS
+  PASS  L3 authenticated RPC create (still EXECUTE-able, invoker rights) rejected: ERROR:  new row violates row-level security policy for table "leads"
+  PASS  L3 no client-role attempt created a row
+== L4 kayad_transition_lead_atomic behaviour (service_role) ==
+  PASS  L4 new→contacted applied with one stage_changed activity
+  PASS  L4 contacted→sold rejected by the state machine
+  PASS  L4 anon transition attempt has no effect: ERROR:  Lead not found
+  PASS  L4 stage unchanged by the anon attempt
+== P1 privilege matrix, stock PostgreSQL defaults (functions EXECUTE-able by PUBLIC unless revoked) ==
+  MATRIX [stock] kayad_rotate_refresh_token(text,text,uuid,integer,uuid,text,text,text,timestamptz,uuid)  anon=f authenticated=f service_role=t  secdef=t owner=postgres config=search_path=public
+  MATRIX [stock] kayad_register_identity_atomic(text,text,text,text,text,text,uuid,text,text,timestamptz)  anon=f authenticated=f service_role=t  secdef=t owner=postgres config=search_path=public
+  MATRIX [stock] kayad_create_lead_atomic(uuid,uuid,uuid,text,text,numeric)  anon=t authenticated=t service_role=t  secdef=f owner=postgres config=search_path=public
+  MATRIX [stock] kayad_transition_lead_atomic(uuid,text,uuid)  anon=t authenticated=t service_role=t  secdef=f owner=postgres config=search_path=public
+  PASS  P1 confirms finding: both lead functions are EXECUTE-able by anon (PUBLIC) until 20261011093000 runs
+  PASS  P1 rotate/register closed to anon under stock defaults (REVOKE … FROM PUBLIC suffices when no explicit grant exists)
+== P2 hostile default function ACL (auto-grant EXECUTE to anon, authenticated) ==
+  MATRIX [hostile-before] kayad_rotate_refresh_token(text,text,uuid,integer,uuid,text,text,text,timestamptz,uuid)  anon=t authenticated=t service_role=t  secdef=t owner=postgres config=search_path=public
+  MATRIX [hostile-before] kayad_register_identity_atomic(text,text,text,text,text,text,uuid,text,text,timestamptz)  anon=f authenticated=f service_role=t  secdef=t owner=postgres config=search_path=public
+  MATRIX [hostile-before] kayad_create_lead_atomic(uuid,uuid,uuid,text,text,numeric)  anon=t authenticated=t service_role=t  secdef=f owner=postgres config=search_path=public
+  MATRIX [hostile-before] kayad_transition_lead_atomic(uuid,text,uuid)  anon=t authenticated=t service_role=t  secdef=f owner=postgres config=search_path=public
+  PASS  P2 confirms Stage 2 finding: rotate RPC EXECUTE-able by anon under hostile defaults
+  PASS  P2 register RPC closed even under hostile defaults (explicit revoke in 20261001220000)
+== P3 remediation: LEADS_V2, then 20261011093000, then ONBOARDING V3 step 9 ==
+  PASS  P3 LEADS_V2 applied
+  PASS  P3 20261011093000 applied
+  PASS  P3 V3 step 9 applied
+  MATRIX [remediated] kayad_rotate_refresh_token(text,text,uuid,integer,uuid,text,text,text,timestamptz,uuid)  anon=f authenticated=f service_role=t  secdef=t owner=postgres config=search_path=public
+  MATRIX [remediated] kayad_register_identity_atomic(text,text,text,text,text,text,uuid,text,text,timestamptz)  anon=f authenticated=f service_role=t  secdef=t owner=postgres config=search_path=public
+  MATRIX [remediated] kayad_create_lead_atomic(uuid,uuid,uuid,text,text,numeric)  anon=f authenticated=f service_role=t  secdef=f owner=postgres config=search_path=public, pg_temp
+  MATRIX [remediated] kayad_transition_lead_atomic(uuid,text,uuid)  anon=f authenticated=f service_role=t  secdef=f owner=postgres config=search_path=public
+  PASS  P3 all four functions: anon=f authenticated=f service_role=t under hostile defaults
+  PASS  P3 re-applying LEADS_V2 AFTER the revoke keeps anon=f (CREATE OR REPLACE preserves the ACL)
+== P4 real calls as client roles after remediation ==
+  PASS  P4 anon → kayad_create_lead_atomic : permission denied for function
+  PASS  P4 anon → kayad_transition_lead_atomic : permission denied for function
+  PASS  P4 anon → kayad_rotate_refresh_token : permission denied for function
+  PASS  P4 anon → kayad_register_identity_atomic : permission denied for function
+  PASS  P4 authenticated → kayad_create_lead_atomic : permission denied for function
+  PASS  P4 authenticated → kayad_transition_lead_atomic : permission denied for function
+  PASS  P4 authenticated → kayad_rotate_refresh_token : permission denied for function
+  PASS  P4 authenticated → kayad_register_identity_atomic : permission denied for function
+  PASS  P4 no client-role call created a user
+  PASS  P4 backend path (service_role) still creates leads after remediation
+== P5 SECURITY DEFINER search_path candidate (pg_temp last) + onboarding behaviour unchanged ==
+  PASS  P5 search_path candidate applied
+  PASS  P5 search_path candidate re-run is idempotent
+  PASS  P5 both definers: prosecdef=t, search_path=public, pg_temp
+  PASS  P5 onboarding behavioural assertions (register/dup/rotate/replay/family/ledger) pass after all candidates
+  MATRIX [final] kayad_rotate_refresh_token(text,text,uuid,integer,uuid,text,text,text,timestamptz,uuid)  anon=f authenticated=f service_role=t  secdef=t owner=postgres config=search_path=public, pg_temp
+  MATRIX [final] kayad_register_identity_atomic(text,text,text,text,text,text,uuid,text,text,timestamptz)  anon=f authenticated=f service_role=t  secdef=t owner=postgres config=search_path=public, pg_temp
+  MATRIX [final] kayad_create_lead_atomic(uuid,uuid,uuid,text,text,numeric)  anon=f authenticated=f service_role=t  secdef=f owner=postgres config=search_path=public, pg_temp
+  MATRIX [final] kayad_transition_lead_atomic(uuid,text,uuid)  anon=f authenticated=f service_role=t  secdef=f owner=postgres config=search_path=public
+  PASS  P5 candidate fails loudly (no partial change) when the functions are absent: expected function public.kayad_rotate_refresh_token
+== I1 inspector_applications: production shape (integer years) vs the API contract (fractional years), INSPECTOR_V1 candidate ==
+  PASS  I1 defect reproduced AFTER the onboarding chain: a 2.5-year application is rejected by the production integer column
+  PASS  I1 INSPECTOR_V1 applied over the production shape
+  PASS  I1 column is numeric(5,2)
+  PASS  I1 the 2.5-year application (JSON array for text[]) now inserts as 2.50
+  PASS  I1 existing row preserved (7 → 7.00), no row lost
+  PASS  I1 81 years rejected by the 0..80 CHECK
+  PASS  I1 text[] columns untouched (PostgREST JSON-array compatible)
+  PASS  I1 re-run is a no-op (one CHECK, same type)
+  PASS  I1b out-of-range existing row: candidate fails loudly, type unchanged, data untouched
+  PASS  I1c on a repository-shaped table (chain-created) the candidate is a no-op
+== RESULT: 57 passed, 0 failed ==

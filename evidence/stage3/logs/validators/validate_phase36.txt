@@ -1,0 +1,7 @@
+(node:25040) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PHASE 36 CSRF BOUNDARY VALIDATION: PASS
+Backend route files discovered: 106
+Global browser-facing mutation CSRF: ENABLED
+JWT Authorization compatibility: ENABLED
+Machine callback exemptions: EXPLICIT / AUTHENTICATED SEPARATELY

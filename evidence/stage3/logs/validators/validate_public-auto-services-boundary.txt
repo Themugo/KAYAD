@@ -1,0 +1,21 @@
+(node:28508) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS public mode is explicit and account mode is separate
+PASS public page does not render personal record tabs
+PASS public page directs signed-in customers to their account workspace
+PASS customer record workspace is embedded in My Garage
+PASS inspection deep links to private history open buyer dashboard
+PASS navigation entry for personal records targets buyer dashboard
+PASS inspection records are bound to a stable account identity
+PASS prior account data is masked before the next request resolves
+PASS stale inspection request responses are sequence guarded
+PASS private record API errors do not echo raw backend messages
+PASS customer bookings require authentication
+PASS customer booking detail requires authentication
+PASS provider management endpoints require authentication and ownership
+PASS public provider search enforces server-side verification status
+PASS public provider search output is projected through public DTO
+PASS public provider profile rejects ineligible providers
+PASS regression tests cover public tab hiding and account switching
+
+17/17 checks passed

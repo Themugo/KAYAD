@@ -1,0 +1,19 @@
+(node:27666) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Premium presentation validation: 16/16 PASS
+PASS — Router location drives auth surface
+PASS — Navbar uses canonical /login navigation
+PASS — Registration is reachable: combined header entry -> /login -> /register CTA
+PASS — Hero keeps stable mobile/desktop footprint
+PASS — Hero keeps real vehicle source
+PASS — Hero retains existing actions
+PASS — Hero retains carousel controls
+PASS — Hero uses Kenyan-road visual fallback
+PASS — Hero premium vehicle stage present (desktop pair + mobile carousel + vehicle info cards on real featured inventory)
+PASS — Login remains canonical standalone surface
+PASS — Register remains canonical standalone surface
+PASS — Login uses shared premium shell
+PASS — Login primary action is explicit
+PASS — Auth screens carry no advertising or decorative artwork
+PASS — Reduced-motion preserved
+PASS — Login test contract matches current presentation

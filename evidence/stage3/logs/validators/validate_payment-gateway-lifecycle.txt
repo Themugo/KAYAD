@@ -1,0 +1,17 @@
+(node:27778) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS: Payment history uses canonical db adapter
+PASS: Payment lifecycle has explicit state machine
+PASS: Payment callback records webhook receipt before side effects
+PASS: Payment callback records failed amount verification as finalized
+PASS: Payment callback does not fund vehicle escrow through M-Pesa
+PASS: Failed-payment mpesa transaction lookup uses canonical field
+PASS: Payment type validation includes operational types
+PASS: Checkout request id is unique
+PASS: Pending duplicate operations are constrained
+PASS: Payment attempt identity is constrained
+PASS: Payment events are append-only to authenticated clients
+PASS: Webhook records are append-only to authenticated clients
+PASS: Payment lifecycle audit helper exists
+
+Payment gateway lifecycle: 13/13 PASS

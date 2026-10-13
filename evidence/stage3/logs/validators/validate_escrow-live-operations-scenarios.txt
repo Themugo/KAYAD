@@ -1,0 +1,27 @@
+(node:27901) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS concurrent release/refund remain row-locked and idempotent
+PASS dispute resolution posts seller/refund/commission ledger consequences
+PASS dispute refund creates pending external settlement, not false cash completion
+PASS refund completion remains separate from approval
+PASS B2C callback rejects provider amount mismatch
+PASS payout provider references are replay-unique
+PASS payout state machine remains terminal/idempotent
+PASS audit storage is append-only at database trigger level
+PASS audit storage is inaccessible to client roles
+PASS audit viewer requires dedicated audit permission
+PASS release/refund/settlement routes retain distinct permissions
+PASS role boundary fails closed for money-moving escrow admin actions
+PASS emergency operations remain explicitly permissioned
+PASS release ledger is single-authority inside the atomic escrow transition
+PASS payment-less refunds create an explicit refund payable record
+PASS refund completion binds the refund to the escrow case
+PASS payment-less refunded escrows receive a settlement record
+PASS seller payout control is exposed through the escrow settlement permission
+PASS B2C conversation identity is persisted before provider callback
+PASS B2C timeout is observed without falsely failing an ambiguous payout
+PASS seller receives idempotent payout completion notification
+BLOCKED staging Supabase credentials not available in this environment
+
+Escrow live-operations scenario contract: 21/21 PASS
+Staging execution: BLOCKED — requires staging Supabase credentials

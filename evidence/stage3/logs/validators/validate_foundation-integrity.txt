@@ -1,0 +1,9 @@
+(node:27512) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS package.json scripts and encoding
+PASS required holistic certification files present
+PASS response wrapper has canonical early single registration
+PASS response hook keeps synchronous response boundary
+PASS error handler guards committed responses
+PASS not-found handler guards committed responses
+FOUNDATION INTEGRITY: PASS

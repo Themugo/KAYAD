@@ -1,0 +1,4 @@
+(node:26712) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS local runtime startup/health/degraded API contract
+{"live":200,"health":200,"ready":503,"cars":503}

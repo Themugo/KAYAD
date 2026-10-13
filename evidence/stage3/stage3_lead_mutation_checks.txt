@@ -1,0 +1,13 @@
+Stage 3 mutation checks — backend/tests/regression/leadManualCreateAuthorization.test.js (Linux, Node 22.22.2, 2026-10-13)
+Command: cd backend && node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit tests/regression/leadManualCreateAuthorization.test.js
+M0 Stage 3 code                                   : 30 passed / 30
+M1 dealerOnly removed from POST /api/leads        : 3 failed / 27 passed  (guard is load-bearing)
+M2 vehicle-ownership check disabled               : 1 failed / 29 passed  (tenant boundary is load-bearing)
+M3 HEAD 194cc807 controller + routes restored     : 22 failed / 8 passed  (original defects reproduced: no role guard, .save() TypeError, no validation)
+All files restored byte-for-byte (cmp) and re-run: 30 passed / 30.
+
+Logout behavioural test — backend/tests/auth/logoutRevocationBehaviour.test.js (same environment)
+M0 unmodified authController.js                          : 8 passed / 8
+M1 logout() without RefreshToken.revokeAllForUser         : 4 failed / 4 passed
+M2 logout() with tokenVersion increment set to 0          : 2 failed / 6 passed
+authController.js restored byte-for-byte (cmp) and re-run: 8 passed / 8.

@@ -1,0 +1,27 @@
+(node:28517) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS finance page defaults to public mode
+PASS App explicitly renders financing in public mode
+PASS application form is conditional on account mode
+PASS personal application tracker is conditional on account mode
+PASS public mode renders service explanation and not lender offers
+PASS public copy explicitly says KAYAD is not a lender
+PASS public CTA directs signed-in users to My Garage
+PASS public CTA never exposes application records directly
+PASS BuyerPlatform hosts the private financing workspace
+PASS buyer dashboard has a financing shortcut
+PASS loan submission requires authentication
+PASS applicant list requires authentication
+PASS admin list and status changes remain protected
+PASS applicant query is scoped to the authenticated user
+PASS applicant response uses an explicit DTO
+PASS applicant DTO omits reviewer notes and reviewer identity
+PASS account data load is skipped in public mode
+PASS stale application responses are cancelled
+PASS application fetch failure is shown honestly with retry
+PASS calculator bounds vehicle, deposit and rate inputs
+PASS calculator disclaims the rate as an offer
+PASS applicant client contract does not expose reviewer notes
+PASS repeatable validator is registered in package scripts
+
+23/23 checks passed

@@ -1,0 +1,10 @@
+(node:25683) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS obsolete browser Supabase clients removed
+PASS SocketContext uses canonical backend Socket.IO transport
+PASS production API fallback is same-origin
+PASS user preference stats no longer returns 501
+PASS src/main.tsx exists
+PASS src/App.tsx exists
+PASS src/api/httpRequest.ts exists
+Runtime integrity validation passed: 7/7

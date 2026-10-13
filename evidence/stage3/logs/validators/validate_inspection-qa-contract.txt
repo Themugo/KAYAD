@@ -1,0 +1,13 @@
+(node:28131) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS QA report-version migration exists
+PASS report_versions is migration-backed
+PASS report_corrections is migration-backed
+PASS generated reports enter canonical QA version lifecycle
+PASS PDF generation creates a real uploaded artifact
+PASS PDF artifacts use authenticated raw storage
+PASS authenticated report PDF download route exists
+PASS QA review uses canonical inspection_staff identity
+PASS QA approval resolves report by report ID
+PASS delivery does not falsely mark buyer review complete
+Inspection QA contract: PASS

@@ -1,0 +1,11 @@
+(node:27761) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+INSPECTION DOMAIN RLS ENABLEMENT: PASS (8/8 tables enabled, 0 inert-policy tables found tree-wide)
+- inspection_bookings: RLS enabled
+- inspection_disputes: RLS enabled
+- inspection_quality_audits: RLS enabled
+- inspection_report_amendments: RLS enabled
+- inspection_reports: RLS enabled
+- inspection_reviews: RLS enabled
+- inspection_staff: RLS enabled
+- inspection_status_history: RLS enabled

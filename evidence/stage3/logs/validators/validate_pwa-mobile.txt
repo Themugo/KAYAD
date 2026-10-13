@@ -1,0 +1,17 @@
+(node:27979) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS viewport prevents browser width drift
+PASS manifest is linked
+PASS Apple touch icon exists in HTML
+PASS 192px maskable PNG exists
+PASS 512px maskable PNG exists
+PASS push badge asset exists
+PASS manifest has exactly two canonical PNG icons
+PASS manifest shortcuts target App state navigation
+PASS PWA theme matches Slate Teal chrome
+PASS notification panel is viewport-safe
+PASS service worker does not cache API responses
+PASS service worker skips auth endpoints
+PASS service worker uses current cache version
+
+PWA/mobile contract: 13/13 PASS

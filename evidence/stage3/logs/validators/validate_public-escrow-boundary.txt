@@ -1,0 +1,18 @@
+(node:28490) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS public view never imports participant or operations desks
+PASS public view has no private tabs
+PASS public view requests only the public program endpoint
+PASS participant desk is mounted in buyer and dealer portals
+PASS staff operations have a dedicated protected portal
+PASS signed-in CTA routes to role-appropriate dashboard
+PASS public copy does not promise automatic release timing
+PASS public explainer describes funding method from published rules
+PASS Escrow navigation keeps public journey actions public and gates participant deals to My Garage
+PASS legacy escrow tab URLs normalize to the public page
+PASS legacy escrow page redirects to canonical public page
+PASS shared public footer uses Escrow Services label
+PASS global app footer uses Escrow Services label
+PASS regression tests assert public/private separation
+
+14/14 public escrow boundary checks passed.

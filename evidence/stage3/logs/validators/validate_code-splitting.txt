@@ -1,0 +1,32 @@
+(node:25410) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS lazy ./features/AuctionsView
+PASS lazy ./features/EscrowView
+PASS lazy ./features/InspectionsView
+PASS lazy ./features/DealersView
+PASS lazy ./features/ChatView
+PASS lazy ./features/AdminView
+PASS lazy ./features/SupportView
+PASS lazy ./features/PaymentHistoryView
+PASS lazy ./pages/KAYADLive
+PASS lazy ./features/OwnershipPlatform
+PASS lazy ./features/PrivateSellerPlatform
+PASS lazy ./pages/dealer/dashboard/DealerDashboard
+PASS lazy ./features/FinancePlatform
+PASS lazy ./features/InspectionMarketplace/pages/InspectionMarketplacePage
+PASS discovery uses canonical AuctionsView surface
+PASS Suspense boundary
+PASS no eager import AuctionsView
+PASS no eager import EscrowView
+PASS no eager import InspectionsView
+PASS no eager import DealersView
+PASS no eager import ChatView
+PASS no eager import AdminView
+PASS no eager import SupportView
+PASS no eager import PaymentHistoryView
+PASS no eager import KAYADLive
+PASS no eager import PrivateSellerPlatform
+PASS no eager import DealerDashboard
+PASS no eager import InspectionMarketplacePage
+
+Code splitting validation: PASS

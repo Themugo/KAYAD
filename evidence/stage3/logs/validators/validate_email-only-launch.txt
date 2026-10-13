@@ -1,0 +1,15 @@
+(node:27386) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS Brevo is the canonical email provider
+PASS M-Pesa is optional by default
+PASS Optional providers fail closed when explicitly required
+PASS Generic communication skips unavailable SMS/WhatsApp
+PASS Registration sends verification through email only
+PASS Registration survives verification-provider failure after atomic account creation
+PASS Registration uses atomic identity creation without provider rollback
+PASS Verification resend preserves the previous token when replacement delivery fails
+PASS Registration sends welcome email through canonical gateway
+PASS Communication defaults remain in-app plus email
+PASS Render keeps optional provider credentials available for later activation
+
+EMAIL-ONLY LAUNCH CONTRACT: 11/11 PASS

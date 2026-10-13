@@ -1,0 +1,22 @@
+(node:25636) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS Node contract
+PASS Vercel API before SPA
+PASS Vercel uses reproducible install
+PASS production env contract
+PASS canonical public hostname
+PASS local Vercel state is ignored
+PASS browser Supabase removed
+PASS Socket.IO client contract
+PASS Socket cookie auth
+PASS Socket leave contract
+PASS Docker context contains backend
+PASS backend bootstrap entrypoint is used by deployment launchers
+PASS production verifier registered
+PASS release identity verification
+PASS release identity emitted
+PASS deployment cannot silently skip Vercel
+PASS Vercel CLI is pinned
+PASS Vercel CI project targeting is explicit
+PASS canonical Supabase service-role env
+Deployment readiness validation: PASS

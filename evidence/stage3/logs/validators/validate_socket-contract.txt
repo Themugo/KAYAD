@@ -1,0 +1,10 @@
+(node:25626) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS auction join
+PASS auction leave
+PASS private chat authorization
+PASS showroom join
+PASS user room
+PASS auction emits
+PASS browser Socket.IO
+Socket contract validation: PASS

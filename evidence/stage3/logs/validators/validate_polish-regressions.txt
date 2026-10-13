@@ -1,0 +1,7 @@
+(node:27989) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS render counter is dev-only
+PASS lazy image shell uses light surface
+PASS feature lazy image shell uses light surface
+PASS service worker has no console logging
+Polish regressions: 4/4 PASS

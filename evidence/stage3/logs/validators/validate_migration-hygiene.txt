@@ -1,0 +1,6 @@
+(node:27918) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Migration hygiene: 181 migration files scanned.
+PASS exact duplicate migration bodies: none
+PASS duplicate table creators: none
+Migration hygiene gate: PASS

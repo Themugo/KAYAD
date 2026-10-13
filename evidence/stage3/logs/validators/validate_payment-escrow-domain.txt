@@ -1,0 +1,12 @@
+(node:27788) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS canonical payment service exists
+PASS canonical escrow service exists
+PASS payment initiated after local record creation
+PASS payment checkout is unique
+PASS pending payment race is constrained
+PASS callback amount mismatch is finalized
+PASS payment status response has one payment field
+PASS active payment history uses canonical service
+PASS secure escrow hub uses canonical services
+Payment/Escrow domain gate: 9/9 PASS

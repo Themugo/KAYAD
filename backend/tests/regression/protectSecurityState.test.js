@@ -65,6 +65,23 @@ describe('protect() security-state contract', () => {
     expect(req.user.grantedPermissions).toEqual(['listings.review']);
     expect(req.user.revokedPermissions).toEqual(['payments.refund']);
   });
+  // Stage 3 (2026-10-13): suspension had no behavioural test.
+  test('a suspended (isBanned) account is refused with 403 AUTH_FORBIDDEN and never reaches the handler', async () => {
+    row = { ...base, isBanned: true };
+    const { res, next } = await run();
+    expect(res.code).toBe(403);
+    expect(res.body.code).toBe('AUTH_FORBIDDEN');
+    expect(res.body.message).toMatch(/suspended/i);
+    expect(next).not.toHaveBeenCalled();
+  });
+  test('suspension is read from the fresh security row, not a cached profile', async () => {
+    row = { ...base, isBanned: false };
+    expect((await run()).next).toHaveBeenCalledTimes(1);
+    row = { ...base, isBanned: true };
+    const { res, next } = await run();
+    expect(res.code).toBe(403);
+    expect(next).not.toHaveBeenCalled();
+  });
   test('an active session id passes and the user is attached', async () => {
     const { res, next, req } = await run({ sessionId: 's-1' });
     expect(res.code).toBe(200);

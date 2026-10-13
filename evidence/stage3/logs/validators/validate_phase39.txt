@@ -1,0 +1,11 @@
+(node:25096) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PHASE 39 SOCKET AUTHORIZATION VALIDATION
+PASS Socket auction room requires a real car lookup
+PASS Socket chat room requires authentication
+PASS Socket chat room requires participant membership
+PASS Socket typing requires an authorized chat room
+PASS Socket typing does not trust client identity fields
+PASS Socket room identifiers remain UUID validated
+PASS Phase 39 completion document exists
+PHASE 39 SOCKET AUTHORIZATION VALIDATION: PASS

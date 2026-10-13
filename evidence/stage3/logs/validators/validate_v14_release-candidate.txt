@@ -1,0 +1,21 @@
+(node:27107) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS package Node engine >=22.22.2
+PASS npm script lint
+PASS npm script test
+PASS npm script build
+PASS npm script validate:release
+PASS npm script validate:v14:holistic
+PASS npm script validate:v14:live-certification-contract
+PASS npm script certify:v14:live-api
+PASS npm script verify:production
+PASS no service-role/secret credentials in frontend/public source
+PASS backend contains no HTTP 501 placeholders
+PASS CI pins Node 22.22.2
+PASS deployment pins Node 22.22.2
+PASS production deployment refuses missing Vercel credentials and verifies deployment
+PASS Vercel uses reproducible npm ci/build commands
+PASS executed validate:v14:holistic
+PASS executed validate:v14:live-certification-contract
+
+V14 release-candidate gate: 17 PASS, 0 FAIL

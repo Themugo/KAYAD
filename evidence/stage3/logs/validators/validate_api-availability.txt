@@ -1,0 +1,12 @@
+(node:27476) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS health routes are registered before session middleware
+PASS session store operations remain bounded
+PASS CSRF safe methods bypass immediately
+PASS CSRF validation is stateless
+PASS CSRF uses double-submit cookie
+PASS CSRF token generation does not persist a session
+PASS CSRF cookie is shared across production KAYAD subdomains
+PASS API system status remains fail-open on control-plane failure
+
+API availability validation: 8/8 PASS

@@ -13,7 +13,13 @@ import { getSupabase } from "../utils/supabase.js";
 // ➕ CREATE LEAD
 // =============================
 
-export const createLead = async (buyerId, dealerId, vehicleId, source, referenceId) => {
+// resolveLead is the single create-or-find pathway (RPC kayad_create_lead_atomic). It returns the lead AND whether
+// this call created it, so callers that must not repeat side effects on a retry (POST /api/leads) can tell.
+// createLead keeps its historical contract (returns the lead only) for the chat/auction/escrow callers.
+export const createLead = async (buyerId, dealerId, vehicleId, source, referenceId) =>
+  (await resolveLead(buyerId, dealerId, vehicleId, source, referenceId)).lead;
+
+export const resolveLead = async (buyerId, dealerId, vehicleId, source, referenceId) => {
   try {
     let estimatedValue = 0;
     if (vehicleId) {
@@ -26,13 +32,30 @@ export const createLead = async (buyerId, dealerId, vehicleId, source, reference
     });
     if (error) throw error;
     const lead = data?.lead || data;
-    if (data?.created !== false) {
+    const created = data?.created !== false;
+    if (created) {
       await addTimelineEvent(lead.id, "lead_created", buyerId, "buyer", `Lead created from ${source}`, { source, referenceId });
     }
-    logInfo("Lead resolved", { leadId: lead.id, buyerId, dealerId, source, created: data?.created !== false });
-    return lead;
+    logInfo("Lead resolved", { leadId: lead.id, buyerId, dealerId, source, created });
+    return { lead, created };
   } catch (err) {
     logError("Failed to create lead", err, { buyerId, dealerId, source });
+    throw err;
+  }
+};
+
+// =============================
+// 📝 SET LEAD NOTES
+// =============================
+// Leads are plain rows returned by db/index.js (no Mongoose document, no .save()). Notes are persisted with the same
+// update() helper archiveLead/markLeadAsHot use; the database row returned by the update is the source of truth.
+export const setLeadNotes = async (leadId, notes) => {
+  try {
+    const updated = await update("leads", leadId, { notes, lastActivityAt: new Date() });
+    logInfo("Lead notes updated", { leadId });
+    return updated;
+  } catch (err) {
+    logError("Failed to set lead notes", err, { leadId });
     throw err;
   }
 };
@@ -383,6 +406,8 @@ export const findOrCreateLeadFromEscrow = async (escrowId) => {
 
 export default {
   createLead,
+  resolveLead,
+  setLeadNotes,
   updateLeadStage,
   addLeadActivity,
   getDealerLeads,

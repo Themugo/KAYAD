@@ -1,0 +1,10 @@
+(node:28005) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS shared box sizing is explicit
+PASS document width is contained on narrow viewports
+PASS text autosizing remains stable on mobile
+PASS media elements cannot create horizontal overflow
+PASS shared keyboard focus treatment exists
+PASS duplicate homepage font declaration removed
+
+NEXT6 polish contract: 6/6 PASS

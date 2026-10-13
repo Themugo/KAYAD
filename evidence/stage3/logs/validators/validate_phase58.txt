@@ -1,0 +1,17 @@
+(node:25169) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS repository package exists
+PASS backend package exists
+PASS frontend build script exists
+PASS frontend lint script exists
+PASS backend start script exists
+PASS Node engine is 22+
+PASS backend Dockerfile exists
+PASS frontend Dockerfile exists
+PASS Vercel config is valid JSON
+PASS Render config exists
+PASS pre-deploy uses configured lint command
+PASS deployment health supports HTTP and HTTPS
+PASS no fake production deployment URLs in config
+
+Phase 58 validation: 13/13 checks passed.

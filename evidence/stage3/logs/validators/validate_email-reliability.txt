@@ -1,0 +1,12 @@
+(node:27404) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS registration commits users/user_auth atomically before non-blocking verification delivery
+PASS registration does not delete a committed identity when verification delivery fails
+PASS registration leaves verification retryable when delivery is unavailable
+PASS resend generates replacement token without persisting it first
+PASS resend commits replacement token only after provider acceptance
+PASS resend leaves persisted token untouched on delivery failure
+PASS optional SMS/WhatsApp cannot block generic email communication
+PASS optional providers are not production startup requirements unless explicitly enabled
+
+EMAIL RELIABILITY CONTRACT: 8/8 PASS

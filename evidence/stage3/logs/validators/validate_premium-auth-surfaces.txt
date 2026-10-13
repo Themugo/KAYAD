@@ -1,0 +1,13 @@
+(node:27640) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS shared premium auth shell exists
+PASS login uses shared premium shell
+PASS registration uses shared premium shell
+PASS login remains canonical /login route
+PASS registration remains canonical /register route
+PASS no advertising panel on auth screens (one task per screen)
+PASS forgot, reset and verify pages use the shared shell
+PASS shell does not own form submission
+PASS responsive auth styling exists
+PASS reduced motion support exists
+Premium auth surface validation: 10/10 PASS

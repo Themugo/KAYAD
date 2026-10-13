@@ -1,0 +1,41 @@
+(node:27232) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS Render env SUPABASE_URL
+PASS Render env SUPABASE_SERVICE_ROLE_KEY
+PASS Render env JWT_SECRET
+PASS Render env REFRESH_TOKEN_SECRET
+PASS Render env SESSION_SECRET
+PASS Render env FRONTEND_URL
+PASS Render env BACKEND_URL
+PASS Render env MPESA_CONSUMER_KEY
+PASS Render env MPESA_CONSUMER_SECRET
+PASS Render env MPESA_SHORTCODE
+PASS Render env MPESA_PASSKEY
+PASS Render env MPESA_CALLBACK_URL
+PASS Render env CLOUDINARY_CLOUD_NAME
+PASS Render env CLOUDINARY_API_KEY
+PASS Render env CLOUDINARY_API_SECRET
+PASS Render env BREVO_API_KEY
+PASS Render env BREVO_FROM_EMAIL
+PASS Render env BREVO_FROM_NAME
+PASS Render env BREVO_WEBHOOK_TOKEN
+PASS Render env AT_API_KEY
+PASS Render env AT_USERNAME
+PASS Render env AT_SENDER_ID
+PASS Render env TWILIO_ACCOUNT_SID
+PASS Render env TWILIO_AUTH_TOKEN
+PASS Render env TWILIO_WHATSAPP_NUMBER
+PASS Render env TWILIO_STATUS_CALLBACK_URL
+PASS Render env COMMUNICATION_WEBHOOK_SECRET
+PASS Render env REDIS_URL
+PASS Render managed Redis — kayad-redis is declared
+PASS Render REDIS_URL binding
+PASS Production Redis fail-closed guard
+PASS Migration RLS coverage inventory — 158 tables explicitly enable RLS
+PENDING provider email — missing BREVO_API_KEY, BREVO_FROM_EMAIL, BREVO_FROM_NAME
+PENDING provider sms — missing AT_API_KEY, AT_USERNAME
+PENDING provider whatsapp — missing TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_NUMBER
+PENDING Live Redis PING — set REDIS_URL in the certification environment.
+PENDING Live Supabase schema — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
+
+PHASE 3 INFRASTRUCTURE VALIDATION COMPLETE.

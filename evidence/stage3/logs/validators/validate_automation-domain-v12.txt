@@ -1,0 +1,16 @@
+(node:26880) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS model compatibility: findAll
+PASS model compatibility: update
+PASS model compatibility: delete
+PASS business-rule surface present
+PASS business-rule surface present
+PASS business-rule surface present
+PASS business-rule surface present
+PASS business-rule surface present
+PASS controller update compatibility
+PASS controller delete compatibility
+PASS admin UI CRUD wired
+PASS business-rule RLS isolation
+PASS business-rule execution fields
+Automation domain V12: 13/13 PASS

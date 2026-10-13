@@ -1,0 +1,13 @@
+(node:27716) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS active inspector marketplace reads canonical inspection_providers
+PASS active inspector marketplace does not read retired user inspector fields
+PASS inspector approval commits provider before application approval
+PASS inspector approval notification cannot turn committed approval into false failure
+PASS inspector rejection notification cannot turn committed rejection into false failure
+PASS dealer onboarding compensates profile when verification submission fails
+PASS inspection provider identity is unique in the database
+PASS compatibility csrf route is documented
+PASS dealer onboarding routes are documented
+
+DOMAIN LIFECYCLE INTEGRITY: PASS

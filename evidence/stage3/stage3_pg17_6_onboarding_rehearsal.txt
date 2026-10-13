@@ -1,0 +1,65 @@
+NOTICE:  database "rehearsal" does not exist, skipping
+pass 1 apply 20260930111500 OK
+pass 1 apply 20260930113000 OK
+pass 1 apply 20260930112000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:37: NOTICE:  trigger "trg_sync_dealer_profile_from_user" for relation "public.users" does not exist, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:92: NOTICE:  trigger "trg_inspector_applications_updated_at" for relation "public.inspector_applications" does not exist, skipping
+pass 1 apply 20261001090000 OK
+pass 1 apply 20261001220000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:2: NOTICE:  extension "pgcrypto" already exists, skipping
+pass 1 apply 20260930110000 OK
+pass 1 apply 20261011090000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20261011121000_profiles_role_sync_repair.sql:41: NOTICE:  trigger "trg_sync_profile_role_from_user" for relation "public.users" does not exist, skipping
+pass 1 apply 20261011121000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20260930111500_advanced_communication_idempotency.sql:3: NOTICE:  column "idempotency_key" of relation "communication_deliveries" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930111500_advanced_communication_idempotency.sql:7: NOTICE:  relation "uq_communication_delivery_idempotency" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930111500_advanced_communication_idempotency.sql:11: NOTICE:  relation "uq_communication_delivery_provider_event" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930111500_advanced_communication_idempotency.sql:15: NOTICE:  relation "idx_communication_delivery_source_event" already exists, skipping
+pass 2 apply 20260930111500 OK
+pass 2 apply 20260930113000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20260930112000_identity_email_normalization.sql:4: NOTICE:  relation "uq_users_email_normalized" already exists, skipping
+pass 2 apply 20260930112000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:16: NOTICE:  column "bio" of relation "dealers" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:16: NOTICE:  column "payment_details" of relation "dealers" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:16: NOTICE:  column "onboarding_complete" of relation "dealers" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:16: NOTICE:  column "onboarding_completed_at" of relation "dealers" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:79: NOTICE:  relation "inspector_applications" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:82: NOTICE:  relation "idx_inspector_applications_status_created" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:84: NOTICE:  relation "idx_inspector_applications_email" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001090000_registration_onboarding_integrity.sql:86: NOTICE:  relation "idx_inspector_applications_user" already exists, skipping
+pass 2 apply 20261001090000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20261001220000_database_contract_alignment.sql:9: NOTICE:  relation "uq_inspector_applications_pending_user" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001220000_database_contract_alignment.sql:13: NOTICE:  relation "uq_inspector_applications_pending_email" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001220000_database_contract_alignment.sql:17: NOTICE:  relation "uq_dealers_user_canonical" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261001220000_database_contract_alignment.sql:21: NOTICE:  relation "uq_user_auth_user_canonical" already exists, skipping
+pass 2 apply 20261001220000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:2: NOTICE:  extension "pgcrypto" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:4: NOTICE:  column "token_hash" of relation "refresh_tokens" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:5: NOTICE:  column "family_id" of relation "refresh_tokens" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:6: NOTICE:  column "session_id" of relation "refresh_tokens" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:7: NOTICE:  column "replaced_by" of relation "refresh_tokens" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:8: NOTICE:  column "revoked_at" of relation "refresh_tokens" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:9: NOTICE:  column "revoke_reason" of relation "refresh_tokens" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:10: NOTICE:  column "reuse_detected_at" of relation "refresh_tokens" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:28: NOTICE:  relation "uq_refresh_tokens_token_hash" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:29: NOTICE:  relation "idx_refresh_tokens_family" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:30: NOTICE:  relation "idx_refresh_tokens_session" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:31: NOTICE:  relation "idx_refresh_tokens_user_active" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:36: NOTICE:  constraint "refresh_tokens_token_key" of relation "refresh_tokens" does not exist, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:37: NOTICE:  index "idx_refresh_tokens_token" does not exist, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20260930110000_advanced_identity_session_hardening.sql:38: NOTICE:  column "token" of relation "refresh_tokens" does not exist, skipping
+pass 2 apply 20260930110000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20261011090000_users_security_state_columns.sql:17: NOTICE:  column "deactivated_at" of relation "users" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261011090000_users_security_state_columns.sql:17: NOTICE:  column "granted_permissions" of relation "users" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261011090000_users_security_state_columns.sql:17: NOTICE:  column "revoked_permissions" of relation "users" already exists, skipping
+psql:/home/claude/kayad-git/supabase/migrations/20261011090000_users_security_state_columns.sql:17: NOTICE:  column "last_active" of relation "users" already exists, skipping
+pass 2 apply 20261011090000 OK
+psql:/home/claude/kayad-git/supabase/migrations/20261011121000_profiles_role_sync_repair.sql:21: NOTICE:  column "updated_at" of relation "profiles" already exists, skipping
+pass 2 apply 20261011121000 OK
+psql:/home/claude/kayad-git/scripts/rehearsal/onboarding_assertions.sql:51: NOTICE:  ALL ASSERTIONS PASSED
+ anon_reg | auth_reg | svc_reg | anon_rot | svc_rot 
+----------+----------+---------+----------+---------
+ f        | f        | t       | f        | t
+(1 row)
+
+REHEARSAL PASSED (applied twice, assertions green)

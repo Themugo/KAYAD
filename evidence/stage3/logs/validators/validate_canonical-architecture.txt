@@ -1,0 +1,14 @@
+(node:27213) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS single canonical inspection router import
+PASS singular inspection API uses canonical router
+PASS plural inspection API is an alias of the canonical router
+PASS no second inspection router implementation is mounted
+PASS dormant digital inspection source removed
+PASS canonical inspection controller has no dormant-table references
+PASS legacy compatibility uses canonical vehicle_inspections
+PASS production env contract exists
+PASS migration chain contains only .sql files
+PASS canonical reconciliation migrations exist
+
+KAYAD canonical architecture validation: PASS

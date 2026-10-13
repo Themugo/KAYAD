@@ -1,0 +1,24 @@
+(node:28444) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS: fulfilment service exists
+PASS: fulfilment migration exists
+PASS: fulfilment routes exist
+PASS: operations list exists
+PASS: collection control exists
+PASS: transfer control exists
+PASS: escrow release control exists
+PASS: reaward control exists
+PASS: cancellation control exists
+PASS: dispute control exists
+PASS: ownership service remains canonical
+PASS: escrow service remains canonical
+PASS: escrow creation uses canonical service
+PASS: escrow funding sync exists
+PASS: outcome migration has collection fields
+PASS: outcome migration has transfer fields
+PASS: fulfilment event audit table exists
+PASS: server mounts fulfilment routes
+PASS: v1 mounts fulfilment routes
+PASS: direct settlement remains selectable
+PASS: late bidding lock remains outside phase9
+PHASE9_PASS=21

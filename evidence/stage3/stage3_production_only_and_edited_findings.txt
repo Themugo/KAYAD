@@ -1,0 +1,26 @@
+Stage 3 provenance checks (local Git + previously captured read-only digests only; no production query was run in Stage 3)
+
+A. Production-only records (38): digests captured 2026-10-11 (docs/audits/evidence/hosted-readonly-20261011/production-migration-statement-digests.tsv)
+   and 2026-10-13 (KAYAD_PRODUCTION_ONLY_MIGRATIONS_20261013.tsv) are identical for all 38 (length and md5) -> production migration history did not change between captures.
+B. The 3 records with same-name files in Git history (20260919080655, 20260919102410, 20260919102636): every Git version of each file was normalised
+   the way that PROVES equality for 20260922045554 / 20260922045609 / 20260921134954 (comments stripped; statements split outside $$; whitespace
+   collapsed or kept; joined with ';\n', '; ' or ';\n\n'; trailing ';'). No variant matched the production md5. Lengths: prod 139 vs git 141/157;
+   prod 12820 vs git 10815/10852; prod 1099 vs git 661–671. Conclusion: what production executed is NOT in Git. Status: DIFFERENT (text unknown).
+C. The 35 directly-applied records: their names occur in Git only inside documentation/evidence files (docs/SUPABASE_MIGRATION_HISTORY_RECONCILIATION.json,
+   docs/audits/08-…, the digest TSVs) — never as SQL. Their SQL text is UNKNOWN to the repository; it exists only in production's
+   supabase_migrations.schema_migrations.statements. Nothing in Stage 3 reconstructs it.
+D. Method validation: the normalisation reproduces production md5 exactly for 20260921134954 (v14_holistic_financial_corrections, matched by version)
+   and 20260922045554, so a mismatch is meaningful evidence of different text, not a hashing artefact.
+E. Edited-after-apply (118 history-matched files, baseline = d0583bf2 2026-09-22 10:11 +0300, the reconciliation commit that aligned file names to
+   live history): 95 unchanged; 21 converted to NO-OP stubs (the 15 name-only duplicates + 6 inverted twins, af9e8fc5 2026-10-02); 2 executable edits:
+   - 20260710044329_…_seed_demo_vehicles.sql (ac933669 2026-10-08): images ARRAY[...] -> to_jsonb(ARRAY[...]) (fresh-build type fix; demo seed data).
+   - 20260909073141_production_advisor_hardening.sql (ac933669 2026-10-08): ad_slots admin policy inline EXISTS(profiles) TO public -> is_admin() TO authenticated,
+     and REVOKE EXECUTE ON is_admin() FROM public, anon, authenticated -> FROM public, anon. Production ran the ORIGINAL (authenticated cannot execute
+     is_admin(); policies calling it error for authenticated). A fresh rebuild differs from production here. Forward-porting would WIDEN a client grant;
+     the application uses service_role only. Owner decision D-MIG-3; no candidate prepared.
+   Full table: evidence/stage3/stage3_edited_after_last_prod_migration.tsv
+F. Loader paths: scripts/db/apply-migrations.mjs (named in the Stage 3 brief) does not exist in any commit. Paths that load migrations:
+   scripts/apply-schema.sh (unconditional `supabase db push` -> now fail-closed), scripts/bootstrap-supabase-production.mjs (dry run by default;
+   --apply now fail-closed), scripts/apply-schema.js (prints guidance only), scripts/normalize-supabase-migrations.mjs --write (renames duplicate
+   versions; currently a no-op: 0 duplicate versions), the two rehearsal scripts (explicit file lists via psql). .github/workflows/deploy.yml and ci.yml
+   run no database command.

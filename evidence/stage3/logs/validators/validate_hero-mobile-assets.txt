@@ -1,0 +1,17 @@
+(node:28094) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS canonical showcase config declares mobileImage for 2 vehicles
+PASS showcase-land-cruiser: legacy desktop hero asset retained (/hero/kayad-land-cruiser-cutout.png)
+PASS showcase-land-cruiser: valid WebP container
+PASS showcase-land-cruiser: WebP has an alpha channel (transparent background)
+PASS showcase-land-cruiser: 163 KB within 100-320 KB budget
+PASS showcase-mercedes-gle: legacy desktop hero asset retained (/hero/kayad-mercedes-gle-cutout.png)
+PASS showcase-mercedes-gle: valid WebP container
+PASS showcase-mercedes-gle: WebP has an alpha channel (transparent background)
+PASS showcase-mercedes-gle: 173 KB within 100-320 KB budget
+PASS no mandatory mobile-specific hero asset: real featured inventory may use its canonical image on mobile
+PASS slide transition defaults to 320ms (admin-controlled via mobileTransitionMs)
+PASS reduced motion disables the slide animation
+PASS no autoplay in the mobile hero block
+
+Hero mobile asset contract: PASS

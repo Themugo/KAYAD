@@ -1,0 +1,10 @@
+(node:27725) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS controller passes historical token to rotation
+PASS controller does not pre-reject stored revoked tokens
+PASS rotation RPC detects revoked or expired token
+PASS rotation RPC revokes entire family on reuse
+PASS controller increments token version after reuse
+PASS refresh model uses canonical rotation RPC
+
+Refresh-token reuse integrity: 6/6 PASS

@@ -1,0 +1,15 @@
+(node:26703) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS backend bootstrap exists
+PASS frontend dev launcher remains canonical
+PASS Windows frontend launcher targets root Vite app
+PASS Windows combined launcher targets root Vite app
+PASS backend package main uses bootstrap
+PASS backend dev uses bootstrap
+PASS backend start uses bootstrap
+PASS admin routes has no encoded newline corruption
+PASS development bootstrap supplies default PORT
+PASS admin routes imports protectAccount
+PASS admin routes has no GlobalSettings dependency
+PASS bootstrap dynamically loads server after environment setup
+Startup convergence validation: PASS
