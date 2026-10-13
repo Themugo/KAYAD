@@ -1,0 +1,69 @@
+import json,re,collections
+M='/home/claude/s2/kayad-fresh/supabase/migrations/'
+inv=json.load(open('/home/claude/audit/inv.json'))
+live={}   # file index -> (total, present) from the read-only catalog query of 2026-10-13
+for t in open('/home/claude/audit/live_partial.txt').read().split():
+    i,r=t.split(':'); total,present=r.split('/'); live[int(i)]=(int(total),int(present))
+ap={l.split(None,1)[0]:(l.split(None,1)[1].strip() if len(l.split(None,1))>1 else '') for l in open('/home/claude/audit/applied.txt') if l.strip()}
+byname={}
+for v,n in ap.items(): byname.setdefault(re.sub(r'\.sql$','',re.sub(r'^\d+_','',n)),[]).append(v)
+creators=collections.defaultdict(list)
+for i,r in enumerate(inv):
+    for t in r['create_tables']+r['create_funcs']: creators[t].append(i)
+suffix=lambda f: re.sub(r'^\d+_(\d+_)?','',f)
+bysuf=collections.defaultdict(list)
+for i,r in enumerate(inv): bysuf[suffix(r['file'])].append(i)
+hdr=['file','timestamp','prod_history','reconciliation_status','live_effect_evidence','depends_on_earlier','change_kind','destructive_or_irreversible','restrictive','rerun_safe_idioms_heuristic','single_txn_declared','overlap_or_conflict','rollback_documented_in_file']
+rows=[]; cnt=collections.Counter()
+for i,r in enumerate(inv):
+    f=r['file']; txt=open(M+f).read(); st=r['status']
+    dep=set()
+    for t in set(r['alter_tables']):
+        c=[j for j in creators.get(t,[]) if j<i]
+        if c: dep.add(inv[c[-1]]['file'][:14])
+    dep=sorted(dep)[:4]
+    kinds=[]
+    if r['create_tables'] or r['alter_tables'] or r['create_funcs'] or r['indexes'] or r['triggers'] or r['policies']: kinds.append('SCHEMA')
+    if r['ins'] or r['upd'] or r['dele']: kinds.append('DATA')
+    destr=[l for k,l in (('drop_col','DROP COLUMN'),('drop_tab','DROP TABLE'),('drop_fn','DROP FUNCTION'),('drop_con','DROP CONSTRAINT'),('truncate','TRUNCATE'),('dele','DELETE')) if r.get(k)]
+    restr=[]
+    if r['not_null']: restr.append('SET NOT NULL')
+    if r['policies']: restr.append('RLS policies')
+    if r['grants']: restr.append('GRANT/REVOKE')
+    if re.search(r'ADD CONSTRAINT|CHECK\s*\(',txt,re.I): restr.append('CHECK/constraint')
+    if re.search(r'CREATE\s+UNIQUE\s+INDEX',txt,re.I): restr.append('UNIQUE index')
+    over=[inv[j]['file'][:14] for j in bysuf[suffix(f)] if j!=i]
+    ov=('same-name sibling '+','.join(over)) if over else ''
+    shared={inv[j]['file'][:14] for t in r['create_tables'] for j in creators[t] if j!=i}
+    if shared: ov=(ov+'; ' if ov else '')+'creates tables also created by '+','.join(sorted(shared)[:3])
+    rb='yes' if re.search(r'rollback',txt,re.I) else 'no'
+    if st.startswith('APPLIED'):
+        rs='MATCHED'; ph=st
+        if st=='APPLIED(name)':
+            hv=byname.get(re.sub(r'^\d+_','',f[:-4]),['?'])[0]
+            ev=f'matched by NAME only: production recorded it as version {hv}, repo file is {f[:14]} (renumbered). A version-keyed tool (supabase db push) would treat this file as PENDING and re-run it'
+            ov=(ov+'; ' if ov else '')+f'VERSION MISMATCH with production {hv}'
+            if 'PRESERVED AS NO-OP' not in txt:
+                ev+=' [INVERTED PAIR: this file holds REAL DDL under a version production lacks; the production-recorded version is a no-op stub in the repo]'
+                ov+='; INVERTED: real DDL under unrecorded version'
+            else:
+                ev+=' [file is an explicit NO-OP stub; harmless if re-run]'
+        else:
+            ev='history record matches by version; effects not individually re-verified except table/function existence'
+    else:
+        ph='absent'
+        if i in live:
+            tot,pres=live[i]
+            if '20260930113000' in f or '20261012140100' in f:
+                rs='CONFLICT'; ev='constraint name present but live definition differs from the file (live lacks '+('dead_letter' if '113000' in f else 'suspended')+')'
+            elif pres==tot: rs='EFFECT_PRESENT_HISTORY_MISSING'; ev=f'{pres}/{tot} extracted objects present (existence only; definition equality not proven)'
+            elif pres==0: rs='EFFECT_MISSING'; ev=f'0/{tot} extracted objects present'
+            else: rs='CONFLICT'; ev=f'partial effect: {pres}/{tot} extracted objects present, history record absent'
+        else:
+            rs='UNVERIFIED'; ev='no catalog-checkable object names extracted (data/seed/alter-only content)'
+    cnt[rs]+=1
+    rows.append([f,f[:14],ph,rs,ev,','.join(dep),'+'.join(kinds) or 'NONE','+'.join(destr),'+'.join(restr),'yes' if r['rerun_idioms'] else 'no','yes' if r['txn'] else 'no',ov,rb])
+with open('/home/claude/s2/kayad-fresh/KAYAD_MIGRATION_RECONCILIATION_20261013.tsv','w') as o:
+    o.write('\t'.join(hdr)+'\n')
+    for r in rows: o.write('\t'.join(x.replace('\t',' ') for x in r)+'\n')
+print(dict(cnt),len(rows))

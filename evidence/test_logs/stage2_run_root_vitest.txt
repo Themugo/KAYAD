@@ -1,0 +1,14 @@
+
+> kayad@0.0.0 test
+> vitest run
+
+
+ RUN  v4.1.11 /home/claude/s2/kayad-fresh
+
+
+ Test Files  81 passed (81)
+      Tests  643 passed | 1 skipped (644)
+   Start at  10:42:29
+   Duration  136.57s (transform 3.95s, setup 9.62s, import 12.77s, tests 39.04s, environment 61.13s)
+
+ROOT_VITEST_EXIT=0

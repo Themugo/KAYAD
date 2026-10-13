@@ -1,0 +1,65 @@
+
+> kayad@0.0.0 build
+> vite build
+
+vite v8.2.0 building client environment for production...
+transforming...
+✓ 2393 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/release.json                                    0.12 kB │ gzip:   0.12 kB
+dist/index.html                                      2.68 kB │ gzip:   0.98 kB
+dist/assets/index-D18Vl2kp.css                     302.49 kB │ gzip:  50.00 kB
+dist/assets/FinancePlatform-DATFZTr3.js              0.08 kB │ gzip:   0.08 kB
+dist/assets/check-DPyNvoox.js                        0.11 kB │ gzip:   0.13 kB
+dist/assets/x-DLwvcv7t.js                            0.14 kB │ gzip:   0.14 kB
+dist/assets/arrow-right-DnOMMGlS.js                  0.16 kB │ gzip:   0.15 kB
+dist/assets/user-round-BWuxVrqV.js                   0.17 kB │ gzip:   0.17 kB
+dist/assets/info-uryv6Uks.js                         0.19 kB │ gzip:   0.17 kB
+dist/assets/credit-card-DaZfya4z.js                  0.20 kB │ gzip:   0.18 kB
+dist/assets/rotate-ccw-clock-5lGOx-pH.js             0.24 kB │ gzip:   0.19 kB
+dist/assets/send-BQUB0-Rj.js                         0.28 kB │ gzip:   0.22 kB
+dist/assets/gavel-ZNEEupxS.js                        0.31 kB │ gzip:   0.21 kB
+dist/assets/shield-check-Ce-gY-V_.js                 0.31 kB │ gzip:   0.24 kB
+dist/assets/ticket-CYDKpW4z.js                       0.31 kB │ gzip:   0.20 kB
+dist/assets/sparkles-BCn_kQUf.js                     0.48 kB │ gzip:   0.27 kB
+dist/assets/paymentApi-BpbWY-mr.js                   0.75 kB │ gzip:   0.47 kB
+dist/assets/auctionService-CiTc5RDG.js               0.76 kB │ gzip:   0.37 kB
+dist/assets/rolldown-runtime-B0Z9INg1.js             0.90 kB │ gzip:   0.51 kB
+dist/assets/inspectionPayment-jg9Yxgj4.js            1.25 kB │ gzip:   0.69 kB
+dist/assets/supportApi-CHb5_e65.js                   1.66 kB │ gzip:   0.81 kB
+dist/assets/authIntent-BSqPgqhn.js                   1.93 kB │ gzip:   0.89 kB
+dist/assets/escrowApi-ByrNNFgl.js                    2.26 kB │ gzip:   0.84 kB
+dist/assets/ActionDialog-C41zKJoc.js                 2.64 kB │ gzip:   1.23 kB
+dist/assets/chatApi-DK11iNAM.js                      3.09 kB │ gzip:   1.43 kB
+dist/assets/KAYADLive-C-28Tkiv.js                    4.43 kB │ gzip:   1.60 kB
+dist/assets/OwnershipPlatform-CwY6KrhZ.js            5.14 kB │ gzip:   1.95 kB
+dist/assets/api-CUGVpxJn.js                          5.63 kB │ gzip:   1.45 kB
+dist/assets/jsx-runtime-C2qclYw9.js                  9.22 kB │ gzip:   3.63 kB
+dist/assets/PaymentHistoryView-BI-BsHFB.js           9.56 kB │ gzip:   2.96 kB
+dist/assets/EscrowOperationsDesk-BvbntWNO.js        10.04 kB │ gzip:   3.43 kB
+dist/assets/EscrowView-BA7i157j.js                  10.56 kB │ gzip:   3.25 kB
+dist/assets/FinanceMarketplace-BYfycyv4.js          10.97 kB │ gzip:   3.43 kB
+dist/assets/api-B6ez5zBH.js                         16.55 kB │ gzip:   4.32 kB
+dist/assets/AuctionsView-BT_-QxxB.js                16.91 kB │ gzip:   5.21 kB
+dist/assets/ParticipantEscrowDesk-CukrrCXc.js       19.55 kB │ gzip:   6.27 kB
+dist/assets/ChatView-DC28mM6T.js                    25.46 kB │ gzip:   6.75 kB
+dist/assets/PrivateSellerPlatform-nejHmmXr.js       28.33 kB │ gzip:   8.18 kB
+dist/assets/DealerDashboard-BIkGK--H.js             34.92 kB │ gzip:   7.08 kB
+dist/assets/AuctionLivePage-BvW_bTKX.js             36.25 kB │ gzip:  10.95 kB
+dist/assets/chunk-62JRHF6Z-B88-54cI.js              36.87 kB │ gzip:  13.35 kB
+dist/assets/SupportView-DIrP9Pe0.js                 43.04 kB │ gzip:  11.60 kB
+dist/assets/AdminView-DIKMQsUb.js                   49.31 kB │ gzip:  12.19 kB
+dist/assets/httpRequest-CdQczMsX.js                 53.08 kB │ gzip:  19.83 kB
+dist/assets/InspectionMarketplacePage-JMJrOdBT.js   55.69 kB │ gzip:  14.40 kB
+dist/assets/DealersView-CJ_8q0MO.js                 57.09 kB │ gzip:  11.91 kB
+dist/assets/InspectionsView-BY8Ap1-C.js             72.69 kB │ gzip:  18.63 kB
+dist/assets/index-BtDcnEJ-.js                      746.09 kB │ gzip: 203.13 kB
+
+✓ built in 1.71s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+BUILD_EXIT=0

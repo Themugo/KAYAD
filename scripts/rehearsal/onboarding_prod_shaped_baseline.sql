@@ -36,6 +36,8 @@ create table communication_deliveries(id uuid primary key default gen_random_uui
 create or replace function update_updated_at_snake() returns trigger language plpgsql as $f$ begin new.updated_at=now(); return new; end $f$;
 create table profiles(id uuid primary key, email text, role text, super_admin boolean, created_at timestamptz default now(), dealer_approved_at timestamptz, deleted_at timestamptz, last_login_at timestamptz);
 alter table users enable row level security; alter table user_auth enable row level security; alter table refresh_tokens enable row level security; alter table communication_deliveries enable row level security;
+-- production fact (read-only catalog check 2026-10-13): service_role has BYPASSRLS; anon/authenticated/authenticator do not.
+alter role service_role bypassrls;
 grant all on all tables in schema public to service_role;
 -- the two production users (dealer, pending, unverified) as seen read-only
 insert into users(name,email,role,status,business_name,location) values ('seed dealer a','a@example.test','dealer','pending','A Motors','Nairobi'),('seed dealer b','b@example.test','dealer','pending','B Motors','Mombasa');

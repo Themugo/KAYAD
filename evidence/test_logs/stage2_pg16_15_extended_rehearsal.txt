@@ -1,0 +1,79 @@
+SERVER: PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+== S1 empty database (no production baseline): expect the chain to FAIL loudly, not partially succeed ==
+  PASS  S1 chain stops with an error at 20260930111500 on an empty DB: psql:/home/claude/s2/kayad-fresh/supabase/migrations/20260930111500_advanced_communication_idempotency.sql:3: ERROR:  relation "public.communication_deliveries"
+== S2 baseline: each migration in its own transaction, applied twice, then behavioural assertions ==
+  PASS  S2 baseline loaded
+  PASS  S2 pass1 20260930111500
+  PASS  S2 pass1 20260930113000
+  PASS  S2 pass1 20260930112000
+  PASS  S2 pass1 20261001090000
+  PASS  S2 pass1 20261001220000
+  PASS  S2 pass1 20260930110000
+  PASS  S2 pass1 20261011090000
+  PASS  S2 pass1 20261011121000
+  PASS  S2 pass2 20260930111500
+  PASS  S2 pass2 20260930113000
+  PASS  S2 pass2 20260930112000
+  PASS  S2 pass2 20261001090000
+  PASS  S2 pass2 20261001220000
+  PASS  S2 pass2 20260930110000
+  PASS  S2 pass2 20261011090000
+  PASS  S2 pass2 20261011121000
+  PASS  S2 assertions (register/dup/rotate/replay/family/ledger)
+  PASS  S2 V2 post-verify: no false rows
+== S2b V3 CANDIDATE: whole chain + step 9 in ONE transaction (runbooks/ONBOARDING_V3_2...), applied twice ==
+  PASS  S2b V3 apply pass1
+  PASS  S2b V3 apply pass2
+  PASS  S2b assertions after V3
+  PASS  S2b V3 post-verify: 40 checks true, 0 false
+  PASS  S2c failure injected after all 9 steps raised
+  PASS  S2c whole chain rolled back atomically (no RPC, no index, plaintext token column intact)
+== S3 partial failure ==
+  PASS  S3 injected failure raised
+  PASS  S3 single-transaction apply rolled back completely (token kept, token_hash absent)
+  INFO  S3 non-transactional run state: family_id,token_hash
+  PASS  S3 clean rerun of 20260930110000 converges after partial state
+  PASS  S3 clean rerun of 20261011090000 converges after partial state
+  PASS  S3 clean rerun of 20261011121000 converges after partial state
+  PASS  S3 assertions after recovery
+== S4 guard masking (20260930110000 backfill guard) ==
+  PASS  S4a inconsistent NULL token_hash is NOT masked: null values
+  PASS  S4b rerun on drifted security state ran
+  PASS  S4b RLS re-enabled by rerun (guard does not skip security)
+  FINDING S4b anon EXECUTE on rotate RPC after rerun of 20260930110000: t (explicit anon grant is NOT removed by REVOKE ... FROM PUBLIC)
+== S5 hostile default privileges (functions auto-granted to anon/authenticated) ==
+  INFO  S5 before step 9: kayad_register_identity_atomic(text,text,text,text,text,text,uuid,text,text,timestamptz) anon=f authenticated=f
+  INFO  S5 before step 9: kayad_rotate_refresh_token(text,text,uuid,integer,uuid,text,text,text,timestamptz,uuid) anon=t authenticated=t
+  INFO  S5 before step 9: sync_dealer_profile_from_user() anon=f authenticated=f
+  INFO  S5 before step 9: sync_profile_role_from_user() anon=f authenticated=f
+  PASS  S5 V3 step 9 applied
+  PASS  S5 after step 9: rotate RPC anon=f authenticated=f service_role=t even under hostile default ACLs
+== S6 volume + dirty data (20k users, 40k legacy plaintext tokens, case/space duplicate emails) ==
+  PASS  S6 chain on 20k users / 40k tokens finished in 4s
+  PASS  S6 all legacy tokens hashed
+  PASS  S6b case/space-duplicate emails make 20260930112000 fail loudly (no silent dedupe): psql:/home/claude/s2/kayad-fresh/supabase/migrations/20260930112000_identity_email_normalization.sql:4: ERROR:  could not create unique inde
+== S7 concurrency (on S2 database) ==
+  PASS  S7a 30 parallel same-email registrations: exactly 1 succeeded (29 unique violations)
+  PASS  S7a exactly one user and one user_auth row
+  PASS  S7b 20 concurrent rotations of one token: exactly 1 rotated, 19 reuse_detected
+  INFO  S7b active tokens left in that family after the race: 0
+== S8 pre-existing object with a DIFFERENT shape (production already has public.inspector_applications: text[] arrays, integer years, no CHECK, no trigger) ==
+  PASS  S8 chain applies over the pre-existing differently-shaped table
+  FINDING S8 shape after chain: specialties=ARRAY years_of_experience=integer status_check=0 (CREATE TABLE IF NOT EXISTS silently kept the production shape; the file's definition was NOT applied)
+  PASS  S8 the three chain indexes were created
+  PASS  S8 updated_at trigger created
+== S9 lead functions (kayad_create_lead_atomic / kayad_transition_lead_atomic): privileges and RLS, with the real 20260907200100 and 20261011093000 files ==
+  PASS  S9 real lead migration applied
+  INFO  S9 secdef=f anon_execute=t authenticated_execute=t (default PUBLIC execute, SECURITY INVOKER)
+  PASS  S9 anon call is rejected by RLS/privileges: ERROR:  permission denied for table leads
+  PASS  S9 no lead row was created by the anon call
+  PASS  S9 service_role call creates the lead
+  FINDING S9 repeating an identical create WITHOUT a unique business-key index returned created=true and leads now=2 (ON CONFLICT DO NOTHING can never fire; production has no such index)
+  PASS  S9 candidate unique index fails loudly while duplicate lead keys exist (no silent dedupe)
+  PASS  S9 candidate unique index created on an empty leads table (production has 0 leads)
+  PASS  S9 with the candidate index: first create=true, identical repeat=false, one row
+  PASS  S9 20 concurrent identical creates: exactly one lead row (advisory lock + unique index)
+  PASS  S9 20261011093000 applied
+  PASS  S9 after 20261011093000: anon=f authenticated=f service_role=t
+  PASS  S9 backend path (service_role) still works after the revoke
+== RESULT: 56 passed, 0 failed ==
