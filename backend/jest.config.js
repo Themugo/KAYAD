@@ -19,6 +19,7 @@ export default {
     "tests/sessionStoreAvailability\\.test\\.js$",
     "tests/socketRuntimeSafety\\.test\\.js$",
     "tests/response-lifecycle\\.test\\.js$",
+    "tests/regression/healthRouteComposition\\.test\\.js$",
     // node:test file (opt-in, needs a disposable database): run with `npm run test:chat-integrity`.
     "tests/integration/chat-message-integrity\\.integration\\.test\\.js$",
   ],

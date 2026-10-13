@@ -11,6 +11,7 @@ export default defineConfig({
       "tests/responseHooks.test.js",
       "tests/sessionStoreAvailability.test.js",
       "tests/socketRuntimeSafety.test.js",
+      "tests/regression/healthRouteComposition.test.js",
     ],
     testTimeout: 60000,
   },

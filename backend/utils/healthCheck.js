@@ -102,6 +102,27 @@ const deepHealth = async (req, res) => {
     };
   }
 
+  // Communications readiness (admin-only: this handler sits behind protect+adminOnly).
+  // `status` is driven ONLY by the structural schema check. providerConfig,
+  // providerAcceptance and mailboxDelivery are reported as separate, weaker
+  // signals: env vars present != valid Brevo key; API acceptance != mailbox
+  // delivery; historical delivery != delivery to any particular recipient.
+  // Anything other than schema_ready (mismatch OR unknown) is degraded.
+  try {
+    const { checkCommunicationReadiness } = await import("../services/communicationReadiness.service.js");
+    const readiness = await checkCommunicationReadiness();
+    checks.communications = {
+      status: readiness.schema === "schema_ready" ? "ok" : "degraded",
+      schema: readiness.schema,
+      missingColumns: readiness.missingColumns,
+      providerConfig: readiness.providerConfig,
+      providerAcceptance: readiness.providerAcceptance,
+      mailboxDelivery: readiness.mailboxDelivery,
+    };
+  } catch {
+    checks.communications = { status: "degraded", schema: "unknown" };
+  }
+
   const allOk = Object.values(checks).every((c) => ["ok", "disabled"].includes(c.status));
   const statusCode = allOk ? 200 : 503;
 
