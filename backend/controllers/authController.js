@@ -196,12 +196,12 @@ const notifyAdminsOfPendingSeller = async (seller) => {
       admins.map((admin) =>
         emitCommunication({
           userId: admin._id,
-          eventType: "seller.approval_pending",
+          eventType: COMMUNICATION_EVENTS.DEALER_SUBMITTED,
           category: "system",
           title: "New seller approval pending",
           message: `${seller.businessName || seller.name} (${seller.email}) registered as a ${seller.role} and is awaiting approval.`,
           channels: ["in_app", "email"],
-          metadata: { sellerId: seller._id, role: seller.role },
+          metadata: { sellerId: seller._id, role: seller.role, sellerType: seller.role, sourceEvent: "seller.approval_pending" },
         }),
       ),
     );

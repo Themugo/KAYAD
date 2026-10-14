@@ -1,0 +1,14 @@
+validate-registration-onboarding.mjs=0
+validate-registration-onboarding-e2e-contract.mjs=0
+validate-registration-role-matrix.mjs=0
+validate-database-contract-alignment.mjs=0
+validate-email-reliability.mjs=0
+validate-canonical-architecture.mjs=0
+validate-phase39-deployment-security.mjs=0
+validate-first-seller-launch-contract.mjs=0
+gateway_syntax=0
+auth_controller_syntax=0
+jest_test_syntax=0
+registration_validator_syntax=0
+new_validator_syntax=0
+validate-backend-boot=1 (expected blocked: eslint dependency absent)

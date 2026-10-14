@@ -97,6 +97,67 @@ describe("recordDelivery — returns the created row, not an undefined identifie
     );
   });
 
+  test("verification delivery persists no rendered token-bearing body in metadata", async () => {
+    const createdRow = { id: "delivery-verification", channel: "email", status: "queued", retryCount: 0 };
+    createMock.mockResolvedValue(createdRow);
+    findOneMock.mockResolvedValue(null);
+    updateMock.mockImplementation(async (table, id, patch) => ({ id, ...createdRow, ...patch }));
+
+    await deliver({
+      channel: "email",
+      eventType: "account.email_verification",
+      recipient: "seller@example.test",
+      subject: "RAW_BEARER_SECRET",
+      html: '<a href="https://example.test/verify?token=RAW_BEARER_SECRET">verify</a>',
+      text: "https://example.test/verify?token=RAW_BEARER_SECRET",
+      message: "https://example.test/verify?token=RAW_BEARER_SECRET",
+      metadata: {
+        verification: true,
+        verifyUrl: "https://example.test/verify?token=RAW_BEARER_SECRET",
+        correlationId: "RAW_BEARER_SECRET",
+        requestId: "RAW_BEARER_SECRET",
+        sourceEvent: "RAW_BEARER_SECRET",
+      },
+    });
+
+    const persisted = createMock.mock.calls[0][1].metadata;
+    expect(JSON.stringify(persisted)).not.toContain("RAW_BEARER_SECRET");
+    expect(persisted.html).toBeUndefined();
+    expect(persisted.text).toBeUndefined();
+    expect(persisted.message).toBeUndefined();
+    expect(persisted.sensitiveBodyOmitted).toBe(true);
+    expect(persisted.verifyUrl).toBeUndefined();
+    expect(persisted.correlationId).toBeUndefined();
+    expect(persisted.requestId).toBeUndefined();
+    expect(persisted.sourceEvent).toBeUndefined();
+    expect(persisted.subject).toBeUndefined();
+  });
+
+  test("password-reset delivery persists no rendered token-bearing body in metadata", async () => {
+    const createdRow = { id: "delivery-reset", channel: "email", status: "queued", retryCount: 0 };
+    createMock.mockResolvedValue(createdRow);
+    findOneMock.mockResolvedValue(null);
+    updateMock.mockImplementation(async (table, id, patch) => ({ id, ...createdRow, ...patch }));
+
+    await deliver({
+      channel: "email",
+      eventType: "account.password_reset",
+      recipient: "seller@example.test",
+      subject: "Reset password",
+      html: '<a href="https://example.test/reset?token=RAW_RESET_SECRET">reset</a>',
+      text: "https://example.test/reset?token=RAW_RESET_SECRET",
+      metadata: { reset: true, resetToken: "RAW_RESET_SECRET", resetUrl: "https://example.test/reset?token=RAW_RESET_SECRET" },
+    });
+
+    const persisted = createMock.mock.calls[0][1].metadata;
+    expect(JSON.stringify(persisted)).not.toContain("RAW_RESET_SECRET");
+    expect(persisted.html).toBeUndefined();
+    expect(persisted.text).toBeUndefined();
+    expect(persisted.sensitiveBodyOmitted).toBe(true);
+    expect(persisted.resetToken).toBeUndefined();
+    expect(persisted.resetUrl).toBeUndefined();
+  });
+
   test("a genuine idempotency-key cache hit still short-circuits without calling create at all", async () => {
     const cached = { id: "delivery-3", channel: "email", status: "sent" };
     findOneMock.mockResolvedValue(cached);

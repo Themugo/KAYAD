@@ -53,7 +53,7 @@ const checks = [
   ['frontend registration uses canonical auth API service', /authRegister\(body\)/.test(read('src/components/OnboardingFlow.tsx')) && /authFetch\('\/api\/v1\/auth\/register'/.test(read('src/services/authApi.ts'))],
   ['verification page uses canonical verification endpoint', /\/api\/v1\/auth\/verify-email\//.test(read('src/services/authApi.ts'))],
   ['resend verification route exists', /\/resend-verification/.test(read('backend/routes/authRoutes.js')) && /resendVerification/.test(read('src/services/authApi.ts'))],
-  ['resend verification delivery is non-blocking', /void \(async \(\) => \{/.test(read('backend/controllers/authController.js')) && /status\(202\)\.json/.test(read('backend/controllers/authController.js')) && /Verification email failed/.test(read('backend/controllers/authController.js'))],
+  ['resend verification delivery is non-blocking', /void \(async \(\) => \{/.test(read('backend/controllers/authController.js')) && /status\(202\)\.json/.test(read('backend/controllers/authController.js')) && /Verification resend failed/.test(read('backend/controllers/authController.js'))],
   ['protected API enforces email verification when configured', /Please verify your email before accessing this resource/.test(read('backend/middleware/auth.js'))],
   ['dealer approval remains server-controlled', /Dealer approval must ONLY come from the admin verification/.test(read('backend/controllers/authController.js'))],
 ];

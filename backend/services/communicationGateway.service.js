@@ -40,6 +40,40 @@ const redactAddress = (value) => {
 const hashExternalId = (provider, externalId) =>
   crypto.createHash("sha256").update(`${provider}:${externalId}`).digest("hex");
 
+// Verification/reset links contain bearer-equivalent secrets. Never persist
+// rendered bodies or arbitrary metadata for these events: the delivery ledger
+// and retry worker are durable operational records, not secret storage.
+// Failed verification delivery is recovered through the existing rate-limited
+// resend flow, which rotates the stored token rather than replaying a secret.
+const SECRET_BEARING_EVENTS = new Set([
+  "account.email_verification",
+  "account.password_reset",
+]);
+const SAFE_TRACE_ID = /^(?:[a-f0-9]{12}|[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})$/i;
+const SAFE_SOURCE_EVENTS = new Set(["seller.approval_pending"]);
+const persistedDeliveryMetadata = ({ eventType, metadata = {}, subject, message, text, html }) => {
+  const safe = { ...metadata };
+  if (SECRET_BEARING_EVENTS.has(String(eventType || "").toLowerCase())) {
+    // Never persist rendered content, subject text, URLs, or arbitrary caller
+    // values for token-bearing messages. Even allow-listed key names are not
+    // trusted: a caller could otherwise place a raw token in `verification`
+    // or `requestId`. Trace IDs must match the application's generated ID
+    // formats; event flags must be booleans; sourceEvent must be a known value.
+    const safeMetadata = {};
+    for (const key of ["verification", "resend"]) {
+      if (typeof safe[key] === "boolean") safeMetadata[key] = safe[key];
+    }
+    for (const key of ["correlationId", "requestId"]) {
+      if (typeof safe[key] === "string" && SAFE_TRACE_ID.test(safe[key])) safeMetadata[key] = safe[key];
+    }
+    if (typeof safe.sourceEvent === "string" && SAFE_SOURCE_EVENTS.has(safe.sourceEvent)) {
+      safeMetadata.sourceEvent = safe.sourceEvent;
+    }
+    return { ...safeMetadata, sensitiveBodyOmitted: true };
+  }
+  return { ...safe, subject, message, text, html };
+};
+
 const emitDeliveryUpdate = (delivery) => {
   const io = getIO();
   if (!io || !delivery?.user_id) return;
@@ -164,7 +198,7 @@ export const deliver = async ({
         userId, channel, eventType, templateCode,
         recipient: recipient || String(userId || ""), provider,
         status: channel === "in_app" ? "delivered" : "queued",
-        metadata: { ...metadata, subject, message, text, html }, category,
+        metadata: persistedDeliveryMetadata({ eventType, metadata, subject, message, text, html }), category,
         idempotencyKey,
       });
     } catch (error) {
@@ -211,7 +245,7 @@ export const deliver = async ({
       sentAt: new Date().toISOString(),
       lastError: null,
     });
-    logInfo("Communication delivered", { deliveryId: delivery.id, channel, provider });
+    logInfo("Communication accepted by provider", { deliveryId: delivery.id, channel, provider });
     return updated;
   } catch (error) {
     logError("Communication delivery failed", error, { deliveryId: delivery.id, channel, provider });
