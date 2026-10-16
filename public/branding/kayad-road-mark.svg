@@ -1,26 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72" role="img" aria-labelledby="title desc">
-  <title id="title">KAYAD road emblem</title>
-  <desc id="desc">A geometric teal K formed from a sweeping road with a premium vehicle silhouette.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 80" role="img" aria-labelledby="title desc">
+  <title id="title">KAYAD road and vehicle mark</title>
+  <desc id="desc">A bold geometric K built from a dark tarmacked road, bright teal road edges, white lane markings and a modern vehicle.</desc>
   <defs>
-    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#13B8A6"/>
-      <stop offset=".55" stop-color="#087F98"/>
+    <linearGradient id="kTeal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#13C7B7"/>
+      <stop offset=".48" stop-color="#087F98"/>
       <stop offset="1" stop-color="#0A3340"/>
     </linearGradient>
-    <linearGradient id="car" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="road" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#172D39"/>
+      <stop offset="1" stop-color="#061923"/>
+    </linearGradient>
+    <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#FFFFFF"/>
       <stop offset="1" stop-color="#B9DCE0"/>
     </linearGradient>
   </defs>
-  <path d="M9 63 28 8h18L29 38 75 8h17L55 35 87 63H65L44 45 38 63Z" fill="url(#teal)"/>
-  <path d="M13 65c20-7 27-18 37-29 8-9 19-15 34-19" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round"/>
-  <path d="M18 64c17-6 25-16 34-26 8-9 18-14 29-17" fill="none" stroke="#13B8A6" stroke-width="1.8" stroke-linecap="round"/>
-  <g transform="translate(28 20)">
-    <path d="M4 18 8 10c1-2 3-3 6-3h19c3 0 5 1 7 4l5 7 5 2c2 1 3 3 3 5v5H1v-6c0-3 1-5 3-6Z" fill="#0A3340" stroke="#FFFFFF" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="m12 10-4 7h14V9h-8c-1 0-2 0-2 1Zm13-1v8h16l-4-6c-1-1-2-2-4-2Z" fill="url(#car)"/>
-    <path d="M4 20h42" stroke="#13B8A6" stroke-width="2" stroke-linecap="round"/>
-    <circle cx="12" cy="29" r="4.5" fill="#0A3340" stroke="#FFFFFF" stroke-width="1.5"/>
-    <circle cx="40" cy="29" r="4.5" fill="#0A3340" stroke="#FFFFFF" stroke-width="1.5"/>
-    <circle cx="12" cy="29" r="1.7" fill="#13B8A6"/><circle cx="40" cy="29" r="1.7" fill="#13B8A6"/>
+  <!-- Strong, angular K silhouette in the established navy/teal palette. -->
+  <path d="M7 72 29 7h19L31 39 77 7h25L59 39l43 33H76L45 49 39 72Z" fill="url(#kTeal)"/>
+  <!-- Tarmacked road sweeps through the K; white dashed centreline stays legible at small sizes. -->
+  <path d="M9 72c17-8 27-18 38-31 12-14 26-23 48-27L77 31C62 35 53 44 44 55 34 66 25 71 9 72Z" fill="url(#road)" stroke="#071E28" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M10 72c18-8 28-19 39-32 12-13 26-22 45-26" fill="none" stroke="#13B8A6" stroke-width="2.7" stroke-linecap="round"/>
+  <path d="M20 67c11-6 19-15 27-24 10-11 22-19 37-24" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="5 5"/>
+  <!-- Compact vehicle silhouette with bright windows and teal lamps. -->
+  <g transform="translate(43 31)">
+    <path d="M2 16 6 8c1-2 3-3 6-3h19c3 0 5 1 7 4l5 7 5 2c2 1 3 3 3 5v5H0v-6c0-3 1-5 2-6Z" fill="#0A3340" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="m10 8-4 8h13V7h-7c-1 0-2 0-2 1Zm12-1v9h16l-4-6c-1-2-2-3-4-3Z" fill="url(#carBody)"/>
+    <path d="M3 19h4m34 0h4" stroke="#13C7B7" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="11" cy="28" r="4.3" fill="#061923" stroke="#FFFFFF" stroke-width="1.5"/>
+    <circle cx="39" cy="28" r="4.3" fill="#061923" stroke="#FFFFFF" stroke-width="1.5"/>
+    <circle cx="11" cy="28" r="1.6" fill="#13C7B7"/><circle cx="39" cy="28" r="1.6" fill="#13C7B7"/>
   </g>
 </svg>

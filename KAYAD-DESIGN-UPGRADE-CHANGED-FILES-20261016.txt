@@ -1,0 +1,16 @@
+KAYAD Design Upgrade — changed-file manifest
+Foundation: KAYAD-NEXT-GATE-STAGING-OWNER-RECOVERY-20261015(1).zip
+Foundation SHA-256: 82dcf7b35404f16ec7dfb8a9d76098c05c8b8cd75edb9b106c7021c919f3010a
+
+Changed existing source files:
+public/branding/kayad-road-mark.svg
+src/components/home/Hero.tsx
+src/index.css
+
+Added documentation:
+docs/KAYAD-DESIGN-UPGRADE-20261016.md
+
+Added manifest:
+KAYAD-DESIGN-UPGRADE-CHANGED-FILES-20261016.txt
+
+No application routes, APIs, database migrations, financial workflows, authorization policies, environment configuration, or deployment settings changed.

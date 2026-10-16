@@ -39,10 +39,10 @@ export const Hero: FC = () => {
   };
 
   return (
-    <section className="w-full bg-[#F6FAF9] text-[#176B87] pt-0 pb-1 sm:pb-2 border-b border-[#D7E7E4] transition-colors">
+    <section className="kayad-home-hero w-full bg-[#F6FAF9] text-[#176B87] pt-0 pb-1 sm:pb-2 border-b border-[#D7E7E4] transition-colors">
       {/* Full-width Edge-to-Edge Hero Card Slider touching navbar */}
       {activeVehicle && (
-        <div className="relative w-full h-[350px] sm:h-[420px] lg:h-[480px] bg-[#0A3340] group shadow-lg overflow-hidden">
+        <div className="kayad-home-hero__stage relative w-full h-[350px] sm:h-[420px] lg:h-[480px] bg-[#0A3340] group shadow-lg overflow-hidden">
           {/* Auto-sliding Background Images with Smooth Fade Transition */}
           {spotlightVehicles.map((vehicle, idx) => (
             <img
@@ -59,12 +59,12 @@ export const Hero: FC = () => {
 
           {/* Top Left Slogan Overlay - Elevated & Scaled for Phone/Desktop */}
           <div className="absolute top-5 sm:top-8 lg:top-12 left-5 sm:left-10 lg:left-14 xl:left-16 z-10 max-w-[85%] sm:max-w-xl md:max-w-2xl pointer-events-auto">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#0A3340]/85 backdrop-blur-md border border-[#13B8A6]/40 text-[#13B8A6] text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest shadow-md mb-2 sm:mb-2.5">
+            <div className="kayad-home-hero__eyebrow inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#061F2A]/85 backdrop-blur-md border border-[#13B8A6]/45 text-[#6DE4D8] text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest shadow-md mb-2 sm:mb-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#13B8A6] animate-pulse" />
               <span>Kenya's Premium Car Market</span>
             </div>
 
-            <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-black text-white uppercase tracking-tight leading-tight drop-shadow-xl">
+            <h1 className="kayad-home-hero__title text-xl sm:text-3xl md:text-4xl lg:text-5xl font-sans font-black text-white tracking-tight leading-[1.08] drop-shadow-xl">
               Drive Your Dream <span className="text-[#13B8A6] underline decoration-[#13B8A6]/40 decoration-wavy decoration-1 underline-offset-4">Today</span>
             </h1>
 
