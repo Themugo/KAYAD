@@ -1,0 +1,33 @@
+PASS: phase 7 bidding-room lock exists
+PASS: phase 8 settlement policy exists
+PASS: phase 8 outcome settlement service exists
+PASS: phase 9 fulfilment service exists
+PASS: phase 9 fulfilment migration exists
+PASS: auction outcome is unique per car
+PASS: outcome RLS is participant/admin scoped
+PASS: fulfilment event RLS is participant/admin scoped
+PASS: late registration remains blocked
+PASS: canonical auction close remains authoritative
+PASS: direct winner payment remains direct
+PASS: direct settlement does not create escrow
+PASS: escrow creation remains canonical
+PASS: escrow funding syncs outcome
+PASS: collection requires settlement
+PASS: collection uses conditional outcome update
+PASS: transfer requires collection
+PASS: transfer uses conditional outcome update
+PASS: ownership service remains canonical
+PASS: escrow release uses canonical service
+PASS: escrow release has idempotency key
+PASS: re-award claims losing bid conditionally
+PASS: re-award claims outcome conditionally
+PASS: re-award never reopens bidding
+PASS: dealer cancellation blocks paid outcomes
+PASS: disputes converge to existing governance/escrow authorities
+PASS: fulfilment events are auditable
+PASS: dealer operations route is authenticated
+PASS: collection route is dealer-protected
+PASS: re-award route is dealer-protected
+PASS: admin platform policy remains admin-protected
+PASS: auction transport convergence is green
+PHASE10_PASS=32/32

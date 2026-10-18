@@ -8,13 +8,14 @@ import { logWarn, logError } from "../utils/logger.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
-import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
+import { STAFF_ROLES, SELLER_ROLES, canManageAnyListing } from "../config/roles.js";
 import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
 import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
 import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/dealerSubscription.service.js";
 import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
 import { randomUUID } from "node:crypto";
 import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
+import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
@@ -395,13 +396,19 @@ export const createCar = async (req, res) => {
     // instead of a permanent hard-coded false.
     req.body.escrowEnabled = await getEscrowEnabledForNewOrEditedCar(seller.id, seller.role);
 
+    // STAGE 5: owner-controlled listing moderation. `hold_for_review` (and any untrusted policy read)
+    // ALWAYS creates the listing as `pending`. `auto_publish` keeps the pre-existing eligibility rule
+    // (an approved seller account publishes immediately; unapproved stays pending). The client cannot
+    // influence either: status is server-assigned and overwrites anything in req.body.
+    const moderation = await getOnboardingPolicy();
+    const autoPublish = isPolicyTrusted(moderation) && moderation.policy.listingModeration === "auto_publish";
     const body = {
       ...req.body,
       dealer: req.user.id,
       views: 0,
       bidsCount: 0,
       trustScore: 0,
-      status: seller.status === "approved" ? "available" : "pending",
+      status: autoPublish && seller.status === "approved" ? "available" : "pending",
       isVerifiedDealer: seller.status === "approved",
     };
     // `city` is the correct app-level alias for the real
@@ -617,7 +624,9 @@ export const updateCar = async (req, res) => {
     // before/after state rather than two identical post-save objects.
     const oldData = car.toObject();
 
-    const isStaff = STAFF_ROLES.includes(req.user.role);
+    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
+    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
+    const isStaff = canManageAnyListing(req.user);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
 
@@ -711,6 +720,37 @@ export const updateCar = async (req, res) => {
       });
     }
 
+    // ── MODERATION / VERIFICATION / PROMOTION FIELDS ARE NOT SELF-SERVICE ──
+    // updateCarSchema is non-strict and validateCar merges (does not strip) on
+    // PUT, so `allowedFields` below was the only gate — and it let a listing's
+    // own seller publish a pending listing (status), self-certify trust badges
+    // (ntsaVerified/logbookVerified/dutyStatus) and grant themselves front-page
+    // promotion (isPromoted/promotionExpiresAt). Each has a canonical path:
+    // admin moderation (/admin/cars/:id/moderate), admin verification
+    // (/admin/cars/:id/verify), the promote endpoint, and dealer status routes.
+    // No-op resubmission of the current value is allowed (round-tripped forms).
+    const STAFF_ONLY_LISTING_FIELDS = ["status", "ntsaVerified", "logbookVerified", "dutyStatus", "isPromoted", "promotionExpiresAt"];
+    if (!isStaff) {
+      const sameValue = (field, incoming, current) => {
+        if (field === "promotionExpiresAt") {
+          const a = incoming ? new Date(incoming).getTime() : null;
+          const b = current ? new Date(current).getTime() : null;
+          return a === b;
+        }
+        return String(incoming) === String(current ?? (typeof incoming === "boolean" ? false : ""));
+      };
+      const attemptedProtected = STAFF_ONLY_LISTING_FIELDS.find(
+        (field) => field in req.body && req.body[field] !== undefined && !sameValue(field, req.body[field], car[field]),
+      );
+      if (attemptedProtected) {
+        return res.status(403).json({
+          success: false,
+          code: "LISTING_FIELD_ADMIN_ONLY",
+          message: `"${attemptedProtected}" cannot be changed through listing edit. Use the moderation, verification, promotion or listing-status workflow instead.`,
+        });
+      }
+    }
+
     // Preserve existing coverImage if caller didn't explicitly send one
     const incomingCover = req.body.coverImage;
     const hadExplicitCover = incomingCover !== undefined && incomingCover !== null && incomingCover !== "";
@@ -742,7 +782,8 @@ export const updateCar = async (req, res) => {
       "status",
       "allowBuy",
       "allowBid",
-      "escrowEnabled",
+      // escrowEnabled is deliberately NOT client-assignable: it is server-computed
+      // above from the listing owner's escrow capability (same invariant as createCar).
       "auctionStartTime",
       "auctionEnd",
       "startingBid",
@@ -840,7 +881,9 @@ export const deleteCar = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isStaff = STAFF_ROLES.includes(req.user.role);
+    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
+    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
+    const isStaff = canManageAnyListing(req.user);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
@@ -892,7 +935,9 @@ export const deleteCarImage = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isStaff = STAFF_ROLES.includes(req.user.role);
+    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
+    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
+    const isStaff = canManageAnyListing(req.user);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
@@ -950,7 +995,9 @@ export const addCarImages = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isStaff = STAFF_ROLES.includes(req.user.role);
+    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
+    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
+    const isStaff = canManageAnyListing(req.user);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {

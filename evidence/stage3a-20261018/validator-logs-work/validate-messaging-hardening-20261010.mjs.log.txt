@@ -1,0 +1,1 @@
+PASS messaging hardening: recipient compatibility, participant authorization, payload normalization, route guard, notification destination

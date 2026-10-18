@@ -1,0 +1,237 @@
+(node:2457) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/regression/stage2EntryCorrections.test.js
+  ● S2-ESC-01 organizer cannot release auction escrow › escrow 'delivered' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"auction_setup_id": "set-1", "car_id": "car-1", "collection_status": "collected", "escrow_id": "esc-1", "escrow_release_at": "2026-10-18T06:35:29.105Z", "id": "o-1", "payment_status": "paid", "settlement_mode": "escrow", "status": "payment_received", "transfer_status": "pending"}
+
+      118 |   test.each(["delivered", "disputed", "funded", "vehicle_confirmed"])("escrow '%s' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write", async (status) => {
+      119 |     rows.escrows = { "esc-1": { id: "esc-1", status } };
+    > 120 |     await expect(releaseAuctionEscrowAndComplete({ outcomeId: "o-1", actorId: SELLER })).rejects.toMatchObject({ status: 409, code: "ESCROW_RELEASE_REQUIRES_APPROVAL" });
+          |           ^
+      121 |     expect(serviceRelease).not.toHaveBeenCalled();
+      122 |     expect(dbUpdate).not.toHaveBeenCalled();
+      123 |   });
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage2EntryCorrections.test.js:120:11
+
+  ● S2-ESC-01 organizer cannot release auction escrow › escrow 'disputed' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"auction_setup_id": "set-1", "car_id": "car-1", "collection_status": "collected", "escrow_id": "esc-1", "escrow_release_at": "2026-10-18T06:35:29.125Z", "id": "o-1", "payment_status": "paid", "settlement_mode": "escrow", "status": "payment_received", "transfer_status": "pending"}
+
+      118 |   test.each(["delivered", "disputed", "funded", "vehicle_confirmed"])("escrow '%s' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write", async (status) => {
+      119 |     rows.escrows = { "esc-1": { id: "esc-1", status } };
+    > 120 |     await expect(releaseAuctionEscrowAndComplete({ outcomeId: "o-1", actorId: SELLER })).rejects.toMatchObject({ status: 409, code: "ESCROW_RELEASE_REQUIRES_APPROVAL" });
+          |           ^
+      121 |     expect(serviceRelease).not.toHaveBeenCalled();
+      122 |     expect(dbUpdate).not.toHaveBeenCalled();
+      123 |   });
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage2EntryCorrections.test.js:120:11
+
+  ● S2-ESC-01 organizer cannot release auction escrow › escrow 'funded' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"auction_setup_id": "set-1", "car_id": "car-1", "collection_status": "collected", "escrow_id": "esc-1", "escrow_release_at": "2026-10-18T06:35:29.127Z", "id": "o-1", "payment_status": "paid", "settlement_mode": "escrow", "status": "payment_received", "transfer_status": "pending"}
+
+      118 |   test.each(["delivered", "disputed", "funded", "vehicle_confirmed"])("escrow '%s' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write", async (status) => {
+      119 |     rows.escrows = { "esc-1": { id: "esc-1", status } };
+    > 120 |     await expect(releaseAuctionEscrowAndComplete({ outcomeId: "o-1", actorId: SELLER })).rejects.toMatchObject({ status: 409, code: "ESCROW_RELEASE_REQUIRES_APPROVAL" });
+          |           ^
+      121 |     expect(serviceRelease).not.toHaveBeenCalled();
+      122 |     expect(dbUpdate).not.toHaveBeenCalled();
+      123 |   });
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage2EntryCorrections.test.js:120:11
+
+  ● S2-ESC-01 organizer cannot release auction escrow › escrow 'vehicle_confirmed' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"auction_setup_id": "set-1", "car_id": "car-1", "collection_status": "collected", "escrow_id": "esc-1", "escrow_release_at": "2026-10-18T06:35:29.133Z", "id": "o-1", "payment_status": "paid", "settlement_mode": "escrow", "status": "payment_received", "transfer_status": "pending"}
+
+      118 |   test.each(["delivered", "disputed", "funded", "vehicle_confirmed"])("escrow '%s' → 409 ESCROW_RELEASE_REQUIRES_APPROVAL, no release, no outcome write", async (status) => {
+      119 |     rows.escrows = { "esc-1": { id: "esc-1", status } };
+    > 120 |     await expect(releaseAuctionEscrowAndComplete({ outcomeId: "o-1", actorId: SELLER })).rejects.toMatchObject({ status: 409, code: "ESCROW_RELEASE_REQUIRES_APPROVAL" });
+          |           ^
+      121 |     expect(serviceRelease).not.toHaveBeenCalled();
+      122 |     expect(dbUpdate).not.toHaveBeenCalled();
+      123 |   });
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage2EntryCorrections.test.js:120:11
+
+  ● S2-AUTH-08 dispute controller uses the canonical role › owner can resolve a dispute
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      140 |     const res = mkRes();
+      141 |     await dispute.resolveDispute({ params: { id: "esc-1" }, user: OWNER, body: { decision: "refund" }, get: () => null }, res);
+    > 142 |     expect(res.body?.success).toBe(true);
+          |                               ^
+      143 |     expect(rpc).toHaveBeenCalledWith("kayad_resolve_dispute_atomic", expect.any(Object));
+      144 |   });
+      145 |   test("owner's appeal review sends p_role 'superadmin' (a role the DB accepts), never 'webhoist'", async () => {
+
+      at Object.<anonymous> (tests/regression/stage2EntryCorrections.test.js:142:31)
+
+  ● S2-AUTH-08 dispute controller uses the canonical role › owner's appeal review sends p_role 'superadmin' (a role the DB accepts), never 'webhoist'
+
+    TypeError: Cannot read properties of undefined (reading '1')
+
+      147 |     await dispute.reviewAppeal({ params: { id: "esc-1" }, user: OWNER, body: { decision: "approve" } }, res);
+      148 |     const call = rpc.mock.calls.find(([fn]) => fn === "kayad_transition_dispute_atomic");
+    > 149 |     expect(call[1].p_role).toBe("superadmin");
+          |                ^
+      150 |   });
+      151 |   test("ghost_checker is denied and nothing reaches the database", async () => {
+      152 |     const res = mkRes();
+
+      at Object.<anonymous> (tests/regression/stage2EntryCorrections.test.js:149:16)
+
+  ● S2-FIN-01/02 ledger writes require MANAGE_FINANCE; reversal records the actor › ghost_checker cannot create, reverse or seed
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      166 |   const entry = { account: "cash", amount: 100, type: "debit" };
+      167 |   test.each([["ghost_checker", () => ghost], ["marketing", () => marketing]])("%s cannot create, reverse or seed", async (_n, who) => {
+    > 168 |     expect((await call("POST", "/api/ledger", who(), entry)).code).toBe(403);
+          |                                                                    ^
+      169 |     expect((await call("POST", `/api/ledger/${UID(99)}/reverse`, who(), { reason: "x" })).code).toBe(403);
+      170 |     expect((await call("GET", "/api/ledger/seed", who())).code).toBe(403);
+      171 |     expect(ledger.recordLedgerEntry).not.toHaveBeenCalled();
+
+      at tests/regression/stage2EntryCorrections.test.js:168:68
+
+  ● S2-FIN-01/02 ledger writes require MANAGE_FINANCE; reversal records the actor › marketing cannot create, reverse or seed
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      166 |   const entry = { account: "cash", amount: 100, type: "debit" };
+      167 |   test.each([["ghost_checker", () => ghost], ["marketing", () => marketing]])("%s cannot create, reverse or seed", async (_n, who) => {
+    > 168 |     expect((await call("POST", "/api/ledger", who(), entry)).code).toBe(403);
+          |                                                                    ^
+      169 |     expect((await call("POST", `/api/ledger/${UID(99)}/reverse`, who(), { reason: "x" })).code).toBe(403);
+      170 |     expect((await call("GET", "/api/ledger/seed", who())).code).toBe(403);
+      171 |     expect(ledger.recordLedgerEntry).not.toHaveBeenCalled();
+
+      at tests/regression/stage2EntryCorrections.test.js:168:68
+
+  ● S2-FIN-01/02 ledger writes require MANAGE_FINANCE; reversal records the actor › accounts (MANAGE_FINANCE) may seed; reversal is attributed to the real user id
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "00000000-0000-4000-8000-000000000099", "00000000-0000-4000-8000-000000000013", "duplicate posting"
+    Received: "00000000-0000-4000-8000-000000000099", undefined, "duplicate posting"
+
+    Number of calls: 1
+
+      177 |     const r = await call("POST", `/api/ledger/${UID(99)}/reverse`, accounts, { reason: "duplicate posting" });
+      178 |     expect(r.code).toBe(200);
+    > 179 |     expect(ledger.reverseLedgerEntry).toHaveBeenCalledWith(UID(99), accounts, "duplicate posting");
+          |                                       ^
+      180 |   });
+      181 |   test("admin and the platform owner pass the finance gate", async () => {
+      182 |     expect((await call("GET", "/api/ledger/seed", admin)).code).toBe(200);
+
+      at Object.<anonymous> (tests/regression/stage2EntryCorrections.test.js:179:39)
+
+  ● S2-SCOPE-01 dealer insights are scoped to the caller › a dealer receives insights for their own id, never an unfiltered set
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "00000000-0000-4000-8000-000000000021"
+    Received: undefined
+
+    Number of calls: 1
+
+      194 |     const r = await call("GET", "/api/market/dealer/insights?dealerId=someone-else", dealer);
+      195 |     expect(r.code).toBe(200);
+    > 196 |     expect(getDealerInsights).toHaveBeenCalledWith(dealer);
+          |                               ^
+      197 |   });
+      198 |   test("admin may target a dealer explicitly, else defaults to self", async () => {
+      199 |     const admin = mk(22, "admin");
+
+      at Object.<anonymous> (tests/regression/stage2EntryCorrections.test.js:196:31)
+
+  ● S2-SCOPE-01 dealer insights are scoped to the caller › admin may target a dealer explicitly, else defaults to self
+
+    expect(jest.fn()).toHaveBeenLastCalledWith(...expected)
+
+    Expected: "00000000-0000-4000-8000-000000000022"
+    Received: undefined
+
+    Number of calls: 1
+
+      200 |     getDealerInsights.mockClear();
+      201 |     await call("GET", `/api/market/dealer/insights`, admin);
+    > 202 |     expect(getDealerInsights).toHaveBeenLastCalledWith(admin);
+          |                               ^
+      203 |   });
+      204 | });
+      205 |
+
+      at Object.<anonymous> (tests/regression/stage2EntryCorrections.test.js:202:31)
+
+FAIL tests/regression/stage2RefreshAccountState.test.js
+  ● S2-AUTH-07 refresh refuses suspended / deactivated accounts › suspended account: 403 AUTH_FORBIDDEN, no new session row
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      119 |     RefreshToken.rotate.mockClear();
+      120 |     const res = await refresh(d.refresh);
+    > 121 |     expect(res.code).toBe(403);
+          |                      ^
+      122 |     expect(res.body.code).toBe("AUTH_FORBIDDEN");
+      123 |     expect(RefreshToken.rotate).not.toHaveBeenCalled();
+      124 |     expect(res.cookies.token).toBeUndefined();
+
+      at Object.<anonymous> (tests/regression/stage2RefreshAccountState.test.js:121:22)
+
+  ● S2-AUTH-07 refresh refuses suspended / deactivated accounts › deactivated account: 403 AUTH_FORBIDDEN
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      128 |     db.users.set(U.id, { ...U, deactivatedAt: new Date().toISOString() });
+      129 |     const res = await refresh(d.refresh);
+    > 130 |     expect(res.code).toBe(403);
+          |                      ^
+      131 |     expect(res.body.code).toBe("AUTH_FORBIDDEN");
+      132 |   });
+      133 | });
+
+      at Object.<anonymous> (tests/regression/stage2RefreshAccountState.test.js:130:22)
+
+Test Suites: 2 failed, 2 total
+Tests:       13 failed, 6 passed, 19 total
+Snapshots:   0 total
+Time:        0.91 s
+Ran all test suites matching tests/regression/stage2EntryCorrections.test.js|tests/regression/stage2RefreshAccountState.test.js.

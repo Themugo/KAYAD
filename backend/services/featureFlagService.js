@@ -32,8 +32,9 @@ export const isFlagEnabled = async (key, user = null, dealer = null) => {
     return enabled;
   } catch (err) {
     logError("Failed to check flag enabled", err);
-    // Return true by default to maintain backwards compatibility
-    return true;
+    // STAGE 4A (G4): fail CLOSED. The previous fail-open default answered "enabled" for every key whenever the
+    // flag store was unavailable (it currently always is: FeatureFlag is not imported and its table is not in any migration).
+    return false;
   }
 };
 
@@ -54,8 +55,9 @@ export const evaluateFlag = async (key, user = null, dealer = null) => {
     return enabled;
   } catch (err) {
     logError("Failed to evaluate flag", err);
-    // Return true by default to maintain backwards compatibility
-    return true;
+    // STAGE 4A (G4): fail CLOSED. The previous fail-open default answered "enabled" for every key whenever the
+    // flag store was unavailable (it currently always is: FeatureFlag is not imported and its table is not in any migration).
+    return false;
   }
 };
 

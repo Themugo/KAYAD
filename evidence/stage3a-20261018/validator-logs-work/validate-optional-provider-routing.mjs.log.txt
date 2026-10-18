@@ -1,0 +1,4 @@
+PASS optional provider routing is capability-aware
+PASS missing SMS/WhatsApp providers are skipped for generic user communication
+PASS Brevo remains explicitly configuration-gated
+OPTIONAL PROVIDER ROUTING VALIDATION: 3/3 PASS

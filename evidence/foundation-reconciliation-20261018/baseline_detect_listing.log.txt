@@ -1,0 +1,268 @@
+(node:5328) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/regression/stage1ListingWriteBoundaries.test.js
+  ● S1-LIST-01 seller cannot self-moderate, self-verify or self-promote through PUT /cars/:id › seller changing status → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      137 |   ])("seller changing %s → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved", async (field, value) => {
+      138 |     const res = await put(SELLER, { [field]: value });
+    > 139 |     expect(res.code).toBe(403);
+          |                      ^
+      140 |     expect(res.body.code).toBe("LISTING_FIELD_ADMIN_ONLY");
+      141 |     expect(saved).toHaveLength(0);
+      142 |   });
+
+      at tests/regression/stage1ListingWriteBoundaries.test.js:139:22
+
+  ● S1-LIST-01 seller cannot self-moderate, self-verify or self-promote through PUT /cars/:id › seller changing ntsaVerified → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      137 |   ])("seller changing %s → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved", async (field, value) => {
+      138 |     const res = await put(SELLER, { [field]: value });
+    > 139 |     expect(res.code).toBe(403);
+          |                      ^
+      140 |     expect(res.body.code).toBe("LISTING_FIELD_ADMIN_ONLY");
+      141 |     expect(saved).toHaveLength(0);
+      142 |   });
+
+      at tests/regression/stage1ListingWriteBoundaries.test.js:139:22
+
+  ● S1-LIST-01 seller cannot self-moderate, self-verify or self-promote through PUT /cars/:id › seller changing logbookVerified → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      137 |   ])("seller changing %s → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved", async (field, value) => {
+      138 |     const res = await put(SELLER, { [field]: value });
+    > 139 |     expect(res.code).toBe(403);
+          |                      ^
+      140 |     expect(res.body.code).toBe("LISTING_FIELD_ADMIN_ONLY");
+      141 |     expect(saved).toHaveLength(0);
+      142 |   });
+
+      at tests/regression/stage1ListingWriteBoundaries.test.js:139:22
+
+  ● S1-LIST-01 seller cannot self-moderate, self-verify or self-promote through PUT /cars/:id › seller changing dutyStatus → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      137 |   ])("seller changing %s → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved", async (field, value) => {
+      138 |     const res = await put(SELLER, { [field]: value });
+    > 139 |     expect(res.code).toBe(403);
+          |                      ^
+      140 |     expect(res.body.code).toBe("LISTING_FIELD_ADMIN_ONLY");
+      141 |     expect(saved).toHaveLength(0);
+      142 |   });
+
+      at tests/regression/stage1ListingWriteBoundaries.test.js:139:22
+
+  ● S1-LIST-01 seller cannot self-moderate, self-verify or self-promote through PUT /cars/:id › seller changing isPromoted → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      137 |   ])("seller changing %s → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved", async (field, value) => {
+      138 |     const res = await put(SELLER, { [field]: value });
+    > 139 |     expect(res.code).toBe(403);
+          |                      ^
+      140 |     expect(res.body.code).toBe("LISTING_FIELD_ADMIN_ONLY");
+      141 |     expect(saved).toHaveLength(0);
+      142 |   });
+
+      at tests/regression/stage1ListingWriteBoundaries.test.js:139:22
+
+  ● S1-LIST-01 seller cannot self-moderate, self-verify or self-promote through PUT /cars/:id › seller changing promotionExpiresAt → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      137 |   ])("seller changing %s → 403 LISTING_FIELD_ADMIN_ONLY, nothing saved", async (field, value) => {
+      138 |     const res = await put(SELLER, { [field]: value });
+    > 139 |     expect(res.code).toBe(403);
+          |                      ^
+      140 |     expect(res.body.code).toBe("LISTING_FIELD_ADMIN_ONLY");
+      141 |     expect(saved).toHaveLength(0);
+      142 |   });
+
+      at tests/regression/stage1ListingWriteBoundaries.test.js:139:22
+
+  ● S1-LIST-02 escrowEnabled stays server-computed on edit › client escrowEnabled:true is ignored for the seller
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      159 |     const res = await put(SELLER, { title: "Prado VX", escrowEnabled: true });
+      160 |     expect(res.code).toBe(200);
+    > 161 |     expect(saved.at(-1).escrowEnabled).toBe(SERVER_ESCROW);
+          |                                        ^
+      162 |   });
+      163 |   test("client escrowEnabled:true is ignored for staff too", async () => {
+      164 |     await put(ADMIN, { escrowEnabled: true });
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:161:40)
+
+  ● S1-LIST-02 escrowEnabled stays server-computed on edit › client escrowEnabled:true is ignored for staff too
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      163 |   test("client escrowEnabled:true is ignored for staff too", async () => {
+      164 |     await put(ADMIN, { escrowEnabled: true });
+    > 165 |     expect(saved.at(-1).escrowEnabled).toBe(SERVER_ESCROW);
+          |                                        ^
+      166 |   });
+      167 | });
+      168 |
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:165:40)
+
+  ● S1-LIST-03 cross-owner edit/delete requires listing-management authority › ghost_checker cannot edit another seller's listing
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      170 |   beforeEach(() => { carRow = baseCar(); saved.length = 0; softDelete.mockClear(); });
+      171 |   test("ghost_checker cannot edit another seller's listing", async () => {
+    > 172 |     expect((await put(GHOST, { title: "x" })).code).toBe(403);
+          |                                                     ^
+      173 |     expect(saved).toHaveLength(0);
+      174 |   });
+      175 |   test("another dealer cannot edit it", async () => expect((await put(OTHER_SELLER, { title: "x" })).code).toBe(403));
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:172:53)
+
+  ● S1-LIST-03 cross-owner edit/delete requires listing-management authority › ghost_checker cannot delete it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      178 |     const res = mkRes();
+      179 |     await deleteCar({ params: { id: "car-1" }, user: GHOST }, res);
+    > 180 |     expect(res.code).toBe(403);
+          |                      ^
+      181 |     expect(softDelete).not.toHaveBeenCalled();
+      182 |   });
+      183 |   test("admin can delete it", async () => {
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:180:22)
+
+  ● S1-LIST-04 dealer bulk-status › admin-only 'rejected' is refused
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      214 |   test("admin-only 'rejected' is refused", async () => {
+      215 |     const r = await patch({ ids: ["c1"], status: "rejected" });
+    > 216 |     expect(r.code).toBe(400);
+          |                    ^
+      217 |     expect(lastUpdate).toBeNull();
+      218 |   });
+      219 |   test("a status outside the cars.status CHECK is refused", async () => {
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:216:20)
+
+  ● S1-LIST-04 dealer bulk-status › a status outside the cars.status CHECK is refused
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      218 |   });
+      219 |   test("a status outside the cars.status CHECK is refused", async () => {
+    > 220 |     expect((await patch({ ids: ["c1"], status: "deleted" })).code).toBe(400);
+          |                                                                    ^
+      221 |   });
+      222 |   test("dashboard 'active' maps to canonical 'available'", async () => {
+      223 |     const r = await patch({ ids: ["c1"], status: "active" });
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:220:68)
+
+  ● S1-LIST-04 dealer bulk-status › dashboard 'active' maps to canonical 'available'
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": "available",
+    +   "status": "active",
+      }
+
+      223 |     const r = await patch({ ids: ["c1"], status: "active" });
+      224 |     expect(r.code).toBe(200);
+    > 225 |     expect(lastUpdate.patch).toEqual({ status: "available" });
+          |                              ^
+      226 |   });
+      227 |   test("only own, non-rejected listings are touched", async () => {
+      228 |     const r = await patch({ ids: ["c1", "c2", "c3"], status: "sold" });
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:225:30)
+
+  ● S1-LIST-04 dealer bulk-status › only own, non-rejected listings are touched
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 2
+
+      227 |   test("only own, non-rejected listings are touched", async () => {
+      228 |     const r = await patch({ ids: ["c1", "c2", "c3"], status: "sold" });
+    > 229 |     expect(r.body.modified).toBe(1);
+          |                             ^
+      230 |     expect(lastUpdate.ids).toEqual(["c1"]);
+      231 |   });
+      232 |   test("a failed write is not reported as success", async () => {
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:229:29)
+
+  ● S1-LIST-04 dealer bulk-status › a failed write is not reported as success
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 500
+    Received: 200
+
+      233 |     updateError = { message: "violates check constraint" };
+      234 |     const r = await patch({ ids: ["c1"], status: "hidden" });
+    > 235 |     expect(r.code).toBe(500);
+          |                    ^
+      236 |     expect(r.body.success).toBe(false);
+      237 |   });
+      238 | });
+
+      at Object.<anonymous> (tests/regression/stage1ListingWriteBoundaries.test.js:235:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       15 failed, 5 passed, 20 total
+Snapshots:   0 total
+Time:        0.448 s
+Ran all test suites matching tests/regression/stage1ListingWriteBoundaries.test.js.

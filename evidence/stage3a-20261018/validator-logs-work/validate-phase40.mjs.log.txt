@@ -1,0 +1,25 @@
+PASS exists:src/components/home/PartnerEcosystem.tsx: present
+PASS exists:src/components/home/CustomerTestimonials.tsx: present
+PASS exists:src/components/home/CustomerStories.tsx: present
+PASS exists:src/components/TrustBadgeMatrix.tsx: present
+PASS exists:src/features/FinancingView.tsx: present
+PASS exists:src/components/TcoCalculator.tsx: present
+PASS exists:src/components/features/common/TcoCalculator.tsx: present
+PASS exists:backend/ai/services/aiIntelligenceService.js: present
+PASS exists:backend/controllers/dealerPlatformController.js: present
+PASS exists:backend/.env.example: present
+PASS no-unverified:/NCBA/i: absent
+PASS no-unverified:/Equity Bank/i: absent
+PASS no-unverified:/Stanbic/i: absent
+PASS no-unverified:/KCB Bank/i: absent
+PASS no-unverified:/Partner Bank/i: absent
+PASS no-unverified:/partner banking ecosystem/i: absent
+PASS no-unverified:/0% Financing Special/i: absent
+PASS financing-portal-retired: no bank officer portal import/render path
+PASS no-fabricated-finance-kpis: no hardcoded lender terms
+PASS tco-no-bank-rates: calculator uses an explicit illustrative rate assumption
+PASS dealer-platform-no-fabricated-finance: dealer profile and finance endpoint are database-backed
+PASS regional-no-unverified-banks: regional provider bootstrap contains no unverified bank partnerships
+PASS env-no-named-escrow-bank: escrow bank name is deployment-configured
+
+Phase 40 validation: 23/23 passed

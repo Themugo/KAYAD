@@ -1,0 +1,14 @@
+PASS canonical team table migration exists
+PASS team middleware exists
+PASS team controller no longer returns 501
+PASS invite token is hashed at rest
+PASS invite acceptance validates signed-in email
+PASS self role/status escalation blocked
+PASS dealer platform routes use org access
+PASS team removal is canonical
+PASS frontend uses canonical team service
+PASS frontend no longer uses legacy team API
+PASS listing creation uses dealer organization owner
+PASS RLS enabled for dealer teams
+
+12/12 PASS

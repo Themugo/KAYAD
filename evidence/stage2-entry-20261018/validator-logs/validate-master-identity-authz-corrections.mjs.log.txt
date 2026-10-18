@@ -1,0 +1,16 @@
+PASS /auth/me reuses the canonical safe user serializer
+PASS /auth/me does not return a raw database user row
+PASS /auth/me has no route-local WEBHOIST_EMAIL allowlist
+PASS Shared owner predicate supports both configured env names
+PASS Fulfilment admin read checks normalize effectiveRole/role
+PASS Fulfilment case route returns 404 before party-property access
+PASS Collection is restricted to organizer in service layer
+PASS Transfer is restricted to organizer or winner in service layer
+PASS Escrow release, cancellation and reaward require organizer
+PASS Disputes require auction party in service layer
+PASS Governance route and controller default role sets are documented and aligned
+PASS Governance audit persistence failures propagate instead of being swallowed
+PASS Governance generic writes reject caller-supplied lifecycle and audit fields
+PASS Risk status mutation uses an explicit allowlist
+
+MASTER IDENTITY/AUTHZ CORRECTIONS: 14/14 checks passed

@@ -1,0 +1,16 @@
+PASS App mounts the canonical SupportView
+PASS user support surface uses canonical case APIs
+PASS support page exposes end-to-end case flow
+PASS support covers core KAYAD business surfaces
+PASS sensitive-data guidance is present
+PASS support API exposes owned-case retrieval and replies
+PASS user ticket projection exposes stable case reference
+PASS controller status vocabulary matches canonical support lifecycle
+PASS controller priority vocabulary matches database contract
+PASS duplicate legacy support implementations removed
+PASS unsupported trust/contact claims absent from user support surface
+PASS database support lifecycle contract is available
+PASS no hard-coded response/resolution time promises
+PASS case creation is retry-safe
+PASS reference is a real linked field, not text prepended to the description
+Support user-surface validation: PASS

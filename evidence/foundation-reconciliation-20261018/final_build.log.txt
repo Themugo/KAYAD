@@ -1,0 +1,60 @@
+vite v8.2.0 building client environment for production...
+transforming...
+✓ 2393 modules transformed.
+
+(!) outDir /home/claude/scratch-build is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../scratch-build/release.json                                    0.12 kB │ gzip:   0.12 kB
+../scratch-build/index.html                                      2.68 kB │ gzip:   0.98 kB
+../scratch-build/assets/index-Bq2I9gQf.css                     303.33 kB │ gzip:  50.17 kB
+../scratch-build/assets/FinancePlatform-8ukFegCq.js              0.08 kB │ gzip:   0.08 kB
+../scratch-build/assets/check-DPyNvoox.js                        0.11 kB │ gzip:   0.13 kB
+../scratch-build/assets/x-DLwvcv7t.js                            0.14 kB │ gzip:   0.14 kB
+../scratch-build/assets/arrow-right-DnOMMGlS.js                  0.16 kB │ gzip:   0.15 kB
+../scratch-build/assets/user-round-BWuxVrqV.js                   0.17 kB │ gzip:   0.17 kB
+../scratch-build/assets/info-uryv6Uks.js                         0.19 kB │ gzip:   0.17 kB
+../scratch-build/assets/credit-card-DaZfya4z.js                  0.20 kB │ gzip:   0.18 kB
+../scratch-build/assets/rotate-ccw-clock-5lGOx-pH.js             0.24 kB │ gzip:   0.19 kB
+../scratch-build/assets/send-BQUB0-Rj.js                         0.28 kB │ gzip:   0.22 kB
+../scratch-build/assets/gavel-ZNEEupxS.js                        0.31 kB │ gzip:   0.21 kB
+../scratch-build/assets/shield-check-Ce-gY-V_.js                 0.31 kB │ gzip:   0.24 kB
+../scratch-build/assets/ticket-CYDKpW4z.js                       0.31 kB │ gzip:   0.20 kB
+../scratch-build/assets/sparkles-BCn_kQUf.js                     0.48 kB │ gzip:   0.27 kB
+../scratch-build/assets/paymentApi-BpbWY-mr.js                   0.75 kB │ gzip:   0.47 kB
+../scratch-build/assets/auctionService-CiTc5RDG.js               0.76 kB │ gzip:   0.37 kB
+../scratch-build/assets/rolldown-runtime-B0Z9INg1.js             0.90 kB │ gzip:   0.51 kB
+../scratch-build/assets/inspectionPayment-jg9Yxgj4.js            1.25 kB │ gzip:   0.69 kB
+../scratch-build/assets/supportApi-CHb5_e65.js                   1.66 kB │ gzip:   0.81 kB
+../scratch-build/assets/authIntent-BSqPgqhn.js                   1.93 kB │ gzip:   0.89 kB
+../scratch-build/assets/escrowApi-ByrNNFgl.js                    2.26 kB │ gzip:   0.84 kB
+../scratch-build/assets/ActionDialog-C41zKJoc.js                 2.64 kB │ gzip:   1.23 kB
+../scratch-build/assets/chatApi-DK11iNAM.js                      3.09 kB │ gzip:   1.43 kB
+../scratch-build/assets/KAYADLive-CWgf021l.js                    4.43 kB │ gzip:   1.60 kB
+../scratch-build/assets/OwnershipPlatform-UIqlAznb.js            5.14 kB │ gzip:   1.95 kB
+../scratch-build/assets/api-CUGVpxJn.js                          5.63 kB │ gzip:   1.45 kB
+../scratch-build/assets/jsx-runtime-C2qclYw9.js                  9.22 kB │ gzip:   3.63 kB
+../scratch-build/assets/PaymentHistoryView-DqnQPFbJ.js           9.56 kB │ gzip:   2.96 kB
+../scratch-build/assets/EscrowOperationsDesk-C3v0ratL.js        10.04 kB │ gzip:   3.43 kB
+../scratch-build/assets/EscrowView-TTLbXy19.js                  10.56 kB │ gzip:   3.25 kB
+../scratch-build/assets/FinanceMarketplace-DKvfayf5.js          10.97 kB │ gzip:   3.43 kB
+../scratch-build/assets/api-B6ez5zBH.js                         16.55 kB │ gzip:   4.32 kB
+../scratch-build/assets/AuctionsView-CD0ZPgR7.js                16.91 kB │ gzip:   5.21 kB
+../scratch-build/assets/ParticipantEscrowDesk-cDQnpH7c.js       19.55 kB │ gzip:   6.27 kB
+../scratch-build/assets/ChatView-DnbonA6V.js                    25.46 kB │ gzip:   6.75 kB
+../scratch-build/assets/PrivateSellerPlatform-DthhC4A8.js       28.33 kB │ gzip:   8.18 kB
+../scratch-build/assets/DealerDashboard-CL9R-oLf.js             34.92 kB │ gzip:   7.08 kB
+../scratch-build/assets/AuctionLivePage-BEkckxw4.js             36.25 kB │ gzip:  10.95 kB
+../scratch-build/assets/chunk-62JRHF6Z-B88-54cI.js              36.87 kB │ gzip:  13.35 kB
+../scratch-build/assets/SupportView-CgnLsj6t.js                 43.04 kB │ gzip:  11.60 kB
+../scratch-build/assets/AdminView-C-v3Dvup.js                   49.31 kB │ gzip:  12.19 kB
+../scratch-build/assets/httpRequest-CdQczMsX.js                 53.08 kB │ gzip:  19.83 kB
+../scratch-build/assets/InspectionMarketplacePage-DNwKWata.js   55.69 kB │ gzip:  14.40 kB
+../scratch-build/assets/DealersView-D14mg0yt.js                 57.09 kB │ gzip:  11.91 kB
+../scratch-build/assets/InspectionsView-B00qdjrC.js             72.69 kB │ gzip:  18.63 kB
+../scratch-build/assets/index-DU_gUJ91.js                      746.09 kB │ gzip: 203.11 kB
+
+✓ built in 2.58s
+build exit 0

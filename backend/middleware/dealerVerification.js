@@ -10,6 +10,7 @@ import User from "../models/User.js";
 import Car from "../models/Car.js";
 import Referral from "../models/Referral.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { getOnboardingPolicy } from "../services/onboardingPolicy.service.js"; // STAGE 5
 
 // Inside a mounted Express router req.path is relative to the mount point
 // (POST /api/cars arrives as "/"), so comparing it to "/cars" never matched and
@@ -84,11 +85,18 @@ export const requireDealerVerification = async (req, res, next) => {
 
     // Check verification status — progressive access for pending/under_review
     if (verification.verificationStatus !== "approved") {
+      // STAGE 5: progressive (pre-approval) listing access exists ONLY in the owner's
+      // `self_onboarding` mode. In `approval_required`/`closed` — and whenever the policy
+      // cannot be trusted — an unapproved dealer cannot create listings at all.
+      let progressiveAllowed = false;
+      if (["pending", "under_review"].includes(verification.verificationStatus) && isListingCreationRequest(req)) {
+        const onboarding = await getOnboardingPolicy();
+        progressiveAllowed =
+          (onboarding.source === "default" || onboarding.source === "database") &&
+          onboarding.policy.dealerOnboardingMode === "self_onboarding";
+      }
       // Progressive verification: allow listing creation if < 3 cars and not rejected
-      if (
-        ["pending", "under_review"].includes(verification.verificationStatus) &&
-        isListingCreationRequest(req)
-      ) {
+      if (progressiveAllowed) {
         const carCount = await Car.countDocuments({ dealer: userId });
         if (carCount < 3) {
           req.dealer = dealer;
@@ -101,6 +109,7 @@ export const requireDealerVerification = async (req, res, next) => {
       return res.status(403).json({
         success: false,
         message: getVerificationMessage(verification.verificationStatus),
+        code: ["pending", "under_review"].includes(verification.verificationStatus) ? "DEALER_APPROVAL_PENDING" : undefined,
         verificationStatus: verification.verificationStatus,
         requiresAction: getRequiredAction(verification.verificationStatus),
         verificationUrl: "/api/verification/status",

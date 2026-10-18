@@ -1,3 +1,4 @@
+import { parseBonusAmount } from "../utils/referralGuards.js"; // STAGE 4A (G9)
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import protectAccount from "../middleware/protectAccount.js";
@@ -17,6 +18,7 @@ import { cacheMiddleware, CACHE_TTL } from "../utils/cache.js";
 import Car from "../models/Car.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import AuditLog from "../models/AuditLog.js";
+import { auditAfterCommit } from "../utils/auditAfterCommit.js";
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
@@ -42,6 +44,15 @@ import { setEscrowCapabilitySchema } from "../validation/escrow.schema.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
 import { normalizeNavigation, validateNavigationInput } from "../utils/navigationConfig.js";
 import { presentMessage } from "../services/chatAttachments.js";
+import {
+  getOnboardingPolicy,
+  updateOnboardingPolicy,
+  publicView as onboardingPublicView,
+  publicRegistrationView,
+  OnboardingPolicyError,
+  POLICY_FIELDS,
+  requireDecisionAuthority,
+} from "../services/onboardingPolicy.service.js"; // STAGE 5
 
 
 // Routes that only admin/superadmin can access
@@ -98,6 +109,17 @@ router.get(
     config = { ...config, navigation: normalizeNavigation(config.navigation) };
 
     res.json({ success: true, config });
+  }),
+);
+
+// STAGE 5: public, non-sensitive registration modes so the signup UI renders the right form.
+// Only the two registration modes and a trust flag are exposed; never authorities or actor ids.
+router.get(
+  "/public/onboarding-policy",
+  asyncHandler(async (req, res) => {
+    const result = await getOnboardingPolicy();
+    res.set("Cache-Control", "no-store");
+    res.json({ success: true, policy: publicRegistrationView(result) });
   }),
 );
 
@@ -355,6 +377,7 @@ router.post(
 router.post(
   "/users/:id/approve-dealer",
   adminOrSuper,
+  requireDecisionAuthority("dealer"), // STAGE 5: owner-controlled decision authority
   validateObjectId,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
@@ -366,10 +389,20 @@ router.post(
       });
     }
 
+    if (!["dealer", "individual_seller"].includes(user.role)) {
+      return res.status(400).json({ success: false, code: "NOT_A_SELLER_ACCOUNT", message: "Only dealer and seller accounts can be approved here." });
+    }
     user.approved = true;
     user.verificationStatus = "verified";
+    user.status = "approved"; // STAGE 5: keep the account gate consistent with /api/verification approval
 
     await user.save();
+    await auditAfterCommit({
+      action: "Dealer decision: approve-dealer",
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+      details: { outcome: "success", targetUserId: String(user._id) },
+    });
 
     emitCommunication({
       userId: user._id,
@@ -420,7 +453,7 @@ router.put(
 
     await user.save();
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `Seller settings updated for ${user.name || user.email}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -552,6 +585,7 @@ router.post(
 router.post(
   "/cars/:id/moderate",
   adminOrSuper,
+  requireDecisionAuthority("listing"), // STAGE 5: owner-controlled decision authority
   validateObjectId,
   asyncHandler(async (req, res) => {
     const { action, adminNote } = req.body;
@@ -599,7 +633,7 @@ router.post(
       });
     }
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `Car listing ${action}d: ${listingTitle}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -699,14 +733,14 @@ router.put(
 
     await config.save();
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: "Platform config updated",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
     });
 
     if (navigationAudit) {
-      await AuditLog.create({
+      await auditAfterCommit({
         action: "Navigation configuration updated",
         admin: req.user.name || req.user.email,
         adminId: req.user.id,
@@ -732,7 +766,7 @@ router.put(
     config.packages = packages;
     await config.save();
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: "Listing packages updated",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -790,6 +824,79 @@ router.post(
 );
 
 // =============================
+// STAGE 5 — OWNER-CONTROLLED ONBOARDING POLICY
+// View: admin / superadmin holding MANAGE_SETTINGS (path layer above). Change: platform owner only.
+// =============================
+const ownerOnly = (req, res, next) => {
+  if (req.user?.effectiveRole === "webhoist" && req.user?.emailVerified !== true) {
+    // The owner is identified by email alone and is exempt from the generic verification gate; a policy
+    // change additionally requires that this owner address has been VERIFIED (see launch checklist).
+    return res.status(403).json({ success: false, code: "OWNER_EMAIL_UNVERIFIED", message: "Verify the owner email address before changing onboarding policy." });
+  }
+  if (req.user?.effectiveRole === "webhoist") return next();
+  return res.status(403).json({
+    success: false,
+    code: "OWNER_ONLY",
+    message: "Only the platform owner can change onboarding policy.",
+  });
+};
+
+router.get(
+  "/settings/onboarding",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const result = await getOnboardingPolicy({ fresh: true });
+    res.set("Cache-Control", "no-store");
+    res.json({
+      success: true,
+      policy: onboardingPublicView(result),
+      options: POLICY_FIELDS,
+      canChange: req.user?.effectiveRole === "webhoist" && req.user?.emailVerified === true,
+      issues: result.issues,
+    });
+  }),
+);
+
+router.put(
+  "/settings/onboarding",
+  adminOrSuper,
+  ownerOnly,
+  asyncHandler(async (req, res) => {
+    const { expectedRevision, ...changes } = req.body || {};
+    const actor = { admin: req.user.name || req.user.email, adminId: req.user.id };
+    try {
+      const { before, after } = await updateOnboardingPolicy({
+        changes,
+        expectedRevision,
+        actorId: req.user.id,
+      });
+      await auditAfterCommit({
+        action: "Onboarding policy updated",
+        ...actor,
+        details: { outcome: "success", before, after },
+      });
+      res.json({ success: true, message: "Onboarding settings saved", policy: after });
+    } catch (err) {
+      if (err instanceof OnboardingPolicyError) {
+        await auditAfterCommit({
+          action: "Onboarding policy update rejected",
+          ...actor,
+          details: { outcome: "failed", code: err.code, attempted: Object.keys(changes) },
+        });
+        return res.status(err.status).json({
+          success: false,
+          code: err.code,
+          message: err.message,
+          errors: err.errors,
+          current: err.current,
+        });
+      }
+      throw err;
+    }
+  }),
+);
+
+// =============================
 // 🚨 SYSTEM KILL-SWITCH (superadmin only)
 // =============================
 router.post(
@@ -832,7 +939,7 @@ router.post(
       .upsert({ key: "system_status", value: systemStatus }, { onConflict: "key" });
     if (writeError) throw writeError;
     invalidateSystemStatusCache();
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `Kill-switch activated: ${type}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -889,7 +996,7 @@ router.post(
       .upsert({ key: "system_status", value: systemStatus }, { onConflict: "key" });
     if (writeError) throw writeError;
     invalidateSystemStatusCache();
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `System recovered: ${type}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -916,7 +1023,7 @@ router.put(
     user.subdomain = subdomain.toLowerCase().trim();
     await user.save();
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `Subdomain ${subdomain}.kayad.space assigned to ${user.email}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -932,6 +1039,7 @@ router.put(
 router.post(
   "/users/:id/verify-dealer",
   adminOrSuper,
+  requireDecisionAuthority("dealer"), // STAGE 5: owner-controlled decision authority
   validateObjectId,
   asyncHandler(async (req, res) => {
     const { action } = req.body; // 'approve' or 'reject'
@@ -949,8 +1057,11 @@ router.post(
       p_reason: req.body.reason || null,
     });
     if (error) throw error;
+    // STAGE 5: the RPC updates users.role/dealers/dealer_verifications but not the account gate, which left an
+    // "approved" dealer's listings pending forever. Keep users.status consistent with the decision.
+    await User.findByIdAndUpdate(req.params.id, { status: action === "approve" ? "approved" : "rejected" });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `Dealer verification: ${action} for ${user.email}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -978,7 +1089,7 @@ router.post(
 
     const result = await stkPush(phone, Number(amount));
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `Test M-Pesa STK Push to ${phone} for KES ${amount}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -1016,7 +1127,7 @@ router.delete(
     );
     await user.deleteOne();
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `User deleted: ${user.email} (${user.role})`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -1044,7 +1155,7 @@ router.put(
     await user.save();
     const deactivatedAt = user.deactivatedAt;
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: user.deactivatedAt ? `User deactivated: ${user.email}` : `User reactivated: ${user.email}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
@@ -1671,8 +1782,10 @@ router.post(
   "/referrals/:id/credit",
   adminOrSuper,
   asyncHandler(async (req, res) => {
-    const { amount } = req.body;
-    if (!amount || amount <= 0)
+    // STAGE 4A (G9): the amount must be a finite positive NUMBER (strings such as "abc" or "1e999" passed the old
+    // `!amount || amount <= 0` test and reached $inc). A maximum is a business-policy decision (register D12) and is not invented here.
+    const amount = parseBonusAmount(req.body?.amount);
+    if (!Number.isFinite(amount))
       return res.status(400).json({ success: false, message: "Valid bonus amount is required" });
 
     const referral = await Referral.findById(req.params.id);
@@ -1680,10 +1793,14 @@ router.post(
     if (referral.status !== "pending")
       return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
 
-    referral.status = "credited";
-    referral.bonusAmount = amount;
-    referral.creditedAt = new Date();
-    await referral.save();
+    // Conditional transition: only the request that actually moves pending -> credited may pay out, so two
+    // concurrent admin clicks cannot both credit the referrer.
+    const claimed = await Referral.findOneAndUpdate(
+      { _id: referral._id, status: "pending" },
+      { status: "credited", bonusAmount: amount, creditedAt: new Date() },
+      { new: true },
+    );
+    if (!claimed) return res.status(409).json({ success: false, message: "Referral is no longer pending" });
 
     await User.findByIdAndUpdate(referral.referrer, {
       $inc: { credits: amount, referralEarnings: amount, referralCount: 1 },
@@ -1698,14 +1815,14 @@ router.post(
       description: `Referral bonus for ${referral.referee}`,
     });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Credit Referral",
       target: `Referral ${referral._id}`,
       details: `Credited KES ${amount} to referrer`,
     });
 
-    res.json({ success: true, message: "Referral credited successfully", referral });
+    res.json({ success: true, message: "Referral credited successfully", referral: claimed });
   }),
 );
 
@@ -1721,7 +1838,7 @@ router.post(
     referral.status = "expired";
     await referral.save();
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Expire Referral",
       target: `Referral ${referral._id}`,
@@ -1848,7 +1965,7 @@ router.delete(
     msg.attachments = [];
     await chat.save();
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Delete Chat Message",
       target: `Message ${req.params.messageId} in Chat ${req.params.chatId}`,
@@ -1866,7 +1983,7 @@ router.post(
     const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: true }, { new: true });
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Block Chat",
       target: `Chat ${chat._id}`,
@@ -1883,7 +2000,7 @@ router.post(
     const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: false }, { new: true });
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Unblock Chat",
       target: `Chat ${chat._id}`,
@@ -1980,7 +2097,7 @@ router.post(
       source,
     });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Create Market Data",
       target: `MarketData ${entry._id}`,
@@ -2017,7 +2134,7 @@ router.put(
     const entry = await MarketData.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true }).lean();
     if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Update Market Data",
       target: `MarketData ${entry._id}`,
@@ -2034,7 +2151,7 @@ router.delete(
     const entry = await MarketData.findByIdAndDelete(req.params.id);
     if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Delete Market Data",
       target: `MarketData ${req.params.id}`,
@@ -2080,7 +2197,7 @@ router.post(
       }
     }
 
-    await AuditLog.create({
+    await auditAfterCommit({
       admin: req.user._id,
       action: "Bulk Import Market Data",
       target: "MarketData",

@@ -1,0 +1,19 @@
+PASS canonical notification worker
+PASS notification regression test
+PASS canonical dealer verification service
+PASS canonical lead service atomic create
+PASS canonical lead service atomic transition
+PASS dealer platform has no Lead model import
+PASS escrow custody mapping
+PASS escrow funding is bank-only
+PASS inspection provider payable account
+PASS inspection payout uses bank cash account
+PASS inspection payout requires closed reported bookings
+PASS inspection payout idempotency
+PASS dealer OTP converges on canonical challenge service
+PASS canonical inspection router has no dormant digital workflow dependency
+PASS canonical inspection compatibility uses vehicle_inspections
+PASS partner webhooks perform real outbound HTTP
+PASS no backend 501 placeholders
+PASS live certification contract converged
+V14 holistic source gate: 18/18 PASS

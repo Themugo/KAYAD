@@ -1,0 +1,3 @@
+Financial ledger sign-convergence source gate: 8/8 PASS
+Signed convention is consistent across posting, reversal and rebuild; dry-run is read-only; migration preserves service-role-only execution and does not auto-rebuild.
+LIMIT: no PostgreSQL execution or target-environment balance diff was run in this environment.

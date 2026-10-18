@@ -1,0 +1,1 @@
+PASS messaging delivery safety: draft retention, no blind retry, serialized writes, user-specific unread checks

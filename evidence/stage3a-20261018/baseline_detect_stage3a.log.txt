@@ -1,0 +1,326 @@
+(node:711) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/regression/stage3aReportQueueGuards.test.js
+  ● S3A-G2-01 listing_removed › sold listing → 409 LISTING_MODERATION_BLOCKED; report not saved; listing untouched
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 200
+
+      40 |   test("sold listing → 409 LISTING_MODERATION_BLOCKED; report not saved; listing untouched", async () => {
+      41 |     const res = await act("listing_removed", "listing", "sold");
+    > 42 |     expect(res.code).toBe(409);
+         |                      ^
+      43 |     expect(res.body.code).toBe("LISTING_MODERATION_BLOCKED");
+      44 |     expect(reportSave).not.toHaveBeenCalled();
+      45 |     expect(carUpdate).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (tests/regression/stage3aReportQueueGuards.test.js:42:22)
+
+  ● S3A-G2-02 user_banned › protected target 'admin' → 403 BAN_TARGET_PROTECTED; nothing saved or banned
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      55 |   test.each(["admin", "owner", "mod2"])("protected target '%s' → 403 BAN_TARGET_PROTECTED; nothing saved or banned", async (who) => {
+      56 |     const res = await act("user_banned", "user", who);
+    > 57 |     expect(res.code).toBe(403);
+         |                      ^
+      58 |     expect(res.body.code).toBe("BAN_TARGET_PROTECTED");
+      59 |     expect(reportSave).not.toHaveBeenCalled();
+      60 |     expect(userUpdate).not.toHaveBeenCalled();
+
+      at tests/regression/stage3aReportQueueGuards.test.js:57:22
+
+  ● S3A-G2-02 user_banned › protected target 'owner' → 403 BAN_TARGET_PROTECTED; nothing saved or banned
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      55 |   test.each(["admin", "owner", "mod2"])("protected target '%s' → 403 BAN_TARGET_PROTECTED; nothing saved or banned", async (who) => {
+      56 |     const res = await act("user_banned", "user", who);
+    > 57 |     expect(res.code).toBe(403);
+         |                      ^
+      58 |     expect(res.body.code).toBe("BAN_TARGET_PROTECTED");
+      59 |     expect(reportSave).not.toHaveBeenCalled();
+      60 |     expect(userUpdate).not.toHaveBeenCalled();
+
+      at tests/regression/stage3aReportQueueGuards.test.js:57:22
+
+  ● S3A-G2-02 user_banned › protected target 'mod2' → 403 BAN_TARGET_PROTECTED; nothing saved or banned
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      55 |   test.each(["admin", "owner", "mod2"])("protected target '%s' → 403 BAN_TARGET_PROTECTED; nothing saved or banned", async (who) => {
+      56 |     const res = await act("user_banned", "user", who);
+    > 57 |     expect(res.code).toBe(403);
+         |                      ^
+      58 |     expect(res.body.code).toBe("BAN_TARGET_PROTECTED");
+      59 |     expect(reportSave).not.toHaveBeenCalled();
+      60 |     expect(userUpdate).not.toHaveBeenCalled();
+
+      at tests/regression/stage3aReportQueueGuards.test.js:57:22
+
+FAIL tests/regression/stage3aDatabaseContract.test.js
+  ● Console
+
+    console.error
+      RBAC ERROR: {
+        code: 'PGRST204',
+        message: "Could not find the 'user_id' column of 'audit_logs' in the schema cache"
+      }
+
+      106 |       next();
+      107 |     } catch (err) {
+    > 108 |       console.error("RBAC ERROR:", err);
+          |               ^
+      109 |       res.status(500).json({ success: false, message: "Authorization failed" });
+      110 |     }
+      111 |   };
+
+      at middleware/rbac.js:108:15
+      at run (tests/regression/stage3aDatabaseContract.test.js:140:74)
+      at Object.<anonymous> (tests/regression/stage3aDatabaseContract.test.js:142:27)
+
+    console.error
+      RBAC ERROR: { code: '08006', message: 'connection failure' }
+
+      106 |       next();
+      107 |     } catch (err) {
+    > 108 |       console.error("RBAC ERROR:", err);
+          |               ^
+      109 |       res.status(500).json({ success: false, message: "Authorization failed" });
+      110 |     }
+      111 |   };
+
+      at middleware/rbac.js:108:15
+      at run (tests/regression/stage3aDatabaseContract.test.js:140:74)
+      at Object.<anonymous> (tests/regression/stage3aDatabaseContract.test.js:149:21)
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › governance → AuditLog.create succeeds and writes only real columns
+
+    expect(received).resolves.toBeTruthy()
+
+    Received promise rejected instead of resolved
+    Rejected to value: {"code": "PGRST204", "message": "Could not find the 'actor' column of 'audit_logs' in the schema cache"}
+
+      93 |   };
+      94 |   test.each(Object.entries(shapes))("%s → AuditLog.create succeeds and writes only real columns", async (_n, payload) => {
+    > 95 |     await expect(AuditLog.create(payload)).resolves.toBeTruthy();
+         |           ^
+      96 |     const row = auditRows().at(-1);
+      97 |     expect(Object.keys(row).filter((k) => k !== "table" && !AUDIT_COLUMNS.has(k))).toEqual([]);
+      98 |     expect(row.action).toBe(payload.action);
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage3aDatabaseContract.test.js:95:11
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › adminKillSwitch → AuditLog.create succeeds and writes only real columns
+
+    expect(received).resolves.toBeTruthy()
+
+    Received promise rejected instead of resolved
+    Rejected to value: {"code": "PGRST204", "message": "Could not find the 'admin' column of 'audit_logs' in the schema cache"}
+
+      93 |   };
+      94 |   test.each(Object.entries(shapes))("%s → AuditLog.create succeeds and writes only real columns", async (_n, payload) => {
+    > 95 |     await expect(AuditLog.create(payload)).resolves.toBeTruthy();
+         |           ^
+      96 |     const row = auditRows().at(-1);
+      97 |     expect(Object.keys(row).filter((k) => k !== "table" && !AUDIT_COLUMNS.has(k))).toEqual([]);
+      98 |     expect(row.action).toBe(payload.action);
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage3aDatabaseContract.test.js:95:11
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › adminReferralCredit → AuditLog.create succeeds and writes only real columns
+
+    expect(received).resolves.toBeTruthy()
+
+    Received promise rejected instead of resolved
+    Rejected to value: {"code": "PGRST204", "message": "Could not find the 'admin' column of 'audit_logs' in the schema cache"}
+
+      93 |   };
+      94 |   test.each(Object.entries(shapes))("%s → AuditLog.create succeeds and writes only real columns", async (_n, payload) => {
+    > 95 |     await expect(AuditLog.create(payload)).resolves.toBeTruthy();
+         |           ^
+      96 |     const row = auditRows().at(-1);
+      97 |     expect(Object.keys(row).filter((k) => k !== "table" && !AUDIT_COLUMNS.has(k))).toEqual([]);
+      98 |     expect(row.action).toBe(payload.action);
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage3aDatabaseContract.test.js:95:11
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › announcement → AuditLog.create succeeds and writes only real columns
+
+    expect(received).resolves.toBeTruthy()
+
+    Received promise rejected instead of resolved
+    Rejected to value: {"code": "PGRST204", "message": "Could not find the 'actor' column of 'audit_logs' in the schema cache"}
+
+      93 |   };
+      94 |   test.each(Object.entries(shapes))("%s → AuditLog.create succeeds and writes only real columns", async (_n, payload) => {
+    > 95 |     await expect(AuditLog.create(payload)).resolves.toBeTruthy();
+         |           ^
+      96 |     const row = auditRows().at(-1);
+      97 |     expect(Object.keys(row).filter((k) => k !== "table" && !AUDIT_COLUMNS.has(k))).toEqual([]);
+      98 |     expect(row.action).toBe(payload.action);
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage3aDatabaseContract.test.js:95:11
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › bulkAdmin → AuditLog.create succeeds and writes only real columns
+
+    expect(received).resolves.toBeTruthy()
+
+    Received promise rejected instead of resolved
+    Rejected to value: {"code": "PGRST204", "message": "Could not find the 'actor' column of 'audit_logs' in the schema cache"}
+
+      93 |   };
+      94 |   test.each(Object.entries(shapes))("%s → AuditLog.create succeeds and writes only real columns", async (_n, payload) => {
+    > 95 |     await expect(AuditLog.create(payload)).resolves.toBeTruthy();
+         |           ^
+      96 |     const row = auditRows().at(-1);
+      97 |     expect(Object.keys(row).filter((k) => k !== "table" && !AUDIT_COLUMNS.has(k))).toEqual([]);
+      98 |     expect(row.action).toBe(payload.action);
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage3aDatabaseContract.test.js:95:11
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › middlewareAuditLog → AuditLog.create succeeds and writes only real columns
+
+    expect(received).resolves.toBeTruthy()
+
+    Received promise rejected instead of resolved
+    Rejected to value: {"code": "PGRST204", "message": "Could not find the 'admin' column of 'audit_logs' in the schema cache"}
+
+      93 |   };
+      94 |   test.each(Object.entries(shapes))("%s → AuditLog.create succeeds and writes only real columns", async (_n, payload) => {
+    > 95 |     await expect(AuditLog.create(payload)).resolves.toBeTruthy();
+         |           ^
+      96 |     const row = auditRows().at(-1);
+      97 |     expect(Object.keys(row).filter((k) => k !== "table" && !AUDIT_COLUMNS.has(k))).toEqual([]);
+      98 |     expect(row.action).toBe(payload.action);
+
+      at expect (../../work/backend/node_modules/expect/build/index.js:2116:15)
+      at tests/regression/stage3aDatabaseContract.test.js:95:11
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › identifiers land in their columns; non-UUID targets and extras are preserved in details
+
+    Could not find the 'admin_id' column of 'audit_logs' in the schema cache
+
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › services/auditService.logAuditEvent (rich payload) persists via db/index.js
+
+    expect(received).not.toBeNull()
+
+    Received: null
+
+      107 |   test("services/auditService.logAuditEvent (rich payload) persists via db/index.js", async () => {
+      108 |     const out = await logAuditEvent({ action: "vehicle_edited", actor: U, actorRole: "dealer", actorName: "D", actorEmail: "d@example.test", target: T, targetModel: "Car", oldValue: { p: 1 }, newValue: { p: 2 }, ipAddress: "10.0.0.1", userAgent: "ua", requestId: "r1", severity: "info" });
+    > 109 |     expect(out).not.toBeNull(); // logAuditEvent returns null when the insert failed
+          |                     ^
+      110 |     const row = auditRows().at(-1);
+      111 |     expect(row).toMatchObject({ actor_id: U, entity_id: T, entity_type: "Car", ip_address: "10.0.0.1" });
+      112 |     expect(row.details).toMatchObject({ actorEmail: "d@example.test", oldValue: { p: 1 }, newValue: { p: 2 }, requestId: "r1" });
+
+      at Object.<anonymous> (tests/regression/stage3aDatabaseContract.test.js:109:21)
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › readers keep application names: actor_id/entity_type/entity_id map back to actor/targetModel/target
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 3
+    + Received  + 8
+
+      Object {
+    -   "actor": "11111111-1111-4111-8111-111111111111",
+    -   "target": "22222222-2222-4222-8222-222222222222",
+    -   "targetModel": "Car",
+    +   "action": "x",
+    +   "actorId": "11111111-1111-4111-8111-111111111111",
+    +   "actor_id": "11111111-1111-4111-8111-111111111111",
+    +   "entityId": "22222222-2222-4222-8222-222222222222",
+    +   "entityType": "Car",
+    +   "entity_id": "22222222-2222-4222-8222-222222222222",
+    +   "entity_type": "Car",
+    +   "id": "a",
+      }
+
+      114 |   test("readers keep application names: actor_id/entity_type/entity_id map back to actor/targetModel/target", () => {
+      115 |     const row = mapRowIn("audit_logs", { id: "a", actor_id: U, entity_type: "Car", entity_id: T, action: "x" });
+    > 116 |     expect(row).toMatchObject({ actor: U, targetModel: "Car", target: T });
+          |                 ^
+      117 |   });
+      118 |   test("serializer output keys are all mapped to real columns", async () => {
+      119 |     const { toAuditLogRow } = await import("../../utils/auditLogRow.js");
+
+      at Object.<anonymous> (tests/regression/stage3aDatabaseContract.test.js:116:17)
+
+  ● S3A-G1-01 every audit writer shape persists into the real audit_logs columns › serializer output keys are all mapped to real columns
+
+    Cannot find module '../../utils/auditLogRow.js' from 'tests/regression/stage3aDatabaseContract.test.js'
+
+      117 |   });
+      118 |   test("serializer output keys are all mapped to real columns", async () => {
+    > 119 |     const { toAuditLogRow } = await import("../../utils/auditLogRow.js");
+          |                               ^
+      120 |     const row = toAuditLogRow({ action: "x", actor: U, target: T, targetModel: "M", ipAddress: "1.2.3.4", createdAt: "2026-10-18T00:00:00Z", actorRole: "r", actorName: "n", metadata: { m: 1 } });
+      121 |     expect(Object.keys(row).sort()).toEqual(["action", "actor", "actorName", "actorRole", "createdAt", "details", "ipAddress", "target", "targetModel"]);
+      122 |   });
+
+      at Resolver._throwModNotFoundError (../../work/backend/node_modules/jest-resolve/build/index.js:895:11)
+      at Object.<anonymous> (tests/regression/stage3aDatabaseContract.test.js:119:31)
+
+  ● S3A-G1-01 governance: a committed mutation is not reported as failed because of audit columns › createPolicy returns 200 and writes the domain row and one audit row
+
+    Could not find the 'actor' column of 'audit_logs' in the schema cache
+
+
+  ● S3A-G1-02 rbac: access_denied audit failure keeps the 403 › audit write succeeds → 403 and one audit row with real columns
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      141 |   test("audit write succeeds → 403 and one audit row with real columns", async () => {
+      142 |     const { res, next } = await run();
+    > 143 |     expect(res.code).toBe(403); expect(next).not.toHaveBeenCalled();
+          |                      ^
+      144 |     expect(auditRows()).toHaveLength(1);
+      145 |     expect(auditRows()[0]).toMatchObject({ action: "access_denied", actor_id: U });
+      146 |   });
+
+      at Object.<anonymous> (tests/regression/stage3aDatabaseContract.test.js:143:22)
+
+  ● S3A-G1-02 rbac: access_denied audit failure keeps the 403 › audit outage → still 403, never 500
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      148 |     failAudit = true;
+      149 |     const { res } = await run();
+    > 150 |     expect(res.code).toBe(403);
+          |                      ^
+      151 |   });
+      152 | });
+      153 |
+
+      at Object.<anonymous> (tests/regression/stage3aDatabaseContract.test.js:150:22)
+
+Test Suites: 2 failed, 2 total
+Tests:       17 failed, 3 passed, 20 total
+Snapshots:   0 total
+Time:        0.582 s, estimated 1 s
+Ran all test suites matching tests/regression/stage3aDatabaseContract.test.js|tests/regression/stage3aReportQueueGuards.test.js.

@@ -122,6 +122,10 @@ export const protect = async (req, res, next) => {
     if (!securityUser || !userAuth) {
       return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalid" });
     }
+    // Non-security profile fields (display name) come from the cached profile
+    // row; the security-only select below deliberately omits them. Without this,
+    // req.user.name was always undefined (audit actorName, team-invite emails).
+    const profileName = user.name ?? securityUser.name;
     user = securityUser;
     if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
       return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalidated, please login again" });
@@ -167,9 +171,10 @@ export const protect = async (req, res, next) => {
       id: String(user._id ?? user.id),
       role: isOwner ? "superadmin" : user.role,
       effectiveRole: isOwner ? "webhoist" : user.role,
-      name: user.name,
+      name: profileName,
       email: user.email,
       status: user.status || "approved",
+      emailVerified: user.emailVerified === true, // STAGE 5: strict boolean; never inferred
       grantedPermissions: user.grantedPermissions || [],
       revokedPermissions: user.revokedPermissions || [],
     };
@@ -224,6 +229,17 @@ export const dealerOnly = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: "Dealer or seller access only",
+    });
+  }
+
+  // STAGE 5: verified email is ALWAYS required for seller actions. Unlike the login/protect gate this is
+  // not provider-gated: an unset BREVO_API_KEY must never turn seller email verification off. Staff are
+  // governed by their own provisioning; the owner returned above. Fail closed on anything but `true`.
+  if (SELLER_ROLES.includes(req.user.role) && !STAFF_ROLES.includes(req.user.role) && req.user.emailVerified !== true) {
+    return res.status(403).json({
+      success: false,
+      code: "EMAIL_VERIFICATION_REQUIRED",
+      message: "Please verify your email address before using seller features.",
     });
   }
 
@@ -309,10 +325,23 @@ export const optionalAuth = async (req, res, next) => {
 
     // 🚫 Don't attach banned/deactivated users on public routes
     if (user && !user.isBanned && !user.deactivatedAt) {
+      // A token that protect() would reject as revoked (logout, password
+      // change, session revocation → tokenVersion/session mismatch) must not
+      // still identify the caller — or their staff role, which unlocks
+      // non-public listing visibility — on optional-auth routes.
+      const userAuth = await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion").lean();
+      if (!userAuth) return next();
+      if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) return next();
+      if (decoded.sessionId) {
+        const activeSession = await RefreshToken.findActiveSessionById(decoded.sessionId, decoded.id);
+        if (!activeSession) return next();
+      }
       const isOwner = isOwnerEmail(user.email);
       req.user = {
         id: String(user._id ?? user.id),
         role: isOwner ? "superadmin" : user.role,
+        effectiveRole: isOwner ? "webhoist" : user.role,
+        email: user.email,
       };
     }
 
@@ -325,12 +354,16 @@ export const optionalAuth = async (req, res, next) => {
 
 // Compatibility aliases used by canonical route modules.
 export const requireAuth = protect;
+// Same semantics as the canonical rbac.requireRole: platform owner (webhoist)
+// and superadmin pass; everyone else must hold one of the listed roles.
+// Previously this compared `effectiveRole || role`, so the owner ("webhoist")
+// and superadmin were denied on routes listing only ['admin'].
 export const requireRole = (...roles) => {
   const allowed = roles.flat().filter(Boolean);
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ success: false, message: "Authentication required" });
-    const role = req.user.effectiveRole || req.user.role;
-    if (allowed.length && !allowed.includes(role)) return res.status(403).json({ success: false, message: "Insufficient permissions" });
+    if (req.user.effectiveRole === "webhoist" || req.user.role === "superadmin") return next();
+    if (allowed.length && !allowed.includes(req.user.role)) return res.status(403).json({ success: false, message: "Insufficient permissions" });
     return next();
   };
 };

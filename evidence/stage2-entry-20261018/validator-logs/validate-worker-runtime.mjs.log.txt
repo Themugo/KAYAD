@@ -1,0 +1,11 @@
+PASS worker Redis connection is separate from queue connection
+PASS worker Redis connection disables ioredis request retry exhaustion
+PASS BullMQ Worker uses workerConnection
+PASS worker startup isolates individual worker failures
+PASS worker startup reports degraded state instead of hiding failures
+PASS worker status exposes all canonical workers
+PASS server consumes worker startup result
+PASS legacy generic worker startup failure message removed
+PASS worker Redis connection closes with queue infrastructure
+
+Worker runtime validation: 9/9 PASS

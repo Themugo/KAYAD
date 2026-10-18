@@ -1,0 +1,35 @@
+PASS migration creates cms_pages
+PASS migration creates cms_page_sections
+PASS migration creates cms_navigation
+PASS migration creates cms_nav_items
+PASS migration creates cms_hero_sections
+PASS migration creates cms_content_blocks
+PASS migration creates cms_car_card_configs
+PASS migration creates cms_theme_configs
+PASS migration creates cms_popups
+PASS migration creates cms_media
+PASS migration creates cms_forms
+PASS migration creates cms_footer_configs
+PASS migration creates cms_seo_configs
+PASS migration creates cms_content_versions
+PASS migration creates cms_website_settings
+PASS migration creates cms_announcements
+PASS migration creates cms_contents
+PASS migration creates cms_campaigns
+PASS migration creates cms_banners
+PASS migration creates cms_faqs
+PASS migration creates cms_taxonomies
+PASS migration creates cms_revisions
+PASS migration creates cms_ab_tests
+PASS migration creates cms_analytics
+PASS migration creates website_settings
+PASS cms_pages extension is idempotent
+PASS CMS page name synchronization function exists
+PASS CMS page synchronization trigger exists
+PASS cms_pages RLS enabled
+PASS cms_pages public read policy exists
+PASS CMS bootstrap indexes are rerunnable
+PASS obsolete duplicate CMS service tree removed
+PASS CMS controller does not use divergent cms_navigations table
+PASS CMS controller has no retired navigation table reference
+CMS schema validation: PASS

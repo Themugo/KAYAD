@@ -1,0 +1,16 @@
+PASS canonical theme stylesheet is imported after Tailwind utilities
+PASS reference palette retains Automotive Services hero token
+PASS reference palette retains mint CTA token
+PASS Support command hero consumes canonical brand hero class
+PASS Marketplace theme scope is route-specific
+PASS Marketplace heading colors map to KAYAD semantic tokens
+PASS Marketplace accent controls map to brand token
+PASS Auction base palette consumes shared KAYAD tokens
+PASS Auction header uses the same hero gradient tokens
+PASS Auction route overrides its active segment with canonical mint
+PASS Semantic status and role accents are explicitly preserved
+PASS Homepage hero remains image-led and unflattened
+PASS Main app continues using canonical route-scoped public shell
+PASS Focus treatment remains in shared theme layer
+PASS Reduced-motion support remains in shared theme layer
+RESULT 15/15 PASS

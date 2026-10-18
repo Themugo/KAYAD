@@ -1,0 +1,6 @@
+PHASE 19 AUCTION CONTRACT VALIDATION: PASS
+- Canonical source: cars.auctionStatus / auctionEnd / currentBid
+- Public auction API: GET /api/auctions and /api/auctions/active
+- Bid placement: POST /api/bids/:carId/bid
+- Separate auctions-table dependency: removed
+- Legacy in-memory auction engine: removed

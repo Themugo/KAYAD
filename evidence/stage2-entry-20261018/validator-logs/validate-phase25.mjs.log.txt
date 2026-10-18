@@ -1,0 +1,5 @@
+PHASE 25 CI/CD CONTRACT VALIDATION: PASS
+Node baseline: 22.22.2
+Production builds: fail closed without required Supabase frontend secrets
+Dependency installation: npm ci lockfile enforced
+Backend container: Node 22 + non-root runtime

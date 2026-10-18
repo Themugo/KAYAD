@@ -146,7 +146,9 @@
     "validate:admin-logo-identity": "node scripts/validate-stage25-admin-logo-identity-20261012.mjs",
     "validate:stage34-showroom-icons": "node scripts/validate-stage34-showroom-icons.mjs",
     "validate:stage35-home-hero-pair": "node scripts/validate-stage35-home-hero-pair.mjs",
-    "validate:phase39-deployment-security": "node scripts/validate-phase39-deployment-security.mjs"
+    "validate:phase39-deployment-security": "node scripts/validate-phase39-deployment-security.mjs",
+    "validate:owner-identity-convergence": "node scripts/validate-owner-identity-convergence.mjs",
+    "validate:master-identity-authz-corrections": "node scripts/validate-master-identity-authz-corrections.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",
@@ -191,6 +193,5 @@
   },
   "engines": {
     "node": ">=22.22.2"
-  },
-  "certify:phase5:browser-contract": "node scripts/certify-phase5-browser-contract.mjs"
+  }
 }

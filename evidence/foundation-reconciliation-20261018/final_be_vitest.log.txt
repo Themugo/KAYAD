@@ -1,0 +1,17 @@
+
+> kayad-backend@2.0.0 test:vitest
+> vitest run --config vitest.config.js
+
+
+ RUN  v4.1.11 /home/claude/work/backend
+
+(node:5836) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Sun, 18 Oct 2026 05:31:41 GMT express-session deprecated req.secret; provide secret option at server.js:558:42
+
+ Test Files  6 passed (6)
+      Tests  36 passed (36)
+   Start at  08:31:33
+   Duration  8.57s (transform 2.28s, setup 0ms, import 4.72s, tests 3.12s, environment 0ms)
+
+vitest exit 0

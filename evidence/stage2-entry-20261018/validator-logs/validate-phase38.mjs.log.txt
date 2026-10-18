@@ -1,0 +1,5 @@
+PHASE 38 TRANSACTION BOUNDARY VALIDATION: PASS
+No-op transaction session shim: RETIRED
+Legacy escrow_vaults runtime dependency: RETIRED
+Canonical escrow source: public.escrows
+Canonical bid atomicity: PostgreSQL RPC + distributed lock

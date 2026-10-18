@@ -143,12 +143,12 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 /* Stage 29: semantic mobile icon colors. Icons remain real Lucide vectors;
    color communicates destination, while shape and labels preserve clarity. */
 .kayad-mobile-drawer-primary .kayad-drawer-group__icon--marketplace { color:#55D9C8;background:linear-gradient(145deg,#0C5262,#0A3D4A); }
-.kayad-mobile-drawer-primary .kayad-drawer-group__icon--auction { color:#FFC17D;background:linear-gradient(145deg,#59402D,#3E3027); }
+.kayad-mobile-drawer-primary .kayad-drawer-group__icon--auction { color:#8DE5D7;background:linear-gradient(145deg,#12576D,#0A3340); }
 .kayad-mobile-drawer-primary .kayad-drawer-group__icon--inspection { color:#77E0B5;background:linear-gradient(145deg,#145C50,#0B443F); }
 .kayad-mobile-drawer-primary .kayad-drawer-group__icon--escrow { color:#8DCBFF;background:linear-gradient(145deg,#174E76,#123C5A); }
 .kayad-mobile-drawer-primary .kayad-drawer-group__icon--support { color:#C5B6FF;background:linear-gradient(145deg,#443D72,#302C54); }
 .kayad-mobile-drawer-primary .kayad-drawer-group__icon--finance { color:#9AE6A3;background:linear-gradient(145deg,#275B3E,#1D4630); }
-.kayad-mobile-drawer-primary .kayad-drawer-chip__icon--auction { color:#FFC17D; }
+.kayad-mobile-drawer-primary .kayad-drawer-chip__icon--auction { color:#8DE5D7; }
 .kayad-mobile-drawer-primary .kayad-drawer-chip__icon--inspection { color:#77E0B5; }
 .kayad-mobile-drawer-primary .kayad-drawer-chip__icon--marketplace { color:#55D9C8; }
 .kayad-mobile-drawer-primary .kayad-drawer-chip__icon--escrow { color:#8DCBFF; }

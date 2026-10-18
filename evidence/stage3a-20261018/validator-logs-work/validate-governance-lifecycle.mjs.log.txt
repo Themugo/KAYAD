@@ -1,0 +1,55 @@
+PASS authoritative migration defines governance_policies
+PASS authoritative migration defines change_requests
+PASS authoritative migration defines approval_rules
+PASS authoritative migration defines feature_lifecycles
+PASS authoritative migration defines risk_assessments
+PASS authoritative migration defines enterprise_standards
+PASS authoritative migration defines country_rules
+PASS authoritative migration defines partner_requirements
+PASS authoritative migration defines releases
+PASS authoritative migration defines decision_registers
+PASS controller exports getGovernanceDashboard
+PASS controller exports getPolicies
+PASS controller exports getPolicy
+PASS controller exports createPolicy
+PASS controller exports updatePolicy
+PASS controller exports getChangeRequests
+PASS controller exports getChangeRequest
+PASS controller exports createChangeRequest
+PASS controller exports submitForApproval
+PASS controller exports approveChangeRequest
+PASS controller exports rejectChangeRequest
+PASS controller exports getApprovalRules
+PASS controller exports createApprovalRule
+PASS controller exports updateApprovalRule
+PASS controller exports getFeatureLifecycles
+PASS controller exports createFeatureLifecycle
+PASS controller exports updateFeatureStage
+PASS controller exports getRisks
+PASS controller exports createRisk
+PASS controller exports updateRiskStatus
+PASS controller exports getStandards
+PASS controller exports createStandard
+PASS controller exports getCountryRules
+PASS controller exports createCountryRule
+PASS controller exports getPartnerRequirements
+PASS controller exports createPartnerRequirement
+PASS controller exports getReleases
+PASS controller exports createRelease
+PASS controller exports updateReleaseStatus
+PASS controller exports getDecisions
+PASS controller exports createDecision
+PASS controller exports getAuditLogs
+PASS controller exports getComplianceDashboard
+PASS controller exports getGovernanceHelp
+PASS controller exports getGovernanceReport
+PASS legacy governance 501 boundary removed
+PASS dashboard derives summary from canonical governance tables
+PASS compliance score is derived from stored governance records
+PASS change approval enforces submitted state
+PASS change rejection requires a reason
+PASS governance routes retain authentication boundary
+PASS governance mutations retain role gates
+PASS frontend dashboard API remains wired
+
+Governance lifecycle validation: 53/53 checks passed.

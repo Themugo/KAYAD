@@ -1,0 +1,8 @@
+PASS production security logging excludes arbitrary metadata
+PASS application logger remains development-only
+PASS service worker has no obsolete API cache list
+PASS service worker never caches API responses
+PASS service worker retains auth bypass
+PASS mobile reduced-motion contract exists
+
+Polish contract: 6/6 PASS

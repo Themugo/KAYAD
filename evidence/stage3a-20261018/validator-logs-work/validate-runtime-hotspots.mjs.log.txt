@@ -1,0 +1,9 @@
+PASS Socket typing is rate-limit fail-closed
+PASS Central response hook is the only production res.json override
+PASS Response wrapper is registered before API v2 routes
+PASS SLI does not override response methods
+PASS Performance monitor does not override response methods
+PASS Error handler guards committed responses
+PASS Not-found handler guards committed responses
+PASS Socket typing regression test exists
+Runtime hotspot validation: 8/8 PASS

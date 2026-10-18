@@ -1,0 +1,22 @@
+diff --git a/backend/controllers/featureFlagController.js b/backend/controllers/featureFlagController.js
+index ab2d30b..cb018ee 100644
+--- a/backend/controllers/featureFlagController.js
++++ b/backend/controllers/featureFlagController.js
+@@ -87,7 +87,7 @@ export const getFlagHandler = async (req, res) => {
+ export const createFlagHandler = async (req, res) => {
+   try {
+     const flagData = req.body;
+-    const createdBy = req.user._id;
++    const createdBy = req.user.id; // protect() sets id, not _id (was always undefined)
+ 
+     const flag = await createFlag(flagData, createdBy);
+ 
+@@ -113,7 +113,7 @@ export const updateFlagHandler = async (req, res) => {
+   try {
+     const { key } = req.params;
+     const flagData = req.body;
+-    const updatedBy = req.user._id;
++    const updatedBy = req.user.id; // protect() sets id, not _id (was always undefined)
+ 
+     const flag = await updateFlag(key, flagData, updatedBy);
+ 

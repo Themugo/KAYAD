@@ -1,0 +1,12 @@
+PASS ledger has provider payable account
+PASS inspection payment posts to canonical ledger
+PASS inspection refunds have dedicated audit rows
+PASS refunds post compensating ledger entries
+PASS settlement generation requires closed bookings
+PASS settlement periods are idempotent
+PASS payout posts to canonical ledger
+PASS paid settlement is idempotent
+PASS admin payout route exists
+PASS RLS hardened on inspection financial tables
+
+10/10 PASS

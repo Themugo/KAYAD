@@ -1,0 +1,1 @@
+PASS messaging RPC error contract: stable HTTP mapping for not-found, forbidden, blocked and empty-message outcomes

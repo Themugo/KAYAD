@@ -154,6 +154,37 @@ export const getPermissions = (role) => {
 
 export const isStaff = (role) => STAFF_ROLES.includes(role);
 
+/**
+ * Canonical "is this authenticated principal in the allowed role list" check.
+ *
+ * `protect()` attaches the platform owner as { role: "superadmin",
+ * effectiveRole: "webhoist" }. Controllers that compared
+ * `effectiveRole || role` against a list such as ['admin','superadmin']
+ * therefore denied the owner (effectiveRole "webhoist" is never listed) even
+ * though every route-level guard lets the owner through. Use this helper for
+ * in-controller role checks so route and controller policy cannot drift.
+ */
+export const isRoleAllowed = (user, roles = []) => {
+  if (!user) return false;
+  if (user.effectiveRole === WEBHOIST) return true;
+  return roles.flat().includes(user.role);
+};
+
+/**
+ * Who may edit/delete a listing they do not own. Uses the documented
+ * permission model (MANAGE_CARS: "Approve, edit and remove car listings")
+ * including per-user grants/revokes, instead of "any STAFF_ROLES member",
+ * which let e.g. ghost_checker or marketing delete any listing.
+ */
+export const canManageAnyListing = (user) => {
+  if (!user) return false;
+  if (user.effectiveRole === WEBHOIST) return true;
+  // Sellers also hold MANAGE_CARS, but only for their OWN listings (ownership is
+  // checked separately by the caller). Cross-owner authority is staff-only.
+  if (!STAFF_ROLES.includes(user.role)) return false;
+  return userHasPermission(user, PERM.MANAGE_CARS);
+};
+
 export const isSeller = (role) => SELLER_ROLES.includes(role);
 
 export const isAtLeast = (role, minRole) => {

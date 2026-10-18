@@ -23,7 +23,7 @@ export const EnterpriseTokens = {
   softBlue: '#5AAFA4',
   softBlueLight: '#DDF4F0',
   mutedOrange: '#13b8a6',
-  mutedOrangeLight: '#FED7AA',
+  mutedOrangeLight: '#DDF4F0',
   mutedCrimson: '#EF4444',
   mutedCrimsonLight: '#FEE2E2',
   purple: '#5aafa4',

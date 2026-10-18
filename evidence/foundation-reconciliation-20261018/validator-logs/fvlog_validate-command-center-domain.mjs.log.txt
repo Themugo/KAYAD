@@ -1,0 +1,9 @@
+PASS - no command-center 501 placeholder
+PASS - all command-center handlers are implemented
+PASS - route-level operator authorization
+PASS - admin gate for destructive actions
+PASS - war room is persistent and singleton
+PASS - widget layouts are user scoped with RLS
+PASS - frontend consumes live command-center APIs
+PASS - frontend has no synthetic KPI fallback
+Command Center domain validation: 8/8 PASS

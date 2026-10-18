@@ -1,0 +1,20 @@
+PASS controller exists
+PASS routes exist
+PASS migration exists
+PASS frontend dashboard exists
+PASS frontend API exists
+PASS schema policies
+PASS schema changes
+PASS schema risks
+PASS schema releases
+PASS schema decisions
+PASS controller export getGovernanceDashboard
+PASS controller export createPolicy
+PASS controller export submitForApproval
+PASS controller export approveChangeRequest
+PASS controller export rejectChangeRequest
+PASS controller export createRisk
+PASS controller export createRelease
+PASS controller export createDecision
+PASS controller export getComplianceDashboard
+Governance validator: 19/19 PASS

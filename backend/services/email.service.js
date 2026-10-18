@@ -420,7 +420,34 @@ export const buildVerificationEmail = ({ name, verifyUrl, resend = false }) => (
     `, `Verify Your Email — ${APP_NAME}`),
 });
 
-export const buildWelcomeEmail = ({ name }) => ({
+// STAGE 5: the welcome email must never tell a dealer or seller they are "ready"/approved when they are not.
+// Application received ≠ email verified ≠ approved. Buyers keep the original wording.
+const WELCOME_COPY = {
+  dealer: {
+    text: (n) => `Hi ${n}, we have received your ${APP_NAME} dealer application. Your email must be verified and your application reviewed before your dealer account is approved. We will email you when a decision is made.`,
+    html: "We have received your dealer application. It is <strong>not approved yet</strong>: please verify your email, then wait for our review. We will email you when a decision is made.",
+    cta: null,
+  },
+  individual_seller: {
+    text: (n) => `Hi ${n}, your ${APP_NAME} seller account has been created. Verify your email to use seller features. New listings are reviewed before they are published.`,
+    html: "Your seller account has been created. Verify your email to use seller features. New listings are reviewed before they are published.",
+    cta: null,
+  },
+};
+
+export const buildWelcomeEmail = ({ name, role }) => {
+  const sellerCopy = WELCOME_COPY[role];
+  if (sellerCopy) {
+    return {
+      subject: `Welcome to ${APP_NAME}`,
+      text: sellerCopy.text(name || "there"),
+      html: layout(`
+      ${heading(`Welcome, ${esc(name || "there")}!`)}
+      ${para(sellerCopy.html)}
+    `, `Welcome to ${APP_NAME}`),
+    };
+  }
+  return {
   subject: `Welcome to ${APP_NAME} — Drive Your Dream Today`,
   text: `Welcome to ${APP_NAME}, ${name || "there"}. Your account is ready. Browse vehicles: ${APP_URL}/showroom`,
   html: layout(`
@@ -428,7 +455,8 @@ export const buildWelcomeEmail = ({ name }) => ({
       ${para("Your account is ready. Browse vehicles, join auctions and use secure transaction workflows.")}
       ${btn("Start Browsing →", `${APP_URL}/showroom`)}
     `, `Welcome to ${APP_NAME}`),
-});
+  };
+};
 
 export const buildPasswordResetEmail = ({ resetUrl }) => ({
   subject: `Reset Your ${APP_NAME} Password`,

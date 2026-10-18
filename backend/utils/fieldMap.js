@@ -21,6 +21,10 @@ export const snakeToCamel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpper
 // can't fix. Add to this as more mismatches are found in other
 // tables — do not duplicate this map elsewhere.
 export const FIELD_ALIASES = {
+  // Stage 3A (2026-10-18): canonical audit_logs mapping. The table's real
+  // columns are actor_id / entity_type / entity_id (see utils/auditLogRow.js);
+  // these aliases let writers and readers keep the application names.
+  audit_logs: { actor: "actor_id", targetModel: "entity_type", target: "entity_id" },
   communication_deliveries: {
     userId: "user_id",
     eventType: "event_type",

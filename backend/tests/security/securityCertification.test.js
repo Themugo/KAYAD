@@ -80,6 +80,8 @@ const errorHandler = (await import("../../middleware/errorHandler.js")).default;
 const { updateProfile, register, forgotPassword, resetPassword, verifyEmail } =
   await import("../../controllers/authController.js");
 const { pickAllowed, safeEqual } = await import("../../routes/webhookRoutes.js");
+const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
+beforeEach(() => __setOnboardingPolicyForTests({})); // STAGE 5
 
 // ── Helpers ───────────────────────────────────────────────────
 const mockRes = () => {

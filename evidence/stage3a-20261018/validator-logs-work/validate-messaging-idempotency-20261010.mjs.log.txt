@@ -1,0 +1,2 @@
+PASS: additive migration, transaction lock, scoped unique idempotency, stable client retry key, duplicate side-effect suppression, and opt-in PostgreSQL integration coverage.
+LIMIT: this source validator does not prove a live PostgreSQL run, authenticated two-account API behavior, unread endpoint behavior, or Socket.IO event delivery.

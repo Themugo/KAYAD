@@ -85,6 +85,10 @@ export const deliverEscrow = async (escrowId, userId, { idempotencyKey } = {}) =
   return findById("escrows", escrowId);
 };
 
+// AUTHORITY CONTRACT: this transitions the escrow as role "admin". Callers MUST
+// have already verified escrow-release authority (canActAsEscrowAdmin +
+// APPROVE_ESCROW_RELEASE, as POST /api/escrow/:id/release does). Never call it
+// on behalf of a buyer or seller (see auctionFulfilment.service.js, 2026-10-18).
 export const releaseEscrow = async (escrowId, adminId, { idempotencyKey } = {}) => {
   const escrow = await findById("escrows", escrowId);
   if (!escrow) throw new Error("Escrow not found");

@@ -1,0 +1,16 @@
+PASS: canonical regional service exists
+PASS: canonical controller exists
+PASS: canonical routes exist
+PASS: regional migration exists
+PASS: frontend regional API exists
+PASS: canonical localization service exists
+PASS: canonical localization frontend API exists
+PASS: regional dashboard exists
+PASS: currency conversion requires configured rate
+PASS: no hardcoded FX table remains
+PASS: country dashboard loads backend data
+PASS: country dashboard has no hardcoded country analytics
+PASS: FX table has positive rate constraint
+PASS: country tables have RLS
+PASS: FX table has uniqueness boundary
+Regional configuration validator: 15/15 PASS

@@ -1,0 +1,2 @@
+PASS: authenticated sender binding, retry side-effect guard, unread-query failure handling, stable client key, transaction lock, scoped uniqueness, and changed-payload rejection.
+LIMIT: static source assertions only; not a substitute for API, PostgreSQL, two-account realtime, or browser integration tests.

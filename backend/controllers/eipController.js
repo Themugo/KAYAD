@@ -2,13 +2,14 @@ import crypto from 'crypto';
 import db from '../db/index.js';
 import partnerPlatformService from '../partnerPlatform/services/partnerPlatformService.js';
 import { AppError } from '../utils/AppError.js';
+import { isRoleAllowed } from '../config/roles.js';
 import { logAuditEvent } from '../services/auditService.js';
 
 const ADMIN_ROLES = new Set(['admin', 'superadmin']);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const text = (v, max = 500) => String(v ?? '').trim().slice(0, max);
 const id = (v, name = 'id') => { const value = text(v, 80); if (!UUID_RE.test(value)) throw new AppError(`${name} must be a valid UUID`, 400); return value; };
-const admin = (req) => { if (!ADMIN_ROLES.has(req.user?.effectiveRole || req.user?.role)) throw new AppError('Administrator access required', 403); };
+const admin = (req) => { if (!isRoleAllowed(req.user, [...ADMIN_ROLES])) throw new AppError('Administrator access required', 403); };
 const audit = (req, action, target, details = {}) => logAuditEvent({ action, actor: req.user.id, actorRole: req.user.effectiveRole || req.user.role, actorName: req.user.name, actorEmail: req.user.email, target, targetModel: 'Integration', details, ipAddress: req.ip, userAgent: req.get('user-agent'), requestId: req.id });
 const publicCredential = (row) => { if (!row) return row; const { api_secret_hash, oauth_client_secret_hash, api_secret_plaintext, oauth_client_secret_plaintext, ...safe } = row; return safe; };
 const validateUrl = (value) => { try { const u = new URL(value); if (u.protocol !== 'https:') throw new AppError('Webhook URL must use HTTPS', 400); if (u.username || u.password) throw new AppError('Webhook URL must not contain credentials', 400); const host = u.hostname.toLowerCase(); if (['localhost', '127.0.0.1', '::1'].includes(host) || host.endsWith('.local')) throw new AppError('Webhook URL host is not allowed', 400); return u.toString(); } catch (e) { if (e instanceof AppError) throw e; throw new AppError('Invalid webhook URL', 400); } };

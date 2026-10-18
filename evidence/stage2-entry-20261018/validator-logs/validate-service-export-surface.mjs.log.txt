@@ -1,0 +1,3 @@
+PASS: backend service export declarations are unique.
+Scanned 119 service modules.
+Named exports are intentionally treated as public service surface; reference-count heuristics are not used as correctness gates.

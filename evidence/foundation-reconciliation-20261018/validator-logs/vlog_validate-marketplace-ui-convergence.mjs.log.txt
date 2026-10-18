@@ -1,0 +1,9 @@
+PASS feature CarCard is compatibility-only
+PASS feature CartyGrid is compatibility-only
+PASS mobile card dead-code removal held (Stage 11 Phase E)
+PASS Marketplace uses canonical VehicleCard
+PASS Showroom has one grid authority
+PASS SimilarCars reuses canonical grid path
+PASS no Marketplace purchase API was duplicated in UI
+
+Marketplace UI convergence: 7/7 PASS

@@ -54,7 +54,10 @@ router.get(
   validateQuery(analyticsQuerySchema),
   asyncHandler(async (req, res) => {
     const dealerId =
-      req.user.role === "admin" || req.user.role === "superadmin" ? req.query.dealerId || req.user._id : req.user._id;
+      // protect()/authenticate set req.user.id (never _id). With _id the dealer filter was
+      // undefined, the db layer skipped it, and a dealer received insights computed over
+      // every dealer's listings instead of their own.
+      req.user.role === "admin" || req.user.role === "superadmin" ? req.query.dealerId || req.user.id : req.user.id;
     const insights = await getDealerInsights(dealerId);
     res.json({ success: true, data: insights });
   }),

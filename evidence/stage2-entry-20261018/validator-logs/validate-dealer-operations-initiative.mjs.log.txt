@@ -1,0 +1,17 @@
+PASS dealer controller exists
+PASS dealer routes exist
+PASS inventory reads dealer scope
+PASS listing mutations use canonical car controller
+PASS lead updates persist through canonical lead service
+PASS CRM notes persist through canonical lead activity service
+PASS CRM tasks persist through canonical lead activity service
+PASS marketing campaigns persist in canonical table
+PASS dealer team operations persist in canonical table
+PASS subscription entitlement is canonical
+PASS finance surface is explicitly routed or delegated
+PASS AI recommendations are evidence-backed
+PASS reputation reads persisted reviews
+PASS dealer settings uses dealer profile API
+PASS dealer routes require dealer role
+
+Dealer Operations Initiative: 15/15 PASS

@@ -1,0 +1,2 @@
+Dealer modal convergence: PASS
+1 canonical implementation + 1 compatibility re-export; no duplicate implementation.

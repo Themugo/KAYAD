@@ -10,6 +10,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
+import { requireDecisionAuthority } from "../services/onboardingPolicy.service.js"; // STAGE 5
 
 import {
   submitVerification,
@@ -89,6 +90,7 @@ router.get("/admin/:id", allowRoles("admin", "superadmin"), validateObjectId, as
 router.post(
   "/admin/:id/approve",
   allowRoles("admin", "superadmin"),
+  requireDecisionAuthority("dealer"), // STAGE 5
   validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {
@@ -105,6 +107,7 @@ router.post(
 router.post(
   "/admin/:id/reject",
   allowRoles("admin", "superadmin"),
+  requireDecisionAuthority("dealer"), // STAGE 5
   validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {
@@ -137,6 +140,7 @@ router.post(
 router.post(
   "/admin/:id/reinstate",
   allowRoles("admin", "superadmin"),
+  requireDecisionAuthority("dealer"), // STAGE 5
   validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {

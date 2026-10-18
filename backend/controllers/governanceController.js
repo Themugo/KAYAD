@@ -1,13 +1,36 @@
 import { findAll, findById, create, update } from '../db/index.js';
 import AuditLog from '../models/AuditLog.js';
+import { isRoleAllowed } from '../config/roles.js';
 import { getIO } from '../utils/io.js';
 
 const tables = { policies:'governance_policies', changes:'change_requests', approvals:'approval_rules', features:'feature_lifecycles', risks:'risk_assessments', standards:'enterprise_standards', countries:'country_rules', partners:'partner_requirements', releases:'releases', decisions:'decision_registers' };
-const role = req => req.user?.effectiveRole || req.user?.role;
-const ensure = (req, roles=['admin','superadmin','executive','manager']) => { if (!roles.includes(role(req))) return false; return true; };
+// Canonical role check (owner/webhoist honoured, same as the route-level allowRoles guards).
+const ensure = (req, roles=['admin','superadmin','executive','manager']) => isRoleAllowed(req.user, roles);
 const ok = (res,data) => res.json({success:true,data});
 const list = async (table, filters={}) => findAll(table,{filters,orderBy:'createdAt',ascending:false,limit:200});
-const audit = async (req, action, target, targetModel, details={}) => { await AuditLog.create({action,actor:req.user?.id,target,targetModel,details,createdAt:new Date().toISOString()}).catch(()=>{}); getIO()?.to('admins').emit('controlPlaneUpdated',{type:'governance',action,target,at:new Date().toISOString()}); };
+// Audit persistence is part of the governance write contract. Do not swallow
+// failures: callers must not report a fully successful governance operation
+// when its audit record could not be persisted. (The underlying write and audit
+// are not yet a single database transaction; see the staging gate/runbook.)
+const audit = async (req, action, target, targetModel, details={}) => {
+  await AuditLog.create({action,actor:req.user?.id,target,targetModel,details,createdAt:new Date().toISOString()});
+  getIO()?.to('admins').emit('controlPlaneUpdated',{type:'governance',action,target,at:new Date().toISOString()});
+};
+const RESERVED_MUTATION_FIELDS = new Set([
+  'id','_id','createdBy','created_by','createdAt','created_at',
+  'updatedBy','updated_by','updatedAt','updated_at','actorId','actor_id',
+  'approvedBy','approved_by','approvedAt','approved_at','reviewedBy','reviewed_by',
+  'reviewedAt','reviewed_at','submittedBy','submitted_by','submittedAt','submitted_at',
+  'checksum','previousChecksum','previous_checksum',
+]);
+const validateMutationPayload = (body, { allowStatus = false, allowStage = false } = {}) => {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { error: 'A JSON object is required.' };
+  const blocked = Object.keys(body).filter((key) =>
+    RESERVED_MUTATION_FIELDS.has(key) || (!allowStatus && key === 'status') || (!allowStage && key === 'stage'));
+  if (blocked.length) return { error: `Protected fields cannot be supplied: ${blocked.join(', ')}` };
+  return { value: body };
+};
+const invalidPayload = (res, error) => res.status(400).json({success:false,error});
 const deny = (res) => res.status(403).json({success:false,error:'Insufficient governance permissions'});
 
 export async function getGovernanceDashboard(req,res){
@@ -16,8 +39,8 @@ export async function getGovernanceDashboard(req,res){
 }
 const simpleList = key => async(req,res)=>ok(res,await list(tables[key]));
 const simpleGet = key => async(req,res)=>{const row=await findById(tables[key],req.params.id); if(!row)return res.status(404).json({success:false,error:'Record not found'}); return ok(res,row)};
-const simpleCreate = (key,roles) => async(req,res)=>{if(!ensure(req,roles))return deny(res); const row=await create(tables[key],{...req.body,createdBy:req.user.id,updatedBy:req.user.id}); await audit(req,`governance_${key}_created`,row.id,key); return ok(res,row)};
-const simpleUpdate = (key,roles) => async(req,res)=>{if(!ensure(req,roles))return deny(res); const row=await update(tables[key],req.params.id,{...req.body,updatedBy:req.user.id,updatedAt:new Date().toISOString()}); await audit(req,`governance_${key}_updated`,row.id,key); return ok(res,row)};
+const simpleCreate = (key,roles) => async(req,res)=>{if(!ensure(req,roles))return deny(res); const parsed=validateMutationPayload(req.body); if(parsed.error)return invalidPayload(res,parsed.error); const row=await create(tables[key],{...parsed.value,createdBy:req.user.id,updatedBy:req.user.id}); await audit(req,`governance_${key}_created`,row.id,key); return ok(res,row)};
+const simpleUpdate = (key,roles) => async(req,res)=>{if(!ensure(req,roles))return deny(res); const parsed=validateMutationPayload(req.body); if(parsed.error)return invalidPayload(res,parsed.error); const row=await update(tables[key],req.params.id,{...parsed.value,updatedBy:req.user.id,updatedAt:new Date().toISOString()}); await audit(req,`governance_${key}_updated`,row.id,key); return ok(res,row)};
 export async function getPolicies(req,res){return simpleList('policies')(req,res)}
 export async function getPolicy(req,res){return simpleGet('policies')(req,res)}
 export async function createPolicy(req,res){return simpleCreate('policies',['admin','superadmin'])(req,res)}
@@ -37,7 +60,13 @@ export async function createFeatureLifecycle(req,res){return simpleCreate('featu
 export async function updateFeatureStage(req,res){if(!ensure(req,['admin','superadmin','manager']))return deny(res);return transition(req,res,'features',req.body?.stage,{stageComments:req.body?.comments||null})}
 export async function getRisks(req,res){return simpleList('risks')(req,res)}
 export async function createRisk(req,res){return simpleCreate('risks',['admin','superadmin','executive'])(req,res)}
-export async function updateRiskStatus(req,res){return simpleUpdate('risks',['admin','superadmin','executive'])(req,res)}
+export async function updateRiskStatus(req,res){
+ if(!ensure(req,['admin','superadmin','executive']))return deny(res);
+ const allowed=new Set(['open','active','monitoring','resolved','escalated','mitigated']);
+ if(typeof req.body?.status!=='string'||!allowed.has(req.body.status))return invalidPayload(res,'status must be one of: open, active, monitoring, resolved, escalated, mitigated.');
+ const row=await update(tables.risks,req.params.id,{status:req.body.status,updatedBy:req.user.id,updatedAt:new Date().toISOString()});
+ await audit(req,'governance_risks_status_updated',row.id,'risks',{status:req.body.status}); return ok(res,row);
+}
 export async function getStandards(req,res){return simpleList('standards')(req,res)}
 export async function createStandard(req,res){return simpleCreate('standards',['admin','superadmin'])(req,res)}
 export async function getCountryRules(req,res){return simpleList('countries')(req,res)}
@@ -46,7 +75,13 @@ export async function getPartnerRequirements(req,res){return simpleList('partner
 export async function createPartnerRequirement(req,res){return simpleCreate('partners',['admin','superadmin'])(req,res)}
 export async function getReleases(req,res){return simpleList('releases')(req,res)}
 export async function createRelease(req,res){return simpleCreate('releases',['admin','superadmin'])(req,res)}
-export async function updateReleaseStatus(req,res){return simpleUpdate('releases',['admin','superadmin'])(req,res)}
+export async function updateReleaseStatus(req,res){
+ if(!ensure(req,['admin','superadmin']))return deny(res);
+ const status=req.body?.status;
+ if(typeof status!=='string'||!status.trim()||status.length>40)return invalidPayload(res,'A valid release status is required.');
+ const row=await update(tables.releases,req.params.id,{status:status.trim(),updatedBy:req.user.id,updatedAt:new Date().toISOString()});
+ await audit(req,'governance_releases_status_updated',row.id,'releases',{status:status.trim()}); return ok(res,row);
+}
 export async function getDecisions(req,res){return simpleList('decisions')(req,res)}
 export async function createDecision(req,res){return simpleCreate('decisions',['admin','superadmin','executive'])(req,res)}
 export async function getAuditLogs(req,res){const limit=Math.min(Math.max(Number.parseInt(req.query.limit,10)||100,1),200);return res.json({success:true,data:await AuditLog.findAll({limit})})}

@@ -1,0 +1,15 @@
+PASS discovery does not expose raw server exception text
+PASS a failed refresh preserves the last successful list snapshot
+PASS headline state follows the selected auction tab and avoids a false empty flash during load
+PASS auction tabs are connected to an accessible results panel
+PASS signed-out saved tab does not show a false zero count
+PASS detail page distinguishes HTTP 404 from service/network failure
+PASS detail page offers retry and a route back to auction discovery
+PASS initial detail load uses the canonical sanitized bid list once
+PASS discovery regression tests cover sanitized failures and refresh preservation
+PASS canonical public live list excludes rejected listings and expired/not-yet-started auctions
+PASS scheduled listing, detail and public bid history hide rejected or deleted vehicles
+PASS published future setup remains openable before car lifecycle mirroring
+PASS backend regression tests cover rejected/deleted visibility, live time boundaries and scheduled detail parity
+PASS detail regression tests cover 404, outage and retry recovery
+Auction public error-state validation: 14/14 PASS

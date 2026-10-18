@@ -1,0 +1,2 @@
+PASS: atomic chat append/read-seen RPCs, persisted-response gate, stable idempotency key, and auth redirect path are present.
+NOTE: live PostgreSQL/two-account API and Socket.IO tests remain outstanding; this validator does not certify them.

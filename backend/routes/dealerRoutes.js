@@ -11,6 +11,7 @@ import { getPricingRecommendations } from "../services/pricingRecommendationServ
 
 import { findAll, findById, findOne, create, update, remove, paginate, count } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
+import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { sendNotification } from "../services/notification.service.js";
 import { initiateDealerUpgrade } from "../services/dealerSubscription.service.js";
 import { deliver } from "../services/communicationGateway.service.js";
@@ -785,7 +786,8 @@ router.post(
       currentBid: 0,
       winner: undefined,
       isPromoted: false,
-      status: "available",
+      // STAGE 5: a duplicate is a NEW listing; it follows the owner's moderation policy.
+      status: (await sellerMayPublishDirectly(req.user)) ? "available" : "pending",
     });
 
     await logActionFromReq(req, "duplicate_listing", {
@@ -859,17 +861,38 @@ router.patch(
   "/cars/bulk-status",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const { ids, status } = req.body;
+    const { ids } = req.body;
+    // Seller-settable listing states. "rejected" is admin-moderation-only (it
+    // freezes bidding — same rule as carController.updateCar), "reserved" belongs
+    // to the sale/escrow flow, and anything else is outside the cars.status CHECK.
+    // "active" is the dashboard's label for a live listing → canonical "available".
+    const SELLER_SETTABLE_STATUSES = new Set(["available", "sold", "pending", "hidden", "draft"]);
+    const status = req.body.status === "active" ? "available" : req.body.status;
     if (!Array.isArray(ids) || !status) {
       return res.status(400).json({ success: false, message: "ids (array) and status required" });
     }
+    if (!SELLER_SETTABLE_STATUSES.has(status)) {
+      return res.status(400).json({ success: false, code: "INVALID_LISTING_STATUS", message: "Unsupported listing status" });
+    }
+    // STAGE 5: sellers cannot self-publish when the owner holds listings for review.
+    if (status === "available" && !(await sellerMayPublishDirectly(req.user))) {
+      return res.status(403).json(PUBLICATION_REVIEW_REQUIRED);
+    }
     const sb = getSupabase();
-    const { data: toUpdate } = await sb.from("cars").select("id").in("id", ids).eq("dealer", req.user.id);
-    const updateIds = (toUpdate || []).map((r) => r.id);
+    // Own listings only; a listing rejected by moderation cannot be re-published here.
+    const { data: toUpdate, error: selErr } = await sb
+      .from("cars")
+      .select("id,status")
+      .in("id", ids)
+      .eq("dealer", req.user.id);
+    if (selErr) throw new Error(`Bulk status lookup failed: ${selErr.message}`);
+    const updateIds = (toUpdate || []).filter((r) => r.status !== "rejected").map((r) => r.id);
     let modified = 0;
     if (updateIds.length > 0) {
       const { error: updErr } = await sb.from("cars").update({ status }).in("id", updateIds);
-      if (!updErr) modified = updateIds.length;
+      // Do not report success for a write that did not persist.
+      if (updErr) throw new Error(`Bulk status update failed: ${updErr.message}`);
+      modified = updateIds.length;
     }
 
     await logActionFromReq(req, "bulk_status_update", {

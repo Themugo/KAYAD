@@ -30,7 +30,7 @@ export async function getLedgerEntry(req, res, next) {
 
 export async function reverseLedgerEntry(req, res, next) {
   try {
-    const entry = await ledgerService.reverseLedgerEntry(req.params.id, req.user._id, req.body.reason);
+    const entry = await ledgerService.reverseLedgerEntry(req.params.id, req.user.id, req.body.reason);
     res.status(200).json({ success: true, data: entry });
   } catch (err) {
     next(err);

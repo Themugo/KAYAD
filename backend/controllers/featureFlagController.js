@@ -87,6 +87,10 @@ export const getFlagHandler = async (req, res) => {
 export const createFlagHandler = async (req, res) => {
   try {
     const flagData = req.body;
+    // Stage 3A: S2-ATTR-01 reverted. No migration defines public.feature_flags, so whether
+    // created_by/updated_by exist is unverified; req.user._id is undefined and is dropped from
+    // the insert (pre-Stage-2 behaviour). Switch to req.user.id only after preflight G1-c
+    // confirms the columns (runbooks/stage3-database-contract-20261018/01_*.sql).
     const createdBy = req.user._id;
 
     const flag = await createFlag(flagData, createdBy);
@@ -113,6 +117,10 @@ export const updateFlagHandler = async (req, res) => {
   try {
     const { key } = req.params;
     const flagData = req.body;
+    // Stage 3A: S2-ATTR-01 reverted. No migration defines public.feature_flags, so whether
+    // created_by/updated_by exist is unverified; req.user._id is undefined and is dropped from
+    // the insert (pre-Stage-2 behaviour). Switch to req.user.id only after preflight G1-c
+    // confirms the columns (runbooks/stage3-database-contract-20261018/01_*.sql).
     const updatedBy = req.user._id;
 
     const flag = await updateFlag(key, flagData, updatedBy);

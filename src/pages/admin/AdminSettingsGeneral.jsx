@@ -42,7 +42,6 @@ export default function AdminSettingsGeneral({ config, setConfig, saveConfig, sa
         <h3 style={{ fontSize: '1rem', marginBottom: 20 }}>Toggle Options</h3>
         {[
           { key: 'allowGuestBrowsing', label: 'Allow Guest Browsing' },
-          { key: 'requireDealerApproval', label: 'Require Dealer Approval' },
           { key: 'waivePayments', label: 'Waive Payments (skip all payment/trial enforcement)' },
           { key: 'freeMarket', label: 'Free Market (no fees, no commissions)' },
         ].map(f => (
@@ -53,6 +52,7 @@ export default function AdminSettingsGeneral({ config, setConfig, saveConfig, sa
             <span style={{ fontSize:14 }}>{f.label}</span>
           </label>
         ))}
+        <p style={{ fontSize:12, color:'var(--text-muted)', marginTop:8 }}>Dealer approval, seller registration and listing moderation are controlled in the <strong>Onboarding</strong> tab.</p>
         <div style={{ marginTop:16 }}>
           <button className="btn btn-gold" onClick={() => saveConfig('general')} disabled={saving} style={{ width:'100%' }}>
             {saving ? <><div className="spinner" style={{ width:16, height:16 }} /> Saving...</> : '💾 Save General Settings'}

@@ -1,5 +1,6 @@
 import { logError } from '../infrastructure/logging/index.js';
 import { createDealerReview, deleteReview, listDealerReviews, listMyReviews } from '../services/review.service.js';
+import { isRoleAllowed } from '../config/roles.js';
 
 const handleError = (res, err, fallback) => {
   const status = Number(err?.statusCode) || 500;
@@ -44,7 +45,10 @@ export const getMyReviews = async (req, res) => {
 
 export const deleteOwnReview = async (req, res) => {
   try {
-    await deleteReview(req.params.id, req.user.id, req.user.role === 'admin' || req.user.role === 'super_admin');
+    // STAGE 4 (S4-F-01): the admin override tested for the literal 'super_admin', a role that
+    // cannot be stored (profiles_role_check) - so the real 'superadmin' and the platform owner
+    // were refused while plain 'admin' was allowed. Use the canonical role helper.
+    await deleteReview(req.params.id, req.user.id, isRoleAllowed(req.user, ['admin', 'superadmin']));
     return res.json({ success: true, message: 'Review deleted' });
   } catch (err) {
     logError('deleteReview error:', err.message);

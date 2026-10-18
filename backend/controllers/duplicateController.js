@@ -9,6 +9,7 @@ import Car from "../models/Car.js";
 import User from "../models/User.js";
 import { restoreScores } from "../services/duplicateVehicleService.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { moderationBlockedReason } from "../utils/carModerationGuard.js";
 
 // =============================
 // 📋 GET ALL FLAGGED DUPLICATES
@@ -157,11 +158,23 @@ export const confirmAsDuplicate = async (req, res) => {
       });
     }
 
+    // STAGE 4 (S4-C-02): "removed" soft-deletes the listing and sets status
+    // "rejected". A sold listing has a settled sale behind it and is unwound
+    // only through the escrow/refund workflow (utils/carModerationGuard.js), so
+    // refuse BEFORE the log is marked reviewed (a blocked request must not
+    // leave the log in a reviewed state).
+    const car = await Car.findById(log.car);
+    if (action === "removed") {
+      const blocked = moderationBlockedReason(car);
+      if (blocked) {
+        return res.status(409).json({ success: false, code: "LISTING_MODERATION_BLOCKED", message: blocked });
+      }
+    }
+
     // Update log status
     await log.markAsReviewed(req.user.id, action, reviewNotes);
 
     // Update car status
-    const car = await Car.findById(log.car);
     if (car) {
       car.duplicateStatus = "confirmed_duplicate";
 

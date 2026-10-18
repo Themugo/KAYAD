@@ -1,3 +1,4 @@
+import { redactUrl } from "../../utils/redactUrl.js";
 // backend/infrastructure/logging/child-logger.js - Production Hardened v6.0
 // ─────────────────────────────────────────────────────────────
 // Child logger factory for request-scoped logging
@@ -18,7 +19,7 @@ export const createRequestLogger = (parentLogger, req) => {
   const context = {
     requestId: req.requestId || "unknown",
     method: req.method,
-    url: req.originalUrl || req.url,
+    url: redactUrl(req.originalUrl || req.url),
     ip: req.ip || req.connection?.remoteAddress,
   };
 

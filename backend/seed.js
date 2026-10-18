@@ -18,6 +18,13 @@ const connectDB = () => {
 };
 
 export async function provisionOwners() {
+  // Production owner recovery must use an approved, audited atomic procedure.
+  // This legacy seed uses independent upserts against users and user_auth and
+  // can overwrite existing identities or leave a partial identity on failure.
+  // Fail closed until that behavior is replaced by a transactional RPC.
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Production seed provisioning is blocked: use the approved atomic owner-recovery procedure. No database connection was opened.");
+  }
   if (process.env.SEED_PROVISIONING_ENABLED !== "true") {
     throw new Error("Seed provisioning is disabled. Set SEED_PROVISIONING_ENABLED=true explicitly to provision configured platform owners.");
   }
@@ -70,7 +77,9 @@ export async function provisionOwners() {
   const webhostName = process.env.SEED_ADMIN_NAME || "Platform Owner";
 
   const { OWNER_EMAILS } = await import("./config/owners.js");
-  const ownerList = OWNER_EMAILS.length ? OWNER_EMAILS : webhostEmail ? [webhostEmail.toLowerCase()] : [];
+  const ownerList = [...new Set((OWNER_EMAILS.length ? OWNER_EMAILS : webhostEmail ? [webhostEmail] : [])
+    .map((email) => String(email || "").normalize("NFKC").trim().toLowerCase())
+    .filter(Boolean))];
   if (!ownerList.length) {
     throw new Error("No platform owner configured. Set OWNER_EMAILS or SEED_ADMIN_EMAIL before running seed provisioning.");
   }
@@ -96,7 +105,8 @@ export async function provisionOwners() {
       });
       created.webhost.push(ownerEmail);
     } catch (err) {
-      logError("Failed to upsert webhost", { email: ownerEmail, error: err.message });
+      logError("Failed to provision configured platform owner", { email: ownerEmail, error: err.message });
+      throw err;
     }
   }
 

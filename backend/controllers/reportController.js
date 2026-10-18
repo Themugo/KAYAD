@@ -6,6 +6,9 @@
 import Report from "../models/Report.js";
 import Car from "../models/Car.js";
 import User from "../models/User.js";
+import { moderationBlockedReason } from "../utils/carModerationGuard.js";
+import { STAFF_ROLES } from "../config/roles.js";
+import { isOwnerEmail } from "../config/owners.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // =============================
@@ -212,6 +215,26 @@ export const updateReportStatus = async (req, res) => {
         success: false,
         message: "Report not found",
       });
+    }
+
+    // Stage 3A (2026-10-18): enforcement actions taken from the report queue
+    // (open to moderators) are checked BEFORE anything is persisted.
+    //  - listing_removed: same sold-listing guard as admin moderation
+    //    (utils/carModerationGuard.js) — a completed sale is unwound through
+    //    escrow/refund, not by flipping the listing to "rejected".
+    //  - user_banned: may not target staff or platform-owner accounts; staff
+    //    suspension stays with admin user management. Without this a moderator
+    //    could ban an admin or superadmin from the report queue.
+    if (actionTaken === "listing_removed" && report.targetType === "listing") {
+      const targetCar = await Car.findById(report.targetId);
+      const blocked = moderationBlockedReason(targetCar);
+      if (blocked) return res.status(409).json({ success: false, code: "LISTING_MODERATION_BLOCKED", message: blocked });
+    }
+    if (actionTaken === "user_banned") {
+      const targetUser = await User.findById(report.targetId).select("email role");
+      if (targetUser && (STAFF_ROLES.includes(targetUser.role) || isOwnerEmail(targetUser.email))) {
+        return res.status(403).json({ success: false, code: "BAN_TARGET_PROTECTED", message: "Staff and platform-owner accounts cannot be suspended from the report queue." });
+      }
     }
 
     if (status) report.status = status;

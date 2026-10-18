@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /home/claude/s2/work
+
+
+ Test Files  81 passed (81)
+      Tests  643 passed | 1 skipped (644)
+   Start at  09:27:54
+   Duration  83.70s (transform 2.62s, setup 5.84s, import 7.89s, tests 25.44s, environment 35.91s)
+
+exit 0

@@ -17,6 +17,7 @@ import {
   createFeatureLogger,
 } from "./child-logger.js";
 import { sentryTransport } from "./sentry-integration.js";
+import { redactUrl } from "../../utils/redactUrl.js";
 
 // =============================
 // 🚀 CREATE PINO LOGGER
@@ -90,7 +91,7 @@ export const logRequest = (req) => {
     {
       requestId,
       method: req.method,
-      url: req.originalUrl || req.url,
+      url: redactUrl(req.originalUrl || req.url),
       ip: req.ip || req.connection?.remoteAddress,
       userAgent: req.headers["user-agent"],
     },
@@ -106,7 +107,7 @@ export const logResponse = (req, res, duration) => {
     {
       requestId: req.requestId,
       method: req.method,
-      url: req.originalUrl || req.url,
+      url: redactUrl(req.originalUrl || req.url),
       status: res.statusCode,
       duration: `${duration}ms`,
     },

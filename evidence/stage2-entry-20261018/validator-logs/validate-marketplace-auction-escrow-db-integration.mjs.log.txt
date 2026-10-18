@@ -1,0 +1,31 @@
+PASS DB table contract exists: public.payments
+PASS DB table contract exists: public.escrows
+PASS DB table contract exists: public.purchase_outcomes
+PASS DB table contract exists: public.auction_outcomes
+PASS DB table contract exists: public.cars
+PASS DB atomic function contract exists: kayad_settle_purchase_payment_atomic
+PASS DB atomic function contract exists: kayad_transition_purchase_outcome_atomic
+PASS DB atomic function contract exists: kayad_transition_escrow_atomic
+PASS DB atomic function contract exists: kayad_resolve_dispute_atomic
+PASS Marketplace outcome has payment uniqueness
+PASS Marketplace pending purchase race is DB-constrained
+PASS Auction outcome is unique per vehicle
+PASS Escrow transitions sync Marketplace purchase outcomes
+PASS Purchase payment callback enters canonical DB settlement
+PASS Purchase settlement wrapper calls canonical RPC
+PASS Purchase fulfilment uses canonical ownership service
+PASS Auction fulfilment uses canonical ownership service
+PASS Auction settlement does not create a second escrow engine
+PASS Escrow service remains canonical for auction release
+PASS Unversioned canonical Auction read route is mounted
+PASS Versioned canonical Auction read route is mounted
+PASS Unversioned Marketplace fulfilment route is mounted
+PASS Versioned Marketplace fulfilment route is mounted
+PASS Unversioned Escrow route is mounted once
+PASS Versioned Escrow route is mounted once
+PASS Unversioned Auction settlement/fulfilment mounts are unique
+PASS Only one Marketplace purchase fulfilment route module exists
+PASS Migration versions are unique
+PASS No exact duplicate migration bodies
+
+Marketplace + Auction + Escrow DB integration audit: 29 PASS, 0 FAIL
