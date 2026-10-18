@@ -151,7 +151,7 @@
     "validate:master-identity-authz-corrections": "node scripts/validate-master-identity-authz-corrections.mjs"
   },
   "dependencies": {
-    "@sentry/react": "10.69.0",
+    "@sentry/react": "11.1.0",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.0.5",
     "axios": "1.20.0",
