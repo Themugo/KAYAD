@@ -1,0 +1,20 @@
+Explicit auth-flow contract: 19/19 PASS
+PASS standalone login route exists
+PASS standalone registration route exists
+PASS navbar guest auth action navigates to canonical /login
+PASS navbar guest auth surface explicitly offers sign-in/sign-up entry
+PASS navbar guest auth action does not directly open a legacy auth modal
+PASS app shell has no rendered authentication modal
+PASS app shell routes all auth prompts to standalone login
+PASS app shell preserves the full current path (validated) as login return context
+PASS compatibility auth modal is only a redirect shim (no second sign-in form)
+PASS auth modal forwards to the canonical /login route
+PASS login links to password recovery
+PASS registration surface links to sign in, carrying the validated return path
+PASS registration conflict has sign-in recovery action
+PASS registration conflict has password reset action
+PASS login uses canonical post-auth routing
+PASS login has registration CTA that carries next/intent
+PASS auth API maps 409 to conflict
+PASS backend normalizes registration email
+PASS backend preserves duplicate-email 409

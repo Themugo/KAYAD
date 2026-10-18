@@ -1,0 +1,11 @@
+PASS navbar retains admin tagline alongside image logo
+PASS navbar master logo has controlled responsive width
+PASS footer reads shared BrandingContext
+PASS footer uses admin-managed image logo
+PASS admin can select ticker direction
+PASS admin can select ticker transition
+PASS ticker applies configurable direction
+PASS ticker supports fade/pop modes
+PASS ticker background/text remain admin configurable
+PASS canonical top_ticker AdManager remains in use
+RESULT 10/10 PASS

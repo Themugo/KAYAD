@@ -1,0 +1,10 @@
+PASS canonical buyer financing surface
+PASS legacy FinancingView is truthful compatibility surface
+PASS real loan transport
+PASS admin review transport
+PASS server-side application validation
+PASS server-side lifecycle transitions
+PASS admin-only review route
+PASS admin-only status route
+
+Finance domain gate: 8/8 PASS

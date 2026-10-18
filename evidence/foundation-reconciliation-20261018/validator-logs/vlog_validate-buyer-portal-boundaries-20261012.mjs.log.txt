@@ -1,0 +1,31 @@
+PASS | Buyer portal derives a stable account key from authenticated user id | Buyer workspace uses the authenticated identity rather than object identity.
+PASS | Buyer portal cancels stale account requests | Old account responses cannot commit after effect cleanup.
+PASS | Buyer portal masks data until the active account has loaded it | Data is masked synchronously during account changes, before effects run.
+PASS | Buyer portal does not turn failed APIs into false empty lists | Independent API failures are surfaced with retry instead of silently becoming empty lists.
+PASS | Real owned vehicle response is rendered in My Garage | The existing ownership dashboard call is no longer fetched and discarded.
+PASS | Saved vehicle action opens the canonical saved-vehicle surface | Saved-vehicle cards route to saved inventory, not the generic marketplace.
+PASS | Private child workspaces are keyed by user identity | Escrow, finance and inspection workspaces remount on account changes.
+PASS | Buyer portal is protected and signed-out prompt remains available | The app retains the authenticated navigation boundary and local sign-in prompt.
+PASS | Buyer dashboard routes escrow deals to the private buyer workspace and exposes messages | Buyer shortcuts do not send participants to the public escrow explainer.
+PASS | Chat state masks prior-account conversations synchronously | Conversation lists are hidden until owned by the current account and stale reads are ignored.
+PASS | Notification state masks prior-account rows synchronously | Notification rows and counts are hidden unless their session key matches.
+PASS | Favorites routes require authentication | All favorite endpoints inherit authentication middleware.
+PASS | Favorite list query is scoped to caller | List and total count are filtered by authenticated user id.
+PASS | Favorite mutations include caller in database predicate | Price alert and removal target the caller-owned favorite record.
+PASS | Ownership routes require authentication | Buyer ownership routes require a verified session.
+PASS | Ownership controller delegates with authenticated owner id | Ownership services receive the caller identity independent of UI state.
+PASS | Financing buyer endpoints require authentication and admin review remains restricted | Buyer application listing is authenticated; cross-user review/listing APIs are admin-only.
+PASS | Financing application query is caller-scoped | GET /my filters by authenticated applicant.
+PASS | Escrow participant list filters by buyer or seller identity | Participant list is restricted to the authenticated buyer/seller.
+PASS | Escrow detail and state enforce participant/staff authorization | Single escrow and state endpoints enforce server-side visibility rules.
+PASS | Inspection customer routes require authentication | Legacy buyer orders and canonical bookings are authenticated.
+PASS | Legacy inspection list is scoped to requester id | GET /my only returns the caller’s inspection orders.
+PASS | Inspection booking detail and cancellation enforce customer ownership | Booking reference lookup does not grant access by identifier alone.
+PASS | Notifications routes require authentication | Notification reads and mutations inherit authentication.
+PASS | Notification reads and mutations are recipient-scoped | Read/list/delete paths bind rows to the authenticated recipient.
+PASS | Chat routes require authentication | Conversation APIs are not public.
+PASS | Chat message read/write and leave actions enforce participant membership | Message reads, sends and chat deletion are checked against participant membership.
+PASS | Private chat attachments require participant membership and no-store response | Attachment retrieval is membership-checked and marked non-cacheable.
+PASS | Canonical notifications route remains authenticated | Notification page entry point remains protected.
+
+Buyer portal boundary checks: 29/29 PASS

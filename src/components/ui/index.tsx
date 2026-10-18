@@ -35,7 +35,7 @@ export const Button: React.FC<ButtonProps> = ({
     outline: 'border border-[#BDE5DE] hover:bg-[#F6FAF9] text-[#12576D]',
     ghost: 'text-[#64748B] hover:bg-[#EEF7F5] hover:text-[#0A3340]',
     danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
-    coral: 'bg-[#176b87] hover:bg-[#c65a34] text-white shadow-sm',
+    coral: 'bg-[#176b87] hover:bg-[#12576D] text-white shadow-sm',
     success: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
   };
 

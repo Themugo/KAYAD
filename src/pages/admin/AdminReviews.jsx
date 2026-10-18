@@ -103,7 +103,7 @@ export default function AdminReviews() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: r.status === 'approved' ? '#15803D' : r.status === 'rejected' ? '#B91C1C' : '#A16207' }}>{r.status || 'pending'}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: r.status === 'approved' ? '#15803D' : r.status === 'rejected' ? '#B91C1C' : '#176B87' }}>{r.status || 'pending'}</span>
                       {r.status !== 'approved' && <button className="btn btn-outline btn-sm" disabled={actionId === r._id} onClick={() => handleStatus(r._id, 'approved')}>Approve</button>}
                       {r.status !== 'rejected' && <button className="btn btn-outline btn-sm" disabled={actionId === r._id} onClick={() => handleStatus(r._id, 'rejected')}>Reject</button>}
                       <button className="btn btn-outline btn-sm" style={{ fontSize: 11, color: 'var(--red)', borderColor: 'rgba(239,68,68,0.3)' }}

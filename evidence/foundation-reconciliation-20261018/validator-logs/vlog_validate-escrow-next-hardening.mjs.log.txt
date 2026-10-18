@@ -1,0 +1,16 @@
+PASS B2C callback has specific operation classification
+PASS B2C timeout has specific operation classification
+PASS B2C callback uses deterministic replay key
+PASS B2C timeout uses deterministic replay key
+PASS B2C provider callbacks use conversation-scoped distributed lock
+PASS critical idempotency failures fail closed
+PASS unknown B2C callbacks persist into webhook_events
+PASS unknown B2C callback is replay-deduped
+PASS partial/split dispute buyer settlement creates refund record
+PASS payment-less dispute refunds are supported
+PASS escrow status reconciles purchase outcome in database
+PASS purchase outcome reconciliation is trigger-bound
+PASS purchase outcome schema contains canonical escrow link
+PASS emergency escrow close uses atomic transition
+
+Escrow next hardening: 14/14 PASS

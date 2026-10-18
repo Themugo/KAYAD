@@ -1,0 +1,12 @@
+PASS Atomic chat send
+PASS Atomic chat seen
+PASS Atomic support message
+PASS Support message RPC migration
+PASS Support status constraint
+PASS Support queue indexes
+PASS Notification indexes
+PASS Chat concurrency migration
+PASS No legacy direct chat message append
+PASS Ticket ownership guard on detail
+PASS Legacy append RPC is inert
+Communications/support lifecycle validation: 11/11 PASS

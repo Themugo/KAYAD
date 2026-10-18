@@ -1,0 +1,24 @@
+Phase 5 E2E contract: 23/23 PASS
+PASS E2E helper does not use localStorage JWT auth
+PASS E2E helper uses canonical /api/v1/auth/login
+PASS E2E helper uses canonical /api/v1/auth/register
+PASS E2E helper uses canonical /api/v1/cars
+PASS E2E helper uses canonical /api/v1/auctions
+PASS E2E helper uses canonical /api/v1/bids
+PASS E2E helper uses canonical /api/v1/escrow
+PASS E2E helper uses canonical /api/v1/payments/initiate
+PASS No stale unversioned core endpoints in E2E helper
+PASS Release journey declares E2E_BUYER_EMAIL
+PASS Release journey declares E2E_BUYER_PASSWORD
+PASS Release journey declares E2E_DEALER_EMAIL
+PASS Release journey declares E2E_DEALER_PASSWORD
+PASS Release journey declares E2E_RELEASE_CAR_ID
+PASS Required E2E suite exists: e2e/tests/release-journey/release-journey.spec.ts
+PASS Required E2E suite exists: e2e/tests/workflow-certification/workflow-certification.spec.ts
+PASS Required E2E suite exists: e2e/tests/marketplace-controls/marketplace-controls.spec.ts
+PASS Required E2E suite exists: e2e/playwright.config.ts
+PASS Playwright configuration exposes release-gate control
+PASS Phase 5 validator registered
+PASS Phase 5 browser contract command registered
+PASS Live release journey is opt-in
+PASS Financial callbacks are not fabricated in browser suite

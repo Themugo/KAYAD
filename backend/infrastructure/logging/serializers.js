@@ -1,3 +1,4 @@
+import { redactUrl } from "../../utils/redactUrl.js";
 // backend/infrastructure/logging/serializers.js - Production Hardened v6.0
 // ─────────────────────────────────────────────────────────────
 // Custom serializers for Pino
@@ -28,7 +29,7 @@ export const requestSerializer = (req) => {
 
   return {
     method: req.method,
-    url: req.originalUrl || req.url,
+    url: redactUrl(req.originalUrl || req.url),
     ip: req.ip || req.connection?.remoteAddress,
     userAgent: req.headers["user-agent"],
     requestId: req.requestId,

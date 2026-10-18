@@ -1,0 +1,9 @@
+PASS send API returns canonical persisted message
+PASS send response validates canonical ID and timestamp
+PASS POST does not auto-retry uncertain writes
+PASS composer uses server-confirmed message
+PASS history refresh failure retains confirmed send
+PASS backend emits the canonical persisted message ID
+PASS backend validates persistence before realtime emit
+
+7/7 chat persisted-response checks passed

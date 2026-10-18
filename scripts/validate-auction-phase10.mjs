@@ -24,8 +24,12 @@ const checks = [
   ['transfer requires collection', /collection_status !== "collected"/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['transfer uses conditional outcome update', /updateMany\("auction_outcomes", guard/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['ownership service remains canonical', /ownershipService\.addVehicleToGarage/.test(read('backend/services/auctionFulfilment.service.js'))],
-  ['escrow release uses canonical service', /releaseEscrow\(/.test(read('backend/services/auctionFulfilment.service.js'))],
-  ['escrow release has idempotency key', /auction-release:\$\{outcome\.id\}/.test(read('backend/services/auctionFulfilment.service.js'))],
+  // 2026-10-18 contract correction (S2-ESC-01): the organizer (seller) must NOT release escrow from the
+  // fulfilment path; release is governed (POST /api/escrow/:id/release: APPROVE_ESCROW_RELEASE) or DB auto-release.
+  // The previous two checks asserted the insecure seller-as-"admin" release call. Behavioural proof:
+  // backend/tests/regression/stage2EntryCorrections.test.js (S2-ESC-01).
+  ['auction fulfilment does not import the admin escrow release service', !/import\s*\{[^}]*\breleaseEscrow\b[^}]*\}\s*from\s*["']\.\/escrow\.service\.js["']/.test(read('backend/services/auctionFulfilment.service.js'))],
+  ['auction completion requires a governed release', /ESCROW_RELEASE_REQUIRES_APPROVAL/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['re-award claims losing bid conditionally', /updateMany\("bids", \{ id: candidate\.id, status: "lost" \}/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['re-award claims outcome conditionally', /updateMany\("auction_outcomes", \{ id: outcome\.id, status: "reaward_pending"/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['re-award never reopens bidding', !/allow_bid:\s*true/.test(read('backend/services/auctionFulfilment.service.js'))],

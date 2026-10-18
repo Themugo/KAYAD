@@ -1,0 +1,10 @@
+PASS - no integration 501 placeholders
+PASS - eip controller exports all routes
+PASS - eip routes admin boundary
+PASS - uuid validation is used
+PASS - webhook URLs require HTTPS
+PASS - credential secrets removed from list responses
+PASS - database default facade is available
+PASS - integration hardening migration exists
+PASS - frontend integration studio consumes live API
+Integration domain validation: 9/9 PASS

@@ -28,9 +28,9 @@ import { recordFailedAttempt, recordSuccessfulAttempt } from "../middleware/acco
 import { logError } from '../infrastructure/logging/index.js';
 import { getSupabase } from '../utils/supabase.js';
 import { mapRowIn } from '../utils/fieldMap.js';
-
-const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
-const OWNER_EMAILS = WEBHOIST_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
+import { isOwnerEmail } from '../config/owners.js';
+import { getOnboardingPolicy, isPolicyTrusted } from '../services/onboardingPolicy.service.js'; // STAGE 5
+import { parseReferralCode, referrerEligible } from '../utils/referralGuards.js'; // STAGE 4A (G9): string-only code; self/suspended referrer excluded
 const STAFF_ROLES = [
   "admin",
   "superadmin",
@@ -43,13 +43,6 @@ const STAFF_ROLES = [
   "moderator",
 ];
 const SELLER_ROLES = ["dealer", "individual_seller"];
-
-const isOwnerEmail = (email) =>
-  OWNER_EMAILS.includes(
-    String(email || "")
-      .toLowerCase()
-      .trim(),
-  );
 
 // Single-use email tokens (verify + password reset) are stored as SHA-256
 // hashes so a database leak does not expose usable tokens.
@@ -82,7 +75,7 @@ const SAFE_USER_FIELDS = [
   "packageAutoRenew", "subscriptionStatus", "wholesale", "deactivatedAt",
 ];
 
-const serializeUser = (user, authState = null) => {
+export const serializeUser = (user, authState = null) => {
   const raw = typeof user.toObject === "function" ? user.toObject() : user;
   const role = isOwnerEmail(raw.email) ? "superadmin" : raw.role;
   const safe = {};
@@ -250,16 +243,35 @@ export const register = async (req, res) => {
       return R.error(res, "Location or city is required for dealer registration", 400);
     }
 
+    // STAGE 5: owner-controlled registration policy, enforced server-side BEFORE any side effect.
+    // Untrusted policy (store unavailable/corrupt) never opens seller or dealer registration.
+    if (role === "individual_seller" || role === "dealer") {
+      const onboarding = await getOnboardingPolicy();
+      if (!isPolicyTrusted(onboarding)) {
+        return res.status(503).json({ success: false, code: "ONBOARDING_POLICY_UNAVAILABLE", message: "Seller and dealer registration is temporarily unavailable. Please try again shortly." });
+      }
+      if (role === "individual_seller" && onboarding.policy.privateSellerRegistration !== "enabled") {
+        return res.status(403).json({ success: false, code: "SELLER_REGISTRATION_DISABLED", message: "Private seller registration is not open right now." });
+      }
+      if (role === "dealer" && onboarding.policy.dealerOnboardingMode === "closed") {
+        return res.status(403).json({ success: false, code: "DEALER_REGISTRATION_CLOSED", message: "Dealer registration is not open right now." });
+      }
+    }
+
     const existing = await User.findOne({ email });
     if (existing) {
       return R.error(res, "An account with that email already exists", 409);
     }
 
     let referredBy = null;
-    const referralCode = req.body.referralCode || req.query?.ref;
+    // STAGE 4A (G9): only a plain string may be used as a referral code. A JSON body such as
+    // {"referralCode":{"$ne":null}} previously reached User.findOne as an operator object and could
+    // attribute the bonus to an arbitrary account. Self-referral is compared on normalised emails
+    // and a suspended/deactivated referrer is never credited.
+    const referralCode = parseReferralCode(req.body.referralCode || req.query?.ref);
     if (referralCode) {
       const referrer = await User.findOne({ referralCode });
-      if (referrer && referrer.email !== email) referredBy = referrer._id;
+      if (referrerEligible(referrer, email, normalizeEmail)) referredBy = referrer._id;
     }
 
     const rawPhone = (phone || "").trim();
@@ -323,15 +335,20 @@ export const register = async (req, res) => {
       void (async () => {
         const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
         try {
-          await User.findByIdAndUpdate(referredBy, {
-            $inc: { credits: REFERRAL_BONUS, referralEarnings: REFERRAL_BONUS, referralCount: 1 },
-          });
-          await (await import("../models/Referral.js")).default.create({
+          // STAGE 4A (G9): record first, credit second, and never credit a referee twice. Previously the
+          // counter was incremented before the record existed, so a failure in between left a credit with no
+          // referral row (and no way to see or reverse it). Now a failed record means no credit.
+          const ReferralModel = (await import("../models/Referral.js")).default;
+          if (await ReferralModel.findOne({ referee: user.id })) return;
+          await ReferralModel.create({
             referrer: referredBy,
             referee: user.id,
             status: "credited",
             bonusAmount: REFERRAL_BONUS,
             creditedAt: new Date(),
+          });
+          await User.findByIdAndUpdate(referredBy, {
+            $inc: { credits: REFERRAL_BONUS, referralEarnings: REFERRAL_BONUS, referralCount: 1 },
           });
         } catch (refErr) {
           console.warn("Referral credit failed:", refErr.message);
@@ -345,10 +362,14 @@ export const register = async (req, res) => {
       eventType: COMMUNICATION_EVENTS.REGISTRATION,
       templateCode: "account_welcome_email",
       recipient: user.email,
-      ...(await buildEmail("buildWelcomeEmail", { name: user.name }, {
+      ...(await buildEmail("buildWelcomeEmail", { name: user.name, role: user.role }, {
         subject: "Welcome to KAYAD",
-        text: `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
-        html: `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
+        text: (role === "dealer" || role === "individual_seller")
+          ? `Welcome to KAYAD, ${user.name || "there"}. Your account has been created; seller access depends on email verification and review.`
+          : `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
+        html: (role === "dealer" || role === "individual_seller")
+          ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account has been created. Seller access depends on email verification and review.</p>`
+          : `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
       })),
       metadata: { welcome: true },
       idempotencyKey: `registration-welcome:${user.id}`,
@@ -359,7 +380,11 @@ export const register = async (req, res) => {
     return res.status(201).json({
       success: true,
       user: serializeUser(user, userAuth),
-      message: "Account created successfully. Please verify your email before signing in.",
+      message: role === "dealer"
+        ? "Dealer application received. Please verify your email. Your dealer account is not approved until our team reviews it, and we will notify you of the decision."
+        : role === "individual_seller"
+          ? "Seller account created. Please verify your email before using seller features. New listings are reviewed before they are published."
+          : "Account created successfully. Please verify your email before signing in.",
     });
   } catch (err) {
     logError("REGISTER ERROR", err);
@@ -478,10 +503,12 @@ export const login = async (req, res) => {
     // ─── Record successful attempt for IP-based lockout ──
     recordSuccessfulAttempt(req);
 
-    if (user.isBanned) {
+    // STAGE 4A (G7): same owner exemption as protect() and refresh. Owners are immutable by design
+    // (config/owners.js) and must not be locked out at login while an existing session still works.
+    if (user.isBanned && !isOwnerEmail(user.email)) {
       return R.error(res, "Account suspended", 403);
     }
-    if (user.deactivatedAt) {
+    if (user.deactivatedAt && !isOwnerEmail(user.email)) {
       return R.error(res, "Account deactivated", 403);
     }
 
@@ -542,6 +569,11 @@ export const refreshToken = async (req, res) => {
     const user = await User.findById(decoded.id);
     const userAuth = user ? await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion") : null;
     if (!user || !userAuth) return R.errorCode(res, "Invalid credentials", 403, "AUTH_SESSION_EXPIRED");
+    // Same account-state gate as protect(): a suspended or deactivated account must
+    // not be issued fresh tokens (owner exempt, as in protect()).
+    if ((user.isBanned || user.deactivatedAt) && !isOwnerEmail(user.email)) {
+      return R.errorCode(res, user.isBanned ? "Account suspended" : "Account deactivated", 403, "AUTH_FORBIDDEN");
+    }
     if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
       return R.errorCode(res, "Session invalidated — please login again", 403, "AUTH_SESSION_EXPIRED");
     }
@@ -916,6 +948,8 @@ export const resetPassword = async (req, res) => {
     );
     if (!userAuth) return R.error(res, "Reset link is invalid or has expired.", 400);
     await RefreshToken.revokeAllForUser(userAuth.user, "password_reset");
+    // STAGE 4A (G7): tokenVersion changed above; drop cached auth state exactly as password change / logout / revoke-all do.
+    invalidateUserCache(userAuth.user);
 
     res.json({ success: true, message: "Password reset successfully. You can now sign in." });
   } catch (err) {

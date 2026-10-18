@@ -1,0 +1,16 @@
+PASS Auto Services public page uses a dedicated styling scope
+PASS Service discovery keeps existing matched-inspection and provider-selection actions
+PASS Provider discovery remains on canonical search API
+PASS Provider discovery preserves separate loading, error and empty states
+PASS Filters still use canonical service taxonomy and backend parameters
+PASS Provider application registration uses canonical existing API
+PASS Provider capabilities remain declared through canonical taxonomy API
+PASS Provider onboarding explains account, business and review steps
+PASS Provider phone field is semantically required and validated
+PASS Application errors do not expose raw backend exception messages
+PASS Mobile refinements are scoped to max-width 639px
+PASS Desktop provider marketplace and shared KAYAD theme remain the base
+PASS Reduced-motion preference is respected for the Auto Services surface
+PASS Provider registration and booking API contract file remains present
+
+Stage 31 Auto Services mobile source checks: 14/14 PASS

@@ -1,0 +1,5 @@
+dealers|{dealers_user_key,uq_dealers_user_canonical}|CREATE UNIQUE INDEX ON public.dealers USING btree ("user")
+inspection_providers|{idx_inspection_provider_one_per_user,uq_inspection_providers_user_canonical}|CREATE UNIQUE INDEX ON public.inspection_providers USING btree (user_id) WHERE (user_id IS NOT NULL)
+inspection_transactions|{idx_inspection_payment_reference,idx_inspection_payment_reference_unique}|CREATE UNIQUE INDEX ON public.inspection_transactions USING btree (reference) WHERE ((transaction_type = 'inspection_payment'::text) AND (reference IS NOT NULL))
+support_tickets|{idx_support_tickets_assigned_status,idx_support_tickets_assignee_queue}|CREATE INDEX ON public.support_tickets USING btree (assigned_to, status, created_at DESC)
+user_auth|{uq_user_auth_user_canonical,user_auth_user_id_key}|CREATE UNIQUE INDEX ON public.user_auth USING btree (user_id)

@@ -1,0 +1,17 @@
+PASS R25 declares proxy-addr as a direct backend dependency
+PASS R25 uses an explicit trusted-proxy CIDR setting
+PASS R25 checks the immediate socket peer before using req.ip
+PASS R25 does not parse the raw X-Forwarded-For header as client identity
+PASS R25 fails closed when proxy CIDRs are missing or invalid
+PASS Production Kubernetes config explicitly sets MPESA_ENV=production
+PASS Kubernetes ConfigMap exposes trusted proxy CIDRs with a blank fail-closed default
+PASS Kubernetes Deployment consumes the ConfigMap
+PASS Helm production values set MPESA_ENV=production
+PASS Helm values expose trusted proxy CIDRs with a blank fail-closed default
+PASS Helm Deployment emits configured environment values
+PASS Helm Secret template quotes rendered secret values
+PASS Ingress main rewrite references its declared capture group
+PASS Ingress routes the M-Pesa bid callback to the backend callback path
+PASS CI invokes gitleaks action
+
+Phase 39 source/config contract: 15/15 PASS

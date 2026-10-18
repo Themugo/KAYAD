@@ -1,0 +1,2 @@
+Public inbox and chat-routing contract: PASS
+Customer-facing copy, honest categories, persisted unread counts, listing-recipient checks and private socket membership verified at source level.

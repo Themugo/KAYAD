@@ -507,6 +507,9 @@ function createQuery(tableName) {
   };
 }
 
+// Tables whose repository DDL defines deleted_at + deleted_by (see softDelete below).
+const SOFT_DELETE_TABLES = new Set(["cars", "users"]);
+
 export function createModel(name) {
   const table = TABLE_MAP[name] || name.toLowerCase();
   const sb = () => getSupabase();
@@ -902,6 +905,28 @@ export function createModel(name) {
       const { error } = await client.from(table).update(payload).in("id", ids);
       if (error) throw error;
       return { modifiedCount: ids.length };
+    },
+
+    // STAGE 4 (S4-C-04): Model.softDelete(idOrIds, actorId) was documented
+    // (migration 20260710160000_idempotency_softdelete.sql: "Car.softDelete(id,
+    // actorId) and User.softDelete(id, actorId) were added") and is called by
+    // carController.deleteCar, adminRoutes (car delete, user delete, staff
+    // delete) and bulkAdminController - but no model defined it, so every one of
+    // those calls threw "softDelete is not a function" (their unit tests mocked
+    // the method, which hid it). Only cars and users carry deleted_at/deleted_by
+    // in the repository DDL. A row that is already soft-deleted keeps its
+    // original deletion stamp (deleted_at IS NULL filter), so the call is idempotent.
+    async softDelete(idOrIds, actorId = null) {
+      if (!SOFT_DELETE_TABLES.has(table)) {
+        throw new Error(`softDelete is not supported for table "${table}"`);
+      }
+      const ids = [...new Set((Array.isArray(idOrIds) ? idOrIds : [idOrIds]).filter(Boolean).map(String))];
+      if (ids.length === 0) return { modifiedCount: 0 };
+      const patch = { deleted_at: new Date().toISOString() };
+      if (actorId) patch.deleted_by = String(actorId);
+      const { data, error } = await sb().from(table).update(patch).in("id", ids).is("deleted_at", null).select("id");
+      if (error) throw error;
+      return { modifiedCount: (data || []).length };
     },
 
     async countDocuments(filters = {}) {

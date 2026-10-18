@@ -1,0 +1,14 @@
+Continuous Improvement validation: 13/13 PASS
+PASS - no continuous-improvement 501 placeholders
+PASS - authoritative improvement tables
+PASS - RLS enabled
+PASS - atomic idea voting
+PASS - atomic improvement status transition
+PASS - experiment lifecycle validation
+PASS - completed improvement immutable
+PASS - duplicate active improvement guard
+PASS - write endpoints rate limited
+PASS - frontend uses mounted improvement path
+PASS - frontend consumes live dashboard
+PASS - audit trail on mutations
+PASS - no hardcoded KPI claims

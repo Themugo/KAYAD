@@ -1,0 +1,25 @@
+table	present_in_replay	rls_enabled	rls_forced	anon_grants	authenticated_grants	policy_count	policies	status_checks
+users	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+user_auth	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+refresh_tokens	yes	True	False	-	-	0	none (deny-all for anon/authenticated when RLS on)	-
+profiles	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+dealers	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	1	dealer_owner_read[SELECT→public]	-
+cars	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+audit_logs	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+security_logs	NO							
+auction_setups	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	3	auction_setups_owner_select[SELECT→public] ; auction_setups_owner_update[UPDATE→public] ; auction_setups_owner_write[INSERT→public]	-
+auction_outcomes	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	1	auction_outcomes_participant_select[SELECT→public]	-
+auction_fulfilment_events	yes	True	False	-	SELECT	1	auction_fulfilment_events_participant_select[SELECT→public]	-
+bids	yes	True	False	REFERENCES,SELECT,TRIGGER,TRUNCATE	REFERENCES,SELECT,TRIGGER,TRUNCATE	0	none (deny-all for anon/authenticated when RLS on)	-
+escrows	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+payments	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+ledger_entries	yes	True	False	REFERENCES,SELECT,TRIGGER,TRUNCATE	REFERENCES,SELECT,TRIGGER,TRUNCATE	0	none (deny-all for anon/authenticated when RLS on)	-
+transaction_ledger	NO							
+dealer_payouts	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	2	dealer_payouts_owner_select[SELECT→public] ; dealer_payouts_service_only[ALL→public]	-
+disputes	NO							
+communication_deliveries	yes	True	False	REFERENCES,SELECT,TRIGGER,TRUNCATE	REFERENCES,SELECT,TRIGGER,TRUNCATE	1	communication_deliveries_owner_read[SELECT→authenticated]	-
+notifications	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-
+idempotency_audit_logs	yes	True	False	-	-	0	none (deny-all for anon/authenticated when RLS on)	-
+inspector_applications	yes	True	False	-	-	0	none (deny-all for anon/authenticated when RLS on)	-
+feature_flags	NO							
+system_settings	yes	True	False	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE	0	none (deny-all for anon/authenticated when RLS on)	-

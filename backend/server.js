@@ -349,6 +349,8 @@ if (Sentry.Handlers && Sentry.Handlers.tracingHandler) {
 
 // ─── HTTP LOGGING ────────────────────────────────────────────
 if (NODE_ENV === "development") app.use(morgan("dev"));
+// STAGE 5: never write path-carried single-use tokens (e.g. /auth/verify-email/:token) to access logs.
+morgan.token("url", (req) => redactUrl(req.originalUrl || req.url));
 if (NODE_ENV === "production") {
   app.use(
     morgan("combined", {
@@ -453,6 +455,7 @@ app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 // ─── REQUEST TIMEOUTS ───────────────────────────────────────────
 // Import operation-specific timeout middleware
 import { mediumTimeout, fastTimeout, externalTimeout, uploadTimeout } from "./middleware/timeout.js";
+import { redactUrl } from "./utils/redactUrl.js"; // STAGE 5
 
 // Apply default medium timeout to all routes (can be overridden per route)
 app.use(mediumTimeout);

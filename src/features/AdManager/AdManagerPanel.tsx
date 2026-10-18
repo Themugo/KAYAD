@@ -359,7 +359,7 @@ export const AdManagerPanel: React.FC<AdManagerPanelProps> = ({ onClose }) => {
                     className="w-full border border-[#D7E7E4] rounded-lg px-3 py-2 text-xs"
                   />
                   <div className="flex gap-2">
-                    <button type="submit" disabled={creating} className="bg-[#176B87] hover:bg-[#B34E29] text-white text-xs font-bold rounded-lg px-4 py-2 disabled:opacity-50">
+                    <button type="submit" disabled={creating} className="bg-[#176B87] hover:bg-[#12576D] text-white text-xs font-bold rounded-lg px-4 py-2 disabled:opacity-50">
                       {creating ? 'Creating…' : 'Create Ad'}
                     </button>
                     <button type="button" onClick={() => setShowAddForm(false)} className="text-xs font-semibold text-[#64748B] px-4 py-2">

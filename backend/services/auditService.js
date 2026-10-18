@@ -4,6 +4,7 @@
 // Ensures immutability and comprehensive tracking
 // ─────────────────────────────────────────────────────────────
 
+import { toAuditLogRow } from "../utils/auditLogRow.js";
 import { logInfo, logError } from "../utils/logger.js";
 import { create } from "../db/index.js";
 
@@ -35,7 +36,7 @@ import { create } from "../db/index.js";
  */
 export const logAuditEvent = async (data) => {
   try {
-    const auditLog = await create("audit_logs", {
+    const auditLog = await create("audit_logs", toAuditLogRow({
       action: data.action,
       actor: data.actor,
       actorRole: data.actorRole,
@@ -53,7 +54,7 @@ export const logAuditEvent = async (data) => {
       sessionId: data.sessionId,
       details: data.details || {},
       severity: data.severity || "info",
-    });
+    }));
 
     logInfo("Audit log created", {
       action: data.action,

@@ -1,0 +1,14 @@
+PASS bottom navigation uses Saved instead of a duplicate Menu tab
+PASS Saved action targets existing canonical saved surface
+PASS Saved tab uses a real Heart icon
+PASS Saved tab reflects existing saved navigation state
+PASS unit test covers new bottom navigation labels
+PASS unit test verifies saved destination
+PASS existing header hamburger remains the menu opener
+PASS existing single accessible drawer is retained
+PASS drawer destination cards no longer stretch vertically
+PASS drawer maintains compact, responsive two-column layout
+PASS menu still hides the dock while open
+PASS reduced-motion preference remains respected
+
+Stage 32 menu polish: 12/12 PASS

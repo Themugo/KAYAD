@@ -3,6 +3,10 @@
 **Foundation:** organized October 10, 2026 working copy, derived from the October 9, 2026 build archive.
 **Status:** source organization and static audit completed; application certification remains outstanding.
 
+> **Status update, 2026-10-18 (foundation reconciliation).** The P0 "build/test not certified" gate below is now satisfied **locally**. Under Node 22.22.2, `npm ci` (root and backend), `tsc`, `vite build`, frontend Vitest (643 passed, 1 skipped) and backend Jest/Vitest/node:test (1384/36/1) all pass. Eight authorization and listing-integrity defects were fixed with behavioural regression tests.
+>
+> Staging, production, provider and browser certification are still outstanding. The backend scripts that point at absent files, and the npm/Bun lockfile question, also remain open. See `KAYAD_FOUNDATION_RECONCILIATION_REPORT_20261018.md` at the repository root. The table below is retained as historical context.
+
 ## 1. First-day setup
 
 1. Use Node.js `22.22.2` or a compatible version satisfying `>=22.22.2`.

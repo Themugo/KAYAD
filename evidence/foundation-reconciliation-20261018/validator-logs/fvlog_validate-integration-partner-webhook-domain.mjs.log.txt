@@ -1,0 +1,16 @@
+PASS EIP no longer fails closed
+PASS Dashboard is persisted-data backed
+PASS Partner lifecycle is implemented
+PASS API credential generation is wired
+PASS Webhook registry is persisted
+PASS Webhook test invokes delivery
+PASS Webhook delivery performs HTTP POST
+PASS Webhook signatures use HMAC
+PASS Webhook delivery records outcome
+PASS API analytics is persisted
+PASS OAuth client secrets are hashed
+PASS Integration schema has 18 tables
+PASS Integration schema enables RLS
+PASS UUID routes no longer use ObjectId validator
+PASS Integration Studio uses canonical request transport
+Integration Partner & Webhook Domain: 15/15 PASS

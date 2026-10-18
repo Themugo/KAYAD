@@ -1,0 +1,21 @@
+PASS refresh tokens are hashed before persistence
+PASS refresh token plaintext column is removed by migration
+PASS refresh rotation is atomic in PostgreSQL
+PASS refresh reuse revokes the family
+PASS access token carries session identity
+PASS session inventory does not expose refresh token
+PASS session revocation is server-side
+PASS security state bypasses profile cache
+PASS Authorization header is not a CSRF bypass
+PASS explicit machine CSRF bypass is available
+PASS account-aware auth limiters exist
+PASS verification token consumption is atomic
+PASS password reset consumption is atomic
+PASS OTP verification consumption is atomic
+PASS communication idempotency key is persisted
+PASS communication provider status is monotonic
+PASS dead-letter state is explicit
+PASS stable machine-readable response codes supported
+PASS normalized email uniqueness migration exists
+
+Advanced auth sweep source gate: 19/19 PASS

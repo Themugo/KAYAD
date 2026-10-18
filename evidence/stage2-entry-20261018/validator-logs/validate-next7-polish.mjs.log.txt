@@ -1,0 +1,6 @@
+PASS mobile search reads reduced-motion preference (via the shared usePrefersReducedMotion hook)
+PASS mobile search uses instant scrolling when reduced motion is enabled
+PASS mobile search still targets canonical marketplace results
+PASS mobile navigation retains explicit button types
+
+NEXT7 polish contract: 4/4 PASS

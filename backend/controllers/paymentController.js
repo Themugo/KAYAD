@@ -10,6 +10,7 @@ import { logInfo } from "../utils/logger.js";
 import { logError } from "../infrastructure/logging/index.js";
 import { findAll, count } from "../db/index.js";
 import { getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
+import { isRoleAllowed } from "../config/roles.js"; // STAGE 4A (G3): canonical admin check
 
 // =============================
 // 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
@@ -427,7 +428,7 @@ export const checkPaymentStatus = async (req, res) => {
     // isn't staff is denied, including when the payment record has no
     // owner on file at all.
     const isOwner = !!(payment.user && req.user && payment.user.toString() === req.user.id);
-    const isStaff = req.user?.role === "admin" || req.user?.effectiveRole === "webhoist";
+    const isStaff = isRoleAllowed(req.user, ["admin", "superadmin"]);
     if (!isOwner && !isStaff) {
       return res.status(403).json({
         success: false,

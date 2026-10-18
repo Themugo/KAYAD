@@ -1,0 +1,7 @@
+# Stage 4 G2 rehearsal - lock behaviour (PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1))
+B (Stage 3 shape) concurrent read during open DROP CONSTRAINT transaction:
+ERROR:  canceling statement due to lock timeout
+LINE 1: set lock_timeout='1s'; select count(*) from public.cars
+                                                    ^
+D (Stage 4 low-lock) concurrent read during open VALIDATE transaction: count=600
+D concurrent write during open VALIDATE transaction: INSERT_OK

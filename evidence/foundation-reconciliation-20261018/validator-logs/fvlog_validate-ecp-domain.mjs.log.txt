@@ -1,0 +1,13 @@
+PASS - no control-plane 501 placeholder
+PASS - authoritative ECP service exists
+PASS - authoritative migration exists
+PASS - incidents RLS
+PASS - alerts RLS
+PASS - staff-only ECP boundary
+PASS - self-healing allowlist
+PASS - incident lifecycle guard
+PASS - alert lifecycle guard
+PASS - audit integration
+PASS - no fabricated ECP fallback
+PASS - frontend consumes ECP API
+ECP domain validation: 12/12 PASS

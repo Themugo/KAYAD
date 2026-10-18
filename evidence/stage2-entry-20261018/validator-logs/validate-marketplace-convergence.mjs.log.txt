@@ -1,0 +1,19 @@
+PASS purchase_outcomes canonical table
+PASS purchase payment settlement is idempotent
+PASS one pending purchase per vehicle
+PASS unavailable vehicle cannot become a second sale
+PASS existing payment RPC remains canonical
+PASS direct vs escrow follows listing escrow policy
+PASS direct settlement marks vehicle sold
+PASS escrow settlement reuses existing escrows
+PASS atomic purchase outcome transitions
+PASS ownership reuses canonical ownership service
+PASS escrow release syncs Marketplace outcome
+PASS escrow refund syncs Marketplace outcome
+PASS purchase fulfilment routes mounted
+PASS auction_win callback type accepted
+PASS no second escrow implementation
+PASS purchase race returns controlled conflict
+PASS refund completion re-syncs purchase outcome
+
+Marketplace convergence: 17/17 PASS

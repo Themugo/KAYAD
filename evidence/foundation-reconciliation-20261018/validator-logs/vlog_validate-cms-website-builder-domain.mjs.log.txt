@@ -1,0 +1,35 @@
+PASS  Canonical CMS migration exists
+PASS  Migration defines cms_pages
+PASS  Migration defines cms_contents
+PASS  Migration defines cms_faqs
+PASS  Migration defines cms_campaigns
+PASS  Migration defines cms_banners
+PASS  Migration defines cms_taxonomies
+PASS  Migration defines cms_revisions
+PASS  Migration defines cms_ab_tests
+PASS  Migration defines cms_analytics
+PASS  CMS tables use RLS
+PASS  No public CMS write policy added
+PASS  CMS page listing uses query chaining
+PASS  FAQ listing uses query chaining
+PASS  Campaign listing uses query chaining
+PASS  Banner listing uses query chaining
+PASS  Media listing uses query chaining
+PASS  Public content-by-id does not expose drafts
+PASS  No legacy _sort filter syntax remains in CMS controller
+PASS  Taxonomy query uses params
+PASS  A/B test query uses params
+PASS  Visual builder persists pages
+PASS  Visual builder loads persisted page content
+PASS  Vehicle carousel has no synthetic vehicle records
+PASS  Vehicle carousel uses live marketplace data
+PASS  Undo history has an initial state
+PASS  Block index zero can be selected
+PASS  Legacy duplicate CMS service removed
+PASS  Docker image no longer copies legacy CMS service
+PASS  Content Studio loads real pages
+PASS  Content Studio creates persisted pages
+PASS  Content Studio opens builder for selected page
+PASS  Content Studio has no synthetic sample records
+
+CMS/Website Builder validator: 33/33 PASS

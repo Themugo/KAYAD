@@ -1,0 +1,11 @@
+PASS private Cloudinary uploads use authenticated delivery
+PASS private Cloudinary responses use signed delivery URLs
+PASS communication delivery persists idempotency and serializes provider callbacks
+PASS passport mutation requires canonical ownership/listing authorization
+PASS admin control plane applies centralized permission boundary
+PASS inventory webhook has durable replay protection and distributed locking
+PASS escrow funding/release/refund converge into canonical ledger transaction
+PASS purchase payment settlement converges into canonical ledger
+PASS high-risk ownership/webhook/ledger RLS migration exists
+PASS database hardening covers ownership, webhooks, communications, documents and ledger
+High-risk boundary sweep: PASS

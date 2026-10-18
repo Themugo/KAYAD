@@ -17,8 +17,12 @@ import {
 
 const router = express.Router();
 
+const isFulfilmentAdmin = (user) => ["admin", "super_admin", "superadmin", "staff", "webhoist"].includes(
+  String(user?.effectiveRole || user?.role || "").toLowerCase(),
+);
+
 router.get("/operations", protect, asyncHandler(async (req, res) => {
-  const isAdmin = ["admin", "super_admin", "superadmin", "staff"].includes(req.user?.role);
+  const isAdmin = isFulfilmentAdmin(req.user);
   const rows = await listAuctionOperations({
     organizerId: isAdmin ? null : req.user.id,
     status: req.query.status || null,
@@ -29,7 +33,8 @@ router.get("/operations", protect, asyncHandler(async (req, res) => {
 
 router.get("/:id/operations", protect, validateObjectId, asyncHandler(async (req, res) => {
   const { outcome, setup, car } = await getAuctionOperationsCase(req.params.id);
-  const isAdmin = ["admin", "super_admin", "superadmin", "staff"].includes(req.user?.role);
+  if (!outcome) return res.status(404).json({ success: false, message: "Auction outcome not found" });
+  const isAdmin = isFulfilmentAdmin(req.user);
   const isParty = String(outcome.winner_user_id) === String(req.user.id) || String(outcome.organizer_id) === String(req.user.id);
   if (!isAdmin && !isParty) return res.status(403).json({ success: false, message: "Not authorized" });
   res.json({ success: true, data: { outcome, setup, car } });

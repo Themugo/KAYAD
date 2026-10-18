@@ -1,0 +1,44 @@
+PASS: nav destination "marketplace" resolves to an existing App.tsx surface/tab
+PASS: nav destination "saved" resolves to an existing App.tsx surface/tab
+PASS: nav destination "financing" resolves to an existing App.tsx surface/tab
+PASS: nav destination "discovery" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:live" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:scheduled" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:ended" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:saved" resolves to an existing App.tsx surface/tab
+PASS: nav destination "inspections" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:inspect" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:find" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:roadside" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:mine" resolves to an existing App.tsx surface/tab
+PASS: nav destination "escrow:journey" resolves to an existing App.tsx surface/tab
+PASS: nav destination "escrow:deals" resolves to an existing App.tsx surface/tab
+PASS: nav destination "escrow:create" resolves to an existing App.tsx surface/tab
+PASS: nav destination "support" resolves to an existing App.tsx surface/tab
+PASS: primary nav is exactly Marketplace, Auction, Auto Services, Escrow, Support
+PASS: Support stays a direct link (no invented submenu)
+PASS: auth-gated entries are presentation only (App protectedNavs + backend remain authority)
+PASS: ticker is still rendered above the navigation
+PASS: navigation adds no network call
+PASS: dropdowns are disclosure buttons with aria-expanded/aria-controls, not ARIA menus
+PASS: Escape closes dropdowns, account menu and drawer
+PASS: mobile drawer is a labelled modal dialog with focus handling
+PASS: primary nav is a labelled landmark of real links
+PASS: single mobile navigation system retained (bottom dock + one drawer)
+PASS: deleted MobileCarCard architecture not resurrected
+PASS: reduced-motion rules cover the new header
+PASS: sign-in/sign-up routes keep canonical /login entry
+PASS: 14A backend registry mirrors frontend navConfig ids exactly (no drift)
+PASS: 14A locked-visible set matches frontend and covers marketplace + support
+PASS: 14A authority lives in the existing platform_config via the existing PUT /config (no second config system / route)
+PASS: 14A navigation mutation is validated before persistence and audited through the existing AuditLog
+PASS: 14A public projection exposes navigation only through the existing whitelist, normalised
+PASS: 14A public projection does not whitelist secrets/admin fields
+PASS: 14A the public-config GET is defined before the global admin guard; mutation is after it
+PASS: 14A frontend consumes navigation via the existing BrandingContext fetch (no new request)
+PASS: 14A Navbar renders from applyNavigationConfig, never directly from raw config
+PASS: 14A resolver is total and falls back to canonical NAV_PRIMARY
+PASS: 14A admin editor is mounted in the reachable admin console (AdminView), not the orphaned legacy settings page
+PASS: 14A admin editor lives in the reachable admin console (AdminView) and saves through the existing adminAPI.updateConfig only
+PASS: 14A migration is the smallest possible: one JSONB column with a default, no policy changes
+Navigation convergence: 43/43 PASS

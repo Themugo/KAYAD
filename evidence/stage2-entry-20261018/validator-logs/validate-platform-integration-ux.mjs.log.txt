@@ -1,0 +1,13 @@
+PASS single onboarding flow
+PASS registration surface uses canonical register flow
+PASS buyer seller dealer registration routes
+PASS inspector application uses canonical API
+PASS staff self registration blocked
+PASS login page uses AuthContext (the modal is a redirect shim)
+PASS dashboard role shell
+PASS dashboard live control-plane source
+PASS dashboard wired into app
+PASS catalogue grid/list controls
+PASS detail trust is data-driven
+PASS backend stores seller onboarding fields
+Platform integration UX validation: PASS

@@ -13314,15 +13314,28 @@ paths:
       tags:
       - Api
       summary: GET /api/ledger/seed
-      description: 'Route contract: GET /api/ledger/seed'
+      description: 'Stage 4A: retained only to answer 405 (Allow: POST). It never changes ledger state; use POST /api/ledger/seed.'
       operationId: getApiLedgerSeed
+      responses:
+        '401':
+          description: Unauthorized
+        '405':
+          description: Method not allowed - use POST
+        '500':
+          description: Internal server error
+    post:
+      tags:
+      - Api
+      summary: POST /api/ledger/seed
+      description: 'Idempotent upsert of the chart of accounts by account code. Requires the MANAGE_FINANCE permission (accounts, admin, superadmin/owner).'
+      operationId: postApiLedgerSeed
       responses:
         '200':
           description: Success
-        '400':
-          description: Bad request
         '401':
           description: Unauthorized
+        '403':
+          description: Forbidden
         '500':
           description: Internal server error
   /api/ledger/trial-balance:

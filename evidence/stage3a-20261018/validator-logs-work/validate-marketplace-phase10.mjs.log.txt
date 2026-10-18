@@ -1,0 +1,247 @@
+
+=== validate-marketplace-initiative.mjs ===
+PASS: central marketplace read service exists
+PASS: marketplace vehicle reads use canonical GET /api/cars
+PASS: marketplace mapper is the canonical vehicle mapper
+PASS: live auctions use canonical auction API
+PASS: my bids use canonical backend API
+PASS: authenticated bid history is loaded from server
+PASS: logout clears prior user bid read model
+PASS: bid placement does not synthesize a bid ID
+PASS: bid placement does not locally increment current bid
+PASS: bid API remains server-authoritative
+PASS: core service contains no mock/demo data source
+PASS: initiative does not introduce a second auction data store
+
+Marketplace Core Initiative validation: 12/12 checks passed.
+
+=== validate-listing-lifecycle-integrity.mjs ===
+PASS edit snapshots old listing before mutation
+PASS edit uses city/location_city contract
+PASS audit compares real listing field names
+PASS seller deletion does not refund trial usage
+PASS admin deletion does not refund trial usage
+
+5/5 checks passed
+
+=== validate-marketplace-service-boundary.mjs ===
+PASS marketplaceCore does not import legacy api.exports
+PASS marketplaceCore delegates auction reads to auctionService
+PASS marketplaceCore delegates bid reads to bidApi
+PASS bidApi owns my-bids transport
+PASS auctionService owns auction transport
+Marketplace service boundary: 5/5 PASS
+
+=== validate-transactions-money-initiative.mjs ===
+PASS financial lifecycle service exists
+PASS payment service records attempts/events
+PASS callback service records webhook receipts
+PASS callback service funds escrow payments
+PASS payment validation accepts canonical bid/purchase/escrow types
+PASS payment transaction uses checkout request id
+PASS atomic bid settlement remains authoritative
+PASS atomic escrow transitions remain authoritative
+PASS payment attempts schema is present
+PASS payment events schema is present
+PASS refund schema is present
+PASS webhook dedupe schema is present
+PASS paymentService: recordPaymentAttempt
+PASS paymentService: stk_initiated
+PASS paymentService: checkoutRequestId
+PASS callback: recordWebhookReceipt
+PASS callback: callback_received
+PASS callback: amount_verified
+PASS callback: escrow_mpesa_rejected
+PASS callback: markWebhookProcessed
+PASS validation: bid
+PASS validation: purchase
+PASS validation: escrow
+Transactions & Money initiative static checks: 23 PASS
+
+=== validate-payment-gateway-lifecycle.mjs ===
+PASS: Payment history uses canonical db adapter
+PASS: Payment lifecycle has explicit state machine
+PASS: Payment callback records webhook receipt before side effects
+PASS: Payment callback records failed amount verification as finalized
+PASS: Payment callback does not fund vehicle escrow through M-Pesa
+PASS: Failed-payment mpesa transaction lookup uses canonical field
+PASS: Payment type validation includes operational types
+PASS: Checkout request id is unique
+PASS: Pending duplicate operations are constrained
+PASS: Payment attempt identity is constrained
+PASS: Payment events are append-only to authenticated clients
+PASS: Webhook records are append-only to authenticated clients
+PASS: Payment lifecycle audit helper exists
+
+Payment gateway lifecycle: 13/13 PASS
+
+=== validate-payment-escrow-domain.mjs ===
+PASS canonical payment service exists
+PASS canonical escrow service exists
+PASS payment initiated after local record creation
+PASS payment checkout is unique
+PASS pending payment race is constrained
+PASS callback amount mismatch is finalized
+PASS payment status response has one payment field
+PASS active payment history uses canonical service
+PASS secure escrow hub uses canonical services
+Payment/Escrow domain gate: 9/9 PASS
+
+=== validate-ownership-passport-domain.mjs ===
+PASS ownership service uses canonical db adapter
+PASS ownership profile update uses user id scope
+PASS owner vehicle access is user scoped
+PASS expense totals are real database data
+PASS sold vehicles cancel pending reminders
+PASS ownership API routes are protected
+PASS passport public route is canonical
+PASS passport service uses canonical db adapter
+PASS passport search uses canonical db lookup
+PASS passport public controller uses passport service
+PASS server mounts ownership API
+PASS frontend uses real ownership API
+PASS migration creates ownership vehicles
+PASS migration creates vehicle passports
+PASS migration enables RLS
+PASS migration preserves passport audit trail
+
+Ownership + passport domain gate: 16/16 PASS
+
+=== validate-domain-lifecycle-integrity.mjs ===
+PASS active inspector marketplace reads canonical inspection_providers
+PASS active inspector marketplace does not read retired user inspector fields
+PASS inspector approval commits provider before application approval
+PASS inspector approval notification cannot turn committed approval into false failure
+PASS inspector rejection notification cannot turn committed rejection into false failure
+PASS dealer onboarding compensates profile when verification submission fails
+PASS inspection provider identity is unique in the database
+PASS compatibility csrf route is documented
+PASS dealer onboarding routes are documented
+
+DOMAIN LIFECYCLE INTEGRITY: PASS
+
+=== validate-transaction-integrity.mjs ===
+PASS No stale Mongo session cleanup remains in bid controller
+PASS Auto-bid uses atomic RPC
+PASS Atomic auto-bid RPC wrapper exists
+PASS Atomic auction close RPC wrapper exists
+PASS Auction close service delegates settlement to DB
+PASS Auction close supports forced winner atomically
+PASS Canonical refund ledger migration exists
+PASS Refund duplicate protection exists
+PASS Auto-bid function locks car row
+PASS Close function locks car row
+PASS Close function marks winner and losers
+PASS Reconciliation uses refunds table
+PASS Refund endpoint is truthful
+PASS Favorite controller has no stale transaction session
+
+Transaction integrity validation: 14/14 PASS
+
+=== validate-inspection-marketplace.mjs ===
+PASS inspection services use the real DB adapter
+PASS canonical singular inspection API is mounted
+PASS plural inspection API remains backward compatible
+PASS provider routes enforce ownership
+PASS private report lookup requires authentication
+PASS customer booking lookup is access checked
+PASS customer cancellation passes the correct argument order
+PASS provider booking mutations verify provider ownership
+PASS report mutations verify provider/customer/admin access
+PASS booking slots are provider-aware
+PASS booking race is backed by a DB unique active-slot index
+PASS payment double-processing is backed by a DB unique index
+PASS settlement writes have matching payment columns
+PASS inspection API unwraps the shared response envelope
+PASS provider search returns the shape consumed by the marketplace UI
+PASS provider starting price is real and null-safe (never invented)
+PASS provider starting price stays synchronized with active packages
+PASS provider search does not query a nonexistent deleted_at column
+PASS marketplace is reachable from the main inspection view
+PASS provider card uses an in-app selection callback instead of a dead href
+PASS fake marketplace headline stats were removed
+PASS public provider search defaults to verified profiles
+PASS public provider profile rejects inactive or unverified providers
+PASS marketplace selection opens provider profile before booking
+PASS booking request has no client discount authority
+PASS booking total is derived only from canonical package price plus server mobile fee
+PASS stored booking discount is server-controlled
+PASS payment initiation derives amount from stored booking
+PASS booking route validates customer input before service execution
+PASS booking schema excludes client-controlled monetary fields
+PASS booking requires active verified provider
+PASS mobile booking respects provider mobile capability
+PASS workshop booking respects provider workshop capability
+PASS booking rejects invalid canonical package price
+PASS booking UI surfaces payment or booking errors
+PASS booking UI treats displayed total as a pre-booking estimate
+PASS booking date generation avoids UTC rollover
+
+Inspection marketplace validation: 37/37 PASS
+
+=== validate-dispute-integrity.mjs ===
+PASS: canonical dispute UI has real API-backed evidence upload
+PASS: canonical dispute UI has real mediation API
+PASS: canonical dispute UI has real resolution API
+PASS: canonical dispute UI has real appeal API
+PASS: dispute details enforce party/staff access
+PASS: evidence item remains scoped to requested escrow dispute
+PASS: evidence mutations remain scoped to requested escrow
+PASS: successful mediation transitions to resolved
+PASS: common duplicate TS dispute panels removed
+PASS: legacy Mongoose dispute implementation is absent from active controller
+PASS: dispute routes expose canonical escrow-centric workflow
+
+Dispute integrity: 11/11 checks passed
+
+=== validate-wave2-invariants.mjs ===
+PASS Wave 2 migration exists
+PASS listing entitlement reservation table
+PASS atomic dealer listing RPC
+PASS dealer listing controller uses atomic RPC
+PASS media recovery job table
+PASS media retry/dead-letter RPCs
+PASS media recovery service integrated
+PASS auction payment posts canonical ledger event
+PASS inspection payout requires report
+PASS dispute resolution posts financial consequences
+PASS structural escrow invariants
+PASS structural inspection settlement invariant
+PASS wave 2 invariant audit RPC
+PASS atomic listing helper exposed in backend
+
+KAYAD Wave 2 invariant gate: PASS
+
+=== validate-marketplace-convergence.mjs ===
+PASS purchase_outcomes canonical table
+PASS purchase payment settlement is idempotent
+PASS one pending purchase per vehicle
+PASS unavailable vehicle cannot become a second sale
+PASS existing payment RPC remains canonical
+PASS direct vs escrow follows listing escrow policy
+PASS direct settlement marks vehicle sold
+PASS escrow settlement reuses existing escrows
+PASS atomic purchase outcome transitions
+PASS ownership reuses canonical ownership service
+PASS escrow release syncs Marketplace outcome
+PASS escrow refund syncs Marketplace outcome
+PASS purchase fulfilment routes mounted
+PASS auction_win callback type accepted
+PASS no second escrow implementation
+PASS purchase race returns controlled conflict
+PASS refund completion re-syncs purchase outcome
+
+Marketplace convergence: 17/17 PASS
+
+=== validate-marketplace-ui-convergence.mjs ===
+PASS feature CarCard is compatibility-only
+PASS feature CartyGrid is compatibility-only
+PASS mobile card dead-code removal held (Stage 11 Phase E)
+PASS Marketplace uses canonical VehicleCard
+PASS Showroom has one grid authority
+PASS SimilarCars reuses canonical grid path
+PASS no Marketplace purchase API was duplicated in UI
+
+Marketplace UI convergence: 7/7 PASS
+
+MARKETPLACE PHASE-10 GATE: PASS (14/14 validators passed)

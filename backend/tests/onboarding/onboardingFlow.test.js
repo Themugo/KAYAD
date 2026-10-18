@@ -1,5 +1,5 @@
 // Onboarding -> first listing, for dealer / private seller / buyer / inspector (mechanic).
-import { describe, test, expect, jest, beforeEach } from "@jest/globals";
+import { describe, test, expect, jest, beforeEach, afterEach, afterAll } from "@jest/globals";
 import crypto from "crypto";
 
 const U = "11111111-1111-4111-8111-111111111111";
@@ -36,11 +36,13 @@ jest.unstable_mockModule("../../utils/securityLogger.js", () => ({ logActionFrom
 jest.unstable_mockModule("../../services/duplicateVehicleService.js", () => ({ detectDuplicates: jest.fn(), flagDuplicate: jest.fn() }));
 jest.unstable_mockModule("../../services/auditService.js", () => ({ logVehicleCreated: jest.fn(), logVehicleEdited: jest.fn(), logVehicleDeleted: jest.fn() }));
 jest.unstable_mockModule("../../utils/atomicTransactions.js", () => ({ atomicCreateDealerListing: jest.fn() }));
-jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({ registerMediaUploadJob: jest.fn(), registerMediaUploadFailure: jest.fn(), completeMediaUpload: jest.fn() }));
+jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({ registerMediaUploadJob: jest.fn(async () => ({})), registerMediaUploadFailure: jest.fn(async () => ({})), completeMediaUpload: jest.fn(async () => ({})) }));
 
 const { requireDealerVerification, isListingCreationRequest } = await import("../../middleware/dealerVerification.js");
 const { approveApplication } = await import("../../controllers/inspectorApplicationController.js");
 const { createCar } = await import("../../controllers/carController.js");
+const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
+beforeEach(() => __setOnboardingPolicyForTests({})); // STAGE 5 default: approval_required
 
 const res = () => { const r = { code: 200, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; } }; return r; };
 beforeEach(() => { jest.clearAllMocks(); });
@@ -70,7 +72,8 @@ describe("requireDealerVerification: who can list on day one", () => {
     expect(next).toHaveBeenCalled();
   });
 
-  test("new dealer (unapproved, verification submitted) gets progressive access for their first 3 cars", async () => {
+  test("new dealer (unapproved, verification submitted) gets progressive access for their first 3 cars ONLY in self_onboarding mode", async () => {
+    __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" });
     dealerModel.findOne.mockResolvedValue({ approved: false });
     verificationModel.findOne.mockResolvedValue({ verificationStatus: "pending" });
     carModel.countDocuments.mockResolvedValue(0);
@@ -163,5 +166,96 @@ describe("inspector (mechanic) approval", () => {
     expect(existing.role).toBe("ghost_checker");
     expect(userAuthModel.create).not.toHaveBeenCalled();
     expect(sendNotification.mock.calls[0][0].message).not.toMatch(/token=/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// STAGE 5 — the owner's onboarding policy actually controls the workflow.
+// ─────────────────────────────────────────────────────────────
+describe("STAGE 5 requireDealerVerification follows the owner's dealer mode", () => {
+  const run = async (user, req = {}) => { const r = res(); const next = jest.fn(); await requireDealerVerification({ user, method: "POST", baseUrl: "/api/cars", path: "/", ...req }, r, next); return { r, next }; };
+  const pending = () => { dealerModel.findOne.mockResolvedValue({ approved: false }); verificationModel.findOne.mockResolvedValue({ verificationStatus: "pending" }); carModel.countDocuments.mockResolvedValue(0); };
+
+  test.each(["approval_required", "closed"])("mode %s: a pending dealer cannot create listings (no progressive access)", async (mode) => {
+    __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
+    pending();
+    const { r, next } = await run({ id: U, role: "dealer" });
+    expect(next).not.toHaveBeenCalled();
+    expect(r.code).toBe(403);
+    expect(r.body.code).toBe("DEALER_APPROVAL_PENDING");
+  });
+  test("self_onboarding: a pending dealer gets limited progressive access (still not 'verified')", async () => {
+    __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" });
+    pending();
+    const { next } = await run({ id: U, role: "dealer" });
+    expect(next).toHaveBeenCalled();
+  });
+  test("untrusted policy (unavailable) behaves like approval_required, never like self_onboarding", async () => {
+    __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" }, "unavailable");
+    pending();
+    const { next, r } = await run({ id: U, role: "dealer" });
+    expect(next).not.toHaveBeenCalled();
+    expect(r.code).toBe(403);
+  });
+  test.each(["approval_required", "self_onboarding", "closed"])("an APPROVED dealer is unaffected by mode %s", async (mode) => {
+    __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
+    dealerModel.findOne.mockResolvedValue({ approved: true });
+    const { next } = await run({ id: U, role: "dealer" });
+    expect(next).toHaveBeenCalled();
+  });
+  test("a rejected dealer is blocked in every mode and told to resubmit", async () => {
+    for (const mode of ["approval_required", "self_onboarding"]) {
+      __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
+      dealerModel.findOne.mockResolvedValue({ approved: false });
+      verificationModel.findOne.mockResolvedValue({ verificationStatus: "rejected" });
+      const { r } = await run({ id: U, role: "dealer" });
+      expect(r.code).toBe(403);
+      expect(r.body.requiresAction).toBe("resubmit_verification");
+    }
+  });
+});
+
+describe("STAGE 5 createCar status follows the owner's listing-moderation setting", () => {
+  const keys = ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"];
+  const prev = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+  // createCar schedules background media work with setImmediate; let it settle, then restore the env so
+  // nothing leaks into other suites that share this worker process.
+  afterEach(async () => { await new Promise((r) => setTimeout(r, 25)); });
+  afterAll(() => { for (const k of keys) { if (prev[k] === undefined) delete process.env[k]; else process.env[k] = prev[k]; } });
+  beforeEach(() => {
+    process.env.CLOUDINARY_CLOUD_NAME = "x"; process.env.CLOUDINARY_API_KEY = "x"; process.env.CLOUDINARY_API_SECRET = "x";
+    carModel.create.mockImplementation(async (b) => ({ _id: "car-1", id: "car-1", ...b }));
+    carModel.countDocuments.mockResolvedValue(0);
+    userModel.findByIdAndUpdate = jest.fn(async () => ({}));
+  });
+  const create = async (sellerStatus, extraBody = {}) => {
+    userModel.findById.mockReturnValue({ select: async () => ({ id: U, role: "individual_seller", status: sellerStatus, location: "Nairobi" }) });
+    const r = res();
+    await createCar({ user: { id: U, role: "individual_seller" }, body: { title: "T", status: "available", isVerifiedDealer: true, ...extraBody }, files: [{ path: "/tmp/a.jpg" }], get: () => undefined }, r);
+    return r;
+  };
+  test("hold_for_review: an approved seller's listing is created PENDING", async () => {
+    __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
+    const r = await create("approved");
+    expect(r.code).toBe(201);
+    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
+  });
+  test("auto_publish: an approved seller's listing is published; an unapproved seller's stays pending", async () => {
+    __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
+    expect((await create("approved")).code).toBe(201);
+    expect(carModel.create.mock.calls[0][0].status).toBe("available");
+    carModel.create.mockClear();
+    expect((await create("pending")).code).toBe(201);
+    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
+  });
+  test("unavailable policy holds the listing for review (fail safe)", async () => {
+    __setOnboardingPolicyForTests({ listingModeration: "auto_publish" }, "unavailable");
+    await create("approved");
+    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
+  });
+  test("a client-supplied status is never honoured (mass assignment)", async () => {
+    __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
+    await create("approved", { status: "available", approved: true });
+    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
   });
 });

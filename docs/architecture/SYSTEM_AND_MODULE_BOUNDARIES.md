@@ -40,6 +40,22 @@ These are the business boundaries to protect during maintenance. A UI success st
 - A deployment is not complete until the deployed commit, frontend URL, API health and critical journeys are verified.
 - Admin permissions should be capability-specific and auditable; do not grant broad authority as a shortcut.
 
+## Canonical authorization implementations (verified 2026-10-18)
+
+- Identity: `backend/middleware/auth.js#protect` (fresh security row, `tokenVersion`, refresh-session check). `optionalAuth` applies the same revocation rules and treats revoked tokens as anonymous.
+- Owner: `backend/config/owners.js` (`WEBHOIST_EMAIL[S]`). `protect` attaches the owner as `role: "superadmin"`, `effectiveRole: "webhoist"`.
+- Roles and permissions: `backend/config/roles.js`.
+  - In controllers, use `isRoleAllowed(req.user, roles)`. Do not compare `effectiveRole || role` against a list, because that denies the owner.
+  - Cross-owner listing authority is `canManageAnyListing(user)`: staff holding `MANAGE_CARS`, including per-user grants and revokes, or the owner.
+- Route guards: both `requireRole` exports (`middleware/auth.js` and `middleware/rbac.js`) admit the owner and superadmin, then check the listed roles.
+- Listing state:
+  - Moderation goes through `POST /api/admin/cars/:id/moderate`.
+  - Trust badges go through `POST /api/admin/cars/:id/verify`.
+  - Promotion goes through `PATCH /api/cars/:id/promote`.
+  - Seller status changes go through `PATCH /api/dealer/cars/bulk-status` (allowlisted) or mark-sold.
+  - `PUT /api/cars/:id` refuses changes to those fields from non-authorised editors (`403 LISTING_FIELD_ADMIN_ONLY`). `escrowEnabled` is always server-computed.
+- Regression coverage: `backend/tests/regression/stage1AuthzConvergence.test.js` and `stage1ListingWriteBoundaries.test.js`. Details are in `KAYAD_FOUNDATION_RECONCILIATION_REPORT_20261018.md`.
+
 ## Canonical configuration
 
 - Node runtime: `.nvmrc`, `.node-version`, `package.json`, `backend/package.json`.

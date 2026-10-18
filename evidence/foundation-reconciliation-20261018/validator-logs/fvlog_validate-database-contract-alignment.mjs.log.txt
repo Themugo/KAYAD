@@ -1,0 +1,12 @@
+PASS required system tables are migration-backed — all present
+PASS migration foreign-key references resolve to migration-backed tables — no unresolved references
+PASS hero_slides is created before its premium ALTER contract
+PASS Phase 22 service-job reference domains are created before service_jobs
+PASS registration atomic identity RPC is migration-backed
+PASS dealer identity has canonical one-to-one constraint
+PASS inspector application has pending concurrency protection
+PASS communication delivery supports dead-letter terminal state
+
+Duplicate table definitions retained for historical compatibility: 0
+
+DATABASE CONTRACT ALIGNMENT: 8/8 PASS

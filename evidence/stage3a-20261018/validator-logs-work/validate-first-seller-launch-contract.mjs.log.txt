@@ -1,0 +1,10 @@
+PASS verification tokens are not persisted in delivery body metadata
+PASS sensitive delivery metadata explicitly records body omission
+PASS sensitive metadata validates values and excludes subject/body persistence
+PASS provider acceptance is not logged as confirmed delivery
+PASS verification and reset regression tests cover raw-token omission
+PASS pending seller notification uses canonical rollout event
+PASS seller notification preserves source-event trace without using a second event ID
+PASS registration delivery remains asynchronous after atomic identity creation
+
+FIRST-SELLER LAUNCH SOURCE CONTRACT: 8/8 PASS

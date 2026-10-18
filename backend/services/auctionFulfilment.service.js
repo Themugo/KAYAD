@@ -5,7 +5,6 @@ import { getAuctionPlatformPolicy } from "./auctionPlatformPolicy.service.js";
 import { ownershipService } from "../ownership/services/ownershipService.js";
 import { openDispute as openEscrowDispute } from "./dispute.service.js";
 import { governanceService } from "../governance/services/governanceService.js";
-import { releaseEscrow } from "./escrow.service.js";
 
 const nowIso = () => new Date().toISOString();
 const error = (message, status = 409, code = null) => Object.assign(new Error(message), { status, ...(code ? { code } : {}) });
@@ -189,7 +188,22 @@ export async function releaseAuctionEscrowAndComplete({ outcomeId, actorId, req 
   if (outcome.status === "disputed") throw error("Escrow release is blocked while the auction outcome is disputed");
   const escrow = await findById("escrows", outcome.escrow_id);
   if (!escrow) throw error("Auction escrow not found", 404);
-  if (escrow.status !== "released") await releaseEscrow(escrow.id, actorId, { idempotencyKey: `auction-release:${outcome.id}` });
+  // The organizer is the SELLER. escrow.service.releaseEscrow() transitions the
+  // escrow with role "admin" and assumes its caller already proved escrow-release
+  // authority (POST /api/escrow/:id/release: escrowAdminOnly + escrowReleaseOnly /
+  // APPROVE_ESCROW_RELEASE). Calling it here let a seller release buyer funds to
+  // themselves as "admin" — bypassing release approval from `delivered`, and
+  // releasing a `disputed` escrow whose auction outcome was not marked disputed.
+  // The database state machine never lets the seller role release. The organizer
+  // may therefore only complete the outcome after a governed release (admin
+  // approval or the database auto-release window) has already happened.
+  if (escrow.status !== "released") {
+    throw error(
+      "Escrow funds are released only through KAYAD escrow approval or the automatic release window. Complete the auction after the escrow shows as released.",
+      409,
+      "ESCROW_RELEASE_REQUIRES_APPROVAL",
+    );
+  }
   const updated = await update("auction_outcomes", outcome.id, {
     status: outcome.transfer_status === "completed" ? "completed" : "payment_received",
     collection_status: "collected",

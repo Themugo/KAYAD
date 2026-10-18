@@ -1,0 +1,2 @@
+Chat surface convergence: PASS
+UnifiedCommunicationHub is the sole mounted chat UI; canonical chatApi owns transport.

@@ -1,0 +1,21 @@
+PASS atomic escrow transition migration exists
+PASS ledger chart seeds escrow accounts
+PASS escrow release consumes escrow payable
+PASS escrow refund reclassifies to buyer payable
+PASS bank funding posts custody ledger entry
+PASS dispute release uses escrow payable
+PASS dispute refund reclassifies to buyer payable
+PASS dealer payout has ledger adapter
+PASS B2C paid callback posts dealer payout ledger
+PASS B2C processing does not misuse transaction_id as idempotency key
+PASS payout state machine rejects paid downgrade
+PASS funding reference is unique
+PASS refund is reclassified, not falsely settled as cash
+PASS refund settlement has separate cash-side ledger adapter
+PASS release/refund financial writes occur inside atomic transition SQL
+PASS bank custody funding has release eligibility window
+PASS payout callback records actual provider transaction id
+PASS refund completion RPC exists
+PASS refund completion route is admin/idempotent protected
+PASS refund provider references are unique
+Escrow business integrity: 20/20 PASS

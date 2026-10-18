@@ -1,0 +1,6 @@
+PASS marketplaceCore does not import legacy api.exports
+PASS marketplaceCore delegates auction reads to auctionService
+PASS marketplaceCore delegates bid reads to bidApi
+PASS bidApi owns my-bids transport
+PASS auctionService owns auction transport
+Marketplace service boundary: 5/5 PASS

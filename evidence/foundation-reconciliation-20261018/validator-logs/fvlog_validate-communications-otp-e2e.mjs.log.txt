@@ -1,0 +1,22 @@
+PASS canonical gateway exists
+PASS canonical OTP challenge service
+PASS OTP stored hashed
+PASS OTP expiry and attempts enforced
+PASS phone auth uses canonical OTP
+PASS dealer phone verification uses canonical OTP service
+PASS WhatsApp is real provider path
+PASS provider callbacks exist
+PASS delivery ledger migration exists
+PASS delivery ledger fields mapped
+PASS disabled email is honest
+PASS SMS is locked to canonical Africa's Talking adapter
+PASS notification service converges channels
+PASS communication webhook mounted
+PASS communication control plane exists
+PASS template storage and consent migration exists
+PASS transactional versus marketing preferences enforced
+PASS admin communications control UI exists
+PASS automatic communication retry cron exists
+PASS OTP abuse windows enforced
+
+20/20 PASS

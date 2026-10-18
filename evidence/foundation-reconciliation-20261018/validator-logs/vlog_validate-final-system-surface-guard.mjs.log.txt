@@ -1,0 +1,14 @@
+PASS: App uses authoritative AuthProvider user/session
+PASS: Admin surface is role-gated
+PASS: Dealer workspace is role-gated
+PASS: Private buyer surfaces are auth-gated
+PASS: Legacy direct routes canonicalize instead of falling through to Marketplace
+PASS: Support FAQ marketplace navigation uses canonical nav
+PASS: Support FAQ auction navigation uses canonical discovery nav
+PASS: Private workspaces suppress the public mobile dock
+PASS: Private workspaces suppress the public notice strip
+PASS: Support FAQ case CTA uses its actual data label
+PASS: Mobile bottom navigation has no duplicate menu tab (header hamburger is the sole opener)
+PASS: Desktop navigation exposes one canonical Marketplace entry
+PASS: Global horizontal overflow is clipped at document level
+FINAL SYSTEM SURFACE GUARD: 13/13 PASS

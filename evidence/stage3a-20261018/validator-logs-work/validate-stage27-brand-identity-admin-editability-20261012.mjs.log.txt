@@ -1,0 +1,11 @@
+PASS premium master logo asset is bundled
+PASS default branding uses bundled master logo
+PASS shared navbar uses admin-managed logo URL
+PASS legacy EA badge is removed from navbar wordmark
+PASS primary footer uses same admin-managed logo URL
+PASS admin can upload logo image
+PASS admin can edit footer description
+PASS admin can edit footer copyright
+PASS footer consumes admin-managed description
+PASS footer consumes admin-managed copyright
+RESULT 10/10 PASS

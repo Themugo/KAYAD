@@ -1,0 +1,47 @@
+
+> kayad-backend@2.0.0 test:jest
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --passWithNoTests
+
+(node:1306) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 98 passed, 98 total
+Tests:       1384 passed, 1384 total
+Snapshots:   0 total
+Time:        50.305 s
+Ran all test suites.
+
+Jest has detected the following 2 open handles potentially keeping Jest from exiting:
+
+  ●  Timeout
+
+      272 |         fn(),
+      273 |         new Promise((_, reject) => {
+    > 274 |           setTimeout(() => {
+          |           ^
+      275 |             const timeoutError = new Error(`Operation timeout after ${timeoutMs}ms`);
+      276 |             timeoutError.code = "TIMEOUT";
+      277 |             timeoutError.service = serviceName || key;
+
+      at utils/retry.js:274:11
+      at attemptWithTimeout (utils/retry.js:273:9)
+      at withRetry (utils/retry.js:227:26)
+      at Object.<anonymous> (tests/resilience/failureModes.test.js:280:7)
+
+
+  ●  Timeout
+
+      272 |         fn(),
+      273 |         new Promise((_, reject) => {
+    > 274 |           setTimeout(() => {
+          |           ^
+      275 |             const timeoutError = new Error(`Operation timeout after ${timeoutMs}ms`);
+      276 |             timeoutError.code = "TIMEOUT";
+      277 |             timeoutError.service = serviceName || key;
+
+      at utils/retry.js:274:11
+      at attemptWithTimeout (utils/retry.js:273:9)
+      at withRetry (utils/retry.js:227:26)
+      at Object.<anonymous> (tests/resilience/failureModes.test.js:298:26)
+
+exit 0

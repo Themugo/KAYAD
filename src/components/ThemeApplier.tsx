@@ -5,7 +5,7 @@ import { loadSiteDesignTokens } from '@/lib/site-control';
 import { publicSupabase } from '@/lib/supabase';
 
 const DEFAULT_THEME = {
-  primary_color: '#c9971f',
+  primary_color: '#176B87',
   secondary_color: '#176b87',
   accent_color: '#0369a1',
   heading_font: 'Space Grotesk',

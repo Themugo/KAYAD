@@ -3,6 +3,7 @@ import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
 import AdminSettingsBranding from './AdminSettingsBranding';
+import AdminSettingsOnboarding from './AdminSettingsOnboarding';
 
 const DEFAULTS = {
   platformName: 'KAYAD',
@@ -179,12 +180,13 @@ export default function AdminSettings() {
   const tabs = useMemo(() => {
     const all = [
       { id: 'general', label: '⚙ General' },
+      { id: 'onboarding', label: '🚪 Onboarding' },
       { id: 'branding', label: '🎨 Branding' },
       { id: 'payments', label: '💳 Payments' },
       { id: 'reconciliation', label: '🔄 Reconciliation' },
       { id: 'audit', label: '📋 Audit Log' },
     ];
-    return isSuperAdmin ? all : all.slice(0, 3);
+    return isSuperAdmin ? all : all.filter((t) => ['general', 'onboarding', 'branding', 'payments'].includes(t.id));
   }, [isSuperAdmin]);
 
   if (loading) {
@@ -220,6 +222,9 @@ export default function AdminSettings() {
             </button>
           ))}
         </div>
+
+        {/* ═══ ONBOARDING (Stage 5) ═══ */}
+        {tab === 'onboarding' && <AdminSettingsOnboarding />}
 
         {/* ═══ BRANDING ═══ */}
         {tab === 'branding' && (

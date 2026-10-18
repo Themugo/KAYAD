@@ -80,16 +80,22 @@ export function requirePermission(...permissions) {
 
       for (const perm of permissions) {
         if (!hasPermission(req.user, perm)) {
-          await AuditLog.create({
-            action: "access_denied",
-            userId: req.user.id,
-            metadata: {
-              permission: perm,
-              path: req.originalUrl,
-              method: req.method,
-              role: req.user.role,
-            },
-          });
+          // The denial is the security decision; recording it is secondary. An audit
+          // persistence failure must not turn the expected 403 into a 500.
+          try {
+            await AuditLog.create({
+              action: "access_denied",
+              userId: req.user.id,
+              metadata: {
+                permission: perm,
+                path: req.originalUrl,
+                method: req.method,
+                role: req.user.role,
+              },
+            });
+          } catch (auditErr) {
+            console.error("RBAC access_denied audit write failed:", auditErr?.message || auditErr);
+          }
 
           return res.status(403).json({
             success: false,

@@ -19,6 +19,7 @@ import { getDealerLeads, getLeadById, updateLeadStage as serviceUpdateLeadStage,
 import { create, findAll, findOne, update } from "../db/index.js";
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
+import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { sendTeamInviteEmail } from "../services/email.service.js";
 
 // ============================================================
@@ -226,6 +227,10 @@ export async function bulkUpdateListings(req, res) {
     if (action !== "status") return res.status(400).json({ success: false, message: "Only status bulk updates are supported" });
     const status = req.body?.data?.status;
     if (!allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid listing status" });
+    // STAGE 5: no self-publication while listings are held for owner review.
+    if ((status === "available" || status === "active") && !(await sellerMayPublishDirectly(req.user))) {
+      return res.status(403).json(PUBLICATION_REVIEW_REQUIRED);
+    }
     const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id });
     if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });
     for (const car of owned) {

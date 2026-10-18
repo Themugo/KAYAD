@@ -1,0 +1,11 @@
+PASS: drawer measures the sticky header bottom
+PASS: drawer is viewport-fixed and anchored below the header
+PASS: drawer surface fills the available viewport height
+PASS: drawer content has a constrained scroll region
+PASS: safe-area bottom padding is preserved
+PASS: body scroll is locked while the menu is open
+PASS: existing shared drawer and focus-dialog semantics remain
+PASS: orientation and resize keep the drawer aligned
+PASS: Android/iOS visual viewport height and browser-chrome changes are tracked
+PASS: drawer height is explicitly constrained to the visible viewport
+Mobile menu viewport validation: 10/10 PASS

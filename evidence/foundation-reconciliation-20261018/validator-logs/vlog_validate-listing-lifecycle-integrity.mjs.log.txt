@@ -1,0 +1,7 @@
+PASS edit snapshots old listing before mutation
+PASS edit uses city/location_city contract
+PASS audit compares real listing field names
+PASS seller deletion does not refund trial usage
+PASS admin deletion does not refund trial usage
+
+5/5 checks passed

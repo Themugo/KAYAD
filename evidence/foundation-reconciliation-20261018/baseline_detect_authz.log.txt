@@ -1,0 +1,239 @@
+(node:5278) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/regression/stage1AuthzConvergence.test.js
+  ● S1-AUTH-01 requireRole (middleware/auth.js) uses canonical owner/superadmin semantics › platform owner passes an ['admin'] route
+
+    expect(jest.fn()).toHaveBeenCalled()
+
+    Expected number of calls: >= 1
+    Received number of calls:    0
+
+      88 |     return { res, next };
+      89 |   };
+    > 90 |   test("platform owner passes an ['admin'] route", () => expect(run(OWNER, ["admin"]).next).toHaveBeenCalled());
+         |                                                                                             ^
+      91 |   test("superadmin passes an ['admin'] route", () => expect(run(SUPER, ["admin"]).next).toHaveBeenCalled());
+      92 |   test("admin passes", () => expect(run(ADMIN, ["admin"]).next).toHaveBeenCalled());
+      93 |   test("ghost_checker is denied 403", () => {
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:90:93)
+
+  ● S1-AUTH-01 requireRole (middleware/auth.js) uses canonical owner/superadmin semantics › superadmin passes an ['admin'] route
+
+    expect(jest.fn()).toHaveBeenCalled()
+
+    Expected number of calls: >= 1
+    Received number of calls:    0
+
+      89 |   };
+      90 |   test("platform owner passes an ['admin'] route", () => expect(run(OWNER, ["admin"]).next).toHaveBeenCalled());
+    > 91 |   test("superadmin passes an ['admin'] route", () => expect(run(SUPER, ["admin"]).next).toHaveBeenCalled());
+         |                                                                                         ^
+      92 |   test("admin passes", () => expect(run(ADMIN, ["admin"]).next).toHaveBeenCalled());
+      93 |   test("ghost_checker is denied 403", () => {
+      94 |     const { res, next } = run(GHOST, ["admin"]);
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:91:89)
+
+  ● S1-AUTH-02 in-controller role checks honour the owner › isRoleAllowed: owner/admin allowed, ghost_checker denied, null denied
+
+    TypeError: isRoleAllowed is not a function
+
+      109 | describe("S1-AUTH-02 in-controller role checks honour the owner", () => {
+      110 |   test("isRoleAllowed: owner/admin allowed, ghost_checker denied, null denied", () => {
+    > 111 |     expect(isRoleAllowed(OWNER, ["admin", "superadmin"])).toBe(true);
+          |            ^
+      112 |     expect(isRoleAllowed(ADMIN, ["admin", "superadmin"])).toBe(true);
+      113 |     expect(isRoleAllowed(GHOST, ["admin", "superadmin"])).toBe(false);
+      114 |     expect(isRoleAllowed(null, ["admin"])).toBe(false);
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:111:12)
+
+  ● S1-AUTH-02 in-controller role checks honour the owner › governance createPolicy: owner is no longer denied by the controller
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 403
+
+      117 |     const res = mkRes();
+      118 |     await governance.createPolicy({ user: OWNER, body: { title: "Retention policy" } }, res);
+    > 119 |     expect(res.code).toBe(200);
+          |                      ^
+      120 |     expect(res.body.success).toBe(true);
+      121 |     expect(auditCreate).toHaveBeenCalled();
+      122 |   });
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:119:22)
+
+  ● S1-AUTH-03 protect() carries the display name › req.user.name is populated although the security re-select omits it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Amina Dealer"
+    Received: undefined
+
+      138 |     await protect(req, mkRes(), next);
+      139 |     expect(next).toHaveBeenCalled();
+    > 140 |     expect(req.user.name).toBe("Amina Dealer");
+          |                           ^
+      141 |   });
+      142 |   test("security state still comes from the fresh row (role not taken from the profile cache)", async () => {
+      143 |     rows.n2 = { id: "n2", email: "n2@example.test", role: "dealer", status: "approved", name: "N2" };
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:140:27)
+
+  ● S1-AUTH-04 optionalAuth() rejects revoked tokens › valid token attaches the caller
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 0
+
+      Object {
+    -   "effectiveRole": "admin",
+        "id": "p1",
+        "role": "admin",
+      }
+
+      162 |     const { req, next } = await run(tok("p1"));
+      163 |     expect(next).toHaveBeenCalled();
+    > 164 |     expect(req.user).toMatchObject({ id: "p1", role: "admin", effectiveRole: "admin" });
+          |                      ^
+      165 |   });
+      166 |   test("token-version mismatch (logout-all / password change) is treated as anonymous", async () => {
+      167 |     authRows.p1 = { tokenVersion: 4 };
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:164:22)
+
+  ● S1-AUTH-04 optionalAuth() rejects revoked tokens › token-version mismatch (logout-all / password change) is treated as anonymous
+
+    expect(received).toBeUndefined()
+
+    Received: {"id": "p1", "role": "admin"}
+
+      168 |     const { req, next } = await run(tok("p1"));
+      169 |     expect(next).toHaveBeenCalled();
+    > 170 |     expect(req.user).toBeUndefined();
+          |                      ^
+      171 |   });
+      172 |   test("revoked session id is treated as anonymous", async () => {
+      173 |     findActiveSessionById.mockResolvedValue(null);
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:170:22)
+
+  ● S1-AUTH-04 optionalAuth() rejects revoked tokens › revoked session id is treated as anonymous
+
+    expect(received).toBeUndefined()
+
+    Received: {"id": "p1", "role": "admin"}
+
+      173 |     findActiveSessionById.mockResolvedValue(null);
+      174 |     const { req } = await run(tok("p1", { sessionId: "gone" }));
+    > 175 |     expect(req.user).toBeUndefined();
+          |                      ^
+      176 |   });
+      177 |   test("missing auth row is treated as anonymous", async () => {
+      178 |     delete authRows.p1;
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:175:22)
+
+  ● S1-AUTH-04 optionalAuth() rejects revoked tokens › missing auth row is treated as anonymous
+
+    expect(received).toBeUndefined()
+
+    Received: {"id": "p1", "role": "admin"}
+
+      178 |     delete authRows.p1;
+      179 |     const { req } = await run(tok("p1"));
+    > 180 |     expect(req.user).toBeUndefined();
+          |                      ^
+      181 |   });
+      182 |   test("owner gets the same role/effectiveRole shape as protect()", async () => {
+      183 |     rows.p2 = { id: "p2", email: "OWNER@example.test", role: "user", status: "approved" };
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:180:22)
+
+  ● S1-AUTH-04 optionalAuth() rejects revoked tokens › owner gets the same role/effectiveRole shape as protect()
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 0
+
+      Object {
+    -   "effectiveRole": "webhoist",
+        "role": "superadmin",
+      }
+
+      184 |     authRows.p2 = { tokenVersion: 0 };
+      185 |     const { req } = await run(tok("p2"));
+    > 186 |     expect(req.user).toMatchObject({ role: "superadmin", effectiveRole: "webhoist" });
+          |                      ^
+      187 |   });
+      188 | });
+      189 |
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:186:22)
+
+  ● S1-AUTH-05 cross-owner listing authority › admin and owner may manage any listing
+
+    TypeError: canManageAnyListing is not a function
+
+      190 | describe("S1-AUTH-05 cross-owner listing authority", () => {
+      191 |   test("admin and owner may manage any listing", () => {
+    > 192 |     expect(canManageAnyListing(ADMIN)).toBe(true);
+          |            ^
+      193 |     expect(canManageAnyListing(OWNER)).toBe(true);
+      194 |     expect(canManageAnyListing(SUPER)).toBe(true);
+      195 |   });
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:192:12)
+
+  ● S1-AUTH-05 cross-owner listing authority › ghost_checker / marketing / moderator may not
+
+    TypeError: canManageAnyListing is not a function
+
+      195 |   });
+      196 |   test("ghost_checker / marketing / moderator may not", () => {
+    > 197 |     expect(canManageAnyListing(GHOST)).toBe(false);
+          |            ^
+      198 |     expect(canManageAnyListing({ role: "marketing" })).toBe(false);
+      199 |     expect(canManageAnyListing({ role: "moderator" })).toBe(false);
+      200 |   });
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:197:12)
+
+  ● S1-AUTH-05 cross-owner listing authority › a seller holding MANAGE_CARS for own listings has no cross-owner authority
+
+    TypeError: canManageAnyListing is not a function
+
+      200 |   });
+      201 |   test("a seller holding MANAGE_CARS for own listings has no cross-owner authority", () => {
+    > 202 |     expect(canManageAnyListing(DEALER)).toBe(false);
+          |            ^
+      203 |     expect(canManageAnyListing({ role: "individual_seller" })).toBe(false);
+      204 |     expect(canManageAnyListing({ role: "dealer", grantedPermissions: ["manage_cars"] })).toBe(false);
+      205 |   });
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:202:12)
+
+  ● S1-AUTH-05 cross-owner listing authority › a staff member explicitly granted MANAGE_CARS gains it; a revoked admin loses it
+
+    TypeError: canManageAnyListing is not a function
+
+      205 |   });
+      206 |   test("a staff member explicitly granted MANAGE_CARS gains it; a revoked admin loses it", () => {
+    > 207 |     expect(canManageAnyListing({ role: "moderator", grantedPermissions: ["manage_cars"] })).toBe(true);
+          |            ^
+      208 |     expect(canManageAnyListing({ role: "admin", revokedPermissions: ["manage_cars"] })).toBe(false);
+      209 |   });
+      210 | });
+
+      at Object.<anonymous> (tests/regression/stage1AuthzConvergence.test.js:207:12)
+
+Test Suites: 1 failed, 1 total
+Tests:       14 failed, 6 passed, 20 total
+Snapshots:   0 total
+Time:        0.607 s, estimated 1 s
+Ran all test suites matching tests/regression/stage1AuthzConvergence.test.js.

@@ -14,6 +14,7 @@ import {
   getSessions,
   revokeSession,
   revokeAllSessions,
+  serializeUser,
 } from "../controllers/authController.js";
 
 import { protect, optionalAuth } from "../middleware/auth.js";
@@ -265,19 +266,9 @@ router.get(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id).select("-password").lean();
     if (!user) return res.status(403).json({ success: false, message: "Invalid session" });
-    const ownerEmails = (process.env.WEBHOIST_EMAIL || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-    if (
-      ownerEmails.includes(
-        String(user.email || "")
-          .toLowerCase()
-          .trim(),
-      )
-    )
-      user.role = "superadmin";
-    res.json({
-      success: true,
-      user,
-    });
+    // Use the same field allowlist and owner-role normalization as login/profile
+    // responses. Returning the raw row here can expose internal account fields.
+    res.json({ success: true, user: serializeUser(user) });
   }),
 );
 
@@ -641,7 +632,7 @@ router.post("/reset-password", recoveryLimiter, authLimiter, asyncHandler(resetP
  * /api/v1/auth/sessions/revoke-all:
  *   post:
  *     summary: Revoke all sessions
- *     description: Revoke all sessions except current
+ *     description: Revokes every refresh token for the caller INCLUDING the current session and increments tokenVersion, so the current access token stops working too; the caller must sign in again.
  *     tags: [Authentication]
  *     security:
  *       - bearerAuth: []

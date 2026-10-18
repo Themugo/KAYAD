@@ -2,6 +2,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import BidLog from "../models/BidLog.js";
 import Bid from "../models/Bid.js";
 import crypto from "crypto";
+import { isRoleAllowed } from "../config/roles.js"; // STAGE 4A (G3): canonical admin check
 
 // =============================
 // 📊 GET ACTIVE BID LOGS FOR CAR
@@ -189,7 +190,7 @@ export const getBidLogDetail = asyncHandler(async (req, res) => {
 
   // Check authorization
   const isOwner = log.user._id.toString() === req.user.id;
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = isRoleAllowed(req.user, ["admin", "superadmin"]);
 
   if (!isOwner && !isAdmin) {
     return res.status(403).json({

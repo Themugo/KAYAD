@@ -1,0 +1,48 @@
+
+> kayad-backend@2.0.0 test:node
+> node --test tests/response-lifecycle.test.js
+
+TAP version 13
+# [07:16:18] [33mWARN[39m: [36mRoute not found[39m
+#     [35mpath[39m: "/unknown"
+#     [35mmethod[39m: "GET"
+#     [35mrequestId[39m: "N/A"
+#     [35muser[39m: "guest"
+# [07:16:18] [33mWARN[39m: [36mRoute not found[39m
+#     [35mpath[39m: "/"
+#     [35mmethod[39m: "HEAD"
+#     [35mrequestId[39m: "N/A"
+#     [35muser[39m: "guest"
+# Subtest: GET, HEAD, JSON, errors and SLI complete without double sending
+ok 1 - GET, HEAD, JSON, errors and SLI complete without double sending
+  ---
+  duration_ms: 100.695741
+  type: 'test'
+  ...
+# Error: late failure
+#     at file:///home/claude/s3a/work/backend/tests/response-lifecycle.test.js:16:65
+#     at Layer.handleRequest (/home/claude/s3a/work/backend/node_modules/router/lib/layer.js:152:17)
+#     at next (/home/claude/s3a/work/backend/node_modules/router/lib/route.js:157:13)
+#     at Route.dispatch (/home/claude/s3a/work/backend/node_modules/router/lib/route.js:117:3)
+#     at handle (/home/claude/s3a/work/backend/node_modules/router/index.js:435:11)
+#     at Layer.handleRequest (/home/claude/s3a/work/backend/node_modules/router/lib/layer.js:152:17)
+#     at /home/claude/s3a/work/backend/node_modules/router/index.js:295:15
+#     at processParams (/home/claude/s3a/work/backend/node_modules/router/index.js:582:12)
+#     at next (/home/claude/s3a/work/backend/node_modules/router/index.js:291:5)
+#     at responseWrapper (file:///home/claude/s3a/work/backend/middleware/responseWrapper.js:10:3)
+# [07:16:18] [31mERROR[39m: [36mServer error[39m
+#     [35mmessage[39m: "test failure"
+#     [35mpath[39m: "/throw"
+#     [35mmethod[39m: "GET"
+#     [35muser[39m: "guest"
+#     [35mstatusCode[39m: 500
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 531.482237
+exit 0

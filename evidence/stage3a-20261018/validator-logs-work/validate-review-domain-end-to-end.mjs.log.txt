@@ -1,0 +1,11 @@
+PASS 1/10: canonical service exists
+PASS 2/10: controller delegates to service
+PASS 3/10: canonical routes exist
+PASS 4/10: review moderation transport exists
+PASS 5/10: review schema has moderation lifecycle
+PASS 6/10: review frontend service exists
+PASS 7/10: real TS review submission exists
+PASS 8/10: legacy review model is not used by review controller
+PASS 9/10: dealer reputation uses canonical service
+PASS 10/10: admin UI supports moderation
+Review domain validator: 10/10 PASS

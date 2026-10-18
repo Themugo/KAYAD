@@ -1,0 +1,16 @@
+PASS atomic registration RPC migration exists
+PASS dealer trigger creates dealer domain row
+PASS dealer onboarding fields persist on dealer domain
+PASS dealer pending onboarding GET route exists before approval boundary
+PASS dealer pending onboarding PUT route exists
+PASS dealer onboarding submits canonical verification service
+PASS frontend dealer onboarding uses canonical dealer API
+PASS dealer onboarding route is reachable from app shell
+PASS dealer onboarding no longer navigates to dead choose-plan route
+PASS inspector application table exists
+PASS inspector application returns 201 after persistence
+PASS inspector reviewer notifications are non-blocking
+PASS inspector approval creates canonical inspection provider
+PASS inspector approval no longer writes nonexistent user inspector fields
+
+Registration/onboarding end-to-end contract: 14/14 PASS

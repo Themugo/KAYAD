@@ -1,0 +1,11 @@
+PASS canonical subscription table
+PASS atomic subscription activation
+PASS atomic plan grant/revoke
+PASS subscription expiry sweep
+PASS listing entitlement gate
+PASS canonical payout ledger
+PASS atomic payout preparation
+PASS payout provider callback reconciliation
+PASS canonical admin verification mutation
+PASS dealer inventory ownership
+Dealer / Subscription initiative validation: 10/10 PASS

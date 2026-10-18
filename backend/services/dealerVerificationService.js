@@ -1,4 +1,4 @@
-import { create, findOne, findById, update, findAll, count } from "../db/index.js";
+import { create, findOne, findById, update, updateMany, findAll, count } from "../db/index.js";
 import { createOtpChallenge, verifyOtpChallenge } from "./otpService.js";
 
 export const VERIFICATION_STATUSES = Object.freeze(["pending", "approved", "rejected", "suspended"]);
@@ -116,7 +116,9 @@ export const transitionDealerVerification = async (verificationId, status, actor
   if (!allowed[current.verificationStatus]?.includes(status)) {
     throw Object.assign(new Error(`Invalid verification transition: ${current.verificationStatus} -> ${status}`), { statusCode: 409 });
   }
-  const verification = await update("dealer_verifications", verificationId, {
+  // STAGE 5: compare-and-swap on the status we validated. Two concurrent decisions (e.g. approve vs reject)
+  // can no longer both succeed: the loser updates zero rows and receives 409 instead of overwriting the winner.
+  const swapped = await updateMany("dealer_verifications", { id: verificationId, verificationStatus: current.verificationStatus }, {
     verificationStatus: status,
     reviewedAt: new Date().toISOString(),
     reviewedBy: actorId,
@@ -126,6 +128,10 @@ export const transitionDealerVerification = async (verificationId, status, actor
     suspensionReason: status === "suspended" ? details.suspensionReason || "Dealer suspended" : null,
     suspensionExpiresAt: status === "suspended" && details.suspensionDays ? new Date(Date.now() + Number(details.suspensionDays) * 86400000).toISOString() : null,
   });
+  if (!Array.isArray(swapped) || swapped.length !== 1) {
+    throw Object.assign(new Error("Verification changed while you were deciding. Reload and review the current status."), { statusCode: 409 });
+  }
+  const verification = swapped[0];
   const dealer = await findById("dealers", current.dealer);
   if (dealer) {
     await update("dealers", dealer.id, {
@@ -139,3 +145,18 @@ export const transitionDealerVerification = async (verificationId, status, actor
 };
 
 export const getVerificationProgress = progressFor;
+
+/**
+ * STAGE 5: one derived, server-computed answer to "where is this dealer?" — never taken from the client.
+ * Account creation, email verification, application and approval are distinct stages.
+ */
+export const deriveDealerOnboardingStage = ({ emailVerified, verification }) => {
+  if (emailVerified !== true) return "email_unverified";
+  const status = verification?.verificationStatus;
+  if (!status) return "application_not_submitted";
+  if (status === "pending") return "pending_approval";
+  if (status === "approved") return "approved";
+  if (status === "rejected") return "rejected";
+  if (status === "suspended") return "suspended";
+  return "unknown";
+};

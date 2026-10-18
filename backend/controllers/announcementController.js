@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 import AuditLog from "../models/AuditLog.js";
+import { auditAfterCommit } from "../utils/auditAfterCommit.js";
 
 const SELLER_ROLES = ["dealer", "individual_seller"];
 const BATCH_SIZE = 1000;
@@ -24,7 +25,7 @@ export const createAnnouncement = async (req, res) => {
 
     logInfo("Announcement created", { announcementId: announcement._id, adminId: req.user.id });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: "announcement_created",
       actor: req.user.id,
       actorRole: req.user.role,
@@ -152,7 +153,7 @@ export const sendAnnouncement = async (req, res) => {
       failCount,
     });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: "announcement_sent",
       actor: req.user.id,
       actorRole: req.user.role,
@@ -256,7 +257,7 @@ export const deleteAnnouncement = async (req, res) => {
 
     logInfo("Announcement deleted", { announcementId: req.params.id, adminId: req.user.id });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: "announcement_deleted",
       actor: req.user.id,
       actorRole: req.user.role,

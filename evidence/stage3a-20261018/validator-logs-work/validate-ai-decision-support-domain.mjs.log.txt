@@ -1,0 +1,12 @@
+PASS decision service exists
+PASS decision routes exist
+PASS server mounts decision routes
+PASS governance migration exists
+PASS domain documentation exists
+PASS service declares rule-based methodology
+PASS recommendations use live cars table
+PASS routes require authentication
+PASS decision routes mounted
+PASS no fake page IDs in decision service
+PASS no fabricated percentage claims in decision service
+AI decision-support validation: 11/11 PASS

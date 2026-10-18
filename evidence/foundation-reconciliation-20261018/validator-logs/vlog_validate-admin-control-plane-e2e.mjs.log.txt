@@ -1,0 +1,13 @@
+PASS - canonical control-plane snapshot exists
+PASS - snapshot reads authoritative Supabase tables
+PASS - command-center mutations emit realtime updates
+PASS - Socket.IO has authenticated control-plane room
+PASS - frontend subscribes to control-plane realtime
+PASS - frontend uses canonical snapshot API
+PASS - governance reads/writes canonical Supabase tables
+PASS - governance approval state is enforced
+PASS - admin mutations broadcast control-plane changes
+PASS - operations routes delegate to command center
+PASS - legacy dispute model is absent from control-plane paths
+
+Admin/control-plane E2E validation: 11/11 passed.

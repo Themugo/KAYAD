@@ -1,0 +1,13 @@
+PASS backend/services/communicationEvents.service.js
+PASS backend/services/communicationGateway.service.js
+PASS backend/services/communicationRetryCron.js
+PASS backend/services/paymentService.js
+PASS backend/services/auctionLifecycle.service.js
+PASS backend/services/auctionClose.service.js
+PASS backend/services/paymentCallback.service.js
+PASS backend/inspection/controllers/legacyCompatibilityController.js
+PASS backend/controllers/disputeController.js
+PASS backend/services/dealerSubscription.service.js
+PASS backend/services/support/supportCase.service.js
+PASS backend/controllers/authController.js
+Communication event convergence: 12/12 PASS

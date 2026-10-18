@@ -1,0 +1,20 @@
+PASS HeroPresentationConfig: every field has an admin control
+PASS HeroFloatingCard: every field has an admin control
+PASS curated showcase pair and fallback are admin-editable
+PASS backend persists heroPresentation
+PASS backend persists heroCardContent
+PASS backend persists heroFeaturedMode
+PASS backend persists heroCarIds
+PASS public page and admin save share normalizeHeroExtras
+PASS mobile headline comes from admin hero slide
+PASS mobile eyebrow comes from admin hero slide
+PASS mobile supporting copy comes from admin config
+PASS desktop and mobile CTA labels are admin-controlled
+PASS admin headline is never rewritten (no includes() hack)
+PASS no literal 6500ms rotation timer
+PASS rotation timers use admin rotationSeconds
+PASS mobile stage height uses admin min/max
+PASS mobile pair image stage uses admin min/max bounds
+PASS hero colors come from admin config
+
+Hero admin-control contract: PASS

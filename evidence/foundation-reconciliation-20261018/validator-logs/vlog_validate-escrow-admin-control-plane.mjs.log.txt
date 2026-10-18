@@ -1,0 +1,16 @@
+PASS granular escrow permissions exist
+PASS escrow officer is not a default money-moving release/refund role
+PASS escrow view middleware exists
+PASS release has dedicated permission gate
+PASS refund has dedicated permission gate
+PASS refund completion has settlement permission gate
+PASS admin escrow listing is not global adminOnly
+PASS admin router escrow paths use escrow permission class
+PASS admin path regex boundaries are real regex word boundaries
+PASS admin escrow account numbers are masked
+PASS admin escrow list excludes phone/email/payment population
+PASS portal gates release by permission
+PASS portal gates refund by permission
+PASS portal exposes control rights
+PASS custody portal gates configuration
+Escrow admin control-plane validation: 15/15 PASS

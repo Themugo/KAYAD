@@ -1,0 +1,24 @@
+PASS signed-out sell entry is a premium role-choice surface
+PASS private seller and dealership have distinct, accessible selections
+PASS seller CTA uses existing registration and signed-in users are routed to support for role access
+PASS existing account has a canonical sign-in path with seller intent preserved
+PASS seller entry is honest about review and does not claim automatic approval
+PASS obsolete SellPage no longer simulates account/listing success
+PASS legacy sell URLs canonicalize to the existing seller workspace
+PASS seller dashboard no longer hardcodes a trust score or unverified approval state
+PASS seller workspace is role-gated and dealers open their existing dealer dashboard
+PASS login retains canonical shared premium shell
+PASS signup role matrix remains canonical and backend-backed
+PASS auth screens remain advertising-free
+PASS public pages share the canonical shell and palette tokens
+PASS buyer, seller, dealer, professional and operations portal identities are defined
+PASS dashboard role accents use KAYAD palette rather than unrelated purple/green accents
+PASS unknown saved-vehicle count is not displayed as a fabricated zero
+PASS dealer portal has its own KAYAD-aligned identity and header uses deep teal rather than near-black
+PASS Escrow dropdown has real public and authenticated destinations
+PASS escrow deal shortcut is authentication-gated in the navigation
+PASS public commercial ticker remains admin-managed and excluded from private workspaces
+PASS homepage commercial/hero controls continue using existing admin configuration
+PASS reduced-motion support covers new seller interactions
+PASS keyboard focus styling exists for seller workflow actions
+Premium sell/auth/public convergence: 23/23 PASS

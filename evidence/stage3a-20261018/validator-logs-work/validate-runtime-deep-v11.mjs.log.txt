@@ -1,0 +1,12 @@
+PASS Supabase exposes a bounded readiness probe
+PASS Supabase initialization resets stale connection state
+PASS Readiness endpoint uses the real database probe
+PASS Health probes are explicitly non-cacheable
+PASS Search facets use full-set database distinct queries
+PASS Search facets no longer derive values from an arbitrary 500-row sample
+PASS Search facets use short-lived cache protection
+PASS Search facets query is validated at the route boundary
+PASS Search facets have a dedicated query contract
+PASS Validation facade exports the search facets schema
+
+Runtime deep V11 validation: 10/10 PASS

@@ -1,0 +1,24 @@
+PASS financial lifecycle service exists
+PASS payment service records attempts/events
+PASS callback service records webhook receipts
+PASS callback service funds escrow payments
+PASS payment validation accepts canonical bid/purchase/escrow types
+PASS payment transaction uses checkout request id
+PASS atomic bid settlement remains authoritative
+PASS atomic escrow transitions remain authoritative
+PASS payment attempts schema is present
+PASS payment events schema is present
+PASS refund schema is present
+PASS webhook dedupe schema is present
+PASS paymentService: recordPaymentAttempt
+PASS paymentService: stk_initiated
+PASS paymentService: checkoutRequestId
+PASS callback: recordWebhookReceipt
+PASS callback: callback_received
+PASS callback: amount_verified
+PASS callback: escrow_mpesa_rejected
+PASS callback: markWebhookProcessed
+PASS validation: bid
+PASS validation: purchase
+PASS validation: escrow
+Transactions & Money initiative static checks: 23 PASS

@@ -1,0 +1,10 @@
+PASS canonical SearchSidebar exists
+PASS feature SearchSidebar is compatibility-only
+PASS root ReportButton is compatibility-only
+PASS canonical common ReportButton exists
+PASS root AdminWidgets is compatibility-only
+PASS canonical admin widgets exists
+PASS Showroom uses canonical SearchSidebar
+PASS feature common index exports canonical ReportButton
+
+8/8 checks passed

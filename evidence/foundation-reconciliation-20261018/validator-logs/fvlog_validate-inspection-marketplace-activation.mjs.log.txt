@@ -1,0 +1,17 @@
+PASS canonical inspection router imported
+PASS canonical inspection router mounted at /api/inspection
+PASS backward-compatible inspection alias mounted at /api/inspections
+PASS inspection payment supports booking binding
+PASS inspection payment amount is server derived
+PASS inspection callback uses atomic settlement RPC
+PASS inspection callback is payment-state idempotent
+PASS inspection payment history type is supported
+PASS frontend booking flow pays through the shared settlement helper
+PASS booking retry reuses the created booking instead of creating another
+PASS shared helper initiates payment for an existing booking
+PASS shared helper waits for authoritative payment success
+PASS frontend uses M-Pesa-only truthful copy
+PASS inspection API exposes booking payment
+PASS inspection payment schema requires bookingId
+PASS inspection settlement service delegates to atomic RPC
+Inspection marketplace activation validation passed: 16/16

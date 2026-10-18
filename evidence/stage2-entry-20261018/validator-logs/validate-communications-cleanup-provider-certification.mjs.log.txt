@@ -1,0 +1,12 @@
+PASS backend/services/communicationRetryCron.js
+PASS backend/services/auctionReminderCron.js
+PASS backend/services/savedSearchCron.js
+PASS backend/services/reminderAutomationService.js
+PASS backend/routes/communicationWebhookRoutes.js
+PASS backend/services/communicationControl.service.js
+PASS backend/services/communicationGateway.service.js
+PASS no direct provider calls outside canonical adapters
+PASS scheduled communications use canonical event gateway
+PASS provider callbacks and retry reconciliation are wired
+Provider configuration: Brevo=false, AfricaTalking=false, TwilioWhatsApp=false
+INFO live provider credential certification skipped: no provider secrets are available in this runtime

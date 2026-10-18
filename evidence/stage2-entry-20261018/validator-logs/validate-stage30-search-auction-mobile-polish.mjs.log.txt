@@ -1,0 +1,14 @@
+PASS auction styling remains scoped to phone breakpoint
+PASS auction tabs remain horizontally scrollable on phones
+PASS auction search and refresh remain usable on phones
+PASS auction reduced-motion preference is respected
+PASS auction still loads live/scheduled/completed from canonical service
+PASS auction lists preserve independent failure states
+PASS auction bidding/navigation still opens canonical detail route
+PASS saved auction toggle still calls canonical favorites API
+PASS marketplace toolbar polish is mobile-only
+PASS sort select keeps real controlled state and accessible label
+PASS real vehicle feed remains canonical
+PASS desktop marketplace rules are not globally overwritten
+
+Stage 30 source contract checks: 12/12 PASS

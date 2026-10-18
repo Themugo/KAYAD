@@ -1,0 +1,9 @@
+PASS Canonical owner module accepts both supported environment variables
+PASS Canonical owner module normalizes configured email case and whitespace
+PASS Login controller imports the shared owner predicate
+PASS Login controller has no divergent local owner allowlist
+PASS Authorization middleware uses the canonical owner predicate
+PASS Legacy seed refuses production before opening a database connection
+PASS Legacy seed no longer swallows per-owner provisioning failures
+
+OWNER IDENTITY CONVERGENCE: 7/7 checks passed

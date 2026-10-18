@@ -9,15 +9,25 @@ import {
   listDealerVerifications,
   transitionDealerVerification,
   getVerificationProgress,
+  deriveDealerOnboardingStage,
 } from "../services/dealerVerificationService.js";
 import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
 
 const maskPhone = (phone) => String(phone || "").replace(/(\d{3})\d{6}(\d{2})/, "$1******$2");
 
 export const submitVerification = async (req, res) => {
   try {
     const result = await submitDealerVerification(req.user.id, req.body?.documents || {});
+    // STAGE 5: acknowledge the APPLICATION (received ≠ verified email ≠ approved). Best effort: a
+    // notification failure never turns a saved application into an error.
+    await sendNotification({
+      userId: req.user.id,
+      title: "Dealer application received",
+      message: "We've received your dealer application. It is now waiting for review — you will be notified of the decision. Receiving your application does not mean your dealer account is approved yet.",
+      type: "verification",
+    }).catch((e) => logError("Dealer application acknowledgement failed", e));
     return res.json({ success: true, message: "Verification submitted successfully", verification: result.verification, progress: result.progress });
   } catch (err) {
     logError("Submit verification error", err);
@@ -28,8 +38,10 @@ export const submitVerification = async (req, res) => {
 export const getVerificationStatus = async (req, res) => {
   try {
     const verification = await getDealerVerification(req.user.id);
-    if (!verification) return res.json({ success: true, verificationStatus: "none", message: "No verification submitted" });
-    return res.json({ success: true, verification, progress: getVerificationProgress(verification) });
+    // STAGE 5: tell the client where the dealer is on the journey in plain, non-overlapping terms.
+    const onboardingStage = deriveDealerOnboardingStage({ emailVerified: req.user.emailVerified === true, verification });
+    if (!verification) return res.json({ success: true, verificationStatus: "none", onboardingStage, message: "No verification submitted" });
+    return res.json({ success: true, verification, onboardingStage, progress: getVerificationProgress(verification) });
   } catch (err) {
     logError("Get verification status error", err);
     return res.status(500).json({ success: false, message: "Failed to get verification status" });
@@ -95,7 +107,16 @@ const transition = async (req, res, status, message) => {
       if (userStatus) await updateMany("users", { id: targetUserId }, { status: userStatus });
       await sendNotification({ userId: targetUserId, title: message.title, message: message.body(verification), type: "verification" }).catch((e) => logError("Verification notification failed", e));
       if (status === "approved") {
-        await updateMany("cars", { dealer: targetUserId, status: "pending" }, { status: "available", isVerifiedDealer: true });
+        // STAGE 5: dealer approval is NOT listing approval. Pending listings are published in bulk only when
+        // the owner chose auto_publish (and the setting is trustworthy); under hold_for_review they stay
+        // pending for explicit listing review. The verified-dealer flag is always applied.
+        const policy = await getOnboardingPolicy();
+        const publish = isPolicyTrusted(policy) && policy.policy.listingModeration === "auto_publish";
+        if (publish) {
+          await updateMany("cars", { dealer: targetUserId, status: "pending" }, { status: "available", isVerifiedDealer: true });
+        } else {
+          await updateMany("cars", { dealer: targetUserId }, { isVerifiedDealer: true });
+        }
       }
     }
     return res.json({ success: true, message: message.success, verification });
@@ -106,7 +127,7 @@ const transition = async (req, res, status, message) => {
 };
 
 export const approveVerification = (req, res) => transition(req, res, "approved", {
-  success: "Verification approved successfully", title: "Verification Approved", body: () => "Your dealer verification has been approved. Your pending listings are now eligible for publication.",
+  success: "Verification approved successfully", title: "Verification Approved", body: () => "Your dealer application has been approved. Your listings are published according to the platform\'s listing review process.",
 });
 export const rejectVerification = (req, res) => transition(req, res, "rejected", {
   success: "Verification rejected", title: "Verification Rejected", body: (v) => `Your dealer verification was rejected: ${v.rejectionReason || "Please update your documents and resubmit."}`,

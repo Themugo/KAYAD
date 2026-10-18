@@ -1,0 +1,5 @@
+PHASE 36 CSRF BOUNDARY VALIDATION: PASS
+Backend route files discovered: 106
+Global browser-facing mutation CSRF: ENABLED
+JWT Authorization compatibility: ENABLED
+Machine callback exemptions: EXPLICIT / AUTHENTICATED SEPARATELY

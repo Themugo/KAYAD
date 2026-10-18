@@ -1,0 +1,12 @@
+PASS inspection order bridges to canonical execution record
+PASS inspection order establishes persistent inspection chat
+PASS assignment adds inspector to inspection chat
+PASS inspection submission persists checklist and evidence
+PASS inspection completion emits realtime update
+PASS chat writes use atomic database RPC
+PASS chat seen uses atomic database RPC
+PASS inspection socket room is participant-authorized
+PASS frontend has canonical inspection socket channel
+PASS database bridge stores chat linkage and inspection evidence/results fields
+
+Inspection → Chat/Realtime E2E validation: 10/10 PASS

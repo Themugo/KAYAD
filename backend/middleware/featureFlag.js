@@ -38,8 +38,8 @@ export const featureFlag = (key, options = {}) => {
       next();
     } catch (err) {
       logError("Feature flag middleware error", err);
-      // On error, allow request to proceed (fail-open for backwards compatibility)
-      next();
+      // STAGE 4A (G4): fail CLOSED. An unavailable flag service must never silently authorize a gated operation.
+      return res.status(503).json({ success: false, code: "FEATURE_FLAG_UNAVAILABLE", message: "Feature check unavailable" });
     }
   };
 };
@@ -119,8 +119,8 @@ export const evaluateFeatureFlag = (key, options = {}) => {
       next();
     } catch (err) {
       logError("Evaluate feature flag middleware error", err);
-      // On error, allow request to proceed (fail-open for backwards compatibility)
-      next();
+      // STAGE 4A (G4): fail CLOSED. An unavailable flag service must never silently authorize a gated operation.
+      return res.status(503).json({ success: false, code: "FEATURE_FLAG_UNAVAILABLE", message: "Feature check unavailable" });
     }
   };
 };
@@ -172,8 +172,8 @@ export const environmentFlag = (key, options = {}) => {
       next();
     } catch (err) {
       logError("Environment flag middleware error", err);
-      // On error, allow request to proceed
-      next();
+      // STAGE 4A (G4): fail CLOSED. An unavailable flag service must never silently authorize a gated operation.
+      return res.status(503).json({ success: false, code: "FEATURE_FLAG_UNAVAILABLE", message: "Feature check unavailable" });
     }
   };
 };
@@ -231,8 +231,8 @@ export const roleFlag = (key, options = {}) => {
       next();
     } catch (err) {
       logError("Role flag middleware error", err);
-      // On error, allow request to proceed
-      next();
+      // STAGE 4A (G4): fail CLOSED. An unavailable flag service must never silently authorize a gated operation.
+      return res.status(503).json({ success: false, code: "FEATURE_FLAG_UNAVAILABLE", message: "Feature check unavailable" });
     }
   };
 };
@@ -294,8 +294,8 @@ export const dealerFlag = (key, options = {}) => {
       next();
     } catch (err) {
       logError("Dealer flag middleware error", err);
-      // On error, allow request to proceed
-      next();
+      // STAGE 4A (G4): fail CLOSED. An unavailable flag service must never silently authorize a gated operation.
+      return res.status(503).json({ success: false, code: "FEATURE_FLAG_UNAVAILABLE", message: "Feature check unavailable" });
     }
   };
 };
@@ -327,8 +327,8 @@ export const percentageRolloutFlag = (key, options = {}) => {
       next();
     } catch (err) {
       logError("Percentage rollout flag middleware error", err);
-      // On error, allow request to proceed
-      next();
+      // STAGE 4A (G4): fail CLOSED. An unavailable flag service must never silently authorize a gated operation.
+      return res.status(503).json({ success: false, code: "FEATURE_FLAG_UNAVAILABLE", message: "Feature check unavailable" });
     }
   };
 };
@@ -443,8 +443,8 @@ export const combinedFlag = (key, options = {}) => {
       next();
     } catch (err) {
       logError("Combined flag middleware error", err);
-      // On error, allow request to proceed
-      next();
+      // STAGE 4A (G4): fail CLOSED. An unavailable flag service must never silently authorize a gated operation.
+      return res.status(503).json({ success: false, code: "FEATURE_FLAG_UNAVAILABLE", message: "Feature check unavailable" });
     }
   };
 };

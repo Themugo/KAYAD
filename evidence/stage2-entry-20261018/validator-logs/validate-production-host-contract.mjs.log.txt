@@ -1,0 +1,7 @@
+PASS canonical public URL is www.kayad.space
+PASS production browser API uses same-origin /api
+PASS production browser API uses same-origin routing with a Vercel rewrite
+PASS backend CORS uses current stable Vercel aliases
+PASS Vercel retains API-before-SPA compatibility routing
+PASS production verifier targets canonical public and API endpoints
+Production host contract: PASS

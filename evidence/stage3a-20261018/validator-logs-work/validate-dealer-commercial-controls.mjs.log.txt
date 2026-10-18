@@ -1,0 +1,11 @@
+PASS canonical subscription service
+PASS subscription controller
+PASS subscription routes
+PASS atomic callback activation
+PASS commercial migration
+PASS lifecycle migration
+PASS frontend transport
+PASS package UI uses server plans
+PASS dealer upgrade has no duplicate plan catalogue
+
+Dealer commercial controls: 9/9 PASS

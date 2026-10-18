@@ -1,0 +1,18 @@
+PASS ownership service uses canonical db adapter
+PASS ownership profile update uses user id scope
+PASS owner vehicle access is user scoped
+PASS expense totals are real database data
+PASS sold vehicles cancel pending reminders
+PASS ownership API routes are protected
+PASS passport public route is canonical
+PASS passport service uses canonical db adapter
+PASS passport search uses canonical db lookup
+PASS passport public controller uses passport service
+PASS server mounts ownership API
+PASS frontend uses real ownership API
+PASS migration creates ownership vehicles
+PASS migration creates vehicle passports
+PASS migration enables RLS
+PASS migration preserves passport audit trail
+
+Ownership + passport domain gate: 16/16 PASS

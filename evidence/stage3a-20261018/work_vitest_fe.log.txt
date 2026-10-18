@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /home/claude/s3a/work
+
+
+ Test Files  81 passed (81)
+      Tests  643 passed | 1 skipped (644)
+   Start at  10:13:45
+   Duration  88.79s (transform 2.69s, setup 6.37s, import 8.38s, tests 26.02s, environment 38.49s)
+
+exit 0

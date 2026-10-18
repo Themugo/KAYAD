@@ -1,6 +1,9 @@
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
+import { auditAfterCommit } from "../utils/auditAfterCommit.js";
+import { moderationBlockedReason } from "../utils/carModerationGuard.js";
+import { cacheDelPattern } from "../utils/cache.js";
 import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 
@@ -33,13 +36,35 @@ export const bulkModerateCars = async (req, res) => {
       });
     }
 
+    // STAGE 4 (S4-C-01): POST /admin/cars/:id/moderate refuses sold listings
+    // (utils/carModerationGuard.js) but this bulk path updated every id it was
+    // given, so one request could flip a completed sale back to "available"
+    // (or hide it) while escrow/ownership records still show it as sold.
+    // Apply the same precondition per car and report what was skipped.
+    const skipped = [];
+    const eligible = [];
+    for (const car of cars) {
+      const blocked = moderationBlockedReason(car);
+      if (blocked) skipped.push({ id: String(car.id ?? car._id), reason: "LISTING_MODERATION_BLOCKED" });
+      else eligible.push(car);
+    }
+    if (eligible.length === 0) {
+      return res.status(409).json({
+        success: false,
+        code: "LISTING_MODERATION_BLOCKED",
+        message: "None of the selected listings can be moderated: sold listings are unwound through the escrow/refund workflow.",
+        skipped,
+      });
+    }
+    const eligibleIds = eligible.map((c) => c._id ?? c.id);
+
     await Car.updateMany(
-      { _id: { $in: carIds } },
+      { _id: { $in: eligibleIds } },
       { $set: { status: newStatus } },
     );
 
     const dealerNotified = new Set();
-    for (const car of cars) {
+    for (const car of eligible) {
       if (car.dealer && !dealerNotified.has(car.dealer._id.toString())) {
         dealerNotified.add(car.dealer._id.toString());
         const listingTitle = car.title || `${car.brand || ""} ${car.model || ""}`.trim();
@@ -64,20 +89,21 @@ export const bulkModerateCars = async (req, res) => {
       }
     }
 
-    logInfo("Bulk car moderation", { carIds, action, adminId: req.user.id, count: cars.length });
+    logInfo("Bulk car moderation", { carIds, action, adminId: req.user.id, count: eligible.length });
 
-    await AuditLog.create({
+    await auditAfterCommit({
       action: `bulk_car_${action}`,
       actor: req.user.id,
       actorRole: req.user.role,
       actorName: req.user.name,
-      details: { carIds, action, adminNote, count: cars.length },
+      details: { carIds, action, adminNote, count: eligible.length, skipped },
     });
 
     res.json({
       success: true,
-      message: `${cars.length} car(s) ${action}d`,
-      count: cars.length,
+      message: `${eligible.length} car(s) ${action}d`,
+      count: eligible.length,
+      ...(skipped.length ? { skipped } : {}),
     });
   } catch (err) {
     logError("Bulk moderate cars error", err);
@@ -108,25 +134,55 @@ export const bulkDeleteCars = async (req, res) => {
       });
     }
 
-    await Car.updateMany(
-      { _id: { $in: carIds } },
-      { $set: { status: "deleted" } },
-    );
+    // STAGE 4 (S4-C-03): this path wrote status "deleted" - not a member of
+    // cars_status_check (available/sold/pending/reserved/hidden/draft) and not
+    // the repository's soft-delete convention (deleted_at via Car.softDelete,
+    // listingCount, cache invalidation - see carController.deleteCar). It also
+    // accepted sold listings. Use the same soft delete as the single-listing
+    // endpoint and refuse sold listings per car.
+    const skipped = [];
+    const eligible = [];
+    for (const car of cars) {
+      if (moderationBlockedReason(car)) skipped.push({ id: String(car.id ?? car._id), reason: "LISTING_MODERATION_BLOCKED" });
+      else eligible.push(car);
+    }
+    if (eligible.length === 0) {
+      return res.status(409).json({
+        success: false,
+        code: "LISTING_MODERATION_BLOCKED",
+        message: "None of the selected listings can be deleted: sold listings are unwound through the escrow/refund workflow.",
+        skipped,
+      });
+    }
 
-    logInfo("Bulk car delete", { carIds, adminId: req.user.id, count: cars.length });
+    for (const car of eligible) {
+      await Car.softDelete(car.id ?? car._id, req.user.id);
+      if (car.dealer) {
+        const owner = await User.findById(car.dealer).select("listingCount");
+        if (owner && owner.listingCount > 0) {
+          await User.findByIdAndUpdate(car.dealer, { listingCount: owner.listingCount - 1 });
+        }
+      }
+    }
+    await cacheDelPattern("cars:list:*");
+    await cacheDelPattern("kayad:search:facets:*");
+    await cacheDelPattern("kayad:search:suggestions:*");
 
-    await AuditLog.create({
+    logInfo("Bulk car delete", { carIds, adminId: req.user.id, count: eligible.length });
+
+    await auditAfterCommit({
       action: "bulk_car_delete",
       actor: req.user.id,
       actorRole: req.user.role,
       actorName: req.user.name,
-      details: { carIds, count: cars.length },
+      details: { carIds, count: eligible.length, skipped },
     });
 
     res.json({
       success: true,
-      message: `${cars.length} car(s) deleted`,
-      count: cars.length,
+      message: `${eligible.length} car(s) deleted`,
+      count: eligible.length,
+      ...(skipped.length ? { skipped } : {}),
     });
   } catch (err) {
     logError("Bulk delete cars error", err);
