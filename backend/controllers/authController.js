@@ -892,7 +892,9 @@ export const resendVerification = async (req, res) => {
           metadata: { verification: true, resend: true },
           idempotencyKey: `verification-resend:${user.id}:${nextVerifyTokenHash.slice(0, 16)}`,
         });
-        if (requiresEmailVerification()) assertEmailDeliverySucceeded(verificationDelivery, "Verification");
+        // STAGE 5E: provider acceptance is the commit point in EVERY configuration. This used to run only when verification was required
+        // (key present / flag on), so with the gate off a failed or undeliverable send still replaced the stored token with one nobody received.
+        assertEmailDeliverySucceeded(verificationDelivery, "Verification");
 
         // Provider acceptance is the commit point for the replacement token.
         userAuth.emailVerifyToken = nextVerifyTokenHash;

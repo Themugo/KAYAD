@@ -1,0 +1,35 @@
+/* eslint-disable no-undef -- Node-run acceptance harness */
+// STAGE 5E — real browser (Chromium), real SPA, real API, disposable PostgreSQL, STUB mail capture (not Brevo): the exact owner-login block and its recovery path.
+import fs from "node:fs";
+import { chromium } from "/opt/node-tools/node_modules/playwright/index.mjs";
+import { sql, rec, summary, capCount, tokenFrom, VERIFY_RE, rawUser, wipeUsers, designated } from "./lib.mjs";
+const WEB = "http://127.0.0.1:5173", SHOTS = "/home/claude/s5f/x/evidence/stage5e2-20261019/shots"; fs.mkdirSync(SHOTS, { recursive: true });
+const [O1] = designated(); const PW = "Old!Dealer#2026a";
+sql("DELETE FROM owner_invitations; DELETE FROM owner_memberships; UPDATE owner_bootstrap_state SET status='open', closed_at=NULL, closed_by=NULL, closed_reason=NULL");
+wipeUsers([O1]); rawUser(O1, "dealer", PW, false, "pending");
+const browser = await chromium.launch(); const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const p = await ctx.newPage(); p.setDefaultTimeout(20000);
+const bodyText = async () => (await p.locator("body").innerText()).replace(/\s+/g, " ");
+await p.goto(`${WEB}/login`, { waitUntil: "networkidle" });
+await p.getByPlaceholder("you@example.com").fill(O1); await p.getByPlaceholder("Enter your password").fill(PW);
+await p.getByRole("button", { name: /Continue to KAYAD/ }).click();
+await p.getByText(/platform-owner account is not verified/i).waitFor();
+await p.screenshot({ path: `${SHOTS}/owner_login_blocked_with_resend.png`, fullPage: true });
+const t1 = await bodyText();
+rec("UI1 the owner explanation is shown after a correct password for the unverified designated address", /platform-owner account is not verified/i.test(t1));
+const btn = p.getByRole("button", { name: /resend verification email/i });
+rec("UI2 the 'Resend verification email' action the message refers to is actually on the page and enabled", (await btn.count()) === 1 && (await btn.isEnabled()));
+const since = capCount(); await btn.click(); await p.waitForTimeout(1200);
+const tok = await tokenFrom(O1, VERIFY_RE, since);
+rec("UI3 clicking it causes a (stubbed) verification mail to the owner mailbox, link carries a 64-hex token", !!tok);
+await p.goto(`${WEB}/verify-email?token=${tok}`, { waitUntil: "networkidle" }); await p.getByText(/Email verified/i).first().waitFor();
+await p.screenshot({ path: `${SHOTS}/owner_email_verified.png`, fullPage: true });
+rec("UI4 the verification page confirms 'Email verified'", /Email verified/i.test(await bodyText()));
+await p.getByRole("link", { name: /Continue to sign in/i }).click(); await p.waitForURL(/login/);
+await p.getByPlaceholder("you@example.com").fill(O1); await p.getByPlaceholder("Enter your password").fill(PW);
+await p.getByRole("button", { name: /Continue to KAYAD/ }).click(); await p.waitForURL((u) => !u.pathname.includes("login"), { timeout: 20000 }); await p.waitForLoadState("networkidle").catch(() => {});
+await p.screenshot({ path: `${SHOTS}/owner_after_verified_login_dealer_no_owner_authority.png`, fullPage: true });
+const st = await p.evaluate(async () => (await fetch("/api/owner", { credentials: "include" })).status);
+rec("UI5 after verification the account signs in with its OLD password and (governance store installed, no membership) holds NO owner authority: /api/owner → 403", st === 403, String(st));
+rec("UI6 role and status unchanged by verification (dealer/pending)", sql(`select role||'/'||status from users where email='${O1}'`) === "dealer/pending");
+await browser.close();
+summary("ui_owner_unverified");

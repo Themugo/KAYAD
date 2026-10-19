@@ -62,7 +62,7 @@ export interface AuthResponse {
  * between, rather than a single generic "it failed" - a login attempt
  * needs to tell "wrong password" apart from "server unreachable" to
  * show the right message. */
-export type AuthErrorKind = 'invalid_credentials' | 'email_verification_required' | 'forbidden' | 'rate_limited' | 'csrf' | 'validation' | 'conflict' | 'network' | 'server' | 'unknown';
+export type AuthErrorKind = 'invalid_credentials' | 'email_verification_required' | 'owner_identity_unverified' | 'forbidden' | 'rate_limited' | 'csrf' | 'validation' | 'conflict' | 'network' | 'server' | 'unknown';
 
 export class AuthApiError extends Error {
   kind: AuthErrorKind;
@@ -79,7 +79,13 @@ async function authFetch(path: string, options: RequestInit & { timeout?: number
     return await request<AuthResponse>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string>, timeout: options.timeout });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
-    const kind: AuthErrorKind = error.status === 403 && /csrf/i.test(error.message)
+    // STAGE 5E: the backend's owner-identity gate answers 403 with code OWNER_IDENTITY_UNVERIFIED. Its message points the owner at
+    // "Resend verification email", so the caller must be able to recognise it and offer that action (matched on the machine code,
+    // never on wording).
+    const responseCode = (error.responseData as { code?: unknown } | undefined)?.code;
+    const kind: AuthErrorKind = error.status === 403 && responseCode === 'OWNER_IDENTITY_UNVERIFIED'
+      ? 'owner_identity_unverified'
+      : error.status === 403 && /csrf/i.test(error.message)
       ? 'csrf'
       : error.status === 403 && /verify your email/i.test(error.message)
         ? 'email_verification_required'

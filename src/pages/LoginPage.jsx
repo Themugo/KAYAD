@@ -56,7 +56,10 @@ export function LoginPage() {
     } catch (err) {
       const message = err instanceof AuthApiError ? err.message : err?.response?.data?.message || 'Unable to sign in. Please try again.';
       const needsVerification = err instanceof AuthApiError && (err.kind === 'email_verification_required' || (err.status === 403 && /verify your email/i.test(err.message)));
-      setVerificationRequired(needsVerification);
+      // STAGE 5E: the owner-identity gate tells the owner to "Resend verification email"; show that action AND keep the owner-specific
+      // explanation visible (the generic panel alone would hide why a correct password was refused).
+      const ownerUnverified = err instanceof AuthApiError && err.kind === 'owner_identity_unverified';
+      setVerificationRequired(needsVerification || ownerUnverified);
       setError(needsVerification ? '' : message);
     } finally {
       inFlight.current = false;

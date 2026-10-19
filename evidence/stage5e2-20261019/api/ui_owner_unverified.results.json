@@ -1,0 +1,36 @@
+{
+ "pass": 6,
+ "fail": 0,
+ "results": [
+  {
+   "id": "UI1 the owner explanation is shown after a correct password for the unverified designated address",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI2 the 'Resend verification email' action the message refers to is actually on the page and enabled",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI3 clicking it causes a (stubbed) verification mail to the owner mailbox, link carries a 64-hex token",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI4 the verification page confirms 'Email verified'",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI5 after verification the account signs in with its OLD password and (governance store installed, no membership) holds NO owner authority: /api/owner → 403",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "UI6 role and status unchanged by verification (dealer/pending)",
+   "ok": true,
+   "d": ""
+  }
+ ]
+}

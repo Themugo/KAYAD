@@ -1,0 +1,471 @@
+{
+ "pass": 93,
+ "fail": 0,
+ "results": [
+  {
+   "id": "K1.1 public registration of the second designated address is refused (reserved)",
+   "ok": true,
+   "d": "{\"success\":false,\"code\":\"OWNER_IDENTITY_RESERVED\",\"message\":\"This email address cannot be used for public registration.\"}"
+  },
+  {
+   "id": "K1.2 WRONG password → generic 401 'Invalid credentials' (NOT the owner message): the owner message is only reachable after a correct password",
+   "ok": true,
+   "d": "401 {\"success\":false,\"message\":\"Invalid credentials\"}"
+  },
+  {
+   "id": "K1.3 CORRECT password, designated address, email_verified=false → 403 code OWNER_IDENTITY_UNVERIFIED with the user's exact message",
+   "ok": true,
+   "d": "403 {\"success\":false,\"code\":\"OWNER_IDENTITY_UNVERIFIED\",\"retryable\":false,\"message\":\"The platform-owner account is not verified. Use \\\"Resend verification email\\\" for the owner address and open the link, or follow the approv"
+  },
+  {
+   "id": "K1.4 no session/token was issued by the blocked login",
+   "ok": true,
+   "d": "{\"success\":false,\"code\":\"OWNER_IDENTITY_UNVERIFIED\",\"retryable\":false,\"message\":\"The platform-owner account is not verified. Use \\\"Resend verification email\\\" for the owner address and open the link, or follow the approv"
+  },
+  {
+   "id": "K1.5 control: a non-designated unverified dealer is blocked by the ORDINARY gate (different code) — the owner message really is designation-specific",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Please verify your email before logging in. Check your inbox or request a new verification link.\"}"
+  },
+  {
+   "id": "K1.6 --plan: O1 pending_verification (not provisioned), O2 not an account yet",
+   "ok": true,
+   "d": "{ \"bootstrap\": \"open\", \"usableOwners\": 0, \"designated\": [ { \"identity\": \"ow***@kayad-test.example\", \"state\": \"pending_verification\" }, { \"identity\": \"ow***@kayad-test.example\", \"state\": \"unprovisioned\" } ] }"
+  },
+  {
+   "id": "K1.7 dealer data unchanged by the blocked attempts (digest)",
+   "ok": true,
+   "d": "want \"cd01dd188ee36f63b2ddc4ef33bcb6d5\" got \"cd01dd188ee36f63b2ddc4ef33bcb6d5\""
+  },
+  {
+   "id": "K1.8 failed/blocked attempts did not lock or alter the account (login_attempts)",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "K2.1 identical status AND body for unverified-owner, unknown and already-verified addresses (no enumeration)",
+   "ok": true,
+   "d": "202/202/202"
+  },
+  {
+   "id": "K2.2 the (stubbed) provider received exactly one verification mail for O1, none for unknown/verified, link carries a 64-hex token",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K2.3 immediate second resend → same generic 202 and NO second mail (per-account cooldown)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K2.4 after the cooldown a replacement link is issued (different token)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K2.5 the first (superseded) link no longer verifies",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "K2.6 …and the account is STILL unverified (a refused link changes nothing)",
+   "ok": true,
+   "d": "want \"false\" got \"false\""
+  },
+  {
+   "id": "K2.7 an EXPIRED link is refused",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "K2.8 …still unverified, owner still blocked",
+   "ok": true,
+   "d": "want \"false/403\" got \"false/403\""
+  },
+  {
+   "id": "K2.9 a fresh link can still be requested after expiry",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K2.10 the mailbox holder's link verifies the account",
+   "ok": true,
+   "d": "want \"200/true\" got \"200/true\""
+  },
+  {
+   "id": "K2.11 the verification link is single-use (replay refused)",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "K2.12 verified designated address now signs in (old password still works: nothing was replaced)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K2.13 …but holds NO owner authority (no membership): /api/owner → 403",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K2.14 users.role still 'dealer', status unchanged, dealer data identical",
+   "ok": true,
+   "d": "want \"cd01dd188ee36f63b2ddc4ef33bcb6d5\" got \"cd01dd188ee36f63b2ddc4ef33bcb6d5\""
+  },
+  {
+   "id": "K3.1 --plan now: O1 account_verified_not_owner, O2 no account",
+   "ok": true,
+   "d": "[{\"identity\":\"ow***@kayad-test.example\",\"state\":\"account_verified_not_owner\"},{\"identity\":\"ow***@kayad-test.example\",\"state\":\"unprovisioned\"}]"
+  },
+  {
+   "id": "K3.2 --apply: two invitations sent, one per designated mailbox",
+   "ok": true,
+   "d": "[19:52:59] \u001b[32mINFO\u001b[39m: \u001b[36mEmail sent successfully\u001b[39m \u001b[35msubject\u001b[39m: \"Owner invitation — Kayad\" \u001b[35mto\u001b[39m: \"ow***@kayad-test.example\" \u001b[35mmessageId\u001b[39m: \"<capture-1792439579988@local>\" [19:52:59] \u001b[32mINFO\u001b[39m: \u001b[36mCommuni"
+  },
+  {
+   "id": "K3.3 each mailbox got its own distinct token; CLI output never contains a token",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K3.4 tokens are stored only as sha256 hashes (no plaintext token in owner_invitations)",
+   "ok": true,
+   "d": "want \"0\" got \"0\""
+  },
+  {
+   "id": "K3.5 invitations alone changed nothing (dealer digest identical, 0 memberships)",
+   "ok": true,
+   "d": "want \"cd01dd188ee36f63b2ddc4ef33bcb6d5/0\" got \"cd01dd188ee36f63b2ddc4ef33bcb6d5/0\""
+  },
+  {
+   "id": "K3.6 re-running --apply is idempotent (no duplicate pending invitations)",
+   "ok": true,
+   "d": "0 pending=2"
+  },
+  {
+   "id": "K4.1 verified existing account + token but NOT signed in → refused (OWNER_LOGIN_REQUIRED); token alone never replaces credentials",
+   "ok": true,
+   "d": "401 {\"success\":false,\"code\":\"OWNER_LOGIN_REQUIRED\",\"message\":\"Sign in to the account that received this invitation, then open the link again.\"}"
+  },
+  {
+   "id": "K4.2 …nothing mutated; old password intact; invitation still pending",
+   "ok": true,
+   "d": "want \"cd01dd188ee36f63b2ddc4ef33bcb6d5/0/200\" got \"cd01dd188ee36f63b2ddc4ef33bcb6d5/0/200\""
+  },
+  {
+   "id": "K4.3 signed in as a DIFFERENT verified user → refused; no membership for either",
+   "ok": true,
+   "d": "401 {\"success\":false,\"code\":\"OWNER_LOGIN_REQUIRED\",\"message\":\"Sign in to the account that received this invitation, then open the link again.\"}"
+  },
+  {
+   "id": "K4.4 unknown token → refused",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "K4.5 weak password refused before any change (no account created for O2)",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "K4.6 audit write FAILS → acceptance fails (not 200)",
+   "ok": true,
+   "d": "503 {\"success\":false,\"code\":\"OWNER_STORE_UNAVAILABLE\",\"message\":\"The owner membership store is temporarily unavailable. See the owner recovery runbook if this persists.\"}"
+  },
+  {
+   "id": "K4.7 …no partial state: no O2 user, no auth row, no membership, invitation still pending",
+   "ok": true,
+   "d": "want \"0/0/1\" got \"0/0/1\""
+  },
+  {
+   "id": "K4.8 EXPIRED invitation refused (OWNER_INVITATION_EXPIRED); no account created",
+   "ok": true,
+   "d": "410 {\"success\":false,\"code\":\"OWNER_INVITATION_EXPIRED\",\"message\":\"This invitation link has expired. Ask an owner to resend it.\"}"
+  },
+  {
+   "id": "K4.9 re-issue after expiry works (new token; the expired one stays dead)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K4.10 the old expired token is still refused",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K4.11 CONCURRENT acceptance of one token: exactly ONE succeeds",
+   "ok": true,
+   "d": "200,400,400,400,400,400"
+  },
+  {
+   "id": "K4.12 …exactly one O2 user, one auth row, one active membership, one activation event",
+   "ok": true,
+   "d": "want \"1/1/1/1\" got \"1/1/1/1\""
+  },
+  {
+   "id": "K4.13 bootstrap stays OPEN: only 1 of 2 designated owners is established",
+   "ok": true,
+   "d": "want \"open\" got \"open\""
+  },
+  {
+   "id": "K4.14 replay of the accepted token refused",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K4.15 the new owner's users row is an ordinary account (role 'user'), authority comes from the membership only",
+   "ok": true,
+   "d": "user/approved/true"
+  },
+  {
+   "id": "K5.1 signed-in, verified mailbox owner accepts → 200, accountCreated=false, credentialsReset=false",
+   "ok": true,
+   "d": "{\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":false}"
+  },
+  {
+   "id": "K5.2 DEALER DATA UNCHANGED after owner activation (role, status, business, phone, dealers/verification rows)",
+   "ok": true,
+   "d": "want \"cd01dd188ee36f63b2ddc4ef33bcb6d5\" got \"cd01dd188ee36f63b2ddc4ef33bcb6d5\""
+  },
+  {
+   "id": "K5.3 token_version unchanged and live sessions NOT revoked",
+   "ok": true,
+   "d": "want \"0/2\" got \"0/2\""
+  },
+  {
+   "id": "K5.4 old password still works",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K5.5 the pre-existing session now carries owner authority",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K5.6 BOTH designated owners established → bootstrap switch closed automatically",
+   "ok": true,
+   "d": "want \"closed\" got \"closed\""
+  },
+  {
+   "id": "K5.7 two usable owners",
+   "ok": true,
+   "d": "want \"2\" got \"2\""
+  },
+  {
+   "id": "K5.8 pending dealer was NOT auto-approved",
+   "ok": true,
+   "d": "want \"0\" got \"0\""
+  },
+  {
+   "id": "K5.9 bootstrap --apply refuses after closure",
+   "ok": true,
+   "d": "3"
+  },
+  {
+   "id": "K6.0 O2 signs in with the password chosen at acceptance",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K6.1 an ordinary verified dealer cannot reach owner management (403)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K6.2 unauthenticated callers are refused (401/403)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K6.3 owner action with a WRONG step-up password refused; no invitation created",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "K6.4 mismatched confirmation address refused; no invitation created",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "K6.5 owner invites a THIRD (non-designated) address with step-up → 201",
+   "ok": true,
+   "d": "{\"success\":true,\"invitation\":{\"id\":\"626c5971-6171-4fc0-8285-40d794d80726\",\"email\":\"k-extra-owner@kayad-test.example\",\"kind\":\"invitation\",\"expiresAt\":\"2026-10-20T22:53:09.393+03:00\"},\"emailDelivered\":true,\"emailStatus\":\"s"
+  },
+  {
+   "id": "K6.6 DUPLICATE pending invitation refused (no second row)",
+   "ok": true,
+   "d": "409 {\"success\":false,\"code\":\"OWNER_INVITATION_PENDING\",\"message\":\"An invitation for that address is already pending. Use Resend to issue a fresh link.\"}"
+  },
+  {
+   "id": "K6.7 inviting someone who is already an active owner refused",
+   "ok": true,
+   "d": "409 {\"success\":false,\"code\":\"OWNER_ALREADY_ACTIVE\",\"message\":\"That identity is already an active owner.\"}"
+  },
+  {
+   "id": "K6.8 owner revokes a pending invitation → 200",
+   "ok": true,
+   "d": "{\"success\":true,\"revoked\":true}"
+  },
+  {
+   "id": "K6.9 the REVOKED invitation cannot be accepted; no account created",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "K6.10 PATH B (unverified existing account): mailbox-token holder takes over → credentialsReset=true, accountCreated=false",
+   "ok": true,
+   "d": "{\"success\":true,\"accepted\":true,\"email\":\"k-***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":true}"
+  },
+  {
+   "id": "K6.11 …role/status/business unchanged even on Path B; old password dead; new works",
+   "ok": true,
+   "d": "want \"929bfc30aef8a4f20d45a89a6a0844df/401/200\" got \"929bfc30aef8a4f20d45a89a6a0844df/401/200\""
+  },
+  {
+   "id": "K6.12 three usable owners",
+   "ok": true,
+   "d": "want \"3\" got \"3\""
+  },
+  {
+   "id": "K7.1 third owner reaches /api/owner",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K7.2 third owner's socket handshake accepted",
+   "ok": true,
+   "d": "want \"connected\" got \"connected\""
+  },
+  {
+   "id": "K7.3 owner removes the third owner (3→2)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K7.4 removed owner's LIVE session is denied immediately on HTTP",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K7.5 removed owner's refresh token is revoked (cannot mint a new session)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "K7.6 removed owner's old token: socket rejected (or connected without owner authority)",
+   "ok": true,
+   "d": "connected"
+  },
+  {
+   "id": "K7.7 removed owner re-logs in as an ordinary user with NO owner surface (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "K7.8 removal wrote a success audit event",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  },
+  {
+   "id": "K7.9 owner removes O2 (2→1)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K7.10 the LAST usable owner cannot be removed (self or otherwise) → 409",
+   "ok": true,
+   "d": "409 {\"success\":false,\"code\":\"OWNER_LAST_USABLE\",\"message\":\"Blocked: this would leave KAYAD with no verified, active owner. Add and activate another owner first.\"}"
+  },
+  {
+   "id": "K7.11 still exactly one usable owner and O1's membership active",
+   "ok": true,
+   "d": "want \"1/active\" got \"1/active\""
+  },
+  {
+   "id": "K7.12 emergency recovery is refused by default (RECOVERY_NOT_AUTHORIZED: no time-boxed deployment authorization)",
+   "ok": true,
+   "d": "3 ✅ Supabase client initialized RECOVERY_NOT_AUTHORIZED: Emergency recovery is not authorised: set OWNER_EMERGENCY_RECOVERY_UNTIL to an ISO time within the next 2"
+  },
+  {
+   "id": "K7.13 even WITH the time-boxed authorization it refuses while a usable owner exists (every designated identity reports refused; no invitation created)",
+   "ok": true,
+   "d": "0 { \"operator\": \"5e-k-harness\", \"incident\": \"INC-5E-K\", \"results\": [ { \"identity\": \"ow***@kayad-test.example\", \"result\": \"refused:OWNER_RECOVERY_NOT_NEEDED\" }, { \"identity\": \"ow***@kayad-test.example\", \"result\": \"refused:O"
+  },
+  {
+   "id": "K8.1 success AND denied events exist for issue/accept/activate/revoke",
+   "ok": true,
+   "d": "want \"t\" got \"t\""
+  },
+  {
+   "id": "K8.2 no token, hash or password material in event text",
+   "ok": true,
+   "d": "want \"0\" got \"0\""
+  },
+  {
+   "id": "K8.3 the event ledger is append-only (DELETE refused by trigger)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K9.0 backend restarted with EMPTY WEBHOIST_EMAIL",
+   "ok": true,
+   "d": "up"
+  },
+  {
+   "id": "K9.1 MISSING config: the existing DB-backed owner keeps authority (config grants/removes nothing in database mode)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "K9.2 MISSING config: a REVOKED former owner's address is no longer reserved, so public sign-up creates an ORDINARY account (201)",
+   "ok": true,
+   "d": "201 {\"success\":true,\"user\":{\"id\":\"2320830f-e6d1-493a-b5f1-ee3aff3a8069\",\"name\":\"Late Squatter\",\"email\":\"owner-two@kayad-test.example\",\"role\":\"user\",\"phone\":\"254712345678\",\"avatar\":\"\",\"status\":\"approved\",\"isBanned\":false,\"loc"
+  },
+  {
+   "id": "K9.3 …and that account has NO owner authority (unverified ⇒ cannot even sign in; role user)",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "K9.4 backend restarted with a MISSPELLED second address",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K9.5 --verify-designated exposes the discrepancy that masked --plan hides (O1 true, intended O2 false, 1 unexpected configured)",
+   "ok": true,
+   "d": "{\"configuredCount\":2,\"expected\":[{\"identity\":\"ow***@kayad-test.example\",\"configuredExactly\":true},{\"identity\":\"ow***@kayad-test.example\",\"configuredExactly\":false}],\"configuredButNotExpectedCount\":1}"
+  },
+  {
+   "id": "K9.6 the MISSPELLED address is the one that is reserved (403)…",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "K9.7 …while the intended address is NOT reserved (a squatter row exists from K9.2): config typo = silent loss of the reservation, never a grant of privilege",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K9.8 backend restored to the two-designated disposable configuration",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "K10.1 invitation (mailbox-delivered token) lets the real mailbox holder take over the unverified squatter row",
+   "ok": true,
+   "d": "{\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":true}"
+  },
+  {
+   "id": "K10.2 the squatter's password is dead; the holder's works",
+   "ok": true,
+   "d": "want \"401/200\" got \"401/200\""
+  },
+  {
+   "id": "K10.3 bootstrap not closed (O1's membership was reset in this sub-scenario; 1 of 2 established)",
+   "ok": true,
+   "d": "want \"open\" got \"open\""
+  }
+ ]
+}
