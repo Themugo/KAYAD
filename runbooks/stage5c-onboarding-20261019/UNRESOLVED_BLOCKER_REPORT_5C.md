@@ -12,3 +12,7 @@
 | B8 | `adminOnly` admits `ghost_checker` (O5C-01) | an inspector can reach ~236 admin routes | route-by-route review; decision D5C-A |
 | B9 | Wholesale/trade listings have no column | feature returns 503 | schema decision |
 | B10 | Deployed revision unknown | cannot confirm hosted runs this code | compare deployed commit with this ZIP |
+
+
+## Stage 5C.1 addendum
+B1–B10 are unchanged. New explicit items B11 (Windows tree reconciliation), B12 (real Cloudinary not contacted) and B13 (production-mode error shaping) are in `runbooks/stage5c1-coverage-20261019/UNRESOLVED_BLOCKERS_5C1.md`.

@@ -44,3 +44,7 @@ Tier key: **M** mocked · **R** real local stack · **P** disposable PostgreSQL 
 | O5C-10 | `communication_event_controls` rows for the 5B/5C events must exist on hosted, otherwise the gateway fails closed and sends nothing | hosted prerequisite |
 | O5C-11 | Admin limiter (200 / window) is per source address; a shared office address can trip it while using the Owners tab (observed during browser runs from a single address; test env raised to 5000) | consider keying by user |
 | O5C-12 | Inspector account created at approval carries `emailVerified=true`; mailbox proof is redeeming the emailed set-password link (account cannot sign in until then) | design note; acceptable |
+
+
+## Stage 5C.1 addendum
+Additional defects D5C1-01…04 and observations O5C1-01…09 are in `runbooks/stage5c1-coverage-20261019/DEFECT_LEDGER_5C1.md`.

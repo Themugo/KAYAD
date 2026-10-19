@@ -173,6 +173,22 @@ export const cleanupFiles = (files = []) => {
 };
 
 // =============================
+// 🧹 STAGE 5C.1: REMOVE DISK UPLOADS WHEN THE REQUEST ENDS IN AN ERROR
+// =============================
+// multer writes accepted files to disk BEFORE the controller decides whether the caller may use them. Every rejected
+// request after that point (ownership 403, 404, cap 400, validation 400, storage failure 5xx) used to leave the files
+// behind forever. This runs after the upload middleware and deletes them once the response has finished with a 4xx/5xx.
+// Successful responses (2xx/3xx) keep their files: createCar uploads them to cloud storage in the background.
+export const cleanupUploadsOnError = (req, res, next) => {
+  res.once("finish", () => {
+    if (res.statusCode < 400) return;
+    const files = [...(Array.isArray(req.files) ? req.files : Object.values(req.files || {}).flat()), ...(req.file ? [req.file] : [])];
+    if (files.length) cleanupFiles(files);
+  });
+  next();
+};
+
+// =============================
 // ❌ ERROR HANDLER
 // =============================
 export const handleUploadError = (err, req, res, next) => {

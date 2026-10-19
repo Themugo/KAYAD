@@ -1,0 +1,181 @@
+{
+ "pass": 35,
+ "fail": 0,
+ "results": [
+  {
+   "id": "US.1 account-created screen shown, states a link was sent and verification is required",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.2 screen does not claim the message was delivered/received",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.3 sign-in before email verification is refused with a verification message",
+   "ok": true,
+   "d": "http://127.0.0.1:5173/login"
+  },
+  {
+   "id": "US.4 resend shows the generic, non-enumerating notice",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.5 a verification email reached the Brevo capture stub (tier R, not live)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.6 verification link verifies the account",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.7 replaying the used link does not error the app (page still renders a result)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.8b seller workspace renders (Private Seller home with account-status panel)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.8 seller signs in after verification and reaches the app (not the login page)",
+   "ok": true,
+   "d": "http://127.0.0.1:5173/?nav=seller-platform"
+  },
+  {
+   "id": "US.9 seller sees no Owners / owner-management surface",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "US.10 account is individual_seller and still pending approval in the database",
+   "ok": true,
+   "d": "individual_seller:pending"
+  },
+  {
+   "id": "UD.1 account-created screen shown, states a link was sent and verification is required",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.2 screen does not claim the message was delivered/received",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.3 sign-in before email verification is refused with a verification message",
+   "ok": true,
+   "d": "http://127.0.0.1:5173/login"
+  },
+  {
+   "id": "UD.4 resend shows the generic, non-enumerating notice",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.5 a verification email reached the Brevo capture stub (tier R, not live)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.6 verification link verifies the account",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.7 replaying the used link does not error the app (page still renders a result)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.8b Dealer Hub overview renders real (zero) metrics for a new dealer, with no error banner",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.8 dealer signs in after verification and reaches the app",
+   "ok": true,
+   "d": "http://127.0.0.1:5173/?nav=dealer-dashboard"
+  },
+  {
+   "id": "UD.9 dealer sees no Owners surface",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UD.10 dealer row created with the business name; not approved",
+   "ok": true,
+   "d": "UI Motors Ltd:false"
+  },
+  {
+   "id": "UI.1 inspector application submitted from the SPA; outcome screen shown",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI.2 no account or session is created by applying",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI.3 application stored as pending",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI.4 admin approval succeeds and queues the invitation",
+   "ok": true,
+   "d": "{\"s\":200,\"i\":\"queued\"}"
+  },
+  {
+   "id": "UI.5 set-password link delivered to the capture stub for the applicant address",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI.6 inspector sets a password via the emailed link and signs in",
+   "ok": true,
+   "d": "http://127.0.0.1:5173/?nav=dashboard"
+  },
+  {
+   "id": "UI.7 inspector dashboard shows inspection work and no Owners surface",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UI.8 role is ghost_checker and email verified",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UO.1 disposable owner provisioned through CLI → emailed invitation → acceptance",
+   "ok": true,
+   "d": "[[200,200],[200,200]]"
+  },
+  {
+   "id": "UO.2 owner sees the Owners tab",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UO.3 owner reaches the Owners table",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UO.4 ordinary admin does not see an Owners tab",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "UX.1 no 5xx API responses observed in any browser journey",
+   "ok": true,
+   "d": ""
+  }
+ ]
+}

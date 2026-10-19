@@ -1,0 +1,341 @@
+{
+ "pass": 67,
+ "fail": 0,
+ "results": [
+  {
+   "id": "D1.1 dealer registration → 201 role dealer",
+   "ok": true,
+   "d": "{\"success\":true,\"user\":{\"id\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"name\":\"Dealer One\",\"email\":\"dealer1-1792429072376@kayad-test.example\",\"role\":\"dealer\",\"phone\":\"254711111111\",\"avatar\":\"\",\"status\":\""
+  },
+  {
+   "id": "D1.2 duplicate dealer e-mail → 409",
+   "ok": true,
+   "d": "{\"success\":false,\"message\":\"An account with that email already exists\"}"
+  },
+  {
+   "id": "D1.3 login before verification: refused or session without dealer access",
+   "ok": true,
+   "d": "{\"success\":false,\"message\":\"Please verify your email before logging in. Check your inbox or request a new verification link.\"}"
+  },
+  {
+   "id": "D1.4 unverified dealer cannot reach onboarding / dashboard (401/403)",
+   "ok": true,
+   "d": "401 {\"success\":false,\"message\":\"Not authorized, token missing\"}"
+  },
+  {
+   "id": "D1.5 verification e-mail sent",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "D1.6 wrong token rejected",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "D1.7 correct token verifies",
+   "ok": true,
+   "d": "{\"success\":true,\"message\":\"Email verified successfully. You can now log in.\"}"
+  },
+  {
+   "id": "D1.8 db: email_verified true; dealer NOT approved",
+   "ok": true,
+   "d": "want \"true/false\" got \"true/false\""
+  },
+  {
+   "id": "D2.1 login after verification → 200",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "D2.2 GET onboarding creates/returns pending dealer (approved=false)",
+   "ok": true,
+   "d": "{\"success\":true,\"dealer\":{\"id\":\"181a67cf-335c-4081-80f8-0185d54a3144\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"business_name\":\"Test Motors Ltd\",\"location\":\"Nairobi\",\"approved\":false,\"verified_at"
+  },
+  {
+   "id": "D2.3 pending dealer blocked from approved-only dashboard APIs (all 401/403)",
+   "ok": true,
+   "d": "/api/dealer/summary:403 /api/dealer/cars:403 /api/dealer/earnings:403 /api/dealer/profile:403 /api/dealer/settlement:403"
+  },
+  {
+   "id": "D2.4 invalid onboarding payload → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "D2.5 invalid KRA PIN → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "D2.6 db unchanged after invalid attempts (onboarding_complete false)",
+   "ok": true,
+   "d": "want \"false\" got \"false\""
+  },
+  {
+   "id": "D2.7 valid onboarding → 200, verification submitted (pending)",
+   "ok": true,
+   "d": "{\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"181a67cf-335c-4081-80f8-0185d54a3144\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"business_name\":"
+  },
+  {
+   "id": "D2.8 db: onboarding_complete true, completed_at set, approved still false",
+   "ok": true,
+   "d": "want \"true/true/false\" got \"true/true/false\""
+  },
+  {
+   "id": "D2.9 payment_details persisted in dealers.payment_details",
+   "ok": true,
+   "d": "want \"Test Bank\" got \"Test Bank\""
+  },
+  {
+   "id": "D2.10 verification status endpoint → pending",
+   "ok": true,
+   "d": "{\"success\":true,\"verification\":{\"id\":\"5e3f867a-b18d-48ef-a9d2-1946ae21b473\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"dealer\":\"181a67cf-335c-4081-80f8-0185d54a3144\",\"verification_status\":\"pending"
+  },
+  {
+   "id": "D2.11 resubmission while pending is safe (no 500, one verification row)",
+   "ok": true,
+   "d": "200 rows=1"
+  },
+  {
+   "id": "D2.12 still blocked from dashboard APIs while pending",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "D2.13 pending dealer cannot create a listing (401/403/400 — never 201)",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Your verification is pending review\",\"code\":\"DEALER_APPROVAL_PENDING\",\"verificationStatus\":\"pending\",\"requiresAction\":\"wait_for_review\",\"verificationUrl\":\"/api/verification"
+  },
+  {
+   "id": "D3.1 seller cannot approve (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "D3.2 dealer cannot approve own verification (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "D3.3 admin lists verifications",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "D3.4 admin approve outcome is governed by policy (200 approved, or 403 if policy reserves to owners) — no 5xx",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "D3.5 ordinary admin approve left dealer unapproved (db)",
+   "ok": true,
+   "d": "want \"f\" got \"f\""
+  },
+  {
+   "id": "D3.6 verification still pending after refused admin approve",
+   "ok": true,
+   "d": "want \"pending\" got \"pending\""
+  },
+  {
+   "id": "D3.7 ordinary admin reject also owner-reserved (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "D4.0 disposable owner signed in via real 5B path",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "D4.1 owner reject → 200, status rejected, reason stored",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Verification rejected\",\"verification\":{\"id\":\"5e3f867a-b18d-48ef-a9d2-1946ae21b473\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"dealer\":\"181a67cf-335c-4081-80f8-0185d54a31"
+  },
+  {
+   "id": "D4.2 reject replay → 409 invalid transition (no double decision)",
+   "ok": true,
+   "d": "want 409 got 409"
+  },
+  {
+   "id": "D4.3 rejected dealer still unapproved",
+   "ok": true,
+   "d": "want \"f\" got \"f\""
+  },
+  {
+   "id": "D4.4 rejected dealer blocked from dashboard APIs",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "D4.5 rejected dealer can resubmit (200) → pending again",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"181a67cf-335c-4081-80f8-0185d54a3144\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"business_name\":"
+  },
+  {
+   "id": "D4.6 owner approve → 200",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Verification approved successfully\",\"verification\":{\"id\":\"5e3f867a-b18d-48ef-a9d2-1946ae21b473\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"dealer\":\"181a67cf-335c-4081-80"
+  },
+  {
+   "id": "D4.7 db: dealer approved, verification approved",
+   "ok": true,
+   "d": "want \"true/approved\" got \"true/approved\""
+  },
+  {
+   "id": "D4.8 approve replay is safe (no 5xx)",
+   "ok": true,
+   "d": "409"
+  },
+  {
+   "id": "D4.9a trade listings report the documented unavailable-feature state (503 TRADE_LISTINGS_UNAVAILABLE), not a crash",
+   "ok": true,
+   "d": "503 TRADE_LISTINGS_UNAVAILABLE"
+  },
+  {
+   "id": "D4.9 approved dealer dashboard route sweep: no 5xx/404 across all GET endpoints",
+   "ok": true,
+   "d": "{\"/api/dealer/onboarding\":200,\"/api/dealer/summary\":200,\"/api/dealer/quick-stats\":200,\"/api/dealer/cars\":200,\"/api/dealer/earnings\":200,\"/api/dealer/analytics\":200,\"/api/dealer/milestones\":200,\"/api/dealer/bids\":200,\"/api/dealer/escrows\":200,\"/api/dealer/settlement\":200,\"/api/dealer/profile\":200,\"/api/dealer/team\":200,\"/api/dealer/trade-listings\":503,\"/api/verification/status\":200}"
+  },
+  {
+   "id": "D4.10 profile update persists supported fields and ignores role/approved",
+   "ok": true,
+   "d": "200 Test Motors Renamed/dealer {\"success\":true,\"profile\":{\"id\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"name\":\"Dealer One\",\"email\":\"dealer1-1792429072376@kayad-test.example\",\"role\":\"dealer\",\"super_admin\":false,\"status\":\"approved\",\"p"
+  },
+  {
+   "id": "D4.11 settlement update persisted in dealers.payment_details",
+   "ok": true,
+   "d": "200 {\"success\":true,\"settlement\":{\"mpesaBusiness\":\"\",\"mpesaBusinessName\":\"\",\"paymentDetails\":{\"bankName\":\"Bank Two\",\"mpesaPhone\":\"0712345678\",\"accountName\":\"Test Motors\",\"accountNumber\":\"1234567890\"},\"ban"
+  },
+  {
+   "id": "D4.12 settlement read-back",
+   "ok": true,
+   "d": "{\"success\":true,\"settlement\":{\"mpesaBusiness\":\"\",\"mpesaBusinessName\":\"\",\"paymentDetails\":{\"bankName\":\"Bank Two\",\"mpesaPhone\":\"0712345678\",\"accountName\":\"Test Motors\",\"accountNumber\":\"1234567890\"},\"ban"
+  },
+  {
+   "id": "D4.13 settlement 400 for non-text input",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "D5.0 approved dealer without an active subscription is stopped by the commercial gate (402 SUBSCRIPTION_REQUIRED)",
+   "ok": true,
+   "d": "402 {\"success\":false,\"message\":\"An active dealer subscription is required to list vehicles.\",\"code\":\"SUBSCRIPTION_REQUIRED\"}"
+  },
+  {
+   "id": "D5.1 approved dealer creates a listing (201)",
+   "ok": true,
+   "d": "201 {\"success\":true,\"data\":{\"id\":\"6522816b-d7c8-4a0b-856f-2742a2e32e42\",\"dealer_id\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"title\":\"Toyota Prado 2018\",\"slug\":null,\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2"
+  },
+  {
+   "id": "D5.2 listing owned by dealer and moderated (pending under hold_for_review)",
+   "ok": true,
+   "d": "pending"
+  },
+  {
+   "id": "D5.3 dealer edits own listing",
+   "ok": true,
+   "d": "200 {\"success\":true,\"data\":{\"id\":\"6522816b-d7c8-4a0b-856f-2742a2e32e42\",\"dealer_id\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"title\":\"Toyota Prado 2018\",\"slug\":null,\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2"
+  },
+  {
+   "id": "D5.4 dealer cannot self-publish via status field",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "D5.5 listing visible in dealer dashboard cars",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "D6.1 refresh keeps session",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "D6.2 logout 200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "D6.3 refresh after logout refused",
+   "ok": true,
+   "d": "401"
+  },
+  {
+   "id": "D6.4 re-login",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "D6.5 owner suspend → 200",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Dealer suspended successfully\",\"verification\":{\"id\":\"5e3f867a-b18d-48ef-a9d2-1946ae21b473\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"dealer\":\"181a67cf-335c-4081-80f8-01"
+  },
+  {
+   "id": "D6.6 db verification_status suspended (constraint accepts it)",
+   "ok": true,
+   "d": "want \"suspended\" got \"suspended\""
+  },
+  {
+   "id": "D6.7 suspended dealer blocked from dashboard APIs",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Account must be approved to access this resource\"}"
+  },
+  {
+   "id": "D6.8 suspended dealer cannot create a listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "D6.9 owner reinstate → 200 and dashboard access restored",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Dealer reinstated successfully\",\"verification\":{\"id\":\"5e3f867a-b18d-48ef-a9d2-1946ae21b473\",\"user\":\"86b474ff-070a-4d86-861d-8b1aab024d4a\",\"dealer\":\"181a67cf-335c-4081-80f8-0"
+  },
+  {
+   "id": "D6.10 dealer password recovery → 200",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Password reset successfully. You can now sign in.\"}"
+  },
+  {
+   "id": "D6.11 old session revoked after reset",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "D6.12 re-login with new password reaches dashboard",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "D6.13a ordinary admin ban of a dealer: outcome is deterministic (200 or policy 403), no 5xx",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"User banned\"}"
+  },
+  {
+   "id": "D6.14 banned dealer: existing session blocked immediately (403, no cache grace)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "D6.15 banned dealer cannot log in (403)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "D6.16 unban restores access",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "D6.17 deactivated dealer blocked (session 403, login 403)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "D6.18 users.status='suspended' alone is NOT an enforcement mechanism (documented: only is_banned/deactivated_at/dealer verification suspension block access)",
+   "ok": true,
+   "d": ""
+  }
+ ]
+}

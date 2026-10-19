@@ -1,0 +1,251 @@
+{
+ "pass": 49,
+ "fail": 0,
+ "results": [
+  {
+   "id": "O1.1 verified designated address with no membership can sign in as an ORDINARY user",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "O1.2 profile shows no owner effective role",
+   "ok": true,
+   "d": "{\"success\":true,\"user\":{\"_id\":\"cb088b1f-f1ed-419c-9af9-ab1ca76068b4\",\"id\":\"cb088b1f-f1ed-419c-9af9-ab1ca76068b4\",\"name\":\"user test\",\"email\":\"owner-one@kayad-test.example\",\"role\":\"user\",\"phone\":null,\"avatar\":\"\",\"status\":\"approved\",\"isBanned\""
+  },
+  {
+   "id": "O1.3 no owner/admin surface is reachable by the address alone (all 403)",
+   "ok": true,
+   "d": "403,403,403,403"
+  },
+  {
+   "id": "O2.1 bootstrap --plan is read-only (no invitations written)",
+   "ok": true,
+   "d": "0 {\n  \"bootstrap\": \"open\",\n  \"usableOwners\": 0,\n  \"designated\": [\n    {\n      \"identity\": \"ow***@kayad-test.example\",\n      \"state\": \"account_verified_not_owner\"\n"
+  },
+  {
+   "id": "O2.2 bootstrap --apply exit 0",
+   "ok": true,
+   "d": "0 ✅ Supabase client initialized"
+  },
+  {
+   "id": "O2.3 owner-one invitation accepted + login",
+   "ok": true,
+   "d": "want \"200/200\" got \"200/200\""
+  },
+  {
+   "id": "O2.4 owner-two invitation accepted + login",
+   "ok": true,
+   "d": "want \"200/200\" got \"200/200\""
+  },
+  {
+   "id": "O2.5 db: two ACTIVE memberships",
+   "ok": true,
+   "d": "want \"2\" got \"2\""
+  },
+  {
+   "id": "O2.6 invitation e-mails captured for BOTH addresses through the provider adapter",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "O2.7 invitation token stored hashed (db hash != emailed token)",
+   "ok": true,
+   "d": "want \"0\" got \"0\""
+  },
+  {
+   "id": "O2.8 invitation replay refused (token single-use)",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "O2.9 unknown 64-hex token preview refused",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "O3.1 owner profile resolves to the owner effective role",
+   "ok": true,
+   "d": "{\"success\":true,\"user\":{\"_id\":\"6f92355b-350a-4364-bd52-28f2163a5818\",\"id\":\"6f92355b-350a-4364-bd52-28f2163a5818\",\"name\":\"Disposable Owner\",\"email\":\"owner-one@kayad-test.example\",\"role\":\"superadmin\",\"phone\":null,\"avatar\":\"\",\"status\":\"approve"
+  },
+  {
+   "id": "O3.2 Owners tab data: store=database, 2 members, canManage",
+   "ok": true,
+   "d": "{\"success\":true,\"members\":[{\"id\":\"dda6798e-8d70-4047-8267-d19e3cce631a\",\"userId\":\"6f92355b-350a-4364-bd52-28f2163a5818\",\"name\":\"Disposable Owner\",\"email\":\"owner-one@kayad-test.example\",\"status\":\"active\",\"verified\":true,\"usable\":true,\"blocke"
+  },
+  {
+   "id": "O3.3 owner reaches user admin, onboarding policy, inspector applications, dealer verification, audit log (all 200)",
+   "ok": true,
+   "d": "{\"/api/admin/users\":200,\"/api/admin/settings/onboarding\":200,\"/api/inspector-applications\":200,\"/api/verification/admin/all\":200,\"/api/admin/audit-log\":200}"
+  },
+  {
+   "id": "O3.4 owner manages onboarding policy (PUT accepted or deterministic validation, no 5xx)",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Onboarding settings saved\",\"policy\":{\"privateSellerRegistration\":\"enabled\",\"dealerOnboardingMode\":\"approval_required\",\"listingModeration\":\"hold_for_review\",\"dealerDecisionAuthority\":\"owner_only\",\"listingDecisionAu"
+  },
+  {
+   "id": "O3.5 stale policy revision is rejected (409/400), not silently applied",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "O3.6 refresh keeps owner authority (HTTP/refresh consistency)",
+   "ok": true,
+   "d": "200/200"
+  },
+  {
+   "id": "O4.1 ordinary admin: owner management and policy change refused (all 403)",
+   "ok": true,
+   "d": "403,403,403,403"
+  },
+  {
+   "id": "O4.2 seller: owner management and policy change refused (all 403)",
+   "ok": true,
+   "d": "403,403,403,403"
+  },
+  {
+   "id": "O4.3 anonymous /api/owner → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "O5.1 invitation requires step-up re-authentication (wrong password refused)",
+   "ok": true,
+   "d": "403 {\"success\":false,\"code\":\"STEP_UP_FAILED\",\"message\":\"Your password is incorrect. Re-enter your password to confirm this change.\"}"
+  },
+  {
+   "id": "O5.2 typed e-mail confirmation mismatch refused",
+   "ok": true,
+   "d": "400 {\"success\":false,\"code\":\"CONFIRMATION_MISMATCH\",\"message\":\"Type the exact e-mail address of the identity you are changing to confirm.\"}"
+  },
+  {
+   "id": "O5.3 owner invites a third owner → 201, e-mail handed to the provider (emailDelivered reflects provider acceptance only)",
+   "ok": true,
+   "d": "201 {\"success\":true,\"invitation\":{\"id\":\"d8d38859-17e0-45f2-a488-00ab459fb136\",\"email\":\"third-owner-1792429085655@kayad-test.example\",\"kind\":\"invitation\",\"expiresAt\":\"2026-10-20T19:58:10.668+03:00\"},\"emailDelivered\":true,\"emailStatus\":\"sent\"}"
+  },
+  {
+   "id": "O5.4 pending invitation grants NO privilege before acceptance",
+   "ok": true,
+   "d": "want \"2\" got \"2\""
+  },
+  {
+   "id": "O5.5 third owner accepts the invitation",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "O5.6 third owner login",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "O5.7 third owner reaches the Owners tab",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "O5.8 socket handshake accepts the active third owner's session",
+   "ok": true,
+   "d": "connected"
+  },
+  {
+   "id": "O5.9 removing an owner needs step-up (wrong password refused)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "O5.10 owner removes a non-final owner → 200",
+   "ok": true,
+   "d": "200 {\"success\":true,\"removed\":true,\"usableOwnersRemaining\":2}"
+  },
+  {
+   "id": "O5.11 removed owner's LIVE session loses owner authority immediately (HTTP 403)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "O5.12 removed owner is an ordinary user after re-login (no owner surface)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "O5.13 socket handshake no longer grants owner privileges to the removed owner's token (rejected, or connected as ordinary user)",
+   "ok": true,
+   "d": "connected"
+  },
+  {
+   "id": "O5.14 owner-two removes owner-one (2→1) → 200",
+   "ok": true,
+   "d": "200 {\"success\":true,\"removed\":true,\"usableOwnersRemaining\":1}"
+  },
+  {
+   "id": "O5.15 LAST-OWNER protection: removing the final active owner is refused (409)",
+   "ok": true,
+   "d": "409 {\"success\":false,\"code\":\"OWNER_LAST_USABLE\",\"message\":\"Blocked: this would leave KAYAD with no verified, active owner. Add and activate another owner first.\"}"
+  },
+  {
+   "id": "O5.16 db: exactly one active owner remains",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  },
+  {
+   "id": "O6.0 recovery of a person who is NOT an active owner is refused (404 OWNER_NOT_MEMBER)",
+   "ok": true,
+   "d": "404 {\"success\":false,\"code\":\"OWNER_NOT_MEMBER\",\"message\":\"That identity is not an active owner.\"}"
+  },
+  {
+   "id": "O6.1 an EXISTING verified account cannot accept anonymously (must sign in as that account: OWNER_LOGIN_REQUIRED)",
+   "ok": true,
+   "d": "401 {\"success\":false,\"code\":\"OWNER_LOGIN_REQUIRED\",\"message\":\"Sign in to the account that received this invitation, then open the link again.\"}"
+  },
+  {
+   "id": "O6.2 removed owner re-admitted by invitation once signed in as the invited account",
+   "ok": true,
+   "d": "201/200 {\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":false}"
+  },
+  {
+   "id": "O6.3 re-admitted owner regains the Owners tab",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "O6.3b recovery needs documented out-of-band verification (e-mail alone refused, 400)",
+   "ok": true,
+   "d": "400 {\"success\":false,\"code\":\"RECOVERY_EVIDENCE_REQUIRED\",\"message\":\"Record how the person's identity was verified out of band (not by e-mail alone) and a short note.\"}"
+  },
+  {
+   "id": "O6.4 recovery (documented out-of-band) → 200: access ended, recovery invitation issued",
+   "ok": true,
+   "d": "200 {\"success\":true,\"recovery\":true,\"resumed\":false,\"invitation\":{\"id\":\"1042cdfe-2b89-49d7-bb23-1bdb8be1290e\",\"email\":\"owner-one@kayad-test.example\",\"expiresAt\":\"2026-10-20T19:58:14.538+03:00\"},\"emailDelivered\":true}"
+  },
+  {
+   "id": "O6.5 recovered owner's old session is cut immediately",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "O6.6 recovery link sets NEW credentials; owner signs in and reaches Owners tab",
+   "ok": true,
+   "d": "200/200 {\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":true}"
+  },
+  {
+   "id": "O6.7 the OLD password no longer works after recovery",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "O7.1 governance events recorded for invite, accept, remove, recovery",
+   "ok": true,
+   "d": "bootstrap_close,membership_activate,invitation_issue,membership_revoke,bootstrap_close,membership_activate,invitation_accept,invitation_issue,membership_revoke,membership_revoke,membership_revoke,step_up"
+  },
+  {
+   "id": "O7.2 no 64-hex token in owner_membership_events",
+   "ok": true,
+   "d": "0"
+  },
+  {
+   "id": "O7.3 no password material in owner_membership_events",
+   "ok": true,
+   "d": "want \"0\" got \"0\""
+  }
+ ]
+}

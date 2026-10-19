@@ -1,0 +1,156 @@
+{
+ "pass": 30,
+ "fail": 0,
+ "results": [
+  {
+   "id": "P1.1 send-otp → 200 and the SMS was actually handed to the provider (captured) with a 6-digit code",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Verification code sent\",\"data\":{\"expiresAt\":\"2026-10-19T20:08:15.956+03:00\"}} code=present"
+  },
+  {
+   "id": "P1.2 db: one pending challenge, code stored hashed (no plaintext)",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  },
+  {
+   "id": "P1.3 the OTP value is in NO ledger/audit/notification/challenge row",
+   "ok": true,
+   "d": "communication_deliveries=0 audit_logs=0 notifications=0 otp_challenges=0"
+  },
+  {
+   "id": "P1.4 the response never contains the code",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "P1.5 provider rejection → NOT reported as sent (5xx), challenge marked delivery_failed",
+   "ok": true,
+   "d": "503 {\"success\":false,\"message\":\"We couldn't send a verification code right now. Please try again shortly.\"}"
+  },
+  {
+   "id": "P1.6 channel/event switched OFF by rollout controls → honest failure (503), nothing sent, never 'code sent'",
+   "ok": true,
+   "d": "503 {\"success\":false,\"message\":\"We couldn't send a verification code right now. Please try again shortly.\"}"
+  },
+  {
+   "id": "P2.1 non-6-digit code → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "P2.2 non-numeric code → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "P2.3 wrong code → 400 and phone NOT verified",
+   "ok": true,
+   "d": "{\"success\":false,\"message\":\"Incorrect code. Try again.\"}"
+  },
+  {
+   "id": "P2.4 binding: user A cannot verify with user D's code",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "P2.5 …and D's challenge was not consumed by that attempt",
+   "ok": true,
+   "d": "want \"pending\" got \"pending\""
+  },
+  {
+   "id": "P2.6 5 wrong attempts lock the challenge",
+   "ok": true,
+   "d": "want \"locked\" got \"locked\""
+  },
+  {
+   "id": "P2.7 after lock even the CORRECT code is refused (400, not 200)",
+   "ok": true,
+   "d": "{\"success\":false,\"message\":\"No active code. Request a new one.\"}"
+  },
+  {
+   "id": "P2.8 phone still unverified",
+   "ok": true,
+   "d": "want \"f\" got \"f\""
+  },
+  {
+   "id": "P2.8b per-user burst guard: a flood of verify calls is throttled (429 appears)",
+   "ok": true,
+   "d": "400,429,400,400,429,429,429,400,400"
+  },
+  {
+   "id": "P2.9 concurrent verification with the right code: succeeds, no 5xx",
+   "ok": true,
+   "d": "400,400,200,400,400"
+  },
+  {
+   "id": "P2.10 phone_verified true only after server validation",
+   "ok": true,
+   "d": "want \"t\" got \"t\""
+  },
+  {
+   "id": "P2.11 challenge consumed exactly once (status verified, single row)",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  },
+  {
+   "id": "P2.12 correct code verifies (200)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "P2.13 replay of a consumed code is refused (400)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "P3.1 resend leaves exactly ONE pending challenge (older invalidated)",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  },
+  {
+   "id": "P3.2 the OLD code no longer verifies after a resend",
+   "ok": true,
+   "d": "400"
+  },
+  {
+   "id": "P3.3 an EXPIRED code is refused with an 'expired' message",
+   "ok": true,
+   "d": "{\"success\":false,\"message\":\"Code expired. Request a new one.\"}"
+  },
+  {
+   "id": "P3.4 per-recipient limit: 3 codes / 15 min, the 4th is 429",
+   "ok": true,
+   "d": "200,200,200,429"
+  },
+  {
+   "id": "P3.5 anonymous send-otp → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "P4.1 phone verification before submitting dealer verification is refused (400)",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Submit dealer verification before phone verification\"}"
+  },
+  {
+   "id": "P4.2 dealer phone request → 200, SMS handed to provider, code is 6 digits",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Verification code sent\",\"expiresAt\":\"2026-10-19T20:09:24.801+03:00\",\"phoneNumber\":\"254******248\"}"
+  },
+  {
+   "id": "P4.3 response masks the phone number",
+   "ok": true,
+   "d": "{\"success\":true,\"message\":\"Verification code sent\",\"expiresAt\":\"2026-10-19T20:09:24.801+03:00\",\"phoneNumber\":\"254******248\"}"
+  },
+  {
+   "id": "P4.4 4-digit code rejected by the 6-digit contract (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "P4.5 dealer phone verify with the right 6-digit code → 200, phone_verified true",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Phone verified successfully\",\"verification\":{\"id\":\"46b5cab8-441a-4494-ae24-c075c8fb372d\",\"user\":\"63c1a8ea-60b0-4007-b59f-935044ddf168\",\"dealer\":\"5231af4b-f744-494b-ae1b-f585"
+  }
+ ]
+}

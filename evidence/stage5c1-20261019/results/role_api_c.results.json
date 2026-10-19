@@ -1,0 +1,281 @@
+{
+ "pass": 55,
+ "fail": 0,
+ "results": [
+  {
+   "id": "I1.1 invalid application payload → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I1.2 public application → 201 pending (no account created)",
+   "ok": true,
+   "d": "{\"success\":true,\"application\":{\"id\":\"660019c8-6905-4029-b9da-d56fa6815d76\",\"user_id\":null,\"full_name\":\"Ivy Inspector\",\"email\":\"insp1-1792429079476@kayad-test.example\",\"phone\":\"0722000111\",\"id_number\":\"12345678\",\"location"
+  },
+  {
+   "id": "I1.3 duplicate pending application refused (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I1.4 application list requires admin (anon 401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I1.5 seller cannot list applications (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I1.6 buyer cannot approve (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I1.7 seller cannot approve (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I1.8 application still pending after refused approvals",
+   "ok": true,
+   "d": "want \"pending\" got \"pending\""
+  },
+  {
+   "id": "I1.9 admin lists applications",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "I1.10 approval of an application whose address belongs to an UNVERIFIED account is refused (409 INSPECTOR_EMAIL_UNVERIFIED) — no verified-inspector minting for a squatter",
+   "ok": true,
+   "d": "409 {\"success\":false,\"code\":\"INSPECTOR_EMAIL_UNVERIFIED\",\"message\":\"The account using squatter-1792429079476@kayad-test.example has not verified its e-mail address. Ask the applicant to verify the mailbox first, then approve"
+  },
+  {
+   "id": "I1.11 squatter row unchanged (role user, unverified)",
+   "ok": true,
+   "d": "want \"user/false\" got \"user/false\""
+  },
+  {
+   "id": "I2.1 admin approval → 200 with provider + ghost_checker user",
+   "ok": true,
+   "d": "200 {\"success\":true,\"application\":{\"id\":\"660019c8-6905-4029-b9da-d56fa6815d76\",\"user_id\":null,\"full_name\":\"Ivy Inspector\",\"email\":\"insp1-1792429079476@kayad-test.example\",\"phone\":\"0722000111\",\"id_number\":\"12345678\",\"location"
+  },
+  {
+   "id": "I2.2 db: provider active/verified/ACTIVE",
+   "ok": true,
+   "d": "want \"active/verified/ACTIVE\" got \"active/verified/ACTIVE\""
+  },
+  {
+   "id": "I2.3 set-password e-mail delivered through the gateway/provider stub (64-hex token link)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "I2.4 the set-password token is NOT stored in notifications (no bearer credential in in-app message)",
+   "ok": true,
+   "d": "rows with token-like content: 0"
+  },
+  {
+   "id": "I2.5 the raw token appears in no ledger/audit/notification row (the only copy is the e-mail body)",
+   "ok": true,
+   "d": "communication_deliveries=0 audit_logs=0 security_logs=n/a notifications=0"
+  },
+  {
+   "id": "I2.6 approve replay refused (400 Already approved)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I2.7 inspector cannot log in with a guessed/default password before setting one (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I2.8 wrong set-password token refused (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I2.9 set-password with the emailed token → 200",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I2.10 set-password token is single-use (replay 400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I2.11 inspector login → 200 role ghost_checker",
+   "ok": true,
+   "d": "want \"ghost_checker\" got \"ghost_checker\""
+  },
+  {
+   "id": "I2.12 db role ghost_checker, never admin",
+   "ok": true,
+   "d": "want \"ghost_checker\" got \"ghost_checker\""
+  },
+  {
+   "id": "I3.1 inspector is refused (401/403) on admin, dealer, owner and assignment-management endpoints",
+   "ok": true,
+   "d": "{\"GET /api/admin/users\":403,\"GET /api/inspector-applications\":403,\"POST /api/inspector-applications/660019c8-6905-4029-b9da-d56fa6815d76/reject\":403,\"GET /api/verification/admin/all\":403,\"GET /api/owner\":403,\"POST /api/owner/invitations\":403,\"GET /api/inspections/available-inspectors\":403}"
+  },
+  {
+   "id": "I3.3 inspector reaches own provider profile",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Success\",\"data\":{\"provider\":{\"id\":\"0fb3469e-0258-431b-83ab-7e1be678cac4\",\"company_name\":\"Ivy Inspector\",\"trading_name\":\"Ivy Inspector\",\"lifecycle_stage\":\"ACTIVE\",\"verification_route\":null,\"reje"
+  },
+  {
+   "id": "I3.4 inspector cannot read ANOTHER provider's dashboard (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I3.5 inspector can read own provider dashboard (200)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I4.1 buyer requests an inspection (200, status pending_payment/requested)",
+   "ok": true,
+   "d": "200 {\"success\":true,\"order\":{\"id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"_id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"car\":{\"id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\",\"dealer_id\":\"3300c2fc-d6ba-4e60-8202-4d660160ee0d\",\"tit"
+  },
+  {
+   "id": "I4.2 inspector worklist empty before assignment",
+   "ok": true,
+   "d": "{\"success\":true,\"orders\":[]}"
+  },
+  {
+   "id": "I4.3 inspector cannot self-assign (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I4.4 buyer cannot assign (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I4.5 inspector cannot start an unassigned job (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I4.6 admin assigns the approved inspector → status assigned",
+   "ok": true,
+   "d": "200 {\"success\":true,\"order\":{\"id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"_id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"car\":{\"_id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\",\"id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\"},\"buyer\":\""
+  },
+  {
+   "id": "I4.7 re-assignment of a non-requested job refused (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I4.8 second active order for same car refused (409)",
+   "ok": true,
+   "d": "want 409 got 409"
+  },
+  {
+   "id": "I4.9 inspector worklist now lists the assigned job only",
+   "ok": true,
+   "d": "{\"success\":true,\"orders\":[{\"id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"_id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"car\":{\"id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\",\"dealer_id\":\"3300c2fc-d6ba-4e60-8202-4d660160ee0d\",\"t"
+  },
+  {
+   "id": "I4.10 worklist projection exposes no requester phone/notes",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "I4.11 buyer's /my does not list inspector-only data and buyer sees assigned status",
+   "ok": true,
+   "d": "want \"assigned\" got \"assigned\""
+  },
+  {
+   "id": "I4.12 a different inspector cannot read the job (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I4.13 a different inspector cannot start the job (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I4.14 a different inspector's worklist is empty",
+   "ok": true,
+   "d": "want 0 got 0"
+  },
+  {
+   "id": "I4.15 submit before start refused (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I4.16 assigned inspector starts → in_progress",
+   "ok": true,
+   "d": "200 {\"success\":true,\"order\":{\"id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"_id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"car\":{\"_id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\",\"id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\"},\"buyer\":\""
+  },
+  {
+   "id": "I4.17 start replay refused (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I4.18 out-of-range score refused (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I4.19 submit → completed with score",
+   "ok": true,
+   "d": "200 {\"success\":true,\"order\":{\"id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"_id\":\"dbdee232-4454-40c0-b59e-31e82105aa98\",\"car\":{\"_id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\",\"id\":\"deea7754-d251-458a-be55-ba10c1b75c2d\"},\"buyer\":\""
+  },
+  {
+   "id": "I4.20 submit replay refused (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I4.21 completed report cannot be re-opened by start (400)",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "I4.22 audit trail records assigned → started → submitted",
+   "ok": true,
+   "d": "inspection_assigned,inspection_started,inspection_submitted"
+  },
+  {
+   "id": "I5.1 refresh works for the inspector",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "I5.2 logout 200",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I5.3 refresh after logout refused (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I5.4 banned inspector live session is blocked immediately (401 session invalidated by logout/403 banned)",
+   "ok": true,
+   "d": "401 {\"success\":false,\"code\":\"AUTH_SESSION_EXPIRED\",\"message\":\"Session invalidated, please login again\"}"
+  },
+  {
+   "id": "I5.5 banned inspector cannot log in (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I5.6 suspended provider cannot be assigned new work (409)",
+   "ok": true,
+   "d": "want 409 got 409"
+  }
+ ]
+}

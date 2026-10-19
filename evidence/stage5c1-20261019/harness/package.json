@@ -1,0 +1,1 @@
+{ "name": "kayad-stage5c1-harness", "private": true, "type": "module", "description": "Acceptance harness tool dependencies (not part of the application)", "dependencies": { "socket.io-client": "^4.7.5" } }

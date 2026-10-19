@@ -1,0 +1,526 @@
+{
+ "pass": 104,
+ "fail": 0,
+ "results": [
+  {
+   "id": "G1.1 owner creates a listing with 2 images through the real multipart API (201)",
+   "ok": true,
+   "d": "201 {\"success\":true,\"data\":{\"id\":\"56fd1936-7a56-4aab-9151-ecfeb9fd599a\",\"dealer_id\":\"b7d16347-f652-4470-8688-890019f13a9f\",\"title\":\"Dealer Prado\",\"slug\":null,\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":3500000,\"mile"
+  },
+  {
+   "id": "G1.2 listing is moderated: pending, owned by the caller",
+   "ok": true,
+   "d": "want \"pending/true\" got \"pending/true\""
+  },
+  {
+   "id": "G1.3 images are recorded immediately as pending (no false \"complete\")",
+   "ok": true,
+   "d": "[{\"url\":\"http://127.0.0.1:9099/kayad-stub/b5b6ca003f48.webp\",\"blur\":\"https://res.cloudinary.com/stub-cloud/image/upload/c_fill,h_20,w_20/q_auto:low/e_blur:1000/f_auto/v1/kayad-stub"
+  },
+  {
+   "id": "G1.4 background upload completes: both images now carry a provider public_id and URL",
+   "ok": true,
+   "d": "[{\"url\":\"http://127.0.0.1:9099/kayad-stub/b5b6ca003f48.webp\",\"blur\":\"https://res.cloudinary.com/stub-cloud/image/upload/c_fill,h_20,w_20/q_auto:low/e_blur:1000/f_auto/v1/kayad-stub/b5b6ca003f48?_a=BAMAPqiu0\",\"card\":\"http"
+  },
+  {
+   "id": "G1.5 the storage provider (stub) received exactly 2 file parts, as PUBLIC listing media under kayad/cars",
+   "ok": true,
+   "d": "[[true,\"upload\",\"kayad/cars\"],[true,\"upload\",\"kayad/cars\"]]"
+  },
+  {
+   "id": "G1.6 media job ledger: both jobs completed",
+   "ok": true,
+   "d": "want \"completed,completed\" got \"completed,completed\""
+  },
+  {
+   "id": "G1.7 local temp files were cleaned after upload (no orphans)",
+   "ok": true,
+   "d": "want 18 got 18"
+  },
+  {
+   "id": "G1.8 owner sees the listing, with its provider-hosted images, through the role's own listing view (/api/v1/cars/dealer/my-cars)",
+   "ok": true,
+   "d": "200 {\"success\":true,\"data\":[{\"title\":\"Dealer Prado\",\"price\":3500000,\"images\":[{\"url\":\"http://127.0.0.1:9099/kayad-stub/b5b6ca003f48.webp\",\"blur\":\"https://res.cloudinary.com/stub-cloud/image/upload/c_fill,h_20,w_20/q_auto:low"
+  },
+  {
+   "id": "G1.8b another dealer's listing view does not include it",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "G1.9 moderation holds: listing with finished images is still NOT in the public marketplace",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "G1.10 owner cannot self-publish by editing (status stays pending)",
+   "ok": true,
+   "d": "want \"pending\" got \"pending\""
+  },
+  {
+   "id": "G1.11 owner adds an image to the existing listing (200, 3 images)",
+   "ok": true,
+   "d": "200 {\"success\":true,\"data\":{\"images\":[{\"url\":\"http://127.0.0.1:9099/kayad-stub/b5b6ca003f48.webp\",\"blur\":\"https://res.cloudinary.com/stub-cloud/image/upload/c_fill,h_20,w_20/q_auto:low/e_blur:1000/f_auto/v1/kayad-stub/b5b6ca"
+  },
+  {
+   "id": "G1.12 provider received exactly that one file",
+   "ok": true,
+   "d": "want 1 got 1"
+  },
+  {
+   "id": "G1.13 another dealer cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Not authorized to edit this listing\"}"
+  },
+  {
+   "id": "G1.14 another dealer cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.15 another dealer cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.13 user of the other seller role cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Not authorized to edit this listing\"}"
+  },
+  {
+   "id": "G1.14 user of the other seller role cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.15 user of the other seller role cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.13 buyer cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Dealer or seller access only\"}"
+  },
+  {
+   "id": "G1.14 buyer cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.15 buyer cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.13 inspector (ghost_checker) cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Not authorized to edit this listing\"}"
+  },
+  {
+   "id": "G1.14 inspector (ghost_checker) cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.15 inspector (ghost_checker) cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G1.13 anonymous cannot attach an image to this listing",
+   "ok": true,
+   "d": "401 {\"success\":false,\"message\":\"Not authorized, token missing\"}"
+  },
+  {
+   "id": "G1.14 anonymous cannot delete an image of this listing",
+   "ok": true,
+   "d": "401"
+  },
+  {
+   "id": "G1.15 anonymous cannot edit this listing",
+   "ok": true,
+   "d": "401"
+  },
+  {
+   "id": "G1.16 images unchanged, provider received nothing, no temp-file orphans after all rejected attempts",
+   "ok": true,
+   "d": "want \"true/0/0\" got \"true/0/0\""
+  },
+  {
+   "id": "G1.17 ordinary admin may manage listings per existing MANAGE_CARS staff policy (observed 200)",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "G1.18 text bytes declared as PNG → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "G1.19 JPEG bytes declared as PNG → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "G1.20 SVG → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Only JPG, PNG, WEBP images allowed\"}"
+  },
+  {
+   "id": "G1.21 > 5 MB image → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File too large\"}"
+  },
+  {
+   "id": "G1.22 no files on add → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"No images provided\"}"
+  },
+  {
+   "id": "G1.23 11 files in one request → 400 (multer limit)",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Too many files\"}"
+  },
+  {
+   "id": "G1.24 create with no image → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"At least one image is required.\"}"
+  },
+  {
+   "id": "G1.25 create with malformed metadata (year/price not numeric) → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Validation failed\",\"errors\":\"year: Invalid input: expected number, received NaN; price: Invalid input: expected number, received NaN\"}"
+  },
+  {
+   "id": "G1.26 create with a bad image type → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "G1.27 rejected requests created no listing, attached no image, reached no storage and left no temp files",
+   "ok": true,
+   "d": "want \"0/0/0/0\" got \"0/0/0/0\""
+  },
+  {
+   "id": "G1.28 per-listing cap of 20 is enforced (later adds refused with 400)",
+   "ok": true,
+   "d": "200,200,200,400 total=19"
+  },
+  {
+   "id": "G1.29 storage failure on add → error response, not success",
+   "ok": true,
+   "d": "500 {\"success\":false,\"message\":\"Failed to add images\"}"
+  },
+  {
+   "id": "G1.30 failed add did not change the listing's images",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "G1.31 failed add left no orphaned temp file on disk",
+   "ok": true,
+   "d": "want 0 got 0"
+  },
+  {
+   "id": "G1.32 retry after recovery attaches exactly one image",
+   "ok": true,
+   "d": "200 pre=19 now=20"
+  },
+  {
+   "id": "G1.33 create is accepted (async upload) but the listing is pending moderation",
+   "ok": true,
+   "d": "201 {\"success\":true,\"data\":{\"id\":\"11a20f12-742a-40d1-9138-69c70793c9c9\",\"dealer_id\":\"b7d16347-f652-4470-8688-890019f13a9f\",\"title\":\"Dealer FailUpload\",\"slug\":null,\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":3500000,"
+  },
+  {
+   "id": "G1.34 after provider failure the image stays flagged pending — never marked as uploaded",
+   "ok": true,
+   "d": "[{\"url\":\"/uploads/1792429182784-d7e48f6daaf6-p0.png\",\"thumb\":\"/uploads/1792429182784-d7e48f6daaf6-p0.png\",\"_pending\":true,\"public_id\":null}]"
+  },
+  {
+   "id": "G1.35 failure is durably recorded for recovery (job not 'completed', attempts>0, error stored)",
+   "ok": true,
+   "d": "failed/1/true"
+  },
+  {
+   "id": "G1.36 source file retained for recovery (not deleted by the failed upload)",
+   "ok": true,
+   "d": "1"
+  },
+  {
+   "id": "G1.37 listing remains non-public after the failure",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "G1.38 owner can still add a fresh image to that listing once storage is healthy",
+   "ok": true,
+   "d": "200 {\"success\":true,\"data\":{\"images\":[{\"url\":\"/uploads/1792429182784-d7e48f6daaf6-p0.png\",\"thumb\":\"/uploads/1792429182784-d7e48f6daaf6-p0.png\",\"_pending\":true,\"public_id\":null},{\"url\":\"http://127.0.0.1:9099/kayad-stub/d6376b"
+  },
+  {
+   "id": "G1.39 no duplicate listing was created by the retry",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  },
+  {
+   "id": "G2.1 owner creates a listing with 2 images through the real multipart API (201)",
+   "ok": true,
+   "d": "201 {\"success\":true,\"data\":{\"id\":\"98819e3b-e1d6-4b55-ac0f-74d9d10a1e7e\",\"dealer_id\":\"ab1e8b60-9710-4281-83c9-ddbbde960710\",\"title\":\"Seller Prado\",\"slug\":null,\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":3500000,\"mile"
+  },
+  {
+   "id": "G2.2 listing is moderated: pending, owned by the caller",
+   "ok": true,
+   "d": "want \"pending/true\" got \"pending/true\""
+  },
+  {
+   "id": "G2.3 images are recorded immediately as pending (no false \"complete\")",
+   "ok": true,
+   "d": "[{\"url\":\"http://127.0.0.1:9099/kayad-stub/39a56e566c68.webp\",\"blur\":\"https://res.cloudinary.com/stub-cloud/image/upload/c_fill,h_20,w_20/q_auto:low/e_blur:1000/f_auto/v1/kayad-stub"
+  },
+  {
+   "id": "G2.4 background upload completes: both images now carry a provider public_id and URL",
+   "ok": true,
+   "d": "[{\"url\":\"http://127.0.0.1:9099/kayad-stub/39a56e566c68.webp\",\"blur\":\"https://res.cloudinary.com/stub-cloud/image/upload/c_fill,h_20,w_20/q_auto:low/e_blur:1000/f_auto/v1/kayad-stub/39a56e566c68?_a=BAMAPqiu0\",\"card\":\"http"
+  },
+  {
+   "id": "G2.5 the storage provider (stub) received exactly 2 file parts, as PUBLIC listing media under kayad/cars",
+   "ok": true,
+   "d": "[[true,\"upload\",\"kayad/cars\"],[true,\"upload\",\"kayad/cars\"]]"
+  },
+  {
+   "id": "G2.6 media job ledger: both jobs completed",
+   "ok": true,
+   "d": "want \"completed,completed\" got \"completed,completed\""
+  },
+  {
+   "id": "G2.7 local temp files were cleaned after upload (no orphans)",
+   "ok": true,
+   "d": "want 19 got 19"
+  },
+  {
+   "id": "G2.8 owner sees the listing, with its provider-hosted images, through the role's own listing view (/api/v1/cars/my-listings)",
+   "ok": true,
+   "d": "200 {\"success\":true,\"data\":[{\"id\":\"98819e3b-e1d6-4b55-ac0f-74d9d10a1e7e\",\"dealer_id\":\"ab1e8b60-9710-4281-83c9-ddbbde960710\",\"title\":\"Seller Prado\",\"slug\":null,\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":3500000,\"mil"
+  },
+  {
+   "id": "G2.8b another seller's listing view does not include it",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "G2.9 moderation holds: listing with finished images is still NOT in the public marketplace",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "G2.10 owner cannot self-publish by editing (status stays pending)",
+   "ok": true,
+   "d": "want \"pending\" got \"pending\""
+  },
+  {
+   "id": "G2.11 owner adds an image to the existing listing (200, 3 images)",
+   "ok": true,
+   "d": "200 {\"success\":true,\"data\":{\"images\":[{\"url\":\"http://127.0.0.1:9099/kayad-stub/39a56e566c68.webp\",\"blur\":\"https://res.cloudinary.com/stub-cloud/image/upload/c_fill,h_20,w_20/q_auto:low/e_blur:1000/f_auto/v1/kayad-stub/39a56e"
+  },
+  {
+   "id": "G2.12 provider received exactly that one file",
+   "ok": true,
+   "d": "want 1 got 1"
+  },
+  {
+   "id": "G2.13 another seller cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Not authorized to edit this listing\"}"
+  },
+  {
+   "id": "G2.14 another seller cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.15 another seller cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.13 user of the other seller role cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Not authorized to edit this listing\"}"
+  },
+  {
+   "id": "G2.14 user of the other seller role cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.15 user of the other seller role cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.13 buyer cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Dealer or seller access only\"}"
+  },
+  {
+   "id": "G2.14 buyer cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.15 buyer cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.13 inspector (ghost_checker) cannot attach an image to this listing",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Not authorized to edit this listing\"}"
+  },
+  {
+   "id": "G2.14 inspector (ghost_checker) cannot delete an image of this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.15 inspector (ghost_checker) cannot edit this listing",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "G2.13 anonymous cannot attach an image to this listing",
+   "ok": true,
+   "d": "401 {\"success\":false,\"message\":\"Not authorized, token missing\"}"
+  },
+  {
+   "id": "G2.14 anonymous cannot delete an image of this listing",
+   "ok": true,
+   "d": "401"
+  },
+  {
+   "id": "G2.15 anonymous cannot edit this listing",
+   "ok": true,
+   "d": "401"
+  },
+  {
+   "id": "G2.16 images unchanged, provider received nothing, no temp-file orphans after all rejected attempts",
+   "ok": true,
+   "d": "want \"true/0/0\" got \"true/0/0\""
+  },
+  {
+   "id": "G2.17 ordinary admin may manage listings per existing MANAGE_CARS staff policy (observed 200)",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "G2.18 text bytes declared as PNG → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "G2.19 JPEG bytes declared as PNG → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "G2.20 SVG → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Only JPG, PNG, WEBP images allowed\"}"
+  },
+  {
+   "id": "G2.21 > 5 MB image → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File too large\"}"
+  },
+  {
+   "id": "G2.22 no files on add → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"No images provided\"}"
+  },
+  {
+   "id": "G2.23 11 files in one request → 400 (multer limit)",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Too many files\"}"
+  },
+  {
+   "id": "G2.24 create with no image → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"At least one image is required.\"}"
+  },
+  {
+   "id": "G2.25 create with malformed metadata (year/price not numeric) → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Validation failed\",\"errors\":\"year: Invalid input: expected number, received NaN; price: Invalid input: expected number, received NaN\"}"
+  },
+  {
+   "id": "G2.26 create with a bad image type → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "G2.27 rejected requests created no listing, attached no image, reached no storage and left no temp files",
+   "ok": true,
+   "d": "want \"0/0/0/0\" got \"0/0/0/0\""
+  },
+  {
+   "id": "G2.28 per-listing cap of 20 is enforced (later adds refused with 400)",
+   "ok": true,
+   "d": "200,200,200,400 total=19"
+  },
+  {
+   "id": "G2.29 storage failure on add → error response, not success",
+   "ok": true,
+   "d": "500 {\"success\":false,\"message\":\"Failed to add images\"}"
+  },
+  {
+   "id": "G2.30 failed add did not change the listing's images",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "G2.31 failed add left no orphaned temp file on disk",
+   "ok": true,
+   "d": "want 0 got 0"
+  },
+  {
+   "id": "G2.32 retry after recovery attaches exactly one image",
+   "ok": true,
+   "d": "200 pre=19 now=20"
+  },
+  {
+   "id": "G2.33 create is accepted (async upload) but the listing is pending moderation",
+   "ok": true,
+   "d": "201 {\"success\":true,\"data\":{\"id\":\"35a3caaf-29e4-4cae-a1ef-2d357e483f12\",\"dealer_id\":\"ab1e8b60-9710-4281-83c9-ddbbde960710\",\"title\":\"Seller FailUpload\",\"slug\":null,\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":3500000,"
+  },
+  {
+   "id": "G2.34 after provider failure the image stays flagged pending — never marked as uploaded",
+   "ok": true,
+   "d": "[{\"url\":\"/uploads/1792429196812-f5a19e3b1c78-p0.png\",\"thumb\":\"/uploads/1792429196812-f5a19e3b1c78-p0.png\",\"_pending\":true,\"public_id\":null}]"
+  },
+  {
+   "id": "G2.35 failure is durably recorded for recovery (job not 'completed', attempts>0, error stored)",
+   "ok": true,
+   "d": "failed/1/true"
+  },
+  {
+   "id": "G2.36 source file retained for recovery (not deleted by the failed upload)",
+   "ok": true,
+   "d": "1"
+  },
+  {
+   "id": "G2.37 listing remains non-public after the failure",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "G2.38 owner can still add a fresh image to that listing once storage is healthy",
+   "ok": true,
+   "d": "200 {\"success\":true,\"data\":{\"images\":[{\"url\":\"/uploads/1792429196812-f5a19e3b1c78-p0.png\",\"thumb\":\"/uploads/1792429196812-f5a19e3b1c78-p0.png\",\"_pending\":true,\"public_id\":null},{\"url\":\"http://127.0.0.1:9099/kayad-stub/5b7a91"
+  },
+  {
+   "id": "G2.39 no duplicate listing was created by the retry",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  }
+ ]
+}

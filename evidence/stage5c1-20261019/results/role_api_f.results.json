@@ -1,0 +1,271 @@
+{
+ "pass": 53,
+ "fail": 0,
+ "results": [
+  {
+   "id": "F1.1 missing documents object → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"documents: Invalid input: expected object, received undefined\"}"
+  },
+  {
+   "id": "F1.2 missing government ID → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"documents: Invalid input: expected object, received undefined\"}"
+  },
+  {
+   "id": "F1.3 invalid ID type → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"documents: Invalid option: expected one of \\\"national_id\\\"|\\\"passport\\\"|\\\"drivers_license\\\"\"}"
+  },
+  {
+   "id": "F1.4 malformed KRA PIN → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"documents: Invalid KRA PIN\"}"
+  },
+  {
+   "id": "F1.5 oversize document number → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"documents: Too big: expected string to have <=100 characters\"}"
+  },
+  {
+   "id": "F1.6 wrong JSON types → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"documents: Invalid input: expected object, received string, Invalid input: expected object, received number\"}"
+  },
+  {
+   "id": "F1.7 none of the rejected submissions created a verification row or completed onboarding",
+   "ok": true,
+   "d": "want \"0/false\" got \"0/false\""
+  },
+  {
+   "id": "F1.8 valid submission accepted",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"ca8e4f3d-280a-450c-9cfd-0fdc5ff99505\",\"user\":\"38fce9d2-3504-4658-8277-b472cc7dd5c0\",\"business_name\":"
+  },
+  {
+   "id": "F1.9 client-supplied verified:true / extra keys / URLs are NOT persisted",
+   "ok": true,
+   "d": "{\"kraPin\":{\"verified\":false,\"pinNumber\":\"A123456789Z\"},\"governmentId\":{\"type\":\"national_id\",\"verified\":false,\"documentNumber\":\"12345678\"}}"
+  },
+  {
+   "id": "F1.10 dealer NOT approved by onboarding; verification is pending; no document marked verified",
+   "ok": true,
+   "d": "want \"false/pending/false\" got \"false/pending/false\""
+  },
+  {
+   "id": "F1.11 resubmission while pending is accepted (retry-safe)",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"ca8e4f3d-280a-450c-9cfd-0fdc5ff99505\",\"user\":\"38fce9d2-3504-4658-8277-b472cc7dd5c0\",\"business_name\":"
+  },
+  {
+   "id": "F1.12 retry created no duplicate verification rows",
+   "ok": true,
+   "d": "want \"1\" got \"1\""
+  },
+  {
+   "id": "F1.13 failed verification write is reported as an error (no false success)",
+   "ok": true,
+   "d": "500 {\"success\":false,\"message\":\"injected verification write failure\",\"requestId\":\"39490b0adcfc\",\"path\":\"/api/dealer/onboarding\",\"method\":\"PUT\"}"
+  },
+  {
+   "id": "F1.14 and the dealer is not left onboarding_complete=true with no verification",
+   "ok": true,
+   "d": "want \"false/0\" got \"false/0\""
+  },
+  {
+   "id": "F1.15 retry after the fault clears succeeds",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "F1.16 anonymous cannot submit dealer onboarding documents (401/403)",
+   "ok": true,
+   "d": "401"
+  },
+  {
+   "id": "F1.16 private seller cannot submit dealer onboarding documents (401/403)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "F1.16 buyer cannot submit dealer onboarding documents (401/403)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "F1.16 ordinary admin cannot submit dealer onboarding documents (401/403)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "F1.17 dealer reads own verification status",
+   "ok": true,
+   "d": "200 {\"success\":true,\"verification\":{\"id\":\"7a4aae73-3ff1-42e1-817e-5c494cf4188b\",\"user\":\"38fce9d2-3504-4658-8277-b472cc7dd5c0\",\"dealer\":\"ca8e4f3d-280a-450c-9cfd-0fdc5ff99505\",\"verification_status\":\"pending"
+  },
+  {
+   "id": "F1.18 seller cannot list all dealer verifications (403)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "F1.19 another dealer cannot read this dealer's verification documents (403)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "F1.20 ordinary admin may review documents (existing admin/superadmin policy), approval remains owner-reserved",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "F1.21 ordinary admin approval is refused (owner-reserved)",
+   "ok": true,
+   "d": "403 {\"success\":false,\"code\":\"DECISION_AUTHORITY_REQUIRED\",\"message\":\"Dealer and seller approval and rejection are reserved for the platform owner under the current onboarding settings.\"}"
+  },
+  {
+   "id": "F1.22 documents unchanged by all unauthorized attempts",
+   "ok": true,
+   "d": "want \"{\\\"kraPin\\\": {\\\"verified\\\": false, \\\"pinNumber\\\": \\\"A123456789Z\\\"}, \\\"governmentId\\\": {\\\"type\\\": \\\"national_id\\\", \\\"verified\\\": false, \\\"documentNumber\\\": \\\"12345678\\\"}}\" got \"{\\\"kraPin\\\": {\\\"verified\\\": false, \\\"pinNumber\\\": \\\"A123456789Z\\\"}, \\\"governmentId\\\": {\\\"type\\\": \\\"national_id\\\", \\\"verified\\\": false, \\\"documentNumber\\\": \\\"12345678\\\"}}\""
+  },
+  {
+   "id": "F2.1 dealer uploads a document image to the private folder (200, url + public_id)",
+   "ok": "kayad-stub/912f44793ab4",
+   "d": "200 {\"success\":true,\"url\":\"https://res.cloudinary.com/stub-cloud/image/authenticated/s--q9L9fvT_--/v1/kayad-stub/912f44793ab4?_a=BAMAPqiu0\",\"public_id\":\"kayad-stub/912f44793ab4\",\"thumb\":\"https://res.cloud"
+  },
+  {
+   "id": "F2.2 the storage provider (stub) received exactly one file part, as an AUTHENTICATED (private) asset in kayad/documents",
+   "ok": true,
+   "d": "[[true,\"authenticated\",\"kayad/documents\"]]"
+  },
+  {
+   "id": "F2.3 upload metadata persisted: owner, private visibility, mime, provider",
+   "ok": true,
+   "d": "{\"id\":\"06f24340-d22e-4752-9669-d80b5ab97747\",\"originalName\":\"id-front.png\",\"mimeType\":\"image/png\",\"size\":70,\"folder\":\"kayad/documents\",\"provider\":\"cloudinary\",\"publicId\":\"kayad-stub/912f44793ab4\",\"url\":\"http://127.0.0.1:"
+  },
+  {
+   "id": "F2.4 owner can read own private document",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "F2.5 another dealer cannot read it (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "F2.6 private seller cannot read it (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "F2.7 buyer cannot read it (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "F2.8 anonymous cannot read it (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "F2.9 admin read follows the existing admin policy (200)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "F2.10 another dealer cannot delete it (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "F2.11 private seller cannot delete it (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "F2.12 anonymous cannot delete it (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "F2.13 text file renamed .png (wrong content) → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "F2.14 declared PNG but JPEG bytes → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File content does not match its declared type\"}"
+  },
+  {
+   "id": "F2.15 executable / PDF MIME → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Only JPG, PNG, WEBP images allowed\"}"
+  },
+  {
+   "id": "F2.16 SVG (script-capable) → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Only JPG, PNG, WEBP images allowed\"}"
+  },
+  {
+   "id": "F2.17 oversize (> 5 MB) → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"File too large\"}"
+  },
+  {
+   "id": "F2.18 no file part → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"No file uploaded\"}"
+  },
+  {
+   "id": "F2.19 invalid folder → 400",
+   "ok": true,
+   "d": "400 {\"success\":false,\"message\":\"Invalid folder. Must be one of: vehicles, dealers, profiles, inspection, auction, escrow, documents, receipts, marketing, chat, temp\"}"
+  },
+  {
+   "id": "F2.20 anonymous upload → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "F2.21 none of the rejected uploads reached the storage provider or created a record",
+   "ok": true,
+   "d": "want \"0/0\" got \"0/0\""
+  },
+  {
+   "id": "F2.22 provider failure → error response, never success",
+   "ok": true,
+   "d": "500 {\"success\":false,\"message\":\"Upload failed\",\"requestId\":\"cfeda4023dd3\",\"stack\":\"Error: Upload failed\\n    at uploadImage (file:///home/claude/s5c1/work/backend/config/cloudinary.js:201:11)\\n    at proc"
+  },
+  {
+   "id": "F2.23 failed storage write left no upload record",
+   "ok": true,
+   "d": "want 0 got 0"
+  },
+  {
+   "id": "F2.24 retry after the provider recovers succeeds",
+   "ok": true,
+   "d": "200 {\"success\":true,\"url\":\"https://res.cloudinary.com/stub-cloud/image/authenticated/s--HRRO2N4E--/v1/kayad-stub/d451f4ce24f9?_a=BAMAPqiu0\",\"public_id\":\"kayad-stub/d451f4ce24f9\",\"thumb\":\"https://res.cloud"
+  },
+  {
+   "id": "F2.25 retry produced exactly one record (no duplicate from the failed attempt)",
+   "ok": true,
+   "d": "want 1 got 1"
+  },
+  {
+   "id": "F2.26 identical re-upload is a distinct asset (no silent dedupe / overwrite of an existing document)",
+   "ok": true,
+   "d": "kayad-stub/544bba44a72b vs kayad-stub/d451f4ce24f9"
+  },
+  {
+   "id": "F2.27 deleting own document works and removes the record",
+   "ok": true,
+   "d": "want \"200/false\" got \"200/false\""
+  },
+  {
+   "id": "F2.28 production storage configuration untouched: the stack's Cloudinary target is the local stub only",
+   "ok": true,
+   "d": "want true got true"
+  }
+ ]
+}

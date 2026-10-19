@@ -1,0 +1,11 @@
+role_api_a | exit=0 | 30s | role_api_a: pass=70 fail=0 info=0
+role_api_b | exit=0 | 7s | role_api_b: pass=67 fail=0 info=0
+role_api_c | exit=0 | 6s | role_api_c: pass=55 fail=0 info=0
+role_api_d | exit=0 | 10s | role_api_d: pass=49 fail=0 info=0
+role_api_e | exit=0 | 69s | role_api_e: pass=30 fail=0 info=0
+role_api_f | exit=0 | 10s | role_api_f: pass=53 fail=0 info=0
+role_api_g | exit=0 | 32s | role_api_g: pass=104 fail=0 info=0
+role_api_h | exit=0 | 12s | role_api_h: pass=60 fail=0 info=0
+role_api_i | exit=0 | 13s | role_api_i: pass=64 fail=0 info=0
+ui_journeys | exit=0 | 56s | ui_journeys: pass=35 fail=0 info=0
+DONE

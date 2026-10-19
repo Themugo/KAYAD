@@ -1,0 +1,306 @@
+{
+ "pass": 60,
+ "fail": 0,
+ "results": [
+  {
+   "id": "H0.1 un-onboarded dealer cannot create a listing (403, server-side)",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Dealer verification required\",\"verificationStatus\":\"none\",\"requiresAction\":\"submit_verification\",\"verificationUrl\":\"/api/verificatio"
+  },
+  {
+   "id": "H0.2 no car row was created",
+   "ok": true,
+   "d": "want \"0\" got \"0\""
+  },
+  {
+   "id": "H0.3 pre-approval dealer API access is recorded (status shown; listing creation is the enforced gate)",
+   "ok": true,
+   "d": "inventory=200"
+  },
+  {
+   "id": "H0.4 un-onboarded dealer is denied admin API",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.1 login after verification succeeds and issues an access token + refresh cookie",
+   "ok": true,
+   "d": "200 cookie=true"
+  },
+  {
+   "id": "H.2 Dealer dashboard / role APIs are reachable (200): /api/dealer-platform/dashboard, /api/v1/cars/dealer/my-cars",
+   "ok": true,
+   "d": "/api/dealer-platform/dashboard:200 /api/v1/cars/dealer/my-cars:200"
+  },
+  {
+   "id": "H.3 role boundary: admin / owner / other-role APIs are denied (401/403): /api/admin/users, /api/owner/overview",
+   "ok": true,
+   "d": "/api/admin/users:403 /api/owner/overview:403"
+  },
+  {
+   "id": "H.4 profile reflects the right role and verified e-mail",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "H.5 refresh returns a new access token and keeps authorized access",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "H.6 the refresh cookie was rotated",
+   "ok": true,
+   "d": "rotated"
+  },
+  {
+   "id": "H.7 replaying the already-used refresh token is refused (reuse detection)",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Refresh token reuse detected. Please sign in again.\",\"code\":\"AUTH_REFRESH_REUSED\"}"
+  },
+  {
+   "id": "H.8 reuse revokes the whole token family (the legitimate current refresh token also stops working)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "H.9 garbage bearer token → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.10 token signed with a different secret → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.11 expired token → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.12 unsigned (alg:none) token → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.13 role-escalation by editing the payload (admin) without re-signing → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.14 stale tokenVersion → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.15 socket handshake with a live session's access token is authenticated",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.16 socket handshake without any credential is anonymous (not authenticated)",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.16b socket handshake with a tampered token is anonymous",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.16c a socket ticket can be minted from the cookie session",
+   "ok": true,
+   "d": "ticket minted"
+  },
+  {
+   "id": "H.16d the ticket authenticates exactly once",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.16e replaying the same ticket is anonymous (single-use)",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.16f reconnection: a fresh ticket authenticates the reconnecting client",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.16g anonymous caller cannot mint a socket ticket (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.17 the user can list their active sessions (≥2)",
+   "ok": true,
+   "d": "200 n=5"
+  },
+  {
+   "id": "H.18 revoking a single session succeeds",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Session revoked\"}"
+  },
+  {
+   "id": "H.19 the revoked session is gone from the active list",
+   "ok": true,
+   "d": "n=4"
+  },
+  {
+   "id": "H.20 revoke-all succeeds",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "H.21 after revoke-all the access token is rejected on a protected request (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.22 after revoke-all a refresh attempt is refused",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.23 after revoke-all the socket handshake no longer authenticates that token",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.23b a ticket minted before revoke-all no longer authenticates",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.24 a fresh login after revocation works",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "H.25 logout succeeds",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "H.26 the logged-out access token is rejected server-side (401), not just forgotten by the browser",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.27 refresh after logout is refused",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.28 socket handshake with the logged-out token is not authenticated",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.28b a ticket minted before logout no longer authenticates",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.29 password change succeeds",
+   "ok": true,
+   "d": "200 {\"success\":true,\"user\":{\"_id\":\"17e0b76b-f0c3-410c-a1a1-0d5f175c8999\",\"id\":\"17e0b76b-f0c3-410c-a1a1-0d5f175c8999\",\"name\":\"Test dealer\",\"email\":\"dealer-sess-1792429206158@kayad-test.example\",\"role\":\"dea"
+  },
+  {
+   "id": "H.30 the other session's token is rejected after the password change",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "H.31 old password refused, new password accepted",
+   "ok": true,
+   "d": "want \"401/200\" got \"401/200\""
+  },
+  {
+   "id": "H.32 ban succeeds (ordinary admin 200)",
+   "ok": true,
+   "d": "{\"success\":true,\"message\":\"User banned\"}"
+  },
+  {
+   "id": "H.33 a banned user's existing access token is rejected server-side (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "H.34 banned user cannot log in",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.35 banned user's refresh is refused",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.36 banned user's socket handshake is not authenticated",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "H.37 after unban the user can log in again",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "H.41b a CONNECTED socket is downgraded (sessionExpired) once its session is revoked server-side",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.41c login still works after live revocation",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "H.38 superadmin deactivates the account",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"User deactivated\",\"deactivatedAt\":\"2026-10-19T20:00:17.354+03:00\",\"user\":{\"_id\":\"17e0b76b-f0c3-410c-a1a1-0d5f175c8999\",\"email\":\"dealer-sess-1792429206158@kayad-test.example\""
+  },
+  {
+   "id": "H.39 deactivated user's access token is rejected (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "H.40 deactivated user cannot log in",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.41 reactivation restores login",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "H.42 after the whole lifecycle the dealer still has dealer access",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "H.43 and is still denied owner governance",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "H.44 owner suspends the dealer verification",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Dealer suspended successfully\",\"verification\":{\"id\":\"dd909422-1a35-495c-8aba-04910d06f0d7\",\"user\":\"17e0b76b-f0c3-"
+  },
+  {
+   "id": "H.45 suspended dealer cannot create a listing (403)",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Your account has been suspended\",\"verificationStatus\":\"suspended\",\"requiresAction\":\"contact_support\",\"verificati"
+  },
+  {
+   "id": "H.46 owner reinstates",
+   "ok": true,
+   "d": "200"
+  }
+ ]
+}

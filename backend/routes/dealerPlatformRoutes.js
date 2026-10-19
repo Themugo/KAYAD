@@ -2,7 +2,7 @@ import express from "express";
 import { protect, dealerOnly } from "../middleware/auth.js";
 import { dealerOrgAccess } from "../middleware/dealerOrgAccess.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import upload, { handleUploadError } from "../middleware/upload.js";
+import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
 import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import {
@@ -66,7 +66,7 @@ router.put("/profile/:dealerId", protect, asyncHandler(updateDealerProfile));
 
 // Inventory
 router.get("/inventory", protect, dealerOnly, asyncHandler(getInventory));
-router.post("/inventory", protect, dealerOnly, requireDealerVerification, uploadLimiter, upload.array("images", 10), handleUploadError, createLimiter, asyncHandler(createListing));
+router.post("/inventory", protect, dealerOnly, requireDealerVerification, uploadLimiter, cleanupUploadsOnError, upload.array("images", 10), handleUploadError, createLimiter, asyncHandler(createListing));
 router.put("/inventory/:listingId", protect, dealerOnly, createLimiter, asyncHandler(updateListing));
 router.delete("/inventory/:listingId", protect, dealerOnly, createLimiter, asyncHandler(deleteListing));
 router.post("/inventory/bulk", protect, dealerOnly, createLimiter, asyncHandler(bulkUpdateListings));

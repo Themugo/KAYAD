@@ -7,6 +7,12 @@ Local behaviour of the seller, dealer, inspector, verification, OTP and owner-go
 
 Evidence tiers: M mocked · **R real local stack** · **P disposable PostgreSQL** · H hosted · L live. Everything below is R/P unless stated; nothing is H or L.
 
+## Foundation (added by Stage 5C.1)
+Stage 5C was built on the **certified Stage 5B closure archive** (`KAYAD-STAGE5B-OWNER-GOVERNANCE-CERTIFIED-FULL-PROJECT-20261019.zip`, SHA-256 `b8b377d7c90c07cb00073600de1161cc138e4e33afb0b4a562d3312d84c1bdee`), which superseded the first 5B archive (`1b2bf64fbdde18f22476664d978842a7e78403d45d8136dced5d975c42fce03a`). This ZIP's SHA-256 is `f6da5adcc07e9bb03b52bb00d437ddda898febaff84a49fd8b7e5634d6090fec`; the commit on `main` is `d9bfccfb34c5fb37dcfe5a2a1340ee053288dd86`. Verified by recomputing the hashes and comparing archive members — see `runbooks/stage5c1-coverage-20261019/PROVENANCE_RECORD_5C1.md`. Corrections: the non-zero validator count is 8 (not 9), and this ZIP contained two git-ignored test PNGs and a populated `backend/data/uploads.json` (not committed).
+
+## Stage 5C.1 addendum
+The coverage gaps in this report (dealer document upload, separate dealer and private-seller listing-image journeys, separate dealer and private-seller session/revocation journeys) are closed in `KAYAD_STAGE5C1_COVERAGE_CLOSURE_REPORT_20261019.md` (status: COVERAGE CLOSURE VERIFIED — LIVE BLOCKERS REMAIN). Until that report is read, the 5C statements above about upload and session coverage should be taken as limited to what this report's own tables list.
+
 ## Result table
 | Area | Result | Basis |
 |---|---|---|

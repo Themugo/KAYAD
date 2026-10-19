@@ -1,0 +1,105 @@
+/* eslint-disable no-undef -- Node-run acceptance harness */
+// STAGE 5C.1 — Part F: dealer document journey. (1) the real onboarding "documents" path (text fields, as the UI sends them),
+// (2) the private `documents` upload endpoint (stub-backed Cloudinary; NOT real Cloudinary). Real HTTP + disposable PG.
+import fs from "node:fs";
+import { provisionOwners, Client, sql, rec, eq, summary, form, registerVerified, approvedDealer, ONB, PNG, JPG, stubUploads, stubCalls, stubFail, upRecords, uid } from "./lib.mjs";
+const T = Date.now(); const em = (n) => `${n}-${T}@kayad-test.example`; const PW = "Dealr!Pass#2026f"; const J = (r) => JSON.stringify(r.body).slice(0, 200);
+stubFail(false);
+const { owners } = await provisionOwners("OwnerOne!Pass#2026", "OwnerTwo!Pass#2026"); const owner = owners[0].client;
+const anon = new Client();
+
+console.log("== F1 onboarding documents (the path the dealer UI actually uses) ==");
+const D1 = await registerVerified(em("dealer-docs"), PW, "dealer", { businessName: "Docs Motors", location: "Nairobi" });
+const dc = D1.client;
+const bad = async (id, body, want = 400) => { const r = await dc.call("PUT", "/api/dealer/onboarding", body); rec(id, r.status === want, `${r.status} ${J(r)}`); return r; };
+const base = ONB("Docs Motors");
+await bad("F1.1 missing documents object → 400", { ...base, documents: undefined });
+await bad("F1.2 missing government ID → 400", { ...base, documents: { kraPin: base.documents.kraPin } });
+await bad("F1.3 invalid ID type → 400", { ...base, documents: { ...base.documents, governmentId: { type: "library_card", documentNumber: "12345678" } } });
+await bad("F1.4 malformed KRA PIN → 400", { ...base, documents: { ...base.documents, kraPin: { pinNumber: "123" } } });
+await bad("F1.5 oversize document number → 400", { ...base, documents: { ...base.documents, governmentId: { type: "national_id", documentNumber: "9".repeat(500) } } });
+await bad("F1.6 wrong JSON types → 400", { ...base, documents: { governmentId: "12345678", kraPin: 7 } });
+eq("F1.7 none of the rejected submissions created a verification row or completed onboarding", sql(`select (select count(*) from dealer_verifications where "user"='${D1.id}')||'/'||coalesce((select onboarding_complete from dealers where "user"='${D1.id}'),false)`), "0/false");
+const withExtra = { ...base, documents: { ...base.documents, governmentId: { ...base.documents.governmentId, verified: true, url: "https://evil.example/x.png", __proto__x: 1 }, adminApproved: true, phoneVerification: { verified: true, phoneNumber: "0712345678" } }, approved: true, status: "approved" };
+const ok1 = await dc.call("PUT", "/api/dealer/onboarding", withExtra);
+rec("F1.8 valid submission accepted", ok1.status === 200, `${ok1.status} ${J(ok1)}`);
+const stored = JSON.parse(sql(`select documents::text from dealer_verifications where "user"='${D1.id}'`));
+rec("F1.9 client-supplied verified:true / extra keys / URLs are NOT persisted", stored.governmentId?.verified === false && !JSON.stringify(stored).includes("evil.example") && !("adminApproved" in stored) && stored.phoneVerification === undefined, JSON.stringify(stored).slice(0, 220));
+eq("F1.10 dealer NOT approved by onboarding; verification is pending; no document marked verified", sql(`select d.approved||'/'||v.verification_status||'/'||(v.documents::text like '%"verified": true%') from dealers d join dealer_verifications v on v."user"=d."user" where d."user"='${D1.id}'`), "false/pending/false");
+const ok2 = await dc.call("PUT", "/api/dealer/onboarding", base);
+rec("F1.11 resubmission while pending is accepted (retry-safe)", ok2.status === 200, `${ok2.status} ${J(ok2)}`);
+eq("F1.12 retry created no duplicate verification rows", sql(`select count(*) from dealer_verifications where "user"='${D1.id}'`), "1");
+// failure injection: the verification write fails → onboarding must be rolled back, not left half-complete
+const D2 = await registerVerified(em("dealer-fail"), PW, "dealer", { businessName: "Fail Motors", location: "Nairobi" });
+sql(`create or replace function trg_fail_dv() returns trigger language plpgsql as $$ begin raise exception 'injected verification write failure'; end $$`);
+sql(`create trigger trg_fail_dv_ins before insert or update on dealer_verifications for each row execute function trg_fail_dv()`);
+const fr = await D2.client.call("PUT", "/api/dealer/onboarding", ONB("Fail Motors"));
+sql(`drop trigger trg_fail_dv_ins on dealer_verifications; drop function trg_fail_dv()`);
+rec("F1.13 failed verification write is reported as an error (no false success)", fr.status >= 400 && fr.body?.success !== true, `${fr.status} ${J(fr)}`);
+eq("F1.14 and the dealer is not left onboarding_complete=true with no verification", sql(`select coalesce((select onboarding_complete from dealers where "user"='${D2.id}'),false)||'/'||(select count(*) from dealer_verifications where "user"='${D2.id}')`), "false/0");
+const fr2 = await D2.client.call("PUT", "/api/dealer/onboarding", ONB("Fail Motors"));
+eq("F1.15 retry after the fault clears succeeds", fr2.status, 200);
+// authorization
+const SELL = await registerVerified(em("seller-docs"), PW, "individual_seller");
+const BUY = await registerVerified(em("buyer-docs"), PW, "user");
+const ADM = em("admin-docs"); sql(`select 1`); const { rawUser } = await import("./lib.mjs"); rawUser(ADM, "admin", PW); const adm = new Client(); await adm.login(ADM, PW);
+for (const [who, c] of [["anonymous", anon], ["private seller", SELL.client], ["buyer", BUY.client], ["ordinary admin", adm]]) {
+  const r = await c.call("PUT", "/api/dealer/onboarding", base); rec(`F1.16 ${who} cannot submit dealer onboarding documents (401/403)`, [401, 403].includes(r.status), `${r.status}`);
+}
+const before = sql(`select documents::text from dealer_verifications where "user"='${D1.id}'`);
+const g = await dc.call("GET", "/api/verification/status"); rec("F1.17 dealer reads own verification status", g.status === 200, `${g.status} ${J(g)}`);
+const og = await SELL.client.call("GET", "/api/verification/admin/all"); rec("F1.18 seller cannot list all dealer verifications (403)", og.status === 403, `${og.status}`);
+const og2 = await D2.client.call("GET", `/api/verification/admin/${sql(`select id from dealer_verifications where "user"='${D1.id}'`)}`); rec("F1.19 another dealer cannot read this dealer's verification documents (403)", og2.status === 403, `${og2.status}`);
+const og3 = await adm.call("GET", `/api/verification/admin/${sql(`select id from dealer_verifications where "user"='${D1.id}'`)}`); rec("F1.20 ordinary admin may review documents (existing admin/superadmin policy), approval remains owner-reserved", og3.status === 200, `${og3.status}`);
+const ap = await adm.call("POST", `/api/verification/admin/${sql(`select id from dealer_verifications where "user"='${D1.id}'`)}/approve`, { adminNotes: "x" }); rec("F1.21 ordinary admin approval is refused (owner-reserved)", ap.status === 403, `${ap.status} ${J(ap)}`);
+eq("F1.22 documents unchanged by all unauthorized attempts", sql(`select documents::text from dealer_verifications where "user"='${D1.id}'`), before);
+
+console.log("== F2 private `documents` upload endpoint (stub-backed Cloudinary) ==");
+const A = await approvedDealer(owner, em("dealer-up-a"), PW, "Up A Motors"); const B = await approvedDealer(owner, em("dealer-up-b"), PW, "Up B Motors");
+const up = (c, buf, o = {}) => form(c, "POST", "/api/upload", { folder: o.folder || "documents" }, o.noFile ? [] : [{ name: "file", data: buf, type: o.type || "image/png", filename: o.filename || "id-front.png" }]);
+let n0 = upRecords().length, s0 = stubCalls().length;
+const u1 = await up(A.client, PNG);
+rec("F2.1 dealer uploads a document image to the private folder (200, url + public_id)", u1.status === 200 && u1.body.success && u1.body.url && u1.body.public_id, `${u1.status} ${J(u1)}`);
+const sc = stubUploads(s0);
+rec("F2.2 the storage provider (stub) received exactly one file part, as an AUTHENTICATED (private) asset in kayad/documents", sc.length >= 1 && sc[0].hasFilePart && sc[0].deliveryType === "authenticated" && /kayad\/documents/.test(sc[0].folder || ""), JSON.stringify(sc.map((x) => [x.hasFilePart, x.deliveryType, x.folder])));
+const recs = upRecords().slice(n0);
+const mine = recs.find((r) => r.publicId === u1.body.public_id);
+rec("F2.3 upload metadata persisted: owner, private visibility, mime, provider", !!mine && mine.userId === A.id && /"visibility":\s*"private"/.test(mine.metadata) && mine.mimeType === "image/png" && mine.provider === "cloudinary", JSON.stringify(mine || {}).slice(0, 220));
+const rid = mine?.id;
+const rd = async (c) => (await c.call("GET", `/api/upload/${rid}`)).status;
+eq("F2.4 owner can read own private document", await rd(A.client), 200);
+eq("F2.5 another dealer cannot read it (403)", await rd(B.client), 403);
+eq("F2.6 private seller cannot read it (403)", await rd(SELL.client), 403);
+eq("F2.7 buyer cannot read it (403)", await rd(BUY.client), 403);
+eq("F2.8 anonymous cannot read it (401)", (await fetch(`http://127.0.0.1:5050/api/upload/${rid}`)).status, 401);
+eq("F2.9 admin read follows the existing admin policy (200)", await rd(adm), 200);
+const del = async (c, pid) => (await c.call("DELETE", `/api/upload/${encodeURIComponent(pid)}`)).status;
+eq("F2.10 another dealer cannot delete it (403)", await del(B.client, u1.body.public_id), 403);
+eq("F2.11 private seller cannot delete it (403)", await del(SELL.client, u1.body.public_id), 403);
+eq("F2.12 anonymous cannot delete it (401)", await del(anon, u1.body.public_id), 401);
+console.log("-- validation --");
+n0 = upRecords().length; s0 = stubCalls().length;
+const tryBad = async (id, r, wantRange = [400, 400]) => rec(id, r.status >= wantRange[0] && r.status <= wantRange[1], `${r.status} ${J(r)}`);
+await tryBad("F2.13 text file renamed .png (wrong content) → 400", await up(A.client, Buffer.from("not an image at all, just text"), { type: "image/png", filename: "id.png" }));
+await tryBad("F2.14 declared PNG but JPEG bytes → 400", await up(A.client, JPG, { type: "image/png" }));
+await tryBad("F2.15 executable / PDF MIME → 400", await up(A.client, Buffer.from("%PDF-1.4 test"), { type: "application/pdf", filename: "id.pdf" }));
+await tryBad("F2.16 SVG (script-capable) → 400", await up(A.client, Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'><script>1</script></svg>"), { type: "image/svg+xml", filename: "x.svg" }));
+await tryBad("F2.17 oversize (> 5 MB) → 400", await up(A.client, Buffer.concat([PNG.subarray(0, 8), Buffer.alloc(5.5 * 1024 * 1024, 7)]), { filename: "big.png" }));
+await tryBad("F2.18 no file part → 400", await up(A.client, null, { noFile: true }));
+await tryBad("F2.19 invalid folder → 400", await up(A.client, PNG, { folder: "../etc" }));
+eq("F2.20 anonymous upload → 401", (await up(anon, PNG)).status, 401);
+eq("F2.21 none of the rejected uploads reached the storage provider or created a record", `${stubUploads(s0).length}/${upRecords().length - n0}`, "0/0");
+console.log("-- storage failure and retry --");
+n0 = upRecords().length; s0 = stubCalls().length; stubFail(true);
+const uf = await up(A.client, PNG);
+stubFail(false);
+rec("F2.22 provider failure → error response, never success", uf.status >= 400 && uf.body?.success !== true && !uf.body?.url, `${uf.status} ${J(uf)}`);
+eq("F2.23 failed storage write left no upload record", upRecords().length - n0, 0);
+const ur = await up(A.client, PNG);
+rec("F2.24 retry after the provider recovers succeeds", ur.status === 200 && !!ur.body.public_id, `${ur.status} ${J(ur)}`);
+eq("F2.25 retry produced exactly one record (no duplicate from the failed attempt)", upRecords().length - n0, 1);
+const ur2 = await up(A.client, PNG);
+rec("F2.26 identical re-upload is a distinct asset (no silent dedupe / overwrite of an existing document)", ur2.status === 200 && ur2.body.public_id !== ur.body.public_id, `${ur2.body.public_id} vs ${ur.body.public_id}`);
+eq("F2.27 deleting own document works and removes the record", `${await del(A.client, u1.body.public_id)}/${upRecords().some((r) => r.publicId === u1.body.public_id)}`, "200/false");
+eq("F2.28 production storage configuration untouched: the stack's Cloudinary target is the local stub only", /127\.0\.0\.1:9099/.test(fs.readFileSync("/home/claude/s5c/stack/backend.env", "utf8")), true);
+summary("role_api_f");

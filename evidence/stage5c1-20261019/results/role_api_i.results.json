@@ -1,0 +1,326 @@
+{
+ "pass": 64,
+ "fail": 0,
+ "results": [
+  {
+   "id": "I0.1 unverified seller cannot obtain a session (login refused)",
+   "ok": true,
+   "d": "register=201 login=403"
+  },
+  {
+   "id": "I1.1 seller A owns a listing",
+   "ok": true,
+   "d": "201"
+  },
+  {
+   "id": "I1.2 seller B's my-listings does not include A's listing",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "I1.3 seller B cannot modify A's listing (403/404)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "I1.4 seller B cannot delete A's listing (403/404)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "I1.5 A's listing is untouched",
+   "ok": true,
+   "d": "want \"3500000\" got \"3500000\""
+  },
+  {
+   "id": "I1.6 seller B's session list contains only B's sessions",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "I1.7 seller B cannot revoke seller A's session",
+   "ok": true,
+   "d": "404"
+  },
+  {
+   "id": "I1.8 seller A's session still valid after B's attempt",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I1.9 dealer-platform dashboard for a private seller is scoped to the caller only (A sees 1 own listing, B sees 0; policy O5C1-01, not a denial)",
+   "ok": true,
+   "d": "A=200/1 B=200/0"
+  },
+  {
+   "id": "I1.9b seller B's dealer-platform inventory does not contain A's listing",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "I.1 login after verification succeeds and issues an access token + refresh cookie",
+   "ok": true,
+   "d": "200 cookie=true"
+  },
+  {
+   "id": "I.2 Seller dashboard / role APIs are reachable (200): /api/v1/cars/my-listings",
+   "ok": true,
+   "d": "/api/v1/cars/my-listings:200"
+  },
+  {
+   "id": "I.3 role boundary: admin / owner / other-role APIs are denied (401/403): /api/admin/users, /api/owner/overview",
+   "ok": true,
+   "d": "/api/admin/users:403 /api/owner/overview:403"
+  },
+  {
+   "id": "I.4 profile reflects the right role and verified e-mail",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "I.5 refresh returns a new access token and keeps authorized access",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "I.6 the refresh cookie was rotated",
+   "ok": true,
+   "d": "rotated"
+  },
+  {
+   "id": "I.7 replaying the already-used refresh token is refused (reuse detection)",
+   "ok": true,
+   "d": "403 {\"success\":false,\"message\":\"Refresh token reuse detected. Please sign in again.\",\"code\":\"AUTH_REFRESH_REUSED\"}"
+  },
+  {
+   "id": "I.8 reuse revokes the whole token family (the legitimate current refresh token also stops working)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "I.9 garbage bearer token → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.10 token signed with a different secret → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.11 expired token → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.12 unsigned (alg:none) token → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.13 role-escalation by editing the payload (admin) without re-signing → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.14 stale tokenVersion → 401",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.15 socket handshake with a live session's access token is authenticated",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.16 socket handshake without any credential is anonymous (not authenticated)",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.16b socket handshake with a tampered token is anonymous",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.16c a socket ticket can be minted from the cookie session",
+   "ok": true,
+   "d": "ticket minted"
+  },
+  {
+   "id": "I.16d the ticket authenticates exactly once",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.16e replaying the same ticket is anonymous (single-use)",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.16f reconnection: a fresh ticket authenticates the reconnecting client",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.16g anonymous caller cannot mint a socket ticket (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.17 the user can list their active sessions (≥2)",
+   "ok": true,
+   "d": "200 n=4"
+  },
+  {
+   "id": "I.18 revoking a single session succeeds",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"Session revoked\"}"
+  },
+  {
+   "id": "I.19 the revoked session is gone from the active list",
+   "ok": true,
+   "d": "n=3"
+  },
+  {
+   "id": "I.20 revoke-all succeeds",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "I.21 after revoke-all the access token is rejected on a protected request (401)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.22 after revoke-all a refresh attempt is refused",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.23 after revoke-all the socket handshake no longer authenticates that token",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.23b a ticket minted before revoke-all no longer authenticates",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.24 a fresh login after revocation works",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I.25 logout succeeds",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "I.26 the logged-out access token is rejected server-side (401), not just forgotten by the browser",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.27 refresh after logout is refused",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.28 socket handshake with the logged-out token is not authenticated",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.28b a ticket minted before logout no longer authenticates",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.29 password change succeeds",
+   "ok": true,
+   "d": "200 {\"success\":true,\"user\":{\"_id\":\"c1d90c4f-1a26-497b-b155-50753ee0c4ba\",\"id\":\"c1d90c4f-1a26-497b-b155-50753ee0c4ba\",\"name\":\"Test individual_seller\",\"email\":\"seller-sess-1792429218939@kayad-test.example\","
+  },
+  {
+   "id": "I.30 the other session's token is rejected after the password change",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "I.31 old password refused, new password accepted",
+   "ok": true,
+   "d": "want \"401/200\" got \"401/200\""
+  },
+  {
+   "id": "I.32 ban succeeds (ordinary admin 200)",
+   "ok": true,
+   "d": "{\"success\":true,\"message\":\"User banned\"}"
+  },
+  {
+   "id": "I.33 a banned user's existing access token is rejected server-side (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I.34 banned user cannot log in",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.35 banned user's refresh is refused",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.36 banned user's socket handshake is not authenticated",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "I.37 after unban the user can log in again",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I.41b a CONNECTED socket is downgraded (sessionExpired) once its session is revoked server-side",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.41c login still works after live revocation",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I.38 superadmin deactivates the account",
+   "ok": true,
+   "d": "200 {\"success\":true,\"message\":\"User deactivated\",\"deactivatedAt\":\"2026-10-19T20:00:30.802+03:00\",\"user\":{\"_id\":\"c1d90c4f-1a26-497b-b155-50753ee0c4ba\",\"email\":\"seller-sess-1792429218939@kayad-test.example\""
+  },
+  {
+   "id": "I.39 deactivated user's access token is rejected (403)",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "I.40 deactivated user cannot log in",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "I.41 reactivation restores login",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I.42 after the whole lifecycle the seller still reaches seller APIs",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "I.43 and is still denied owner governance and admin APIs",
+   "ok": true,
+   "d": "want true got true"
+  }
+ ]
+}

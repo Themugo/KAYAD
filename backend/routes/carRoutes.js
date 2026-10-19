@@ -4,7 +4,7 @@ import { protect, dealerOnly, adminOnly, optionalAuth } from "../middleware/auth
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateCar, validateQuery, carListQuerySchema, validateResponse, carResponseSchema, carListResponseSchema } from "../middleware/validate.js";
 
-import upload, { handleUploadError } from "../middleware/upload.js";
+import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
 import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
 import { cacheResponse, invalidateCache } from "../middleware/cacheMiddleware.js";
 import { cacheVehicleSearch, invalidateVehicleSearchCache } from "../middleware/searchCache.js";
@@ -263,6 +263,7 @@ router.post(
   dealerOnly,
   requireDealerVerification,
   uploadLimiter,
+  cleanupUploadsOnError,
   upload.array("images", 10),
   handleUploadError,
   validateCar,
@@ -309,6 +310,7 @@ router.post(
   protect,
   dealerOnly,
   uploadLimiter,
+  cleanupUploadsOnError,
   upload.array("images", 10),
   handleUploadError,
   invalidateCache("cache:*"),

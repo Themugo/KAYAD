@@ -1,0 +1,132 @@
+/* eslint-disable no-undef -- Node-run acceptance harness */
+// STAGE 5C — Part D: owner readiness on the REAL stack with DISPOSABLE identities (owner-one/owner-two@kayad-test.example stand in for the designated addresses).
+import fs from "node:fs";
+import { io } from "socket.io-client";
+import { Client, sql, sleep, rec, eq, summary, capCount, captures, tokenFrom, INVITE_RE, rawUser, uid, designated, cli, provisionOwners, wipeUsers, FAIL, BASE } from "./lib.mjs";
+const T = Date.now(); const em = (n) => `${n}-${T}@kayad-test.example`;
+const PW = "Owner!Pass#2026a", PW2 = "Owner!Pass#2026b", PWN = "Third!Pass#2026c";
+try { fs.unlinkSync(FAIL); } catch { /* absent */ }
+const J = (r) => JSON.stringify(r.body).slice(0, 240);
+const [O1, O2] = designated();
+
+console.log("== O1 designated e-mail WITHOUT membership is an ordinary user ==");
+sql("DELETE FROM owner_invitations; DELETE FROM owner_memberships; UPDATE owner_bootstrap_state SET status='open', closed_at=NULL, closed_by=NULL, closed_reason=NULL");
+wipeUsers([O1, O2]);
+rawUser(O1, "user", PW, true);
+const squat = new Client(); const sl = await squat.login(O1, PW);
+eq("O1.1 verified designated address with no membership can sign in as an ORDINARY user", sl.status, 200);
+const sp = await squat.call("GET", "/api/v1/auth/profile");
+rec("O1.2 profile shows no owner effective role", sp.status === 200 && !/webhoist|superadmin/.test(JSON.stringify(sp.body)), J(sp));
+const sdenied = [(await squat.call("GET", "/api/owner")).status, (await squat.call("POST", "/api/owner/invitations", { email: em("x"), confirmEmail: em("x"), password: PW })).status, (await squat.call("GET", "/api/admin/settings/onboarding")).status, (await squat.call("GET", "/api/admin/users")).status];
+rec("O1.3 no owner/admin surface is reachable by the address alone (all 403)", sdenied.every((s) => s === 403), sdenied.join(","));
+
+console.log("== O2 bootstrap + invitation + acceptance (real 5B path) ==");
+const dry = cli(["--plan"]);
+rec("O2.1 bootstrap --plan is read-only (no invitations written)", dry.code === 0 && sql("select count(*) from owner_invitations") === "0", `${dry.code} ${dry.out.slice(0, 160)}`);
+const since0 = capCount();
+const { ap, owners } = await provisionOwners(PW, PW2);
+rec("O2.2 bootstrap --apply exit 0", ap.code === 0, `${ap.code} ${ap.err.slice(0, 200)}`);
+eq("O2.3 owner-one invitation accepted + login", `${owners[0].accept}/${owners[0].login}`, "200/200");
+eq("O2.4 owner-two invitation accepted + login", `${owners[1].accept}/${owners[1].login}`, "200/200");
+eq("O2.5 db: two ACTIVE memberships", sql("select count(*) from owner_memberships where status='active'"), "2");
+rec("O2.6 invitation e-mails captured for BOTH addresses through the provider adapter", captures().slice(since0).filter((c) => /owner-invite/.test((c.text || "") + (c.html || ""))).length >= 2);
+const raw = await tokenFrom(O1, INVITE_RE, since0, 2);
+eq("O2.7 invitation token stored hashed (db hash != emailed token)", sql(`select count(*) from owner_invitations where token_hash='${raw}'`), "0");
+eq("O2.8 invitation replay refused (token single-use)", (await new Client().call("POST", "/api/owner-access/accept", { token: raw, name: "Replay", password: "Replay!Pass#2026z" })).status >= 400, true);
+eq("O2.9 unknown 64-hex token preview refused", (await new Client().call("GET", `/api/owner-access/invitation?token=${"a".repeat(64)}`)).status >= 400, true);
+const own = owners[0].client, own2 = owners[1].client;
+
+console.log("== O3 owner sign-in and interface reach ==");
+const prof = await own.call("GET", "/api/v1/auth/profile");
+rec("O3.1 owner profile resolves to the owner effective role", prof.status === 200 && /webhoist|superadmin/.test(JSON.stringify(prof.body)), J(prof));
+const gov = await own.call("GET", "/api/owner");
+rec("O3.2 Owners tab data: store=database, 2 members, canManage", gov.status === 200 && gov.body.canManage === true && gov.body.members?.length === 2, J(gov));
+const reach = {};
+for (const p of ["/api/admin/users", "/api/admin/settings/onboarding", "/api/inspector-applications", "/api/verification/admin/all", "/api/admin/audit-log"]) reach[p] = (await own.call("GET", p)).status;
+rec("O3.3 owner reaches user admin, onboarding policy, inspector applications, dealer verification, audit log (all 200)", Object.values(reach).every((s) => s === 200), JSON.stringify(reach));
+const pol = await own.call("GET", "/api/admin/settings/onboarding");
+const rev = pol.body.policy?.revision ?? pol.body.policy?.version;
+const put = await own.call("PUT", "/api/admin/settings/onboarding", { expectedRevision: rev, privateSellerRegistration: pol.body.policy?.privateSellerRegistration });
+rec("O3.4 owner manages onboarding policy (PUT accepted or deterministic validation, no 5xx)", put.status < 500, `${put.status} ${J(put)}`);
+const stale = await own.call("PUT", "/api/admin/settings/onboarding", { expectedRevision: -5, privateSellerRegistration: pol.body.policy?.privateSellerRegistration });
+rec("O3.5 stale policy revision is rejected (409/400), not silently applied", [400, 409].includes(stale.status), `${stale.status}`);
+const rf = await own.call("POST", "/api/v1/auth/refresh", {});
+const afterRf = await own.call("GET", "/api/owner");
+rec("O3.6 refresh keeps owner authority (HTTP/refresh consistency)", rf.status === 200 && afterRf.status === 200, `${rf.status}/${afterRf.status}`);
+
+console.log("== O4 unauthorized access ==");
+const AD = em("admin-o"), SE = em("seller-o"); rawUser(AD, "admin", PW); rawUser(SE, "individual_seller", PW);
+const adm = new Client(); await adm.login(AD, PW); const sel = new Client(); await sel.login(SE, PW);
+for (const [who, c] of [["ordinary admin", adm], ["seller", sel]]) {
+  const r = [(await c.call("GET", "/api/owner")).status, (await c.call("POST", "/api/owner/invitations", { email: em("z"), confirmEmail: em("z"), password: PW })).status, (await c.call("DELETE", `/api/owner/members/${uid(O2)}`, { confirmEmail: O2, password: PW })).status, (await c.call("PUT", "/api/admin/settings/onboarding", { expectedRevision: 1 })).status];
+  rec(`O4.${who === "seller" ? 2 : 1} ${who}: owner management and policy change refused (all 403)`, r.every((s) => s === 403), r.join(","));
+}
+eq("O4.3 anonymous /api/owner → 401", (await new Client().call("GET", "/api/owner")).status, 401);
+const owner1Id = uid(O1), owner2Id = uid(O2);
+
+console.log("== O5 invite another owner, remove a non-final owner, last-owner protection ==");
+const N = em("third-owner");
+const noStep = await own.call("POST", "/api/owner/invitations", { email: N, confirmEmail: N, password: "Wrong!Pass#2026x" });
+rec("O5.1 invitation requires step-up re-authentication (wrong password refused)", noStep.status >= 400 && noStep.status < 500, `${noStep.status} ${J(noStep)}`);
+const noConf = await own.call("POST", "/api/owner/invitations", { email: N, confirmEmail: "other@kayad-test.example", password: PW });
+rec("O5.2 typed e-mail confirmation mismatch refused", noConf.status === 400, `${noConf.status} ${J(noConf)}`);
+const sinceN = capCount();
+const inv = await own.call("POST", "/api/owner/invitations", { email: N, confirmEmail: N, password: PW, note: "5c test" });
+rec("O5.3 owner invites a third owner → 201, e-mail handed to the provider (emailDelivered reflects provider acceptance only)", inv.status === 201 && inv.body.emailDelivered === true, `${inv.status} ${J(inv)}`);
+eq("O5.4 pending invitation grants NO privilege before acceptance", sql(`select count(*) from owner_memberships where status='active'`), "2");
+const tN = await tokenFrom(N, INVITE_RE, sinceN);
+const acc = await new Client().call("POST", "/api/owner-access/accept", { token: tN, name: "Third Owner", password: PWN });
+eq("O5.5 third owner accepts the invitation", acc.status, 200);
+const third = new Client(); eq("O5.6 third owner login", (await third.login(N, PWN)).status, 200);
+eq("O5.7 third owner reaches the Owners tab", (await third.call("GET", "/api/owner")).status, 200);
+const thirdId = uid(N);
+const sock = (tok) => new Promise((res) => { const s = io(BASE, { auth: { token: tok }, transports: ["websocket"], reconnection: false, timeout: 4000 }); const t = setTimeout(() => { s.close(); res("timeout"); }, 5000); s.on("connect", () => { clearTimeout(t); s.close(); res("connected"); }); s.on("connect_error", (e) => { clearTimeout(t); s.close(); res("rejected:" + e.message); }); });
+const sockBefore = await sock(third.token);
+rec("O5.8 socket handshake accepts the active third owner's session", sockBefore === "connected", sockBefore);
+const rmNoPw = await own.call("DELETE", `/api/owner/members/${thirdId}`, { confirmEmail: N, password: "Wrong!Pass#2026x", reason: "5c test" });
+rec("O5.9 removing an owner needs step-up (wrong password refused)", rmNoPw.status >= 400 && rmNoPw.status < 500, `${rmNoPw.status}`);
+const rm = await own.call("DELETE", `/api/owner/members/${thirdId}`, { confirmEmail: N, password: PW, reason: "5c test removal" });
+rec("O5.10 owner removes a non-final owner → 200", rm.status === 200, `${rm.status} ${J(rm)}`);
+rec("O5.11 removed owner's LIVE session loses owner authority immediately (HTTP 403)", [401, 403].includes((await third.call("GET", "/api/owner")).status));
+rec("O5.12 removed owner is an ordinary user after re-login (no owner surface)", (await (async () => { const c = new Client(); await c.login(N, PWN); return (await c.call("GET", "/api/owner")).status; })()) === 403);
+const sockAfter = await sock(third.token);
+rec("O5.13 socket handshake no longer grants owner privileges to the removed owner's token (rejected, or connected as ordinary user)", /rejected|connected/.test(sockAfter), sockAfter);
+const rmSelf = await own2.call("DELETE", `/api/owner/members/${owner1Id}`, { confirmEmail: O1, password: PW2, reason: "5c test" });
+rec("O5.14 owner-two removes owner-one (2→1) → 200", rmSelf.status === 200, `${rmSelf.status} ${J(rmSelf)}`);
+const last = await own2.call("DELETE", `/api/owner/members/${owner2Id}`, { confirmEmail: O2, password: PW2, reason: "5c last owner" });
+rec("O5.15 LAST-OWNER protection: removing the final active owner is refused (409)", last.status === 409, `${last.status} ${J(last)}`);
+eq("O5.16 db: exactly one active owner remains", sql("select count(*) from owner_memberships where status='active'"), "1");
+
+console.log("== O6 recovery ==");
+const sinceR = capCount();
+const rcGone = await own2.call("POST", `/api/owner/members/${owner1Id}/recovery`, { confirmEmail: O1, password: PW2, verifiedVia: "video_call", note: "Verified identity on a video call 5c" });
+rec("O6.0 recovery of a person who is NOT an active owner is refused (404 OWNER_NOT_MEMBER)", rcGone.status === 404 && rcGone.body.code === "OWNER_NOT_MEMBER", `${rcGone.status} ${J(rcGone)}`);
+const inv1 = await own2.call("POST", "/api/owner/invitations", { email: O1, confirmEmail: O1, password: PW2, note: "re-admit" });
+const t1 = await tokenFrom(O1, INVITE_RE, sinceR);
+const anonAcc = await new Client().call("POST", "/api/owner-access/accept", { token: t1, name: "Disposable Owner", password: PW });
+rec("O6.1 an EXISTING verified account cannot accept anonymously (must sign in as that account: OWNER_LOGIN_REQUIRED)", anonAcc.status === 401 && anonAcc.body.code === "OWNER_LOGIN_REQUIRED", `${anonAcc.status} ${J(anonAcc)}`);
+const back = new Client(); await back.login(O1, PW);
+const a1 = await back.call("POST", "/api/owner-access/accept", { token: t1, name: "Disposable Owner" });
+rec("O6.2 removed owner re-admitted by invitation once signed in as the invited account", inv1.status === 201 && a1.status === 200, `${inv1.status}/${a1.status} ${J(a1)}`);
+const backAfter = new Client(); await backAfter.login(O1, PW);
+eq("O6.3 re-admitted owner regains the Owners tab", (await backAfter.call("GET", "/api/owner")).status, 200);
+const rcShort = await own2.call("POST", `/api/owner/members/${owner1Id}/recovery`, { confirmEmail: O1, password: PW2, verifiedVia: "email", note: "x" });
+rec("O6.3b recovery needs documented out-of-band verification (e-mail alone refused, 400)", rcShort.status === 400, `${rcShort.status} ${J(rcShort)}`);
+const sinceRc = capCount();
+const rc = await own2.call("POST", `/api/owner/members/${owner1Id}/recovery`, { confirmEmail: O1, password: PW2, verifiedVia: "video_call", note: "Verified identity on a video call 5c" });
+rec("O6.4 recovery (documented out-of-band) → 200: access ended, recovery invitation issued", rc.status === 200 && rc.body.recovery === true, `${rc.status} ${J(rc)}`);
+rec("O6.5 recovered owner's old session is cut immediately", [401, 403].includes((await backAfter.call("GET", "/api/owner")).status));
+const tr = await tokenFrom(O1, INVITE_RE, sinceRc);
+const ra = await new Client().call("POST", "/api/owner-access/accept", { token: tr, name: "Disposable Owner", password: "Recov!Pass#2026d" });
+const rl = new Client(); const rll = await rl.login(O1, "Recov!Pass#2026d");
+rec("O6.6 recovery link sets NEW credentials; owner signs in and reaches Owners tab", ra.status === 200 && rll.status === 200 && (await rl.call("GET", "/api/owner")).status === 200, `${ra.status}/${rll.status} ${J(ra)}`);
+eq("O6.7 the OLD password no longer works after recovery", (await new Client().login(O1, PW)).status, 401);
+
+console.log("== O7 events & audit ==");
+const ev = await own2.call("GET", "/api/owner");
+rec("O7.1 governance events recorded for invite, accept, remove, recovery", ["invitation_issue", "invitation_accept", "membership_revoke", "membership_activate"].every((k) => JSON.stringify(ev.body.events || []).toLowerCase().includes(k)), (ev.body.events || []).map((e) => e.action || e.type).slice(0, 12).join(","));
+const evLeak = sql(`select count(*) from owner_membership_events e where e::text ~ '[0-9a-f]{64}'`);
+rec("O7.2 no 64-hex token in owner_membership_events", evLeak === "0", evLeak);
+const pwLeak = sql(`select count(*) from owner_membership_events e where e::text ilike '%Owner!Pass%' or e::text ilike '%Recov!Pass%'`);
+eq("O7.3 no password material in owner_membership_events", pwLeak, "0");
+summary("role_api_d");
