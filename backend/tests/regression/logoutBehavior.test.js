@@ -32,7 +32,8 @@ jest.unstable_mockModule('../../middleware/accountLockout.js', () => ({
   recordFailedAttempt: jest.fn(),
   recordSuccessfulAttempt: jest.fn(),
 }));
-jest.unstable_mockModule('../../infrastructure/logging/index.js', () => ({ logError }));
+const logWarn = jest.fn();
+jest.unstable_mockModule('../../infrastructure/logging/index.js', () => ({ logError, logWarn }));
 jest.unstable_mockModule('../../utils/supabase.js', () => ({ getSupabase: jest.fn() }));
 jest.unstable_mockModule('../../utils/fieldMap.js', () => ({ mapRowIn: jest.fn() }));
 jest.unstable_mockModule('bcryptjs', () => ({ default: {} }));
