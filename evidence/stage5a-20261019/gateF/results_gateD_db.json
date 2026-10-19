@@ -1,0 +1,47 @@
+[
+  {
+    "id": "DB1 settings survive backend restart",
+    "ok": true,
+    "detail": "self_onboarding/auto_publish rev 77"
+  },
+  {
+    "id": "DB2 corrupt (non-object JSON) falls back restrictive [self-publish attempt blocked]",
+    "ok": true,
+    "detail": "403/pending"
+  },
+  {
+    "id": "DB2 corrupt (non-object JSON) falls back restrictive",
+    "ok": true,
+    "detail": "source=invalid dealer=closed listing=hold_for_review auth=owner_only issues=[\"value is not an object\"]"
+  },
+  {
+    "id": "DB3 invalid enum values fall back restrictive [self-publish attempt blocked]",
+    "ok": true,
+    "detail": "403/pending"
+  },
+  {
+    "id": "DB3 invalid enum values fall back restrictive",
+    "ok": true,
+    "detail": "source=invalid dealer=closed listing=hold_for_review auth=owner_only issues=[\"dealerOnboardingMode is invalid\",\"dealerDecisionAuthority is invalid\"]"
+  },
+  {
+    "id": "DB4 unknown extra field is ignored (authority stays owner_only)",
+    "ok": true,
+    "detail": "source=database dealer=self_onboarding listing=auto_publish auth=owner_only issues=[]"
+  },
+  {
+    "id": "DB4b extra field 'isOwner' grants nothing",
+    "ok": true,
+    "detail": "[\"privateSellerRegistration\",\"dealerOnboardingMode\",\"listingModeration\",\"dealerDecisionAuthority\",\"listingDecisionAuthority\",\"revision\",\"updatedAt\",\"updatedBy\",\"source\",\"emailVerificationRequiredForSellers\"]"
+  },
+  {
+    "id": "DB5 missing row falls back to launch defaults (restrictive)",
+    "ok": true,
+    "detail": "source=default dealer=approval_required listing=hold_for_review auth=owner_only issues=[]"
+  },
+  {
+    "id": "DB6 restored saved policy is read again",
+    "ok": true,
+    "detail": "source=database"
+  }
+]

@@ -9,6 +9,7 @@ const STATUS_BADGE = {
   pending:  'badge-muted',
   active:   'badge-green',
   rejected: 'badge-muted',
+  hidden: 'badge-muted',
   sold:     'badge-gold',
 };
 
@@ -68,15 +69,15 @@ export default function AdminCarModeration() {
 
   const handleBulkModerate = async (action) => {
     if (selectedIds.length === 0) return;
-    const adminNote = action === 'reject' ? prompt('Reason for rejection:') : '';
-    if (action === 'reject' && adminNote === null) return;
+    const adminNote = action === 'hide' ? prompt('Reason for hiding these listings (shown to the sellers):') : '';
+    if (action === 'hide' && adminNote === null) return;
     setBulkAction(action);
     try {
       await bulkAdminAPI.moderateCars({ carIds: selectedIds, action, adminNote });
-      toast(`${selectedIds.length} listing(s) ${action}d successfully`, 'success');
+      toast(action === 'approve' ? `${selectedIds.length} listing(s) approved and published` : `${selectedIds.length} listing(s) hidden — not publicly visible`, 'success');
       setCars(prev => prev.filter(c => !selectedIds.includes(c._id)));
       setSelectedIds([]);
-    } catch { toast(`Failed to ${action} listings`, 'error'); }
+    } catch { toast(action === 'approve' ? 'Failed to approve listings' : 'Failed to hide listings', 'error'); }
     finally { setBulkAction(null); }
   };
 
@@ -93,14 +94,14 @@ export default function AdminCarModeration() {
   };
 
   const handleModerate = async (carId, action) => {
-    const adminNote = action === 'reject' ? prompt('Reason for rejection:') : '';
-    if (action === 'reject' && adminNote === null) return;
+    const adminNote = action === 'hide' ? prompt('Reason for hiding this listing (shown to the seller):') : '';
+    if (action === 'hide' && adminNote === null) return;
     setActionId(carId);
     try {
       await adminAPI.moderateCar(carId, { action, adminNote });
-      toast(`Listing ${action}d successfully`, 'success');
+      toast(action === 'approve' ? 'Listing approved and published' : 'Listing hidden — not publicly visible', 'success');
       setCars(prev => prev.filter(c => c._id !== carId));
-    } catch { toast(`Failed to ${action} listing`, 'error'); }
+    } catch { toast(action === 'approve' ? 'Failed to approve listing' : 'Failed to hide listing', 'error'); }
     finally { setActionId(null); }
   };
 
@@ -128,7 +129,7 @@ export default function AdminCarModeration() {
               <option value="all">All Statuses</option>
               <option value="pending">Pending Review</option>
               <option value="active">Approved</option>
-              <option value="rejected">Rejected</option>
+              <option value="hidden">Hidden</option>
               <option value="sold">Sold</option>
             </select>
           </div>
@@ -158,9 +159,9 @@ export default function AdminCarModeration() {
                 className="btn btn-sm"
                 style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
                 disabled={bulkAction !== null}
-                onClick={() => handleBulkModerate('reject')}>
+                onClick={() => handleBulkModerate('hide')}>
                 <XCircle size={12} style={{ marginRight: 4 }} />
-                {bulkAction === 'reject' ? '…' : 'Reject Selected'}
+                {bulkAction === 'hide' ? '…' : 'Hide Selected'}
               </button>
               <button className="btn btn-sm btn-outline" onClick={() => setSelectedIds([])} disabled={bulkAction !== null}
                 style={{ marginLeft: 'auto', fontSize: 11 }}>
@@ -230,9 +231,9 @@ export default function AdminCarModeration() {
                           className="btn btn-sm"
                           style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
                           disabled={actionId === car._id}
-                          onClick={() => handleModerate(car._id, 'reject')}>
+                          onClick={() => handleModerate(car._id, 'hide')}>
                           <XCircle size={12} style={{ marginRight: 4 }} />
-                          Reject
+                          Hide
                         </button>
                         <button className="btn btn-sm btn-outline"
                           onClick={() => setSelected(car)}>
@@ -297,8 +298,8 @@ export default function AdminCarModeration() {
                 <button className="btn btn-sm"
                   style={{ background: '#ef4444', color: '#fff', fontWeight: 700, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer' }}
                   disabled={actionId === selected._id}
-                  onClick={() => { handleModerate(selected._id, 'reject'); setSelected(null); }}>
-                  <XCircle size={14} style={{ marginRight: 6 }} /> Reject Listing
+                  onClick={() => { handleModerate(selected._id, 'hide'); setSelected(null); }}>
+                  <XCircle size={14} style={{ marginRight: 6 }} /> Hide Listing
                 </button>
               </div>
             )}

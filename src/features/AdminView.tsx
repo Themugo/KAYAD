@@ -22,6 +22,8 @@ import AdminCommunications from '../pages/admin/AdminCommunications';
 import AdminNavigationControl from './AdminNavigationControl';
 import AdminProviderGovernance from './AdminProviderGovernance';
 import AdminSupportWorkspace from './AdminSupportWorkspace';
+// STAGE 5A (Gate D): the owner onboarding settings page was built in Stage 5 but never mounted anywhere reachable.
+import AdminSettingsOnboarding from '../pages/admin/AdminSettingsOnboarding';
 
 interface AdminViewProps {
   vehicles: Vehicle[];
@@ -69,7 +71,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [cars, setCars] = useState<AdminCar[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
-  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support'>('overview');
+  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding'>('overview');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,16 +86,17 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         adminAPI.stats(),
         adminAPI.users({ page: 1, limit: 50, search: search || undefined }),
         adminAPI.cars({ page: 1, limit: 50, search: search || undefined }),
-        adminAPI.getAuditLogs({ page: 1, limit: 25 }),
+        adminAPI.getAuditLog({ page: 1, limit: 25 }), // STAGE 5A: /audit/logs does not exist (400 'Invalid ID format') and rejected the whole console load
       ]);
       const statsPayload = unwrap<any>(statsRes);
       const usersPayload = unwrap<any>(usersRes);
       const carsPayload = unwrap<any>(carsRes);
       const auditPayload = unwrap<any>(auditRes);
       setStats(statsPayload?.stats || statsPayload || {});
-      setUsers(usersPayload?.users || []);
-      setCars(carsPayload?.cars || []);
-      setAuditLogs(auditPayload?.logs || auditPayload?.auditLogs || []);
+      // STAGE 5A: the live API returns `id` (no Mongo-style `_id`); every action below was sending the id "undefined" (400 Invalid ID format).
+      setUsers((usersPayload?.users || []).map((u: any) => ({ ...u, _id: u._id ?? u.id })));
+      setCars((carsPayload?.cars || []).map((c: any) => ({ ...c, _id: c._id ?? c.id })));
+      setAuditLogs(auditPayload?.entries || auditPayload?.logs || auditPayload?.auditLogs || []);
     } catch (err: any) {
       setError(err?.message || 'The administration API could not be reached. No local/demo data is displayed.');
       setStats({});
@@ -127,6 +130,35 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       await load();
     } catch (err: any) {
       setActionError(err?.message || 'The server rejected this account action.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // STAGE 5A (Gate F): the dealer/seller decision and listing moderation controls existed only on pages that are not mounted
+  // anywhere reachable. The server remains the authority (owner_only / admins policy); these buttons only call it and show its answer.
+  const decideSeller = async (user: AdminUser, action: 'approve' | 'reject') => {
+    setBusyId(user._id);
+    setActionError(null);
+    try {
+      if (action === 'approve') await adminAPI.approveDealer(user._id);
+      else await adminAPI.verifyDealer(user._id, { action: 'reject', reason: 'Application not approved' });
+      await load();
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'The server rejected this application decision.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const moderateListing = async (car: AdminCar, action: 'approve' | 'hide') => {
+    setBusyId(car._id);
+    setActionError(null);
+    try {
+      await adminAPI.moderateCar(car._id, { action });
+      await load();
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'The server rejected this listing decision.');
     } finally {
       setBusyId(null);
     }
@@ -166,7 +198,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       )}
 
       <div className="flex flex-wrap gap-2">
-        {(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support'] as const).map((item) => (
+        {(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding'] as const).map((item) => (
           <Button key={item} variant={module === item ? 'primary' : 'outline'} size="sm" onClick={() => setModule(item)}>
             {item === 'overview' && <ShieldCheck className="w-4 h-4" />}
             {item === 'users' && <Users className="w-4 h-4" />}
@@ -176,10 +208,11 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             {item === 'navigation' && <Compass className="w-4 h-4" />}
             {item === 'providers' && <ProvidersIcon className="w-4 h-4" />}
             {item === 'support' && <LifeBuoy className="w-4 h-4" />}
+            {item === 'onboarding' && <Compass className="w-4 h-4" />}
             {item[0].toUpperCase() + item.slice(1)}
           </Button>
         ))}
-        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
+        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
       </div>
 
       {module === 'overview' && (
@@ -218,8 +251,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               {filteredUsers.map((u) => <TableRow key={u._id}>
                 <TableCell><div className="font-bold">{u.name || 'Unnamed user'}</div><div className="text-xs text-[#64748B]">{u.email || 'No email returned'}</div></TableCell>
                 <TableCell><Badge variant="neutral">{u.role || 'unknown'}</Badge></TableCell>
-                <TableCell>{u.isBanned ? <Badge variant="warning">Banned</Badge> : <Badge variant="success">Active</Badge>}</TableCell>
-                <TableCell><Button size="sm" variant="outline" disabled={busyId === u._id} onClick={() => void toggleBan(u)}><Ban className="w-3.5 h-3.5" /> {u.isBanned ? 'Unban' : 'Ban'}</Button></TableCell>
+                <TableCell>{u.isBanned ? <Badge variant="warning">Banned</Badge> : u.status === 'pending' ? <Badge variant="warning">Pending approval</Badge> : u.status === 'rejected' ? <Badge variant="warning">Not approved</Badge> : <Badge variant="success">Active</Badge>}</TableCell>
+                <TableCell><div className="flex flex-wrap gap-2">
+                  {(u.role === 'dealer' || u.role === 'individual_seller') && u.status !== 'approved' && <Button size="sm" variant="primary" disabled={busyId === u._id} onClick={() => void decideSeller(u, 'approve')}><CheckCircle2 className="w-3.5 h-3.5" /> Approve</Button>}
+                  {u.role === 'dealer' && u.status === 'pending' && <Button size="sm" variant="outline" disabled={busyId === u._id} onClick={() => void decideSeller(u, 'reject')}>Reject</Button>}
+                  <Button size="sm" variant="outline" disabled={busyId === u._id} onClick={() => void toggleBan(u)}><Ban className="w-3.5 h-3.5" /> {u.isBanned ? 'Unban' : 'Ban'}</Button>
+                </div></TableCell>
               </TableRow>)}
               {!filteredUsers.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">No live users returned by the server.</TableCell></TableRow>}
             </TableBody>
@@ -236,7 +273,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 <TableCell><div className="font-bold">{c.title || 'Untitled vehicle'}</div><div className="text-xs text-[#64748B]">{c._id}</div></TableCell>
                 <TableCell><Badge variant="neutral">{c.status || 'unknown'}</Badge></TableCell>
                 <TableCell>{typeof c.price === 'number' ? `Ksh ${c.price.toLocaleString()}` : 'Not provided'}</TableCell>
-                <TableCell><div className="flex gap-2"><Button size="sm" variant="outline" disabled={busyId === c._id} onClick={() => void verifyCar(c)}><FileCheck className="w-3.5 h-3.5" /> Verify</Button>{onQuickViewVehicle && <Button size="sm" variant="outline" onClick={() => { const v = vehicles.find((x) => x.id === c._id); if (v) onQuickViewVehicle(v); }}>View</Button>}</div></TableCell>
+                <TableCell><div className="flex flex-wrap gap-2">{c.status === 'pending' && <Button size="sm" variant="primary" disabled={busyId === c._id} onClick={() => void moderateListing(c, 'approve')}>Approve</Button>}{(c.status === 'pending' || c.status === 'available') && <Button size="sm" variant="outline" disabled={busyId === c._id} onClick={() => void moderateListing(c, 'hide')}>Hide</Button>}<Button size="sm" variant="outline" disabled={busyId === c._id} onClick={() => void verifyCar(c)}><FileCheck className="w-3.5 h-3.5" /> Verify</Button>{onQuickViewVehicle && <Button size="sm" variant="outline" onClick={() => { const v = vehicles.find((x) => x.id === c._id); if (v) onQuickViewVehicle(v); }}>View</Button>}</div></TableCell>
               </TableRow>)}
               {!filteredCars.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">No live vehicles returned by the server.</TableCell></TableRow>}
             </TableBody>
@@ -249,6 +286,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       {module === 'navigation' && <AdminNavigationControl />}
       {module === 'providers' && <AdminProviderGovernance />}
       {module === 'support' && <AdminSupportWorkspace />}
+      {module === 'onboarding' && <AdminSettingsOnboarding />}
 
       {module === 'audit' && (
         <Card className="overflow-hidden">

@@ -220,10 +220,10 @@ router.get(
       Car.countDocuments({ auctionStatus: "live" }),                                  // activeAuctions
       Escrow.countDocuments(),                                                        // totalEscrows
       User.countDocuments({ role: "dealer" }),                                        // totalDealers
-      User.countDocuments({ role: "dealer", approved: true }),                        // verifiedDealers
+      User.countDocuments({ role: "dealer", status: "approved" }),                    // verifiedDealers  (STAGE 5A: users has no `approved` column; status is the account gate)
       Bid.countDocuments({ createdAt: { $gte: today } }),                             // bidsTodayCount
       Payment.countDocuments({ status: "success" }),                                  // totalPayments
-      User.countDocuments({ role: "dealer", approved: false }),                       // pendingDealers
+      User.countDocuments({ role: "dealer", status: "pending" }),                     // pendingDealers
       Car.countDocuments({ status: "pending" }),                                      // pendingCars
       Escrow.countDocuments({ status: { $in: ["funded", "vehicle_confirmed", "delivered"] } }),                                      // openEscrows
       Escrow.countDocuments({ status: "disputed" }),                                  // disputedEscrows
@@ -302,7 +302,7 @@ router.get(
     }
     if (req.query.pendingApproval === "true") {
       filter.role = { $in: ["dealer", "individual_seller"] };
-      filter.approved = false;
+      filter.status = "pending"; // STAGE 5A: users.approved does not exist; status is the account gate
     }
 
     // 🔎 SEARCH (name/email)
@@ -314,7 +314,7 @@ router.get(
 
     // H-2 FIX: Use field whitelist instead of select("-password") which leaks
     // internal fields like bankAccount, mpesaBusiness, paymentDetails, etc.
-    const ADMIN_USER_FIELDS = "_id name email role phone avatar status isBanned approved location dealerRating bio businessName businessType createdAt lastLogin lastLoginAt verificationStatus emailVerified phoneVerified dealerPackage subscriptionStatus";
+    const ADMIN_USER_FIELDS = "_id name email role phone avatar status isBanned location dealerRating bio businessName createdAt lastLoginAt emailVerified phoneVerified dealerPackage subscriptionStatus";
 
     const [users, total] = await Promise.all([
       User.find(filter).select(ADMIN_USER_FIELDS).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
@@ -322,9 +322,19 @@ router.get(
       User.countDocuments(filter),
     ]);
 
+    // STAGE 5A: `approved` / `verificationStatus` / `businessType` / `lastLogin` are not columns of `users` (selecting them made this
+    // endpoint fail with 500 on the real schema). The admin UI still reads `approved` and `verificationStatus`, so derive them
+    // from the authoritative account gate, `status`.
+    const decorated = users.map((u) => ({
+      ...u,
+      approved: u.status === "approved",
+      verificationStatus: u.status === "approved" ? "verified" : u.status === "rejected" ? "rejected" : "pending",
+      lastLogin: u.lastLoginAt ?? null,
+    }));
+
     res.json({
       success: true,
-      users,
+      users: decorated,
       pagination: {
         page,
         limit,
@@ -392,11 +402,20 @@ router.post(
     if (!["dealer", "individual_seller"].includes(user.role)) {
       return res.status(400).json({ success: false, code: "NOT_A_SELLER_ACCOUNT", message: "Only dealer and seller accounts can be approved here." });
     }
-    user.approved = true;
-    user.verificationStatus = "verified";
-    user.status = "approved"; // STAGE 5: keep the account gate consistent with /api/verification approval
+    // STAGE 5A: `users.approved` / `users.verification_status` do not exist (this handler failed with 500 on the real schema and
+    // never approved anyone). Approval is: the atomic verification RPC for dealers (dealers.approved, dealer_verifications) plus
+    // the account gate users.status = "approved" for dealers and private sellers alike.
+    if (user.role === "dealer") {
+      const { error: rpcError } = await getSupabase().rpc("kayad_apply_dealer_verification_atomic", {
+        p_user: String(req.params.id),
+        p_action: "approve",
+        p_admin: String(req.user.id),
+        p_reason: null,
+      });
+      if (rpcError) throw rpcError;
+    }
+    await User.findByIdAndUpdate(req.params.id, { status: "approved", dealerApprovedAt: new Date() });
 
-    await user.save();
     await auditAfterCommit({
       action: "Dealer decision: approve-dealer",
       admin: req.user.name || req.user.email,
@@ -471,7 +490,7 @@ router.put(
         commission: user.commission,
         waiver: user.waiver,
         discount: user.discount,
-        approved: user.approved,
+        approved: user.status === "approved",
         isBanned: user.isBanned,
         dealerRating: user.dealerRating,
       },
@@ -588,10 +607,16 @@ router.post(
   requireDecisionAuthority("listing"), // STAGE 5: owner-controlled decision authority
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const { action, adminNote } = req.body;
-    if (!["approve", "reject"].includes(action)) {
-      return res.status(400).json({ success: false, message: "Action must be 'approve' or 'reject'" });
+    // STAGE 5A (Gate E): the negative decision HIDES the listing. The database status constraint
+    // (cars_status_check: available/sold/pending/reserved/hidden/draft) has no `rejected` value until owner decision D3 is
+    // taken, so writing it failed with a 500 and never changed the listing. "reject" is kept as a backward-compatible alias
+    // of "hide"; every response, notification and audit entry says what really happened (hidden, not publicly visible).
+    const { adminNote } = req.body;
+    const requested = req.body.action;
+    if (!["approve", "hide", "reject"].includes(requested)) {
+      return res.status(400).json({ success: false, code: "INVALID_MODERATION_ACTION", message: "Action must be 'approve' or 'hide'" });
     }
+    const action = requested === "approve" ? "approve" : "hide";
 
     const car = await Car.findById(req.params.id).populate("dealer", "email phone name");
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
@@ -601,46 +626,52 @@ router.post(
     // is no longer eligible for listing moderation.
     const blockedReason = moderationBlockedReason(car);
     if (blockedReason) {
-      return res.status(409).json({ success: false, message: blockedReason });
+      return res.status(409).json({ success: false, code: "LISTING_MODERATION_BLOCKED", message: blockedReason });
     }
 
-    if (action === "approve") {
-      car.status = "available";
-    } else {
-      car.status = "rejected";
-    }
-
-    await car.save();
+    // STAGE 5A (real-DB defect): the car was loaded with a populated dealer object, and car.save() wrote that object back
+    // into the uuid column (cars.dealer_id), so every single-listing decision returned 500. Update only the status.
+    const newStatus = action === "approve" ? "available" : "hidden";
+    await Car.findByIdAndUpdate(req.params.id, { status: newStatus });
+    car.status = newStatus;
 
     const dealer = car.dealer;
     const listingTitle = car.title || car.brand + " " + (car.model || "");
 
-    if (action === "approve") {
-      await sendNotification({
-        userId: dealer._id,
-        title: "Listing Approved",
-        message: `Your listing "${listingTitle}" has been approved and is now live on the marketplace.`,
-        type: "info",
-        email: dealer.email,
-      });
-    } else {
-      await sendNotification({
-        userId: dealer._id,
-        title: "Listing Rejected",
-        message: `Your listing "${listingTitle}" was not approved.${adminNote ? ` Reason: ${adminNote}` : ""}`,
-        type: "system",
-        email: dealer.email,
-      });
+    if (dealer) {
+      if (action === "approve") {
+        await sendNotification({
+          userId: (typeof dealer === "string" ? dealer : dealer?.id ?? (typeof dealer?._id === "string" ? dealer._id : null)),
+          title: "Listing Approved",
+          message: `Your listing "${listingTitle}" has been approved and is now live on the marketplace.`,
+          type: "info",
+          email: dealer.email,
+        });
+      } else {
+        await sendNotification({
+          userId: (typeof dealer === "string" ? dealer : dealer?.id ?? (typeof dealer?._id === "string" ? dealer._id : null)),
+          title: "Listing not approved",
+          message: `Your listing "${listingTitle}" was not approved and is not publicly visible.${adminNote ? ` Reason: ${adminNote}` : ""}`,
+          type: "system",
+          email: dealer.email,
+        });
+      }
     }
 
     await auditAfterCommit({
-      action: `Car listing ${action}d: ${listingTitle}`,
+      action: `Listing decision: ${action === "approve" ? "approved" : "hidden"} — ${listingTitle}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { carId: car._id, action, adminNote },
+      details: { carId: car._id, action, requestedAction: requested, resultingStatus: car.status, adminNote },
     });
 
-    res.json({ success: true, message: `Listing ${action}d successfully.`, car });
+    res.json({
+      success: true,
+      action,
+      status: car.status,
+      message: action === "approve" ? "Listing approved and published." : "Listing hidden. It is not publicly visible.",
+      car,
+    });
   }),
 );
 
@@ -1602,7 +1633,7 @@ router.patch(
     }
 
     const updated = await User.findById(dealerId)
-      .select("id name email role phone avatar status approved dealerPackage packageListingMax packageFeatures packageExpiresAt packageAutoRenew subscriptionStatus")
+      .select("id name email role phone avatar status dealerPackage packageListingMax packageFeatures packageExpiresAt packageAutoRenew subscriptionStatus")
       .lean();
 
     res.json({ success: true, subscription: result, user: updated });
@@ -1626,9 +1657,9 @@ router.post(
     const ids = Array.isArray(dealerIds) ? dealerIds.filter(Boolean).map(String) : [];
     let dealers;
     if (ids.length) {
-      dealers = await User.find({ _id: { $in: ids }, role: "dealer", approved: true }).select("id").lean();
+      dealers = await User.find({ _id: { $in: ids }, role: "dealer", status: "approved" }).select("id").lean();
     } else {
-      dealers = await User.find({ role: "dealer", approved: true }).select("id").lean();
+      dealers = await User.find({ role: "dealer", status: "approved" }).select("id").lean();
     }
 
     const sb = getSupabase();

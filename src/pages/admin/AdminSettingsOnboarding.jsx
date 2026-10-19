@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
+import { Button } from '../../components/ui';
 
 // STAGE 5 — Owner-controlled onboarding policy.
 // The server is the authority: this page only displays what GET /admin/settings/onboarding returns
@@ -142,7 +143,7 @@ export default function AdminSettingsOnboarding() {
               value={value(f.key)}
               disabled={!canChange || saving}
               onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
-              style={{ width: '100%', maxWidth: 560, padding: '10px 12px', fontSize: 14 }}
+              style={{ width: '100%', maxWidth: 560, padding: '10px 12px', fontSize: 14, border: '1px solid #94A3B8', borderRadius: 8, background: '#fff' }}
             >
               {Object.entries(f.options).map(([v, text]) => <option key={v} value={v}>{text}</option>)}
             </select>
@@ -157,11 +158,11 @@ export default function AdminSettingsOnboarding() {
 
       {canChange && (
         <div style={{ marginTop: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button className="btn btn-gold" onClick={save} disabled={saving || dirty.length === 0}>
+          <Button variant="primary" onClick={save} disabled={saving || dirty.length === 0}>
             {saving ? 'Saving…' : dirty.length ? `Save ${dirty.length} change${dirty.length > 1 ? 's' : ''}` : 'No changes'}
-          </button>
-          <button className="btn btn-outline" onClick={() => { setDraft({}); setNotice(null); }} disabled={saving || dirty.length === 0}>Discard</button>
-          <button className="btn btn-outline" onClick={load} disabled={saving}>Reload</button>
+          </Button>
+          <Button variant="outline" onClick={() => { setDraft({}); setNotice(null); }} disabled={saving || dirty.length === 0}>Discard</Button>
+          <Button variant="outline" onClick={load} disabled={saving}>Reload</Button>
         </div>
       )}
     </div>

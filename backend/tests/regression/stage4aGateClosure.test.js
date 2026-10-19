@@ -56,7 +56,12 @@ const ledgerRouter = (await import("../../routes/ledgerRoutes.js")).default;
 
 // ---------------- G1 ----------------
 describe("G1 rejected is written by three workflows while cars_status_check forbids it (static pins)", () => {
-  const writers = ["backend/routes/adminRoutes.js", "backend/controllers/duplicateController.js", "backend/controllers/reportController.js"];
+  // STAGE 5A: admin moderation and duplicate removal now write the supported 'hidden' status; only reportController still writes 'rejected'.
+  const fixed = ["backend/routes/adminRoutes.js", "backend/controllers/duplicateController.js"];
+  test.each(fixed)("%s no longer writes status 'rejected' (Stage 5A maps negative decisions to hidden)", (f) => {
+    expect(src(f)).not.toMatch(/status\s*(=|:)\s*["']rejected["']/);
+  });
+  const writers = ["backend/controllers/reportController.js"];
   test.each(writers)("%s still writes status 'rejected'", (f) => {
     expect(src(f)).toMatch(/status\s*(=|:)\s*["']rejected["']/);
   });

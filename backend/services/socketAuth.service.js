@@ -20,7 +20,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
 import RefreshToken from "../models/RefreshToken.js";
-import { isOwnerEmail } from "../config/owners.js";
+import { isOwnerEmail, isUnverifiedOwner } from "../config/owners.js";
 
 export const SOCKET_TICKET_TTL_SECONDS = 60;
 const AUDIENCE = "kayad-socket";
@@ -75,11 +75,12 @@ export function issueSocketTicket(req) {
  */
 export async function resolveSocketUser({ id, tokenVersion, sessionId, exp }) {
   if (!id) return null;
-  const user = await User.findById(id).select("_id,email,name,role,status,isBanned,deactivatedAt").lean();
+  const user = await User.findById(id).select("_id,email,name,role,status,isBanned,deactivatedAt,emailVerified").lean();
   const userAuth = await UserAuth.findOne({ user: id }).select("+tokenVersion").lean();
   if (!user || !userAuth) return null;
   if (tokenVersion !== undefined && tokenVersion !== null && tokenVersion !== (userAuth.tokenVersion ?? 0)) return null;
   if (sessionId && !(await RefreshToken.findActiveSessionById(sessionId, id))) return null;
+  if (isUnverifiedOwner(user)) return null; // STAGE 5A (Gate A)
   const owner = isOwnerEmail(user.email);
   if (!owner && (user.isBanned || user.deactivatedAt)) return null;
   return {

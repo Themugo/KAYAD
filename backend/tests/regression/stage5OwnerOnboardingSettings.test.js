@@ -34,8 +34,11 @@ jest.unstable_mockModule("../../models/PlatformConfig.js", () => ({ default: { f
 const auditCreate = jest.fn(async () => ({}));
 jest.unstable_mockModule("../../models/AuditLog.js", () => ({ default: { create: auditCreate } }));
 jest.unstable_mockModule("../../middleware/auditLog.js", () => ({ auditLog: () => (req, res, next) => next() }));
+const sendNotification = jest.fn(async () => {});
+jest.unstable_mockModule("../../services/notification.service.js", () => ({ sendNotification }));
 const carFind = jest.fn();
-jest.unstable_mockModule("../../models/Car.js", () => ({ default: { findById: jest.fn(() => ({ populate: async () => carFind() })), find: jest.fn() } }));
+const carUpdate = jest.fn(async () => ({}));
+jest.unstable_mockModule("../../models/Car.js", () => ({ default: { findById: jest.fn(() => ({ populate: async () => carFind() })), findByIdAndUpdate: carUpdate, find: jest.fn() } }));
 
 // ── in-memory system_settings with UNIQUE(key) and a hook to interleave concurrent requests ──
 let table; let failRead; let failWrite; let beforeWrite;
@@ -136,9 +139,8 @@ describe("pure policy functions", () => {
   });
   test("corrupt values become restrictive per field and are reported", () => {
     const { policy, issues } = svc.normalizePolicyValue({ privateSellerRegistration: "yes", dealerOnboardingMode: "self_onboarding", listingModeration: 7 });
-    expect(policy.privateSellerRegistration).toBe("disabled");
-    expect(policy.dealerOnboardingMode).toBe("self_onboarding");
-    expect(policy.listingModeration).toBe("hold_for_review");
+    // STAGE 5A: any corrupt field makes the whole record untrusted — every field is RESTRICTIVE (no permissive value survives).
+    expect(policy).toEqual(RESTRICTIVE);
     expect(issues.length).toBe(2);
   });
   test.each([null, "x", 5, [], undefined])("non-object stored value %j is fully restrictive", (v) => {
@@ -188,8 +190,7 @@ describe("read path fails safe", () => {
     table.push({ key: svc.ONBOARDING_POLICY_KEY, value: { dealerOnboardingMode: "wide_open", privateSellerRegistration: "enabled", revision: 3 }, updated_at: "2026-10-01T00:00:00.000Z" });
     const r = await svc.getOnboardingPolicy({ fresh: true });
     expect(r.source).toBe("invalid");
-    expect(r.policy.dealerOnboardingMode).toBe("closed");
-    expect(r.policy.privateSellerRegistration).toBe("enabled");
+    expect(r.policy).toEqual(RESTRICTIVE); // STAGE 5A: whole record restrictive, including the otherwise-valid field
     expect(svc.isPolicyTrusted(r)).toBe(false);
   });
 });
@@ -217,13 +218,13 @@ describe("GET /api/admin/settings/onboarding — who can view", () => {
     expect(o.body.canChange).toBe(true);
     expect(o.body.options.dealerOnboardingMode).toEqual(["self_onboarding", "approval_required", "closed"]);
   });
-  test("an owner whose email is NOT verified can view but not change (no inherited owner power from an unclaimed address)", async () => {
+  test("an owner-email account whose email is NOT verified holds no owner power at all (STAGE 5A: refused at authentication, not merely at the setting)", async () => {
     users["u-owner"].emailVerified = false;
     try {
       const g = await call("GET", "/api/admin/settings/onboarding", { role: "owner" });
-      expect([g.status, g.body.canChange]).toEqual([200, false]);
+      expect([g.status, g.body.code]).toEqual([403, "OWNER_IDENTITY_UNVERIFIED"]);
       const p = await call("PUT", "/api/admin/settings/onboarding", { role: "owner", body: { dealerOnboardingMode: "closed", expectedRevision: 0 } });
-      expect([p.status, p.body.code]).toEqual([403, "OWNER_EMAIL_UNVERIFIED"]);
+      expect([p.status, p.body.code]).toEqual([403, "OWNER_IDENTITY_UNVERIFIED"]);
       expect(stored()).toBeUndefined();
       carFind.mockReturnValue(null);
       const m = await call("POST", `/api/admin/cars/11111111-1111-4111-8111-111111111111/moderate`, { role: "owner", body: { action: "approve" } });
@@ -405,6 +406,54 @@ describe("decision authority is enforced on the real approval/moderation routes"
     svc.__setOnboardingPolicyForTests({ listingDecisionAuthority: "admins" }, "unavailable");
     const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "admin", body: { action: "approve" } });
     expect(r.status).toBe(403);
+  });
+  // ── STAGE 5A (Gate E): the negative decision HIDES; nothing claims "rejected" ──
+  describe("moderation actions are truthful (STAGE 5A)", () => {
+    const mkCar = (over = {}) => {
+      const c = { _id: ID, id: ID, title: "Prado", status: "pending", dealer: { _id: "seller-1", email: "s@example.test", name: "S" }, save: jest.fn(async () => {}), ...over };
+      return c;
+    };
+    beforeEach(() => { sendNotification.mockClear(); carUpdate.mockReset(); carUpdate.mockResolvedValue({}); });
+    test.each(["hide", "reject"])("owner action %j ⇒ status 'hidden' (never the DB-invalid 'rejected'), honest response, audited as hidden", async (action) => {
+      const car = mkCar(); carFind.mockReturnValue(car);
+      const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action, adminNote: "blurry photos" } });
+      expect(r.status).toBe(200);
+      expect(carUpdate).toHaveBeenCalledWith(ID, { status: "hidden" }); // only the status is written (never the populated dealer object)
+      expect([r.body.action, r.body.status]).toEqual(["hide", "hidden"]);
+      expect(r.body.message).toMatch(/hidden.*not publicly visible/i);
+      expect(JSON.stringify(r.body.message)).not.toMatch(/reject/i);
+      const n = sendNotification.mock.calls.at(-1)[0];
+      expect(n.title).toBe("Listing not approved");
+      expect(n.message).toMatch(/not approved and is not publicly visible.*blurry photos/);
+      expect(actions().some((a) => /^Listing decision: hidden/.test(a))).toBe(true);
+    });
+    test("approve publishes and says so", async () => {
+      const car = mkCar(); carFind.mockReturnValue(car);
+      const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action: "approve" } });
+      expect([r.status, r.body.status]).toEqual([200, "available"]);
+      expect(carUpdate).toHaveBeenCalledWith(ID, { status: "available" });
+      expect(sendNotification.mock.calls.at(-1)[0].title).toBe("Listing Approved");
+    });
+    test.each(["approve", "hide", "reject"])("a SOLD listing cannot be moderated (%s ⇒ 409, nothing saved, nobody notified)", async (action) => {
+      const car = mkCar({ status: "sold" }); carFind.mockReturnValue(car);
+      const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action } });
+      expect([r.status, r.body.code]).toEqual([409, "LISTING_MODERATION_BLOCKED"]);
+      expect(carUpdate).not.toHaveBeenCalled();
+      expect(sendNotification).not.toHaveBeenCalled();
+    });
+    test("unknown action ⇒ 400 INVALID_MODERATION_ACTION", async () => {
+      carFind.mockReturnValue(mkCar());
+      const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action: "delete" } });
+      expect([r.status, r.body.code]).toEqual([400, "INVALID_MODERATION_ACTION"]);
+    });
+    test("a failed save is a failure: no notification, no success audit", async () => {
+      const car = mkCar(); carFind.mockReturnValue(car); carUpdate.mockRejectedValue(new Error("db"));
+      auditCreate.mockClear();
+      const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action: "hide" } });
+      expect(r.status).toBeGreaterThanOrEqual(500);
+      expect(sendNotification).not.toHaveBeenCalled();
+      expect(actions().some((a) => /Listing decision/.test(a))).toBe(false);
+    });
   });
   test("a marketing/hr/accounts role never reaches the decision (blocked earlier by role/permission layers)", async () => {
     svc.__setOnboardingPolicyForTests({ listingDecisionAuthority: "admins", dealerDecisionAuthority: "admins" });

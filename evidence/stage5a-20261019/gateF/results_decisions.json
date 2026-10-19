@@ -1,0 +1,77 @@
+[
+  {
+    "id": "E0 non-owner admin can sign in (test fixture)",
+    "ok": true,
+    "detail": "status 200"
+  },
+  {
+    "id": "E1 admin cannot approve dealer under owner_only (403)",
+    "ok": true,
+    "detail": "status 403 DECISION_AUTHORITY_REQUIRED"
+  },
+  {
+    "id": "E2 admin cannot change owner policy (403)",
+    "ok": true,
+    "detail": "status 403"
+  },
+  {
+    "id": "E3 dealer cannot change owner policy (403)",
+    "ok": true,
+    "detail": "status 403"
+  },
+  {
+    "id": "E4 pending dealer is labelled 'Pending approval' in owner UI",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "E5 UI Approve -> dealer approved in DB",
+    "ok": true,
+    "detail": "approved"
+  },
+  {
+    "id": "E6 UI Reject -> dealer rejected in DB, not a dealer",
+    "ok": true,
+    "detail": "rejected|dealer"
+  },
+  {
+    "id": "E7 UI Approve -> private seller approved",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "E8 duplicate approval is idempotent (no 5xx)",
+    "ok": true,
+    "detail": "200/200"
+  },
+  {
+    "id": "E9 duplicate rejection has no 5xx",
+    "ok": true,
+    "detail": "200/200"
+  },
+  {
+    "id": "E10 concurrent approve vs reject leaves a consistent state",
+    "ok": true,
+    "detail": "200/200 final rejected|false"
+  },
+  {
+    "id": "E11 audit entries exist for decisions",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "E12 applicant notification created on approval",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "E13 admin may decide once owner selects 'admins'",
+    "ok": true,
+    "detail": "status 200"
+  },
+  {
+    "id": "E14 UI Hide stores 'hidden' (UI never claims rejected)",
+    "ok": true,
+    "detail": "hidden"
+  }
+]

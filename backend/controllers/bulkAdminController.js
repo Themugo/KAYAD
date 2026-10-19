@@ -9,7 +9,9 @@ import { logInfo, logError } from "../utils/logger.js";
 
 export const bulkModerateCars = async (req, res) => {
   try {
-    const { carIds, action, adminNote } = req.body;
+    const { carIds, adminNote } = req.body;
+    // STAGE 5A (Gate E): see routes/adminRoutes.js. The negative decision hides; "reject" is a backward-compatible alias.
+    const requested = req.body.action;
 
     if (!carIds || !Array.isArray(carIds) || carIds.length === 0) {
       return res.status(400).json({
@@ -18,12 +20,14 @@ export const bulkModerateCars = async (req, res) => {
       });
     }
 
-    if (!["approve", "reject"].includes(action)) {
+    if (!["approve", "hide", "reject"].includes(requested)) {
       return res.status(400).json({
         success: false,
-        message: "Action must be 'approve' or 'reject'",
+        code: "INVALID_MODERATION_ACTION",
+        message: "Action must be 'approve' or 'hide'",
       });
     }
+    const action = requested === "approve" ? "approve" : "hide";
 
     const newStatus = action === "approve" ? "available" : "hidden";
 
@@ -63,15 +67,17 @@ export const bulkModerateCars = async (req, res) => {
       { $set: { status: newStatus } },
     );
 
+    // STAGE 5A (real-DB defect): populated dealers carry `id`, not a string `_id`; the old code threw on dealer._id.toString().
+    const idOf = (d) => (typeof d === "string" ? d : d?.id ?? (typeof d?._id === "string" ? d._id : null));
     const dealerNotified = new Set();
     for (const car of eligible) {
-      if (car.dealer && !dealerNotified.has(car.dealer._id.toString())) {
-        dealerNotified.add(car.dealer._id.toString());
+      if (idOf(car.dealer) && !dealerNotified.has(String(idOf(car.dealer)))) {
+        dealerNotified.add(String(idOf(car.dealer)));
         const listingTitle = car.title || `${car.brand || ""} ${car.model || ""}`.trim();
 
         if (action === "approve") {
           await sendNotification({
-            userId: car.dealer._id,
+            userId: idOf(car.dealer),
             title: "Listing Approved",
             message: `Your listing "${listingTitle}" has been approved and is now live.`,
             type: "info",
@@ -79,9 +85,9 @@ export const bulkModerateCars = async (req, res) => {
           });
         } else {
           await sendNotification({
-            userId: car.dealer._id,
-            title: "Listing Rejected",
-            message: `Your listing "${listingTitle}" was not approved.${adminNote ? ` Reason: ${adminNote}` : ""}`,
+            userId: idOf(car.dealer),
+            title: "Listing not approved",
+            message: `Your listing "${listingTitle}" was not approved and is not publicly visible.${adminNote ? ` Reason: ${adminNote}` : ""}`,
             type: "system",
             email: car.dealer.email,
           });
@@ -96,12 +102,14 @@ export const bulkModerateCars = async (req, res) => {
       actor: req.user.id,
       actorRole: req.user.role,
       actorName: req.user.name,
-      details: { carIds, action, adminNote, count: eligible.length, skipped },
+      details: { carIds, action, requestedAction: requested, resultingStatus: newStatus, adminNote, count: eligible.length, skipped },
     });
 
     res.json({
       success: true,
-      message: `${eligible.length} car(s) ${action}d`,
+      action,
+      status: newStatus,
+      message: action === "approve" ? `${eligible.length} listing(s) approved and published` : `${eligible.length} listing(s) hidden (not publicly visible)`,
       count: eligible.length,
       ...(skipped.length ? { skipped } : {}),
     });

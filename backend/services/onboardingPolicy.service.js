@@ -95,6 +95,9 @@ export function normalizePolicyValue(raw) {
     else if (typeof raw[field] === "string" && allowed.includes(raw[field])) policy[field] = raw[field];
     else { policy[field] = RESTRICTIVE[field]; issues.push(`${field} is invalid`); }
   }
+  // STAGE 5A: a partially corrupt record must not display (or half-apply) a permissive value for a *different* field. Any issue
+  // means the whole record is untrusted: every field becomes RESTRICTIVE until the owner saves a valid configuration.
+  if (issues.length) return { policy: { ...RESTRICTIVE }, issues, meta: meta(raw) };
   return { policy, issues, meta: meta(raw) };
 }
 
