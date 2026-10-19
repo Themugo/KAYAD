@@ -65,7 +65,23 @@ export const isOwnerUser = (user) => {
   const bound = snap.owners.get(e);
   if (bound === undefined) return false;
   const id = idOf(user);
-  return !id || id === bound;
+  if (!id || id !== bound) return false; // STAGE 5B closure: an id-less object can never carry owner privilege in database mode
+  // Real-time facts present on the object beat the TTL-bounded snapshot: a banned / deactivated / unverified identity is not an owner now.
+  if (user.isBanned === true || user.deactivatedAt) return false;
+  if (user.emailVerified !== undefined && user.emailVerified !== true) return false;
+  return true;
+};
+
+/**
+ * Protection (not privilege): is this address an owner ACCOUNT that ordinary administrators must never modify? Designated ∪ any active
+ * membership (usable or not) — and, unlike isOwnerEmail, it still answers when the store is unreadable (fail-closed mode).
+ */
+export const isOwnerAccountEmail = (email) => {
+  const e = normalizeOwnerEmail(email);
+  if (!e) return false;
+  if (OWNER_EMAILS.includes(e)) return true;
+  const snap = snapshotProvider();
+  return !!snap && (snap.owners.has(e) || snap.active.has(e));
 };
 
 /** Addresses that must never be created by public sign-up: designated + current owners + pending invitations. */

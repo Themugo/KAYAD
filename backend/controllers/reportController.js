@@ -8,7 +8,7 @@ import Car from "../models/Car.js";
 import User from "../models/User.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
 import { STAFF_ROLES } from "../config/roles.js";
-import { isOwnerEmail } from "../config/owners.js";
+import { isOwnerAccountEmail } from "../config/owners.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // =============================
@@ -232,7 +232,7 @@ export const updateReportStatus = async (req, res) => {
     }
     if (actionTaken === "user_banned") {
       const targetUser = await User.findById(report.targetId).select("email role");
-      if (targetUser && (STAFF_ROLES.includes(targetUser.role) || isOwnerEmail(targetUser.email))) {
+      if (targetUser && (STAFF_ROLES.includes(targetUser.role) || isOwnerAccountEmail(targetUser.email))) {
         return res.status(403).json({ success: false, code: "BAN_TARGET_PROTECTED", message: "Staff and platform-owner accounts cannot be suspended from the report queue." });
       }
     }

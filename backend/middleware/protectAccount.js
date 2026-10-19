@@ -9,7 +9,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import User from "../models/User.js";
-import { isOwnerEmail, isMainOwnerEmail } from "../config/owners.js";
+import { isOwnerEmail, isOwnerAccountEmail, isMainOwnerEmail } from "../config/owners.js";
 
 const FORBIDDEN_FIELDS = ["email", "role"]; // never editable on an owner account
 
@@ -21,7 +21,7 @@ export const protectAccount = async (req, res, next) => {
     const target = await User.findById(targetId).select("email role");
     if (!target) return next(); // let the route 404 naturally
 
-    const targetIsOwner = isOwnerEmail(target.email);
+    const targetIsOwner = isOwnerAccountEmail(target.email); // STAGE 5B closure: also true while the membership store is unreadable
     const requesterIsOwner = isOwnerEmail(req.user?.email);
     const method = req.method.toUpperCase();
 

@@ -117,6 +117,8 @@ export default function AdminOwnerManagement() {
       setState({ status: 'error', message: d.message || 'Could not load owner management.' });
     }
   }, []);
+  // fetch-on-mount: load() only sets state after the awaited request resolves (same pattern as the other admin tabs).
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   if (state.status === 'loading') return <div className="loading-center"><div className="spinner" /></div>;

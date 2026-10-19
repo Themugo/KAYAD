@@ -1,3 +1,4 @@
+/* eslint-disable no-undef -- Node-run acceptance harness, not application code */
 // STAGE 5B — browser acceptance of the owner-management UI on the isolated stack (real SPA, real API, real PostgreSQL, Brevo capture stub). Tier: R+P (no live e-mail).
 import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -46,7 +47,7 @@ try {
   // ── desktop owner one: signs in, opens the e-mailed link, accepts ──
   const c1 = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p1 = await login(c1, O1, PW1);
-  for (const [ctx, who, pg] of [[c1, O1, p1]]) {
+  for (const [, who, pg] of [[c1, O1, p1]]) {
     const t = await tokenFrom(who);
     await pg.goto(`${WEB}/owner-invite?token=${t}`, { waitUntil: "networkidle" });
     await pg.getByRole("button", { name: /Accept ownership/ }).click();

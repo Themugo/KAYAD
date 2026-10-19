@@ -125,9 +125,8 @@ async function sendInvitationEmail({ id, email, token, kind, invitedBy, resend }
   }
 }
 async function notifyOwners(headline, detail, { alsoTo = [] } = {}) {
-  const snap = registry.__testing.state.snapshot;
   const targets = new Map();
-  if (snap?.owners) for (const [email, uid] of snap.owners) targets.set(email, uid);
+  for (const [email, uid] of registry.currentOwners()) targets.set(email, uid);
   for (const e of alsoTo.map(normalizeOwnerEmail)) if (e && !targets.has(e)) targets.set(e, null);
   for (const [email, uid] of targets) {
     void (async () => {
@@ -177,7 +176,7 @@ export async function inviteOwner({ actor, email, confirmEmail, password, note, 
   await requireStepUp(actor, password);
   const token = newToken();
   const r = unwrap(await rpc("kayad_owner_issue_invitation", { p_email: target, p_kind: kind, p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: actor.id, p_actor_label: label(actor), p_note: note ? String(note).slice(0, 500) : null }));
-  registry.invalidate();
+  registry.invalidate({ taint: false }); // invitation only: no privilege changed
   const mail = await sendInvitationEmail({ id: r.id, email: target, token, kind, invitedBy: normalizeOwnerEmail(actor.email), resend: false });
   await registry.ensureFresh();
   await notifyOwners("An owner invitation was issued", `${mask(normalizeOwnerEmail(actor.email))} invited ${mask(target)} to become a platform owner. Access is granted only after that person verifies their mailbox and accepts.`);
@@ -197,7 +196,7 @@ export async function resendInvitation({ actor, invitationId, confirmEmail, pass
   await requireStepUp(actor, password);
   const token = newToken();
   const r = unwrap(await rpc("kayad_owner_resend_invitation", { p_invitation_id: invitationId, p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: actor.id, p_actor_label: label(actor), p_cooldown_seconds: Number(process.env.OWNER_INVITE_RESEND_COOLDOWN_SECONDS ?? 60) }));
-  registry.invalidate();
+  registry.invalidate({ taint: false });
   const mail = await sendInvitationEmail({ id: r.id, email: r.email, token, kind: r.kind, invitedBy: normalizeOwnerEmail(actor.email), resend: true });
   return { invitation: { id: r.id, email: r.email, kind: r.kind, expiresAt: r.expires_at }, emailDelivered: mail.delivered, emailStatus: mail.status };
 }
@@ -207,7 +206,7 @@ export async function revokeInvitation({ actor, invitationId, confirmEmail, pass
   requireTypedConfirmation(confirmEmail, row.email);
   await requireStepUp(actor, password);
   unwrap(await rpc("kayad_owner_revoke_invitation", { p_invitation_id: invitationId, p_actor: actor.id, p_actor_label: label(actor), p_reason: String(reason || "revoked by owner").slice(0, 500) }));
-  registry.invalidate();
+  registry.invalidate({ taint: false });
   return { revoked: true };
 }
 
@@ -239,21 +238,43 @@ export async function removeOwner({ actor, targetUserId, confirmEmail, password,
 
 const VERIFIED_VIA = new Set(["in_person", "video_call", "phone_call_known_number", "other_documented"]);
 /** One owner recovers another whose mailbox/credentials are lost: end their access now, then re-invite with a credential reset. */
+/** An interrupted recovery leaves the member revoked with reason "recovery: …" and no pending invitation: it can simply be re-issued. */
+async function interruptedRecovery(userId) {
+  const sb = getSupabase();
+  const { data: m, error } = await sb.from("owner_memberships").select("id,user_id,email,status,revoke_reason,revoked_at").eq("user_id", userId).eq("status", "revoked").order("revoked_at", { ascending: false }).limit(1).maybeSingle();
+  if (error || !m || !/^recovery:/.test(String(m.revoke_reason || ""))) return null;
+  const { data: active } = await sb.from("owner_memberships").select("id").eq("email", m.email).eq("status", "active").maybeSingle();
+  if (active) return null;
+  const { data: pend } = await sb.from("owner_invitations").select("id").eq("email", m.email).eq("status", "pending").maybeSingle();
+  return pend ? null : m;
+}
+
+/** One owner recovers another whose mailbox/credentials are lost: end their access now, then re-invite with a credential reset. */
 export async function recoverOwner({ actor, targetUserId, confirmEmail, password, verifiedVia, note }) {
-  const m = await memberRow(targetUserId);
+  let m; let resumed = false;
+  try { m = await memberRow(targetUserId); } catch (e) { if (e?.code !== "OWNER_NOT_MEMBER") throw e; m = await interruptedRecovery(targetUserId); resumed = !!m; if (!m) throw e; }
   if (m.user_id === actor.id) throw new OwnerError("RECOVERY_SELF", "Recover another owner; to change your own credentials use the normal password change.", 400);
   requireTypedConfirmation(confirmEmail, m.email);
   if (!VERIFIED_VIA.has(verifiedVia) || String(note || "").trim().length < 10) throw new OwnerError("RECOVERY_EVIDENCE_REQUIRED", "Record how the person's identity was verified out of band (not by e-mail alone) and a short note.", 400);
   await requireStepUp(actor, password);
-  unwrap(await rpc("kayad_owner_revoke_membership_atomic", { p_target_user: targetUserId, p_actor: actor.id, p_actor_label: label(actor), p_reason: `recovery: ${verifiedVia}: ${String(note).trim()}`.slice(0, 500) }));
-  afterRevocation(targetUserId);
+  if (!resumed) {
+    unwrap(await rpc("kayad_owner_revoke_membership_atomic", { p_target_user: targetUserId, p_actor: actor.id, p_actor_label: label(actor), p_reason: `recovery: ${verifiedVia}: ${String(note).trim()}`.slice(0, 500) }));
+    afterRevocation(targetUserId);
+  }
   const token = newToken();
-  const r = unwrap(await rpc("kayad_owner_issue_invitation", { p_email: m.email, p_kind: "recovery", p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: actor.id, p_actor_label: label(actor), p_note: `verified via ${verifiedVia}` }));
-  registry.invalidate();
+  let r;
+  try {
+    r = unwrap(await rpc("kayad_owner_issue_invitation", { p_email: m.email, p_kind: "recovery", p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: actor.id, p_actor_label: label(actor), p_note: `verified via ${verifiedVia}` }));
+  } catch (e) {
+    // The membership is already revoked (the safe state). Say so and make the retry possible instead of leaving the person stranded.
+    await logEvent("recovery_issue", "failed", { actor: actor.id, actorLabelText: label(actor), email: m.email, target: m.user_id, reason: String(e?.code || "error").slice(0, 80) });
+    throw new OwnerError("OWNER_RECOVERY_INCOMPLETE", "Access for this owner was ended but the recovery invitation could not be issued. Run Recover again for the same person to re-issue it.", 503, { retry: true });
+  }
+  registry.invalidate({ taint: false });
   const mail = await sendInvitationEmail({ id: r.id, email: m.email, token, kind: "recovery", invitedBy: normalizeOwnerEmail(actor.email), resend: false });
   await registry.ensureFresh();
   await notifyOwners("Owner recovery started", `${mask(normalizeOwnerEmail(actor.email))} started recovery for ${mask(m.email)} (identity verified out of band). The old credentials stop working when the new link is accepted.`);
-  return { recovery: true, invitation: { id: r.id, email: m.email, expiresAt: r.expires_at }, emailDelivered: mail.delivered };
+  return { recovery: true, resumed, invitation: { id: r.id, email: m.email, expiresAt: r.expires_at }, emailDelivered: mail.delivered };
 }
 
 // ───────────── invitee side (public routes, token-gated) ─────────────
@@ -281,8 +302,8 @@ export async function acceptInvitation({ token, name, password, authUserId }) {
   await registry.ensureFresh();
   // bootstrap switches itself off once every designated identity is established
   try {
-    const snap = registry.__testing.state.snapshot;
-    if (OWNER_EMAILS.length && snap && OWNER_EMAILS.every((e) => snap.owners.has(e))) await rpc("kayad_owner_bootstrap_close", { p_actor_label: "system:auto", p_reason: "all designated owners established" });
+    const established = new Set(registry.currentOwners().map(([e]) => e));
+    if (OWNER_EMAILS.length && OWNER_EMAILS.every((e) => established.has(e))) await rpc("kayad_owner_bootstrap_close", { p_actor_label: "system:auto", p_reason: "all designated owners established" });
   } catch (e) { logWarn("bootstrap auto-close not completed", { error: e?.message }); }
   await notifyOwners("An owner joined", `${mask(r.email)} accepted an owner invitation (${r.kind}) and is now an active platform owner.`);
   return { accepted: true, email: mask(r.email), accountCreated: r.account_created, credentialsReset: r.credentials_reset };

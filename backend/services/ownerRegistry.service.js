@@ -21,7 +21,7 @@ const num = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0
 
 let store = null; // test seam: async () => ({ data, error })
 let forced = false; // test seam: run the registry under NODE_ENV=test
-const state = { mode: "legacy", snapshot: null, bootstrap: null, loadedAt: 0, goodAt: 0, error: null, inflight: null, usableCount: 0 };
+const state = { mode: "legacy", snapshot: null, bootstrap: null, loadedAt: 0, goodAt: 0, error: null, inflight: null, usableCount: 0, generation: 0, seenInstalled: false };
 
 const enabled = () => forced || (process.env.NODE_ENV !== "test" && process.env.OWNER_STORE_MODE !== "legacy");
 const ttl = () => num(process.env.OWNER_REGISTRY_TTL_MS, 5000);
@@ -57,14 +57,19 @@ async function load() {
 
 async function refresh() {
   const now = Date.now();
+  const gen = state.generation; // STAGE 5B closure: a read that started before a membership change must never become the cache
   try {
     const { data, error } = await load();
     if (error) {
-      if (NOT_INSTALLED(error)) { state.mode = "legacy"; state.snapshot = null; state.error = null; state.loadedAt = now; state.goodAt = now; return; }
+      // "Not installed" only means legacy mode for a process that has NEVER seen the store. Once the store has been seen, a missing
+      // function (PostgREST schema-cache reload, partial rollback) must fail CLOSED — otherwise the env list would silently
+      // restore privilege to an owner who was removed from the membership table (invariant: no legacy bypass after migration).
+      if (NOT_INSTALLED(error) && !state.seenInstalled) { state.mode = "legacy"; state.snapshot = null; state.error = null; state.loadedAt = now; state.goodAt = now; return; }
       throw error;
     }
     const snap = parseSnapshot(data);
-    state.mode = "database"; state.snapshot = snap; state.bootstrap = snap.bootstrap; state.error = null;
+    if (gen !== state.generation) return; // invalidated while reading: discard, ensureFresh() reads again
+    state.mode = "database"; state.snapshot = snap; state.bootstrap = snap.bootstrap; state.error = null; state.seenInstalled = true;
     state.usableCount = snap.owners.size; state.loadedAt = now; state.goodAt = now;
   } catch (e) {
     state.error = String(e?.code || e?.message || "unreadable").slice(0, 120);
@@ -77,14 +82,28 @@ async function refresh() {
 
 export async function ensureFresh() {
   if (!enabled()) { state.mode = "legacy"; state.snapshot = null; return state; }
-  if (state.loadedAt && Date.now() - state.loadedAt < ttl()) return state;
-  if (!state.inflight) state.inflight = refresh().finally(() => { state.inflight = null; });
-  await state.inflight;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (state.loadedAt && Date.now() - state.loadedAt < ttl()) return state;
+    if (!state.inflight) state.inflight = refresh().finally(() => { state.inflight = null; });
+    await state.inflight; // may be a read that started BEFORE the latest invalidate(): loop until a post-invalidation read lands
+  }
   return state;
 }
 
-/** Drop the cached view (called by the instance that changed membership; other instances converge within the TTL). */
-export function invalidate() { state.loadedAt = 0; }
+/**
+ * Drop the cached view (called by the instance that changed membership; other instances converge within the TTL).
+ * Any read still in flight is discarded. With the default `taint`, the last good snapshot also stops being servable as "stale":
+ * if the database cannot be read right after a local membership change, privilege is suspended (fail closed) instead of
+ * resurrecting an owner who was just revoked. Invitation-only changes (no privilege change) pass { taint: false }.
+ */
+export function invalidate({ taint = true } = {}) {
+  state.generation += 1;
+  state.loadedAt = 0;
+  if (taint) state.goodAt = 0;
+}
+
+/** Current usable owners as [email, userId] pairs (empty in legacy/error mode). */
+export function currentOwners() { return state.mode === "database" && state.snapshot ? [...state.snapshot.owners] : []; }
 
 export function describe() {
   return { mode: state.mode, usableOwners: state.mode === "database" ? state.usableCount : null, bootstrap: state.bootstrap, stale: !!state.error && state.mode === "database", error: state.error, ttlMs: ttl(), staleMaxMs: staleMax() };
@@ -98,6 +117,6 @@ __setOwnerSnapshotProvider(() => (state.mode === "legacy" ? null : state.snapsho
 export const __testing = {
   enable(fn) { forced = true; store = fn || null; this.reset(); },
   disable() { forced = false; store = null; this.reset(); },
-  reset() { Object.assign(state, { mode: "legacy", snapshot: null, bootstrap: null, loadedAt: 0, goodAt: 0, error: null, inflight: null, usableCount: 0 }); },
+  reset() { Object.assign(state, { mode: "legacy", snapshot: null, bootstrap: null, loadedAt: 0, goodAt: 0, error: null, inflight: null, usableCount: 0, generation: 0, seenInstalled: false }); },
   state,
 };

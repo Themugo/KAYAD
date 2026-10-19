@@ -328,3 +328,6 @@ INSERT INTO public.communication_event_controls(event_type, channel, enabled) VA
   ('owner.invitation', 'email', true), ('owner.invitation', 'sms', false), ('owner.invitation', 'whatsapp', false),
   ('owner.security_notice', 'email', true), ('owner.security_notice', 'sms', false), ('owner.security_notice', 'whatsapp', false)
 ON CONFLICT (event_type, channel) DO NOTHING;
+
+-- Make PostgREST pick up the new functions immediately (a schema-cache gap would otherwise surface as 'function not found').
+NOTIFY pgrst, 'reload schema';

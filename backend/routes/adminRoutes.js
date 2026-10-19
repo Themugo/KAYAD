@@ -1346,6 +1346,10 @@ router.post(
         .status(400)
         .json({ success: false, message: `Invalid staff role. Must be one of: ${staffRoles.join(", ")}` });
     }
+    // STAGE 5B closure: owner identities (designated / active / invited) are provisioned ONLY through the mailbox-verified owner flow.
+    if (isReservedOwnerEmail(email)) {
+      return res.status(409).json({ success: false, message: "That address is reserved for platform-owner provisioning." });
+    }
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(409).json({ success: false, message: "Email already in use" });
@@ -1685,6 +1689,7 @@ router.post(
 // =============================
 import { uploadMemory, handleUploadError } from "../middleware/upload.js";
 import { uploadImage } from "../config/cloudinary.js";
+import { isReservedOwnerEmail } from "../config/owners.js"; // STAGE 5B closure
 router.post(
   "/upload-logo",
   protect,
