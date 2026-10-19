@@ -5,6 +5,8 @@ export const COMMUNICATION_EVENTS = Object.freeze({
   REGISTRATION: "registration.completed",
   EMAIL_VERIFICATION: "account.email_verification",
   PASSWORD_RESET: "account.password_reset",
+  OWNER_INVITATION: "owner.invitation", // STAGE 5B: secret-bearing (one-time acceptance link)
+  OWNER_SECURITY_NOTICE: "owner.security_notice", // STAGE 5B: owner-membership change notices (no link, no secret)
   PHONE_VERIFICATION: "account.phone_verification",
   BID_PLACED: "auction.bid_placed",
   BID_CONFIRMED: "auction.bid_confirmed",

@@ -18,6 +18,12 @@ const connectDB = () => {
 };
 
 export async function provisionOwners() {
+  // STAGE 5B: this legacy path writes owner accounts as email_verified=true WITHOUT any mailbox proof. In production the only
+  // supported route is `npm run owner:bootstrap` (mailbox-verified invitation). An explicit, named override remains for a
+  // documented break-glass situation and is recorded in the log.
+  if (process.env.NODE_ENV === "production" && process.env.SEED_ALLOW_UNVERIFIED_OWNER_PROVISIONING !== "I_ACCEPT_NO_MAILBOX_PROOF") {
+    throw new Error("Refusing to provision owner accounts as pre-verified in production. Use `npm run owner:bootstrap` (mailbox-verified), or see runbooks/stage5b-owner-governance-20261019/OWNER_BOOTSTRAP_AND_RECOVERY_RUNBOOK.md.");
+  }
   // Production owner recovery must use an approved, audited atomic procedure.
   // This legacy seed uses independent upserts against users and user_auth and
   // can overwrite existing identities or leave a partial identity on failure.

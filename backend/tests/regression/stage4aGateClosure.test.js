@@ -219,10 +219,11 @@ describe("G6 GET /api/ledger/seed never mutates", () => {
 // ---------------- G7 ----------------
 describe("G7 session and owner consistency (static pins)", () => {
   const auth = src("backend/controllers/authController.js");
+  // STAGE 5B: the exemption predicate became the id-aware isOwnerUser(user) (membership-backed). Same shape, stronger identity.
   test("login, refresh and (protect) share the owner exemption for suspended/deactivated state", () => {
-    expect(auth).toMatch(/user\.isBanned && !isOwnerEmail\(user\.email\)/);
-    expect(auth).toMatch(/user\.deactivatedAt && !isOwnerEmail\(user\.email\)/);
-    expect(auth).toMatch(/\(user\.isBanned \|\| user\.deactivatedAt\) && !isOwnerEmail\(user\.email\)/);
+    expect(auth).toMatch(/user\.isBanned && !isOwnerUser\(user\)/);
+    expect(auth).toMatch(/user\.deactivatedAt && !isOwnerUser\(user\)/);
+    expect(auth).toMatch(/\(user\.isBanned \|\| user\.deactivatedAt\) && !isOwnerUser\(user\)/);
   });
   test("password reset bumps tokenVersion, revokes refresh tokens and drops the auth cache", () => {
     const reset = auth.slice(auth.indexOf("tokenVersion: (existingAuth.tokenVersion || 0) + 1"));

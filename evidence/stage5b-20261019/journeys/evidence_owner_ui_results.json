@@ -1,0 +1,131 @@
+{
+  "at": "2026-10-19T10:33:10.057Z",
+  "failed": 0,
+  "results": [
+    {
+      "id": "U0 operator CLI issued invitations to both designated, mailbox-verified accounts (no promotion, no password)",
+      "ok": true,
+      "detail": "✅ Supabase client initialized\n"
+    },
+    {
+      "id": "U0.1 both initial owners accepted through the UI as signed-in verified accounts; bootstrap closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U1 owner one sees the Owners module with both owners",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U1.1 own row is marked and cannot be removed while another owner exists only via Leave",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U2 invite button disabled until typed confirmation and password are supplied",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U2.1 wrong password refused with a clear message and the field is cleared",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U2.2 session survived the wrong password (no logout)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U3 invitation sent and listed as pending",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U3.1 pending invitee is NOT an owner yet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U3.2 no invitation token or hash in the admin page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U4 invitation e-mail captured (provider stub) with an accept link",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U4.1 token removed from the address bar (mobile width)",
+      "ok": true,
+      "detail": "http://127.0.0.1:5173/owner-invite"
+    },
+    {
+      "id": "U5 acceptance completes; membership active in the database",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U5.1 replaying the link is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U6 the new owner sees the module on a phone-width screen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U6.1 no horizontal page scroll at 390px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U7 removal recorded and shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U7.1 removed owner no longer has the Owners tab",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U7.2 removed owner's API access is refused immediately",
+      "ok": true,
+      "detail": "status 401"
+    },
+    {
+      "id": "U8 removing a second owner when the other is valid works; now only one owner remains",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U8.1 last owner sees no Leave/Remove button and is told why",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U8.2 server also refuses a hand-crafted last-owner removal",
+      "ok": true,
+      "detail": "status 400"
+    },
+    {
+      "id": "U9 audit history lists the changes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U10 ordinary admin has no Owners module",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "U10.1 ordinary admin is refused by the owner API",
+      "ok": true,
+      "detail": "status 403"
+    }
+  ]
+}

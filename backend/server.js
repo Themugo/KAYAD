@@ -48,6 +48,8 @@ import auctionRoutes from "./routes/auctionRoutes.js";
 import auctionSettlementRoutes from "./routes/auctionSettlementRoutes.js";
 import auctionFulfilmentRoutes from "./routes/auctionFulfilmentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import { ownerRouter, ownerAccessRouter } from "./routes/ownerRoutes.js"; // STAGE 5B
+import { ownerRegistryMiddleware } from "./services/ownerRegistry.service.js"; // STAGE 5B
 import paymentRoutes from "./routes/paymentRoutes.js";
 import escrowRoutes from "./routes/escrowRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
@@ -451,6 +453,8 @@ app.use(bodyGuard());
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+// STAGE 5B: refresh the owner-membership view (TTL-bounded, fail-closed) before any route decides on owner privilege.
+app.use(ownerRegistryMiddleware);
 
 // ─── REQUEST TIMEOUTS ───────────────────────────────────────────
 // Import operation-specific timeout middleware
@@ -827,6 +831,8 @@ app.use("/api/auctions", auctionRegistrationRoutes);
 app.use("/api/auctions", auctionSettlementRoutes);
 app.use("/api/auctions", auctionFulfilmentRoutes);
 app.use("/api/admin", adminLimiter, adminRoutes);
+app.use("/api/owner-access", authLimiter, ownerAccessRouter); // STAGE 5B: public, token-gated invitation preview/accept
+app.use("/api/owner", adminLimiter, ownerRouter); // STAGE 5B: owner-only governance
 
 app.use("/api/payments", externalTimeout, paymentRoutes);
 

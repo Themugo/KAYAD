@@ -8,6 +8,7 @@ import CompareModal from './components/CompareModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
 import DashboardHub from './components/DashboardHub';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import OwnerInviteAccept from './pages/OwnerInviteAccept';
 import LoginPage from './pages/LoginPage';
 import OnboardingFlow from './components/OnboardingFlow';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -892,6 +893,7 @@ function AuthRouteSurface() {
 export function App() {
   const location = useLocation();
   if (location.pathname === '/verify-email') return <VerifyEmailPage />;
+  if (location.pathname === '/owner-invite') return <OwnerInviteAccept />;
   return (
     <AuthProvider>
       <SocketProvider>

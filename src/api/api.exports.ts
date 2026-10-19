@@ -644,3 +644,15 @@ export const BRANDS = [
   'Honda', 'Volkswagen', 'Lexus', 'Audi', 'Mitsubishi', 'Hyundai', 'Kia', 'Ford',
   'Jeep', 'Peugeot', 'Isuzu', 'Porsche', 'Jaguar', 'Volvo', 'Suzuki', 'Daihatsu',
 ].map(name => ({ name }));
+
+// STAGE 5B — owner governance. The server is the authority; every mutation carries the owner's password (step-up) and a typed confirmation.
+export const ownerAPI = {
+  overview: () => api.get('/owner').then(unwrap),
+  invite: (body: { email: string; confirmEmail: string; password: string; note?: string }) => api.post('/owner/invitations', body).then(unwrap),
+  resend: (id: string, body: { confirmEmail: string; password: string }) => api.post(`/owner/invitations/${encodeURIComponent(id)}/resend`, body).then(unwrap),
+  revokeInvitation: (id: string, body: { confirmEmail: string; password: string; reason: string }) => api.delete(`/owner/invitations/${encodeURIComponent(id)}`, { data: body }).then(unwrap),
+  removeMember: (userId: string, body: { confirmEmail: string; password: string; reason: string }) => api.delete(`/owner/members/${encodeURIComponent(userId)}`, { data: body }).then(unwrap),
+  recover: (userId: string, body: { confirmEmail: string; password: string; verifiedVia: string; note: string }) => api.post(`/owner/members/${encodeURIComponent(userId)}/recovery`, body).then(unwrap),
+  previewInvitation: (token: string) => api.get('/owner-access/invitation', { params: { token } }).then(unwrap),
+  acceptInvitation: (body: { token: string; name?: string; password?: string }) => api.post('/owner-access/accept', body).then(unwrap),
+};

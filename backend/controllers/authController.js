@@ -28,7 +28,7 @@ import { recordFailedAttempt, recordSuccessfulAttempt } from "../middleware/acco
 import { logError, logWarn } from '../infrastructure/logging/index.js';
 import { getSupabase } from '../utils/supabase.js';
 import { mapRowIn } from '../utils/fieldMap.js';
-import { isOwnerEmail, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from '../config/owners.js'; // STAGE 5A: owner identity gate
+import { isOwnerUser, isReservedOwnerEmail, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from '../config/owners.js'; // STAGE 5A/5B: owner identity gate
 import { getOnboardingPolicy, isPolicyTrusted } from '../services/onboardingPolicy.service.js'; // STAGE 5
 import { parseReferralCode, referrerEligible } from '../utils/referralGuards.js'; // STAGE 4A (G9): string-only code; self/suspended referrer excluded
 const STAFF_ROLES = [
@@ -77,7 +77,7 @@ const SAFE_USER_FIELDS = [
 
 export const serializeUser = (user, authState = null) => {
   const raw = typeof user.toObject === "function" ? user.toObject() : user;
-  const role = isOwnerEmail(raw.email) ? "superadmin" : raw.role;
+  const role = isOwnerUser(raw) ? "superadmin" : raw.role;
   const safe = {};
   for (const field of SAFE_USER_FIELDS) {
     if (raw[field] !== undefined) safe[field] = raw[field];
@@ -89,7 +89,7 @@ export const serializeUser = (user, authState = null) => {
   if (authState && authState.mustChangePassword !== undefined) {
     safe.mustChangePassword = Boolean(authState.mustChangePassword);
   }
-  safe.isOwner = isOwnerEmail(raw.email);
+  safe.isOwner = isOwnerUser(raw);
   return safe;
 };
 
@@ -234,7 +234,7 @@ export const register = async (req, res) => {
     // STAGE 5A (Gate A, finding A1): the owner identity is an EMAIL (config/owners.js). Public sign-up must never be
     // able to create or claim it, whether or not the owner row exists yet, and the answer must not reveal which.
     // Owner accounts are provisioned out of band (backend/seed.js, email_verified=true).
-    if (isOwnerEmail(email)) {
+    if (isReservedOwnerEmail(email)) { // STAGE 5B: designated + current owners + pending owner invitations
       logWarn("Public registration attempted with a reserved platform-owner address", { event: "account.owner_identity_reserved", ip: req.ip });
       return res.status(403).json({ success: false, code: "OWNER_IDENTITY_RESERVED", message: "This email address cannot be used for public registration." });
     }
@@ -513,10 +513,10 @@ export const login = async (req, res) => {
 
     // STAGE 4A (G7): same owner exemption as protect() and refresh. Owners are immutable by design
     // (config/owners.js) and must not be locked out at login while an existing session still works.
-    if (user.isBanned && !isOwnerEmail(user.email)) {
+    if (user.isBanned && !isOwnerUser(user)) {
       return R.error(res, "Account suspended", 403);
     }
-    if (user.deactivatedAt && !isOwnerEmail(user.email)) {
+    if (user.deactivatedAt && !isOwnerUser(user)) {
       return R.error(res, "Account deactivated", 403);
     }
 
@@ -586,7 +586,7 @@ export const refreshToken = async (req, res) => {
     if (!user || !userAuth) return R.errorCode(res, "Invalid credentials", 403, "AUTH_SESSION_EXPIRED");
     // Same account-state gate as protect(): a suspended or deactivated account must
     // not be issued fresh tokens (owner exempt, as in protect()).
-    if ((user.isBanned || user.deactivatedAt) && !isOwnerEmail(user.email)) {
+    if ((user.isBanned || user.deactivatedAt) && !isOwnerUser(user)) {
       return R.errorCode(res, user.isBanned ? "Account suspended" : "Account deactivated", 403, "AUTH_FORBIDDEN");
     }
     if (isUnverifiedOwner(user)) return res.status(403).json(OWNER_IDENTITY_UNVERIFIED_RESPONSE); // STAGE 5A (Gate A)
