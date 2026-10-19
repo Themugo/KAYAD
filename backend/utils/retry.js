@@ -103,7 +103,10 @@ export async function withRetry(fn, opts = {}) {
     enableLogging,
   } = mergedOpts;
 
-  const key = opts.key || fn.name || "default";
+  // STAGE 5C: anonymous callbacks have no name, so every service that opted into the circuit breaker without an explicit key (Brevo e-mail,
+  // Africa's Talking SMS, ...) shared ONE circuit called "default": an SMS outage opened it and then rejected verification, reset and
+  // owner-invitation e-mails. The service name is the key.
+  const key = opts.key || serviceName || fn.name || "default";
   const startTime = Date.now();
 
   // Circuit breaker check

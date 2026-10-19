@@ -13,6 +13,7 @@ const userModel = { findOne: jest.fn(), create: jest.fn(), findById: jest.fn() }
 const userAuthModel = { create: jest.fn(async (d) => d) };
 const appModel = { findById: jest.fn(), findOne: jest.fn(), create: jest.fn() };
 const sendNotification = jest.fn(async () => ({}));
+const deliver = jest.fn(async () => ({ status: "sent" })); // STAGE 5C: the set-password link goes via the gateway, not the in-app notification
 const entitlement = jest.fn();
 
 const sbChain = () => { const c = { select: () => c, eq: () => c, is: () => c, maybeSingle: async () => ({ data: null, error: null }), single: async () => ({ data: { id: "prov" }, error: null }), insert: () => c, update: () => c }; return c; };
@@ -26,6 +27,7 @@ jest.unstable_mockModule("../../models/Referral.js", () => ({ default: {} }));
 jest.unstable_mockModule("../../models/InspectorApplication.js", () => ({ default: appModel }));
 jest.unstable_mockModule("../../models/PlatformConfig.js", () => ({ default: { findOne: () => ({ lean: async () => ({ freeMarket: true }) }) } }));
 jest.unstable_mockModule("../../services/notification.service.js", () => ({ sendNotification }));
+jest.unstable_mockModule("../../services/communicationGateway.service.js", () => ({ deliver, sendUserCommunication: jest.fn(async () => ({})) }));
 jest.unstable_mockModule("../../utils/logger.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn() }));
 jest.unstable_mockModule("../../utils/supabase.js", () => ({ getSupabase: () => ({ from: () => sbChain() }), isSupabaseConnected: () => true }));
 jest.unstable_mockModule("../../services/dealerSubscription.service.js", () => ({ getDealerEntitlement: jest.fn(), assertDealerCanCreateListing: entitlement }));
@@ -142,7 +144,10 @@ describe("inspector (mechanic) approval", () => {
     const auth = userAuthModel.create.mock.calls[0][0];
     expect(auth.resetToken).toMatch(/^[0-9a-f]{64}$/);
     expect(auth.resetTokenExpire).toBeInstanceOf(Date);
-    const msg = sendNotification.mock.calls[0][0].message;
+    // STAGE 5C: the in-app notification must NOT carry the token; the emailed link does.
+    expect(sendNotification.mock.calls[0][0].message).not.toMatch(/token=/);
+    const msg = deliver.mock.calls[0][0].text;
+    expect(deliver.mock.calls[0][0].recipient).toBe("mech@x.co");
     const raw = decodeURIComponent(msg.match(/token=([0-9a-f]{64})/)[1]);
     expect(crypto.createHash("sha256").update(raw).digest("hex")).toBe(auth.resetToken);
   });
@@ -157,9 +162,20 @@ describe("inspector (mechanic) approval", () => {
     expect(existing.save).not.toHaveBeenCalled();
   });
 
-  test("existing buyer is converted and told to log in (no new password link)", async () => {
+  test("STAGE 5C: existing buyer with an UNVERIFIED mailbox is refused (no squatter promotion)", async () => {
     appModel.findById.mockResolvedValue(application());
-    const existing = { id: U, _id: U, role: "user", status: "approved", save: jest.fn(async () => {}) };
+    const existing = { id: U, _id: U, role: "user", status: "approved", emailVerified: false, save: jest.fn() };
+    userModel.findOne.mockResolvedValue(existing);
+    const r = await approve();
+    expect(r.code).toBe(409);
+    expect(r.body.code).toBe("INSPECTOR_EMAIL_UNVERIFIED");
+    expect(existing.role).toBe("user");
+    expect(existing.save).not.toHaveBeenCalled();
+  });
+
+  test("existing VERIFIED buyer is converted and told to log in (no new password link)", async () => {
+    appModel.findById.mockResolvedValue(application());
+    const existing = { id: U, _id: U, role: "user", status: "approved", emailVerified: true, save: jest.fn(async () => {}) };
     userModel.findOne.mockResolvedValue(existing);
     const r = await approve();
     expect(r.code).toBe(200);

@@ -1,0 +1,7 @@
+node v22.22.2 npm 10.9.4
+tsc | exit=0 | 26s | npx tsc --noEmit
+build | exit=0 | 3s | npm run build
+front_vitest | exit=0 | 107s | npx vitest run
+back_jest | exit=0 | 97s | npm run test:jest
+back_vitest | exit=0 | 14s | npm run test:vitest
+back_node | exit=0 | 1s | timeout 300 npm run test:node

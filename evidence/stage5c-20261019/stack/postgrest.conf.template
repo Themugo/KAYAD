@@ -1,0 +1,7 @@
+db-uri = "postgres://authenticator:disposable-local-only@127.0.0.1:54339/kayad5c_disposable"
+db-schemas = "public"
+db-anon-role = "anon"
+jwt-secret = "<not-shipped>"
+server-host = "127.0.0.1"
+server-port = 54340
+db-pool = 10

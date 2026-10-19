@@ -6,6 +6,10 @@ import { getIO } from '../../utils/io.js';
 import Car from '../../models/Car.js';
 import User from '../../models/User.js';
 import { emitCommunication, COMMUNICATION_EVENTS } from '../../services/communicationEvents.service.js';
+import { logActionFromReq } from '../../utils/securityLogger.js';
+
+// STAGE 5C: status transitions are audit-trailed. Auditing is best-effort and must never turn a committed transition into a 500.
+const audit = (req, action, inspection, details = {}) => Promise.resolve(logActionFromReq(req, action, { target: inspection.id, targetModel: 'VehicleInspection', details })).catch(() => {});
 
 // STAGE 2 API CONTRACT CONVERGENCE FIX: 'assigned' added alongside the fix to
 // assign() below (which previously never actually set this status). Without
@@ -124,6 +128,18 @@ export const listMine = asyncHandler(async (req, res) => {
   res.json({ success: true, orders });
 });
 
+// STAGE 5C: the inspector-side worklist. listMine() is deliberately buyer-scoped (requester_id = caller), so before this an assigned
+// inspector had NO endpoint that returned the jobs assigned to them. Scope is strictly inspector_id = caller; the projection never
+// includes the requester's phone/notes blob, and a user with no assignments simply gets an empty list.
+export const listAssigned = asyncHandler(async (req, res) => {
+  const { data, error } = await getSupabase().from('vehicle_inspections').select('*').eq('inspector_id', req.user.id).order('created_at', { ascending: false });
+  if (error) throw new AppError(error.message, 500);
+  const rows = data || [];
+  const carIds = [...new Set(rows.map((row) => row.car_id).filter(Boolean).map(String))];
+  const cars = new Map(await Promise.all(carIds.map(async (id) => [id, await Car.findById(id).catch(() => null)])));
+  res.json({ success: true, orders: rows.map((row) => legacyOrder(row, cars.get(String(row.car_id)) || null)) });
+});
+
 export const createOrder = asyncHandler(async (req, res) => {
   const { carId, phone, location } = req.body;
   if (!carId || !phone) return res.status(400).json({ success: false, message: 'carId and phone required' });
@@ -217,6 +233,7 @@ export const assign = asyncHandler(async (req, res) => {
   const { data: car } = await getSupabase().from('cars').select('dealer_id').eq('id', inspection.car_id).maybeSingle();
   const { data: chatId, error: chatError } = await getSupabase().rpc('kayad_get_or_create_inspection_chat', { p_vehicle_inspection_id: inspection.id, p_car_id: inspection.car_id, p_buyer_id: inspection.requester_id, p_seller_id: car?.dealer_id || null, p_inspector_id: inspectorId });
   if (chatError) throw new AppError(chatError.message, 500);
+  await audit(req, 'inspection_assigned', inspection, { inspectorId, from: 'requested', to: 'assigned' });
   res.json({ success: true, order: legacyOrder({ ...data, chat_id: chatId }) });
 });
 
@@ -237,6 +254,7 @@ export const start = asyncHandler(async (req, res) => {
   if (inspection.status !== 'assigned') return res.status(400).json({ success: false, message: 'Inspection must be assigned before it can be started' });
   const { data, error } = await getSupabase().from('vehicle_inspections').update({ status: 'in_progress', current_stage: 'job_verification', scheduled_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', inspection.id).select('*').single();
   if (error) throw new AppError(error.message, 500);
+  await audit(req, 'inspection_started', inspection, { from: 'assigned', to: 'in_progress' });
   res.json({ success: true, order: legacyOrder(data) });
 });
 
@@ -245,6 +263,7 @@ export const submit = asyncHandler(async (req, res) => {
   await assertAccess(inspection, req.user);
   if (String(inspection.inspector_id) !== String(req.user.id) && !['admin', 'superadmin'].includes(req.user.role)) return res.status(403).json({ success: false, message: 'Not your assignment' });
   if (inspection.status !== 'in_progress') return res.status(400).json({ success: false, message: 'Inspection not in progress' });
+  if (req.body?.overallScore !== undefined && !(Number(req.body.overallScore) >= 0 && Number(req.body.overallScore) <= 100)) return res.status(400).json({ success: false, message: 'overallScore must be between 0 and 100' });
   const { checklist = [], overallScore = 0, conditionRating = 'fair', inspectorNotes = '', images = [] } = req.body;
   const { data, error } = await getSupabase().from('vehicle_inspections').update({ checklist, overall_score: Number(overallScore) || 0, condition_rating: conditionRating, inspector_notes: inspectorNotes, evidence: images, status: 'completed', completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', inspection.id).select('*').single();
   if (error) throw new AppError(error.message, 500);
@@ -255,6 +274,7 @@ export const submit = asyncHandler(async (req, res) => {
     getIO().to(`inspection_${data.id}`).emit('inspectionUpdated', event);
   }
   await emitCommunication({ userId: data.requester_id, eventType: COMMUNICATION_EVENTS.INSPECTION_COMPLETED, title: 'Inspection completed', message: `Your vehicle inspection is complete with a score of ${Number(data.overall_score) || 0}/100.`, channels: ['in_app', 'email', 'sms', 'whatsapp'], metadata: { inspectionId: data.id, carId: data.car_id, overallScore: data.overall_score, conditionRating: data.condition_rating } }).catch(() => {});
+  await audit(req, 'inspection_submitted', data, { from: 'in_progress', to: 'completed', overallScore: data.overall_score });
   res.json({ success: true, order: legacyOrder(data) });
 });
 
@@ -311,4 +331,4 @@ export const confirmPayment = asyncHandler(async (req, res) => {
   res.json({ success: true, order: legacyOrder(rows[0]) });
 });
 
-export default { protect, adminOnly, listMine, createOrder, getById, getByCar, assign, start, submit, availableInspectors, confirmPayment };
+export default { protect, adminOnly, listMine, listAssigned, createOrder, getById, getByCar, assign, start, submit, availableInspectors, confirmPayment };

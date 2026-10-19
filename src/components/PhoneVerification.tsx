@@ -58,8 +58,8 @@ export const PhoneVerification: React.FC = () => {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\d{4}$/.test(otpInput)) {
-      setError('Enter the 4-digit code.');
+    if (!/^\d{6}$/.test(otpInput)) {
+      setError('Enter the 6-digit code.');
       return;
     }
     setVerifying(true);
@@ -135,15 +135,15 @@ export const PhoneVerification: React.FC = () => {
       ) : (
         <form onSubmit={handleVerify} className="space-y-3">
           <div>
-            <label className="text-xs font-bold text-[#64748B] block mb-1.5">Enter the 4-digit code sent to {phone}</label>
+            <label className="text-xs font-bold text-[#64748B] block mb-1.5">Enter the 6-digit code sent to {phone}</label>
             <input
               type="text"
               inputMode="numeric"
-              maxLength={4}
+              maxLength={6}
               value={otpInput}
               onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
-              placeholder="1234"
-              className="w-32 border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-lg font-mono tracking-widest text-center"
+              placeholder="123456"
+              className="w-40 border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-lg font-mono tracking-widest text-center"
               autoFocus
             />
           </div>

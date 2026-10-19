@@ -4,7 +4,7 @@
 // Prevents brute force attacks by locking accounts after failed login attempts
 // ─────────────────────────────────────────────────────────────
 
-import { ipKeyGenerator } from "./rateLimiter.js";
+import { clientIp } from "./rateLimiter.js";
 
 // Configuration
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
@@ -46,7 +46,7 @@ const getLockoutInfo = (ip) => {
 
 // Record a failed login attempt
 export const recordFailedAttempt = (req) => {
-  const ip = ipKeyGenerator(req);
+  const ip = clientIp(req);
   const attempts = failedAttempts.get(ip) || { count: 0, lastAttempt: 0 };
 
   attempts.count++;
@@ -64,13 +64,13 @@ export const recordFailedAttempt = (req) => {
 
 // Record a successful login attempt (clears lockout)
 export const recordSuccessfulAttempt = (req) => {
-  const ip = ipKeyGenerator(req);
+  const ip = clientIp(req);
   failedAttempts.delete(ip);
 };
 
 // Account lockout middleware
 export const accountLockout = (req, res, next) => {
-  const ip = ipKeyGenerator(req);
+  const ip = clientIp(req);
   const lockoutInfo = getLockoutInfo(ip);
 
   if (lockoutInfo.locked) {

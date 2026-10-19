@@ -364,6 +364,7 @@ export const inspectionAPI = {
   order:           (body: any)           => api.post('/inspections/order', body).then(unwrap),
   confirmPayment:  (checkoutRequestID: string) => api.post('/inspections/confirm-payment', { checkoutRequestID }).then(unwrap),
   myOrders:        ()               => api.get('/inspections/my').then(unwrap),
+  myAssigned:      ()               => api.get('/inspections/assigned').then(unwrap),
   myTasks:         ()               => api.get('/inspections/my-tasks').then(unwrap),
   list:            (params: any)         => api.get('/inspections', { params }).then(unwrap),
   availableInspectors: ()           => api.get('/inspections/available-inspectors').then(unwrap),

@@ -1,0 +1,356 @@
+{
+ "pass": 70,
+ "fail": 0,
+ "results": [
+  {
+   "id": "V1.1 weak password (no special char) → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V1.2 missing name → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V1.3 valid private-seller registration → 201 pending seller",
+   "ok": true,
+   "d": "{\"success\":true,\"user\":{\"id\":\"620bd8b3-f258-47ff-a144-100a27debc33\",\"name\":\"Seller One\",\"email\":\"seller1-1792419005822@kayad-test.example\",\"role\":\"individual_se"
+  },
+  {
+   "id": "V1.4 no credentials/tokens in the registration response",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "V1.5 duplicate e-mail → 409 (existing account handling)",
+   "ok": true,
+   "d": "want 409 got 409"
+  },
+  {
+   "id": "V1.6 duplicate with different case → 409 (normalised)",
+   "ok": true,
+   "d": "want 409 got 409"
+  },
+  {
+   "id": "V1.7 register with role=admin → refused (400) or plain unverified buyer — never a privileged role",
+   "ok": true,
+   "d": "400 "
+  },
+  {
+   "id": "V1.7 register with role=superadmin → refused (400) or plain unverified buyer — never a privileged role",
+   "ok": true,
+   "d": "400 "
+  },
+  {
+   "id": "V1.7 register with role=webhoist → refused (400) or plain unverified buyer — never a privileged role",
+   "ok": true,
+   "d": "400 "
+  },
+  {
+   "id": "V1.7 register with role=ghost_checker → refused (400) or plain unverified buyer — never a privileged role",
+   "ok": true,
+   "d": "400 "
+  },
+  {
+   "id": "V1.7 register with role=moderator → refused (400) or plain unverified buyer — never a privileged role",
+   "ok": true,
+   "d": "400 "
+  },
+  {
+   "id": "V1.8 privilege fields in the registration body are rejected (400) or have no effect (identical to a control buyer)",
+   "ok": true,
+   "d": "201 user/false/approved vs control user/false/approved"
+  },
+  {
+   "id": "V2.0 verification e-mail captured (provider stub), link has a 64-hex token",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "V2.1 token is stored HASHED (db value != emailed token, 64 hex)",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "V2.2 login before verification refused (403)",
+   "ok": true,
+   "d": "{\"success\":false,\"message\":\"Please verify your email before logging in. Check your inbox or request a new verification link.\"}"
+  },
+  {
+   "id": "V2.3 garbage token → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V2.4 well-formed unknown token → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V2.5 six concurrent uses of the same token → exactly one success",
+   "ok": true,
+   "d": "want 1 got 1"
+  },
+  {
+   "id": "V2.6 replay after use → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V2.7 user is verified only after server-side validation",
+   "ok": true,
+   "d": "want \"t\" got \"t\""
+  },
+  {
+   "id": "V2.8 consumed token is cleared in the database",
+   "ok": true,
+   "d": "want \"null\" got \"null\""
+  },
+  {
+   "id": "V2.9 expired token → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V2.10 …and the account stays unverified",
+   "ok": true,
+   "d": "want \"f\" got \"f\""
+  },
+  {
+   "id": "V3.1 identical status+body for unknown, already-verified and unverified addresses (enumeration-resistant)",
+   "ok": true,
+   "d": "202/202/202"
+  },
+  {
+   "id": "V3.2 resend e-mails a NEW link for the unverified account",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "V3.3 unknown/verified addresses receive no e-mail",
+   "ok": true,
+   "d": "want 0 got 0"
+  },
+  {
+   "id": "V3.4 immediate second resend is inside the cooldown → no second e-mail",
+   "ok": true,
+   "d": "want 0 got 0"
+  },
+  {
+   "id": "V3.5 the replaced (older) token no longer works",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V3.6 provider outage: response stays generic (202) and nothing is delivered",
+   "ok": true,
+   "d": "{\"success\":true,\"message\":\"If that email exists and is unverified, a verification email is being sent.\"}"
+  },
+  {
+   "id": "V3.7 …and the previously issued link is STILL valid (outage did not strand the account)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "V3.8 registration during provider outage still creates the account (201) and does not claim the e-mail was delivered",
+   "ok": true,
+   "d": "{\"success\":true,\"user\":{\"id\":\"0aea2158-98e2-40b2-8832-aa409bd17bc3\",\"name\":\"Seller Three\",\"email\":\"seller3-1792419005822@kayad-test.example\",\"role\":\"individual_"
+  },
+  {
+   "id": "V3.9 …the failed delivery is recorded as failed (operator-visible), not sent",
+   "ok": true,
+   "d": "delivery ledger checked"
+  },
+  {
+   "id": "V3.9b delivery ledger status for the outage registration is failed/dead_letter/queued (never 'sent')",
+   "ok": true,
+   "d": "queued,queued"
+  },
+  {
+   "id": "V3.10 after the outage, resend recovers the account",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "V4.0 verified seller logs in",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "V4.1 forgot-password identical for known and unknown address",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "V4.2 reset e-mail delivered (stub) with 64-hex token",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "id": "V4.3 reset token stored hashed",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "V4.4 weak new password rejected",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V4.5 three concurrent resets with one token → exactly one success",
+   "ok": true,
+   "d": "want 1 got 1"
+  },
+  {
+   "id": "V4.6 replay of the used reset token → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V4.7 session created BEFORE the reset is revoked (HTTP)",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "V4.8 …and its refresh cookie no longer refreshes",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "V4.9 old password rejected",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "V4.10 new password works",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "V4.11 expired reset token → 400",
+   "ok": true,
+   "d": "want 400 got 400"
+  },
+  {
+   "id": "V4.12 logout then the same access token is dead",
+   "ok": true,
+   "d": "want 401 got 401"
+  },
+  {
+   "id": "V4.13 five wrong passwords lock the account: the 5th/6th attempt answer 429",
+   "ok": true,
+   "d": "401,401,401,401,429,429"
+  },
+  {
+   "id": "V4.14 the correct password from ANOTHER address is still refused during the account lock",
+   "ok": true,
+   "d": "want 429 got 429"
+  },
+  {
+   "id": "V4.15 …and from the locked address too (IP lockout)",
+   "ok": true,
+   "d": "want 429 got 429"
+  },
+  {
+   "id": "V4.16 a different account from a different address is unaffected (lock is not global)",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "V4.17 attempt counter is persisted (>=5)",
+   "ok": true,
+   "d": "want true got true"
+  },
+  {
+   "id": "V4.18 once the lock expires the correct password works again and the counter resets",
+   "ok": true,
+   "d": "want \"200/0\" got \"200/0\""
+  },
+  {
+   "id": "V4.19 a completed password reset (mailbox proof) clears the account lock",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "S1.1 verified seller profile",
+   "ok": true,
+   "d": "want 200 got 200"
+  },
+  {
+   "id": "S1.2 profile completion succeeds",
+   "ok": true,
+   "d": "{\"success\":true,\"user\":{\"_id\":\"620bd8b3-f258-47ff-a144-100a27debc33\",\"id\":\"620bd8b3-f258-47ff-a144-100a27debc33\",\"name\":\"Seller One\",\"email\":\"seller1-1792419005"
+  },
+  {
+   "id": "S1.3 role/status fields in the profile body are ignored",
+   "ok": true,
+   "d": "want \"individual_seller/pending\" got \"individual_seller/pending\""
+  },
+  {
+   "id": "S1.4 payout/onboarding fields are refused with a clear 400 (not a column-not-found 500, not a false success)",
+   "ok": true,
+   "d": "{\"success\":false,\"code\":\"PROFILE_FIELD_NOT_SUPPORTED\",\"message\":\"Payout and onboarding details are not part of the account profile. Dealers save them from Settl"
+  },
+  {
+   "id": "S1.5 verified private seller can create a listing",
+   "ok": true,
+   "d": "201 {\"success\":true,\"data\":{\"id\":\"1fbe4c26-dae9-4cd0-9e60-06186f0ddde8\",\"dealer_id\":\"620bd8b3-f258-47ff-a144-100a27debc33\",\"title\":\"Toyota Axio 2015\",\"slug\":null,\"b"
+  },
+  {
+   "id": "S1.6 new listing is PENDING moderation (hold_for_review default); client cannot publish",
+   "ok": true,
+   "d": "want \"pending\" got \"pending\""
+  },
+  {
+   "id": "S1.7 client-supplied status/seller fields are ignored (still pending, owned by caller)",
+   "ok": true,
+   "d": "want \"pending/true\" got \"pending/true\""
+  },
+  {
+   "id": "S1.8 pending listing is NOT visible in the public marketplace",
+   "ok": true,
+   "d": "want false got false"
+  },
+  {
+   "id": "S1.9 another seller cannot edit or delete the listing",
+   "ok": true,
+   "d": "403/403"
+  },
+  {
+   "id": "S1.10 listing untouched",
+   "ok": true,
+   "d": "want \"Toyota Axio 2015\" got \"Toyota Axio 2015\""
+  },
+  {
+   "id": "S1.11 unverified seller cannot sign in (so cannot reach seller APIs)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "S1.12 a seller whose verification is revoked is blocked on existing session (API bypass closed)",
+   "ok": true,
+   "d": "403"
+  },
+  {
+   "id": "S2.0 disposable owners provisioned via bootstrap → invitation → acceptance → sign-in",
+   "ok": true,
+   "d": "200/200 200/200"
+  },
+  {
+   "id": "S2.1 suspended seller: existing access token is refused",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "S2.2 suspended seller cannot sign in",
+   "ok": true,
+   "d": "want 403 got 403"
+  },
+  {
+   "id": "S2.3 suspended seller: listing creation refused",
+   "ok": true,
+   "d": "want 403 got 403"
+  }
+ ]
+}

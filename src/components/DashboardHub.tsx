@@ -34,7 +34,7 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
     const owned = vehicles.filter((v) => v?.sellerId && v.sellerId === (user?.id || user?._id));
     if (role === 'dealer' || role === 'individual_seller' || role === 'broker') return [{id:'inventory',label:'Your inventory',value:owned.length,icon:Car},{id:'saved',label:'Saved vehicles',value:0,icon:ShoppingBag},{id:'activity',label:'Marketplace activity',value:vehicles.length,icon:Activity}];
     if (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role)) return [{id:'users',label:'Users',value:snapshot?.counts?.users ?? '—',icon:Users},{id:'cars',label:'Vehicles',value:snapshot?.counts?.cars ?? '—',icon:Car},{id:'incidents',label:'Incidents',value:snapshot?.counts?.incidents ?? '—',icon:Activity},{id:'alerts',label:'Alerts',value:snapshot?.counts?.alerts ?? '—',icon:Bell}];
-    if (role === 'ghost_checker') return [{id:'assigned',label:'Assigned inspections',value:'—',icon:ClipboardCheck},{id:'messages',label:'Messages',value:'—',icon:Bell},{id:'market',label:'Marketplace',value:vehicles.length,icon:Car}];
+    if (role === 'ghost_checker') return [{id:'assigned',label:'Assigned inspections',value:Array.isArray(snapshot?.orders) ? snapshot.orders.length : '—',icon:ClipboardCheck},{id:'messages',label:'Messages',value:'—',icon:Bell},{id:'market',label:'Marketplace',value:vehicles.length,icon:Car}];
     return [{id:'saved',label:'Saved vehicles',value:'—',icon:ShoppingBag},{id:'vehicles',label:'Marketplace inventory',value:vehicles.length,icon:Car},{id:'alerts',label:'Action alerts',value:'—',icon:Bell}];
   }, [vehicles, user, role, snapshot]);
 
@@ -48,7 +48,7 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
       } else if (role === 'user' || role === 'buyer') {
         const result = await getOwnershipDashboard(); setSnapshot(result);
       } else if (role === 'ghost_checker') {
-        const result = await inspectionAPI.myOrders?.(); setSnapshot(result?.data || result);
+        const result = await inspectionAPI.myAssigned(); setSnapshot(result?.data || result);
       }
     } catch (e) { setSourceError('Live dashboard data could not be refreshed. Existing values were not replaced with mock data.'); }
     finally { setLoading(false); }

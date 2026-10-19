@@ -11,6 +11,12 @@ import { getPricingRecommendations } from "../services/pricingRecommendationServ
 
 import { findAll, findById, findOne, create, update, remove, paginate, count } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
+
+// STAGE 5C: raw PostgREST queries bypass the model adapter, so they must use the REAL snake_case column names and must
+// surface database errors instead of rendering them as silent zeros / empty dashboards.
+const must = ({ data, count, error }) => { if (error) throw error; return { data, count }; };
+const countOf = (r) => must(r).count || 0;
+const WHOLESALE_UNSUPPORTED = /42703|PGRST204|PGRST200|PGRST205|column .*wholesale|wholesale.*does not exist|Could not find/i;
 import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { sendNotification } from "../services/notification.service.js";
 import { initiateDealerUpgrade } from "../services/dealerSubscription.service.js";
@@ -122,15 +128,21 @@ router.get(
       dateFrom = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
     }
 
-    let listQuery = sb.from("payments").select("*", { count: 'exact' }).eq("user", req.user.id).eq("status", "success").order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
-    if (dateFrom) listQuery = listQuery.gte("createdAt", dateFrom);
-    if (dateTo) listQuery = listQuery.lte("createdAt", dateTo);
-    const { data: payments, count: total } = await listQuery;
+    // Earnings are the dealer_amount of successful payments made FOR the dealer's own vehicles (payments.user_id is the payer).
+    const { data: ownCars } = must(await sb.from("cars").select("id").eq("dealer_id", req.user.id));
+    const ownCarIds = (ownCars || []).map((r) => r.id);
+    const empty = { data: [], count: 0 };
+    let listQuery = ownCarIds.length ? sb.from("payments").select("*", { count: 'exact' }).in("car_id", ownCarIds).eq("status", "success").order("created_at", { ascending: false }).range(skip, skip + limit - 1) : null;
+    if (listQuery && dateFrom) listQuery = listQuery.gte("created_at", dateFrom);
+    if (listQuery && dateTo) listQuery = listQuery.lte("created_at", dateTo);
+    const { data: rawPayments, count: total } = listQuery ? must(await listQuery) : empty;
+    const payments = (rawPayments || []).map((p) => ({ ...p, createdAt: p.created_at, dealerAmount: Number(p.dealer_amount || 0), platformFee: Number(p.platform_fee || 0) }));
 
-    let aggQuery = sb.from("payments").select("dealerAmount,createdAt").eq("user", req.user.id).eq("status", "success");
-    if (dateFrom) aggQuery = aggQuery.gte("createdAt", dateFrom);
-    if (dateTo) aggQuery = aggQuery.lte("createdAt", dateTo);
-    const { data: aggData } = await aggQuery;
+    let aggQuery = ownCarIds.length ? sb.from("payments").select("dealer_amount,created_at").in("car_id", ownCarIds).eq("status", "success") : null;
+    if (aggQuery && dateFrom) aggQuery = aggQuery.gte("created_at", dateFrom);
+    if (aggQuery && dateTo) aggQuery = aggQuery.lte("created_at", dateTo);
+    const { data: aggRaw } = aggQuery ? must(await aggQuery) : empty;
+    const aggData = (aggRaw || []).map((p) => ({ createdAt: p.created_at, dealerAmount: Number(p.dealer_amount || 0) }));
     const monthlyMap = {};
     (aggData || []).forEach((p) => {
       const d = new Date(p.createdAt);
@@ -145,7 +157,7 @@ router.get(
       amount: m.amount,
     }));
 
-    const totalAmount = payments.reduce((sum, p) => sum + p.dealerAmount, 0);
+    const totalAmount = payments.reduce((sum, p) => sum + (p.dealerAmount || 0), 0);
 
     res.json({
       success: true,
@@ -153,7 +165,7 @@ router.get(
       monthly,
       count: payments.length,
       payments,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+      pagination: { page, limit, total: total || 0, pages: Math.ceil((total || 0) / limit) },
     });
   }),
 );
@@ -168,7 +180,7 @@ router.get(
     const { page, limit, skip } = getPagination(req);
 
     const sb = getSupabase();
-    let query = sb.from("cars").select("*", { count: 'exact' }).eq("dealer", req.user.id).order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
+    let query = sb.from("cars").select("*", { count: 'exact' }).eq("dealer_id", req.user.id).order("created_at", { ascending: false }).range(skip, skip + limit - 1);
     if (req.query.sold === "true") query = query.eq("sold", true);
     if (req.query.active === "true") query = query.eq("sold", false);
     if (req.query.status) query = query.eq("status", req.query.status);
@@ -176,7 +188,7 @@ router.get(
       const q = `%${req.query.search}%`;
       query = query.or(`title.ilike.${q},brand.ilike.${q},model.ilike.${q},vin.ilike.${q}`);
     }
-    const { data: cars, count: total } = await query;
+    const { data: cars, count: total } = must(await query);
 
     res.json({
       success: true,
@@ -203,7 +215,7 @@ router.get(
     const from = req.query.from ? new Date(req.query.from) : new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000);
 
     const sb = getSupabase();
-    const { data: dealerIdList } = await sb.from("cars").select("id").eq("dealer", dealerId);
+    const { data: dealerIdList } = must(await sb.from("cars").select("id").eq("dealer_id", dealerId));
     const dealerCarIds = (dealerIdList || []).map((r) => r.id);
     const dealerCars = await findAll("cars", { filters: { dealer: dealerId } });
 
@@ -213,15 +225,15 @@ router.get(
     const fromStr = from.toISOString();
     const [totalBids, totalInquiries, totalFavorites, topCars] = await Promise.all([
       dealerCarIds.length > 0
-        ? sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCarIds).gte("createdAt", fromStr).then(({ count }) => count || 0)
+        ? sb.from("bids").select("id", { count: 'exact', head: true }).in("car_id", dealerCarIds).gte("created_at", fromStr).then(countOf)
         : 0,
       dealerCarIds.length > 0
-        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).gte("createdAt", fromStr).then(({ count }) => count || 0)
+        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).gte("createdAt", fromStr).then(countOf)
         : 0,
       dealerCarIds.length > 0
-        ? sb.from("favorites").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).gte("createdAt", fromStr).then(({ count }) => count || 0)
+        ? sb.from("favorites").select("id", { count: 'exact', head: true }).in("car_id", dealerCarIds).gte("created_at", fromStr).then(countOf)
         : 0,
-      sb.from("cars").select("title,views,bidsCount,favoritesCount,currentBid,price,auctionStatus,status,createdAt").eq("dealer", dealerId).order("views", { ascending: false }).order("bidsCount", { ascending: false }).limit(10).then(({ data }) => data || []),
+      sb.from("cars").select("title,views,bids_count,favorites_count,current_bid,price,auction_status,status,created_at").eq("dealer_id", dealerId).order("views", { ascending: false }).order("bids_count", { ascending: false }).limit(10).then((r) => must(r).data || []).then((rows) => rows.map((c) => ({ title: c.title, views: c.views, bidsCount: c.bids_count, favoritesCount: c.favorites_count, currentBid: c.current_bid, price: c.price, auctionStatus: c.auction_status, status: c.status, createdAt: c.created_at }))),
     ]);
 
     // ── Price comparison ──────────────────────────────────────
@@ -239,7 +251,7 @@ router.get(
         const avgPrice = Math.round(group.prices.reduce((a, b) => a + b, 0) / group.prices.length);
         let marketQuery = sb.from("cars").select("price").eq("brand", group.brand).gt("price", 0);
         if (group.model !== 'all') marketQuery = marketQuery.eq("model", group.model);
-        const { data: marketPrices } = await marketQuery;
+        const { data: marketPrices } = must(await marketQuery);
         const marketAvg = marketPrices && marketPrices.length > 0
           ? Math.round(marketPrices.reduce((s, c) => s + c.price, 0) / marketPrices.length)
           : null;
@@ -271,13 +283,13 @@ router.get(
     }));
 
     // ── Monthly revenue ───────────────────────────────────────
-    const { data: revData } = await sb.from("payments").select("amount,createdAt").eq("user", dealerId).eq("status", "success").gte("createdAt", fromStr);
+    const { data: revData } = dealerCarIds.length ? must(await sb.from("payments").select("dealer_amount,created_at").in("car_id", dealerCarIds).eq("status", "success").gte("created_at", fromStr)) : { data: [] };
     const revMap = {};
     (revData || []).forEach((p) => {
-      const d = new Date(p.createdAt);
+      const d = new Date(p.created_at);
       const key = `${d.getFullYear()}-${d.getMonth()}`;
       if (!revMap[key]) revMap[key] = { year: d.getFullYear(), month: d.getMonth() + 1, total: 0 };
-      revMap[key].total += (p.amount || 0);
+      revMap[key].total += Number(p.dealer_amount || 0);
     });
     const monthlyRevenue = Object.values(revMap).sort((a, b) => a.year - b.year || a.month - b.month);
 
@@ -313,7 +325,7 @@ router.get(
     const dealerId = req.user.id;
 
     const sb = getSupabase();
-    const { data: idList } = await sb.from("cars").select("id").eq("dealer", dealerId);
+    const { data: idList } = must(await sb.from("cars").select("id").eq("dealer_id", dealerId));
     const dealerCarIds = (idList || []).map((r) => r.id);
 
     const [
@@ -329,40 +341,39 @@ router.get(
       totalFavorites,
       unreadMessages,
     ] = await Promise.all([
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).then(({ count }) => count || 0),
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("sold", true).then(({ count }) => count || 0),
-
-      sb.from("payments").select("dealerAmount").eq("user", dealerId).eq("status", "success").then(({ data }) =>
-        (data || []).reduce((s, p) => s + (p.dealerAmount || 0), 0)
-      ),
-
-      sb.from("cars").select("views").eq("dealer", dealerId).then(({ data }) =>
-        (data || []).reduce((s, c) => s + (c.views || 0), 0)
-      ),
-
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "live").then(({ count }) => count || 0),
-
-      sb.from("escrows").select("id", { count: 'exact', head: true }).eq("seller", dealerId).in("status", ["funded", "vehicle_confirmed", "delivered"]).then(({ count }) => count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("sold", true).then(countOf),
 
       dealerCarIds.length > 0
-        ? sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCarIds).eq("status", "pending").then(({ count }) => count || 0)
+        ? sb.from("payments").select("dealer_amount").in("car_id", dealerCarIds).eq("status", "success").then((r) => (must(r).data || []).reduce((s, p) => s + Number(p.dealer_amount || 0), 0))
         : 0,
 
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "draft").then(({ count }) => count || 0),
+      sb.from("cars").select("views").eq("dealer_id", dealerId).then((r) => (must(r).data || []).reduce((s, c) => s + (c.views || 0), 0)),
+
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "live").then(countOf),
+
+      sb.from("escrows").select("id", { count: 'exact', head: true }).eq("seller", dealerId).in("status", ["funded", "vehicle_confirmed", "delivered"]).then(countOf),
 
       dealerCarIds.length > 0
-        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(({ count }) => count || 0)
+        ? sb.from("bids").select("id", { count: 'exact', head: true }).in("car_id", dealerCarIds).eq("status", "pending").then(countOf)
+        : 0,
+
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "draft").then(countOf),
+
+      dealerCarIds.length > 0
+        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(countOf)
         : 0,
 
       dealerCarIds.length > 0
-        ? sb.from("favorites").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(({ count }) => count || 0)
+        ? sb.from("favorites").select("id", { count: 'exact', head: true }).in("car_id", dealerCarIds).then(countOf)
         : 0,
 
-      sb.from("messages").select("id", { count: 'exact', head: true }).eq("receiver", dealerId).neq("status", "seen").then(({ count }) => count || 0),
+      // Unread = the dealer's per-conversation unread counters (messages carries no receiver column).
+      sb.from("conversations").select("seller_unread_count").eq("seller_id", dealerId).then((r) => (must(r).data || []).reduce((s, c) => s + (c.seller_unread_count || 0), 0)),
     ]);
 
     const totalBids = dealerCarIds.length > 0
-      ? await sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCarIds).then(({ count }) => count || 0)
+      ? await sb.from("bids").select("id", { count: 'exact', head: true }).in("car_id", dealerCarIds).then(countOf)
       : 0;
 
     res.json({
@@ -395,8 +406,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const sb = getSupabase();
     const [cars, sold] = await Promise.all([
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", req.user.id).then(({ count }) => count || 0),
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", req.user.id).eq("sold", true).then(({ count }) => count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", req.user.id).then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", req.user.id).eq("sold", true).then(countOf),
     ]);
 
     res.json({
@@ -421,7 +432,6 @@ router.get(
     const sb = getSupabase();
     // Raw PostgREST calls bypass utils/fieldMap, so they must use the real column names (cars.dealer_id,
     // cars.auction_status). The camelCase names made every call fail with 42703 (route answered 500).
-    const must = ({ data, count, error }) => { if (error) throw error; return { data, count }; };
     const { data: dealerCarIdRows } = must(await sb.from("cars").select("id").eq("dealer_id", dealerId));
     const dealerCarIds = (dealerCarIdRows || []).map((r) => r.id);
     // dealer_health_scores is an optional, display-only score; the table exists in production but no repository
@@ -488,7 +498,6 @@ router.get(
     const sb = getSupabase();
     // Real column names (cars.dealer_id, bids.car_id/created_at); errors surface instead of becoming `null.map`.
     // Car and bidder details are read with two explicit lookups (no PostgREST embeds) so the response shape is unchanged.
-    const must = ({ data, count, error }) => { if (error) throw error; return { data, count }; };
     const { data: carRows } = must(await sb.from("cars").select("id,title,price,images").eq("dealer_id", req.user.id));
     const carsById = new Map((carRows || []).map((r) => [r.id, r]));
     const dealerCars = [...carsById.keys()];
@@ -556,21 +565,28 @@ router.get(
 // =============================
 // 💳 DEALER SETTLEMENT CONFIG + CACHED
 // =============================
+// STAGE 5C: settlement details live in `dealers.payment_details` (jsonb, the same column the onboarding form fills). The previous
+// handlers read/wrote users.mpesa_business / mpesa_business_name / bank_name / bank_account / payment_details, none of which exist
+// in any migration (GET failed with "column not found"), and PUT called a local object named `update` as a function (TypeError),
+// so no dealer could ever save settlement details. The API contract (field names) is unchanged; storage is mapped:
+//   mpesaBusiness -> paymentDetails.paybillNumber   mpesaBusinessName -> paymentDetails.mpesaBusinessName
+//   bankName      -> paymentDetails.bankName        bankAccount       -> paymentDetails.accountNumber
+const SETTLEMENT_KEYS = ["bankName", "accountName", "accountNumber", "paybillNumber", "mpesaPhone", "mpesaBusinessName"];
+const settlementView = (pd = {}) => ({
+  mpesaBusiness: pd.paybillNumber || "",
+  mpesaBusinessName: pd.mpesaBusinessName || "",
+  paymentDetails: pd,
+  bankName: pd.bankName || "",
+  bankAccount: pd.accountNumber || "",
+});
+const cleanSettlementString = (v) => (typeof v === "string" ? v.trim().slice(0, 200) : null);
+
 router.get(
   "/settlement",
   cacheDealerData,
   asyncHandler(async (req, res) => {
-    const user = await findById("users", req.user.id, "mpesaBusiness,mpesaBusinessName,paymentDetails,bankName,bankAccount");
-    res.json({
-      success: true,
-      settlement: {
-        mpesaBusiness: user?.mpesaBusiness || "",
-        mpesaBusinessName: user?.mpesaBusinessName || "",
-        paymentDetails: user?.paymentDetails || {},
-        bankName: user?.bankName || "",
-        bankAccount: user?.bankAccount || "",
-      },
-    });
+    const dealer = await findOne("dealers", { user: req.user.id });
+    res.json({ success: true, settlement: settlementView(dealer?.paymentDetails || {}) });
   }),
 );
 
@@ -578,30 +594,51 @@ router.put(
   "/settlement",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const { mpesaBusiness, mpesaBusinessName, paymentDetails, bankName, bankAccount } = req.body;
+    const dealer = await findOne("dealers", { user: req.user.id });
+    if (!dealer) return res.status(404).json({ success: false, message: "Dealer profile not found" });
 
-    const update = {};
-    if (mpesaBusiness !== undefined) update.mpesaBusiness = mpesaBusiness;
-    if (mpesaBusinessName !== undefined) update.mpesaBusinessName = mpesaBusinessName;
-    if (bankName !== undefined) update.bankName = bankName;
-    if (bankAccount !== undefined) update.bankAccount = bankAccount;
-    if (paymentDetails !== undefined) update.paymentDetails = paymentDetails;
-    const user = await update("users", req.user.id, update);
-    await logActionFromReq(req, "update_settlement", {
-      details: { fields: Object.keys(update) },
-    });
-    res.json({ success: true, settlement: user });
+    const body = req.body || {};
+    const incoming = {};
+    const direct = { mpesaBusiness: "paybillNumber", mpesaBusinessName: "mpesaBusinessName", bankName: "bankName", bankAccount: "accountNumber" };
+    for (const [field, key] of Object.entries(direct)) {
+      if (body[field] === undefined) continue;
+      const v = cleanSettlementString(body[field]);
+      if (v === null) return res.status(400).json({ success: false, message: `${field} must be text` });
+      incoming[key] = v;
+    }
+    if (body.paymentDetails !== undefined) {
+      if (!body.paymentDetails || typeof body.paymentDetails !== "object" || Array.isArray(body.paymentDetails)) {
+        return res.status(400).json({ success: false, message: "paymentDetails must be an object" });
+      }
+      for (const key of SETTLEMENT_KEYS) {
+        if (body.paymentDetails[key] === undefined) continue;
+        const v = cleanSettlementString(body.paymentDetails[key]);
+        if (v === null) return res.status(400).json({ success: false, message: `paymentDetails.${key} must be text` });
+        // explicit top-level fields win over the nested object
+        if (!(key in incoming)) incoming[key] = v;
+      }
+    }
+    if (!Object.keys(incoming).length) return res.status(400).json({ success: false, message: "No settlement fields supplied" });
+
+    const merged = { ...(dealer.paymentDetails || {}), ...incoming };
+    const saved = await update("dealers", dealer.id, { paymentDetails: merged });
+    await logActionFromReq(req, "update_settlement", { details: { fields: Object.keys(incoming) } });
+    res.json({ success: true, settlement: settlementView(saved?.paymentDetails || merged) });
   }),
 );
 
 // =============================
 // 👤 DEALER PROFILE + CACHED
 // =============================
+// STAGE 5C: `users` has no businessAddress / dealerListingsCount / socialLinks / website / visibility columns (the old GET selected them,
+// so it failed with "column not found"), and the old PUT shadowed `update` with a local object and then called it (TypeError). Only
+// real columns are read/written; anything else the client sends is reported back as ignored instead of being silently "saved".
+const DEALER_PROFILE_COLUMNS = ["name", "phone", "avatar", "businessName", "location", "bio"];
 router.get(
   "/profile",
   cacheDealerData,
   asyncHandler(async (req, res) => {
-    const user = await findById("users", req.user.id, "name,email,phone,avatar,businessName,businessAddress,dealerRating,dealerListingsCount,location,bio,socialLinks,website,verifiedBuyer");
+    const user = await findById("users", req.user.id, [...DEALER_PROFILE_COLUMNS, "email", "dealerRating", "listingCount", "verifiedBuyer"].join(","));
     res.json({ success: true, profile: user });
   }),
 );
@@ -610,24 +647,17 @@ router.put(
   "/profile",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const allowed = [
-      "name",
-      "phone",
-      "avatar",
-      "businessName",
-      "businessAddress",
-      "location",
-      "bio",
-      "socialLinks",
-      "website",
-    ];
-    const update = {};
-    for (const field of allowed) {
-      if (req.body[field] !== undefined) update[field] = req.body[field];
+    const changes = {};
+    for (const field of DEALER_PROFILE_COLUMNS) {
+      if (req.body[field] !== undefined) changes[field] = typeof req.body[field] === "string" ? req.body[field].trim() : req.body[field];
     }
-    const user = await update("users", req.user.id, update);
-    await logActionFromReq(req, "update_profile", { details: { fields: Object.keys(update) } });
-    res.json({ success: true, profile: user });
+    const ignored = Object.keys(req.body || {}).filter((k) => !DEALER_PROFILE_COLUMNS.includes(k));
+    if (!Object.keys(changes).length) {
+      return res.status(400).json({ success: false, message: "No supported profile fields supplied", ignored });
+    }
+    const user = await update("users", req.user.id, changes);
+    await logActionFromReq(req, "update_profile", { details: { fields: Object.keys(changes) } });
+    res.json({ success: true, profile: user, ...(ignored.length ? { ignored } : {}) });
   }),
 );
 
@@ -644,17 +674,17 @@ router.get(
     const { page, limit, skip } = getPagination(req);
 
     const sb = getSupabase();
-    const { data: members, count: total } = await sb
+    const { data: members, count: total } = must(await sb
       .from("dealer_teams")
-      .select("*, member:users(name, email, phone, role, avatar)", { count: 'exact' })
+      .select("*, member:users!dealer_teams_member_fkey(name, email, phone, role, avatar)", { count: 'exact' })
       .eq("dealer", req.user.id)
-      .order("createdAt", { ascending: false })
-      .range(skip, skip + limit - 1);
+      .order("created_at", { ascending: false })
+      .range(skip, skip + limit - 1));
 
     res.json({
       success: true,
       members,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+      pagination: { page, limit, total: total || 0, pages: Math.ceil((total || 0) / limit) },
     });
   }),
 );
@@ -1212,7 +1242,13 @@ router.patch(
   asyncHandler(async (req, res) => {
     const existing = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!existing) return res.status(404).json({ success: false, message: "Car not found" });
-    const car = await update("cars", req.params.id, { wholesale: req.body.wholesale === true });
+    let car;
+    try {
+      car = await update("cars", req.params.id, { wholesale: req.body.wholesale === true });
+    } catch (e) {
+      if (WHOLESALE_UNSUPPORTED.test(`${e?.code || ""} ${e?.message || ""}`) || !e?.message) return res.status(503).json({ success: false, code: "TRADE_LISTINGS_UNAVAILABLE", message: "Dealer trade listings are not available on this deployment yet." });
+      throw e;
+    }
     res.json({ success: true, car });
   }),
 );
@@ -1225,13 +1261,19 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
     const sb = getSupabase();
-    let qb = sb.from("cars").select("*, dealer:users(name, businessName, location)", { count: 'exact' }).eq("wholesale", true).order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
+    // STAGE 5C: public.cars has no `wholesale` column in the repository schema, so this query used to fail inside PostgREST and the route
+    // answered 200 with `cars` undefined. Say so explicitly instead of pretending the trade marketplace is empty.
+    let qb = sb.from("cars").select("*, dealer:users!cars_dealer_id_fkey(name, business_name, location)", { count: 'exact' }).eq("wholesale", true).order("created_at", { ascending: false }).range(skip, skip + limit - 1);
     if (req.query.search) {
       const s = `%${req.query.search}%`;
       qb = qb.or(`title.ilike.${s},brand.ilike.${s},model.ilike.${s}`);
     }
-    const { data: cars, count: total } = await qb;
-    res.json({ success: true, cars, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+    const { data: cars, count: total, error } = await qb;
+    if (error) {
+      if (WHOLESALE_UNSUPPORTED.test(`${error.code || ""} ${error.message || ""}`) || !error.message) return res.status(503).json({ success: false, code: "TRADE_LISTINGS_UNAVAILABLE", message: "Dealer trade listings are not available on this deployment yet." });
+      throw error;
+    }
+    res.json({ success: true, cars, pagination: { page, limit, total: total || 0, pages: Math.ceil((total || 0) / limit) } });
   }),
 );
 

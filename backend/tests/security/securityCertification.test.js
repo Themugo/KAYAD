@@ -385,7 +385,7 @@ describe("registration role assignment", () => {
 describe("dealer self-approval prevention", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test("updateProfile with onboardingComplete does NOT approve the dealer", async () => {
+  test("updateProfile with onboardingComplete does NOT approve the dealer (400 PROFILE_FIELD_NOT_SUPPORTED)", async () => {
     userModelMock.findByIdAndUpdate.mockResolvedValue({
       _id: "u1",
       email: "d@e.f",
@@ -396,7 +396,9 @@ describe("dealer self-approval prevention", () => {
     const res = mockRes();
     await updateProfile(req, res);
     expect(dealerModelMock.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+    // STAGE 5C: unsupported fields are rejected explicitly instead of being silently dropped.
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: "PROFILE_FIELD_NOT_SUPPORTED" }));
   });
 });
 

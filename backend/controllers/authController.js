@@ -457,7 +457,9 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     // Auth fields live in user_auth table (H1 split)
-    const userAuth = user ? await UserAuth.findOne({ user: user._id }).select("+password +tokenVersion") : null;
+    // STAGE 5C: this adapter treats "+field" selects as the COMPLETE column list. Without loginAttempts/lockUntil here the failed-attempt
+    // counter read back as undefined on every request, so it never passed 1 and the 5-attempt account lock could not trigger.
+    const userAuth = user ? await UserAuth.findOne({ user: user._id }).select("+password +tokenVersion +loginAttempts +lockUntil") : null;
 
     // STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: when `userAuth` is
     // null (unknown email), the credential check below previously read
@@ -478,8 +480,13 @@ export const login = async (req, res) => {
     }
 
     // ─── Check lockout BEFORE password verification ──────
-    if (userAuth?.lockUntil && userAuth.lockUntil > new Date()) {
-      const remaining = Math.ceil((userAuth.lockUntil - new Date()) / 60000);
+    // STAGE 5C: an expired lock starts a fresh attempt window (otherwise the stale counter re-locks on the very next typo).
+    if (userAuth?.lockUntil && new Date(userAuth.lockUntil) <= new Date()) {
+      userAuth.loginAttempts = 0;
+      userAuth.lockUntil = null;
+    }
+    if (userAuth?.lockUntil && new Date(userAuth.lockUntil) > new Date()) {
+      const remaining = Math.ceil((new Date(userAuth.lockUntil) - new Date()) / 60000);
       return R.error(res, `Account locked. Try again in ${remaining} minute(s).`, 429);
     }
 
@@ -708,15 +715,6 @@ export const updateProfile = async (req, res) => {
       location,
       businessName,
       bio,
-      visibility,
-      mpesaBusiness,
-      mpesaBusinessName,
-      bankName,
-      bankAccount,
-      bankBranch,
-      notifications,
-      paymentDetails,
-      onboardingComplete,
       avatar,
     } = req.body;
 
@@ -726,16 +724,21 @@ export const updateProfile = async (req, res) => {
     if (location !== undefined) updates.location = String(location).trim();
     if (businessName !== undefined) updates.businessName = String(businessName).trim();
     if (bio !== undefined) updates.bio = String(bio).trim();
-    if (visibility && typeof visibility === "object") updates.visibility = visibility;
-    if (mpesaBusiness !== undefined) updates.mpesaBusiness = String(mpesaBusiness).trim();
-    if (mpesaBusinessName !== undefined) updates.mpesaBusinessName = String(mpesaBusinessName).trim();
-    if (bankName !== undefined) updates.bankName = String(bankName).trim();
-    if (bankAccount !== undefined) updates.bankAccount = String(bankAccount).trim();
-    if (bankBranch !== undefined) updates.bankBranch = String(bankBranch).trim();
-    if (notifications) updates.notifications = { sms: notifications.sms };
-    if (paymentDetails) updates.paymentDetails = paymentDetails;
-    if (onboardingComplete !== undefined) updates.onboardingComplete = Boolean(onboardingComplete);
     if (avatar !== undefined) updates.avatar = String(avatar);
+
+    // STAGE 5C: bank / M-Pesa / payment / onboarding / visibility / notifications fields are NOT columns of `users` (they never existed in any migration, so sending
+    // them produced a 500 "column not found"). Dealer payout details are stored on the dealer record via PUT /dealer/settlement and
+    // PUT /dealer/onboarding. Refuse them explicitly instead of failing late or pretending to save.
+    const NOT_PROFILE_FIELDS = ["mpesaBusiness", "mpesaBusinessName", "bankName", "bankAccount", "bankBranch", "paymentDetails", "onboardingComplete", "visibility", "notifications"];
+    const misplaced = NOT_PROFILE_FIELDS.filter((f) => req.body[f] !== undefined);
+    if (misplaced.length) {
+      return res.status(400).json({
+        success: false,
+        code: "PROFILE_FIELD_NOT_SUPPORTED",
+        message: "Payout and onboarding details are not part of the account profile. Dealers save them from Settlement / Onboarding.",
+        fields: misplaced,
+      });
+    }
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true });
 
@@ -972,7 +975,7 @@ export const resetPassword = async (req, res) => {
 
     const userAuth = await UserAuth.findOneAndUpdate(
       { resetToken: hashToken(token), resetTokenExpire: { $gt: new Date() } },
-      { password: passwordHash, resetToken: null, resetTokenExpire: null, tokenVersion: (existingAuth.tokenVersion || 0) + 1 },
+      { password: passwordHash, resetToken: null, resetTokenExpire: null, tokenVersion: (existingAuth.tokenVersion || 0) + 1, loginAttempts: 0, lockUntil: null }, // STAGE 5C: proof of mailbox control also clears a brute-force lock
       { new: true },
     );
     if (!userAuth) return R.error(res, "Reset link is invalid or has expired.", 400);
