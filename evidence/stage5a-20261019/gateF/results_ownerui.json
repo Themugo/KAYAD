@@ -1,0 +1,62 @@
+[
+  {
+    "id": "D1 owner reaches onboarding settings through the real admin UI",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "D2 UI shows server values (approval_required/hold_for_review/owner_only)",
+    "ok": true,
+    "detail": "approval_required/hold_for_review/owner_only"
+  },
+  {
+    "id": "D3 UI save persisted on the server",
+    "ok": true,
+    "detail": "server=self_onboarding rev=79"
+  },
+  {
+    "id": "D4 value survives browser reload",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "D5 stale UI save returns conflict and does NOT overwrite",
+    "ok": true,
+    "detail": "listing=hold_for_review dealerAuth=admins"
+  },
+  {
+    "id": "D6 UI tells the owner about the conflict",
+    "ok": true,
+    "detail": "changed 10/19/2026, 12:14:10 PM. These settings were changed by someone else. The latest values are shown — review them "
+  },
+  {
+    "id": "D-RESP onboarding settings @320",
+    "ok": true,
+    "detail": "noHScroll=true"
+  },
+  {
+    "id": "D-RESP onboarding settings @360",
+    "ok": true,
+    "detail": "noHScroll=true"
+  },
+  {
+    "id": "D-RESP onboarding settings @375",
+    "ok": true,
+    "detail": "noHScroll=true"
+  },
+  {
+    "id": "D-RESP onboarding settings @390",
+    "ok": true,
+    "detail": "noHScroll=true"
+  },
+  {
+    "id": "D-RESP onboarding settings @412",
+    "ok": true,
+    "detail": "noHScroll=true"
+  },
+  {
+    "id": "D-RESP onboarding settings @430",
+    "ok": true,
+    "detail": "noHScroll=true"
+  }
+]

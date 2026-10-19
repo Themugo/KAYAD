@@ -33,7 +33,7 @@ jest.unstable_mockModule('../../services/communicationEvents.service.js', () => 
 jest.unstable_mockModule('../../utils/generateToken.js', () => ({ generateAccessToken: jest.fn(), generateRefreshToken: jest.fn() }));
 jest.unstable_mockModule('../../middleware/auth.js', () => ({ invalidateUserCache: jest.fn() }));
 jest.unstable_mockModule('../../middleware/accountLockout.js', () => ({ recordFailedAttempt, recordSuccessfulAttempt }));
-jest.unstable_mockModule('../../infrastructure/logging/index.js', () => ({ logError: jest.fn() }));
+jest.unstable_mockModule('../../infrastructure/logging/index.js', () => ({ logError: jest.fn(), logWarn: jest.fn() }));
 jest.unstable_mockModule('../../utils/supabase.js', () => ({ getSupabase: jest.fn() }));
 jest.unstable_mockModule('../../utils/fieldMap.js', () => ({ mapRowIn: jest.fn((x) => x) }));
 

@@ -159,7 +159,7 @@ export const confirmAsDuplicate = async (req, res) => {
     }
 
     // STAGE 4 (S4-C-02): "removed" soft-deletes the listing and sets status
-    // "rejected". A sold listing has a settled sale behind it and is unwound
+    // "hidden" (Stage 5A: was "rejected", which the database refuses). A sold listing has a settled sale behind it and is unwound
     // only through the escrow/refund workflow (utils/carModerationGuard.js), so
     // refuse BEFORE the log is marked reviewed (a blocked request must not
     // leave the log in a reviewed state).
@@ -171,15 +171,14 @@ export const confirmAsDuplicate = async (req, res) => {
       }
     }
 
-    // Update log status
-    await log.markAsReviewed(req.user.id, action, reviewNotes);
-
-    // Update car status
+    // STAGE 5A (Gate E): the listing is changed FIRST and the log is marked reviewed only once that succeeded. Previously the
+    // log was marked reviewed before the car write, and a failing car write (status "rejected" violates cars_status_check)
+    // left a reviewed log over an untouched, still-public duplicate. A removed duplicate is soft-deleted AND hidden.
     if (car) {
       car.duplicateStatus = "confirmed_duplicate";
 
       if (action === "removed") {
-        car.status = "rejected";
+        car.status = "hidden";
         car.deletedAt = new Date();
         car.deletedBy = req.user.id;
       } else if (action === "merged") {
@@ -189,6 +188,8 @@ export const confirmAsDuplicate = async (req, res) => {
 
       await car.save();
     }
+
+    await log.markAsReviewed(req.user.id, action, reviewNotes);
 
     logInfo("Duplicate confirmed", {
       logId: id,

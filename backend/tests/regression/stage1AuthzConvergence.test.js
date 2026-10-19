@@ -180,7 +180,7 @@ describe("S1-AUTH-04 optionalAuth() rejects revoked tokens", () => {
     expect(req.user).toBeUndefined();
   });
   test("owner gets the same role/effectiveRole shape as protect()", async () => {
-    rows.p2 = { id: "p2", email: "OWNER@example.test", role: "user", status: "approved" };
+    rows.p2 = { id: "p2", email: "OWNER@example.test", role: "user", status: "approved", emailVerified: true }; // STAGE 5A: owner must be verified
     authRows.p2 = { tokenVersion: 0 };
     const { req } = await run(tok("p2"));
     expect(req.user).toMatchObject({ role: "superadmin", effectiveRole: "webhoist" });

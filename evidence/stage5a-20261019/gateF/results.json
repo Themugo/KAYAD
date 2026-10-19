@@ -1,0 +1,247 @@
+[
+  {
+    "id": "F0 owner sets launch policy via API",
+    "ok": true,
+    "detail": "status 200"
+  },
+  {
+    "id": "F-RESP register seller @320",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register dealer @320",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register seller @360",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register dealer @360",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register seller @375",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register dealer @375",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register seller @390",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register dealer @390",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register seller @412",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register dealer @412",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register seller @430",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "F-RESP register dealer @430",
+    "ok": true,
+    "detail": "noHScroll=true submitVisible=true"
+  },
+  {
+    "id": "J1.1 seller registration shows verification message",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.2 pre-verification sign-in denied",
+    "ok": true,
+    "detail": "status 403 code undefined"
+  },
+  {
+    "id": "J1.3 UI shows recoverable unverified message",
+    "ok": true,
+    "detail": "verification required Verify your KAYAD email before signing in. If you did not receive the message, request another ver"
+  },
+  {
+    "id": "J1.4 verification email captured (LOCAL CAPTURE, not live Brevo)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.5 link verifies in browser",
+    "ok": true,
+    "detail": "KAYAD KENYA’S TRUSTED VEHICLE MARKETPLACE Create account EMAIL VERIFICATION Email verified Email verified successfully. You can now log in. Continue to sign in "
+  },
+  {
+    "id": "J1.6 replay of token rejected safely",
+    "ok": true,
+    "detail": "KAYAD KENYA’S TRUSTED VEHICLE MARKETPLACE Create account EMAIL VERIFICATION Verification link problem Invalid or expired verification link. Request a new one. R"
+  },
+  {
+    "id": "J1.7 invalid token rejected",
+    "ok": true,
+    "detail": "status 400"
+  },
+  {
+    "id": "J1.8 sign-in after verification",
+    "ok": true,
+    "detail": "status 200 userStatus pending role individual_seller"
+  },
+  {
+    "id": "J1.9 seller not self-approved",
+    "ok": true,
+    "detail": "status pending"
+  },
+  {
+    "id": "J1.10 seller listing submission with image upload — NOT TESTED (isolated stack has no Cloudinary; createCar requires images)",
+    "ok": null,
+    "detail": "see J4 for DB-level publication-protection checks"
+  },
+  {
+    "id": "J1.11 role/status injection through profile ignored",
+    "ok": true,
+    "detail": "profile 200; db individual_seller|pending"
+  },
+  {
+    "id": "J1.12 logout revokes session",
+    "ok": true,
+    "detail": "logout 200, me-after 401"
+  },
+  {
+    "id": "J2.1 application received, email verified, NOT approved (distinct states)",
+    "ok": true,
+    "detail": "dealer|pending|true|false"
+  },
+  {
+    "id": "J2.2 pending dealer cannot list",
+    "ok": true,
+    "detail": "status 403"
+  },
+  {
+    "id": "J2.3 pending state renders without horizontal scroll",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.4 concurrent approvals are safe (no 5xx)",
+    "ok": true,
+    "detail": "200/200"
+  },
+  {
+    "id": "J2.5 final state approved dealer",
+    "ok": true,
+    "detail": "dealer|approved|true"
+  },
+  {
+    "id": "J2.6 audit events recorded",
+    "ok": true,
+    "detail": "count 60"
+  },
+  {
+    "id": "J2.7 user-facing notification created",
+    "ok": true,
+    "detail": "count 2"
+  },
+  {
+    "id": "J2.8 approved dealer can sign in with dealer role",
+    "ok": true,
+    "detail": "role dealer"
+  },
+  {
+    "id": "J2.9 dealer approval did not publish any listing",
+    "ok": true,
+    "detail": "published 0"
+  },
+  {
+    "id": "J3.1 self-onboarding: verified dealer state recorded",
+    "ok": true,
+    "detail": "dealer|pending"
+  },
+  {
+    "id": "J3.2 self-onboarding does not grant privileged role",
+    "ok": true,
+    "detail": "dealer|pending"
+  },
+  {
+    "id": "J3.3 closed mode refuses dealer registration",
+    "ok": true,
+    "detail": "status 403"
+  },
+  {
+    "id": "J4.1 dealer bulk-status cannot self-publish under hold_for_review",
+    "ok": true,
+    "detail": "status 403 db pending"
+  },
+  {
+    "id": "J4.2 dealer-platform inventory/bulk cannot self-publish",
+    "ok": true,
+    "detail": "status 403 db pending"
+  },
+  {
+    "id": "J4.3 sold listing untouched by seller bulk-status",
+    "ok": true,
+    "detail": "status 200 db sold"
+  },
+  {
+    "id": "J4.4 sold listing blocked by inventory/bulk (409)",
+    "ok": true,
+    "detail": "status 409"
+  },
+  {
+    "id": "J4.5 owner cannot hide a sold listing (409)",
+    "ok": true,
+    "detail": "status 409 LISTING_MODERATION_BLOCKED"
+  },
+  {
+    "id": "J4.6 owner hide works on real DB and stores 'hidden'",
+    "ok": true,
+    "detail": "status 200 db hidden msg Listing hidden. It is not publicly visible."
+  },
+  {
+    "id": "J4.7 legacy 'reject' alias stores hidden, never 'rejected'",
+    "ok": true,
+    "detail": "status 200"
+  },
+  {
+    "id": "J4.8 owner approve publishes only the targeted listing",
+    "ok": true,
+    "detail": "status 200 db available"
+  },
+  {
+    "id": "J4.9 invalid moderation action rejected (400)",
+    "ok": true,
+    "detail": "status 400"
+  },
+  {
+    "id": "J4.10 bulk hide hides pending, skips sold",
+    "ok": true,
+    "detail": "status 200 2 listing(s) hidden (not publicly visible)"
+  },
+  {
+    "id": "J4.11 auto_publish lets an approved dealer publish own listing",
+    "ok": true,
+    "detail": "status 200 db available"
+  },
+  {
+    "id": "J4.12 switching back to hold_for_review blocks self-publish again",
+    "ok": true,
+    "detail": "status 403"
+  }
+]

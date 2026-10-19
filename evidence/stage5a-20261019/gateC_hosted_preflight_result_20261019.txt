@@ -1,0 +1,18 @@
+GATE C — hosted READ-ONLY preflight result (project "KAYAD EA", ref ubvgixwhfybbyjuvxboj), executed 2026-10-19 via SELECT only.
+Query: runbooks/stage5a-launch-gate-20261019/GATE_C_PREFLIGHT_READONLY.sql (first statement). No data written, no secrets printed.
+OK       audit_logs actor/action columns exist
+OK       cars_status_check allows hidden and NOT rejected
+OK       dealers.approved column exists
+OK       registration RPC NOT executable by anon/authenticated  (vacuously true: RPC absent)
+OK       RLS enabled on system_settings/users/cars/audit_logs
+OK       rpc kayad_apply_dealer_verification_atomic exists
+OK       system_settings.key is unique/primary
+OK       system_settings.updated_at exists
+OK       user_auth.email_verify_token/expire exist
+OK       users.dealer_approved_at / email_verified / status exist
+MISSING  rpc kayad_register_identity_atomic exists
+MISSING  refresh_tokens session columns (session_id, family_id)
+MISSING  users security state columns (deactivated_at, granted_permissions, revoked_permissions, last_active)
+MISSING  case-insensitive unique email index on users
+Counts (earlier read-only query): users=2 (0 email_verified); system_settings rows=10 (onboarding_policy rows=0).
+Same query on the disposable PostgreSQL built from the 181-file chain: 16/16 OK.

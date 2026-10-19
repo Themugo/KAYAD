@@ -813,7 +813,7 @@ router.post(
     }
 
     const sb = getSupabase();
-    const { data: toDelete } = await sb.from("cars").select("id").in("id", ids).eq("dealer", req.user.id);
+    const { data: toDelete } = await sb.from("cars").select("id").in("id", ids).eq("dealer_id", req.user.id); // STAGE 5A: physical column is dealer_id
     const deleteIds = (toDelete || []).map((r) => r.id);
     if (deleteIds.length > 0) {
       await sb.from("cars").delete().in("id", deleteIds);
@@ -884,9 +884,11 @@ router.patch(
       .from("cars")
       .select("id,status")
       .in("id", ids)
-      .eq("dealer", req.user.id);
+      .eq("dealer_id", req.user.id); // STAGE 5A: physical column is dealer_id (cars.dealer does not exist)
     if (selErr) throw new Error(`Bulk status lookup failed: ${selErr.message}`);
-    const updateIds = (toUpdate || []).filter((r) => r.status !== "rejected").map((r) => r.id);
+    // STAGE 5A (Gate E): a sold listing's state belongs to the sale/escrow workflow; a seller bulk edit must not hide, re-open
+    // or re-publish it (same invariant as utils/carModerationGuard.js for admin paths).
+    const updateIds = (toUpdate || []).filter((r) => r.status !== "rejected" && r.status !== "sold").map((r) => r.id);
     let modified = 0;
     if (updateIds.length > 0) {
       const { error: updErr } = await sb.from("cars").update({ status }).in("id", updateIds);

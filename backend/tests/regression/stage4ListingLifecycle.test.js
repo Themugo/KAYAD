@@ -157,12 +157,12 @@ describe("S4-C-02 duplicate review 'removed' cannot remove a sold listing", () =
     expect(car.save).not.toHaveBeenCalled();
     expect(car.status).toBe("sold");
   });
-  test("live + removed → rejected and soft-deleted as before", async () => {
+  test("live + removed → hidden (STAGE 5A: `rejected` is refused by cars_status_check) and soft-deleted", async () => {
     const car = { ...live("a"), save: jest.fn(async () => {}) };
     const res = await run(car, "removed");
     expect(res.code).toBe(200);
     expect(markAsReviewed).toHaveBeenCalledTimes(1);
-    expect(car.status).toBe("rejected");
+    expect(car.status).toBe("hidden");
     expect(car.deletedBy).toBe("adm-1");
     expect(car.save).toHaveBeenCalled();
   });

@@ -25,10 +25,10 @@ import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicati
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { invalidateUserCache } from "../middleware/auth.js";
 import { recordFailedAttempt, recordSuccessfulAttempt } from "../middleware/accountLockout.js";
-import { logError } from '../infrastructure/logging/index.js';
+import { logError, logWarn } from '../infrastructure/logging/index.js';
 import { getSupabase } from '../utils/supabase.js';
 import { mapRowIn } from '../utils/fieldMap.js';
-import { isOwnerEmail } from '../config/owners.js';
+import { isOwnerEmail, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from '../config/owners.js'; // STAGE 5A: owner identity gate
 import { getOnboardingPolicy, isPolicyTrusted } from '../services/onboardingPolicy.service.js'; // STAGE 5
 import { parseReferralCode, referrerEligible } from '../utils/referralGuards.js'; // STAGE 4A (G9): string-only code; self/suspended referrer excluded
 const STAFF_ROLES = [
@@ -230,6 +230,14 @@ export const register = async (req, res) => {
     }
 
     email = normalizeEmail(email);
+
+    // STAGE 5A (Gate A, finding A1): the owner identity is an EMAIL (config/owners.js). Public sign-up must never be
+    // able to create or claim it, whether or not the owner row exists yet, and the answer must not reveal which.
+    // Owner accounts are provisioned out of band (backend/seed.js, email_verified=true).
+    if (isOwnerEmail(email)) {
+      logWarn("Public registration attempted with a reserved platform-owner address", { event: "account.owner_identity_reserved", ip: req.ip });
+      return res.status(403).json({ success: false, code: "OWNER_IDENTITY_RESERVED", message: "This email address cannot be used for public registration." });
+    }
 
     const requestedRole = req.body.role;
     const role = requestedRole === "dealer" || requestedRole === "individual_seller" ? requestedRole : "user";
@@ -512,6 +520,13 @@ export const login = async (req, res) => {
       return R.error(res, "Account deactivated", 403);
     }
 
+    // STAGE 5A (Gate A): an owner-email account that was never verified is not a provisioned owner. Refuse regardless of
+    // REQUIRE_EMAIL_VERIFICATION / provider state (the general gate below is config-dependent and owner-exempt in protect()).
+    if (isUnverifiedOwner(user)) {
+      logWarn("Owner-email account is not verified; sign-in refused", { event: "account.owner_identity_unverified", userId: user.id });
+      return res.status(403).json(OWNER_IDENTITY_UNVERIFIED_RESPONSE);
+    }
+
     // ─── Email verification gate ────────────────────────────────
     // Only enforce when verification can actually be completed. If Brevo
     // isn't configured there is no way to receive the
@@ -574,6 +589,7 @@ export const refreshToken = async (req, res) => {
     if ((user.isBanned || user.deactivatedAt) && !isOwnerEmail(user.email)) {
       return R.errorCode(res, user.isBanned ? "Account suspended" : "Account deactivated", 403, "AUTH_FORBIDDEN");
     }
+    if (isUnverifiedOwner(user)) return res.status(403).json(OWNER_IDENTITY_UNVERIFIED_RESPONSE); // STAGE 5A (Gate A)
     if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
       return R.errorCode(res, "Session invalidated — please login again", 403, "AUTH_SESSION_EXPIRED");
     }
@@ -819,16 +835,29 @@ export const resendVerification = async (req, res) => {
     const { email } = req.body;
     if (!email) return R.error(res, "Email required", 400);
 
+    // STAGE 5A (Gate B): every outcome — unknown address, already verified, no credential row, cooldown, or "sent" — returns the
+    // SAME status and body, so the endpoint reveals neither whether an address is registered nor whether it is verified.
+    // (It previously answered 200 for unknown/verified addresses and 202 for unverified ones.)
+    const GENERIC = { success: true, message: "If that email exists and is unverified, a verification email is being sent." };
     const user = await User.findOne({ email: normalizeEmail(email) });
 
-    // Always return 200 to avoid user enumeration
     if (!user || user.emailVerified) {
-      return res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
+      return res.status(202).json(GENERIC);
     }
 
     const userAuth = await UserAuth.findOne({ user: user._id }).select("+emailVerifyToken +emailVerifyExpire");
     if (!userAuth) {
-      return res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
+      return res.status(202).json(GENERIC);
+    }
+
+    // STAGE 5A (Gate B): per-account resend cooldown. The IP+email rate limiter allows several sends per window; this stops a
+    // burst to one mailbox. Stateless on purpose (no migration): the token lifetime is 24h, so "issued at" = expiry − 24h.
+    const COOLDOWN_MS = Math.max(0, Number(process.env.VERIFICATION_RESEND_COOLDOWN_SECONDS ?? 60)) * 1000;
+    if (COOLDOWN_MS && userAuth.emailVerifyToken && userAuth.emailVerifyExpire) {
+      const issuedAt = new Date(userAuth.emailVerifyExpire).getTime() - 24 * 60 * 60 * 1000;
+      if (Number.isFinite(issuedAt) && Date.now() - issuedAt < COOLDOWN_MS) {
+        return res.status(202).json(GENERIC);
+      }
     }
 
     // Generate the replacement token in memory first. Do not persist it until
@@ -873,7 +902,7 @@ export const resendVerification = async (req, res) => {
       }
     })();
 
-    return res.status(202).json({ success: true, message: "If that email exists and is unverified, a verification email is being sent." });
+    return res.status(202).json(GENERIC);
   } catch (err) {
     R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }

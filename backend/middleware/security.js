@@ -129,19 +129,17 @@ export const extraHeaders = () => (req, res, next) => {
 // ── 5. HTTP PARAMETER POLLUTION PROTECTION ──────────────────
 // Rejects duplicate query/body parameters to prevent parameter pollution attacks
 export const hppProtection = () => (req, res, next) => {
-  const checkDuplicates = (obj, source) => {
-    if (!obj || typeof obj !== "object") return;
-    for (const key of Object.keys(obj)) {
-      if (Array.isArray(obj[key]) && obj[key].length > 1) {
-        return res.status(400).json({
-          success: false,
-          message: `Duplicate parameter detected: ${key} in ${source}`,
-        });
-      }
-    }
-  };
-  checkDuplicates(req.query, "query");
-  checkDuplicates(req.body, "body");
+  // STAGE 5A (real-stack defect): the previous version rejected ANY body array with more than one element, which made every
+  // multi-id bulk endpoint (bulk moderation, bulk status, bulk delete) unusable, and it fell through to next() after replying.
+  // Parameter pollution is a query-string / form-encoded phenomenon; JSON arrays are legitimate request bodies.
+  const dup = (obj) => obj && typeof obj === "object" && Object.keys(obj).find((k) => Array.isArray(obj[k]) && obj[k].length > 1);
+  const q = dup(req.query);
+  if (q) return res.status(400).json({ success: false, message: `Duplicate parameter detected: ${q} in query` });
+  const ct = String(req.headers["content-type"] || "");
+  if (ct.includes("application/x-www-form-urlencoded")) {
+    const b = dup(req.body);
+    if (b) return res.status(400).json({ success: false, message: `Duplicate parameter detected: ${b} in body` });
+  }
   next();
 };
 

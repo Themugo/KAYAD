@@ -233,6 +233,10 @@ export async function bulkUpdateListings(req, res) {
     }
     const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id });
     if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });
+    // STAGE 5A (Gate E): sold listings are governed by the sale/escrow workflow, never by a seller bulk status edit.
+    if (owned.some((c) => c.status === "sold" || c.sold === true)) {
+      return res.status(409).json({ success: false, code: "LISTING_MODERATION_BLOCKED", message: "Sold listings cannot be changed in bulk." });
+    }
     for (const car of owned) {
       car.status = status;
       await car.save();

@@ -5,7 +5,7 @@ import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
 import RefreshToken from "../models/RefreshToken.js";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
-import { OWNER_EMAILS, isOwnerEmail } from "../config/owners.js";
+import { OWNER_EMAILS, isOwnerEmail, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from "../config/owners.js";
 import { logError, logWarn } from "../utils/logger.js";
 
 // OWNER_EMAILS / isOwnerEmail now come from config/owners.js, which supports a
@@ -143,6 +143,11 @@ export const protect = async (req, res, next) => {
     }
     if (user.deactivatedAt && !isOwnerEmail(user.email)) {
       return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account deactivated" });
+    }
+
+    // STAGE 5A (Gate A): the owner exemptions above and below apply ONLY to a verified owner identity.
+    if (isUnverifiedOwner(user)) {
+      return res.status(403).json(OWNER_IDENTITY_UNVERIFIED_RESPONSE);
     }
 
     // 📧 EMAIL VERIFICATION (config-gated; OWNER + DEMO EXEMPT)
@@ -336,6 +341,7 @@ export const optionalAuth = async (req, res, next) => {
         const activeSession = await RefreshToken.findActiveSessionById(decoded.sessionId, decoded.id);
         if (!activeSession) return next();
       }
+      if (isUnverifiedOwner(user)) return next(); // STAGE 5A (Gate A): never identify an unverified owner-email row as owner
       const isOwner = isOwnerEmail(user.email);
       req.user = {
         id: String(user._id ?? user.id),
