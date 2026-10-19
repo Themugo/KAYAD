@@ -5,7 +5,8 @@ import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
 import RefreshToken from "../models/RefreshToken.js";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
-import { OWNER_EMAILS, isOwnerEmail, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from "../config/owners.js";
+import { OWNER_EMAILS, isOwnerEmail, isOwnerUser, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from "../config/owners.js";
+import { ensureFresh as ensureOwnerRegistryFresh } from "../services/ownerRegistry.service.js"; // STAGE 5B
 import { logError, logWarn } from "../utils/logger.js";
 
 // OWNER_EMAILS / isOwnerEmail now come from config/owners.js, which supports a
@@ -52,6 +53,7 @@ export function invalidateUserCache(id) {
 // =============================
 export const protect = async (req, res, next) => {
   try {
+    await ensureOwnerRegistryFresh(); // STAGE 5B: owner membership is read fresh (TTL-bounded) before any owner decision
     let token;
 
     // =============================
@@ -138,10 +140,10 @@ export const protect = async (req, res, next) => {
     }
 
     // 🚫 BLOCK BANNED USERS (OWNER EXEMPT)
-    if (user.isBanned && !isOwnerEmail(user.email)) {
+    if (user.isBanned && !isOwnerUser(user)) {
       return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account suspended" });
     }
-    if (user.deactivatedAt && !isOwnerEmail(user.email)) {
+    if (user.deactivatedAt && !isOwnerUser(user)) {
       return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account deactivated" });
     }
 
@@ -156,7 +158,7 @@ export const protect = async (req, res, next) => {
     const _requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION
       ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
       : _emailConfigured;
-    if (_requireVerification && !user.emailVerified && !isOwnerEmail(user.email)) {
+    if (_requireVerification && !user.emailVerified && !isOwnerUser(user)) {
       return res.status(403).json({
         success: false,
         message: "Please verify your email before accessing this resource",
@@ -171,7 +173,7 @@ export const protect = async (req, res, next) => {
       logWarn("lastActive update failed", { error: e.message }),
     );
 
-    const isOwner = isOwnerEmail(user.email);
+    const isOwner = isOwnerUser(user);
     req.user = {
       id: String(user._id ?? user.id),
       role: isOwner ? "superadmin" : user.role,
@@ -312,6 +314,7 @@ export const requireApproved = (req, res, next) => {
 
 export const optionalAuth = async (req, res, next) => {
   try {
+    await ensureOwnerRegistryFresh();
     let token;
 
     const authHeader = req.headers.authorization;
@@ -342,7 +345,7 @@ export const optionalAuth = async (req, res, next) => {
         if (!activeSession) return next();
       }
       if (isUnverifiedOwner(user)) return next(); // STAGE 5A (Gate A): never identify an unverified owner-email row as owner
-      const isOwner = isOwnerEmail(user.email);
+      const isOwner = isOwnerUser(user);
       req.user = {
         id: String(user._id ?? user.id),
         role: isOwner ? "superadmin" : user.role,

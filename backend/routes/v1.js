@@ -12,6 +12,7 @@ import auctionRegistrationRoutes from "./auctionRegistrationRoutes.js";
 import auctionSettlementRoutes from "./auctionSettlementRoutes.js";
 import auctionFulfilmentRoutes from "./auctionFulfilmentRoutes.js";
 import adminRoutes from "./adminRoutes.js";
+import { ownerRouter, ownerAccessRouter } from "./ownerRoutes.js"; // STAGE 5B
 import paymentRoutes from "./paymentRoutes.js";
 import escrowRoutes from "./escrowRoutes.js";
 import chatRoutes from "./chatRoutes.js";
@@ -49,6 +50,8 @@ router.use("/bids", idempotencyCheck, csrfProtection, bidRoutes);
 router.use("/dealer", dealerRoutes);
 router.use("/dealer", auctionSetupRoutes);
 router.use("/admin", adminRoutes);
+router.use("/owner-access", authLimiter, ownerAccessRouter); // STAGE 5B
+router.use("/owner", ownerRouter); // STAGE 5B
 router.use("/payments", paymentRoutes);
 router.use("/escrow", idempotencyCheck, csrfProtection, escrowRoutes);
 router.use("/chat", chatRoutes);

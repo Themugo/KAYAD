@@ -48,6 +48,7 @@ const hashExternalId = (provider, externalId) =>
 const SECRET_BEARING_EVENTS = new Set([
   "account.email_verification",
   "account.password_reset",
+  "owner.invitation", // STAGE 5B
 ]);
 const SAFE_TRACE_ID = /^(?:[a-f0-9]{12}|[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})$/i;
 const SAFE_SOURCE_EVENTS = new Set(["seller.approval_pending"]);

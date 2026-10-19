@@ -1,0 +1,682 @@
+[
+  {
+    "id": "J0.1 unauthenticated owner API → 401",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J0.2 public registration with designated owner address → 403 reserved",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J0.3 …and the upper-case variant is reserved too",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J0.3b …a padded variant never reaches account creation (validation 400)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J0.4 …and no account row was created",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J0.5 squatter cannot sign in (unverified owner-address row refused)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.1 plan is read-only and reports both designated identities",
+    "ok": true,
+    "detail": "{ \"bootstrap\": \"open\", \"usableOwners\": 0, \"designated\": [ { \"identity\": \"ow***@kayad-test.example\", \"state\": \"pending_verification\" }, { \"identity\": \"ow***@kayad-test.example\", \"state\": \"unprovisioned"
+  },
+  {
+    "id": "J1.2 plan output shows masked identities only (no full address, no token)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.3 apply refused without --confirm-host",
+    "ok": true,
+    "detail": "Refusing: --confirm-host must equal the target database host (127.0.0.1:54341). This guards against running against the "
+  },
+  {
+    "id": "J1.4 apply refused with a wrong --confirm-host",
+    "ok": true,
+    "detail": "Refusing: --confirm-host must equal the target database host (127.0.0.1:54341). This guards against "
+  },
+  {
+    "id": "J1.5 apply refused without --operator (audit needs a name)",
+    "ok": true,
+    "detail": "✅ Supabase client initialized\nOPERATOR_REQUIRED: --operator <name> is required so the audit record n"
+  },
+  {
+    "id": "J1.6 nothing was provisioned by refused runs",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.7 apply issues one invitation per designated identity",
+    "ok": true,
+    "detail": "[10:33:29] \u001b[32mINFO\u001b[39m: \u001b[36mEmail sent successfully\u001b[39m \u001b[35msubject\u001b[39m: \"Owner invitation — Kayad\" \u001b[35mto\u001b[39m: \"ow***@kayad-test.example\" \u001b[35mmessageId\u001b[39m: \"<capture-1792406009489@local>\" [10:33:29] \u001b[32mINFO\u001b[39m: \u001b[36mCommunication accepted by p"
+  },
+  {
+    "id": "J1.8 …and e-mails them through the Brevo adapter (stub capture)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.9 invitation links captured for both owners",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.10 re-running apply is idempotent (no duplicate invitations, no new mail)",
+    "ok": true,
+    "detail": "{ \"operator\": \"tester\", \"results\": [ { \"identity\": \"ow***@kayad-test.example\", \"result\": \"invitation_already_pending\" }, { \"identity\": \"ow***@kayad-test.example\", \"result\": \"invitation_already_pending"
+  },
+  {
+    "id": "J1.11 exactly two pending invitations exist",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.12 still nobody is an owner (an invitation is not membership)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J1.13 pending invitation address is reserved against public sign-up",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.1 preview shows kind and mode, masked address, no secrets",
+    "ok": true,
+    "detail": "{\"success\":true,\"valid\":true,\"kind\":\"bootstrap\",\"expiresAt\":\"2026-10-20T13:33:29.466+03:00\",\"email\":\"ow***@kayad-test.example\",\"mode\":\"set_password\"}"
+  },
+  {
+    "id": "J2.2 garbage token → generic invalid",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.3 well-formed unknown token → generic invalid",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.4 weak password rejected before any change",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.5 …no membership yet",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.6 owner one accepts; squatter row is taken over (credentials replaced)",
+    "ok": true,
+    "detail": "{\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":true}"
+  },
+  {
+    "id": "J2.7 replay of the same token → refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.8 the squatter's old password no longer works",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.9 …and the squatter's old session is dead",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.10 owner one signs in with the NEW password",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.11 owner one reaches owner management; sees themselves verified+active",
+    "ok": true,
+    "detail": "status 200"
+  },
+  {
+    "id": "J2.12 bootstrap still open (second designated owner pending)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.13 owner two accepts (account created, verified by the invitation mailbox proof)",
+    "ok": true,
+    "detail": "{\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":true,\"credentialsReset\":false}"
+  },
+  {
+    "id": "J2.14 owner two signs in",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.15 owner two reaches owner management independently",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.16 bootstrap closed automatically once both designated owners are established",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J2.17 bootstrap CLI now refuses (capability expired)",
+    "ok": true,
+    "detail": "✅ Supabase client initialized\nOWNER_BOOTSTRAP_CLOSED: The one-time bootstrap is closed. Use the documented recovery proc"
+  },
+  {
+    "id": "J2.18 plan reports both identities provisioned",
+    "ok": true,
+    "detail": "{ \"bootstrap\": \"closed\", \"usableOwners\": 2, \"designated\": [ { \"identity\": \"ow***@kayad-test.example\", \"state\": \"provisioned\" }, { \"identity\": \"ow***@kayad-test.example\", \"state\": \"provisioned\" } ] }"
+  },
+  {
+    "id": "J2.19 registered owner role in the users table is still the ordinary role (no DB 'superadmin' flag grants ownership)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J3.one owner one can change onboarding policy (approval_required)",
+    "ok": true,
+    "detail": "GET 200 PUT 200"
+  },
+  {
+    "id": "J3.two owner two can change onboarding policy (self_onboarding)",
+    "ok": true,
+    "detail": "GET 200 PUT 200"
+  },
+  {
+    "id": "J3.3 stale revision still conflicts (409) — no lost update",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.0 ordinary admin signs in",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.1 admin: owner management → 403",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.2 admin: invite (self) → 403",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.3 admin: remove an owner → 403",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.4 admin: onboarding policy PUT → 403",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.5 admin: accept with an invented token → generic invalid",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.6 plain user: owner management → 403",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.7 admin cannot promote themselves through the user-admin API",
+    "ok": true,
+    "detail": "status 404"
+  },
+  {
+    "id": "J4.8 database role label is not ownership: a DB 'superadmin' is still no owner",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.9 no membership rows were created for admin/user",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J4.10 a client-supplied role label is ignored (role=webhoist in login body/query)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.1 wrong password (step-up) → 401, nothing issued",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.2 no password at all → refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.3 mismatching typed confirmation → 400",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.4 nothing pending yet",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.5 correct password + typed confirmation → invitation issued and e-mailed",
+    "ok": true,
+    "detail": "{\"success\":true,\"invitation\":{\"id\":\"e00900f0-767f-4aaa-a3e9-c43ac9af935b\",\"email\":\"owner-three@kayad-test.example\",\"kind\":\"invitation\",\"expiresAt\":\"2026-10-20T13:33:35.433+03:00\"},\"emailDelivered\":tru"
+  },
+  {
+    "id": "J5.6 acceptance link captured",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.7 API response carries no token or hash",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.8 duplicate invitation → 409",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.9 inviting an existing owner → 409",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.10 the invited identity is NOT an owner yet",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.11 …and cannot sign in as one (no account)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.12 weak password rejected",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.13 owner three accepts → membership active",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.14 owner three signs in",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.15 owner three reaches owner management",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J5.16 owner three holds a live, AUTHENTICATED socket connection",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.1 expired link: preview → 410 expired",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.2 expired link: accept → 410 expired, no account created",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.3 …no user row for the invitee",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.4 console shows the invitation as expired",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.5 resend without password → refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.6 owner resends the expired invitation",
+    "ok": true,
+    "detail": "{\"success\":true,\"invitation\":{\"id\":\"df7bb10e-f970-46a2-9edf-1c4e24c7e66a\",\"email\":\"owner-four@kayad-test.example\",\"kind\":\"invitation\",\"expiresAt\":\"202"
+  },
+  {
+    "id": "J6.7 a NEW link was issued",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.8 resend inside the cooldown → 429",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.9 the old link is dead after resend",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.10 the fresh link works once",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.11 …and not twice",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J6.12 revoking a non-pending invitation → 404",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.0 before removal owner three's session and refresh both work",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.1 removal without password → refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.2 removal without a reason → 400",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.3 removal with wrong typed confirmation → 400",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.4 …owner three still active after the refusals",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.5 owner one removes owner three",
+    "ok": true,
+    "detail": "{\"success\":true,\"removed\":true,\"usableOwnersRemaining\":3}"
+  },
+  {
+    "id": "J7.6 removed owner's EXISTING access token is rejected immediately",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.7 removed owner's refresh session is revoked",
+    "ok": true,
+    "detail": "status 403 {\"success\":false,\"message\":\"Session invalidated — please login again\",\"code\":\"AUTH_SESSION_EXPIRED\"}"
+  },
+  {
+    "id": "J7.8 removed owner's admin-settings write is rejected",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.9 removed owner's live socket is disconnected promptly",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.10 removed owner can still sign in as an ORDINARY user",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.11 …but owner management is refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.12 …and the owner-only policy write is refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.13 the other owners are unaffected",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J7.14 removal notices sent to the removed identity and the remaining owners (no links/secrets)",
+    "ok": true,
+    "detail": "notices=4"
+  },
+  {
+    "id": "J7.15 removing a non-member → 404",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J8.1 owner one removes owner four",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J8.2 owner two removes themselves while owner one remains → allowed",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J8.3 owner two's session ended by their own removal",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J8.4 the LAST usable owner cannot be removed (self)",
+    "ok": true,
+    "detail": "{\"success\":false,\"code\":\"OWNER_LAST_USABLE\",\"message\":\"Blocked: this would leave KAYAD with no verified, active owner. Add and activate anot"
+  },
+  {
+    "id": "J8.5 owner one is still active and signed in",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J8.6 exactly one active owner remains",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.1 re-invite a removed owner through the normal path",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.2 a VERIFIED existing account accepts while signed in (credentials untouched)",
+    "ok": true,
+    "detail": "{\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":false}"
+  },
+  {
+    "id": "J9.2b …and the same link without the sign-in is refused (no password reset via link)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.3 owner two (re-added) is active",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.4 recovery needs an out-of-band verification method, e-mail alone is refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.5 owner one starts recovery for owner two (identity verified out of band)",
+    "ok": true,
+    "detail": "{\"success\":true,\"recovery\":true,\"invitation\":{\"id\":\"e51f4b26-d32b-4fdd-ac47-43a75720a35b\",\"email\":\"owner-two@kayad-test.example\",\"expiresAt\":\"2026-10-20T13:33:4"
+  },
+  {
+    "id": "J9.6 owner two's old session ended immediately",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.7 owner two is NOT an owner until they accept",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.8 recovery link resets credentials and restores membership",
+    "ok": true,
+    "detail": "{\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":true}"
+  },
+  {
+    "id": "J9.9 old password is dead",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.10 new password works and owner management is back",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.11 …owner access restored",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J9.12 recovering yourself is refused",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.1 malformed snapshot: owner privilege suspended for everyone (503, recovery pointer)",
+    "ok": true,
+    "detail": "status 503"
+  },
+  {
+    "id": "J10.2 owner-only policy write is refused while the store is unreadable",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.3 ordinary traffic keeps working (non-owner endpoint)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.4 store restored: owner access returns by itself",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.5 unreadable store: brief grace on the last good snapshot, then fail closed (never indefinite)",
+    "ok": true,
+    "detail": "during grace 200, after 503"
+  },
+  {
+    "id": "J10.6 recovered",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.7 no usable owner: the designated owner cannot sign in (unverified owner identity)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.8 emergency CLI refuses without the time-boxed deployment authorisation",
+    "ok": true,
+    "detail": "✅ Supabase client initialized\nRECOVERY_NOT_AUTHORIZED: Emergency recovery is not authorised: set OWNER_EMERGENCY_RECOVER"
+  },
+  {
+    "id": "J10.9 emergency CLI (authorised, no usable owner) issues recovery invitations to the DESIGNATED identities only",
+    "ok": true,
+    "detail": "[10:34:03] \u001b[32mINFO\u001b[39m: \u001b[36mEmail sent successfully\u001b[39m \u001b[35msubject\u001b[39m: \"Restore your owner access — Kayad\" \u001b[35mto\u001b[39m: \"ow***@kayad-test.example\" \u001b[35mmessageId\u001b[39m: \"<capture-179240604398"
+  },
+  {
+    "id": "J10.10 owner one regains access through the emergency link (credentials replaced, mailbox verified)",
+    "ok": true,
+    "detail": "{\"success\":true,\"accepted\":true,\"email\":\"ow***@kayad-test.example\",\"accountCreated\":false,\"credentialsReset\":true}"
+  },
+  {
+    "id": "J10.11 …signs in and manages owners",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.12 …owner management works",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J10.13 emergency CLI refuses once a usable owner exists",
+    "ok": true,
+    "detail": "{ \"operator\": \"tester\", \"incident\": \"INC-5B-2\", \"results\": [ { \"identity\": \"ow***@kayad-test.example\", \"result\": \"refused:OWNER_RECOVERY_NOT_NEEDED\" }, { \"identity\": \"ow***@kayad-test.example\", \"resul"
+  },
+  {
+    "id": "J10.14 second designated owner restored too",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J11.1 audit history lists issue / accept / activate / revoke / resend / recovery / bootstrap-close / step-up denials",
+    "ok": true,
+    "detail": "bootstrap_close,membership_activate,invitation_issue,membership_revoke,invitation_accept,step_up,invitation_resend"
+  },
+  {
+    "id": "J11.2 every event names its actor",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J11.3 API output contains no token, hash, password or cookie material",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J11.4 none of the invitation tokens appears in any API response or in the backend log",
+    "ok": true,
+    "detail": "tokens checked=9"
+  },
+  {
+    "id": "J11.5 no 64-hex value in the event ledger",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J11.6 the delivery ledger stores no invitation URL/token",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "J11.7 event ledger is append-only (UPDATE refused)",
+    "ok": true,
+    "detail": ""
+  }
+]

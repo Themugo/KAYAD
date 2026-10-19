@@ -24,6 +24,9 @@ import AdminProviderGovernance from './AdminProviderGovernance';
 import AdminSupportWorkspace from './AdminSupportWorkspace';
 // STAGE 5A (Gate D): the owner onboarding settings page was built in Stage 5 but never mounted anywhere reachable.
 import AdminSettingsOnboarding from '../pages/admin/AdminSettingsOnboarding';
+// STAGE 5B: owner membership management (owner-only on the server; the tab is shown only to owners).
+import AdminOwnerManagement from '../pages/admin/AdminOwnerManagement';
+import { useAuth } from '../context/AuthContext';
 
 interface AdminViewProps {
   vehicles: Vehicle[];
@@ -67,11 +70,13 @@ function unwrap<T = any>(value: any): T {
 }
 
 export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehicle }) => {
+  const { user: sessionUser } = useAuth();
+  const isOwner = (sessionUser as { isOwner?: boolean } | null)?.isOwner === true; // display only — the server enforces owner authority on every call
   const [stats, setStats] = useState<AdminStats>({});
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [cars, setCars] = useState<AdminCar[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
-  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding'>('overview');
+  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding' | 'owners'>('overview');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -198,7 +203,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       )}
 
       <div className="flex flex-wrap gap-2">
-        {(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding'] as const).map((item) => (
+        {([...(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding'] as const), ...(isOwner ? (['owners'] as const) : [])]).map((item) => (
           <Button key={item} variant={module === item ? 'primary' : 'outline'} size="sm" onClick={() => setModule(item)}>
             {item === 'overview' && <ShieldCheck className="w-4 h-4" />}
             {item === 'users' && <Users className="w-4 h-4" />}
@@ -212,7 +217,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             {item[0].toUpperCase() + item.slice(1)}
           </Button>
         ))}
-        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
+        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && module !== 'owners' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
       </div>
 
       {module === 'overview' && (
@@ -287,6 +292,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       {module === 'providers' && <AdminProviderGovernance />}
       {module === 'support' && <AdminSupportWorkspace />}
       {module === 'onboarding' && <AdminSettingsOnboarding />}
+      {module === 'owners' && isOwner && <AdminOwnerManagement />}
 
       {module === 'audit' && (
         <Card className="overflow-hidden">

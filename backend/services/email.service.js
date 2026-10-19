@@ -420,6 +420,36 @@ export const buildVerificationEmail = ({ name, verifyUrl, resend = false }) => (
     `, `Verify Your Email — ${APP_NAME}`),
 });
 
+// STAGE 5B: owner governance emails. The invitation carries a one-time, hashed-at-rest, expiring acceptance link; the notice carries NO link or secret.
+export const buildOwnerInvitationEmail = ({ acceptUrl, kind = "invitation", expiresInHours = 24, invitedBy = "a KAYAD owner", resend = false }) => {
+  const what = kind === "recovery" ? "restore your KAYAD platform-owner access" : "become a KAYAD platform owner";
+  return {
+    subject: `${resend ? "New link: " : ""}${kind === "recovery" ? "Restore your owner access" : "Owner invitation"} — ${APP_NAME}`,
+    text: `You have been asked by ${invitedBy} to ${what}. Open this one-time link, ${kind === "recovery" ? "set a new password and " : ""}confirm that this mailbox is yours: ${acceptUrl} (expires in ${expiresInHours} hours). Owner access is granted only after you complete this step and sign in. If you did not expect this, do not open the link and tell the person who runs your KAYAD platform.`,
+    html: layout(`
+      ${heading(kind === "recovery" ? "Restore Owner Access" : "Platform Owner Invitation")}
+      ${para(`You have been asked by <strong style="color:#F6FAF9">${esc(invitedBy)}</strong> to ${esc(what)}.`)}
+      ${para("Open the one-time link below and confirm that this mailbox is yours. Owner access is granted only after you complete this step and sign in.")}
+      ${btn("Accept Owner Invitation →", acceptUrl)}
+      ${para(`If the button does not work, copy this link into your browser:<br/><span style="word-break:break-all;color:#13B8A6;">${esc(acceptUrl)}</span>`)}
+      ${divider()}
+      ${para(`<em style='color:#94A3B8;font-size:13px;'>This link works once and expires in ${esc(String(expiresInHours))} hours. If you did not expect it, do not open it.</em>`)}
+    `, `Owner invitation — ${APP_NAME}`),
+  };
+};
+
+export const buildOwnerNoticeEmail = ({ headline, detail }) => ({
+  subject: `Security notice: ${headline} — ${APP_NAME}`,
+  text: `${headline}. ${detail} If this was not expected, contact the other platform owners immediately.`,
+  html: layout(`
+      ${heading("Security Notice")}
+      ${para(`<strong style="color:#F6FAF9">${esc(headline)}</strong>`)}
+      ${para(esc(detail))}
+      ${divider()}
+      ${para("<em style='color:#94A3B8;font-size:13px;'>This message contains no links or secrets. If this was not expected, contact the other platform owners immediately.</em>")}
+    `, `Security notice — ${APP_NAME}`),
+});
+
 // STAGE 5: the welcome email must never tell a dealer or seller they are "ready"/approved when they are not.
 // Application received ≠ email verified ≠ approved. Buyers keep the original wording.
 const WELCOME_COPY = {

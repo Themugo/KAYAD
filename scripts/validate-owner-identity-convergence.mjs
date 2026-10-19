@@ -20,7 +20,8 @@ check('Canonical owner module accepts both supported environment variables',
 check('Canonical owner module normalizes configured email case and whitespace',
   /\.map\(\(e\) => e\.toLowerCase\(\)\.trim\(\)\)/.test(owners));
 check('Login controller imports the shared owner predicate',
-  /import\s*\{[^}]*\bisOwnerEmail\b[^}]*\}\s*from\s*["']\.\.\/config\/owners\.js["']/.test(auth));
+  // STAGE 5B (intentional update): the shared predicate is now the id-aware, membership-backed isOwnerUser.
+  /import\s*\{[^}]*\b(isOwnerEmail|isOwnerUser)\b[^}]*\}\s*from\s*["']\.\.\/config\/owners\.js["']/.test(auth));
 check('Login controller has no divergent local owner allowlist',
   !/const\s+WEBHOIST_EMAIL\s*=/.test(auth) && !/const\s+OWNER_EMAILS\s*=/.test(auth) && !/const\s+isOwnerEmail\s*=/.test(auth));
 check('Authorization middleware uses the canonical owner predicate',
