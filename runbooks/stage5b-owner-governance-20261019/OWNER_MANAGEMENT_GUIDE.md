@@ -11,3 +11,8 @@ Visible only to a verified, active owner. Ordinary administrators never see the 
 **Notices** — every invitation, acceptance, removal and recovery sends a security notice (no link, no secret) to all active owners, and to the affected person.
 **What owners cannot do through this page** — approve dealers/publish listings (separate policy), read private seller data, alter ledgers. Owner authority never bypasses ownership checks, escrow/ledger integrity or idempotency (see AUTHORIZATION_MATRIX_5B.md).
 **Wrong password** — five wrong passwords in 15 minutes lock owner changes for that account for 15 minutes; this does not log you out.
+**Deleting a former owner** — a user row with an owner membership (even revoked) cannot be hard-deleted (database `RESTRICT`); deactivate or ban the account instead.
+**Designated addresses** — the list holds exact addresses. Gmail dot/plus variants are different addresses; designate the canonical one that owns the mailbox.
+**Wrong-password lockout** is counted per running server instance.
+**If the invitation e-mail did not arrive** — the page says "not delivered"; the invitation exists but nothing was activated. Use *Resend* (after the cooldown) or revoke it.
+

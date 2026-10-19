@@ -11,4 +11,4 @@ run front_vitest npx vitest run
 (cd backend && run back_vitest npm run test:vitest)
 (cd backend && run back_node timeout 300 npm run test:node)
 (cd backend && grep -q "exit=124\|exit=143" "$LOG/summary.txt" && echo "NOTE: node:test hit the 300s guard (known intermittent keep-alive hang); rerunning once" | tee -a "$LOG/summary.txt" && run back_node_rerun timeout 300 npm run test:node)
-bash /home/claude/s5a/evidence/gateG/run_validators.sh "$ROOT" "$(cd "$LOG" && pwd)/validators_results.txt"
+bash "$ROOT/evidence/stage5a-20261019/gateG/run_validators.sh" "$ROOT" "$(cd "$LOG" && pwd)/validators_results.txt"

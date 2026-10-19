@@ -7,6 +7,7 @@ import { sendNotification } from "../services/notification.service.js";
 import { logError } from "../utils/logger.js";
 import { submitApplicationSchema } from "../validation/inspectorApplication.schema.js";
 import { getSupabase } from "../utils/supabase.js";
+import { isReservedOwnerEmail } from "../config/owners.js"; // STAGE 5B closure
 
 const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"];
 
@@ -158,6 +159,11 @@ export const approveApplication = async (req, res) => {
         success: false,
         message: `An existing ${user.role} account already uses ${application.email}. Resolve the account conflict before approving this application.`,
       });
+    }
+    // STAGE 5B closure: both branches below mark the account emailVerified=true WITHOUT mailbox proof (new account OR an existing
+    // unverified row), so an owner-reserved address (designated / active / invited) is refused before either runs.
+    if (isReservedOwnerEmail(application.email)) {
+      return res.status(409).json({ success: false, message: "That address is reserved for platform-owner provisioning and cannot be approved as an inspector account." });
     }
     let setPasswordLink = null;
     if (!user) {

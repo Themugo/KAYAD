@@ -1,0 +1,4 @@
+ESLint (npx eslint . ; backend/ is ignored by the repo config)
+Stage 5A baseline: 1953 errors, 1517 warnings (3470 findings)
+Stage 5B certified: 1953 errors, 1517 warnings (3470 findings)
+Newly introduced findings (same file+rule+severity, count above baseline): 0

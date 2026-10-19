@@ -1,3 +1,4 @@
+/* eslint-disable no-undef -- Node-run acceptance harness, not application code */
 // STAGE 5B — owner-governance acceptance journey against the REAL isolated stack (HTTP + real PostgreSQL + Brevo capture stub).
 // Evidence tiers: R (real app) + P (disposable PostgreSQL). Email = provider STUB, never live.
 import fs from "node:fs";
@@ -54,7 +55,7 @@ eq("J0.3 …and the upper-case variant is reserved too", (await new Client().cal
 eq("J0.3b …a padded variant never reaches account creation (validation 400)", (await new Client().call("POST", "/api/v1/auth/register", { name: "Claimant", email: `  ${O1} `, password: "Claim!Pass#2026" })).status, 400);
 eq("J0.4 …and no account row was created", sql(`select count(*) from users where email='${O1}'`), "0");
 // a pre-5A squatter: unverified row on owner address 1 with a password the attacker knows
-const squatId = rawUser(O1, "user", PWSQ, false);
+rawUser(O1, "user", PWSQ, false);
 const sq = new Client();
 const sqLogin = await sq.login(O1, PWSQ);
 eq("J0.5 squatter cannot sign in (unverified owner-address row refused)", sqLogin.body?.code, "OWNER_IDENTITY_UNVERIFIED");
@@ -236,7 +237,6 @@ const t2b = seeToken(await tokenFor(O2, /owner-invite\?token=([0-9a-f]{64})/, ca
 const accR = await o2b.call("POST", "/api/v1/owner-access/accept", { token: t2b, name: "Owner Two" });
 rec("J9.2 a VERIFIED existing account accepts while signed in (credentials untouched)", accR.status === 200 && accR.body.credentialsReset === false, JSON.stringify(accR.body).slice(0, 140));
 eq("J9.2b …and the same link without the sign-in is refused (no password reset via link)", (await anon.call("POST", "/api/v1/owner-access/accept", { token: t2b, name: "x" })).body?.code, "OWNER_INVITATION_INVALID");
-const o2UserId = sql(`select id from users where email='${O2}'`);
 eq("J9.3 owner two (re-added) is active", owners(), "2");
 const rec0 = await o1.call("POST", `/api/v1/owner/members/${o2Id}/recovery`, { confirmEmail: O2, password: PW1, verifiedVia: "email", note: "lost phone" });
 eq("J9.4 recovery needs an out-of-band verification method, e-mail alone is refused", rec0.body?.code, "RECOVERY_EVIDENCE_REQUIRED");

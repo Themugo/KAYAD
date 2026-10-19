@@ -1,3 +1,4 @@
+/* eslint-disable no-undef -- Node-run acceptance harness, not application code */
 // Minimal cookie-jar API client with CSRF double-submit (mirrors the SPA's httpClient).
 export const BASE = process.env.API || "http://127.0.0.1:5050";
 export class Client {

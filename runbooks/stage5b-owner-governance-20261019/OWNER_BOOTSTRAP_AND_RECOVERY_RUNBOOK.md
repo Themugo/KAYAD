@@ -36,7 +36,7 @@ Then: `npm run owner:bootstrap -- --emergency --operator "<name>" --incident "<t
 If a designated mailbox itself is lost, update the `WEBHOIST_EMAIL` designation through the normal deployment change process (reviewed) and re-run the emergency step.
 
 ## 4. Store unreadable (`OWNER_STORE_UNAVAILABLE`)
-The application **fails closed**: if the membership store cannot be read beyond a short grace window (default 30 s on the last good snapshot; `OWNER_REGISTRY_STALE_MAX_MS`), nobody has owner privilege and owner endpoints return 503 with this runbook pointer. It recovers by itself when the database recovers. Break-glass `OWNER_STORE_MODE=legacy` restores the Stage 5A behaviour (designated address ⇒ owner, still mailbox-verified) — use only with an incident record and revert afterwards.
+The application **fails closed**: if the membership store cannot be read beyond a short grace window (default 30 s on the last good snapshot; `OWNER_REGISTRY_STALE_MAX_MS`), nobody has owner privilege and owner endpoints return 503 with this runbook pointer. It recovers by itself when the database recovers. This includes the case where the owner functions disappear *after* the store was seen (e.g. a rollback): a running process never falls back to the env list on its own. Break-glass `OWNER_STORE_MODE=legacy` **plus a restart** restores the Stage 5A behaviour (designated address ⇒ owner, still mailbox-verified) — use only with an incident record and revert afterwards. A freshly started process against a database that has no store is in legacy mode by design.
 
 ## 5. Never
 Do not edit `owner_memberships` by hand, share an invitation link, reuse a link, or paste a token into chat/tickets. If a link was exposed, revoke the invitation in Admin → Owners and resend.
