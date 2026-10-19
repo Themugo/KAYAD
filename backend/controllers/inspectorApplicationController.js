@@ -8,6 +8,10 @@ import { logError } from "../utils/logger.js";
 import { submitApplicationSchema } from "../validation/inspectorApplication.schema.js";
 import { getSupabase } from "../utils/supabase.js";
 import { isReservedOwnerEmail } from "../config/owners.js"; // STAGE 5B closure
+import { deliver } from "../services/communicationGateway.service.js"; // STAGE 5C
+import { COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js"; // STAGE 5C
+
+const escHtml = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
 const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"];
 
@@ -160,6 +164,16 @@ export const approveApplication = async (req, res) => {
         message: `An existing ${user.role} account already uses ${application.email}. Resolve the account conflict before approving this application.`,
       });
     }
+    // STAGE 5C: the apply endpoint is public and accepts ANY e-mail address. An existing buyer row whose mailbox was never verified may
+    // have been registered by someone who does not control that mailbox (with their own password). Approval must not mint a verified
+    // inspector out of it: the applicant has to prove the mailbox first (the normal verification link / resend).
+    if (user && user.role === "user" && user.emailVerified !== true) {
+      return res.status(409).json({
+        success: false,
+        code: "INSPECTOR_EMAIL_UNVERIFIED",
+        message: `The account using ${application.email} has not verified its e-mail address. Ask the applicant to verify the mailbox first, then approve again.`,
+      });
+    }
     // STAGE 5B closure: both branches below mark the account emailVerified=true WITHOUT mailbox proof (new account OR an existing
     // unverified row), so an owner-reserved address (designated / active / invited) is refused before either runs.
     if (isReservedOwnerEmail(application.email)) {
@@ -190,9 +204,9 @@ export const approveApplication = async (req, res) => {
       });
       setPasswordLink = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/reset-password?token=${setupToken}`;
     } else {
+      // Mailbox ownership was already proven (verified above) or the account is already an inspector; credentials are kept.
       user.role = "ghost_checker";
       user.status = "approved";
-      user.emailVerified = true;
       await user.save();
     }
 
@@ -252,20 +266,34 @@ export const approveApplication = async (req, res) => {
     // Approval is already durably committed at this point. Notification delivery
     // must never turn a successful approval into a false 500 or force an admin to
     // repeat an approval that already created the provider identity.
+    // STAGE 5C: the single-use set-password link is a bearer credential. It is delivered ONLY as the e-mail body through the gateway
+    // (idempotent, hashed-at-rest token) and is never written into the in-app notification, the socket payload or the notification table.
     void sendNotification({
       userId: user._id,
       title: "✅ Inspector Application Approved",
       message: setPasswordLink
-        ? `Welcome to the KAYAD Inspector Network! Set your password here (valid 72 hours): ${setPasswordLink} then log in to receive inspection assignments.`
-        : `Welcome to the KAYAD Inspector Network! Your account is now active. Log in to receive inspection assignments.`,
+        ? "Welcome to the KAYAD Inspector Network! We have emailed you a link to set your password; use it, then log in to receive inspection assignments."
+        : "Welcome to the KAYAD Inspector Network! Your account is now active. Log in to receive inspection assignments.",
       type: "system",
-      email: application.email,
       phone: application.phone,
     }).catch((notificationError) => {
       console.warn("Inspector approval notification failed:", notificationError?.message || notificationError);
     });
+    if (setPasswordLink) {
+      void deliver({
+        userId: user.id || user._id,
+        channel: "email",
+        eventType: COMMUNICATION_EVENTS.PASSWORD_RESET,
+        recipient: application.email,
+        subject: "Welcome to the KAYAD Inspector Network — set your password",
+        text: `Your KAYAD inspector application was approved. Set your password here (valid 72 hours): ${setPasswordLink}`,
+        html: `<p>Your KAYAD inspector application was approved.</p><p><a href="${escHtml(setPasswordLink)}">Set my password</a> (valid 72 hours)</p>`,
+        metadata: { inspectorInvitation: true },
+        idempotencyKey: `inspector-invite:${user.id || user._id}:${application.id || id}`,
+      }).catch((e) => logError("Inspector invitation email dispatch failed", e, { userId: user.id, event: "inspector.invitation" }));
+    }
 
-    res.json({ success: true, application, provider, user: { id: user._id, email: user.email, role: user.role } });
+    res.json({ success: true, application, provider, user: { id: user._id, email: user.email, role: user.role }, invitation: setPasswordLink ? "queued" : "not_required" });
   } catch (err) {
     logError("❌ APPROVE INSPECTOR ERROR:", err);
     res.status(500).json({ success: false, message: "Approval failed" });

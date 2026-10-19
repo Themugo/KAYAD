@@ -54,11 +54,12 @@ export const requestPhoneVerification = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     const phoneNumber = String(user.phone || req.body?.phoneNumber || "").trim();
     if (!phoneNumber) return res.status(400).json({ success: false, message: "Phone number required" });
-    if (!/^(\+254|0)?7\d{8}$/.test(phoneNumber)) return res.status(400).json({ success: false, message: "Invalid Kenyan phone number format" });
+    if (!/^(?:\+?254|0)?7\d{8}$/.test(phoneNumber))  /* STAGE 5C: registration stores 2547XXXXXXXX (no "+"), which the old pattern rejected for every registered dealer */ return res.status(400).json({ success: false, message: "Invalid Kenyan phone number format" });
     const result = await requestDealerOtp(req.user.id, phoneNumber);
     return res.json({ success: true, message: "Verification code sent", expiresAt: result.expiresAt, phoneNumber: maskPhone(phoneNumber) });
   } catch (err) {
     logError("Request phone verification error", err);
+    if (err?.code === "OTP_DELIVERY_UNAVAILABLE") return res.status(503).json({ success: false, message: "We couldn't send a verification code right now. Please try again shortly." });
     return res.status(err.statusCode || 502).json({ success: false, message: err.statusCode ? err.message : "Failed to send verification code" });
   }
 };

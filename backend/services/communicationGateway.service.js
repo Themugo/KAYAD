@@ -52,9 +52,10 @@ const SECRET_BEARING_EVENTS = new Set([
 ]);
 const SAFE_TRACE_ID = /^(?:[a-f0-9]{12}|[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})$/i;
 const SAFE_SOURCE_EVENTS = new Set(["seller.approval_pending"]);
-const persistedDeliveryMetadata = ({ eventType, metadata = {}, subject, message, text, html }) => {
+export const persistedDeliveryMetadata = ({ eventType, category, metadata = {}, subject, message, text, html }) => {
   const safe = { ...metadata };
-  if (SECRET_BEARING_EVENTS.has(String(eventType || "").toLowerCase())) {
+  // STAGE 5C: one-time codes (category "otp") are secret-bearing regardless of the event name; the rendered body is never persisted.
+  if (SECRET_BEARING_EVENTS.has(String(eventType || "").toLowerCase()) || String(category || "").toLowerCase() === "otp") {
     // Never persist rendered content, subject text, URLs, or arbitrary caller
     // values for token-bearing messages. Even allow-listed key names are not
     // trusted: a caller could otherwise place a raw token in `verification`
@@ -199,7 +200,7 @@ export const deliver = async ({
         userId, channel, eventType, templateCode,
         recipient: recipient || String(userId || ""), provider,
         status: channel === "in_app" ? "delivered" : "queued",
-        metadata: persistedDeliveryMetadata({ eventType, metadata, subject, message, text, html }), category,
+        metadata: persistedDeliveryMetadata({ eventType, category, metadata, subject, message, text, html }), category,
         idempotencyKey,
       });
     } catch (error) {

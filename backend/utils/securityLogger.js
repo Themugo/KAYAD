@@ -1,4 +1,6 @@
 import SecurityLog from "../models/SecurityLog.js";
+import AuditLog from "../models/AuditLog.js";
+import { toAuditLogRow } from "./auditLogRow.js";
 import { logError, logWarn, logInfo } from "./logger.js";
 import { deliver } from "../services/communicationGateway.service.js";
 
@@ -72,18 +74,30 @@ export const logSecurityAction = async ({
   severity = "info",
 }) => {
   try {
-    await SecurityLog.create({
-      action,
-      actor,
-      actorRole,
-      target,
-      targetModel,
-      resourceId,
-      details,
-      ip,
-      userAgent,
-      severity,
-    });
+    try {
+      await SecurityLog.create({
+        action,
+        actor,
+        actorRole,
+        target,
+        targetModel,
+        resourceId,
+        details,
+        ip,
+        userAgent,
+        severity,
+      });
+    } catch (primaryError) {
+      // STAGE 5C: public.security_logs has no DDL in the repository (docs/audits/08, 21), so on a database built from the migrations
+      // every action audit (dealer onboarding, verification decisions, inspection transitions, ...) was silently lost. Only when the
+      // relation is MISSING, fall back to the canonical audit_logs table (same fields, mapped by auditLogRow). Any other failure -
+      // and a failure of the fallback itself - still surfaces through the outer handler below; nothing is swallowed.
+      const detail = `${primaryError?.code || ""} ${primaryError?.message || ""}`.trim();
+      // An opaque error (no code, no message) is what a bare 404 from the REST layer produces for an unknown relation.
+      const missing = !detail || /42P01|PGRST205|schema cache|does not exist|Could not find the table/i.test(detail);
+      if (!missing) throw primaryError;
+      await AuditLog.create(toAuditLogRow({ action, actor, actorRole, target, targetModel, ip, details: { ...(details && typeof details === "object" ? details : {}), severity, resourceId, userAgent, store: "audit_logs_fallback" } }));
+    }
 
     // Log to application logger for immediate visibility
     if (severity === SEVERITY.CRITICAL) {

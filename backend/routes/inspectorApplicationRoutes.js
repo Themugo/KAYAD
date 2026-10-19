@@ -1,6 +1,6 @@
 import { Router } from "express";
 import InspectorApplication from "../models/InspectorApplication.js";
-import { protect, adminOnly, optionalAuth } from "../middleware/auth.js";
+import { protect, allowRoles, optionalAuth } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema } from "../validation/inspectorApplication.schema.js";
@@ -13,6 +13,11 @@ import {
   getApplication,
   listActiveInspectors,
 } from "../controllers/inspectorApplicationController.js";
+
+// STAGE 5C: adminOnly admits EVERY staff role, including ghost_checker (the inspectors themselves), which let an inspector read every
+// applicant's national-ID/phone and approve or reject other inspectors. Review authority is the same set that is notified of new
+// applications (controller INSPECTOR_REVIEW_ROLES); the owner passes allowRoles as webhoist.
+const reviewerOnly = allowRoles("admin", "superadmin", "hr", "technical_support");
 
 const router = Router();
 
@@ -41,9 +46,9 @@ router.get(
   }),
 );
 
-router.get("/", protect, adminOnly, asyncHandler(listApplications));
-router.get("/:id", protect, adminOnly, validateObjectId, asyncHandler(getApplication));
-router.post("/:id/approve", protect, adminOnly, validateObjectId, validateBody(approveApplicationSchema), asyncHandler(approveApplication));
-router.post("/:id/reject", protect, adminOnly, validateObjectId, validateBody(rejectApplicationSchema), asyncHandler(rejectApplication));
+router.get("/", protect, reviewerOnly, asyncHandler(listApplications));
+router.get("/:id", protect, reviewerOnly, validateObjectId, asyncHandler(getApplication));
+router.post("/:id/approve", protect, reviewerOnly, validateObjectId, validateBody(approveApplicationSchema), asyncHandler(approveApplication));
+router.post("/:id/reject", protect, reviewerOnly, validateObjectId, validateBody(rejectApplicationSchema), asyncHandler(rejectApplication));
 
 export default router;

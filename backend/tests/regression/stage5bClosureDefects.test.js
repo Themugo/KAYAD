@@ -127,7 +127,9 @@ describe("CL-6 every other account-creating path refuses owner-reserved addresse
     const guard = s.indexOf("isReservedOwnerEmail(application.email)");
     expect(guard).toBeGreaterThan(0);
     expect(guard).toBeLessThan(s.indexOf("if (!user) {", guard));
-    expect(guard).toBeLessThan(s.indexOf("user.emailVerified = true"));
+    // STAGE 5C: the existing-user branch no longer sets emailVerified at all; only the new-account branch does.
+    expect(guard).toBeLessThan(s.indexOf("emailVerified: true"));
+    expect(s).not.toMatch(/user\.emailVerified\s*=\s*true/);
   });
 });
 

@@ -3,13 +3,20 @@ import { create, findAll, update } from "../db/index.js";
 import { deliver } from "./communicationGateway.service.js";
 import { getTemplate, renderTemplate } from "./communicationControl.service.js";
 import { getSupabase } from "../utils/supabase.js";
+import { COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 const hash = (value) => crypto.createHash("sha256").update(String(value)).digest("hex");
-const generate = () => String(crypto.randomInt(0, 10000)).padStart(4, "0");
+// STAGE 5C: 6 digits (was 4: 10^4 space, 5 attempts per challenge, up to 10 challenges/day). The dealer verify endpoint and every client now agree on 6.
+export const OTP_LENGTH = 6;
+const generate = () => String(crypto.randomInt(0, 10 ** OTP_LENGTH)).padStart(OTP_LENGTH, "0");
+const otpError = (code, message, statusCode) => Object.assign(new Error(message), { code, statusCode });
 
-export const createOtpChallenge = async ({ userId, purpose, channel, recipient, eventType = "otp", ip = null, userAgent = null }) => {
+export const createOtpChallenge = async ({ userId, purpose, channel, recipient, eventType = COMMUNICATION_EVENTS.PHONE_VERIFICATION, ip = null, userAgent = null }) => {
+  // STAGE 5C: the rollout gate is keyed by the namespaced event ("account.phone_verification"). The legacy bare names "otp" and
+  // "phone_verification" have no control row, so the gateway suppressed them (fail closed) and the user was told a code was sent when nothing was.
+  if (["otp", "phone_verification"].includes(String(eventType))) eventType = COMMUNICATION_EVENTS.PHONE_VERIFICATION;
   if (!userId || !purpose || !channel || !recipient) throw new Error("OTP challenge is incomplete");
   const now = new Date();
   const recipientKey = String(recipient).trim().toLowerCase();
@@ -20,8 +27,8 @@ export const createOtpChallenge = async ({ userId, purpose, channel, recipient, 
     sb.from("otp_challenges").select("id", { count: "exact", head: true }).eq("recipient", recipientKey).gte("created_at", window15),
     sb.from("otp_challenges").select("id", { count: "exact", head: true }).eq("recipient", recipientKey).gte("created_at", window24),
   ]);
-  if (Number(recent15 || 0) >= 3) throw new Error("Too many verification codes requested. Please wait before trying again.");
-  if (Number(recent24 || 0) >= 10) throw new Error("Verification request limit reached. Please try again later.");
+  if (Number(recent15 || 0) >= 3) throw otpError("OTP_RATE_LIMITED", "Too many verification codes requested. Please wait before trying again.", 429);
+  if (Number(recent24 || 0) >= 10) throw otpError("OTP_RATE_LIMITED", "Verification request limit reached. Please try again later.", 429);
   const code = generate();
   const challenge = await create("otp_challenges", {
     userId,
@@ -57,10 +64,15 @@ export const createOtpChallenge = async ({ userId, purpose, channel, recipient, 
     metadata: { otpChallengeId: challenge.id, purpose, message, text: message, subject: "Your KAYAD verification code", ipHash: ip ? hash(ip) : null, userAgentHash: userAgent ? hash(userAgent) : null },
   });
 
-  if (delivery?.status === "failed") {
+  // STAGE 5C: a code the provider did not accept must never be reported as sent. `deliver` returns null when the channel/event is
+  // switched off by the rollout controls (nothing was sent) and a failed/dead_letter row when the provider rejected it.
+  if (!delivery || ["failed", "dead_letter"].includes(delivery.status)) {
     await update("otp_challenges", challenge.id, { status: "delivery_failed", lastSentAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-    throw new Error("Verification code could not be delivered");
+    throw otpError("OTP_DELIVERY_UNAVAILABLE", delivery ? "Verification code could not be delivered" : "Verification codes are not available on this channel right now", 503);
   }
+  // Resending invalidates earlier codes: only the newest challenge for this user+purpose may remain pending.
+  await getSupabase().from("otp_challenges").update({ status: "expired", updated_at: new Date().toISOString() })
+    .eq("user_id", userId).eq("purpose", purpose).eq("status", "pending").neq("id", challenge.id);
   return { challengeId: challenge.id, expiresAt: challenge.expiresAt };
 };
 

@@ -1,0 +1,8 @@
+disposable DB kayad5c_disposable only (never hosted)
+hash_with_candidate_applied: 13b0958005d1cfdc3fa93d1f13b32ede
+rows dealer_subscriptions before: 2
+rollback applied OK
+hash_after_rollback: aebc44c68403da85937326cbbc723e59
+candidate re-applied OK
+hash_after_reapply: 13b0958005d1cfdc3fa93d1f13b32ede
+rows dealer_subscriptions after: 2

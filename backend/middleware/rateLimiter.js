@@ -6,11 +6,17 @@ import { logWarn } from "../utils/logger.js";
 // Export ipKeyGenerator for use in other modules
 export { ipKeyGenerator };
 
+// STAGE 5C: express-rate-limit v8's ipKeyGenerator(ip, subnet) takes an IP *string*. Every call site below used to pass the whole
+// request object, which the helper returns unchanged: the "key" was then the request object itself, unique per request, so every
+// IP-keyed limiter (auth, OTP, webhook, anonymous traffic) and the login IP lockout never accumulated a single hit.
+// clientIp() is the one correct way to key by caller address (IPv6 callers are bucketed by /56 subnet).
+export const clientIp = (req) => ipKeyGenerator(String(req?.ip || req?.socket?.remoteAddress || "unknown"));
+
 // =============================
 // 🧠 SAFE KEY GENERATOR (IPv6 FIX ✅)
 // =============================
 const keyGenerator = (req) => {
-  return req.user?.id || ipKeyGenerator(req);
+  return req.user?.id || clientIp(req);
 };
 
 // M-10 FIX: Admin should NOT bypass all rate limits. A compromised admin account
@@ -32,7 +38,7 @@ const rateLimitMessage = (message) => ({
 const normalizedBodyEmail = (req) => String(req.body?.email || "").trim().toLowerCase();
 const accountAwareKey = (req) => {
   const email = normalizedBodyEmail(req);
-  return email ? `${ipKeyGenerator(req)}:${email}` : ipKeyGenerator(req);
+  return email ? `${clientIp(req)}:${email}` : clientIp(req);
 };
 
 const authAbuseLimiter = (max, message) => rateLimit({
@@ -75,7 +81,11 @@ export const globalLimiter = rateLimit({
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: parseInt(process.env.AUTH_RATE_LIMIT_MAX || "20"),
-  keyGenerator: (req) => ipKeyGenerator(req), // ✅ FIXED
+  keyGenerator: (req) => clientIp(req),
+  // STAGE 5C: this limiter is mounted on the whole /auth router and, now that it actually counts, must not throttle the SPA's own
+  // session plumbing (CSRF bootstrap, silent refresh, profile/session reads). Credential-handling endpoints (login, register,
+  // verify/resend, forgot/reset, OTP) keep both this limit and their own stricter ones.
+  skip: (req) => (req.method === "GET" && ["/csrf", "/profile", "/sessions", "/phone-status"].includes(req.path)) || (req.method === "POST" && req.path === "/refresh"),
   handler: (req, res) => {
     logWarn("RATE LIMIT (AUTH)", {
       ip: req.ip,
@@ -159,10 +169,13 @@ export const reviewLimiter = rateLimit({
 // =============================
 // 🔐 ESCROW OTP LIMITER
 // =============================
+// STAGE 5C: keyed by the authenticated user (these routes run after `protect`), not only the IP — mobile carriers put many subscribers
+// behind one address, so a per-IP budget of 3/min let one person's retries lock out strangers. The hard brute-force limits live in
+// otpService (5 attempts per challenge, 3 codes / 15 min and 10 / day per recipient); this is only the burst guard.
 export const otpLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 3,
-  keyGenerator: (req) => ipKeyGenerator(req),
+  max: Number(process.env.OTP_RATE_LIMIT_MAX || 6),
+  keyGenerator: (req) => (req.user?.id ? `u:${req.user.id}` : clientIp(req)),
   handler: (req, res) => {
     logWarn("RATE LIMIT (OTP)", { ip: req.ip });
     res.status(429).json(rateLimitMessage("Too many OTP requests. Try again later."));
@@ -175,7 +188,7 @@ export const otpLimiter = rateLimit({
 export const webhookLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
-  keyGenerator: (req) => ipKeyGenerator(req),
+  keyGenerator: (req) => clientIp(req),
   handler: (req, res) => {
     logWarn("RATE LIMIT (WEBHOOK)", { ip: req.ip });
     res.status(429).json(rateLimitMessage("Too many webhook requests"));

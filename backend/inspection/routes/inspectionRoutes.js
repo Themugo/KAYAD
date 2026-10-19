@@ -172,6 +172,7 @@ router.get('/reports/:reportId', requireAuth, controller.getReport);
  * digital-inspection storage is used.
  */
 router.get('/my', requireAuth, legacy.listMine);
+router.get('/assigned', requireAuth, legacy.listAssigned); // STAGE 5C: inspector worklist (inspector_id = caller)
 router.post('/order', requireAuth, legacy.createOrder);
 router.post('/confirm-payment', requireAuth, legacy.confirmPayment);
 router.get('/available-inspectors', requireAuth, requireRole(['admin', 'superadmin']), legacy.availableInspectors);
