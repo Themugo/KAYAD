@@ -1,0 +1,9 @@
+Gitleaks v8.18.4 (linux x64), repo config .gitleaks.toml (byte-identical to main), --redact. Values are never written; TSVs hold rule/file/line(/commit) only.
+Binary archive sha256: ba6dbb656933921c775ee5a2d1c13a91046e7952e9d919f9bac4cec61d628e7d  (downloaded from the official gitleaks GitHub release; not part of the package)
+working tree BEFORE fix : 16 findings (includes backend/tests/regression/stage5eResendCommitOnProviderAcceptance.test.js:16 and stage5aEmailVerificationGate.test.js:21)
+working tree AFTER fix  : 14 findings (both fixture findings gone; remaining are older, outside this change)
+git-mode 'before' commit (old fixture, scratch repo): 2 leaks   |   git-mode 'after' commit diff: no leaks found
+canary (xkeysib-<48 random hex>, generated at run time, deleted): detected by generic-api-key
+history: git log --all -G'xkeysib-[A-Za-z0-9]{40,}' over 1181 commits / all refs -> 0 commits; literal fixture text -> 3 commits (3154675d, dbdc4a1b, 0a3d10bb)
+full history scan of main: 83 matches (generic-api-key 42, database-connection-string 33, jwt-token 4, twilio-account-sid 3, aws-access-key 1); heuristic triage in GITLEAKS_FINDING_5E1.md section 6
+LIMIT: CI uses the engine bundled in gitleaks-action; a hosted run was not reproduced.

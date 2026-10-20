@@ -1,0 +1,4 @@
+Controller copy taken, mutated, tests run, controller restored and byte-compared (cmp) afterwards.
+mutant 1 (remove provider-acceptance assertion): 18 failed / 22 passed (new integration + 5E tests)
+mutant 2 (persist token before delivery):        11 failed / 16 passed (new integration suite)
+restored: stage5e1* + stage5eResend* = 51 passed

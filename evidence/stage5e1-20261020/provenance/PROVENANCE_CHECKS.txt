@@ -1,0 +1,9 @@
+Stage 5D archive: KAYAD-STAGE5D-HOSTED-PREFLIGHT-READINESS-FULL-PROJECT-20261019.zip
+  expected b44dc4f2d0ada531e9c7e04382f2185b6ce5693b28af793b14d9dd0a6dc845c5
+  actual   b44dc4f2d0ada531e9c7e04382f2185b6ce5693b28af793b14d9dd0a6dc845c5   -> MATCH ; unzip -t: no errors
+GitHub main (read-only public clone, separate directory): HEAD = 0a3d10bb175525ee02bc82c40262e1e44144c77c
+  recent: 0a3d10bb Stage 5E: owner verification recovery, resend commit-on-acceptance fix, owner-unverified login UX, de;a8d79bfd Stage 5E: owner activation readiness and hosted reconciliation (no hosted changes);552aa5a5 Stage 5D: hosted-schema preflight, provider verification, owner readiness; fix stale regression tests;
+  tree diff main vs working tree before this stage's edits: only the two fixture lines (all other differences are *.log files excluded by .gitignore)
+  commits in repo (all refs): 1181
+Prior ZIPs preserved in /home/claude/out (none overwritten): Foundation, Stage2, Stage3, 3A, 4, 4A, 5, 5A (+interim), 5B (+certified), 5C, 5C.1, 5D, 5E, 5E-VR.
+No uncommitted-change inspection of the Windows tree was possible from this environment.

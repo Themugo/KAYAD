@@ -1,0 +1,15 @@
+rule	file	line	commit
+aws-access-key	KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md	85	
+database-connection-string	evidence/stage5c-20261019/stack/postgrest.conf.template	1	
+generic-api-key	KAYAD_PHASE37_GAP_AND_RISK_REGISTER.md	25	
+generic-api-key	backend/tests/regression/onboardingEmailWorkflow.test.js	10	
+generic-api-key	docs/domains/INTEGRATION_GUIDE.md	164	
+generic-api-key	docs/domains/INTEGRATION_GUIDE.md	322	
+generic-api-key	evidence/phase37_gitleaks_report.json	100	
+generic-api-key	evidence/phase37_gitleaks_report.json	31	
+generic-api-key	evidence/phase37_gitleaks_report.json	54	
+generic-api-key	helm/kayad-backend/values.yaml	125	
+generic-api-key	scripts/setup-supabase.js	43	
+twilio-account-sid	docs/domains/INTEGRATION_GUIDE.md	245	
+twilio-account-sid	evidence/phase37_gitleaks_report.json	8	
+twilio-account-sid	evidence/phase37_gitleaks_report.json	9	

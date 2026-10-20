@@ -1,0 +1,177 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+--- a/.github/workflows/ci.yml	2026-10-20 08:08:47.936535141 +0300
++++ b/.github/workflows/ci.yml	2026-10-20 08:08:47.938215284 +0300
+@@ -18,10 +18,10 @@
+ 
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+ 
+       - name: Setup Node.js
+-        uses: actions/setup-node@v4
++        uses: actions/setup-node@v5
+         with:
+           node-version: '22.22.2'
+           cache: 'npm'
+@@ -51,7 +51,7 @@
+         run: npm run build
+ 
+       - name: Upload build artifact
+-        uses: actions/upload-artifact@v4
++        uses: actions/upload-artifact@v7
+         with:
+           name: dist
+           path: dist/
+@@ -64,10 +64,10 @@
+ 
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+ 
+       - name: Setup Node.js
+-        uses: actions/setup-node@v4
++        uses: actions/setup-node@v5
+         with:
+           node-version: '22.22.2'
+           cache: 'npm'
+@@ -94,10 +94,10 @@
+ 
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+ 
+       - name: Setup Node.js
+-        uses: actions/setup-node@v4
++        uses: actions/setup-node@v5
+         with:
+           node-version: '22.22.2'
+           cache: 'npm'
+@@ -124,10 +124,10 @@
+ 
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+ 
+       - name: Setup Node.js
+-        uses: actions/setup-node@v4
++        uses: actions/setup-node@v5
+         with:
+           node-version: '22.22.2'
+           cache: 'npm'
+diff --git a/.github/workflows/dependabot-auto-merge.yml b/.github/workflows/dependabot-auto-merge.yml
+--- a/.github/workflows/dependabot-auto-merge.yml	2026-10-20 08:08:47.936555386 +0300
++++ b/.github/workflows/dependabot-auto-merge.yml	2026-10-20 08:08:47.938234481 +0300
+@@ -23,7 +23,7 @@
+     steps:
+       - name: Check PR and CI status
+         id: check-status
+-        uses: actions/github-script@v7
++        uses: actions/github-script@v8
+         with:
+           result-encoding: string
+           script: |
+@@ -111,7 +111,7 @@
+ 
+       - name: Enable auto-merge
+         if: steps.check-status.result == 'success'
+-        uses: actions/github-script@v7
++        uses: actions/github-script@v8
+         with:
+           script: |
+             // Get PR number from different event types
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+--- a/.github/workflows/deploy.yml	2026-10-20 08:08:47.936568350 +0300
++++ b/.github/workflows/deploy.yml	2026-10-20 08:08:47.938246273 +0300
+@@ -15,9 +15,9 @@
+     timeout-minutes: 15
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+       - name: Setup Node.js
+-        uses: actions/setup-node@v4
++        uses: actions/setup-node@v5
+         with:
+           node-version: '22.22.2'
+           cache: 'npm'
+@@ -49,7 +49,7 @@
+       - name: Validate dist output
+         run: test -f dist/index.html && test -d dist/assets
+       - name: Upload deployment artifact
+-        uses: actions/upload-artifact@v4
++        uses: actions/upload-artifact@v7
+         with:
+           name: production-build
+           path: dist/
+@@ -61,7 +61,7 @@
+     runs-on: ubuntu-latest
+     steps:
+       - name: Download artifact
+-        uses: actions/download-artifact@v4
++        uses: actions/download-artifact@v7
+         with:
+           name: production-build
+           path: dist/
+@@ -75,7 +75,7 @@
+     timeout-minutes: 15
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+       - name: Require Vercel deployment credentials
+         env:
+           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+@@ -86,7 +86,7 @@
+           test -n "$VERCEL_ORG_ID" || { echo "::error::VERCEL_ORG_ID is required so CI can target the intended Vercel scope without interactive linking."; exit 1; }
+           test -n "$VERCEL_PROJECT_ID" || { echo "::error::VERCEL_PROJECT_ID is required so CI can target the intended Vercel project without interactive linking."; exit 1; }
+       - name: Setup Node.js
+-        uses: actions/setup-node@v4
++        uses: actions/setup-node@v5
+         with:
+           node-version: '22.22.2'
+           cache: 'npm'
+diff --git a/.github/workflows/security.yml b/.github/workflows/security.yml
+--- a/.github/workflows/security.yml	2026-10-20 08:08:47.936581335 +0300
++++ b/.github/workflows/security.yml	2026-10-20 08:08:47.938257571 +0300
+@@ -23,18 +23,18 @@
+ 
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+ 
+       - name: Initialize CodeQL
+-        uses: github/codeql-action/init@v3
++        uses: github/codeql-action/init@v4
+         with:
+           languages: javascript
+ 
+       - name: Autobuild
+-        uses: github/codeql-action/autobuild@v3
++        uses: github/codeql-action/autobuild@v4
+ 
+       - name: Perform CodeQL Analysis
+-        uses: github/codeql-action/analyze@v3
++        uses: github/codeql-action/analyze@v4
+         with:
+           category: "/language:javascript"
+ 
+@@ -50,12 +50,12 @@
+       contents: read
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@v5
+         with:
+           fetch-depth: 0
+ 
+       - name: Run gitleaks against project config
+-        uses: gitleaks/gitleaks-action@v2
++        uses: gitleaks/gitleaks-action@v3
+         env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           GITLEAKS_CONFIG: .gitleaks.toml

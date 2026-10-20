@@ -18,7 +18,9 @@ process.env.NODE_ENV = "test";
 process.env.WEBHOIST_EMAIL = "owner@example.test";
 process.env.FRONTEND_URL = "https://app.example.test";
 process.env.REQUIRE_EMAIL_VERIFICATION = "true";
-process.env.BREVO_API_KEY = "xkeysib-TESTONLY-NOT-A-REAL-KEY";
+// Synthetic opaque fixture (no provider prefix, not a credential). Tests only need a non-empty, distinctive string.
+const FIXTURE = "fixture-not-a-credential-0001";
+process.env.BREVO_API_KEY = FIXTURE;
 delete process.env.BREVO_FROM_EMAIL; delete process.env.EMAIL_FROM; delete process.env.BREVO_FROM_NAME;
 delete process.env.VERIFICATION_RESEND_COOLDOWN_SECONDS;
 

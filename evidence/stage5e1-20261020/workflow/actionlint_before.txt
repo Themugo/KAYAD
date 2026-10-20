@@ -1,0 +1,1 @@
+dependabot-auto-merge.yml:113:13: property "result" is not defined in object type {conclusion: string; outcome: string; outputs: object} [expression]
