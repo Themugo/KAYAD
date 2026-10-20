@@ -37,6 +37,8 @@ function Modal({ title, children, onClose }) {
 export default function AdminDealerVerifications() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [actionError, setActionError] = useState('');
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
@@ -46,11 +48,12 @@ export default function AdminDealerVerifications() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const params = filter ? { status: filter } : {};
       const data = await adminVerificationAPI.list(params);
       setItems(data.verifications || []);
-    } catch { setItems([]); }
+    } catch { setLoadError('Dealer verification records could not be loaded. Check access or connectivity and retry.'); }
     finally { setLoading(false); }
   }, [filter]);
 
@@ -66,10 +69,16 @@ export default function AdminDealerVerifications() {
   const openAction = (id, action) => {
     setActionModal({ id, action });
     setActionNotes('');
+    setActionError('');
   };
 
   const handleAction = async () => {
     if (!actionModal) return;
+    if (actionModal.action === 'reject' && !actionNotes.trim()) {
+      setActionError('A specific rejection reason is required.');
+      return;
+    }
+    setActionError('');
     setProcessing(true);
     try {
       const { id, action } = actionModal;
@@ -80,9 +89,10 @@ export default function AdminDealerVerifications() {
       }
       setActionModal(null);
       setSelected(null);
+      setActionError('');
       load();
     } catch (err) {
-      if (import.meta.env.DEV) console.warn('Action failed', err);
+      setActionError(err?.response?.data?.message || 'The decision could not be saved. No approval change is confirmed; retry after checking the record.');
     } finally { setProcessing(false); }
   };
 
@@ -101,6 +111,13 @@ export default function AdminDealerVerifications() {
           </p>
         </div>
       </div>
+
+      {loadError && (
+        <div role="alert" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, padding: 14, borderRadius: 10, border: '1px solid rgba(239,68,68,.35)', background: 'rgba(239,68,68,.08)', color: '#fecaca' }}>
+          <span>{loadError}</span>
+          <button onClick={load} style={{ padding: '7px 12px', borderRadius: 7, border: '1px solid rgba(255,255,255,.18)', color: '#fff' }}>Retry</button>
+        </div>
+      )}
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
@@ -301,6 +318,7 @@ export default function AdminDealerVerifications() {
               borderRadius: 8, color: '#fff', fontSize: 13, outline: 'none', resize: 'vertical',
             }}
           />
+          {actionError && <p role="alert" style={{ color: '#fecaca', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 8, padding: 10, fontSize: 12, marginBottom: 12 }}>{actionError}</p>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button onClick={() => setActionModal(null)} style={{
               padding: '9px 18px', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',

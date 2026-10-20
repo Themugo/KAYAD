@@ -1,0 +1,12 @@
+KAYAD Stage 5F.12 validation log
+Date: 2026-10-20
+Foundation SHA-256: db717a86d39281d52563e850df69c790503546fe46d20911d89c968e768abaab
+
+PASS: node scripts/validate-stage5f12-dealer-workflow.mjs (13/13)
+PASS: node --check backend/middleware/dealerVerification.js
+PASS: node --check backend/controllers/verificationController.js
+BLOCKED: npm run lint / semantic typecheck — dependencies not installed; Node v22.16.0 is below declared >=22.22.2 engine requirement.
+BLOCKED: npm run build — Vite dependency unavailable in isolated workspace.
+BLOCKED: npm test — Vitest dependency unavailable in isolated workspace.
+NOT RUN: backend Jest/Vitest, real PostgreSQL/RLS, API integration, Playwright browser journeys.
+NOT RUN: hosted systems, hosted migrations, deployment, commit, push, real payment/provider calls.

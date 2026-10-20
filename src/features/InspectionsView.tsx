@@ -15,6 +15,8 @@ import { InspectionReportModal } from './InspectionsView/InspectionReportModal';
 import { CancelBookingModal, PayBookingModal } from './InspectionsView/BookingActions';
 import { ProviderApplicationModal } from './InspectionsView/ProviderApplicationModal';
 import { ProviderServicesModal } from './InspectionsView/ProviderServicesModal';
+import { Modal } from '../components/ui/Modal';
+import { OrganizationWorkspace } from './InspectionMarketplace/organization/OrganizationWorkspace';
 
 export type InspectionsTab = 'service' | 'mine' | 'reports';
 export type InspectionsViewMode = 'public' | 'account';
@@ -141,6 +143,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   const [requestOpen, setRequestOpen] = useState(launchAction === 'request');
   const [providerOpen, setProviderOpen] = useState(launchAction === 'apply-provider');
   const [manageOpen, setManageOpen] = useState(launchAction === 'manage-business' && signedIn);
+  const [workspaceOrg, setWorkspaceOrg] = useState<string | null>(null);
   const [reportRecord, setReportRecord] = useState<InspectionRecord | null>(null);
   const [payRecord, setPayRecord] = useState<InspectionRecord | null>(null);
   const [cancelRecord, setCancelRecord] = useState<InspectionRecord | null>(null);
@@ -370,7 +373,12 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
       <InspectionReportModal record={reportRecord} onClose={() => setReportRecord(null)} />
       <PayBookingModal record={payRecord} onClose={() => setPayRecord(null)} onPaid={() => { void refresh(); }} />
       <CancelBookingModal record={cancelRecord} onClose={() => setCancelRecord(null)} onCancelled={() => { void refresh(); }} />
-      {viewMode === 'public' && signedIn && <ProviderServicesModal isOpen={manageOpen} onClose={() => setManageOpen(false)} />}
+      {viewMode === 'public' && signedIn && <ProviderServicesModal isOpen={manageOpen} onClose={() => setManageOpen(false)} onOpenWorkspace={(id) => setWorkspaceOrg(id)} />}
+      {viewMode === 'public' && signedIn && workspaceOrg && (
+        <Modal isOpen onClose={() => { setWorkspaceOrg(null); setManageOpen(true); }} title="Organization workspace" size="xl">
+          <OrganizationWorkspace organizationId={workspaceOrg} />
+        </Modal>
+      )}
       {viewMode === 'public' && <ProviderApplicationModal isOpen={providerOpen} signedIn={signedIn} onClose={() => setProviderOpen(false)} onOpenAuth={onOpenAuth} onOpenRegister={onOpenRegister} />}
     </div>
   );

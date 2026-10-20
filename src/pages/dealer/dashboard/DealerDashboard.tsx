@@ -156,7 +156,7 @@ const AICopilot = () => (
 const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+    className={`flex shrink-0 lg:w-full items-center gap-3 px-4 py-3 min-h-11 rounded-xl transition-colors ${
       active ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-[#64748B] hover:bg-[#F6FAF9]'
     }`}
   >
@@ -442,9 +442,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F6FAF9] flex">
+    <div className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-white border-r border-[#D7E7E4] flex flex-col">
+      <aside className="w-full lg:w-64 lg:min-w-64 bg-white border-b lg:border-b-0 lg:border-r border-[#D7E7E4] flex flex-col">
         <div className="p-4 border-b border-[#D7E7E4]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center">
@@ -457,7 +457,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav aria-label="Dealer workspace" className="flex-1 p-3 lg:p-4 flex lg:block gap-2 overflow-x-auto lg:overflow-x-visible lg:space-y-1">
           {sections.map((section) => (
             <NavTab
               key={section.id}
@@ -470,23 +470,20 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-[#D7E7E4]">
+        <div className="hidden lg:block p-4 border-t border-[#D7E7E4]">
           <div className="p-4 bg-gradient-to-r from-[#DDF4F0] to-[#F3FAF9] rounded-xl">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-2">
               <Shield className="w-5 h-5 text-[#176B87]" />
-              <span className="font-semibold text-[#0E4655]">Dealer account</span>
+              <span className="font-semibold text-[#0E4655]">Account status</span>
             </div>
-            <p className="text-xs text-[#176B87] mb-3">Plan information is not available.</p>
-            <button className="w-full py-2 bg-[#176B87] text-white text-sm font-medium rounded-lg hover:bg-[#12576D]">
-              Plan unavailable
-            </button>
+            <p className="text-xs text-[#176B87]">Plan and verification details appear here when supplied by the account service.</p>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -507,41 +504,41 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           {activeSection === 'overview' && (
             <>
               {/* Quick Stats */}
-              <div className="grid grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
                 <StatCard
                   title="Total Listings"
-                  value={dashboard?.overview?.totalListings ?? 0}
+                  value={dashboard?.overview?.totalListings ?? '—'}
                   icon={Car}
                   color={colors.softBlue}
                 />
                 <StatCard
                   title="Total Views"
-                  value={(dashboard?.overview?.totalViews ?? 0).toLocaleString()}
+                  value={dashboard?.overview?.totalViews == null ? '—' : dashboard.overview.totalViews.toLocaleString()}
                   icon={Eye}
                   color={colors.purple}
                 />
                 <StatCard
                   title="Active Leads"
-                  value={dashboard?.overview?.leads?.total ?? 0}
+                  value={dashboard?.overview?.leads?.total ?? '—'}
                   icon={Users}
                   color={colors.emerald}
                 />
                 <StatCard
                   title="Revenue (This Month)"
-                  value={`Ksh ${((dashboard?.overview?.revenue?.total ?? 0) / 1000000).toFixed(1)}M`}
+                  value={dashboard?.overview?.revenue?.total == null ? '—' : `Ksh ${(dashboard.overview.revenue.total / 1000000).toFixed(1)}M`}
                   icon={DollarSign}
                   color={colors.navy}
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
                 {/* Lead Pipeline */}
-                <div className="col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-6">
+                <div className="xl:col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-[#0A3340]">Lead Pipeline</h3>
                     <button onClick={() => setActiveSection('leads')} className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View All</button>
                   </div>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <PipelineStage stage="New" count={dashboard?.overview?.leads?.new ?? 0} color={colors.softBlue} />
                     <PipelineStage stage="Contacted" count={dashboard?.overview?.leads?.contacted ?? 0} color={colors.purple} />
                     <PipelineStage stage="Negotiating" count={dashboard?.overview?.leads?.negotiating ?? 0} color={colors.amber} />
@@ -585,7 +582,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
               <div className="grid grid-cols-3 gap-6">
                 {/* Top Performing Vehicles */}
-                <div className="col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-6">
+                <div className="xl:col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-[#0A3340]">Top Performing Vehicles</h3>
                     <button onClick={() => setActiveSection('inventory')} className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View Inventory</button>
